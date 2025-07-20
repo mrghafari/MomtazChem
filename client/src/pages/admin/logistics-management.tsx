@@ -134,18 +134,61 @@ const LogisticsManagement = () => {
   );
   
   // Map data to add customer object structure for compatibility
-  const mapOrderData = (orders: any[]) => orders.map((order: any) => ({
-    ...order,
-    // Use existing customer object if available, otherwise create from individual fields
-    customer: order.customer || {
-      firstName: order.customerFirstName,
-      lastName: order.customerLastName,
-      email: order.customerEmail,
-      phone: order.customerPhone
-    },
-    // Ensure customerAddress is available for display
-    customerAddress: order.customerAddress || 'آدرس ثبت نشده'
-  }));
+  const mapOrderData = (orders: any[]) => orders.map((order: any) => {
+    // Extract address from shippingAddress JSON if available
+    let customerAddress = 'آدرس ثبت نشده';
+    if (order.customerAddress) {
+      customerAddress = order.customerAddress;
+    } else if (order.recipientAddress) {
+      customerAddress = order.recipientAddress;
+    } else if (order.shippingAddress) {
+      try {
+        const shippingAddr = typeof order.shippingAddress === 'string' 
+          ? JSON.parse(order.shippingAddress) 
+          : order.shippingAddress;
+        if (shippingAddr && shippingAddr.address) {
+          customerAddress = `${shippingAddr.address}${shippingAddr.city ? ', ' + shippingAddr.city : ''}`;
+        }
+      } catch (e) {
+        console.log('Error parsing shipping address:', e);
+      }
+    }
+    
+    return {
+      ...order,
+      // Use existing customer object if available, otherwise create from individual fields
+      customer: order.customer || {
+        firstName: order.customerFirstName,
+        lastName: order.customerLastName,
+        email: order.customerEmail,
+        phone: order.customerPhone
+      },
+      customerAddress,
+      // Extract recipient info from shippingAddress if not available directly
+      recipientName: order.recipientName || (order.shippingAddress ? 
+        (() => {
+          try {
+            const addr = typeof order.shippingAddress === 'string' 
+              ? JSON.parse(order.shippingAddress) 
+              : order.shippingAddress;
+            return addr?.name || `${order.customerFirstName || ''} ${order.customerLastName || ''}`.trim();
+          } catch (e) {
+            return `${order.customerFirstName || ''} ${order.customerLastName || ''}`.trim();
+          }
+        })() : `${order.customerFirstName || ''} ${order.customerLastName || ''}`.trim()),
+      recipientPhone: order.recipientPhone || (order.shippingAddress ? 
+        (() => {
+          try {
+            const addr = typeof order.shippingAddress === 'string' 
+              ? JSON.parse(order.shippingAddress) 
+              : order.shippingAddress;
+            return addr?.phone || order.customerPhone;
+          } catch (e) {
+            return order.customerPhone;
+          }
+        })() : order.customerPhone)
+    };
+  });
   
   const mappedActiveOrders = mapOrderData(activeOrders);
   const mappedDeliveredOrders = mapOrderData(deliveredOrders);

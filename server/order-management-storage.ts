@@ -432,6 +432,13 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       totalAmount: customerOrders.totalAmount,
       currency: customerOrders.currency,
       
+      // Shipping and delivery address from customer order
+      shippingAddress: customerOrders.shippingAddress,
+      recipientName: customerOrders.recipientName,
+      recipientPhone: customerOrders.recipientPhone,
+      recipientAddress: customerOrders.recipientAddress,
+      deliveryNotes: customerOrders.deliveryNotes,
+      
       // Customer info
       customerFirstName: crmCustomers.firstName,
       customerLastName: crmCustomers.lastName,
@@ -567,6 +574,19 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       paymentReceiptUrl: row.paymentReceiptUrl || row.receiptUrl, // Use receipt from payment_receipts if available
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
+      
+      // Shipping and delivery address information from customer order
+      shippingAddress: row.shippingAddress,
+      recipientName: row.recipientName,
+      recipientPhone: row.recipientPhone,
+      recipientAddress: row.recipientAddress,
+      deliveryNotes: row.deliveryNotes,
+      customerAddress: row.recipientAddress || (row.shippingAddress ? 
+        (typeof row.shippingAddress === 'object' ? 
+          `${row.shippingAddress.address || ''}, ${row.shippingAddress.city || ''}, ${row.shippingAddress.country || ''}`.trim().replace(/^,|,$/g, '') 
+          : row.shippingAddress) 
+        : 'آدرس ثبت نشده'),
+      
       customer: {
         firstName: row.customerFirstName,
         lastName: row.customerLastName,
