@@ -39,6 +39,7 @@ import EmailTemplatesCentral from '@/pages/admin/email-templates-central';
 import Template05View from '@/pages/admin/template05-view';
 import Template05StaticView from '@/pages/admin/template05-static-view';
 import EmailRoutingStats from "@/pages/admin/email-routing-stats";
+import AutomatedEmailLogs from "@/pages/admin/automated-email-logs";
 import ServerConfig from "@/components/admin/server-config";
 import ForgotPassword from "@/pages/forgot-password";
 import ResetPassword from "@/pages/reset-password";
@@ -155,6 +156,7 @@ function Router() {
           <Route path="/admin/email-routing-stats" component={EmailRoutingStats} />
 
           <Route path="/admin/email-templates-central" component={EmailTemplatesCentral} />
+          <Route path="/admin/automated-email-logs" component={AutomatedEmailLogs} />
           <Route path="/admin/email-templates-fixed" component={EmailTemplatesFixed} />
           <Route path="/admin/template-distribution" component={TemplateDistribution} />
           <Route path="/admin/template-numbering-system" component={TemplateNumberingSystem} />
