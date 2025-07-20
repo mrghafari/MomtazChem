@@ -9889,6 +9889,232 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get customer order details with items for logistics
+  app.get("/api/customers/orders/:orderId/details", requireAuth, async (req, res) => {
+    try {
+      const { orderId } = req.params;
+      const { pool } = await import('./db');
+      
+      // Get customer order with management details
+      const orderResult = await pool.query(`
+        SELECT 
+          co.id,
+          co.order_number,
+          co.customer_id,
+          co.total_amount,
+          co.currency,
+          co.status,
+          co.payment_status,
+          co.payment_method,
+          co.guest_name,
+          co.guest_email,
+          co.recipient_phone,
+          co.recipient_name,
+          co.recipient_address,
+          co.shipping_address,
+          co.notes,
+          co.created_at,
+          om.current_status,
+          om.delivery_code,
+          om.actual_delivery_date,
+          om.delivery_person_name,
+          om.delivery_person_phone,
+          c.first_name,
+          c.last_name,
+          c.email as customer_email,
+          c.phone as customer_phone
+        FROM customer_orders co
+        LEFT JOIN order_management om ON om.customer_order_id = co.id
+        LEFT JOIN crm_customers c ON c.id = co.customer_id
+        WHERE co.id = $1
+      `, [orderId]);
+
+      if (orderResult.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "سفارش یافت نشد"
+        });
+      }
+
+      const order = orderResult.rows[0];
+
+      // Get order items with product details
+      const itemsResult = await pool.query(`
+        SELECT 
+          oi.id,
+          oi.product_id,
+          oi.quantity,
+          oi.unit_price,
+          oi.total_price,
+          sp.name as product_name,
+          sp.sku,
+          sp.category,
+          sp.barcode,
+          sp.weight,
+          sp.weight_unit,
+          sp.gross_weight,
+          sp.net_weight,
+          sp.image_urls
+        FROM order_items oi
+        LEFT JOIN shop_products sp ON oi.product_id = sp.id
+        WHERE oi.order_id = $1
+        ORDER BY oi.id
+      `, [orderId]);
+
+      // Calculate total order weight
+      let totalWeight = 0;
+      itemsResult.rows.forEach((item: any) => {
+        const weight = item.gross_weight || item.weight || 0;
+        totalWeight += parseFloat(weight) * item.quantity;
+      });
+
+      const orderDetails = {
+        ...order,
+        items: itemsResult.rows,
+        totalWeight: totalWeight,
+        weightUnit: 'kg'
+      };
+
+      res.json({
+        success: true,
+        data: orderDetails
+      });
+
+    } catch (error) {
+      console.error("Error fetching customer order details:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت جزئیات سفارش"
+      });
+    }
+  });
+
+  // Get specific customer order by ID
+  app.get("/api/customers/orders/:orderId", requireAuth, async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      const customerId = (req.session as any)?.customerId;
+      const crmCustomerId = (req.session as any)?.crmCustomerId;
+      const adminId = (req.session as any)?.adminId;
+      
+      if (isNaN(orderId)) {
+        return res.status(400).json({
+          success: false,
+          message: "شناسه سفارش نامعتبر است"
+        });
+      }
+
+      const { pool } = await import('./db');
+      
+      let finalCustomerId = crmCustomerId || customerId;
+      let authQuery = '';
+      let queryParams = [orderId];
+      
+      // Admin can access any order, customers only their own orders
+      if (!adminId) {
+        if (!finalCustomerId) {
+          return res.status(401).json({ 
+            success: false, 
+            message: "احراز هویت نشده" 
+          });
+        }
+        authQuery = ' AND co.customer_id = $2';
+        queryParams.push(finalCustomerId);
+      }
+
+      // Get order details
+      const orderResult = await pool.query(`
+        SELECT 
+          co.id,
+          co.order_number,
+          co.customer_id,
+          co.total_amount,
+          co.currency,
+          co.payment_status,
+          co.payment_method,
+          co.shipping_method,
+          co.status,
+          co.guest_name,
+          co.guest_email,
+          co.recipient_phone,
+          co.recipient_name,
+          co.recipient_address,
+          co.shipping_address,
+          co.notes,
+          co.created_at,
+          om.current_status,
+          om.delivery_code,
+          om.actual_delivery_date,
+          om.delivery_person_name,
+          om.delivery_person_phone,
+          c.first_name,
+          c.last_name,
+          c.email as customer_email,
+          c.phone as customer_phone
+        FROM customer_orders co
+        LEFT JOIN order_management om ON om.customer_order_id = co.id
+        LEFT JOIN crm_customers c ON c.id = co.customer_id
+        WHERE co.id = $1${authQuery}
+      `, queryParams);
+
+      if (orderResult.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "سفارش یافت نشد"
+        });
+      }
+
+      const order = orderResult.rows[0];
+
+      // Get order items with product details
+      const itemsResult = await pool.query(`
+        SELECT 
+          oi.id,
+          oi.product_id,
+          oi.product_name,
+          oi.quantity,
+          oi.unit_price,
+          oi.total_price,
+          oi.sku,
+          sp.weight,
+          sp.weight_unit,
+          sp.gross_weight,
+          sp.net_weight,
+          sp.image_urls
+        FROM order_items oi
+        LEFT JOIN shop_products sp ON oi.product_id = sp.id
+        WHERE oi.customer_order_id = $1
+        ORDER BY oi.id
+      `, [orderId]);
+
+      // Calculate total order weight
+      let totalWeight = 0;
+      itemsResult.rows.forEach((item: any) => {
+        const weight = item.gross_weight || item.net_weight || item.weight || 0;
+        totalWeight += parseFloat(weight) * item.quantity;
+      });
+
+      const orderDetails = {
+        ...order,
+        items: itemsResult.rows,
+        totalWeight: totalWeight,
+        weightUnit: 'kg'
+      };
+
+      res.json({
+        success: true,
+        data: orderDetails
+      });
+
+    } catch (error) {
+      console.error("Error fetching customer order details:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت جزئیات سفارش"
+      });
+    }
+  });
+
   // Cancel customer order and release reserved inventory
   app.post("/api/customers/orders/:orderId/cancel", async (req, res) => {
     try {

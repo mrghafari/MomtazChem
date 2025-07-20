@@ -89,6 +89,9 @@ const LogisticsManagement = () => {
   const [resendingCodes, setResendingCodes] = useState<{[key: number]: boolean}>({});
   const [resentCodes, setResentCodes] = useState<{[key: number]: boolean}>({});
   const [isAdmin, setIsAdmin] = useState(false);
+  const [selectedOrderDetails, setSelectedOrderDetails] = useState<any>(null);
+  const [isOrderDetailsOpen, setIsOrderDetailsOpen] = useState(false);
+  const [loadingOrderDetails, setLoadingOrderDetails] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -109,6 +112,35 @@ const LogisticsManagement = () => {
     };
     checkAdminAuth();
   }, []);
+
+  // Function to fetch and show order details
+  const handleShowOrderDetails = async (orderId: number) => {
+    setLoadingOrderDetails(true);
+    try {
+      const response = await fetch(`/api/customers/orders/${orderId}`);
+      const result = await response.json();
+      
+      if (result.success) {
+        setSelectedOrderDetails(result.data);
+        setIsOrderDetailsOpen(true);
+      } else {
+        toast({
+          title: "خطا",
+          description: "جزئیات سفارش یافت نشد",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching order details:', error);
+      toast({
+        title: "خطا",
+        description: "خطا در دریافت جزئیات سفارش",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingOrderDetails(false);
+    }
+  };
 
   // Enable audio notifications for logistics orders
   const { orderCount } = useOrderNotifications({
@@ -233,38 +265,7 @@ const LogisticsManagement = () => {
     }
   });
 
-  // Force complete delivery mutation (Super Admin Bypass)
-  const forceCompleteDeliveryMutation = useMutation({
-    mutationFn: async (orderId: number) => {
-      const response = await fetch(`/api/order-management/${orderId}/force-complete`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include'
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to force complete order');
-      }
-      return response.json();
-    },
-    onSuccess: (data, orderId) => {
-      // Refresh orders list
-      queryClient.invalidateQueries({ queryKey: ['/api/order-management/logistics'] });
-      toast({
-        title: "بای پس ورک فلو",
-        description: "سفارش مستقیماً به بایگانی منتقل شد (Workflow Bypass)",
-        className: "rtl"
-      });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "خطا",
-        description: error.message,
-        variant: "destructive",
-        className: "rtl"
-      });
-    }
-  });
+
 
   const getStatusBadge = (status: string) => {
     const statusMap = {
@@ -434,11 +435,15 @@ const LogisticsManagement = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-4">
-            {/* Customer Info Block */}
-            <div className="bg-white rounded-lg p-3 border border-green-200">
+            {/* Customer Info Block - Clickable */}
+            <div 
+              className="bg-white rounded-lg p-3 border border-green-200 cursor-pointer hover:bg-green-50 hover:border-green-300 transition-colors"
+              onClick={() => handleShowOrderDetails(order.customerOrderId)}
+            >
               <h5 className="font-medium text-green-800 mb-2 flex items-center">
                 <User className="w-4 h-4 mr-2" />
                 اطلاعات گیرنده
+                <Eye className="w-4 h-4 mr-1 text-green-600" />
               </h5>
               <div className="space-y-2">
                 <div className="bg-gray-50 rounded p-2">
@@ -455,6 +460,7 @@ const LogisticsManagement = () => {
                   </div>
                 </div>
               </div>
+              <p className="text-xs text-green-600 mt-2 text-center">کلیک کنید برای مشاهده جزئیات خرید</p>
             </div>
 
             {/* Total Weight Block */}
@@ -593,21 +599,6 @@ const LogisticsManagement = () => {
                   >
                     <CheckCircle className="w-4 h-4 mr-2" />
                     {completeDeliveryMutation.isPending ? 'در حال پردازش...' : 'تحویل شد'}
-                  </Button>
-
-                  {/* Super Admin Bypass - Force Complete Order */}
-                  <Button 
-                    size="sm" 
-                    className="bg-red-600 hover:bg-red-700 text-white border-2 border-yellow-300"
-                    onClick={() => forceCompleteDeliveryMutation.mutate(order.id)}
-                    disabled={forceCompleteDeliveryMutation.isPending}
-                    title="بای پس ورک فلو - انتقال مستقیم به بایگانی (فقط سوپر ادمین)"
-                  >
-                    <div className="flex items-center">
-                      <CheckCircle className="w-4 h-4 mr-1" />
-                      <span className="text-yellow-200">⚡</span>
-                    </div>
-                    {forceCompleteDeliveryMutation.isPending ? 'بای پس...' : 'بای پس ورک فلو'}
                   </Button>
                 </div>
               ) : (
@@ -915,6 +906,180 @@ const LogisticsManagement = () => {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
+      {/* Order Details Dialog */}
+      <Dialog open={isOrderDetailsOpen} onOpenChange={setIsOrderDetailsOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto rtl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-center">
+              جزئیات کامل خرید
+            </DialogTitle>
+            <DialogDescription className="text-center">
+              {selectedOrderDetails && `سفارش #${selectedOrderDetails.order_number}`}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {loadingOrderDetails ? (
+            <div className="flex justify-center items-center py-8">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                <p>در حال بارگذاری جزئیات سفارش...</p>
+              </div>
+            </div>
+          ) : selectedOrderDetails ? (
+            <div className="space-y-6">
+              {/* Order Summary */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center">
+                      <FileText className="w-5 h-5 mr-2" />
+                      اطلاعات سفارش
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">شماره سفارش:</span>
+                      <span className="font-medium">{selectedOrderDetails.order_number}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">مبلغ کل:</span>
+                      <span className="font-medium">{selectedOrderDetails.total_amount} {selectedOrderDetails.currency}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">وضعیت پرداخت:</span>
+                      <Badge variant={selectedOrderDetails.payment_status === 'paid' ? 'default' : 'secondary'}>
+                        {selectedOrderDetails.payment_status === 'paid' ? 'پرداخت شده' : 'در انتظار پرداخت'}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">روش پرداخت:</span>
+                      <span className="font-medium">{selectedOrderDetails.payment_method}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">تاریخ ثبت:</span>
+                      <span className="font-medium">{new Date(selectedOrderDetails.created_at).toLocaleDateString('fa-IR')}</span>
+                    </div>
+                    {selectedOrderDetails.delivery_code && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">کد تحویل:</span>
+                        <span className="font-medium text-green-600">{selectedOrderDetails.delivery_code}</span>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center">
+                      <User className="w-5 h-5 mr-2" />
+                      اطلاعات مشتری
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">نام مشتری:</span>
+                      <span className="font-medium">
+                        {selectedOrderDetails.first_name} {selectedOrderDetails.last_name}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">ایمیل:</span>
+                      <span className="font-medium">{selectedOrderDetails.customer_email}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">تلفن:</span>
+                      <span className="font-medium">{selectedOrderDetails.customer_phone}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">نام گیرنده:</span>
+                      <span className="font-medium">{selectedOrderDetails.recipient_name || selectedOrderDetails.guest_name}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">تلفن گیرنده:</span>
+                      <span className="font-medium">{selectedOrderDetails.recipient_phone}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Order Items */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center">
+                    <Package className="w-5 h-5 mr-2" />
+                    محصولات سفارش ({selectedOrderDetails.items?.length || 0} قلم)
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {selectedOrderDetails.items?.map((item: any, index: number) => (
+                      <div key={index} className="border rounded-lg p-4">
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                          <div>
+                            <p className="text-sm text-gray-600">نام محصول</p>
+                            <p className="font-medium">{item.product_name}</p>
+                            {item.sku && (
+                              <p className="text-xs text-gray-500">SKU: {item.sku}</p>
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-600">تعداد</p>
+                            <p className="font-medium">{item.quantity}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-600">قیمت واحد</p>
+                            <p className="font-medium">{item.unit_price} {selectedOrderDetails.currency}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-600">قیمت کل</p>
+                            <p className="font-medium text-green-600">{item.total_price} {selectedOrderDetails.currency}</p>
+                          </div>
+                        </div>
+                        {(item.weight || item.gross_weight) && (
+                          <div className="mt-2 pt-2 border-t">
+                            <p className="text-sm text-gray-600">
+                              وزن: {(item.gross_weight || item.weight) * item.quantity} {item.weight_unit || 'kg'}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {/* Total Weight */}
+                  {selectedOrderDetails.totalWeight > 0 && (
+                    <div className="mt-4 pt-4 border-t">
+                      <div className="flex justify-between items-center">
+                        <span className="text-lg font-medium">وزن کل محموله:</span>
+                        <span className="text-lg font-bold text-blue-600">
+                          {selectedOrderDetails.totalWeight} {selectedOrderDetails.weightUnit}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Notes */}
+              {selectedOrderDetails.notes && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">یادداشت‌ها</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-700">{selectedOrderDetails.notes}</p>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p>جزئیات سفارش یافت نشد</p>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">مدیریت لجستیک</h1>
