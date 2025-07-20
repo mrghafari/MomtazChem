@@ -534,29 +534,248 @@ const LogisticsManagement = () => {
       phone: '',
       email: '',
       address: '',
-      website: '',
-      contractEndDate: '',
-      maxWeight: '',
-      baseRate: '',
-      ratePerKm: ''
+      website: ''
     });
+
+    const addCompanyMutation = useMutation({
+      mutationFn: async (data: any) => {
+        const response = await fetch('/api/logistics/companies', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+          credentials: 'include'
+        });
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || 'Failed to create company');
+        }
+        return response.json();
+      },
+      onSuccess: () => {
+        setShowAddForm(false);
+        setCompanyFormData({
+          name: '',
+          contactPerson: '',
+          phone: '',
+          email: '',
+          address: '',
+          website: ''
+        });
+        queryClient.invalidateQueries({ queryKey: ['/api/logistics/companies'] });
+        toast({ title: "موفق", description: "شرکت حمل و نقل جدید ثبت شد" });
+      },
+      onError: (error: Error) => {
+        toast({ 
+          title: "خطا", 
+          description: error.message || "خطا در ثبت شرکت",
+          variant: "destructive" 
+        });
+      }
+    });
+
+    const handleSubmitCompany = (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!companyFormData.name || !companyFormData.phone) {
+        toast({ 
+          title: "خطا", 
+          description: "لطفاً نام شرکت و شماره تماس را وارد کنید",
+          variant: "destructive"
+        });
+        return;
+      }
+      addCompanyMutation.mutate(companyFormData);
+    };
 
     return (
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h3 className="text-lg font-semibold">مدیریت شرکت‌های حمل</h3>
+          <h3 className="text-lg font-semibold">شرکت‌های حمل و نقل</h3>
           <Button onClick={() => setShowAddForm(true)} className="bg-blue-600 hover:bg-blue-700">
             <Plus className="w-4 h-4 mr-2" />
-            افزودن شرکت جدید
+            شرکت جدید
           </Button>
         </div>
 
-        <Card>
-          <CardContent className="text-center py-8">
-            <Truck className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-            <p className="text-gray-500">مدیریت شرکت‌های حمل در دست توسعه است</p>
-          </CardContent>
-        </Card>
+        {showAddForm && (
+          <Card>
+            <CardHeader>
+              <CardTitle>ثبت شرکت حمل و نقل جدید</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmitCompany} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="name">نام شرکت *</Label>
+                    <Input
+                      id="name"
+                      value={companyFormData.name}
+                      onChange={(e) => setCompanyFormData(prev => ({ ...prev, name: e.target.value }))}
+                      placeholder="نام شرکت حمل و نقل"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="contactPerson">نام مسئول</Label>
+                    <Input
+                      id="contactPerson"
+                      value={companyFormData.contactPerson}
+                      onChange={(e) => setCompanyFormData(prev => ({ ...prev, contactPerson: e.target.value }))}
+                      placeholder="نام شخص رابط"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="phone">شماره تماس *</Label>
+                    <Input
+                      id="phone"
+                      value={companyFormData.phone}
+                      onChange={(e) => setCompanyFormData(prev => ({ ...prev, phone: e.target.value }))}
+                      placeholder="شماره تماس شرکت"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="email">ایمیل</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={companyFormData.email}
+                      onChange={(e) => setCompanyFormData(prev => ({ ...prev, email: e.target.value }))}
+                      placeholder="آدرس ایمیل"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="address">آدرس</Label>
+                  <Input
+                    id="address"
+                    value={companyFormData.address}
+                    onChange={(e) => setCompanyFormData(prev => ({ ...prev, address: e.target.value }))}
+                    placeholder="آدرس کامل شرکت"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="website">وب‌سایت</Label>
+                  <Input
+                    id="website"
+                    type="url"
+                    value={companyFormData.website}
+                    onChange={(e) => setCompanyFormData(prev => ({ ...prev, website: e.target.value }))}
+                    placeholder="https://www.example.com"
+                  />
+                </div>
+
+                <div className="flex gap-2">
+                  <Button type="submit" disabled={addCompanyMutation.isPending}>
+                    {addCompanyMutation.isPending ? 'در حال ثبت...' : 'ثبت شرکت'}
+                  </Button>
+                  <Button type="button" variant="outline" onClick={() => setShowAddForm(false)}>
+                    لغو
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        )}
+
+        <div className="grid gap-4">
+          {loadingCompanies ? (
+            <div className="text-center py-8">
+              <div className="animate-spin w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+              <p>در حال بارگذاری شرکت‌های حمل و نقل...</p>
+            </div>
+          ) : companies.length === 0 ? (
+            <Card>
+              <CardContent className="text-center py-8">
+                <Truck className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                <p className="text-gray-500 mb-4">هیچ شرکت حمل و نقل ثبت نشده است</p>
+                <Button onClick={() => setShowAddForm(true)} variant="outline">
+                  <Plus className="w-4 h-4 mr-2" />
+                  ثبت اولین شرکت
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              <div className="text-sm text-gray-600 bg-blue-50 p-3 rounded-lg">
+                📊 تعداد کل شرکت‌ها: {companies.length} شرکت
+              </div>
+              {companies.map((company: TransportationCompany) => (
+                <Card key={company.id}>
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-lg">{company.name}</h4>
+                        {company.contactPerson && (
+                          <p className="text-sm text-gray-600 mt-1">مسئول: {company.contactPerson}</p>
+                        )}
+                        
+                        <div className="flex items-center gap-4 mt-3 flex-wrap">
+                          <span className="text-sm flex items-center gap-1">
+                            📞 {company.phone}
+                          </span>
+                          {company.email && (
+                            <span className="text-sm flex items-center gap-1">
+                              ✉️ {company.email}
+                            </span>
+                          )}
+                          {company.website && (
+                            <a 
+                              href={company.website} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-sm text-blue-600 hover:underline flex items-center gap-1"
+                            >
+                              🌐 وب‌سایت
+                            </a>
+                          )}
+                        </div>
+                        
+                        {company.address && (
+                          <p className="text-sm text-gray-600 mt-2">
+                            📍 {company.address}
+                          </p>
+                        )}
+                        
+                        <div className="flex items-center gap-4 mt-3">
+                          <span className="text-sm text-gray-600">
+                            ⭐ امتیاز: {company.rating || 0}/5
+                          </span>
+                          <span className="text-sm text-gray-600">
+                            📦 تحویل‌ها: {company.totalDeliveries || 0}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div className="text-right">
+                        {company.isActive ? (
+                          <Badge className="bg-green-500 hover:bg-green-600">فعال</Badge>
+                        ) : (
+                          <Badge className="bg-red-500 hover:bg-red-600">غیرفعال</Badge>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-2 mt-4 pt-4 border-t">
+                      <Button size="sm" variant="outline" className="hover:bg-blue-50">
+                        <Edit className="w-4 h-4 mr-2" />
+                        ویرایش
+                      </Button>
+                      <Button size="sm" variant="outline" className="hover:bg-green-50">
+                        <Eye className="w-4 h-4 mr-2" />
+                        جزئیات
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     );
   };
