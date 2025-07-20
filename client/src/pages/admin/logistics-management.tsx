@@ -733,31 +733,25 @@ const LogisticsManagement = () => {
                                 </>
                               )}
                             </Button>
-                            {/* Complete Delivery Button - Admin Only */}
-                            {currentUser?.roleId === 1 ? (
-                              <Button
-                                size="sm"
-                                onClick={() => handleCompleteDelivery(order.id)}
-                                disabled={completingDeliveries[order.id]}
-                                className="bg-green-600 hover:bg-green-700 text-white text-xs"
-                              >
-                                {completingDeliveries[order.id] ? (
-                                  <>
-                                    <CheckCircle className="w-3 h-3 mr-1 animate-spin" />
-                                    در حال تکمیل...
-                                  </>
-                                ) : (
-                                  <>
-                                    <CheckCircle className="w-3 h-3 mr-1" />
-                                    تحویل شد
-                                  </>
-                                )}
-                              </Button>
-                            ) : (
-                              <Badge variant="outline" className="text-xs bg-gray-100 text-gray-500">
-                                فقط ادمین می‌تواند تحویل را تکمیل کند
-                              </Badge>
-                            )}
+                            {/* Complete Delivery Button */}
+                            <Button
+                              size="sm"
+                              onClick={() => handleCompleteDelivery(order.id)}
+                              disabled={completingDeliveries[order.id]}
+                              className="bg-green-600 hover:bg-green-700 text-white text-xs"
+                            >
+                              {completingDeliveries[order.id] ? (
+                                <>
+                                  <CheckCircle className="w-3 h-3 mr-1 animate-spin" />
+                                  در حال تکمیل...
+                                </>
+                              ) : (
+                                <>
+                                  <CheckCircle className="w-3 h-3 mr-1" />
+                                  تحویل شد
+                                </>
+                              )}
+                            </Button>
                           </div>
                         </td>
                       </tr>

@@ -9,9 +9,9 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 ### COMPLETED: Restored Complete Delivery Button and Card View for Active Logistics Orders (July 20, 2025)
 ✅ **FULLY RESTORED: Active logistics orders now have complete delivery functionality and card view interface**
 - **Complete Delivery Button**: 
-  - Added "تحویل شد" button back to active logistics orders table with admin-only access
-  - Button includes loading state and proper authentication check (currentUser?.roleId === 1)
-  - Non-admin users see informational badge: "فقط ادمین می‌تواند تحویل را تکمیل کند"
+  - Added "تحویل شد" button back to active logistics orders table accessible to all users
+  - Button includes loading state and proper functionality for order completion
+  - Removed admin-only restriction per user request
 - **Card View Interface**:
   - Added card view section below table for active orders with OrderCard component
   - Displays up to 6 orders in grid layout (1 column mobile, 2 columns large screens, 3 columns extra large)
