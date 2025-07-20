@@ -161,7 +161,7 @@ const LogisticsManagement = () => {
   const completeDeliveryMutation = useMutation({
     mutationFn: async (orderId: number) => {
       const response = await fetch(`/api/order-management/logistics/${orderId}/complete`, {
-        method: 'POST',
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include'
       });
@@ -177,6 +177,39 @@ const LogisticsManagement = () => {
       toast({
         title: "تکمیل تحویل",
         description: "سفارش به بایگانی لجستیک منتقل شد",
+        className: "rtl"
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "خطا",
+        description: error.message,
+        variant: "destructive",
+        className: "rtl"
+      });
+    }
+  });
+
+  // Force complete delivery mutation (Super Admin Bypass)
+  const forceCompleteDeliveryMutation = useMutation({
+    mutationFn: async (orderId: number) => {
+      const response = await fetch(`/api/order-management/${orderId}/force-complete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to force complete order');
+      }
+      return response.json();
+    },
+    onSuccess: (data, orderId) => {
+      // Refresh orders list
+      queryClient.invalidateQueries({ queryKey: ['/api/order-management/logistics'] });
+      toast({
+        title: "بای پس ورک فلو",
+        description: "سفارش مستقیماً به بایگانی منتقل شد (Workflow Bypass)",
         className: "rtl"
       });
     },
@@ -489,15 +522,32 @@ const LogisticsManagement = () => {
               
               {/* Admin-only delivery completion */}
               {isAdmin ? (
-                <Button 
-                  size="sm" 
-                  className="bg-green-600 hover:bg-green-700 text-white"
-                  onClick={() => completeDeliveryMutation.mutate(order.id)}
-                  disabled={completeDeliveryMutation.isPending}
-                >
-                  <CheckCircle className="w-4 h-4 mr-2" />
-                  {completeDeliveryMutation.isPending ? 'در حال پردازش...' : 'تحویل شد'}
-                </Button>
+                <div className="flex gap-2 flex-wrap">
+                  <Button 
+                    size="sm" 
+                    className="bg-green-600 hover:bg-green-700 text-white"
+                    onClick={() => completeDeliveryMutation.mutate(order.id)}
+                    disabled={completeDeliveryMutation.isPending}
+                  >
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    {completeDeliveryMutation.isPending ? 'در حال پردازش...' : 'تحویل شد'}
+                  </Button>
+
+                  {/* Super Admin Bypass - Force Complete Order */}
+                  <Button 
+                    size="sm" 
+                    className="bg-red-600 hover:bg-red-700 text-white border-2 border-yellow-300"
+                    onClick={() => forceCompleteDeliveryMutation.mutate(order.id)}
+                    disabled={forceCompleteDeliveryMutation.isPending}
+                    title="بای پس ورک فلو - انتقال مستقیم به بایگانی (فقط سوپر ادمین)"
+                  >
+                    <div className="flex items-center">
+                      <CheckCircle className="w-4 h-4 mr-1" />
+                      <span className="text-yellow-200">⚡</span>
+                    </div>
+                    {forceCompleteDeliveryMutation.isPending ? 'بای پس...' : 'بای پس ورک فلو'}
+                  </Button>
+                </div>
               ) : (
                 <div className="flex items-center px-3 py-1 bg-amber-100 border border-amber-300 rounded text-amber-700 text-sm">
                   <Shield className="w-4 h-4 mr-2" />

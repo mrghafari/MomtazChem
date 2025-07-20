@@ -17213,6 +17213,91 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     }
   });
 
+  // Super Admin Bypass: Send any order directly to archive (Skip workflow)
+  app.post('/api/order-management/:id/force-complete', requireAuth, async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      const adminId = req.session?.adminId;
+      
+      console.log(`🔐 [FORCE-COMPLETE-AUTH] Session check:`, {
+        adminId: req.session?.adminId,
+        customUserId: req.session?.customUserId,
+        roleId: req.session?.roleId,
+        sessionId: req.sessionID
+      });
+      
+      // Check if user is admin - get role from database
+      let userRole = null;
+      if (req.session?.adminId) {
+        const adminUser = await storage.getUserById(req.session.adminId);
+        userRole = adminUser?.roleId;
+        console.log(`🔐 [FORCE-COMPLETE-AUTH] Admin user role: ${userRole}`);
+      } else if (req.session?.customUserId) {
+        const { pool } = await import('./db');
+        const result = await pool.query('SELECT role_id FROM custom_users WHERE id = $1', [req.session.customUserId]);
+        userRole = result.rows[0]?.role_id;
+        console.log(`🔐 [FORCE-COMPLETE-AUTH] Custom user role: ${userRole}`);
+      }
+      
+      // Only super admin (roleId === 1) can force complete orders
+      if (userRole !== 1) {
+        console.log(`❌ [FORCE-COMPLETE-AUTH] Access denied - user role: ${userRole}, required: 1 (super admin)`);
+        return res.status(403).json({ 
+          success: false, 
+          message: 'فقط سوپر ادمین می‌تواند سفارش را مستقیماً به بایگانی بفرستد' 
+        });
+      }
+      
+      console.log(`✅ [FORCE-COMPLETE-AUTH] Super Admin access granted - role: ${userRole}`);
+      console.log(`🚀 [FORCE-COMPLETE] Super Admin ${adminId} bypassing workflow for order ${orderId}`);
+      
+      // Get current order status
+      const currentOrder = await orderManagementStorage.getOrderById(orderId);
+      if (!currentOrder) {
+        return res.status(404).json({ 
+          success: false, 
+          message: 'سفارش یافت نشد' 
+        });
+      }
+      
+      console.log(`📋 [FORCE-COMPLETE] Current order status: ${currentOrder.currentStatus}`);
+      
+      // Force update order to completed status, bypassing all workflow checks
+      const updatedOrder = await orderManagementStorage.updateOrderStatus(
+        orderId,
+        'completed', // Skip logistics_delivered and go directly to completed
+        adminId,
+        'admin_bypass',
+        `سفارش توسط سوپر ادمین مستقیماً به بایگانی منتقل شد (Workflow Bypass از وضعیت: ${currentOrder.currentStatus})`
+      );
+      
+      // Generate delivery code if it doesn't exist
+      if (!currentOrder.deliveryCode) {
+        const deliveryCode = `DEL-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+        await orderManagementStorage.updateDeliveryInfo(orderId, {
+          deliveryCode: deliveryCode,
+          actualDeliveryDate: new Date().toISOString(),
+          deliveryStatus: 'delivered'
+        });
+        console.log(`🎯 [FORCE-COMPLETE] Generated delivery code: ${deliveryCode}`);
+      }
+      
+      console.log(`✅ [FORCE-COMPLETE] Order ${orderId} forcefully completed by super admin (bypassed workflow)`);
+      
+      res.json({ 
+        success: true, 
+        order: updatedOrder,
+        message: `سفارش مستقیماً به بایگانی منتقل شد (Workflow Bypass)`
+      });
+    } catch (error) {
+      console.error('❌ [FORCE-COMPLETE] Error force completing order:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'خطا در انتقال مستقیم سفارش به بایگانی' 
+      });
+    }
+  });
+
   // =============================================================================
   // DELIVERY METHODS MANAGEMENT ENDPOINTS
   // =============================================================================
