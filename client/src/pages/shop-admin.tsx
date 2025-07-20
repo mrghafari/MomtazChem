@@ -978,17 +978,27 @@ function ReturnForm({ onClose }: { onClose: () => void }) {
       console.log('Fetching customer for phone:', phone);
       const data = await apiRequest(`/api/crm/customers/by-phone/${encodeURIComponent(phone)}`, { method: 'GET' });
       
-      console.log('Customer data received:', data);
+      console.log('Customer data received:', JSON.stringify(data, null, 2));
+      console.log('Customer object:', data?.customer);
+      console.log('firstName:', data?.customer?.firstName);
+      console.log('lastName:', data?.customer?.lastName);
+      console.log('email:', data?.customer?.email);
       
-      if (data.success && data.customer) {
+      if (data && data.success && data.customer) {
         const customer = data.customer;
-        setCustomerName(`${customer.firstName || ''} ${customer.lastName || ''}`.trim());
+        const fullName = `${customer.firstName || ''} ${customer.lastName || ''}`.trim();
+        console.log('Setting customer name to:', fullName);
+        console.log('Setting customer email to:', customer.email);
+        
+        setCustomerName(fullName);
         setCustomerEmail(customer.email || '');
+        
         toast({
           title: "مشتری یافت شد",
-          description: `اطلاعات مشتری ${customer.firstName} ${customer.lastName} بارگذاری شد`,
+          description: `اطلاعات مشتری ${customer.firstName || ''} ${customer.lastName || ''} بارگذاری شد`,
         });
       } else {
+        console.log('Customer not found or invalid response structure');
         // Clear fields if customer not found
         setCustomerName('');
         setCustomerEmail('');
