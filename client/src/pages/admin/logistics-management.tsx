@@ -148,22 +148,30 @@ const LogisticsManagement = () => {
     enabled: true
   });
 
-  // Get orders that have reached logistics stage (warehouse approved)
-  const { data: logisticsOrdersResponse, isLoading: loadingLogisticsOrders } = useQuery({
-    queryKey: ['/api/order-management/logistics'],
+  // Get active logistics orders (not delivered)
+  const { data: activeOrdersResponse, isLoading: loadingActiveOrders } = useQuery({
+    queryKey: ['/api/order-management/logistics', { active: true }],
+    queryFn: () => fetch('/api/order-management/logistics').then(res => res.json()),
     enabled: activeTab === 'orders'
   });
   
-  const allLogisticsOrders = logisticsOrdersResponse?.orders || [];
+  // Get delivered orders with specific statuses to trigger correct sorting
+  const { data: deliveredOrdersResponse, isLoading: loadingDeliveredOrders } = useQuery({
+    queryKey: ['/api/order-management/logistics', { delivered: true }],
+    queryFn: () => fetch('/api/order-management/logistics?statuses=logistics_delivered,completed').then(res => res.json()),
+    enabled: activeTab === 'orders'
+  });
   
-  // Separate active and delivered orders
-  const activeOrders = allLogisticsOrders.filter((order: any) => 
+  const allActiveOrders = activeOrdersResponse?.orders || [];
+  const allDeliveredOrders = deliveredOrdersResponse?.orders || [];
+  
+  // Filter active orders (exclude delivered ones just in case)
+  const activeOrders = allActiveOrders.filter((order: any) => 
     order.currentStatus !== 'logistics_delivered' && order.currentStatus !== 'completed'
   );
   
-  const deliveredOrders = allLogisticsOrders.filter((order: any) => 
-    order.currentStatus === 'logistics_delivered' || order.currentStatus === 'completed'
-  );
+  // Use delivered orders from dedicated query (already sorted by server)
+  const deliveredOrders = allDeliveredOrders;
   
   // Map data to add customer object structure for compatibility
   const mapOrderData = (orders: any[]) => orders.map((order: any) => {
@@ -224,6 +232,8 @@ const LogisticsManagement = () => {
   
   const mappedActiveOrders = mapOrderData(activeOrders);
   const mappedDeliveredOrders = mapOrderData(deliveredOrders);
+  
+  const loadingLogisticsOrders = loadingActiveOrders || loadingDeliveredOrders;
 
   const { data: companiesResponse, isLoading: loadingCompanies } = useQuery({
     queryKey: ['/api/logistics/companies'],
@@ -248,7 +258,10 @@ const LogisticsManagement = () => {
     },
     onSuccess: (data, orderId) => {
       // Refresh orders list
+      // Invalidate both active and delivered order queries
       queryClient.invalidateQueries({ queryKey: ['/api/order-management/logistics'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/order-management/logistics', { active: true }] });
+      queryClient.invalidateQueries({ queryKey: ['/api/order-management/logistics', { delivered: true }] });
       toast({
         title: "تکمیل تحویل",
         description: "سفارش به بایگانی لجستیک منتقل شد",
