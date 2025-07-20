@@ -138,6 +138,31 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Result**: Logistics staff now see exactly which address (primary or secondary) customer selected for delivery
 - **Impact**: Improved delivery accuracy by displaying customer's actual chosen delivery address in logistics interface
 
+### COMPLETED: Delivery Code Column Added to Active Logistics Orders Table (July 20, 2025)
+✅ **FULLY IMPLEMENTED: Delivery code column integration in active logistics orders table with visual indicators**
+- **Column Implementation**:
+  - Added sortable "کد تحویل" (Delivery Code) column to active logistics orders table
+  - Integrated with existing SortableHeader component for consistent sorting functionality
+  - Positioned between weight column and operations column for logical flow
+- **Visual Display Features**:
+  - Delivery codes display in green badges with `bg-green-100 text-green-800` styling
+  - Orders without delivery codes show "کد تحویل تولید نشده" in gray text
+  - Compact badge format with padding and rounded corners for professional appearance
+- **Sorting Integration**:
+  - Delivery code field fully integrated with existing sorting system
+  - Supports ascending/descending sort by delivery code string values
+  - Enhanced sortActiveOrders function handles deliveryCode field sorting
+- **Table Layout Enhancement**:
+  - Maintained responsive table design with horizontal scroll capability
+  - Proper RTL alignment and border styling consistent with other columns
+  - Professional spacing and typography matching existing table design
+- **User Interface Consistency**:
+  - Matches delivered orders table format for unified user experience
+  - Green color scheme consistent with logistics branding
+  - Clear visual distinction between orders with and without delivery codes
+- **Result**: Complete delivery code column functionality allowing sorting and visual identification of delivery code status
+- **Impact**: Enhanced logistics management with immediate delivery code visibility and sorting capabilities
+
 ### COMPLETED: Sortable Table Headers for Active Logistics Orders Management (July 20, 2025)
 ✅ **FULLY IMPLEMENTED: Complete sortable table interface for active logistics orders with clickable column headers**
 - **Sortable Headers System**:

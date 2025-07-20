@@ -621,6 +621,16 @@ const LogisticsManagement = () => {
                           وزن کل
                         </SortableHeader>
                       </th>
+                      <th className="text-right p-2 border-r">
+                        <SortableHeader 
+                          field="deliveryCode" 
+                          sortField={sortField} 
+                          sortDirection={sortDirection} 
+                          onSort={handleSort}
+                        >
+                          کد تحویل
+                        </SortableHeader>
+                      </th>
                       <th className="text-center p-2">عملیات</th>
                     </tr>
                   </thead>
@@ -663,6 +673,17 @@ const LogisticsManagement = () => {
                         <td className="p-3 border-r">
                           <div className="font-medium">
                             {order.calculatedWeight || order.totalWeight || '0'} {order.weightUnit || 'kg'}
+                          </div>
+                        </td>
+                        <td className="p-3 border-r">
+                          <div className="text-sm">
+                            {order.deliveryCode ? (
+                              <span className="inline-block bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium">
+                                {order.deliveryCode}
+                              </span>
+                            ) : (
+                              <span className="text-gray-400 text-xs">کد تحویل تولید نشده</span>
+                            )}
                           </div>
                         </td>
                         <td className="p-3 text-center">
