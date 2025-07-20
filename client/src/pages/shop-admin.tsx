@@ -1222,7 +1222,7 @@ function ReturnForm({ onClose }: { onClose: () => void }) {
         </div>
 
         <div>
-          <Label htmlFor="returnQuantity">Return Quantity *</Label>
+          <Label htmlFor="returnQuantity">Return Quantity * {productUnit && `(${productUnit})`}</Label>
           <div className="flex gap-2">
             <Input
               id="returnQuantity"
@@ -1233,15 +1233,17 @@ function ReturnForm({ onClose }: { onClose: () => void }) {
               required
               className="flex-1"
             />
-            {productUnit && (
-              <Input
-                value={productUnit}
-                readOnly
-                className="w-24 bg-gray-100 text-center text-gray-700 font-medium"
-                title={`واحد اندازه‌گیری: ${productUnit}`}
-              />
+            {productUnit && productUnit !== 'units' && (
+              <div className="flex items-center px-3 py-2 bg-gray-100 rounded-md border text-sm text-gray-700 font-medium min-w-[60px] justify-center">
+                {productUnit}
+              </div>
             )}
           </div>
+          {productId && (
+            <p className="text-xs text-gray-500 mt-1">
+              واحد اندازه‌گیری از کاردکس: {productUnit || 'نامشخص'}
+            </p>
+          )}
         </div>
 
         <div>

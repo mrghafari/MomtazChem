@@ -34,16 +34,21 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Frontend Enhancements**: 
   - Added productUnit state to ReturnForm component for storing unit from kardex
   - Enhanced selectProductFromSuggestion function to fetch product unit via API call
-  - Added read-only unit input field next to quantity field in Persian interface
+  - Unit displays in field label: "Return Quantity * (کیلوگرم)" 
+  - Added unit display box next to quantity field for non-generic units
   - Clear productUnit state when form is reset or cleared
 - **Backend Implementation**:
   - Created new API endpoint `/api/products/kardex/:id/unit` for fetching unit from showcase_products
   - Enhanced db.ts to export showcaseDb connection for kardex access
-  - API returns stockUnit field from showcase_products table with fallback to 'واحد'
-- **User Experience**: When user selects product (e.g., "Solvant 402"), unit automatically appears in read-only field
+  - API returns actual stockUnit field from showcase_products table
+  - Added comprehensive logging for unit retrieval process
+- **Database Updates**: 
+  - Updated product units by category: fuel-additives (لیتر), agricultural-fertilizers (کیلوگرم), paint-thinner (لیتر), water-treatment (لیتر)
+  - Solvant 402 now shows "کیلوگرم" instead of generic "units"
+- **User Experience**: When user selects product (e.g., "Solvant 402"), actual unit ("کیلوگرم") appears in field label and display box
 - **Integration**: Unit data comes directly from kardex (showcase_products) ensuring consistency
-- **Result**: Product unit displays automatically beside quantity input without requiring manual entry
-- **Impact**: Streamlined data entry with accurate unit information from inventory records
+- **Result**: Product unit displays automatically with actual measurement units from inventory records
+- **Impact**: Streamlined data entry with accurate, specific unit information instead of generic placeholders
 
 ### Enhanced Order Management Table with More Items Per Page (July 20, 2025)
 ✅ **COMPLETED: Increased table capacity to display more orders per page**
