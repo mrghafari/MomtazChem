@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bank Receipt Upload Test</title>
+    <meta charset="UTF-8">
+</head>
+<body dir="rtl">
+    <h1>تست آپلود فیش بانکی</h1>
+    
+    <form id="uploadForm" enctype="multipart/form-data">
+        <div>
+            <label>شماره سفارش:</label>
+            <input type="text" id="orderId" value="ORD-1001" required>
+        </div>
+        <br>
+        <div>
+            <label>فیش بانکی:</label>
+            <input type="file" id="receipt" accept="image/*,application/pdf" required>
+        </div>
+        <br>
+        <div>
+            <label>توضیحات:</label>
+            <textarea id="notes" placeholder="توضیحات اختیاری..."></textarea>
+        </div>
+        <br>
+        <button type="submit">آپلود فیش بانکی</button>
+    </form>
+    
+    <div id="result"></div>
+    
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            formData.append('orderId', document.getElementById('orderId').value);
+            formData.append('receipt', document.getElementById('receipt').files[0]);
+            formData.append('notes', document.getElementById('notes').value);
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'در حال آپلود...';
+            
+            try {
+                const response = await fetch('/api/payment/upload-receipt', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
+                });
+                
+                const result = await response.text();
+                console.log('Response status:', response.status);
+                console.log('Response text:', result);
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `<div style="color: green;">✅ آپلود موفق: ${result}</div>`;
+                } else {
+                    resultDiv.innerHTML = `<div style="color: red;">❌ خطا: ${result}</div>`;
+                }
+            } catch (error) {
+                console.error('Upload error:', error);
+                resultDiv.innerHTML = `<div style="color: red;">❌ خطا: ${error.message}</div>`;
+            }
+        });
+    </script>
+</body>
+</html>

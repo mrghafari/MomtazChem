@@ -251,13 +251,21 @@ const uploadReceipt = multer({
       'image/jpeg',
       'image/jpg', 
       'image/png',
+      'image/webp',
       'application/pdf'
     ];
+    
+    console.log('🔍 [RECEIPT UPLOAD] File validation:', {
+      originalname: file.originalname,
+      mimetype: file.mimetype,
+      size: file.size,
+      allowed: allowedMimeTypes.includes(file.mimetype)
+    });
     
     if (allowedMimeTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('Only JPEG, PNG, and PDF files are allowed for receipt uploads'));
+      cb(new Error(`File type not supported: ${file.mimetype}. Only JPEG, PNG, WebP, and PDF files are allowed for receipt uploads`));
     }
   }
 });
@@ -21878,7 +21886,26 @@ momtazchem.com
   });
 
   // Upload bank receipt
-  app.post('/api/payment/upload-receipt', uploadReceipt.single('receipt'), async (req, res) => {
+  app.post('/api/payment/upload-receipt', (req, res, next) => {
+    // Check customer authentication first
+    console.log('🔐 [RECEIPT UPLOAD] Session check:', {
+      exists: !!req.session,
+      customerId: req.session?.customerId,
+      crmCustomerId: req.session?.crmCustomerId,
+      sessionID: req.sessionID
+    });
+    
+    if (!req.session?.customerId) {
+      console.log('❌ [RECEIPT UPLOAD] Authentication failed - no customerId in session');
+      return res.status(401).json({ 
+        success: false, 
+        message: 'احراز هویت مشتری ضروری است' 
+      });
+    }
+    
+    console.log('✅ [RECEIPT UPLOAD] Authentication successful for customer:', req.session.customerId);
+    next();
+  }, uploadReceipt.single('receipt'), async (req, res) => {
     try {
       const { orderId } = req.body;
       const file = req.file;
