@@ -78,6 +78,7 @@ interface LogisticsOrder {
 
 const LogisticsManagement = () => {
   const [activeTab, setActiveTab] = useState('orders');
+  const [ordersSubTab, setOrdersSubTab] = useState('active'); // 'active' or 'delivered'
   const [orderButtonStates, setOrderButtonStates] = useState<{[orderId: number]: { 
     isCodeSent: boolean; 
     existingCode: string | null; 
@@ -87,8 +88,27 @@ const LogisticsManagement = () => {
   const [isLabelDialogOpen, setIsLabelDialogOpen] = useState(false);
   const [resendingCodes, setResendingCodes] = useState<{[key: number]: boolean}>({});
   const [resentCodes, setResentCodes] = useState<{[key: number]: boolean}>({});
+  const [isAdmin, setIsAdmin] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Check admin authentication
+  useEffect(() => {
+    const checkAdminAuth = async () => {
+      try {
+        const response = await fetch('/api/admin/me');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.user?.roleId === 1) {
+            setIsAdmin(true);
+          }
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error);
+      }
+    };
+    checkAdminAuth();
+  }, []);
 
   // Enable audio notifications for logistics orders
   const { orderCount } = useOrderNotifications({
@@ -102,10 +122,19 @@ const LogisticsManagement = () => {
     enabled: activeTab === 'orders'
   });
   
-  const logisticsOrders = logisticsOrdersResponse?.orders || [];
+  const allLogisticsOrders = logisticsOrdersResponse?.orders || [];
+  
+  // Separate active and delivered orders
+  const activeOrders = allLogisticsOrders.filter((order: any) => 
+    order.currentStatus !== 'logistics_delivered' && order.currentStatus !== 'completed'
+  );
+  
+  const deliveredOrders = allLogisticsOrders.filter((order: any) => 
+    order.currentStatus === 'logistics_delivered' || order.currentStatus === 'completed'
+  );
   
   // Map data to add customer object structure for compatibility
-  const mappedLogisticsOrders = logisticsOrders.map((order: any) => ({
+  const mapOrderData = (orders: any[]) => orders.map((order: any) => ({
     ...order,
     // Use existing customer object if available, otherwise create from individual fields
     customer: order.customer || {
@@ -117,6 +146,9 @@ const LogisticsManagement = () => {
     // Ensure customerAddress is available for display
     customerAddress: order.customerAddress || 'آدرس ثبت نشده'
   }));
+  
+  const mappedActiveOrders = mapOrderData(activeOrders);
+  const mappedDeliveredOrders = mapOrderData(deliveredOrders);
 
   const { data: companiesResponse, isLoading: loadingCompanies } = useQuery({
     queryKey: ['/api/logistics/companies'],
@@ -124,6 +156,39 @@ const LogisticsManagement = () => {
   });
 
   const companies = companiesResponse?.data || [];
+
+  // Complete delivery mutation (admin only)
+  const completeDeliveryMutation = useMutation({
+    mutationFn: async (orderId: number) => {
+      const response = await fetch(`/api/order-management/logistics/${orderId}/complete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to complete delivery');
+      }
+      return response.json();
+    },
+    onSuccess: (data, orderId) => {
+      // Refresh orders list
+      queryClient.invalidateQueries({ queryKey: ['/api/order-management/logistics'] });
+      toast({
+        title: "تکمیل تحویل",
+        description: "سفارش به بایگانی لجستیک منتقل شد",
+        className: "rtl"
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "خطا",
+        description: error.message,
+        variant: "destructive",
+        className: "rtl"
+      });
+    }
+  });
 
   const getStatusBadge = (status: string) => {
     const statusMap = {
@@ -200,220 +265,262 @@ const LogisticsManagement = () => {
           <h3 className="text-lg font-semibold">مدیریت سفارشات لجستیک</h3>
           <div className="flex gap-2">
             <Badge variant="outline" className="bg-blue-50 text-blue-700">
-              {mappedLogisticsOrders.length} سفارش در لجستیک
+              {mappedActiveOrders.length} سفارش فعال
+            </Badge>
+            <Badge variant="outline" className="bg-green-50 text-green-700">
+              {mappedDeliveredOrders.length} تحویل شده
             </Badge>
           </div>
         </div>
 
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <CheckCircle className="w-5 h-5 text-green-600" />
-            <h4 className="text-md font-semibold text-green-800">سفارشات تایید شده انبار (در لجستیک)</h4>
+        {/* Sub-tabs for Active and Delivered Orders */}
+        <Tabs value={ordersSubTab} onValueChange={setOrdersSubTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="active">سفارشات فعال ({mappedActiveOrders.length})</TabsTrigger>
+            <TabsTrigger value="delivered">تحویل داده شده ({mappedDeliveredOrders.length})</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="active">
+            <ActiveOrdersList />
+          </TabsContent>
+
+          <TabsContent value="delivered">
+            <DeliveredOrdersList />
+          </TabsContent>
+        </Tabs>
+      </div>
+    );
+  };
+
+  const ActiveOrdersList = () => {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <CheckCircle className="w-5 h-5 text-green-600" />
+          <h4 className="text-md font-semibold text-green-800">سفارشات تایید شده انبار (در لجستیک)</h4>
+        </div>
+        
+        {loadingLogisticsOrders ? (
+          <div className="text-center py-8">در حال بارگذاری سفارشات لجستیک...</div>
+        ) : mappedActiveOrders.length === 0 ? (
+          <Card className="border-green-200">
+            <CardContent className="text-center py-8">
+              <Package className="w-12 h-12 mx-auto mb-4 text-green-400" />
+              <p className="text-green-600">هیچ سفارش فعال در لجستیک موجود نیست</p>
+            </CardContent>
+          </Card>
+        ) : (
+          mappedActiveOrders.map((order: LogisticsOrder) => (
+            <OrderCard key={order.id} order={order} showDeliveryButton={true} />
+          ))
+        )}
+      </div>
+    );
+  };
+
+  const DeliveredOrdersList = () => {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <CheckCircle className="w-5 h-5 text-green-600" />
+          <h4 className="text-md font-semibold text-green-800">بایگانی سفارشات تحویل شده</h4>
+        </div>
+        
+        {loadingLogisticsOrders ? (
+          <div className="text-center py-8">در حال بارگذاری بایگانی...</div>
+        ) : mappedDeliveredOrders.length === 0 ? (
+          <Card className="border-green-200">
+            <CardContent className="text-center py-8">
+              <CheckCircle className="w-12 h-12 mx-auto mb-4 text-green-400" />
+              <p className="text-green-600">هیچ سفارش تحویل شده‌ای موجود نیست</p>
+            </CardContent>
+          </Card>
+        ) : (
+          mappedDeliveredOrders.map((order: LogisticsOrder) => (
+            <OrderCard key={order.id} order={order} showDeliveryButton={false} />
+          ))
+        )}
+      </div>
+    );
+  };
+
+  const OrderCard = ({ order, showDeliveryButton }: { order: LogisticsOrder; showDeliveryButton: boolean }) => {
+    return (
+      <Card className={`border-r-4 ${showDeliveryButton ? 'border-r-green-500 bg-green-50' : 'border-r-gray-400 bg-gray-50'}`}>
+        <CardContent className="p-4">
+          <div className="flex justify-between items-center mb-3">
+            <h4 className={`font-semibold text-lg ${showDeliveryButton ? 'text-green-800' : 'text-gray-700'}`}>
+              سفارش #{order.customerOrderId}
+            </h4>
+            <Badge variant="default" className={showDeliveryButton ? "bg-green-600 text-white" : "bg-gray-600 text-white"}>
+              {showDeliveryButton ? 'در حال پردازش' : 'تحویل شده'}
+            </Badge>
           </div>
           
-          {loadingLogisticsOrders ? (
-            <div className="text-center py-8">در حال بارگذاری سفارشات لجستیک...</div>
-          ) : mappedLogisticsOrders.length === 0 ? (
-            <Card className="border-green-200">
-              <CardContent className="text-center py-8">
-                <Package className="w-12 h-12 mx-auto mb-4 text-green-400" />
-                <p className="text-green-600">هیچ سفارش تایید شده‌ای از انبار موجود نیست</p>
-              </CardContent>
-            </Card>
-          ) : (
-            mappedLogisticsOrders.map((order: LogisticsOrder) => (
-              <Card key={order.id} className="border-r-4 border-r-green-500 bg-green-50">
-                <CardContent className="p-4">
-                  <div className="flex justify-between items-center mb-3">
-                    <h4 className="font-semibold text-green-800 text-lg">سفارش #{order.customerOrderId}</h4>
-                    <Badge variant="default" className="bg-green-600 text-white">
-                      تایید شده انبار
-                    </Badge>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-4">
-                    {/* Customer Info Block */}
-                    <div className="bg-white rounded-lg p-3 border border-green-200">
-                      <h5 className="font-medium text-green-800 mb-2 flex items-center">
-                        <User className="w-4 h-4 mr-2" />
-                        اطلاعات گیرنده
-                      </h5>
-                      <div className="space-y-2">
-                        <div className="bg-gray-50 rounded p-2">
-                          <p className="text-xs text-gray-500 mb-1">نام مشتری</p>
-                          <p className="text-sm font-medium text-gray-800">
-                            {order.customer?.firstName || order.customerFirstName} {order.customer?.lastName || order.customerLastName}
-                          </p>
-                        </div>
-                        <div className="bg-gray-50 rounded p-2 flex items-center">
-                          <Phone className="w-3 h-3 mr-2 text-gray-500" />
-                          <span className="text-sm text-gray-700">{order.customer?.phone || order.customerPhone}</span>
-                        </div>
-                      </div>
-                    </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-4">
+            {/* Customer Info Block */}
+            <div className="bg-white rounded-lg p-3 border border-green-200">
+              <h5 className="font-medium text-green-800 mb-2 flex items-center">
+                <User className="w-4 h-4 mr-2" />
+                اطلاعات گیرنده
+              </h5>
+              <div className="space-y-2">
+                <div className="bg-gray-50 rounded p-2">
+                  <p className="text-xs text-gray-500 mb-1">نام مشتری</p>
+                  <p className="text-sm font-medium text-gray-800">
+                    {order.customer?.firstName || order.customerFirstName} {order.customer?.lastName || order.customerLastName}
+                  </p>
+                </div>
+                <div className="bg-gray-50 rounded p-2 flex items-center">
+                  <Phone className="w-3 h-3 mr-2 text-gray-500" />
+                  <span className="text-sm text-gray-700">{order.customer?.phone || order.customerPhone}</span>
+                </div>
+              </div>
+            </div>
 
-                    {/* Total Weight Block */}
-                    <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
-                      <h5 className="font-medium text-blue-800 mb-2 flex items-center">
-                        <Package className="w-4 h-4 mr-2" />
-                        وزن محموله
-                      </h5>
-                      <p className="text-lg font-bold text-blue-700 flex items-center">
-                        <Package className="w-4 h-4 mr-1" />
-                        {order.calculatedWeight ? `${order.calculatedWeight} کیلوگرم` : 'محاسبه نشده'}
-                      </p>
-                      <p className="text-xs text-blue-600 mt-1">مجموع وزن ناخالص کالاها</p>
-                    </div>
+            {/* Total Weight Block */}
+            <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
+              <h5 className="font-medium text-blue-800 mb-2 flex items-center">
+                <Package className="w-4 h-4 mr-2" />
+                وزن کل محموله
+              </h5>
+              <p className="text-lg font-bold text-blue-700">
+                {order.calculatedWeight || order.totalWeight || '0'} {order.weightUnit || 'kg'}
+              </p>
+              <p className="text-xs text-blue-600 mt-1">وزن محاسبه شده</p>
+            </div>
 
-                    {/* Delivery Code Block */}
-                    <div className={`rounded-lg p-3 border ${
-                      order.deliveryCode
-                        ? 'bg-purple-50 border-purple-200' 
-                        : 'bg-gray-50 border-gray-200'
-                    }`}>
-                      <h5 className={`font-medium mb-2 flex items-center ${
-                        order.deliveryCode
-                          ? 'text-purple-800' 
-                          : 'text-gray-600'
-                      }`}>
-                        <Shield className="w-4 h-4 mr-2" />
-                        کد تحویل
-                      </h5>
-                      <p className={`text-lg font-bold mb-2 ${
-                        order.deliveryCode
-                          ? 'text-purple-700' 
-                          : 'text-gray-500'
-                      }`}>
-                        {order.deliveryCode || 'کد ندارد'}
-                      </p>
-                      <p className={`text-xs mb-2 ${
-                        order.deliveryCode
-                          ? 'text-purple-600' 
-                          : 'text-gray-500'
-                      }`}>
-                        کد 4 رقمی تحویل
-                      </p>
-                      {order.deliveryCode && (
-                        <Button
-                          size="sm"
-                          onClick={() => handleResendDeliveryCode(order.id)}
-                          disabled={resendingCodes[order.id]}
-                          className={`w-full text-xs ${
-                            resentCodes[order.id] 
-                              ? 'bg-red-600 hover:bg-red-700 text-white' 
-                              : 'bg-blue-600 hover:bg-blue-700 text-white'
-                          }`}
-                        >
-                          {resendingCodes[order.id] ? (
-                            <>
-                              <Send className="w-3 h-3 mr-1 animate-spin" />
-                              در حال ارسال...
-                            </>
-                          ) : resentCodes[order.id] ? (
-                            <>
-                              <Send className="w-3 h-3 mr-1" />
-                              ارسال شد ✓
-                            </>
-                          ) : (
-                            <>
-                              <Send className="w-3 h-3 mr-1" />
-                              ارسال مجدد
-                            </>
-                          )}
-                        </Button>
-                      )}
-                    </div>
+            {/* Delivery Address Block */}
+            <div className="bg-orange-50 rounded-lg p-3 border border-orange-200">
+              <h5 className="font-medium text-orange-800 mb-2 flex items-center">
+                <MapPin className="w-4 h-4 mr-2" />
+                آدرس تحویل
+              </h5>
+              <p className="text-sm text-orange-700">
+                {order.customerAddress || 'آدرس ثبت نشده'}
+              </p>
+              <p className="text-xs text-orange-600 mt-1">آدرس دریافت کالا</p>
+            </div>
 
-                    {/* Delivery Address Block */}
-                    <div className="bg-orange-50 rounded-lg p-3 border border-orange-200">
-                      <h5 className="font-medium text-orange-800 mb-2 flex items-center">
-                        <MapPin className="w-4 h-4 mr-2" />
-                        آدرس تحویل
-                      </h5>
-                      <p className="text-sm text-orange-700">
-                        {order.customerAddress || order.shippingAddress || 'آدرس ثبت نشده'}
-                      </p>
-                      <p className="text-xs text-orange-600 mt-1">آدرس دریافت کالا</p>
-                    </div>
+            {/* Order Date Block */}
+            <div className="bg-green-50 rounded-lg p-3 border border-green-200">
+              <h5 className="font-medium text-green-800 mb-2 flex items-center">
+                <Package className="w-4 h-4 mr-2" />
+                تاریخ سفارش
+              </h5>
+              <p className="text-sm font-medium text-green-700">
+                {order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-US') : 'نامشخص'}
+              </p>
+              <p className="text-xs text-green-600 mt-1">تاریخ ثبت سفارش</p>
+            </div>
 
-                    {/* Order Date Block */}
-                    <div className="bg-green-50 rounded-lg p-3 border border-green-200">
-                      <h5 className="font-medium text-green-800 mb-2 flex items-center">
-                        <Package className="w-4 h-4 mr-2" />
-                        تاریخ سفارش
-                      </h5>
-                      <p className="text-sm font-medium text-green-700">
-                        {order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-US') : 'نامشخص'}
-                      </p>
-                      <p className="text-xs text-green-600 mt-1">تاریخ ثبت سفارش</p>
-                    </div>
+            {/* Delivery Date Block */}
+            <div className="bg-yellow-50 rounded-lg p-3 border border-yellow-200">
+              <h5 className="font-medium text-yellow-800 mb-2 flex items-center">
+                <Truck className="w-4 h-4 mr-2" />
+                تاریخ تحویل
+              </h5>
+              <p className="text-sm font-medium text-yellow-700">
+                {order.actualDeliveryDate ? new Date(order.actualDeliveryDate).toLocaleDateString('en-US') : 'در انتظار تحویل'}
+              </p>
+              <p className="text-xs text-yellow-600 mt-1">تاریخ تحویل سفارش</p>
+            </div>
 
-                    {/* Delivery Date Block */}
-                    <div className="bg-yellow-50 rounded-lg p-3 border border-yellow-200">
-                      <h5 className="font-medium text-yellow-800 mb-2 flex items-center">
-                        <Truck className="w-4 h-4 mr-2" />
-                        تاریخ تحویل
-                      </h5>
-                      <p className="text-sm font-medium text-yellow-700">
-                        {order.actualDeliveryDate ? new Date(order.actualDeliveryDate).toLocaleDateString('en-US') : 'در انتظار تحویل'}
-                      </p>
-                      <p className="text-xs text-yellow-600 mt-1">تاریخ تحویل سفارش</p>
-                    </div>
-                  </div>
+            {/* Tracking Code Block (for delivered orders) */}
+            {!showDeliveryButton && order.deliveryCode && (
+              <div className="bg-purple-50 rounded-lg p-3 border border-purple-200">
+                <h5 className="font-medium text-purple-800 mb-2 flex items-center">
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  کد تحویل
+                </h5>
+                <p className="text-sm font-medium text-purple-700">
+                  {order.deliveryCode}
+                </p>
+                <p className="text-xs text-purple-600 mt-1">کد رهگیری تحویل</p>
+              </div>
+            )}
+          </div>
 
-                  {/* Action Buttons */}
-                  <div className="flex gap-2 flex-wrap">
-                    <Button 
-                      size="sm" 
-                      onClick={() => handleSendDeliveryCode(order.id, !!order.deliveryCode)}
-                      disabled={resendingCodes[order.id]}
-                      className={`${
-                        resentCodes[order.id] 
-                          ? 'bg-red-600 hover:bg-red-700 text-white' 
-                          : 'bg-blue-600 hover:bg-blue-700 text-white'
-                      }`}
-                    >
-                      {resendingCodes[order.id] ? (
-                        <>
-                          <Send className="w-4 h-4 mr-2 animate-spin" />
-                          در حال ارسال...
-                        </>
-                      ) : resentCodes[order.id] ? (
-                        <>
-                          <Send className="w-4 h-4 mr-2" />
-                          کد ارسال شد ✓
-                        </>
-                      ) : order.deliveryCode ? (
-                        <>
-                          <Send className="w-4 h-4 mr-2" />
-                          ارسال مجدد کد
-                        </>
-                      ) : (
-                        <>
-                          <Send className="w-4 h-4 mr-2" />
-                          ارسال کد به مشتری
-                        </>
-                      )}
-                    </Button>
-                    <Button size="sm" variant="outline" className="border-green-500 text-green-700 hover:bg-green-100">
-                      <Users className="w-4 h-4 mr-2" />
-                      اختصاص راننده
-                    </Button>
-                    <Button size="sm" variant="outline" className="border-green-500 text-green-700 hover:bg-green-100">
-                      <MapPin className="w-4 h-4 mr-2" />
-                      پیگیری مسیر
-                    </Button>
-                    <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white">
-                      <CheckCircle className="w-4 h-4 mr-2" />
-                      تحویل شد
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
+          {/* Action Buttons */}
+          {showDeliveryButton && (
+            <div className="flex gap-2 flex-wrap">
+              <Button 
+                size="sm" 
+                onClick={() => handleSendDeliveryCode(order.id, !!order.deliveryCode)}
+                disabled={resendingCodes[order.id]}
+                className={`${
+                  resentCodes[order.id] 
+                    ? 'bg-red-600 hover:bg-red-700 text-white' 
+                    : 'bg-blue-600 hover:bg-blue-700 text-white'
+                }`}
+              >
+                {resendingCodes[order.id] ? (
+                  <>
+                    <Send className="w-4 h-4 mr-2 animate-spin" />
+                    در حال ارسال...
+                  </>
+                ) : resentCodes[order.id] ? (
+                  <>
+                    <Send className="w-4 h-4 mr-2" />
+                    کد ارسال شد ✓
+                  </>
+                ) : order.deliveryCode ? (
+                  <>
+                    <Send className="w-4 h-4 mr-2" />
+                    ارسال مجدد کد
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-4 h-4 mr-2" />
+                    ارسال کد به مشتری
+                  </>
+                )}
+              </Button>
+              <Button size="sm" variant="outline" className="border-green-500 text-green-700 hover:bg-green-100">
+                <Users className="w-4 h-4 mr-2" />
+                اختصاص راننده
+              </Button>
+              <Button size="sm" variant="outline" className="border-green-500 text-green-700 hover:bg-green-100">
+                <MapPin className="w-4 h-4 mr-2" />
+                پیگیری مسیر
+              </Button>
+              
+              {/* Admin-only delivery completion */}
+              {isAdmin ? (
+                <Button 
+                  size="sm" 
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                  onClick={() => completeDeliveryMutation.mutate(order.id)}
+                  disabled={completeDeliveryMutation.isPending}
+                >
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  {completeDeliveryMutation.isPending ? 'در حال پردازش...' : 'تحویل شد'}
+                </Button>
+              ) : (
+                <div className="flex items-center px-3 py-1 bg-amber-100 border border-amber-300 rounded text-amber-700 text-sm">
+                  <Shield className="w-4 h-4 mr-2" />
+                  فقط ادمین می‌تواند تحویل را تکمیل کند
+                </div>
+              )}
+            </div>
           )}
-        </div>
-      </div>
+
+          {/* Delivered order info */}
+          {!showDeliveryButton && (
+            <div className="mt-4 p-3 bg-green-100 rounded-lg border border-green-200">
+              <div className="flex items-center gap-2 text-green-800">
+                <CheckCircle className="w-5 h-5" />
+                <span className="font-medium">این سفارش با موفقیت تحویل داده شده است</span>
+              </div>
+              {order.deliveryCode && (
+                <p className="text-sm text-green-700 mt-1">
+                  کد تحویل: <span className="font-medium">{order.deliveryCode}</span>
+                </p>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     );
   };
 
@@ -432,230 +539,63 @@ const LogisticsManagement = () => {
       ratePerKm: ''
     });
 
-    const addCompanyMutation = useMutation({
-      mutationFn: async (data: any) => {
-        const response = await fetch('/api/logistics/companies', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
-        });
-        if (!response.ok) throw new Error('Failed to create company');
-        return response.json();
-      },
-      onSuccess: () => {
-        setShowAddForm(false);
-        setCompanyFormData({
-          name: '',
-          contactPerson: '',
-          phone: '',
-          email: '',
-          address: '',
-          website: '',
-          contractEndDate: '',
-          maxWeight: '',
-          baseRate: '',
-          ratePerKm: ''
-        });
-        queryClient.invalidateQueries({ queryKey: ['/api/logistics/companies'] });
-        toast({ title: "موفق", description: "شرکت حمل و نقل جدید ثبت شد" });
-      }
-    });
-
-    const handleSubmitCompany = (e: React.FormEvent) => {
-      e.preventDefault();
-      if (!companyFormData.name || !companyFormData.phone) {
-        toast({ 
-          title: "خطا", 
-          description: "لطفاً نام شرکت و شماره تماس را وارد کنید",
-          variant: "destructive"
-        });
-        return;
-      }
-      addCompanyMutation.mutate(companyFormData);
-    };
-
     return (
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h3 className="text-lg font-semibold">شرکت‌های حمل و نقل</h3>
-          <Button onClick={() => setShowAddForm(true)}>
+          <h3 className="text-lg font-semibold">مدیریت شرکت‌های حمل</h3>
+          <Button onClick={() => setShowAddForm(true)} className="bg-blue-600 hover:bg-blue-700">
             <Plus className="w-4 h-4 mr-2" />
-            شرکت جدید
+            افزودن شرکت جدید
           </Button>
         </div>
 
-        {showAddForm && (
-          <Card>
-            <CardHeader>
-              <CardTitle>ثبت شرکت حمل و نقل جدید</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmitCompany} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="name">نام شرکت *</Label>
-                    <Input
-                      id="name"
-                      value={companyFormData.name}
-                      onChange={(e) => setCompanyFormData(prev => ({ ...prev, name: e.target.value }))}
-                      placeholder="نام شرکت حمل و نقل"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="contactPerson">نام مسئول</Label>
-                    <Input
-                      id="contactPerson"
-                      value={companyFormData.contactPerson}
-                      onChange={(e) => setCompanyFormData(prev => ({ ...prev, contactPerson: e.target.value }))}
-                      placeholder="نام شخص رابط"
-                    />
-                  </div>
-                </div>
+        <Card>
+          <CardContent className="text-center py-8">
+            <Truck className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+            <p className="text-gray-500">مدیریت شرکت‌های حمل در دست توسعه است</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  };
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="phone">شماره تماس *</Label>
-                    <Input
-                      id="phone"
-                      value={companyFormData.phone}
-                      onChange={(e) => setCompanyFormData(prev => ({ ...prev, phone: e.target.value }))}
-                      placeholder="شماره تماس شرکت"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="email">ایمیل</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={companyFormData.email}
-                      onChange={(e) => setCompanyFormData(prev => ({ ...prev, email: e.target.value }))}
-                      placeholder="آدرس ایمیل"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="address">آدرس</Label>
-                  <Input
-                    id="address"
-                    value={companyFormData.address}
-                    onChange={(e) => setCompanyFormData(prev => ({ ...prev, address: e.target.value }))}
-                    placeholder="آدرس کامل شرکت"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="website">وب‌سایت</Label>
-                  <Input
-                    id="website"
-                    type="url"
-                    value={companyFormData.website}
-                    onChange={(e) => setCompanyFormData(prev => ({ ...prev, website: e.target.value }))}
-                    placeholder="https://www.example.com"
-                  />
-                </div>
-
-                <div className="flex gap-2">
-                  <Button type="submit" disabled={addCompanyMutation.isPending}>
-                    {addCompanyMutation.isPending ? 'در حال ثبت...' : 'ثبت شرکت'}
-                  </Button>
-                  <Button type="button" variant="outline" onClick={() => setShowAddForm(false)}>
-                    لغو
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        )}
-
-        <div className="grid gap-4">
-          {loadingCompanies ? (
-            <div className="text-center py-8">در حال بارگذاری...</div>
-          ) : companies.length === 0 ? (
-            <Card>
-              <CardContent className="text-center py-8">
-                <Truck className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                <p className="text-gray-500">هیچ شرکت حمل و نقل ثبت نشده است</p>
-              </CardContent>
-            </Card>
-          ) : (
-            companies.map((company: TransportationCompany) => (
-              <Card key={company.id}>
-                <CardContent className="p-4">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h4 className="font-semibold">{company.name}</h4>
-                      <p className="text-sm text-gray-600">{company.contactPerson}</p>
-                      <div className="flex items-center gap-4 mt-2 flex-wrap">
-                        <span className="text-sm">📞 {company.phone}</span>
-                        <span className="text-sm">✉️ {company.email}</span>
-                        {company.website && (
-                          <a 
-                            href={company.website} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-sm text-blue-600 hover:underline"
-                          >
-                            🌐 {company.website}
-                          </a>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2 mt-2">
-                        <span className="text-sm">⭐ {company.rating || 0}/5</span>
-                        <span className="text-sm">({company.totalDeliveries} تحویل)</span>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      {company.isActive ? (
-                        <Badge className="bg-green-500">فعال</Badge>
-                      ) : (
-                        <Badge className="bg-red-500">غیرفعال</Badge>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex gap-2 mt-4">
-                    <Button size="sm" variant="outline">
-                      <Edit className="w-4 h-4 mr-2" />
-                      ویرایش
-                    </Button>
-                    <Button size="sm" variant="outline">
-                      <Eye className="w-4 h-4 mr-2" />
-                      جزئیات
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
-          )}
+  const VehiclesTab = () => {
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h3 className="text-lg font-semibold">مدیریت وسایل نقلیه</h3>
+          <Button className="bg-green-600 hover:bg-green-700">
+            <Plus className="w-4 h-4 mr-2" />
+            افزودن وسیله نقلیه
+          </Button>
         </div>
+
+        <Card>
+          <CardContent className="text-center py-8">
+            <Truck className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+            <p className="text-gray-500">مدیریت وسایل نقلیه در دست توسعه است</p>
+          </CardContent>
+        </Card>
       </div>
     );
   };
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">مدیریت لجستیک</h1>
-        <div className="flex items-center gap-2">
-          <Badge variant="outline">
-            {mappedLogisticsOrders.length} سفارش فعال
-          </Badge>
-          {orderCount > 0 && (
-            <Badge className="bg-orange-500 animate-pulse">
-              {orderCount} سفارش جدید
-            </Badge>
-          )}
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">مدیریت لجستیک</h1>
+          <p className="text-muted-foreground mt-1">
+            سیستم مدیریت کامل لجستیک و حمل‌ونقل
+          </p>
         </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="orders">سفارشات</TabsTrigger>
           <TabsTrigger value="companies">شرکت‌های حمل</TabsTrigger>
           <TabsTrigger value="vehicles">وسایل نقلیه</TabsTrigger>
-          <TabsTrigger value="analytics">آنالیتیک</TabsTrigger>
         </TabsList>
 
         <TabsContent value="orders">
@@ -667,21 +607,7 @@ const LogisticsManagement = () => {
         </TabsContent>
 
         <TabsContent value="vehicles">
-          <Card>
-            <CardContent className="p-6 text-center">
-              <Truck className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-              <p className="text-gray-500">مدیریت وسایل نقلیه در دست توسعه است</p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="analytics">
-          <Card>
-            <CardContent className="p-6 text-center">
-              <FileText className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-              <p className="text-gray-500">آنالیتیک لجستیک در دست توسعه است</p>
-            </CardContent>
-          </Card>
+          <VehiclesTab />
         </TabsContent>
       </Tabs>
     </div>

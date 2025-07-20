@@ -80,7 +80,7 @@ import AdminOrderManagement from "@/pages/admin-order-management";
 import AbandonedCartManagement from "@/pages/abandoned-cart-management";
 import FinancialDepartment from "@/pages/financial-department";
 import WarehouseDepartment from "@/pages/warehouse-department";
-import LogisticsDepartment from "@/pages/logistics-department";
+
 import FinanceOrders from "@/pages/admin/finance-orders";
 import LogisticsSimple from "@/pages/logistics-simple";
 import FinancialLogin from "@/pages/financial-login";
@@ -229,8 +229,8 @@ function Router() {
           <Route path="/financial/login" component={FinancialLogin} />
           <Route path="/warehouse" component={WarehouseManagementFixed} />
           <Route path="/warehouse/login" component={WarehouseLogin} />
-          <Route path="/logistics-department" component={LogisticsDepartment} />
-          <Route path="/logistics-full" component={LogisticsDepartment} />
+
+
           <Route path="/logistics" component={LogisticsSimple} />
           <Route path="/logistics/login" component={LogisticsLogin} />
           <Route path="/test-logistics" component={TestLogistics} />
