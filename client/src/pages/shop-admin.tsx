@@ -986,8 +986,18 @@ function ReturnForm({ onClose }: { onClose: () => void }) {
       
       if (data && data.success && data.customer) {
         const customer = data.customer;
-        const fullName = `${customer.firstName || ''} ${customer.lastName || ''}`.trim();
-        console.log('Setting customer name to:', fullName);
+        
+        // Try both field formats (mapped and original)
+        const firstName = customer.firstName || customer.first_name || '';
+        const lastName = customer.lastName || customer.last_name || '';
+        const fullName = `${firstName} ${lastName}`.trim();
+        
+        console.log('Customer fields available:', Object.keys(customer));
+        console.log('firstName (mapped):', customer.firstName);
+        console.log('lastName (mapped):', customer.lastName);
+        console.log('first_name (original):', customer.first_name);
+        console.log('last_name (original):', customer.last_name);
+        console.log('Final fullName:', fullName);
         console.log('Setting customer email to:', customer.email);
         
         setCustomerName(fullName);
