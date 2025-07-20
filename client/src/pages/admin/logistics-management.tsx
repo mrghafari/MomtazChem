@@ -113,11 +113,11 @@ const LogisticsManagement = () => {
     checkAdminAuth();
   }, []);
 
-  // Function to fetch and show order details
+  // Function to fetch and show order details using admin endpoint
   const handleShowOrderDetails = async (orderId: number) => {
     setLoadingOrderDetails(true);
     try {
-      const response = await fetch(`/api/customers/orders/${orderId}`);
+      const response = await fetch(`/api/admin/customer-orders/${orderId}`);
       const result = await response.json();
       
       if (result.success) {
@@ -126,7 +126,7 @@ const LogisticsManagement = () => {
       } else {
         toast({
           title: "خطا",
-          description: "جزئیات سفارش یافت نشد",
+          description: result.message || "جزئیات سفارش یافت نشد",
           variant: "destructive",
         });
       }

@@ -9955,6 +9955,115 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin access to customer order details (for logistics management)
+  app.get("/api/admin/customer-orders/:orderId", requireAuth, async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      const adminId = (req.session as any)?.adminId;
+      
+      // Only admins can access this endpoint
+      if (!adminId) {
+        return res.status(403).json({
+          success: false,
+          message: "دسترسی مجاز نیست"
+        });
+      }
+
+      if (isNaN(orderId)) {
+        return res.status(400).json({
+          success: false,
+          message: "شناسه سفارش نامعتبر است"
+        });
+      }
+
+      const { pool } = await import('./db');
+      
+      // Get order details (admin access - no customer restriction)
+      const orderResult = await pool.query(`
+        SELECT 
+          co.id,
+          co.order_number,
+          co.customer_id,
+          co.total_amount,
+          co.currency,
+          co.payment_status,
+          co.payment_method,
+          co.status,
+          co.guest_name,
+          co.guest_email,
+          co.recipient_phone,
+          co.recipient_name,
+          co.recipient_address,
+          co.shipping_address,
+          co.notes,
+          co.created_at,
+          om.current_status,
+          om.delivery_code,
+          om.actual_delivery_date,
+          om.delivery_person_name,
+          om.delivery_person_phone,
+          c.first_name,
+          c.last_name,
+          c.email as customer_email,
+          c.phone as customer_phone
+        FROM customer_orders co
+        LEFT JOIN order_management om ON om.customer_order_id = co.id
+        LEFT JOIN crm_customers c ON c.id = co.customer_id
+        WHERE co.id = $1
+      `, [orderId]);
+
+      if (orderResult.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "سفارش یافت نشد"
+        });
+      }
+
+      const order = orderResult.rows[0];
+
+      // Get order items
+      const itemsResult = await pool.query(`
+        SELECT 
+          oi.*,
+          sp.name,
+          sp.price,
+          sp.weight,
+          sp.gross_weight,
+          sp.stock_unit
+        FROM order_items oi
+        LEFT JOIN shop_products sp ON oi.product_id = sp.id
+        WHERE oi.order_id = $1
+        ORDER BY oi.id
+      `, [orderId]);
+
+      // Calculate total order weight
+      let totalWeight = 0;
+      itemsResult.rows.forEach((item: any) => {
+        const weight = item.gross_weight || item.weight || 0;
+        totalWeight += parseFloat(weight) * item.quantity;
+      });
+
+      const orderDetails = {
+        ...order,
+        items: itemsResult.rows,
+        totalWeight: totalWeight,
+        weightUnit: 'kg'
+      };
+
+      res.json({
+        success: true,
+        data: orderDetails
+      });
+
+    } catch (error) {
+      console.error("Error fetching admin customer order details:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت جزئیات سفارش"
+      });
+    }
+  });
+
   // Get specific customer order by ID
   app.get("/api/customers/orders/:orderId", requireAuth, async (req, res) => {
     try {
