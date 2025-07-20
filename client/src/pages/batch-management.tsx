@@ -240,10 +240,10 @@ export default function BatchManagement() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Package className="w-5 h-5" />
-              لیست بچ‌ها (مرتب شده بر اساس LIFO)
+              لیست بچ‌ها به روش (FIFO)
             </CardTitle>
             <CardDescription>
-              بچ‌های جدیدتر در بالا قرار دارند و اول فروخته می‌شوند
+              بچ‌های قدیمی‌تر اول فروخته می‌شوند (First In, First Out)
             </CardDescription>
           </CardHeader>
           <CardContent>
