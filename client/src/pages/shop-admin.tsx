@@ -975,8 +975,36 @@ function ReturnForm({ onClose }: { onClose: () => void }) {
     
     setIsLoadingCustomer(true);
     try {
+      console.log('Fetching customer for phone:', phone);
       const response = await apiRequest('GET', `/api/crm/customers/by-phone/${encodeURIComponent(phone)}`);
+      
+      // Check if response is ok
+      if (!response.ok) {
+        console.error('Customer API response not ok:', response.status, response.statusText);
+        toast({
+          title: "خطا در دریافت اطلاعات",
+          description: `خطای سرور: ${response.status}`,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Check content type
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        console.error('Customer response is not JSON:', contentType);
+        const text = await response.text();
+        console.error('Customer response text:', text);
+        toast({
+          title: "خطا در دریافت اطلاعات",
+          description: "پاسخ سرور نامعتبر است",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const data = await response.json();
+      console.log('Customer data received:', data);
       
       if (data.success && data.customer) {
         const customer = data.customer;
@@ -1036,8 +1064,23 @@ function ReturnForm({ onClose }: { onClose: () => void }) {
     try {
       console.log('Fetching product suggestions for:', query);
       const response = await apiRequest('GET', `/api/shop/products`);
-      const data = await response.json();
       
+      // Check if response is ok
+      if (!response.ok) {
+        console.error('API response not ok:', response.status, response.statusText);
+        return;
+      }
+
+      // Check content type
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        console.error('Response is not JSON:', contentType);
+        const text = await response.text();
+        console.error('Response text:', text);
+        return;
+      }
+
+      const data = await response.json();
       console.log('Products data received:', data?.length);
       
       if (Array.isArray(data)) {
