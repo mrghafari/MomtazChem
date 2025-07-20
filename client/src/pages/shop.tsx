@@ -293,30 +293,19 @@ const Shop = () => {
     checkCustomerAuth();
   }, []);
 
-  // Initialize display stock from actual database values (not affected by cart)
+  // Initialize display stock from actual database values with real-time cart updates
   useEffect(() => {
     if (currentProducts?.length > 0) {
-      const initialDisplayStock: {[key: number]: number} = {};
+      const updatedDisplayStock: {[key: number]: number} = {};
       currentProducts.forEach(product => {
-        // Show actual stock quantity from database, not reduced by cart items
-        initialDisplayStock[product.id] = product.stockQuantity || 0;
-      });
-      setDisplayStock(initialDisplayStock);
-    }
-  }, [currentProducts]); // Removed cart dependency to prevent UI stock reduction
-
-  // Force recalculation of display stock after order completion
-  useEffect(() => {
-    if (Object.keys(displayStock).length === 0 && currentProducts?.length > 0) {
-      const refreshedDisplayStock: {[key: number]: number} = {};
-      currentProducts.forEach(product => {
+        // Calculate available stock by subtracting cart items from actual stock
         const productInCart = cart[product.id] || 0;
         const availableStock = (product.stockQuantity || 0) - productInCart;
-        refreshedDisplayStock[product.id] = Math.max(0, availableStock);
+        updatedDisplayStock[product.id] = Math.max(0, availableStock);
       });
-      setDisplayStock(refreshedDisplayStock);
+      setDisplayStock(updatedDisplayStock);
     }
-  }, [currentProducts, displayStock, cart]);
+  }, [currentProducts, cart]); // Added cart dependency for real-time updates
 
   // Handle cart based on authentication status after customer state is known
   useEffect(() => {
@@ -723,8 +712,7 @@ const Shop = () => {
     setCart(newCart);
     saveCartToStorage(newCart);
 
-    // DO NOT update displayStock here - it should only reflect actual database values
-    // Display stock will be updated only after successful order submission
+    // Display stock will be automatically updated by the useEffect hook that watches cart changes
 
     // Reset quantity for this product and show success message
     setProductQuantity(productId, 1);
@@ -746,8 +734,7 @@ const Shop = () => {
     setCart(newCart);
     saveCartToStorage(newCart);
 
-    // DO NOT update displayStock - it should only reflect actual database values
-    // Display stock will be updated only after successful order submission
+    // Display stock will be automatically updated by the useEffect hook that watches cart changes
   };
 
   const getTotalItems = () => {
