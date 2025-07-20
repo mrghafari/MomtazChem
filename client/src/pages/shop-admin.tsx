@@ -889,6 +889,244 @@ export default function ShopAdmin() {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Return Form Dialog */}
+      {showReturnForm && (
+        <Dialog open={showReturnForm} onOpenChange={setShowReturnForm}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Add New Return</DialogTitle>
+            </DialogHeader>
+            <ReturnForm onClose={() => setShowReturnForm(false)} />
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Return Details Dialog */}
+      {selectedReturn && (
+        <Dialog open={showReturnDialog} onOpenChange={setShowReturnDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Return Details</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Product Name</label>
+                <p className="text-sm bg-gray-50 p-2 rounded">{selectedReturn.productName}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Customer Name</label>
+                <p className="text-sm bg-gray-50 p-2 rounded">{selectedReturn.customerName}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Return Quantity</label>
+                <p className="text-sm bg-gray-50 p-2 rounded">{selectedReturn.returnQuantity}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Return Amount</label>
+                <p className="text-sm bg-gray-50 p-2 rounded">${selectedReturn.totalReturnAmount}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Return Reason</label>
+                <p className="text-sm bg-gray-50 p-2 rounded">{selectedReturn.returnReason}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Status</label>
+                <Badge variant={
+                  selectedReturn.refundStatus === 'approved' ? 'default' :
+                  selectedReturn.refundStatus === 'pending' ? 'secondary' :
+                  selectedReturn.refundStatus === 'rejected' ? 'destructive' : 'secondary'
+                }>
+                  {selectedReturn.refundStatus}
+                </Badge>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
+  );
+}
+
+// Return Form Component
+function ReturnForm({ onClose }: { onClose: () => void }) {
+  const [productId, setProductId] = useState("");
+  const [productName, setProductName] = useState("");
+  const [returnQuantity, setReturnQuantity] = useState("");
+  const [customerName, setCustomerName] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
+  const [returnReason, setReturnReason] = useState("");
+  const [totalReturnAmount, setTotalReturnAmount] = useState("");
+  const [refundStatus, setRefundStatus] = useState("pending");
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const createReturnMutation = useMutation({
+    mutationFn: async (returnData: any) => {
+      const response = await apiRequest('POST', '/api/shop/returns', returnData);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Return created successfully"
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/shop/returns"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/shop/returns/stats"] });
+      onClose();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create return",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!productName || !returnQuantity || !customerName || !customerPhone) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    createReturnMutation.mutate({
+      productId: productId ? parseInt(productId) : null,
+      productName,
+      returnQuantity: parseInt(returnQuantity),
+      customerName,
+      customerPhone,
+      customerEmail: customerEmail || null,
+      returnReason,
+      totalReturnAmount: parseFloat(totalReturnAmount) || 0,
+      refundStatus,
+      returnDate: new Date().toISOString()
+    });
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="productId">Product ID (Optional)</Label>
+          <Input
+            id="productId"
+            type="number"
+            value={productId}
+            onChange={(e) => setProductId(e.target.value)}
+            placeholder="Enter product ID"
+          />
+        </div>
+        
+        <div>
+          <Label htmlFor="productName">Product Name *</Label>
+          <Input
+            id="productName"
+            value={productName}
+            onChange={(e) => setProductName(e.target.value)}
+            placeholder="Enter product name"
+            required
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="returnQuantity">Return Quantity *</Label>
+          <Input
+            id="returnQuantity"
+            type="number"
+            value={returnQuantity}
+            onChange={(e) => setReturnQuantity(e.target.value)}
+            placeholder="Enter quantity"
+            required
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="totalReturnAmount">Return Amount ($)</Label>
+          <Input
+            id="totalReturnAmount"
+            type="number"
+            step="0.01"
+            value={totalReturnAmount}
+            onChange={(e) => setTotalReturnAmount(e.target.value)}
+            placeholder="Enter return amount"
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="customerName">Customer Name *</Label>
+          <Input
+            id="customerName"
+            value={customerName}
+            onChange={(e) => setCustomerName(e.target.value)}
+            placeholder="Enter customer name"
+            required
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="customerPhone">Customer Phone *</Label>
+          <Input
+            id="customerPhone"
+            value={customerPhone}
+            onChange={(e) => setCustomerPhone(e.target.value)}
+            placeholder="Enter phone number"
+            required
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="customerEmail">Customer Email</Label>
+          <Input
+            id="customerEmail"
+            type="email"
+            value={customerEmail}
+            onChange={(e) => setCustomerEmail(e.target.value)}
+            placeholder="Enter email address"
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="refundStatus">Refund Status</Label>
+          <Select value={refundStatus} onValueChange={setRefundStatus}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="approved">Approved</SelectItem>
+              <SelectItem value="rejected">Rejected</SelectItem>
+              <SelectItem value="refunded">Refunded</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div>
+        <Label htmlFor="returnReason">Return Reason</Label>
+        <Input
+          id="returnReason"
+          value={returnReason}
+          onChange={(e) => setReturnReason(e.target.value)}
+          placeholder="Enter reason for return"
+        />
+      </div>
+
+      <div className="flex gap-4 justify-end pt-4">
+        <Button type="button" variant="outline" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button type="submit" disabled={createReturnMutation.isPending}>
+          {createReturnMutation.isPending ? "Creating..." : "Create Return"}
+        </Button>
+      </div>
+    </form>
   );
 }

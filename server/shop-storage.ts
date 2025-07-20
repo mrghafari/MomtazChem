@@ -1539,28 +1539,27 @@ export class ShopStorage implements IShopStorage {
     try {
       console.log("🔄 Getting return statistics...");
       
-      // Use raw SQL to avoid Drizzle ORM issues
-      const result = await shopDb.execute(sql`
-        SELECT 
-          COALESCE(COUNT(id), 0) as total_returns,
-          COALESCE(SUM(total_return_amount), 0) as total_return_amount,
-          COALESCE(COUNT(CASE WHEN refund_status = 'pending' THEN 1 END), 0) as pending_returns,
-          COALESCE(COUNT(CASE WHEN refund_status = 'approved' THEN 1 END), 0) as approved_returns,
-          COALESCE(COUNT(CASE WHEN refund_status = 'rejected' THEN 1 END), 0) as rejected_returns
-        FROM product_returns
-      `);
-
-      const stats = result.rows[0];
-      console.log("✅ Return statistics fetched:", stats);
+      // Get all returns first
+      const allReturns = await shopDb.select().from(productReturns);
+      console.log("✅ Found returns:", allReturns.length);
       
-      // Ensure we return proper defaults if no data
-      return {
-        totalReturns: Number(stats.total_returns) || 0,
-        totalReturnAmount: String(stats.total_return_amount) || "0",
-        pendingReturns: Number(stats.pending_returns) || 0,
-        approvedReturns: Number(stats.approved_returns) || 0,
-        rejectedReturns: Number(stats.rejected_returns) || 0,
+      // Calculate statistics manually
+      const totalReturns = allReturns.length;
+      const totalReturnAmount = allReturns.reduce((sum, ret) => sum + (ret.totalReturnAmount || 0), 0);
+      const pendingReturns = allReturns.filter(ret => ret.refundStatus === 'pending').length;
+      const approvedReturns = allReturns.filter(ret => ret.refundStatus === 'approved').length;
+      const rejectedReturns = allReturns.filter(ret => ret.refundStatus === 'rejected').length;
+      
+      const stats = {
+        totalReturns,
+        totalReturnAmount: totalReturnAmount.toString(),
+        pendingReturns,
+        approvedReturns,
+        rejectedReturns,
       };
+      
+      console.log("✅ Return statistics calculated:", stats);
+      return stats;
     } catch (error) {
       console.error("❌ Error in getReturnStatistics:", error);
       // Return safe defaults if query fails
