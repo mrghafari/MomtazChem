@@ -590,6 +590,16 @@ export class CrmStorage implements ICrmStorage {
     return customer;
   }
 
+  async searchCrmCustomersByPhone(phone: string): Promise<CrmCustomer[]> {
+    // Return multiple customers matching phone for dropdown selection
+    const customers = await crmDb
+      .select()
+      .from(crmCustomers)
+      .where(sql`${crmCustomers.phone} LIKE ${`%${phone}%`}`)
+      .limit(5); // Limit to 5 suggestions
+    return customers;
+  }
+
   async checkEmailExists(email: string, excludeId?: number): Promise<boolean> {
     let whereClause = eq(crmCustomers.email, email);
     

@@ -13489,6 +13489,46 @@ Leading Chemical Solutions Provider
     }
   });
 
+  // Search CRM customers by phone for dropdown suggestions
+  app.get("/api/crm/customers/search-phone/:phone", requireAuth, async (req, res) => {
+    try {
+      const phone = decodeURIComponent(req.params.phone);
+      
+      if (!phone || phone.length < 3) {
+        return res.status(400).json({
+          success: false,
+          message: "شماره تلفن نامعتبر است"
+        });
+      }
+
+      const customers = await crmStorage.searchCrmCustomersByPhone(phone);
+      
+      // Format customers for dropdown
+      const formattedCustomers = customers.map(customer => ({
+        id: customer.id,
+        phone: customer.phone,
+        firstName: customer.firstName || customer.first_name,
+        lastName: customer.lastName || customer.last_name,
+        email: customer.email,
+        displayName: `${customer.firstName || customer.first_name} ${customer.lastName || customer.last_name}`,
+        displayText: `${customer.phone} - ${customer.firstName || customer.first_name} ${customer.lastName || customer.last_name}`
+      }));
+
+      res.json({
+        success: true,
+        customers: formattedCustomers,
+        count: formattedCustomers.length,
+        message: `${formattedCustomers.length} مشتری یافت شد`
+      });
+    } catch (error) {
+      console.error("Error searching customers by phone:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در جستجوی مشتریان"
+      });
+    }
+  });
+
   // Get CRM customer by phone number
   app.get("/api/crm/customers/by-phone/:phone", requireAuth, async (req, res) => {
     try {

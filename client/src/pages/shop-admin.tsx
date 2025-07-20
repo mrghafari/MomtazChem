@@ -962,6 +962,8 @@ function ReturnForm({ onClose }: { onClose: () => void }) {
   const [totalReturnAmount, setTotalReturnAmount] = useState("");
   const [refundStatus, setRefundStatus] = useState("pending");
   const [isLoadingCustomer, setIsLoadingCustomer] = useState(false);
+  const [phoneSuggestions, setPhoneSuggestions] = useState<any[]>([]);
+  const [showPhoneSuggestions, setShowPhoneSuggestions] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
@@ -969,65 +971,45 @@ function ReturnForm({ onClose }: { onClose: () => void }) {
   const phoneTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const productTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Function to fetch customer by phone number
-  const fetchCustomerByPhone = async (phone: string) => {
-    if (!phone || phone.length < 3) return;
+  // Function to fetch phone suggestions
+  const fetchPhoneSuggestions = async (phone: string) => {
+    if (!phone || phone.length < 3) {
+      setPhoneSuggestions([]);
+      setShowPhoneSuggestions(false);
+      return;
+    }
     
-    setIsLoadingCustomer(true);
     try {
-      console.log('Fetching customer for phone:', phone);
-      const data = await apiRequest(`/api/crm/customers/by-phone/${encodeURIComponent(phone)}`, { method: 'GET' });
+      console.log('Fetching phone suggestions for:', phone);
+      const data = await apiRequest(`/api/crm/customers/search-phone/${encodeURIComponent(phone)}`, { method: 'GET' });
       
-      console.log('Customer data received:', JSON.stringify(data, null, 2));
-      console.log('Customer object:', data?.customer);
-      console.log('firstName:', data?.customer?.firstName);
-      console.log('lastName:', data?.customer?.lastName);
-      console.log('email:', data?.customer?.email);
+      console.log('Phone suggestions received:', data);
       
-      if (data && data.success && data.customer) {
-        const customer = data.customer;
-        
-        // Try both field formats (mapped and original)
-        const firstName = customer.firstName || customer.first_name || '';
-        const lastName = customer.lastName || customer.last_name || '';
-        const fullName = `${firstName} ${lastName}`.trim();
-        
-        console.log('Customer fields available:', Object.keys(customer));
-        console.log('firstName (mapped):', customer.firstName);
-        console.log('lastName (mapped):', customer.lastName);
-        console.log('first_name (original):', customer.first_name);
-        console.log('last_name (original):', customer.last_name);
-        console.log('Final fullName:', fullName);
-        console.log('Setting customer email to:', customer.email);
-        
-        setCustomerName(fullName);
-        setCustomerEmail(customer.email || '');
-        
-        toast({
-          title: "مشتری یافت شد",
-          description: `اطلاعات مشتری ${customer.firstName || ''} ${customer.lastName || ''} بارگذاری شد`,
-        });
+      if (data && data.success && data.customers) {
+        setPhoneSuggestions(data.customers);
+        setShowPhoneSuggestions(data.customers.length > 0);
       } else {
-        console.log('Customer not found or invalid response structure');
-        // Clear fields if customer not found
-        setCustomerName('');
-        setCustomerEmail('');
-        toast({
-          title: "مشتری یافت نشد",
-          description: "لطفاً اطلاعات مشتری را به صورت دستی وارد کنید",
-          variant: "destructive"
-        });
+        setPhoneSuggestions([]);
+        setShowPhoneSuggestions(false);
       }
     } catch (error) {
-      console.error('Error fetching customer:', error);
-      toast({
-        title: "خطا در دریافت اطلاعات",
-        description: "خطا در دریافت اطلاعات مشتری",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoadingCustomer(false);
+      console.error('Error fetching phone suggestions:', error);
+      setPhoneSuggestions([]);
+      setShowPhoneSuggestions(false);
     }
+  };
+
+  // Function to select customer from suggestions
+  const selectCustomerFromSuggestion = (customer: any) => {
+    setCustomerPhone(customer.phone);
+    setCustomerName(customer.displayName);
+    setCustomerEmail(customer.email || '');
+    setShowPhoneSuggestions(false);
+    
+    toast({
+      title: "مشتری انتخاب شد",
+      description: `اطلاعات مشتری ${customer.displayName} بارگذاری شد`,
+    });
   };
 
   // Handle phone number change with debouncing
@@ -1039,10 +1021,13 @@ function ReturnForm({ onClose }: { onClose: () => void }) {
       clearTimeout(phoneTimeoutRef.current);
     }
     
-    // Set new timeout
+    // Set new timeout for phone suggestions
     phoneTimeoutRef.current = setTimeout(() => {
       if (phone && phone.length >= 3) {
-        fetchCustomerByPhone(phone);
+        fetchPhoneSuggestions(phone);
+      } else {
+        setPhoneSuggestions([]);
+        setShowPhoneSuggestions(false);
       }
     }, 500); // 500ms delay
   };
@@ -1232,7 +1217,7 @@ function ReturnForm({ onClose }: { onClose: () => void }) {
           />
         </div>
 
-        <div>
+        <div className="relative">
           <Label htmlFor="customerPhone">Customer Phone * {isLoadingCustomer && "(جستجو...)"}</Label>
           <Input
             id="customerPhone"
@@ -1241,8 +1226,26 @@ function ReturnForm({ onClose }: { onClose: () => void }) {
             placeholder="Enter phone number"
             required
           />
+          
+          {/* Phone suggestions dropdown */}
+          {showPhoneSuggestions && phoneSuggestions.length > 0 && (
+            <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-10 mt-1 max-h-60 overflow-y-auto">
+              {phoneSuggestions.map((customer, index) => (
+                <button
+                  key={customer.id || index}
+                  type="button"
+                  className="w-full text-left px-3 py-2 hover:bg-blue-50 border-b last:border-b-0 text-sm"
+                  onClick={() => selectCustomerFromSuggestion(customer)}
+                >
+                  <div className="font-medium text-gray-900">{customer.displayText}</div>
+                  <div className="text-xs text-gray-500">{customer.email}</div>
+                </button>
+              ))}
+            </div>
+          )}
+          
           <p className="text-xs text-gray-500 mt-1">
-            اطلاعات مشتری پس از وارد کردن 3 رقم اول شماره تلفن به طور خودکار پر می‌شود
+            حداقل 3 رقم از شماره تلفن را تایپ کنید تا لیست مشتریان نمایش داده شود
           </p>
         </div>
 
