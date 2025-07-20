@@ -1537,28 +1537,32 @@ export class ShopStorage implements IShopStorage {
     rejectedReturns: number;
   }> {
     try {
-      const result = await shopDb
-        .select({
-          totalReturns: sql<number>`COALESCE(COUNT(${productReturns.id}), 0)`,
-          totalReturnAmount: sql<string>`COALESCE(SUM(${productReturns.totalReturnAmount}), 0)::text`,
-          pendingReturns: sql<number>`COALESCE(COUNT(CASE WHEN ${productReturns.refundStatus} = 'pending' THEN 1 END), 0)`,
-          approvedReturns: sql<number>`COALESCE(COUNT(CASE WHEN ${productReturns.refundStatus} = 'approved' THEN 1 END), 0)`,
-          rejectedReturns: sql<number>`COALESCE(COUNT(CASE WHEN ${productReturns.refundStatus} = 'rejected' THEN 1 END), 0)`,
-        })
-        .from(productReturns);
+      console.log("🔄 Getting return statistics...");
+      
+      // Use raw SQL to avoid Drizzle ORM issues
+      const result = await shopDb.execute(sql`
+        SELECT 
+          COALESCE(COUNT(id), 0) as total_returns,
+          COALESCE(SUM(total_return_amount), 0) as total_return_amount,
+          COALESCE(COUNT(CASE WHEN refund_status = 'pending' THEN 1 END), 0) as pending_returns,
+          COALESCE(COUNT(CASE WHEN refund_status = 'approved' THEN 1 END), 0) as approved_returns,
+          COALESCE(COUNT(CASE WHEN refund_status = 'rejected' THEN 1 END), 0) as rejected_returns
+        FROM product_returns
+      `);
 
-      const stats = result[0];
+      const stats = result.rows[0];
+      console.log("✅ Return statistics fetched:", stats);
       
       // Ensure we return proper defaults if no data
       return {
-        totalReturns: stats.totalReturns || 0,
-        totalReturnAmount: stats.totalReturnAmount || "0",
-        pendingReturns: stats.pendingReturns || 0,
-        approvedReturns: stats.approvedReturns || 0,
-        rejectedReturns: stats.rejectedReturns || 0,
+        totalReturns: Number(stats.total_returns) || 0,
+        totalReturnAmount: String(stats.total_return_amount) || "0",
+        pendingReturns: Number(stats.pending_returns) || 0,
+        approvedReturns: Number(stats.approved_returns) || 0,
+        rejectedReturns: Number(stats.rejected_returns) || 0,
       };
     } catch (error) {
-      console.error("Error in getReturnStatistics:", error);
+      console.error("❌ Error in getReturnStatistics:", error);
       // Return safe defaults if query fails
       return {
         totalReturns: 0,
