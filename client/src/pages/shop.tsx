@@ -959,16 +959,7 @@ const Shop = () => {
                 </div>
               )}
               
-              {/* AI Recommendations Button - Left */}
-              <Button 
-                variant="outline" 
-                className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white border-none hover:from-purple-600 hover:to-pink-600 shadow-lg"
-                onClick={() => navigate('/product-recommendations')}
 
-              >
-                <Sparkles className="w-5 h-5" />
-                <span className="hidden sm:inline">AI Recommendations</span>
-              </Button>
             </div>
             
             {/* User & Cart Section */}
