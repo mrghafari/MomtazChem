@@ -687,7 +687,7 @@ const LogisticsManagement = () => {
                           </div>
                         </td>
                         <td className="p-3 text-center">
-                          <div className="flex gap-2 justify-center">
+                          <div className="flex gap-1 justify-center">
                             <Button 
                               variant="outline" 
                               size="sm"
@@ -724,6 +724,31 @@ const LogisticsManagement = () => {
                                 </>
                               )}
                             </Button>
+                            {/* Complete Delivery Button - Admin Only */}
+                            {currentUser?.roleId === 1 ? (
+                              <Button
+                                size="sm"
+                                onClick={() => handleCompleteDelivery(order.id)}
+                                disabled={completingDeliveries[order.id]}
+                                className="bg-green-600 hover:bg-green-700 text-white text-xs"
+                              >
+                                {completingDeliveries[order.id] ? (
+                                  <>
+                                    <CheckCircle className="w-3 h-3 mr-1 animate-spin" />
+                                    در حال تکمیل...
+                                  </>
+                                ) : (
+                                  <>
+                                    <CheckCircle className="w-3 h-3 mr-1" />
+                                    تحویل شد
+                                  </>
+                                )}
+                              </Button>
+                            ) : (
+                              <Badge variant="outline" className="text-xs bg-gray-100 text-gray-500">
+                                فقط ادمین می‌تواند تحویل را تکمیل کند
+                              </Badge>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -733,6 +758,30 @@ const LogisticsManagement = () => {
               </div>
             </CardContent>
           </Card>
+        )}
+
+        {/* Card View for Active Orders */}
+        {mappedActiveOrders.length > 0 && (
+          <div className="mt-6">
+            <div className="flex items-center gap-2 mb-4">
+              <ToggleLeft className="w-5 h-5 text-green-600" />
+              <h4 className="text-md font-semibold text-green-800">نمایش کارتی سفارشات فعال</h4>
+            </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+              {mappedActiveOrders.slice(0, 6).map((order: LogisticsOrder) => (
+                <OrderCard key={order.id} order={order} showDeliveryButton={true} />
+              ))}
+            </div>
+            
+            {mappedActiveOrders.length > 6 && (
+              <div className="text-center mt-4">
+                <Badge variant="outline" className="text-sm">
+                  و {mappedActiveOrders.length - 6} سفارش دیگر در جدول بالا
+                </Badge>
+              </div>
+            )}
+          </div>
         )}
       </div>
     );

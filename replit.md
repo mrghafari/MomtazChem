@@ -6,6 +6,27 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Restored Complete Delivery Button and Card View for Active Logistics Orders (July 20, 2025)
+✅ **FULLY RESTORED: Active logistics orders now have complete delivery functionality and card view interface**
+- **Complete Delivery Button**: 
+  - Added "تحویل شد" button back to active logistics orders table with admin-only access
+  - Button includes loading state and proper authentication check (currentUser?.roleId === 1)
+  - Non-admin users see informational badge: "فقط ادمین می‌تواند تحویل را تکمیل کند"
+- **Card View Interface**:
+  - Added card view section below table for active orders with OrderCard component
+  - Displays up to 6 orders in grid layout (1 column mobile, 2 columns large screens, 3 columns extra large)
+  - Shows remaining order count for orders beyond 6: "و X سفارش دیگر در جدول بالا"
+  - Cards include full slider functionality with delivery buttons and interactive elements
+- **Button Layout Enhancement**:
+  - Adjusted button spacing in table (gap-1) to accommodate three buttons: جزئیات، ارسال کد، تحویل شد
+  - Maintained proper text sizing (text-xs) and responsive design
+- **User Interface Features**:
+  - Toggle section header: "نمایش کارتی سفارشات فعال" with ToggleLeft icon
+  - Cards maintain full functionality with delivery code sending and order details
+  - Both table and card views available for comprehensive order management
+- **Result**: Active logistics orders now have complete functionality with both table sorting and card slider interfaces
+- **Impact**: Restored full logistics management capabilities with admin delivery completion and flexible viewing options
+
 ### COMPLETED: Sortable Table Headers for Delivered Orders Management (July 20, 2025)
 ✅ **FULLY IMPLEMENTED: Complete sortable table interface for delivered orders with clickable column headers**
 - **Sortable Headers System**:
