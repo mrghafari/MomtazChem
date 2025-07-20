@@ -138,6 +138,33 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Result**: Logistics staff now see exactly which address (primary or secondary) customer selected for delivery
 - **Impact**: Improved delivery accuracy by displaying customer's actual chosen delivery address in logistics interface
 
+### COMPLETED: Enhanced Order Details Modal with Customer Address and Print Button (July 20, 2025)
+✅ **FULLY IMPLEMENTED: Customer address display and print functionality in order details modal**
+- **Customer Address Section**:
+  - Added dedicated customer address card in order details modal
+  - Displays shipping address, recipient address, or fallback customer address
+  - Professional orange-themed card with proper RTL styling
+  - Clear labeling as "آدرس تحویل مشتری" (Customer Delivery Address)
+- **Print Functionality**:
+  - Added professional print button with blue styling and FileText icon
+  - Uses window.print() for native browser printing functionality
+  - Positioned at bottom center of modal for easy access
+  - Large button size for better user experience
+- **Code Cleanup**:
+  - Removed duplicate delivery code display from order summary section
+  - Cleaned up JSX structure and fixed syntax errors
+  - Maintained existing order details structure while adding new features
+- **User Interface Enhancement**:
+  - Address information displayed in highlighted orange box for visibility
+  - Print button only appears when order details are successfully loaded
+  - Professional styling matching existing modal design
+- **Technical Implementation**:
+  - Enhanced OrderDetailsModal with additional address parsing logic
+  - Proper fallback chain: shipping_address → recipient_address → customer address
+  - Clean separation of address display from other order information
+- **Result**: Complete order details modal with customer address visibility and print functionality
+- **Impact**: Logistics staff can now see customer delivery address and print order details for physical documentation
+
 ### COMPLETED: Delivery Code Column Added to Active Logistics Orders Table (July 20, 2025)
 ✅ **FULLY IMPLEMENTED: Delivery code column integration in active logistics orders table with visual indicators**
 - **Column Implementation**:
