@@ -4,7 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { User, Package, Calendar, DollarSign, ShoppingBag, LogOut, MapPin, Building, Phone, Mail, Edit, FileText, Download, Clock, AlertTriangle, PlayCircle } from "lucide-react";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Input } from "@/components/ui/input";
+import { User, Package, Calendar, DollarSign, ShoppingBag, LogOut, MapPin, Building, Phone, Mail, Edit, FileText, Download, Clock, AlertTriangle, PlayCircle, Search, History } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { getPersonalizedWelcome, getDashboardMotivation } from "@/utils/greetings";
@@ -14,6 +16,8 @@ const CustomerProfile = () => {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { t, language, direction } = useLanguage();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   // Get customer information
   const { data: customerData, isLoading: customerLoading, error: customerError } = useQuery<any>({
@@ -336,6 +340,154 @@ const CustomerProfile = () => {
     sum + parseFloat(order.totalAmount || 0), 0
   );
 
+  // Filter orders based on search query
+  const filteredOrders = orders.filter((order: any) => 
+    order.orderNumber?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    order.customerName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    order.totalAmount?.toString().includes(searchQuery) ||
+    getStatusLabel(order.status).toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Get the most recent order
+  const mostRecentOrder = orders.length > 0 ? orders[0] : null;
+
+  // Function to render a single order
+  const renderOrder = (order: any) => (
+    <div key={order.id} className={`border rounded-lg p-4 ${(order.orderType === 'temporary' || order.orderCategory === 'temporary') ? 'border-amber-200 bg-amber-50' : ''}`}>
+      <div className="flex justify-between items-start mb-3">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <h4 className="font-semibold text-gray-900">
+              Order #{order.orderNumber || order.id}
+            </h4>
+            {(order.orderType === 'temporary' || order.orderCategory === 'temporary') && (
+              <Badge className="bg-orange-100 text-orange-800">
+                <Clock className="w-3 h-3 mr-1" />
+                سفارش موقت
+              </Badge>
+            )}
+          </div>
+          <p className="text-sm text-gray-500 flex items-center gap-1">
+            <Calendar className="w-4 h-4" />
+            {formatDate(order.createdAt)}
+          </p>
+          {(order.orderType === 'temporary' || order.orderCategory === 'temporary') && (
+            <div className="mt-2 space-y-1">
+              <div className="flex items-center gap-4 text-sm text-gray-600">
+                <span className="flex items-center gap-1">
+                  <User className="w-4 h-4" />
+                  {order.customerName}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Phone className="w-4 h-4" />
+                  {order.customerPhone}
+                </span>
+              </div>
+              {order.gracePeriodStatus === 'active' ? (
+                <p className="text-sm text-amber-600 flex items-center gap-1">
+                  <Clock className="w-4 h-4" />
+                  مهلت باقی‌مانده: {formatTimeRemaining(order.hoursRemaining)}
+                </p>
+              ) : (
+                <p className="text-sm text-red-600 flex items-center gap-1">
+                  <AlertTriangle className="w-4 h-4" />
+                  مهلت پرداخت منقضی شده
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+        <div className="text-right">
+          <p className="font-semibold text-lg">{parseFloat(order.totalAmount).toFixed(2)} {order.currency || 'IQD'}</p>
+          <Badge className={getStatusColor(order.status)}>
+            {getStatusLabel(order.status)}
+          </Badge>
+          {/* Show tracking code for completed orders */}
+          {(order.status === 'completed' || order.currentStatus === 'completed') && order.deliveryCode && (
+            <div className="mt-2 text-sm">
+              <div className="bg-green-50 border border-green-200 rounded px-2 py-1">
+                <span className="text-green-700 font-medium">کد رهگیری: </span>
+                <span className="text-green-900 font-mono">{order.deliveryCode}</span>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+      
+      {order.items && order.items.length > 0 && (
+        <div>
+          <Separator className="mb-3" />
+          <div className="space-y-2">
+            <h5 className="font-medium text-gray-700">Order Items:</h5>
+            {order.items.map((item: any) => (
+              <div key={item.id} className="flex justify-between text-sm">
+                <span>{item.product_name} × {parseFloat(item.quantity)}</span>
+                <span>{parseFloat(item.total_price).toFixed(2)} IQD</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {order.notes && (
+        <div className="mt-3 pt-3 border-t">
+          <p className="text-sm text-gray-600">
+            <strong>Notes:</strong> {order.notes}
+          </p>
+        </div>
+      )}
+
+      {/* Actions */}
+      <div className="mt-4 pt-3 border-t flex gap-2 flex-wrap">
+        {(order.orderType === 'temporary' || order.orderCategory === 'temporary') && order.gracePeriodStatus === 'active' ? (
+          <>
+            <Button
+              size="sm"
+              onClick={() => handleActivateGracePeriodOrder(order.orderNumber)}
+              className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+            >
+              <PlayCircle className="w-4 h-4" />
+              فعال‌سازی سفارش
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setLocation(`/customer/bank-receipt-upload?orderId=${order.orderNumber}`)}
+              className="flex items-center gap-2"
+            >
+              <FileText className="w-4 h-4" />
+              آپلود رسید بانکی
+            </Button>
+          </>
+        ) : (order.orderType === 'temporary' || order.orderCategory === 'temporary') && order.gracePeriodStatus === 'expired' ? (
+          <div className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded">
+            این سفارش منقضی شده است و قابل فعال‌سازی نیست
+          </div>
+        ) : (
+          <>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => handleDownloadInvoice(order.id)}
+              className="flex items-center gap-2"
+            >
+              <Download className="w-4 h-4" />
+              دانلود فاکتور
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => handleGenerateOfficialInvoice(order.id)}
+              className="flex items-center gap-2"
+            >
+              <FileText className="w-4 h-4" />
+              درخواست فاکتور رسمی
+            </Button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-6xl mx-auto px-4">
@@ -528,141 +680,58 @@ const CustomerProfile = () => {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {orders.map((order: any) => (
-                      <div key={order.id} className={`border rounded-lg p-4 ${(order.orderType === 'temporary' || order.orderCategory === 'temporary') ? 'border-amber-200 bg-amber-50' : ''}`}>
-                        <div className="flex justify-between items-start mb-3">
-                          <div>
-                            <div className="flex items-center gap-2 mb-1">
-                              <h4 className="font-semibold text-gray-900">
-                                Order #{order.orderNumber || order.id}
-                              </h4>
-                              {(order.orderType === 'temporary' || order.orderCategory === 'temporary') && (
-                                <Badge className="bg-orange-100 text-orange-800">
-                                  <Clock className="w-3 h-3 mr-1" />
-                                  سفارش موقت
-                                </Badge>
+                    {/* Show only most recent order */}
+                    {mostRecentOrder && renderOrder(mostRecentOrder)}
+                    
+                    {/* Purchase History Button */}
+                    {orders.length > 1 && (
+                      <div className="text-center pt-4 border-t">
+                        <Sheet open={isHistoryOpen} onOpenChange={setIsHistoryOpen}>
+                          <SheetTrigger asChild>
+                            <Button variant="outline" className="flex items-center gap-2">
+                              <History className="w-4 h-4" />
+                              سابقه خرید ({orders.length} سفارش)
+                            </Button>
+                          </SheetTrigger>
+                          <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
+                            <SheetHeader>
+                              <SheetTitle className="flex items-center gap-2">
+                                <History className="w-5 h-5" />
+                                سابقه کامل خرید
+                              </SheetTitle>
+                              <SheetDescription>
+                                تمام سفارشات شما ({orders.length} سفارش)
+                              </SheetDescription>
+                            </SheetHeader>
+                            
+                            {/* Search Box */}
+                            <div className="my-4">
+                              <div className="relative">
+                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                                <Input
+                                  placeholder="جستجو در سفارشات..."
+                                  value={searchQuery}
+                                  onChange={(e) => setSearchQuery(e.target.value)}
+                                  className="pl-10"
+                                />
+                              </div>
+                            </div>
+                            
+                            {/* Orders List */}
+                            <div className="space-y-4 mt-6">
+                              {filteredOrders.length === 0 ? (
+                                <div className="text-center py-8">
+                                  <Search className="w-12 h-12 text-gray-300 mx-auto mb-2" />
+                                  <p className="text-gray-500">هیچ سفارشی با این جستجو یافت نشد</p>
+                                </div>
+                              ) : (
+                                filteredOrders.map((order: any) => renderOrder(order))
                               )}
                             </div>
-                            <p className="text-sm text-gray-500 flex items-center gap-1">
-                              <Calendar className="w-4 h-4" />
-                              {formatDate(order.createdAt)}
-                            </p>
-                            {(order.orderType === 'temporary' || order.orderCategory === 'temporary') && (
-                              <div className="mt-2 space-y-1">
-                                <div className="flex items-center gap-4 text-sm text-gray-600">
-                                  <span className="flex items-center gap-1">
-                                    <User className="w-4 h-4" />
-                                    {order.customerName}
-                                  </span>
-                                  <span className="flex items-center gap-1">
-                                    <Phone className="w-4 h-4" />
-                                    {order.customerPhone}
-                                  </span>
-                                </div>
-                                {order.gracePeriodStatus === 'active' ? (
-                                  <p className="text-sm text-amber-600 flex items-center gap-1">
-                                    <Clock className="w-4 h-4" />
-                                    مهلت باقی‌مانده: {formatTimeRemaining(order.hoursRemaining)}
-                                  </p>
-                                ) : (
-                                  <p className="text-sm text-red-600 flex items-center gap-1">
-                                    <AlertTriangle className="w-4 h-4" />
-                                    مهلت پرداخت منقضی شده
-                                  </p>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                          <div className="text-right">
-                            <p className="font-semibold text-lg">{parseFloat(order.totalAmount).toFixed(2)} {order.currency || 'IQD'}</p>
-                            <Badge className={getStatusColor(order.status)}>
-                              {getStatusLabel(order.status)}
-                            </Badge>
-                            {/* Show tracking code for completed orders */}
-                            {(order.status === 'completed' || order.currentStatus === 'completed') && order.deliveryCode && (
-                              <div className="mt-2 text-sm">
-                                <div className="bg-green-50 border border-green-200 rounded px-2 py-1">
-                                  <span className="text-green-700 font-medium">کد رهگیری: </span>
-                                  <span className="text-green-900 font-mono">{order.deliveryCode}</span>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        
-                        {order.items && order.items.length > 0 && (
-                          <div>
-                            <Separator className="mb-3" />
-                            <div className="space-y-2">
-                              <h5 className="font-medium text-gray-700">Order Items:</h5>
-                              {order.items.map((item: any) => (
-                                <div key={item.id} className="flex justify-between text-sm">
-                                  <span>{item.product_name} × {parseFloat(item.quantity)}</span>
-                                  <span>{parseFloat(item.total_price).toFixed(2)} IQD</span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {order.notes && (
-                          <div className="mt-3 pt-3 border-t">
-                            <p className="text-sm text-gray-600">
-                              <strong>Notes:</strong> {order.notes}
-                            </p>
-                          </div>
-                        )}
-
-                        {/* Actions */}
-                        <div className="mt-4 pt-3 border-t flex gap-2 flex-wrap">
-                          {(order.orderType === 'temporary' || order.orderCategory === 'temporary') && order.gracePeriodStatus === 'active' ? (
-                            <>
-                              <Button
-                                size="sm"
-                                onClick={() => handleActivateGracePeriodOrder(order.orderNumber)}
-                                className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
-                              >
-                                <PlayCircle className="w-4 h-4" />
-                                فعال‌سازی سفارش
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => setLocation(`/customer/bank-receipt-upload?orderId=${order.orderNumber}`)}
-                                className="flex items-center gap-2"
-                              >
-                                <FileText className="w-4 h-4" />
-                                آپلود رسید بانکی
-                              </Button>
-                            </>
-                          ) : (order.orderType === 'temporary' || order.orderCategory === 'temporary') && order.gracePeriodStatus === 'expired' ? (
-                            <div className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded">
-                              این سفارش منقضی شده است و قابل فعال‌سازی نیست
-                            </div>
-                          ) : (
-                            <>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => handleDownloadInvoice(order.id)}
-                                className="flex items-center gap-2"
-                              >
-                                <Download className="w-4 h-4" />
-                                دانلود فاکتور
-                              </Button>
-                              <Button
-                                size="sm"
-                                onClick={() => handleGenerateOfficialInvoice(order.id)}
-                                className="flex items-center gap-2"
-                              >
-                                <FileText className="w-4 h-4" />
-                                درخواست فاکتور رسمی
-                              </Button>
-                            </>
-                          )}
-                        </div>
+                          </SheetContent>
+                        </Sheet>
                       </div>
-                    ))}
+                    )}
                   </div>
                 )}
               </CardContent>
