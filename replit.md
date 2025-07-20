@@ -6,6 +6,23 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Admin-Only Delivery Completion with Logistics Archive System (July 20, 2025)
+✅ **FULLY IMPLEMENTED: Admin-only "تحویل شد" button with logistics delivered orders archive**
+- **Admin Authentication**: Added admin role checking system in logistics department (roleId === 1 check)
+- **Restricted Access**: "تحویل شد" button only visible and functional for admin users (super admin role)
+- **Non-Admin Indicator**: Non-admin users see informational badge: "فقط ادمین می‌تواند تحویل را تکمیل کند"
+- **Backend Security**: Enhanced API endpoint `/api/order-management/logistics/:id/complete` with requireAuth and role validation
+- **Admin-Only Completion**: Backend checks `req.session?.roleId !== 1` and returns 403 for non-admin attempts
+- **Delivered Orders Archive**: Added new "تحویل داده شده" tab showing completed deliveries with archive functionality
+- **Order Filtering**: Active orders filter excludes 'logistics_delivered' and 'completed' status orders
+- **Archive Display**: Delivered orders show completion date, delivery person details, and tracking information
+- **Status Management**: Orders move from active logistics queue to delivered archive upon admin completion
+- **Enhanced UX**: Success message "سفارش به بایگانی لجستیک منتقل شد" confirms successful archive transfer
+- **Date Tracking**: Actual delivery date recorded and displayed in Persian calendar format
+- **Complete Workflow**: Admin completes delivery → order moves to archive → removed from active processing queue
+- **Result**: Complete logistics workflow with admin-controlled delivery completion and professional archive system
+- **Impact**: Only authorized admin personnel can finalize deliveries ensuring accountability and proper order lifecycle management
+
 ### COMPLETED: Bank Payment ID Integration in Customer Order System (July 20, 2025)
 ✅ **FULLY IMPLEMENTED: Complete bank payment ID (شناسه پرداخت بانکی) payment option in customer order system**
 - **Frontend Integration**: Bank payment ID option fully integrated in bilingual-purchase-form.tsx with Building icon and proper validation

@@ -164,10 +164,20 @@ export default function LogisticsDepartment() {
     }
   });
 
-  // Check logistics authentication
+  // Check logistics authentication & admin status
+  const [isAdmin, setIsAdmin] = useState(false);
+  
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        // Check admin status for delivery completion
+        const adminResponse = await fetch('/api/admin/me');
+        if (adminResponse.ok) {
+          const adminData = await adminResponse.json();
+          setIsAdmin(adminData.success && adminData.user?.roleId === 1);
+        }
+        
+        // Check logistics auth
         const response = await fetch('/api/logistics/auth/me');
         if (!response.ok) {
           setLocation('/admin/login');
@@ -213,8 +223,14 @@ export default function LogisticsDepartment() {
   const shippingRates = shippingRatesData?.data || [];
   
   // Filter orders by delivery status
-  const activeOrders = orders.filter((order: LogisticsOrder) => order.currentStatus !== 'logistics_delivered');
-  const deliveredOrders = orders.filter((order: LogisticsOrder) => order.currentStatus === 'logistics_delivered');
+  const activeOrders = orders.filter((order: LogisticsOrder) => 
+    order.currentStatus !== 'logistics_delivered' && 
+    order.currentStatus !== 'completed'
+  );
+  const deliveredOrders = orders.filter((order: LogisticsOrder) => 
+    order.currentStatus === 'logistics_delivered' || 
+    order.currentStatus === 'completed'
+  );
 
   // Update delivery info mutation
   const updateDeliveryMutation = useMutation({
@@ -233,17 +249,40 @@ export default function LogisticsDepartment() {
     }
   });
 
-  // Complete delivery mutation
+  // Complete delivery mutation (Admin only)
   const completeDeliveryMutation = useMutation({
     mutationFn: async (orderId: number) => {
-      return apiRequest(`/api/logistics/orders/${orderId}/complete`, 'POST', {});
+      const response = await fetch(`/api/order-management/logistics/${orderId}/complete`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          status: 'logistics_delivered',
+          actualDeliveryDate: new Date().toISOString()
+        })
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'خطا در تکمیل تحویل');
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
-      toast({ title: "موفق", description: "تحویل سفارش تکمیل شد" });
+      toast({ 
+        title: "✅ تحویل تکمیل شد", 
+        description: "سفارش به بایگانی لجستیک منتقل شد",
+        duration: 3000
+      });
       queryClient.invalidateQueries({ queryKey: ["/api/order-management/logistics"] });
     },
-    onError: () => {
-      toast({ title: "خطا", description: "خطا در تکمیل تحویل", variant: "destructive" });
+    onError: (error: any) => {
+      toast({ 
+        title: "❌ خطا در تکمیل تحویل", 
+        description: error.message || "خطا در انتقال سفارش به بایگانی", 
+        variant: "destructive",
+        duration: 3000 
+      });
     }
   });
 
@@ -500,15 +539,22 @@ export default function LogisticsDepartment() {
                             مدیریت ارسال
                           </Button>
                           
-                          {order.currentStatus !== 'logistics_delivered' && (
+                          {/* Only Admin can complete delivery */}
+                          {isAdmin && order.currentStatus !== 'logistics_delivered' && (
                             <Button
                               onClick={() => completeDeliveryMutation.mutate(order.id)}
                               className="bg-green-600 hover:bg-green-700"
                               disabled={completeDeliveryMutation.isPending}
+                              title="فقط ادمین می‌تواند سفارش را تحویل شده علامت‌گذاری کند"
                             >
-                              <Package className="w-4 h-4 mr-2" />
-                              تکمیل تحویل
+                              <CheckCircle className="w-4 h-4 mr-2" />
+                              {completeDeliveryMutation.isPending ? 'در حال ثبت...' : 'تحویل شد'}
                             </Button>
+                          )}
+                          {!isAdmin && order.currentStatus !== 'logistics_delivered' && (
+                            <Badge variant="secondary" className="text-gray-500">
+                              فقط ادمین می‌تواند تحویل را تکمیل کند
+                            </Badge>
                           )}
                         </div>
                       </div>

@@ -17139,24 +17139,54 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     }
   });
 
-  // Complete delivery for an order
-  app.post('/api/logistics/orders/:id/complete', async (req, res) => {
+  // Complete delivery for an order (Admin only)
+  app.patch('/api/order-management/logistics/:id/complete', requireAuth, async (req, res) => {
     try {
       const orderId = parseInt(req.params.id);
-      const adminId = req.session?.adminId || 1; // Default for logistics operations
+      const adminId = req.session?.adminId;
       
+      // Check if user is admin (only admin can complete deliveries)
+      if (req.session?.roleId !== 1) {
+        return res.status(403).json({ 
+          success: false, 
+          message: 'فقط ادمین می‌تواند تحویل سفارش را تکمیل کند' 
+        });
+      }
+      
+      const { status, actualDeliveryDate } = req.body;
+      
+      console.log(`📦 [DELIVERY-COMPLETE] Admin ${adminId} completing delivery for order ${orderId}`);
+      
+      // Update order status to delivered with actual delivery date
       const updatedOrder = await orderManagementStorage.updateOrderStatus(
         orderId,
-        'logistics_delivered',
+        status || 'logistics_delivered',
         adminId,
         'logistics',
-        'Order delivered successfully'
+        'سفارش توسط ادمین تحویل شده تایید شد'
       );
       
-      res.json({ success: true, order: updatedOrder });
+      // Also update the actual delivery date if provided
+      if (actualDeliveryDate) {
+        await orderManagementStorage.updateDeliveryInfo(orderId, {
+          actualDeliveryDate: actualDeliveryDate,
+          deliveryStatus: 'delivered'
+        });
+      }
+      
+      console.log(`✅ [DELIVERY-COMPLETE] Order ${orderId} marked as delivered by admin`);
+      
+      res.json({ 
+        success: true, 
+        order: updatedOrder,
+        message: 'سفارش با موفقیت به بایگانی لجستیک منتقل شد'
+      });
     } catch (error) {
-      console.error('Error completing delivery:', error);
-      res.status(500).json({ success: false, message: 'خطا در تکمیل تحویل' });
+      console.error('❌ [DELIVERY-COMPLETE] Error completing delivery:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'خطا در تکمیل تحویل' 
+      });
     }
   });
 
