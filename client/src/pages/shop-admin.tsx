@@ -1587,7 +1587,7 @@ ${data.data.map((item: any) =>
                 </div>
 
                 {/* Shipping Information */}
-                {(selectedOrder.shippingAddress || selectedOrder.shippingCity) && (
+                {(selectedOrder.shippingAddress || selectedOrder.shippingCity || selectedOrder.billingAddress) && (
                   <div className="border rounded-lg p-4 bg-orange-50">
                     <h3 className="font-semibold mb-3 flex items-center gap-2">
                       <Truck className="w-4 h-4" />
@@ -1596,8 +1596,22 @@ ${data.data.map((item: any) =>
                     <div className="grid grid-cols-2 gap-4">
                       {selectedOrder.shippingAddress && (
                         <div>
-                          <p className="text-sm text-gray-600">Address</p>
-                          <p className="font-medium">{selectedOrder.shippingAddress}</p>
+                          <p className="text-sm text-gray-600">Shipping Address</p>
+                          <p className="font-medium">
+                            {typeof selectedOrder.shippingAddress === 'object' 
+                              ? `${selectedOrder.shippingAddress.address || ''} ${selectedOrder.shippingAddress.city || ''} ${selectedOrder.shippingAddress.postalCode || ''}`.trim()
+                              : selectedOrder.shippingAddress}
+                          </p>
+                        </div>
+                      )}
+                      {selectedOrder.billingAddress && (
+                        <div>
+                          <p className="text-sm text-gray-600">Billing Address</p>
+                          <p className="font-medium">
+                            {typeof selectedOrder.billingAddress === 'object' 
+                              ? `${selectedOrder.billingAddress.address || ''} ${selectedOrder.billingAddress.city || ''} ${selectedOrder.billingAddress.postalCode || ''}`.trim()
+                              : selectedOrder.billingAddress}
+                          </p>
                         </div>
                       )}
                       {selectedOrder.shippingCity && (
