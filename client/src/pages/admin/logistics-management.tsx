@@ -26,8 +26,7 @@ import {
   FileText,
   ChevronUp,
   ChevronDown,
-  ChevronsUpDown,
-  ToggleLeft
+  ChevronsUpDown
 } from 'lucide-react';
 import { useOrderNotifications } from '@/hooks/useOrderNotifications';
 
@@ -226,7 +225,7 @@ const LogisticsManagement = () => {
       if (result.success) {
         toast({
           title: "موفقیت",
-          description: "سفارش به بایگانی لجستیک منتقل شد",
+          description: "سفارش به لیست تحویل شده‌ها منتقل شد",
         });
         
         // Invalidate both active and delivered orders queries to refresh the data
@@ -470,7 +469,7 @@ const LogisticsManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['/api/order-management/logistics', { delivered: true }] });
       toast({
         title: "تکمیل تحویل",
-        description: "سفارش به بایگانی لجستیک منتقل شد",
+        description: "سفارش به لیست تحویل شده‌ها منتقل شد",
         className: "rtl"
       });
     },
@@ -573,7 +572,7 @@ const LogisticsManagement = () => {
         <Tabs value={ordersSubTab} onValueChange={setOrdersSubTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="active">سفارشات فعال ({mappedActiveOrders.length})</TabsTrigger>
-            <TabsTrigger value="delivered">تحویل داده شده ({mappedDeliveredOrders.length})</TabsTrigger>
+            <TabsTrigger value="delivered">تحویل شده‌ها ({mappedDeliveredOrders.length})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="active">
@@ -811,29 +810,7 @@ const LogisticsManagement = () => {
           </Card>
         )}
 
-        {/* Card View for Active Orders */}
-        {mappedActiveOrders.length > 0 && (
-          <div className="mt-6">
-            <div className="flex items-center gap-2 mb-4">
-              <ToggleLeft className="w-5 h-5 text-green-600" />
-              <h4 className="text-md font-semibold text-green-800">نمایش کارتی سفارشات فعال</h4>
-            </div>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-              {mappedActiveOrders.slice(0, 6).map((order: LogisticsOrder) => (
-                <OrderCard key={order.id} order={order} showDeliveryButton={true} />
-              ))}
-            </div>
-            
-            {mappedActiveOrders.length > 6 && (
-              <div className="text-center mt-4">
-                <Badge variant="outline" className="text-sm">
-                  و {mappedActiveOrders.length - 6} سفارش دیگر در جدول بالا
-                </Badge>
-              </div>
-            )}
-          </div>
-        )}
+
       </div>
     );
   };
@@ -843,7 +820,7 @@ const LogisticsManagement = () => {
       <div className="space-y-4">
         <div className="flex items-center gap-2">
           <CheckCircle className="w-5 h-5 text-green-600" />
-          <h4 className="text-md font-semibold text-green-800">بایگانی سفارشات تحویل شده</h4>
+          <h4 className="text-md font-semibold text-green-800">لیست سفارشات تحویل شده</h4>
         </div>
         
         {loadingLogisticsOrders ? (
@@ -997,204 +974,7 @@ const LogisticsManagement = () => {
     );
   };
 
-  const OrderCard = ({ order, showDeliveryButton }: { order: LogisticsOrder; showDeliveryButton: boolean }) => {
-    return (
-      <Card className={`border-r-4 ${showDeliveryButton ? 'border-r-green-500 bg-green-50' : 'border-r-gray-400 bg-gray-50'}`}>
-        <CardContent className="p-4">
-          <div className="flex justify-between items-center mb-3">
-            <h4 className={`font-semibold text-lg ${showDeliveryButton ? 'text-green-800' : 'text-gray-700'}`}>
-              سفارش #{order.customerOrderId}
-            </h4>
-            <Badge variant="default" className={showDeliveryButton ? "bg-green-600 text-white" : "bg-gray-600 text-white"}>
-              {showDeliveryButton ? 'در حال پردازش' : 'تحویل شده'}
-            </Badge>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-4">
-            {/* Customer Info Block - Clickable */}
-            <div 
-              className="bg-white rounded-lg p-3 border border-green-200 cursor-pointer hover:bg-green-50 hover:border-green-300 transition-colors"
-              onClick={() => handleShowOrderDetails(order.customerOrderId)}
-            >
-              <h5 className="font-medium text-green-800 mb-2 flex items-center">
-                <User className="w-4 h-4 mr-2" />
-                اطلاعات گیرنده
-                <Eye className="w-4 h-4 mr-1 text-green-600" />
-              </h5>
-              <div className="space-y-2">
-                <div className="bg-gray-50 rounded p-2">
-                  <p className="text-xs text-gray-500 mb-1">نام گیرنده</p>
-                  <p className="text-sm font-medium text-gray-800">
-                    {order.recipientName || `${order.customer?.firstName || order.customerFirstName} ${order.customer?.lastName || order.customerLastName}`}
-                  </p>
-                </div>
-                <div className="bg-gray-50 rounded p-2 flex items-center">
-                  <Phone className="w-3 h-3 mr-2 text-gray-500" />
-                  <div className="flex flex-col">
-                    <span className="text-sm text-gray-700">{order.recipientPhone || order.customer?.phone || order.customerPhone}</span>
-                    <span className="text-xs text-gray-500">شماره موبایل گیرنده</span>
-                  </div>
-                </div>
-              </div>
-              <p className="text-xs text-green-600 mt-2 text-center">کلیک کنید برای مشاهده جزئیات خرید</p>
-            </div>
 
-            {/* Total Weight Block */}
-            <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
-              <h5 className="font-medium text-blue-800 mb-2 flex items-center">
-                <Package className="w-4 h-4 mr-2" />
-                وزن کل محموله
-              </h5>
-              <p className="text-lg font-bold text-blue-700">
-                {order.calculatedWeight || order.totalWeight || '0'} {order.weightUnit || 'kg'}
-              </p>
-              <p className="text-xs text-blue-600 mt-1">وزن محاسبه شده</p>
-            </div>
-
-            {/* Delivery Address Block */}
-            <div className="bg-orange-50 rounded-lg p-3 border border-orange-200">
-              <h5 className="font-medium text-orange-800 mb-2 flex items-center">
-                <MapPin className="w-4 h-4 mr-2" />
-                آدرس تحویل کالا
-              </h5>
-              <p className="text-sm text-orange-700">
-                {(() => {
-                  // Try to parse shipping address if it's a JSON string
-                  if (order.shippingAddress && typeof order.shippingAddress === 'string') {
-                    try {
-                      const addr = JSON.parse(order.shippingAddress);
-                      return addr.address || addr.recipientAddress || order.shippingAddress;
-                    } catch {
-                      return order.shippingAddress;
-                    }
-                  }
-                  // If it's already an object
-                  if (order.shippingAddress && typeof order.shippingAddress === 'object') {
-                    return order.shippingAddress.address || order.shippingAddress.recipientAddress;
-                  }
-                  // Fallback to customer address
-                  return order.customerAddress || 'آدرس ثبت نشده';
-                })()}
-              </p>
-              <p className="text-xs text-orange-600 mt-1">
-                آدرس انتخابی مشتری در فرآیند خرید (آدرس اول یا دوم)
-              </p>
-            </div>
-
-            {/* Order Date Block */}
-            <div className="bg-green-50 rounded-lg p-3 border border-green-200">
-              <h5 className="font-medium text-green-800 mb-2 flex items-center">
-                <Package className="w-4 h-4 mr-2" />
-                تاریخ سفارش
-              </h5>
-              <p className="text-sm font-medium text-green-700">
-                {order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-US') : 'نامشخص'}
-              </p>
-              <p className="text-xs text-green-600 mt-1">تاریخ ثبت سفارش</p>
-            </div>
-
-            {/* Delivery Date Block */}
-            <div className="bg-yellow-50 rounded-lg p-3 border border-yellow-200">
-              <h5 className="font-medium text-yellow-800 mb-2 flex items-center">
-                <Truck className="w-4 h-4 mr-2" />
-                تاریخ تحویل
-                {order.deliveryCode && (
-                  <span className="mr-2 px-2 py-1 bg-green-100 text-green-700 text-xs rounded-md font-bold">
-                    کد: {order.deliveryCode}
-                  </span>
-                )}
-              </h5>
-              <p className="text-sm font-medium text-yellow-700">
-                {order.actualDeliveryDate ? new Date(order.actualDeliveryDate).toLocaleDateString('en-US') : 'در انتظار تحویل'}
-              </p>
-              <p className="text-xs text-yellow-600 mt-1">تاریخ تحویل سفارش</p>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          {showDeliveryButton && (
-            <div className="flex gap-2 flex-wrap">
-              <Button 
-                size="sm" 
-                onClick={() => handleSendDeliveryCode(order.id, !!order.deliveryCode)}
-                disabled={resendingCodes[order.id]}
-                className={`${
-                  resentCodes[order.id] 
-                    ? 'bg-red-600 hover:bg-red-700 text-white' 
-                    : 'bg-blue-600 hover:bg-blue-700 text-white'
-                }`}
-              >
-                {resendingCodes[order.id] ? (
-                  <>
-                    <Send className="w-4 h-4 mr-2 animate-spin" />
-                    در حال ارسال...
-                  </>
-                ) : resentCodes[order.id] ? (
-                  <>
-                    <Send className="w-4 h-4 mr-2" />
-                    ارسال مجدد
-                  </>
-                ) : order.deliveryCode ? (
-                  <>
-                    <Send className="w-4 h-4 mr-2" />
-                    ارسال مجدد
-                  </>
-                ) : (
-                  <>
-                    <Send className="w-4 h-4 mr-2" />
-                    ارسال کد به مشتری
-                  </>
-                )}
-              </Button>
-              <Button size="sm" variant="outline" className="border-green-500 text-green-700 hover:bg-green-100">
-                <Users className="w-4 h-4 mr-2" />
-                اختصاص راننده
-              </Button>
-              <Button size="sm" variant="outline" className="border-green-500 text-green-700 hover:bg-green-100">
-                <MapPin className="w-4 h-4 mr-2" />
-                پیگیری مسیر
-              </Button>
-              
-              {/* Admin-only delivery completion */}
-              {isAdmin ? (
-                <div className="flex gap-2 flex-wrap">
-                  <Button 
-                    size="sm" 
-                    className="bg-green-600 hover:bg-green-700 text-white"
-                    onClick={() => completeDeliveryMutation.mutate(order.id)}
-                    disabled={completeDeliveryMutation.isPending}
-                  >
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    {completeDeliveryMutation.isPending ? 'در حال پردازش...' : 'تحویل شد'}
-                  </Button>
-                </div>
-              ) : (
-                <div className="flex items-center px-3 py-1 bg-amber-100 border border-amber-300 rounded text-amber-700 text-sm">
-                  <Shield className="w-4 h-4 mr-2" />
-                  فقط ادمین می‌تواند تحویل را تکمیل کند
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Delivered order info */}
-          {!showDeliveryButton && (
-            <div className="mt-4 p-3 bg-green-100 rounded-lg border border-green-200">
-              <div className="flex items-center gap-2 text-green-800">
-                <CheckCircle className="w-5 h-5" />
-                <span className="font-medium">این سفارش با موفقیت تحویل داده شده است</span>
-              </div>
-              {order.deliveryCode && (
-                <p className="text-sm text-green-700 mt-1">
-                  کد تحویل: <span className="font-medium">{order.deliveryCode}</span>
-                </p>
-              )}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    );
-  };
 
   const CompaniesTab = () => {
     const [showAddForm, setShowAddForm] = useState(false);

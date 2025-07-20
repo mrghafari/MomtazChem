@@ -6,6 +6,31 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Complete Code Cleanup - Removed OrderCard Component and "بایگانی" References (July 20, 2025)
+✅ **FULLY COMPLETED: Complete cleanup of card view components and archive terminology per user requirements**
+- **OrderCard Component Removal**:
+  - Completely removed the 200+ line OrderCard component from logistics-management.tsx
+  - OrderCard was no longer used after table-only view implementation
+  - Cleaned up all related imports and unused code references
+- **Import Cleanup**:
+  - Removed unused ToggleLeft icon import from lucide-react
+  - Cleaned up all card view related dependencies
+- **Archive Terminology Elimination**:
+  - Changed "بایگانی لجستیک" to "لیست سفارشات تحویل شده" in delivered orders header
+  - Updated TabsTrigger from "تحویل داده شده" to "تحویل شده‌ها" for consistency
+  - Modified success toast messages from "سفارش به بایگانی لجستیک منتقل شد" to "سفارش به لیست تحویل شده‌ها منتقل شد"
+  - Updated completeDeliveryMutation success message to use proper "تحویل شده‌ها" terminology
+- **User Experience Enhancement**:
+  - Logistics interface now uses proper "تحویل شده‌ها" (Delivered Orders) terminology instead of "بایگانی" (Archive)
+  - Orders move directly from active status to delivered status without archiving concept
+  - Clear workflow: Admin clicks "تحویل شد" → order moves to "تحویل شده‌ها" tab
+- **Code Optimization**:
+  - Reduced logistics-management.tsx file size by removing 200+ lines of unused OrderCard component
+  - Cleaner imports with only necessary icons and components
+  - Eliminated duplicate code and unused UI elements
+- **Result**: Complete removal of card view components and archive terminology with clean table-only interface
+- **Impact**: Simplified logistics management with proper Persian terminology and streamlined codebase without unused components
+
 ### COMPLETED: Restored Complete Delivery Button and Card View for Active Logistics Orders (July 20, 2025)
 ✅ **FULLY RESTORED: Active logistics orders now have complete delivery functionality and card view interface**
 - **Complete Delivery Button**: 
