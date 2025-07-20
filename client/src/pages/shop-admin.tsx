@@ -947,65 +947,85 @@ ${data.data.map((item: any) =>
           <div>
             <div className="mb-4">
               <h1 className="text-3xl font-bold text-gray-900">
-                Welcome, Shop Manager!
+                Shop Management Dashboard
               </h1>
               <p className="text-lg text-blue-600 mt-1">
-                Your e-commerce control center is active
+                Complete e-commerce management and analytics
               </p>
             </div>
             <div>
-              <h2 className="text-xl font-semibold text-gray-700">Shop Management</h2>
-              <p className="text-gray-600">Manage orders, inventory, and discount settings</p>
+              <h2 className="text-xl font-semibold text-gray-700">Real-time Shop Overview</h2>
+              <p className="text-gray-600">Monitor orders, track inventory, manage customers and analyze performance</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+              System Active
+            </div>
+            <div className="text-sm text-gray-500">
+              Last updated: {new Date().toLocaleTimeString()}
             </div>
           </div>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card>
+          <Card className="border-l-4 border-l-blue-500">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Total Orders</p>
                   <p className="text-2xl font-bold text-gray-900">{(stats as any)?.totalOrders || 0}</p>
+                  <p className="text-xs text-blue-600 mt-1">All time orders</p>
                 </div>
-                <ShoppingCart className="w-8 h-8 text-blue-600" />
+                <div className="bg-blue-100 p-3 rounded-full">
+                  <ShoppingCart className="w-8 h-8 text-blue-600" />
+                </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-l-4 border-l-green-500">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-                  <p className="text-2xl font-bold text-gray-900">${(stats as any)?.totalRevenue || 0}</p>
+                  <p className="text-2xl font-bold text-gray-900">{(stats as any)?.totalRevenue || 0} IQD</p>
+                  <p className="text-xs text-green-600 mt-1">Sales performance</p>
                 </div>
-                <DollarSign className="w-8 h-8 text-green-600" />
+                <div className="bg-green-100 p-3 rounded-full">
+                  <DollarSign className="w-8 h-8 text-green-600" />
+                </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-l-4 border-l-orange-500">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Pending Orders</p>
                   <p className="text-2xl font-bold text-gray-900">{(stats as any)?.pendingOrders || 0}</p>
+                  <p className="text-xs text-orange-600 mt-1">Awaiting processing</p>
                 </div>
-                <Package className="w-8 h-8 text-orange-600" />
+                <div className="bg-orange-100 p-3 rounded-full">
+                  <Clock className="w-8 h-8 text-orange-600" />
+                </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-l-4 border-l-purple-500">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Shipped Orders</p>
-                  <p className="text-2xl font-bold text-gray-900">{(stats as any)?.shippedOrders || 0}</p>
+                  <p className="text-sm font-medium text-gray-600">Products</p>
+                  <p className="text-2xl font-bold text-gray-900">{products?.length || 0}</p>
+                  <p className="text-xs text-purple-600 mt-1">Active inventory</p>
                 </div>
-                <Truck className="w-8 h-8 text-purple-600" />
+                <div className="bg-purple-100 p-3 rounded-full">
+                  <Package className="w-8 h-8 text-purple-600" />
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -1013,7 +1033,7 @@ ${data.data.map((item: any) =>
 
         {/* Main Content */}
         <Tabs defaultValue="orders" className="space-y-6">
-          <TabsList>
+          <TabsList className="grid grid-cols-6 w-full">
             <TabsTrigger value="orders">Orders Management</TabsTrigger>
             <TabsTrigger value="inventory">Inventory Management</TabsTrigger>
             <TabsTrigger value="discounts">Discount Settings</TabsTrigger>
@@ -1027,7 +1047,10 @@ ${data.data.map((item: any) =>
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle>Orders</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <ShoppingCart className="w-5 h-5" />
+                    Orders
+                  </CardTitle>
                   <div className="flex items-center gap-4">
                     <div className="relative">
                       <Search className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
@@ -1075,7 +1098,7 @@ ${data.data.map((item: any) =>
                               {formatDate(order.createdAt.toString())}
                             </p>
                             <p className="text-sm text-gray-600">
-                              مبلغ: <span className="font-semibold text-lg text-green-600">{order.totalAmount} IQD</span>
+                              Amount: <span className="font-semibold text-lg text-green-600">{order.totalAmount} IQD</span>
                             </p>
                           </div>
 
@@ -1114,7 +1137,7 @@ ${data.data.map((item: any) =>
                               className="bg-blue-50 hover:bg-blue-100 border-blue-200"
                             >
                               <Eye className="w-4 h-4 mr-1" />
-                              جزئیات
+                              Details
                             </Button>
                           </div>
                         </div>
