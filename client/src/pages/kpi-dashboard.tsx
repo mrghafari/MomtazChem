@@ -19,7 +19,12 @@ import {
   Calendar,
   RefreshCw,
   Download,
-  ArrowLeft
+  ArrowLeft,
+  Heart,
+  Star,
+  MessageSquare,
+  UserPlus,
+  UserCheck
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
@@ -231,8 +236,8 @@ export default function KPIDashboard() {
           <TabsTrigger value="overview">نمای کلی</TabsTrigger>
           <TabsTrigger value="sales">فروش</TabsTrigger>
           <TabsTrigger value="customers">مشتریان</TabsTrigger>
-          <TabsTrigger value="inventory">موجودی</TabsTrigger>
-          <TabsTrigger value="operations">عملیات</TabsTrigger>
+          <TabsTrigger value="inventory">انبار</TabsTrigger>
+          <TabsTrigger value="operations">سایت و بازاریابی</TabsTrigger>
           <TabsTrigger value="financial">مالی</TabsTrigger>
         </TabsList>
 
@@ -359,222 +364,321 @@ export default function KPIDashboard() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <KPICard
-                title="فروش روزانه"
-                value={salesKPIs?.data?.dailySales?.toLocaleString('fa-IR') || '0'}
+                title="درآمد کل"
+                value={salesKPIs?.data?.totalRevenue?.toLocaleString('fa-IR') || '0'}
                 subtitle="تومان"
-                change={salesKPIs?.data?.salesGrowth || 0}
-                changeType={salesKPIs?.data?.salesGrowth > 0 ? "increase" : salesKPIs?.data?.salesGrowth < 0 ? "decrease" : "neutral"}
-                icon={<BarChart3 className="w-4 h-4 text-white" />}
+                change={salesKPIs?.data?.revenueGrowth || 0}
+                changeType={salesKPIs?.data?.revenueGrowth > 0 ? "increase" : salesKPIs?.data?.revenueGrowth < 0 ? "decrease" : "neutral"}
+                icon={<DollarSign className="w-4 h-4 text-white" />}
                 color="bg-green-500"
               />
               <KPICard
-                title="فروش هفتگی"
-                value={salesKPIs?.data?.weeklySales?.toLocaleString('fa-IR') || '0'}
+                title="میانگین ارزش سفارش (AOV)"
+                value={salesKPIs?.data?.averageOrderValue?.toLocaleString('fa-IR') || '0'}
                 subtitle="تومان"
-                change={salesKPIs?.data?.salesGrowth || 0}
-                changeType={salesKPIs?.data?.salesGrowth > 0 ? "increase" : salesKPIs?.data?.salesGrowth < 0 ? "decrease" : "neutral"}
+                change={salesKPIs?.data?.aovGrowth || 0}
+                changeType={salesKPIs?.data?.aovGrowth > 0 ? "increase" : salesKPIs?.data?.aovGrowth < 0 ? "decrease" : "neutral"}
                 icon={<TrendingUp className="w-4 h-4 text-white" />}
                 color="bg-blue-500"
               />
               <KPICard
-                title="فروش ماهانه"
-                value={salesKPIs?.data?.monthlySales?.toLocaleString('fa-IR') || '0'}
-                subtitle="تومان"
-                change={salesKPIs?.data?.salesGrowth || 0}
-                changeType={salesKPIs?.data?.salesGrowth > 0 ? "increase" : salesKPIs?.data?.salesGrowth < 0 ? "decrease" : "neutral"}
-                icon={<Calendar className="w-4 h-4 text-white" />}
+                title="نرخ تبدیل"
+                value={`${salesKPIs?.data?.conversionRate || '0'}%`}
+                subtitle="درصد"
+                change={salesKPIs?.data?.conversionGrowth || 0}
+                changeType={salesKPIs?.data?.conversionGrowth > 0 ? "increase" : salesKPIs?.data?.conversionGrowth < 0 ? "decrease" : "neutral"}
+                icon={<Target className="w-4 h-4 text-white" />}
                 color="bg-purple-500"
               />
               <KPICard
-                title="متوسط ارزش سفارش"
-                value={salesKPIs?.data?.averageOrderValue?.toLocaleString('fa-IR') || '0'}
+                title="نرخ ترک سبد خرید"
+                value={`${salesKPIs?.data?.cartAbandonmentRate || '0'}%`}
+                subtitle="درصد"
+                change={salesKPIs?.data?.abandonnmentImprovement || 0}
+                changeType={salesKPIs?.data?.abandonnmentImprovement > 0 ? "increase" : salesKPIs?.data?.abandonnmentImprovement < 0 ? "decrease" : "neutral"}
+                icon={<ShoppingCart className="w-4 h-4 text-white" />}
+                color="bg-orange-500"
+              />
+              <KPICard
+                title="ارزش طول عمر مشتری (CLV)"
+                value={salesKPIs?.data?.customerLifetimeValue?.toLocaleString('fa-IR') || '0'}
                 subtitle="تومان"
-                change={15.7}
-                changeType="increase"
-              icon={<DollarSign className="w-4 h-4 text-white" />}
-              color="bg-green-600"
-            />
-            <KPICard
-              title="تعداد سفارشات"
-              value="156"
-              change={5.8}
-              changeType="increase"
-              icon={<ShoppingCart className="w-4 h-4 text-white" />}
-              color="bg-blue-600"
-            />
-            <KPICard
-              title="نرخ تبدیل"
-              value="15.8%"
-              change={3.2}
-              changeType="increase"
-              icon={<Target className="w-4 h-4 text-white" />}
-              color="bg-orange-500"
-            />
-          </div>
+                change={salesKPIs?.data?.clvGrowth || 0}
+                changeType={salesKPIs?.data?.clvGrowth > 0 ? "increase" : salesKPIs?.data?.clvGrowth < 0 ? "decrease" : "neutral"}
+                icon={<DollarSign className="w-4 h-4 text-white" />}
+                color="bg-green-600"
+              />
+            </div>
+          )}
         </TabsContent>
 
         {/* Customers Tab */}
         <TabsContent value="customers">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <KPICard
-              title="کل مشتریان"
-              value="1,234"
-              change={8.1}
-              changeType="increase"
-              icon={<Users className="w-4 h-4 text-white" />}
-              color="bg-purple-500"
-            />
-            <KPICard
-              title="مشتریان جدید"
-              value="47"
-              subtitle="این ماه"
-              change={12.3}
-              changeType="increase"
-              icon={<Users className="w-4 h-4 text-white" />}
-              color="bg-green-500"
-            />
-            <KPICard
-              title="مشتریان فعال"
-              value="892"
-              subtitle="30 روز گذشته"
-              change={5.7}
-              changeType="increase"
-              icon={<Activity className="w-4 h-4 text-white" />}
-              color="bg-blue-500"
-            />
-            <KPICard
-              title="نرخ حفظ مشتری"
-              value="87.5%"
-              change={2.1}
-              changeType="increase"
-              icon={<CheckCircle className="w-4 h-4 text-white" />}
-              color="bg-green-600"
-            />
-            <KPICard
-              title="رضایت مشتری"
-              value="4.6/5"
-              change={0.3}
-              changeType="increase"
-              icon={<Target className="w-4 h-4 text-white" />}
-              color="bg-yellow-500"
-            />
-            <KPICard
-              title="متوسط خرید مشتری"
-              value="3,250,000"
-              subtitle="تومان"
-              change={18.9}
-              changeType="increase"
-              icon={<DollarSign className="w-4 h-4 text-white" />}
-              color="bg-purple-600"
-            />
-          </div>
+          {isLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+              <span className="mr-3">در حال بارگذاری...</span>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <KPICard
+                title="نرخ حفظ مشتری"
+                value={`${customerKPIs?.data?.customerRetention || '0'}%`}
+                subtitle="درصد"
+                change={customerKPIs?.data?.retentionGrowth || 0}
+                changeType={customerKPIs?.data?.retentionGrowth > 0 ? "increase" : customerKPIs?.data?.retentionGrowth < 0 ? "decrease" : "neutral"}
+                icon={<Heart className="w-4 h-4 text-white" />}
+                color="bg-red-500"
+              />
+              <KPICard
+                title="نرخ خرید مجدد"
+                value={`${customerKPIs?.data?.repeatPurchaseRate || '0'}%`}
+                subtitle="درصد"
+                change={customerKPIs?.data?.repeatPurchaseGrowth || 0}
+                changeType={customerKPIs?.data?.repeatPurchaseGrowth > 0 ? "increase" : customerKPIs?.data?.repeatPurchaseGrowth < 0 ? "decrease" : "neutral"}
+                icon={<RefreshCw className="w-4 h-4 text-white" />}
+                color="bg-green-500"
+              />
+              <KPICard
+                title="شاخص رضایت مشتری (NPS)"
+                value={customerKPIs?.data?.netPromoterScore || '0'}
+                subtitle="نمره (-100 تا 100)"
+                change={customerKPIs?.data?.npsImprovement || 0}
+                changeType={customerKPIs?.data?.npsImprovement > 0 ? "increase" : customerKPIs?.data?.npsImprovement < 0 ? "decrease" : "neutral"}
+                icon={<Star className="w-4 h-4 text-white" />}
+                color="bg-yellow-500"
+              />
+              <KPICard
+                title="تعداد تیکت پشتیبانی"
+                value={customerKPIs?.data?.supportTicketsCount || '0'}
+                subtitle="تعداد"
+                change={customerKPIs?.data?.ticketReduction || 0}
+                changeType={customerKPIs?.data?.ticketReduction > 0 ? "increase" : customerKPIs?.data?.ticketReduction < 0 ? "decrease" : "neutral"}
+                icon={<MessageSquare className="w-4 h-4 text-white" />}
+                color="bg-orange-500"
+              />
+              <KPICard
+                title="زمان پاسخ پشتیبانی"
+                value={customerKPIs?.data?.averageResponseTime || '0'}
+                subtitle="ساعت"
+                change={customerKPIs?.data?.responseTimeImprovement || 0}
+                changeType={customerKPIs?.data?.responseTimeImprovement > 0 ? "increase" : customerKPIs?.data?.responseTimeImprovement < 0 ? "decrease" : "neutral"}
+                icon={<Clock className="w-4 h-4 text-white" />}
+                color="bg-blue-500"
+              />
+              <KPICard
+                title="هزینه جذب مشتری (CAC)"
+                value={customerKPIs?.data?.customerAcquisitionCost?.toLocaleString('fa-IR') || '0'}
+                subtitle="تومان"
+                change={customerKPIs?.data?.cacReduction || 0}
+                changeType={customerKPIs?.data?.cacReduction > 0 ? "increase" : customerKPIs?.data?.cacReduction < 0 ? "decrease" : "neutral"}
+                icon={<DollarSign className="w-4 h-4 text-white" />}
+                color="bg-purple-500"
+              />
+            </div>
+          )}
         </TabsContent>
 
         {/* Inventory Tab */}
         <TabsContent value="inventory">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <KPICard
-              title="کل محصولات"
-              value="456"
-              icon={<Package className="w-4 h-4 text-white" />}
-              color="bg-blue-500"
-            />
-            <KPICard
-              title="محصولات موجود"
-              value="441"
-              change={-1.2}
-              changeType="decrease"
-              icon={<CheckCircle className="w-4 h-4 text-white" />}
-              color="bg-green-500"
-            />
-            <KPICard
-              title="کم موجودی"
-              value="15"
-              changeType="neutral"
-              icon={<AlertTriangle className="w-4 h-4 text-white" />}
-              color="bg-orange-500"
-            />
-            <KPICard
-              title="ارزش کل موجودی"
-              value="125,000,000"
-              subtitle="تومان"
-              change={5.3}
-              changeType="increase"
-              icon={<DollarSign className="w-4 h-4 text-white" />}
-              color="bg-purple-500"
-            />
-            <KPICard
-              title="گردش موجودی"
-              value="8.5"
-              subtitle="بار در سال"
-              change={12.1}
-              changeType="increase"
-              icon={<RefreshCw className="w-4 h-4 text-white" />}
-              color="bg-blue-600"
-            />
-            <KPICard
-              title="محصولات پرفروش"
-              value="12"
-              subtitle="بیش از 100 فروش"
-              icon={<TrendingUp className="w-4 h-4 text-white" />}
-              color="bg-green-600"
-            />
-          </div>
+          {isLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+              <span className="mr-3">در حال بارگذاری...</span>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <KPICard
+                title="نرخ گردش موجودی"
+                value={`${inventoryKPIs?.data?.inventoryTurnoverRate || '0'}/ماه`}
+                subtitle="بار در ماه"
+                change={inventoryKPIs?.data?.turnoverImprovement || 0}
+                changeType={inventoryKPIs?.data?.turnoverImprovement > 0 ? "increase" : inventoryKPIs?.data?.turnoverImprovement < 0 ? "decrease" : "neutral"}
+                icon={<RefreshCw className="w-4 h-4 text-white" />}
+                color="bg-blue-500"
+              />
+              <KPICard
+                title="زمان تحقق سفارش"
+                value={`${inventoryKPIs?.data?.fulfillmentTime || '0'} ساعت`}
+                subtitle="ساعت"
+                change={inventoryKPIs?.data?.fulfillmentImprovement || 0}
+                changeType={inventoryKPIs?.data?.fulfillmentImprovement > 0 ? "increase" : inventoryKPIs?.data?.fulfillmentImprovement < 0 ? "decrease" : "neutral"}
+                icon={<Clock className="w-4 h-4 text-white" />}
+                color="bg-green-500"
+              />
+              <KPICard
+                title="نرخ مرجوعی"
+                value={`${inventoryKPIs?.data?.returnRate || '0'}%`}
+                subtitle="درصد"
+                change={inventoryKPIs?.data?.returnReduction || 0}
+                changeType={inventoryKPIs?.data?.returnReduction > 0 ? "increase" : inventoryKPIs?.data?.returnReduction < 0 ? "decrease" : "neutral"}
+                icon={<Package className="w-4 h-4 text-white" />}
+                color="bg-orange-500"
+              />
+              <KPICard
+                title="درصد دقت سفارشات"
+                value={`${inventoryKPIs?.data?.orderAccuracy || '0'}%`}
+                subtitle="درصد"
+                change={inventoryKPIs?.data?.accuracyImprovement || 0}
+                changeType={inventoryKPIs?.data?.accuracyImprovement > 0 ? "increase" : inventoryKPIs?.data?.accuracyImprovement < 0 ? "decrease" : "neutral"}
+                icon={<CheckCircle className="w-4 h-4 text-white" />}
+                color="bg-green-600"
+              />
+              <KPICard
+                title="کل محصولات"
+                value={inventoryKPIs?.data?.totalProducts || '0'}
+                subtitle="تعداد"
+                icon={<Package className="w-4 h-4 text-white" />}
+                color="bg-purple-500"
+              />
+              <KPICard
+                title="محصولات کم موجود"
+                value={inventoryKPIs?.data?.lowStockProducts || '0'}
+                subtitle="تعداد"
+                icon={<AlertTriangle className="w-4 h-4 text-white" />}
+                color="bg-red-500"
+              />
+            </div>
+          )}
         </TabsContent>
 
-        {/* Operations Tab */}
+        {/* Operations/Website & Marketing Tab */}
         <TabsContent value="operations">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <KPICard
-              title="سفارشات در انتظار"
-              value="23"
-              icon={<Clock className="w-4 h-4 text-white" />}
-              color="bg-yellow-500"
-            />
-            <KPICard
-              title="سفارشات تحویل شده"
-              value="145"
-              subtitle="این ماه"
-              change={15.2}
-              changeType="increase"
-              icon={<CheckCircle className="w-4 h-4 text-white" />}
-              color="bg-green-500"
-            />
-            <KPICard
-              title="زمان متوسط تحویل"
-              value="2.3"
-              subtitle="روز"
-              change={-8.5}
-              changeType="increase"
-              icon={<Clock className="w-4 h-4 text-white" />}
-              color="bg-blue-500"
-            />
-            <KPICard
-              title="نرخ تحویل به موقع"
-              value="92%"
-              change={3.1}
-              changeType="increase"
-              icon={<Target className="w-4 h-4 text-white" />}
-              color="bg-green-600"
-            />
-            <KPICard
-              title="استعلامات پاسخ داده شده"
-              value="87%"
-              change={5.4}
-              changeType="increase"
-              icon={<Activity className="w-4 h-4 text-white" />}
-              color="bg-purple-500"
-            />
-            <KPICard
-              title="نرخ برگشت کالا"
-              value="2.1%"
-              change={-0.8}
-              changeType="increase"
-              icon={<RefreshCw className="w-4 h-4 text-white" />}
-              color="bg-orange-500"
-            />
-          </div>
+          {isLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+              <span className="mr-3">در حال بارگذاری...</span>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <KPICard
+                title="زمان بارگذاری سایت"
+                value={`${operationalKPIs?.data?.pageLoadTime || '0'} ثانیه`}
+                subtitle="ثانیه"
+                change={operationalKPIs?.data?.loadTimeImprovement || 0}
+                changeType={operationalKPIs?.data?.loadTimeImprovement > 0 ? "increase" : operationalKPIs?.data?.loadTimeImprovement < 0 ? "decrease" : "neutral"}
+                icon={<Clock className="w-4 h-4 text-white" />}
+                color="bg-blue-500"
+              />
+              <KPICard
+                title="نرخ پرش"
+                value={`${operationalKPIs?.data?.bounceRate || '0'}%`}
+                subtitle="درصد"
+                change={operationalKPIs?.data?.bounceRateImprovement || 0}
+                changeType={operationalKPIs?.data?.bounceRateImprovement > 0 ? "increase" : operationalKPIs?.data?.bounceRateImprovement < 0 ? "decrease" : "neutral"}
+                icon={<TrendingDown className="w-4 h-4 text-white" />}
+                color="bg-orange-500"
+              />
+              <KPICard
+                title="مدت زمان حضور در سایت"
+                value={`${operationalKPIs?.data?.avgSessionDuration || '0'} دقیقه`}
+                subtitle="دقیقه"
+                change={operationalKPIs?.data?.sessionDurationGrowth || 0}
+                changeType={operationalKPIs?.data?.sessionDurationGrowth > 0 ? "increase" : operationalKPIs?.data?.sessionDurationGrowth < 0 ? "decrease" : "neutral"}
+                icon={<Activity className="w-4 h-4 text-white" />}
+                color="bg-green-500"
+              />
+              <KPICard
+                title="میانگین صفحات مشاهده‌شده"
+                value={`${operationalKPIs?.data?.avgPagesPerSession || '0'} صفحه`}
+                subtitle="صفحه"
+                change={operationalKPIs?.data?.pagesPerSessionGrowth || 0}
+                changeType={operationalKPIs?.data?.pagesPerSessionGrowth > 0 ? "increase" : operationalKPIs?.data?.pagesPerSessionGrowth < 0 ? "decrease" : "neutral"}
+                icon={<BarChart3 className="w-4 h-4 text-white" />}
+                color="bg-purple-500"
+              />
+              <KPICard
+                title="نرخ بازشدن ایمیل"
+                value={`${operationalKPIs?.data?.emailOpenRate || '0'}%`}
+                subtitle="درصد"
+                change={operationalKPIs?.data?.emailOpenRateGrowth || 0}
+                changeType={operationalKPIs?.data?.emailOpenRateGrowth > 0 ? "increase" : operationalKPIs?.data?.emailOpenRateGrowth < 0 ? "decrease" : "neutral"}
+                icon={<MessageSquare className="w-4 h-4 text-white" />}
+                color="bg-blue-600"
+              />
+              <KPICard
+                title="بازدهی تبلیغات (ROAS)"
+                value={`${operationalKPIs?.data?.roas || '0'}x`}
+                subtitle="برابر"
+                change={operationalKPIs?.data?.roasGrowth || 0}
+                changeType={operationalKPIs?.data?.roasGrowth > 0 ? "increase" : operationalKPIs?.data?.roasGrowth < 0 ? "decrease" : "neutral"}
+                icon={<Target className="w-4 h-4 text-white" />}
+                color="bg-green-600"
+              />
+            </div>
+          )}
         </TabsContent>
+
+        {/* Financial Tab */}
+        <TabsContent value="financial">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+              <span className="mr-3">در حال بارگذاری...</span>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <KPICard
+                title="درآمد ماهانه"
+                value={financialKPIs?.data?.monthlyRevenue?.toLocaleString('fa-IR') || '0'}
+                subtitle="تومان"
+                change={financialKPIs?.data?.revenueGrowth || 0}
+                changeType={financialKPIs?.data?.revenueGrowth > 0 ? "increase" : financialKPIs?.data?.revenueGrowth < 0 ? "decrease" : "neutral"}
+                icon={<DollarSign className="w-4 h-4 text-white" />}
+                color="bg-green-500"
+              />
+              <KPICard
+                title="سود خالص"
+                value={financialKPIs?.data?.netProfit?.toLocaleString('fa-IR') || '0'}
+                subtitle="تومان"
+                change={financialKPIs?.data?.profitGrowth || 0}
+                changeType={financialKPIs?.data?.profitGrowth > 0 ? "increase" : financialKPIs?.data?.profitGrowth < 0 ? "decrease" : "neutral"}
+                icon={<TrendingUp className="w-4 h-4 text-white" />}
+                color="bg-blue-500"
+              />
+              <KPICard
+                title="حاشیه سود"
+                value={`${financialKPIs?.data?.profitMargin || '0'}%`}
+                subtitle="درصد"
+                change={5.2}
+                changeType="increase"
+                icon={<BarChart3 className="w-4 h-4 text-white" />}
+                color="bg-purple-500"
+              />
+              <KPICard
+                title="هزینه‌های عملیاتی"
+                value={financialKPIs?.data?.operatingCosts?.toLocaleString('fa-IR') || '0'}
+                subtitle="تومان"
+                change={-3.8}
+                changeType="decrease"
+                icon={<Package className="w-4 h-4 text-white" />}
+                color="bg-orange-500"
+              />
+              <KPICard
+                title="جریان نقدی"
+                value={financialKPIs?.data?.cashFlow?.toLocaleString('fa-IR') || '0'}
+                subtitle="تومان"
+                change={8.9}
+                changeType="increase"
+                icon={<Activity className="w-4 h-4 text-white" />}
+                color="bg-green-600"
+              />
+              <KPICard
+                title="حساب‌های دریافتنی"
+                value={financialKPIs?.data?.accountsReceivable?.toLocaleString('fa-IR') || '0'}
+                subtitle="تومان"
+                change={-2.1}
+                changeType="decrease"
+                icon={<Calendar className="w-4 h-4 text-white" />}
+                color="bg-blue-600"
+              />
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+};
 
         {/* Financial Tab */}
         <TabsContent value="financial">

@@ -5974,16 +5974,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { pool } = await import('./db');
       
-      // Get sales data for today, this month, and comparison metrics
+      // Sales KPIs based on your requirements
       const salesData = {
-        dailySales: 2543000,
-        weeklySales: 15890000,
-        monthlySales: 75230000,
-        averageOrderValue: 1245000,
-        totalOrders: 156,
-        conversionRate: 15.8,
-        salesGrowth: 12.5,
-        ordersGrowth: 5.8
+        // درآمد کل (Total Revenue)
+        totalRevenue: 125450000,
+        // میانگین ارزش سفارش (AOV)
+        averageOrderValue: 1375000,
+        // نرخ تبدیل (Conversion Rate)
+        conversionRate: 3.2,
+        // نرخ ترک سبد خرید (Cart Abandonment Rate)
+        cartAbandonmentRate: 67.5,
+        // ارزش طول عمر مشتری (CLV)
+        customerLifetimeValue: 8250000,
+        // Growth metrics
+        revenueGrowth: 15.2,
+        aovGrowth: 8.7,
+        conversionGrowth: -2.1,
+        abandonnmentImprovement: 5.3, // Improvement (reduction in abandonment)
+        clvGrowth: 12.4
       };
       
       res.json({
@@ -6001,16 +6009,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { pool } = await import('./db');
       
-      // Get customer metrics
+      // Customer KPIs based on your requirements
       const customerData = {
-        totalCustomers: 1234,
-        newCustomers: 47,
-        activeCustomers: 892,
-        customerRetention: 87.5,
-        customerSatisfaction: 4.6,
-        averageCustomerValue: 3250000,
-        customersGrowth: 8.1,
-        newCustomersGrowth: 12.3
+        // نرخ حفظ مشتری (Customer Retention Rate)
+        customerRetention: 78.5,
+        // نرخ خرید مجدد (Repeat Purchase Rate)
+        repeatPurchaseRate: 42.3,
+        // شاخص رضایت مشتری NPS (Net Promoter Score)
+        netPromoterScore: 35, // Scale: -100 to 100
+        // تعداد تیکت پشتیبانی (Support Tickets)
+        supportTicketsCount: 127,
+        // زمان پاسخ پشتیبانی (Response Time in hours)
+        averageResponseTime: 2.5,
+        // هزینه جذب مشتری CAC (Customer Acquisition Cost)
+        customerAcquisitionCost: 450000,
+        // Growth metrics
+        retentionGrowth: 5.2,
+        repeatPurchaseGrowth: 8.9,
+        npsImprovement: 12.0,
+        ticketReduction: -15.3, // Negative means reduction (good)
+        responseTimeImprovement: -18.5, // Negative means faster response
+        cacReduction: -8.7 // Negative means lower cost (good)
       };
       
       res.json({
@@ -6023,21 +6042,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get inventory KPIs
+  // Get inventory KPIs  
   app.get("/api/kpi/inventory", requireAuth, async (req, res) => {
     try {
       const { pool } = await import('./db');
       
-      // Get inventory metrics
+      // Inventory KPIs based on your requirements
       const inventoryData = {
+        // نرخ گردش موجودی (Inventory Turnover Rate per month)
+        inventoryTurnoverRate: 6.8,
+        // زمان تحقق سفارش (Fulfillment Time in hours)
+        fulfillmentTime: 18.5,
+        // نرخ مرجوعی (Return Rate)
+        returnRate: 2.3,
+        // درصد دقت سفارشات (Order Accuracy)
+        orderAccuracy: 97.8,
+        // Additional inventory metrics
         totalProducts: 456,
         inStockProducts: 441,
         lowStockProducts: 15,
-        totalInventoryValue: 125000000,
-        inventoryTurnover: 8.5,
-        topSellingProducts: 12,
-        inventoryGrowth: -1.2,
-        turnoverGrowth: 12.1
+        outOfStockProducts: 0,
+        // Growth metrics
+        turnoverImprovement: 12.1,
+        fulfillmentImprovement: -8.5, // Negative means faster fulfillment
+        returnReduction: -5.2, // Negative means fewer returns (good)
+        accuracyImprovement: 2.1
       };
       
       res.json({
@@ -6050,21 +6079,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get operational KPIs
+  // Get website/marketing KPIs
   app.get("/api/kpi/operational", requireAuth, async (req, res) => {
     try {
       const { pool } = await import('./db');
       
-      // Get operational metrics
+      // Website & Marketing KPIs based on your requirements
       const operationalData = {
-        pendingOrders: 23,
-        deliveredOrders: 145,
-        averageDeliveryTime: 2.3,
-        onTimeDeliveryRate: 92,
-        responseRate: 87,
-        returnRate: 2.1,
-        deliveredGrowth: 15.2,
-        onTimeGrowth: 3.1
+        // زمان بارگذاری سایت (Page Load Time in seconds)
+        pageLoadTime: 2.1,
+        // نرخ پرش (Bounce Rate)
+        bounceRate: 35.7,
+        // مدت زمان حضور در سایت (Session Duration in minutes)
+        avgSessionDuration: 4.2,
+        // میانگین صفحات مشاهده‌شده (Pages per Session)
+        avgPagesPerSession: 3.8,
+        // سهم منابع ترافیک (Traffic Sources)
+        trafficSources: {
+          organic: 45.2,
+          direct: 28.5,
+          social: 15.3,
+          email: 8.7,
+          ads: 2.3
+        },
+        // نرخ بازشدن ایمیل (Email Open Rate)
+        emailOpenRate: 24.8,
+        // نرخ کلیک ایمیل (Email Click Rate)
+        emailClickRate: 3.2,
+        // بازدهی تبلیغات ROAS (Return on Ad Spend)
+        roas: 4.8,
+        // Growth metrics
+        loadTimeImprovement: -12.5, // Negative means faster loading
+        bounceRateImprovement: -8.2, // Negative means lower bounce rate
+        sessionDurationGrowth: 15.3,
+        pagesPerSessionGrowth: 7.9,
+        emailOpenRateGrowth: 5.1,
+        roasGrowth: 18.7
       };
       
       res.json({
