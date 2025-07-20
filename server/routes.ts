@@ -26339,7 +26339,7 @@ momtazchem.com
 
       // Get order details with customer information first
       const { customerOrders } = await import("../shared/customer-schema");
-      const { crmCustomers } = await import("../shared/crm-schema");
+      const { crmCustomers } = await import("../shared/schema");
       
       const orderDetailsQuery = await db
         .select({
