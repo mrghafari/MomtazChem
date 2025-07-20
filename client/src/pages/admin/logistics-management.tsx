@@ -26,7 +26,8 @@ import {
   FileText,
   ChevronUp,
   ChevronDown,
-  ChevronsUpDown
+  ChevronsUpDown,
+  ToggleLeft
 } from 'lucide-react';
 import { useOrderNotifications } from '@/hooks/useOrderNotifications';
 
@@ -206,6 +207,14 @@ const LogisticsManagement = () => {
   const { orderCount } = useOrderNotifications({
     department: 'logistics',
     enabled: true
+  });
+
+  // Get current user info for admin checks
+  const { data: currentUser } = useQuery({
+    queryKey: ['/api/admin/me'],
+    queryFn: () => fetch('/api/admin/me').then(res => res.json()).then(data => data.user),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    cacheTime: 10 * 60 * 1000, // 10 minutes
   });
 
   // Get active logistics orders (not delivered)
