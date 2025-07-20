@@ -12,7 +12,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { 
   MessageSquare, 
   Settings, 
-  Users, 
   BarChart3, 
   Shield, 
   Clock, 
@@ -81,18 +80,7 @@ interface SmsSettings {
   rateLimitMinutes: number;
 }
 
-interface CustomerSmsSettings {
-  id: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  company?: string;
-  smsEnabled: boolean;
-  customerStatus: string;
-  totalOrders: number;
-  lastOrderDate?: string;
-}
+
 
 interface SmsLog {
   id: number;
@@ -142,48 +130,19 @@ export default function AdminSmsManagement() {
     rateLimitMinutes: 60,
     isTestMode: true
   });
-  const [customersWithSms, setCustomersWithSms] = useState<CustomerSmsSettings[]>([]);
-  const [filteredCustomers, setFilteredCustomers] = useState<CustomerSmsSettings[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
+
   const [smsLogs, setSmsLogs] = useState<SmsLog[]>([]);
   const [filteredLogs, setFilteredLogs] = useState<SmsLog[]>([]);
   const [logSearchQuery, setLogSearchQuery] = useState('');
   const [timeFilter, setTimeFilter] = useState('all');
-  const [localSmsStates, setLocalSmsStates] = useState<Record<number, boolean>>(() => {
-    try {
-      const saved = localStorage.getItem('sms-local-states');
-      return saved ? JSON.parse(saved) : {};
-    } catch {
-      return {};
-    }
-  });
+
 
   useEffect(() => {
     loadSmsSettings();
     loadSmsLogs();
-    loadCustomersWithSms();
   }, []);
 
-  // Save local SMS states to localStorage whenever they change
-  useEffect(() => {
-    localStorage.setItem('sms-local-states', JSON.stringify(localSmsStates));
-  }, [localSmsStates]);
 
-  // Filter customers based on search query
-  useEffect(() => {
-    if (!searchQuery.trim()) {
-      setFilteredCustomers(customersWithSms);
-    } else {
-      const filtered = customersWithSms.filter(customer => 
-        customer.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        customer.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        customer.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        customer.phone.includes(searchQuery) ||
-        (customer.company && customer.company.toLowerCase().includes(searchQuery.toLowerCase()))
-      );
-      setFilteredCustomers(filtered);
-    }
-  }, [customersWithSms, searchQuery]);
 
   // Filter SMS logs based on search and time filters
   useEffect(() => {
@@ -242,17 +201,7 @@ export default function AdminSmsManagement() {
     }
   };
 
-  const loadCustomersWithSms = async () => {
-    try {
-      const response = await fetch('/api/admin/sms/customers');
-      const result = await response.json();
-      if (result.success && result.data) {
-        setCustomersWithSms(result.data);
-      }
-    } catch (error) {
-      console.error('Error loading customers with SMS:', error);
-    }
-  };
+
 
 
 
@@ -420,76 +369,7 @@ export default function AdminSmsManagement() {
     }
   };
 
-  const handleToggleCustomerSms = async (customerId: number, enabled: boolean) => {
-    setLoading(true);
-    try {
-      const response = await fetch('/api/admin/sms/customer/toggle', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ customerId, enabled })
-      });
 
-      if (response.ok) {
-        setCustomersWithSms(prev => 
-          prev.map(customer => 
-            customer.id === customerId ? { ...customer, smsEnabled: enabled } : customer
-          )
-        );
-        
-        setLocalSmsStates(prev => ({ ...prev, [customerId]: enabled }));
-        
-        toast({
-          title: enabled ? 'فعال شد' : 'غیرفعال شد',
-          description: `SMS برای مشتری ${enabled ? 'فعال' : 'غیرفعال'} شد`
-        });
-      }
-    } catch (error) {
-      toast({
-        title: 'خطا',
-        description: 'مشکل در تغییر وضعیت SMS مشتری',
-        variant: 'destructive'
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleBulkSmsToggle = async (action: 'enable' | 'disable') => {
-    setLoading(true);
-    try {
-      const response = await fetch('/api/admin/sms/bulk-toggle', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action })
-      });
-
-      if (response.ok) {
-        const enabled = action === 'enable';
-        setCustomersWithSms(prev => 
-          prev.map(customer => ({ ...customer, smsEnabled: enabled }))
-        );
-        
-        const newLocalStates: Record<number, boolean> = {};
-        customersWithSms.forEach(customer => {
-          newLocalStates[customer.id] = enabled;
-        });
-        setLocalSmsStates(newLocalStates);
-        
-        toast({
-          title: enabled ? 'همه فعال شدند' : 'همه غیرفعال شدند',
-          description: `SMS برای همه مشتریان ${enabled ? 'فعال' : 'غیرفعال'} شد`
-        });
-      }
-    } catch (error) {
-      toast({
-        title: 'خطا',
-        description: 'مشکل در تغییر وضعیت SMS',
-        variant: 'destructive'
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="space-y-6">
@@ -517,10 +397,7 @@ export default function AdminSmsManagement() {
             <Settings className="h-4 w-4 mr-2" />
             تنظیمات
           </TabsTrigger>
-          <TabsTrigger value="customers">
-            <Users className="h-4 w-4 mr-2" />
-            مشتریان
-          </TabsTrigger>
+
           <TabsTrigger value="templates">
             <MessageSquare className="h-4 w-4 mr-2" />
             قالب‌های SMS
@@ -1109,112 +986,7 @@ export default function AdminSmsManagement() {
           )}
         </TabsContent>
 
-        <TabsContent value="customers" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>مدیریت دسترسی SMS مشتریان</CardTitle>
-              <CardDescription>
-                مدیریت دسترسی احراز هویت SMS برای مشتریان به صورت جداگانه
-              </CardDescription>
-              
-              {/* Search Box */}
-              <div className="space-y-4 mt-4">
-                <div className="flex items-center space-x-4 gap-4">
-                  <div className="flex-1">
-                    <Input
-                      placeholder="جستجو مشتریان (نام، ایمیل، تلفن، شرکت)..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="max-w-md"
-                    />
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    {filteredCustomers.length} از {customersWithSms.length} مشتری
-                  </div>
-                </div>
-                
-                <div className="flex gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => handleBulkSmsToggle('enable')}
-                    disabled={loading}
-                  >
-                    فعال کردن همه
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => handleBulkSmsToggle('disable')}
-                    disabled={loading}
-                  >
-                    غیرفعال کردن همه
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {customersWithSms.length === 0 ? (
-                <div className="text-center py-8">
-                  <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">مشتری با SMS فعال وجود ندارد</h3>
-                  <p className="text-muted-foreground">
-                    احراز هویت SMS را برای مشتریان از پروفایل‌های جداگانه آن‌ها در بخش CRM فعال کنید.
-                  </p>
-                </div>
-              ) : filteredCustomers.length === 0 ? (
-                <div className="text-center py-8">
-                  <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">مشتری یافت نشد</h3>
-                  <p className="text-muted-foreground">
-                    هیچ مشتری با این جستجو پیدا نشد. جستجوی خود را تغییر دهید.
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {filteredCustomers.map((customer) => (
-                    <div key={customer.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="space-y-1">
-                        <div className="font-medium">
-                          {customer.firstName} {customer.lastName}
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          {customer.email} • {customer.phone}
-                        </div>
-                        {customer.company && (
-                          <div className="text-sm text-muted-foreground">
-                            شرکت: {customer.company}
-                          </div>
-                        )}
-                        <div className="flex items-center gap-2 text-xs">
-                          <Badge variant="outline">{customer.customerStatus}</Badge>
-                          <span className="text-muted-foreground">
-                            {customer.totalOrders} سفارش
-                          </span>
-                          {customer.lastOrderDate && (
-                            <span className="text-muted-foreground">
-                              • آخرین سفارش: {new Date(customer.lastOrderDate).toLocaleDateString('fa-IR')}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Switch
-                          checked={localSmsStates[customer.id] ?? customer.smsEnabled}
-                          onCheckedChange={(enabled) => handleToggleCustomerSms(customer.id, enabled)}
-                          disabled={loading}
-                        />
-                        <Badge variant={customer.smsEnabled ? "default" : "secondary"}>
-                          {customer.smsEnabled ? "فعال" : "غیرفعال"}
-                        </Badge>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+
 
         <TabsContent value="templates" className="space-y-4">
           <SmsTemplatesSimple />
