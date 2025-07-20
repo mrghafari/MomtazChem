@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بررسی فیش‌های بانکی</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .receipt-card { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 6px; margin: 10px 0; padding: 15px; }
+        .receipt-image { max-width: 300px; border: 1px solid #ddd; border-radius: 4px; }
+        .status-pending { color: orange; font-weight: bold; }
+        .status-rejected { color: red; font-weight: bold; }
+        .status-uploaded { color: blue; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>بررسی فیش‌های بانکی آپلود شده</h1>
+        <div id="receipts-container">در حال بارگذاری...</div>
+    </div>
+
+    <script>
+        async function loadFinancialOrders() {
+            try {
+                const response = await fetch('/api/financial/orders');
+                const data = await response.json();
+                
+                if (!data.success) {
+                    document.getElementById('receipts-container').innerHTML = 
+                        '<div style="color: red;">خطا: ' + (data.message || 'دسترسی رد شد') + '</div>';
+                    return;
+                }
+                
+                const orders = data.orders;
+                const receiptOrders = orders.filter(order => order.paymentReceiptUrl);
+                
+                console.log('Total orders:', orders.length);
+                console.log('Orders with receipts:', receiptOrders.length);
+                
+                if (receiptOrders.length === 0) {
+                    document.getElementById('receipts-container').innerHTML = 
+                        '<div>هیچ سفارش با فیش بانکی یافت نشد.</div>';
+                    return;
+                }
+                
+                let html = '<h2>سفارشات با فیش بانکی (' + receiptOrders.length + ' مورد)</h2>';
+                
+                receiptOrders.forEach(order => {
+                    const statusClass = order.currentStatus === 'pending' ? 'status-pending' : 
+                                      order.currentStatus === 'financial_rejected' ? 'status-rejected' : 
+                                      order.currentStatus === 'payment_uploaded' ? 'status-uploaded' : '';
+                    
+                    html += `
+                        <div class="receipt-card">
+                            <h3>سفارش شماره: ${order.customerOrderId}</h3>
+                            <p><strong>وضعیت:</strong> <span class="${statusClass}">${order.currentStatus}</span></p>
+                            <p><strong>مبلغ:</strong> ${order.totalAmount} ${order.currency}</p>
+                            <p><strong>مسیر فیش:</strong> ${order.paymentReceiptUrl}</p>
+                            ${order.financialNotes ? '<p><strong>توضیحات مالی:</strong> ' + order.financialNotes + '</p>' : ''}
+                            <div>
+                                <strong>تصویر فیش:</strong><br>
+                                <img src="${order.paymentReceiptUrl}" class="receipt-image" 
+                                     onerror="this.style.display='none'; this.nextSibling.style.display='block';">
+                                <div style="display: none; color: red; padding: 10px; border: 1px dashed #ccc;">
+                                    خطا در بارگذاری تصویر فیش
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                document.getElementById('receipts-container').innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error loading orders:', error);
+                document.getElementById('receipts-container').innerHTML = 
+                    '<div style="color: red;">خطا در بارگذاری داده‌ها: ' + error.message + '</div>';
+            }
+        }
+        
+        loadFinancialOrders();
+    </script>
+</body>
+</html>
