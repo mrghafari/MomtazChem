@@ -6,6 +6,17 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Fixed Critical Delivery Code Generation Issue in Warehouse-to-Logistics Transfer (July 20, 2025)
+✅ **RESOLVED: Delivery codes now properly generated and stored when orders move from warehouse to logistics**
+- **Root Cause**: Delivery code was being generated during warehouse approval but not saved to order_management table
+- **Technical Fix**: Added critical database update in warehouse approve endpoint to save delivery code to order_management.deliveryCode field
+- **Code Enhancement**: Added `deliveryCode: deliveryCodeData.verificationCode` in order_management table update after code generation
+- **Logging Added**: Enhanced console logging to track delivery code storage: "💾 [WAREHOUSE] Delivery code {code} saved to order_management table for order {orderId}"
+- **Workflow**: Warehouse approve → Generate delivery code → Save to order_management table → Send SMS to customer → Display in logistics interface
+- **Impact**: "Send Code" button in logistics now resends the actual delivery code that was generated during warehouse-to-logistics transfer
+- **User Experience**: Logistics staff can now see delivery codes in the table and resend the same code to customers when needed
+- **Status**: Complete fix - delivery code generation and storage workflow fully operational
+
 ### COMPLETED: Fixed Logistics Delivery Button Query Cache Invalidation (July 20, 2025)
 ✅ **FULLY RESOLVED: Delivery completion button now properly updates order counts in both tabs**
 - **Root Cause Identified**: Query cache invalidation was not properly refreshing separate active and delivered order queries

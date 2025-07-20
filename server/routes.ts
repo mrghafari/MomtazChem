@@ -26429,6 +26429,16 @@ momtazchem.com
           console.log(`🆕 [WAREHOUSE] Generated new delivery code ${deliveryCodeData.verificationCode} for order ${orderId}, customer: ${customerName}`);
         }
 
+        // CRITICAL: Update order_management table with delivery code
+        await db
+          .update(orderManagement)
+          .set({
+            deliveryCode: deliveryCodeData.verificationCode
+          })
+          .where(eq(orderManagement.customerOrderId, orderId));
+
+        console.log(`💾 [WAREHOUSE] Delivery code ${deliveryCodeData.verificationCode} saved to order_management table for order ${orderId}`);
+
         // Send SMS notification automatically with proper customer details
         try {
           const customerName = `${order.customerFirstName || ''} ${order.customerLastName || ''}`.trim() || 'مشتری';
