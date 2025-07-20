@@ -13494,7 +13494,7 @@ Leading Chemical Solutions Provider
     try {
       const phone = decodeURIComponent(req.params.phone);
       
-      if (!phone || phone.length < 8) {
+      if (!phone || phone.length < 3) {
         return res.status(400).json({
           success: false,
           message: "شماره تلفن نامعتبر است"

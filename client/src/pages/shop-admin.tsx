@@ -967,7 +967,7 @@ function ReturnForm({ onClose }: { onClose: () => void }) {
 
   // Function to fetch customer by phone number
   const fetchCustomerByPhone = async (phone: string) => {
-    if (!phone || phone.length < 8) return;
+    if (!phone || phone.length < 3) return;
     
     setIsLoadingCustomer(true);
     try {
@@ -1010,7 +1010,7 @@ function ReturnForm({ onClose }: { onClose: () => void }) {
     
     // Clear existing timeout
     const timeoutId = setTimeout(() => {
-      if (phone && phone.length >= 8) {
+      if (phone && phone.length >= 3) {
         fetchCustomerByPhone(phone);
       }
     }, 500); // 500ms delay
@@ -1020,7 +1020,7 @@ function ReturnForm({ onClose }: { onClose: () => void }) {
 
   // Function to fetch product suggestions
   const fetchProductSuggestions = async (query: string) => {
-    if (!query || query.length < 2) {
+    if (!query || query.length < 3) {
       setProductSuggestions([]);
       setShowProductSuggestions(false);
       return;
@@ -1053,7 +1053,7 @@ function ReturnForm({ onClose }: { onClose: () => void }) {
     
     // Clear existing timeout
     const timeoutId = setTimeout(() => {
-      if (name && name.length >= 2) {
+      if (name && name.length >= 3) {
         fetchProductSuggestions(name);
       }
     }, 300); // 300ms delay
@@ -1158,7 +1158,7 @@ function ReturnForm({ onClose }: { onClose: () => void }) {
           )}
           
           <p className="text-xs text-gray-500 mt-1">
-            نام محصول را تایپ کنید تا پیشنهادات نمایش داده شود
+            حداقل 3 حرف از نام محصول را تایپ کنید تا پیشنهادات نمایش داده شود
           </p>
         </div>
 
@@ -1207,7 +1207,7 @@ function ReturnForm({ onClose }: { onClose: () => void }) {
             required
           />
           <p className="text-xs text-gray-500 mt-1">
-            اطلاعات مشتری پس از وارد کردن شماره تلفن به طور خودکار پر می‌شود
+            اطلاعات مشتری پس از وارد کردن 3 رقم اول شماره تلفن به طور خودکار پر می‌شود
           </p>
         </div>
 

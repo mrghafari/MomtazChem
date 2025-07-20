@@ -15,8 +15,8 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
   - Return details dialog for viewing existing returns
   - Form validation and error handling
 - **Smart Features Implemented**:
-  - ✅ **Automatic Customer Lookup**: When entering phone number, customer information auto-fills (name, email)
-  - ✅ **Product Name Suggestions**: Type part of product name to see dropdown suggestions (max 5 results)
+  - ✅ **Automatic Customer Lookup**: When entering phone number (3+ characters), customer information auto-fills (name, email)
+  - ✅ **Product Name Suggestions**: Type part of product name (3+ characters) to see dropdown suggestions (max 5 results)
   - ✅ **Real-time Data Fetching**: 500ms debounced customer lookup, 300ms product suggestions
   - ✅ **Persian Interface**: All notifications and help text in Persian language
 - **API Enhancements**: 
