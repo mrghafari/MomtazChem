@@ -13510,12 +13510,18 @@ Leading Chemical Solutions Provider
         });
       }
 
-      // Map database fields to frontend expected format
+      // Map database fields to frontend expected format - ensure proper field mapping
       const formattedCustomer = {
         ...customer,
-        firstName: customer.first_name,
-        lastName: customer.last_name
+        firstName: customer.firstName || customer.first_name,
+        lastName: customer.lastName || customer.last_name,
+        // Keep original fields for debugging
+        first_name: customer.first_name,
+        last_name: customer.last_name
       };
+      
+      console.log('[CUSTOMER LOOKUP] Original customer:', customer);
+      console.log('[CUSTOMER LOOKUP] Formatted customer:', formattedCustomer);
 
       res.json({
         success: true,
