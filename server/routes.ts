@@ -3973,6 +3973,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Function to convert technical module IDs to Persian names
   function convertTechnicalToPersianModule(moduleId: string): string {
     const technicalToPersianMap: { [key: string]: string } = {
+      'kpi_dashboard': 'شاخص‌های عملکرد (KPI)',
+      'management_dashboard': 'داشبورد مدیریتی',
       'syncing_shop': 'همگام‌سازی فروشگاه',
       'inquiries': 'مدیریت استعلامات',
       'barcode': 'مدیریت بارکد',
@@ -4036,7 +4038,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { pool } = await import('./db');
       
-      // Define the main system modules - these are the 26 Site Management modules
+      // Define the main system modules - these are the 28 Site Management modules
       const mainModules = [
         'syncing_shop',
         'inquiries', 
@@ -4064,7 +4066,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'logistics_management',
         'ticketing_system',
         'remote_desktop',
-        'server_config'
+        'server_config',
+        'kpi_dashboard',
+        'management_dashboard'
       ];
 
       // Get super admin role (admin@momtazchem.com has user ID 7)
@@ -4152,8 +4156,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       'content_management',
       'ticketing_system',
       'remote_desktop',
-      'server_config'
-      // Total: 26 modules - automatically synced with Site Management
+      'server_config',
+      'kpi_dashboard',
+      'management_dashboard'
+      // Total: 28 modules - automatically synced with Site Management
     ];
   };
 
@@ -5441,6 +5447,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Map module IDs to their display information
       const moduleMapping = {
+        'kpi_dashboard': { name: 'شاخص‌های عملکرد (KPI)', description: 'نمایش شاخص‌های عملکرد کسب‌وکار', category: 'analytics' },
+        'management_dashboard': { name: 'داشبورد مدیریتی', description: 'مرکز کنترل مدیریتی و نظارت سیستم', category: 'analytics' },
         'server_config': { name: 'تنظیمات سرور', description: 'مدیریت کانفیگ سرور و مهاجرت', category: 'system' },
         'syncing_shop': { name: 'همگام‌سازی فروشگاه', description: 'همگام‌سازی محصولات کاردکس با فروشگاه', category: 'commerce' },
         'shop_management': { name: 'مدیریت فروشگاه', description: 'مدیریت محصولات، سفارشات و فروش', category: 'commerce' },
