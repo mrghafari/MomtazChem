@@ -13510,9 +13510,16 @@ Leading Chemical Solutions Provider
         });
       }
 
+      // Map database fields to frontend expected format
+      const formattedCustomer = {
+        ...customer,
+        firstName: customer.first_name,
+        lastName: customer.last_name
+      };
+
       res.json({
         success: true,
-        customer: customer,
+        customer: formattedCustomer,
         message: "اطلاعات مشتری دریافت شد"
       });
     } catch (error) {

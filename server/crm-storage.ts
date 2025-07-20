@@ -581,10 +581,11 @@ export class CrmStorage implements ICrmStorage {
   }
 
   async getCrmCustomerByPhone(phone: string): Promise<CrmCustomer | undefined> {
+    // Support partial phone number matching for auto-complete
     const [customer] = await crmDb
       .select()
       .from(crmCustomers)
-      .where(eq(crmCustomers.phone, phone))
+      .where(sql`${crmCustomers.phone} LIKE ${`%${phone}%`}`)
       .limit(1);
     return customer;
   }
