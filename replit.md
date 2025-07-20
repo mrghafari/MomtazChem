@@ -138,6 +138,36 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Result**: Logistics staff now see exactly which address (primary or secondary) customer selected for delivery
 - **Impact**: Improved delivery accuracy by displaying customer's actual chosen delivery address in logistics interface
 
+### COMPLETED: Sortable Table Headers for Active Logistics Orders Management (July 20, 2025)
+✅ **FULLY IMPLEMENTED: Complete sortable table interface for active logistics orders with clickable column headers**
+- **Sortable Headers System**:
+  - Added sortable headers for active logistics orders matching delivered orders system
+  - Created comprehensive sorting for: Order ID, Customer Name, Creation Date, Warehouse Approval Date, Total Amount, Weight
+  - Visual sorting indicators with blue arrows for active field and neutral icons for inactive
+  - Hover effects and cursor pointer for better user experience
+- **Table Conversion**:
+  - Converted active orders from card layout to professional table format matching delivered orders
+  - Maintained Persian RTL layout with proper border styling and responsive design
+  - Added horizontal scroll for mobile compatibility with min-width 1200px
+- **Enhanced Sorting Logic**:
+  - Created sortActiveOrders function handling different data types (dates, numbers, strings)
+  - Smart customer name sorting combining first and last name fields
+  - Date sorting for creation date and warehouse processed date with proper timestamp conversion
+  - Numeric sorting for amounts and weights with proper parsing
+- **User Interface Features**:
+  - Green-themed table matching logistics branding consistency
+  - Integrated delivery code sending buttons directly in table rows
+  - Order details button for each row with eye icon
+  - Persian date formatting and proper RTL text alignment
+- **Technical Implementation**:
+  - Applied sortActiveOrders function to filter and sort active orders before display
+  - Enhanced handleSort function to work with both active and delivered orders
+  - Maintained existing card-based OrderCard component for backwards compatibility
+  - Integration with existing order filtering and mapping logic
+- **Action Buttons**: Combined order details viewing and delivery code sending in compact table row format
+- **Result**: Complete sortable table interface for active logistics orders matching delivered orders functionality
+- **Impact**: Unified table experience for both active and delivered orders with comprehensive sorting capabilities
+
 ### COMPLETED: Hidden Primary Address in Purchase Order Card When Secondary Address Active (July 20, 2025)
 ✅ **IMPLEMENTED: Primary address display hidden in Purchase Order card when customer selects secondary address**
 - **Purchase Order Card Enhancement**: Added conditional primary address display in the Purchase Order card within checkout process

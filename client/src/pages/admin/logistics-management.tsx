@@ -137,8 +137,8 @@ const LogisticsManagement = () => {
   const [isOrderDetailsOpen, setIsOrderDetailsOpen] = useState(false);
   const [loadingOrderDetails, setLoadingOrderDetails] = useState(false);
   
-  // Sorting state
-  const [sortField, setSortField] = useState<string>('actualDeliveryDate');
+  // Sorting state - default sort by creation date for active orders
+  const [sortField, setSortField] = useState<string>('createdAt');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   
   const { toast } = useToast();
@@ -267,6 +267,46 @@ const LogisticsManagement = () => {
       } else if (sortField === 'deliveryCode') {
         aValue = (aValue || '').toString().toLowerCase();
         bValue = (bValue || '').toString().toLowerCase();
+      } else if (sortField === 'calculatedWeight' || sortField === 'totalWeight') {
+        aValue = parseFloat((a.calculatedWeight || a.totalWeight || '0').toString());
+        bValue = parseFloat((b.calculatedWeight || b.totalWeight || '0').toString());
+      } else {
+        aValue = (aValue || '').toString().toLowerCase();
+        bValue = (bValue || '').toString().toLowerCase();
+      }
+      
+      if (sortDirection === 'asc') {
+        return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
+      } else {
+        return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
+      }
+    });
+  };
+
+  // Function to sort active orders
+  const sortActiveOrders = (orders: any[]) => {
+    if (!sortField) return orders;
+    
+    return [...orders].sort((a, b) => {
+      let aValue = a[sortField];
+      let bValue = b[sortField];
+      
+      // Handle different data types
+      if (sortField === 'createdAt' || sortField === 'warehouseProcessedAt') {
+        aValue = new Date(aValue || 0).getTime();
+        bValue = new Date(bValue || 0).getTime();
+      } else if (sortField === 'totalAmount') {
+        aValue = parseFloat(aValue || '0');
+        bValue = parseFloat(bValue || '0');
+      } else if (sortField === 'customerOrderId' || sortField === 'id') {
+        aValue = parseInt(aValue || '0');
+        bValue = parseInt(bValue || '0');
+      } else if (sortField === 'customerName') {
+        aValue = `${a.customerFirstName || ''} ${a.customerLastName || ''}`.trim().toLowerCase();
+        bValue = `${b.customerFirstName || ''} ${b.customerLastName || ''}`.trim().toLowerCase();
+      } else if (sortField === 'calculatedWeight' || sortField === 'totalWeight') {
+        aValue = parseFloat((a.calculatedWeight || a.totalWeight || '0').toString());
+        bValue = parseFloat((b.calculatedWeight || b.totalWeight || '0').toString());
       } else {
         aValue = (aValue || '').toString().toLowerCase();
         bValue = (bValue || '').toString().toLowerCase();
@@ -337,7 +377,8 @@ const LogisticsManagement = () => {
     };
   });
   
-  const mappedActiveOrders = mapOrderData(activeOrders);
+  const sortedActiveOrders = sortActiveOrders(activeOrders);
+  const mappedActiveOrders = mapOrderData(sortedActiveOrders);
   const sortedDeliveredOrders = sortDeliveredOrders(deliveredOrders);
   const mappedDeliveredOrders = mapOrderData(sortedDeliveredOrders);
   
@@ -508,9 +549,169 @@ const LogisticsManagement = () => {
             </CardContent>
           </Card>
         ) : (
-          mappedActiveOrders.map((order: LogisticsOrder) => (
-            <OrderCard key={order.id} order={order} showDeliveryButton={true} />
-          ))
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 text-green-600" />
+                سفارشات فعال لجستیک ({mappedActiveOrders.length} سفارش)
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[1200px] border-collapse" dir="rtl">
+                  <thead>
+                    <tr className="bg-green-50 border-b">
+                      <th className="text-right p-2 border-r">
+                        <SortableHeader 
+                          field="customerOrderId" 
+                          sortField={sortField} 
+                          sortDirection={sortDirection} 
+                          onSort={handleSort}
+                        >
+                          شماره سفارش
+                        </SortableHeader>
+                      </th>
+                      <th className="text-right p-2 border-r">
+                        <SortableHeader 
+                          field="customerName" 
+                          sortField={sortField} 
+                          sortDirection={sortDirection} 
+                          onSort={handleSort}
+                        >
+                          نام مشتری
+                        </SortableHeader>
+                      </th>
+                      <th className="text-right p-2 border-r">
+                        <SortableHeader 
+                          field="createdAt" 
+                          sortField={sortField} 
+                          sortDirection={sortDirection} 
+                          onSort={handleSort}
+                        >
+                          تاریخ ثبت
+                        </SortableHeader>
+                      </th>
+                      <th className="text-right p-2 border-r">
+                        <SortableHeader 
+                          field="warehouseProcessedAt" 
+                          sortField={sortField} 
+                          sortDirection={sortDirection} 
+                          onSort={handleSort}
+                        >
+                          تاریخ تایید انبار
+                        </SortableHeader>
+                      </th>
+                      <th className="text-right p-2 border-r">
+                        <SortableHeader 
+                          field="totalAmount" 
+                          sortField={sortField} 
+                          sortDirection={sortDirection} 
+                          onSort={handleSort}
+                        >
+                          مبلغ کل
+                        </SortableHeader>
+                      </th>
+                      <th className="text-right p-2 border-r">
+                        <SortableHeader 
+                          field="calculatedWeight" 
+                          sortField={sortField} 
+                          sortDirection={sortDirection} 
+                          onSort={handleSort}
+                        >
+                          وزن کل
+                        </SortableHeader>
+                      </th>
+                      <th className="text-center p-2">عملیات</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {mappedActiveOrders.map((order: LogisticsOrder) => (
+                      <tr key={order.id} className="border-b hover:bg-green-50">
+                        <td className="p-3 border-r">
+                          <div className="font-medium text-green-700">#{order.customerOrderId}</div>
+                        </td>
+                        <td className="p-3 border-r">
+                          <div className="font-medium">
+                            {order.recipientName || `${order.customer?.firstName || order.customerFirstName} ${order.customer?.lastName || order.customerLastName}`}
+                          </div>
+                          <div className="text-xs text-gray-500 flex items-center">
+                            <Phone className="w-3 h-3 mr-1" />
+                            {order.recipientPhone || order.customer?.phone || order.customerPhone}
+                          </div>
+                        </td>
+                        <td className="p-3 border-r">
+                          <div className="text-sm">
+                            {order.createdAt ? 
+                              new Date(order.createdAt).toLocaleDateString('fa-IR') : 
+                              'تاریخ نامشخص'
+                            }
+                          </div>
+                        </td>
+                        <td className="p-3 border-r">
+                          <div className="text-sm font-medium text-blue-600">
+                            {order.warehouseProcessedAt ? 
+                              new Date(order.warehouseProcessedAt).toLocaleDateString('fa-IR') : 
+                              'در انتظار'
+                            }
+                          </div>
+                        </td>
+                        <td className="p-3 border-r">
+                          <div className="font-medium text-blue-600">
+                            {parseFloat(order.totalAmount).toLocaleString('fa-IR')} {order.currency}
+                          </div>
+                        </td>
+                        <td className="p-3 border-r">
+                          <div className="font-medium">
+                            {order.calculatedWeight || order.totalWeight || '0'} {order.weightUnit || 'kg'}
+                          </div>
+                        </td>
+                        <td className="p-3 text-center">
+                          <div className="flex gap-2 justify-center">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleShowOrderDetails(order.customerOrderId)}
+                              className="text-xs"
+                            >
+                              <Eye className="w-3 h-3 mr-1" />
+                              جزئیات
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              onClick={() => handleSendDeliveryCode(order.id, !!order.deliveryCode)}
+                              disabled={resendingCodes[order.id]}
+                              className={`${
+                                resentCodes[order.id] 
+                                  ? 'bg-red-600 hover:bg-red-700 text-white' 
+                                  : 'bg-blue-600 hover:bg-blue-700 text-white'
+                              } text-xs`}
+                            >
+                              {resendingCodes[order.id] ? (
+                                <>
+                                  <Send className="w-3 h-3 mr-1 animate-spin" />
+                                  در حال ارسال...
+                                </>
+                              ) : order.deliveryCode ? (
+                                <>
+                                  <Send className="w-3 h-3 mr-1" />
+                                  ارسال مجدد
+                                </>
+                              ) : (
+                                <>
+                                  <Send className="w-3 h-3 mr-1" />
+                                  ارسال کد
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
         )}
       </div>
     );
