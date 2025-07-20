@@ -17262,10 +17262,10 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       
       console.log(`📋 [FORCE-COMPLETE] Current order status: ${currentOrder.currentStatus}`);
       
-      // Force update order to completed status, bypassing all workflow checks
+      // Force update order to logistics_delivered status (this is what shows in "تحویل داده شده" tab)
       const updatedOrder = await orderManagementStorage.updateOrderStatus(
         orderId,
-        'completed', // Skip logistics_delivered and go directly to completed
+        'logistics_delivered', // This moves order to "تحویل داده شده" tab
         adminId,
         'admin_bypass',
         `سفارش توسط سوپر ادمین مستقیماً به بایگانی منتقل شد (Workflow Bypass از وضعیت: ${currentOrder.currentStatus})`
