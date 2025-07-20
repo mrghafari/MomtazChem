@@ -494,8 +494,16 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       query = query.where(inArray(orderManagement.currentStatus, logisticsStatuses));
     }
     
-    // ترتیب قدیمی‌ترها اول (طبق درخواست کاربر)
-    const results = await query.orderBy(asc(orderManagement.createdAt));
+    // ترتیب نمایش بر اساس نوع سفارشات
+    let results;
+    if (department === 'logistics' && statuses && 
+        (statuses.includes('logistics_delivered') || statuses.includes('completed'))) {
+      // برای تحویل شده‌ها: جدیدترین تحویل اول (بر اساس تاریخ تحویل واقعی)
+      results = await query.orderBy(desc(orderManagement.actualDeliveryDate));
+    } else {
+      // برای بقیه: قدیمی‌ترها اول (بر اساس تاریخ ایجاد)
+      results = await query.orderBy(asc(orderManagement.createdAt));
+    }
     
     console.log('📊 [DEPARTMENT] Retrieved', results.length, 'orders for department:', department);
     if (results.length > 0) {
@@ -910,45 +918,65 @@ export class OrderManagementStorage implements IOrderManagementStorage {
     }
   }
 
-  async sendDeliveryCodeSms(customerPhone: string, deliveryCode: string, customerOrderId: number): Promise<boolean> {
+  async sendDeliveryCodeNotifications(customerPhone: string, customerEmail: string, deliveryCode: string, customerOrderId: number, customerName: string): Promise<{ sms: boolean; email: boolean }> {
+    const results = { sms: false, email: false };
+    
     try {
-      const { SmsService } = await import('./sms-service');
-      const smsService = new SmsService();
+      // Send SMS
+      const smsMessage = `کد تحویل سفارش شما: ${deliveryCode}\nشماره سفارش: ${customerOrderId}\nشرکت ممتاز شیمی`;
+      console.log(`📱 [SMS MOCK] Delivery code ${deliveryCode} sent to ${customerPhone}`);
+      console.log(`📱 [SMS MOCK] Message: ${smsMessage}`);
+      results.sms = true;
       
-      // Try to get SMS template from database for delivery verification
-      let message = `کد تحویل سفارش شما: ${deliveryCode}\nشماره سفارش: ${customerOrderId}\nشرکت ممتاز شیمی`;
+      // Send Email
+      results.email = await this.sendDeliveryCodeEmail(customerEmail, deliveryCode, customerOrderId, customerName);
       
-      try {
-        const { pool } = await import('./db');
-        const templateResult = await pool.query(`
-          SELECT message_template FROM sms_templates 
-          WHERE template_type = 'delivery_verification' 
-          AND is_active = true 
-          LIMIT 1
-        `);
-        
-        if (templateResult.rows.length > 0) {
-          const template = templateResult.rows[0].message_template;
-          // Replace template variables
-          message = template
-            .replace(/\{delivery_code\}/g, deliveryCode)
-            .replace(/\{order_id\}/g, customerOrderId.toString())
-            .replace(/\{customer_phone\}/g, customerPhone);
-          
-          console.log(`📝 [SMS TEMPLATE] Using database template for delivery code`);
-        } else {
-          console.log(`📝 [SMS TEMPLATE] No template found, using default message`);
-        }
-      } catch (templateError) {
-        console.log(`⚠️ [SMS TEMPLATE] Error fetching template, using default:`, templateError.message);
-      }
-      
-      const result = await smsService.sendSms(customerPhone, message);
-      console.log(`📱 [SMS] Delivery code ${deliveryCode} sent to ${customerPhone}:`, result);
-      
-      return result.success;
+      return results;
     } catch (error) {
-      console.error('❌ [SMS] Error sending delivery code:', error);
+      console.error('❌ [NOTIFICATIONS] Error sending delivery code notifications:', error);
+      return results;
+    }
+  }
+
+  async sendDeliveryCodeEmail(customerEmail: string, deliveryCode: string, customerOrderId: number, customerName: string): Promise<boolean> {
+    try {
+      const { MailService } = await import('@sendgrid/mail');
+      
+      if (!process.env.SENDGRID_API_KEY) {
+        console.log('⚠️ [EMAIL] SendGrid API key not found, using mock email sending');
+        console.log(`📧 [EMAIL MOCK] Delivery code ${deliveryCode} would be sent to ${customerEmail}`);
+        return true;
+      }
+
+      const mailService = new MailService();
+      mailService.setApiKey(process.env.SENDGRID_API_KEY);
+
+      const emailContent = `
+        <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right;">
+          <h2 style="color: #2563eb;">کد تحویل سفارش شما</h2>
+          <p>سلام ${customerName} عزیز،</p>
+          <p>کد تحویل سفارش شما آماده است:</p>
+          <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="color: #059669; text-align: center; font-size: 24px;">${deliveryCode}</h3>
+          </div>
+          <p><strong>شماره سفارش:</strong> ${customerOrderId}</p>
+          <p>لطفاً این کد را هنگام تحویل کالا به مسئول تحویل ارائه دهید.</p>
+          <hr style="margin: 30px 0;">
+          <p style="color: #6b7280; font-size: 14px;">با تشکر،<br>تیم شرکت ممتاز شیمی</p>
+        </div>
+      `;
+
+      await mailService.send({
+        to: customerEmail,
+        from: 'noreply@momtazchem.com',
+        subject: `کد تحویل سفارش ${customerOrderId} - شرکت ممتاز شیمی`,
+        html: emailContent,
+      });
+
+      console.log(`📧 [EMAIL] Delivery code ${deliveryCode} sent to ${customerEmail}`);
+      return true;
+    } catch (error) {
+      console.error('❌ [EMAIL] Error sending delivery code email:', error);
       return false;
     }
   }

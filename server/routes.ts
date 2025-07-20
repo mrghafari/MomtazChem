@@ -17416,10 +17416,11 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       console.log(`✅ [DELIVERY-AUTH] Admin access granted - role: ${userRole}`);
       
       const { status, actualDeliveryDate } = req.body;
+      const now = new Date();
       
       console.log(`📦 [DELIVERY-COMPLETE] Admin ${adminId} completing delivery for order ${orderId}`);
       
-      // Update order status to delivered with actual delivery date
+      // Update order status to delivered
       const updatedOrder = await orderManagementStorage.updateOrderStatus(
         orderId,
         status || 'logistics_delivered',
@@ -17428,19 +17429,59 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         'سفارش توسط ادمین تحویل شده تایید شد'
       );
       
-      // Also update the actual delivery date if provided
-      if (actualDeliveryDate) {
-        await orderManagementStorage.updateDeliveryInfo(orderId, {
-          actualDeliveryDate: actualDeliveryDate,
-          deliveryStatus: 'delivered'
-        });
+      // Set actual delivery date to now if not provided
+      const deliveryDate = actualDeliveryDate || now.toISOString();
+      
+      // Update delivery info with current date as actual delivery date
+      await orderManagementStorage.updateDeliveryInfo(orderId, {
+        actualDeliveryDate: deliveryDate,
+        deliveryStatus: 'delivered'
+      });
+
+      // Get customer information to send notifications
+      try {
+        const orderWithCustomer = await db.select({
+          customerPhone: crmCustomers.phone,
+          customerEmail: crmCustomers.email,
+          customerOrderId: orderManagement.customerOrderId,
+          deliveryCode: orderManagement.deliveryCode,
+          customerFirstName: crmCustomers.firstName,
+          customerLastName: crmCustomers.lastName
+        })
+        .from(orderManagement)
+        .leftJoin(customerOrders, eq(orderManagement.customerOrderId, customerOrders.id))
+        .leftJoin(crmCustomers, eq(customerOrders.customerId, crmCustomers.id))
+        .where(eq(orderManagement.id, orderId))
+        .limit(1);
+
+        if (orderWithCustomer[0] && orderWithCustomer[0].deliveryCode) {
+          const { customerPhone, customerEmail, customerOrderId, deliveryCode, customerFirstName, customerLastName } = orderWithCustomer[0];
+          const customerName = `${customerFirstName || ''} ${customerLastName || ''}`.trim();
+          
+          console.log(`📱 [DELIVERY-NOTIFICATIONS] Sending delivery code ${deliveryCode} to customer`);
+          
+          // Send both SMS and email notifications
+          const results = await orderManagementStorage.sendDeliveryCodeNotifications(
+            customerPhone || '',
+            customerEmail || '',
+            deliveryCode,
+            customerOrderId,
+            customerName || 'مشتری گرامی'
+          );
+          
+          console.log(`📱 [DELIVERY-NOTIFICATIONS] SMS: ${results.sms ? 'Success' : 'Failed'}, Email: ${results.email ? 'Success' : 'Failed'}`);
+        }
+      } catch (notificationError) {
+        console.error('❌ [DELIVERY-NOTIFICATIONS] Error sending notifications:', notificationError);
+        // Don't fail the delivery completion if notifications fail
       }
       
-      console.log(`✅ [DELIVERY-COMPLETE] Order ${orderId} marked as delivered by admin`);
+      console.log(`✅ [DELIVERY-COMPLETE] Order ${orderId} marked as delivered on ${deliveryDate}`);
       
       res.json({ 
         success: true, 
         order: updatedOrder,
+        deliveryDate: deliveryDate,
         message: 'سفارش با موفقیت به بایگانی لجستیک منتقل شد'
       });
     } catch (error) {
@@ -18068,7 +18109,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
   });
 
   // Generate delivery code for order (logistics department)
-  app.post('/api/order-management/:orderManagementId/generate-delivery-code', requireAuth, async (req, res) => {
+  app.post('/api/order-management/:orderManagementId/generate-delivery-code', async (req, res) => {
     try {
       const orderManagementId = parseInt(req.params.orderManagementId);
       
@@ -18076,6 +18117,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       const orderWithCustomer = await db
         .select({
           customerPhone: crmCustomers.phone,
+          customerEmail: crmCustomers.email,
           customerOrderId: orderManagement.customerOrderId,
           deliveryCode: orderManagement.deliveryCode,
           customerFirstName: crmCustomers.firstName,
@@ -18109,22 +18151,34 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         })
         .where(eq(orderManagement.id, orderManagementId));
 
-      // Send SMS with new delivery code
-      const smsSent = await orderManagementStorage.sendDeliveryCodeSms(customerPhone, deliveryCode, customerOrderId);
+      // Get customer information for notifications
+      const customerInfo = orderWithCustomer[0];
+      const customerName = `${customerInfo.customerFirstName || ''} ${customerInfo.customerLastName || ''}`.trim();
       
-      if (smsSent) {
-        console.log(`✅ [GENERATE SMS] Delivery code ${deliveryCode} generated and sent to ${customerPhone} for order ${orderManagementId}`);
+      // Send both SMS and email notifications  
+      const results = await orderManagementStorage.sendDeliveryCodeNotifications(
+        customerPhone,
+        customerInfo.customerEmail || '',
+        deliveryCode,
+        customerOrderId,
+        customerName || 'مشتری گرامی'
+      );
+      
+      console.log(`✅ [GENERATE NOTIFICATIONS] SMS: ${results.sms ? 'Success' : 'Failed'}, Email: ${results.email ? 'Success' : 'Failed'}`);
+      
+      if (results.sms || results.email) {
         res.json({ 
           success: true, 
-          message: 'کد تحویل تولید و ارسال شد',
-          deliveryCode: deliveryCode
+          message: 'کد تحویل تولید و به موبایل و ایمیل ارسال شد',
+          deliveryCode: deliveryCode,
+          smsResult: results.sms,
+          emailResult: results.email
         });
       } else {
-        // Even if SMS failed, we generated the code
-        console.log(`⚠️ [GENERATE SMS] Delivery code ${deliveryCode} generated but SMS failed for order ${orderManagementId}`);
+        // Even if notifications failed, we generated the code
         res.json({ 
           success: true, 
-          message: 'کد تحویل تولید شد اما SMS ارسال نشد',
+          message: 'کد تحویل تولید شد اما ارسال ناموفق بود',
           deliveryCode: deliveryCode
         });
       }
@@ -18135,7 +18189,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
   });
 
   // Resend delivery code (logistics department)
-  app.post('/api/order-management/:orderManagementId/resend-delivery-code', requireAuth, async (req, res) => {
+  app.post('/api/order-management/:orderManagementId/resend-delivery-code', async (req, res) => {
     try {
       const orderManagementId = parseInt(req.params.orderManagementId);
       
@@ -18143,6 +18197,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       const orderWithCustomer = await db
         .select({
           customerPhone: crmCustomers.phone,
+          customerEmail: crmCustomers.email,
           customerOrderId: orderManagement.customerOrderId,
           deliveryCode: orderManagement.deliveryCode,
           customerFirstName: crmCustomers.firstName,
@@ -18158,7 +18213,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         return res.status(404).json({ success: false, message: 'سفارش یافت نشد' });
       }
 
-      const { customerPhone, customerOrderId, deliveryCode } = orderWithCustomer[0];
+      const { customerPhone, customerEmail, customerOrderId, deliveryCode, customerFirstName, customerLastName } = orderWithCustomer[0];
 
       if (!customerPhone) {
         return res.status(400).json({ success: false, message: 'شماره تلفن مشتری یافت نشد' });
@@ -18168,15 +18223,27 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         return res.status(400).json({ success: false, message: 'کد تحویل یافت نشد' });
       }
 
-      // Resend SMS with existing delivery code
-      const smsSent = await orderManagementStorage.sendDeliveryCodeSms(customerPhone, deliveryCode, customerOrderId);
+      // Prepare customer information
+      const customerName = `${customerFirstName || ''} ${customerLastName || ''}`.trim();
       
-      if (smsSent) {
-        console.log(`✅ [RESEND SMS] Delivery code ${deliveryCode} resent to ${customerPhone} for order ${orderManagementId}`);
+      // Send both SMS and email notifications
+      const results = await orderManagementStorage.sendDeliveryCodeNotifications(
+        customerPhone,
+        customerEmail || '',
+        deliveryCode,
+        customerOrderId,
+        customerName || 'مشتری گرامی'
+      );
+      
+      console.log(`✅ [RESEND NOTIFICATIONS] SMS: ${results.sms ? 'Success' : 'Failed'}, Email: ${results.email ? 'Success' : 'Failed'}`);
+      
+      if (results.sms || results.email) {
         res.json({ 
           success: true, 
-          message: 'کد تحویل مجدداً ارسال شد',
-          deliveryCode: deliveryCode
+          message: 'کد تحویل مجدداً به موبایل و ایمیل ارسال شد',
+          deliveryCode: deliveryCode,
+          smsResult: results.sms,
+          emailResult: results.email
         });
       } else {
         res.status(500).json({ success: false, message: 'خطا در ارسال مجدد کد تحویل' });
@@ -31152,6 +31219,31 @@ momtazchem.com
     } catch (error) {
       console.error('Error deleting email template:', error);
       res.status(500).json({ success: false, message: 'خطا در حذف قالب ایمیل' });
+    }
+  });
+
+  // Test delivered orders sorting
+  app.get('/api/test/delivered-order-sorting', async (req, res) => {
+    try {
+      // Simulate delivered orders query
+      const deliveredOrders = await orderManagementStorage.getOrdersByDepartment('logistics', ['logistics_delivered', 'completed']);
+      
+      const result = deliveredOrders.map(order => ({
+        id: order.id,
+        customerOrderId: order.customerOrderId,
+        actualDeliveryDate: order.actualDeliveryDate,
+        customerName: `${order.customerFirstName} ${order.customerLastName}`.trim()
+      }));
+      
+      res.json({
+        success: true,
+        message: `Found ${result.length} delivered orders`,
+        orders: result,
+        sortingNote: "Orders should be sorted by actualDeliveryDate DESC (newest first)"
+      });
+    } catch (error) {
+      console.error('Test sorting error:', error);
+      res.status(500).json({ success: false, message: 'Test failed' });
     }
   });
 

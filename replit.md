@@ -6,6 +6,15 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Delivered Orders Display Sorted by Latest First (July 20, 2025)
+✅ **FULLY IMPLEMENTED: Delivered orders now display with newest deliveries at the top**
+- **Sorting Logic**: Enhanced getOrdersByDepartment method to detect delivered orders status filter
+- **Order Criteria**: Delivered orders sorted by actualDeliveryDate in descending order (newest first)
+- **Active Orders**: Non-delivered orders continue using ascending order by createdAt (oldest first)
+- **Smart Detection**: System automatically detects when showing delivered orders (logistics_delivered, completed statuses)
+- **User Experience**: Most recent deliveries now appear at top of delivered orders list
+- **Result**: Delivered orders tab shows newest deliveries first while maintaining chronological order for active processing
+
 ### COMPLETED: Logistics Department File Completely Removed (July 20, 2025)
 ✅ **FULLY COMPLETED: Complete removal of logistics-department file and cleanup per user request**
 - **File Deletion**: Successfully deleted client/src/pages/logistics-department.tsx file completely
