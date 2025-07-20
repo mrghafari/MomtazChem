@@ -27951,13 +27951,28 @@ momtazchem.com
       }
 
       // Check if user is authenticated
-      const customerId = req.session.customerId;
+      const customerId = (req.session as any)?.customerId || (req.session as any)?.crmCustomerId;
+      console.log('🌟 [REVIEW AUTH] Full session debug:', { 
+        sessionId: req.sessionID,
+        session: req.session,
+        customerId: (req.session as any)?.customerId,
+        crmCustomerId: (req.session as any)?.crmCustomerId,
+        finalCustomerId: customerId,
+        hasSession: !!req.session,
+        sessionKeys: Object.keys(req.session || {}),
+        userAgent: req.get('User-Agent'),
+        cookies: req.headers.cookie
+      });
+      
       if (!customerId) {
+        console.log('❌ [REVIEW AUTH] Authentication failed - no customer ID in session');
         return res.status(401).json({ 
           success: false, 
           message: "برای ثبت نظر ابتدا وارد حساب کاربری خود شوید" 
         });
       }
+      
+      console.log('✅ [REVIEW AUTH] Authentication successful for customer:', customerId);
 
       const { rating, title, review, comment, pros, cons } = req.body;
       
