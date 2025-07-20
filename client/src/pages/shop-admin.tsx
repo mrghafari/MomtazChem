@@ -952,6 +952,7 @@ export default function ShopAdmin() {
 function ReturnForm({ onClose }: { onClose: () => void }) {
   const [productId, setProductId] = useState("");
   const [productName, setProductName] = useState("");
+  const [productUnit, setProductUnit] = useState(""); // واحد اندازه‌گیری از کاردکس
   const [productSuggestions, setProductSuggestions] = useState<any[]>([]);
   const [showProductSuggestions, setShowProductSuggestions] = useState(false);
   const [returnQuantity, setReturnQuantity] = useState("");
@@ -1086,10 +1087,23 @@ function ReturnForm({ onClose }: { onClose: () => void }) {
   };
 
   // Handle product suggestion selection
-  const selectProductFromSuggestion = (product: any) => {
+  const selectProductFromSuggestion = async (product: any) => {
     setProductId(product.id.toString());
     setProductName(product.name);
     setShowProductSuggestions(false);
+    
+    // Fetch product unit from kardex
+    try {
+      const response = await apiRequest(`/api/products/kardex/${product.id}/unit`, { method: 'GET' });
+      if (response.success && response.unit) {
+        setProductUnit(response.unit);
+      } else {
+        setProductUnit('واحد'); // Default unit
+      }
+    } catch (error) {
+      console.error('Error fetching product unit:', error);
+      setProductUnit('واحد'); // Default unit
+    }
     
     toast({
       title: "محصول انتخاب شد",
@@ -1113,6 +1127,7 @@ function ReturnForm({ onClose }: { onClose: () => void }) {
       // Clear all form fields
       setProductId('');
       setProductName('');
+      setProductUnit('');
       setReturnQuantity('');
       setCustomerName('');
       setCustomerPhone('');
@@ -1206,14 +1221,25 @@ function ReturnForm({ onClose }: { onClose: () => void }) {
 
         <div>
           <Label htmlFor="returnQuantity">Return Quantity *</Label>
-          <Input
-            id="returnQuantity"
-            type="number"
-            value={returnQuantity}
-            onChange={(e) => setReturnQuantity(e.target.value)}
-            placeholder="Enter quantity"
-            required
-          />
+          <div className="flex gap-2">
+            <Input
+              id="returnQuantity"
+              type="number"
+              value={returnQuantity}
+              onChange={(e) => setReturnQuantity(e.target.value)}
+              placeholder="Enter quantity"
+              required
+              className="flex-1"
+            />
+            {productUnit && (
+              <Input
+                value={productUnit}
+                readOnly
+                className="w-20 bg-gray-100 text-center text-gray-700"
+                placeholder="واحد"
+              />
+            )}
+          </div>
         </div>
 
         <div>

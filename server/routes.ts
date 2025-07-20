@@ -2044,6 +2044,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // API endpoint for getting product unit from kardex (showcase_products)
+  app.get("/api/products/kardex/:id/unit", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { showcaseDb } = await import('./db');
+      const { showcaseProducts } = await import('../shared/showcase-schema');
+      const { eq } = await import('drizzle-orm');
+      
+      const [product] = await showcaseDb
+        .select({
+          stockUnit: showcaseProducts.stockUnit,
+          name: showcaseProducts.name
+        })
+        .from(showcaseProducts)
+        .where(eq(showcaseProducts.id, parseInt(id)))
+        .limit(1);
+      
+      if (!product) {
+        return res.status(404).json({
+          success: false,
+          message: "محصول در کاردکس یافت نشد"
+        });
+      }
+      
+      res.json({
+        success: true,
+        unit: product.stockUnit || 'واحد',
+        productName: product.name
+      });
+    } catch (error) {
+      console.error("Error fetching product unit from kardex:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در دریافت واحد محصول از کاردکس" 
+      });
+    }
+  });
+
   // Protected admin routes for product management (کاردکس)
   app.post("/api/products", requireAuth, async (req, res) => {
     try {

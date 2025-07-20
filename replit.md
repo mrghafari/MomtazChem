@@ -28,6 +28,23 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Result**: "Add New Return" button opens intelligent form with auto-complete for faster data entry
 - **Impact**: Streamlined returns management with reduced data entry time and improved accuracy
 
+### COMPLETED: Product Unit Display from Kardex System (July 20, 2025)
+✅ **IMPLEMENTED: Product unit automatically displays from kardex after product selection**
+- **Issue**: User requested display of product unit (واحد اندازه‌گیری) after selecting product in returns form
+- **Frontend Enhancements**: 
+  - Added productUnit state to ReturnForm component for storing unit from kardex
+  - Enhanced selectProductFromSuggestion function to fetch product unit via API call
+  - Added read-only unit input field next to quantity field in Persian interface
+  - Clear productUnit state when form is reset or cleared
+- **Backend Implementation**:
+  - Created new API endpoint `/api/products/kardex/:id/unit` for fetching unit from showcase_products
+  - Enhanced db.ts to export showcaseDb connection for kardex access
+  - API returns stockUnit field from showcase_products table with fallback to 'واحد'
+- **User Experience**: When user selects product (e.g., "Solvant 402"), unit automatically appears in read-only field
+- **Integration**: Unit data comes directly from kardex (showcase_products) ensuring consistency
+- **Result**: Product unit displays automatically beside quantity input without requiring manual entry
+- **Impact**: Streamlined data entry with accurate unit information from inventory records
+
 ### Enhanced Order Management Table with More Items Per Page (July 20, 2025)
 ✅ **COMPLETED: Increased table capacity to display more orders per page**
 - **Issue**: User requested to display more items per page in Order Management table
