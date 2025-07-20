@@ -9328,6 +9328,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+
+
   // Create customer order (from BilingualPurchaseForm)
   app.post("/api/customers/orders", async (req, res) => {
     console.log('🚀 [ENDPOINT] /api/customers/orders called with timestamp:', req.query.t);
@@ -9370,8 +9372,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         notes: orderData.notes || '', // Add notes from form
       };
 
-      // Generate unique order number
-      const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
+      // Generate order number using new MOM format
+      const { generateOrderNumber } = await import('./order-number-generator');
+      const orderNumber = await generateOrderNumber();
+      console.log('🔢 [BILINGUAL ORDER] Generated MOM order number:', orderNumber);
       
       // Calculate order totals
       const subtotal = orderData.totalAmount || 0;
@@ -17484,12 +17488,40 @@ ${message ? `Additional Requirements:\n${message}` : ''}
               name: customerName
             });
             
-            // Generate delivery code using logistics storage
-            const { logisticsStorage } = await import('./logistics-storage');
-            const deliveryCode = await logisticsStorage.generateSequentialDeliveryCode(
-              orderDetails.customerOrderId,
-              orderDetails.customerPhone
+            // Use original customer order number as delivery code for consistency
+            const { customerPool } = await import('./db');
+            const orderResult = await customerPool.query(
+              'SELECT order_number FROM customer_orders WHERE id = $1',
+              [orderDetails.customerOrderId]
             );
+            
+            const deliveryCode = orderResult.rows[0]?.order_number || `FALLBACK-${orderDetails.customerOrderId}`;
+            
+            console.log('🔢 [ORDER-CONSISTENCY] Using original order number as delivery code:', deliveryCode);
+            
+            // Update order_management table with delivery code (same as order number)
+            await orderManagementStorage.updateOrderManagement(parseInt(id), {
+              deliveryCode: deliveryCode,
+              updatedAt: new Date()
+            });
+            
+            // Send SMS notification with original order number as delivery code
+            try {
+              const { smsService } = await import('./sms-service');
+              const smsResult = await smsService.sendDeliveryCode(
+                orderDetails.customerPhone,
+                deliveryCode,  // Using original order number
+                customerName
+              );
+              
+              console.log('📱 [SMS-NOTIFICATION] SMS sent with order number as delivery code:', {
+                phone: orderDetails.customerPhone,
+                deliveryCode: deliveryCode,
+                smsResult: smsResult.success
+              });
+            } catch (smsError) {
+              console.error('❌ [SMS-NOTIFICATION] Failed to send SMS:', smsError);
+            }
             
             const codeResult = { success: true, deliveryCode };
             
