@@ -1117,15 +1117,40 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                       </div>
                     </div>
                     
-                    {/* Second Address Option */}
+                    {/* Address Selection Options */}
                     <div className="space-y-2">
+                      {/* Primary Address Selection - Hidden when secondary address is active */}
+                      {!useSecondaryAddress && (
+                        <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg border border-green-200 dark:border-green-800">
+                          <div className="text-xs font-medium text-green-800 dark:text-green-300 mb-2">
+                            انتخاب آدرس اول (Primary Address)
+                          </div>
+                          {selectedAddress ? (
+                            <div className="text-xs text-green-700 dark:text-green-400">
+                              <div className="font-medium">آدرس انتخاب شده:</div>
+                              <div className="mt-1">{selectedAddress.address}, {selectedAddress.city}</div>
+                            </div>
+                          ) : (
+                            <div className="text-xs text-green-600 dark:text-green-500">
+                              هیچ آدرس اولی انتخاب نشده است
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Secondary Address Option */}
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Second Address (Optional)</span>
                         <Button
                           type="button"
                           size="sm"
                           variant="ghost"
-                          onClick={() => setShowSecondAddress(!showSecondAddress)}
+                          onClick={() => {
+                            const newShowSecondAddress = !showSecondAddress;
+                            setShowSecondAddress(newShowSecondAddress);
+                            // When toggling secondary address, also update useSecondaryAddress
+                            setUseSecondaryAddress(newShowSecondAddress);
+                          }}
                           className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200 h-6 w-6 p-0"
                         >
                           {showSecondAddress ? '−' : '+'}

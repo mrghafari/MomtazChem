@@ -138,17 +138,20 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Result**: Logistics staff now see exactly which address (primary or secondary) customer selected for delivery
 - **Impact**: Improved delivery accuracy by displaying customer's actual chosen delivery address in logistics interface
 
-### COMPLETED: Hidden Primary Address When Secondary Address Active (July 20, 2025)
-✅ **IMPLEMENTED: Primary address selector hidden when customer activates secondary address**
-- **Conditional Display**: AddressSelector component now hidden when useSecondaryAddress is true
-- **Clean Interface**: When secondary address is activated, primary address selection disappears
-- **User Experience**: Customers see only relevant address options based on their selection
-- **Smart Logic**: Primary address selector shows only when secondary address is not active
-- **Form Behavior**: Prevents confusion by showing only the active address selection method
-- **Code Implementation**: `{!useSecondaryAddress && <AddressSelector />}` in checkout.tsx line 593-606
-- **Result**: Cleaner checkout interface that adapts based on customer's address choice
-- **Impact**: Improved user experience with contextual address selection interface
-- **User Confirmation**: Feature verified working as requested - primary address hidden when secondary selected
+### COMPLETED: Hidden Primary Address in Purchase Order Card When Secondary Address Active (July 20, 2025)
+✅ **IMPLEMENTED: Primary address display hidden in Purchase Order card when customer selects secondary address**
+- **Purchase Order Card Enhancement**: Added conditional primary address display in the Purchase Order card within checkout process
+- **Smart Address Display**: Primary address information now hidden in Purchase Order card when secondary address is activated
+- **Interactive Toggle**: Clicking Secondary Address button (+/-) automatically toggles useSecondaryAddress state
+- **Visual Feedback**: Green-colored primary address section shows selected address when active, hidden when secondary address is chosen
+- **Code Implementation**: 
+  - Added `{!useSecondaryAddress && <Primary Address Display>}` in Purchase Order card (lines 1126-1142)
+  - Enhanced button onClick to sync showSecondAddress and useSecondaryAddress states
+  - Main checkout form already had `{!useSecondaryAddress && <AddressSelector />}` (lines 593-606)
+- **User Interface**: Purchase Order card now shows either primary OR secondary address information, never both simultaneously
+- **Result**: Complete address selection workflow with Purchase Order card reflecting customer's address choice
+- **Impact**: Enhanced user experience with contextual address display in both main form and Purchase Order summary
+- **User Confirmation**: Correctly implemented in Purchase Order card as shown in attached image
 
 ### COMPLETED: Customer Unpaid Order Notification System with Order Cancellation (July 20, 2025)
 ✅ **IMPLEMENTED: Yellow background warning system for customers with unpaid orders**
