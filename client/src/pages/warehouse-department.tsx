@@ -56,7 +56,7 @@ export default function WarehouseDepartment() {
   });
 
   // Extract orders from response
-  const orders = response?.orders || response || [];
+  const orders = (response as any)?.orders || (response as any) || [];
   
   // Add some debug logging to check the data structure
   console.log('Warehouse response:', response);
@@ -76,10 +76,20 @@ export default function WarehouseDepartment() {
   // Process order mutation
   const processOrderMutation = useMutation({
     mutationFn: async (orderId: number) => {
-      return apiRequest(`/api/order-management/warehouse/${orderId}/process`, "PATCH", {
-        status: "warehouse_approved",
-        notes: processingNotes
+      const response = await fetch(`/api/order-management/warehouse/${orderId}/process`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: "warehouse_approved",
+          notes: processingNotes
+        })
       });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       toast({
@@ -130,14 +140,28 @@ export default function WarehouseDepartment() {
             مدیریت سفارشات تایید شده توسط واحد مالی
           </p>
         </div>
-        <Button 
-          onClick={() => refetch()}
-          disabled={isLoading}
-          className="flex items-center gap-2"
-        >
-          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-          بروزرسانی
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button 
+            onClick={() => {
+              console.log('Refresh button clicked');
+              refetch();
+              queryClient.invalidateQueries({ queryKey: ['/api/order-management/warehouse'] });
+            }}
+            disabled={isLoading}
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+            بروزرسانی
+          </Button>
+          <Button 
+            onClick={() => window.location.href = '/admin/login'}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <User className="w-4 h-4" />
+            ورود مجدد
+          </Button>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -257,7 +281,11 @@ export default function WarehouseDepartment() {
                   ورود به حساب ادمین
                 </Button>
                 <Button 
-                  onClick={() => refetch()}
+                  onClick={() => {
+                    console.log('Manual refetch from auth error section');
+                    queryClient.invalidateQueries({ queryKey: ['/api/order-management/warehouse'] });
+                    refetch();
+                  }}
                   variant="outline"
                   className="border-gray-300"
                 >
@@ -269,6 +297,26 @@ export default function WarehouseDepartment() {
             <div className="flex items-center justify-center py-8">
               <Loader className="w-6 h-6 animate-spin text-gray-500" />
               <span className="ml-2 text-gray-500">در حال بارگیری سفارشات...</span>
+            </div>
+          ) : filteredOrders.length === 0 && Array.isArray(orders) && orders.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 space-y-4">
+              <Package className="w-12 h-12 text-gray-400" />
+              <h3 className="text-lg font-semibold text-gray-900">هیچ سفارشی برای پردازش وجود ندارد</h3>
+              <p className="text-gray-600 text-center max-w-md">
+                همه سفارشات پردازش شده‌اند یا در مراحل دیگر قرار دارند
+              </p>
+              <Button 
+                onClick={() => {
+                  console.log('Empty state refresh clicked');
+                  queryClient.invalidateQueries({ queryKey: ['/api/order-management/warehouse'] });
+                  refetch();
+                }}
+                variant="outline"
+                className="mt-4"
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                بررسی سفارشات جدید
+              </Button>
             </div>
           ) : filteredOrders.length > 0 ? (
             <div className="space-y-4">
@@ -406,12 +454,27 @@ export default function WarehouseDepartment() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-12 text-gray-500">
-              <Package className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-              <p className="text-lg font-medium mb-2">سفارشی برای پردازش وجود ندارد</p>
-              <p className="text-sm">
-                سفارشات تایید شده توسط واحد مالی اینجا نمایش داده می‌شوند
+            <div className="flex flex-col items-center justify-center py-12 space-y-4">
+              <Package className="w-12 h-12 text-gray-400" />
+              <h3 className="text-lg font-semibold text-gray-900">سفارش‌هایی یافت نشد</h3>
+              <p className="text-gray-600 text-center max-w-md">
+                ممکن است سفارش در مراحل دیگر باشد یا فیلتر جستجو اعمال شده باشد
               </p>
+              <div className="text-sm text-gray-500 bg-yellow-50 p-3 rounded-lg max-w-md">
+                💡 نکته: سفارش 232 باید در انبار باشد - در صورت مشاهده نشدن، دکمه بروزرسانی را فشار دهید
+              </div>
+              <Button 
+                onClick={() => {
+                  console.log('Search state refresh clicked');
+                  queryClient.invalidateQueries({ queryKey: ['/api/order-management/warehouse'] });
+                  refetch();
+                }}
+                variant="outline"
+                className="mt-2"
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                بررسی مجدد سفارشات
+              </Button>
             </div>
           )}
         </CardContent>
