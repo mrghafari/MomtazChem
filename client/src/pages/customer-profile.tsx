@@ -19,6 +19,12 @@ const CustomerProfile = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
+  // Get payment methods for bank account information
+  const { data: paymentMethods } = useQuery<any>({
+    queryKey: ["/api/payment/methods"],
+    retry: 1,
+  });
+
   // Get customer information
   const { data: customerData, isLoading: customerLoading, error: customerError } = useQuery<any>({
     queryKey: ["/api/customers/me"],
@@ -521,6 +527,61 @@ const CustomerProfile = () => {
                     </div>
                   ))}
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Bank Account Information for Temporary Payment Orders */}
+        {unpaidOrders.some(order => order.current_status === 'payment_grace_period') && paymentMethods?.success && (
+          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg" dir="rtl">
+            <div className="flex items-center gap-3 mb-3">
+              <Building className="w-6 h-6 text-blue-600" />
+              <h3 className="text-lg font-semibold text-blue-800">
+                اطلاعات حساب بانکی شرکت برای واریز
+              </h3>
+            </div>
+            <div className="bg-white rounded-lg p-4 border">
+              {paymentMethods.data
+                .filter((method: any) => method.type === 'iraqi_bank' || method.type === 'bank_transfer')
+                .map((bankMethod: any, index: number) => (
+                <div key={bankMethod.id} className={`${index > 0 ? 'mt-4 pt-4 border-t' : ''}`}>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-600 mb-1">نام بانک:</p>
+                      <p className="font-semibold text-gray-900">
+                        {bankMethod.config?.bankName || bankMethod.name}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600 mb-1">شماره حساب:</p>
+                      <p className="font-mono text-lg font-bold text-blue-700 bg-blue-50 px-3 py-1 rounded">
+                        {bankMethod.config?.accountNumber || 'شماره حساب موجود نیست'}
+                      </p>
+                    </div>
+                    {bankMethod.config?.swiftCode && (
+                      <div>
+                        <p className="text-sm text-gray-600 mb-1">کد SWIFT:</p>
+                        <p className="font-mono text-sm font-medium text-gray-700">
+                          {bankMethod.config.swiftCode}
+                        </p>
+                      </div>
+                    )}
+                    {bankMethod.config?.instructions && (
+                      <div className="md:col-span-2">
+                        <p className="text-sm text-gray-600 mb-1">دستورالعمل پرداخت:</p>
+                        <p className="text-sm text-gray-700 bg-gray-50 p-2 rounded">
+                          {bankMethod.config.instructions}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+              <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                <p className="text-sm text-green-800">
+                  <strong>نکته مهم:</strong> پس از واریز وجه، حتماً رسید بانکی را از طریق دکمه "آپلود رسید بانکی" ارسال کنید.
+                </p>
               </div>
             </div>
           </div>

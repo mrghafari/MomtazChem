@@ -6,6 +6,20 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Bank Payment ID Integration in Customer Order System (July 20, 2025)
+✅ **FULLY IMPLEMENTED: Complete bank payment ID (شناسه پرداخت بانکی) payment option in customer order system**
+- **Frontend Integration**: Bank payment ID option fully integrated in bilingual-purchase-form.tsx with Building icon and proper validation
+- **Backend Processing**: Enhanced customer order creation endpoint to handle bank payment ID transactions
+- **Order Management**: Bank payment ID orders automatically routed to financial department with 'financial_pending' status
+- **Data Storage**: Bank payment ID stored in order notes with Persian label "شناسه پرداخت بانکی: {ID}"
+- **Payment Status**: Orders created with 'bank_payment_submitted' payment status for financial verification
+- **Success Messaging**: Custom Persian success message: "سفارش شما با موفقیت ثبت شد. شناسه پرداخت شما در دست بررسی است."
+- **Workflow Integration**: Orders with bank payment ID bypass customer payment and go directly to financial department for ID verification
+- **Testing Verified**: Complete end-to-end testing confirmed successful order creation, storage, and financial routing
+- **Order Tracking**: Bank payment ID orders trackable through customer profile with appropriate status display
+- **Result**: Complete bank payment ID payment option operational for Iraqi banking system integration
+- **Impact**: Customers can now submit bank payment IDs for order processing through existing financial verification workflow
+
 ### COMPLETED: KPI Dashboard Deployment Syntax Errors Fixed (July 20, 2025)
 ✅ **RESOLVED: Fixed critical syntax errors preventing deployment build**
 - **Issue**: Deployment failed with "unterminated regular expression" syntax error in kpi-dashboard.tsx at line 741

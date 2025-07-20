@@ -9493,6 +9493,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         finalPaymentMethod = "bank_transfer_grace";
         console.log("✅ Bank transfer with grace period method selected - 3-day grace period activated");
       }
+      
+      // Handle bank payment ID method
+      else if (orderData.paymentMethod === 'bank_payment_id') {
+        finalPaymentStatus = "bank_payment_submitted";
+        finalPaymentMethod = "bank_payment_id";
+        console.log(`✅ Bank payment ID method selected - ID: ${orderData.bankPaymentId}`);
+      }
 
       const order = await customerStorage.createOrder({
         customerId: finalCustomerId,
@@ -9502,7 +9509,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         paymentMethod: finalPaymentMethod,
         totalAmount: totalAmount.toString(),
         currency: orderData.currency || "IQD",
-        notes: orderData.notes || "",
+        notes: orderData.paymentMethod === 'bank_payment_id' 
+          ? `${orderData.notes || ""}\nشناسه پرداخت بانکی: ${orderData.bankPaymentId}`
+          : orderData.notes || "",
         billingAddress: JSON.stringify({
           name: customerInfo.name,
           phone: customerInfo.phone,
@@ -9677,6 +9686,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log(`🕒 Grace period activated for order ${orderNumber} - expires: ${gracePeriodEnd.toISOString()}`);
         }
 
+        // Set status for bank payment ID orders
+        if (orderData.paymentMethod === 'bank_payment_id') {
+          orderMgmtData.currentStatus = 'financial_pending';
+          orderMgmtData.currentDepartment = 'financial';
+          console.log(`💳 Bank payment ID order ${orderNumber} sent to financial department for verification`);
+        }
+
         await orderManagementStorage.createOrderManagement(orderMgmtData);
         console.log(`✅ Order management record created for order ${orderNumber}`);
       } catch (orderMgmtError) {
@@ -9700,6 +9716,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         responseData.redirectToPayment = true;
         responseData.paymentGatewayUrl = `/payment?orderId=${order.id}&amount=${remainingAmount > 0 ? remainingAmount : totalAmount}`;
         console.log(`✅ Order ${orderNumber} created - redirecting to payment gateway for ${remainingAmount > 0 ? remainingAmount : totalAmount} IQD`);
+      }
+      
+      // Add success message for bank payment ID
+      if (finalPaymentMethod === 'bank_payment_id') {
+        responseData.message = "سفارش شما با موفقیت ثبت شد. شناسه پرداخت شما در دست بررسی است.";
+        responseData.bankPaymentId = orderData.bankPaymentId;
+        console.log(`✅ Order ${orderNumber} created with bank payment ID: ${orderData.bankPaymentId}`);
       }
 
       res.json(responseData);
