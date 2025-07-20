@@ -497,6 +497,38 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       console.log('📊 [DEPARTMENT] Total orders in order_management table:', basicCount[0]);
     }
     
+    // Calculate missing weights for orders that don't have totalWeight
+    const resultsWithWeight = await Promise.all(results.map(async (row) => {
+      let totalWeight = row.totalWeight;
+      
+      // If totalWeight is missing, calculate it using gross weight
+      if (!totalWeight || parseFloat(totalWeight.toString()) === 0) {
+        console.log(`🔍 [WEIGHT CALC] Missing weight for order ${row.customerOrderId}, calculating...`);
+        try {
+          const calculatedWeight = await this.calculateOrderWeight(row.customerOrderId);
+          if (calculatedWeight > 0) {
+            totalWeight = calculatedWeight.toString();
+            
+            // Update the database with calculated weight
+            await db
+              .update(orderManagement)
+              .set({
+                totalWeight: calculatedWeight.toString(),
+                weightUnit: 'kg',
+                updatedAt: new Date()
+              })
+              .where(eq(orderManagement.customerOrderId, row.customerOrderId));
+            
+            console.log(`✅ [WEIGHT CALC] Updated order ${row.customerOrderId} with weight: ${calculatedWeight} kg`);
+          }
+        } catch (error) {
+          console.error(`❌ [WEIGHT CALC] Failed to calculate weight for order ${row.customerOrderId}:`, error);
+        }
+      }
+      
+      return row;
+    }));
+    
     // Transform results to include customer info and receipt info in nested structure
     return results.map(row => ({
       id: row.id,
@@ -506,7 +538,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       totalAmount: row.totalAmount,
       currency: row.currency,
       
-      // Weight and delivery information
+      // Weight and delivery information - use updated totalWeight if calculated
       totalWeight: row.totalWeight,
       weightUnit: row.weightUnit,
       deliveryMethod: row.deliveryMethod,
