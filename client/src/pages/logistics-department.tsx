@@ -976,7 +976,6 @@ export default function LogisticsDepartment() {
         <AudioNotification 
           department="logistics" 
           enabled={true}
-          interval={30000} // Check every 30 seconds
         />
       </div>
     </div>

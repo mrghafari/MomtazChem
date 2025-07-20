@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 interface AudioNotificationProps {
   department: 'financial' | 'warehouse' | 'logistics';
   enabled?: boolean;
-  interval?: number; // Refresh interval in milliseconds
 }
 
 interface Order {
@@ -16,17 +15,33 @@ interface Order {
 
 const AudioNotification = ({ 
   department, 
-  enabled = true, 
-  interval = 30000 // 30 seconds default
+  enabled = true
 }: AudioNotificationProps) => {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [lastOrderCount, setLastOrderCount] = useState<number | null>(null);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
 
+  // Get refresh interval from global settings
+  const getRefreshInterval = () => {
+    const globalSettings = localStorage.getItem('global-refresh-settings');
+    if (globalSettings) {
+      const settings = JSON.parse(globalSettings);
+      const departmentSettings = settings.departments[department];
+      
+      if (departmentSettings?.autoRefresh) {
+        const refreshInterval = settings.syncEnabled 
+          ? settings.globalInterval 
+          : departmentSettings.interval;
+        return refreshInterval * 1000; // Convert seconds to milliseconds
+      }
+    }
+    return 600000; // Default 10 minutes if no settings found
+  };
+
   // Query for orders in the specified department
   const { data: ordersData, isError } = useQuery({
     queryKey: [`/api/${department}/orders`],
-    refetchInterval: enabled ? interval : false,
+    refetchInterval: enabled ? getRefreshInterval() : false,
     refetchIntervalInBackground: true,
     enabled: enabled,
   });

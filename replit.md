@@ -6,6 +6,21 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Department Pages Integrated with Global Refresh Control (July 20, 2025)
+✅ **INTEGRATED: All department pages now use centralized refresh settings from Module Refresh Control**
+- **Issue**: User requested that financial, warehouse, and logistics pages receive refresh commands from centralized Refresh Control module
+- **Solution**: Modified all three department pages to use global refresh settings instead of hardcoded intervals
+- **Integration Details**:
+  - **Financial Department**: Now uses getRefreshInterval() function to fetch refresh settings from localStorage
+  - **Warehouse Department**: Already had global refresh integration maintained
+  - **Logistics Department**: Already had global refresh integration maintained
+  - **AudioNotification Component**: Updated to use department-specific refresh intervals from global settings
+- **Centralized Control**: All refresh intervals controlled through Site Management → Module Refresh Settings
+- **Dynamic Configuration**: Supports both global sync mode and department-specific intervals
+- **Audio Notifications**: Sound alerts for new orders now follow same refresh timing as data queries
+- **Result**: Complete centralized refresh control across all three operational departments
+- **Impact**: Administrators can now manage all department refresh rates from single unified interface
+
 ### COMPLETED: Enhanced Management Dashboard with Power BI Integration and Comprehensive KPI Table (July 20, 2025)
 ✅ **FULLY IMPLEMENTED: Complete Management Dashboard with comparative analytics based on user design specifications**
 - **Issue**: User provided comprehensive KPI table design image showing month-over-month comparative analytics with Power BI integration requirements

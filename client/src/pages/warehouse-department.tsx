@@ -421,7 +421,6 @@ export default function WarehouseDepartment() {
       <AudioNotification 
         department="warehouse" 
         enabled={true}
-        interval={30000} // Check every 30 seconds
       />
     </div>
   );

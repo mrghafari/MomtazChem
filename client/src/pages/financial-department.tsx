@@ -589,7 +589,6 @@ export default function FinancialDepartment() {
         <AudioNotification 
           department="financial" 
           enabled={true}
-          interval={30000} // Check every 30 seconds
         />
       </div>
     </div>
