@@ -90,6 +90,16 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Result**: Logistics staff now see exactly which address (primary or secondary) customer selected for delivery
 - **Impact**: Improved delivery accuracy by displaying customer's actual chosen delivery address in logistics interface
 
+### COMPLETED: Hidden Primary Address When Secondary Address Active (July 20, 2025)
+✅ **IMPLEMENTED: Primary address selector hidden when customer activates secondary address**
+- **Conditional Display**: AddressSelector component now hidden when useSecondaryAddress is true
+- **Clean Interface**: When secondary address is activated, primary address selection disappears
+- **User Experience**: Customers see only relevant address options based on their selection
+- **Smart Logic**: Primary address selector shows only when secondary address is not active
+- **Form Behavior**: Prevents confusion by showing only the active address selection method
+- **Result**: Cleaner checkout interface that adapts based on customer's address choice
+- **Impact**: Improved user experience with contextual address selection interface
+
 ### COMPLETED: Customer Unpaid Order Notification System with Order Cancellation (July 20, 2025)
 ✅ **IMPLEMENTED: Yellow background warning system for customers with unpaid orders**
 - **Feature**: Customer profile displays yellow notification banner when customer has unpaid orders

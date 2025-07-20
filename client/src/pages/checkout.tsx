@@ -589,18 +589,21 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                   <CardContent>
                     {isUserLoggedIn ? (
                       <div className="space-y-6">
-                        <AddressSelector
-                          selectedAddressId={selectedAddress?.id}
-                          onAddressSelect={(address) => {
-                            setSelectedAddress(address);
-                            // Auto-fill form fields from selected address
-                            form.setValue('billingAddress1', address.address);
-                            form.setValue('billingCity', address.city);
-                            form.setValue('billingState', address.state || '');
-                            form.setValue('billingPostalCode', address.postalCode || '');
-                            form.setValue('billingCountry', address.country);
-                          }}
-                        />
+                        {/* Hide primary address selector when secondary address is active */}
+                        {!useSecondaryAddress && (
+                          <AddressSelector
+                            selectedAddressId={selectedAddress?.id}
+                            onAddressSelect={(address) => {
+                              setSelectedAddress(address);
+                              // Auto-fill form fields from selected address
+                              form.setValue('billingAddress1', address.address);
+                              form.setValue('billingCity', address.city);
+                              form.setValue('billingState', address.state || '');
+                              form.setValue('billingPostalCode', address.postalCode || '');
+                              form.setValue('billingCountry', address.country);
+                            }}
+                          />
+                        )}
                         
                         {/* Secondary Address Option */}
                         <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
