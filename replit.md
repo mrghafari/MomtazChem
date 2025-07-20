@@ -6,6 +6,25 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### Fixed Order Management Table Layout (July 20, 2025)
+✅ **COMPLETED: Fixed column overflow issue in Order Management table**
+- **Issue**: Order Management table columns were extending outside container causing horizontal overflow
+- **Changes Made**: Implemented responsive table layout with horizontal scroll and fixed column widths
+- **Files Updated**: shop-admin.tsx
+- **New Layout**: Table with min-width of 1200px, overflow-x-auto, and specific column widths
+- **Column Optimization**: Reduced padding from px-6 to px-4, added truncate classes for long text
+- **Result**: Order Management table now displays properly within container with horizontal scroll when needed
+- **Impact**: Improved usability and readability of Order Management interface in shop admin
+
+### Fixed Add New Return Button Functionality (July 20, 2025)
+✅ **COMPLETED: Resolved database table issue preventing returns functionality**
+- **Issue**: Add New Return button failing due to missing product_returns table in database
+- **Error**: "relation 'product_returns' does not exist" causing 500 errors
+- **Solution**: Created product_returns table with all required fields for return management
+- **Table Fields**: product_id, product_name, return_quantity, customer details, refund status, etc.
+- **Result**: Returns functionality now fully operational with proper database schema
+- **Impact**: Returned Items tab now loads correctly and allows adding new product returns
+
 ### Simplified Pie Chart Displays (July 20, 2025)
 ✅ **COMPLETED: Simplified pie chart displays to show only legends below charts**
 - **Issue**: Pie charts were showing detailed descriptions next to each section (label text on pie slices)
