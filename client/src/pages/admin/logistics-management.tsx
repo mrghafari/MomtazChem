@@ -137,6 +137,7 @@ const LogisticsManagement = () => {
   const [selectedOrderDetails, setSelectedOrderDetails] = useState<any>(null);
   const [isOrderDetailsOpen, setIsOrderDetailsOpen] = useState(false);
   const [loadingOrderDetails, setLoadingOrderDetails] = useState(false);
+  const [completingDeliveries, setCompletingDeliveries] = useState<{[key: number]: boolean}>({});
   
   // Sorting state - default sort by creation date for active orders
   const [sortField, setSortField] = useState<string>('createdAt');
@@ -200,6 +201,48 @@ const LogisticsManagement = () => {
       });
     } finally {
       setLoadingOrderDetails(false);
+    }
+  };
+
+  // Handle complete delivery
+  const handleCompleteDelivery = async (orderId: number) => {
+    setCompletingDeliveries(prev => ({ ...prev, [orderId]: true }));
+    
+    try {
+      const response = await fetch(`/api/order-management/logistics/${orderId}/complete`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        toast({
+          title: "موفقیت",
+          description: "سفارش به بایگانی لجستیک منتقل شد",
+        });
+        
+        // Invalidate queries to refresh the data
+        queryClient.invalidateQueries({ queryKey: ['/api/order-management/logistics'] });
+      } else {
+        toast({
+          title: "خطا",
+          description: result.message || "خطا در تکمیل تحویل",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error completing delivery:', error);
+      toast({
+        title: "خطا",
+        description: "خطا در اتصال به سرور",
+        variant: "destructive",
+      });
+    } finally {
+      setCompletingDeliveries(prev => ({ ...prev, [orderId]: false }));
     }
   };
 
