@@ -15,7 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { Truck, Package, Settings, Plus, Edit, Eye, MapPin, Phone, Car, Calendar, BarChart3 } from "lucide-react";
+import { Truck, Package, Settings, Plus, Edit, Eye, MapPin, Phone, Car, Calendar, BarChart3, CheckCircle } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import DeliveryMethodsManagement from "@/components/DeliveryMethodsManagement";
 import ShippingRatesManagement from "@/components/ShippingRatesManagement";
@@ -211,6 +211,10 @@ export default function LogisticsDepartment() {
 
   const orders = ordersData?.orders || [];
   const shippingRates = shippingRatesData?.data || [];
+  
+  // Filter orders by delivery status
+  const activeOrders = orders.filter((order: LogisticsOrder) => order.currentStatus !== 'logistics_delivered');
+  const deliveredOrders = orders.filter((order: LogisticsOrder) => order.currentStatus === 'logistics_delivered');
 
   // Update delivery info mutation
   const updateDeliveryMutation = useMutation({
@@ -376,10 +380,14 @@ export default function LogisticsDepartment() {
         </div>
 
         <Tabs defaultValue="orders" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="orders" className="flex items-center gap-2">
               <Package className="w-4 h-4" />
-              سفارشات
+              سفارشات فعال
+            </TabsTrigger>
+            <TabsTrigger value="delivered" className="flex items-center gap-2">
+              <CheckCircle className="w-4 h-4" />
+              تحویل داده شده
             </TabsTrigger>
             <TabsTrigger value="delivery-methods" className="flex items-center gap-2">
               <Truck className="w-4 h-4" />
@@ -395,18 +403,18 @@ export default function LogisticsDepartment() {
             </TabsTrigger>
           </TabsList>
 
-          {/* Orders Tab */}
+          {/* Active Orders Tab */}
           <TabsContent value="orders">
             <div className="space-y-4">
-              {orders.length === 0 ? (
+              {activeOrders.length === 0 ? (
                 <Card>
                   <CardContent className="p-6 text-center">
                     <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600">هیچ سفارشی برای پردازش وجود ندارد</p>
+                    <p className="text-gray-600">هیچ سفارش فعالی برای پردازش وجود ندارد</p>
                   </CardContent>
                 </Card>
               ) : (
-                orders.map((order: LogisticsOrder) => (
+                activeOrders.map((order: LogisticsOrder) => (
                   <Card key={order.id} className="hover:shadow-md transition-shadow">
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
@@ -502,6 +510,94 @@ export default function LogisticsDepartment() {
                               تکمیل تحویل
                             </Button>
                           )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
+            </div>
+          </TabsContent>
+
+          {/* Delivered Orders Tab */}
+          <TabsContent value="delivered">
+            <div className="space-y-4">
+              {deliveredOrders.length === 0 ? (
+                <Card>
+                  <CardContent className="p-6 text-center">
+                    <CheckCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600">هنوز هیچ سفارشی تحویل داده نشده است</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                deliveredOrders.map((order: LogisticsOrder) => (
+                  <Card key={order.id} className="hover:shadow-md transition-shadow">
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-4 mb-4">
+                            <h3 className="text-lg font-semibold">سفارش #{order.customerOrderId}</h3>
+                            {getStatusBadge(order.currentStatus)}
+                            <Badge variant="outline">{getDeliveryMethodLabel(order.deliveryMethod)}</Badge>
+                            {order.actualDeliveryDate && (
+                              <Badge className="bg-green-100 text-green-800">
+                                تحویل: {new Date(order.actualDeliveryDate).toLocaleDateString('fa-IR')}
+                              </Badge>
+                            )}
+                          </div>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <h4 className="font-semibold text-gray-900 mb-2">اطلاعات مشتری</h4>
+                              <p className="text-sm text-gray-600">
+                                {order.customer?.firstName && order.customer?.lastName 
+                                  ? `${order.customer.firstName} ${order.customer.lastName}`
+                                  : 'نام مشتری ناشناس'
+                                }
+                              </p>
+                              <p className="text-sm text-gray-600">{order.customer?.phone || 'شماره تلفن ثبت نشده'}</p>
+                            </div>
+                            
+                            <div>
+                              <h4 className="font-semibold text-gray-900 mb-2">اطلاعات تحویل</h4>
+                              
+                              {/* Delivery Info Display */}
+                              <div className="mb-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                                <div className="flex items-center gap-2">
+                                  <CheckCircle className="w-4 h-4 text-green-600" />
+                                  <span className="text-sm font-medium text-green-800">
+                                    وضعیت: تحویل شده
+                                  </span>
+                                </div>
+                                {order.actualDeliveryDate && (
+                                  <p className="text-xs text-green-600 mt-1">
+                                    تاریخ تحویل: {new Date(order.actualDeliveryDate).toLocaleDateString('fa-IR')}
+                                  </p>
+                                )}
+                              </div>
+                              
+                              {order.trackingNumber && (
+                                <p className="text-sm text-gray-600">کد رهگیری: {order.trackingNumber}</p>
+                              )}
+                              {order.deliveryPersonName && (
+                                <p className="text-sm text-gray-600">تحویل‌دهنده: {order.deliveryPersonName}</p>
+                              )}
+                              {order.deliveryPersonPhone && (
+                                <p className="text-sm text-gray-600">تلفن تحویل‌دهنده: {order.deliveryPersonPhone}</p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                          <Button
+                            onClick={() => handleOrderClick(order)}
+                            variant="outline"
+                            className="border-blue-600 text-blue-600 hover:bg-blue-50"
+                          >
+                            <Eye className="w-4 h-4 mr-2" />
+                            مشاهده جزئیات
+                          </Button>
                         </div>
                       </div>
                     </CardContent>
