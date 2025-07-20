@@ -1,0 +1,85 @@
+VM27 site-management:51 Tawk.to script loaded successfully
+index-Bu-eS7BH.js:1482 🔍 [DEBUG] Site Management component initialized
+index-Bu-eS7BH.js:1482 🔍 [DEBUG] useEffect triggered, userPermissions: undefined
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 ()
+index-Bu-eS7BH.js:941 Auth check result: Object
+index-Bu-eS7BH.js:1482 🔍 [DEBUG] Site Management component initialized
+index-Bu-eS7BH.js:1482 🔍 [DEBUG] Site Management component initialized
+index-Bu-eS7BH.js:1482 🔍 [DEBUG] useEffect triggered, userPermissions: Object
+index-Bu-eS7BH.js:1482 🔍 [DEBUG] userPermissions modules: Array(27)
+index-Bu-eS7BH.js:1482 🔍 [DEBUG] allowedModules: Array(27)
+index-Bu-eS7BH.js:1482 🔍 [DEBUG] finance in allowedModules? true
+index-Bu-eS7BH.js:1482 🔍 [DEBUG] geography_analytics in allowedModules? true
+index-Bu-eS7BH.js:1482 🔍 [DEBUG] finance button found in allButtons? Object
+index-Bu-eS7BH.js:1482 🔍 [DEBUG] geography_analytics button found in allButtons? Object
+index-Bu-eS7BH.js:1482 🔍 [DEBUG] finance button in filtered? Object
+index-Bu-eS7BH.js:1482 🔍 [DEBUG] geography_analytics button in filtered? Object
+index-Bu-eS7BH.js:1482 🔍 [DEBUG] filtered buttons count: 28
+index-Bu-eS7BH.js:1482 🔍 [DEBUG] Site Management component initialized
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:115737)
+    at t.value (twk-chunk-common.js:2:148821)
+    at p.updateUUID (twk-chunk-common.js:2:200473)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:122752)
+    at twk-chunk-common.js:2:122063
+value @ twk-chunk-common.js:2
+VM27 site-management:23 Tawk.to Live Chat loaded successfully
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 ()
+index-Bu-eS7BH.js:941 Auth check result: Object
+/api/shop/returns/stats:1  Failed to load resource: the server responded with a status of 400 ()
+index-Bu-eS7BH.js:945 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ index-Bu-eS7BH.js:945
+index-Bu-eS7BH.js:1134 Fetching product suggestions for: 402
+index-Bu-eS7BH.js:1134 Products data received: 6
+index-Bu-eS7BH.js:1134 Filtered suggestions: Array(1)
+index-Bu-eS7BH.js:1134 Fetching product suggestions for: 402
+index-Bu-eS7BH.js:1134 Products data received: 6
+index-Bu-eS7BH.js:1134 Filtered suggestions: Array(1)
+index-Bu-eS7BH.js:1134 ✅ واحد محصول از کاردکس دریافت شد: کیلوگرم
+index-Bu-eS7BH.js:941 Auth check result: Object
+index-Bu-eS7BH.js:1134 Fetching phone suggestions for: 0912
+index-Bu-eS7BH.js:1134 Phone suggestions received: Object
+index-Bu-eS7BH.js:1134 Fetching phone suggestions for: 9124
+index-Bu-eS7BH.js:1134 Phone suggestions received: Object
+/api/shop/returns/stats:1  Failed to load resource: the server responded with a status of 400 ()
+index-Bu-eS7BH.js:941 Auth check result: {success: true, user: {…}}
+index-Bu-eS7BH.js:1134 Fetching product suggestions for: 402
+index-Bu-eS7BH.js:1134 Products data received: 6
+index-Bu-eS7BH.js:1134 Filtered suggestions: [{…}]
+index-Bu-eS7BH.js:1134 ✅ واحد محصول از کاردکس دریافت شد: کیلوگرم
+index-Bu-eS7BH.js:1134 Fetching phone suggestions for: 91249
+index-Bu-eS7BH.js:1134 Phone suggestions received: {success: true, customers: Array(1), count: 1, message: '1 مشتری یافت شد'}
+index-Bu-eS7BH.js:48  GET https://momtaz-chem-website-admin3119.replit.app/api/shop/returns/stats 400 (Bad Request)
+(anonymous) @ index-Bu-eS7BH.js:48
+i @ index-Bu-eS7BH.js:48
+w @ index-Bu-eS7BH.js:48
+start @ index-Bu-eS7BH.js:48
+fetch @ index-Bu-eS7BH.js:48
+(anonymous) @ index-Bu-eS7BH.js:48
+(anonymous) @ index-Bu-eS7BH.js:48
+batch @ index-Bu-eS7BH.js:48
+refetchQueries @ index-Bu-eS7BH.js:48
+(anonymous) @ index-Bu-eS7BH.js:48
+batch @ index-Bu-eS7BH.js:48
+invalidateQueries @ index-Bu-eS7BH.js:48
+onSuccess @ index-Bu-eS7BH.js:1134
+execute @ index-Bu-eS7BH.js:48
+await in execute
+mutate @ index-Bu-eS7BH.js:48
+(anonymous) @ index-Bu-eS7BH.js:48
+Ye @ index-Bu-eS7BH.js:1134
+Rce @ index-Bu-eS7BH.js:37
+Fce @ index-Bu-eS7BH.js:37
+Bce @ index-Bu-eS7BH.js:37
+IM @ index-Bu-eS7BH.js:37
+Hq @ index-Bu-eS7BH.js:37
+(anonymous) @ index-Bu-eS7BH.js:37
+rP @ index-Bu-eS7BH.js:40
+gq @ index-Bu-eS7BH.js:37
+vC @ index-Bu-eS7BH.js:37
+kk @ index-Bu-eS7BH.js:37
+tde @ index-Bu-eS7BH.js:37
+index-Bu-eS7BH.js:941 Auth check result: {success: true, user: {…}}

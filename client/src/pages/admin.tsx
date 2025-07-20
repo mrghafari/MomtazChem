@@ -74,7 +74,7 @@ export default function AdminPage() {
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Administrative Dashboard</h2>
                 <p className="text-gray-600 dark:text-gray-400 mt-1 mb-4">Centralized management and system controls</p>
                 <Button 
-                  onClick={() => setLocation("/site-management")}
+                  onClick={() => setLocation("/admin/site-management")}
                   className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2"
                 >
                   <Package className="w-4 h-4 mr-2" />

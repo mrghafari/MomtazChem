@@ -54,8 +54,8 @@ export default function AdminLogin() {
       // Wait for cache clear to complete 
       await new Promise(resolve => setTimeout(resolve, 200));
       
-      // Navigate to Site Management directly
-      window.location.href = "/admin/site-management";
+      // Navigate to Admin Welcome page first
+      window.location.href = "/admin";
     },
     onError: (error: any) => {
       // Set error message to display under form
