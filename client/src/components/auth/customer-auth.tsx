@@ -70,6 +70,7 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
   const [registrationData, setRegistrationData] = useState<any>(null);
   const [verificationCode, setVerificationCode] = useState("");
   const [verificationError, setVerificationError] = useState("");
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   const loginForm = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
@@ -128,6 +129,8 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
 
   const onLogin = async (data: LoginForm) => {
     setIsLoading(true);
+    setLoginError(null); // Clear previous error
+    
     try {
       const response = await fetch('/api/customers/login', {
         method: 'POST',
@@ -140,27 +143,34 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
 
       if (result.success) {
         toast({
-          title: "Welcome",
-          description: "Successfully logged in",
+          title: "خوش آمدید",
+          description: "با موفقیت وارد شدید",
         });
         onLoginSuccess(result.customer);
         onOpenChange(false);
         loginForm.reset();
       } else {
+        // Set error message to display under form
+        const errorMessage = result.message || "ایمیل یا رمز عبور اشتباه است";
+        setLoginError(errorMessage);
+        
         toast({
           variant: "destructive",
-          title: "Login Error",
-          description: result.message || "Invalid email or password",
+          title: "خطای ورود",
+          description: errorMessage,
         });
       }
     } catch (error) {
+      // Set generic error message for network issues
+      setLoginError("خطا در اتصال به سرور. لطفاً دوباره تلاش کنید");
+      
       // Completely suppress authentication errors - they are handled by response checking
       // Only show actual network connection errors
       if (error && typeof error === 'object' && error.name === 'TypeError' && error.message?.includes('fetch')) {
         toast({
           variant: "destructive",
-          title: "Network Error",
-          description: "Connection problem. Please try again.",
+          title: "خطای شبکه",
+          description: "مشکل در اتصال. لطفاً دوباره تلاش کنید.",
         });
       }
     } finally {
@@ -530,8 +540,17 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
                   )}
                 />
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Logging in..." : "Login"}
+                  {isLoading ? "در حال ورود..." : "ورود"}
                 </Button>
+                
+                {/* Display login error under form */}
+                {loginError && (
+                  <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-md">
+                    <p className="text-sm text-red-600 text-center font-medium">
+                      {loginError}
+                    </p>
+                  </div>
+                )}
                 
                 <div className="text-center mt-4">
                   <button
@@ -542,7 +561,7 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
                     }}
                     className="text-sm text-blue-600 hover:text-blue-800 underline"
                   >
-                    Forgot your password?
+                    رمز عبور را فراموش کرده‌اید؟
                   </button>
                 </div>
               </form>

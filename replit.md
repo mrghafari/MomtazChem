@@ -50,6 +50,26 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Result**: Product unit displays automatically with actual measurement units from inventory records
 - **Impact**: Streamlined data entry with accurate, specific unit information instead of generic placeholders
 
+### COMPLETED: Enhanced Authentication Error Display (July 20, 2025)
+✅ **IMPLEMENTED: Error messages now display directly below login forms**
+- **Issue**: User requested that login errors appear directly under the form instead of only in toast notifications
+- **Frontend Enhancements**:
+  - Added `loginError` state management to all login components
+  - Enhanced admin-login.tsx with error display box below form
+  - Updated customer-auth.tsx with Persian error messages under login form
+  - Modified checkout auth-modal.tsx to show errors directly in form area
+- **Error Display Features**:
+  - Clean red-bordered error boxes with centered Persian text
+  - Automatic error clearing when user retries login
+  - Proper error state management during authentication flow
+- **Persian Error Messages**: 
+  - "نام کاربری یا رمز عبور اشتباه است" for admin login failures
+  - "ایمیل یا رمز عبور اشتباه است" for customer login failures
+  - "خطا در اتصال به سرور. لطفاً دوباره تلاش کنید" for network issues
+- **Files Updated**: admin-login.tsx, customer-auth.tsx, auth-modal.tsx
+- **Result**: Users now see clear error messages directly below login forms for immediate feedback
+- **Impact**: Improved user experience with instant visual feedback for authentication failures
+
 ### Enhanced Order Management Table with More Items Per Page (July 20, 2025)
 ✅ **COMPLETED: Increased table capacity to display more orders per page**
 - **Issue**: User requested to display more items per page in Order Management table

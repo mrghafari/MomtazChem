@@ -21,6 +21,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
   const [currentView, setCurrentView] = useState<'choice' | 'login' | 'register'>(initialMode || 'choice');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   // Update currentView when initialMode changes
   useEffect(() => {
@@ -52,6 +53,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
   const resetModal = () => {
     setCurrentView('choice');
     setLoginData({ email: '', password: '' });
+    setLoginError(null); // Clear login error on reset
     setRegisterData({
       firstName: '',
       lastName: '',
@@ -78,6 +80,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setLoginError(null); // Clear previous error
 
     try {
       const response = await fetch('/api/customers/login', {
@@ -93,8 +96,8 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
 
       if (response.ok && data.success) {
         toast({
-          title: 'Welcome Back',
-          description: 'Successfully logged in'
+          title: 'خوش آمدید',
+          description: 'با موفقیت وارد شدید'
         });
         
         // Invalidate customer cache to refresh UI
@@ -104,19 +107,26 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
         resetModal();
         onAuthSuccess();
       } else {
+        // Set error message to display under form
+        const errorMessage = data.message || 'ایمیل یا رمز عبور اشتباه است';
+        setLoginError(errorMessage);
+        
         toast({
-          title: 'Login Failed',
-          description: data.message || 'Invalid email or password',
+          title: 'خطای ورود',
+          description: errorMessage,
           variant: 'destructive'
         });
       }
     } catch (error) {
+      // Set generic error message for network issues
+      setLoginError("خطا در اتصال به سرور. لطفاً دوباره تلاش کنید");
+      
       // Completely suppress errors during authentication flow
       // Only show toast for actual network connectivity issues
       if (error && typeof error === 'object' && error.name === 'TypeError' && error.message?.includes('fetch')) {
         toast({
-          title: 'Network Error',
-          description: 'Connection problem. Please try again.',
+          title: 'خطای شبکه',
+          description: 'مشکل در اتصال. لطفاً دوباره تلاش کنید.',
           variant: 'destructive'
         });
       }
@@ -315,8 +325,17 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
                 </div>
 
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? 'Logging in...' : 'Login'}
+                  {isLoading ? 'در حال ورود...' : 'ورود'}
                 </Button>
+                
+                {/* Display login error under form */}
+                {loginError && (
+                  <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-md">
+                    <p className="text-sm text-red-600 text-center font-medium">
+                      {loginError}
+                    </p>
+                  </div>
+                )}
               </form>
             </CardContent>
           </Card>

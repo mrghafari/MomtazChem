@@ -23,6 +23,7 @@ export default function AdminLogin() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   const form = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
@@ -36,6 +37,9 @@ export default function AdminLogin() {
     mutationFn: (data: LoginForm) => apiRequest("/api/admin/login", { method: "POST", body: data }),
     onSuccess: async (response) => {
       console.log("Login response:", response);
+      
+      // Clear any previous error
+      setLoginError(null);
       
       toast({ title: "Success", description: "Admin login successful" });
       
@@ -54,15 +58,22 @@ export default function AdminLogin() {
       window.location.href = "/admin/site-management";
     },
     onError: (error: any) => {
+      // Set error message to display under form
+      const errorMessage = error.message || "نام کاربری یا رمز عبور اشتباه است";
+      setLoginError(errorMessage);
+      
+      // Also show toast notification
       toast({ 
-        title: "Login Failed", 
-        description: error.message || "Invalid username or password", 
+        title: "خطای ورود", 
+        description: errorMessage, 
         variant: "destructive" 
       });
     },
   });
 
   const onSubmit = (data: LoginForm) => {
+    // Clear previous error when user tries again
+    setLoginError(null);
     loginMutation.mutate(data);
   };
 
@@ -137,6 +148,15 @@ export default function AdminLogin() {
               >
                 {loginMutation.isPending ? "Logging in..." : "Login"}
               </Button>
+              
+              {/* Display login error under form */}
+              {loginError && (
+                <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-md">
+                  <p className="text-sm text-red-600 text-center font-medium">
+                    {loginError}
+                  </p>
+                </div>
+              )}
             </form>
           </Form>
           
