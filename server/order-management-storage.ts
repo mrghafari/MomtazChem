@@ -485,7 +485,8 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       query = query.where(inArray(orderManagement.currentStatus, logisticsStatuses));
     }
     
-    const results = await query.orderBy(desc(orderManagement.createdAt));
+    // ترتیب قدیمی‌ترها اول (طبق درخواست کاربر)
+    const results = await query.orderBy(asc(orderManagement.createdAt));
     
     console.log('📊 [DEPARTMENT] Retrieved', results.length, 'orders for department:', department);
     if (results.length > 0) {

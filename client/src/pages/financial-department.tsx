@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import GlobalRefreshControl from "@/components/GlobalRefreshControl";
 import VatManagement from "@/components/VatManagement";
+import AudioNotification from "@/components/AudioNotification";
 
 interface OrderManagement {
   id: number;
@@ -131,7 +132,7 @@ export default function FinancialDepartment() {
     refetchInterval: getRefreshInterval(),
   });
 
-  const orders = ordersData?.orders || [];
+  const orders = (ordersData as any)?.orders || (ordersData as any)?.data || [];
 
   // Process order mutation
   const processOrderMutation = useMutation({
@@ -141,8 +142,7 @@ export default function FinancialDepartment() {
         : `/api/finance/orders/${data.orderId}/reject`;
       
       return apiRequest(endpoint, 'POST', {
-        notes: data.notes,
-        reviewerId: user?.id
+        notes: data.notes
       });
     },
     onSuccess: () => {
@@ -327,16 +327,16 @@ export default function FinancialDepartment() {
                         <div>
                           <h4 className="font-semibold text-gray-900 mb-2">اطلاعات مشتری</h4>
                           <p className="text-sm text-gray-600 font-medium">
-                            {order.customerFirstName && order.customerLastName 
-                              ? `${order.customerFirstName} ${order.customerLastName}`
-                              : 'نام مشتری ناشناس'
+                            {(order as any).customerFirstName && (order as any).customerLastName 
+                              ? `${(order as any).customerFirstName} ${(order as any).customerLastName}`
+                              : (order as any).customerName || 'نام مشتری ناشناس'
                             }
                           </p>
                           <p className="text-sm text-gray-600">
-                            {order.customerEmail || 'ایمیل ثبت نشده'}
+                            {(order as any).customerEmail || 'ایمیل ثبت نشده'}
                           </p>
                           <p className="text-sm text-gray-600">
-                            {order.customerPhone || 'شماره تلفن ثبت نشده'}
+                            {(order as any).customerPhone || 'شماره تلفن ثبت نشده'}
                           </p>
                         </div>
                         
@@ -584,6 +584,13 @@ export default function FinancialDepartment() {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Audio Notification for New Orders */}
+        <AudioNotification 
+          department="financial" 
+          enabled={true}
+          interval={30000} // Check every 30 seconds
+        />
       </div>
     </div>
   );

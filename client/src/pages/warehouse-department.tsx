@@ -23,6 +23,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { queryClient } from "@/lib/queryClient";
+import AudioNotification from "@/components/AudioNotification";
 
 export default function WarehouseDepartment() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -296,6 +297,12 @@ export default function WarehouseDepartment() {
                           <DollarSign className="w-4 h-4" />
                           {formatCurrency(order.totalAmount)} {order.currency}
                         </div>
+                        <div className="flex items-center gap-1">
+                          <Package className="w-4 h-4 text-blue-600" />
+                          <span className="text-blue-600">
+                            وزن محموله: {order.totalWeight ? `${order.totalWeight} کیلوگرم` : 'محاسبه نشده'}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -409,6 +416,13 @@ export default function WarehouseDepartment() {
           )}
         </CardContent>
       </Card>
+
+      {/* Audio Notification for New Orders */}
+      <AudioNotification 
+        department="warehouse" 
+        enabled={true}
+        interval={30000} // Check every 30 seconds
+      />
     </div>
   );
 }

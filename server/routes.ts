@@ -16660,49 +16660,47 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     try {
       console.log('📦 [WAREHOUSE] Fetching warehouse orders...');
       
-      // Get orders that are approved by financial department and ready for warehouse processing
-      const { pool } = await import('./db');
-      const result = await pool.query(`
-        SELECT 
-          o.id,
-          o.customer_name as "customerName",
-          o.customer_email as "customerEmail", 
-          o.total_amount as "totalAmount",
-          o.status,
-          o.created_at as "createdAt",
-          o.shipping_address as "shippingAddress",
-          o.payment_method as "paymentMethod",
-          o.notes,
-          o.warehouse_notes as "warehouseNotes",
-          o.financial_approved_at as "financialApprovedAt",
-          o.fulfilled_at as "fulfilledAt",
-          o.fulfilled_by as "fulfilledBy",
-          COALESCE(
-            json_agg(
-              json_build_object(
-                'id', oi.id,
-                'name', oi.name,
-                'quantity', oi.quantity,
-                'price', oi.price,
-                'sku', oi.sku,
-                'barcode', oi.barcode
-              )
-            ) FILTER (WHERE oi.id IS NOT NULL),
-            '[]'::json
-          ) as items
-        FROM orders o
-        LEFT JOIN order_items oi ON o.id = oi.order_id
-        WHERE o.status = 'financial_approved'
-        GROUP BY o.id, o.customer_name, o.customer_email, o.total_amount, o.status, 
-                 o.created_at, o.shipping_address, o.payment_method, o.notes, 
-                 o.warehouse_notes, o.financial_approved_at, o.fulfilled_at, o.fulfilled_by
-        ORDER BY o.financial_approved_at DESC
-      `);
+      // Use order management storage for modern order handling
+      const orders = await orderManagementStorage.getOrdersByDepartment('warehouse');
       
-      const orders = result.rows;
-      console.log('📦 [WAREHOUSE] Found financial approved orders:', orders.length);
-      console.log('📦 [WAREHOUSE] Orders ready for warehouse processing:', JSON.stringify(orders, null, 2));
-      res.json({ success: true, orders });
+      // Calculate weight for each order
+      const ordersWithWeight = await Promise.all(
+        orders.map(async (order) => {
+          try {
+            // Calculate total weight for the order
+            const totalWeight = await orderManagementStorage.calculateOrderWeight(order.customerOrderId);
+            
+            return {
+              ...order,
+              totalWeight: totalWeight > 0 ? totalWeight.toString() : null,
+              weightUnit: totalWeight > 0 ? 'kg' : null,
+              // Add customer information for display
+              customer: {
+                firstName: order.customerFirstName,
+                lastName: order.customerLastName,
+                email: order.customerEmail,
+                phone: order.customerPhone
+              }
+            };
+          } catch (weightError) {
+            console.warn(`⚠️ [WAREHOUSE] Could not calculate weight for order ${order.customerOrderId}:`, weightError);
+            return {
+              ...order,
+              totalWeight: null,
+              weightUnit: null,
+              customer: {
+                firstName: order.customerFirstName,
+                lastName: order.customerLastName,
+                email: order.customerEmail,
+                phone: order.customerPhone
+              }
+            };
+          }
+        })
+      );
+      
+      console.log('📦 [WAREHOUSE] Found orders with weights:', ordersWithWeight.length);
+      res.json({ success: true, orders: ordersWithWeight });
     } catch (error) {
       console.error('❌ [WAREHOUSE] Error fetching warehouse orders:', error);
       res.status(500).json({ success: false, message: 'خطا در بارگیری سفارشات انبار' });
@@ -18699,10 +18697,26 @@ ${message ? `Additional Requirements:\n${message}` : ''}
   // Get financial pending orders  
   app.get('/api/financial/orders', async (req, res) => {
     try {
-      const orders = await orderManagementStorage.getFinancialPendingOrders();
-      res.json({ success: true, orders });
+      console.log('💰 [FINANCIAL] Fetching financial orders...');
+      
+      // Use modern order management system for consistent ordering (قدیمی‌ترها اول)
+      const orders = await orderManagementStorage.getOrdersByDepartment('financial');
+      
+      // Add customer information structure for consistency
+      const ordersWithCustomerInfo = orders.map(order => ({
+        ...order,
+        customer: {
+          firstName: order.customerFirstName,
+          lastName: order.customerLastName,
+          email: order.customerEmail,
+          phone: order.customerPhone
+        }
+      }));
+      
+      console.log('💰 [FINANCIAL] Found orders (قدیمی‌ترها اول):', ordersWithCustomerInfo.length);
+      res.json({ success: true, orders: ordersWithCustomerInfo });
     } catch (error) {
-      console.error('Error fetching financial orders:', error);
+      console.error('❌ [FINANCIAL] Error fetching financial orders:', error);
       res.status(500).json({ success: false, message: "خطا در دریافت سفارشات" });
     }
   });
@@ -25419,60 +25433,51 @@ momtazchem.com
   // Logistics Department - Get orders approved by warehouse
   app.get("/api/logistics/orders", requireAuth, attachUserDepartments, requireDepartment('logistics'), async (req: Request, res: Response) => {
     try {
-      const { db } = await import("./db");
-      const { orderManagement } = await import("../shared/order-management-schema");
-      const { customerOrders } = await import("../shared/customer-schema");
-      const { orderItems } = await import("../shared/shop-schema");
-      const { crmCustomers } = await import("../shared/schema");
-      const { eq, inArray } = await import("drizzle-orm");
-
-      // Get orders approved by warehouse, pending logistics processing
-      const orders = await db
-        .select({
-          id: orderManagement.id,
-          customerOrderId: orderManagement.customerOrderId,
-          currentStatus: orderManagement.currentStatus,
-          warehouseNotes: orderManagement.warehouseNotes,
-          warehouseProcessedAt: orderManagement.warehouseProcessedAt,
-          logisticsNotes: orderManagement.logisticsNotes,
-          logisticsProcessedAt: orderManagement.logisticsProcessedAt,
-          deliveryCode: orderManagement.deliveryCode,
-          trackingNumber: orderManagement.trackingNumber,
-          deliveryPersonName: orderManagement.deliveryPersonName,
-          deliveryPersonPhone: orderManagement.deliveryPersonPhone,
-          estimatedDeliveryDate: orderManagement.estimatedDeliveryDate,
-          createdAt: orderManagement.createdAt,
-          orderTotal: customerOrders.total,
-          orderDate: customerOrders.createdAt,
-          customerName: crmCustomers.firstName,
-          customerLastName: crmCustomers.lastName,
-          customerEmail: crmCustomers.email,
-          customerPhone: crmCustomers.phone,
-          customerAddress: crmCustomers.address,
+      console.log('🚚 [LOGISTICS] Fetching logistics orders...');
+      
+      // Use order management storage for modern order handling
+      const orders = await orderManagementStorage.getOrdersByDepartment('logistics');
+      
+      // Calculate weight for each order
+      const ordersWithWeight = await Promise.all(
+        orders.map(async (order) => {
+          try {
+            // Calculate total weight for the order
+            const totalWeight = await orderManagementStorage.calculateOrderWeight(order.customerOrderId);
+            
+            return {
+              ...order,
+              totalWeight: totalWeight > 0 ? totalWeight.toString() : null,
+              weightUnit: totalWeight > 0 ? 'kg' : null,
+              // Add customer information for display
+              customer: {
+                firstName: order.customerFirstName,
+                lastName: order.customerLastName,
+                email: order.customerEmail,
+                phone: order.customerPhone
+              }
+            };
+          } catch (weightError) {
+            console.warn(`⚠️ [LOGISTICS] Could not calculate weight for order ${order.customerOrderId}:`, weightError);
+            return {
+              ...order,
+              totalWeight: null,
+              weightUnit: null,
+              customer: {
+                firstName: order.customerFirstName,
+                lastName: order.customerLastName,
+                email: order.customerEmail,
+                phone: order.customerPhone
+              }
+            };
+          }
         })
-        .from(orderManagement)
-        .innerJoin(customerOrders, eq(orderManagement.customerOrderId, customerOrders.id))
-        .innerJoin(crmCustomers, eq(customerOrders.customerId, crmCustomers.id))
-        .where(eq(orderManagement.currentStatus, 'warehouse_approved'))
-        .orderBy(orderManagement.warehouseProcessedAt); // Oldest warehouse-approved first
-
-      // Get order items for each order
-      const ordersWithItems = await Promise.all(orders.map(async (order) => {
-        const items = await db
-          .select()
-          .from(orderItems)
-          .where(eq(orderItems.orderId, order.customerOrderId));
-
-        return {
-          ...order,
-          customerName: `${order.customerName} ${order.customerLastName}`,
-          orderItems: items
-        };
-      }));
-
-      res.json({ success: true, orders: ordersWithItems });
+      );
+      
+      console.log('🚚 [LOGISTICS] Found orders with weights:', ordersWithWeight.length);
+      res.json({ success: true, orders: ordersWithWeight });
     } catch (error) {
-      console.error("Error fetching logistics orders:", error);
+      console.error("❌ [LOGISTICS] Error fetching logistics orders:", error);
       res.status(500).json({
         success: false,
         message: "خطا در دریافت سفارشات لجستیک",

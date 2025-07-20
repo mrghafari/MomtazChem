@@ -19,6 +19,7 @@ import { Truck, Package, Settings, Plus, Edit, Eye, MapPin, Phone, Car, Calendar
 import { apiRequest } from "@/lib/queryClient";
 import DeliveryMethodsManagement from "@/components/DeliveryMethodsManagement";
 import ShippingRatesManagement from "@/components/ShippingRatesManagement";
+import AudioNotification from "@/components/AudioNotification";
 
 // Types
 interface LogisticsOrder {
@@ -970,6 +971,13 @@ export default function LogisticsDepartment() {
             </Form>
           </DialogContent>
         </Dialog>
+
+        {/* Audio Notification for New Orders */}
+        <AudioNotification 
+          department="logistics" 
+          enabled={true}
+          interval={30000} // Check every 30 seconds
+        />
       </div>
     </div>
   );
