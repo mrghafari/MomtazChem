@@ -6,16 +6,16 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
-### Enhanced Order Management Table with Scrollable View (July 20, 2025)
-✅ **COMPLETED: Added vertical scrolling to Order Management table for better space management**
-- **Issue**: Order Management table was too long, taking up excessive vertical space
-- **Changes Made**: Implemented fixed height container with vertical scrolling capability
+### Enhanced Order Management Table with More Items Per Page (July 20, 2025)
+✅ **COMPLETED: Increased table capacity to display more orders per page**
+- **Issue**: User requested to display more items per page in Order Management table
+- **Changes Made**: Increased container height and reduced padding for more compact rows
 - **Files Updated**: shop-admin.tsx
-- **New Features**: max-h-96 (384px) container with overflow-y-auto, sticky header with z-10
-- **UI Improvements**: Added scroll indicator showing total order count when scrolling needed
-- **Row Optimization**: Reduced row padding from py-4 to py-3 for more compact display
-- **Result**: Order Management table now displays in controlled height with smooth scrolling
-- **Impact**: Better space utilization allowing users to see other interface elements while managing orders
+- **New Features**: max-h-[600px] container (increased from 384px), reduced padding to px-3 py-2
+- **UI Improvements**: More compact header and row spacing, adjusted scroll indicator threshold to 15+ orders
+- **Display Capacity**: Now shows approximately 20-25 orders per page (increased from ~12-15)
+- **Result**: Order Management table displays significantly more orders without scrolling
+- **Impact**: Improved efficiency for users managing large numbers of orders with less scrolling required
 
 ### Fixed Order Management Table Layout (July 20, 2025)
 ✅ **COMPLETED: Fixed column overflow issue in Order Management table**

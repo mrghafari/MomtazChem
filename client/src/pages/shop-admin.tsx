@@ -310,32 +310,32 @@ export default function ShopAdmin() {
 
                 {/* Orders table with horizontal and vertical scroll */}
                 <div className="border rounded-lg overflow-hidden">
-                  <div className="overflow-x-auto max-h-96 overflow-y-auto">
+                  <div className="overflow-x-auto max-h-[600px] overflow-y-auto">
                     <table className="w-full min-w-[1200px]">
                       <thead className="bg-gray-50 sticky top-0 z-10">
                         <tr>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
+                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
                             Order Number
                           </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48">
+                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48">
                             Customer Name
                           </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-36">
+                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-36">
                             Mobile
                           </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-52">
+                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-52">
                             Email
                           </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
+                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
                             Total Amount
                           </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
+                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
                             Status
                           </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
+                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
                             Date
                           </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
+                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
                             Actions
                           </th>
                         </tr>
@@ -343,10 +343,10 @@ export default function ShopAdmin() {
                       <tbody className="bg-white divide-y divide-gray-200">
                         {orders.length > 0 ? orders.map((order: any) => (
                           <tr key={order.id} className="hover:bg-gray-50">
-                            <td className="px-4 py-3 text-sm font-medium text-gray-900 w-32">
+                            <td className="px-3 py-2 text-sm font-medium text-gray-900 w-32">
                               <div className="truncate">#{order.orderNumber || order.id}</div>
                             </td>
-                            <td className="px-4 py-3 text-sm text-gray-900 w-48">
+                            <td className="px-3 py-2 text-sm text-gray-900 w-48">
                               <div className="truncate">
                                 {order.customer ? 
                                   `${order.customer.firstName} ${order.customer.lastName}` : 
@@ -354,22 +354,22 @@ export default function ShopAdmin() {
                                 }
                               </div>
                             </td>
-                            <td className="px-4 py-3 text-sm text-gray-900 w-36">
+                            <td className="px-3 py-2 text-sm text-gray-900 w-36">
                               <div className="truncate">
                                 {order.customer?.phone || order.mobileNumber || 'نامشخص'}
                               </div>
                             </td>
-                            <td className="px-4 py-3 text-sm text-gray-900 w-52">
+                            <td className="px-3 py-2 text-sm text-gray-900 w-52">
                               <div className="truncate">
                                 {order.customer?.email || order.email || 'نامشخص'}
                               </div>
                             </td>
-                            <td className="px-4 py-3 text-sm text-gray-900 w-32">
+                            <td className="px-3 py-2 text-sm text-gray-900 w-32">
                               <div className="truncate font-medium">
                                 ${order.totalAmount || 0}
                               </div>
                             </td>
-                            <td className="px-4 py-3 w-32">
+                            <td className="px-3 py-2 w-32">
                               <Badge variant={order.status === 'confirmed' ? 'default' : 'secondary'} className="text-xs">
                                 {order.status === 'pending' ? 'در انتظار' :
                                  order.status === 'confirmed' ? 'تایید شده' :
@@ -379,12 +379,12 @@ export default function ShopAdmin() {
                                  order.status}
                               </Badge>
                             </td>
-                            <td className="px-4 py-3 text-sm text-gray-900 w-32">
+                            <td className="px-3 py-2 text-sm text-gray-900 w-32">
                               <div className="truncate">
                                 {new Date(order.createdAt).toLocaleDateString('fa-IR')}
                               </div>
                             </td>
-                            <td className="px-4 py-3 text-sm text-gray-900 w-24">
+                            <td className="px-3 py-2 text-sm text-gray-900 w-24">
                               <Button
                                 size="sm"
                                 variant="outline"
@@ -407,8 +407,8 @@ export default function ShopAdmin() {
                     </table>
                   </div>
                   {/* Scroll indicator */}
-                  <div className="bg-gray-100 px-4 py-2 text-xs text-gray-500 text-center border-t">
-                    {orders.length > 10 && (
+                  <div className="bg-gray-100 px-4 py-1 text-xs text-gray-500 text-center border-t">
+                    {orders.length > 15 && (
                       <span>Scroll to view all {orders.length} orders</span>
                     )}
                   </div>
