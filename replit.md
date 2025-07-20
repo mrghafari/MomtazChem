@@ -6,6 +6,25 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Fixed Logistics Delivery Button Query Cache Invalidation (July 20, 2025)
+✅ **FULLY RESOLVED: Delivery completion button now properly updates order counts in both tabs**
+- **Root Cause Identified**: Query cache invalidation was not properly refreshing separate active and delivered order queries
+- **Solution Implemented**: 
+  - Enhanced query invalidation to use predicate function targeting all logistics queries
+  - Added forced refetch for both active and delivered order queries after delivery completion
+  - Applied same pattern to both completeDelivery function and completeDeliveryMutation
+- **Cache Strategy**:
+  - Active orders query: `/api/order-management/logistics` with `{ active: true }` key
+  - Delivered orders query: `/api/order-management/logistics` with `{ delivered: true }` key
+  - Invalidation targets all queries starting with `/api/order-management/logistics`
+- **Technical Changes**:
+  - Updated invalidateQueries to use predicate function instead of simple queryKey match
+  - Added queryClient.refetchQueries for both query types after successful delivery completion
+  - Ensures real-time count updates in tab headers and order lists
+- **User Experience**: When admin clicks "تحویل شد" button, order immediately disappears from active tab and appears in delivered tab with updated counts
+- **Status**: Complete fix implemented - delivery button functionality now works as expected
+- **Impact**: Logistics management interface now provides immediate visual feedback when orders are marked as delivered
+
 ### COMPLETED: Complete Code Cleanup - Removed OrderCard Component and "بایگانی" References (July 20, 2025)
 ✅ **FULLY COMPLETED: Complete cleanup of card view components and archive terminology per user requirements**
 - **OrderCard Component Removal**:

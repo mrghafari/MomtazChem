@@ -228,9 +228,14 @@ const LogisticsManagement = () => {
           description: "سفارش به لیست تحویل شده‌ها منتقل شد",
         });
         
-        // Invalidate both active and delivered orders queries to refresh the data
-        queryClient.invalidateQueries({ queryKey: ['/api/order-management/logistics'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/order-management/logistics', { statuses: 'logistics_delivered,completed' }] });
+        // Invalidate all logistics queries to refresh both active and delivered orders
+        queryClient.invalidateQueries({ 
+          predicate: (query) => 
+            query.queryKey[0] === '/api/order-management/logistics'
+        });
+        // Force refetch both queries
+        queryClient.refetchQueries({ queryKey: ['/api/order-management/logistics', { active: true }] });
+        queryClient.refetchQueries({ queryKey: ['/api/order-management/logistics', { delivered: true }] });
       } else {
         toast({
           title: "خطا",
@@ -462,11 +467,14 @@ const LogisticsManagement = () => {
       return response.json();
     },
     onSuccess: (data, orderId) => {
-      // Refresh orders list
-      // Invalidate both active and delivered order queries
-      queryClient.invalidateQueries({ queryKey: ['/api/order-management/logistics'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/order-management/logistics', { active: true }] });
-      queryClient.invalidateQueries({ queryKey: ['/api/order-management/logistics', { delivered: true }] });
+      // Invalidate all logistics queries to refresh both active and delivered orders
+      queryClient.invalidateQueries({ 
+        predicate: (query) => 
+          query.queryKey[0] === '/api/order-management/logistics'
+      });
+      // Force refetch both queries
+      queryClient.refetchQueries({ queryKey: ['/api/order-management/logistics', { active: true }] });
+      queryClient.refetchQueries({ queryKey: ['/api/order-management/logistics', { delivered: true }] });
       toast({
         title: "تکمیل تحویل",
         description: "سفارش به لیست تحویل شده‌ها منتقل شد",
@@ -1288,10 +1296,7 @@ const LogisticsManagement = () => {
                       <span className="text-gray-600">شماره سفارش:</span>
                       <span className="font-medium">{selectedOrderDetails.order_number}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">مبلغ کل:</span>
-                      <span className="font-medium">{selectedOrderDetails.total_amount} {selectedOrderDetails.currency}</span>
-                    </div>
+
                     <div className="flex justify-between">
                       <span className="text-gray-600">وضعیت پرداخت:</span>
                       <Badge variant="default" className="bg-green-100 text-green-800">
@@ -1376,7 +1381,7 @@ const LogisticsManagement = () => {
                   <div className="space-y-3">
                     {selectedOrderDetails.items?.map((item: any, index: number) => (
                       <div key={index} className="border rounded-lg p-4">
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
                             <p className="text-sm text-gray-600">نام محصول</p>
                             <p className="font-medium">{item.product_name}</p>
@@ -1387,14 +1392,6 @@ const LogisticsManagement = () => {
                           <div>
                             <p className="text-sm text-gray-600">تعداد</p>
                             <p className="font-medium">{item.quantity}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm text-gray-600">قیمت واحد</p>
-                            <p className="font-medium">{item.unit_price} {selectedOrderDetails.currency}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm text-gray-600">قیمت کل</p>
-                            <p className="font-medium text-green-600">{item.total_price} {selectedOrderDetails.currency}</p>
                           </div>
                         </div>
                         {(item.weight || item.gross_weight) && (
