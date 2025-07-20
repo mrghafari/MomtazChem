@@ -306,8 +306,8 @@ const LogisticsManagement = () => {
       if (result.success) {
         setResentCodes(prev => ({ ...prev, [orderManagementId]: true }));
         
-        // Refresh the orders to show the new delivery code
-        queryClient.invalidateQueries({ queryKey: ['/api/order-management/logistics'] });
+        // NO refresh when sending manually - as requested by user
+        // queryClient.invalidateQueries({ queryKey: ['/api/order-management/logistics'] });
         
         toast({
           title: "✅ موفقیت",
@@ -565,12 +565,12 @@ const LogisticsManagement = () => {
                 ) : resentCodes[order.id] ? (
                   <>
                     <Send className="w-4 h-4 mr-2" />
-                    کد ارسال شد ✓
+                    ارسال مجدد
                   </>
                 ) : order.deliveryCode ? (
                   <>
                     <Send className="w-4 h-4 mr-2" />
-                    ارسال مجدد کد
+                    ارسال مجدد
                   </>
                 ) : (
                   <>
