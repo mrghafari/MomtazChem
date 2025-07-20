@@ -9789,6 +9789,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           co.recipient_phone,
           co.recipient_name,
           co.recipient_address,
+          co.notes,
           co.created_at,
           co.updated_at,
           om.payment_grace_period_start,
@@ -9865,7 +9866,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         customerPhone: row.recipient_phone,
         recipientName: row.recipient_name,
         recipientAddress: row.recipient_address,
-        deliveryCode: row.delivery_code // Add delivery code for tracking
+        deliveryCode: row.delivery_code, // Add delivery code for tracking
+        notes: row.notes,
+        receiptUploaded: row.payment_status === 'payment_uploaded' || row.payment_status === 'receipt_uploaded'
       }));
 
       // Remove duplicate orders and combine all orders

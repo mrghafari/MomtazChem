@@ -509,10 +509,10 @@ const CustomerProfile = () => {
               size="sm"
               variant="outline"
               onClick={() => setLocation(`/customer/bank-receipt-upload?orderId=${order.orderNumber}`)}
-              className="flex items-center gap-2"
+              className={`flex items-center gap-2 ${order.receiptUploaded ? 'bg-green-50 border-green-200 text-green-700' : ''}`}
             >
               <FileText className="w-4 h-4" />
-              آپلود رسید بانکی
+              {order.receiptUploaded ? 'فیش آپلود شده' : 'آپلود رسید بانکی'}
             </Button>
           </>
         ) : (order.orderType === 'temporary' || order.orderCategory === 'temporary') && order.gracePeriodStatus === 'expired' ? (
