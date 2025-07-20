@@ -583,8 +583,6 @@ export default function GeographicAnalytics() {
                       data={productChartData.slice(0, 6)}
                       cx="50%"
                       cy="50%"
-                      labelLine={false}
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                       outerRadius={80}
                       fill="#8884d8"
                       dataKey="revenue"
@@ -594,6 +592,7 @@ export default function GeographicAnalytics() {
                       ))}
                     </Pie>
                     <Tooltip formatter={(value: any) => [`$${value.toFixed(2)}`, 'Revenue']} />
+                    <Legend />
                   </PieChart>
                 </ResponsiveContainer>
               </CardContent>
