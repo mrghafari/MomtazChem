@@ -270,17 +270,21 @@ const LogisticsManagement = () => {
   });
 
   // Get active logistics orders (not delivered)
-  const { data: activeOrdersResponse, isLoading: loadingActiveOrders } = useQuery({
+  const { data: activeOrdersResponse, isLoading: loadingActiveOrders, refetch: refetchActiveOrders } = useQuery({
     queryKey: ['/api/order-management/logistics', { active: true }],
     queryFn: () => fetch('/api/order-management/logistics').then(res => res.json()),
-    enabled: activeTab === 'orders'
+    enabled: activeTab === 'orders',
+    refetchOnWindowFocus: true,
+    staleTime: 0 // Always consider data stale to force updates
   });
   
   // Get delivered orders with specific statuses to trigger correct sorting
-  const { data: deliveredOrdersResponse, isLoading: loadingDeliveredOrders } = useQuery({
+  const { data: deliveredOrdersResponse, isLoading: loadingDeliveredOrders, refetch: refetchDeliveredOrders } = useQuery({
     queryKey: ['/api/order-management/logistics', { delivered: true }],
     queryFn: () => fetch('/api/order-management/logistics?statuses=logistics_delivered,completed').then(res => res.json()),
-    enabled: activeTab === 'orders'
+    enabled: activeTab === 'orders',
+    refetchOnWindowFocus: true,
+    staleTime: 0 // Always consider data stale to force updates
   });
   
   const allActiveOrders = activeOrdersResponse?.orders || [];
@@ -573,6 +577,20 @@ const LogisticsManagement = () => {
             <Badge variant="outline" className="bg-green-50 text-green-700">
               {mappedDeliveredOrders.length} تحویل شده
             </Badge>
+            <Button 
+              onClick={async () => {
+                await Promise.all([refetchActiveOrders(), refetchDeliveredOrders()]);
+                toast({
+                  title: "به‌روزرسانی شد",
+                  description: "تعداد سفارشات به‌روزرسانی شد",
+                });
+              }}
+              variant="outline" 
+              size="sm"
+              className="ml-2"
+            >
+              🔄 بروزرسانی
+            </Button>
           </div>
         </div>
 
