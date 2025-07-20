@@ -1097,12 +1097,14 @@ function ReturnForm({ onClose }: { onClose: () => void }) {
       const response = await apiRequest(`/api/products/kardex/${product.id}/unit`, { method: 'GET' });
       if (response.success && response.unit) {
         setProductUnit(response.unit);
+        console.log(`✅ واحد محصول از کاردکس دریافت شد: ${response.unit}`);
       } else {
-        setProductUnit('واحد'); // Default unit
+        setProductUnit(''); // Empty if no unit available
+        console.log('❌ واحد محصول در کاردکس یافت نشد');
       }
     } catch (error) {
       console.error('Error fetching product unit:', error);
-      setProductUnit('واحد'); // Default unit
+      setProductUnit(''); // Empty if error
     }
     
     toast({
@@ -1235,8 +1237,8 @@ function ReturnForm({ onClose }: { onClose: () => void }) {
               <Input
                 value={productUnit}
                 readOnly
-                className="w-20 bg-gray-100 text-center text-gray-700"
-                placeholder="واحد"
+                className="w-24 bg-gray-100 text-center text-gray-700 font-medium"
+                title={`واحد اندازه‌گیری: ${productUnit}`}
               />
             )}
           </div>

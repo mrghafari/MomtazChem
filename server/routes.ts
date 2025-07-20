@@ -2070,9 +2070,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({
         success: true,
-        unit: product.stockUnit || 'واحد',
+        unit: product.stockUnit || '', // Return actual unit or empty string
         productName: product.name
       });
+      
+      console.log(`✅ واحد محصول ${product.name} از کاردکس: "${product.stockUnit}"`)
     } catch (error) {
       console.error("Error fetching product unit from kardex:", error);
       res.status(500).json({ 
