@@ -17485,11 +17485,12 @@ ${message ? `Additional Requirements:\n${message}` : ''}
             
             // Generate delivery code using logistics storage
             const { logisticsStorage } = await import('./logistics-storage');
-            const codeResult = await logisticsStorage.generateDeliveryCode(
+            const deliveryCode = await logisticsStorage.generateSequentialDeliveryCode(
               orderDetails.customerOrderId,
-              orderDetails.customerPhone,
-              customerName
+              orderDetails.customerPhone
             );
+            
+            const codeResult = { success: true, deliveryCode };
             
             if (codeResult.success) {
               console.log('✅ [AUTO-CODE] Delivery code generated and sent automatically:', codeResult.deliveryCode);

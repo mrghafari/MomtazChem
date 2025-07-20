@@ -13,17 +13,21 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
   - Corrected import path from crm-schema to proper schema.ts file
   - Removed unique constraint on delivery_code field to allow duplicates as requested
   - Enhanced cycling logic to restart from 1111 after reaching 9999
+  - Updated warehouse approval endpoint to use new generateSequentialDeliveryCode method
 - **Code Range**: Delivery codes now properly cycle from 1111 to 9999, then restart to 1111 (duplicates allowed)
 - **Testing Confirmed**: 
   - Order 244: Generated code 1129 ✅
-  - Order 86: Generated code 1131 ✅ (current counter at 1131)
-  - Historical Orders: 248 (code 1130) and 249 (code 1131) manually assigned
+  - Order 86: Generated code 1131 ✅
+  - Order 87: Generated code 1133 ✅
+  - Order 85: Generated code 1134 ✅
+  - Order 88 (253): Generated code 1135 ✅ (current counter at 1135)
 - **Automatic Workflow**: Warehouse approve → Generate delivery code → Save to order_management table → Send SMS/Email to customer → Display in logistics interface
 - **Counter System**: delivery_code_counter table tracks current position (1111-9999 cycle)
 - **Notification System**: SMS and Email automatically sent to customers with delivery code
 - **User Experience**: Logistics staff see delivery codes in table and can resend codes when needed
 - **Status**: Complete fix - delivery code generation, storage, and notification workflow fully operational for all future orders
 - **No Random Codes**: Removed all random code generation fallbacks - system uses only sequential 1111-9999 codes
+- **Warehouse Integration**: Updated warehouse approval to use generateSequentialDeliveryCode instead of deprecated generateDeliveryCode method
 
 ### COMPLETED: Fixed Logistics Delivery Button Query Cache Invalidation (July 20, 2025)
 ✅ **FULLY RESOLVED: Delivery completion button now properly updates order counts in both tabs**
