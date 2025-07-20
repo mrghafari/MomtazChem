@@ -9973,6 +9973,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete expired temporary orders completely from system
+  app.delete("/api/customers/expired-orders", async (req, res) => {
+    try {
+      const customerId = (req.session as any)?.customerId;
+      if (!customerId) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "احراز هویت نشده" 
+        });
+      }
+
+      const { pool } = await import('./db');
+
+      // Find expired temporary orders for this customer
+      const expiredOrdersResult = await pool.query(`
+        SELECT om.customer_order_id, co.order_number
+        FROM order_management om
+        LEFT JOIN customer_orders co ON om.customer_order_id = co.id
+        WHERE om.current_status = 'payment_grace_period'
+          AND om.payment_grace_period_end < NOW()
+          AND (co.guest_email = (
+            SELECT email FROM crm_customers WHERE id = $1
+          ) OR co.customer_id = $1)
+      `, [customerId]);
+
+      if (expiredOrdersResult.rows.length === 0) {
+        return res.json({
+          success: true,
+          message: "هیچ سفارش منقضی شده‌ای یافت نشد",
+          deletedCount: 0
+        });
+      }
+
+      const expiredOrderIds = expiredOrdersResult.rows.map(row => row.customer_order_id);
+      const orderNumbers = expiredOrdersResult.rows.map(row => row.order_number);
+
+      // Delete from order_management first (foreign key constraint)
+      await pool.query(`
+        DELETE FROM order_management 
+        WHERE customer_order_id = ANY($1::int[])
+      `, [expiredOrderIds]);
+
+      // Delete from customer_orders
+      await pool.query(`
+        DELETE FROM customer_orders 
+        WHERE id = ANY($1::int[])
+      `, [expiredOrderIds]);
+
+      console.log(`🗑️ [EXPIRED ORDERS DELETED] Customer ${customerId}: Orders ${orderNumbers.join(', ')} permanently deleted`);
+
+      res.json({
+        success: true,
+        message: `${expiredOrderIds.length} سفارش منقضی شده با موفقیت حذف شد`,
+        deletedCount: expiredOrderIds.length,
+        orderNumbers
+      });
+
+    } catch (error) {
+      console.error("Error deleting expired orders:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در حذف سفارشات منقضی شده"
+      });
+    }
+  });
+
   // Activate grace period order (continue with order after uploading receipt)
   app.post("/api/customers/orders/:orderId/activate-grace-period", async (req, res) => {
     try {

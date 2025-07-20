@@ -238,6 +238,40 @@ const CustomerProfile = () => {
     }
   };
 
+  const handleDeleteExpiredOrders = async () => {
+    try {
+      const response = await fetch('/api/customers/expired-orders', {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        toast({
+          title: "حذف موفق",
+          description: result.message,
+        });
+        
+        // Refresh orders list
+        window.location.reload();
+      } else {
+        throw new Error(result.message || 'خطا در حذف سفارشات منقضی شده');
+      }
+
+    } catch (error) {
+      console.error('Error deleting expired orders:', error);
+      toast({
+        variant: "destructive", 
+        title: "خطا در حذف",
+        description: error.message || "امکان حذف سفارشات منقضی شده وجود ندارد",
+      });
+    }
+  };
+
   if (customerLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -542,6 +576,14 @@ const CustomerProfile = () => {
                       </Button>
                     </div>
                   ))}
+                  <Button
+                    size="sm"
+                    onClick={handleDeleteExpiredOrders}
+                    className="text-xs bg-red-600 hover:bg-red-700 text-white flex items-center gap-1"
+                  >
+                    <AlertTriangle className="w-3 h-3" />
+                    حذف سفارشات منقضی شده
+                  </Button>
                 </div>
               </div>
             </div>
