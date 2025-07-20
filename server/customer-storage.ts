@@ -142,8 +142,11 @@ export class CustomerStorage implements ICustomerStorage {
 
   // Customer orders
   async createOrder(orderData: InsertCustomerOrder): Promise<CustomerOrder> {
-    // Generate unique order number
-    const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+    // Generate unique order number using MOM format
+    const { generateOrderNumber } = await import('./order-number-generator');
+    const orderNumber = await generateOrderNumber();
+    
+    console.log('🔢 [CUSTOMER-STORAGE] Generated MOM order number:', orderNumber);
     
     const [order] = await customerDb
       .insert(customerOrders)
