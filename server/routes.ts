@@ -26417,30 +26417,51 @@ momtazchem.com
           deliveryCodeData = existingCode;
           console.log(`🔄 [WAREHOUSE] Reusing existing delivery code ${existingCode.verificationCode} for order ${orderId}`);
         } else {
-          // Generate new sequential delivery code (1111-9999) using logisticsStorage method
+          // Use the original customer order number as delivery code instead of generating new one
           const customerName = `${order.customerFirstName || ''} ${order.customerLastName || ''}`.trim() || 'مشتری';
           const customerPhone = order.customerPhone || '09000000000';
           
-          // Use logisticsStorage method which already generates sequential codes
-          deliveryCodeData = await logisticsStorage.generateVerificationCode(
-            orderId,
+          // Get the original order number from customer_orders
+          const { customerOrders } = await import("../shared/customer-schema");
+          const [customerOrderData] = await db
+            .select({ orderNumber: customerOrders.orderNumber })
+            .from(customerOrders)
+            .where(eq(customerOrders.id, orderId))
+            .limit(1);
+            
+          if (!customerOrderData) {
+            throw new Error(`Customer order ${orderId} not found`);
+          }
+          
+          const originalOrderNumber = customerOrderData.orderNumber;
+          
+          // Create delivery verification record with original order number
+          deliveryCodeData = await logisticsStorage.createDeliveryVerificationCode({
+            customerOrderId: orderId,
+            verificationCode: originalOrderNumber, // Use original order number
             customerPhone,
-            customerName
-          );
+            customerName,
+            smsMessage: `${customerName} عزیز، سفارش شما آماده ارسال است.
+شماره سفارش: ${originalOrderNumber}
+این شماره را هنگام تحویل به پیک اعلام کنید.
+ممتازکم - Momtazchem`,
+            expiresAt: new Date(Date.now() + 48 * 60 * 60 * 1000) // 48 hours
+          });
+          
           isNewCode = true;
-          console.log(`🆕 [WAREHOUSE] Generated sequential delivery code ${deliveryCodeData.verificationCode} for order ${orderId}, customer: ${customerName}`);
+          console.log(`🆕 [WAREHOUSE] Using original order number ${originalOrderNumber} as delivery code for order ${orderId}, customer: ${customerName}`);
         }
 
-        // CRITICAL: Update order_management table with delivery code AND move to logistics_dispatched
+        // CRITICAL: Update order_management table with original order number as delivery code AND move to logistics_dispatched
         await db
           .update(orderManagement)
           .set({
-            deliveryCode: deliveryCodeData.verificationCode,
+            deliveryCode: deliveryCodeData.verificationCode, // This is now the original order number
             currentStatus: 'logistics_dispatched'
           })
           .where(eq(orderManagement.customerOrderId, orderId));
 
-        console.log(`💾 [WAREHOUSE] Delivery code ${deliveryCodeData.verificationCode} saved to order_management table and status updated to logistics_dispatched for order ${orderId}`);
+        console.log(`💾 [WAREHOUSE] Original order number ${deliveryCodeData.verificationCode} saved as delivery code in order_management table and status updated to logistics_dispatched for order ${orderId}`);
 
         // Send SMS notification automatically with proper customer details
         try {
@@ -26449,7 +26470,7 @@ momtazchem.com
           
           const smsResult = await smsService.sendDeliveryVerificationSms(
             customerPhone,
-            deliveryCodeData.verificationCode,
+            deliveryCodeData.verificationCode, // This is now the original order number
             customerName,
             deliveryCodeData.id
           );
@@ -26482,6 +26503,73 @@ momtazchem.com
       res.status(500).json({
         success: false,
         message: "خطا در تایید انبار",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Get sent orders from warehouse (orders that have been sent to logistics)
+  app.get("/api/warehouse/orders-sent", requireAuth, async (req: Request, res: Response) => {
+    try {
+      console.log("🔍 [WAREHOUSE] Fetching orders sent to logistics");
+      
+      // Get orders that have been sent to logistics by warehouse
+      const sentStatuses = [
+        'logistics_dispatched',
+        'logistics_delivered',
+        'completed'
+      ];
+      
+      const orders = await db
+        .select()
+        .from(orderManagement)
+        .leftJoin(customerOrders, eq(orderManagement.customerOrderId, customerOrders.id))
+        .leftJoin(crmCustomers, eq(customerOrders.customerId, crmCustomers.id))
+        .where(inArray(orderManagement.currentStatus, sentStatuses))
+        .orderBy(desc(orderManagement.warehouseProcessedAt));
+
+      console.log("📊 [WAREHOUSE] Retrieved", orders.length, "sent orders");
+
+      const formattedOrders = orders.map(order => ({
+        id: order.order_management.id,
+        customerOrderId: order.order_management.customerOrderId,
+        currentStatus: order.order_management.currentStatus,
+        createdAt: order.order_management.createdAt,
+        updatedAt: order.order_management.updatedAt,
+        totalAmount: order.customer_orders?.totalAmount || '0',
+        orderNumber: order.customer_orders?.orderNumber || '',
+        trackingNumber: order.customer_orders?.trackingNumber || '',
+        shippingAddress: order.customer_orders?.shippingAddress || {},
+        billingAddress: order.customer_orders?.billingAddress || {},
+        notes: order.customer_orders?.notes || '',
+        paymentMethod: order.customer_orders?.paymentMethod || '',
+        paymentStatus: order.customer_orders?.paymentStatus || '',
+        priority: order.customer_orders?.priority || '',
+        estimatedDelivery: order.customer_orders?.estimatedDelivery,
+        actualDelivery: order.customer_orders?.actualDelivery,
+        shippedAt: order.customer_orders?.shippedAt,
+        deliveredAt: order.customer_orders?.deliveredAt,
+        customerFirstName: order.crm_customers?.firstName || order.customer_orders?.guestName?.split(' ')[0] || '',
+        customerLastName: order.crm_customers?.lastName || order.customer_orders?.guestName?.split(' ').slice(1).join(' ') || '',
+        customerEmail: order.crm_customers?.email || order.customer_orders?.guestEmail || '',
+        customerPhone: order.crm_customers?.phone || '',
+        totalWeight: order.order_management.totalWeight,
+        weightUnit: order.order_management.weightUnit,
+        warehouseProcessedAt: order.order_management.warehouseProcessedAt,
+        warehouseNotes: order.order_management.warehouseNotes,
+        deliveryCode: order.order_management.deliveryCode,
+        actualDeliveryDate: order.order_management.actualDeliveryDate
+      }));
+
+      res.json({
+        success: true,
+        orders: formattedOrders
+      });
+    } catch (error) {
+      console.error("Error fetching sent orders:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch sent orders",
         error: error instanceof Error ? error.message : 'Unknown error'
       });
     }

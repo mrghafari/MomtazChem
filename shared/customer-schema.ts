@@ -187,6 +187,17 @@ export const insertOrderItemSchema = createInsertSchema(orderItems).omit({
 export type InsertOrderItem = z.infer<typeof insertOrderItemSchema>;
 export type OrderItem = typeof orderItems.$inferSelect;
 
+// Order number counter table for MOM format
+export const orderNumberCounter = pgTable("order_number_counter", {
+  id: serial("id").primaryKey(),
+  year: integer("year").notNull().unique(),
+  counter: integer("counter").notNull().default(1111),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export type OrderNumberCounter = typeof orderNumberCounter.$inferSelect;
+
 // Customer inquiries table
 export const customerInquiries = pgTable("customer_inquiries", {
   id: serial("id").primaryKey(),
