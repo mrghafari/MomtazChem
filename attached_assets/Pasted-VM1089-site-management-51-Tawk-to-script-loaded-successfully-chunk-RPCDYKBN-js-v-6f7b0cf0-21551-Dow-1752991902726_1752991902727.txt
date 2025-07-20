@@ -1,0 +1,125 @@
+VM1089 site-management:51 Tawk.to script loaded successfully
+chunk-RPCDYKBN.js?v=6f7b0cf0:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+site-management-fixed.tsx:71 🔍 [DEBUG] useEffect triggered, userPermissions: undefined
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+useAuth.ts:43 Auth check result: Object
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:115737)
+    at t.value (twk-chunk-common.js:2:148821)
+    at p.updateUUID (twk-chunk-common.js:2:200473)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:122752)
+    at twk-chunk-common.js:2:122063
+value @ twk-chunk-common.js:2
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+site-management-fixed.tsx:71 🔍 [DEBUG] useEffect triggered, userPermissions: Object
+site-management-fixed.tsx:73 🔍 [DEBUG] userPermissions modules: Array(27)
+site-management-fixed.tsx:371 🔍 [DEBUG] allowedModules: Array(27)
+site-management-fixed.tsx:372 🔍 [DEBUG] finance in allowedModules? true
+site-management-fixed.tsx:373 🔍 [DEBUG] geography_analytics in allowedModules? true
+site-management-fixed.tsx:379 🔍 [DEBUG] finance button found in allButtons? Object
+site-management-fixed.tsx:380 🔍 [DEBUG] geography_analytics button found in allButtons? Object
+site-management-fixed.tsx:381 🔍 [DEBUG] finance button in filtered? Object
+site-management-fixed.tsx:382 🔍 [DEBUG] geography_analytics button in filtered? Object
+site-management-fixed.tsx:75 🔍 [DEBUG] filtered buttons count: 28
+about:blank:1 [Intervention] Slow network is detected. See https://www.chromestatus.com/feature/5636954674692096 for more details. Fallback font will be used while loading: https://embed.tawk.to/_s/v4/assets/fonts/tawk-font-icon-3.woff?55755728=
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+VM1089 site-management:23 Tawk.to Live Chat loaded successfully
+/api/shop/returns/stats:1  Failed to load resource: the server responded with a status of 400 (Bad Request)
+chunk-C436OVJF.js?v=6f7b0cf0:339 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-C436OVJF.js?v=6f7b0cf0:339
+shop-admin.tsx:1044 Fetching product suggestions for: 402
+shop-admin.tsx:1047 Products data received: 6
+shop-admin.tsx:1061 Filtered suggestions: Array(1)
+shop-admin.tsx:983 Fetching phone suggestions for: 912
+shop-admin.tsx:986 Phone suggestions received: Object
+useAuth.ts:43 Auth check result: Object
+shop-admin.tsx:983 Fetching phone suggestions for: 9124
+shop-admin.tsx:986 Phone suggestions received: Object
+/api/shop/returns:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+/api/shop/returns:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+useAuth.ts:43 Auth check result: Object
+/api/shop/returns/stats:1  Failed to load resource: the server responded with a status of 400 (Bad Request)
+queryClient.ts:54  POST https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/shop/returns 500 (Internal Server Error)
+apiRequest @ queryClient.ts:54
+mutationFn @ shop-admin.tsx:1102
+fn @ @tanstack_react-query.js?v=6f7b0cf0:1189
+run @ @tanstack_react-query.js?v=6f7b0cf0:494
+start @ @tanstack_react-query.js?v=6f7b0cf0:536
+execute @ @tanstack_react-query.js?v=6f7b0cf0:1225
+await in execute
+mutate @ @tanstack_react-query.js?v=6f7b0cf0:2630
+(anonymous) @ @tanstack_react-query.js?v=6f7b0cf0:3295
+handleSubmit @ shop-admin.tsx:1136
+callCallback2 @ chunk-RPCDYKBN.js?v=6f7b0cf0:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=6f7b0cf0:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=6f7b0cf0:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=6f7b0cf0:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=6f7b0cf0:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=6f7b0cf0:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=6f7b0cf0:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=6f7b0cf0:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=6f7b0cf0:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=6f7b0cf0:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=6f7b0cf0:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=6f7b0cf0:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=6f7b0cf0:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=6f7b0cf0:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=6f7b0cf0:5449
+queryClient.ts:54  POST https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/shop/returns 500 (Internal Server Error)
+apiRequest @ queryClient.ts:54
+mutationFn @ shop-admin.tsx:1102
+fn @ @tanstack_react-query.js?v=6f7b0cf0:1189
+run @ @tanstack_react-query.js?v=6f7b0cf0:494
+start @ @tanstack_react-query.js?v=6f7b0cf0:536
+execute @ @tanstack_react-query.js?v=6f7b0cf0:1225
+await in execute
+mutate @ @tanstack_react-query.js?v=6f7b0cf0:2630
+(anonymous) @ @tanstack_react-query.js?v=6f7b0cf0:3295
+handleSubmit @ shop-admin.tsx:1136
+callCallback2 @ chunk-RPCDYKBN.js?v=6f7b0cf0:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=6f7b0cf0:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=6f7b0cf0:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=6f7b0cf0:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=6f7b0cf0:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=6f7b0cf0:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=6f7b0cf0:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=6f7b0cf0:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=6f7b0cf0:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=6f7b0cf0:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=6f7b0cf0:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=6f7b0cf0:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=6f7b0cf0:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=6f7b0cf0:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=6f7b0cf0:5449
+queryClient.ts:54  POST https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/shop/returns 500 (Internal Server Error)
+apiRequest @ queryClient.ts:54
+mutationFn @ shop-admin.tsx:1102
+fn @ @tanstack_react-query.js?v=6f7b0cf0:1189
+run @ @tanstack_react-query.js?v=6f7b0cf0:494
+start @ @tanstack_react-query.js?v=6f7b0cf0:536
+execute @ @tanstack_react-query.js?v=6f7b0cf0:1225
+await in execute
+mutate @ @tanstack_react-query.js?v=6f7b0cf0:2630
+(anonymous) @ @tanstack_react-query.js?v=6f7b0cf0:3295
+handleSubmit @ shop-admin.tsx:1136
+callCallback2 @ chunk-RPCDYKBN.js?v=6f7b0cf0:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=6f7b0cf0:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=6f7b0cf0:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=6f7b0cf0:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=6f7b0cf0:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=6f7b0cf0:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=6f7b0cf0:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=6f7b0cf0:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=6f7b0cf0:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=6f7b0cf0:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=6f7b0cf0:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=6f7b0cf0:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=6f7b0cf0:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=6f7b0cf0:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=6f7b0cf0:5449

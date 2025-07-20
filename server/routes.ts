@@ -10803,6 +10803,13 @@ Momtaz Chemical Technical Team`,
       returnData.productSku = product.sku;
       returnData.unitPrice = product.price;
       
+      // Ensure returnDate is a proper Date object
+      if (returnData.returnDate && typeof returnData.returnDate === 'string') {
+        returnData.returnDate = new Date(returnData.returnDate);
+      } else if (!returnData.returnDate) {
+        returnData.returnDate = new Date();
+      }
+      
       const newReturn = await shopStorage.createProductReturn(returnData);
       res.json({ success: true, data: newReturn });
     } catch (error) {

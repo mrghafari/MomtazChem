@@ -1438,11 +1438,15 @@ export class ShopStorage implements IShopStorage {
     // Calculate total return amount
     const totalAmount = (parseFloat(returnData.unitPrice.toString()) * returnData.returnQuantity).toFixed(2);
     
+    // Remove returnDate from data - let database handle it with defaultNow()
+    const { returnDate, ...insertData } = returnData;
+    
     const result = await shopDb
       .insert(productReturns)
       .values({
-        ...returnData,
+        ...insertData,
         totalReturnAmount: totalAmount,
+        returnDate: new Date(), // Explicitly provide current date as Date object
       })
       .returning();
 

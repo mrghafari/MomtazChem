@@ -1144,7 +1144,7 @@ function ReturnForm({ onClose }: { onClose: () => void }) {
       unitPrice: 0, // Default unit price
       totalReturnAmount: parseFloat(totalReturnAmount) || 0,
       refundStatus,
-      returnDate: new Date().toISOString() // Convert back to string format
+      returnDate: new Date() // Keep as Date object for Drizzle
     });
   };
 
