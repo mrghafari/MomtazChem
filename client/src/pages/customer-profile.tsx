@@ -354,8 +354,24 @@ const CustomerProfile = () => {
     getStatusLabel(order.status).toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Get the most recent order
-  const mostRecentOrder = orders.length > 0 ? orders[0] : null;
+  // Separate orders into active (including temporary) and history
+  const activeOrders = orders.filter((order: any) => {
+    // Keep temporary orders in active list while they are active
+    if (order.orderType === 'temporary' || order.orderCategory === 'temporary') {
+      return order.gracePeriodStatus === 'active' || order.current_status === 'payment_grace_period';
+    }
+    // For regular orders, only show the most recent one
+    return orders.indexOf(order) === 0;
+  });
+
+  const historyOrders = orders.filter((order: any) => {
+    // Expired temporary orders go to history
+    if (order.orderType === 'temporary' || order.orderCategory === 'temporary') {
+      return order.gracePeriodStatus !== 'active' && order.current_status !== 'payment_grace_period';
+    }
+    // All other orders except the most recent one go to history
+    return orders.indexOf(order) !== 0;
+  });
 
   // Function to render a single order
   const renderOrder = (order: any) => (
@@ -741,17 +757,17 @@ const CustomerProfile = () => {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {/* Show only most recent order */}
-                    {mostRecentOrder && renderOrder(mostRecentOrder)}
+                    {/* Show all active orders (recent order + active temporary orders) */}
+                    {activeOrders.map((order: any) => renderOrder(order))}
                     
                     {/* Purchase History Button */}
-                    {orders.length > 1 && (
+                    {historyOrders.length > 0 && (
                       <div className="text-center pt-4 border-t">
                         <Sheet open={isHistoryOpen} onOpenChange={setIsHistoryOpen}>
                           <SheetTrigger asChild>
                             <Button variant="outline" className="flex items-center gap-2">
                               <History className="w-4 h-4" />
-                              سابقه خرید ({orders.length} سفارش)
+                              سابقه خرید ({historyOrders.length} سفارش)
                             </Button>
                           </SheetTrigger>
                           <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
@@ -761,7 +777,7 @@ const CustomerProfile = () => {
                                 سابقه کامل خرید
                               </SheetTitle>
                               <SheetDescription>
-                                تمام سفارشات شما ({orders.length} سفارش)
+                                سفارشات تکمیل شده و منقضی ({historyOrders.length} سفارش)
                               </SheetDescription>
                             </SheetHeader>
                             
@@ -770,7 +786,7 @@ const CustomerProfile = () => {
                               <div className="relative">
                                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                                 <Input
-                                  placeholder="جستجو در سفارشات..."
+                                  placeholder="جستجو در سابقه سفارشات..."
                                   value={searchQuery}
                                   onChange={(e) => setSearchQuery(e.target.value)}
                                   className="pl-10"
@@ -778,15 +794,25 @@ const CustomerProfile = () => {
                               </div>
                             </div>
                             
-                            {/* Orders List */}
+                            {/* History Orders List */}
                             <div className="space-y-4 mt-6">
-                              {filteredOrders.length === 0 ? (
+                              {historyOrders.filter((order: any) => 
+                                order.orderNumber?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                order.customerName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                order.totalAmount?.toString().includes(searchQuery) ||
+                                getStatusLabel(order.status).toLowerCase().includes(searchQuery.toLowerCase())
+                              ).length === 0 ? (
                                 <div className="text-center py-8">
                                   <Search className="w-12 h-12 text-gray-300 mx-auto mb-2" />
                                   <p className="text-gray-500">هیچ سفارشی با این جستجو یافت نشد</p>
                                 </div>
                               ) : (
-                                filteredOrders.map((order: any) => renderOrder(order))
+                                historyOrders.filter((order: any) => 
+                                  order.orderNumber?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                  order.customerName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                  order.totalAmount?.toString().includes(searchQuery) ||
+                                  getStatusLabel(order.status).toLowerCase().includes(searchQuery.toLowerCase())
+                                ).map((order: any) => renderOrder(order))
                               )}
                             </div>
                           </SheetContent>
