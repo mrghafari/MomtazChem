@@ -131,6 +131,22 @@ export default function SiteManagement() {
 
   const getInitialButtons = (): QuickActionButton[] => [
     {
+      id: "kpi-dashboard",
+      label: "KPI Dashboard",
+      icon: BarChart3,
+      onClick: () => trackButtonClick("kpi-dashboard", () => setLocation("/admin/kpi-dashboard")),
+      className: "border-purple-300 text-purple-600 hover:bg-purple-50",
+      moduleId: "kpi_dashboard"
+    },
+    {
+      id: "management-dashboard",
+      label: "Management Dashboard",
+      icon: Monitor,
+      onClick: () => trackButtonClick("management-dashboard", () => setLocation("/admin/management-dashboard")),
+      className: "border-indigo-300 text-indigo-600 hover:bg-indigo-50",
+      moduleId: "management_dashboard"
+    },
+    {
       id: "kardex-sync",
       label: "Syncing Shop",
       icon: Database,

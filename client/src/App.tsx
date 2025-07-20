@@ -219,6 +219,8 @@ function Router() {
           <Route path="/admin/remote-desktop" component={RemoteDesktop} />
           <Route path="/admin/server-config" component={ServerConfig} />
           <Route path="/admin/batch-management" component={BatchManagement} />
+          <Route path="/admin/kpi-dashboard" component={lazy(() => import("@/pages/kpi-dashboard"))} />
+          <Route path="/admin/management-dashboard" component={lazy(() => import("@/pages/management-dashboard"))} />
           <Route path="/admin/detailed-inventory" component={DetailedInventory} />
 
           

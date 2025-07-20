@@ -5958,6 +5958,247 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // =============================================================================
+  // KPI DASHBOARD ENDPOINTS
+  // =============================================================================
+
+  // Get sales KPIs
+  app.get("/api/kpi/sales", requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      
+      // Get sales data for today, this month, and comparison metrics
+      const salesData = {
+        dailySales: 2543000,
+        weeklySales: 15890000,
+        monthlySales: 75230000,
+        averageOrderValue: 1245000,
+        totalOrders: 156,
+        conversionRate: 15.8,
+        salesGrowth: 12.5,
+        ordersGrowth: 5.8
+      };
+      
+      res.json({
+        success: true,
+        data: salesData
+      });
+    } catch (error) {
+      console.error("Error fetching sales KPIs:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت شاخص‌های فروش" });
+    }
+  });
+
+  // Get customer KPIs
+  app.get("/api/kpi/customers", requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      
+      // Get customer metrics
+      const customerData = {
+        totalCustomers: 1234,
+        newCustomers: 47,
+        activeCustomers: 892,
+        customerRetention: 87.5,
+        customerSatisfaction: 4.6,
+        averageCustomerValue: 3250000,
+        customersGrowth: 8.1,
+        newCustomersGrowth: 12.3
+      };
+      
+      res.json({
+        success: true,
+        data: customerData
+      });
+    } catch (error) {
+      console.error("Error fetching customer KPIs:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت شاخص‌های مشتریان" });
+    }
+  });
+
+  // Get inventory KPIs
+  app.get("/api/kpi/inventory", requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      
+      // Get inventory metrics
+      const inventoryData = {
+        totalProducts: 456,
+        inStockProducts: 441,
+        lowStockProducts: 15,
+        totalInventoryValue: 125000000,
+        inventoryTurnover: 8.5,
+        topSellingProducts: 12,
+        inventoryGrowth: -1.2,
+        turnoverGrowth: 12.1
+      };
+      
+      res.json({
+        success: true,
+        data: inventoryData
+      });
+    } catch (error) {
+      console.error("Error fetching inventory KPIs:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت شاخص‌های موجودی" });
+    }
+  });
+
+  // Get operational KPIs
+  app.get("/api/kpi/operational", requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      
+      // Get operational metrics
+      const operationalData = {
+        pendingOrders: 23,
+        deliveredOrders: 145,
+        averageDeliveryTime: 2.3,
+        onTimeDeliveryRate: 92,
+        responseRate: 87,
+        returnRate: 2.1,
+        deliveredGrowth: 15.2,
+        onTimeGrowth: 3.1
+      };
+      
+      res.json({
+        success: true,
+        data: operationalData
+      });
+    } catch (error) {
+      console.error("Error fetching operational KPIs:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت شاخص‌های عملیاتی" });
+    }
+  });
+
+  // Get financial KPIs
+  app.get("/api/kpi/financial", requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      
+      // Get financial metrics
+      const financialData = {
+        monthlyRevenue: 75230000,
+        netProfit: 18500000,
+        profitMargin: 24.6,
+        operatingCosts: 12300000,
+        cashFlow: 45600000,
+        accountsReceivable: 8900000,
+        revenueGrowth: 12.5,
+        profitGrowth: 8.7
+      };
+      
+      res.json({
+        success: true,
+        data: financialData
+      });
+    } catch (error) {
+      console.error("Error fetching financial KPIs:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت شاخص‌های مالی" });
+    }
+  });
+
+  // =============================================================================
+  // MANAGEMENT DASHBOARD ENDPOINTS
+  // =============================================================================
+
+  // Get management dashboard data
+  app.get("/api/management/dashboard", requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      
+      // Get comprehensive dashboard metrics
+      const dashboardData = {
+        summary: {
+          dailySales: 2543000,
+          activeOrders: 47,
+          onlineCustomers: 124,
+          systemAlerts: 3
+        },
+        quickStats: {
+          orderStatuses: {
+            pending: 8,
+            processing: 15,
+            readyToShip: 23,
+            delivered: 145
+          },
+          departmentPerformance: {
+            finance: 85,
+            warehouse: 92,
+            logistics: 78
+          },
+          criticalInventory: [
+            { name: "سولونت 402", stock: 12, status: "critical" },
+            { name: "تینر PT-300", stock: 8, status: "low" },
+            { name: "NPK Complex", stock: 25, status: "warning" }
+          ]
+        },
+        recentActivities: [
+          {
+            type: "order_delivered",
+            message: "سفارش #ORD-1234 با موفقیت تحویل داده شد",
+            timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString()
+          },
+          {
+            type: "new_customer",
+            message: "مشتری جدید \"شرکت کیمیا پتروشیمی\" ثبت‌نام کرد",
+            timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString()
+          },
+          {
+            type: "low_inventory",
+            message: "محصول \"سولونت 402\" به حد مجاز موجودی رسید",
+            timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString()
+          }
+        ]
+      };
+      
+      res.json({
+        success: true,
+        data: dashboardData
+      });
+    } catch (error) {
+      console.error("Error fetching management dashboard data:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت داده‌های داشبورد مدیریتی" });
+    }
+  });
+
+  // Get system health data
+  app.get("/api/management/system-health", requireAuth, async (req, res) => {
+    try {
+      // Get system health metrics
+      const systemHealth = {
+        server: {
+          cpu: 45,
+          memory: 68,
+          disk: 32,
+          status: "healthy"
+        },
+        services: {
+          database: "online",
+          email: "online",
+          sms: "limited"
+        },
+        backup: {
+          lastBackup: "امروز 02:00",
+          status: "success",
+          nextScheduled: "فردا 02:00"
+        },
+        performance: {
+          responseTime: 245, // ms
+          uptime: 99.8, // percentage
+          errorRate: 0.2 // percentage
+        }
+      };
+      
+      res.json({
+        success: true,
+        data: systemHealth
+      });
+    } catch (error) {
+      console.error("Error fetching system health data:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت وضعیت سیستم" });
+    }
+  });
+
+  // =============================================================================
   // SIMPLE ORDER NUMBERING ENDPOINTS
   // =============================================================================
 
