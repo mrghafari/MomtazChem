@@ -6,19 +6,27 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
-### COMPLETED: Returns Button Functionality Fixed (July 20, 2025)
-✅ **RESOLVED: Add New Return button now fully functional with complete return management system**
-- **Issue**: Returns button was not working due to missing form component and API errors
-- **Solution**: Added comprehensive ReturnForm component with full functionality
+### COMPLETED: Enhanced Returns Form with Auto-Complete Features (July 20, 2025)
+✅ **RESOLVED: Add New Return button with intelligent customer and product lookup**
+- **Issue**: Returns button was not working due to missing form component and needed smart data entry
+- **Solution**: Added comprehensive ReturnForm component with auto-complete functionality
 - **Components Added**: 
   - Complete return form dialog with product details, customer information, and return status
   - Return details dialog for viewing existing returns
   - Form validation and error handling
-- **API Fixes**: Enhanced getReturnStatistics method to use reliable data fetching approach
-- **Features**: Product ID, product name, quantities, customer details, return reasons, refund status management
+- **Smart Features Implemented**:
+  - ✅ **Automatic Customer Lookup**: When entering phone number, customer information auto-fills (name, email)
+  - ✅ **Product Name Suggestions**: Type part of product name to see dropdown suggestions (max 5 results)
+  - ✅ **Real-time Data Fetching**: 500ms debounced customer lookup, 300ms product suggestions
+  - ✅ **Persian Interface**: All notifications and help text in Persian language
+- **API Enhancements**: 
+  - Added `/api/crm/customers/by-phone/:phone` endpoint for customer lookup
+  - Enhanced getReturnStatistics method for reliable data fetching
+  - Integrated with existing shop products API for name suggestions
+- **Features**: Product ID, product name with autocomplete, quantities, customer auto-lookup, return reasons, refund status management
 - **Database Integration**: Full CRUD operations with product_returns table
-- **Result**: "Add New Return" button opens professional form for creating new product returns
-- **Impact**: Complete returns management system for tracking and processing customer returns
+- **Result**: "Add New Return" button opens intelligent form with auto-complete for faster data entry
+- **Impact**: Streamlined returns management with reduced data entry time and improved accuracy
 
 ### Enhanced Order Management Table with More Items Per Page (July 20, 2025)
 ✅ **COMPLETED: Increased table capacity to display more orders per page**

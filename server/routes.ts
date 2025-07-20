@@ -13489,6 +13489,41 @@ Leading Chemical Solutions Provider
     }
   });
 
+  // Get CRM customer by phone number
+  app.get("/api/crm/customers/by-phone/:phone", requireAuth, async (req, res) => {
+    try {
+      const phone = decodeURIComponent(req.params.phone);
+      
+      if (!phone || phone.length < 8) {
+        return res.status(400).json({
+          success: false,
+          message: "شماره تلفن نامعتبر است"
+        });
+      }
+
+      const customer = await crmStorage.getCrmCustomerByPhone(phone);
+      
+      if (!customer) {
+        return res.status(404).json({
+          success: false,
+          message: "مشتری با این شماره تلفن یافت نشد"
+        });
+      }
+
+      res.json({
+        success: true,
+        customer: customer,
+        message: "اطلاعات مشتری دریافت شد"
+      });
+    } catch (error) {
+      console.error("Error fetching customer by phone:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت اطلاعات مشتری"
+      });
+    }
+  });
+
   // Get specific CRM customer by ID
   app.get("/api/crm/customers/:id", requireAuth, async (req, res) => {
     try {

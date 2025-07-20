@@ -952,6 +952,8 @@ export default function ShopAdmin() {
 function ReturnForm({ onClose }: { onClose: () => void }) {
   const [productId, setProductId] = useState("");
   const [productName, setProductName] = useState("");
+  const [productSuggestions, setProductSuggestions] = useState<string[]>([]);
+  const [showProductSuggestions, setShowProductSuggestions] = useState(false);
   const [returnQuantity, setReturnQuantity] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
@@ -959,8 +961,112 @@ function ReturnForm({ onClose }: { onClose: () => void }) {
   const [returnReason, setReturnReason] = useState("");
   const [totalReturnAmount, setTotalReturnAmount] = useState("");
   const [refundStatus, setRefundStatus] = useState("pending");
+  const [isLoadingCustomer, setIsLoadingCustomer] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Function to fetch customer by phone number
+  const fetchCustomerByPhone = async (phone: string) => {
+    if (!phone || phone.length < 8) return;
+    
+    setIsLoadingCustomer(true);
+    try {
+      const response = await apiRequest('GET', `/api/crm/customers/by-phone/${encodeURIComponent(phone)}`);
+      const data = await response.json();
+      
+      if (data.success && data.customer) {
+        const customer = data.customer;
+        setCustomerName(`${customer.firstName || ''} ${customer.lastName || ''}`.trim());
+        setCustomerEmail(customer.email || '');
+        toast({
+          title: "مشتری یافت شد",
+          description: `اطلاعات مشتری ${customer.firstName} ${customer.lastName} بارگذاری شد`,
+        });
+      } else {
+        // Clear fields if customer not found
+        setCustomerName('');
+        setCustomerEmail('');
+        toast({
+          title: "مشتری یافت نشد",
+          description: "لطفاً اطلاعات مشتری را به صورت دستی وارد کنید",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching customer:', error);
+      toast({
+        title: "خطا در دریافت اطلاعات",
+        description: "خطا در دریافت اطلاعات مشتری",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoadingCustomer(false);
+    }
+  };
+
+  // Handle phone number change with debouncing
+  const handlePhoneChange = (phone: string) => {
+    setCustomerPhone(phone);
+    
+    // Clear existing timeout
+    const timeoutId = setTimeout(() => {
+      if (phone && phone.length >= 8) {
+        fetchCustomerByPhone(phone);
+      }
+    }, 500); // 500ms delay
+
+    return () => clearTimeout(timeoutId);
+  };
+
+  // Function to fetch product suggestions
+  const fetchProductSuggestions = async (query: string) => {
+    if (!query || query.length < 2) {
+      setProductSuggestions([]);
+      setShowProductSuggestions(false);
+      return;
+    }
+
+    try {
+      const response = await apiRequest('GET', `/api/shop/products`);
+      const data = await response.json();
+      
+      if (Array.isArray(data)) {
+        const filtered = data
+          .filter(product => 
+            product.name.toLowerCase().includes(query.toLowerCase())
+          )
+          .map(product => product.name)
+          .slice(0, 5); // Show max 5 suggestions
+        
+        setProductSuggestions(filtered);
+        setShowProductSuggestions(filtered.length > 0);
+      }
+    } catch (error) {
+      console.error('Error fetching product suggestions:', error);
+    }
+  };
+
+  // Handle product name change with debouncing
+  const handleProductNameChange = (name: string) => {
+    setProductName(name);
+    setShowProductSuggestions(false);
+    
+    // Clear existing timeout
+    const timeoutId = setTimeout(() => {
+      if (name && name.length >= 2) {
+        fetchProductSuggestions(name);
+      }
+    }, 300); // 300ms delay
+
+    return () => clearTimeout(timeoutId);
+  };
+
+  // Handle suggestion selection
+  const handleSuggestionSelect = (suggestion: string) => {
+    setProductName(suggestion);
+    setShowProductSuggestions(false);
+    setProductSuggestions([]);
+  };
 
   const createReturnMutation = useMutation({
     mutationFn: async (returnData: any) => {
@@ -1025,15 +1131,35 @@ function ReturnForm({ onClose }: { onClose: () => void }) {
           />
         </div>
         
-        <div>
+        <div className="relative">
           <Label htmlFor="productName">Product Name *</Label>
           <Input
             id="productName"
             value={productName}
-            onChange={(e) => setProductName(e.target.value)}
+            onChange={(e) => handleProductNameChange(e.target.value)}
             placeholder="Enter product name"
             required
           />
+          
+          {/* Product Suggestions Dropdown */}
+          {showProductSuggestions && productSuggestions.length > 0 && (
+            <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-40 overflow-y-auto">
+              {productSuggestions.map((suggestion, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  className="w-full px-3 py-2 text-left hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
+                  onClick={() => handleSuggestionSelect(suggestion)}
+                >
+                  {suggestion}
+                </button>
+              ))}
+            </div>
+          )}
+          
+          <p className="text-xs text-gray-500 mt-1">
+            نام محصول را تایپ کنید تا پیشنهادات نمایش داده شود
+          </p>
         </div>
 
         <div>
@@ -1072,14 +1198,17 @@ function ReturnForm({ onClose }: { onClose: () => void }) {
         </div>
 
         <div>
-          <Label htmlFor="customerPhone">Customer Phone *</Label>
+          <Label htmlFor="customerPhone">Customer Phone * {isLoadingCustomer && "(جستجو...)"}</Label>
           <Input
             id="customerPhone"
             value={customerPhone}
-            onChange={(e) => setCustomerPhone(e.target.value)}
+            onChange={(e) => handlePhoneChange(e.target.value)}
             placeholder="Enter phone number"
             required
           />
+          <p className="text-xs text-gray-500 mt-1">
+            اطلاعات مشتری پس از وارد کردن شماره تلفن به طور خودکار پر می‌شود
+          </p>
         </div>
 
         <div>
