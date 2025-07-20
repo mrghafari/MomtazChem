@@ -65,7 +65,6 @@ import {
   type AbandonedCartSettings,
   type AbandonedCartNotification
 } from "@shared/cart-schema";
-import { gpsDeliveryStorage } from "./gps-delivery-storage";
 import { logisticsStorage } from "./logistics-storage";
 import { 
   transportationCompanies,
@@ -92,7 +91,6 @@ import {
 import { 
   gpsDeliveryConfirmations,
   gpsDeliveryAnalytics,
-  insertGpsDeliveryConfirmationSchema,
   insertGpsDeliveryAnalyticsSchema,
   type GpsDeliveryConfirmation,
   type GpsDeliveryAnalytics
@@ -103,6 +101,14 @@ declare module "express-session" {
   interface SessionData {
     adminId?: number;
     customerId?: number;
+    customUserId?: number;
+    customerEmail?: string;
+    crmCustomerId?: number;
+    customUserEmail?: string;
+    customUserName?: string;
+    customUserRole?: string;
+    customUserPermissions?: string[];
+    customerType?: string;
     isAuthenticated?: boolean;
     departmentUser?: {
       id: number;
@@ -564,7 +570,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({
         status: 'unhealthy',
         timestamp: new Date().toISOString(),
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         services: {
           database: 'unhealthy',
           server: 'healthy'
@@ -1673,7 +1679,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { msdsUrl, showMsdsToCustomers, msdsFileName } = req.body;
 
       // Update shop product MSDS
-      await storage.updateShopProduct(parseInt(id), {
+      await storage.updateProduct(parseInt(id), {
         msdsUrl,
         showMsdsToCustomers,
         msdsFileName,
@@ -1682,7 +1688,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Also update showcase product if it exists
       try {
-        await storage.updateShowcaseProduct(parseInt(id), {
+        await storage.updateProduct(parseInt(id), {
           msdsUrl,
           showMsdsToCustomers,
           msdsFileName,
@@ -1712,7 +1718,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
 
       // Get product MSDS information
-      const product = await storage.getShopProduct(parseInt(id));
+      const product = await storage.getProductById(parseInt(id));
       
       if (!product || !product.msdsUrl || !product.showMsdsToCustomers) {
         return res.status(404).json({ 
@@ -2259,7 +2265,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json(product);
     } catch (error) {
-      console.error(`Error fetching product ${id}:`, error);
+      console.error(`Error fetching product ${req.params.id}:`, error);
       res.status(500).json({ 
         success: false, 
         message: "Internal server error",
@@ -2507,8 +2513,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               category: product.category,
               description: product.description,
               shortDescription: product.shortDescription || product.description,
-              price: product.unitPrice || product.price || 0,
-              priceUnit: product.currency || product.priceUnit || 'IQD',
+              price: product.unitPrice || 0,
+              priceUnit: product.currency || 'IQD',
               inStock: totalStock > 0 || (productData.showWhenOutOfStock || false),
               stockQuantity: totalStock, // Use total stock from all batches
               lowStockThreshold: 10,
@@ -2554,8 +2560,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const updateData = {
               stockQuantity: totalStock, // Use total stock from all batches
               inStock: totalStock > 0 || (productData.showWhenOutOfStock || false),
-              price: product.unitPrice || product.price || 0,
-              priceUnit: product.currency || product.priceUnit || 'IQD',
+              price: product.unitPrice || 0,
+              priceUnit: product.currency || 'IQD',
               description: product.description,
               shortDescription: product.shortDescription || product.description,
               imageUrls: product.imageUrl ? [product.imageUrl] : (existingShopProduct.imageUrls || []),
@@ -2571,7 +2577,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.log(`✅ محصول در فروشگاه به‌روزرسانی شد: ${product.name}`);
           }
         } catch (syncError) {
-          console.error(`❌ خطا در sync کردن محصول ${product.name}:`, syncError.message);
+          console.error(`❌ خطا در sync کردن محصول ${product.name}:`, syncError instanceof Error ? syncError.message : String(syncError));
           // Continue with the product update even if shop sync fails
         }
       } else if (productData.syncWithShop === false) {

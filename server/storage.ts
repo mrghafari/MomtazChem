@@ -113,7 +113,7 @@ export class DatabaseStorage implements IStorage {
       whereCondition = and(
         eq(showcaseProducts.sku, trimmedSku),
         sql`${showcaseProducts.id} != ${excludeId}`
-      );
+      ) as any;
     }
     
     const result = await showcaseDb
@@ -315,8 +315,9 @@ export class DatabaseStorage implements IStorage {
       
       // Extract price from unitPrice first, fallback to priceRange
       let productPrice = "50"; // Default price
-      if (showcaseProduct.unitPrice && showcaseProduct.unitPrice > 0) {
-        productPrice = showcaseProduct.unitPrice.toString();
+      const unitPriceNumber = parseFloat(showcaseProduct.unitPrice?.toString() || "0");
+      if (showcaseProduct.unitPrice && unitPriceNumber > 0) {
+        productPrice = unitPriceNumber.toString();
       } else if (showcaseProduct.priceRange) {
         const priceMatch = showcaseProduct.priceRange.match(/\$?(\d+(?:\.\d+)?)/);
         if (priceMatch) {
@@ -343,8 +344,7 @@ export class DatabaseStorage implements IStorage {
           grossWeight: showcaseProduct.grossWeight || null,
           weight: showcaseProduct.weight || showcaseProduct.grossWeight || null,
           weightUnit: showcaseProduct.weightUnit || 'kg',
-          // Batch tracking
-          batchNumber: showcaseProduct.batchNumber || null,
+          // Batch tracking not available in shop schema
           // Document fields sync
           showCatalogToCustomers: showcaseProduct.showCatalogToCustomers || false,
           showMsdsToCustomers: showcaseProduct.showMsdsToCustomers || false,
@@ -374,8 +374,7 @@ export class DatabaseStorage implements IStorage {
           grossWeight: showcaseProduct.grossWeight || null,
           weight: showcaseProduct.weight || showcaseProduct.grossWeight || null,
           weightUnit: showcaseProduct.weightUnit || 'kg',
-          // Batch tracking
-          batchNumber: showcaseProduct.batchNumber || null,
+          // Batch tracking not available in shop schema
           // Document fields sync
           showCatalogToCustomers: showcaseProduct.showCatalogToCustomers || false,
           showMsdsToCustomers: showcaseProduct.showMsdsToCustomers || false,
