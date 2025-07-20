@@ -24,7 +24,7 @@ import PreCheckoutModal from "@/components/checkout/pre-checkout-modal";
 import CustomerAuth from "@/components/auth/customer-auth";
 import { useMultilingualToast } from "@/hooks/use-multilingual-toast";
 import VisualBarcode from "@/components/ui/visual-barcode";
-import { ProductRating } from "@/components/ProductRating";
+import ProductRating from "@/components/ProductRating";
 import StarRating from "@/components/StarRating";
 import { ProductSpecsModal } from "@/components/ProductSpecsModal";
 
@@ -199,7 +199,7 @@ const Shop = () => {
 
 
   // Fetch product stats for ratings
-  const { data: productStats, isLoading: statsLoading, error: statsError } = useQuery({
+  const { data: productStats, isLoading: statsLoading, error: statsError } = useQuery<Record<number, { totalReviews: number; averageRating: number }>>({
     queryKey: ["/api/shop/product-stats"],
     retry: false,
   });
@@ -209,8 +209,8 @@ const Shop = () => {
   
   // Debug current products with their IDs
   if (filteredProducts && filteredProducts.length > 0) {
-    console.log('🌟 [RATINGS DEBUG] Current products:', filteredProducts.map(p => ({ id: p.id, name: p.name })));
-    console.log('🌟 [RATINGS DEBUG] Products with ratings:', filteredProducts.filter(p => productStats?.[p.id]).map(p => ({ id: p.id, name: p.name, rating: productStats[p.id] })));
+    console.log('🌟 [RATINGS DEBUG] Current products:', filteredProducts.map((p: any) => ({ id: p.id, name: p.name })));
+    console.log('🌟 [RATINGS DEBUG] Products with ratings:', filteredProducts.filter((p: any) => productStats?.[p.id]).map((p: any) => ({ id: p.id, name: p.name, rating: productStats?.[p.id] })));
   }
 
   // Initialize price range only once when first loaded
