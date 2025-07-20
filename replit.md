@@ -6,6 +6,17 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### CRITICAL FIX: Batch Consolidation in Sync System (July 20, 2025)
+✅ **RESOLVED: Fixed critical sync system bug causing incorrect inventory display**
+- **Issue**: Sync system was only using stockQuantity from first batch, ignoring other batches with same barcode
+- **Example**: Solvent 402 had 3 batches (2000+300+2400=4700 total) but shop showed only 2000
+- **Solution**: Enhanced kardex-sync-master.ts to calculate total stock from all batches with same barcode
+- **New Functions**: Added getTotalStockForBarcode() method for accurate batch consolidation
+- **Modified Methods**: Updated smartSyncShopFromKardex(), fullRebuildShopFromKardex(), copyKardexProductToShop(), and updateShopProductFromKardex()
+- **Result**: Shop products now show accurate total inventory from all batches (Solvent 402 now correctly shows 4700)
+- **Impact**: Eliminates inventory discrepancies between Kardex and Shop databases
+- **Status**: All sync operations now properly consolidate batch inventories for accurate stock reporting
+
 ### FIFO Batch Management System Implementation (July 19, 2025)
 ✅ **COMPLETED: Changed batch management from LIFO to FIFO methodology**
 - Updated `reduceInventoryFIFO` function to `reduceInventoryFIFO` with oldest-first processing (ORDER BY created_at ASC)

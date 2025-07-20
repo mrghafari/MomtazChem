@@ -28,19 +28,34 @@ export class KardexSyncMaster {
       // مرحله 1: دریافت محصولات کاردکس و تجمیع بر اساس barcode
       const allKardexProducts = await storage.getProducts();
       
-      // تجمیع محصولات بر اساس بارکد (برای batch های مختلف) - انتخاب اولین محصول از هر barcode
+      // تجمیع محصولات بر اساس بارکد (برای batch های مختلف) - محاسبه مجموع موجودی همه batches
       const kardexWithBarcode = allKardexProducts.filter(p => 
         p.barcode && p.barcode.trim() !== ''
       );
       
       const uniqueKardexBarcodes = new Map<string, any>();
+      const barcodeStockTotals = new Map<string, number>();
+      
       for (const product of kardexWithBarcode) {
         const barcode = product.barcode.trim();
+        const stockQuantity = product.stockQuantity || 0;
+        
         if (!uniqueKardexBarcodes.has(barcode)) {
+          // برای اولین batch از این barcode، محصول پایه را ذخیره می‌کنیم
           uniqueKardexBarcodes.set(barcode, product);
+          barcodeStockTotals.set(barcode, stockQuantity);
+        } else {
+          // برای batch های بعدی، فقط موجودی را جمع می‌کنیم
+          const currentTotal = barcodeStockTotals.get(barcode) || 0;
+          barcodeStockTotals.set(barcode, currentTotal + stockQuantity);
         }
       }
-      const kardexProducts = Array.from(uniqueKardexBarcodes.values());
+      
+      // بروزرسانی محصولات با مجموع موجودی صحیح
+      const kardexProducts = Array.from(uniqueKardexBarcodes.values()).map(product => ({
+        ...product,
+        stockQuantity: barcodeStockTotals.get(product.barcode.trim()) || 0
+      }));
       console.log(`📋 [KARDEX-SYNC] ${kardexProducts.length} محصول تجمیع شده (یونیک) در کاردکس`);
       
       // مرحله 2: پاک کردن کامل فروشگاه با تأیید
@@ -254,15 +269,30 @@ export class KardexSyncMaster {
         p.barcode && p.barcode.trim() !== ''
       );
       
-      // تجمیع محصولات بر اساس بارکد (برای batch های مختلف) - انتخاب اولین محصول از هر barcode
+      // تجمیع محصولات بر اساس بارکد (برای batch های مختلف) - محاسبه مجموع موجودی همه batches
       const uniqueKardexBarcodes = new Map<string, any>();
+      const barcodeStockTotals = new Map<string, number>();
+      
       for (const product of kardexWithBarcode) {
         const barcode = product.barcode.trim();
+        const stockQuantity = product.stockQuantity || 0;
+        
         if (!uniqueKardexBarcodes.has(barcode)) {
+          // برای اولین batch از این barcode، محصول پایه را ذخیره می‌کنیم
           uniqueKardexBarcodes.set(barcode, product);
+          barcodeStockTotals.set(barcode, stockQuantity);
+        } else {
+          // برای batch های بعدی، فقط موجودی را جمع می‌کنیم
+          const currentTotal = barcodeStockTotals.get(barcode) || 0;
+          barcodeStockTotals.set(barcode, currentTotal + stockQuantity);
         }
       }
-      const syncEnabledKardex = Array.from(uniqueKardexBarcodes.values());
+      
+      // بروزرسانی محصولات با مجموع موجودی صحیح
+      const syncEnabledKardex = Array.from(uniqueKardexBarcodes.values()).map(product => ({
+        ...product,
+        stockQuantity: barcodeStockTotals.get(product.barcode.trim()) || 0
+      }));
       
       // محصولاتی که در کاردکس هستند و باید در فروشگاه باشند (بر اساس بارکد EAN-13)
       const kardexBarcodes = new Set(syncEnabledKardex.map(p => p.barcode.trim()));
@@ -359,6 +389,9 @@ export class KardexSyncMaster {
       const uniqueSku = kardexProduct.sku || `SP-${kardexProduct.id}-${Date.now().toString().slice(-6)}`;
       
       // NOTE: isNonChemical field is intentionally NOT synced - remains showcase-only per user requirement
+      // محاسبه مجموع موجودی همه batches با همان barcode
+      const totalStock = await this.getTotalStockForBarcode(kardexProduct.barcode || '');
+      
       const shopProductData = {
         name: kardexProduct.name,
         category: kardexProduct.category,
@@ -366,7 +399,7 @@ export class KardexSyncMaster {
         shortDescription: kardexProduct.shortDescription || '',
         price: kardexProduct.unitPrice?.toString() || '0',
         priceUnit: kardexProduct.currency || 'IQD', // Currency field sync
-        stockQuantity: kardexProduct.stockQuantity || 0,
+        stockQuantity: totalStock,
         minStockLevel: kardexProduct.minStockLevel || 5,
         maxStockLevel: kardexProduct.maxStockLevel || 100,
         lowStockThreshold: 10,
@@ -387,7 +420,7 @@ export class KardexSyncMaster {
         msdsUrl: kardexProduct.msdsUrl || null,
         syncWithShop: kardexProduct.syncWithShop !== false,
         showWhenOutOfStock: kardexProduct.showWhenOutOfStock || false,
-        inStock: (kardexProduct.stockQuantity || 0) > 0 || (kardexProduct.showWhenOutOfStock || false)
+        inStock: totalStock > 0 || (kardexProduct.showWhenOutOfStock || false)
       };
       
       await shopStorage.createShopProduct(shopProductData);
@@ -403,6 +436,9 @@ export class KardexSyncMaster {
    */
   private static async updateShopProductFromKardex(shopProductId: number, kardexProduct: ShowcaseProduct): Promise<void> {
     try {
+      // محاسبه مجموع موجودی همه batches با همان barcode
+      const totalStock = await this.getTotalStockForBarcode(kardexProduct.barcode || '');
+      
       const updateData = {
         name: kardexProduct.name,
         category: kardexProduct.category,
@@ -410,7 +446,7 @@ export class KardexSyncMaster {
         shortDescription: kardexProduct.shortDescription || '',
         price: kardexProduct.unitPrice?.toString() || '0',
         priceUnit: kardexProduct.currency || 'IQD', // Currency field sync
-        stockQuantity: kardexProduct.stockQuantity || 0,
+        stockQuantity: totalStock,
         minStockLevel: kardexProduct.minStockLevel || 5,
         maxStockLevel: kardexProduct.maxStockLevel || 100,
         sku: kardexProduct.sku || `UP-${kardexProduct.id}-${Date.now().toString().slice(-6)}`,
@@ -430,7 +466,7 @@ export class KardexSyncMaster {
         msdsUrl: kardexProduct.msdsUrl || null,
         syncWithShop: kardexProduct.syncWithShop !== false,
         showWhenOutOfStock: kardexProduct.showWhenOutOfStock || false,
-        inStock: (kardexProduct.stockQuantity || 0) > 0 || (kardexProduct.showWhenOutOfStock || false)
+        inStock: totalStock > 0 || (kardexProduct.showWhenOutOfStock || false)
       };
       
       await shopStorage.updateShopProduct(shopProductId, updateData);
@@ -554,6 +590,28 @@ export class KardexSyncMaster {
         missingInShop: [],
         extraInShop: []
       };
+    }
+  }
+
+  /**
+   * محاسبه مجموع موجودی همه batches برای یک barcode خاص
+   */
+  private static async getTotalStockForBarcode(barcode: string): Promise<number> {
+    try {
+      const allKardexProducts = await storage.getProducts();
+      const matchingProducts = allKardexProducts.filter(p => 
+        p.barcode && p.barcode.trim() === barcode.trim()
+      );
+      
+      const totalStock = matchingProducts.reduce((total, product) => {
+        return total + (product.stockQuantity || 0);
+      }, 0);
+      
+      console.log(`📊 [KARDEX-SYNC] مجموع موجودی برای بارکد ${barcode}: ${totalStock} (از ${matchingProducts.length} batch)`);
+      return totalStock;
+    } catch (error) {
+      console.error(`❌ [KARDEX-SYNC] خطا در محاسبه موجودی برای بارکد ${barcode}:`, error);
+      return 0;
     }
   }
 }

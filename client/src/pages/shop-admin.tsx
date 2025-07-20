@@ -25,6 +25,8 @@ import {
   CreditCard,
   FileText,
   User,
+  Phone,
+  Mail,
   Receipt,
   Building,
   Clock
@@ -1061,7 +1063,7 @@ ${data.data.map((item: any) =>
                     <div className="space-y-3">
                       {filteredOrders.map(order => (
                         <div key={order.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
-                          {/* Left section: Order details and customer */}
+                          {/* Left section: Order details */}
                           <div className="flex-1">
                             <div className="flex items-center gap-3 mb-2">
                               <h3 className="font-semibold text-gray-900">#{order.orderNumber}</h3>
@@ -1072,64 +1074,48 @@ ${data.data.map((item: any) =>
                             <p className="text-sm text-gray-600 mb-1">
                               {formatDate(order.createdAt.toString())}
                             </p>
-                            {(order as any).customer && (
-                              <p className="text-sm text-blue-600">
-                                {(order as any).customer.firstName} {(order as any).customer.lastName}
-                              </p>
-                            )}
+                            <p className="text-sm text-gray-600">
+                              مبلغ: <span className="font-semibold text-lg text-green-600">{order.totalAmount} IQD</span>
+                            </p>
                           </div>
 
-                          {/* Center section: Payment and shipping */}
-                          <div className="flex-1 text-center">
-                            {(order as any).paymentMethod && (
-                              <p className="text-sm text-purple-600 font-medium mb-1">
-                                {(order as any).paymentMethod === 'bank_transfer' ? 'Bank Transfer' : 
-                                 (order as any).paymentMethod === 'cash_on_delivery' ? 'Cash on Delivery' :
-                                 (order as any).paymentMethod === 'company_credit' ? 'Company Credit' : (order as any).paymentMethod}
-                              </p>
-                            )}
-                            {(order as any).carrier && (
-                              <p className="text-sm text-green-600 font-medium">
-                                {(order as any).carrier}
-                              </p>
-                            )}
+                          {/* Center section: Customer Information */}
+                          <div className="flex-1 px-4">
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
+                                <User className="w-4 h-4 text-blue-500" />
+                                <span className="text-sm font-medium text-gray-700">
+                                  {(order as any).customerName || (order as any).customer?.firstName 
+                                    ? `${(order as any).customer?.firstName || ''} ${(order as any).customer?.lastName || ''}`.trim()
+                                    : 'نام نامشخص'}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Phone className="w-4 h-4 text-green-500" />
+                                <span className="text-sm text-gray-600">
+                                  {(order as any).customerPhone || (order as any).customer?.phone || 'موبایل نامشخص'}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Mail className="w-4 h-4 text-purple-500" />
+                                <span className="text-sm text-gray-600">
+                                  {(order as any).customerEmail || (order as any).customer?.email || 'ایمیل نامشخص'}
+                                </span>
+                              </div>
+                            </div>
                           </div>
 
-                          {/* Right section: Amount and actions */}
-                          <div className="flex items-center gap-4">
-                            <div className="text-right">
-                              <p className="font-semibold text-lg">${order.totalAmount}</p>
-                            </div>
-                            <div className="flex gap-2">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => setSelectedOrder(order)}
-                              >
-                                <Eye className="w-4 h-4" />
-                              </Button>
-                              <Select
-                                value={order.status}
-                                onValueChange={(newStatus) => {
-                                  updateOrderMutation.mutate({
-                                    orderId: order.id,
-                                    updates: { status: newStatus }
-                                  });
-                                }}
-                              >
-                                <SelectTrigger className="w-32">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="pending">Pending</SelectItem>
-                                  <SelectItem value="confirmed">Confirmed</SelectItem>
-                                  <SelectItem value="processing">Processing</SelectItem>
-                                  <SelectItem value="shipped">Shipped</SelectItem>
-                                  <SelectItem value="delivered">Delivered</SelectItem>
-                                  <SelectItem value="cancelled">Cancelled</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
+                          {/* Right section: View Details only */}
+                          <div className="flex items-center">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setSelectedOrder(order)}
+                              className="bg-blue-50 hover:bg-blue-100 border-blue-200"
+                            >
+                              <Eye className="w-4 h-4 mr-1" />
+                              جزئیات
+                            </Button>
                           </div>
                         </div>
                       ))}
