@@ -381,10 +381,17 @@ export default function SiteManagement() {
   const getFilteredButtons = () => {
     if (isLoadingPermissions || !userPermissions?.success) return [];
     
-    const allowedModules = userPermissions.permissions?.map((p: any) => p.moduleId) || [];
+    console.log('🔍 [DEBUG] Full userPermissions response:', userPermissions);
+    console.log('🔍 [DEBUG] userPermissions.modules:', userPermissions.modules);
+    console.log('🔍 [DEBUG] userPermissions.permissions:', userPermissions.permissions);
+    
+    // Try both the modules array and permissions array for compatibility
+    const allowedModules = userPermissions.modules || userPermissions.permissions?.map((p: any) => p.moduleId) || [];
     const allButtons = getInitialButtons();
     
     console.log('🔍 [DEBUG] allowedModules:', allowedModules);
+    console.log('🔍 [DEBUG] kpi_dashboard in allowedModules?', allowedModules.includes('kpi_dashboard'));
+    console.log('🔍 [DEBUG] management_dashboard in allowedModules?', allowedModules.includes('management_dashboard'));
     console.log('🔍 [DEBUG] finance in allowedModules?', allowedModules.includes('finance'));
     console.log('🔍 [DEBUG] geography_analytics in allowedModules?', allowedModules.includes('geography_analytics'));
     

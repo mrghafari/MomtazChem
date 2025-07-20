@@ -18787,13 +18787,21 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         );
         
         console.log(`✓ [PERMISSIONS] Super admin ${legacyUser[0].email} has all modules:`, normalizedModules);
+        console.log(`🔍 [DEBUG] kpi_dashboard in normalizedModules?`, normalizedModules.includes('kpi_dashboard'));
+        console.log(`🔍 [DEBUG] management_dashboard in normalizedModules?`, normalizedModules.includes('management_dashboard'));
 
         // Convert technical module IDs to Persian names for super admin
-        const persianModules = normalizedModules.map(moduleId => 
-          convertTechnicalToPersianModule(moduleId)
-        );
+        const persianModules = normalizedModules.map(moduleId => {
+          const persianName = convertTechnicalToPersianModule(moduleId);
+          if (moduleId === 'kpi_dashboard' || moduleId === 'management_dashboard') {
+            console.log(`🔍 [DEBUG] Converting ${moduleId} → ${persianName}`);
+          }
+          return persianName;
+        });
 
         console.log(`✓ [PERMISSIONS] Super admin Persian modules:`, persianModules);
+        console.log(`🔍 [DEBUG] کیا شاخص‌های عملکرد (KPI) in persianModules?`, persianModules.includes('شاخص‌های عملکرد (KPI)'));
+        console.log(`🔍 [DEBUG] داشبورد مدیریتی in persianModules?`, persianModules.includes('داشبورد مدیریتی'));
         console.log(`🔍 [DEBUG] finance mapping: ${normalizedModules.includes('finance')} → ${persianModules.includes('مدیریت مالی')}`);
         console.log(`🔍 [DEBUG] geography_analytics mapping: ${normalizedModules.includes('geography_analytics')} → ${persianModules.includes('آمار جغرافیایی')}`);
 
