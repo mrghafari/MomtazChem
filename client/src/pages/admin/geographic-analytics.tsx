@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Legend } from 'recharts';
 import { MapPin, Package, TrendingUp, Users, DollarSign, ShoppingCart, Calendar, Download, Filter, ArrowUpDown, ArrowUp, ArrowDown, Navigation, Target, Clock, CheckCircle, AlertTriangle, Maximize2, Minimize2 } from "lucide-react";
 
 interface GeographicData {
@@ -1184,11 +1184,11 @@ export default function GeographicAnalytics() {
                       )}
 
                       {/* Legacy expandable section - remove this */}
-                      {false && gpsDeliveries.length > 20 && (
+                      {false && gpsDeliveries && gpsDeliveries.length > 20 && (
                         <div id="expanded-gps-table" style={{ display: 'none' }} className="overflow-x-auto">
                           <table className="w-full border-collapse border border-gray-300">
                             <tbody>
-                              {gpsDeliveries.slice(20).map((delivery, index) => (
+                              {gpsDeliveries && gpsDeliveries.slice(20).map((delivery, index) => (
                                 <tr key={`expanded-${delivery.id || index}`} className="hover:bg-gray-50">
                                   <td className="border border-gray-300 px-3 py-2 font-medium">
                                     #{delivery.customerOrderId}

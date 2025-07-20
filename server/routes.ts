@@ -19971,6 +19971,188 @@ ${message ? `Additional Requirements:\n${message}` : ''}
   });
 
   // ============================================================================
+  // GEOGRAPHIC ANALYTICS API
+  // ============================================================================
+  
+  // Geographic Analytics - Main endpoint
+  app.get('/api/geographic-analytics', requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      
+      // Get order statistics by geography (countries/cities)
+      const geographicStats = await pool.query(`
+        SELECT 
+          'Iraq' as country,
+          CASE 
+            WHEN shipping_address LIKE '%بغداد%' OR shipping_address LIKE '%Baghdad%' THEN 'Baghdad'
+            WHEN shipping_address LIKE '%بصره%' OR shipping_address LIKE '%Basra%' THEN 'Basra'
+            WHEN shipping_address LIKE '%اربیل%' OR shipping_address LIKE '%Erbil%' THEN 'Erbil'
+            WHEN shipping_address LIKE '%سلیمانیه%' OR shipping_address LIKE '%Sulaymaniyah%' THEN 'Sulaymaniyah'
+            WHEN shipping_address LIKE '%موصل%' OR shipping_address LIKE '%Mosul%' THEN 'Mosul'
+            WHEN shipping_address LIKE '%نجف%' OR shipping_address LIKE '%Najaf%' THEN 'Najaf'
+            WHEN shipping_address LIKE '%کربلا%' OR shipping_address LIKE '%Karbala%' THEN 'Karbala'
+            ELSE 'Other Cities'
+          END as city,
+          COUNT(*) as totalOrders,
+          SUM(total_amount) as totalRevenue,
+          COUNT(DISTINCT customer_id) as customerCount,
+          AVG(total_amount) as avgOrderValue
+        FROM customer_orders 
+        WHERE status != 'cancelled'
+        GROUP BY city
+        ORDER BY totalRevenue DESC
+      `);
+
+      // Get GPS delivery data - check if table exists first
+      let gpsDeliveries = { rows: [] };
+      let gpsStats = { rows: [{ 
+        totalDeliveries: 0,
+        successfulDeliveries: 0,
+        averageAccuracy: 0,
+        coverageCountries: 0,
+        coverageCities: 0,
+        uniqueDeliveryPersons: 0 
+      }] };
+      
+      try {
+        gpsDeliveries = await pool.query(`
+          SELECT 
+            gd.id,
+            gd.customer_order_id as customerOrderId,
+            gd.latitude,
+            gd.longitude,
+            gd.accuracy,
+            gd.delivery_person_name as deliveryPersonName,
+            gd.delivery_person_phone as deliveryPersonPhone,
+            gd.address_matched as addressMatched,
+            gd.customer_address as customerAddress,
+            gd.detected_address as detectedAddress,
+            gd.distance_from_customer as distanceFromCustomer,
+            gd.country,
+            gd.city,
+            gd.region,
+            gd.verification_time as verificationTime,
+            gd.delivery_notes as deliveryNotes
+          FROM gps_delivery_confirmations gd
+          ORDER BY gd.verification_time DESC
+          LIMIT 100
+        `);
+
+        // Calculate GPS stats
+        gpsStats = await pool.query(`
+          SELECT 
+            COUNT(*) as totalDeliveries,
+            COUNT(CASE WHEN address_matched = true THEN 1 END) as successfulDeliveries,
+            AVG(CAST(accuracy AS FLOAT)) as averageAccuracy,
+            COUNT(DISTINCT country) as coverageCountries,
+            COUNT(DISTINCT city) as coverageCities,
+            COUNT(DISTINCT delivery_person_name) as uniqueDeliveryPersons
+          FROM gps_delivery_confirmations
+        `);
+      } catch (gpsError) {
+        console.log('GPS delivery table not available, using empty data:', gpsError.message);
+      }
+
+      res.json({
+        success: true,
+        data: {
+          geographic: geographicStats.rows,
+          gpsDeliveries: gpsDeliveries.rows,
+          gpsStats: gpsStats.rows[0] || {
+            totalDeliveries: 0,
+            successfulDeliveries: 0,
+            averageAccuracy: 0,
+            coverageCountries: 0,
+            coverageCities: 0,
+            uniqueDeliveryPersons: 0
+          }
+        }
+      });
+    } catch (error) {
+      console.error('Geographic Analytics Error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error fetching geographic analytics data'
+      });
+    }
+  });
+
+  // Product Analytics by Geography
+  app.get('/api/geographic-analytics/products', requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      
+      const productAnalytics = await pool.query(`
+        SELECT 
+          sp.name,
+          sp.category,
+          SUM(oi.quantity) as totalSales,
+          SUM(oi.total_price) as revenue,
+          CASE 
+            WHEN co.shipping_address LIKE '%بغداد%' OR co.shipping_address LIKE '%Baghdad%' THEN 'Baghdad'
+            WHEN co.shipping_address LIKE '%بصره%' OR co.shipping_address LIKE '%Basra%' THEN 'Basra'
+            WHEN co.shipping_address LIKE '%اربیل%' OR co.shipping_address LIKE '%Erbil%' THEN 'Erbil'
+            ELSE 'Other Cities'
+          END as region
+        FROM order_items oi
+        LEFT JOIN customer_orders co ON oi.order_id = co.id
+        LEFT JOIN shop_products sp ON oi.product_id = sp.id
+        WHERE co.status != 'cancelled'
+        GROUP BY sp.name, sp.category, region
+        ORDER BY revenue DESC
+        LIMIT 50
+      `);
+
+      res.json({
+        success: true,
+        data: productAnalytics.rows
+      });
+    } catch (error) {
+      console.error('Product Analytics Error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error fetching product analytics data'
+      });
+    }
+  });
+
+  // Time Series Analytics
+  app.get('/api/geographic-analytics/timeseries', requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      
+      const timeSeriesData = await pool.query(`
+        SELECT 
+          DATE(created_at) as date,
+          COUNT(*) as orders,
+          SUM(total_amount) as revenue,
+          CASE 
+            WHEN shipping_address LIKE '%بغداد%' OR shipping_address LIKE '%Baghdad%' THEN 'Baghdad'
+            WHEN shipping_address LIKE '%بصره%' OR shipping_address LIKE '%Basra%' THEN 'Basra'
+            WHEN shipping_address LIKE '%اربیل%' OR shipping_address LIKE '%Erbil%' THEN 'Erbil'
+            ELSE 'Others'
+          END as region
+        FROM customer_orders 
+        WHERE status != 'cancelled'
+          AND created_at >= NOW() - INTERVAL '30 days'
+        GROUP BY DATE(created_at), region
+        ORDER BY date DESC
+      `);
+
+      res.json({
+        success: true,
+        data: timeSeriesData.rows
+      });
+    } catch (error) {
+      console.error('Time Series Analytics Error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error fetching time series analytics data'
+      });
+    }
+  });
+
+  // ============================================================================
   // ROLE-BASED ACCESS CONTROL API
   // ============================================================================
 
