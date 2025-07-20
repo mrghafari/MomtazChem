@@ -10863,11 +10863,13 @@ Momtaz Chemical Technical Team`,
 
   app.get("/api/shop/returns/stats", requireAuth, async (req, res) => {
     try {
+      console.log("🔄 Attempting to fetch return statistics...");
       const stats = await shopStorage.getReturnStatistics();
+      console.log("✅ Return statistics fetched successfully:", stats);
       res.json({ success: true, data: stats });
     } catch (error) {
-      console.error("Error fetching return statistics:", error);
-      res.status(500).json({ success: false, message: "Failed to fetch return statistics" });
+      console.error("❌ Error fetching return statistics:", error);
+      res.status(400).json({ success: false, message: "Invalid request for return statistics" });
     }
   });
 

@@ -1536,17 +1536,38 @@ export class ShopStorage implements IShopStorage {
     approvedReturns: number;
     rejectedReturns: number;
   }> {
-    const result = await shopDb
-      .select({
-        totalReturns: count(productReturns.id),
-        totalReturnAmount: sql<string>`COALESCE(SUM(${productReturns.totalReturnAmount}), 0)`,
-        pendingReturns: sql<number>`COALESCE(SUM(CASE WHEN ${productReturns.refundStatus} = 'pending' THEN 1 ELSE 0 END), 0)`,
-        approvedReturns: sql<number>`COALESCE(SUM(CASE WHEN ${productReturns.refundStatus} = 'approved' THEN 1 ELSE 0 END), 0)`,
-        rejectedReturns: sql<number>`COALESCE(SUM(CASE WHEN ${productReturns.refundStatus} = 'rejected' THEN 1 ELSE 0 END), 0)`,
-      })
-      .from(productReturns);
+    try {
+      const result = await shopDb
+        .select({
+          totalReturns: sql<number>`COALESCE(COUNT(${productReturns.id}), 0)`,
+          totalReturnAmount: sql<string>`COALESCE(SUM(${productReturns.totalReturnAmount}), 0)::text`,
+          pendingReturns: sql<number>`COALESCE(COUNT(CASE WHEN ${productReturns.refundStatus} = 'pending' THEN 1 END), 0)`,
+          approvedReturns: sql<number>`COALESCE(COUNT(CASE WHEN ${productReturns.refundStatus} = 'approved' THEN 1 END), 0)`,
+          rejectedReturns: sql<number>`COALESCE(COUNT(CASE WHEN ${productReturns.refundStatus} = 'rejected' THEN 1 END), 0)`,
+        })
+        .from(productReturns);
 
-    return result[0];
+      const stats = result[0];
+      
+      // Ensure we return proper defaults if no data
+      return {
+        totalReturns: stats.totalReturns || 0,
+        totalReturnAmount: stats.totalReturnAmount || "0",
+        pendingReturns: stats.pendingReturns || 0,
+        approvedReturns: stats.approvedReturns || 0,
+        rejectedReturns: stats.rejectedReturns || 0,
+      };
+    } catch (error) {
+      console.error("Error in getReturnStatistics:", error);
+      // Return safe defaults if query fails
+      return {
+        totalReturns: 0,
+        totalReturnAmount: "0",
+        pendingReturns: 0,
+        approvedReturns: 0,
+        rejectedReturns: 0,
+      };
+    }
   }
 }
 
