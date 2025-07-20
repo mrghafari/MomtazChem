@@ -6,14 +6,23 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
-### COMPLETED: Delivered Orders Display Sorted by Latest First (July 20, 2025)
-✅ **FULLY IMPLEMENTED: Delivered orders now display with newest deliveries at the top**
-- **Sorting Logic**: Enhanced getOrdersByDepartment method to detect delivered orders status filter
-- **Order Criteria**: Delivered orders sorted by actualDeliveryDate in descending order (newest first)
-- **Active Orders**: Non-delivered orders continue using ascending order by createdAt (oldest first)
-- **Smart Detection**: System automatically detects when showing delivered orders (logistics_delivered, completed statuses)
-- **User Experience**: Most recent deliveries now appear at top of delivered orders list
-- **Result**: Delivered orders tab shows newest deliveries first while maintaining chronological order for active processing
+### COMPLETED: Delivered Orders Sorting & Delivery Code Display Enhancement (July 20, 2025)
+✅ **FULLY IMPLEMENTED: Delivered orders with newest-first sorting and improved delivery code display**
+- **Smart Sorting System**: 
+  - Frontend uses separate queries for active vs delivered orders
+  - Delivered orders query uses `?statuses=logistics_delivered,completed` parameter
+  - Backend detects delivered status filter and applies `desc(actualDeliveryDate)` sorting
+  - Active orders maintain `asc(createdAt)` sorting for processing workflow
+- **Enhanced UI Design**:
+  - Delivery code now displays directly next to delivery date in header: "تاریخ تحویل [کد: ABC123]"
+  - Green badge format for delivery code visibility 
+  - Removed duplicate delivery code block to reduce clutter
+- **Query Architecture**:
+  - Separate useQuery for active orders: `/api/order-management/logistics`
+  - Dedicated useQuery for delivered orders: `/api/order-management/logistics?statuses=logistics_delivered,completed`
+  - Enhanced cache invalidation for both query types
+- **User Experience**: Newest deliveries appear first in delivered orders tab with delivery codes prominently displayed next to dates
+- **Result**: Complete sorting and display solution ensuring newest deliveries show first with streamlined delivery code presentation
 
 ### COMPLETED: Logistics Department File Completely Removed (July 20, 2025)
 ✅ **FULLY COMPLETED: Complete removal of logistics-department file and cleanup per user request**

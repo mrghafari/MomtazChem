@@ -535,26 +535,17 @@ const LogisticsManagement = () => {
               <h5 className="font-medium text-yellow-800 mb-2 flex items-center">
                 <Truck className="w-4 h-4 mr-2" />
                 تاریخ تحویل
+                {order.deliveryCode && (
+                  <span className="mr-2 px-2 py-1 bg-green-100 text-green-700 text-xs rounded-md font-bold">
+                    کد: {order.deliveryCode}
+                  </span>
+                )}
               </h5>
               <p className="text-sm font-medium text-yellow-700">
                 {order.actualDeliveryDate ? new Date(order.actualDeliveryDate).toLocaleDateString('en-US') : 'در انتظار تحویل'}
               </p>
               <p className="text-xs text-yellow-600 mt-1">تاریخ تحویل سفارش</p>
             </div>
-
-            {/* Tracking Code Block (for delivered orders) */}
-            {!showDeliveryButton && order.deliveryCode && (
-              <div className="bg-purple-50 rounded-lg p-3 border border-purple-200">
-                <h5 className="font-medium text-purple-800 mb-2 flex items-center">
-                  <CheckCircle className="w-4 h-4 mr-2" />
-                  کد تحویل
-                </h5>
-                <p className="text-sm font-medium text-purple-700">
-                  {order.deliveryCode}
-                </p>
-                <p className="text-xs text-purple-600 mt-1">کد رهگیری تحویل</p>
-              </div>
-            )}
           </div>
 
           {/* Action Buttons */}
