@@ -133,6 +133,46 @@ const CustomerProfile = () => {
     }
   };
 
+  const handleCancelOrder = async (orderId: number, orderNumber: string) => {
+    if (!confirm(`آیا مطمئن هستید که می‌خواهید سفارش ${orderNumber} را لغو کنید؟ موجودی رزرو شده به فروشگاه بازگردانده خواهد شد.`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/customers/orders/${orderId}/cancel`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          reason: 'لغو توسط مشتری - آزادسازی موجودی'
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'خطا در لغو سفارش');
+      }
+
+      toast({
+        title: "سفارش لغو شد",
+        description: "سفارش با موفقیت لغو شد و موجودی به فروشگاه بازگردانده شد",
+      });
+
+      // Refresh order data
+      window.location.reload();
+
+    } catch (error) {
+      console.error('Error canceling order:', error);
+      toast({
+        variant: "destructive",
+        title: "خطا در لغو سفارش",
+        description: error.message || "امکان لغو سفارش وجود ندارد",
+      });
+    }
+  };
+
   const handleDownloadInvoice = async (orderId: number) => {
     try {
       // First, generate invoice from order if doesn't exist
@@ -225,6 +265,14 @@ const CustomerProfile = () => {
   const customer = customerData.customer;
   const orders = orderData?.success ? orderData.orders : [];
 
+  // Check for unpaid orders
+  const unpaidOrders = orders.filter(order => 
+    order.current_status === 'pending' || 
+    order.current_status === 'payment_grace_period' ||
+    order.payment_status === 'unpaid' ||
+    order.payment_status === 'pending'
+  );
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -292,6 +340,40 @@ const CustomerProfile = () => {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-6xl mx-auto px-4">
         {/* Header */}
+        {/* Unpaid Orders Notification */}
+        {unpaidOrders.length > 0 && (
+          <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg" dir="rtl">
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="w-6 h-6 text-yellow-600" />
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-yellow-800">
+                  {customer.firstName} {customer.lastName} - توجه: سفارشات پرداخت نشده
+                </h3>
+                <p className="text-yellow-700 mt-1">
+                  شما {unpaidOrders.length} سفارش پرداخت نشده دارید. لطفاً پرداخت کنید یا سفارش را لغو کنید تا موجودی آزاد شود.
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {unpaidOrders.map(order => (
+                    <div key={order.id} className="flex items-center gap-2 bg-yellow-100 px-3 py-1 rounded-md">
+                      <span className="text-sm font-medium text-yellow-800">
+                        {order.simple_order_number || `ORD-${order.id}`}
+                      </span>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleCancelOrder(order.id, order.simple_order_number || `ORD-${order.id}`)}
+                        className="text-xs bg-red-50 border-red-200 text-red-700 hover:bg-red-100"
+                      >
+                        لغو سفارش
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="flex justify-between items-center mb-8">
           <div>
             <div className="mb-4">

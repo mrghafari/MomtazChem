@@ -16,6 +16,22 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Result**: KPI Dashboard deployment blockers completely resolved - build passes without syntax errors
 - **Impact**: Application now ready for production deployment without compilation failures
 
+### COMPLETED: Customer Unpaid Order Notification System with Order Cancellation (July 20, 2025)
+✅ **IMPLEMENTED: Yellow background warning system for customers with unpaid orders**
+- **Feature**: Customer profile displays yellow notification banner when customer has unpaid orders
+- **Customer Name Integration**: Warning shows customer name with Persian text: "{firstName} {lastName} - توجه: سفارشات پرداخت نشده"
+- **Order Identification**: System detects unpaid orders by checking for 'pending', 'payment_grace_period', 'unpaid', or 'pending' payment status
+- **Visual Design**: Yellow background notification with AlertTriangle icon for clear visibility
+- **Order Cancellation**: Each unpaid order shows cancel button allowing customer to cancel and free up reserved inventory
+- **Inventory Release**: When order is cancelled, reserved stock is automatically returned to available inventory through InventoryWorkflow
+- **Confirmation Dialog**: Customer must confirm cancellation with order number display
+- **Backend API**: Created `/api/customers/orders/:orderId/cancel` endpoint with proper authentication and inventory management
+- **Status Updates**: Cancelled orders update both customer_orders and order_management tables to 'cancelled' status
+- **Persian Interface**: All notifications, confirmations, and messages in Persian language
+- **Security**: Only customers can cancel their own orders, with proper ownership verification
+- **Result**: Complete notification and cancellation system for unpaid orders with automatic inventory release
+- **Impact**: Customers receive immediate notification of unpaid orders and can easily cancel to free reserved inventory for other customers
+
 ### COMPLETED: Bank Receipt Upload System for Temporary Orders Fixed (July 20, 2025)
 ✅ **RESOLVED: Fixed critical bank receipt upload authentication issue for temporary orders**
 - **Issue**: Users reported that bank receipt upload (فیش بانکی) was not working for temporary orders with grace period

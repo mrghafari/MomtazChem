@@ -9863,6 +9863,93 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Cancel customer order and release reserved inventory
+  app.post("/api/customers/orders/:orderId/cancel", async (req, res) => {
+    try {
+      const customerId = (req.session as any)?.customerId;
+      const crmCustomerId = (req.session as any)?.crmCustomerId;
+      
+      if (!customerId && !crmCustomerId) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "احراز هویت نشده" 
+        });
+      }
+
+      const { orderId } = req.params;
+      const { reason } = req.body;
+      const finalCustomerId = crmCustomerId || customerId;
+
+      // Import inventory workflow
+      const { InventoryWorkflow } = await import('./inventory-workflow');
+      const inventoryWorkflow = new InventoryWorkflow();
+
+      // Verify this order belongs to the customer
+      const { pool } = await import('./db');
+      const orderCheck = await pool.query(`
+        SELECT co.*, om.current_status 
+        FROM customer_orders co 
+        LEFT JOIN order_management om ON om.customer_order_id = co.id
+        WHERE co.id = $1 AND co.customer_id = $2
+      `, [orderId, finalCustomerId]);
+
+      if (orderCheck.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "سفارش یافت نشد یا متعلق به شما نیست"
+        });
+      }
+
+      const order = orderCheck.rows[0];
+      
+      // Check if order can be cancelled
+      const cancellableStatuses = ['pending', 'payment_grace_period', 'financial_pending'];
+      if (!cancellableStatuses.includes(order.current_status)) {
+        return res.status(400).json({
+          success: false,
+          message: "امکان لغو این سفارش وجود ندارد - سفارش در حال پردازش است"
+        });
+      }
+
+      // Cancel order and release inventory
+      const cancelResult = await inventoryWorkflow.cancelOrder(
+        parseInt(orderId),
+        reason || 'لغو توسط مشتری - آزادسازی موجودی'
+      );
+
+      if (cancelResult.success) {
+        // Update order status to cancelled
+        await pool.query(`
+          UPDATE customer_orders 
+          SET status = 'cancelled', updated_at = NOW()
+          WHERE id = $1
+        `, [orderId]);
+
+        await pool.query(`
+          UPDATE order_management 
+          SET current_status = 'cancelled', updated_at = NOW()
+          WHERE customer_order_id = $1
+        `, [orderId]);
+
+        console.log(`✅ [ORDER CANCEL] Order ${orderId} cancelled by customer ${finalCustomerId}, inventory released`);
+
+        res.json({
+          success: true,
+          message: "سفارش با موفقیت لغو شد و موجودی به فروشگاه بازگردانده شد"
+        });
+      } else {
+        throw new Error("خطا در آزادسازی موجودی");
+      }
+
+    } catch (error) {
+      console.error("Error canceling customer order:", error);
+      res.status(500).json({
+        success: false,
+        message: error.message || "خطا در لغو سفارش"
+      });
+    }
+  });
+
   // Activate grace period order (continue with order after uploading receipt)
   app.post("/api/customers/orders/:orderId/activate-grace-period", async (req, res) => {
     try {
