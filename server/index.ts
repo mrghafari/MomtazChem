@@ -30,8 +30,8 @@ app.use(session({
   store: new MemoryStoreSession({
     checkPeriod: 86400000 // prune expired entries every 24h
   }),
-  resave: true, // Force session save
-  saveUninitialized: true, // Save new sessions immediately
+  resave: false, // Don't save unchanged sessions
+  saveUninitialized: false, // Don't save uninitialized sessions
   rolling: true, // Reset maxAge on each request
   cookie: {
     secure: false, // Set to true in production with HTTPS
