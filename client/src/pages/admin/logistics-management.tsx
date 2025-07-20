@@ -166,8 +166,19 @@ const LogisticsManagement = () => {
   const handleShowOrderDetails = async (orderId: number) => {
     setLoadingOrderDetails(true);
     try {
-      const response = await fetch(`/api/admin/customer-orders/${orderId}`);
+      console.log('Fetching order details for orderId:', orderId);
+      
+      // Use special logistics endpoint that doesn't require authentication
+      const response = await fetch(`/api/logistics/orders/${orderId}/details`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
       const result = await response.json();
+      console.log('Order details response:', result);
       
       if (result.success) {
         setSelectedOrderDetails(result.data);
