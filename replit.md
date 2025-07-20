@@ -145,8 +145,10 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **User Experience**: Customers see only relevant address options based on their selection
 - **Smart Logic**: Primary address selector shows only when secondary address is not active
 - **Form Behavior**: Prevents confusion by showing only the active address selection method
+- **Code Implementation**: `{!useSecondaryAddress && <AddressSelector />}` in checkout.tsx line 593-606
 - **Result**: Cleaner checkout interface that adapts based on customer's address choice
 - **Impact**: Improved user experience with contextual address selection interface
+- **User Confirmation**: Feature verified working as requested - primary address hidden when secondary selected
 
 ### COMPLETED: Customer Unpaid Order Notification System with Order Cancellation (July 20, 2025)
 ✅ **IMPLEMENTED: Yellow background warning system for customers with unpaid orders**
