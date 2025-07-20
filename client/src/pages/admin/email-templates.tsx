@@ -765,11 +765,29 @@ const EmailTemplates: React.FC = () => {
                 </div>
                 
                 <div>
-                  <h3 className="font-medium text-gray-700">محتوای HTML:</h3>
+                  <h3 className="font-medium text-gray-700 mb-2">پیش‌نمایش ایمیل (همانطور که مشتری می‌بیند):</h3>
                   <div 
-                    className="border p-4 rounded bg-white"
-                    dangerouslySetInnerHTML={{ __html: previewTemplate.html_content }}
+                    className="border-2 border-blue-200 rounded-lg p-6 bg-white shadow-inner"
+                    style={{ 
+                      fontFamily: 'Arial, sans-serif',
+                      lineHeight: '1.6',
+                      direction: 'ltr',
+                      textAlign: 'left'
+                    }}
+                    dangerouslySetInnerHTML={{ 
+                      __html: previewTemplate.html_content
+                        .replace(/{{customer_name}}/g, 'علی احمدی')
+                        .replace(/{{inquiry_number}}/g, 'INQ-2025001')
+                        .replace(/{{inquiry_subject}}/g, 'استعلام قیمت محصولات شیمیایی')
+                        .replace(/{{inquiry_category}}/g, 'آب-درمانی')
+                        .replace(/{{response_text}}/g, 'پاسخ شما در اسرع وقت ارسال خواهد شد')
+                        .replace(/{{company_name}}/g, 'Momtaz Chemical')
+                        .replace(/{{date}}/g, new Date().toLocaleDateString('fa-IR'))
+                    }}
                   />
+                  <p className="text-xs text-gray-500 mt-2 italic">
+                    * این پیش‌نمایش با داده‌های نمونه نشان داده شده و دقیقاً همان چیزی است که مشتری دریافت می‌کند
+                  </p>
                 </div>
 
                 {previewTemplate.text_content && (

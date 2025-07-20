@@ -2044,42 +2044,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // API endpoint for getting product unit from kardex (showcase_products)
+  // API endpoint for getting product unit from kardex by shop product ID
   app.get("/api/products/kardex/:id/unit", async (req, res) => {
     try {
-      const { id } = req.params;
-      const { showcaseDb } = await import('./db');
+      const shopProductId = parseInt(req.params.id);
+      const { db, showcaseDb } = await import('./db');
+      const { shopProducts } = await import('../shared/shop-schema');
       const { showcaseProducts } = await import('../shared/showcase-schema');
       const { eq } = await import('drizzle-orm');
       
-      const [product] = await showcaseDb
+      if (isNaN(shopProductId)) {
+        return res.status(400).json({
+          success: false,
+          message: "شناسه محصول نامعتبر است"
+        });
+      }
+
+      // First get the shop product to find its name
+      const [shopProduct] = await db
+        .select({
+          name: shopProducts.name
+        })
+        .from(shopProducts)
+        .where(eq(shopProducts.id, shopProductId))
+        .limit(1);
+
+      console.log(`🔍 Looking for shop product ID ${shopProductId}:`, shopProduct);
+
+      if (!shopProduct) {
+        return res.status(404).json({
+          success: false,
+          message: "محصول در فروشگاه یافت نشد"
+        });
+      }
+
+      // Find corresponding product in showcase_products (kardex) by name with preference for non-generic units
+      const kardexProducts = await showcaseDb
         .select({
           stockUnit: showcaseProducts.stockUnit,
           name: showcaseProducts.name
         })
         .from(showcaseProducts)
-        .where(eq(showcaseProducts.id, parseInt(id)))
-        .limit(1);
-      
-      if (!product) {
-        return res.status(404).json({
-          success: false,
-          message: "محصول در کاردکس یافت نشد"
+        .where(eq(showcaseProducts.name, shopProduct.name));
+
+      console.log(`🔍 Found ${kardexProducts.length} kardex products for "${shopProduct.name}":`, kardexProducts);
+
+      // Choose best unit: prefer specific units like کیلوگرم, لیتر over generic "units"
+      let kardexProduct = kardexProducts.find(p => p.stockUnit && p.stockUnit !== 'units') || kardexProducts[0];
+
+      if (!kardexProduct) {
+        console.log(`❌ محصول ${shopProduct.name} در کاردکس یافت نشد`);
+        return res.json({
+          success: true,
+          unit: 'واحد', // Default unit if not found in kardex
+          productName: shopProduct.name
         });
       }
       
       res.json({
         success: true,
-        unit: product.stockUnit || '', // Return actual unit or empty string
-        productName: product.name
+        unit: kardexProduct.stockUnit || 'واحد',
+        productName: kardexProduct.name
       });
       
-      console.log(`✅ واحد محصول ${product.name} از کاردکس: "${product.stockUnit}"`)
+      console.log(`✅ واحد محصول ${kardexProduct.name} از کاردکس: "${kardexProduct.stockUnit}"`)
     } catch (error) {
       console.error("Error fetching product unit from kardex:", error);
-      res.status(500).json({ 
-        success: false, 
-        message: "خطا در دریافت واحد محصول از کاردکس" 
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت واحد محصول از کاردکس"
       });
     }
   });
