@@ -27844,6 +27844,113 @@ momtazchem.com
   });
 
   // =============================================================================
+  // LOW STOCK INVENTORY ALERTS - هشدارهای موجودی کم
+  // =============================================================================
+  
+  // Get products with low stock levels from کاردکس (showcase_products)
+  app.get("/api/inventory/low-stock", async (req, res) => {
+    try {
+      // Use storage instead of direct database query
+      const showcaseProducts = await storage.getProducts();
+      
+      const lowStockProducts = showcaseProducts
+        .filter(product => {
+          const currentStock = product.stockQuantity || 0;
+          const minimumStock = product.minStockLevel || 5;
+          return currentStock < minimumStock && minimumStock > 0;
+        })
+        .map(product => {
+          const currentStock = product.stockQuantity || 0;
+          const minimumStock = product.minStockLevel || 5;
+          
+          return {
+            id: product.id,
+            name: product.name,
+            stockQuantity: currentStock,
+            minimumStock: minimumStock,
+            difference: minimumStock - currentStock,
+            category: product.category || '',
+            sku: product.sku || ''
+          };
+        })
+        .sort((a, b) => b.difference - a.difference || a.name.localeCompare(b.name));
+
+      console.log(`📦 [LOW-STOCK] Found ${lowStockProducts.length} products below minimum level from کاردکس`);
+
+      res.json({
+        success: true,
+        data: {
+          products: lowStockProducts,
+          totalCount: lowStockProducts.length,
+          timestamp: new Date().toISOString()
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching low stock products from کاردکس:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در دریافت کالاهای کم‌موجود از کاردکس" 
+      });
+    }
+  });
+
+  // Update minimum stock for a specific product
+  app.put("/api/shop/products/:id/minimum-stock", async (req, res) => {
+    try {
+      const productId = parseInt(req.params.id);
+      const { minimumStock } = req.body;
+
+      if (isNaN(productId)) {
+        return res.status(400).json({ success: false, message: "شناسه محصول نامعتبر است" });
+      }
+
+      if (typeof minimumStock !== 'number' || minimumStock < 0) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "حد مینیمم موجودی باید عددی صفر یا مثبت باشد" 
+        });
+      }
+
+      const { pool } = await import('./db');
+
+      // Check if product exists
+      const productCheck = await pool.query(`
+        SELECT id, name FROM shop_products WHERE id = $1
+      `, [productId]);
+
+      if (productCheck.rows.length === 0) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "محصول یافت نشد" 
+        });
+      }
+
+      // Update minimum stock
+      await pool.query(`
+        UPDATE shop_products 
+        SET minimum_stock = $1, updated_at = CURRENT_TIMESTAMP
+        WHERE id = $2
+      `, [minimumStock, productId]);
+
+      res.json({
+        success: true,
+        message: `حد مینیمم موجودی محصول "${productCheck.rows[0].name}" به ${minimumStock} واحد تغییر یافت`,
+        data: {
+          productId: productId,
+          productName: productCheck.rows[0].name,
+          newMinimumStock: minimumStock
+        }
+      });
+    } catch (error) {
+      console.error("Error updating minimum stock:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در تغییر حد مینیمم موجودی" 
+      });
+    }
+  });
+
+  // =============================================================================
   // PRODUCT REVIEWS & RATINGS ENDPOINTS - نظرسنجی و امتیازدهی محصولات
   // =============================================================================
 

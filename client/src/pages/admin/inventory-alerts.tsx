@@ -1,571 +1,280 @@
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
+import LowStockAlert from '@/components/LowStockAlert';
 import { 
   AlertTriangle, 
   Package, 
   TrendingDown, 
-  Mail, 
   RefreshCw, 
-  CheckCircle,
-  XCircle,
-  Clock,
-  BarChart3,
-  Settings,
-  Users
-} from "lucide-react";
-import { Link } from "wouter";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+  Plus,
+  Edit,
+  Save,
+  X
+} from 'lucide-react';
 
-interface ShopProduct {
+interface LowStockProduct {
   id: number;
   name: string;
-  category: string;
-  sku: string;
   stockQuantity: number;
-  lowStockThreshold: number;
-  inStock: boolean;
-  price: string;
-  priceUnit: string;
+  minimumStock: number;
+  availableQuantity: number;
+  difference: number;
 }
 
 export default function InventoryAlerts() {
-  const [isCheckingAll, setIsCheckingAll] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [editingProduct, setEditingProduct] = useState<number | null>(null);
+  const [newMinimumStock, setNewMinimumStock] = useState<number>(0);
 
-  const { data: products = [], isLoading } = useQuery({
-    queryKey: ["/api/shop/products"],
+  // Get low stock products
+  const { data: lowStockData, isLoading: isLoadingLowStock, refetch: refetchLowStock } = useQuery({
+    queryKey: ['/api/inventory/low-stock'],
+    refetchInterval: 300000, // تحديث كل 5 دقائق
   });
 
-  const checkAllInventoryMutation = useMutation({
-    mutationFn: () => apiRequest("/api/inventory/check-all", "POST"),
+  // Get all products for minimum stock management
+  const { data: allProducts, isLoading: isLoadingProducts } = useQuery({
+    queryKey: ['/api/shop/products'],
+  });
+
+  const lowStockProducts: LowStockProduct[] = lowStockData?.data?.products || [];
+  const totalLowStockItems = lowStockProducts.length;
+
+  // Update minimum stock mutation
+  const updateMinimumStockMutation = useMutation({
+    mutationFn: async ({ productId, minimumStock }: { productId: number; minimumStock: number }) => {
+      return await apiRequest(`/api/shop/products/${productId}/minimum-stock`, 'PUT', {
+        minimumStock: minimumStock
+      });
+    },
     onSuccess: () => {
       toast({
-        title: "Inventory Check Complete",
-        description: "All products checked and alerts sent if needed.",
+        title: "موفق",
+        description: "حد مینیمم موجودی با موفقیت به‌روزرسانی شد"
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/shop/products"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/inventory/low-stock'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/shop/products'] });
+      setEditingProduct(null);
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to check inventory levels.",
-        variant: "destructive",
+        title: "خطا",
+        description: "خطا در به‌روزرسانی حد مینیمم موجودی",
+        variant: "destructive"
       });
-    },
-  });
-
-  const checkProductMutation = useMutation({
-    mutationFn: (productId: number) => apiRequest(`/api/inventory/check-product/${productId}`, "POST"),
-    onSuccess: (data: any, productId: number) => {
-      const product = products.find((p: ShopProduct) => p.id === productId);
-      toast({
-        title: data.alertSent ? "Alert Sent" : "Stock OK",
-        description: data.alertSent 
-          ? `Low stock alert sent for ${product?.name}`
-          : `Stock levels are adequate for ${product?.name}`,
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to check product inventory.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const handleCheckAll = async () => {
-    setIsCheckingAll(true);
-    try {
-      await checkAllInventoryMutation.mutateAsync();
-    } finally {
-      setIsCheckingAll(false);
     }
-  };
-
-  const handleCheckProduct = (productId: number) => {
-    checkProductMutation.mutate(productId);
-  };
-
-  // Calculate inventory statistics
-  const getInventoryStats = () => {
-    const totalProducts = products.length;
-    const outOfStock = products.filter((p: ShopProduct) => (p.stockQuantity || 0) <= 0).length;
-    const lowStock = products.filter((p: ShopProduct) => {
-      const stock = p.stockQuantity || 0;
-      const threshold = p.minStockLevel || 5; // حد مینیمم برای اعلام به مدیر تولید
-      return stock > 0 && stock <= threshold;
-    }).length;
-    const adequateStock = totalProducts - outOfStock - lowStock;
-
-    return { totalProducts, outOfStock, lowStock, adequateStock };
-  };
-
-  const stats = getInventoryStats();
-  const outOfStockProducts = products.filter((p: ShopProduct) => (p.stockQuantity || 0) <= 0);
-  const lowStockProducts = products.filter((p: ShopProduct) => {
-    const stock = p.stockQuantity || 0;
-    const threshold = p.minStockLevel || 5; // حد مینیمم برای اعلام به مدیر تولید
-    return stock > 0 && stock <= threshold;
-  });
-  const adequateStockProducts = products.filter((p: ShopProduct) => {
-    const stock = p.stockQuantity || 0;
-    const threshold = p.minStockLevel || 5; // حد مینیمم برای اعلام به مدیر تولید
-    return stock > threshold;
   });
 
-  const getStockStatus = (product: ShopProduct) => {
-    const stock = product.stockQuantity || 0;
-    const threshold = product.minStockLevel || 5; // حد مینیمم برای اعلام به مدیر تولید
-    
-    if (stock <= 0) return { status: 'out_of_stock', label: 'Out of Stock', color: 'bg-red-500' };
-    if (stock <= threshold) return { status: 'low_stock', label: 'Low Stock', color: 'bg-yellow-500' };
-    return { status: 'adequate', label: 'Adequate', color: 'bg-green-500' };
+  const handleUpdateMinimumStock = (productId: number) => {
+    if (newMinimumStock < 0) {
+      toast({
+        title: "خطا",
+        description: "حد مینیمم موجودی نمی‌تواند منفی باشد",
+        variant: "destructive"
+      });
+      return;
+    }
+    updateMinimumStockMutation.mutate({ productId, minimumStock: newMinimumStock });
   };
 
-  const getStockPercentage = (product: ShopProduct) => {
-    const stock = product.stockQuantity || 0;
-    const threshold = product.minStockLevel || 5; // حد مینیمم برای اعلام به مدیر تولید
-    const maxStock = threshold * 3; // Assume optimal stock is 3x threshold
-    return Math.min((stock / maxStock) * 100, 100);
+  const startEditing = (productId: number, currentMinimum: number) => {
+    setEditingProduct(productId);
+    setNewMinimumStock(currentMinimum);
   };
 
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-gray-900">Inventory Alerts</h1>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <CardContent className="p-6">
-                <div className="h-8 bg-gray-200 rounded mb-2"></div>
-                <div className="h-6 bg-gray-200 rounded"></div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-    );
-  }
+  const cancelEditing = () => {
+    setEditingProduct(null);
+    setNewMinimumStock(0);
+  };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Inventory Management</h1>
-          <p className="text-gray-600 mt-1">Monitor stock levels and manage inventory alerts</p>
-        </div>
-        
-        <div className="flex gap-3">
-          <Link href="/admin/inventory-notification-settings">
-            <Button 
-              variant="outline"
-              className="border-purple-300 text-purple-700 hover:bg-purple-50"
-            >
-              <Settings className="w-4 h-4 mr-2" />
-              تنظیمات اطلاع‌رسانی
-            </Button>
-          </Link>
-          
-          <Button 
-            onClick={handleCheckAll}
-            disabled={isCheckingAll || checkAllInventoryMutation.isPending}
-            className="bg-blue-600 hover:bg-blue-700"
+    <div className="container mx-auto px-4 py-8" dir="rtl">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <h1 className="text-3xl font-bold text-gray-900">هشدارهای موجودی</h1>
+            <p className="text-gray-500">مدیریت و نظارت بر سطح موجودی کالاها</p>
+          </div>
+          <Button
+            onClick={() => {
+              refetchLowStock();
+              queryClient.invalidateQueries({ queryKey: ['/api/shop/products'] });
+            }}
+            variant="outline"
+            size="sm"
           >
-            {isCheckingAll ? (
-              <>
-                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                Checking...
-              </>
-            ) : (
-              <>
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Check All Inventory
-              </>
-            )}
+            <RefreshCw className="w-4 h-4 ml-2" />
+            بروزرسانی
           </Button>
         </div>
-      </div>
 
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Products</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalProducts}</p>
-              </div>
-              <Package className="w-8 h-8 text-blue-600" />
-            </div>
-          </CardContent>
-        </Card>
+        <Tabs defaultValue="alerts" className="w-full">
+          <TabsList className="w-full">
+            <TabsTrigger value="alerts" className="flex-1">
+              هشدارهای فعلی
+              {totalLowStockItems > 0 && (
+                <Badge variant="destructive" className="mr-2">
+                  {totalLowStockItems}
+                </Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="flex-1">
+              تنظیمات حد مینیمم
+            </TabsTrigger>
+          </TabsList>
 
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Out of Stock</p>
-                <p className="text-2xl font-bold text-red-600">{stats.outOfStock}</p>
-              </div>
-              <XCircle className="w-8 h-8 text-red-600" />
-            </div>
-          </CardContent>
-        </Card>
+          {/* Current Alerts Tab */}
+          <TabsContent value="alerts" className="space-y-6">
+            <LowStockAlert />
+            
+            {/* Detailed Low Stock Products List */}
+            {totalLowStockItems > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingDown className="w-5 h-5 text-red-500" />
+                    جزئیات کالاهای کم‌موجود
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-right py-3 px-4">نام کالا</th>
+                          <th className="text-right py-3 px-4">موجودی فعلی</th>
+                          <th className="text-right py-3 px-4">حد مینیمم</th>
+                          <th className="text-right py-3 px-4">کمبود</th>
+                          <th className="text-right py-3 px-4">وضعیت</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {lowStockProducts.map((product) => (
+                          <tr key={product.id} className="border-b hover:bg-gray-50">
+                            <td className="py-3 px-4 font-medium">{product.name}</td>
+                            <td className="py-3 px-4">
+                              <Badge variant="outline">{product.stockQuantity}</Badge>
+                            </td>
+                            <td className="py-3 px-4">
+                              <Badge variant="secondary">{product.minimumStock}</Badge>
+                            </td>
+                            <td className="py-3 px-4">
+                              <Badge variant="destructive">
+                                {Math.abs(product.difference)} واحد
+                              </Badge>
+                            </td>
+                            <td className="py-3 px-4">
+                              <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                                <span className="text-red-600 text-xs">نیاز به تأمین</span>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
 
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Low Stock</p>
-                <p className="text-2xl font-bold text-yellow-600">{stats.lowStock}</p>
-              </div>
-              <AlertTriangle className="w-8 h-8 text-yellow-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Adequate Stock</p>
-                <p className="text-2xl font-bold text-green-600">{stats.adequateStock}</p>
-              </div>
-              <CheckCircle className="w-8 h-8 text-green-600" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Alert Information */}
-      <Alert>
-        <Mail className="h-4 w-4" />
-        <AlertDescription>
-          Inventory alerts are automatically sent to <strong>info@momtazchem.com</strong> when stock levels fall below the minimum threshold. 
-          The system checks inventory every hour during business hours (8 AM - 6 PM).
-        </AlertDescription>
-      </Alert>
-
-      {/* Product Inventory Tabs */}
-      <Tabs defaultValue="alerts" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="alerts" className="flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4" />
-            Alerts ({stats.outOfStock + stats.lowStock})
-          </TabsTrigger>
-          <TabsTrigger value="out-of-stock">
-            <XCircle className="w-4 h-4 mr-2" />
-            Out of Stock ({stats.outOfStock})
-          </TabsTrigger>
-          <TabsTrigger value="low-stock">
-            <TrendingDown className="w-4 h-4 mr-2" />
-            Low Stock ({stats.lowStock})
-          </TabsTrigger>
-          <TabsTrigger value="settings">
-            <Settings className="w-4 h-4 mr-2" />
-            Threshold Settings
-          </TabsTrigger>
-          <TabsTrigger value="all">
-            <BarChart3 className="w-4 h-4 mr-2" />
-            All Products
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="alerts" className="space-y-4">
-          {outOfStockProducts.length === 0 && lowStockProducts.length === 0 ? (
+          {/* Minimum Stock Settings Tab */}
+          <TabsContent value="settings" className="space-y-6">
             <Card>
-              <CardContent className="p-8 text-center">
-                <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-gray-700 mb-2">No Inventory Alerts</h3>
-                <p className="text-gray-500">All products have adequate stock levels.</p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-4">
-              {outOfStockProducts.map((product: ShopProduct) => (
-                <Card key={product.id} className="border-red-200 bg-red-50">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3">
-                          <Badge variant="destructive">Out of Stock</Badge>
-                          <h3 className="font-semibold text-gray-900">{product.name}</h3>
-                          <span className="text-sm text-gray-500">({product.sku})</span>
-                        </div>
-                        <p className="text-sm text-gray-600 mt-1">{product.category}</p>
-                        <div className="flex items-center gap-4 mt-2">
-                          <span className="text-sm">Current: <strong className="text-red-600">0</strong></span>
-                          <span className="text-sm">Manager Alert Threshold: <strong>{product.minStockLevel || 5}</strong></span>
-                          <span className="text-sm">Price: <strong>{product.price} {product.priceUnit}</strong></span>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Edit className="w-5 h-5" />
+                  تنظیم حد مینیمم موجودی کالاها
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {isLoadingProducts ? (
+                  <div className="space-y-4">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="animate-pulse flex items-center space-x-4">
+                        <div className="flex-1 space-y-2">
+                          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                          <div className="h-4 bg-gray-200 rounded w-1/2"></div>
                         </div>
                       </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleCheckProduct(product.id)}
-                        disabled={checkProductMutation.isPending}
+                    ))}
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {allProducts?.map((product: any) => (
+                      <div
+                        key={product.id}
+                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
                       >
-                        <Mail className="w-4 h-4 mr-2" />
-                        Send Alert
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-              
-              {lowStockProducts.map((product: ShopProduct) => (
-                <Card key={product.id} className="border-yellow-200 bg-yellow-50">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3">
-                          <Badge variant="outline" className="border-yellow-500 text-yellow-700">Low Stock</Badge>
-                          <h3 className="font-semibold text-gray-900">{product.name}</h3>
-                          <span className="text-sm text-gray-500">({product.sku})</span>
-                        </div>
-                        <p className="text-sm text-gray-600 mt-1">{product.category}</p>
-                        <div className="flex items-center gap-4 mt-2">
-                          <span className="text-sm">Current: <strong className="text-yellow-600">{product.stockQuantity}</strong></span>
-                          <span className="text-sm">Manager Alert Threshold: <strong>{product.minStockLevel || 5}</strong></span>
-                          <span className="text-sm">Price: <strong>{product.price} {product.priceUnit}</strong></span>
-                        </div>
-                        <div className="mt-3">
-                          <div className="flex items-center justify-between text-sm mb-1">
-                            <span>Stock Level</span>
-                            <span>{getStockPercentage(product).toFixed(0)}%</span>
+                        <div className="flex-1">
+                          <h3 className="font-medium text-gray-900">{product.name}</h3>
+                          <div className="flex items-center gap-4 mt-1 text-sm text-gray-600">
+                            <span>موجودی فعلی: {product.stockQuantity || 0}</span>
+                            <span>حد فعلی: {product.minimumStock || 0}</span>
+                            {(product.stockQuantity || 0) < (product.minimumStock || 0) && (
+                              <Badge variant="destructive" className="text-xs">
+                                کم‌موجود
+                              </Badge>
+                            )}
                           </div>
-                          <Progress value={getStockPercentage(product)} className="h-2" />
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {editingProduct === product.id ? (
+                            <>
+                              <Input
+                                type="number"
+                                min="0"
+                                value={newMinimumStock}
+                                onChange={(e) => setNewMinimumStock(parseInt(e.target.value) || 0)}
+                                className="w-20"
+                                placeholder="0"
+                              />
+                              <Button
+                                size="sm"
+                                onClick={() => handleUpdateMinimumStock(product.id)}
+                                disabled={updateMinimumStockMutation.isPending}
+                              >
+                                <Save className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={cancelEditing}
+                              >
+                                <X className="w-4 h-4" />
+                              </Button>
+                            </>
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => startEditing(product.id, product.minimumStock || 0)}
+                            >
+                              <Edit className="w-4 h-4 ml-1" />
+                              ویرایش
+                            </Button>
+                          )}
                         </div>
                       </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleCheckProduct(product.id)}
-                        disabled={checkProductMutation.isPending}
-                      >
-                        <Mail className="w-4 h-4 mr-2" />
-                        Send Alert
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="out-of-stock" className="space-y-4">
-          {outOfStockProducts.length === 0 ? (
-            <Card>
-              <CardContent className="p-8 text-center">
-                <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-gray-700 mb-2">No Out of Stock Products</h3>
-                <p className="text-gray-500">All products have some inventory available.</p>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {outOfStockProducts.map((product: ShopProduct) => (
-                <Card key={product.id} className="border-red-200">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-semibold text-gray-900">{product.name}</h3>
-                      <Badge variant="destructive">Out of Stock</Badge>
-                    </div>
-                    <p className="text-sm text-gray-600 mb-2">{product.category} • {product.sku}</p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">{product.price} {product.priceUnit}</span>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleCheckProduct(product.id)}
-                      >
-                        <Mail className="w-3 h-3 mr-1" />
-                        Alert
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="low-stock" className="space-y-4">
-          {lowStockProducts.length === 0 ? (
-            <Card>
-              <CardContent className="p-8 text-center">
-                <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-gray-700 mb-2">No Low Stock Products</h3>
-                <p className="text-gray-500">All products have adequate stock levels.</p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {lowStockProducts.map((product: ShopProduct) => (
-                <Card key={product.id} className="border-yellow-200">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-semibold text-gray-900">{product.name}</h3>
-                      <Badge variant="outline" className="border-yellow-500 text-yellow-700">Low Stock</Badge>
-                    </div>
-                    <p className="text-sm text-gray-600 mb-2">{product.category} • {product.sku}</p>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span>Stock: {product.stockQuantity} / {product.lowStockThreshold || 10}</span>
-                        <span>{product.price} {product.priceUnit}</span>
-                      </div>
-                      <Progress value={getStockPercentage(product)} className="h-2" />
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="w-full"
-                        onClick={() => handleCheckProduct(product.id)}
-                      >
-                        <Mail className="w-3 h-3 mr-1" />
-                        Send Alert
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="all" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {products.map((product: ShopProduct) => {
-              const status = getStockStatus(product);
-              return (
-                <Card key={product.id}>
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-semibold text-gray-900 text-sm">{product.name}</h3>
-                      <Badge 
-                        variant={status.status === 'out_of_stock' ? 'destructive' : 'outline'}
-                        className={status.status === 'low_stock' ? 'border-yellow-500 text-yellow-700' : ''}
-                      >
-                        {status.label}
-                      </Badge>
-                    </div>
-                    <p className="text-xs text-gray-600 mb-2">{product.category} • {product.sku}</p>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-xs">
-                        <span>Stock: {product.stockQuantity || 0}</span>
-                        <span>Min: {product.lowStockThreshold || 10}</span>
-                      </div>
-                      <Progress value={getStockPercentage(product)} className="h-1" />
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs font-medium">{product.price} {product.priceUnit}</span>
-                        {status.status !== 'adequate' && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleCheckProduct(product.id)}
-                            className="h-6 px-2 text-xs"
-                          >
-                            <Mail className="w-3 h-3" />
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="settings" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="w-5 h-5" />
-                Threshold Settings
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                <Alert>
-                  <AlertTriangle className="h-4 w-4" />
-                  <AlertDescription>
-                    <strong>مهم:</strong> سیستم دو آستانه مجزا دارد:
-                    <br />
-                    • <strong>Low Stock Threshold (10)</strong>: برای هشدار به مشتریان در فروشگاه
-                    <br />
-                    • <strong>Min Stock Level (5)</strong>: برای اعلام به مدیر تولید در پنل ادمین
-                  </AlertDescription>
-                </Alert>
-                
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <h3 className="font-semibold text-blue-900 mb-3">نحوه تنظیم آستانه‌ها:</h3>
-                  <div className="space-y-2 text-sm">
-                    <p><strong>1. برای محصولات جدید:</strong></p>
-                    <p className="ml-4">• به Site Management → Products بروید</p>
-                    <p className="ml-4">• در فرم ثبت محصول، فیلدهای "Low Stock Threshold" و "Min Stock Level" را تنظیم کنید</p>
-                    
-                    <p><strong>2. برای محصولات موجود:</strong></p>
-                    <p className="ml-4">• محصولات از طریق فرم ویرایش محصول قابل تنظیم هستند</p>
-                    <p className="ml-4">• یا با دسترسی مستقیم به پایگاه داده</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Card className="border-orange-200 bg-orange-50">
-                    <CardContent className="p-4">
-                      <h4 className="font-semibold text-orange-900 mb-2">Customer Warning System</h4>
-                      <p className="text-sm text-orange-800 mb-2">lowStockThreshold = 10</p>
-                      <p className="text-xs text-orange-700">
-                        هشدار "تنها X عدد باقی مانده!" در صفحه فروشگاه نمایش داده می‌شود
-                      </p>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="border-red-200 bg-red-50">
-                    <CardContent className="p-4">
-                      <h4 className="font-semibold text-red-900 mb-2">Manager Alert System</h4>
-                      <p className="text-sm text-red-800 mb-2">minStockLevel = 5</p>
-                      <p className="text-xs text-red-700">
-                        اعلان خودکار به مدیر تولید برای سفارش محصول ارسال می‌شود
-                      </p>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                <div className="pt-4 border-t">
-                  <h4 className="font-semibold mb-3">Current System Status:</h4>
-                  <div className="grid grid-cols-3 gap-4 text-center">
-                    <div className="p-3 bg-gray-50 rounded">
-                      <div className="text-2xl font-bold text-gray-700">{stats.total}</div>
-                      <div className="text-sm text-gray-600">Total Products</div>
-                    </div>
-                    <div className="p-3 bg-yellow-50 rounded">
-                      <div className="text-2xl font-bold text-yellow-700">{stats.lowStock}</div>
-                      <div className="text-sm text-yellow-600">Low Stock Items</div>
-                    </div>
-                    <div className="p-3 bg-red-50 rounded">
-                      <div className="text-2xl font-bold text-red-700">{stats.outOfStock}</div>
-                      <div className="text-sm text-red-600">Out of Stock</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }
