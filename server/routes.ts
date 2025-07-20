@@ -26417,28 +26417,30 @@ momtazchem.com
           deliveryCodeData = existingCode;
           console.log(`🔄 [WAREHOUSE] Reusing existing delivery code ${existingCode.verificationCode} for order ${orderId}`);
         } else {
-          // Generate new delivery code with proper customer details
+          // Generate new sequential delivery code (1111-9999) using logisticsStorage method
           const customerName = `${order.customerFirstName || ''} ${order.customerLastName || ''}`.trim() || 'مشتری';
           const customerPhone = order.customerPhone || '09000000000';
           
+          // Use logisticsStorage method which already generates sequential codes
           deliveryCodeData = await logisticsStorage.generateVerificationCode(
             orderId,
             customerPhone,
             customerName
           );
           isNewCode = true;
-          console.log(`🆕 [WAREHOUSE] Generated new delivery code ${deliveryCodeData.verificationCode} for order ${orderId}, customer: ${customerName}`);
+          console.log(`🆕 [WAREHOUSE] Generated sequential delivery code ${deliveryCodeData.verificationCode} for order ${orderId}, customer: ${customerName}`);
         }
 
-        // CRITICAL: Update order_management table with delivery code
+        // CRITICAL: Update order_management table with delivery code AND move to logistics_dispatched
         await db
           .update(orderManagement)
           .set({
-            deliveryCode: deliveryCodeData.verificationCode
+            deliveryCode: deliveryCodeData.verificationCode,
+            currentStatus: 'logistics_dispatched'
           })
           .where(eq(orderManagement.customerOrderId, orderId));
 
-        console.log(`💾 [WAREHOUSE] Delivery code ${deliveryCodeData.verificationCode} saved to order_management table for order ${orderId}`);
+        console.log(`💾 [WAREHOUSE] Delivery code ${deliveryCodeData.verificationCode} saved to order_management table and status updated to logistics_dispatched for order ${orderId}`);
 
         // Send SMS notification automatically with proper customer details
         try {
