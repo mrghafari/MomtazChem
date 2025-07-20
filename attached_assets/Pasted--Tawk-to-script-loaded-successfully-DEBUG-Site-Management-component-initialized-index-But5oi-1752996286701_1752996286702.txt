@@ -1,0 +1,137 @@
+ Tawk.to script loaded successfully
+ 🔍 [DEBUG] Site Management component initialized
+index-But5oiQP.js:1482 🔍 [DEBUG] useEffect triggered, userPermissions: undefined
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 ()
+index-But5oiQP.js:941 Auth check result: Object
+index-But5oiQP.js:1482 🔍 [DEBUG] Site Management component initialized
+index-But5oiQP.js:1482 🔍 [DEBUG] Site Management component initialized
+index-But5oiQP.js:1482 🔍 [DEBUG] useEffect triggered, userPermissions: Object
+index-But5oiQP.js:1482 🔍 [DEBUG] userPermissions modules: Array(27)
+index-But5oiQP.js:1482 🔍 [DEBUG] allowedModules: Array(27)
+index-But5oiQP.js:1482 🔍 [DEBUG] finance in allowedModules? true
+index-But5oiQP.js:1482 🔍 [DEBUG] geography_analytics in allowedModules? true
+index-But5oiQP.js:1482 🔍 [DEBUG] finance button found in allButtons? Object
+index-But5oiQP.js:1482 🔍 [DEBUG] geography_analytics button found in allButtons? Object
+index-But5oiQP.js:1482 🔍 [DEBUG] finance button in filtered? Object
+index-But5oiQP.js:1482 🔍 [DEBUG] geography_analytics button in filtered? Object
+index-But5oiQP.js:1482 🔍 [DEBUG] filtered buttons count: 28
+index-But5oiQP.js:1482 🔍 [DEBUG] Site Management component initialized
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:115737)
+    at t.value (twk-chunk-common.js:2:148821)
+    at p.updateUUID (twk-chunk-common.js:2:200473)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:122752)
+    at twk-chunk-common.js:2:122063
+value @ twk-chunk-common.js:2
+twk-chunk-vendors.js:2 WebSocket connection to 'wss://vsb8.tawk.to/s/?k=687c96e6ee771623a2867629&cver=2&pop=false&asver=41&tkn=eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InZpc2l0b3ItYXBwbGljYXRpb24tc2VydmVyLTIwMjEwMjIifQ.eyJwaWQiOiI2ODVjNjhkYWMzYTBjNTE5MGNhMzc1MDgiLCJ2aWQiOiI2ODVjNjhkYWMzYTBjNTE5MGNhMzc1MDgtenFCY3l4UDR1dUYyanlvVDdSeld1Iiwic2lkIjoiNjg3Yzk2ZTZlZTc3MTYyM2EyODY3NjI5IiwiaWF0IjoxNzUyOTk1NTU4LCJleHAiOjE3NTI5OTczNTgsImp0aSI6ImNJMXZXREZla3JIWFFNVGFSckJDayJ9.MkL0lXA-wub9q4CN_sArInANluwXKC2_kADMSX2lCpI2kxea00xU6JLhPiv6uj0UAykfaniNOQrScXxzvx0bbw&EIO=3&transport=websocket&__t=PWchuL9' failed: 
+(anonymous) @ twk-chunk-vendors.js:2
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:115737)
+    at t.value (twk-chunk-common.js:2:148821)
+    at p.updateUUID (twk-chunk-common.js:2:200473)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:122752)
+    at twk-chunk-common.js:2:84842
+value @ twk-chunk-common.js:2
+VM28 site-management:23 Tawk.to Live Chat loaded successfully
+index-But5oiQP.js:1417 🔔 [FINANCIAL] نوتیفیکیشن: 7 سفارش جدید دریافت شد
+index-But5oiQP.js:941 Auth check result: Object
+index-But5oiQP.js:941 Auth check result: Object
+index-But5oiQP.js:941 Auth check result: Object
+index-But5oiQP.js:941 Auth check result: Object
+index-But5oiQP.js:941 Auth check result: Object
+index-But5oiQP.js:941 Auth check result: Object
+index-But5oiQP.js:941 Auth check result: Object
+index-But5oiQP.js:941 Auth check result: Object
+index-But5oiQP.js:941 Auth check result: Object
+index-But5oiQP.js:1482 🔍 [DEBUG] Site Management component initialized
+index-But5oiQP.js:1482 🔍 [DEBUG] useEffect triggered, userPermissions: Object
+index-But5oiQP.js:1482 🔍 [DEBUG] userPermissions modules: Array(27)
+index-But5oiQP.js:1482 🔍 [DEBUG] allowedModules: Array(27)
+index-But5oiQP.js:1482 🔍 [DEBUG] finance in allowedModules? true
+index-But5oiQP.js:1482 🔍 [DEBUG] geography_analytics in allowedModules? true
+index-But5oiQP.js:1482 🔍 [DEBUG] finance button found in allButtons? Object
+index-But5oiQP.js:1482 🔍 [DEBUG] geography_analytics button found in allButtons? Object
+index-But5oiQP.js:1482 🔍 [DEBUG] finance button in filtered? Object
+index-But5oiQP.js:1482 🔍 [DEBUG] geography_analytics button in filtered? Object
+index-But5oiQP.js:1482 🔍 [DEBUG] filtered buttons count: 28
+index-But5oiQP.js:1482 🔍 [DEBUG] Site Management component initialized
+index-But5oiQP.js:941 Auth check result: Object
+/api/shop/returns/stats:1  Failed to load resource: the server responded with a status of 400 ()
+index-But5oiQP.js:941 Auth check result: Object
+index-But5oiQP.js:945 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ index-But5oiQP.js:945
+index-But5oiQP.js:1134 Fetching product suggestions for: 402
+index-But5oiQP.js:1134 Products data received: 6
+index-But5oiQP.js:1134 Filtered suggestions: Array(1)
+index-But5oiQP.js:941 Auth check result: Object
+index-But5oiQP.js:1134 Fetching phone suggestions for: 912
+index-But5oiQP.js:1134 Fetching phone suggestions for: 9124
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 ()
+index-But5oiQP.js:1134 Phone suggestions received: Object
+/api/shop/returns/stats:1  Failed to load resource: the server responded with a status of 400 ()
+index-But5oiQP.js:1134 Phone suggestions received: Object
+index-But5oiQP.js:941 Auth check result: Object
+index-But5oiQP.js:945 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ index-But5oiQP.js:945
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 ()
+/api/shop/returns/stats:1  Failed to load resource: the server responded with a status of 400 ()
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:115737)
+    at t.value (twk-chunk-common.js:2:148821)
+    at p.updateUUID (twk-chunk-common.js:2:200473)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:122752)
+    at twk-chunk-common.js:2:84842
+value @ twk-chunk-common.js:2
+index-But5oiQP.js:1134 Fetching product suggestions for: 402
+index-But5oiQP.js:1134 Products data received: 6
+index-But5oiQP.js:1134 Filtered suggestions: Array(1)
+index-But5oiQP.js:1134 Fetching phone suggestions for: 9124
+index-But5oiQP.js:1134 Phone suggestions received: Object
+index-But5oiQP.js:941 Auth check result: Object
+/api/shop/returns/stats:1  Failed to load resource: the server responded with a status of 400 ()
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 ()
+/api/shop/returns/stats:1  Failed to load resource: the server responded with a status of 400 ()
+index-But5oiQP.js:941 Auth check result: Object
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 ()
+/api/shop/returns/stats:1  Failed to load resource: the server responded with a status of 400 ()
+index-But5oiQP.js:941 Auth check result: Object
+/api/shop/returns/stats:1  Failed to load resource: the server responded with a status of 400 ()
+index-But5oiQP.js:48  GET https://momtaz-chem-website-admin3119.replit.app/api/shop/returns/stats 400 (Bad Request)
+(anonymous) @ index-But5oiQP.js:48
+i @ index-But5oiQP.js:48
+w @ index-But5oiQP.js:48
+start @ index-But5oiQP.js:48
+fetch @ index-But5oiQP.js:48
+(anonymous) @ index-But5oiQP.js:48
+(anonymous) @ index-But5oiQP.js:48
+batch @ index-But5oiQP.js:48
+refetchQueries @ index-But5oiQP.js:48
+(anonymous) @ index-But5oiQP.js:48
+batch @ index-But5oiQP.js:48
+invalidateQueries @ index-But5oiQP.js:48
+onSuccess @ index-But5oiQP.js:1134
+execute @ index-But5oiQP.js:48
+await in execute
+mutate @ index-But5oiQP.js:48
+(anonymous) @ index-But5oiQP.js:48
+Fe @ index-But5oiQP.js:1134
+Rce @ index-But5oiQP.js:37
+Fce @ index-But5oiQP.js:37
+Bce @ index-But5oiQP.js:37
+IM @ index-But5oiQP.js:37
+Hq @ index-But5oiQP.js:37
+(anonymous) @ index-But5oiQP.js:37
+rP @ index-But5oiQP.js:40
+gq @ index-But5oiQP.js:37
+vC @ index-But5oiQP.js:37
+kk @ index-But5oiQP.js:37
+tde @ index-But5oiQP.js:37

@@ -1435,8 +1435,37 @@ export class ShopStorage implements IShopStorage {
 
   // Product Returns Management
   async createProductReturn(returnData: InsertProductReturn): Promise<ProductReturn> {
-    // Calculate total return amount
-    const totalAmount = (parseFloat(returnData.unitPrice.toString()) * returnData.returnQuantity).toFixed(2);
+    // Get product unit and price from showcase (kardex) if productId exists
+    let unitPrice = parseFloat(returnData.unitPrice?.toString() || '0');
+    
+    if (returnData.productId && returnData.productId > 0) {
+      try {
+        // Import showcaseDb to get product info from kardex
+        const { showcaseDb } = await import('./db');
+        const { showcaseProducts } = await import('../shared/showcase-schema');
+        const { eq } = await import('drizzle-orm');
+        
+        const [showcaseProduct] = await showcaseDb
+          .select({
+            unitPrice: showcaseProducts.unitPrice,
+            stockUnit: showcaseProducts.stockUnit
+          })
+          .from(showcaseProducts)
+          .where(eq(showcaseProducts.id, returnData.productId))
+          .limit(1);
+          
+        if (showcaseProduct && showcaseProduct.unitPrice) {
+          unitPrice = parseFloat(showcaseProduct.unitPrice);
+          console.log(`✅ Unit price retrieved from Kardex for product ${returnData.productId}: ${unitPrice}`);
+        }
+      } catch (error) {
+        console.log('Could not fetch product info from showcase:', error);
+        // Continue with provided unitPrice
+      }
+    }
+    
+    // Calculate total return amount using actual unit price
+    const totalAmount = (unitPrice * returnData.returnQuantity).toFixed(2);
     
     // Remove returnDate from data - let database handle it with defaultNow()
     const { returnDate, ...insertData } = returnData;
@@ -1445,6 +1474,7 @@ export class ShopStorage implements IShopStorage {
       .insert(productReturns)
       .values({
         ...insertData,
+        unitPrice: unitPrice.toString(), // Use the actual unit price from kardex
         totalReturnAmount: totalAmount,
         returnDate: new Date(), // Explicitly provide current date as Date object
       })
