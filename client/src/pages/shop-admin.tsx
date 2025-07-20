@@ -952,7 +952,7 @@ export default function ShopAdmin() {
 function ReturnForm({ onClose }: { onClose: () => void }) {
   const [productId, setProductId] = useState("");
   const [productName, setProductName] = useState("");
-  const [productSuggestions, setProductSuggestions] = useState<string[]>([]);
+  const [productSuggestions, setProductSuggestions] = useState<any[]>([]);
   const [showProductSuggestions, setShowProductSuggestions] = useState(false);
   const [returnQuantity, setReturnQuantity] = useState("");
   const [customerName, setCustomerName] = useState("");
@@ -1051,7 +1051,11 @@ function ReturnForm({ onClose }: { onClose: () => void }) {
           .filter(product => 
             product.name.toLowerCase().includes(query.toLowerCase())
           )
-          .map(product => product.name)
+          .map(product => ({
+            id: product.id,
+            name: product.name,
+            displayText: `${product.name} (ID: ${product.id})`
+          }))
           .slice(0, 5); // Show max 5 suggestions
         
         console.log('Filtered suggestions:', filtered);
@@ -1081,11 +1085,16 @@ function ReturnForm({ onClose }: { onClose: () => void }) {
     }, 300); // 300ms delay
   };
 
-  // Handle suggestion selection
-  const handleSuggestionSelect = (suggestion: string) => {
-    setProductName(suggestion);
+  // Handle product suggestion selection
+  const selectProductFromSuggestion = (product: any) => {
+    setProductId(product.id.toString());
+    setProductName(product.name);
     setShowProductSuggestions(false);
-    setProductSuggestions([]);
+    
+    toast({
+      title: "محصول انتخاب شد",
+      description: `محصول ${product.name} انتخاب شد`,
+    });
   };
 
   const createReturnMutation = useMutation({
@@ -1100,6 +1109,7 @@ function ReturnForm({ onClose }: { onClose: () => void }) {
       });
       queryClient.invalidateQueries({ queryKey: ["/api/shop/returns"] });
       queryClient.invalidateQueries({ queryKey: ["/api/shop/returns/stats"] });
+      clearFormFields();
       onClose();
     },
     onError: (error: any) => {
@@ -1163,22 +1173,23 @@ function ReturnForm({ onClose }: { onClose: () => void }) {
           
           {/* Product Suggestions Dropdown */}
           {showProductSuggestions && productSuggestions.length > 0 && (
-            <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-40 overflow-y-auto">
-              {productSuggestions.map((suggestion, index) => (
+            <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-10 mt-1 max-h-60 overflow-y-auto">
+              {productSuggestions.map((product, index) => (
                 <button
-                  key={index}
+                  key={product.id || index}
                   type="button"
-                  className="w-full px-3 py-2 text-left hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
-                  onClick={() => handleSuggestionSelect(suggestion)}
+                  className="w-full text-left px-3 py-2 hover:bg-blue-50 border-b last:border-b-0 text-sm"
+                  onClick={() => selectProductFromSuggestion(product)}
                 >
-                  {suggestion}
+                  <div className="font-medium text-gray-900">{product.name}</div>
+                  <div className="text-xs text-gray-500">Product ID: {product.id}</div>
                 </button>
               ))}
             </div>
           )}
           
           <p className="text-xs text-gray-500 mt-1">
-            حداقل 3 حرف از نام محصول را تایپ کنید تا پیشنهادات نمایش داده شود
+            حداقل 3 حرف از نام محصول را تایپ کنید تا لیست محصولات نمایش داده شود
           </p>
         </div>
 
