@@ -191,7 +191,7 @@ export type OrderItem = typeof orderItems.$inferSelect;
 export const orderNumberCounter = pgTable("order_number_counter", {
   id: serial("id").primaryKey(),
   year: integer("year").notNull().unique(),
-  counter: integer("counter").notNull().default(1111),
+  counter: integer("counter").notNull().default(11111),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

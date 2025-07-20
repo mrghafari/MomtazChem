@@ -27,10 +27,10 @@ export async function generateOrderNumber(): Promise<string> {
       // Increment existing counter
       sequentialNumber = existingCounter.counter;
       
-      // Calculate next counter value (cycle from 1111-9999)
+      // Calculate next counter value (cycle from 11111-99999)
       let nextCounter = sequentialNumber + 1;
-      if (nextCounter > 9999) {
-        nextCounter = 1111; // Reset to 1111 when exceeding 9999
+      if (nextCounter > 99999) {
+        nextCounter = 11111; // Reset to 11111 when exceeding 99999
       }
       
       // Update counter
@@ -45,11 +45,11 @@ export async function generateOrderNumber(): Promise<string> {
       console.log(`🔄 [ORDER-NUMBER] Updated counter for year ${currentYear}: ${sequentialNumber} -> ${nextCounter}`);
     } else {
       // Create new counter for current year
-      sequentialNumber = 1111; // Start from 1111
+      sequentialNumber = 11111; // Start from 11111
       
       await db.insert(orderNumberCounter).values({
         year: currentYear,
-        counter: 1112, // Next number will be 1112
+        counter: 11112, // Next number will be 11112
         createdAt: new Date(),
         updatedAt: new Date()
       });
@@ -57,8 +57,8 @@ export async function generateOrderNumber(): Promise<string> {
       console.log(`🆕 [ORDER-NUMBER] Created new counter for year ${currentYear}, starting with ${sequentialNumber}`);
     }
     
-    // Format: MOM + 2-digit year + 4-digit sequential number
-    const orderNumber = `MOM${shortYear.toString().padStart(2, '0')}${sequentialNumber.toString().padStart(4, '0')}`;
+    // Format: MOM + 2-digit year + 5-digit sequential number
+    const orderNumber = `MOM${shortYear.toString().padStart(2, '0')}${sequentialNumber.toString().padStart(5, '0')}`;
     
     console.log(`✅ [ORDER-NUMBER] Generated order number: ${orderNumber}`);
     return orderNumber;
@@ -67,7 +67,7 @@ export async function generateOrderNumber(): Promise<string> {
     console.error(`❌ [ORDER-NUMBER] Error generating order number:`, error);
     
     // Fallback: generate with timestamp to ensure uniqueness
-    const timestamp = Date.now().toString().slice(-4);
+    const timestamp = Date.now().toString().slice(-5);
     const fallbackNumber = `MOM${shortYear.toString().padStart(2, '0')}${timestamp}`;
     
     console.log(`🔄 [ORDER-NUMBER] Using fallback order number: ${fallbackNumber}`);
@@ -91,7 +91,7 @@ export async function initializeOrderNumberCounter(): Promise<void> {
     if (!existingCounter) {
       await db.insert(orderNumberCounter).values({
         year: currentYear,
-        counter: 1111, // Start from 1111
+        counter: 11111, // Start from 11111
         createdAt: new Date(),
         updatedAt: new Date()
       });
