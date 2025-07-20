@@ -442,14 +442,17 @@ const LogisticsManagement = () => {
               </h5>
               <div className="space-y-2">
                 <div className="bg-gray-50 rounded p-2">
-                  <p className="text-xs text-gray-500 mb-1">نام مشتری</p>
+                  <p className="text-xs text-gray-500 mb-1">نام گیرنده</p>
                   <p className="text-sm font-medium text-gray-800">
-                    {order.customer?.firstName || order.customerFirstName} {order.customer?.lastName || order.customerLastName}
+                    {order.recipientName || `${order.customer?.firstName || order.customerFirstName} ${order.customer?.lastName || order.customerLastName}`}
                   </p>
                 </div>
                 <div className="bg-gray-50 rounded p-2 flex items-center">
                   <Phone className="w-3 h-3 mr-2 text-gray-500" />
-                  <span className="text-sm text-gray-700">{order.customer?.phone || order.customerPhone}</span>
+                  <div className="flex flex-col">
+                    <span className="text-sm text-gray-700">{order.recipientPhone || order.customer?.phone || order.customerPhone}</span>
+                    <span className="text-xs text-gray-500">شماره موبایل گیرنده</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -470,13 +473,29 @@ const LogisticsManagement = () => {
             <div className="bg-orange-50 rounded-lg p-3 border border-orange-200">
               <h5 className="font-medium text-orange-800 mb-2 flex items-center">
                 <MapPin className="w-4 h-4 mr-2" />
-                آدرس تحویل
+                آدرس تحویل کالا
               </h5>
               <p className="text-sm text-orange-700">
-                {order.shippingAddress || order.customerAddress || 'آدرس ثبت نشده'}
+                {(() => {
+                  // Try to parse shipping address if it's a JSON string
+                  if (order.shippingAddress && typeof order.shippingAddress === 'string') {
+                    try {
+                      const addr = JSON.parse(order.shippingAddress);
+                      return addr.address || addr.recipientAddress || order.shippingAddress;
+                    } catch {
+                      return order.shippingAddress;
+                    }
+                  }
+                  // If it's already an object
+                  if (order.shippingAddress && typeof order.shippingAddress === 'object') {
+                    return order.shippingAddress.address || order.shippingAddress.recipientAddress;
+                  }
+                  // Fallback to customer address
+                  return order.customerAddress || 'آدرس ثبت نشده';
+                })()}
               </p>
               <p className="text-xs text-orange-600 mt-1">
-                {order.shippingAddress ? 'آدرس جایگزین سفارش' : 'آدرس مشتری از CRM'}
+                آدرس انتخابی مشتری در فرآیند خرید (آدرس اول یا دوم)
               </p>
             </div>
 

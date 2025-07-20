@@ -59,6 +59,37 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Result**: KPI Dashboard deployment blockers completely resolved - build passes without syntax errors
 - **Impact**: Application now ready for production deployment without compilation failures
 
+### COMPLETED: CRM-Integrated Secondary Address Management in Checkout Process (July 20, 2025)
+✅ **IMPLEMENTED: Complete CRM integration for secondary address in payment checkout form**
+- **Customer Address Integration**: Secondary address from CRM now loads and displays in checkout form
+- **Real-time Updates**: Address changes in checkout automatically update CRM customer record
+- **API Endpoint**: Created `/api/customers/update-secondary-address` endpoint for seamless CRM updates
+- **Smart Form Logic**: 
+  - If customer has secondary address: shows current address with edit capability
+  - If no secondary address: shows input field for new address creation
+  - Auto-fill checkbox loads secondary address into billing fields
+- **Frontend Features**:
+  - Live address input field with onBlur CRM synchronization
+  - Loading indicator during CRM update process
+  - Success notifications in Persian language
+  - Auto-refresh customer data after updates
+- **Activity Logging**: All secondary address changes logged in CRM customer activities
+- **Bidirectional Sync**: Address entered in checkout → saved to CRM → available in future orders
+- **User Experience**: "آدرس دوم به طور خودکار در پروفایل CRM شما ذخیره می‌شود و در سفارشات آینده قابل انتخاب است"
+- **Result**: Complete secondary address lifecycle management from checkout form to CRM persistence
+- **Impact**: Customers can manage secondary addresses during checkout with automatic CRM synchronization
+
+### COMPLETED: Logistics Address Display Enhancement (July 20, 2025)
+✅ **ENHANCED: Delivery address display in logistics management to show customer's selected address**
+- **Address Clarification**: Updated logistics interface to clearly show "آدرس تحویل کالا" (delivery address)
+- **Smart Address Parsing**: Enhanced address extraction logic to parse JSON shipping_address field properly
+- **Recipient Information**: Improved recipient name and phone display to prioritize actual recipient over customer info
+- **Clear Labeling**: Added descriptive text "آدرس انتخابی مشتری در فرآیند خرید (آدرس اول یا دوم)"
+- **JSON Address Handling**: Implemented proper parsing of shipping address data from checkout form
+- **Fallback Logic**: Address extraction uses shipping address → recipient address → customer address hierarchy
+- **Result**: Logistics staff now see exactly which address (primary or secondary) customer selected for delivery
+- **Impact**: Improved delivery accuracy by displaying customer's actual chosen delivery address in logistics interface
+
 ### COMPLETED: Customer Unpaid Order Notification System with Order Cancellation (July 20, 2025)
 ✅ **IMPLEMENTED: Yellow background warning system for customers with unpaid orders**
 - **Feature**: Customer profile displays yellow notification banner when customer has unpaid orders

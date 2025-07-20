@@ -14692,6 +14692,53 @@ Leading Chemical Solutions Provider
     }
   });
 
+  // Update customer secondary address specifically for checkout process
+  app.put("/api/customers/update-secondary-address", async (req, res) => {
+    try {
+      const { customerId, secondaryAddress, city, state, postalCode, country } = req.body;
+      
+      if (!customerId) {
+        return res.status(400).json({
+          success: false,
+          message: "Customer ID is required"
+        });
+      }
+
+      // Update the customer's secondary address information in CRM
+      const updateData = {
+        secondaryAddress: secondaryAddress || null,
+        city: city || null,
+        state: state || null,
+        postalCode: postalCode || null,
+        country: country || null
+      };
+
+      const updatedCustomer = await crmStorage.updateCrmCustomer(customerId, updateData);
+      
+      // Log the activity
+      await crmStorage.logCustomerActivity({
+        customerId: customerId,
+        activityType: 'updated',
+        description: 'Secondary address updated during checkout process',
+        performedBy: 'customer',
+        activityData: { updatedFields: Object.keys(updateData), newAddress: secondaryAddress }
+      });
+
+      res.json({
+        success: true,
+        data: updatedCustomer,
+        message: "آدرس دوم با موفقیت بروزرسانی شد"
+      });
+      
+    } catch (error) {
+      console.error("Error updating secondary address:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to update secondary address"
+      });
+    }
+  });
+
   // Delete CRM customer
   app.delete("/api/crm/customers/:id", requireAuth, async (req, res) => {
     try {

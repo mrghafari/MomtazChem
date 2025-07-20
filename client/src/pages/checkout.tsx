@@ -127,11 +127,33 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
     },
   });
 
+  // Mutation to update secondary address in CRM
+  const updateSecondaryAddressMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return apiRequest('/api/customers/update-secondary-address', {
+        method: 'PUT',
+        body: JSON.stringify(data)
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "آدرس دوم بروزرسانی شد",
+        description: "اطلاعات آدرس دوم شما در سیستم CRM بروزرسانی شد",
+        className: "rtl"
+      });
+      // Refresh customer data to reflect the changes
+      refetchCustomer();
+    }
+  });
+
   // Auto-fill form with customer data when available
   useEffect(() => {
     if (customerData?.success && customerData.customer) {
       const customer = customerData.customer;
       setIsLoggedIn(true);
+      
+      // Store customer info for secondary address access
+      setCustomerInfo(customer);
       
       // Fill form with customer data from CRM
       form.setValue("email", customer.email || "");
@@ -581,48 +603,91 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                         />
                         
                         {/* Secondary Address Option */}
-                        {customerInfo?.secondaryAddress && (
-                          <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                            <div className="flex items-center space-x-2 space-x-reverse">
-                              <input
-                                type="checkbox"
-                                id="useSecondaryAddress"
-                                checked={useSecondaryAddress}
+                        <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                          <div className="flex items-center space-x-2 space-x-reverse mb-3">
+                            <input
+                              type="checkbox"
+                              id="useSecondaryAddress"
+                              checked={useSecondaryAddress}
+                              onChange={(e) => {
+                                setUseSecondaryAddress(e.target.checked);
+                                if (e.target.checked && customerInfo?.secondaryAddress) {
+                                  // Auto-fill with secondary address
+                                  form.setValue('billingAddress1', customerInfo.secondaryAddress);
+                                  form.setValue('billingCity', customerInfo.city || '');
+                                  form.setValue('billingState', customerInfo.state || '');
+                                  form.setValue('billingPostalCode', customerInfo.postalCode || '');
+                                  form.setValue('billingCountry', customerInfo.country || 'Iran');
+                                } else if (selectedAddress) {
+                                  // Revert to selected primary address
+                                  form.setValue('billingAddress1', selectedAddress.address);
+                                  form.setValue('billingCity', selectedAddress.city);
+                                  form.setValue('billingState', selectedAddress.state || '');
+                                  form.setValue('billingPostalCode', selectedAddress.postalCode || '');
+                                  form.setValue('billingCountry', selectedAddress.country);
+                                }
+                              }}
+                              className="rounded"
+                            />
+                            <label htmlFor="useSecondaryAddress" className="text-sm font-medium text-blue-700 dark:text-blue-300 cursor-pointer">
+                              استفاده از آدرس دوم (Secondary Address)
+                            </label>
+                          </div>
+                          
+                          {useSecondaryAddress && customerInfo?.secondaryAddress && (
+                            <div className="mt-3 p-3 bg-white dark:bg-gray-800 rounded border text-sm">
+                              <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+                                <MapPin className="w-4 h-4" />
+                                <span className="font-medium">آدرس دوم انتخاب شده:</span>
+                              </div>
+                              <p className="mt-1 text-gray-700 dark:text-gray-300">{customerInfo.secondaryAddress}</p>
+                            </div>
+                          )}
+                          
+                          {/* Secondary Address Input - Always show for editing */}
+                          <div className="space-y-3">
+                            <div>
+                              <label className="block text-sm font-medium mb-1">
+                                {customerInfo?.secondaryAddress ? 'ویرایش آدرس دوم:' : 'آدرس دوم جدید:'}
+                              </label>
+                              <Input 
+                                placeholder="آدرس دوم خود را وارد کنید..."
+                                defaultValue={customerInfo?.secondaryAddress || ''}
                                 onChange={(e) => {
-                                  setUseSecondaryAddress(e.target.checked);
-                                  if (e.target.checked && customerInfo?.secondaryAddress) {
-                                    // Auto-fill with secondary address
-                                    form.setValue('billingAddress1', customerInfo.secondaryAddress);
-                                    form.setValue('billingCity', customerInfo.city || '');
-                                    form.setValue('billingState', customerInfo.state || '');
-                                    form.setValue('billingPostalCode', customerInfo.postalCode || '');
-                                    form.setValue('billingCountry', customerInfo.country || 'Iraq');
-                                  } else if (selectedAddress) {
-                                    // Revert to selected primary address
-                                    form.setValue('billingAddress1', selectedAddress.address);
-                                    form.setValue('billingCity', selectedAddress.city);
-                                    form.setValue('billingState', selectedAddress.state || '');
-                                    form.setValue('billingPostalCode', selectedAddress.postalCode || '');
-                                    form.setValue('billingCountry', selectedAddress.country);
+                                  const newAddress = e.target.value.trim();
+                                  // Auto-fill form if using secondary address
+                                  if (useSecondaryAddress && newAddress) {
+                                    form.setValue('billingAddress1', newAddress);
                                   }
                                 }}
-                                className="rounded"
+                                onBlur={(e) => {
+                                  const newAddress = e.target.value.trim();
+                                  if (newAddress !== customerInfo?.secondaryAddress) {
+                                    // Update secondary address in CRM when user finishes typing
+                                    updateSecondaryAddressMutation.mutate({
+                                      customerId: customerData?.customer?.id,
+                                      secondaryAddress: newAddress || null,
+                                      city: form.getValues('billingCity'),
+                                      state: form.getValues('billingState'),
+                                      postalCode: form.getValues('billingPostalCode'),
+                                      country: form.getValues('billingCountry')
+                                    });
+                                  }
+                                }}
                               />
-                              <label htmlFor="useSecondaryAddress" className="text-sm font-medium text-blue-700 dark:text-blue-300 cursor-pointer">
-                                استفاده از آدرس دوم (Secondary Address)
-                              </label>
                             </div>
-                            {useSecondaryAddress && (
-                              <div className="mt-3 p-3 bg-white dark:bg-gray-800 rounded border text-sm">
-                                <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
-                                  <MapPin className="w-4 h-4" />
-                                  <span className="font-medium">آدرس دوم انتخاب شده:</span>
-                                </div>
-                                <p className="mt-1 text-gray-700 dark:text-gray-300">{customerInfo.secondaryAddress}</p>
+                            
+                            {updateSecondaryAddressMutation.isPending && (
+                              <div className="text-xs text-blue-600 dark:text-blue-400">
+                                در حال ذخیره آدرس دوم در سیستم CRM...
                               </div>
                             )}
+                            
+                            <div className="text-xs text-gray-500 dark:text-gray-400">
+                              آدرس دوم به طور خودکار در پروفایل CRM شما ذخیره می‌شود و در سفارشات آینده قابل انتخاب است
+                            </div>
                           </div>
-                        )}
+                        </div>
                         
 
                       </div>
