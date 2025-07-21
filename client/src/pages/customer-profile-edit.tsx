@@ -17,7 +17,7 @@ import { ArrowLeft, Save, Shield, Phone, Mail } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-// Schema for profile editing
+// Schema for profile editing - includes all registration fields
 const createEditProfileSchema = (t: any) => z.object({
   firstName: z.string().min(1, t.firstName + " is required"),
   lastName: z.string().min(1, t.lastName + " is required"),
@@ -25,11 +25,18 @@ const createEditProfileSchema = (t: any) => z.object({
   email: z.string().email("Invalid email").optional(),
   company: z.string().optional(),
   country: z.string().min(1, t.country + " is required"),
+  province: z.string().min(1, "Province is required"),
   city: z.string().min(1, t.city + " is required"),
   address: z.string().min(1, t.address + " is required"),
   secondaryAddress: z.string().optional(),
   postalCode: z.string().optional(),
+  alternatePhone: z.string().optional(),
+  industry: z.string().optional(),
   businessType: z.string().optional(),
+  companySize: z.string().optional(),
+  communicationPreference: z.string().optional(),
+  preferredLanguage: z.string().optional(),
+  marketingConsent: z.boolean().optional(),
   notes: z.string().optional(),
   customerType: z.string().optional(),
   customerStatus: z.string().optional(),
@@ -38,7 +45,6 @@ const createEditProfileSchema = (t: any) => z.object({
   website: z.string().optional(),
   taxId: z.string().optional(),
   registrationNumber: z.string().optional(),
-  preferredCommunication: z.string().optional(),
   leadSource: z.string().optional(),
   assignedSalesRep: z.string().optional(),
 });
@@ -66,19 +72,42 @@ export default function CustomerProfileEdit() {
     retry: 1,
   });
 
+  // Fetch provinces data
+  const { data: provincesData } = useQuery({
+    queryKey: ["/api/logistics/provinces"],
+    retry: 1,
+  });
+
+  // Fetch cities data
+  const { data: citiesData } = useQuery({
+    queryKey: ["/api/logistics/cities"],
+    retry: 1,
+  });
+
+  const provinces = provincesData?.data || [];
+  const cities = citiesData?.data || [];
+
   const form = useForm<EditProfileForm>({
     resolver: zodResolver(editProfileSchema),
     defaultValues: {
       firstName: "",
       lastName: "",
       phone: "",
+      email: "",
       company: "",
       country: "",
+      province: "",
       city: "",
       address: "",
       secondaryAddress: "",
       postalCode: "",
+      alternatePhone: "",
+      industry: "",
       businessType: "",
+      companySize: "",
+      communicationPreference: "",
+      preferredLanguage: "",
+      marketingConsent: false,
       notes: "",
       customerType: "",
       customerStatus: "",
@@ -87,7 +116,6 @@ export default function CustomerProfileEdit() {
       website: "",
       taxId: "",
       registrationNumber: "",
-      preferredCommunication: "",
       leadSource: "",
       assignedSalesRep: "",
     },
@@ -111,11 +139,18 @@ export default function CustomerProfileEdit() {
         email: customerData.email || "",
         company: customerData.company || "",
         country: customerData.country || "",
+        province: customerData.province || "",
         city: customerData.city || "",
         address: customerData.address || "",
         secondaryAddress: customerData.secondaryAddress || "",
         postalCode: customerData.postalCode || "",
+        alternatePhone: customerData.alternatePhone || "",
+        industry: customerData.industry || "",
         businessType: customerData.businessType || "",
+        companySize: customerData.companySize || "",
+        communicationPreference: customerData.communicationPreference || "",
+        preferredLanguage: customerData.preferredLanguage || "",
+        marketingConsent: customerData.marketingConsent || false,
         notes: customerData.notes || "",
         customerType: customerData.customerType || "",
         customerStatus: customerData.customerStatus || "",
@@ -124,7 +159,7 @@ export default function CustomerProfileEdit() {
         website: customerData.website || "",
         taxId: customerData.taxId || "",
         registrationNumber: customerData.registrationNumber || "",
-        preferredCommunication: customerData.preferredCommunication || "",
+
         leadSource: customerData.leadSource || "",
         assignedSalesRep: customerData.assignedSalesRep || "",
       });
@@ -200,7 +235,7 @@ export default function CustomerProfileEdit() {
   // Update profile without SMS (if no phone change)
   const updateProfileMutation = useMutation({
     mutationFn: async (data: EditProfileForm) => {
-      const response = await fetch('/api/customers/update-profile', {
+      const response = await fetch('/api/customers/me', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -377,12 +412,42 @@ export default function CustomerProfileEdit() {
                   />
                   <FormField
                     control={form.control}
+                    name="alternatePhone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Alternate Phone</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Alternative phone number" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Company & Industry Fields */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
                     name="company"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>{t.company}</FormLabel>
                         <FormControl>
                           <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="industry"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Industry</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Your industry" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -410,7 +475,7 @@ export default function CustomerProfileEdit() {
                 />
 
                 {/* Location Fields */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <FormField
                     control={form.control}
                     name="country"
@@ -426,13 +491,48 @@ export default function CustomerProfileEdit() {
                   />
                   <FormField
                     control={form.control}
+                    name="province"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Province / State</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select province" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {provinces.map((province: any) => (
+                              <SelectItem key={province.id} value={province.name}>
+                                {province.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
                     name="city"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>{t.city}</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select city" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {cities.map((city: any) => (
+                              <SelectItem key={city.id} value={city.name}>
+                                {city.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -488,7 +588,7 @@ export default function CustomerProfileEdit() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Business Type</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select business type" />
@@ -502,6 +602,104 @@ export default function CustomerProfileEdit() {
                           </SelectContent>
                         </Select>
                         <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Company Size & Communication Preferences */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="companySize"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Company Size</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select company size" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="small">Small (1-50 employees)</SelectItem>
+                            <SelectItem value="medium">Medium (51-200 employees)</SelectItem>
+                            <SelectItem value="large">Large (201-1000 employees)</SelectItem>
+                            <SelectItem value="enterprise">Enterprise (1000+ employees)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="communicationPreference"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Communication Preference</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select preference" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="email">Email</SelectItem>
+                            <SelectItem value="phone">Phone</SelectItem>
+                            <SelectItem value="sms">SMS</SelectItem>
+                            <SelectItem value="whatsapp">WhatsApp</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Language & Marketing Preferences */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="preferredLanguage"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Preferred Language</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select language" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="en">English</SelectItem>
+                            <SelectItem value="fa">Persian (فارسی)</SelectItem>
+                            <SelectItem value="ar">Arabic (العربية)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="marketingConsent"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                        <FormControl>
+                          <input
+                            type="checkbox"
+                            checked={field.value}
+                            onChange={field.onChange}
+                            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel>Marketing Consent</FormLabel>
+                          <p className="text-sm text-gray-600">
+                            I agree to receive marketing communications
+                          </p>
+                        </div>
                       </FormItem>
                     )}
                   />

@@ -8950,6 +8950,120 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update customer profile
+  app.put("/api/customers/me", async (req, res) => {
+    try {
+      const customerId = (req.session as any)?.customerId;
+      const crmCustomerId = (req.session as any)?.crmCustomerId;
+      const adminId = (req.session as any)?.adminId;
+      
+      // If admin is logged in, don't allow customer data access
+      if (adminId) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Admin authenticated - not a customer" 
+        });
+      }
+      
+      if (!customerId && !crmCustomerId) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "احراز هویت نشده" 
+        });
+      }
+
+      const {
+        firstName,
+        lastName,
+        email,
+        company,
+        alternatePhone,
+        country,
+        province,
+        city,
+        address,
+        secondaryAddress,
+        postalCode,
+        industry,
+        businessType,
+        companySize,
+        communicationPreference,
+        preferredLanguage,
+        marketingConsent
+      } = req.body;
+
+      // Prioritize updating CRM customer data
+      if (crmCustomerId) {
+        const updateData = {
+          firstName,
+          lastName,
+          email,
+          company: company || null,
+          alternatePhone: alternatePhone || null,
+          country,
+          province: province || null,
+          city,
+          address,
+          secondaryAddress: secondaryAddress || null,
+          postalCode: postalCode || null,
+          industry: industry || null,
+          businessType: businessType || null,
+          companySize: companySize || null,
+          communicationPreference: communicationPreference || 'email',
+          preferredLanguage: preferredLanguage || 'en',
+          marketingConsent: marketingConsent || false
+        };
+
+        await crmStorage.updateCrmCustomer(crmCustomerId, updateData);
+        
+        // Get updated customer data
+        const updatedCustomer = await crmStorage.getCrmCustomerById(crmCustomerId);
+        
+        res.json({
+          success: true,
+          message: "پروفایل با موفقیت بهروزرسانی شد",
+          customer: updatedCustomer
+        });
+      } else if (customerId) {
+        // Fallback to updating portal customer
+        const updateData = {
+          firstName,
+          lastName,
+          email,
+          company: company || '',
+          phone: req.body.phone, // Keep original phone
+          country,
+          city,
+          address,
+          postalCode: postalCode || ''
+        };
+
+        await customerStorage.updateCustomer(customerId, updateData);
+        
+        // Get updated customer data
+        const updatedCustomer = await customerStorage.getCustomerById(customerId);
+        
+        res.json({
+          success: true,
+          message: "پروفایل با موفقیت بهروزرسانی شد",
+          customer: updatedCustomer
+        });
+      } else {
+        return res.status(404).json({ 
+          success: false, 
+          message: "مشتری یافت نشد" 
+        });
+      }
+
+    } catch (error) {
+      console.error("Error updating customer profile:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در بهروزرسانی پروفایل" 
+      });
+    }
+  });
+
   // Create shop order and integrate with CRM
   app.post("/api/shop/orders", async (req, res) => {
     try {
