@@ -9464,6 +9464,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete temporary order with product reservation release
+  app.delete("/api/customers/orders/:orderId/delete-temporary", async (req, res) => {
+    try {
+      const customerId = (req.session as any)?.customerId;
+      const crmCustomerId = (req.session as any)?.crmCustomerId;
+      
+      if (!customerId && !crmCustomerId) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "احراز هویت نشده" 
+        });
+      }
+      
+      const orderId = parseInt(req.params.orderId);
+      const finalCustomerId = crmCustomerId || customerId;
+      
+      console.log(`🗑️ [DELETE TEMP ORDER] Request to delete temporary order ${orderId} by customer ${finalCustomerId}`);
+      
+      // Verify order belongs to customer
+      const order = await customerStorage.getOrderById(orderId);
+      if (!order || order.customerId !== finalCustomerId) {
+        return res.status(404).json({
+          success: false,
+          message: "سفارش یافت نشد یا متعلق به شما نیست"
+        });
+      }
+      
+      // Delete temporary order and release product reservations
+      const result = await customerStorage.deleteTemporaryOrder(orderId);
+      
+      console.log(`✅ [DELETE TEMP ORDER] Order ${orderId} successfully deleted with ${result.releasedProducts.length} products released`);
+      
+      res.json({
+        success: true,
+        message: `سفارش موقت ${order.orderNumber} با موفقیت حذف شد`,
+        data: {
+          deletedOrderId: orderId,
+          deletedOrderNumber: order.orderNumber,
+          releasedProducts: result.releasedProducts,
+          message: `${result.releasedProducts.length} محصول رزرو شده آزاد شد`
+        }
+      });
+      
+    } catch (error: any) {
+      console.error("❌ [DELETE TEMP ORDER] Error deleting temporary order:", error);
+      res.status(500).json({
+        success: false,
+        message: error.message || "خطا در حذف سفارش موقت"
+      });
+    }
+  });
+
   // Activate grace period order (continue with order after uploading receipt)
   app.post("/api/customers/orders/:orderId/activate-grace-period", async (req, res) => {
     try {

@@ -6,6 +6,19 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Temporary Order Deletion System with Sequential Numbering Preservation (July 21, 2025)
+✅ **IMPLEMENTED: Complete temporary order deletion system that maintains order numbering sequence**
+- **Soft Delete Method**: Created deleteTemporaryOrder() method in customer-storage.ts that marks orders as 'deleted' instead of hard deletion
+- **Product Reservation Release**: System automatically releases product reservations by adding quantities back to shop inventory
+- **API Endpoint**: Added DELETE /api/customers/orders/:orderId/delete-temporary endpoint with proper authentication and validation
+- **Frontend Integration**: Enhanced customer-profile.tsx with delete button functionality and confirmation dialog
+- **Sequential Numbering**: Deleted order numbers remain as "deleted" in system preserving M[YY][NNNNN] sequence integrity
+- **Database Integrity**: Foreign key constraints handled properly by deleting order items first, then updating order status
+- **User Experience**: Clear confirmation dialog warning about permanent deletion and product release
+- **Logging System**: Comprehensive logging for tracking deletion operations and released products
+- **Authorization**: Verified order ownership before allowing deletion to prevent unauthorized access
+- **Impact**: Users can safely delete temporary orders knowing numbering sequence remains intact and reserved products are released
+
 ### COMPLETED: Comprehensive PDF Generation System with PDFKit and pdfMake Integration (July 21, 2025)
 ✅ **IMPLEMENTED: Dual PDF generation system with both server-side PDFKit and client-side pdfMake approaches**
 - **Server-Side PDFKit Implementation**: Successfully integrated PDFKit with full Vazir font support for professional Persian/Arabic text rendering

@@ -37,6 +37,7 @@ export interface ICustomerStorage {
   getOrdersByCustomer(customerId: number): Promise<CustomerOrder[]>;
   updateOrder(id: number, order: Partial<InsertCustomerOrder>): Promise<CustomerOrder>;
   getAllOrders(): Promise<CustomerOrder[]>;
+  deleteTemporaryOrder(id: number): Promise<{ success: boolean; releasedProducts: any[] }>;
   
   // Order items
   createOrderItem(item: InsertOrderItem): Promise<OrderItem>;
@@ -322,6 +323,76 @@ export class CustomerStorage implements ICustomerStorage {
     await customerDb
       .delete(orderItems)
       .where(eq(orderItems.id, id));
+  }
+
+  async deleteTemporaryOrder(id: number): Promise<{ success: boolean; releasedProducts: any[] }> {
+    try {
+      // First check if this is a temporary order
+      const order = await this.getOrderById(id);
+      if (!order) {
+        throw new Error('Order not found');
+      }
+
+      if (order.orderType !== 'temporary' && order.orderCategory !== 'temporary') {
+        throw new Error('Only temporary orders can be deleted');
+      }
+
+      // Get order items to release reservations
+      const items = await this.getOrderItems(id);
+      const releasedProducts: any[] = [];
+
+      // Release product reservations by adding quantities back to inventory
+      if (items.length > 0) {
+        const { shopDb } = await import('./db');
+        const { shopProducts } = await import('@shared/shop-schema');
+        
+        for (const item of items) {
+          if (item.productId && item.quantity) {
+            // Add quantity back to shop product inventory
+            await shopDb
+              .update(shopProducts)
+              .set({
+                stockQuantity: sql`stock_quantity + ${item.quantity}`,
+                updatedAt: new Date()
+              })
+              .where(eq(shopProducts.id, item.productId));
+
+            releasedProducts.push({
+              productId: item.productId,
+              productName: item.productName,
+              quantity: item.quantity,
+              released: true
+            });
+          }
+        }
+      }
+
+      // Delete order items first (foreign key constraint)
+      await customerDb
+        .delete(orderItems)
+        .where(eq(orderItems.orderId, id));
+
+      // Mark order as deleted instead of removing it completely to preserve order numbering
+      await customerDb
+        .update(customerOrders)
+        .set({
+          status: 'deleted',
+          notes: order.notes ? `${order.notes} - سفارش حذف شده در ${new Date().toISOString()}` : `سفارش حذف شده در ${new Date().toISOString()}`,
+          updatedAt: new Date()
+        })
+        .where(eq(customerOrders.id, id));
+
+      console.log(`✅ Temporary order ${id} marked as deleted and ${releasedProducts.length} products released`);
+      
+      return {
+        success: true,
+        releasedProducts
+      };
+
+    } catch (error) {
+      console.error('Error deleting temporary order:', error);
+      throw error;
+    }
   }
 
   // Customer inquiries

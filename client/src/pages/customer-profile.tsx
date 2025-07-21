@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { User, Package, Calendar, DollarSign, ShoppingBag, LogOut, MapPin, Building, Phone, Mail, Edit, FileText, Download, Clock, AlertTriangle, PlayCircle } from "lucide-react";
+import { User, Package, Calendar, DollarSign, ShoppingBag, LogOut, MapPin, Building, Phone, Mail, Edit, FileText, Download, Clock, AlertTriangle, PlayCircle, Trash2 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { getPersonalizedWelcome, getDashboardMotivation } from "@/utils/greetings";
@@ -14,6 +14,7 @@ const CustomerProfile = () => {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { t, language, direction } = useLanguage();
+  const queryClient = useQueryClient();
 
   // Get customer information
   const { data: customerData, isLoading: customerLoading, error: customerError } = useQuery<any>({
@@ -48,6 +49,50 @@ const CustomerProfile = () => {
         variant: "destructive",
         title: t.error,
         description: t.logoutError,
+      });
+    }
+  };
+
+  const handleDeleteTemporaryOrder = async (orderId: number, orderNumber: string) => {
+    if (!confirm(`آیا از حذف سفارش موقت ${orderNumber} اطمینان دارید؟\nشماره سفارش حذف شده به عنوان "حذف شده" باقی می‌ماند و محصولات رزرو شده آزاد خواهند شد.`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/customers/orders/${orderId}/delete-temporary`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        toast({
+          title: "سفارش حذف شد",
+          description: `${result.message} - ${result.data?.releasedProducts?.length || 0} محصول آزاد شد`,
+        });
+
+        // Refresh orders list without page reload
+        queryClient.invalidateQueries({ queryKey: ['/api/customers/orders'] });
+        
+        console.log(`✅ Temporary order ${orderNumber} deleted with preserved numbering`, result.data);
+      } else {
+        toast({
+          variant: "destructive",
+          title: "خطا در حذف سفارش",
+          description: result.message,
+        });
+      }
+
+    } catch (error) {
+      console.error('Error deleting temporary order:', error);
+      toast({
+        variant: "destructive",
+        title: "خطا در حذف",
+        description: "امکان حذف سفارش موقت وجود ندارد",
       });
     }
   };
@@ -542,11 +587,31 @@ const CustomerProfile = () => {
                                 <FileText className="w-4 h-4" />
                                 آپلود رسید بانکی
                               </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => handleDeleteTemporaryOrder(order.id, order.orderNumber)}
+                                className="flex items-center gap-2"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                                حذف سفارش موقت
+                              </Button>
                             </>
                           ) : (order.orderType === 'temporary' || order.orderCategory === 'temporary') && order.gracePeriodStatus === 'expired' ? (
-                            <div className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded">
-                              این سفارش منقضی شده است و قابل فعال‌سازی نیست
-                            </div>
+                            <>
+                              <div className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded">
+                                این سفارش منقضی شده است و قابل فعال‌سازی نیست
+                              </div>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => handleDeleteTemporaryOrder(order.id, order.orderNumber)}
+                                className="flex items-center gap-2 mt-2"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                                حذف سفارش موقت
+                              </Button>
+                            </>
                           ) : (
                             <>
                               <Button
