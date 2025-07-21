@@ -1,0 +1,113 @@
+// src/index.ts
+import express from 'express';
+import bodyParser from 'body-parser';
+import cors from 'cors';
+import { drizzleDbConnect } from './lib/db';
+import invoiceRoutes from './routes/invoiceRoutes';
+
+const app = express();
+const PORT = process.env.PORT || 3001;
+
+app.use(cors());
+app.use(bodyParser.json());
+
+// API routes
+app.use('/api/invoices', invoiceRoutes);
+
+// Start server
+drizzleDbConnect().then(() => {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
+  });
+});
+
+// --- src/lib/db.ts ---
+import { drizzle } from 'drizzle-orm/node-postgres';
+import { Client } from 'pg';
+import * as schema from '../schema';
+
+let db: ReturnType<typeof drizzle>;
+
+export async function drizzleDbConnect() {
+  const client = new Client({
+    connectionString: process.env.DATABASE_URL || 'postgresql://user:pass@localhost:5432/invoice_db',
+  });
+  await client.connect();
+  db = drizzle(client, { schema });
+  console.log('✅ Connected to database');
+}
+
+export { db };
+
+// --- src/schema.ts ---
+import { pgTable, serial, text, timestamp, integer, real } from 'drizzle-orm/pg-core';
+
+export const invoices = pgTable('invoices', {
+  id: serial('id').primaryKey(),
+  customer_name: text('customer_name').notNull(),
+  date: timestamp('date').defaultNow(),
+  total_amount: real('total_amount').notNull(),
+});
+
+export const invoiceItems = pgTable('invoice_items', {
+  id: serial('id').primaryKey(),
+  invoice_id: integer('invoice_id').references(() => invoices.id),
+  description: text('description').notNull(),
+  quantity: integer('quantity').notNull(),
+  unit_price: real('unit_price').notNull(),
+});
+
+// --- src/routes/invoiceRoutes.ts ---
+import express from 'express';
+import { db } from '../lib/db';
+import { invoices, invoiceItems } from '../schema';
+
+const router = express.Router();
+
+// Create invoice
+router.post('/', async (req, res) => {
+  try {
+    const { customer_name, items } = req.body;
+
+    const total_amount = items.reduce((sum: number, item: any) => sum + item.quantity * item.unit_price, 0);
+
+    const [newInvoice] = await db.insert(invoices).values({ customer_name, total_amount }).returning();
+
+    await db.insert(invoiceItems).values(
+      items.map((item: any) => ({
+        invoice_id: newInvoice.id,
+        description: item.description,
+        quantity: item.quantity,
+        unit_price: item.unit_price,
+      }))
+    );
+
+    res.status(201).json(newInvoice);
+  } catch (error) {
+    res.status(500).json({ error: 'Error creating invoice' });
+  }
+});
+
+// List all invoices
+router.get('/', async (_req, res) => {
+  try {
+    const results = await db.select().from(invoices);
+    res.json(results);
+  } catch (error) {
+    res.status(500).json({ error: 'Error fetching invoices' });
+  }
+});
+
+// Get one invoice with items
+router.get('/:id', async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const [invoice] = await db.select().from(invoices).where(invoices.id.eq(id));
+    const items = await db.select().from(invoiceItems).where(invoiceItems.invoice_id.eq(id));
+    res.json({ ...invoice, items });
+  } catch (error) {
+    res.status(500).json({ error: 'Error fetching invoice details' });
+  }
+});
+
+export default router;
