@@ -354,7 +354,7 @@ const WarehouseManagementFixed: React.FC = () => {
                         {filteredOrders.map((order: Order) => (
                           <tr key={order.id} className="border-b hover:bg-blue-50 transition-colors">
                             <td className="p-4" style={{ width: '120px' }}>
-                              <div className="font-bold text-blue-600 truncate">#{order.id}</div>
+                              <div className="font-bold text-blue-600 truncate">MOM25{String(order.customerOrderId || order.id).padStart(5, '1')}</div>
                             </td>
                             <td className="p-4" style={{ width: '250px' }}>
                               <div className="space-y-1">
@@ -459,7 +459,7 @@ const WarehouseManagementFixed: React.FC = () => {
         <Dialog open={showOrderDetails} onOpenChange={setShowOrderDetails}>
           <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>جزئیات سفارش #{selectedOrder?.customerOrderId}</DialogTitle>
+              <DialogTitle>جزئیات سفارش MOM25{String(selectedOrder?.customerOrderId || selectedOrder?.id).padStart(5, '1')}</DialogTitle>
             </DialogHeader>
             {loadingOrderDetails ? (
               <div className="text-center py-8">
