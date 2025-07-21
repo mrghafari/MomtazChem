@@ -311,8 +311,8 @@ function UserManagement() {
       const staticModule = extractSiteManagementModules().find(m => m.moduleId === module.id);
       return {
         id: module.id,
-        name: module.name,
-        displayName: module.name,
+        name: module.id, // Use technical English name instead of Persian translation
+        displayName: staticModule?.displayName || module.id, // Use English display name from static config
         description: module.description,
         category: module.category,
         isCore: true,
@@ -1131,7 +1131,7 @@ function UserManagement() {
                                           </div>
                                           <div className="flex-1">
                                             <div className="text-sm font-medium">{module.displayName}</div>
-                                            <div className="text-xs text-gray-500">{module.name}</div>
+                                            <div className="text-xs text-gray-500">{module.id}</div>
                                           </div>
                                           <Plus className="h-4 w-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
                                         </div>
@@ -1177,7 +1177,7 @@ function UserManagement() {
                                         </div>
                                         <div className="flex-1">
                                           <div className="text-sm font-medium">{module.displayName}</div>
-                                          <div className="text-xs text-gray-500">{module.name}</div>
+                                          <div className="text-xs text-gray-500">{module.id}</div>
                                         </div>
                                         {module.isCore && (
                                           <Crown className="h-3 w-3 text-yellow-500" />
@@ -1392,7 +1392,7 @@ function UserManagement() {
                       </span>
                       <div className="flex-1">
                         <div className="font-medium text-sm">{module.displayName}</div>
-                        <div className="text-xs text-gray-500">{module.name}</div>
+                        <div className="text-xs text-gray-500">{module.id}</div>
                       </div>
                       <Checkbox 
                         disabled
