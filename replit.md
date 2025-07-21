@@ -6,6 +6,16 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Customer Profile Order Display Limitation (July 21, 2025)
+✅ **IMPLEMENTED: Customer profile now shows only two orders - one temporary and one regular**
+- **Display Logic**: Shows one temporary order and one regular order in customer profile
+- **Fallback Logic**: If no temporary order exists, shows two most recent regular orders
+- **Purchase History**: Remaining orders are hidden as purchase history to reduce clutter
+- **API Enhancement**: Added totalOrders and hiddenOrders count for transparency
+- **User Experience**: Cleaner profile interface with focus on current active orders
+- **Result**: Customer profile displays simplified order view while maintaining full order history in backend
+- **Impact**: Improved customer interface clarity with essential order information prioritized
+
 ### COMPLETED: M[YY][NNNNN] Order Numbering System Implementation (July 21, 2025)
 ✅ **IMPLEMENTED: New order numbering pattern M2511111, M2511112, etc. for consistent customer order tracking**
 - **Pattern**: M + 25 (year) + 11111-99999 (sequential counter)

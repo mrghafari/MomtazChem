@@ -9384,9 +9384,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
 
+      // Filter to show only two orders: one temporary and one regular
+      // If no temporary order exists, show two regular orders
+      const temporaryOrder = allOrders.find(order => order.orderCategory === 'temporary');
+      const regularOrders = allOrders.filter(order => order.orderCategory === 'regular');
+      
+      let displayOrders = [];
+      
+      if (temporaryOrder) {
+        // Show one temporary order and one regular order
+        displayOrders = [temporaryOrder];
+        if (regularOrders.length > 0) {
+          displayOrders.push(regularOrders[0]);
+        }
+      } else {
+        // Show two most recent regular orders
+        displayOrders = regularOrders.slice(0, 2);
+      }
+
       res.json({
         success: true,
-        orders: allOrders,
+        orders: displayOrders,
+        totalOrders: allOrders.length, // Keep track of total orders for reference
+        hiddenOrders: Math.max(0, allOrders.length - displayOrders.length), // How many orders are hidden
       });
     } catch (error) {
       console.error("Error getting customer orders:", error);
