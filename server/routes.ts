@@ -31763,6 +31763,59 @@ momtazchem.com
     }
   });
 
+  // Test endpoint for order number generation
+  app.get("/api/test/order-number", async (req, res) => {
+    try {
+      const { generateOrderNumber } = await import('./order-number-generator');
+      const orderNumber1 = await generateOrderNumber();
+      const orderNumber2 = await generateOrderNumber();
+      const orderNumber3 = await generateOrderNumber();
+      
+      res.json({
+        success: true,
+        orderNumbers: [orderNumber1, orderNumber2, orderNumber3],
+        format: "MOM + 2-digit year + 5-digit sequential number",
+        message: "Order numbers generated successfully"
+      });
+    } catch (error) {
+      console.error('Order number generation test failed:', error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to generate order numbers",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  // Test endpoint for checking recent orders format
+  app.get("/api/test/recent-orders", async (req, res) => {
+    try {
+      const recentOrders = await customerDb
+        .select({
+          id: customerOrders.id,
+          orderNumber: customerOrders.orderNumber,
+          totalAmount: customerOrders.totalAmount,
+          createdAt: customerOrders.createdAt
+        })
+        .from(customerOrders)
+        .orderBy(desc(customerOrders.createdAt))
+        .limit(10);
+      
+      res.json({
+        success: true,
+        orders: recentOrders,
+        message: `Found ${recentOrders.length} recent orders`
+      });
+    } catch (error) {
+      console.error('Recent orders test failed:', error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to get recent orders",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
   // Catch-all for unmatched API routes - return JSON 404
   app.all('/api/*', (req, res) => {
     console.log(`❌ 404 - Unmatched API route: ${req.method} ${req.originalUrl}`);
