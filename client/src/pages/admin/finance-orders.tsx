@@ -54,6 +54,7 @@ import { formatCurrency } from "@/lib/utils";
 interface OrderManagement {
   id: number;
   customerOrderId: number;
+  orderNumber?: string; // شماره سفارش M[YY][NNNNN]
   currentStatus: string;
   totalAmount: string;
   currency: string;
@@ -334,7 +335,7 @@ function FinanceOrders() {
         title: "کدهای ردیابی ایجاد شدند",
         description: `${response.trackingCodes?.length || 0} کد ردیابی برای کالاها ایجاد شد`
       });
-      loadTrackingCodes(selectedOrderForTracking?.customerOrderId);
+      // loadTrackingCodes(selectedOrderForTracking?.customerOrderId);
     },
     onError: (error: any) => {
       toast({
@@ -351,17 +352,17 @@ function FinanceOrders() {
     
     try {
       const response = await apiRequest(`/api/tracking/order/${orderId}`);
-      setTrackingCodes(response.trackingCodes || []);
+      // setTrackingCodes(response.trackingCodes || []);
     } catch (error) {
       console.error("Error loading tracking codes:", error);
     }
   };
 
   // Handle tracking modal open
-  const handleTrackingModal = (order: Order) => {
-    setSelectedOrderForTracking(order);
-    setShowTrackingModal(true);
-    loadTrackingCodes(order.customerOrderId);
+  const handleTrackingModal = (order: OrderManagement) => {
+    // setSelectedOrderForTracking(order);
+    // setShowTrackingModal(true);
+    // loadTrackingCodes(order.customerOrderId);
   };
 
   const getStatusBadge = (status: string) => {
@@ -375,10 +376,10 @@ function FinanceOrders() {
     }
   };
 
-  const handleOrderReview = (order: Order) => {
+  const handleOrderReview = (order: OrderManagement) => {
     setSelectedOrder(order);
     setReviewNotes(order.financialNotes || "");
-    setIsDialogOpen(true);
+    setDialogOpen(true);
   };
 
   const handleApprove = () => {

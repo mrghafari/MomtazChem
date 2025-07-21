@@ -396,7 +396,8 @@ const CustomerProfile = () => {
                               </Button>
                             </>
                           )}
-                          {order.status === 'confirmed' && (
+                          {/* دکمه دانلود فاکتور/پیش فاکتور */}
+                          {order.status === 'confirmed' ? (
                             <Button
                               size="sm"
                               onClick={() => window.open(`/download-invoice/${order.id}`, '_blank')}
@@ -404,6 +405,15 @@ const CustomerProfile = () => {
                             >
                               <Download className="w-4 h-4 mr-2" />
                               دانلود فاکتور
+                            </Button>
+                          ) : (
+                            <Button
+                              size="sm"
+                              onClick={() => window.open(`/download-proforma-invoice/${order.id}`, '_blank')}
+                              className="bg-blue-600 hover:bg-blue-700"
+                            >
+                              <Download className="w-4 h-4 mr-2" />
+                              دانلود پیش فاکتور
                             </Button>
                           )}
                         </div>

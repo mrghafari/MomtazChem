@@ -412,6 +412,94 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Proforma Invoice PDF generation endpoint  
+  app.get("/download-proforma-invoice/:orderId", async (req, res) => {
+    console.log('📄 Proforma Invoice PDF generation requested for order:', req.params.orderId);
+    
+    try {
+      const orderId = parseInt(req.params.orderId);
+      if (!orderId) {
+        return res.status(400).json({ success: false, message: 'شناسه سفارش نامعتبر است' });
+      }
+
+      // Get order data from customer_orders
+      const orderResult = await db
+        .select({
+          id: customerOrders.id,
+          orderNumber: customerOrders.orderNumber,
+          totalAmount: customerOrders.totalAmount,
+          currency: customerOrders.currency,
+          paymentMethod: customerOrders.paymentMethod,
+          status: customerOrders.status,
+          createdAt: customerOrders.createdAt,
+          customerName: sql<string>`CONCAT(${crmCustomers.firstName}, ' ', ${crmCustomers.lastName})`,
+          customerEmail: crmCustomers.email,
+          customerPhone: crmCustomers.phone,
+          customerAddress: crmCustomers.address,
+        })
+        .from(customerOrders)
+        .leftJoin(crmCustomers, eq(customerOrders.customerId, crmCustomers.id))
+        .where(eq(customerOrders.id, orderId));
+
+      if (!orderResult.length) {
+        return res.status(404).json({ success: false, message: 'سفارش یافت نشد' });
+      }
+
+      const order = orderResult[0];
+
+      // Get order items
+      const itemsResult = await db
+        .select({
+          productName: orderItems.productName,
+          quantity: orderItems.quantity,
+          unitPrice: orderItems.unitPrice,
+          totalPrice: sql<string>`${orderItems.quantity} * ${orderItems.unitPrice}`,
+        })
+        .from(orderItems)
+        .where(eq(orderItems.orderId, orderId));
+
+      const invoiceData = {
+        invoiceType: 'PROFORMA', // نوع فاکتور: پیش فاکتور
+        invoiceNumber: `P-${order.orderNumber}`, // P- برای پیش فاکتور
+        orderNumber: order.orderNumber,
+        invoiceDate: new Date().toLocaleDateString('fa-IR'),
+        customer: {
+          name: order.customerName || 'مشتری',
+          email: order.customerEmail,
+          phone: order.customerPhone,
+          address: order.customerAddress,
+        },
+        items: itemsResult.map(item => ({
+          name: item.productName,
+          quantity: item.quantity,
+          unitPrice: parseFloat(item.unitPrice),
+          total: parseFloat(item.totalPrice || '0'),
+        })),
+        subtotal: parseFloat(order.totalAmount || '0'),
+        total: parseFloat(order.totalAmount || '0'),
+        currency: order.currency || 'IQD',
+        paymentStatus: 'در انتظار پرداخت', // برای پیش فاکتور
+        notes: 'این پیش فاکتور است و پس از پرداخت و تأیید مالی، فاکتور نهایی صادر خواهد شد.'
+      };
+
+      const { generateInvoicePDF } = await import('./pdfkit-generator');
+      const pdfBuffer = await generateInvoicePDF(invoiceData);
+      
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="proforma-invoice-${order.orderNumber}.pdf"`);
+      res.send(pdfBuffer);
+      
+      console.log('✅ Proforma Invoice PDF generated successfully for order:', order.orderNumber);
+    } catch (error: any) {
+      console.error('❌ Error generating proforma invoice PDF:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در تولید پیش فاکتور PDF',
+        error: error.message
+      });
+    }
+  });
+  
   // Customer report PDF generation endpoint
   app.post("/api/pdf/customer-report", requireAuth, async (req, res) => {
     console.log('📄 Customer report PDF generation requested');
@@ -434,6 +522,102 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({
         success: false,
         message: 'خطا در تولید گزارش مشتری PDF',
+        error: error.message
+      });
+    }
+  });
+
+  // Final Invoice PDF generation endpoint (for approved orders)
+  app.get("/download-invoice/:orderId", async (req, res) => {
+    console.log('📄 Final Invoice PDF generation requested for order:', req.params.orderId);
+    
+    try {
+      const orderId = parseInt(req.params.orderId);
+      if (!orderId) {
+        return res.status(400).json({ success: false, message: 'شناسه سفارش نامعتبر است' });
+      }
+
+      // Get order data from customer_orders
+      const orderResult = await db
+        .select({
+          id: customerOrders.id,
+          orderNumber: customerOrders.orderNumber,
+          totalAmount: customerOrders.totalAmount,
+          currency: customerOrders.currency,
+          paymentMethod: customerOrders.paymentMethod,
+          status: customerOrders.status,
+          createdAt: customerOrders.createdAt,
+          customerName: sql<string>`CONCAT(${crmCustomers.firstName}, ' ', ${crmCustomers.lastName})`,
+          customerEmail: crmCustomers.email,
+          customerPhone: crmCustomers.phone,
+          customerAddress: crmCustomers.address,
+        })
+        .from(customerOrders)
+        .leftJoin(crmCustomers, eq(customerOrders.customerId, crmCustomers.id))
+        .where(eq(customerOrders.id, orderId));
+
+      if (!orderResult.length) {
+        return res.status(404).json({ success: false, message: 'سفارش یافت نشد' });
+      }
+
+      const order = orderResult[0];
+
+      // Check if order is confirmed (has financial approval)
+      if (order.status !== 'confirmed') {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'فقط سفارشات تأیید شده قابل صدور فاکتور نهایی هستند' 
+        });
+      }
+
+      // Get order items
+      const itemsResult = await db
+        .select({
+          productName: orderItems.productName,
+          quantity: orderItems.quantity,
+          unitPrice: orderItems.unitPrice,
+          totalPrice: sql<string>`${orderItems.quantity} * ${orderItems.unitPrice}`,
+        })
+        .from(orderItems)
+        .where(eq(orderItems.orderId, orderId));
+
+      const invoiceData = {
+        invoiceType: 'FINAL', // نوع فاکتور: فاکتور نهایی
+        invoiceNumber: order.orderNumber,
+        orderNumber: order.orderNumber,
+        invoiceDate: new Date().toLocaleDateString('fa-IR'),
+        customer: {
+          name: order.customerName || 'مشتری',
+          email: order.customerEmail,
+          phone: order.customerPhone,
+          address: order.customerAddress,
+        },
+        items: itemsResult.map(item => ({
+          name: item.productName,
+          quantity: item.quantity,
+          unitPrice: parseFloat(item.unitPrice),
+          total: parseFloat(item.totalPrice || '0'),
+        })),
+        subtotal: parseFloat(order.totalAmount || '0'),
+        total: parseFloat(order.totalAmount || '0'),
+        currency: order.currency || 'IQD',
+        paymentStatus: 'پرداخت شده', // برای فاکتور نهایی
+        notes: 'این فاکتور نهایی است و پس از تأیید مالی و آماده‌سازی در انبار صادر شده است.'
+      };
+
+      const { generateInvoicePDF } = await import('./pdfkit-generator');
+      const pdfBuffer = await generateInvoicePDF(invoiceData);
+      
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="invoice-${order.orderNumber}.pdf"`);
+      res.send(pdfBuffer);
+      
+      console.log('✅ Final Invoice PDF generated successfully for order:', order.orderNumber);
+    } catch (error: any) {
+      console.error('❌ Error generating final invoice PDF:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در تولید فاکتور نهایی PDF',
         error: error.message
       });
     }
