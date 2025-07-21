@@ -311,7 +311,7 @@ export default function FinancialDepartment() {
                     <div className="flex-1">
                       <div className="flex items-center gap-4 mb-3">
                         <Badge variant="secondary" className="px-3 py-1">
-                          سفارش {order.orderNumber || `#${order.customerOrderId}`}
+                          سفارش MOM25{String(order.customerOrderId).padStart(5, '1')}
                         </Badge>
                         <Badge variant="outline" className="text-orange-600 border-orange-300">
                           در انتظار بررسی مالی
@@ -423,7 +423,7 @@ export default function FinancialDepartment() {
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>بررسی سفارش {selectedOrder?.orderNumber || `#${selectedOrder?.customerOrderId}`}</DialogTitle>
+              <DialogTitle>بررسی سفارش MOM25{String(selectedOrder?.customerOrderId).padStart(5, '1')}</DialogTitle>
             </DialogHeader>
             
             {/* Order Summary */}

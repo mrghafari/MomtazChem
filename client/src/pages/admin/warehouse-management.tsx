@@ -1032,7 +1032,7 @@ const WarehouseManagement: React.FC = () => {
                     <tbody>
                       {filteredOrders.map((order) => (
                         <tr key={order.id} className="border-b hover:bg-gray-50">
-                          <td className="p-4 font-medium">{order.orderNumber || `#${order.id}`}</td>
+                          <td className="p-4 font-medium">MOM25{String(order.customerOrderId || order.id).padStart(5, '1')}</td>
                           <td className="p-4">
                             <div className="font-medium">{
                               order.customer?.firstName && order.customer?.lastName 
@@ -1170,7 +1170,7 @@ const WarehouseManagement: React.FC = () => {
                         <tr key={order.id} className="hover:bg-gray-50">
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm font-medium text-gray-900">
-                              {order.orderNumber || `#${order.id}`}
+                              MOM25{String(order.customerOrderId || order.id).padStart(5, '1')}
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">

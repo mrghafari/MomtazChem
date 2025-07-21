@@ -720,7 +720,7 @@ const LogisticsManagement = () => {
                     {mappedActiveOrders.map((order: LogisticsOrder) => (
                       <tr key={order.id} className="border-b hover:bg-green-50">
                         <td className="p-3 border-r">
-                          <div className="font-medium text-green-700">{order.orderNumber || `#${order.customerOrderId}`}</div>
+                          <div className="font-medium text-green-700">MOM25{String(order.customerOrderId).padStart(5, '1')}</div>
                         </td>
                         <td className="p-3 border-r">
                           <div className="font-medium">
@@ -932,7 +932,7 @@ const LogisticsManagement = () => {
                     {mappedDeliveredOrders.map((order: LogisticsOrder) => (
                       <tr key={order.id} className="border-b hover:bg-gray-50">
                         <td className="p-3 border-r">
-                          <div className="font-medium text-green-700">{order.orderNumber || `#${order.customerOrderId}`}</div>
+                          <div className="font-medium text-green-700">MOM25{String(order.customerOrderId).padStart(5, '1')}</div>
                         </td>
                         <td className="p-3 border-r">
                           <div className="font-medium">
