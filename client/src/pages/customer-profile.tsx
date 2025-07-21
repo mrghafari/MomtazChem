@@ -90,7 +90,7 @@ const CustomerProfile = () => {
     );
   }
 
-  const customer = customerData?.data || null;
+  const customer = customerData?.customer || null;
   const orders = orderData?.success ? orderData.data : [];
   
   // Safety check for customer data
