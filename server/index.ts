@@ -4,6 +4,7 @@ import MemoryStore from "memorystore";
 import path from "path";
 import { registerRoutes } from "./routes";
 import InventoryAlertService from "./inventory-alerts";
+import { expiredOrdersCleanup } from "./expired-orders-cleanup";
 import { setupVite, serveStatic, log } from "./vite";
 
 // Global error handlers to prevent server crashes
@@ -128,12 +129,17 @@ app.use((req, res, next) => {
     }, () => {
       log(`serving on port ${port}`);
       
-      // Start inventory monitoring service with delayed initialization
+      // Start services with delayed initialization
       setTimeout(() => {
         try {
+          // Start expired orders cleanup service
+          expiredOrdersCleanup.start();
+          log('🧹 Expired orders cleanup service started');
+          
+          // Start inventory monitoring service
           InventoryAlertService.startInventoryMonitoring();
-        } catch (monitoringError) {
-          console.error("Error starting inventory monitoring:", monitoringError);
+        } catch (servicesError) {
+          console.error("Error starting services:", servicesError);
         }
       }, 5000); // Delay 5 seconds to ensure database connections are stable
     });

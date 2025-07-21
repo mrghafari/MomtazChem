@@ -396,16 +396,16 @@ export class CustomerStorage implements ICustomerStorage {
 
       // Release product reservations by adding quantities back to inventory
       if (items.length > 0) {
-        const { shopDb } = await import('./db');
+        const { db } = await import('./db');
         const { shopProducts } = await import('@shared/shop-schema');
         
         for (const item of items) {
           if (item.productId && item.quantity) {
             // Add quantity back to shop product inventory
-            await shopDb
+            await db
               .update(shopProducts)
               .set({
-                stockQuantity: sql`stock_quantity + ${item.quantity}`,
+                stockQuantity: sql`stock_quantity + ${parseFloat(item.quantity)}`,
                 updatedAt: new Date()
               })
               .where(eq(shopProducts.id, item.productId));

@@ -31090,6 +31090,50 @@ momtazchem.com
     }
   });
 
+  // =============================================================================
+  // EXPIRED ORDERS CLEANUP ENDPOINTS
+  // =============================================================================
+
+  // Manual cleanup of expired orders
+  app.post("/api/admin/cleanup/expired-orders", requireAuth, async (req, res) => {
+    try {
+      const { expiredOrdersCleanup } = await import('./expired-orders-cleanup');
+      
+      await expiredOrdersCleanup.manualCleanup();
+      
+      res.json({
+        success: true,
+        message: "تمیزکاری سفارشات منقضی شده با موفقیت انجام شد"
+      });
+    } catch (error) {
+      console.error("Error performing manual cleanup:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در انجام تمیزکاری"
+      });
+    }
+  });
+
+  // Get cleanup service status
+  app.get("/api/admin/cleanup/status", requireAuth, async (req, res) => {
+    try {
+      const { expiredOrdersCleanup } = await import('./expired-orders-cleanup');
+      
+      const status = expiredOrdersCleanup.getStatus();
+      
+      res.json({
+        success: true,
+        data: status
+      });
+    } catch (error) {
+      console.error("Error getting cleanup status:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت وضعیت تمیزکاری"
+      });
+    }
+  });
+
   // Global error handler for all API routes
   app.use('/api/*', (err: any, req: Request, res: Response, next: NextFunction) => {
     console.error('API Error:', err);
