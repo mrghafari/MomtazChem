@@ -19,6 +19,7 @@ import AudioNotification from "@/components/AudioNotification";
 interface OrderManagement {
   id: number;
   customerOrderId: number;
+  orderNumber: string; // شماره سفارش MOM format
   currentStatus: string;
   deliveryCode: string | null;
   
@@ -310,7 +311,7 @@ export default function FinancialDepartment() {
                     <div className="flex-1">
                       <div className="flex items-center gap-4 mb-3">
                         <Badge variant="secondary" className="px-3 py-1">
-                          سفارش {(order as any).orderNumber || `#${order.customerOrderId}`}
+                          سفارش {order.orderNumber || `#${order.customerOrderId}`}
                         </Badge>
                         <Badge variant="outline" className="text-orange-600 border-orange-300">
                           در انتظار بررسی مالی
@@ -422,7 +423,7 @@ export default function FinancialDepartment() {
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>بررسی سفارش {(selectedOrder as any)?.orderNumber || `#${selectedOrder?.customerOrderId}`}</DialogTitle>
+              <DialogTitle>بررسی سفارش {selectedOrder?.orderNumber || `#${selectedOrder?.customerOrderId}`}</DialogTitle>
             </DialogHeader>
             
             {/* Order Summary */}
