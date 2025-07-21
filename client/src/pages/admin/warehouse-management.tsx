@@ -749,8 +749,8 @@ const WarehouseManagement: React.FC = () => {
   const handleSendToLogistics = (order: Order) => {
     updateOrderMutation.mutate({
       orderId: order.id,
-      status: 'logistics_assigned',
-      notes: 'سفارش از انبار به بخش لجستیک ارسال شد'
+      status: 'logistics_dispatched',
+      notes: 'سفارش از انبار به بخش لجستیک ارسال شد - کد تحویل ارسال شد'
     });
   };
 

@@ -17481,7 +17481,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       console.log('📦 [WAREHOUSE] Order updated successfully:', updatedOrder);
       
       // Auto-generate and send delivery code when order is sent to logistics
-      if (status === 'logistics_assigned' || status === 'warehouse_approved') {
+      if (status === 'logistics_dispatched' || status === 'logistics_assigned' || status === 'warehouse_approved') {
         try {
           console.log('🚚 [AUTO-CODE] Order approved to logistics, auto-generating delivery code...');
           
@@ -17531,34 +17531,31 @@ ${message ? `Additional Requirements:\n${message}` : ''}
               console.error('❌ [SMS-NOTIFICATION] Failed to send SMS:', smsError);
             }
 
-            // Send email notification to customer
+            // Send email notification to customer using template system
             try {
               if (orderDetails.customerEmail) {
-                const { emailService } = await import('./email-service');
+                const { UniversalEmailService } = await import('./universal-email-service');
                 
-                const emailSubject = `کد تحویل سفارش شما - ${deliveryCode}`;
-                const emailContent = `
-                  <div dir="rtl" style="font-family: Arial, sans-serif;">
-                    <h2>سلام ${customerName} عزیز</h2>
-                    <p>سفارش شما با شماره <strong>${deliveryCode}</strong> آماده ارسال است.</p>
-                    <p><strong>کد تحویل شما: ${deliveryCode}</strong></p>
-                    <p>این کد را هنگام تحویل سفارش ارائه دهید.</p>
-                    <hr>
-                    <p>با تشکر<br>تیم مُمتاز کِم</p>
-                  </div>
-                `;
-                
-                const emailResult = await emailService.sendEmail({
-                  to: orderDetails.customerEmail,
-                  subject: emailSubject,
-                  html: emailContent,
-                  category: 'order_notifications'
+                const emailResult = await UniversalEmailService.sendEmail({
+                  categoryKey: 'order_notifications',
+                  to: [orderDetails.customerEmail],
+                  subject: 'کد تحویل سفارش شما',
+                  html: '', // Will be filled by template
+                  templateNumber: '#05', // Delivery code notification template
+                  variables: {
+                    customerName: customerName,
+                    orderNumber: deliveryCode,
+                    deliveryCode: deliveryCode,
+                    customerFirstName: orderDetails.customerFirstName || customerName.split(' ')[0],
+                    customerLastName: orderDetails.customerLastName || customerName.split(' ').slice(1).join(' ') || ''
+                  }
                 });
                 
-                console.log('📧 [EMAIL-NOTIFICATION] Email sent with delivery code:', {
+                console.log('📧 [EMAIL-NOTIFICATION] Email sent using template #05 with delivery code:', {
                   email: orderDetails.customerEmail,
                   deliveryCode: deliveryCode,
-                  emailResult: emailResult.success
+                  template: '#05',
+                  emailResult: emailResult
                 });
               }
             } catch (emailError) {
