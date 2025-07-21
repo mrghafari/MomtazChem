@@ -425,7 +425,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const pdfBuffer = await generateCustomerReportPDF(customerData, orders, activities);
       
       res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename="customer-report-${customerData?.name || 'report'}.pdf"`);
+      res.setHeader('Content-Disposition', `attachment; filename="customer-report.pdf"`);
       res.send(pdfBuffer);
       
       console.log('✅ Customer report PDF generated and sent successfully');

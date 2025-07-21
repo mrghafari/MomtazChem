@@ -119,8 +119,8 @@
                         { id: 'ORD-002', totalAmount: 200000, status: 'pending' }
                     ],
                     activities: [
-                        { activityType: 'login', description: 'ورود به سیستم' },
-                        { activityType: 'order', description: 'ثبت سفارش جدید' }
+                        { activityType: 'login', description: 'Login to system' },
+                        { activityType: 'order', description: 'New order placed' }
                     ]
                 };
 
@@ -135,7 +135,7 @@
                     const url = window.URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = `customer-report-${reportData.customerData.name}.pdf`;
+                    a.download = 'customer-report.pdf';
                     document.body.appendChild(a);
                     a.click();
                     window.URL.revokeObjectURL(url);

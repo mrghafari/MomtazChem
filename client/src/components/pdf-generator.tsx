@@ -11,7 +11,7 @@ import pdfFonts from 'pdfmake/build/vfs_fonts';
 import { vazirRegular, vazirBold } from '@/lib/vazir-fonts';
 
 // Initialize pdfMake with Vazir fonts
-pdfMake.vfs = pdfFonts.pdfMake.vfs;
+pdfMake.vfs = pdfFonts.pdfMake?.vfs || {};
 
 // Add Vazir fonts to VFS
 pdfMake.vfs['Vazir-Regular.ttf'] = vazirRegular;
@@ -55,19 +55,15 @@ export default function PDFGenerator({
     setIsGenerating(true);
     
     try {
-      const docDefinition = {
+      const docDefinition: any = {
         defaultStyle: {
-          font: 'Vazir',
-          fontSize: 10,
-          direction: 'rtl',
-          alignment: 'right'
+          fontSize: 10
         },
         content: [
           // Header
           {
             text: 'فاکتور فروش - Momtaz Chem',
             fontSize: 20,
-            font: 'Vazir',
             bold: true,
             alignment: 'center',
             margin: [0, 0, 0, 20]
