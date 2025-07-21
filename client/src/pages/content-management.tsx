@@ -46,7 +46,7 @@ export default function ContentManagement() {
   const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedLanguage, setSelectedLanguage] = useState<'en' | 'ar' | 'ku' | 'tr'>('en');
-  const [selectedSection, setSelectedSection] = useState<string>('admin_dashboard');
+  const [selectedSection, setSelectedSection] = useState<string>('discount_banner');
   const [editingContent, setEditingContent] = useState<ContentItem | null>(null);
 
   // Check if user is super admin (id = 1)
@@ -203,7 +203,9 @@ export default function ContentManagement() {
     { value: 'navigation', label: 'Navigation' },
     { value: 'hero', label: 'Hero Section' },
     { value: 'testimonials', label: 'Testimonials' },
-    { value: 'social_media', label: 'Social Media Links' }
+    { value: 'social_media', label: 'Social Media Links' },
+    { value: 'discount_banner', label: 'بنر تخفیف (Discount Banner)' },
+    { value: 'ai_settings', label: 'تنظیمات AI (AI Settings)' }
   ];
 
   const languages = [
@@ -274,10 +276,14 @@ export default function ContentManagement() {
 
         {/* Content Management Tabs */}
         <Tabs defaultValue="text-content" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="text-content" className="flex items-center gap-2">
               <Type className="w-4 h-4" />
               Text Content
+            </TabsTrigger>
+            <TabsTrigger value="settings-control" className="flex items-center gap-2">
+              <Switch className="w-4 h-4" />
+              کنترل تنظیمات
             </TabsTrigger>
             <TabsTrigger value="images" className="flex items-center gap-2">
               <Image className="w-4 h-4" />
@@ -392,6 +398,176 @@ export default function ContentManagement() {
                   )}
                 </>
               )}
+            </div>
+          </TabsContent>
+
+          {/* Settings Control Tab */}
+          <TabsContent value="settings-control" className="space-y-6">
+            <div className="grid gap-6 md:grid-cols-2">
+              {/* Discount Banner Control */}
+              <Card className="border-orange-200 bg-orange-50/50">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-orange-800">
+                    <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+                    کنترل بنر تخفیف
+                  </CardTitle>
+                  <CardDescription>
+                    فعال/غیرفعال کردن بنر تخفیف در صفحه اصلی وب‌سایت
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium text-gray-900">وضعیت بنر تخفیف</h4>
+                      <p className="text-sm text-gray-600">نمایش بنر تخفیف در بالای صفحه</p>
+                    </div>
+                    <Switch
+                      checked={contentItems?.find((item: ContentItem) => item.key === 'discount_banner_enabled')?.isActive || false}
+                      onCheckedChange={(checked) => {
+                        const existingItem = contentItems?.find((item: ContentItem) => item.key === 'discount_banner_enabled');
+                        if (existingItem) {
+                          updateContentMutation.mutate({
+                            id: existingItem.id,
+                            content: existingItem.content,
+                            isActive: checked
+                          });
+                        } else {
+                          createContentMutation.mutate({
+                            key: 'discount_banner_enabled',
+                            content: 'true',
+                            contentType: 'text',
+                            language: selectedLanguage,
+                            section: 'discount_banner'
+                          });
+                        }
+                      }}
+                    />
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <Label>متن بنر تخفیف</Label>
+                    <Textarea
+                      placeholder="متن بنر تخفیف را وارد کنید..."
+                      value={contentItems?.find((item: ContentItem) => item.key === 'discount_banner_text')?.content || ''}
+                      onChange={(e) => {
+                        const existingItem = contentItems?.find((item: ContentItem) => item.key === 'discount_banner_text');
+                        if (existingItem) {
+                          updateContentMutation.mutate({
+                            id: existingItem.id,
+                            content: e.target.value,
+                            isActive: existingItem.isActive
+                          });
+                        } else {
+                          createContentMutation.mutate({
+                            key: 'discount_banner_text',
+                            content: e.target.value,
+                            contentType: 'text',
+                            language: selectedLanguage,
+                            section: 'discount_banner'
+                          });
+                        }
+                      }}
+                      className="min-h-[80px]"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* AI Settings Control */}
+              <Card className="border-blue-200 bg-blue-50/50">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-blue-800">
+                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                    کنترل تنظیمات AI
+                  </CardTitle>
+                  <CardDescription>
+                    فعال/غیرفعال کردن ویژگی‌های هوش مصنوعی
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium text-gray-900">وضعیت AI</h4>
+                      <p className="text-sm text-gray-600">فعال‌سازی قابلیت‌های هوش مصنوعی</p>
+                    </div>
+                    <Switch
+                      checked={contentItems?.find((item: ContentItem) => item.key === 'ai_enabled')?.isActive || false}
+                      onCheckedChange={(checked) => {
+                        const existingItem = contentItems?.find((item: ContentItem) => item.key === 'ai_enabled');
+                        if (existingItem) {
+                          updateContentMutation.mutate({
+                            id: existingItem.id,
+                            content: existingItem.content,
+                            isActive: checked
+                          });
+                        } else {
+                          createContentMutation.mutate({
+                            key: 'ai_enabled',
+                            content: 'true',
+                            contentType: 'text',
+                            language: selectedLanguage,
+                            section: 'ai_settings'
+                          });
+                        }
+                      }}
+                    />
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <Label>پیام AI</Label>
+                    <Textarea
+                      placeholder="پیام یا توضیح AI را وارد کنید..."
+                      value={contentItems?.find((item: ContentItem) => item.key === 'ai_message')?.content || ''}
+                      onChange={(e) => {
+                        const existingItem = contentItems?.find((item: ContentItem) => item.key === 'ai_message');
+                        if (existingItem) {
+                          updateContentMutation.mutate({
+                            id: existingItem.id,
+                            content: e.target.value,
+                            isActive: existingItem.isActive
+                          });
+                        } else {
+                          createContentMutation.mutate({
+                            key: 'ai_message',
+                            content: e.target.value,
+                            contentType: 'text',
+                            language: selectedLanguage,
+                            section: 'ai_settings'
+                          });
+                        }
+                      }}
+                      className="min-h-[80px]"
+                    />
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <Label>API کلید OpenAI</Label>
+                    <Input
+                      type="password"
+                      placeholder="OpenAI API Key..."
+                      value={contentItems?.find((item: ContentItem) => item.key === 'openai_api_key')?.content || ''}
+                      onChange={(e) => {
+                        const existingItem = contentItems?.find((item: ContentItem) => item.key === 'openai_api_key');
+                        if (existingItem) {
+                          updateContentMutation.mutate({
+                            id: existingItem.id,
+                            content: e.target.value,
+                            isActive: existingItem.isActive
+                          });
+                        } else {
+                          createContentMutation.mutate({
+                            key: 'openai_api_key',
+                            content: e.target.value,
+                            contentType: 'text',
+                            language: selectedLanguage,
+                            section: 'ai_settings'
+                          });
+                        }
+                      }}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
 
