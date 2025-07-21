@@ -50,7 +50,7 @@ export const orderManagement = pgTable("order_management", {
   
   // Current status and tracking
   currentStatus: varchar("current_status", { length: 50 }).notNull().default(orderStatuses.PENDING_PAYMENT),
-  deliveryCode: varchar("delivery_code", { length: 50 }).unique(), // Original order number for delivery verification
+  deliveryCode: varchar("delivery_code", { length: 10 }).unique(), // SMS code for delivery verification
   
   // Financial department
   financialReviewerId: integer("financial_reviewer_id"),

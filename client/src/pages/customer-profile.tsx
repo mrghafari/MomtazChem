@@ -4,9 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Input } from "@/components/ui/input";
-import { User, Package, Calendar, DollarSign, ShoppingBag, LogOut, MapPin, Building, Phone, Mail, Edit, FileText, Download, Clock, AlertTriangle, PlayCircle, Search, History } from "lucide-react";
+import { User, Package, Calendar, DollarSign, ShoppingBag, LogOut, MapPin, Building, Phone, Mail, Edit, FileText, Download, Clock, AlertTriangle, PlayCircle } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { getPersonalizedWelcome, getDashboardMotivation } from "@/utils/greetings";
@@ -16,14 +14,6 @@ const CustomerProfile = () => {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { t, language, direction } = useLanguage();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
-
-  // Get payment methods for bank account information
-  const { data: paymentMethods } = useQuery<any>({
-    queryKey: ["/api/payment/methods"],
-    retry: 1,
-  });
 
   // Get customer information
   const { data: customerData, isLoading: customerLoading, error: customerError } = useQuery<any>({
@@ -55,97 +45,233 @@ const CustomerProfile = () => {
     } catch (error) {
       console.error('Logout error:', error);
       toast({
-        title: "خطا در خروج",
-        description: "لطفاً دوباره تلاش کنید",
         variant: "destructive",
+        title: t.error,
+        description: t.logoutError,
+      });
+    }
+  };
+
+  const handleGenerateOfficialInvoice = async (orderId: number) => {
+    try {
+      // First, generate invoice from order
+      const generateResponse = await fetch(`/api/invoices/generate/${orderId}`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!generateResponse.ok) {
+        throw new Error('Failed to generate invoice');
+      }
+
+      const generateResult = await generateResponse.json();
+      const invoiceId = generateResult.data.id;
+
+      // Then, request official invoice
+      const officialResponse = await fetch(`/api/invoices/${invoiceId}/request-official`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ language: language })
+      });
+
+      if (!officialResponse.ok) {
+        throw new Error('Failed to request official invoice');
+      }
+
+      toast({
+        title: "درخواست فاکتور رسمی",
+        description: "درخواست فاکتور رسمی با موفقیت ثبت شد. فاکتور پس از تایید برای شما ارسال خواهد شد.",
+      });
+
+    } catch (error) {
+      console.error('Error generating official invoice:', error);
+      toast({
+        variant: "destructive",
+        title: "خطا در صدور فاکتور",
+        description: "امکان صدور فاکتور رسمی وجود ندارد. لطفاً دوباره تلاش کنید.",
+      });
+    }
+  };
+
+  const handleActivateGracePeriodOrder = async (orderId: number) => {
+    try {
+      const response = await fetch(`/api/customers/orders/${orderId}/activate-grace-period`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to activate order');
+      }
+
+      toast({
+        title: "فعال‌سازی سفارش",
+        description: result.message,
+      });
+
+      // Refresh orders to show updated status
+      window.location.reload();
+
+    } catch (error) {
+      console.error('Error activating grace period order:', error);
+      toast({
+        variant: "destructive",
+        title: "خطا در فعال‌سازی",
+        description: error.message || "امکان فعال‌سازی سفارش وجود ندارد. لطفاً دوباره تلاش کنید.",
+      });
+    }
+  };
+
+  const handleDownloadInvoice = async (orderId: number) => {
+    try {
+      // First, generate invoice from order if doesn't exist
+      const generateResponse = await fetch(`/api/invoices/generate/${orderId}`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!generateResponse.ok) {
+        throw new Error('Failed to generate invoice');
+      }
+
+      const generateResult = await generateResponse.json();
+      const invoiceId = generateResult.data.id;
+
+      // Download the invoice PDF
+      const downloadResponse = await fetch(`/api/invoices/${invoiceId}/download`, {
+        method: 'GET',
+        credentials: 'include'
+      });
+
+      if (!downloadResponse.ok) {
+        throw new Error('Failed to download invoice');
+      }
+
+      const blob = await downloadResponse.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `invoice-${orderId}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: "دانلود موفق",
+        description: "فاکتور با موفقیت دانلود شد",
+      });
+
+    } catch (error) {
+      console.error('Error downloading invoice:', error);
+      toast({
+        variant: "destructive",
+        title: "خطا در دانلود",
+        description: "امکان دانلود فاکتور وجود ندارد",
       });
     }
   };
 
   if (customerLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">در حال بارگذاری اطلاعات...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading profile...</p>
         </div>
       </div>
     );
   }
 
-  if (customerError || !customerData?.success) {
+  // Check for authentication errors or missing data
+  if (customerError || (!customerLoading && (!customerData || !customerData.success))) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8 flex items-center justify-center">
+      <div className={`min-h-screen bg-gray-50 flex items-center justify-center ${direction === 'rtl' ? 'rtl' : 'ltr'}`}>
         <Card className="w-full max-w-md">
-          <CardContent className="pt-6 text-center">
-            <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">{t.error}</h2>
-            <p className="text-gray-600 mb-4">{t.loginToAccessWallet}</p>
-            <Button onClick={() => setLocation("/customer/auth")}>
-              {t.goToLogin}
-            </Button>
+          <CardContent className="p-8 text-center">
+            <User className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-gray-700 mb-2">{t.error}</h2>
+            <p className="text-gray-500 mb-6">{t.loginToAccessWallet}</p>
+            <div className="space-y-3">
+              <Button onClick={() => setLocation("/customer/login")} className="w-full">
+                {t.login}
+              </Button>
+              <Button onClick={() => setLocation("/shop")} variant="outline" className="w-full">
+                {t.continueShopping}
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
     );
   }
 
-  const customer = customerData?.customer || null;
-  const orders = orderData?.success ? orderData.data : [];
-  
-  // Safety check for customer data
-  if (!customer) {
-    return (
-      <div className="min-h-screen bg-gray-50 py-8 flex items-center justify-center">
-        <Card className="w-full max-w-md">
-          <CardContent className="pt-6 text-center">
-            <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">{t.unauthorized}</h2>
-            <p className="text-gray-600 mb-4">{t.unauthorizedDesc}</p>
-            <Button onClick={() => setLocation("/customer/auth")}>
-              {t.login}
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-  
-  // Enhanced order categorization logic
-  const categorizeOrders = (orders: any[] = []) => {
-    const regularOrders = (orders || []).filter((order: any) => {
-      // Cash on delivery or completed orders
-      return order.payment_method === 'cash_on_delivery' || 
-             order.current_status === 'completed' ||
-             (order.payment_status === 'paid' && order.current_status !== 'payment_grace_period');
-    });
+  const customer = customerData.customer;
+  const orders = orderData?.success ? orderData.orders : [];
 
-    const temporaryOrders = (orders || []).filter((order: any) => {
-      // Orders in grace period for payment (temporary orders)
-      return order.current_status === 'payment_grace_period' ||
-             (order.payment_status === 'pending' && order.created_at && 
-              new Date().getTime() - new Date(order.created_at).getTime() < 3 * 24 * 60 * 60 * 1000);
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
     });
-
-    const otherOrders = (orders || []).filter((order: any) => {
-      // Orders that don't fit in regular or temporary categories
-      return !regularOrders.includes(order) && !temporaryOrders.includes(order);
-    });
-
-    return { regularOrders, temporaryOrders, otherOrders };
   };
 
-  const { regularOrders, temporaryOrders, otherOrders } = categorizeOrders(orders);
-  
-  // Orders that need payment (unpaid orders notification)
-  const unpaidOrders = (orders || []).filter((order: any) => 
-    ['pending', 'payment_grace_period', 'unpaid', 'pending'].includes(order.payment_status) ||
-    ['payment_grace_period'].includes(order.current_status)
-  );
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'pending': return 'bg-yellow-100 text-yellow-800';
+      case 'confirmed': return 'bg-blue-100 text-blue-800';
+      case 'processing': return 'bg-orange-100 text-orange-800';
+      case 'shipped': return 'bg-purple-100 text-purple-800';
+      case 'delivered': return 'bg-green-100 text-green-800';
+      case 'cancelled': return 'bg-red-100 text-red-800';
+      case 'payment_grace_period': return 'bg-amber-100 text-amber-800';
+      case 'financial_pending': return 'bg-blue-100 text-blue-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
 
-  // Get history orders for the sheet
-  const historyOrders = (orders || []).filter((order: any) => 
-    ['completed', 'delivered', 'logistics_delivered'].includes(order.current_status)
+  const getStatusLabel = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'pending': return t.pending;
+      case 'confirmed': return t.confirmed;
+      case 'processing': return t.processing;
+      case 'shipped': return t.shipped;
+      case 'delivered': return t.delivered;
+      case 'cancelled': return t.cancelled;
+      case 'payment_grace_period': return 'مهلت پرداخت';
+      case 'financial_pending': return 'در انتظار بررسی مالی';
+      default: return status;
+    }
+  };
+
+  const formatTimeRemaining = (hours: number) => {
+    if (hours <= 0) return 'منقضی شده';
+    if (hours < 1) return 'کمتر از ۱ ساعت';
+    if (hours < 24) return `${Math.floor(hours)} ساعت`;
+    const days = Math.floor(hours / 24);
+    const remainingHours = Math.floor(hours % 24);
+    return `${days} روز و ${remainingHours} ساعت`;
+  };
+
+  const totalSpent = orders.reduce((sum: number, order: any) => 
+    sum + parseFloat(order.totalAmount || 0), 0
   );
 
   return (
@@ -156,15 +282,15 @@ const CustomerProfile = () => {
           <div>
             <div className="mb-4">
               <h1 className="text-3xl font-bold text-gray-900">
-                {t.welcomeCustomer}, {customer?.firstName || ''} {customer?.lastName || ''}!
+                Welcome, {customer.firstName} {customer.lastName}!
               </h1>
               <p className="text-lg text-blue-600 mt-1">
-                {getPersonalizedWelcome(customer?.firstName || 'کاربر', 'customer', 'fa')}
+                {getPersonalizedWelcome(customer.firstName, 'customer', 'en')}
               </p>
             </div>
             <div>
-              <h2 className="text-xl font-semibold text-gray-700">پروفایل مشتری</h2>
-              <p className="text-gray-600">مدیریت حساب و مشاهده تاریخچه سفارشات</p>
+              <h2 className="text-xl font-semibold text-gray-700">Customer Profile</h2>
+              <p className="text-gray-600">Manage your account and view order history</p>
             </div>
           </div>
           <div className="flex gap-3">
@@ -173,352 +299,274 @@ const CustomerProfile = () => {
               onClick={() => setLocation("/customer/profile/edit")}
             >
               <Edit className="w-4 h-4 mr-2" />
-              ویرایش پروفایل
+              Edit Profile
             </Button>
             <Button
               variant="outline"
               onClick={() => setLocation("/shop")}
             >
               <ShoppingBag className="w-4 h-4 mr-2" />
-              فروشگاه
+              Continue Shopping
             </Button>
-            <Button onClick={handleLogout} variant="outline">
+            <Button
+              variant="outline"
+              onClick={handleLogout}
+            >
               <LogOut className="w-4 h-4 mr-2" />
-              خروج
+              Logout
             </Button>
           </div>
         </div>
 
-        {/* Unpaid Orders Notification */}
-        {unpaidOrders.length > 0 && (
-          <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg" dir="rtl">
-            <div className="flex items-center gap-3">
-              <AlertTriangle className="w-6 h-6 text-yellow-600" />
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold text-yellow-800">
-                  {customer?.firstName || ''} {customer?.lastName || ''} - توجه: سفارشات پرداخت نشده
-                </h3>
-                <p className="text-yellow-700 mt-1">
-                  شما {unpaidOrders.length} سفارش پرداخت نشده دارید. لطفاً پرداخت کنید یا سفارش را لغو کنید تا موجودی آزاد شود.
-                </p>
-              </div>
-            </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Customer Information */}
+          <div className="lg:col-span-1">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <User className="w-5 h-5" />
+                  Account Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-500 flex items-center gap-2">
+                    <User className="w-4 h-4" />
+                    Full Name
+                  </label>
+                  <p className="text-gray-900 font-semibold">{customer.firstName} {customer.lastName}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500 flex items-center gap-2">
+                    <Mail className="w-4 h-4" />
+                    Email
+                  </label>
+                  <p className="text-gray-900">{customer.email}</p>
+                </div>
+                {customer.company && (
+                  <div>
+                    <label className="text-sm font-medium text-gray-500 flex items-center gap-2">
+                      <Building className="w-4 h-4" />
+                      Company
+                    </label>
+                    <p className="text-gray-900">{customer.company}</p>
+                  </div>
+                )}
+                {customer.phone && (
+                  <div>
+                    <label className="text-sm font-medium text-gray-500 flex items-center gap-2">
+                      <Phone className="w-4 h-4" />
+                      Phone
+                    </label>
+                    <p className="text-gray-900">{customer.phone}</p>
+                  </div>
+                )}
+                {customer.address && (
+                  <div>
+                    <label className="text-sm font-medium text-gray-500 flex items-center gap-2">
+                      <MapPin className="w-4 h-4" />
+                      Address
+                    </label>
+                    <p className="text-gray-900">{customer.address}</p>
+                  </div>
+                )}
+                {customer.city && customer.country && (
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Location</label>
+                    <p className="text-gray-900">{customer.city}, {customer.country}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Order Statistics */}
+            <Card className="mt-6">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <DollarSign className="w-5 h-5" />
+                  Order Statistics
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Total Orders:</span>
+                  <span className="font-semibold">{orders.length}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Total Spent:</span>
+                  <span className="font-semibold">${totalSpent.toFixed(2)}</span>
+                </div>
+                {orders.length > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Average Order:</span>
+                    <span className="font-semibold">${(totalSpent / orders.length).toFixed(2)}</span>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
-        )}
 
-        {/* Order Categories */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          {/* Regular Orders */}
-          <Card>
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">{t.regularOrders}</CardTitle>
-                <Badge variant="secondary">{regularOrders.length}</Badge>
-              </div>
-              <p className="text-sm text-gray-600">{t.regularOrdersDesc}</p>
-            </CardHeader>
-            <CardContent>
-              {regularOrders.length > 0 ? (
-                <div className="space-y-3">
-                  {(regularOrders || []).slice(0, 2).map((order: any) => (
-                    <div key={order.id} className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <p className="font-medium text-green-800">
-                            {order.simple_order_number || `#${order.id}`}
-                          </p>
-                          <p className="text-sm text-green-600">
-                            {new Date(order.created_at).toLocaleDateString('fa-IR')}
-                          </p>
-                        </div>
-                        <Badge className="bg-green-100 text-green-700">
-                          {order.current_status === 'completed' ? 'تکمیل شده' : 'عادی'}
-                        </Badge>
-                      </div>
-                    </div>
-                  ))}
-                  {regularOrders.length > 2 && (
-                    <p className="text-sm text-gray-500 text-center">
-                      و {regularOrders.length - 2} سفارش دیگر...
-                    </p>
-                  )}
-                </div>
-              ) : (
-                <p className="text-sm text-gray-500 text-center py-4">
-                  {t.noRegularOrders}
-                </p>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Temporary Orders */}
-          <Card>
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">{t.temporaryOrders}</CardTitle>
-                <Badge variant="secondary" className="bg-orange-100 text-orange-600">
-                  {temporaryOrders.length}
-                </Badge>
-              </div>
-              <p className="text-sm text-gray-600">{t.temporaryOrdersDesc}</p>
-            </CardHeader>
-            <CardContent>
-              {temporaryOrders.length > 0 ? (
-                <div className="space-y-3">
-                  {(temporaryOrders || []).slice(0, 2).map((order: any) => (
-                    <div key={order.id} className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <p className="font-medium text-orange-800">
-                            {order.simple_order_number || `#${order.id}`}
-                          </p>
-                          <p className="text-sm text-orange-600">
-                            {new Date(order.created_at).toLocaleDateString('fa-IR')}
-                          </p>
-                        </div>
-                        <Badge className="bg-orange-100 text-orange-700">
-                          {t.temporary}
-                        </Badge>
-                      </div>
-                    </div>
-                  ))}
-                  {temporaryOrders.length > 2 && (
-                    <p className="text-sm text-gray-500 text-center">
-                      و {temporaryOrders.length - 2} سفارش دیگر...
-                    </p>
-                  )}
-                </div>
-              ) : (
-                <p className="text-sm text-gray-500 text-center py-4">
-                  {t.noTemporaryOrders}
-                </p>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Other Orders */}
-          <Card>
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">{t.otherOrders}</CardTitle>
-                <Badge variant="secondary" className="bg-gray-100 text-gray-600">
-                  {otherOrders.length}
-                </Badge>
-              </div>
-              <p className="text-sm text-gray-600">{t.otherOrdersDesc}</p>
-            </CardHeader>
-            <CardContent>
-              {otherOrders.length > 0 ? (
-                <div className="space-y-3">
-                  {(otherOrders || []).slice(0, 2).map((order: any) => (
-                    <div key={order.id} className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <p className="font-medium text-gray-800">
-                            {order.simple_order_number || `#${order.id}`}
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            {new Date(order.created_at).toLocaleDateString('fa-IR')}
-                          </p>
-                        </div>
-                        <Badge className="bg-gray-100 text-gray-700">
-                          {t.other}
-                        </Badge>
-                      </div>
-                    </div>
-                  ))}
-                  {otherOrders.length > 2 && (
-                    <p className="text-sm text-gray-500 text-center">
-                      و {otherOrders.length - 2} سفارش دیگر...
-                    </p>
-                  )}
-                </div>
-              ) : (
-                <p className="text-sm text-gray-500 text-center py-4">
-                  {t.noOtherOrders}
-                </p>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Customer Information Card */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User className="w-5 h-5" />
-              {t.accountInformation}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <User className="w-5 h-5 text-gray-400" />
-                  <div>
-                    <p className="text-sm text-gray-500">نام و نام خانوادگی</p>
-                    <p className="font-medium">{customer?.firstName || ''} {customer?.lastName || ''}</p>
+          {/* Order History */}
+          <div className="lg:col-span-2">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Package className="w-5 h-5" />
+                  Order History
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {ordersLoading ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading orders...</p>
                   </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Mail className="w-5 h-5 text-gray-400" />
-                  <div>
-                    <p className="text-sm text-gray-500">ایمیل</p>
-                    <p className="font-medium">{customer?.email || 'ثبت نشده'}</p>
+                ) : orders.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-700 mb-2">No Orders Yet</h3>
+                    <p className="text-gray-500 mb-6">Start shopping to see your order history here.</p>
+                    <Button onClick={() => setLocation("/shop")}>
+                      Start Shopping
+                    </Button>
                   </div>
-                </div>
-              </div>
-              
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <Phone className="w-5 h-5 text-gray-400" />
-                  <div>
-                    <p className="text-sm text-gray-500">شماره تلفن</p>
-                    <p className="font-medium">{customer?.phone || 'ثبت نشده'}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Building className="w-5 h-5 text-gray-400" />
-                  <div>
-                    <p className="text-sm text-gray-500">شرکت</p>
-                    <p className="font-medium">{customer?.company || 'ثبت نشده'}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Order History */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <History className="w-5 h-5" />
-                تاریخچه سفارشات
-              </CardTitle>
-              <Sheet open={isHistoryOpen} onOpenChange={setIsHistoryOpen}>
-                <SheetTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    <Search className="w-4 h-4 mr-2" />
-                    جستجوی پیشرفته
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="right" className="w-[400px] sm:w-[540px]">
-                  <SheetHeader>
-                    <SheetTitle>جستجو در تاریخچه سفارشات</SheetTitle>
-                    <SheetDescription>
-                      جستجو و فیلتر در همه سفارشات شما
-                    </SheetDescription>
-                  </SheetHeader>
-                  
-                  <div className="mt-6">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                      <Input
-                        placeholder="جستجو در سابقه سفارشات..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-10"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-4 mt-6">
-                    {historyOrders.filter((order: any) => 
-                      order.simple_order_number?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                      order.id?.toString().includes(searchQuery)
-                    ).length === 0 ? (
-                      <div className="text-center py-8">
-                        <Search className="w-12 h-12 text-gray-300 mx-auto mb-2" />
-                        <p className="text-gray-500">هیچ سفارشی با این جستجو یافت نشد</p>
-                      </div>
-                    ) : (
-                      historyOrders.filter((order: any) => 
-                        order.simple_order_number?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                        order.id?.toString().includes(searchQuery)
-                      ).map((order: any) => (
-                        <div key={order.id} className="p-4 border rounded-lg">
-                          <div className="flex justify-between items-start mb-2">
-                            <div>
-                              <p className="font-medium">
-                                {order.simple_order_number || `#${order.id}`}
-                              </p>
-                              <p className="text-sm text-gray-500">
-                                {new Date(order.created_at).toLocaleDateString('fa-IR')}
-                              </p>
+                ) : (
+                  <div className="space-y-4">
+                    {orders.map((order: any) => (
+                      <div key={order.id} className={`border rounded-lg p-4 ${(order.orderType === 'temporary' || order.orderCategory === 'temporary') ? 'border-amber-200 bg-amber-50' : ''}`}>
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <h4 className="font-semibold text-gray-900">
+                                Order #{order.orderNumber || order.id}
+                              </h4>
+                              {(order.orderType === 'temporary' || order.orderCategory === 'temporary') && (
+                                <Badge className="bg-orange-100 text-orange-800">
+                                  <Clock className="w-3 h-3 mr-1" />
+                                  سفارش موقت
+                                </Badge>
+                              )}
                             </div>
-                            <Badge>
-                              {order.current_status === 'completed' ? 'تکمیل شده' : 'تحویل شده'}
+                            <p className="text-sm text-gray-500 flex items-center gap-1">
+                              <Calendar className="w-4 h-4" />
+                              {formatDate(order.createdAt)}
+                            </p>
+                            {(order.orderType === 'temporary' || order.orderCategory === 'temporary') && (
+                              <div className="mt-2 space-y-1">
+                                <div className="flex items-center gap-4 text-sm text-gray-600">
+                                  <span className="flex items-center gap-1">
+                                    <User className="w-4 h-4" />
+                                    {order.customerName}
+                                  </span>
+                                  <span className="flex items-center gap-1">
+                                    <Phone className="w-4 h-4" />
+                                    {order.customerPhone}
+                                  </span>
+                                </div>
+                                {order.gracePeriodStatus === 'active' ? (
+                                  <p className="text-sm text-amber-600 flex items-center gap-1">
+                                    <Clock className="w-4 h-4" />
+                                    مهلت باقی‌مانده: {formatTimeRemaining(order.hoursRemaining)}
+                                  </p>
+                                ) : (
+                                  <p className="text-sm text-red-600 flex items-center gap-1">
+                                    <AlertTriangle className="w-4 h-4" />
+                                    مهلت پرداخت منقضی شده
+                                  </p>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                          <div className="text-right">
+                            <p className="font-semibold text-lg">{parseFloat(order.totalAmount).toFixed(2)} {order.currency || 'IQD'}</p>
+                            <Badge className={getStatusColor(order.status)}>
+                              {getStatusLabel(order.status)}
                             </Badge>
                           </div>
-                          <p className="text-sm text-gray-600">
-                            مبلغ: {order.total_amount?.toLocaleString('fa-IR')} تومان
-                          </p>
                         </div>
-                      ))
-                    )}
+                        
+                        {order.items && order.items.length > 0 && (
+                          <div>
+                            <Separator className="mb-3" />
+                            <div className="space-y-2">
+                              <h5 className="font-medium text-gray-700">Order Items:</h5>
+                              {order.items.map((item: any) => (
+                                <div key={item.id} className="flex justify-between text-sm">
+                                  <span>{item.product_name} × {parseFloat(item.quantity)}</span>
+                                  <span>{parseFloat(item.total_price).toFixed(2)} IQD</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {order.notes && (
+                          <div className="mt-3 pt-3 border-t">
+                            <p className="text-sm text-gray-600">
+                              <strong>Notes:</strong> {order.notes}
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Actions */}
+                        <div className="mt-4 pt-3 border-t flex gap-2 flex-wrap">
+                          {(order.orderType === 'temporary' || order.orderCategory === 'temporary') && order.gracePeriodStatus === 'active' ? (
+                            <>
+                              <Button
+                                size="sm"
+                                onClick={() => handleActivateGracePeriodOrder(order.orderNumber)}
+                                className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+                              >
+                                <PlayCircle className="w-4 h-4" />
+                                فعال‌سازی سفارش
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setLocation(`/customer/bank-receipt-upload?orderId=${order.orderNumber}`)}
+                                className="flex items-center gap-2"
+                              >
+                                <FileText className="w-4 h-4" />
+                                آپلود رسید بانکی
+                              </Button>
+                            </>
+                          ) : (order.orderType === 'temporary' || order.orderCategory === 'temporary') && order.gracePeriodStatus === 'expired' ? (
+                            <div className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded">
+                              این سفارش منقضی شده است و قابل فعال‌سازی نیست
+                            </div>
+                          ) : (
+                            <>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleDownloadInvoice(order.id)}
+                                className="flex items-center gap-2"
+                              >
+                                <Download className="w-4 h-4" />
+                                دانلود فاکتور
+                              </Button>
+                              <Button
+                                size="sm"
+                                onClick={() => handleGenerateOfficialInvoice(order.id)}
+                                className="flex items-center gap-2"
+                              >
+                                <FileText className="w-4 h-4" />
+                                درخواست فاکتور رسمی
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                </SheetContent>
-              </Sheet>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {(orders || []).slice(0, 5).map((order: any) => (
-                <div key={order.id} className="flex justify-between items-center p-4 border rounded-lg">
-                  <div className="flex items-center gap-4">
-                    <Package className="w-8 h-8 text-gray-400" />
-                    <div>
-                      <p className="font-medium">
-                        {order.simple_order_number || `سفارش #${order.id}`}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {new Date(order.created_at).toLocaleDateString('fa-IR')}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="text-right">
-                    <Badge className={
-                      order.current_status === 'completed' ? 'bg-green-100 text-green-800' :
-                      order.current_status === 'payment_grace_period' ? 'bg-orange-100 text-orange-800' :
-                      'bg-gray-100 text-gray-800'
-                    }>
-                      {order.current_status === 'completed' ? 'تکمیل شده' :
-                       order.current_status === 'payment_grace_period' ? 'در دوره مهلت' : 
-                       'در حال پردازش'}
-                    </Badge>
-                    <p className="text-sm text-gray-600 mt-1">
-                      {order.total_amount?.toLocaleString('fa-IR')} تومان
-                    </p>
-                  </div>
-                </div>
-              ))}
-              
-              {(orders || []).length === 0 && (
-                <div className="text-center py-8">
-                  <Package className="w-12 h-12 text-gray-300 mx-auto mb-2" />
-                  <p className="text-gray-500">هنوز هیچ سفارشی ثبت نکرده‌اید</p>
-                  <Button className="mt-3" onClick={() => setLocation("/shop")}>
-                    شروع خرید
-                  </Button>
-                </div>
-              )}
-              
-              {(orders || []).length > 5 && (
-                <div className="text-center">
-                  <Button variant="outline" onClick={() => setIsHistoryOpen(true)}>
-                    مشاهده همه سفارشات ({(orders || []).length})
-                  </Button>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default CustomerProfile
+export default CustomerProfile;

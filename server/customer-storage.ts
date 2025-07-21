@@ -142,11 +142,8 @@ export class CustomerStorage implements ICustomerStorage {
 
   // Customer orders
   async createOrder(orderData: InsertCustomerOrder): Promise<CustomerOrder> {
-    // Generate unique order number using MOM format
-    const { generateOrderNumber } = await import('./order-number-generator');
-    const orderNumber = await generateOrderNumber();
-    
-    console.log('🔢 [CUSTOMER-STORAGE] Generated MOM order number:', orderNumber);
+    // Generate unique order number
+    const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
     
     const [order] = await customerDb
       .insert(customerOrders)
@@ -155,25 +152,6 @@ export class CustomerStorage implements ICustomerStorage {
         orderNumber,
       })
       .returning();
-    
-    // 🔄 [AUTO-SYNC] Automatically create matching order_management record
-    console.log('🔄 [AUTO-SYNC] Creating order_management record for order:', order.id);
-    try {
-      const { orderManagementStorage } = await import('./order-management-storage');
-      await orderManagementStorage.createOrderManagement({
-        customerOrderId: order.id,
-        currentStatus: 'pending_payment' as any, // Start with pending_payment status for financial review
-        totalWeight: orderData.totalWeight || '0',
-        weightUnit: orderData.weightUnit || 'kg',
-        deliveryMethod: orderData.deliveryMethod || 'courier',
-        createdAt: new Date(),
-        updatedAt: new Date()
-      });
-      console.log('✅ [AUTO-SYNC] Order management record created successfully for order:', order.id);
-    } catch (error) {
-      console.error('❌ [AUTO-SYNC] Failed to create order_management record:', error);
-      // Don't fail the customer order creation if sync fails
-    }
     
     // Update customer metrics after creating order
     if (order.customerId) {

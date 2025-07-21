@@ -22,7 +22,6 @@ export class UnifiedInventoryManager {
     minStockLevel: number;
     lowStockThreshold: number;
     inStock: boolean;
-    barcode?: string;
   } | null> {
     try {
       console.log(`📦 [INVENTORY] Getting inventory for: ${productName}`);
@@ -40,8 +39,7 @@ export class UnifiedInventoryManager {
         stockQuantity: showcaseProduct.stockQuantity || 0,
         minStockLevel: showcaseProduct.minStockLevel || 5,
         lowStockThreshold: 10, // Default threshold for customer warnings
-        inStock: (showcaseProduct.stockQuantity || 0) > 0,
-        barcode: showcaseProduct.barcode || undefined
+        inStock: (showcaseProduct.stockQuantity || 0) > 0
       };
       
       console.log(`✅ [INVENTORY] ${productName} inventory:`, inventory);

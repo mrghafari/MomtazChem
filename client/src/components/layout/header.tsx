@@ -52,7 +52,7 @@ export default function Header() {
     staleTime: 30000, // 30 seconds
   });
 
-  const rawBalance = (walletData as any)?.balance || (walletData as any)?.data?.wallet?.balance || (walletData as any)?.wallet?.balance || "0";
+  const rawBalance = walletData?.balance || walletData?.data?.wallet?.balance || walletData?.wallet?.balance || "0";
   const walletBalance = typeof rawBalance === 'string' ? parseFloat(rawBalance) : rawBalance;
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -65,11 +65,11 @@ export default function Header() {
 
   // Function to get admin role display name
   const getAdminRoleDisplay = () => {
-    if (!isAdminAuthenticated || !(adminUser as any)?.user) {
+    if (!isAdminAuthenticated || !adminUser?.user) {
       return direction === 'rtl' ? 'مدیر' : 'Admin';
     }
     
-    const username = (adminUser as any).user.username;
+    const username = adminUser.user.username;
     if (direction === 'rtl') {
       return username; // Return Persian username directly
     } else {
@@ -355,7 +355,7 @@ export default function Header() {
                 </Link>
                 <Button 
                   variant="ghost" 
-                  onClick={() => logout()} 
+                  onClick={logout} 
                   className="flex items-center gap-2 px-3 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
                 >
                   <LogOut className="h-4 w-4" />

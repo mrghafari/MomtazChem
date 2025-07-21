@@ -24,7 +24,7 @@ import PreCheckoutModal from "@/components/checkout/pre-checkout-modal";
 import CustomerAuth from "@/components/auth/customer-auth";
 import { useMultilingualToast } from "@/hooks/use-multilingual-toast";
 import VisualBarcode from "@/components/ui/visual-barcode";
-import ProductRating from "@/components/ProductRating";
+import { ProductRating } from "@/components/ProductRating";
 import StarRating from "@/components/StarRating";
 import { ProductSpecsModal } from "@/components/ProductSpecsModal";
 
@@ -199,7 +199,7 @@ const Shop = () => {
 
 
   // Fetch product stats for ratings
-  const { data: productStats, isLoading: statsLoading, error: statsError } = useQuery<Record<number, { totalReviews: number; averageRating: number }>>({
+  const { data: productStats, isLoading: statsLoading, error: statsError } = useQuery({
     queryKey: ["/api/shop/product-stats"],
     retry: false,
   });
@@ -209,8 +209,8 @@ const Shop = () => {
   
   // Debug current products with their IDs
   if (filteredProducts && filteredProducts.length > 0) {
-    console.log('🌟 [RATINGS DEBUG] Current products:', filteredProducts.map((p: any) => ({ id: p.id, name: p.name })));
-    console.log('🌟 [RATINGS DEBUG] Products with ratings:', filteredProducts.filter((p: any) => productStats?.[p.id]).map((p: any) => ({ id: p.id, name: p.name, rating: productStats?.[p.id] })));
+    console.log('🌟 [RATINGS DEBUG] Current products:', filteredProducts.map(p => ({ id: p.id, name: p.name })));
+    console.log('🌟 [RATINGS DEBUG] Products with ratings:', filteredProducts.filter(p => productStats?.[p.id]).map(p => ({ id: p.id, name: p.name, rating: productStats[p.id] })));
   }
 
   // Initialize price range only once when first loaded
@@ -293,19 +293,30 @@ const Shop = () => {
     checkCustomerAuth();
   }, []);
 
-  // Initialize display stock from actual database values with real-time cart updates
+  // Initialize display stock from actual database values (not affected by cart)
   useEffect(() => {
     if (currentProducts?.length > 0) {
-      const updatedDisplayStock: {[key: number]: number} = {};
+      const initialDisplayStock: {[key: number]: number} = {};
       currentProducts.forEach(product => {
-        // Calculate available stock by subtracting cart items from actual stock
+        // Show actual stock quantity from database, not reduced by cart items
+        initialDisplayStock[product.id] = product.stockQuantity || 0;
+      });
+      setDisplayStock(initialDisplayStock);
+    }
+  }, [currentProducts]); // Removed cart dependency to prevent UI stock reduction
+
+  // Force recalculation of display stock after order completion
+  useEffect(() => {
+    if (Object.keys(displayStock).length === 0 && currentProducts?.length > 0) {
+      const refreshedDisplayStock: {[key: number]: number} = {};
+      currentProducts.forEach(product => {
         const productInCart = cart[product.id] || 0;
         const availableStock = (product.stockQuantity || 0) - productInCart;
-        updatedDisplayStock[product.id] = Math.max(0, availableStock);
+        refreshedDisplayStock[product.id] = Math.max(0, availableStock);
       });
-      setDisplayStock(updatedDisplayStock);
+      setDisplayStock(refreshedDisplayStock);
     }
-  }, [currentProducts, cart]); // Added cart dependency for real-time updates
+  }, [currentProducts, displayStock, cart]);
 
   // Handle cart based on authentication status after customer state is known
   useEffect(() => {
@@ -712,7 +723,8 @@ const Shop = () => {
     setCart(newCart);
     saveCartToStorage(newCart);
 
-    // Display stock will be automatically updated by the useEffect hook that watches cart changes
+    // DO NOT update displayStock here - it should only reflect actual database values
+    // Display stock will be updated only after successful order submission
 
     // Reset quantity for this product and show success message
     setProductQuantity(productId, 1);
@@ -734,7 +746,8 @@ const Shop = () => {
     setCart(newCart);
     saveCartToStorage(newCart);
 
-    // Display stock will be automatically updated by the useEffect hook that watches cart changes
+    // DO NOT update displayStock - it should only reflect actual database values
+    // Display stock will be updated only after successful order submission
   };
 
   const getTotalItems = () => {
@@ -946,7 +959,16 @@ const Shop = () => {
                 </div>
               )}
               
+              {/* AI Recommendations Button - Left */}
+              <Button 
+                variant="outline" 
+                className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white border-none hover:from-purple-600 hover:to-pink-600 shadow-lg"
+                onClick={() => navigate('/product-recommendations')}
 
+              >
+                <Sparkles className="w-5 h-5" />
+                <span className="hidden sm:inline">AI Recommendations</span>
+              </Button>
             </div>
             
             {/* User & Cart Section */}
@@ -1313,21 +1335,23 @@ const Shop = () => {
                             </div>
                           )}
                           
-                          {/* Star Rating - Always show for all products */}
-                          <div className="absolute bottom-2 left-8 flex items-center">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="p-1 h-7 w-7 hover:bg-yellow-50/80 bg-transparent"
-                              onClick={() => navigate(`/product-reviews/${product.id}`)}
-                            >
-                              <StarRating
-                                rating={productStats?.[product.id]?.averageRating || 0}
+                          {/* Star Rating - More to the left */}
+                          {productStats?.[product.id] && (
+                            <div className="absolute bottom-2 left-8 flex items-center">
+                              <Button
+                                variant="ghost"
                                 size="sm"
-                                showNumber={false}
-                              />
-                            </Button>
-                          </div>
+                                className="p-1 h-7 w-7 hover:bg-yellow-50/80 bg-transparent"
+                                onClick={() => navigate(`/product-reviews/${product.id}`)}
+                              >
+                                <StarRating
+                                  rating={productStats[product.id].averageRating}
+                                  size="sm"
+                                  showNumber={false}
+                                />
+                              </Button>
+                            </div>
+                          )}
                           
 
 
@@ -1609,21 +1633,23 @@ const Shop = () => {
                             </div>
                           )}
                           
-                          {/* Star Rating - Always show for all products - List View */}
-                          <div className="absolute bottom-2 left-8 flex items-center">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="p-1 h-7 w-7 hover:bg-yellow-50/80 bg-transparent"
-                              onClick={() => navigate(`/product-reviews/${product.id}`)}
-                            >
-                              <StarRating
-                                rating={productStats?.[product.id]?.averageRating || 0}
+                          {/* Star Rating - More to the left - List View */}
+                          {productStats?.[product.id] && (
+                            <div className="absolute bottom-2 left-8 flex items-center">
+                              <Button
+                                variant="ghost"
                                 size="sm"
-                                showNumber={false}
-                              />
-                            </Button>
-                          </div>
+                                className="p-1 h-7 w-7 hover:bg-yellow-50/80 bg-transparent"
+                                onClick={() => navigate(`/product-reviews/${product.id}`)}
+                              >
+                                <StarRating
+                                  rating={productStats[product.id].averageRating}
+                                  size="sm"
+                                  showNumber={false}
+                                />
+                              </Button>
+                            </div>
+                          )}
                           
 
 

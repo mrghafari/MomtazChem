@@ -700,7 +700,7 @@ function FinanceOrders() {
                                   <CardContent className="p-4">
                                     <div className="flex items-center justify-between">
                                       <div className="flex items-center gap-3">
-                                        <span className="font-medium">سفارش MOM25{String(order.customerOrderId).padStart(5, '1')}</span>
+                                        <span className="font-medium">سفارش #{order.orderNumber}</span>
                                         <Badge className="bg-amber-100 text-amber-800">مهلت فعال</Badge>
                                         <span className="text-sm text-muted-foreground">
                                           {order.totalAmount} {order.currency}
@@ -960,7 +960,7 @@ function OrderCard({ order, onOrderSelect, readOnly = false }: OrderCardProps) {
               <Receipt className="h-5 w-5 text-blue-600" />
             </div>
             <div>
-              <h3 className="font-bold text-lg text-gray-900">سفارش MOM25{String(order.customerOrderId).padStart(5, '1')}</h3>
+              <h3 className="font-bold text-lg text-gray-900">سفارش #{order.customerOrderId}</h3>
               <p className="text-sm text-gray-600">{order.customer?.firstName} {order.customer?.lastName}</p>
             </div>
           </div>
@@ -1087,7 +1087,7 @@ function TransferredOrderCard({ order }: TransferredOrderCardProps) {
               <ChevronRight className="h-5 w-5 text-blue-600" />
             </div>
             <div>
-              <h3 className="font-bold text-lg text-gray-900">سفارش MOM25{String(order.customerOrderId).padStart(5, '1')}</h3>
+              <h3 className="font-bold text-lg text-gray-900">سفارش #{order.customerOrderId}</h3>
               <p className="text-sm text-gray-600">{order.customer?.firstName} {order.customer?.lastName}</p>
             </div>
           </div>

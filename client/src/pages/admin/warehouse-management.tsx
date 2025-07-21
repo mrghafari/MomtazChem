@@ -379,20 +379,9 @@ const WarehouseManagement: React.FC = () => {
   const { data: ordersResponse, isLoading: ordersLoading, refetch: refetchOrders } = useQuery({
     queryKey: ['/api/warehouse/orders-noauth'],
     staleTime: 10000,
-    enabled: activeTab === 'orders'
   });
   
   const orders = ordersResponse?.orders || [];
-
-  // Fetch sent orders (warehouse approved and sent to logistics)
-  const { data: sentOrdersResponse, isLoading: sentOrdersLoading, refetch: refetchSentOrders } = useQuery({
-    queryKey: ['/api/warehouse/orders-sent'],
-    queryFn: () => fetch('/api/warehouse/orders-sent').then(res => res.json()),
-    enabled: activeTab === 'sent-orders',
-    staleTime: 10000
-  });
-
-  const sentOrders = sentOrdersResponse?.orders || [];
 
   // Fetch unified products for inventory management
   const { data: unifiedProducts = [], isLoading: productsLoading, refetch: refetchProducts } = useQuery({
@@ -746,14 +735,6 @@ const WarehouseManagement: React.FC = () => {
     });
   };
 
-  const handleSendToLogistics = (order: Order) => {
-    updateOrderMutation.mutate({
-      orderId: order.id,
-      status: 'logistics_dispatched',
-      notes: 'سفارش از انبار به بخش لجستیک ارسال شد - کد تحویل ارسال شد'
-    });
-  };
-
   const handleViewDetails = (order: Order) => {
     setSelectedOrder(order);
     setWarehouseNotes(order.warehouseNotes || '');
@@ -881,9 +862,8 @@ const WarehouseManagement: React.FC = () => {
 
       {/* Main Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="orders">سفارشات فعال</TabsTrigger>
-          <TabsTrigger value="sent-orders">سفارشات ارسال شده</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="orders">سفارشات</TabsTrigger>
           <TabsTrigger value="inventory">موجودی</TabsTrigger>
           <TabsTrigger value="movements">حرکات انبار</TabsTrigger>
           <TabsTrigger value="settings">تنظیمات</TabsTrigger>
@@ -1040,7 +1020,7 @@ const WarehouseManagement: React.FC = () => {
                     <tbody>
                       {filteredOrders.map((order) => (
                         <tr key={order.id} className="border-b hover:bg-gray-50">
-                          <td className="p-4 font-medium">MOM25{String(order.customerOrderId || order.id).padStart(5, '1')}</td>
+                          <td className="p-4 font-medium">#{order.id}</td>
                           <td className="p-4">
                             <div className="font-medium">{
                               order.customer?.firstName && order.customer?.lastName 
@@ -1116,111 +1096,7 @@ const WarehouseManagement: React.FC = () => {
                                   تکمیل
                                 </Button>
                               )}
-                              {order.currentStatus === 'warehouse_approved' && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleSendToLogistics(order)}
-                                  className="text-blue-600 hover:text-blue-800"
-                                >
-                                  <Truck className="w-4 h-4 mr-1" />
-                                  ارسال به لجستیک
-                                </Button>
-                              )}
                             </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="sent-orders" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>سفارشات ارسال شده به لجستیک</CardTitle>
-                <Badge variant="outline" className="bg-green-50 text-green-700">
-                  {sentOrders.length} سفارش
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {sentOrdersLoading ? (
-                <div className="flex justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                </div>
-              ) : sentOrders.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  <Package className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                  <p>هیچ سفارش ارسال شده‌ای یافت نشد</p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          سفارش
-                        </th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          مشتری
-                        </th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          شماره سفارش
-                        </th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          تاریخ ارسال
-                        </th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          وضعیت
-                        </th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          مبلغ کل
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {sentOrders.map((order: any) => (
-                        <tr key={order.id} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-medium text-gray-900">
-                              MOM25{String(order.customerOrderId || order.id).padStart(5, '1')}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">
-                              {`${order.customerFirstName || ''} ${order.customerLastName || ''}`.trim() || 'مشتری میهمان'}
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              {order.customerPhone}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-mono bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                              {order.orderNumber || order.deliveryCode || 'بدون شماره'}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {order.warehouseProcessedAt ? new Date(order.warehouseProcessedAt).toLocaleDateString('fa-IR') : '-'}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                              order.currentStatus === 'logistics_delivered' || order.currentStatus === 'completed' 
-                                ? 'bg-green-100 text-green-800' 
-                                : 'bg-yellow-100 text-yellow-800'
-                            }`}>
-                              {order.currentStatus === 'logistics_dispatched' && 'ارسال شده به لجستیک'}
-                              {order.currentStatus === 'logistics_delivered' && 'تحویل شده'}
-                              {order.currentStatus === 'completed' && 'تکمیل شده'}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {parseFloat(order.totalAmount).toLocaleString('fa-IR')} تومان
                           </td>
                         </tr>
                       ))}
@@ -1629,7 +1505,7 @@ const WarehouseManagement: React.FC = () => {
       <Dialog open={showOrderDetails} onOpenChange={setShowOrderDetails}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>جزئیات سفارش MOM25{String(selectedOrder?.customerOrderId || selectedOrder?.id).padStart(5, '1')}</DialogTitle>
+            <DialogTitle>جزئیات سفارش #{selectedOrder?.id}</DialogTitle>
           </DialogHeader>
           {selectedOrder && (
             <div className="space-y-4">
@@ -1712,7 +1588,7 @@ const WarehouseManagement: React.FC = () => {
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Package className="w-5 h-5" />
-                لیست کالاهای سفارش MOM25{String(selectedOrderForItems.customerOrderId).padStart(5, '1')}
+                لیست کالاهای سفارش #{selectedOrderForItems.customerOrderId}
               </DialogTitle>
               <p className="text-sm text-gray-600">
                 مشتری: {selectedOrderForItems.customer?.firstName} {selectedOrderForItems.customer?.lastName}

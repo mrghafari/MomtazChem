@@ -37,7 +37,7 @@ import { sql, eq, and, or, isNull, isNotNull, desc, gte } from "drizzle-orm";
 import { z } from "zod";
 import * as schema from "@shared/schema";
 const { crmCustomers } = schema;
-import { orderManagement, shippingRates, vatSettings, deliveryMethods, type OrderStatus } from "@shared/order-management-schema";
+import { orderManagement, shippingRates, vatSettings, deliveryMethods } from "@shared/order-management-schema";
 import { generateEAN13Barcode, validateEAN13, parseEAN13Barcode, isMomtazchemBarcode } from "@shared/barcode-utils";
 import { generateSmartSKU, validateSKUUniqueness } from "./ai-sku-generator";
 import { deliveryVerificationStorage } from "./delivery-verification-storage";
@@ -65,6 +65,7 @@ import {
   type AbandonedCartSettings,
   type AbandonedCartNotification
 } from "@shared/cart-schema";
+import { gpsDeliveryStorage } from "./gps-delivery-storage";
 import { logisticsStorage } from "./logistics-storage";
 import { 
   transportationCompanies,
@@ -91,6 +92,7 @@ import {
 import { 
   gpsDeliveryConfirmations,
   gpsDeliveryAnalytics,
+  insertGpsDeliveryConfirmationSchema,
   insertGpsDeliveryAnalyticsSchema,
   type GpsDeliveryConfirmation,
   type GpsDeliveryAnalytics
@@ -101,14 +103,6 @@ declare module "express-session" {
   interface SessionData {
     adminId?: number;
     customerId?: number;
-    customUserId?: number;
-    customerEmail?: string;
-    crmCustomerId?: number;
-    customUserEmail?: string;
-    customUserName?: string;
-    customUserRole?: string;
-    customUserPermissions?: string[];
-    customerType?: string;
     isAuthenticated?: boolean;
     departmentUser?: {
       id: number;
@@ -251,21 +245,13 @@ const uploadReceipt = multer({
       'image/jpeg',
       'image/jpg', 
       'image/png',
-      'image/webp',
       'application/pdf'
     ];
-    
-    console.log('🔍 [RECEIPT UPLOAD] File validation:', {
-      originalname: file.originalname,
-      mimetype: file.mimetype,
-      size: file.size,
-      allowed: allowedMimeTypes.includes(file.mimetype)
-    });
     
     if (allowedMimeTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error(`File type not supported: ${file.mimetype}. Only JPEG, PNG, WebP, and PDF files are allowed for receipt uploads`));
+      cb(new Error('Only JPEG, PNG, and PDF files are allowed for receipt uploads'));
     }
   }
 });
@@ -578,7 +564,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({
         status: 'unhealthy',
         timestamp: new Date().toISOString(),
-        error: error instanceof Error ? error.message : String(error),
+        error: error.message,
         services: {
           database: 'unhealthy',
           server: 'healthy'
@@ -784,10 +770,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // =============================================================================
-  // AI PRODUCT RECOMMENDATIONS API - DISABLED
+  // AI PRODUCT RECOMMENDATIONS API
   // =============================================================================
   
-  /*
   // Generate AI-powered product recommendations
   app.post('/api/recommendations/analyze', async (req, res) => {
     try {
@@ -850,7 +835,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
-  */
 
   // API endpoint to get active users count
   app.get("/api/active-users", requireAuth, async (req: Request, res: Response) => {
@@ -1687,7 +1671,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { msdsUrl, showMsdsToCustomers, msdsFileName } = req.body;
 
       // Update shop product MSDS
-      await storage.updateProduct(parseInt(id), {
+      await storage.updateShopProduct(parseInt(id), {
         msdsUrl,
         showMsdsToCustomers,
         msdsFileName,
@@ -1696,7 +1680,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Also update showcase product if it exists
       try {
-        await storage.updateProduct(parseInt(id), {
+        await storage.updateShowcaseProduct(parseInt(id), {
           msdsUrl,
           showMsdsToCustomers,
           msdsFileName,
@@ -1726,7 +1710,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
 
       // Get product MSDS information
-      const product = await storage.getProductById(parseInt(id));
+      const product = await storage.getShopProduct(parseInt(id));
       
       if (!product || !product.msdsUrl || !product.showMsdsToCustomers) {
         return res.status(404).json({ 
@@ -2273,7 +2257,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json(product);
     } catch (error) {
-      console.error(`Error fetching product ${req.params.id}:`, error);
+      console.error(`Error fetching product ${id}:`, error);
       res.status(500).json({ 
         success: false, 
         message: "Internal server error",
@@ -2521,8 +2505,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               category: product.category,
               description: product.description,
               shortDescription: product.shortDescription || product.description,
-              price: product.unitPrice || 0,
-              priceUnit: product.currency || 'IQD',
+              price: product.unitPrice || product.price || 0,
+              priceUnit: product.currency || product.priceUnit || 'IQD',
               inStock: totalStock > 0 || (productData.showWhenOutOfStock || false),
               stockQuantity: totalStock, // Use total stock from all batches
               lowStockThreshold: 10,
@@ -2568,8 +2552,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const updateData = {
               stockQuantity: totalStock, // Use total stock from all batches
               inStock: totalStock > 0 || (productData.showWhenOutOfStock || false),
-              price: product.unitPrice || 0,
-              priceUnit: product.currency || 'IQD',
+              price: product.unitPrice || product.price || 0,
+              priceUnit: product.currency || product.priceUnit || 'IQD',
               description: product.description,
               shortDescription: product.shortDescription || product.description,
               imageUrls: product.imageUrl ? [product.imageUrl] : (existingShopProduct.imageUrls || []),
@@ -2585,7 +2569,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.log(`✅ محصول در فروشگاه به‌روزرسانی شد: ${product.name}`);
           }
         } catch (syncError) {
-          console.error(`❌ خطا در sync کردن محصول ${product.name}:`, syncError instanceof Error ? syncError.message : String(syncError));
+          console.error(`❌ خطا در sync کردن محصول ${product.name}:`, syncError.message);
           // Continue with the product update even if shop sync fails
         }
       } else if (productData.syncWithShop === false) {
@@ -5914,29 +5898,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Log first order structure for debugging
       if (orders.length > 0) {
         console.log('🔍 [ROUTES] First order structure:', JSON.stringify(orders[0], null, 2));
-        console.log('🔍 [ROUTES] First order orderNumber specifically:', orders[0].orderNumber);
       }
       
       // Transform orders to ensure compatibility with frontend interface
-      const transformedOrders = orders.map(order => {
-        console.log('🔧 [TRANSFORM] Order', order.customerOrderId, 'original orderNumber:', order.orderNumber);
-        const transformed = {
-          ...order,
-          // Ensure orderNumber is explicitly included in response
-          orderNumber: order.orderNumber,
-          // Extract customer fields from nested customer object
-          customerFirstName: order.customer?.firstName || '',
-          customerLastName: order.customer?.lastName || '',
-          customerEmail: order.customer?.email || '',
-          customerPhone: order.customer?.phone || '',
-          // Also provide receipt info in legacy format
-          receiptUrl: order.receipt?.url || order.paymentReceiptUrl,
-          receiptFileName: order.receipt?.fileName || '',
-          receiptMimeType: order.receipt?.mimeType || ''
-        };
-        console.log('🔧 [TRANSFORM] Order', order.customerOrderId, 'transformed orderNumber:', transformed.orderNumber);
-        return transformed;
-      });
+      const transformedOrders = orders.map(order => ({
+        ...order,
+        // Extract customer fields from nested customer object
+        customerFirstName: order.customer?.firstName || '',
+        customerLastName: order.customer?.lastName || '',
+        customerEmail: order.customer?.email || '',
+        customerPhone: order.customer?.phone || '',
+        // Also provide receipt info in legacy format
+        receiptUrl: order.receipt?.url || order.paymentReceiptUrl,
+        receiptFileName: order.receipt?.fileName || '',
+        receiptMimeType: order.receipt?.mimeType || ''
+      }));
       
       res.json({ 
         success: true, 
@@ -5994,25 +5970,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // =============================================================================
 
   // Get sales KPIs
-  app.get("/api/kpi/sales", async (req, res) => {
+  app.get("/api/kpi/sales", requireAuth, async (req, res) => {
     try {
+      const { pool } = await import('./db');
+      
+      // Get sales data for today, this month, and comparison metrics
       const salesData = {
-        // درآمد کل (Total Revenue in IQD)
-        totalRevenue: 125450000,
-        // میانگین ارزش سفارش (AOV in IQD)
-        averageOrderValue: 1375000,
-        // نرخ تبدیل (Conversion Rate %)
-        conversionRate: 3.2,
-        // نرخ ترک سبد خرید (Cart Abandonment Rate %)
-        cartAbandonmentRate: 67.5,
-        // ارزش طول عمر مشتری (CLV in IQD)
-        customerLifetimeValue: 8250000,
-        // Growth metrics (month-over-month performance)
-        revenueGrowth: 15.2,
-        aovGrowth: 8.7,
-        conversionGrowth: 2.1,
-        abandonnmentImprovement: -5.3, // Negative means improvement
-        clvGrowth: 12.4
+        dailySales: 2543000,
+        weeklySales: 15890000,
+        monthlySales: 75230000,
+        averageOrderValue: 1245000,
+        totalOrders: 156,
+        conversionRate: 15.8,
+        salesGrowth: 12.5,
+        ordersGrowth: 5.8
       };
       
       res.json({
@@ -6026,76 +5997,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get customer KPIs
-  app.get("/api/kpi/customers", async (req, res) => {
+  app.get("/api/kpi/customers", requireAuth, async (req, res) => {
     try {
       const { pool } = await import('./db');
       
-      // Get actual customer data from CRM
-      const customersQuery = `
-        SELECT 
-          COUNT(*) as total_customers,
-          COUNT(CASE WHEN created_at >= CURRENT_DATE - INTERVAL '30 days' THEN 1 END) as new_customers,
-          COUNT(CASE WHEN is_verified = true THEN 1 END) as verified_customers
-        FROM crm_customers
-      `;
-      
-      const ticketsQuery = `
-        SELECT 
-          COUNT(*) as total_tickets,
-          COUNT(CASE WHEN status = 'resolved' THEN 1 END) as resolved_tickets,
-          COUNT(CASE WHEN created_at >= CURRENT_DATE - INTERVAL '7 days' THEN 1 END) as recent_tickets
-        FROM support_tickets
-      `;
-      
-      const customersResult = await pool.query(customersQuery);
-      const ticketsResult = await pool.query(ticketsQuery);
-      
-      const customerStats = customersResult.rows[0] || {};
-      const ticketStats = ticketsResult.rows[0] || {};
-      
-      // Calculate realistic customer metrics
-      const totalCustomers = parseInt(customerStats.total_customers) || 235;
-      const verifiedCustomers = parseInt(customerStats.verified_customers) || 198;
-      const newCustomers = parseInt(customerStats.new_customers) || 23;
-      const totalTickets = parseInt(ticketStats.total_tickets) || 127;
-      const recentTickets = parseInt(ticketStats.recent_tickets) || 8;
-      
-      // Calculate retention rate (customers who made purchases in last 6 months)
-      const retentionRate = ((verifiedCustomers / totalCustomers) * 100).toFixed(1);
-      
-      // Calculate repeat purchase rate (industry standard for B2B chemicals)
-      const repeatPurchaseRate = 42.3;
-      
-      // Calculate NPS (based on customer satisfaction surveys)
-      const netPromoterScore = 35;
-      
-      // Calculate average response time (based on ticket resolution)
-      const avgResponseTime = 2.5;
-      
-      // Calculate customer acquisition cost
-      const marketingBudget = 10350000; // Monthly marketing spend
-      const customerAcquisitionCost = Math.round(marketingBudget / (newCustomers || 1));
-      
+      // Get customer metrics
       const customerData = {
-        // نرخ حفظ مشتری (Customer Retention Rate)
-        customerRetention: parseFloat(retentionRate),
-        // نرخ خرید مجدد (Repeat Purchase Rate)
-        repeatPurchaseRate: repeatPurchaseRate,
-        // شاخص رضایت مشتری NPS (Net Promoter Score)
-        netPromoterScore: netPromoterScore,
-        // تعداد تیکت پشتیبانی (Support Tickets)
-        supportTicketsCount: totalTickets,
-        // زمان پاسخ پشتیبانی (Response Time in hours)
-        averageResponseTime: avgResponseTime,
-        // هزینه جذب مشتری CAC (Customer Acquisition Cost)
-        customerAcquisitionCost: customerAcquisitionCost,
-        // Growth metrics
-        retentionGrowth: 5.2,
-        repeatPurchaseGrowth: 8.9,
-        npsImprovement: 12.0,
-        ticketReduction: -15.3, // Negative means reduction (good)
-        responseTimeImprovement: -18.5, // Negative means faster response
-        cacReduction: -8.7 // Negative means lower cost (good)
+        totalCustomers: 1234,
+        newCustomers: 47,
+        activeCustomers: 892,
+        customerRetention: 87.5,
+        customerSatisfaction: 4.6,
+        averageCustomerValue: 3250000,
+        customersGrowth: 8.1,
+        newCustomersGrowth: 12.3
       };
       
       res.json({
@@ -6108,86 +6023,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get inventory KPIs  
-  app.get("/api/kpi/inventory", async (req, res) => {
+  // Get inventory KPIs
+  app.get("/api/kpi/inventory", requireAuth, async (req, res) => {
     try {
       const { pool } = await import('./db');
       
-      // Get actual inventory data from shop and showcase databases
-      const inventoryQuery = `
-        SELECT 
-          COUNT(*) as total_products,
-          COUNT(CASE WHEN stock_quantity > 0 THEN 1 END) as in_stock_products,
-          COUNT(CASE WHEN stock_quantity <= minimum_stock THEN 1 END) as low_stock_products,
-          COUNT(CASE WHEN stock_quantity = 0 THEN 1 END) as out_of_stock_products,
-          AVG(stock_quantity) as avg_stock_level
-        FROM shop_products
-      `;
-      
-      const returnsQuery = `
-        SELECT 
-          COUNT(*) as total_returns,
-          SUM(return_quantity) as total_returned_quantity
-        FROM product_returns
-        WHERE created_at >= CURRENT_DATE - INTERVAL '30 days'
-      `;
-      
-      const ordersQuery = `
-        SELECT 
-          COUNT(*) as total_orders,
-          COUNT(CASE WHEN status = 'delivered' THEN 1 END) as delivered_orders,
-          AVG(EXTRACT(EPOCH FROM (warehouse_approved_at - created_at))/3600) as avg_fulfillment_hours
-        FROM order_management
-        WHERE created_at >= CURRENT_DATE - INTERVAL '30 days'
-        AND warehouse_approved_at IS NOT NULL
-      `;
-      
-      const inventoryResult = await pool.query(inventoryQuery);
-      const returnsResult = await pool.query(returnsQuery);
-      const ordersResult = await pool.query(ordersQuery);
-      
-      const inventoryStats = inventoryResult.rows[0] || {};
-      const returnStats = returnsResult.rows[0] || {};
-      const orderStats = ordersResult.rows[0] || {};
-      
-      // Calculate realistic inventory metrics
-      const totalProducts = parseInt(inventoryStats.total_products) || 456;
-      const inStockProducts = parseInt(inventoryStats.in_stock_products) || 441;
-      const lowStockProducts = parseInt(inventoryStats.low_stock_products) || 15;
-      const outOfStockProducts = parseInt(inventoryStats.out_of_stock_products) || 0;
-      
-      const totalOrders = parseInt(orderStats.total_orders) || 145;
-      const deliveredOrders = parseInt(orderStats.delivered_orders) || 142;
-      const avgFulfillmentHours = parseFloat(orderStats.avg_fulfillment_hours) || 18.5;
-      
-      const totalReturns = parseInt(returnStats.total_returns) || 8;
-      const returnRate = ((totalReturns / (deliveredOrders || 1)) * 100).toFixed(1);
-      
-      // Calculate inventory turnover (cost of goods sold / average inventory)
-      const inventoryTurnoverRate = 6.8; // Monthly turnover for chemical industry
-      
-      // Calculate order accuracy (delivered without issues / total delivered)
-      const orderAccuracy = ((deliveredOrders - totalReturns) / (deliveredOrders || 1) * 100).toFixed(1);
-      
+      // Get inventory metrics
       const inventoryData = {
-        // نرخ گردش موجودی (Inventory Turnover Rate per month)
-        inventoryTurnoverRate: inventoryTurnoverRate,
-        // زمان تحقق سفارش (Fulfillment Time in hours)
-        fulfillmentTime: avgFulfillmentHours,
-        // نرخ مرجوعی (Return Rate)
-        returnRate: parseFloat(returnRate),
-        // درصد دقت سفارشات (Order Accuracy)
-        orderAccuracy: parseFloat(orderAccuracy),
-        // Additional inventory metrics
-        totalProducts: totalProducts,
-        inStockProducts: inStockProducts,
-        lowStockProducts: lowStockProducts,
-        outOfStockProducts: outOfStockProducts,
-        // Growth metrics
-        turnoverImprovement: 12.1,
-        fulfillmentImprovement: -8.5, // Negative means faster fulfillment
-        returnReduction: -5.2, // Negative means fewer returns (good)
-        accuracyImprovement: 2.1
+        totalProducts: 456,
+        inStockProducts: 441,
+        lowStockProducts: 15,
+        totalInventoryValue: 125000000,
+        inventoryTurnover: 8.5,
+        topSellingProducts: 12,
+        inventoryGrowth: -1.2,
+        turnoverGrowth: 12.1
       };
       
       res.json({
@@ -6200,83 +6050,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get website/marketing KPIs
-  app.get("/api/kpi/operational", async (req, res) => {
+  // Get operational KPIs
+  app.get("/api/kpi/operational", requireAuth, async (req, res) => {
     try {
       const { pool } = await import('./db');
       
-      // Get actual website/marketing data from contacts and email logs
-      const contactsQuery = `
-        SELECT 
-          COUNT(*) as total_inquiries,
-          COUNT(CASE WHEN created_at >= CURRENT_DATE - INTERVAL '7 days' THEN 1 END) as recent_inquiries,
-          COUNT(CASE WHEN product_interest = 'fuel-additives' THEN 1 END) as fuel_inquiries,
-          COUNT(CASE WHEN product_interest = 'water-treatment' THEN 1 END) as water_inquiries
-        FROM contacts
-        WHERE created_at >= CURRENT_DATE - INTERVAL '30 days'
-      `;
-      
-      const emailStatsQuery = `
-        SELECT 
-          COUNT(*) as total_emails_sent,
-          COUNT(CASE WHEN status = 'success' THEN 1 END) as successful_emails
-        FROM email_logs
-        WHERE created_at >= CURRENT_DATE - INTERVAL '30 days'
-      `;
-      
-      const contactsResult = await pool.query(contactsQuery);
-      const emailResult = await pool.query(emailStatsQuery);
-      
-      const contactStats = contactsResult.rows[0] || {};
-      const emailStats = emailResult.rows[0] || {};
-      
-      // Calculate realistic website metrics
-      const totalInquiries = parseInt(contactStats.total_inquiries) || 85;
-      const recentInquiries = parseInt(contactStats.recent_inquiries) || 12;
-      const totalEmailsSent = parseInt(emailStats.total_emails_sent) || 245;
-      const successfulEmails = parseInt(emailStats.successful_emails) || 235;
-      
-      // Calculate email open rate (industry standard for B2B)
-      const emailOpenRate = 24.8;
-      const emailSuccessRate = ((successfulEmails / (totalEmailsSent || 1)) * 100).toFixed(1);
-      
-      // Website performance metrics (optimized for chemical industry)
-      const pageLoadTime = 2.1; // Seconds
-      const bounceRate = 35.7; // Percentage
-      const avgSessionDuration = 4.2; // Minutes
-      const avgPagesPerSession = 3.8; // Pages
-      
-      // Calculate ROAS based on inquiry conversion
-      const estimatedConversions = Math.round(totalInquiries * 0.15); // 15% inquiry to order conversion
-      const avgOrderValue = 1375000;
-      const marketingSpend = 4250000; // Monthly marketing budget
-      const roas = ((estimatedConversions * avgOrderValue) / marketingSpend).toFixed(1);
-      
+      // Get operational metrics
       const operationalData = {
-        // زمان بارگذاری سایت (Page Load Time in seconds)
-        pageLoadTime: pageLoadTime,
-        // نرخ پرش (Bounce Rate)
-        bounceRate: bounceRate,
-        // مدت زمان حضور در سایت (Session Duration in minutes)
-        avgSessionDuration: avgSessionDuration,
-        // میانگین صفحات مشاهده‌شده (Pages per Session)
-        avgPagesPerSession: avgPagesPerSession,
-        // نرخ بازشدن ایمیل (Email Open Rate)
-        emailOpenRate: emailOpenRate,
-        // نرخ موفقیت ایمیل (Email Success Rate)
-        emailSuccessRate: parseFloat(emailSuccessRate),
-        // بازدهی تبلیغات ROAS (Return on Ad Spend)
-        roas: parseFloat(roas),
-        // Website analytics
-        totalInquiries: totalInquiries,
-        recentInquiries: recentInquiries,
-        // Growth metrics
-        loadTimeImprovement: -12.5, // Negative means faster loading
-        bounceRateImprovement: -8.2, // Negative means lower bounce rate
-        sessionDurationGrowth: 15.3,
-        pagesPerSessionGrowth: 7.9,
-        emailOpenRateGrowth: 5.1,
-        roasGrowth: 18.7
+        pendingOrders: 23,
+        deliveredOrders: 145,
+        averageDeliveryTime: 2.3,
+        onTimeDeliveryRate: 92,
+        responseRate: 87,
+        returnRate: 2.1,
+        deliveredGrowth: 15.2,
+        onTimeGrowth: 3.1
       };
       
       res.json({
@@ -6290,63 +6078,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get financial KPIs
-  app.get("/api/kpi/financial", async (req, res) => {
+  app.get("/api/kpi/financial", requireAuth, async (req, res) => {
     try {
       const { pool } = await import('./db');
       
-      // Get actual financial data from orders
-      const monthlyRevenueQuery = `
-        SELECT 
-          SUM(total_amount) as monthly_revenue,
-          COUNT(*) as monthly_orders,
-          AVG(total_amount) as avg_order_value
-        FROM order_management
-        WHERE payment_status = 'paid'
-        AND created_at >= CURRENT_DATE - INTERVAL '30 days'
-      `;
-      
-      const pendingPaymentsQuery = `
-        SELECT 
-          SUM(total_amount) as pending_amount,
-          COUNT(*) as pending_orders
-        FROM order_management
-        WHERE payment_status IN ('pending', 'grace_period')
-      `;
-      
-      const monthlyResult = await pool.query(monthlyRevenueQuery);
-      const pendingResult = await pool.query(pendingPaymentsQuery);
-      
-      const monthlyStats = monthlyResult.rows[0] || {};
-      const pendingStats = pendingResult.rows[0] || {};
-      
-      // Calculate realistic financial metrics
-      const monthlyRevenue = parseFloat(monthlyStats.monthly_revenue) || 75230000;
-      const monthlyOrders = parseInt(monthlyStats.monthly_orders) || 145;
-      const pendingAmount = parseFloat(pendingStats.pending_amount) || 8900000;
-      
-      // Calculate profit margin (industry standard for chemical distribution)
-      const costOfGoodsSold = monthlyRevenue * 0.65; // 65% COGS
-      const operatingCosts = monthlyRevenue * 0.16; // 16% operating costs
-      const netProfit = monthlyRevenue - costOfGoodsSold - operatingCosts;
-      const profitMargin = ((netProfit / monthlyRevenue) * 100).toFixed(1);
-      
-      // Calculate cash flow (revenue - costs + collections)
-      const cashFlow = netProfit + (pendingAmount * 0.3); // 30% of pending expected to collect
-      
+      // Get financial metrics
       const financialData = {
-        // درآمد ماهانه (Monthly Revenue)
-        monthlyRevenue: Math.round(monthlyRevenue),
-        // سود خالص (Net Profit)
-        netProfit: Math.round(netProfit),
-        // حاشیه سود (Profit Margin)
-        profitMargin: parseFloat(profitMargin),
-        // هزینه‌های عملیاتی (Operating Costs)
-        operatingCosts: Math.round(operatingCosts),
-        // جریان نقدی (Cash Flow)
-        cashFlow: Math.round(cashFlow),
-        // حساب‌های دریافتنی (Accounts Receivable)
-        accountsReceivable: Math.round(pendingAmount),
-        // Growth metrics
+        monthlyRevenue: 75230000,
+        netProfit: 18500000,
+        profitMargin: 24.6,
+        operatingCosts: 12300000,
+        cashFlow: 45600000,
+        accountsReceivable: 8900000,
         revenueGrowth: 12.5,
         profitGrowth: 8.7
       };
@@ -6366,217 +6109,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // =============================================================================
 
   // Get management dashboard data
-  app.get("/api/management/dashboard", async (req, res) => {
+  app.get("/api/management/dashboard", requireAuth, async (req, res) => {
     try {
       const { pool } = await import('./db');
       
-      // Get actual data for comprehensive management dashboard
-      const currentMonthQuery = `
-        SELECT 
-          SUM(total_amount) as revenue,
-          COUNT(*) as orders,
-          AVG(total_amount) as avg_order_value
-        FROM order_management
-        WHERE payment_status = 'paid'
-        AND created_at >= CURRENT_DATE - INTERVAL '30 days'
-      `;
-      
-      const previousMonthQuery = `
-        SELECT 
-          SUM(total_amount) as revenue,
-          COUNT(*) as orders,
-          AVG(total_amount) as avg_order_value
-        FROM order_management
-        WHERE payment_status = 'paid'
-        AND created_at >= CURRENT_DATE - INTERVAL '60 days'
-        AND created_at < CURRENT_DATE - INTERVAL '30 days'
-      `;
-      
-      const inventoryQuery = `
-        SELECT 
-          COUNT(*) as total_products,
-          COUNT(CASE WHEN stock_quantity > 0 THEN 1 END) as in_stock,
-          COUNT(CASE WHEN stock_quantity <= minimum_stock THEN 1 END) as low_stock
-        FROM shop_products
-      `;
-      
-      const customerQuery = `
-        SELECT 
-          COUNT(*) as total_customers,
-          COUNT(CASE WHEN created_at >= CURRENT_DATE - INTERVAL '30 days' THEN 1 END) as new_customers
-        FROM crm_customers
-      `;
-      
-      const currentResult = await pool.query(currentMonthQuery);
-      const previousResult = await pool.query(previousMonthQuery);
-      const inventoryResult = await pool.query(inventoryQuery);
-      const customerResult = await pool.query(customerQuery);
-      
-      const currentData = currentResult.rows[0] || {};
-      const previousData = previousResult.rows[0] || {};
-      const inventoryData = inventoryResult.rows[0] || {};
-      const customerData = customerResult.rows[0] || {};
-      
-      // Calculate comprehensive KPIs matching the design
-      const managementKPIs = [
-        {
-          category: "درآمد کل",
-          unit: "دینار",
-          currentMonth: parseFloat(currentData.revenue) || 8000000000,
-          previousMonth: parseFloat(previousData.revenue) || 7600000000
-        },
-        {
-          category: "تعداد سفارش کل",
-          unit: "عدد",
-          currentMonth: parseInt(currentData.orders) || 125,
-          previousMonth: parseInt(previousData.orders) || 118
-        },
-        {
-          category: "% نرخ رشد کل",
-          unit: "%",
-          currentMonth: 1.8,
-          previousMonth: 1.6
-        },
-        {
-          category: "% نرخ رشد سبد خرید",
-          unit: "%",
-          currentMonth: 67,
-          previousMonth: 69
-        },
-        {
-          category: "ارزش طول عمر مشتری",
-          unit: "دینار",
-          currentMonth: 3200000,
-          previousMonth: 3000000
-        },
-        {
-          category: "سود",
-          unit: "دینار",
-          currentMonth: parseFloat(currentData.revenue) * 0.19 || 720000,
-          previousMonth: parseFloat(previousData.revenue) * 0.18 || 690000
-        },
-        {
-          category: "% نرخ رشد فروش",
-          unit: "%",
-          currentMonth: 1.8,
-          previousMonth: 1.6
-        },
-        {
-          category: "سود طول عمر مشتری",
-          unit: "دینار",
-          currentMonth: 3200000,
-          previousMonth: 3000000
-        },
-        {
-          category: "سهم منابع و بازاریابی",
-          unit: "%",
-          currentMonth: 42,
-          previousMonth: 38
-        },
-        {
-          category: "% نرخ رشد بازاریابی",
-          unit: "%",
-          currentMonth: 21,
-          previousMonth: 20
-        },
-        {
-          category: "کیفیت کالاها",
-          unit: "نسبت",
-          currentMonth: 4.5,
-          previousMonth: 3.9
-        },
-        {
-          category: "هزینه جذب مشتری",
-          unit: "دینار",
-          currentMonth: 180000,
-          previousMonth: 195000
-        },
-        {
-          category: "% محیط رضایت مشتری",
-          unit: "%",
-          currentMonth: 52,
-          previousMonth: 48
-        },
-        {
-          category: "محصولات مشتری",
-          unit: "عدد",
-          currentMonth: 31,
-          previousMonth: 29
-        },
-        {
-          category: "شاخص رضا مشتری",
-          unit: "نمره",
-          currentMonth: 48,
-          previousMonth: 45
-        },
-        {
-          category: "تعداد تیکت مشتری",
-          unit: "عدد",
-          currentMonth: 26,
-          previousMonth: 31
-        },
-        {
-          category: "زمان پاسخگویی سایت",
-          unit: "ثانیه",
-          currentMonth: 4.2,
-          previousMonth: 4.6
-        },
-        {
-          category: "% کیفیت سایت",
-          unit: "%",
-          currentMonth: 83,
-          previousMonth: 66
-        },
-        {
-          category: "مدت حضور سایت",
-          unit: "دقیقه",
-          currentMonth: 5.7,
-          previousMonth: 5.1
-        },
-        {
-          category: "میانگین صفحه سایت",
-          unit: "عدد",
-          currentMonth: 4,
-          previousMonth: 4
-        },
-        {
-          category: "بازدید مهین سایت",
-          unit: "عدد",
-          currentMonth: 24,
-          previousMonth: 21
-        },
-        {
-          category: "زمان ارسال انبار",
-          unit: "ساعت",
-          currentMonth: 38,
-          previousMonth: 41
-        },
-        {
-          category: "% نرخ موجودی انبار",
-          unit: "%",
-          currentMonth: 8.2,
-          previousMonth: 8.8
-        },
-        {
-          category: "% درصد دقت انبار",
-          unit: "%",
-          currentMonth: 94,
-          previousMonth: 92
-        }
-      ];
-      
+      // Get comprehensive dashboard metrics
       const dashboardData = {
-        kpis: managementKPIs,
         summary: {
-          dailySales: parseFloat(currentData.revenue) / 30 || 2543000,
-          activeOrders: parseInt(currentData.orders) || 47,
+          dailySales: 2543000,
+          activeOrders: 47,
           onlineCustomers: 124,
-          systemAlerts: 3,
-          totalProducts: parseInt(inventoryData.total_products) || 456,
-          inStockProducts: parseInt(inventoryData.in_stock) || 441,
-          lowStockProducts: parseInt(inventoryData.low_stock) || 15,
-          totalCustomers: parseInt(customerData.total_customers) || 235,
-          newCustomers: parseInt(customerData.new_customers) || 23
+          systemAlerts: 3
+        },
+        quickStats: {
+          orderStatuses: {
+            pending: 8,
+            processing: 15,
+            readyToShip: 23,
+            delivered: 145
+          },
+          departmentPerformance: {
+            finance: 85,
+            warehouse: 92,
+            logistics: 78
+          },
+          criticalInventory: [
+            { name: "سولونت 402", stock: 12, status: "critical" },
+            { name: "تینر PT-300", stock: 8, status: "low" },
+            { name: "NPK Complex", stock: 25, status: "warning" }
+          ]
         },
         recentActivities: [
           {
@@ -6585,7 +6146,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString()
           },
           {
-            type: "new_customer", 
+            type: "new_customer",
             message: "مشتری جدید \"شرکت کیمیا پتروشیمی\" ثبت‌نام کرد",
             timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString()
           },
@@ -6593,11 +6154,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
             type: "low_inventory",
             message: "محصول \"سولونت 402\" به حد مجاز موجودی رسید",
             timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString()
-          },
-          {
-            type: "report_generated",
-            message: "گزارش فروش هفتگی تولید شد",
-            timestamp: new Date(Date.now() - 60 * 60 * 1000).toISOString()
           }
         ]
       };
@@ -9172,9 +8728,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         finalCustomerInfo = crmCustomer;
       }
 
-      // Generate order number using new MOM format
-      const { generateOrderNumber } = await import('./order-number-generator');
-      const orderNumber = await generateOrderNumber();
+      // Generate order number
+      const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
 
       // Handle wallet payments
       let finalPaymentStatus = "pending";
@@ -9257,9 +8812,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const order = await customerStorage.createOrder(orderData);
 
-      // 🔄 [AUTO-SYNC] Note: createOrder in customer-storage.ts already handles sync to order_management
-      console.log(`✅ [AUTO-SYNC] Order ${order.orderNumber} automatically synced to order_management table`);
-
       // Create order items and update stock
       for (const item of items) {
         const unitPrice = item.unitPrice || item.price || 0;
@@ -9339,8 +8891,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-
-
   // Create customer order (from BilingualPurchaseForm)
   app.post("/api/customers/orders", async (req, res) => {
     console.log('🚀 [ENDPOINT] /api/customers/orders called with timestamp:', req.query.t);
@@ -9383,10 +8933,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         notes: orderData.notes || '', // Add notes from form
       };
 
-      // Generate order number using new MOM format
-      const { generateOrderNumber } = await import('./order-number-generator');
-      const orderNumber = await generateOrderNumber();
-      console.log('🔢 [BILINGUAL ORDER] Generated MOM order number:', orderNumber);
+      // Generate unique order number
+      const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
       
       // Calculate order totals
       const subtotal = orderData.totalAmount || 0;
@@ -9475,13 +9023,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         finalPaymentMethod = "bank_transfer_grace";
         console.log("✅ Bank transfer with grace period method selected - 3-day grace period activated");
       }
-      
-      // Handle bank payment ID method
-      else if (orderData.paymentMethod === 'bank_payment_id') {
-        finalPaymentStatus = "bank_payment_submitted";
-        finalPaymentMethod = "bank_payment_id";
-        console.log(`✅ Bank payment ID method selected - ID: ${orderData.bankPaymentId}`);
-      }
 
       const order = await customerStorage.createOrder({
         customerId: finalCustomerId,
@@ -9491,9 +9032,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         paymentMethod: finalPaymentMethod,
         totalAmount: totalAmount.toString(),
         currency: orderData.currency || "IQD",
-        notes: orderData.paymentMethod === 'bank_payment_id' 
-          ? `${orderData.notes || ""}\nشناسه پرداخت بانکی: ${orderData.bankPaymentId}`
-          : orderData.notes || "",
+        notes: orderData.notes || "",
         billingAddress: JSON.stringify({
           name: customerInfo.name,
           phone: customerInfo.phone,
@@ -9668,13 +9207,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log(`🕒 Grace period activated for order ${orderNumber} - expires: ${gracePeriodEnd.toISOString()}`);
         }
 
-        // Set status for bank payment ID orders
-        if (orderData.paymentMethod === 'bank_payment_id') {
-          orderMgmtData.currentStatus = 'financial_pending';
-          orderMgmtData.currentDepartment = 'financial';
-          console.log(`💳 Bank payment ID order ${orderNumber} sent to financial department for verification`);
-        }
-
         await orderManagementStorage.createOrderManagement(orderMgmtData);
         console.log(`✅ Order management record created for order ${orderNumber}`);
       } catch (orderMgmtError) {
@@ -9698,13 +9230,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         responseData.redirectToPayment = true;
         responseData.paymentGatewayUrl = `/payment?orderId=${order.id}&amount=${remainingAmount > 0 ? remainingAmount : totalAmount}`;
         console.log(`✅ Order ${orderNumber} created - redirecting to payment gateway for ${remainingAmount > 0 ? remainingAmount : totalAmount} IQD`);
-      }
-      
-      // Add success message for bank payment ID
-      if (finalPaymentMethod === 'bank_payment_id') {
-        responseData.message = "سفارش شما با موفقیت ثبت شد. شناسه پرداخت شما در دست بررسی است.";
-        responseData.bankPaymentId = orderData.bankPaymentId;
-        console.log(`✅ Order ${orderNumber} created with bank payment ID: ${orderData.bankPaymentId}`);
       }
 
       res.json(responseData);
@@ -9771,7 +9296,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           co.recipient_phone,
           co.recipient_name,
           co.recipient_address,
-          co.notes,
           co.created_at,
           co.updated_at,
           om.payment_grace_period_start,
@@ -9779,7 +9303,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           om.is_order_locked,
           om.current_status,
           om.financial_reviewed_at,
-          om.delivery_code,
           EXTRACT(EPOCH FROM (om.payment_grace_period_end - NOW()))/3600 as hours_remaining,
           CASE 
             WHEN om.payment_grace_period_end > NOW() THEN 'active'
@@ -9825,7 +9348,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const customerOrders = allOrdersWithItems.map((row: any) => ({
         id: row.id,
         orderNumber: row.order_number,
-        status: row.current_status || row.status, // Use current_status from order_management if available
+        status: row.status,
         totalAmount: row.total_amount,
         currency: row.currency,
         paymentStatus: row.payment_status,
@@ -9847,10 +9370,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         customerEmail: row.guest_email,
         customerPhone: row.recipient_phone,
         recipientName: row.recipient_name,
-        recipientAddress: row.recipient_address,
-        deliveryCode: row.delivery_code, // Add delivery code for tracking
-        notes: row.notes,
-        receiptUploaded: row.payment_status === 'payment_uploaded' || row.payment_status === 'receipt_uploaded'
+        recipientAddress: row.recipient_address
       }));
 
       // Remove duplicate orders and combine all orders
@@ -9867,683 +9387,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({
         success: false,
         message: "خطا در دریافت سفارشات"
-      });
-    }
-  });
-
-  // Get customer order details with items for logistics (with auth)
-  app.get("/api/customers/orders/:orderId/details", requireAuth, async (req, res) => {
-    try {
-      const { orderId } = req.params;
-      const { pool } = await import('./db');
-      
-      // Get customer order with management details
-      const orderResult = await pool.query(`
-        SELECT 
-          co.id,
-          co.order_number,
-          co.customer_id,
-          co.total_amount,
-          co.currency,
-          co.status,
-          co.payment_status,
-          co.payment_method,
-          co.guest_name,
-          co.guest_email,
-          co.recipient_phone,
-          co.recipient_name,
-          co.recipient_address,
-          co.shipping_address,
-          co.notes,
-          co.created_at,
-          om.current_status,
-          om.delivery_code,
-          om.actual_delivery_date,
-          om.delivery_person_name,
-          om.delivery_person_phone,
-          c.first_name,
-          c.last_name,
-          c.email as customer_email,
-          c.phone as customer_phone
-        FROM customer_orders co
-        LEFT JOIN order_management om ON om.customer_order_id = co.id
-        LEFT JOIN crm_customers c ON c.id = co.customer_id
-        WHERE co.id = $1
-      `, [orderId]);
-
-      if (orderResult.rows.length === 0) {
-        return res.status(404).json({
-          success: false,
-          message: "سفارش یافت نشد"
-        });
-      }
-
-      const order = orderResult.rows[0];
-
-      // Get order items with product details
-      const itemsResult = await pool.query(`
-        SELECT 
-          oi.id,
-          oi.product_id,
-          oi.quantity,
-          oi.unit_price,
-          oi.total_price,
-          sp.name as product_name,
-          sp.sku,
-          sp.category,
-          sp.barcode,
-          sp.weight,
-          sp.weight_unit,
-          sp.gross_weight,
-          sp.net_weight,
-          sp.image_urls
-        FROM order_items oi
-        LEFT JOIN shop_products sp ON oi.product_id = sp.id
-        WHERE oi.order_id = $1
-        ORDER BY oi.id
-      `, [orderId]);
-
-      // Calculate total order weight
-      let totalWeight = 0;
-      itemsResult.rows.forEach((item: any) => {
-        const weight = item.gross_weight || item.weight || 0;
-        totalWeight += parseFloat(weight) * item.quantity;
-      });
-
-      const orderDetails = {
-        ...order,
-        items: itemsResult.rows,
-        totalWeight: totalWeight,
-        weightUnit: 'kg'
-      };
-
-      res.json({
-        success: true,
-        data: orderDetails
-      });
-
-    } catch (error) {
-      console.error("Error fetching customer order details:", error);
-      res.status(500).json({
-        success: false,
-        message: "خطا در دریافت جزئیات سفارش"
-      });
-    }
-  });
-
-  // Special logistics endpoint for order details (no authentication required)
-  app.get("/api/logistics/orders/:orderId/details", async (req, res) => {
-    try {
-      const { orderId } = req.params;
-      const { pool } = await import('./db');
-      
-      // Get customer order with management details
-      const orderResult = await pool.query(`
-        SELECT 
-          co.id,
-          co.order_number,
-          co.customer_id,
-          co.total_amount,
-          co.currency,
-          co.status,
-          co.payment_status,
-          co.payment_method,
-          co.guest_name,
-          co.guest_email,
-          co.recipient_phone,
-          co.recipient_name,
-          co.recipient_address,
-          co.shipping_address,
-          co.notes,
-          co.created_at,
-          om.current_status,
-          om.delivery_code,
-          om.actual_delivery_date,
-          om.delivery_person_name,
-          om.delivery_person_phone,
-          c.first_name,
-          c.last_name,
-          c.email as customer_email,
-          c.phone as customer_phone
-        FROM customer_orders co
-        LEFT JOIN order_management om ON om.customer_order_id = co.id
-        LEFT JOIN crm_customers c ON c.id = co.customer_id
-        WHERE co.id = $1
-      `, [orderId]);
-
-      if (orderResult.rows.length === 0) {
-        return res.status(404).json({
-          success: false,
-          message: "سفارش یافت نشد"
-        });
-      }
-
-      const order = orderResult.rows[0];
-
-      // Get order items with product details
-      const itemsResult = await pool.query(`
-        SELECT 
-          oi.id,
-          oi.product_id,
-          oi.quantity,
-          oi.unit_price,
-          oi.total_price,
-          sp.name as product_name,
-          sp.sku,
-          sp.category,
-          sp.barcode,
-          sp.weight,
-          sp.weight_unit,
-          sp.gross_weight,
-          sp.net_weight,
-          sp.image_urls
-        FROM order_items oi
-        LEFT JOIN shop_products sp ON oi.product_id = sp.id
-        WHERE oi.order_id = $1
-        ORDER BY oi.id
-      `, [orderId]);
-
-      // Calculate total order weight
-      let totalWeight = 0;
-      itemsResult.rows.forEach((item: any) => {
-        const weight = item.gross_weight || item.weight || 0;
-        totalWeight += parseFloat(weight) * item.quantity;
-      });
-
-      const orderDetails = {
-        ...order,
-        items: itemsResult.rows,
-        totalWeight: totalWeight,
-        weightUnit: 'kg'
-      };
-
-      res.json({
-        success: true,
-        data: orderDetails
-      });
-
-    } catch (error) {
-      console.error("Error fetching logistics order details:", error);
-      res.status(500).json({
-        success: false,
-        message: "خطا در دریافت جزئیات سفارش"
-      });
-    }
-  });
-
-  // Get admin customer order by ID
-  app.get("/api/admin/customer-orders/:orderId", requireAuth, async (req, res) => {
-    try {
-      const { orderId } = req.params;
-      const { pool } = await import('./db');
-
-      // Get customer order with management details
-      const orderResult = await pool.query(`
-        SELECT 
-          co.id,
-          co.order_number,
-          co.customer_id,
-          co.total_amount,
-          co.currency,
-          co.status,
-          co.payment_status,
-          co.payment_method,
-          co.guest_name,
-          co.guest_email,
-          co.recipient_phone,
-          co.recipient_name,
-          co.recipient_address,
-          co.shipping_address,
-          co.notes,
-          co.created_at
-        FROM customer_orders co
-        WHERE co.id = $1
-      `, [orderId]);
-
-      if (orderResult.rows.length === 0) {
-        return res.status(404).json({
-          success: false,
-          message: "سفارش یافت نشد"
-        });
-      }
-
-      const order = orderResult.rows[0];
-
-      // Get order items with product details
-      const itemsResult = await pool.query(`
-        SELECT 
-          oi.id,
-          oi.product_id,
-          oi.quantity,
-          oi.unit_price,
-          oi.total_price,
-          sp.name as product_name,
-          sp.sku,
-          sp.category,
-          sp.barcode,
-          sp.weight,
-          sp.weight_unit,
-          sp.gross_weight,
-          sp.net_weight,
-          sp.image_urls
-        FROM order_items oi
-        LEFT JOIN shop_products sp ON oi.product_id = sp.id
-        WHERE oi.order_id = $1
-        ORDER BY oi.id
-      `, [orderId]);
-
-      // Calculate total order weight
-      let totalWeight = 0;
-      itemsResult.rows.forEach((item: any) => {
-        const weight = item.gross_weight || item.weight || 0;
-        totalWeight += parseFloat(weight) * item.quantity;
-      });
-
-      const orderDetails = {
-        ...order,
-        items: itemsResult.rows,
-        totalWeight: totalWeight,
-        weightUnit: 'kg'
-      };
-
-      res.json({
-        success: true,
-        data: orderDetails
-      });
-
-    } catch (error) {
-      console.error("Error fetching customer order details:", error);
-      res.status(500).json({
-        success: false,
-        message: "خطا در دریافت جزئیات سفارش"
-      });
-    }
-  });
-
-  // Admin access to customer order details (for logistics management)
-  app.get("/api/admin/customer-orders/:orderId", requireAuth, async (req, res) => {
-    try {
-      const orderId = parseInt(req.params.orderId);
-      const adminId = (req.session as any)?.adminId;
-      
-      // Only admins can access this endpoint
-      if (!adminId) {
-        return res.status(403).json({
-          success: false,
-          message: "دسترسی مجاز نیست"
-        });
-      }
-
-      if (isNaN(orderId)) {
-        return res.status(400).json({
-          success: false,
-          message: "شناسه سفارش نامعتبر است"
-        });
-      }
-
-      const { pool } = await import('./db');
-      
-      // Get order details (admin access - no customer restriction)
-      const orderResult = await pool.query(`
-        SELECT 
-          co.id,
-          co.order_number,
-          co.customer_id,
-          co.total_amount,
-          co.currency,
-          co.payment_status,
-          co.payment_method,
-          co.status,
-          co.guest_name,
-          co.guest_email,
-          co.recipient_phone,
-          co.recipient_name,
-          co.recipient_address,
-          co.shipping_address,
-          co.notes,
-          co.created_at,
-          om.current_status,
-          om.delivery_code,
-          om.actual_delivery_date,
-          om.delivery_person_name,
-          om.delivery_person_phone,
-          c.first_name,
-          c.last_name,
-          c.email as customer_email,
-          c.phone as customer_phone
-        FROM customer_orders co
-        LEFT JOIN order_management om ON om.customer_order_id = co.id
-        LEFT JOIN crm_customers c ON c.id = co.customer_id
-        WHERE co.id = $1
-      `, [orderId]);
-
-      if (orderResult.rows.length === 0) {
-        return res.status(404).json({
-          success: false,
-          message: "سفارش یافت نشد"
-        });
-      }
-
-      const order = orderResult.rows[0];
-
-      // Get order items
-      const itemsResult = await pool.query(`
-        SELECT 
-          oi.*,
-          sp.name,
-          sp.price,
-          sp.weight,
-          sp.gross_weight,
-          sp.stock_unit
-        FROM order_items oi
-        LEFT JOIN shop_products sp ON oi.product_id = sp.id
-        WHERE oi.order_id = $1
-        ORDER BY oi.id
-      `, [orderId]);
-
-      // Calculate total order weight
-      let totalWeight = 0;
-      itemsResult.rows.forEach((item: any) => {
-        const weight = item.gross_weight || item.weight || 0;
-        totalWeight += parseFloat(weight) * item.quantity;
-      });
-
-      const orderDetails = {
-        ...order,
-        items: itemsResult.rows,
-        totalWeight: totalWeight,
-        weightUnit: 'kg'
-      };
-
-      res.json({
-        success: true,
-        data: orderDetails
-      });
-
-    } catch (error) {
-      console.error("Error fetching admin customer order details:", error);
-      res.status(500).json({
-        success: false,
-        message: "خطا در دریافت جزئیات سفارش"
-      });
-    }
-  });
-
-  // Get specific customer order by ID
-  app.get("/api/customers/orders/:orderId", requireAuth, async (req, res) => {
-    try {
-      const orderId = parseInt(req.params.orderId);
-      const customerId = (req.session as any)?.customerId;
-      const crmCustomerId = (req.session as any)?.crmCustomerId;
-      const adminId = (req.session as any)?.adminId;
-      
-      if (isNaN(orderId)) {
-        return res.status(400).json({
-          success: false,
-          message: "شناسه سفارش نامعتبر است"
-        });
-      }
-
-      const { pool } = await import('./db');
-      
-      let finalCustomerId = crmCustomerId || customerId;
-      let authQuery = '';
-      let queryParams = [orderId];
-      
-      // Admin can access any order, customers only their own orders
-      if (!adminId) {
-        if (!finalCustomerId) {
-          return res.status(401).json({ 
-            success: false, 
-            message: "احراز هویت نشده" 
-          });
-        }
-        authQuery = ' AND co.customer_id = $2';
-        queryParams.push(finalCustomerId);
-      }
-
-      // Get order details
-      const orderResult = await pool.query(`
-        SELECT 
-          co.id,
-          co.order_number,
-          co.customer_id,
-          co.total_amount,
-          co.currency,
-          co.payment_status,
-          co.payment_method,
-
-          co.status,
-          co.guest_name,
-          co.guest_email,
-          co.recipient_phone,
-          co.recipient_name,
-          co.recipient_address,
-          co.shipping_address,
-          co.notes,
-          co.created_at,
-          om.current_status,
-          om.delivery_code,
-          om.actual_delivery_date,
-          om.delivery_person_name,
-          om.delivery_person_phone,
-          c.first_name,
-          c.last_name,
-          c.email as customer_email,
-          c.phone as customer_phone
-        FROM customer_orders co
-        LEFT JOIN order_management om ON om.customer_order_id = co.id
-        LEFT JOIN crm_customers c ON c.id = co.customer_id
-        WHERE co.id = $1${authQuery}
-      `, queryParams);
-
-      if (orderResult.rows.length === 0) {
-        return res.status(404).json({
-          success: false,
-          message: "سفارش یافت نشد"
-        });
-      }
-
-      const order = orderResult.rows[0];
-
-      // Get order items with product details
-      const itemsResult = await pool.query(`
-        SELECT 
-          oi.id,
-          oi.product_id,
-          oi.product_name,
-          oi.quantity,
-          oi.unit_price,
-          oi.total_price,
-          oi.sku,
-          sp.weight,
-          sp.weight_unit,
-          sp.gross_weight,
-          sp.net_weight,
-          sp.image_urls
-        FROM order_items oi
-        LEFT JOIN shop_products sp ON oi.product_id = sp.id
-        WHERE oi.customer_order_id = $1
-        ORDER BY oi.id
-      `, [orderId]);
-
-      // Calculate total order weight
-      let totalWeight = 0;
-      itemsResult.rows.forEach((item: any) => {
-        const weight = item.gross_weight || item.net_weight || item.weight || 0;
-        totalWeight += parseFloat(weight) * item.quantity;
-      });
-
-      const orderDetails = {
-        ...order,
-        items: itemsResult.rows,
-        totalWeight: totalWeight,
-        weightUnit: 'kg'
-      };
-
-      res.json({
-        success: true,
-        data: orderDetails
-      });
-
-    } catch (error) {
-      console.error("Error fetching customer order details:", error);
-      res.status(500).json({
-        success: false,
-        message: "خطا در دریافت جزئیات سفارش"
-      });
-    }
-  });
-
-  // Cancel customer order and release reserved inventory
-  app.post("/api/customers/orders/:orderId/cancel", async (req, res) => {
-    try {
-      const customerId = (req.session as any)?.customerId;
-      const crmCustomerId = (req.session as any)?.crmCustomerId;
-      
-      if (!customerId && !crmCustomerId) {
-        return res.status(401).json({ 
-          success: false, 
-          message: "احراز هویت نشده" 
-        });
-      }
-
-      const { orderId } = req.params;
-      const { reason } = req.body;
-      const finalCustomerId = crmCustomerId || customerId;
-
-      // Import inventory workflow
-      const { InventoryWorkflow } = await import('./inventory-workflow');
-      const inventoryWorkflow = new InventoryWorkflow();
-
-      // Verify this order belongs to the customer
-      const { pool } = await import('./db');
-      const orderCheck = await pool.query(`
-        SELECT co.*, om.current_status 
-        FROM customer_orders co 
-        LEFT JOIN order_management om ON om.customer_order_id = co.id
-        WHERE co.id = $1 AND co.customer_id = $2
-      `, [orderId, finalCustomerId]);
-
-      if (orderCheck.rows.length === 0) {
-        return res.status(404).json({
-          success: false,
-          message: "سفارش یافت نشد یا متعلق به شما نیست"
-        });
-      }
-
-      const order = orderCheck.rows[0];
-      
-      // Check if order can be cancelled
-      const cancellableStatuses = ['pending', 'payment_grace_period', 'financial_pending'];
-      if (!cancellableStatuses.includes(order.current_status)) {
-        return res.status(400).json({
-          success: false,
-          message: "امکان لغو این سفارش وجود ندارد - سفارش در حال پردازش است"
-        });
-      }
-
-      // Cancel order and release inventory
-      const cancelResult = await inventoryWorkflow.cancelOrder(
-        parseInt(orderId),
-        reason || 'لغو توسط مشتری - آزادسازی موجودی'
-      );
-
-      if (cancelResult.success) {
-        // Update order status to cancelled
-        await pool.query(`
-          UPDATE customer_orders 
-          SET status = 'cancelled', updated_at = NOW()
-          WHERE id = $1
-        `, [orderId]);
-
-        await pool.query(`
-          UPDATE order_management 
-          SET current_status = 'cancelled', updated_at = NOW()
-          WHERE customer_order_id = $1
-        `, [orderId]);
-
-        console.log(`✅ [ORDER CANCEL] Order ${orderId} cancelled by customer ${finalCustomerId}, inventory released`);
-
-        res.json({
-          success: true,
-          message: "سفارش با موفقیت لغو شد و موجودی به فروشگاه بازگردانده شد"
-        });
-      } else {
-        throw new Error("خطا در آزادسازی موجودی");
-      }
-
-    } catch (error) {
-      console.error("Error canceling customer order:", error);
-      res.status(500).json({
-        success: false,
-        message: error.message || "خطا در لغو سفارش"
-      });
-    }
-  });
-
-  // Delete expired temporary orders completely from system
-  app.delete("/api/customers/expired-orders", async (req, res) => {
-    try {
-      const customerId = (req.session as any)?.customerId;
-      if (!customerId) {
-        return res.status(401).json({ 
-          success: false, 
-          message: "احراز هویت نشده" 
-        });
-      }
-
-      const { pool } = await import('./db');
-
-      // Find expired temporary orders for this customer
-      const expiredOrdersResult = await pool.query(`
-        SELECT om.customer_order_id, co.order_number
-        FROM order_management om
-        LEFT JOIN customer_orders co ON om.customer_order_id = co.id
-        WHERE om.current_status = 'payment_grace_period'
-          AND om.payment_grace_period_end < NOW()
-          AND (co.guest_email = (
-            SELECT email FROM crm_customers WHERE id = $1
-          ) OR co.customer_id = $1)
-      `, [customerId]);
-
-      if (expiredOrdersResult.rows.length === 0) {
-        return res.json({
-          success: true,
-          message: "هیچ سفارش منقضی شده‌ای یافت نشد",
-          deletedCount: 0
-        });
-      }
-
-      const expiredOrderIds = expiredOrdersResult.rows.map(row => row.customer_order_id);
-      const orderNumbers = expiredOrdersResult.rows.map(row => row.order_number);
-
-      // Delete from order_management first (foreign key constraint)
-      await pool.query(`
-        DELETE FROM order_management 
-        WHERE customer_order_id = ANY($1::int[])
-      `, [expiredOrderIds]);
-
-      // Delete from customer_orders
-      await pool.query(`
-        DELETE FROM customer_orders 
-        WHERE id = ANY($1::int[])
-      `, [expiredOrderIds]);
-
-      console.log(`🗑️ [EXPIRED ORDERS DELETED] Customer ${customerId}: Orders ${orderNumbers.join(', ')} permanently deleted`);
-
-      res.json({
-        success: true,
-        message: `${expiredOrderIds.length} سفارش منقضی شده با موفقیت حذف شد`,
-        deletedCount: expiredOrderIds.length,
-        orderNumbers
-      });
-
-    } catch (error) {
-      console.error("Error deleting expired orders:", error);
-      res.status(500).json({
-        success: false,
-        message: "خطا در حذف سفارشات منقضی شده"
       });
     }
   });
@@ -15198,53 +14041,6 @@ Leading Chemical Solutions Provider
     }
   });
 
-  // Update customer secondary address specifically for checkout process
-  app.put("/api/customers/update-secondary-address", async (req, res) => {
-    try {
-      const { customerId, secondaryAddress, city, state, postalCode, country } = req.body;
-      
-      if (!customerId) {
-        return res.status(400).json({
-          success: false,
-          message: "Customer ID is required"
-        });
-      }
-
-      // Update the customer's secondary address information in CRM
-      const updateData = {
-        secondaryAddress: secondaryAddress || null,
-        city: city || null,
-        state: state || null,
-        postalCode: postalCode || null,
-        country: country || null
-      };
-
-      const updatedCustomer = await crmStorage.updateCrmCustomer(customerId, updateData);
-      
-      // Log the activity
-      await crmStorage.logCustomerActivity({
-        customerId: customerId,
-        activityType: 'updated',
-        description: 'Secondary address updated during checkout process',
-        performedBy: 'customer',
-        activityData: { updatedFields: Object.keys(updateData), newAddress: secondaryAddress }
-      });
-
-      res.json({
-        success: true,
-        data: updatedCustomer,
-        message: "آدرس دوم با موفقیت بروزرسانی شد"
-      });
-      
-    } catch (error) {
-      console.error("Error updating secondary address:", error);
-      res.status(500).json({
-        success: false,
-        message: "Failed to update secondary address"
-      });
-    }
-  });
-
   // Delete CRM customer
   app.delete("/api/crm/customers/:id", requireAuth, async (req, res) => {
     try {
@@ -17402,47 +16198,49 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     try {
       console.log('📦 [WAREHOUSE] Fetching warehouse orders...');
       
-      // Use order management storage for modern order handling
-      const orders = await orderManagementStorage.getOrdersByDepartment('warehouse');
+      // Get orders that are approved by financial department and ready for warehouse processing
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        SELECT 
+          o.id,
+          o.customer_name as "customerName",
+          o.customer_email as "customerEmail", 
+          o.total_amount as "totalAmount",
+          o.status,
+          o.created_at as "createdAt",
+          o.shipping_address as "shippingAddress",
+          o.payment_method as "paymentMethod",
+          o.notes,
+          o.warehouse_notes as "warehouseNotes",
+          o.financial_approved_at as "financialApprovedAt",
+          o.fulfilled_at as "fulfilledAt",
+          o.fulfilled_by as "fulfilledBy",
+          COALESCE(
+            json_agg(
+              json_build_object(
+                'id', oi.id,
+                'name', oi.name,
+                'quantity', oi.quantity,
+                'price', oi.price,
+                'sku', oi.sku,
+                'barcode', oi.barcode
+              )
+            ) FILTER (WHERE oi.id IS NOT NULL),
+            '[]'::json
+          ) as items
+        FROM orders o
+        LEFT JOIN order_items oi ON o.id = oi.order_id
+        WHERE o.status = 'financial_approved'
+        GROUP BY o.id, o.customer_name, o.customer_email, o.total_amount, o.status, 
+                 o.created_at, o.shipping_address, o.payment_method, o.notes, 
+                 o.warehouse_notes, o.financial_approved_at, o.fulfilled_at, o.fulfilled_by
+        ORDER BY o.financial_approved_at DESC
+      `);
       
-      // Calculate weight for each order
-      const ordersWithWeight = await Promise.all(
-        orders.map(async (order) => {
-          try {
-            // Calculate total weight for the order
-            const totalWeight = await orderManagementStorage.calculateOrderWeight(order.customerOrderId);
-            
-            return {
-              ...order,
-              totalWeight: totalWeight > 0 ? totalWeight.toString() : null,
-              weightUnit: totalWeight > 0 ? 'kg' : null,
-              // Add customer information for display
-              customer: {
-                firstName: order.customerFirstName,
-                lastName: order.customerLastName,
-                email: order.customerEmail,
-                phone: order.customerPhone
-              }
-            };
-          } catch (weightError) {
-            console.warn(`⚠️ [WAREHOUSE] Could not calculate weight for order ${order.customerOrderId}:`, weightError);
-            return {
-              ...order,
-              totalWeight: null,
-              weightUnit: null,
-              customer: {
-                firstName: order.customerFirstName,
-                lastName: order.customerLastName,
-                email: order.customerEmail,
-                phone: order.customerPhone
-              }
-            };
-          }
-        })
-      );
-      
-      console.log('📦 [WAREHOUSE] Found orders with weights:', ordersWithWeight.length);
-      res.json({ success: true, orders: ordersWithWeight });
+      const orders = result.rows;
+      console.log('📦 [WAREHOUSE] Found financial approved orders:', orders.length);
+      console.log('📦 [WAREHOUSE] Orders ready for warehouse processing:', JSON.stringify(orders, null, 2));
+      res.json({ success: true, orders });
     } catch (error) {
       console.error('❌ [WAREHOUSE] Error fetching warehouse orders:', error);
       res.status(500).json({ success: false, message: 'خطا در بارگیری سفارشات انبار' });
@@ -17471,7 +16269,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       // Use order management storage to update order status
       const updatedOrder = await orderManagementStorage.updateOrderStatus(
         parseInt(id),
-        status as OrderStatus, // Use the provided status
+        status,
         userId,
         'warehouse',
         notes
@@ -17483,107 +16281,29 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       
       console.log('📦 [WAREHOUSE] Order updated successfully:', updatedOrder);
       
-      // Auto-generate and send delivery code when order is sent to logistics
-      if (status === 'logistics_dispatched' || status === 'logistics_assigned' || status === 'warehouse_approved') {
+      // Auto-generate and send delivery code when order is approved to logistics
+      if (status === 'warehouse_approved') {
         try {
           console.log('🚚 [AUTO-CODE] Order approved to logistics, auto-generating delivery code...');
           
-          // Get customer info from the order data - need to query for complete customer details
-          const { pool } = await import('./db');
-          const customerResult = await pool.query(`
-            SELECT 
-              co.order_number,
-              co.guest_name,
-              co.guest_email,
-              co.shipping_address
-            FROM customer_orders co
-            WHERE co.id = $1
-          `, [updatedOrder.customerOrderId]);
-          
-          const customerData = customerResult.rows[0];
-          
-          // Generate sequential delivery code (1111-9999, cycling)
-          const { generateSequentialDeliveryCode } = await import('./new-delivery-code-generator');
-          const deliveryCode = await generateSequentialDeliveryCode();
-          
-          console.log('🔢 [DELIVERY-CODE] Generated sequential delivery code:', deliveryCode);
-          
-          // Update order_management table with sequential delivery code
-          await orderManagementStorage.updateOrderManagement(parseInt(id), {
-            deliveryCode: deliveryCode,
-            updatedAt: new Date()
-          });
-          
-          console.log('✅ [DELIVERY-CODE] Sequential delivery code saved to database:', deliveryCode);
-          
-          if (customerData && (customerData.guest_name || customerData.guest_email || customerData.shipping_address)) {
-            const customerName = customerData.guest_name || 'Customer';
-            
-            // Extract phone from shipping address JSON
-            const shippingAddress = customerData.shipping_address || {};
-            const customerPhone = shippingAddress.phone;
+          // Get order details for customer info
+          const orderDetails = await orderManagementStorage.getOrderById(parseInt(id));
+          if (orderDetails && orderDetails.customerPhone && orderDetails.customerFirstName) {
+            const customerName = `${orderDetails.customerFirstName} ${orderDetails.customerLastName || ''}`.trim();
             
             console.log('🚚 [AUTO-CODE] Customer info:', {
-              orderId: updatedOrder.customerOrderId,
-              phone: customerPhone,
+              orderId: orderDetails.customerOrderId,
+              phone: orderDetails.customerPhone,
               name: customerName
             });
             
-
-            
-            // Send SMS notification with original order number as delivery code
-            try {
-              const { createSmsService } = await import('./sms-service');
-              const smsService = await createSmsService();
-              if (customerPhone) {
-                const smsResult = await smsService.sendDeliveryCode(
-                  customerPhone,
-                  deliveryCode,  // Using original order number
-                  customerName
-                );
-                
-                console.log('📱 [SMS-NOTIFICATION] SMS sent with order number as delivery code:', {
-                  phone: customerPhone,
-                  deliveryCode: deliveryCode,
-                  smsResult: smsResult.success
-                });
-              }
-            } catch (smsError) {
-              console.error('❌ [SMS-NOTIFICATION] Failed to send SMS:', smsError);
-            }
-
-            // Send email notification to customer using template system
-            try {
-              if (customerData.guest_email) {
-                const { UniversalEmailService } = await import('./universal-email-service');
-                
-                const emailResult = await UniversalEmailService.sendEmail({
-                  categoryKey: 'order_notifications',
-                  to: [customerData.guest_email],
-                  subject: 'کد تحویل سفارش شما',
-                  html: '', // Will be filled by template
-                  templateNumber: '#05', // Delivery code notification template
-                  variables: {
-                    customerName: customerName,
-                    orderNumber: deliveryCode,
-                    deliveryCode: deliveryCode,
-                    customerFirstName: customerName.split(' ')[0],
-                    customerLastName: customerName.split(' ').slice(1).join(' ') || ''
-                  }
-                });
-                
-                console.log('📧 [EMAIL-NOTIFICATION] Email sent using template #05 with delivery code:', {
-                  email: customerData.guest_email,
-                  deliveryCode: deliveryCode,
-                  template: '#05',
-                  emailResult: emailResult
-                });
-              }
-            } catch (emailError) {
-              console.error('❌ [EMAIL-NOTIFICATION] Failed to send email:', emailError);
-            }
-            
-            const codeResult = { success: true, deliveryCode };
+            // Generate delivery code using logistics storage
+            const { logisticsStorage } = await import('./logistics-storage');
+            const codeResult = await logisticsStorage.generateDeliveryCode(
+              orderDetails.customerOrderId,
+              orderDetails.customerPhone,
+              customerName
+            );
             
             if (codeResult.success) {
               console.log('✅ [AUTO-CODE] Delivery code generated and sent automatically:', codeResult.deliveryCode);
@@ -17591,7 +16311,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
               console.log('❌ [AUTO-CODE] Failed to generate delivery code:', codeResult.message);
             }
           } else {
-            console.log('⚠️ [SMS-EMAIL] Customer contact information incomplete - delivery code generated but notifications not sent');
+            console.log('❌ [AUTO-CODE] Missing customer information for auto-code generation');
           }
         } catch (autoCodeError) {
           console.error('❌ [AUTO-CODE] Error in auto-code generation:', autoCodeError);
@@ -17770,211 +16490,24 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     }
   });
 
-  // Complete delivery for an order (All users allowed per request)
-  app.patch('/api/order-management/logistics/:id/complete', requireAuth, async (req, res) => {
+  // Complete delivery for an order
+  app.post('/api/logistics/orders/:id/complete', async (req, res) => {
     try {
-      console.log(`🚀 [DELIVERY-START] Initiating delivery completion for order ${req.params.id}`);
       const orderId = parseInt(req.params.id);
-      const adminId = req.session?.adminId;
+      const adminId = req.session?.adminId || 1; // Default for logistics operations
       
-      console.log(`🔐 [DELIVERY-AUTH] Session check:`, {
-        adminId: req.session?.adminId,
-        customUserId: req.session?.customUserId,
-        roleId: req.session?.roleId,
-        sessionId: req.sessionID
-      });
-      
-      // Check if user is admin - get role from database
-      let userRole = null;
-      if (req.session?.adminId) {
-        const adminUser = await storage.getUserById(req.session.adminId);
-        userRole = adminUser?.roleId;
-        console.log(`🔐 [DELIVERY-AUTH] Admin user role: ${userRole}`);
-      } else if (req.session?.customUserId) {
-        const { pool } = await import('./db');
-        const result = await pool.query('SELECT role_id FROM custom_users WHERE id = $1', [req.session.customUserId]);
-        userRole = result.rows[0]?.role_id;
-        console.log(`🔐 [DELIVERY-AUTH] Custom user role: ${userRole}`);
-      }
-      
-      // Allow all authenticated users to complete deliveries (admin restriction removed per user request)
-      console.log(`✅ [DELIVERY-AUTH] Delivery completion allowed - user role: ${userRole}`);
-      
-      /* Admin restriction removed per user request
-      // Check if user is admin (only admin can complete deliveries)
-      if (userRole !== 1) {
-        console.log(`❌ [DELIVERY-AUTH] Access denied - user role: ${userRole}, required: 1`);
-        return res.status(403).json({ 
-          success: false, 
-          message: 'فقط ادمین می‌تواند تحویل سفارش را تکمیل کند' 
-        });
-      }
-      */
-      
-      console.log(`✅ [DELIVERY-AUTH] Admin access granted - role: ${userRole}`);
-      
-      const { status, actualDeliveryDate } = req.body;
-      const now = new Date();
-      
-      console.log(`📦 [DELIVERY-COMPLETE] User ${adminId} completing delivery for order ${orderId}`);
-      
-      // Update order status to delivered
-      console.log(`🗂️ [DELIVERY-DB] Updating order status to 'logistics_delivered'`);
       const updatedOrder = await orderManagementStorage.updateOrderStatus(
         orderId,
-        status || 'logistics_delivered',
+        'logistics_delivered',
         adminId,
         'logistics',
-        'سفارش تحویل شده تایید شد'
-      );
-      console.log(`✅ [DELIVERY-DB] Order status updated successfully:`, updatedOrder?.id);
-      
-      // Set actual delivery date to now if not provided
-      const deliveryDate = actualDeliveryDate || now.toISOString();
-      
-      // Update delivery info with current date as actual delivery date
-      await orderManagementStorage.updateDeliveryInfo(orderId, {
-        actualDeliveryDate: deliveryDate,
-        deliveryStatus: 'delivered'
-      });
-
-      // Get customer information to send notifications
-      try {
-        const orderWithCustomer = await db.select({
-          customerPhone: crmCustomers.phone,
-          customerEmail: crmCustomers.email,
-          customerOrderId: orderManagement.customerOrderId,
-          deliveryCode: orderManagement.deliveryCode,
-          customerFirstName: crmCustomers.firstName,
-          customerLastName: crmCustomers.lastName
-        })
-        .from(orderManagement)
-        .leftJoin(customerOrders, eq(orderManagement.customerOrderId, customerOrders.id))
-        .leftJoin(crmCustomers, eq(customerOrders.customerId, crmCustomers.id))
-        .where(eq(orderManagement.id, orderId))
-        .limit(1);
-
-        if (orderWithCustomer[0] && orderWithCustomer[0].deliveryCode) {
-          const { customerPhone, customerEmail, customerOrderId, deliveryCode, customerFirstName, customerLastName } = orderWithCustomer[0];
-          const customerName = `${customerFirstName || ''} ${customerLastName || ''}`.trim();
-          
-          console.log(`📱 [DELIVERY-NOTIFICATIONS] Sending delivery code ${deliveryCode} to customer`);
-          
-          // Send both SMS and email notifications
-          const results = await orderManagementStorage.sendDeliveryCodeNotifications(
-            customerPhone || '',
-            customerEmail || '',
-            deliveryCode,
-            customerOrderId,
-            customerName || 'مشتری گرامی'
-          );
-          
-          console.log(`📱 [DELIVERY-NOTIFICATIONS] SMS: ${results.sms ? 'Success' : 'Failed'}, Email: ${results.email ? 'Success' : 'Failed'}`);
-        }
-      } catch (notificationError) {
-        console.error('❌ [DELIVERY-NOTIFICATIONS] Error sending notifications:', notificationError);
-        // Don't fail the delivery completion if notifications fail
-      }
-      
-      console.log(`✅ [DELIVERY-COMPLETE] Order ${orderId} marked as delivered on ${deliveryDate}`);
-      
-      res.json({ 
-        success: true, 
-        order: updatedOrder,
-        deliveryDate: deliveryDate,
-        message: 'سفارش با موفقیت به بایگانی لجستیک منتقل شد'
-      });
-    } catch (error) {
-      console.error('❌ [DELIVERY-COMPLETE] Error completing delivery:', error);
-      res.status(500).json({ 
-        success: false, 
-        message: 'خطا در تکمیل تحویل' 
-      });
-    }
-  });
-
-  // Super Admin Bypass: Send any order directly to archive (Skip workflow)
-  app.post('/api/order-management/:id/force-complete', requireAuth, async (req, res) => {
-    try {
-      const orderId = parseInt(req.params.id);
-      const adminId = req.session?.adminId;
-      
-      console.log(`🔐 [FORCE-COMPLETE-AUTH] Session check:`, {
-        adminId: req.session?.adminId,
-        customUserId: req.session?.customUserId,
-        roleId: req.session?.roleId,
-        sessionId: req.sessionID
-      });
-      
-      // Check if user is admin - get role from database
-      let userRole = null;
-      if (req.session?.adminId) {
-        const adminUser = await storage.getUserById(req.session.adminId);
-        userRole = adminUser?.roleId;
-        console.log(`🔐 [FORCE-COMPLETE-AUTH] Admin user role: ${userRole}`);
-      } else if (req.session?.customUserId) {
-        const { pool } = await import('./db');
-        const result = await pool.query('SELECT role_id FROM custom_users WHERE id = $1', [req.session.customUserId]);
-        userRole = result.rows[0]?.role_id;
-        console.log(`🔐 [FORCE-COMPLETE-AUTH] Custom user role: ${userRole}`);
-      }
-      
-      // Only super admin (roleId === 1) can force complete orders
-      if (userRole !== 1) {
-        console.log(`❌ [FORCE-COMPLETE-AUTH] Access denied - user role: ${userRole}, required: 1 (super admin)`);
-        return res.status(403).json({ 
-          success: false, 
-          message: 'فقط سوپر ادمین می‌تواند سفارش را مستقیماً به بایگانی بفرستد' 
-        });
-      }
-      
-      console.log(`✅ [FORCE-COMPLETE-AUTH] Super Admin access granted - role: ${userRole}`);
-      console.log(`🚀 [FORCE-COMPLETE] Super Admin ${adminId} bypassing workflow for order ${orderId}`);
-      
-      // Get current order status
-      const currentOrder = await orderManagementStorage.getOrderById(orderId);
-      if (!currentOrder) {
-        return res.status(404).json({ 
-          success: false, 
-          message: 'سفارش یافت نشد' 
-        });
-      }
-      
-      console.log(`📋 [FORCE-COMPLETE] Current order status: ${currentOrder.currentStatus}`);
-      
-      // Force update order to logistics_delivered status (this is what shows in "تحویل داده شده" tab)
-      const updatedOrder = await orderManagementStorage.updateOrderStatus(
-        orderId,
-        'logistics_delivered', // This moves order to "تحویل داده شده" tab
-        adminId,
-        'admin_bypass',
-        `سفارش توسط سوپر ادمین مستقیماً به بایگانی منتقل شد (Workflow Bypass از وضعیت: ${currentOrder.currentStatus})`
+        'Order delivered successfully'
       );
       
-      // Generate delivery code if it doesn't exist
-      if (!currentOrder.deliveryCode) {
-        const deliveryCode = `DEL-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
-        await orderManagementStorage.updateDeliveryInfo(orderId, {
-          deliveryCode: deliveryCode,
-          actualDeliveryDate: new Date().toISOString(),
-          deliveryStatus: 'delivered'
-        });
-        console.log(`🎯 [FORCE-COMPLETE] Generated delivery code: ${deliveryCode}`);
-      }
-      
-      console.log(`✅ [FORCE-COMPLETE] Order ${orderId} forcefully completed by super admin (bypassed workflow)`);
-      
-      res.json({ 
-        success: true, 
-        order: updatedOrder,
-        message: `سفارش مستقیماً به بایگانی منتقل شد (Workflow Bypass)`
-      });
+      res.json({ success: true, order: updatedOrder });
     } catch (error) {
-      console.error('❌ [FORCE-COMPLETE] Error force completing order:', error);
-      res.status(500).json({ 
-        success: false, 
-        message: 'خطا در انتقال مستقیم سفارش به بایگانی' 
-      });
+      console.error('Error completing delivery:', error);
+      res.status(500).json({ success: false, message: 'خطا در تکمیل تحویل' });
     }
   });
 
@@ -18509,7 +17042,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
   });
 
   // Generate delivery code for order (logistics department)
-  app.post('/api/order-management/:orderManagementId/generate-delivery-code', async (req, res) => {
+  app.post('/api/order-management/:orderManagementId/generate-delivery-code', requireAuth, async (req, res) => {
     try {
       const orderManagementId = parseInt(req.params.orderManagementId);
       
@@ -18517,7 +17050,6 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       const orderWithCustomer = await db
         .select({
           customerPhone: crmCustomers.phone,
-          customerEmail: crmCustomers.email,
           customerOrderId: orderManagement.customerOrderId,
           deliveryCode: orderManagement.deliveryCode,
           customerFirstName: crmCustomers.firstName,
@@ -18551,34 +17083,22 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         })
         .where(eq(orderManagement.id, orderManagementId));
 
-      // Get customer information for notifications
-      const customerInfo = orderWithCustomer[0];
-      const customerName = `${customerInfo.customerFirstName || ''} ${customerInfo.customerLastName || ''}`.trim();
+      // Send SMS with new delivery code
+      const smsSent = await orderManagementStorage.sendDeliveryCodeSms(customerPhone, deliveryCode, customerOrderId);
       
-      // Send both SMS and email notifications  
-      const results = await orderManagementStorage.sendDeliveryCodeNotifications(
-        customerPhone,
-        customerInfo.customerEmail || '',
-        deliveryCode,
-        customerOrderId,
-        customerName || 'مشتری گرامی'
-      );
-      
-      console.log(`✅ [GENERATE NOTIFICATIONS] SMS: ${results.sms ? 'Success' : 'Failed'}, Email: ${results.email ? 'Success' : 'Failed'}`);
-      
-      if (results.sms || results.email) {
+      if (smsSent) {
+        console.log(`✅ [GENERATE SMS] Delivery code ${deliveryCode} generated and sent to ${customerPhone} for order ${orderManagementId}`);
         res.json({ 
           success: true, 
-          message: 'کد تحویل تولید و به موبایل و ایمیل ارسال شد',
-          deliveryCode: deliveryCode,
-          smsResult: results.sms,
-          emailResult: results.email
+          message: 'کد تحویل تولید و ارسال شد',
+          deliveryCode: deliveryCode
         });
       } else {
-        // Even if notifications failed, we generated the code
+        // Even if SMS failed, we generated the code
+        console.log(`⚠️ [GENERATE SMS] Delivery code ${deliveryCode} generated but SMS failed for order ${orderManagementId}`);
         res.json({ 
           success: true, 
-          message: 'کد تحویل تولید شد اما ارسال ناموفق بود',
+          message: 'کد تحویل تولید شد اما SMS ارسال نشد',
           deliveryCode: deliveryCode
         });
       }
@@ -18589,7 +17109,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
   });
 
   // Resend delivery code (logistics department)
-  app.post('/api/order-management/:orderManagementId/resend-delivery-code', async (req, res) => {
+  app.post('/api/order-management/:orderManagementId/resend-delivery-code', requireAuth, async (req, res) => {
     try {
       const orderManagementId = parseInt(req.params.orderManagementId);
       
@@ -18597,7 +17117,6 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       const orderWithCustomer = await db
         .select({
           customerPhone: crmCustomers.phone,
-          customerEmail: crmCustomers.email,
           customerOrderId: orderManagement.customerOrderId,
           deliveryCode: orderManagement.deliveryCode,
           customerFirstName: crmCustomers.firstName,
@@ -18613,7 +17132,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         return res.status(404).json({ success: false, message: 'سفارش یافت نشد' });
       }
 
-      const { customerPhone, customerEmail, customerOrderId, deliveryCode, customerFirstName, customerLastName } = orderWithCustomer[0];
+      const { customerPhone, customerOrderId, deliveryCode } = orderWithCustomer[0];
 
       if (!customerPhone) {
         return res.status(400).json({ success: false, message: 'شماره تلفن مشتری یافت نشد' });
@@ -18623,27 +17142,15 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         return res.status(400).json({ success: false, message: 'کد تحویل یافت نشد' });
       }
 
-      // Prepare customer information
-      const customerName = `${customerFirstName || ''} ${customerLastName || ''}`.trim();
+      // Resend SMS with existing delivery code
+      const smsSent = await orderManagementStorage.sendDeliveryCodeSms(customerPhone, deliveryCode, customerOrderId);
       
-      // Send both SMS and email notifications
-      const results = await orderManagementStorage.sendDeliveryCodeNotifications(
-        customerPhone,
-        customerEmail || '',
-        deliveryCode,
-        customerOrderId,
-        customerName || 'مشتری گرامی'
-      );
-      
-      console.log(`✅ [RESEND NOTIFICATIONS] SMS: ${results.sms ? 'Success' : 'Failed'}, Email: ${results.email ? 'Success' : 'Failed'}`);
-      
-      if (results.sms || results.email) {
+      if (smsSent) {
+        console.log(`✅ [RESEND SMS] Delivery code ${deliveryCode} resent to ${customerPhone} for order ${orderManagementId}`);
         res.json({ 
           success: true, 
-          message: 'کد تحویل مجدداً به موبایل و ایمیل ارسال شد',
-          deliveryCode: deliveryCode,
-          smsResult: results.sms,
-          emailResult: results.email
+          message: 'کد تحویل مجدداً ارسال شد',
+          deliveryCode: deliveryCode
         });
       } else {
         res.status(500).json({ success: false, message: 'خطا در ارسال مجدد کد تحویل' });
@@ -19730,26 +18237,10 @@ ${message ? `Additional Requirements:\n${message}` : ''}
   // Get financial pending orders  
   app.get('/api/financial/orders', async (req, res) => {
     try {
-      console.log('💰 [FINANCIAL] Fetching financial orders...');
-      
-      // Use modern order management system for consistent ordering (قدیمی‌ترها اول)
-      const orders = await orderManagementStorage.getOrdersByDepartment('financial');
-      
-      // Add customer information structure for consistency
-      const ordersWithCustomerInfo = orders.map(order => ({
-        ...order,
-        customer: {
-          firstName: order.customerFirstName,
-          lastName: order.customerLastName,
-          email: order.customerEmail,
-          phone: order.customerPhone
-        }
-      }));
-      
-      console.log('💰 [FINANCIAL] Found orders (قدیمی‌ترها اول):', ordersWithCustomerInfo.length);
-      res.json({ success: true, orders: ordersWithCustomerInfo });
+      const orders = await orderManagementStorage.getFinancialPendingOrders();
+      res.json({ success: true, orders });
     } catch (error) {
-      console.error('❌ [FINANCIAL] Error fetching financial orders:', error);
+      console.error('Error fetching financial orders:', error);
       res.status(500).json({ success: false, message: "خطا در دریافت سفارشات" });
     }
   });
@@ -20069,188 +18560,6 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     } catch (error) {
       console.error('Error resetting password:', error);
       res.status(500).json({ success: false, message: "خطا در تغییر رمز عبور" });
-    }
-  });
-
-  // ============================================================================
-  // GEOGRAPHIC ANALYTICS API
-  // ============================================================================
-  
-  // Geographic Analytics - Main endpoint
-  app.get('/api/geographic-analytics', requireAuth, async (req, res) => {
-    try {
-      const { pool } = await import('./db');
-      
-      // Get order statistics by geography (countries/cities)
-      const geographicStats = await pool.query(`
-        SELECT 
-          'Iraq' as country,
-          CASE 
-            WHEN shipping_address LIKE '%بغداد%' OR shipping_address LIKE '%Baghdad%' THEN 'Baghdad'
-            WHEN shipping_address LIKE '%بصره%' OR shipping_address LIKE '%Basra%' THEN 'Basra'
-            WHEN shipping_address LIKE '%اربیل%' OR shipping_address LIKE '%Erbil%' THEN 'Erbil'
-            WHEN shipping_address LIKE '%سلیمانیه%' OR shipping_address LIKE '%Sulaymaniyah%' THEN 'Sulaymaniyah'
-            WHEN shipping_address LIKE '%موصل%' OR shipping_address LIKE '%Mosul%' THEN 'Mosul'
-            WHEN shipping_address LIKE '%نجف%' OR shipping_address LIKE '%Najaf%' THEN 'Najaf'
-            WHEN shipping_address LIKE '%کربلا%' OR shipping_address LIKE '%Karbala%' THEN 'Karbala'
-            ELSE 'Other Cities'
-          END as city,
-          COUNT(*) as totalOrders,
-          SUM(total_amount) as totalRevenue,
-          COUNT(DISTINCT customer_id) as customerCount,
-          AVG(total_amount) as avgOrderValue
-        FROM customer_orders 
-        WHERE status != 'cancelled'
-        GROUP BY city
-        ORDER BY totalRevenue DESC
-      `);
-
-      // Get GPS delivery data - check if table exists first
-      let gpsDeliveries = { rows: [] };
-      let gpsStats = { rows: [{ 
-        totalDeliveries: 0,
-        successfulDeliveries: 0,
-        averageAccuracy: 0,
-        coverageCountries: 0,
-        coverageCities: 0,
-        uniqueDeliveryPersons: 0 
-      }] };
-      
-      try {
-        gpsDeliveries = await pool.query(`
-          SELECT 
-            gd.id,
-            gd.customer_order_id as customerOrderId,
-            gd.latitude,
-            gd.longitude,
-            gd.accuracy,
-            gd.delivery_person_name as deliveryPersonName,
-            gd.delivery_person_phone as deliveryPersonPhone,
-            gd.address_matched as addressMatched,
-            gd.customer_address as customerAddress,
-            gd.detected_address as detectedAddress,
-            gd.distance_from_customer as distanceFromCustomer,
-            gd.country,
-            gd.city,
-            gd.region,
-            gd.verification_time as verificationTime,
-            gd.delivery_notes as deliveryNotes
-          FROM gps_delivery_confirmations gd
-          ORDER BY gd.verification_time DESC
-          LIMIT 100
-        `);
-
-        // Calculate GPS stats
-        gpsStats = await pool.query(`
-          SELECT 
-            COUNT(*) as totalDeliveries,
-            COUNT(CASE WHEN address_matched = true THEN 1 END) as successfulDeliveries,
-            AVG(CAST(accuracy AS FLOAT)) as averageAccuracy,
-            COUNT(DISTINCT country) as coverageCountries,
-            COUNT(DISTINCT city) as coverageCities,
-            COUNT(DISTINCT delivery_person_name) as uniqueDeliveryPersons
-          FROM gps_delivery_confirmations
-        `);
-      } catch (gpsError) {
-        console.log('GPS delivery table not available, using empty data:', gpsError.message);
-      }
-
-      res.json({
-        success: true,
-        data: {
-          geographic: geographicStats.rows,
-          gpsDeliveries: gpsDeliveries.rows,
-          gpsStats: gpsStats.rows[0] || {
-            totalDeliveries: 0,
-            successfulDeliveries: 0,
-            averageAccuracy: 0,
-            coverageCountries: 0,
-            coverageCities: 0,
-            uniqueDeliveryPersons: 0
-          }
-        }
-      });
-    } catch (error) {
-      console.error('Geographic Analytics Error:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Error fetching geographic analytics data'
-      });
-    }
-  });
-
-  // Product Analytics by Geography
-  app.get('/api/geographic-analytics/products', requireAuth, async (req, res) => {
-    try {
-      const { pool } = await import('./db');
-      
-      const productAnalytics = await pool.query(`
-        SELECT 
-          sp.name,
-          sp.category,
-          SUM(oi.quantity) as totalSales,
-          SUM(oi.total_price) as revenue,
-          CASE 
-            WHEN co.shipping_address LIKE '%بغداد%' OR co.shipping_address LIKE '%Baghdad%' THEN 'Baghdad'
-            WHEN co.shipping_address LIKE '%بصره%' OR co.shipping_address LIKE '%Basra%' THEN 'Basra'
-            WHEN co.shipping_address LIKE '%اربیل%' OR co.shipping_address LIKE '%Erbil%' THEN 'Erbil'
-            ELSE 'Other Cities'
-          END as region
-        FROM order_items oi
-        LEFT JOIN customer_orders co ON oi.order_id = co.id
-        LEFT JOIN shop_products sp ON oi.product_id = sp.id
-        WHERE co.status != 'cancelled'
-        GROUP BY sp.name, sp.category, region
-        ORDER BY revenue DESC
-        LIMIT 50
-      `);
-
-      res.json({
-        success: true,
-        data: productAnalytics.rows
-      });
-    } catch (error) {
-      console.error('Product Analytics Error:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Error fetching product analytics data'
-      });
-    }
-  });
-
-  // Time Series Analytics
-  app.get('/api/geographic-analytics/timeseries', requireAuth, async (req, res) => {
-    try {
-      const { pool } = await import('./db');
-      
-      const timeSeriesData = await pool.query(`
-        SELECT 
-          DATE(created_at) as date,
-          COUNT(*) as orders,
-          SUM(total_amount) as revenue,
-          CASE 
-            WHEN shipping_address LIKE '%بغداد%' OR shipping_address LIKE '%Baghdad%' THEN 'Baghdad'
-            WHEN shipping_address LIKE '%بصره%' OR shipping_address LIKE '%Basra%' THEN 'Basra'
-            WHEN shipping_address LIKE '%اربیل%' OR shipping_address LIKE '%Erbil%' THEN 'Erbil'
-            ELSE 'Others'
-          END as region
-        FROM customer_orders 
-        WHERE status != 'cancelled'
-          AND created_at >= NOW() - INTERVAL '30 days'
-        GROUP BY DATE(created_at), region
-        ORDER BY date DESC
-      `);
-
-      res.json({
-        success: true,
-        data: timeSeriesData.rows
-      });
-    } catch (error) {
-      console.error('Time Series Analytics Error:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Error fetching time series analytics data'
-      });
     }
   });
 
@@ -23091,26 +21400,7 @@ momtazchem.com
   });
 
   // Upload bank receipt
-  app.post('/api/payment/upload-receipt', (req, res, next) => {
-    // Check customer authentication first
-    console.log('🔐 [RECEIPT UPLOAD] Session check:', {
-      exists: !!req.session,
-      customerId: req.session?.customerId,
-      crmCustomerId: req.session?.crmCustomerId,
-      sessionID: req.sessionID
-    });
-    
-    if (!req.session?.customerId) {
-      console.log('❌ [RECEIPT UPLOAD] Authentication failed - no customerId in session');
-      return res.status(401).json({ 
-        success: false, 
-        message: 'احراز هویت مشتری ضروری است' 
-      });
-    }
-    
-    console.log('✅ [RECEIPT UPLOAD] Authentication successful for customer:', req.session.customerId);
-    next();
-  }, uploadReceipt.single('receipt'), async (req, res) => {
+  app.post('/api/payment/upload-receipt', uploadReceipt.single('receipt'), async (req, res) => {
     try {
       const { orderId } = req.body;
       const file = req.file;
@@ -26433,7 +24723,7 @@ momtazchem.com
 
       // Get order details with customer information first
       const { customerOrders } = await import("../shared/customer-schema");
-      const { crmCustomers } = await import("../shared/schema");
+      const { crmCustomers } = await import("../shared/crm-schema");
       
       const orderDetailsQuery = await db
         .select({
@@ -26510,51 +24800,18 @@ momtazchem.com
           deliveryCodeData = existingCode;
           console.log(`🔄 [WAREHOUSE] Reusing existing delivery code ${existingCode.verificationCode} for order ${orderId}`);
         } else {
-          // Use the original customer order number as delivery code instead of generating new one
+          // Generate new delivery code with proper customer details
           const customerName = `${order.customerFirstName || ''} ${order.customerLastName || ''}`.trim() || 'مشتری';
           const customerPhone = order.customerPhone || '09000000000';
           
-          // Get the original order number from customer_orders
-          const { customerOrders } = await import("../shared/customer-schema");
-          const [customerOrderData] = await db
-            .select({ orderNumber: customerOrders.orderNumber })
-            .from(customerOrders)
-            .where(eq(customerOrders.id, orderId))
-            .limit(1);
-            
-          if (!customerOrderData) {
-            throw new Error(`Customer order ${orderId} not found`);
-          }
-          
-          const originalOrderNumber = customerOrderData.orderNumber;
-          
-          // Create delivery verification record with original order number
-          deliveryCodeData = await logisticsStorage.createDeliveryVerificationCode({
-            customerOrderId: orderId,
-            verificationCode: originalOrderNumber, // Use original order number
+          deliveryCodeData = await logisticsStorage.generateVerificationCode(
+            orderId,
             customerPhone,
-            customerName,
-            smsMessage: `${customerName} عزیز، سفارش شما آماده ارسال است.
-شماره سفارش: ${originalOrderNumber}
-این شماره را هنگام تحویل به پیک اعلام کنید.
-ممتازکم - Momtazchem`,
-            expiresAt: new Date(Date.now() + 48 * 60 * 60 * 1000) // 48 hours
-          });
-          
+            customerName
+          );
           isNewCode = true;
-          console.log(`🆕 [WAREHOUSE] Using original order number ${originalOrderNumber} as delivery code for order ${orderId}, customer: ${customerName}`);
+          console.log(`🆕 [WAREHOUSE] Generated new delivery code ${deliveryCodeData.verificationCode} for order ${orderId}, customer: ${customerName}`);
         }
-
-        // CRITICAL: Update order_management table with original order number as delivery code AND move to logistics_dispatched
-        await db
-          .update(orderManagement)
-          .set({
-            deliveryCode: deliveryCodeData.verificationCode, // This is now the original order number
-            currentStatus: 'logistics_dispatched'
-          })
-          .where(eq(orderManagement.customerOrderId, orderId));
-
-        console.log(`💾 [WAREHOUSE] Original order number ${deliveryCodeData.verificationCode} saved as delivery code in order_management table and status updated to logistics_dispatched for order ${orderId}`);
 
         // Send SMS notification automatically with proper customer details
         try {
@@ -26563,7 +24820,7 @@ momtazchem.com
           
           const smsResult = await smsService.sendDeliveryVerificationSms(
             customerPhone,
-            deliveryCodeData.verificationCode, // This is now the original order number
+            deliveryCodeData.verificationCode,
             customerName,
             deliveryCodeData.id
           );
@@ -26596,73 +24853,6 @@ momtazchem.com
       res.status(500).json({
         success: false,
         message: "خطا در تایید انبار",
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  });
-
-  // Get sent orders from warehouse (orders that have been sent to logistics)
-  app.get("/api/warehouse/orders-sent", requireAuth, async (req: Request, res: Response) => {
-    try {
-      console.log("🔍 [WAREHOUSE] Fetching orders sent to logistics");
-      
-      // Get orders that have been sent to logistics by warehouse
-      const sentStatuses = [
-        'logistics_dispatched',
-        'logistics_delivered',
-        'completed'
-      ];
-      
-      const orders = await db
-        .select()
-        .from(orderManagement)
-        .leftJoin(customerOrders, eq(orderManagement.customerOrderId, customerOrders.id))
-        .leftJoin(crmCustomers, eq(customerOrders.customerId, crmCustomers.id))
-        .where(inArray(orderManagement.currentStatus, sentStatuses))
-        .orderBy(desc(orderManagement.warehouseProcessedAt));
-
-      console.log("📊 [WAREHOUSE] Retrieved", orders.length, "sent orders");
-
-      const formattedOrders = orders.map(order => ({
-        id: order.order_management.id,
-        customerOrderId: order.order_management.customerOrderId,
-        currentStatus: order.order_management.currentStatus,
-        createdAt: order.order_management.createdAt,
-        updatedAt: order.order_management.updatedAt,
-        totalAmount: order.customer_orders?.totalAmount || '0',
-        orderNumber: order.customer_orders?.orderNumber || '',
-        trackingNumber: order.customer_orders?.trackingNumber || '',
-        shippingAddress: order.customer_orders?.shippingAddress || {},
-        billingAddress: order.customer_orders?.billingAddress || {},
-        notes: order.customer_orders?.notes || '',
-        paymentMethod: order.customer_orders?.paymentMethod || '',
-        paymentStatus: order.customer_orders?.paymentStatus || '',
-        priority: order.customer_orders?.priority || '',
-        estimatedDelivery: order.customer_orders?.estimatedDelivery,
-        actualDelivery: order.customer_orders?.actualDelivery,
-        shippedAt: order.customer_orders?.shippedAt,
-        deliveredAt: order.customer_orders?.deliveredAt,
-        customerFirstName: order.crm_customers?.firstName || order.customer_orders?.guestName?.split(' ')[0] || '',
-        customerLastName: order.crm_customers?.lastName || order.customer_orders?.guestName?.split(' ').slice(1).join(' ') || '',
-        customerEmail: order.crm_customers?.email || order.customer_orders?.guestEmail || '',
-        customerPhone: order.crm_customers?.phone || '',
-        totalWeight: order.order_management.totalWeight,
-        weightUnit: order.order_management.weightUnit,
-        warehouseProcessedAt: order.order_management.warehouseProcessedAt,
-        warehouseNotes: order.order_management.warehouseNotes,
-        deliveryCode: order.order_management.deliveryCode,
-        actualDeliveryDate: order.order_management.actualDeliveryDate
-      }));
-
-      res.json({
-        success: true,
-        orders: formattedOrders
-      });
-    } catch (error) {
-      console.error("Error fetching sent orders:", error);
-      res.status(500).json({
-        success: false,
-        message: "Failed to fetch sent orders",
         error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
@@ -26767,51 +24957,60 @@ momtazchem.com
   // Logistics Department - Get orders approved by warehouse
   app.get("/api/logistics/orders", requireAuth, attachUserDepartments, requireDepartment('logistics'), async (req: Request, res: Response) => {
     try {
-      console.log('🚚 [LOGISTICS] Fetching logistics orders...');
-      
-      // Use order management storage for modern order handling
-      const orders = await orderManagementStorage.getOrdersByDepartment('logistics');
-      
-      // Calculate weight for each order
-      const ordersWithWeight = await Promise.all(
-        orders.map(async (order) => {
-          try {
-            // Calculate total weight for the order
-            const totalWeight = await orderManagementStorage.calculateOrderWeight(order.customerOrderId);
-            
-            return {
-              ...order,
-              totalWeight: totalWeight > 0 ? totalWeight.toString() : null,
-              weightUnit: totalWeight > 0 ? 'kg' : null,
-              // Add customer information for display
-              customer: {
-                firstName: order.customerFirstName,
-                lastName: order.customerLastName,
-                email: order.customerEmail,
-                phone: order.customerPhone
-              }
-            };
-          } catch (weightError) {
-            console.warn(`⚠️ [LOGISTICS] Could not calculate weight for order ${order.customerOrderId}:`, weightError);
-            return {
-              ...order,
-              totalWeight: null,
-              weightUnit: null,
-              customer: {
-                firstName: order.customerFirstName,
-                lastName: order.customerLastName,
-                email: order.customerEmail,
-                phone: order.customerPhone
-              }
-            };
-          }
+      const { db } = await import("./db");
+      const { orderManagement } = await import("../shared/order-management-schema");
+      const { customerOrders } = await import("../shared/customer-schema");
+      const { orderItems } = await import("../shared/shop-schema");
+      const { crmCustomers } = await import("../shared/schema");
+      const { eq, inArray } = await import("drizzle-orm");
+
+      // Get orders approved by warehouse, pending logistics processing
+      const orders = await db
+        .select({
+          id: orderManagement.id,
+          customerOrderId: orderManagement.customerOrderId,
+          currentStatus: orderManagement.currentStatus,
+          warehouseNotes: orderManagement.warehouseNotes,
+          warehouseProcessedAt: orderManagement.warehouseProcessedAt,
+          logisticsNotes: orderManagement.logisticsNotes,
+          logisticsProcessedAt: orderManagement.logisticsProcessedAt,
+          deliveryCode: orderManagement.deliveryCode,
+          trackingNumber: orderManagement.trackingNumber,
+          deliveryPersonName: orderManagement.deliveryPersonName,
+          deliveryPersonPhone: orderManagement.deliveryPersonPhone,
+          estimatedDeliveryDate: orderManagement.estimatedDeliveryDate,
+          createdAt: orderManagement.createdAt,
+          orderTotal: customerOrders.total,
+          orderDate: customerOrders.createdAt,
+          customerName: crmCustomers.firstName,
+          customerLastName: crmCustomers.lastName,
+          customerEmail: crmCustomers.email,
+          customerPhone: crmCustomers.phone,
+          customerAddress: crmCustomers.address,
         })
-      );
-      
-      console.log('🚚 [LOGISTICS] Found orders with weights:', ordersWithWeight.length);
-      res.json({ success: true, orders: ordersWithWeight });
+        .from(orderManagement)
+        .innerJoin(customerOrders, eq(orderManagement.customerOrderId, customerOrders.id))
+        .innerJoin(crmCustomers, eq(customerOrders.customerId, crmCustomers.id))
+        .where(eq(orderManagement.currentStatus, 'warehouse_approved'))
+        .orderBy(orderManagement.warehouseProcessedAt); // Oldest warehouse-approved first
+
+      // Get order items for each order
+      const ordersWithItems = await Promise.all(orders.map(async (order) => {
+        const items = await db
+          .select()
+          .from(orderItems)
+          .where(eq(orderItems.orderId, order.customerOrderId));
+
+        return {
+          ...order,
+          customerName: `${order.customerName} ${order.customerLastName}`,
+          orderItems: items
+        };
+      }));
+
+      res.json({ success: true, orders: ordersWithItems });
     } catch (error) {
-      console.error("❌ [LOGISTICS] Error fetching logistics orders:", error);
+      console.error("Error fetching logistics orders:", error);
       res.status(500).json({
         success: false,
         message: "خطا در دریافت سفارشات لجستیک",
@@ -26831,37 +25030,8 @@ momtazchem.com
       const { notes, trackingNumber, deliveryPersonName, deliveryPersonPhone, estimatedDeliveryDate } = req.body;
       const adminId = req.session.adminId;
 
-      // Generate sequential 4-digit delivery code using logistics storage
-      const { logisticsStorage } = await import('./logistics-storage');
-      let deliveryCode: string;
-      
-      try {
-        // Get customer phone for delivery code generation
-        const { crmCustomers } = await import("../shared/schema");
-        const { customerOrders } = await import("../shared/customer-schema");
-        
-        const orderDetails = await db
-          .select({
-            customerPhone: crmCustomers.phone
-          })
-          .from(orderManagement)
-          .innerJoin(customerOrders, eq(orderManagement.customerOrderId, customerOrders.id))
-          .innerJoin(crmCustomers, eq(customerOrders.customerId, crmCustomers.id))
-          .where(eq(orderManagement.customerOrderId, orderId))
-          .limit(1);
-
-        if (orderDetails[0]?.customerPhone) {
-          deliveryCode = await logisticsStorage.generateSequentialDeliveryCode(orderId, orderDetails[0].customerPhone);
-          console.log('✅ [SEQUENTIAL CODE] Generated delivery code with SMS:', deliveryCode);
-        } else {
-          // Sequential code without SMS notification
-          deliveryCode = await logisticsStorage.getNextSequentialCode();
-          console.log('✅ [SEQUENTIAL CODE] Generated delivery code (no SMS):', deliveryCode);
-        }
-      } catch (error) {
-        console.error('❌ [SEQUENTIAL CODE] Error generating sequential code:', error);
-        throw error; // Don't use random fallback, throw error instead
-      }
+      // Generate unique 4-digit delivery code
+      const deliveryCode = Math.floor(1000 + Math.random() * 9000).toString();
 
       // Update order status to logistics_dispatched
       await db
@@ -28999,113 +27169,6 @@ momtazchem.com
   });
 
   // =============================================================================
-  // LOW STOCK INVENTORY ALERTS - هشدارهای موجودی کم
-  // =============================================================================
-  
-  // Get products with low stock levels from کاردکس (showcase_products)
-  app.get("/api/inventory/low-stock", async (req, res) => {
-    try {
-      // Use storage instead of direct database query
-      const showcaseProducts = await storage.getProducts();
-      
-      const lowStockProducts = showcaseProducts
-        .filter(product => {
-          const currentStock = product.stockQuantity || 0;
-          const minimumStock = product.minStockLevel || 5;
-          return currentStock < minimumStock && minimumStock > 0;
-        })
-        .map(product => {
-          const currentStock = product.stockQuantity || 0;
-          const minimumStock = product.minStockLevel || 5;
-          
-          return {
-            id: product.id,
-            name: product.name,
-            stockQuantity: currentStock,
-            minimumStock: minimumStock,
-            difference: minimumStock - currentStock,
-            category: product.category || '',
-            sku: product.sku || ''
-          };
-        })
-        .sort((a, b) => b.difference - a.difference || a.name.localeCompare(b.name));
-
-      console.log(`📦 [LOW-STOCK] Found ${lowStockProducts.length} products below minimum level from کاردکس`);
-
-      res.json({
-        success: true,
-        data: {
-          products: lowStockProducts,
-          totalCount: lowStockProducts.length,
-          timestamp: new Date().toISOString()
-        }
-      });
-    } catch (error) {
-      console.error("Error fetching low stock products from کاردکس:", error);
-      res.status(500).json({ 
-        success: false, 
-        message: "خطا در دریافت کالاهای کم‌موجود از کاردکس" 
-      });
-    }
-  });
-
-  // Update minimum stock for a specific product
-  app.put("/api/shop/products/:id/minimum-stock", async (req, res) => {
-    try {
-      const productId = parseInt(req.params.id);
-      const { minimumStock } = req.body;
-
-      if (isNaN(productId)) {
-        return res.status(400).json({ success: false, message: "شناسه محصول نامعتبر است" });
-      }
-
-      if (typeof minimumStock !== 'number' || minimumStock < 0) {
-        return res.status(400).json({ 
-          success: false, 
-          message: "حد مینیمم موجودی باید عددی صفر یا مثبت باشد" 
-        });
-      }
-
-      const { pool } = await import('./db');
-
-      // Check if product exists
-      const productCheck = await pool.query(`
-        SELECT id, name FROM shop_products WHERE id = $1
-      `, [productId]);
-
-      if (productCheck.rows.length === 0) {
-        return res.status(404).json({ 
-          success: false, 
-          message: "محصول یافت نشد" 
-        });
-      }
-
-      // Update minimum stock
-      await pool.query(`
-        UPDATE shop_products 
-        SET minimum_stock = $1, updated_at = CURRENT_TIMESTAMP
-        WHERE id = $2
-      `, [minimumStock, productId]);
-
-      res.json({
-        success: true,
-        message: `حد مینیمم موجودی محصول "${productCheck.rows[0].name}" به ${minimumStock} واحد تغییر یافت`,
-        data: {
-          productId: productId,
-          productName: productCheck.rows[0].name,
-          newMinimumStock: minimumStock
-        }
-      });
-    } catch (error) {
-      console.error("Error updating minimum stock:", error);
-      res.status(500).json({ 
-        success: false, 
-        message: "خطا در تغییر حد مینیمم موجودی" 
-      });
-    }
-  });
-
-  // =============================================================================
   // PRODUCT REVIEWS & RATINGS ENDPOINTS - نظرسنجی و امتیازدهی محصولات
   // =============================================================================
 
@@ -29213,28 +27276,13 @@ momtazchem.com
       }
 
       // Check if user is authenticated
-      const customerId = (req.session as any)?.customerId || (req.session as any)?.crmCustomerId;
-      console.log('🌟 [REVIEW AUTH] Full session debug:', { 
-        sessionId: req.sessionID,
-        session: req.session,
-        customerId: (req.session as any)?.customerId,
-        crmCustomerId: (req.session as any)?.crmCustomerId,
-        finalCustomerId: customerId,
-        hasSession: !!req.session,
-        sessionKeys: Object.keys(req.session || {}),
-        userAgent: req.get('User-Agent'),
-        cookies: req.headers.cookie
-      });
-      
+      const customerId = req.session.customerId;
       if (!customerId) {
-        console.log('❌ [REVIEW AUTH] Authentication failed - no customer ID in session');
         return res.status(401).json({ 
           success: false, 
           message: "برای ثبت نظر ابتدا وارد حساب کاربری خود شوید" 
         });
       }
-      
-      console.log('✅ [REVIEW AUTH] Authentication successful for customer:', customerId);
 
       const { rating, title, review, comment, pros, cons } = req.body;
       
@@ -29245,10 +27293,9 @@ momtazchem.com
       if (!rating || rating < 1 || rating > 5) {
         return res.status(400).json({ success: false, message: "امتیاز باید بین 1 تا 5 باشد" });
       }
-      // Comment is now optional - user can submit rating only
-      // if (!reviewText || reviewText.trim().length === 0) {
-      //   return res.status(400).json({ success: false, message: "متن نظر الزامی است" });
-      // }
+      if (!reviewText || reviewText.trim().length === 0) {
+        return res.status(400).json({ success: false, message: "متن نظر الزامی است" });
+      }
 
       const { pool } = await import('./db');
       
@@ -31823,59 +29870,6 @@ momtazchem.com
     }
   });
 
-  // Test endpoint for order number generation
-  app.get("/api/test/order-number", async (req, res) => {
-    try {
-      const { generateOrderNumber } = await import('./order-number-generator');
-      const orderNumber1 = await generateOrderNumber();
-      const orderNumber2 = await generateOrderNumber();
-      const orderNumber3 = await generateOrderNumber();
-      
-      res.json({
-        success: true,
-        orderNumbers: [orderNumber1, orderNumber2, orderNumber3],
-        format: "MOM + 2-digit year + 5-digit sequential number",
-        message: "Order numbers generated successfully"
-      });
-    } catch (error) {
-      console.error('Order number generation test failed:', error);
-      res.status(500).json({
-        success: false,
-        message: "Failed to generate order numbers",
-        error: error instanceof Error ? error.message : "Unknown error"
-      });
-    }
-  });
-
-  // Test endpoint for checking recent orders format
-  app.get("/api/test/recent-orders", async (req, res) => {
-    try {
-      const recentOrders = await customerDb
-        .select({
-          id: customerOrders.id,
-          orderNumber: customerOrders.orderNumber,
-          totalAmount: customerOrders.totalAmount,
-          createdAt: customerOrders.createdAt
-        })
-        .from(customerOrders)
-        .orderBy(desc(customerOrders.createdAt))
-        .limit(10);
-      
-      res.json({
-        success: true,
-        orders: recentOrders,
-        message: `Found ${recentOrders.length} recent orders`
-      });
-    } catch (error) {
-      console.error('Recent orders test failed:', error);
-      res.status(500).json({
-        success: false,
-        message: "Failed to get recent orders",
-        error: error instanceof Error ? error.message : "Unknown error"
-      });
-    }
-  });
-
   // Catch-all for unmatched API routes - return JSON 404
   app.all('/api/*', (req, res) => {
     console.log(`❌ 404 - Unmatched API route: ${req.method} ${req.originalUrl}`);
@@ -31983,31 +29977,6 @@ momtazchem.com
     } catch (error) {
       console.error('Error deleting email template:', error);
       res.status(500).json({ success: false, message: 'خطا در حذف قالب ایمیل' });
-    }
-  });
-
-  // Test delivered orders sorting
-  app.get('/api/test/delivered-order-sorting', async (req, res) => {
-    try {
-      // Simulate delivered orders query
-      const deliveredOrders = await orderManagementStorage.getOrdersByDepartment('logistics', ['logistics_delivered', 'completed']);
-      
-      const result = deliveredOrders.map(order => ({
-        id: order.id,
-        customerOrderId: order.customerOrderId,
-        actualDeliveryDate: order.actualDeliveryDate,
-        customerName: `${order.customerFirstName} ${order.customerLastName}`.trim()
-      }));
-      
-      res.json({
-        success: true,
-        message: `Found ${result.length} delivered orders`,
-        orders: result,
-        sortingNote: "Orders should be sorted by actualDeliveryDate DESC (newest first)"
-      });
-    } catch (error) {
-      console.error('Test sorting error:', error);
-      res.status(500).json({ success: false, message: 'Test failed' });
     }
   });
 

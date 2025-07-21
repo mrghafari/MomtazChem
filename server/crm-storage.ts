@@ -309,9 +309,9 @@ export class CrmStorage implements ICrmStorage {
       await this.logCustomerActivity({
         customerId: customer.id,
         activityType: "order_placed",
-        description: `Order placed for $${orderData.orderValue?.toFixed(2) || '0.00'}`,
+        description: `Order placed for $${orderData.orderValue.toFixed(2)}`,
         performedBy: "system",
-        activityData: { orderValue: orderData.orderValue || 0, orderCount: newTotalOrders }
+        activityData: { orderValue: orderData.orderValue, orderCount: newTotalOrders }
       });
       
     } else {
@@ -341,7 +341,7 @@ export class CrmStorage implements ICrmStorage {
       await this.logCustomerActivity({
         customerId: customer.id,
         activityType: "first_order",
-        description: `First order placed for $${orderData.orderValue?.toFixed(2) || '0.00'}`,
+        description: `First order placed for $${orderData.orderValue.toFixed(2)}`,
         performedBy: "system",
         activityData: { orderValue: orderData.orderValue, isFirstOrder: true }
       });

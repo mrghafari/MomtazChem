@@ -360,22 +360,6 @@ export class SmsService {
     return await this.sendSms(message);
   }
 
-  async sendDeliveryCode(phone: string, deliveryCode: string, customerName: string): Promise<{ success: boolean; messageId?: string; error?: string }> {
-    const message = {
-      to: phone,
-      message: `سلام ${customerName} عزیز، سفارش شما آماده تحویل است. کد تحویل: ${deliveryCode} - شرکت مُمتاز کِم`,
-      code: deliveryCode
-    };
-
-    console.log('📱 [SMS-DELIVERY] Sending delivery code SMS:', {
-      phone: phone,
-      deliveryCode: deliveryCode,
-      customerName: customerName
-    });
-
-    return await this.sendSms(message);
-  }
-
   async testConnection(): Promise<{ success: boolean; error?: string }> {
     try {
       const testResult = await this.sendSms({

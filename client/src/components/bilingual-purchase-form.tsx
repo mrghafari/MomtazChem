@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { MapPin, Globe, X, ShoppingCart, Plus, Minus, Trash2, Wallet, CreditCard, Upload, Clock, Building } from "lucide-react";
+import { MapPin, Globe, X, ShoppingCart, Plus, Minus, Trash2, Wallet, CreditCard, Upload, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -216,10 +216,9 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const { language, direction } = useLanguage();
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [locationData, setLocationData] = useState<{latitude: number, longitude: number} | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<'online_payment' | 'wallet_full' | 'wallet_partial' | 'bank_payment_id' | 'bank_receipt' | 'bank_transfer_grace'>('online_payment');
+  const [paymentMethod, setPaymentMethod] = useState<'online_payment' | 'wallet_full' | 'wallet_partial' | 'bank_receipt'>('online_payment');
   const [walletAmount, setWalletAmount] = useState<number>(0);
   const [selectedReceiptFile, setSelectedReceiptFile] = useState<File | null>(null);
-  const [bankPaymentId, setBankPaymentId] = useState<string>('');
   const [selectedShippingMethod, setSelectedShippingMethod] = useState<number | null>(null);
   const [shippingCost, setShippingCost] = useState<number>(0);
 
@@ -704,14 +703,6 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         });
         onOrderComplete();
       }
-      // Handle bank payment ID
-      else if (paymentMethod === 'bank_payment_id') {
-        toast({
-          title: "✅ سفارش با شناسه بانکی ثبت شد",
-          description: `سفارش شما با شناسه پرداخت ${bankPaymentId} ثبت شد و در انتظار تایید مالی است`
-        });
-        onOrderComplete();
-      }
       else {
         toast({
           title: t.orderSubmitted,
@@ -737,18 +728,6 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         variant: "destructive"
       });
       return;
-    }
-
-    // Validate bank payment ID if selected
-    if (paymentMethod === 'bank_payment_id') {
-      if (!bankPaymentId || bankPaymentId.trim().length < 3) {
-        toast({
-          title: "شناسه پرداخت بانکی الزامی است",
-          description: "لطفاً شناسه پرداخت بانکی را وارد کنید",
-          variant: "destructive"
-        });
-        return;
-      }
     }
 
     let orderData = {
@@ -785,11 +764,6 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       orderData.walletAmountUsed = 0;
       orderData.remainingAmount = totalAmount;
       orderData.paymentGracePeriod = true; // Flag for 3-day grace period
-    } else if (paymentMethod === 'bank_payment_id') {
-      orderData.walletAmountUsed = 0;
-      orderData.remainingAmount = totalAmount;
-      orderData.bankPaymentId = bankPaymentId;
-      orderData.paymentNote = `شناسه پرداخت بانکی: ${bankPaymentId}`;
     }
 
     console.log('🚀 [ORDER SUBMIT] Submitting order with complete data:', {
@@ -1072,16 +1046,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                   </div>
                 )}
                 
-                {/* چهارم: پرداخت با شناسه بانکی */}
-                <div className="flex items-center space-x-2 space-x-reverse">
-                  <RadioGroupItem value="bank_payment_id" id="bank_payment_id" />
-                  <Label htmlFor="bank_payment_id" className="flex items-center gap-2 cursor-pointer">
-                    <Building className="w-4 h-4 text-indigo-600" />
-                    پرداخت با شناسه بانکی
-                  </Label>
-                </div>
-
-                {/* پنجم: ارسال فیش واریزی بانکی */}
+                {/* چهارم: ارسال فیش واریزی بانکی */}
                 <div className="flex items-center space-x-2 space-x-reverse">
                   <RadioGroupItem 
                     value="bank_receipt" 
@@ -1193,25 +1158,6 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                   />
                   <div className="text-sm text-muted-foreground">
                     مبلغ باقیمانده (آنلاین): {formatCurrency(totalAmount - walletAmount)}
-                  </div>
-                </div>
-              )}
-
-              {/* Bank Payment ID Input */}
-              {paymentMethod === 'bank_payment_id' && (
-                <div className="space-y-2">
-                  <Label htmlFor="bankPaymentId">شناسه پرداخت بانکی</Label>
-                  <Input
-                    id="bankPaymentId"
-                    type="text"
-                    value={bankPaymentId || ''}
-                    onChange={(e) => setBankPaymentId(e.target.value)}
-                    placeholder="شناسه پرداخت را وارد کنید"
-                    className="text-right font-mono"
-                    dir="rtl"
-                  />
-                  <div className="text-sm text-muted-foreground bg-blue-50 p-2 rounded border">
-                    💡 شناسه پرداخت بانکی را که از بانک خود دریافت کرده‌اید وارد کنید. این شناسه معمولاً در فیش واریزی یا پیامک بانک موجود است.
                   </div>
                 </div>
               )}

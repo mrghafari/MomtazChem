@@ -143,15 +143,6 @@ export interface IOrderManagementStorage {
 export class OrderManagementStorage implements IOrderManagementStorage {
   
   async createOrderManagement(orderData: InsertOrderManagement): Promise<OrderManagement> {
-    // Check if order_management already exists for this customer_order_id
-    if (orderData.customerOrderId) {
-      const existing = await this.getOrderManagementByCustomerOrderId(orderData.customerOrderId);
-      if (existing) {
-        console.log('⚠️ [DUPLICATE-PREVENTION] Order management already exists for customer order:', orderData.customerOrderId);
-        return existing;
-      }
-    }
-
     const [order] = await db
       .insert(orderManagement)
       .values(orderData)
@@ -160,7 +151,6 @@ export class OrderManagementStorage implements IOrderManagementStorage {
     // Log initial status
     await this.logStatusChange(order.id, null, order.currentStatus as OrderStatus, null, null);
     
-    console.log('✅ [ORDER-MANAGEMENT] Created new order management record:', order.id, 'for customer order:', orderData.customerOrderId);
     return order;
   }
   
@@ -438,17 +428,9 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       deliveryCompanyName: orderManagement.deliveryCompanyName,
       deliveryCompanyPhone: orderManagement.deliveryCompanyPhone,
       
-      // Customer Order fields - مبلغ و کارنسی و شماره سفارش
+      // Customer Order fields - مبلغ و کارنسی
       totalAmount: customerOrders.totalAmount,
       currency: customerOrders.currency,
-      orderNumber: customerOrders.orderNumber, // شماره سفارش MOM از customer_orders
-      
-      // Shipping and delivery address from customer order
-      shippingAddress: customerOrders.shippingAddress,
-      recipientName: customerOrders.recipientName,
-      recipientPhone: customerOrders.recipientPhone,
-      recipientAddress: customerOrders.recipientAddress,
-      deliveryNotes: customerOrders.deliveryNotes,
       
       // Customer info
       customerFirstName: crmCustomers.firstName,
@@ -493,28 +475,17 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       console.log('🔍 [WAREHOUSE] Searching for orders with statuses:', warehouseStatuses);
       query = query.where(inArray(orderManagement.currentStatus, warehouseStatuses));
     } else if (department === 'logistics') {
-      // لجستیک تمام سفارشات از تایید انبار تا تحویل نهایی را می‌بیند
+      // لجستیک فقط سفارشات تایید شده انبار را می‌بیند
       const logisticsStatuses = statuses || [
         orderStatuses.WAREHOUSE_APPROVED, // تایید شده توسط انبار
         orderStatuses.LOGISTICS_ASSIGNED,
         orderStatuses.LOGISTICS_PROCESSING,
-        orderStatuses.LOGISTICS_DISPATCHED,
-        orderStatuses.LOGISTICS_DELIVERED, // تحویل شده - برای تب "تحویل داده شده"
-        orderStatuses.COMPLETED // کامل شده - برای تب "تحویل داده شده"
+        orderStatuses.LOGISTICS_DISPATCHED
       ];
       query = query.where(inArray(orderManagement.currentStatus, logisticsStatuses));
     }
     
-    // ترتیب نمایش بر اساس نوع سفارشات
-    let results;
-    if (department === 'logistics' && statuses && 
-        (statuses.includes('logistics_delivered') || statuses.includes('completed'))) {
-      // برای تحویل شده‌ها: جدیدترین تحویل اول (بر اساس تاریخ تحویل واقعی)
-      results = await query.orderBy(desc(orderManagement.actualDeliveryDate));
-    } else {
-      // برای بقیه: قدیمی‌ترها اول (بر اساس تاریخ ایجاد)
-      results = await query.orderBy(asc(orderManagement.createdAt));
-    }
+    const results = await query.orderBy(desc(orderManagement.createdAt));
     
     console.log('📊 [DEPARTMENT] Retrieved', results.length, 'orders for department:', department);
     if (results.length > 0) {
@@ -525,38 +496,6 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       console.log('📊 [DEPARTMENT] Total orders in order_management table:', basicCount[0]);
     }
     
-    // Calculate missing weights for orders that don't have totalWeight
-    const resultsWithWeight = await Promise.all(results.map(async (row) => {
-      let totalWeight = row.totalWeight;
-      
-      // If totalWeight is missing, calculate it using gross weight
-      if (!totalWeight || parseFloat(totalWeight.toString()) === 0) {
-        console.log(`🔍 [WEIGHT CALC] Missing weight for order ${row.customerOrderId}, calculating...`);
-        try {
-          const calculatedWeight = await this.calculateOrderWeight(row.customerOrderId);
-          if (calculatedWeight > 0) {
-            totalWeight = calculatedWeight.toString();
-            
-            // Update the database with calculated weight
-            await db
-              .update(orderManagement)
-              .set({
-                totalWeight: calculatedWeight.toString(),
-                weightUnit: 'kg',
-                updatedAt: new Date()
-              })
-              .where(eq(orderManagement.customerOrderId, row.customerOrderId));
-            
-            console.log(`✅ [WEIGHT CALC] Updated order ${row.customerOrderId} with weight: ${calculatedWeight} kg`);
-          }
-        } catch (error) {
-          console.error(`❌ [WEIGHT CALC] Failed to calculate weight for order ${row.customerOrderId}:`, error);
-        }
-      }
-      
-      return row;
-    }));
-    
     // Transform results to include customer info and receipt info in nested structure
     return results.map(row => ({
       id: row.id,
@@ -565,9 +504,8 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       deliveryCode: row.deliveryCode,
       totalAmount: row.totalAmount,
       currency: row.currency,
-      orderNumber: row.orderNumber, // شماره سفارش MOM format
       
-      // Weight and delivery information - use updated totalWeight if calculated
+      // Weight and delivery information
       totalWeight: row.totalWeight,
       weightUnit: row.weightUnit,
       deliveryMethod: row.deliveryMethod,
@@ -594,19 +532,6 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       paymentReceiptUrl: row.paymentReceiptUrl || row.receiptUrl, // Use receipt from payment_receipts if available
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
-      
-      // Shipping and delivery address information from customer order
-      shippingAddress: row.shippingAddress,
-      recipientName: row.recipientName,
-      recipientPhone: row.recipientPhone,
-      recipientAddress: row.recipientAddress,
-      deliveryNotes: row.deliveryNotes,
-      customerAddress: row.recipientAddress || (row.shippingAddress ? 
-        (typeof row.shippingAddress === 'object' ? 
-          `${row.shippingAddress.address || ''}, ${row.shippingAddress.city || ''}, ${row.shippingAddress.country || ''}`.trim().replace(/^,|,$/g, '') 
-          : row.shippingAddress) 
-        : 'آدرس ثبت نشده'),
-      
       customer: {
         firstName: row.customerFirstName,
         lastName: row.customerLastName,
@@ -674,10 +599,9 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       deliveryCompanyName: orderManagement.deliveryCompanyName,
       deliveryCompanyPhone: orderManagement.deliveryCompanyPhone,
       
-      // Customer Order fields  
+      // Customer Order fields
       totalAmount: customerOrders.totalAmount,
       currency: customerOrders.currency,
-      orderNumber: customerOrders.orderNumber, // شماره سفارش MOM از customer_orders
       
       // Customer info
       customerFirstName: crmCustomers.firstName,
@@ -707,7 +631,6 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       deliveryCode: row.deliveryCode,
       totalAmount: row.totalAmount,
       currency: row.currency,
-      orderNumber: row.orderNumber,
       
       // Weight and delivery information
       totalWeight: row.totalWeight,
@@ -932,65 +855,45 @@ export class OrderManagementStorage implements IOrderManagementStorage {
     }
   }
 
-  async sendDeliveryCodeNotifications(customerPhone: string, customerEmail: string, deliveryCode: string, customerOrderId: number, customerName: string): Promise<{ sms: boolean; email: boolean }> {
-    const results = { sms: false, email: false };
-    
+  async sendDeliveryCodeSms(customerPhone: string, deliveryCode: string, customerOrderId: number): Promise<boolean> {
     try {
-      // Send SMS
-      const smsMessage = `کد تحویل سفارش شما: ${deliveryCode}\nشماره سفارش: ${customerOrderId}\nشرکت ممتاز شیمی`;
-      console.log(`📱 [SMS MOCK] Delivery code ${deliveryCode} sent to ${customerPhone}`);
-      console.log(`📱 [SMS MOCK] Message: ${smsMessage}`);
-      results.sms = true;
+      const { SmsService } = await import('./sms-service');
+      const smsService = new SmsService();
       
-      // Send Email
-      results.email = await this.sendDeliveryCodeEmail(customerEmail, deliveryCode, customerOrderId, customerName);
+      // Try to get SMS template from database for delivery verification
+      let message = `کد تحویل سفارش شما: ${deliveryCode}\nشماره سفارش: ${customerOrderId}\nشرکت ممتاز شیمی`;
       
-      return results;
-    } catch (error) {
-      console.error('❌ [NOTIFICATIONS] Error sending delivery code notifications:', error);
-      return results;
-    }
-  }
-
-  async sendDeliveryCodeEmail(customerEmail: string, deliveryCode: string, customerOrderId: number, customerName: string): Promise<boolean> {
-    try {
-      const { MailService } = await import('@sendgrid/mail');
-      
-      if (!process.env.SENDGRID_API_KEY) {
-        console.log('⚠️ [EMAIL] SendGrid API key not found, using mock email sending');
-        console.log(`📧 [EMAIL MOCK] Delivery code ${deliveryCode} would be sent to ${customerEmail}`);
-        return true;
+      try {
+        const { pool } = await import('./db');
+        const templateResult = await pool.query(`
+          SELECT message_template FROM sms_templates 
+          WHERE template_type = 'delivery_verification' 
+          AND is_active = true 
+          LIMIT 1
+        `);
+        
+        if (templateResult.rows.length > 0) {
+          const template = templateResult.rows[0].message_template;
+          // Replace template variables
+          message = template
+            .replace(/\{delivery_code\}/g, deliveryCode)
+            .replace(/\{order_id\}/g, customerOrderId.toString())
+            .replace(/\{customer_phone\}/g, customerPhone);
+          
+          console.log(`📝 [SMS TEMPLATE] Using database template for delivery code`);
+        } else {
+          console.log(`📝 [SMS TEMPLATE] No template found, using default message`);
+        }
+      } catch (templateError) {
+        console.log(`⚠️ [SMS TEMPLATE] Error fetching template, using default:`, templateError.message);
       }
-
-      const mailService = new MailService();
-      mailService.setApiKey(process.env.SENDGRID_API_KEY);
-
-      const emailContent = `
-        <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right;">
-          <h2 style="color: #2563eb;">کد تحویل سفارش شما</h2>
-          <p>سلام ${customerName} عزیز،</p>
-          <p>کد تحویل سفارش شما آماده است:</p>
-          <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="color: #059669; text-align: center; font-size: 24px;">${deliveryCode}</h3>
-          </div>
-          <p><strong>شماره سفارش:</strong> ${customerOrderId}</p>
-          <p>لطفاً این کد را هنگام تحویل کالا به مسئول تحویل ارائه دهید.</p>
-          <hr style="margin: 30px 0;">
-          <p style="color: #6b7280; font-size: 14px;">با تشکر،<br>تیم شرکت ممتاز شیمی</p>
-        </div>
-      `;
-
-      await mailService.send({
-        to: customerEmail,
-        from: 'noreply@momtazchem.com',
-        subject: `کد تحویل سفارش ${customerOrderId} - شرکت ممتاز شیمی`,
-        html: emailContent,
-      });
-
-      console.log(`📧 [EMAIL] Delivery code ${deliveryCode} sent to ${customerEmail}`);
-      return true;
+      
+      const result = await smsService.sendSms(customerPhone, message);
+      console.log(`📱 [SMS] Delivery code ${deliveryCode} sent to ${customerPhone}:`, result);
+      
+      return result.success;
     } catch (error) {
-      console.error('❌ [EMAIL] Error sending delivery code email:', error);
+      console.error('❌ [SMS] Error sending delivery code:', error);
       return false;
     }
   }
@@ -1234,8 +1137,6 @@ export class OrderManagementStorage implements IOrderManagementStorage {
   async updateDeliveryInfo(orderId: number, deliveryData: {
     trackingNumber?: string;
     estimatedDeliveryDate?: string;
-    actualDeliveryDate?: string;
-    deliveryStatus?: string;
     deliveryPersonName?: string;
     deliveryPersonPhone?: string;
     deliveryMethod?: string;
@@ -1259,7 +1160,6 @@ export class OrderManagementStorage implements IOrderManagementStorage {
     const updateData: Partial<OrderManagement> = {
       ...deliveryData,
       estimatedDeliveryDate: deliveryData.estimatedDeliveryDate ? new Date(deliveryData.estimatedDeliveryDate) : undefined,
-      actualDeliveryDate: deliveryData.actualDeliveryDate ? new Date(deliveryData.actualDeliveryDate) : undefined,
       postalWeight: deliveryData.postalWeight ? deliveryData.postalWeight : undefined,
       postalPrice: deliveryData.postalPrice ? deliveryData.postalPrice : undefined,
       updatedAt: new Date(),
