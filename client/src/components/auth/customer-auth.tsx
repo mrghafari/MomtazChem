@@ -76,19 +76,24 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
   const [selectedProvince, setSelectedProvince] = useState("");
 
   // Fetch provinces
-  const { data: provinces = [] } = useQuery({
+  const { data: provincesResponse } = useQuery({
     queryKey: ["/api/logistics/provinces"],
     enabled: true,
   });
+  
+  const provinces = (provincesResponse as any)?.data || [];
 
   // Find selected province ID 
   const selectedProvinceData = Array.isArray(provinces) ? provinces.find((p: any) => p.nameEnglish === selectedProvince) : null;
   
   // Fetch cities based on selected province
-  const { data: cities = [] } = useQuery({
+  const { data: citiesResponse } = useQuery({
     queryKey: ["/api/logistics/cities", selectedProvinceData?.id],
+    queryFn: () => fetch(`/api/logistics/cities?provinceId=${selectedProvinceData?.id}`).then(res => res.json()),
     enabled: !!selectedProvinceData?.id,
   });
+  
+  const cities = (citiesResponse as any)?.data || [];
 
   const loginForm = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
@@ -186,7 +191,7 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
       
       // Completely suppress authentication errors - they are handled by response checking
       // Only show actual network connection errors
-      if (error && typeof error === 'object' && error.name === 'TypeError' && error.message?.includes('fetch')) {
+      if (error && typeof error === 'object' && (error as any).name === 'TypeError' && (error as any).message?.includes('fetch')) {
         toast({
           variant: "destructive",
           title: "خطای شبکه",
@@ -289,7 +294,7 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
     } catch (error) {
       // Suppress registration errors - they are handled by response checking
       // Only show actual network connection errors
-      if (error && typeof error === 'object' && error.name === 'TypeError' && error.message?.includes('fetch')) {
+      if (error && typeof error === 'object' && (error as any).name === 'TypeError' && (error as any).message?.includes('fetch')) {
         toast({
           variant: "destructive",
           title: "Network Error",
