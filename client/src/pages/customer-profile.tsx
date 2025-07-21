@@ -79,10 +79,10 @@ const CustomerProfile = () => {
         <Card className="w-full max-w-md">
           <CardContent className="pt-6 text-center">
             <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">خطا در دریافت اطلاعات</h2>
-            <p className="text-gray-600 mb-4">لطفاً دوباره وارد شوید</p>
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">{t.error}</h2>
+            <p className="text-gray-600 mb-4">{t.loginToAccessWallet}</p>
             <Button onClick={() => setLocation("/customer/auth")}>
-              ورود مجدد
+              {t.goToLogin}
             </Button>
           </CardContent>
         </Card>
@@ -100,10 +100,10 @@ const CustomerProfile = () => {
         <Card className="w-full max-w-md">
           <CardContent className="pt-6 text-center">
             <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">لطفاً ابتدا وارد شوید</h2>
-            <p className="text-gray-600 mb-4">برای مشاهده پروفایل، ابتدا باید وارد حساب کاربری خود شوید</p>
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">{t.unauthorized}</h2>
+            <p className="text-gray-600 mb-4">{t.unauthorizedDesc}</p>
             <Button onClick={() => setLocation("/customer/auth")}>
-              ورود به حساب کاربری
+              {t.login}
             </Button>
           </CardContent>
         </Card>
@@ -156,7 +156,7 @@ const CustomerProfile = () => {
           <div>
             <div className="mb-4">
               <h1 className="text-3xl font-bold text-gray-900">
-                خوش آمدید، {customer?.firstName || ''} {customer?.lastName || ''}!
+                {t.welcomeCustomer}, {customer?.firstName || ''} {customer?.lastName || ''}!
               </h1>
               <p className="text-lg text-blue-600 mt-1">
                 {getPersonalizedWelcome(customer?.firstName || 'کاربر', 'customer', 'fa')}
@@ -212,10 +212,10 @@ const CustomerProfile = () => {
           <Card>
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">سفارشات عادی</CardTitle>
+                <CardTitle className="text-lg">{t.regularOrders}</CardTitle>
                 <Badge variant="secondary">{regularOrders.length}</Badge>
               </div>
-              <p className="text-sm text-gray-600">سفارشات پس از پرداخت و تکمیل شده</p>
+              <p className="text-sm text-gray-600">{t.regularOrdersDesc}</p>
             </CardHeader>
             <CardContent>
               {regularOrders.length > 0 ? (
@@ -245,7 +245,7 @@ const CustomerProfile = () => {
                 </div>
               ) : (
                 <p className="text-sm text-gray-500 text-center py-4">
-                  هیچ سفارش عادی یافت نشد
+                  {t.noRegularOrders}
                 </p>
               )}
             </CardContent>
@@ -255,12 +255,12 @@ const CustomerProfile = () => {
           <Card>
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">سفارشات موقت</CardTitle>
+                <CardTitle className="text-lg">{t.temporaryOrders}</CardTitle>
                 <Badge variant="secondary" className="bg-orange-100 text-orange-600">
                   {temporaryOrders.length}
                 </Badge>
               </div>
-              <p className="text-sm text-gray-600">سفارشات در دوره مهلت پرداخت</p>
+              <p className="text-sm text-gray-600">{t.temporaryOrdersDesc}</p>
             </CardHeader>
             <CardContent>
               {temporaryOrders.length > 0 ? (
@@ -277,7 +277,7 @@ const CustomerProfile = () => {
                           </p>
                         </div>
                         <Badge className="bg-orange-100 text-orange-700">
-                          موقت
+                          {t.temporary}
                         </Badge>
                       </div>
                     </div>
@@ -290,7 +290,7 @@ const CustomerProfile = () => {
                 </div>
               ) : (
                 <p className="text-sm text-gray-500 text-center py-4">
-                  هیچ سفارش موقت یافت نشد
+                  {t.noTemporaryOrders}
                 </p>
               )}
             </CardContent>
@@ -300,12 +300,12 @@ const CustomerProfile = () => {
           <Card>
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">سایر سفارشات</CardTitle>
+                <CardTitle className="text-lg">{t.otherOrders}</CardTitle>
                 <Badge variant="secondary" className="bg-gray-100 text-gray-600">
                   {otherOrders.length}
                 </Badge>
               </div>
-              <p className="text-sm text-gray-600">سایر وضعیت‌های سفارشات</p>
+              <p className="text-sm text-gray-600">{t.otherOrdersDesc}</p>
             </CardHeader>
             <CardContent>
               {otherOrders.length > 0 ? (
@@ -322,7 +322,7 @@ const CustomerProfile = () => {
                           </p>
                         </div>
                         <Badge className="bg-gray-100 text-gray-700">
-                          دیگر
+                          {t.other}
                         </Badge>
                       </div>
                     </div>
@@ -335,7 +335,7 @@ const CustomerProfile = () => {
                 </div>
               ) : (
                 <p className="text-sm text-gray-500 text-center py-4">
-                  هیچ سفارش دیگری یافت نشد
+                  {t.noOtherOrders}
                 </p>
               )}
             </CardContent>
@@ -347,7 +347,7 @@ const CustomerProfile = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <User className="w-5 h-5" />
-              اطلاعات شخصی
+              {t.accountInformation}
             </CardTitle>
           </CardHeader>
           <CardContent>
