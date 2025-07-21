@@ -611,25 +611,33 @@ const CustomerProfile = () => {
 
                         {/* Actions */}
                         <div className="mt-4 pt-3 border-t flex gap-2 flex-wrap">
-                          {(order.status === 'pending' || order.status === 'payment_grace_period') && order.gracePeriodStatus === 'active' ? (
+                          {/* For temporary orders: show delete button */}
+                          {(order.orderType === 'temporary' || order.orderCategory === 'temporary') ? (
                             <>
-                              <Button
-                                size="sm"
-                                onClick={() => handleActivateGracePeriodOrder(order.orderNumber)}
-                                className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
-                              >
-                                <PlayCircle className="w-4 h-4" />
-                                فعال‌سازی سفارش
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => setLocation(`/customer/bank-receipt-upload?orderId=${order.orderNumber}`)}
-                                className="flex items-center gap-2"
-                              >
-                                <FileText className="w-4 h-4" />
-                                آپلود رسید بانکی
-                              </Button>
+                              {/* Grace period specific buttons */}
+                              {(order.status === 'pending' || order.status === 'payment_grace_period') && order.gracePeriodStatus === 'active' && (
+                                <>
+                                  <Button
+                                    size="sm"
+                                    onClick={() => handleActivateGracePeriodOrder(order.orderNumber)}
+                                    className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+                                  >
+                                    <PlayCircle className="w-4 h-4" />
+                                    فعال‌سازی سفارش
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => setLocation(`/customer/bank-receipt-upload?orderId=${order.orderNumber}`)}
+                                    className="flex items-center gap-2"
+                                  >
+                                    <FileText className="w-4 h-4" />
+                                    آپلود رسید بانکی
+                                  </Button>
+                                </>
+                              )}
+
+                              {/* Delete button for all temporary orders */}
                               <Button
                                 size="sm"
                                 variant="destructive"
@@ -639,23 +647,16 @@ const CustomerProfile = () => {
                                 <Trash2 className="w-4 h-4" />
                                 حذف سفارش موقت
                               </Button>
-                            </>
-                          ) : (order.status === 'pending' || order.status === 'payment_grace_period') && order.gracePeriodStatus === 'expired' ? (
-                            <>
-                              <div className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded">
-                                این سفارش منقضی شده است و قابل فعال‌سازی نیست
-                              </div>
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                onClick={() => handleDeleteTemporaryOrder(order.id, order.orderNumber)}
-                                className="flex items-center gap-2 mt-2"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                                حذف سفارش موقت
-                              </Button>
+
+                              {/* Grace period expired message */}
+                              {(order.status === 'pending' || order.status === 'payment_grace_period') && order.gracePeriodStatus === 'expired' && (
+                                <div className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded">
+                                  این سفارش منقضی شده است و قابل فعال‌سازی نیست
+                                </div>
+                              )}
                             </>
                           ) : (
+                            /* For regular orders: show standard buttons */
                             <>
                               <Button
                                 size="sm"
