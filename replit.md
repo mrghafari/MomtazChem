@@ -6,7 +6,7 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
-### COMPLETED: Complete Order Numbering System Implementation with MOM Format (July 20, 2025)
+### COMPLETED: Complete Order Numbering System Implementation with MOM Format (July 21, 2025)
 ✅ **FULLY IMPLEMENTED: New order numbering system with MOM + year + sequential format**
 - **Order Number Format**: MOM + 2-digit year + 5-digit sequential number
   - Format: MOM[YY][NNNNN] (e.g., MOM2511111, MOM2511112, etc.)
@@ -27,6 +27,16 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Warehouse Integration**: Orders display with new MOM format in warehouse sent orders tab
 - **Scalability**: System supports 89,889 unique orders per year with automatic year rollover
 - **Status**: Complete implementation - new MOM format order numbers operational for all new orders
+
+### COMPLETED: Financial Department Order Number Display Fixed (July 21, 2025)
+✅ **FULLY RESOLVED: Financial department now displays proper MOM order numbers instead of integer IDs**
+- **Backend Enhancement**: Added orderNumber field to getOrdersByDepartment query in order-management-storage.ts
+- **Frontend Update**: Modified financial-department.tsx to display orderNumber field instead of customerOrderId
+- **Display Logic**: Shows actual order number (MOM2511119) with fallback to #ID format for old orders
+- **Dialog Integration**: Order review dialog title also updated to show proper order number
+- **Database Verification**: Order 267 confirmed with proper MOM2511119 format in database
+- **Result**: Financial department now shows consistent MOM format order numbers matching customer-facing displays
+- **Impact**: Financial staff can now reference orders using same numbering system as customers see
 
 ### COMPLETED: Fixed Critical Delivery Code Generation Issue in Warehouse-to-Logistics Transfer (July 20, 2025)
 ✅ **FULLY RESOLVED: Automatic delivery code generation system completely operational with original order number usage**
