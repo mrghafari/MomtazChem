@@ -31281,6 +31281,23 @@ momtazchem.com
 
   // NOTE: Duplicate ABANDONED CART endpoints removed - using endpoints from Customer Section above
 
+  // =============================================================================
+  // DEBUG ENDPOINTS (FOR TESTING)
+  // =============================================================================
+
+  // Manual trigger for expired orders cleanup
+  app.post("/api/debug/trigger-expired-cleanup", async (req, res) => {
+    try {
+      const { ExpiredOrdersCleanupService } = await import('./expired-orders-cleanup');
+      const service = ExpiredOrdersCleanupService.getInstance();
+      await service.performCleanup();
+      res.json({ success: true, message: "Expired cleanup triggered manually" });
+    } catch (error) {
+      console.error("Error triggering expired cleanup:", error);
+      res.status(500).json({ success: false, message: "Failed to trigger cleanup" });
+    }
+  });
+
   // Global error handler for all API routes
   app.use('/api/*', (err: any, req: Request, res: Response, next: NextFunction) => {
     console.error('API Error:', err);

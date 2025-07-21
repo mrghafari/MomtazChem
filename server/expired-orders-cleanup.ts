@@ -55,7 +55,7 @@ export class ExpiredOrdersCleanup {
     try {
       console.log('🧹 [EXPIRED CLEANUP] Starting cleanup process...');
 
-      // Find expired orders (more than 7 days old with pending/grace_period status)
+      // Find expired temporary orders (3-day grace period expired)
       const expiredOrders = await customerDb
         .select({
           id: customerOrders.id,
@@ -63,15 +63,18 @@ export class ExpiredOrdersCleanup {
           customerId: customerOrders.customerId,
           status: customerOrders.status,
           paymentStatus: customerOrders.paymentStatus,
+          paymentMethod: customerOrders.paymentMethod,
           createdAt: customerOrders.createdAt
         })
         .from(customerOrders)
         .where(
           and(
+            // Temporary orders with 3-day grace period
+            eq(customerOrders.paymentMethod, 'واریز بانکی با مهلت 3 روزه'),
             // Status is pending or payment_grace_period
             sql`${customerOrders.status} IN ('pending', 'payment_grace_period')`,
-            // Created more than 7 days ago
-            lt(customerOrders.createdAt, sql`NOW() - INTERVAL '7 days'`)
+            // Grace period expired (3 days + 1 hour buffer)
+            lt(customerOrders.createdAt, sql`NOW() - INTERVAL '73 hours'`)
           )
         );
 
