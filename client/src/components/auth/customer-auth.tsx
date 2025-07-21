@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,7 +30,8 @@ const registerSchema = z.object({
   phone: z.string().min(10, "Phone number is required"),
   company: z.string().optional(),
   country: z.string().min(2, "Country is required"),
-  city: z.string().min(2, "City is required"),
+  province: z.string().min(1, "Province is required"),
+  city: z.string().min(1, "City is required"),
   address: z.string().min(5, "Address is required"),
   secondaryAddress: z.string().optional(),
   postalCode: z.string().optional(),
@@ -71,6 +73,22 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
   const [verificationCode, setVerificationCode] = useState("");
   const [verificationError, setVerificationError] = useState("");
   const [loginError, setLoginError] = useState<string | null>(null);
+  const [selectedProvince, setSelectedProvince] = useState("");
+
+  // Fetch provinces
+  const { data: provinces = [] } = useQuery({
+    queryKey: ["/api/logistics/provinces"],
+    enabled: true,
+  });
+
+  // Find selected province ID 
+  const selectedProvinceData = Array.isArray(provinces) ? provinces.find((p: any) => p.nameEnglish === selectedProvince) : null;
+  
+  // Fetch cities based on selected province
+  const { data: cities = [] } = useQuery({
+    queryKey: ["/api/logistics/cities", selectedProvinceData?.id],
+    enabled: !!selectedProvinceData?.id,
+  });
 
   const loginForm = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
@@ -91,6 +109,7 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
       phone: "",
       company: "",
       country: "",
+      province: "",
       city: "",
       address: "",
     },
@@ -113,6 +132,7 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
         phone: existingCustomer.phone || "",
         company: existingCustomer.company || "",
         country: existingCustomer.country || "",
+        province: existingCustomer.province || "",
         city: existingCustomer.city || "",
         address: existingCustomer.address || "",
         postalCode: existingCustomer.postalCode || "",
@@ -727,16 +747,58 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                   <FormField
                     control={registerForm.control}
                     name="country"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Country *</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Country" {...field} />
-                        </FormControl>
+                        <Select value={field.value} onValueChange={field.onChange}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select country" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="Iraq">Iraq</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={registerForm.control}
+                    name="province"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Province *</FormLabel>
+                        <Select 
+                          value={field.value} 
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            setSelectedProvince(value);
+                            // Clear city when province changes
+                            registerForm.setValue("city", "");
+                          }}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select province" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {Array.isArray(provinces) && provinces.map((province: any) => (
+                              <SelectItem key={province.id} value={province.nameEnglish}>
+                                {province.nameEnglish} - {province.nameArabic}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -747,9 +809,20 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>City *</FormLabel>
-                        <FormControl>
-                          <Input placeholder="City" {...field} />
-                        </FormControl>
+                        <Select value={field.value} onValueChange={field.onChange}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select city" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {Array.isArray(cities) && cities.map((city: any) => (
+                              <SelectItem key={city.id} value={city.nameEnglish}>
+                                {city.nameEnglish} - {city.nameArabic}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}

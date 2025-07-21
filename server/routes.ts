@@ -8077,6 +8077,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         secondaryAddress,
         postalCode,
         alternatePhone,
+        province,
         state,
         industry,
         businessType,
@@ -8114,10 +8115,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Validate mandatory fields
-      if (!email || !phone || !country || !city || !address) {
+      if (!email || !phone || !country || !province || !city || !address) {
         return res.status(400).json({ 
           success: false, 
-          message: "ایمیل، شماره تلفن، کشور، شهر و آدرس اجباری هستند" 
+          message: "ایمیل، شماره تلفن، کشور، استان، شهر و آدرس اجباری هستند" 
         });
       }
 
@@ -8135,7 +8136,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         phone,
         alternatePhone: alternatePhone || null,
         country,
-        state: state || null,
+        province: province || null,
         city,
         address,
         secondaryAddress: secondaryAddress || null,
