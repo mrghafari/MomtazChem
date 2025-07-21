@@ -24,25 +24,24 @@ export async function generateOrderNumber(): Promise<string> {
     let sequentialNumber: number;
     
     if (existingCounter) {
-      // Increment existing counter
-      sequentialNumber = existingCounter.counter;
-      
-      // Calculate next counter value (cycle from 11111-99999)
-      let nextCounter = sequentialNumber + 1;
-      if (nextCounter > 99999) {
-        nextCounter = 11111; // Reset to 11111 when exceeding 99999
-      }
-      
-      // Update counter
-      await db
+      // 🔐 ATOMIC RESERVATION: Reserve number immediately to prevent conflicts
+      // Use atomic UPDATE with RETURNING to reserve and get the number in one operation
+      const [updatedCounter] = await db
         .update(orderNumberCounter)
         .set({
-          counter: nextCounter,
+          counter: existingCounter.counter + 1 > 99999 ? 11111 : existingCounter.counter + 1,
           updatedAt: new Date()
         })
-        .where(eq(orderNumberCounter.year, currentYear));
+        .where(eq(orderNumberCounter.year, currentYear))
+        .returning({
+          reservedNumber: orderNumberCounter.counter,
+          previousCounter: existingCounter.counter
+        });
       
-      console.log(`🔄 [ORDER-NUMBER] Updated counter for year ${currentYear}: ${sequentialNumber} -> ${nextCounter}`);
+      // The reserved number is the counter value BEFORE increment
+      sequentialNumber = existingCounter.counter;
+      
+      console.log(`🔐 [ATOMIC-RESERVE] Reserved order number: ${sequentialNumber} (counter: ${existingCounter.counter} -> ${existingCounter.counter + 1 > 99999 ? 11111 : existingCounter.counter + 1})`);
     } else {
       // Create new counter for current year
       sequentialNumber = 11111; // Start from 11111

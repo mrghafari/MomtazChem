@@ -156,6 +156,25 @@ export class CustomerStorage implements ICustomerStorage {
       })
       .returning();
     
+    // 🔄 [AUTO-SYNC] Automatically create matching order_management record
+    console.log('🔄 [AUTO-SYNC] Creating order_management record for order:', order.id);
+    try {
+      const { orderManagementStorage } = await import('./order-management-storage');
+      await orderManagementStorage.createOrderManagement({
+        customerOrderId: order.id,
+        currentStatus: 'pending' as any, // Start with pending status for financial review
+        totalWeight: orderData.totalWeight || '0',
+        weightUnit: orderData.weightUnit || 'kg',
+        deliveryMethod: orderData.deliveryMethod || 'courier',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+      console.log('✅ [AUTO-SYNC] Order management record created successfully for order:', order.id);
+    } catch (error) {
+      console.error('❌ [AUTO-SYNC] Failed to create order_management record:', error);
+      // Don't fail the customer order creation if sync fails
+    }
+    
     // Update customer metrics after creating order
     if (order.customerId) {
       await this.updateCustomerMetricsAfterOrder(order.customerId);
