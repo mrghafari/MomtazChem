@@ -13,30 +13,22 @@ import { Link, useLocation } from "wouter";
 import { z } from "zod";
 
 // Enhanced registration schema with mandatory fields
-const customerRegistrationSchema = insertCustomerSchema.omit({
-  passwordHash: true,
-  isActive: true,
-  emailVerified: true,
-  verificationToken: true,
-  resetPasswordToken: true,
-  resetPasswordExpires: true,
-  totalOrdersCount: true,
-  totalSpent: true,
-  averageOrderValue: true,
-  lastOrderDate: true,
-  firstOrderDate: true,
-  customerSource: true,
-  customerType: true,
-  customerStatus: true,
-}).extend({
+const customerRegistrationSchema = z.object({
   email: z.string().email("Please enter a valid email address").min(1, "Email is required"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   confirmPassword: z.string(),
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  company: z.string().optional(),
   phone: z.string().min(1, "Phone number is required"),
   country: z.string().min(1, "Country is required"),
   province: z.string().min(1, "Province is required"),
   city: z.string().min(1, "City is required"),
   address: z.string().min(1, "Address is required"),
+  postalCode: z.string().optional(),
+  communicationPreference: z.string().default("email"),
+  preferredLanguage: z.string().default("en"),
+  marketingConsent: z.boolean().default(false),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
@@ -57,7 +49,7 @@ const CustomerRegister = () => {
   });
 
   // Find selected province ID 
-  const selectedProvinceData = provinces.find((p: any) => p.nameEnglish === selectedProvince);
+  const selectedProvinceData = Array.isArray(provinces) ? provinces.find((p: any) => p.nameEnglish === selectedProvince) : null;
   
   // Fetch cities based on selected province
   const { data: cities = [] } = useQuery({
@@ -272,7 +264,7 @@ const CustomerRegister = () => {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {provinces.map((province: any) => (
+                            {Array.isArray(provinces) && provinces.map((province: any) => (
                               <SelectItem key={province.id} value={province.nameEnglish}>
                                 {province.nameEnglish} ({province.nameArabic})
                               </SelectItem>
@@ -297,7 +289,7 @@ const CustomerRegister = () => {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {cities.map((city: any) => (
+                            {Array.isArray(cities) && cities.map((city: any) => (
                               <SelectItem key={city.id} value={city.nameEnglish}>
                                 {city.nameEnglish} ({city.nameArabic})
                               </SelectItem>

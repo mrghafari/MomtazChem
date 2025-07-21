@@ -9731,8 +9731,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { iraqiProvinces } = await import('../shared/logistics-schema');
       const { db } = await import('./db');
+      const { eq } = await import('drizzle-orm');
       
-      const provinces = await db.select().from(iraqiProvinces).orderBy(iraqiProvinces.nameArabic);
+      const provinces = await db
+        .select({
+          id: iraqiProvinces.id,
+          name: iraqiProvinces.name,
+          nameArabic: iraqiProvinces.nameArabic,
+          nameEnglish: iraqiProvinces.nameEnglish,
+          capital: iraqiProvinces.capital,
+          isActive: iraqiProvinces.isActive
+        })
+        .from(iraqiProvinces)
+        .where(eq(iraqiProvinces.isActive, true))
+        .orderBy(iraqiProvinces.nameArabic);
       
       res.json({
         success: true,
@@ -9747,12 +9759,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get all Iraqi cities with province information
+  // Get all Iraqi cities with province information - supports filtering by provinceId
   app.get("/api/logistics/cities", async (req, res) => {
     try {
       const { iraqiCities, iraqiProvinces } = await import('../shared/logistics-schema');
       const { db } = await import('./db');
-      const { eq } = await import('drizzle-orm');
+      const { eq, and } = await import('drizzle-orm');
+      
+      const provinceId = req.query.provinceId ? parseInt(req.query.provinceId as string) : null;
+      
+      let whereConditions = [eq(iraqiCities.isActive, true)];
+      
+      // Add province filter if provided
+      if (provinceId && !isNaN(provinceId)) {
+        whereConditions.push(eq(iraqiCities.provinceId, provinceId));
+      }
       
       const cities = await db
         .select({
@@ -9769,7 +9790,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           provinceId: iraqiCities.provinceId
         })
         .from(iraqiCities)
-        .where(eq(iraqiCities.isActive, true))
+        .where(whereConditions.length > 1 ? and(...whereConditions) : whereConditions[0])
         .orderBy(iraqiCities.nameArabic);
       
       res.json({
