@@ -220,7 +220,7 @@ const CustomerProfile = () => {
             <CardContent>
               {regularOrders.length > 0 ? (
                 <div className="space-y-3">
-                  {regularOrders.slice(0, 2).map((order: any) => (
+                  {(regularOrders || []).slice(0, 2).map((order: any) => (
                     <div key={order.id} className="p-3 bg-green-50 border border-green-200 rounded-lg">
                       <div className="flex justify-between items-start">
                         <div>
@@ -265,7 +265,7 @@ const CustomerProfile = () => {
             <CardContent>
               {temporaryOrders.length > 0 ? (
                 <div className="space-y-3">
-                  {temporaryOrders.slice(0, 2).map((order: any) => (
+                  {(temporaryOrders || []).slice(0, 2).map((order: any) => (
                     <div key={order.id} className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
                       <div className="flex justify-between items-start">
                         <div>
@@ -310,7 +310,7 @@ const CustomerProfile = () => {
             <CardContent>
               {otherOrders.length > 0 ? (
                 <div className="space-y-3">
-                  {otherOrders.slice(0, 2).map((order: any) => (
+                  {(otherOrders || []).slice(0, 2).map((order: any) => (
                     <div key={order.id} className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
                       <div className="flex justify-between items-start">
                         <div>
@@ -465,7 +465,7 @@ const CustomerProfile = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {orders.slice(0, 5).map((order: any) => (
+              {(orders || []).slice(0, 5).map((order: any) => (
                 <div key={order.id} className="flex justify-between items-center p-4 border rounded-lg">
                   <div className="flex items-center gap-4">
                     <Package className="w-8 h-8 text-gray-400" />
@@ -496,7 +496,7 @@ const CustomerProfile = () => {
                 </div>
               ))}
               
-              {orders.length === 0 && (
+              {(orders || []).length === 0 && (
                 <div className="text-center py-8">
                   <Package className="w-12 h-12 text-gray-300 mx-auto mb-2" />
                   <p className="text-gray-500">هنوز هیچ سفارشی ثبت نکرده‌اید</p>
