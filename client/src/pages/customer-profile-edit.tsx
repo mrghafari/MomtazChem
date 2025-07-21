@@ -78,9 +78,18 @@ export default function CustomerProfileEdit() {
     retry: 1,
   });
 
-  // Fetch cities data
+  // State for selected province to filter cities
+  const [selectedProvinceId, setSelectedProvinceId] = useState<number | null>(null);
+
+  // Fetch cities data based on selected province
   const { data: citiesData } = useQuery({
-    queryKey: ["/api/logistics/cities"],
+    queryKey: ["/api/logistics/cities", selectedProvinceId],
+    queryFn: () => {
+      const url = selectedProvinceId 
+        ? `/api/logistics/cities?provinceId=${selectedProvinceId}`
+        : '/api/logistics/cities';
+      return fetch(url).then(res => res.json());
+    },
     retry: 1,
   });
 
@@ -494,17 +503,27 @@ export default function CustomerProfileEdit() {
                     name="province"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Province / State</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
+                        <FormLabel>Province / محافظة</FormLabel>
+                        <Select 
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            // Find the selected province to get its ID for city filtering
+                            const selectedProvince = provinces.find((p: any) => p.nameEnglish === value);
+                            setSelectedProvinceId(selectedProvince ? selectedProvince.id : null);
+                            // Clear city selection when province changes
+                            form.setValue('city', '');
+                          }} 
+                          value={field.value}
+                        >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select province" />
+                              <SelectValue placeholder="Select province / اختر المحافظة" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
                             {provinces.map((province: any) => (
-                              <SelectItem key={province.id} value={province.name}>
-                                {province.name}
+                              <SelectItem key={province.id} value={province.nameEnglish}>
+                                {province.nameEnglish} / {province.nameArabic}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -518,17 +537,17 @@ export default function CustomerProfileEdit() {
                     name="city"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t.city}</FormLabel>
+                        <FormLabel>City / مدينة</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select city" />
+                              <SelectValue placeholder="Select city / اختر المدينة" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
                             {cities.map((city: any) => (
-                              <SelectItem key={city.id} value={city.name}>
-                                {city.name}
+                              <SelectItem key={city.id} value={city.nameEnglish}>
+                                {city.nameEnglish} / {city.nameArabic}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -839,11 +858,11 @@ export default function CustomerProfileEdit() {
                   />
                   <FormField
                     control={form.control}
-                    name="preferredCommunication"
+                    name="communicationPreference"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Preferred Communication</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select communication method" />
