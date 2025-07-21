@@ -37,7 +37,7 @@ import { sql, eq, and, or, isNull, isNotNull, desc, gte } from "drizzle-orm";
 import { z } from "zod";
 import * as schema from "@shared/schema";
 const { crmCustomers } = schema;
-import { orderManagement, shippingRates, vatSettings, deliveryMethods } from "@shared/order-management-schema";
+import { orderManagement, shippingRates, vatSettings, deliveryMethods, type OrderStatus } from "@shared/order-management-schema";
 import { generateEAN13Barcode, validateEAN13, parseEAN13Barcode, isMomtazchemBarcode } from "@shared/barcode-utils";
 import { generateSmartSKU, validateSKUUniqueness } from "./ai-sku-generator";
 import { deliveryVerificationStorage } from "./delivery-verification-storage";
@@ -17468,7 +17468,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       // Use order management storage to update order status
       const updatedOrder = await orderManagementStorage.updateOrderStatus(
         parseInt(id),
-        'warehouse_approved', // Fixed to_status
+        status as OrderStatus, // Use the provided status
         userId,
         'warehouse',
         notes

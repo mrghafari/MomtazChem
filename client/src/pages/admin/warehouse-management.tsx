@@ -746,6 +746,14 @@ const WarehouseManagement: React.FC = () => {
     });
   };
 
+  const handleSendToLogistics = (order: Order) => {
+    updateOrderMutation.mutate({
+      orderId: order.id,
+      status: 'logistics_assigned',
+      notes: 'سفارش از انبار به بخش لجستیک ارسال شد'
+    });
+  };
+
   const handleViewDetails = (order: Order) => {
     setSelectedOrder(order);
     setWarehouseNotes(order.warehouseNotes || '');
@@ -1106,6 +1114,17 @@ const WarehouseManagement: React.FC = () => {
                                 >
                                   <Package className="w-4 h-4 mr-1" />
                                   تکمیل
+                                </Button>
+                              )}
+                              {order.currentStatus === 'warehouse_approved' && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleSendToLogistics(order)}
+                                  className="text-blue-600 hover:text-blue-800"
+                                >
+                                  <Truck className="w-4 h-4 mr-1" />
+                                  ارسال به لجستیک
                                 </Button>
                               )}
                             </div>
