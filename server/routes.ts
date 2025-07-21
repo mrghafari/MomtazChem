@@ -5919,6 +5919,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Transform orders to ensure compatibility with frontend interface
       const transformedOrders = orders.map(order => ({
         ...order,
+        // Ensure orderNumber is explicitly included in response
+        orderNumber: order.orderNumber,
         // Extract customer fields from nested customer object
         customerFirstName: order.customer?.firstName || '',
         customerLastName: order.customer?.lastName || '',

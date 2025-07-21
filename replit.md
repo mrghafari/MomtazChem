@@ -32,11 +32,13 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 ✅ **FULLY RESOLVED: Financial department now displays proper MOM order numbers instead of integer IDs**
 - **Backend Enhancement**: Added orderNumber field to getOrdersByDepartment query in order-management-storage.ts
 - **Frontend Update**: Modified financial-department.tsx to display orderNumber field instead of customerOrderId
+- **Critical API Fix**: Fixed JSON transformation in routes.ts to explicitly include orderNumber in API response
 - **Display Logic**: Shows actual order number (MOM2511119) with fallback to #ID format for old orders
 - **Dialog Integration**: Order review dialog title also updated to show proper order number
-- **Database Verification**: Order 267 confirmed with proper MOM2511119 format in database
+- **Database Verification**: Orders 267 (MOM2511119) and 268 (MOM2511121) confirmed with proper MOM format in database
 - **Result**: Financial department now shows consistent MOM format order numbers matching customer-facing displays
 - **Impact**: Financial staff can now reference orders using same numbering system as customers see
+- **Resolution**: API response transformation issue resolved - orderNumber now properly serialized in JSON
 
 ### COMPLETED: Fixed Critical Delivery Code Generation Issue in Warehouse-to-Logistics Transfer (July 20, 2025)
 ✅ **FULLY RESOLVED: Automatic delivery code generation system completely operational with original order number usage**
