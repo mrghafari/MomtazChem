@@ -143,6 +143,15 @@ export interface IOrderManagementStorage {
 export class OrderManagementStorage implements IOrderManagementStorage {
   
   async createOrderManagement(orderData: InsertOrderManagement): Promise<OrderManagement> {
+    // Check if order_management already exists for this customer_order_id
+    if (orderData.customerOrderId) {
+      const existing = await this.getOrderManagementByCustomerOrderId(orderData.customerOrderId);
+      if (existing) {
+        console.log('⚠️ [DUPLICATE-PREVENTION] Order management already exists for customer order:', orderData.customerOrderId);
+        return existing;
+      }
+    }
+
     const [order] = await db
       .insert(orderManagement)
       .values(orderData)
@@ -151,6 +160,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
     // Log initial status
     await this.logStatusChange(order.id, null, order.currentStatus as OrderStatus, null, null);
     
+    console.log('✅ [ORDER-MANAGEMENT] Created new order management record:', order.id, 'for customer order:', orderData.customerOrderId);
     return order;
   }
   

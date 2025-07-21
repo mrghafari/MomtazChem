@@ -112,15 +112,15 @@ const CustomerProfile = () => {
   }
   
   // Enhanced order categorization logic
-  const categorizeOrders = (orders: any[]) => {
-    const regularOrders = orders.filter((order: any) => {
+  const categorizeOrders = (orders: any[] = []) => {
+    const regularOrders = (orders || []).filter((order: any) => {
       // Cash on delivery or completed orders
       return order.payment_method === 'cash_on_delivery' || 
              order.current_status === 'completed' ||
              (order.payment_status === 'paid' && order.current_status !== 'payment_grace_period');
     });
 
-    const temporaryOrders = orders.filter((order: any) => {
+    const temporaryOrders = (orders || []).filter((order: any) => {
       // Orders in grace period for payment (temporary orders)
       return order.current_status === 'payment_grace_period' ||
              (order.payment_status === 'pending' && order.created_at && 
