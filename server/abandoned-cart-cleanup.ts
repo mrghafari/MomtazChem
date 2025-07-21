@@ -1,11 +1,10 @@
 import { CartStorage } from './cart-storage';
-import { CustomerStorage } from './customer-storage';
+import { CrmStorage } from './crm-storage';
 import { UniversalEmailService } from './universal-email-service';
 
 class AbandonedCartCleanupService {
   private cartStorage = new CartStorage();
-  private customerStorage = new CustomerStorage();
-  private emailService = new UniversalEmailService();
+  private crmStorage = new CrmStorage();
   private intervalId: NodeJS.Timeout | null = null;
   private isRunning = false;
 
@@ -67,20 +66,36 @@ class AbandonedCartCleanupService {
 
   async sendFirstNotification(cart: any) {
     try {
-      // Get customer information
-      const customer = await this.customerStorage.getCustomerById(cart.customerId);
+      // Get customer information  
+      const customer = await this.crmStorage.getCrmCustomerById(cart.customerId);
       if (!customer) return;
       
-      console.log(`🛒 [CART CLEANUP] Sending first notification to customer ${customer.email} for cart ${cart.id}`);
+      console.log(`🛒 [FIRST NOTIFICATION] Sending to customer ${customer.email} for cart ${cart.id}`);
       
-      // Create notification record
-      await this.cartStorage.createNotification({
-        cartSessionId: cart.id,
-        customerId: cart.customerId,
-        notificationType: 'first_reminder',
-        title: 'یادآوری سبد خرید',
-        message: 'کالاهای شما در سبد خرید منتظر تکمیل هستند'
-      });
+      // Parse cart items
+      let items = [];
+      try {
+        items = typeof cart.cartData === 'string' ? JSON.parse(cart.cartData) : cart.cartData || [];
+      } catch (error) {
+        console.error('Error parsing cart data for notification:', error);
+        items = [];
+      }
+      
+      const emailContent = {
+        to: customer.email,
+        subject: `یادآوری: سبد خرید شما در انتظار تکمیل است - ${items.length} محصول`,
+        template: 'abandoned-cart-first',
+        variables: {
+          customerName: `${customer.firstName} ${customer.lastName}`,
+          cartItemsCount: items.length,
+          totalValue: cart.totalValue || 0,
+          cartRestoreUrl: `${process.env.BASE_URL || 'http://localhost:5000'}/shop/cart?restore=${cart.id}`,
+          lastActivity: new Date(cart.lastActivity).toLocaleDateString('fa-IR')
+        }
+      };
+      
+      await UniversalEmailService.sendEmail(emailContent);
+      console.log(`✅ First notification sent successfully to ${customer.email}`);
       
       // Send SMS using Template #2
       await this.sendSMSNotification(customer, cart, 'first');
@@ -93,19 +108,36 @@ class AbandonedCartCleanupService {
   async sendSecondNotification(cart: any) {
     try {
       // Get customer information
-      const customer = await this.customerStorage.getCustomerById(cart.customerId);
+      const customer = await this.crmStorage.getCrmCustomerById(cart.customerId);
       if (!customer) return;
       
-      console.log(`🛒 [CART CLEANUP] Sending second notification to customer ${customer.email} for cart ${cart.id}`);
+      console.log(`🛒 [SECOND NOTIFICATION] Final warning to customer ${customer.email} for cart ${cart.id}`);
       
-      // Create notification record
-      await this.cartStorage.createNotification({
-        cartSessionId: cart.id,
-        customerId: cart.customerId,
-        notificationType: 'second_reminder',
-        title: 'آخرین فرصت تکمیل خرید',
-        message: 'سبد خرید شما به زودی حذف خواهد شد'
-      });
+      // Parse cart items
+      let items = [];
+      try {
+        items = typeof cart.cartData === 'string' ? JSON.parse(cart.cartData) : cart.cartData || [];
+      } catch (error) {
+        console.error('Error parsing cart data for notification:', error);
+        items = [];
+      }
+      
+      const emailContent = {
+        to: customer.email,
+        subject: `آخرین فرصت: سبد خرید شما به زودی حذف می‌شود - ${items.length} محصول`,
+        template: 'abandoned-cart-final',
+        variables: {
+          customerName: `${customer.firstName} ${customer.lastName}`,
+          cartItemsCount: items.length,
+          totalValue: cart.totalValue || 0,
+          cartRestoreUrl: `${process.env.BASE_URL || 'http://localhost:5000'}/shop/cart?restore=${cart.id}`,
+          lastActivity: new Date(cart.lastActivity).toLocaleDateString('fa-IR'),
+          finalWarning: true
+        }
+      };
+      
+      await UniversalEmailService.sendEmail(emailContent);
+      console.log(`✅ Final notification sent successfully to ${customer.email}`);
       
       // Send SMS using Template #2
       await this.sendSMSNotification(customer, cart, 'second');

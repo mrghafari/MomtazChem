@@ -145,39 +145,63 @@ export class CartStorage {
 
   async getAbandonedCartsByCustomer(customerId: number): Promise<CartSession[]> {
     try {
-      // Get settings for abandonment threshold (1 hour minimum)
+      console.log(`🛒 [DEBUG] Getting abandoned carts for customer ${customerId}`);
+      
+      // Return all carts that are already marked as abandoned (regardless of isActive status)
+      const abandonedCarts = await cartDb
+        .select()
+        .from(cartSessions)
+        .where(and(
+          eq(cartSessions.customerId, customerId),
+          gte(cartSessions.itemCount, 1), // Has items in cart
+          eq(cartSessions.isAbandoned, true) // Already marked as abandoned
+        ))
+        .orderBy(desc(cartSessions.lastActivity));
+      
+      console.log(`🛒 [DEBUG] Found ${abandonedCarts.length} abandoned carts for customer ${customerId}`);
+      
+      // Also check for carts that should be marked as abandoned (1 hour threshold)
       const settings = await this.getAbandonedCartSettings();
       const thresholdHours = Math.max(settings?.timeoutMinutes ? settings.timeoutMinutes / 60 : 1, 1); // Minimum 1 hour
-      
-      // Calculate cutoff time
       const cutoffTime = new Date();
       cutoffTime.setHours(cutoffTime.getHours() - thresholdHours);
       
-      const abandonedCarts = await cartDb
+      const cartsToMark = await cartDb
         .select()
         .from(cartSessions)
         .where(and(
           eq(cartSessions.customerId, customerId),
           eq(cartSessions.isActive, true),
           gte(cartSessions.itemCount, 1), // Has items in cart
+          eq(cartSessions.isAbandoned, false), // Not yet marked
           lte(cartSessions.lastActivity, cutoffTime) // Past threshold
+        ));
+        
+      // Mark newly abandoned carts
+      for (const cart of cartsToMark) {
+        await cartDb
+          .update(cartSessions)
+          .set({
+            isAbandoned: true,
+            abandonedAt: new Date()
+          })
+          .where(eq(cartSessions.id, cart.id));
+        console.log(`🛒 [MARKED] Cart ${cart.id} marked as abandoned`);
+      }
+      
+      // Return all abandoned carts (existing + newly marked) regardless of isActive status
+      const allAbandonedCarts = await cartDb
+        .select()
+        .from(cartSessions)
+        .where(and(
+          eq(cartSessions.customerId, customerId),
+          gte(cartSessions.itemCount, 1),
+          eq(cartSessions.isAbandoned, true)
         ))
         .orderBy(desc(cartSessions.lastActivity));
       
-      // Mark as abandoned if not already marked
-      for (const cart of abandonedCarts) {
-        if (!cart.isAbandoned) {
-          await cartDb
-            .update(cartSessions)
-            .set({
-              isAbandoned: true,
-              abandonedAt: new Date()
-            })
-            .where(eq(cartSessions.id, cart.id));
-        }
-      }
-      
-      return abandonedCarts;
+      console.log(`🛒 [RESULT] Returning ${allAbandonedCarts.length} total abandoned carts`);
+      return allAbandonedCarts;
     } catch (error) {
       console.error('Error getting abandoned carts by customer:', error);
       return [];
@@ -265,6 +289,38 @@ export class CartStorage {
   }
 
   // Delete abandoned cart after 4 hours
+  async getCartSessionById(cartId: number): Promise<CartSession | null> {
+    try {
+      const cart = await cartDb
+        .select()
+        .from(cartSessions)
+        .where(eq(cartSessions.id, cartId))
+        .limit(1);
+      
+      return cart[0] || null;
+    } catch (error) {
+      console.error('Error getting cart session by ID:', error);
+      return null;
+    }
+  }
+
+  async updateCartSession(cartId: number, updateData: Partial<CartSession>) {
+    try {
+      await cartDb
+        .update(cartSessions)
+        .set({
+          ...updateData,
+          updatedAt: new Date()
+        })
+        .where(eq(cartSessions.id, cartId));
+      
+      console.log(`🛒 [UPDATE] Cart session ${cartId} updated`);
+    } catch (error) {
+      console.error('Error updating cart session:', error);
+      throw error;
+    }
+  }
+
   async deleteAbandonedCart(cartId: number) {
     await cartDb
       .update(cartSessions)
