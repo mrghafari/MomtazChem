@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { insertCustomerSchema } from "@shared/customer-schema";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -34,6 +34,7 @@ const customerRegistrationSchema = insertCustomerSchema.omit({
   confirmPassword: z.string(),
   phone: z.string().min(1, "Phone number is required"),
   country: z.string().min(1, "Country is required"),
+  province: z.string().min(1, "Province is required"),
   city: z.string().min(1, "City is required"),
   address: z.string().min(1, "Address is required"),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -47,6 +48,26 @@ const CustomerRegister = () => {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedProvince, setSelectedProvince] = useState("");
+
+  // Fetch provinces data
+  const { data: provinces = [] } = useQuery({
+    queryKey: ["/api/logistics/provinces"],
+    enabled: true,
+  });
+
+  // Find selected province ID 
+  const selectedProvinceData = provinces.find((p: any) => p.nameEnglish === selectedProvince);
+  
+  // Fetch cities based on selected province
+  const { data: cities = [] } = useQuery({
+    queryKey: ["/api/logistics/cities", selectedProvinceData?.id],
+    queryFn: () => 
+      fetch(`/api/logistics/cities?provinceId=${selectedProvinceData?.id}`)
+        .then(res => res.json())
+        .then(data => data.data),
+    enabled: !!selectedProvinceData?.id,
+  });
 
   const form = useForm<CustomerRegistrationData>({
     resolver: zodResolver(customerRegistrationSchema),
@@ -57,6 +78,7 @@ const CustomerRegister = () => {
       company: "",
       phone: "",
       country: "",
+      province: "",
       city: "",
       address: "",
       postalCode: "",
@@ -199,7 +221,7 @@ const CustomerRegister = () => {
                   )}
                 />
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <FormField
                     control={form.control}
                     name="country"
@@ -232,13 +254,56 @@ const CustomerRegister = () => {
 
                   <FormField
                     control={form.control}
+                    name="province"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Province/State *</FormLabel>
+                        <Select 
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            setSelectedProvince(value);
+                            form.setValue("city", ""); // Reset city when province changes
+                          }} 
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select province" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {provinces.map((province: any) => (
+                              <SelectItem key={province.id} value={province.nameEnglish}>
+                                {province.nameEnglish} ({province.nameArabic})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
                     name="city"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>City *</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Enter your city" {...field} required />
-                        </FormControl>
+                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedProvince}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder={selectedProvince ? "Select city" : "Select province first"} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {cities.map((city: any) => (
+                              <SelectItem key={city.id} value={city.nameEnglish}>
+                                {city.nameEnglish} ({city.nameArabic})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}

@@ -1,6 +1,7 @@
 import { pgTable, text, serial, timestamp, decimal, boolean, integer, json } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { crmCustomers } from "./schema";
 
 // =============================================================================
 // CUSTOMER PORTAL SCHEMA
@@ -16,6 +17,7 @@ export const customers = pgTable("customers", {
   company: text("company"),
   phone: text("phone").notNull(), // Mandatory mobile phone
   country: text("country").notNull(), // Mandatory country
+  province: text("province").notNull(), // Mandatory province/state
   city: text("city").notNull(), // Mandatory city
   address: text("address").notNull(), // Mandatory address
   postalCode: text("postal_code"),

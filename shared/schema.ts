@@ -573,7 +573,7 @@ export const crmCustomers = pgTable("crm_customers", {
   phone: text("phone"),
   alternatePhone: text("alternate_phone"),
   country: text("country"),
-  state: text("state"),
+  province: text("province"), // State/Province field
   city: text("city"),
   address: text("address"),
   secondaryAddress: text("secondary_address"),
