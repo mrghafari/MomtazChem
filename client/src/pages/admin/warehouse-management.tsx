@@ -1610,7 +1610,7 @@ const WarehouseManagement: React.FC = () => {
       <Dialog open={showOrderDetails} onOpenChange={setShowOrderDetails}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>جزئیات سفارش #{selectedOrder?.id}</DialogTitle>
+            <DialogTitle>جزئیات سفارش MOM25{String(selectedOrder?.customerOrderId || selectedOrder?.id).padStart(5, '1')}</DialogTitle>
           </DialogHeader>
           {selectedOrder && (
             <div className="space-y-4">
