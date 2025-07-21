@@ -35,6 +35,7 @@ export interface IOrderManagementStorage {
   // Order Management
   createOrderManagement(orderData: InsertOrderManagement): Promise<OrderManagement>;
   getOrderManagementById(id: number): Promise<OrderManagement | undefined>;
+  getOrderById(id: number): Promise<OrderManagement | undefined>;
   getOrderManagementByCustomerOrderId(customerOrderId: number): Promise<OrderManagement | undefined>;
   updateOrderManagement(id: number, updateData: Partial<InsertOrderManagement>): Promise<OrderManagement>;
   updateOrderStatus(id: number, newStatus: OrderStatus, changedBy: number, department: Department, notes?: string): Promise<OrderManagement>;
@@ -163,6 +164,11 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       .from(orderManagement)
       .where(eq(orderManagement.id, id));
     return order;
+  }
+  
+  async getOrderById(id: number): Promise<OrderManagement | undefined> {
+    // Alias for getOrderManagementById to maintain compatibility with routes.ts
+    return this.getOrderManagementById(id);
   }
   
   async getOrderManagementByCustomerOrderId(customerOrderId: number): Promise<OrderManagement | undefined> {
@@ -431,9 +437,10 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       deliveryCompanyName: orderManagement.deliveryCompanyName,
       deliveryCompanyPhone: orderManagement.deliveryCompanyPhone,
       
-      // Customer Order fields - مبلغ و کارنسی
+      // Customer Order fields - مبلغ و کارنسی و شماره سفارش
       totalAmount: customerOrders.totalAmount,
       currency: customerOrders.currency,
+      orderNumber: customerOrders.orderNumber, // شماره سفارش M[YY][NNNNN]
       
       // Customer info
       customerFirstName: crmCustomers.firstName,

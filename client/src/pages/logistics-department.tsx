@@ -411,7 +411,7 @@ export default function LogisticsDepartment() {
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-4 mb-4">
-                            <h3 className="text-lg font-semibold">سفارش #{order.customerOrderId}</h3>
+                            <h3 className="text-lg font-semibold">سفارش {order.orderNumber}</h3>
                             {getStatusBadge(order.currentStatus)}
                             <Badge variant="outline">{getDeliveryMethodLabel(order.deliveryMethod)}</Badge>
                           </div>

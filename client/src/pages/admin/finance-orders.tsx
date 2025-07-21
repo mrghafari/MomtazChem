@@ -797,7 +797,7 @@ function FinanceOrders() {
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogContent className="max-w-2xl" dir="rtl">
             <DialogHeader>
-              <DialogTitle>بررسی پرداخت سفارش #{selectedOrder?.customerOrderId}</DialogTitle>
+              <DialogTitle>بررسی پرداخت سفارش {selectedOrder?.orderNumber}</DialogTitle>
             </DialogHeader>
             
             {selectedOrder && (
@@ -960,7 +960,7 @@ function OrderCard({ order, onOrderSelect, readOnly = false }: OrderCardProps) {
               <Receipt className="h-5 w-5 text-blue-600" />
             </div>
             <div>
-              <h3 className="font-bold text-lg text-gray-900">سفارش #{order.customerOrderId}</h3>
+              <h3 className="font-bold text-lg text-gray-900">سفارش {order.orderNumber}</h3>
               <p className="text-sm text-gray-600">{order.customer?.firstName} {order.customer?.lastName}</p>
             </div>
           </div>
@@ -1087,7 +1087,7 @@ function TransferredOrderCard({ order }: TransferredOrderCardProps) {
               <ChevronRight className="h-5 w-5 text-blue-600" />
             </div>
             <div>
-              <h3 className="font-bold text-lg text-gray-900">سفارش #{order.customerOrderId}</h3>
+              <h3 className="font-bold text-lg text-gray-900">سفارش {order.orderNumber}</h3>
               <p className="text-sm text-gray-600">{order.customer?.firstName} {order.customer?.lastName}</p>
             </div>
           </div>

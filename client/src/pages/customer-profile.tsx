@@ -451,7 +451,7 @@ const CustomerProfile = () => {
                           <div>
                             <div className="flex items-center gap-2 mb-1">
                               <h4 className="font-semibold text-gray-900">
-                                Order #{order.orderNumber || order.id}
+                                {order.orderNumber}
                               </h4>
                               {(order.orderType === 'temporary' || order.orderCategory === 'temporary') && (
                                 <Badge className="bg-orange-100 text-orange-800">

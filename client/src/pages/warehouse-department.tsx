@@ -277,7 +277,7 @@ export default function WarehouseDepartment() {
                   <div className="flex items-start justify-between">
                     <div className="space-y-1">
                       <div className="flex items-center gap-3">
-                        <h3 className="font-semibold text-lg">سفارش #{order.customerOrderId}</h3>
+                        <h3 className="font-semibold text-lg">سفارش {order.orderNumber}</h3>
                         <Badge variant="secondary">
                           <Clock className="w-3 h-3 mr-1" />
                           در انتظار پردازش
