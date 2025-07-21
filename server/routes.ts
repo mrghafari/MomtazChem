@@ -9774,11 +9774,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         recipientAddress: row.recipient_address
       }));
 
+      // Get abandoned orders information from enhanced profile data
+      const profileData = await customerStorage.getOrdersForProfile(finalCustomerId);
+      
       res.json({
         success: true,
         orders: detailedOrders,
         totalOrders: totalOrders, // Total number of orders from new method
         hiddenOrders: hiddenOrders, // Number of hidden orders as purchase history
+        abandonedOrders: profileData.abandonedOrders,
+        hasAbandonedOrders: profileData.hasAbandonedOrders,
+        abandonedCount: profileData.abandonedOrders.length,
         displayInfo: {
           totalDisplayed: detailedOrders.length,
           hasTemporaryOrder: detailedOrders.some(order => order.orderType === 'temporary'),
@@ -9993,7 +9999,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Customer password reset - Request reset
+  // Customer password reset - Request reset (Alternative endpoint)
   app.post("/api/customers/forgot-password", async (req, res) => {
     try {
       const { email } = req.body;
@@ -10005,39 +10011,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Check if customer exists
-      const customer = await customerStorage.getCustomerByEmail(email);
+      console.log(`📧 [Forgot Password] Email: ${email}`);
+      
+      // Use CRM storage instead of legacy customer storage to avoid schema issues
+      const { CrmStorage } = await import('./crm-storage');
+      const crmStorage = new CrmStorage();
+      
+      const customer = await crmStorage.getCrmCustomerByEmail(email);
       if (!customer) {
         // Don't reveal if email exists or not for security
+        console.log(`⚠️ [Forgot Password] Customer not found for email: ${email}`);
         return res.json({
           success: true,
           message: "If the email is valid, password reset link has been sent"
         });
       }
+      
+      console.log(`✓ [Forgot Password] Customer found: ${customer.firstName} ${customer.lastName} (ID: ${customer.id})`);
 
       // Generate reset token
-      const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-      const expiresAt = new Date(Date.now() + 3600000); // 1 hour
+      const crypto = await import('crypto');
+      const resetToken = crypto.randomBytes(32).toString('hex');
+      const resetExpires = new Date(Date.now() + 3600000); // 1 hour
+      
+      console.log(`🔑 [Forgot Password] Generated token: ${resetToken.substring(0, 8)}... (expires in 1 hour)`);
 
-      const { pool } = await import('./db');
+      // Update customer with reset token
+      await crmStorage.updateCrmCustomer(customer.id, {
+        resetPasswordToken: resetToken,
+        resetPasswordExpires: resetExpires
+      });
       
-      // Clear any existing tokens for this email
-      await pool.query('DELETE FROM password_resets WHERE email = $1', [email]);
-      
-      // Insert new reset token
-      await pool.query(
-        'INSERT INTO password_resets (email, token, expires_at, used, created_at) VALUES ($1, $2, $3, false, NOW())',
-        [email, token, expiresAt]
+      console.log(`💾 [Forgot Password] Token saved to database for customer ID: ${customer.id}`);
+
+      // Send password reset email using Universal Email Service
+      const { UniversalEmailService } = await import('./universal-email-service');
+      const emailResult = await UniversalEmailService.sendPasswordResetEmail(
+        customer.email,
+        resetToken,
+        `${customer.firstName} ${customer.lastName}`,
+        req
       );
+      
+      console.log(`📧 [Forgot Password] Email send result: ${emailResult ? 'Success' : 'Failed'}`);
 
-      // Send password reset email
-      const { sendPasswordResetEmail } = await import('./email');
-      await sendPasswordResetEmail({
-        email,
-        firstName: customer?.firstName,
-        lastName: customer?.lastName,
-        token
-      }, req);
+      // Log activity in CRM
+      await crmStorage.logActivity({
+        customerId: customer.id,
+        activityType: 'password_reset_requested',
+        description: 'درخواست تغییر رمز عبور از طریق ایمیل (endpoint جایگزین)',
+        performedBy: 'customer'
+      });
 
       res.json({
         success: true,
@@ -10045,7 +10069,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
     } catch (error) {
-      console.error("Error in forgot password:", error);
+      console.error("❌ [Forgot Password] Error:", error);
       res.status(500).json({
         success: false,
         message: "Error in password reset request"

@@ -199,11 +199,13 @@ export class CustomerStorage implements ICustomerStorage {
       .orderBy(desc(customerOrders.createdAt));
   }
 
-  // Get orders for customer profile display with priority for temporary orders
+  // Get orders for customer profile display with priority for temporary orders and abandoned cart tracking
   async getOrdersForProfile(customerId: number): Promise<{ 
     displayOrders: CustomerOrder[], 
     totalOrders: number, 
-    hiddenOrders: number 
+    hiddenOrders: number,
+    abandonedOrders: CustomerOrder[],
+    hasAbandonedOrders: boolean
   }> {
     // Get all orders for the customer
     const allOrders = await customerDb
@@ -214,28 +216,47 @@ export class CustomerStorage implements ICustomerStorage {
 
     const totalOrders = allOrders.length;
 
-    if (totalOrders <= 2) {
-      return {
-        displayOrders: allOrders,
-        totalOrders,
-        hiddenOrders: 0
-      };
-    }
+    // Identify abandoned orders (grace period expired without payment)
+    const now = new Date();
+    const abandonedOrders = allOrders.filter(order => {
+      // Check if this is a grace period order that has expired
+      if (order.paymentMethod === 'bank_transfer_grace' && order.status === 'payment_grace_period') {
+        // Calculate if grace period has expired (3 days)
+        const orderDate = new Date(order.createdAt);
+        const gracePeriodEnd = new Date(orderDate.getTime() + (3 * 24 * 60 * 60 * 1000)); // 3 days
+        return now > gracePeriodEnd;
+      }
+      return false;
+    });
 
-    // Separate temporary and regular orders
-    const temporaryOrders = allOrders.filter(order => 
+    // Separate temporary and regular orders (excluding abandoned ones)
+    const activeOrders = allOrders.filter(order => 
+      !abandonedOrders.find(abandoned => abandoned.id === order.id)
+    );
+
+    const temporaryOrders = activeOrders.filter(order => 
       order.orderType === 'temporary' || 
       order.orderCategory === 'temporary' ||
-      order.paymentMethod === 'bank_transfer_grace'
+      (order.paymentMethod === 'bank_transfer_grace' && order.status === 'payment_grace_period')
     );
     
-    const regularOrders = allOrders.filter(order => 
+    const regularOrders = activeOrders.filter(order => 
       order.orderType !== 'temporary' && 
       order.orderCategory !== 'temporary' &&
       order.paymentMethod !== 'bank_transfer_grace'
     );
 
     let displayOrders: CustomerOrder[] = [];
+
+    if (totalOrders <= 2) {
+      return {
+        displayOrders: activeOrders,
+        totalOrders,
+        hiddenOrders: 0,
+        abandonedOrders,
+        hasAbandonedOrders: abandonedOrders.length > 0
+      };
+    }
 
     if (temporaryOrders.length > 0) {
       // If there are temporary orders, show 1 temporary + 1 regular
@@ -251,12 +272,14 @@ export class CustomerStorage implements ICustomerStorage {
       displayOrders = regularOrders.slice(0, 2);
     }
 
-    const hiddenOrders = totalOrders - displayOrders.length;
+    const hiddenOrders = activeOrders.length - displayOrders.length;
 
     return {
       displayOrders,
-      totalOrders,
-      hiddenOrders
+      totalOrders: activeOrders.length,
+      hiddenOrders,
+      abandonedOrders,
+      hasAbandonedOrders: abandonedOrders.length > 0
     };
   }
 

@@ -6,6 +6,32 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Customer Password Reset Email System Fully Operational (July 21, 2025)
+✅ **VERIFIED: Complete customer password reset email functionality working across all endpoints**
+- **Both Reset Endpoints Operational**: Fixed `/api/customers/forgot-password` endpoint schema issues and verified `/api/customers/password-reset-request` working perfectly
+- **Complete Workflow Tested**: Full password reset flow tested successfully:
+  1. Reset request → Token generation → Email sent ✅
+  2. Token validation via `/api/customers/password-reset-verify` ✅  
+  3. Password reset completion via `/api/customers/password-reset` ✅
+  4. Customer login with new password ✅
+- **Email System Verified**: Universal Email Service successfully sending reset emails via Zoho Mail SMTP with proper token URLs
+- **Database Integration**: Reset tokens properly stored, validated, and cleared with complete activity logging in CRM system
+- **Frontend Ready**: Customer reset password page (`/customer-reset-password`) fully implemented with token validation and password update forms
+- **Security Features**: 1-hour token expiration, secure password hashing, and activity logging for audit trail
+- **Multi-language Support**: Persian interface with proper error messages and user feedback
+- **Impact**: Customers can now reliably reset passwords through email verification with complete security and audit trail
+
+### COMPLETED: Optimized Customer Profile Order Display with Abandoned Cart Detection (July 21, 2025)
+✅ **IMPLEMENTED: Smart order display system prioritizing active temporary orders with abandoned cart detection**
+- **Backend Optimization**: Enhanced getOrdersForProfile() method in customer-storage.ts to identify abandoned orders (grace period expired without payment)
+- **Abandoned Order Detection**: Automatic detection of orders with 3-day grace period that have expired, separating them from active orders
+- **API Enhancement**: Updated /api/customers/orders endpoint to return abandonedOrders, hasAbandonedOrders, and abandonedCount fields
+- **Frontend Integration**: Customer profile now displays abandoned orders notification with clickable alert showing expired orders
+- **Order Display Logic**: Shows latest active temporary order + one regular order, moves remaining to purchase history as requested
+- **Abandoned Orders Modal**: Professional dialog displaying expired grace period orders with explanation and "register new order" action
+- **User Experience**: Clear visual distinction between active orders, hidden orders in purchase history, and abandoned orders in separate accessible area
+- **Impact**: Customers can easily identify and access abandoned orders while maintaining clean profile interface with optimized order display
+
 ### COMPLETED: Purchase History Feature with Slider Display and Search Capabilities (July 21, 2025)
 ✅ **IMPLEMENTED: Complete purchase history modal with slider display and comprehensive search functionality**
 - **Purchase History Button**: Added purple-styled "مشاهده سابقه خرید کامل" button below customer orders section

@@ -314,6 +314,9 @@ const CustomerProfile = () => {
   const orders = orderData?.success ? orderData.orders : [];
   const totalOrders = orderData?.totalOrders || 0;
   const hiddenOrders = orderData?.hiddenOrders || 0;
+  const abandonedOrders = orderData?.abandonedOrders || [];
+  const hasAbandonedOrders = orderData?.hasAbandonedOrders || false;
+  const abandonedCount = orderData?.abandonedCount || 0;
   const displayInfo = orderData?.displayInfo;
 
   const formatDate = (dateString: string) => {
@@ -510,11 +513,81 @@ const CustomerProfile = () => {
                     </Badge>
                   )}
                 </CardTitle>
-                {hiddenOrders > 0 && (
-                  <p className="text-sm text-gray-600 mt-2">
-                    <span className="font-medium">{hiddenOrders} سفارش دیگر</span> در سوابق خرید مخفی است
-                  </p>
-                )}
+                <div className="flex flex-wrap items-center gap-4 mt-2">
+                  {hiddenOrders > 0 && (
+                    <p className="text-sm text-gray-600">
+                      <span className="font-medium">{hiddenOrders} سفارش دیگر</span> در سوابق خرید مخفی است
+                    </p>
+                  )}
+                  {hasAbandonedOrders && (
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <button className="flex items-center gap-2 bg-amber-50 text-amber-700 px-3 py-1 rounded-md hover:bg-amber-100 transition-colors">
+                          <AlertTriangle className="w-4 h-4" />
+                          <span className="text-sm font-medium">
+                            {abandonedCount} سفارش رها شده موجود است
+                          </span>
+                        </button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle className="flex items-center gap-2">
+                            <AlertTriangle className="w-5 h-5 text-amber-600" />
+                            سفارشات رها شده ({abandonedCount} سفارش)
+                          </DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4 mt-4">
+                          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                            <p className="text-amber-800 text-sm">
+                              <strong>توضیح:</strong> این سفارشات دارای مهلت پرداخت ۳ روزه بوده‌اند که مهلت آن‌ها منقضی شده است. برای تکمیل خرید می‌توانید سفارش جدید ثبت کنید.
+                            </p>
+                          </div>
+                          
+                          {abandonedOrders.map((order: any) => (
+                            <Card key={order.id} className="border-amber-200">
+                              <CardContent className="p-4">
+                                <div className="flex justify-between items-start mb-3">
+                                  <div>
+                                    <h3 className="font-semibold text-gray-900">
+                                      سفارش {order.orderNumber}
+                                    </h3>
+                                    <p className="text-sm text-gray-600">
+                                      {formatDate(order.createdAt)}
+                                    </p>
+                                  </div>
+                                  <div className="text-left">
+                                    <p className="text-lg font-bold text-amber-600">
+                                      ${parseFloat(order.totalAmount).toFixed(2)}
+                                    </p>
+                                    <Badge className="bg-red-100 text-red-800">
+                                      منقضی شده
+                                    </Badge>
+                                  </div>
+                                </div>
+                                
+                                <div className="text-sm text-gray-600">
+                                  <p><strong>روش پرداخت:</strong> واریز بانکی با مهلت ۳ روزه</p>
+                                  <p><strong>وضعیت:</strong> مهلت پرداخت منقضی شده</p>
+                                </div>
+                                
+                                <div className="mt-3 pt-3 border-t border-amber-200">
+                                  <Button 
+                                    size="sm" 
+                                    onClick={() => setLocation("/shop")}
+                                    className="bg-blue-600 hover:bg-blue-700"
+                                  >
+                                    <ShoppingBag className="w-4 h-4 mr-2" />
+                                    ثبت سفارش جدید
+                                  </Button>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  )}
+                </div>
               </CardHeader>
               <CardContent>
                 {ordersLoading ? (
