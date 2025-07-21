@@ -329,3 +329,122 @@ export type VehicleType = typeof VEHICLE_TYPES[keyof typeof VEHICLE_TYPES];
 export type DeliveryStatus = typeof DELIVERY_STATUS[keyof typeof DELIVERY_STATUS];
 export type RouteStatus = typeof ROUTE_STATUS[keyof typeof ROUTE_STATUS];
 export type SmsStatus = typeof SMS_STATUS[keyof typeof SMS_STATUS];
+
+// =============================================================================
+// IRAQI CITIES AND SHIPPING RATES MANAGEMENT
+// =============================================================================
+
+// Iraqi cities table for shipping and freight calculation
+export const iraqiCities = pgTable("iraqi_cities", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(), // City name in Arabic/English
+  nameArabic: text("name_arabic"), // Arabic name
+  nameEnglish: text("name_english"), // English name
+  province: text("province"), // محافظة (Baghdad, Basra, Mosul, etc.)
+  region: text("region").default("center"), // north, south, center, kurdistan
+  postalCode: text("postal_code"), // Postal code if available
+  distanceFromBaghdad: integer("distance_from_baghdad"), // Distance in KM from Baghdad
+  isCapital: boolean("is_capital").default(false), // Is it a province capital
+  isActive: boolean("is_active").default(true),
+  population: integer("population"), // Population estimate
+  coordinates: text("coordinates"), // GPS coordinates if available
+  notes: text("notes"), // Additional notes
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => [
+  index("iraqi_cities_name_idx").on(table.name),
+  index("iraqi_cities_province_idx").on(table.province),
+  index("iraqi_cities_region_idx").on(table.region),
+  index("iraqi_cities_active_idx").on(table.isActive),
+]);
+
+// Shipping rates table for Iraqi cities
+export const shippingRates = pgTable("shipping_rates", {
+  id: serial("id").primaryKey(),
+  cityId: integer("city_id").notNull().references(() => iraqiCities.id),
+  weightRange: text("weight_range").notNull(), // "0-1kg", "1-5kg", "5-10kg", etc.
+  minWeight: decimal("min_weight", { precision: 8, scale: 2 }).default("0"), // Minimum weight in kg
+  maxWeight: decimal("max_weight", { precision: 8, scale: 2 }), // Maximum weight in kg
+  standardRate: decimal("standard_rate", { precision: 10, scale: 2 }).notNull(), // Standard shipping rate in IQD
+  expressRate: decimal("express_rate", { precision: 10, scale: 2 }), // Express shipping rate in IQD
+  overnightRate: decimal("overnight_rate", { precision: 10, scale: 2 }), // Overnight delivery rate in IQD
+  deliveryDays: integer("delivery_days").default(3), // Standard delivery days
+  expressDeliveryDays: integer("express_delivery_days").default(1), // Express delivery days
+  currency: text("currency").default("IQD"),
+  isActive: boolean("is_active").default(true),
+  effectiveFrom: timestamp("effective_from").notNull().defaultNow(),
+  effectiveUntil: timestamp("effective_until"), // Rate expiration date
+  notes: text("notes"), // Special conditions or notes
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => [
+  index("shipping_rates_city_idx").on(table.cityId),
+  index("shipping_rates_weight_idx").on(table.weightRange),
+  index("shipping_rates_active_idx").on(table.isActive),
+]);
+
+// Freight calculation table for bulk shipments
+export const freightRates = pgTable("freight_rates", {
+  id: serial("id").primaryKey(),
+  cityId: integer("city_id").notNull().references(() => iraqiCities.id),
+  transportType: text("transport_type").notNull(), // "truck", "van", "motorcycle", "plane"
+  vehicleSize: text("vehicle_size"), // "small", "medium", "large", "extra_large"
+  baseRate: decimal("base_rate", { precision: 10, scale: 2 }).notNull(), // Base rate in IQD
+  perKgRate: decimal("per_kg_rate", { precision: 8, scale: 2 }), // Rate per kilogram
+  perKmRate: decimal("per_km_rate", { precision: 8, scale: 2 }), // Rate per kilometer
+  fuelSurcharge: decimal("fuel_surcharge", { precision: 5, scale: 2 }).default("0"), // Fuel surcharge percentage
+  minimumCharge: decimal("minimum_charge", { precision: 10, scale: 2 }), // Minimum charge
+  maximumWeight: decimal("maximum_weight", { precision: 10, scale: 2 }), // Maximum weight capacity
+  deliveryTimeHours: integer("delivery_time_hours").default(72), // Estimated delivery time in hours
+  isActive: boolean("is_active").default(true),
+  currency: text("currency").default("IQD"),
+  providerName: text("provider_name"), // Transportation company name
+  contactInfo: text("contact_info"), // Contact information
+  notes: text("notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => [
+  index("freight_rates_city_idx").on(table.cityId),
+  index("freight_rates_transport_idx").on(table.transportType),
+  index("freight_rates_vehicle_idx").on(table.vehicleSize),
+  index("freight_rates_active_idx").on(table.isActive),
+]);
+
+// Add new schemas and types for Iraqi cities
+export const insertIraqiCitySchema = createInsertSchema(iraqiCities);
+export const insertShippingRateSchema = createInsertSchema(shippingRates);
+export const insertFreightRateSchema = createInsertSchema(freightRates);
+
+export type IraqiCity = typeof iraqiCities.$inferSelect;
+export type InsertIraqiCity = z.infer<typeof insertIraqiCitySchema>;
+export type ShippingRate = typeof shippingRates.$inferSelect;
+export type InsertShippingRate = z.infer<typeof insertShippingRateSchema>;
+export type FreightRate = typeof freightRates.$inferSelect;
+export type InsertFreightRate = z.infer<typeof insertFreightRateSchema>;
+
+// Iraqi regions constants
+export const IRAQI_REGIONS = {
+  BAGHDAD: 'baghdad',
+  NORTH: 'north',
+  SOUTH: 'south',
+  CENTER: 'center',
+  KURDISTAN: 'kurdistan'
+} as const;
+
+export const TRANSPORT_TYPES = {
+  MOTORCYCLE: 'motorcycle',
+  VAN: 'van',
+  TRUCK: 'truck',
+  PLANE: 'plane'
+} as const;
+
+export const VEHICLE_SIZES = {
+  SMALL: 'small',
+  MEDIUM: 'medium', 
+  LARGE: 'large',
+  EXTRA_LARGE: 'extra_large'
+} as const;
+
+export type IraqiRegion = typeof IRAQI_REGIONS[keyof typeof IRAQI_REGIONS];
+export type TransportType = typeof TRANSPORT_TYPES[keyof typeof TRANSPORT_TYPES];
+export type VehicleSize = typeof VEHICLE_SIZES[keyof typeof VEHICLE_SIZES];
