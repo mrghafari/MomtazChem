@@ -382,6 +382,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
   // ============================================
+  // START: PDF Generation Routes
+  // ============================================
+
+  // Invoice PDF generation endpoint
+  app.post("/api/pdf/invoice", async (req, res) => {
+    console.log('📄 Invoice PDF generation requested');
+    
+    try {
+      const { generateInvoicePDF } = await import('./pdfkit-generator');
+      
+      const invoiceData = req.body;
+      console.log('Invoice data received:', invoiceData);
+      
+      const pdfBuffer = await generateInvoicePDF(invoiceData);
+      
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="invoice-${invoiceData.invoiceNumber || 'INV'}.pdf"`);
+      res.send(pdfBuffer);
+      
+      console.log('✅ Invoice PDF generated and sent successfully');
+    } catch (error: any) {
+      console.error('❌ Error generating invoice PDF:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در تولید فاکتور PDF',
+        error: error.message
+      });
+    }
+  });
+  
+  // Customer report PDF generation endpoint
+  app.post("/api/pdf/customer-report", requireAuth, async (req, res) => {
+    console.log('📄 Customer report PDF generation requested');
+    
+    try {
+      const { generateCustomerReportPDF } = await import('./pdfkit-generator');
+      
+      const { customerData, orders = [], activities = [] } = req.body;
+      console.log('Customer report data received');
+      
+      const pdfBuffer = await generateCustomerReportPDF(customerData, orders, activities);
+      
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="customer-report-${customerData?.name || 'report'}.pdf"`);
+      res.send(pdfBuffer);
+      
+      console.log('✅ Customer report PDF generated and sent successfully');
+    } catch (error: any) {
+      console.error('❌ Error generating customer report PDF:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در تولید گزارش مشتری PDF',
+        error: error.message
+      });
+    }
+  });
+
+  // ============================================
   // START: Documentation PDF Generation Routes
   // ============================================
 

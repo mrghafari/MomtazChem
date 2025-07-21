@@ -1,7 +1,7 @@
 // PDFMake Generator با فونت فارسی Vazir برای Persian/Arabic support
 import pdfMake from "pdfmake/build/pdfmake.js";
 import pdfFonts from "pdfmake/build/vfs_fonts.js";
-import vazirBase64 from "./vazir-base64";
+import { vazirRegular, vazirBold } from "./vazir-base64";
 
 // Setup fonts for pdfMake with Vazir support for Persian/Arabic text
 function setupVazirFont() {
@@ -15,10 +15,12 @@ function setupVazirFont() {
       pdfMake.vfs = {};
     }
     
-    // Add our custom font with the exact filename
-    pdfMake.vfs["vazirmatn.ttf"] = vazirBase64;
+    // Add our custom fonts with proper base64 data
+    pdfMake.vfs["Vazir-Regular.ttf"] = vazirRegular;
+    pdfMake.vfs["Vazir-Bold.ttf"] = vazirBold;
     
-    console.log('Font data length:', vazirBase64.length);
+    console.log('Regular font data length:', vazirRegular.length);
+    console.log('Bold font data length:', vazirBold.length);
     console.log('VFS keys:', Object.keys(pdfMake.vfs));
 
     // Setup font families
@@ -29,11 +31,11 @@ function setupVazirFont() {
         italics: 'Roboto-Italic.ttf',
         bolditalics: 'Roboto-MediumItalic.ttf'
       },
-      Vazirmatn: {
-        normal: "vazirmatn.ttf",
-        bold: "vazirmatn.ttf",
-        italics: "vazirmatn.ttf",
-        bolditalics: "vazirmatn.ttf",
+      Vazir: {
+        normal: "Vazir-Regular.ttf",
+        bold: "Vazir-Bold.ttf", 
+        italics: "Vazir-Regular.ttf",
+        bolditalics: "Vazir-Bold.ttf",
       },
     };
     

@@ -1,321 +1,275 @@
-// PDFKit Generator with Embedded Vazir Font for Perfect Persian/Arabic Support
+// PDFKit Generator - Clean PDF generation with Vazir fonts
+// This approach uses PDFKit library for generating professional PDFs
+
 import PDFDocument from 'pdfkit';
-import fs from 'fs';
-import path from 'path';
+import { vazirRegular, vazirBold } from './vazir-base64';
 
-// Base64 encoded Vazir font
-const VAZIR_FONT_BASE64 = `AAEAAAAKAIAAAwAgT1MvMnlUMksAABVIAAAAYGNtYXA8JhX6AAAVqAAAA2RnYXNwAAAAEAAAGQwAAAAIZ2x5ZtGrFEgAAAGYAAASUGhlYWQkmGCnAAATaAAAADZoaGVhCQoGjAAAE3AAAAAkaG10eEHhA1YAABOUAAAAtGxvY2FLQkfYAAAUSAAAAFptYXhwABwAKAAAFGgAAAAgbmFtZfBwSxAAABiIAAACL3Bvc3T/hgBGAAAauAAAACAAWABYAFgAWABYAFgBUgHJAnQB1QKnAoAC9gMDA1QDUwNOA1IDSgNJA0kDZgNlA2MDZgNlA2MDZgNlA2MDZgNlA2MDZgNlA2P/wgLZ/8IC2f/CAtk=`;
-
-// Convert base64 to buffer
-function getVazirFontBuffer(): Buffer {
-  const base64Data = VAZIR_FONT_BASE64.replace(/^data:font\/truetype;charset=utf-8;base64,/, '');
-  return Buffer.from(base64Data, 'base64');
-}
-
-export async function generateCustomerPDFWithPDFKit(
-  customerData: any,
-  orders: any[],
-  activities: any[],
-  title: string
-): Promise<Buffer> {
-  
+// Generate Invoice PDF using PDFKit
+export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     try {
-      // Create PDF document
+      console.log('📄 Generating invoice PDF with PDFKit...');
+      
+      // Create a PDF document
       const doc = new PDFDocument({
         size: 'A4',
-        margins: { top: 50, bottom: 50, left: 50, right: 50 },
-        bufferPages: true
+        margin: 50,
+        info: {
+          Title: `Invoice ${invoiceData.invoiceNumber}`,
+          Author: 'Momtaz Chem',
+          Subject: 'Invoice PDF'
+        }
       });
 
-      // Store PDF in memory
       const chunks: Buffer[] = [];
-      doc.on('data', (chunk) => chunks.push(chunk));
-      doc.on('end', () => resolve(Buffer.concat(chunks)));
-      doc.on('error', reject);
-
-      // Register Vazir font from base64
-      const vazirBuffer = getVazirFontBuffer();
-      doc.registerFont('Vazir', vazirBuffer);
-
-      // Use Vazir font
-      doc.font('Vazir');
-
-      // Header
-      doc.fontSize(20)
-         .fillColor('#2563eb')
-         .text('شرکت ممتاز برای مواد شیمیایی', { align: 'center', direction: 'rtl' });
-
-      doc.fontSize(16)
-         .fillColor('#666')
-         .text('Momtaz Chemical Solutions Company', { align: 'center' });
-
-      doc.fontSize(18)
-         .fillColor('#333')
-         .text(`گزارش مشتری - ${title}`, { align: 'center', direction: 'rtl' });
-
-      doc.fontSize(12)
-         .fillColor('#666')
-         .text(`تاریخ تولید: ${new Date().toLocaleDateString('fa-IR')}`, { align: 'center', direction: 'rtl' });
-
-      // Move down
-      doc.moveDown(2);
-
-      // Customer Information Section
-      doc.fontSize(16)
-         .fillColor('#2563eb')
-         .text('اطلاعات مشتری', { align: 'right', direction: 'rtl' });
-
-      doc.moveDown(0.5);
-
-      // Customer details
-      const customerName = customerData?.name || customerData?.customer_name || 'نامشخص';
-      const customerEmail = customerData?.email || 'نامشخص';
-      const customerPhone = customerData?.phone || 'نامشخص';
-      const customerAddress = customerData?.address || 'نامشخص';
-
-      doc.fontSize(12)
-         .fillColor('#333')
-         .text(`نام: ${customerName}`, { align: 'right', direction: 'rtl' })
-         .text(`ایمیل: ${customerEmail}`, { align: 'right', direction: 'rtl' })
-         .text(`تلفن: ${customerPhone}`, { align: 'right', direction: 'rtl' })
-         .text(`آدرس: ${customerAddress}`, { align: 'right', direction: 'rtl' });
-
-      doc.moveDown(2);
-
-      // Orders Section
-      doc.fontSize(16)
-         .fillColor('#2563eb')
-         .text('سفارشات اخیر', { align: 'right', direction: 'rtl' });
-
-      doc.moveDown(0.5);
-
-      // Process orders safely
-      const safeOrders = Array.isArray(orders) ? orders.slice(0, 5) : [];
       
-      if (safeOrders.length > 0) {
-        safeOrders.forEach((order, index) => {
-          const orderId = order?.id || order?.customer_order_id || 'نامشخص';
-          const amount = order?.totalAmount || order?.total_amount || 0;
-          const status = order?.status || 'نامشخص';
-          const date = order?.createdAt || order?.created_at || order?.orderDate;
-          const formattedDate = date ? new Date(date).toLocaleDateString('fa-IR') : 'نامشخص';
-          
-          doc.fontSize(11)
-             .fillColor('#333')
-             .text(`${index + 1}. سفارش ${orderId} - ${amount} دینار - ${status} - ${formattedDate}`, 
-                   { align: 'right', direction: 'rtl' });
-        });
-      } else {
+      doc.on('data', (chunk: Buffer) => {
+        chunks.push(chunk);
+      });
+
+      doc.on('end', () => {
+        const result = Buffer.concat(chunks);
+        console.log('✅ Invoice PDF generated successfully, size:', result.length);
+        resolve(result);
+      });
+
+      doc.on('error', (error: Error) => {
+        console.error('❌ PDF generation error:', error);
+        reject(error);
+      });
+
+      // Add content to PDF with font fallback
+      try {
+        // Try to register custom fonts
+        const vazirRegularBuffer = Buffer.from(vazirRegular, 'base64');
+        const vazirBoldBuffer = Buffer.from(vazirBold, 'base64');
+        
+        doc.registerFont('VazirRegular', vazirRegularBuffer);
+        doc.registerFont('VazirBold', vazirBoldBuffer);
+        
+        console.log('✅ Vazir fonts registered successfully');
+        
+        // Set font for RTL text
+        doc.font('VazirRegular');
+        
+        // Header
+        doc.fontSize(20)
+           .font('VazirBold')
+           .text('فاکتور فروش - Momtaz Chem', 50, 50, { align: 'center' });
+        
+        // Invoice details
+        doc.fontSize(12)
+           .font('VazirRegular')
+           .text(`شماره فاکتور: ${invoiceData.invoiceNumber || 'INV-001'}`, 50, 100, { align: 'right' })
+           .text(`تاریخ: ${new Date().toLocaleDateString('fa-IR')}`, 350, 100, { align: 'left' });
+        
+        // Customer info
+        doc.fontSize(14)
+           .font('VazirBold')
+           .text('مشخصات مشتری:', 50, 150, { align: 'right' });
+        
         doc.fontSize(11)
-           .fillColor('#666')
-           .text('سفارشی ثبت نشده است', { align: 'right', direction: 'rtl' });
-      }
-
-      doc.moveDown(2);
-
-      // Activities Section
-      doc.fontSize(16)
-         .fillColor('#2563eb')
-         .text('فعالیت‌های اخیر', { align: 'right', direction: 'rtl' });
-
-      doc.moveDown(0.5);
-
-      // Process activities safely
-      const safeActivities = Array.isArray(activities) ? activities.slice(0, 5) : [];
-      
-      if (safeActivities.length > 0) {
-        safeActivities.forEach((activity, index) => {
-          const type = activity?.activityType || activity?.activity_type || 'نامشخص';
-          const desc = activity?.description || 'توضیحی ثبت نشده';
-          const date = activity?.createdAt || activity?.created_at;
-          const formattedDate = date ? new Date(date).toLocaleDateString('fa-IR') : 'نامشخص';
+           .font('VazirRegular')
+           .text(`نام: ${invoiceData.customerName || 'نامشخص'}`, 50, 180, { align: 'right' })
+           .text(`تلفن: ${invoiceData.customerPhone || 'نامشخص'}`, 50, 200, { align: 'right' })
+           .text(`ایمیل: ${invoiceData.customerEmail || 'نامشخص'}`, 50, 220, { align: 'right' });
+        
+        // Items table
+        doc.fontSize(14)
+           .font('VazirBold')
+           .text('کالاها و خدمات:', 50, 260, { align: 'right' });
+        
+        // Table headers
+        const startY = 290;
+        doc.fontSize(10)
+           .font('VazirBold')
+           .text('شرح کالا', 50, startY, { align: 'right' })
+           .text('تعداد', 200, startY, { align: 'center' })
+           .text('قیمت واحد', 250, startY, { align: 'center' })
+           .text('مبلغ کل', 350, startY, { align: 'center' });
+        
+        // Draw line under headers
+        doc.moveTo(50, startY + 15)
+           .lineTo(500, startY + 15)
+           .stroke();
+        
+        // Items
+        let currentY = startY + 25;
+        const items = invoiceData.items || [];
+        
+        items.forEach((item: any, index: number) => {
+          const itemY = currentY + (index * 20);
           
-          doc.fontSize(11)
-             .fillColor('#333')
-             .text(`${index + 1}. ${type} - ${desc} - ${formattedDate}`, 
-                   { align: 'right', direction: 'rtl' });
+          doc.fontSize(9)
+             .font('VazirRegular')
+             .text(item.name || 'نامشخص', 50, itemY, { align: 'right' })
+             .text((item.quantity || 1).toString(), 200, itemY, { align: 'center' })
+             .text((item.unitPrice || 0).toLocaleString('fa-IR') + ' ریال', 250, itemY, { align: 'center' })
+             .text(((item.quantity || 1) * (item.unitPrice || 0)).toLocaleString('fa-IR') + ' ریال', 350, itemY, { align: 'center' });
         });
-      } else {
+        
+        // Total
+        const totalY = currentY + (items.length * 20) + 30;
+        doc.fontSize(12)
+           .font('VazirBold')
+           .text(`مجموع کل: ${(invoiceData.totalAmount || 0).toLocaleString('fa-IR')} ریال`, 50, totalY, { align: 'right' });
+        
+        // Footer
+        doc.fontSize(9)
+           .font('VazirRegular')
+           .text('شرکت مواد شیمیایی ممتاز - Momtaz Chemical Solutions', 50, 750, { align: 'center' })
+           .text('www.momtazchem.com | info@momtazchem.com', 50, 765, { align: 'center' });
+        
+      } catch (fontError) {
+        console.warn('⚠️ Font registration failed, using default font:', fontError);
+        
+        // Fallback to default font
+        doc.fontSize(20)
+           .text('Invoice - Momtaz Chem', 50, 50, { align: 'center' });
+        
+        doc.fontSize(12)
+           .text(`Invoice Number: ${invoiceData.invoiceNumber || 'INV-001'}`, 50, 100)
+           .text(`Date: ${new Date().toLocaleDateString()}`, 350, 100);
+        
+        doc.fontSize(14)
+           .text('Customer Details:', 50, 150);
+        
         doc.fontSize(11)
-           .fillColor('#666')
-           .text('فعالیتی ثبت نشده است', { align: 'right', direction: 'rtl' });
+           .text(`Name: ${invoiceData.customerName || 'Unknown'}`, 50, 180)
+           .text(`Phone: ${invoiceData.customerPhone || 'Unknown'}`, 50, 200)
+           .text(`Email: ${invoiceData.customerEmail || 'Unknown'}`, 50, 220);
+        
+        doc.fontSize(14)
+           .text('Items:', 50, 260);
+        
+        const items = invoiceData.items || [];
+        let currentY = 290;
+        
+        items.forEach((item: any, index: number) => {
+          const itemY = currentY + (index * 20);
+          doc.fontSize(10)
+             .text(`${item.name || 'Unknown'} - Qty: ${item.quantity || 1} - Price: ${(item.unitPrice || 0).toLocaleString()} IQD`, 50, itemY);
+        });
+        
+        const totalY = currentY + (items.length * 20) + 30;
+        doc.fontSize(12)
+           .text(`Total: ${(invoiceData.totalAmount || 0).toLocaleString()} IQD`, 50, totalY);
       }
-
-      // Footer
-      doc.moveDown(3);
-      doc.fontSize(10)
-         .fillColor('#666')
-         .text('تلفن: +964 770 999 6771 | ایمیل: info@momtazchem.com', { align: 'center', direction: 'rtl' })
-         .text('وب‌سایت: www.momtazchem.com | آدرس: عراق - بغداد', { align: 'center', direction: 'rtl' })
-         .text(`© ${new Date().getFullYear()} شرکت ممتاز برای مواد شیمیایی`, { align: 'center', direction: 'rtl' });
 
       // Finalize the PDF
       doc.end();
-
+      
     } catch (error) {
-      console.error('PDFKit generation error:', error);
+      console.error('❌ Error in generateInvoicePDF:', error);
       reject(error);
     }
   });
 }
 
-export async function generateAnalyticsPDFWithPDFKit(
-  analyticsData: any,
-  title: string
-): Promise<Buffer> {
-  
+// Generate Customer Report PDF using PDFKit
+export async function generateCustomerReportPDF(customerData: any, orders: any[] = [], activities: any[] = []): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     try {
+      console.log('📄 Generating customer report PDF with PDFKit...');
+      
+      // Create a PDF document
       const doc = new PDFDocument({
         size: 'A4',
-        margins: { top: 50, bottom: 50, left: 50, right: 50 },
-        bufferPages: true
+        margin: 50,
+        info: {
+          Title: `Customer Report - ${customerData.customerName || 'Unknown'}`,
+          Author: 'Momtaz Chem',
+          Subject: 'Customer Report PDF'
+        }
       });
 
       const chunks: Buffer[] = [];
-      doc.on('data', (chunk) => chunks.push(chunk));
-      doc.on('end', () => resolve(Buffer.concat(chunks)));
-      doc.on('error', reject);
+      
+      doc.on('data', (chunk: Buffer) => {
+        chunks.push(chunk);
+      });
 
-      // Register and use Vazir font
-      const vazirBuffer = getVazirFontBuffer();
-      doc.registerFont('Vazir', vazirBuffer);
-      doc.font('Vazir');
+      doc.on('end', () => {
+        const result = Buffer.concat(chunks);
+        console.log('✅ Customer report PDF generated successfully, size:', result.length);
+        resolve(result);
+      });
 
-      // Header
-      doc.fontSize(20)
-         .fillColor('#2563eb')
-         .text('گزارش آمارها', { align: 'center', direction: 'rtl' });
+      doc.on('error', (error: Error) => {
+        console.error('❌ PDF generation error:', error);
+        reject(error);
+      });
 
-      doc.fontSize(16)
-         .fillColor('#666')
-         .text('شرکت ممتاز برای مواد شیمیایی', { align: 'center', direction: 'rtl' });
-
-      doc.fontSize(12)
-         .fillColor('#666')
-         .text(`تاریخ تولید: ${new Date().toLocaleDateString('fa-IR')}`, { align: 'center', direction: 'rtl' });
-
-      doc.moveDown(3);
-
-      // Statistics
-      const stats = [
-        { label: 'تعداد کل مشتریان', value: analyticsData?.totalCustomers || 0 },
-        { label: 'مشتریان فعال', value: analyticsData?.activeCustomers || 0 },
-        { label: 'تعداد کل سفارشات', value: analyticsData?.totalOrders || 0 },
-        { label: 'درآمد ماهانه (دینار)', value: analyticsData?.monthlyRevenue || 0 },
-        { label: 'مشتریان جدید این ماه', value: analyticsData?.newThisMonth || 0 },
-        { label: 'میانگین ارزش سفارش', value: analyticsData?.averageOrderValue || 0 }
-      ];
-
-      stats.forEach((stat) => {
+      // Add content to PDF with font fallback
+      try {
+        // Try to register custom fonts
+        const vazirRegularBuffer = Buffer.from(vazirRegular, 'base64');
+        const vazirBoldBuffer = Buffer.from(vazirBold, 'base64');
+        
+        doc.registerFont('VazirRegular', vazirRegularBuffer);
+        doc.registerFont('VazirBold', vazirBoldBuffer);
+        
+        // Set font for RTL text
+        doc.font('VazirRegular');
+        
+        // Header
+        doc.fontSize(20)
+           .font('VazirBold')
+           .text('گزارش مشتری - Momtaz Chem', 50, 50, { align: 'center' });
+        
+        // Customer info
         doc.fontSize(14)
-           .fillColor('#2563eb')
-           .text(`${stat.label}: ${stat.value.toLocaleString('fa-IR')}`, { align: 'right', direction: 'rtl' });
-        doc.moveDown(0.5);
-      });
-
-      // Footer
-      doc.moveDown(3);
-      doc.fontSize(10)
-         .fillColor('#666')
-         .text('تلفن: +964 770 999 6771 | ایمیل: info@momtazchem.com', { align: 'center', direction: 'rtl' })
-         .text(`© ${new Date().getFullYear()} شرکت ممتاز برای مواد شیمیایی`, { align: 'center', direction: 'rtl' });
-
-      doc.end();
-
-    } catch (error) {
-      console.error('Analytics PDFKit generation error:', error);
-      reject(error);
-    }
-  });
-}
-
-export async function generateInvoicePDFWithPDFKit(
-  customerData: any,
-  orderData: any,
-  batchData: any[],
-  title: string
-): Promise<Buffer> {
-  
-  return new Promise((resolve, reject) => {
-    try {
-      const doc = new PDFDocument({
-        size: 'A4',
-        margins: { top: 50, bottom: 50, left: 50, right: 50 },
-        bufferPages: true
-      });
-
-      const chunks: Buffer[] = [];
-      doc.on('data', (chunk) => chunks.push(chunk));
-      doc.on('end', () => resolve(Buffer.concat(chunks)));
-      doc.on('error', reject);
-
-      // Register and use Vazir font
-      const vazirBuffer = getVazirFontBuffer();
-      doc.registerFont('Vazir', vazirBuffer);
-      doc.font('Vazir');
-
-      // Header
-      doc.fontSize(20)
-         .fillColor('#2563eb')
-         .text('فاکتور', { align: 'center', direction: 'rtl' });
-
-      doc.fontSize(16)
-         .fillColor('#666')
-         .text('شرکت ممتاز برای مواد شیمیایی', { align: 'center', direction: 'rtl' });
-
-      doc.fontSize(12)
-         .fillColor('#666')
-         .text(`شماره فاکتور: ${title}`, { align: 'center', direction: 'rtl' })
-         .text(`تاریخ صدور: ${new Date().toLocaleDateString('fa-IR')}`, { align: 'center', direction: 'rtl' });
-
-      doc.moveDown(2);
-
-      // Customer Info
-      doc.fontSize(14)
-         .fillColor('#2563eb')
-         .text('اطلاعات مشتری', { align: 'right', direction: 'rtl' });
-
-      doc.fontSize(12)
-         .fillColor('#333')
-         .text(`نام: ${customerData?.name || 'نامشخص'}`, { align: 'right', direction: 'rtl' })
-         .text(`تلفن: ${customerData?.phone || 'نامشخص'}`, { align: 'right', direction: 'rtl' });
-
-      doc.moveDown(2);
-
-      // Batch Data
-      doc.fontSize(14)
-         .fillColor('#2563eb')
-         .text('جزئیات محصولات', { align: 'right', direction: 'rtl' });
-
-      doc.moveDown(0.5);
-
-      const safeBatchData = Array.isArray(batchData) ? batchData : [];
-      if (safeBatchData.length > 0) {
-        safeBatchData.forEach((batch, index) => {
-          doc.fontSize(11)
-             .fillColor('#333')
-             .text(`${index + 1}. بچ ${batch?.batchNumber || 'نامشخص'} - مقدار: ${batch?.quantitySold || 0} - قیمت: ${batch?.totalPrice || 0} دینار`, 
-                   { align: 'right', direction: 'rtl' });
-        });
-      } else {
+           .font('VazirBold')
+           .text('اطلاعات مشتری:', 50, 100, { align: 'right' });
+        
         doc.fontSize(11)
-           .fillColor('#666')
-           .text('اطلاعات محصول موجود نیست', { align: 'right', direction: 'rtl' });
+           .font('VazirRegular')
+           .text(`نام: ${customerData.customerName || 'نامشخص'}`, 50, 130, { align: 'right' })
+           .text(`ایمیل: ${customerData.email || 'نامشخص'}`, 50, 150, { align: 'right' })
+           .text(`تلفن: ${customerData.phone || 'نامشخص'}`, 50, 170, { align: 'right' });
+        
+        // Orders section
+        doc.fontSize(14)
+           .font('VazirBold')
+           .text('سوابق سفارشات:', 50, 210, { align: 'right' });
+        
+        doc.fontSize(11)
+           .font('VazirRegular')
+           .text(orders.length > 0 ? `تعداد سفارشات: ${orders.length}` : 'هیچ سفارشی یافت نشد.', 50, 240, { align: 'right' });
+        
+        // Footer
+        doc.fontSize(9)
+           .font('VazirRegular')
+           .text('شرکت مواد شیمیایی ممتاز - Momtaz Chemical Solutions', 50, 750, { align: 'center' })
+           .text('www.momtazchem.com | info@momtazchem.com', 50, 765, { align: 'center' });
+        
+      } catch (fontError) {
+        console.warn('⚠️ Font registration failed, using default font:', fontError);
+        
+        // Fallback to default font
+        doc.fontSize(20)
+           .text('Customer Report - Momtaz Chem', 50, 50, { align: 'center' });
+        
+        doc.fontSize(14)
+           .text('Customer Information:', 50, 100);
+        
+        doc.fontSize(11)
+           .text(`Name: ${customerData.customerName || 'Unknown'}`, 50, 130)
+           .text(`Email: ${customerData.email || 'Unknown'}`, 50, 150)
+           .text(`Phone: ${customerData.phone || 'Unknown'}`, 50, 170);
+        
+        doc.fontSize(14)
+           .text('Order History:', 50, 210);
+        
+        doc.fontSize(11)
+           .text(orders.length > 0 ? `Total Orders: ${orders.length}` : 'No orders found.', 50, 240);
       }
 
-      // Footer
-      doc.moveDown(3);
-      doc.fontSize(10)
-         .fillColor('#666')
-         .text('تلفن: +964 770 999 6771 | ایمیل: info@momtazchem.com', { align: 'center', direction: 'rtl' })
-         .text(`© ${new Date().getFullYear()} شرکت ممتاز برای مواد شیمیایی`, { align: 'center', direction: 'rtl' });
-
+      // Finalize the PDF
       doc.end();
-
+      
     } catch (error) {
-      console.error('Invoice PDFKit generation error:', error);
+      console.error('❌ Error in generateCustomerReportPDF:', error);
       reject(error);
     }
   });

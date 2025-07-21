@@ -225,6 +225,7 @@ function Router() {
           <Route path="/admin/kpi-dashboard" component={KpiDashboard} />
           <Route path="/admin/management-dashboard" component={ManagementDashboard} />
           <Route path="/admin/accounting-management" component={AccountingManagement} />
+          <Route path="/admin/pdf-test" component={lazy(() => import("@/pages/admin/pdf-test"))} />
 
 
           
