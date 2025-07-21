@@ -5914,23 +5914,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Log first order structure for debugging
       if (orders.length > 0) {
         console.log('🔍 [ROUTES] First order structure:', JSON.stringify(orders[0], null, 2));
+        console.log('🔍 [ROUTES] First order orderNumber specifically:', orders[0].orderNumber);
       }
       
       // Transform orders to ensure compatibility with frontend interface
-      const transformedOrders = orders.map(order => ({
-        ...order,
-        // Ensure orderNumber is explicitly included in response
-        orderNumber: order.orderNumber,
-        // Extract customer fields from nested customer object
-        customerFirstName: order.customer?.firstName || '',
-        customerLastName: order.customer?.lastName || '',
-        customerEmail: order.customer?.email || '',
-        customerPhone: order.customer?.phone || '',
-        // Also provide receipt info in legacy format
-        receiptUrl: order.receipt?.url || order.paymentReceiptUrl,
-        receiptFileName: order.receipt?.fileName || '',
-        receiptMimeType: order.receipt?.mimeType || ''
-      }));
+      const transformedOrders = orders.map(order => {
+        console.log('🔧 [TRANSFORM] Order', order.customerOrderId, 'original orderNumber:', order.orderNumber);
+        const transformed = {
+          ...order,
+          // Ensure orderNumber is explicitly included in response
+          orderNumber: order.orderNumber,
+          // Extract customer fields from nested customer object
+          customerFirstName: order.customer?.firstName || '',
+          customerLastName: order.customer?.lastName || '',
+          customerEmail: order.customer?.email || '',
+          customerPhone: order.customer?.phone || '',
+          // Also provide receipt info in legacy format
+          receiptUrl: order.receipt?.url || order.paymentReceiptUrl,
+          receiptFileName: order.receipt?.fileName || '',
+          receiptMimeType: order.receipt?.mimeType || ''
+        };
+        console.log('🔧 [TRANSFORM] Order', order.customerOrderId, 'transformed orderNumber:', transformed.orderNumber);
+        return transformed;
+      });
       
       res.json({ 
         success: true, 

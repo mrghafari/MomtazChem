@@ -555,6 +555,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       deliveryCode: row.deliveryCode,
       totalAmount: row.totalAmount,
       currency: row.currency,
+      orderNumber: row.orderNumber, // شماره سفارش MOM format
       
       // Weight and delivery information - use updated totalWeight if calculated
       totalWeight: row.totalWeight,
