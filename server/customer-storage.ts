@@ -117,11 +117,16 @@ export class CustomerStorage implements ICustomerStorage {
   }
 
   async getCustomerById(id: number): Promise<Customer | undefined> {
-    const [customer] = await customerDb
-      .select()
-      .from(customers)
-      .where(eq(customers.id, id));
-    return customer;
+    try {
+      const [customer] = await customerDb
+        .select()
+        .from(customers)
+        .where(eq(customers.id, id));
+      return customer;
+    } catch (error) {
+      console.error("Error fetching customer:", error);
+      return undefined;
+    }
   }
 
   async getCustomerByEmail(email: string): Promise<Customer | undefined> {
@@ -239,14 +244,10 @@ export class CustomerStorage implements ICustomerStorage {
     );
 
     const temporaryOrders = activeOrders.filter(order => 
-      order.orderType === 'temporary' || 
-      order.orderCategory === 'temporary' ||
       (order.paymentMethod === 'bank_transfer_grace' && order.status === 'payment_grace_period')
     );
     
     const regularOrders = activeOrders.filter(order => 
-      order.orderType !== 'temporary' && 
-      order.orderCategory !== 'temporary' &&
       order.paymentMethod !== 'bank_transfer_grace'
     );
 
@@ -258,7 +259,9 @@ export class CustomerStorage implements ICustomerStorage {
         totalOrders,
         hiddenOrders: 0,
         abandonedOrders,
-        hasAbandonedOrders: abandonedOrders.length > 0
+        hasAbandonedOrders: abandonedOrders.length > 0,
+        abandonedCarts: [],
+        hasAbandonedCarts: false
       };
     }
 
@@ -549,55 +552,8 @@ export class CustomerStorage implements ICustomerStorage {
       .orderBy(inquiryResponses.createdAt);
   }
 
-  // Quote requests
-  async createQuoteRequest(quoteData: InsertQuoteRequest): Promise<QuoteRequest> {
-    // Generate unique quote number
-    const quoteNumber = `QUO-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
-    
-    const [quote] = await customerDb
-      .insert(quoteRequests)
-      .values({
-        ...quoteData,
-        quoteNumber,
-      })
-      .returning();
-    return quote;
-  }
-
-  async getQuoteRequestById(id: number): Promise<QuoteRequest | undefined> {
-    const [quote] = await customerDb
-      .select()
-      .from(quoteRequests)
-      .where(eq(quoteRequests.id, id));
-    return quote;
-  }
-
-  async getQuoteRequestsByCustomer(customerId: number): Promise<QuoteRequest[]> {
-    return await customerDb
-      .select()
-      .from(quoteRequests)
-      .where(eq(quoteRequests.customerId, customerId))
-      .orderBy(desc(quoteRequests.createdAt));
-  }
-
-  async getAllQuoteRequests(): Promise<QuoteRequest[]> {
-    return await customerDb
-      .select()
-      .from(quoteRequests)
-      .orderBy(desc(quoteRequests.createdAt));
-  }
-
-  async updateQuoteRequest(id: number, quoteUpdate: Partial<InsertQuoteRequest>): Promise<QuoteRequest> {
-    const [quote] = await customerDb
-      .update(quoteRequests)
-      .set({
-        ...quoteUpdate,
-        updatedAt: new Date(),
-      })
-      .where(eq(quoteRequests.id, id))
-      .returning();
-    return quote;
-  }
+  // Quote requests - temporarily disabled due to missing schema
+  // Will re-enable when quote_requests table and types are properly defined
 
   // Analytics and stats
   async getCustomerStats(): Promise<{

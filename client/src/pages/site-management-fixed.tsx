@@ -304,6 +304,22 @@ export default function SiteManagement() {
       moduleId: "ai_settings"
     },
     {
+      id: "geography-analytics", 
+      label: "Geography Analytics",
+      icon: MapPin,
+      onClick: () => trackButtonClick("geography-analytics", () => setLocation("/admin/geographic-analytics")),
+      className: "border-teal-300 text-teal-600 hover:bg-teal-50",
+      moduleId: "geography_analytics"
+    },
+    {
+      id: "payment-settings",
+      label: "Payment Settings",
+      icon: CreditCard,
+      onClick: () => trackButtonClick("payment-settings", () => setLocation("/admin/payment-settings")),
+      className: "border-blue-300 text-blue-600 hover:bg-blue-50",
+      moduleId: "payment_management"
+    },
+    {
       id: "user-management",
       label: "User Management",
       icon: UserCog,
