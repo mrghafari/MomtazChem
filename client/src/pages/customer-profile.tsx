@@ -127,7 +127,7 @@ const CustomerProfile = () => {
               new Date().getTime() - new Date(order.created_at).getTime() < 3 * 24 * 60 * 60 * 1000);
     });
 
-    const otherOrders = orders.filter((order: any) => {
+    const otherOrders = (orders || []).filter((order: any) => {
       // Orders that don't fit in regular or temporary categories
       return !regularOrders.includes(order) && !temporaryOrders.includes(order);
     });
@@ -138,13 +138,13 @@ const CustomerProfile = () => {
   const { regularOrders, temporaryOrders, otherOrders } = categorizeOrders(orders);
   
   // Orders that need payment (unpaid orders notification)
-  const unpaidOrders = orders.filter((order: any) => 
+  const unpaidOrders = (orders || []).filter((order: any) => 
     ['pending', 'payment_grace_period', 'unpaid', 'pending'].includes(order.payment_status) ||
     ['payment_grace_period'].includes(order.current_status)
   );
 
   // Get history orders for the sheet
-  const historyOrders = orders.filter((order: any) => 
+  const historyOrders = (orders || []).filter((order: any) => 
     ['completed', 'delivered', 'logistics_delivered'].includes(order.current_status)
   );
 
