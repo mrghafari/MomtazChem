@@ -17499,18 +17499,19 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           
           const customerData = customerResult.rows[0];
           
-          // Always generate delivery code, even if customer info is incomplete
-          const deliveryCode = customerData.order_number || `MOM25${String(updatedOrder.customerOrderId).padStart(5, '1')}`;
+          // Generate sequential delivery code (1111-9999, cycling)
+          const { generateDeliveryCode } = await import('./delivery-code-generator');
+          const deliveryCode = await generateDeliveryCode();
           
-          console.log('🔢 [ORDER-CONSISTENCY] Generated delivery code:', deliveryCode);
+          console.log('🔢 [DELIVERY-CODE] Generated sequential delivery code:', deliveryCode);
           
-          // Update order_management table with delivery code (same as order number)
+          // Update order_management table with sequential delivery code
           await orderManagementStorage.updateOrderManagement(parseInt(id), {
             deliveryCode: deliveryCode,
             updatedAt: new Date()
           });
           
-          console.log('✅ [DELIVERY-CODE] Delivery code saved to database:', deliveryCode);
+          console.log('✅ [DELIVERY-CODE] Sequential delivery code saved to database:', deliveryCode);
           
           if (customerData && (customerData.guest_name || customerData.guest_email || customerData.shipping_address)) {
             const customerName = customerData.guest_name || 'Customer';

@@ -743,7 +743,7 @@ const LogisticsManagement = () => {
                           <div className="text-sm font-medium text-blue-600">
                             {order.warehouseProcessedAt ? 
                               new Date(order.warehouseProcessedAt).toLocaleDateString('fa-IR') : 
-                              'در انتظار'
+                              'پردازش نشده'
                             }
                           </div>
                         </td>
