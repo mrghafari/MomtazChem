@@ -428,9 +428,10 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       deliveryCompanyName: orderManagement.deliveryCompanyName,
       deliveryCompanyPhone: orderManagement.deliveryCompanyPhone,
       
-      // Customer Order fields - مبلغ و کارنسی
+      // Customer Order fields - مبلغ و کارنسی و شماره سفارش
       totalAmount: customerOrders.totalAmount,
       currency: customerOrders.currency,
+      orderNumber: customerOrders.orderNumber,
       
       // Shipping and delivery address from customer order
       shippingAddress: customerOrders.shippingAddress,
