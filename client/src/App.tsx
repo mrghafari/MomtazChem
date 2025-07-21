@@ -117,6 +117,7 @@ import BankReceiptUpload from "@/pages/bank-receipt-upload";
 import TestLogistics from "@/pages/test-logistics";
 import KpiDashboard from "@/pages/kpi-dashboard";
 import ManagementDashboard from "@/pages/management-dashboard";
+import AccountingManagement from "@/pages/admin/accounting-management";
 
 import NotFound from "@/pages/not-found";
 
@@ -223,6 +224,7 @@ function Router() {
           <Route path="/admin/batch-management" component={BatchManagement} />
           <Route path="/admin/kpi-dashboard" component={KpiDashboard} />
           <Route path="/admin/management-dashboard" component={ManagementDashboard} />
+          <Route path="/admin/accounting-management" component={AccountingManagement} />
 
 
           

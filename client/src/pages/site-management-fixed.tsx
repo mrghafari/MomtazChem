@@ -215,6 +215,14 @@ export default function SiteManagement() {
       moduleId: "finance"
     },
     {
+      id: "accounting-management",
+      label: "Accounting Management",
+      icon: Calculator,
+      onClick: () => trackButtonClick("accounting-management", () => setLocation("/admin/accounting-management")),
+      className: "border-emerald-300 text-emerald-600 hover:bg-emerald-50",
+      moduleId: "accounting_management"
+    },
+    {
       id: "payment-settings",
       label: "Payment Settings",
       icon: CreditCard,

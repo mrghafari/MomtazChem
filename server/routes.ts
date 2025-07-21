@@ -3991,6 +3991,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       'order_management': 'مدیریت سفارشات',
       'product_management': 'مدیریت محصولات',
       'payment_management': 'مدیریت پرداخت',
+      'accounting_management': 'مدیریت حسابداری',
       'finance': 'مدیریت مالی',
       'wallet_management': 'مدیریت کیف پول',
       'geography_analytics': 'آمار جغرافیایی',
@@ -5468,6 +5469,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'user_management': { name: 'مدیریت کاربران', description: 'ایجاد و مدیریت کاربران سیستم', category: 'admin' },
         'procedures': { name: 'مدیریت روش‌ها', description: 'مدیریت اسناد و روش‌های کاری', category: 'content' },
         'payment_management': { name: 'مدیریت پرداخت', description: 'تنظیمات درگاه پرداخت', category: 'finance' },
+        'accounting_management': { name: 'مدیریت حسابداری', description: 'مدیریت فاکتورها و حسابداری کسب‌وکار', category: 'finance' },
         'finance': { name: 'مدیریت مالی', description: 'بررسی و تایید مالی سفارشات', category: 'finance' },
         'wallet_management': { name: 'مدیریت کیف پول', description: 'مدیریت کیف پول مشتریان', category: 'finance' },
         'geography_analytics': { name: 'آمار جغرافیایی', description: 'تحلیل آمار منطقه‌ای', category: 'analytics' },
@@ -18780,7 +18782,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       if (legacyUser[0].id === 15 || legacyUser[0].email === 'admin@momtazchem.com') {
         console.log(`🔍 [DEBUG] SUPER ADMIN PATH ACTIVATED for ${legacyUser[0].email}`);
         const allModules = [
-          "kpi_dashboard", "management_dashboard",
+          "kpi_dashboard", "management_dashboard", "accounting_management",
           "syncing_shop", "inquiries", "barcode", "email_settings", "database_backup",
           "crm", "seo", "categories", "sms", "factory", "user_management",
           "shop_management", "procedures", "order_management", "product_management",
@@ -26222,6 +26224,132 @@ momtazchem.com
         };
         return acc;
       }, {});
+
+  // ===== ACCOUNTING MANAGEMENT ROUTES =====
+  
+  // Get all invoices
+  app.get("/api/accounting/invoices", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { db } = await import('./db');
+      
+      // Simple mock data for now - in production, fetch from invoices table
+      const invoices = [
+        {
+          id: 1,
+          customer_name: "شرکت نمونه",
+          date: new Date().toISOString(),
+          total_amount: 1500000,
+          status: "paid",
+          items: [
+            {
+              id: 1,
+              invoice_id: 1,
+              description: "محصول شیمیایی A",
+              quantity: 10,
+              unit_price: 150000,
+              total: 1500000
+            }
+          ]
+        },
+        {
+          id: 2,
+          customer_name: "مشتری تست",
+          date: new Date(Date.now() - 86400000).toISOString(),
+          total_amount: 750000,
+          status: "sent",
+          items: []
+        }
+      ];
+      
+      res.json(invoices);
+    } catch (error) {
+      console.error("Error fetching invoices:", error);
+      res.status(500).json({ success: false, message: "خطا در بازیابی فاکتورها" });
+    }
+  });
+
+  // Create new invoice
+  app.post("/api/accounting/invoices", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { customer_name, items } = req.body;
+
+      if (!customer_name || !items || items.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: "نام مشتری و آیتم‌های فاکتور الزامی است"
+        });
+      }
+
+      const total_amount = items.reduce((sum: number, item: any) => sum + item.quantity * item.unit_price, 0);
+
+      // In production, save to database
+      const newInvoice = {
+        id: Date.now(),
+        customer_name,
+        date: new Date().toISOString(),
+        total_amount,
+        status: 'draft',
+        items: items.map((item: any, index: number) => ({
+          id: Date.now() + index,
+          invoice_id: Date.now(),
+          description: item.description,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          total: item.quantity * item.unit_price
+        }))
+      };
+
+      res.status(201).json({
+        success: true,
+        data: newInvoice,
+        message: "فاکتور با موفقیت ایجاد شد"
+      });
+    } catch (error) {
+      console.error("Error creating invoice:", error);
+      res.status(500).json({ success: false, message: "خطا در ایجاد فاکتور" });
+    }
+  });
+
+  // Get single invoice with items
+  app.get("/api/accounting/invoices/:id", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const invoiceId = parseInt(req.params.id);
+      
+      if (isNaN(invoiceId)) {
+        return res.status(400).json({
+          success: false,
+          message: "شناسه فاکتور نامعتبر است"
+        });
+      }
+
+      // In production, fetch from database
+      const invoice = {
+        id: invoiceId,
+        customer_name: "مشتری نمونه",
+        date: new Date().toISOString(),
+        total_amount: 1500000,
+        status: "draft",
+        items: [
+          {
+            id: 1,
+            invoice_id: invoiceId,
+            description: "محصول نمونه",
+            quantity: 10,
+            unit_price: 150000,
+            total: 1500000
+          }
+        ]
+      };
+
+      res.json({
+        success: true,
+        data: invoice
+      });
+    } catch (error) {
+      console.error("Error fetching invoice details:", error);
+      res.status(500).json({ success: false, message: "خطا در بازیابی جزئیات فاکتور" });
+    }
+  });
       
       res.json({
         success: true,
