@@ -115,6 +115,8 @@ import TemplateNumberingSystem from "@/pages/admin/template-numbering-system";
 
 import BankReceiptUpload from "@/pages/bank-receipt-upload";
 import TestLogistics from "@/pages/test-logistics";
+import KpiDashboard from "@/pages/kpi-dashboard";
+import ManagementDashboard from "@/pages/management-dashboard";
 
 import NotFound from "@/pages/not-found";
 
@@ -219,8 +221,8 @@ function Router() {
           <Route path="/admin/remote-desktop" component={RemoteDesktop} />
           <Route path="/admin/server-config" component={ServerConfig} />
           <Route path="/admin/batch-management" component={BatchManagement} />
-          <Route path="/admin/kpi-dashboard" component={lazy(() => import("@/pages/kpi-dashboard"))} />
-          <Route path="/admin/management-dashboard" component={lazy(() => import("@/pages/management-dashboard"))} />
+          <Route path="/admin/kpi-dashboard" component={KpiDashboard} />
+          <Route path="/admin/management-dashboard" component={ManagementDashboard} />
           <Route path="/admin/detailed-inventory" component={DetailedInventory} />
 
           
