@@ -75,19 +75,21 @@ export async function generateDeliveryCode(): Promise<string> {
       counter = await initializeDeliveryCodeCounter(currentYear);
     }
     
-    // Generate current code 
+    // Get current code value with fallback to DELIVERY_CODE_START
     const currentCodeValue = counter.currentCode || DELIVERY_CODE_START;
+    
+    // Generate current delivery code 
     const deliveryCode = String(currentCodeValue).padStart(4, '0');
     
-    // Calculate next code (cycle back to DELIVERY_CODE_START after DELIVERY_CODE_END)
-    let nextCode = parseInt(currentCodeValue.toString()) + 1;
+    // Calculate next code for updating counter (cycle back to DELIVERY_CODE_START after DELIVERY_CODE_END)
+    let nextCode = currentCodeValue + 1;
     if (isNaN(nextCode) || nextCode > DELIVERY_CODE_END) {
       nextCode = DELIVERY_CODE_START;
       console.log(`🔄 [DELIVERY-CODE] Cycling back to ${DELIVERY_CODE_START} after reaching ${DELIVERY_CODE_END}`);
     }
     
     // Update counter with next code  
-    console.log(`🔢 [DELIVERY-CODE] Updating counter from ${currentCodeValue} to ${nextCode} for year ${currentYear}`);
+    console.log(`🔢 [DELIVERY-CODE] Using delivery code: ${deliveryCode}, updating counter from ${currentCodeValue} to ${nextCode} for year ${currentYear}`);
     
     await pool.query(
       'UPDATE delivery_code_counter SET current_code = $1, updated_at = NOW() WHERE year = $2',

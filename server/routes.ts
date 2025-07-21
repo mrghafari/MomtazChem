@@ -17500,8 +17500,8 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           const customerData = customerResult.rows[0];
           
           // Generate sequential delivery code (1111-9999, cycling)
-          const { generateDeliveryCode } = await import('./delivery-code-generator');
-          const deliveryCode = await generateDeliveryCode();
+          const { generateSequentialDeliveryCode } = await import('./new-delivery-code-generator');
+          const deliveryCode = await generateSequentialDeliveryCode();
           
           console.log('🔢 [DELIVERY-CODE] Generated sequential delivery code:', deliveryCode);
           
