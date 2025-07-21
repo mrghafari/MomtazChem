@@ -334,28 +334,56 @@ export type SmsStatus = typeof SMS_STATUS[keyof typeof SMS_STATUS];
 // IRAQI CITIES AND SHIPPING RATES MANAGEMENT
 // =============================================================================
 
+// Iraqi provinces table
+export const iraqiProvinces = pgTable("iraqi_provinces", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(), // Province name
+  nameArabic: text("name_arabic").notNull(), // Arabic name (محافظة بغداد)
+  nameEnglish: text("name_english").notNull(), // English name (Baghdad Governorate)
+  nameKurdish: text("name_kurdish"), // Kurdish name if applicable
+  capital: text("capital").notNull(), // Capital city of the province
+  region: text("region").notNull().default("center"), // north, south, center, kurdistan
+  area: integer("area"), // Area in square kilometers
+  population: integer("population"), // Population estimate
+  isActive: boolean("is_active").default(true),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => [
+  index("iraqi_provinces_name_idx").on(table.name),
+  index("iraqi_provinces_region_idx").on(table.region),
+  index("iraqi_provinces_active_idx").on(table.isActive),
+]);
+
 // Iraqi cities table for shipping and freight calculation
 export const iraqiCities = pgTable("iraqi_cities", {
   id: serial("id").primaryKey(),
-  name: text("name").notNull().unique(), // City name in Arabic/English
+  name: text("name").notNull(), // City name
   nameArabic: text("name_arabic"), // Arabic name
   nameEnglish: text("name_english"), // English name
-  province: text("province"), // محافظة (Baghdad, Basra, Mosul, etc.)
+  nameKurdish: text("name_kurdish"), // Kurdish name if applicable
+  provinceId: integer("province_id").notNull().references(() => iraqiProvinces.id), // Reference to province
+  provinceName: text("province_name").notNull(), // Province name for easy access
   region: text("region").default("center"), // north, south, center, kurdistan
   postalCode: text("postal_code"), // Postal code if available
   distanceFromBaghdad: integer("distance_from_baghdad"), // Distance in KM from Baghdad
-  isCapital: boolean("is_capital").default(false), // Is it a province capital
+  distanceFromProvinceCapital: integer("distance_from_province_capital"), // Distance from province capital
+  isProvinceCapital: boolean("is_province_capital").default(false), // Is it a province capital
   isActive: boolean("is_active").default(true),
   population: integer("population"), // Population estimate
   coordinates: text("coordinates"), // GPS coordinates if available
+  elevation: integer("elevation"), // Elevation in meters
+  economicActivity: text("economic_activity"), // Main economic activities
   notes: text("notes"), // Additional notes
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 }, (table) => [
   index("iraqi_cities_name_idx").on(table.name),
-  index("iraqi_cities_province_idx").on(table.province),
+  index("iraqi_cities_province_idx").on(table.provinceId),
+  index("iraqi_cities_province_name_idx").on(table.provinceName),
   index("iraqi_cities_region_idx").on(table.region),
   index("iraqi_cities_active_idx").on(table.isActive),
+  index("iraqi_cities_capital_idx").on(table.isProvinceCapital),
 ]);
 
 // Shipping rates table for Iraqi cities
@@ -411,10 +439,13 @@ export const freightRates = pgTable("freight_rates", {
 ]);
 
 // Add new schemas and types for Iraqi cities
+export const insertIraqiProvinceSchema = createInsertSchema(iraqiProvinces);
 export const insertIraqiCitySchema = createInsertSchema(iraqiCities);
 export const insertShippingRateSchema = createInsertSchema(shippingRates);
 export const insertFreightRateSchema = createInsertSchema(freightRates);
 
+export type IraqiProvince = typeof iraqiProvinces.$inferSelect;
+export type InsertIraqiProvince = z.infer<typeof insertIraqiProvinceSchema>;
 export type IraqiCity = typeof iraqiCities.$inferSelect;
 export type InsertIraqiCity = z.infer<typeof insertIraqiCitySchema>;
 export type ShippingRate = typeof shippingRates.$inferSelect;

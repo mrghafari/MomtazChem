@@ -9722,6 +9722,475 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // =============================================================================
+  // IRAQI CITIES AND SHIPPING RATES MANAGEMENT
+  // =============================================================================
+
+  // Get all Iraqi provinces
+  app.get("/api/logistics/provinces", async (req, res) => {
+    try {
+      const { iraqiProvinces } = await import('../shared/logistics-schema');
+      const { db } = await import('./db');
+      
+      const provinces = await db.select().from(iraqiProvinces).orderBy(iraqiProvinces.nameArabic);
+      
+      res.json({
+        success: true,
+        data: provinces
+      });
+    } catch (error) {
+      console.error("Error fetching Iraqi provinces:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch provinces" 
+      });
+    }
+  });
+
+  // Get all Iraqi cities with province information
+  app.get("/api/logistics/cities", async (req, res) => {
+    try {
+      const { iraqiCities, iraqiProvinces } = await import('../shared/logistics-schema');
+      const { db } = await import('./db');
+      const { eq } = await import('drizzle-orm');
+      
+      const cities = await db
+        .select({
+          id: iraqiCities.id,
+          name: iraqiCities.name,
+          nameArabic: iraqiCities.nameArabic,
+          nameEnglish: iraqiCities.nameEnglish,
+          provinceName: iraqiCities.provinceName,
+          region: iraqiCities.region,
+          isProvinceCapital: iraqiCities.isProvinceCapital,
+          isActive: iraqiCities.isActive,
+          population: iraqiCities.population,
+          distanceFromBaghdad: iraqiCities.distanceFromBaghdad,
+          provinceId: iraqiCities.provinceId
+        })
+        .from(iraqiCities)
+        .where(eq(iraqiCities.isActive, true))
+        .orderBy(iraqiCities.nameArabic);
+      
+      res.json({
+        success: true,
+        data: cities
+      });
+    } catch (error) {
+      console.error("Error fetching Iraqi cities:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch cities" 
+      });
+    }
+  });
+
+  // Get cities by province
+  app.get("/api/logistics/provinces/:provinceId/cities", async (req, res) => {
+    try {
+      const provinceId = parseInt(req.params.provinceId);
+      if (isNaN(provinceId)) {
+        return res.status(400).json({ success: false, message: "Invalid province ID" });
+      }
+
+      const { iraqiCities } = await import('../shared/logistics-schema');
+      const { db } = await import('./db');
+      const { eq, and } = await import('drizzle-orm');
+      
+      const cities = await db
+        .select()
+        .from(iraqiCities)
+        .where(and(
+          eq(iraqiCities.provinceId, provinceId),
+          eq(iraqiCities.isActive, true)
+        ))
+        .orderBy(iraqiCities.nameArabic);
+      
+      res.json({
+        success: true,
+        data: cities
+      });
+    } catch (error) {
+      console.error("Error fetching cities by province:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch cities" 
+      });
+    }
+  });
+
+  // Add new Iraqi city
+  app.post("/api/logistics/cities", requireAuth, async (req, res) => {
+    try {
+      const { insertIraqiCitySchema, iraqiCities } = await import('../shared/logistics-schema');
+      const { db } = await import('./db');
+      
+      const cityData = insertIraqiCitySchema.parse(req.body);
+      const [city] = await db.insert(iraqiCities).values(cityData).returning();
+      
+      res.json({
+        success: true,
+        message: "City added successfully",
+        data: city
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ 
+          success: false, 
+          message: "Invalid city data", 
+          errors: error.errors 
+        });
+      } else {
+        console.error("Error adding Iraqi city:", error);
+        res.status(500).json({ 
+          success: false, 
+          message: "Failed to add city" 
+        });
+      }
+    }
+  });
+
+  // Update Iraqi city
+  app.patch("/api/logistics/cities/:id", requireAuth, async (req, res) => {
+    try {
+      const cityId = parseInt(req.params.id);
+      if (isNaN(cityId)) {
+        return res.status(400).json({ success: false, message: "Invalid city ID" });
+      }
+
+      const { iraqiCities } = await import('../shared/logistics-schema');
+      const { db } = await import('./db');
+      const { eq } = await import('drizzle-orm');
+      
+      const updates = { ...req.body, updatedAt: new Date() };
+      const [city] = await db
+        .update(iraqiCities)
+        .set(updates)
+        .where(eq(iraqiCities.id, cityId))
+        .returning();
+      
+      if (!city) {
+        return res.status(404).json({ success: false, message: "City not found" });
+      }
+      
+      res.json({
+        success: true,
+        message: "City updated successfully",
+        data: city
+      });
+    } catch (error) {
+      console.error("Error updating Iraqi city:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to update city" 
+      });
+    }
+  });
+
+  // =============================================================================
+  // SHIPPING RATES MANAGEMENT
+  // =============================================================================
+
+  // Get shipping rates for a specific city
+  app.get("/api/logistics/shipping-rates/:cityName", async (req, res) => {
+    try {
+      const cityName = req.params.cityName;
+      const { pool } = await import('./db');
+      
+      const result = await pool.query(`
+        SELECT * FROM shipping_rates 
+        WHERE city_name = $1 AND is_active = true
+        ORDER BY delivery_method, base_price
+      `, [cityName]);
+      
+      res.json({
+        success: true,
+        data: result.rows
+      });
+    } catch (error) {
+      console.error("Error fetching shipping rates:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch shipping rates" 
+      });
+    }
+  });
+
+  // Get all shipping rates with pagination
+  app.get("/api/logistics/shipping-rates", async (req, res) => {
+    try {
+      const { page = 1, limit = 50, city, province, delivery_method } = req.query;
+      const offset = (parseInt(page) - 1) * parseInt(limit);
+      const { pool } = await import('./db');
+      
+      let whereClause = 'WHERE is_active = true';
+      const params = [];
+      let paramIndex = 1;
+      
+      if (city) {
+        whereClause += ` AND city_name ILIKE $${paramIndex}`;
+        params.push(`%${city}%`);
+        paramIndex++;
+      }
+      
+      if (province) {
+        whereClause += ` AND province_name ILIKE $${paramIndex}`;
+        params.push(`%${province}%`);
+        paramIndex++;
+      }
+      
+      if (delivery_method) {
+        whereClause += ` AND delivery_method = $${paramIndex}`;
+        params.push(delivery_method);
+        paramIndex++;
+      }
+      
+      const countQuery = `SELECT COUNT(*) FROM shipping_rates ${whereClause}`;
+      const countResult = await pool.query(countQuery, params);
+      const total = parseInt(countResult.rows[0].count);
+      
+      const dataQuery = `
+        SELECT * FROM shipping_rates 
+        ${whereClause}
+        ORDER BY province_name, city_name, delivery_method
+        LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
+      `;
+      params.push(parseInt(limit), offset);
+      
+      const dataResult = await pool.query(dataQuery, params);
+      
+      res.json({
+        success: true,
+        data: dataResult.rows,
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total,
+          pages: Math.ceil(total / parseInt(limit))
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching shipping rates:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch shipping rates" 
+      });
+    }
+  });
+
+  // Add new shipping rate
+  app.post("/api/logistics/shipping-rates", requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      const {
+        delivery_method,
+        transportation_type,
+        city_name,
+        province_name,
+        min_weight,
+        max_weight,
+        max_dimensions,
+        base_price,
+        price_per_kg,
+        free_shipping_threshold,
+        estimated_days,
+        tracking_available,
+        insurance_available,
+        insurance_rate,
+        description,
+        internal_notes
+      } = req.body;
+      
+      const result = await pool.query(`
+        INSERT INTO shipping_rates (
+          delivery_method, transportation_type, city_name, province_name,
+          min_weight, max_weight, max_dimensions, base_price, price_per_kg,
+          free_shipping_threshold, estimated_days, tracking_available,
+          insurance_available, insurance_rate, description, internal_notes,
+          is_active, created_at, updated_at
+        ) VALUES (
+          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
+          true, NOW(), NOW()
+        ) RETURNING *
+      `, [
+        delivery_method, transportation_type, city_name, province_name,
+        min_weight, max_weight, max_dimensions, base_price, price_per_kg,
+        free_shipping_threshold, estimated_days, tracking_available,
+        insurance_available, insurance_rate, description, internal_notes
+      ]);
+      
+      res.json({
+        success: true,
+        message: "Shipping rate added successfully",
+        data: result.rows[0]
+      });
+    } catch (error) {
+      console.error("Error adding shipping rate:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to add shipping rate" 
+      });
+    }
+  });
+
+  // Update shipping rate
+  app.patch("/api/logistics/shipping-rates/:id", requireAuth, async (req, res) => {
+    try {
+      const rateId = parseInt(req.params.id);
+      if (isNaN(rateId)) {
+        return res.status(400).json({ success: false, message: "Invalid rate ID" });
+      }
+
+      const { pool } = await import('./db');
+      const updates = { ...req.body, updated_at: new Date() };
+      
+      // Build dynamic update query
+      const updateFields = Object.keys(updates)
+        .filter(key => key !== 'id')
+        .map((key, index) => `${key} = $${index + 2}`)
+        .join(', ');
+      
+      const values = [rateId, ...Object.values(updates).filter((_, index) => Object.keys(updates)[index] !== 'id')];
+      
+      const result = await pool.query(`
+        UPDATE shipping_rates 
+        SET ${updateFields}
+        WHERE id = $1
+        RETURNING *
+      `, values);
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ success: false, message: "Shipping rate not found" });
+      }
+      
+      res.json({
+        success: true,
+        message: "Shipping rate updated successfully",
+        data: result.rows[0]
+      });
+    } catch (error) {
+      console.error("Error updating shipping rate:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to update shipping rate" 
+      });
+    }
+  });
+
+  // Delete shipping rate (soft delete)
+  app.delete("/api/logistics/shipping-rates/:id", requireAuth, async (req, res) => {
+    try {
+      const rateId = parseInt(req.params.id);
+      if (isNaN(rateId)) {
+        return res.status(400).json({ success: false, message: "Invalid rate ID" });
+      }
+
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        UPDATE shipping_rates 
+        SET is_active = false, updated_at = NOW()
+        WHERE id = $1
+        RETURNING *
+      `, [rateId]);
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ success: false, message: "Shipping rate not found" });
+      }
+      
+      res.json({
+        success: true,
+        message: "Shipping rate deleted successfully"
+      });
+    } catch (error) {
+      console.error("Error deleting shipping rate:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to delete shipping rate" 
+      });
+    }
+  });
+
+  // Calculate shipping cost for a city and weight
+  app.post("/api/logistics/calculate-shipping", async (req, res) => {
+    try {
+      const { cityName, provinceName, weight, deliveryMethod, orderValue } = req.body;
+      
+      if (!cityName || !weight) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "City name and weight are required" 
+        });
+      }
+
+      const { pool } = await import('./db');
+      
+      let query = `
+        SELECT * FROM shipping_rates 
+        WHERE city_name = $1 AND is_active = true
+      `;
+      const params = [cityName];
+      
+      if (deliveryMethod) {
+        query += ` AND delivery_method = $2`;
+        params.push(deliveryMethod);
+      }
+      
+      if (provinceName) {
+        query += ` AND province_name = $${params.length + 1}`;
+        params.push(provinceName);
+      }
+      
+      query += ` ORDER BY base_price ASC`;
+      
+      const result = await pool.query(query, params);
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "No shipping rates found for this city"
+        });
+      }
+      
+      const calculations = result.rows.map(rate => {
+        const basePrice = parseFloat(rate.base_price);
+        const pricePerKg = parseFloat(rate.price_per_kg || 0);
+        const weightCost = weight * pricePerKg;
+        const totalCost = basePrice + weightCost;
+        
+        // Check for free shipping
+        const freeShippingThreshold = parseFloat(rate.free_shipping_threshold || 0);
+        const finalCost = (orderValue && orderValue >= freeShippingThreshold) ? 0 : totalCost;
+        
+        // Calculate insurance cost if applicable
+        const insuranceCost = rate.insurance_available && rate.insurance_rate ? 
+          (orderValue * parseFloat(rate.insurance_rate) / 100) : 0;
+        
+        return {
+          ...rate,
+          weight_cost: weightCost,
+          total_shipping_cost: finalCost,
+          insurance_cost: insuranceCost,
+          final_total: finalCost + insuranceCost,
+          is_free_shipping: finalCost === 0 && totalCost > 0
+        };
+      });
+      
+      res.json({
+        success: true,
+        city: cityName,
+        province: provinceName,
+        weight,
+        calculations
+      });
+    } catch (error) {
+      console.error("Error calculating shipping cost:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to calculate shipping cost" 
+      });
+    }
+  });
+
   // Customer password reset - Reset with token
   app.post("/api/customers/reset-password", async (req, res) => {
     try {
