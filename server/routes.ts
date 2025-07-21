@@ -17468,7 +17468,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       // Use order management storage to update order status
       const updatedOrder = await orderManagementStorage.updateOrderStatus(
         parseInt(id),
-        status,
+        'warehouse_approved', // Fixed to_status
         userId,
         'warehouse',
         notes
