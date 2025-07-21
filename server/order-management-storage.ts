@@ -667,6 +667,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       // Customer Order fields
       totalAmount: customerOrders.totalAmount,
       currency: customerOrders.currency,
+      orderNumber: customerOrders.orderNumber,
       
       // Customer info
       customerFirstName: crmCustomers.firstName,
@@ -696,6 +697,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       deliveryCode: row.deliveryCode,
       totalAmount: row.totalAmount,
       currency: row.currency,
+      orderNumber: row.orderNumber,
       
       // Weight and delivery information
       totalWeight: row.totalWeight,

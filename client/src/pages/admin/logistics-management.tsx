@@ -387,6 +387,14 @@ const LogisticsManagement = () => {
   
   // Map data to add customer object structure for compatibility
   const mapOrderData = (orders: any[]) => orders.map((order: any) => {
+    // DEBUG: Log order number mapping
+    console.log('🔧 [FRONTEND DEBUG] Mapping order:', {
+      id: order.id,
+      customerOrderId: order.customerOrderId,
+      orderNumber: order.orderNumber,
+      hasOrderNumber: !!order.orderNumber
+    });
+    
     // Extract address from shippingAddress JSON if available
     let customerAddress = 'آدرس ثبت نشده';
     if (order.customerAddress) {
@@ -406,7 +414,7 @@ const LogisticsManagement = () => {
       }
     }
     
-    return {
+    const mappedOrder = {
       ...order,
       // Use existing customer object if available, otherwise create from individual fields
       customer: order.customer || {
@@ -440,6 +448,16 @@ const LogisticsManagement = () => {
           }
         })() : order.customerPhone)
     };
+    
+    // DEBUG: Log final mapped order
+    console.log('✅ [FRONTEND DEBUG] Final mapped order:', {
+      id: mappedOrder.id,
+      customerOrderId: mappedOrder.customerOrderId,
+      orderNumber: mappedOrder.orderNumber,
+      hasOrderNumber: !!mappedOrder.orderNumber
+    });
+    
+    return mappedOrder;
   });
   
   const sortedActiveOrders = sortActiveOrders(activeOrders);
