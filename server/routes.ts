@@ -17485,60 +17485,77 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         try {
           console.log('🚚 [AUTO-CODE] Order approved to logistics, auto-generating delivery code...');
           
-          // Get order details for customer info
-          const orderDetails = await orderManagementStorage.getOrderById(parseInt(id));
-          if (orderDetails && orderDetails.customerPhone && orderDetails.customerFirstName) {
-            const customerName = `${orderDetails.customerFirstName} ${orderDetails.customerLastName || ''}`.trim();
+          // Get customer info from the order data - need to query for complete customer details
+          const { pool } = await import('./db');
+          const customerResult = await pool.query(`
+            SELECT 
+              co.order_number,
+              co.guest_name,
+              co.guest_email,
+              co.shipping_address
+            FROM customer_orders co
+            WHERE co.id = $1
+          `, [updatedOrder.customerOrderId]);
+          
+          const customerData = customerResult.rows[0];
+          
+          // Always generate delivery code, even if customer info is incomplete
+          const deliveryCode = customerData.order_number || `MOM25${String(updatedOrder.customerOrderId).padStart(5, '1')}`;
+          
+          console.log('🔢 [ORDER-CONSISTENCY] Generated delivery code:', deliveryCode);
+          
+          // Update order_management table with delivery code (same as order number)
+          await orderManagementStorage.updateOrderManagement(parseInt(id), {
+            deliveryCode: deliveryCode,
+            updatedAt: new Date()
+          });
+          
+          console.log('✅ [DELIVERY-CODE] Delivery code saved to database:', deliveryCode);
+          
+          if (customerData && (customerData.guest_name || customerData.guest_email || customerData.shipping_address)) {
+            const customerName = customerData.guest_name || 'Customer';
+            
+            // Extract phone from shipping address JSON
+            const shippingAddress = customerData.shipping_address || {};
+            const customerPhone = shippingAddress.phone;
             
             console.log('🚚 [AUTO-CODE] Customer info:', {
-              orderId: orderDetails.customerOrderId,
-              phone: orderDetails.customerPhone,
+              orderId: updatedOrder.customerOrderId,
+              phone: customerPhone,
               name: customerName
             });
             
-            // Use original customer order number as delivery code for consistency
-            const { customerPool } = await import('./db');
-            const orderResult = await customerPool.query(
-              'SELECT order_number FROM customer_orders WHERE id = $1',
-              [orderDetails.customerOrderId]
-            );
-            
-            const deliveryCode = orderResult.rows[0]?.order_number || `FALLBACK-${orderDetails.customerOrderId}`;
-            
-            console.log('🔢 [ORDER-CONSISTENCY] Using original order number as delivery code:', deliveryCode);
-            
-            // Update order_management table with delivery code (same as order number)
-            await orderManagementStorage.updateOrderManagement(parseInt(id), {
-              deliveryCode: deliveryCode,
-              updatedAt: new Date()
-            });
+
             
             // Send SMS notification with original order number as delivery code
             try {
-              const { smsService } = await import('./sms-service');
-              const smsResult = await smsService.sendDeliveryCode(
-                orderDetails.customerPhone,
-                deliveryCode,  // Using original order number
-                customerName
-              );
-              
-              console.log('📱 [SMS-NOTIFICATION] SMS sent with order number as delivery code:', {
-                phone: orderDetails.customerPhone,
-                deliveryCode: deliveryCode,
-                smsResult: smsResult.success
-              });
+              const { createSmsService } = await import('./sms-service');
+              const smsService = await createSmsService();
+              if (customerPhone) {
+                const smsResult = await smsService.sendDeliveryCode(
+                  customerPhone,
+                  deliveryCode,  // Using original order number
+                  customerName
+                );
+                
+                console.log('📱 [SMS-NOTIFICATION] SMS sent with order number as delivery code:', {
+                  phone: customerPhone,
+                  deliveryCode: deliveryCode,
+                  smsResult: smsResult.success
+                });
+              }
             } catch (smsError) {
               console.error('❌ [SMS-NOTIFICATION] Failed to send SMS:', smsError);
             }
 
             // Send email notification to customer using template system
             try {
-              if (orderDetails.customerEmail) {
+              if (customerData.guest_email) {
                 const { UniversalEmailService } = await import('./universal-email-service');
                 
                 const emailResult = await UniversalEmailService.sendEmail({
                   categoryKey: 'order_notifications',
-                  to: [orderDetails.customerEmail],
+                  to: [customerData.guest_email],
                   subject: 'کد تحویل سفارش شما',
                   html: '', // Will be filled by template
                   templateNumber: '#05', // Delivery code notification template
@@ -17546,13 +17563,13 @@ ${message ? `Additional Requirements:\n${message}` : ''}
                     customerName: customerName,
                     orderNumber: deliveryCode,
                     deliveryCode: deliveryCode,
-                    customerFirstName: orderDetails.customerFirstName || customerName.split(' ')[0],
-                    customerLastName: orderDetails.customerLastName || customerName.split(' ').slice(1).join(' ') || ''
+                    customerFirstName: customerName.split(' ')[0],
+                    customerLastName: customerName.split(' ').slice(1).join(' ') || ''
                   }
                 });
                 
                 console.log('📧 [EMAIL-NOTIFICATION] Email sent using template #05 with delivery code:', {
-                  email: orderDetails.customerEmail,
+                  email: customerData.guest_email,
                   deliveryCode: deliveryCode,
                   template: '#05',
                   emailResult: emailResult
@@ -17570,7 +17587,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
               console.log('❌ [AUTO-CODE] Failed to generate delivery code:', codeResult.message);
             }
           } else {
-            console.log('❌ [AUTO-CODE] Missing customer information for auto-code generation');
+            console.log('⚠️ [SMS-EMAIL] Customer contact information incomplete - delivery code generated but notifications not sent');
           }
         } catch (autoCodeError) {
           console.error('❌ [AUTO-CODE] Error in auto-code generation:', autoCodeError);
