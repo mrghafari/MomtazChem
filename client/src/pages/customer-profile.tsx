@@ -224,6 +224,9 @@ const CustomerProfile = () => {
 
   const customer = customerData.customer;
   const orders = orderData?.success ? orderData.orders : [];
+  const totalOrders = orderData?.totalOrders || 0;
+  const hiddenOrders = orderData?.hiddenOrders || 0;
+  const displayInfo = orderData?.displayInfo;
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -390,7 +393,7 @@ const CustomerProfile = () => {
               <CardContent className="space-y-4">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Total Orders:</span>
-                  <span className="font-semibold">{orders.length}</span>
+                  <span className="font-semibold">{totalOrders}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Total Spent:</span>
@@ -413,7 +416,17 @@ const CustomerProfile = () => {
                 <CardTitle className="flex items-center gap-2">
                   <Package className="w-5 h-5" />
                   Order History
+                  {totalOrders > orders.length && (
+                    <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                      {orders.length} از {totalOrders}
+                    </Badge>
+                  )}
                 </CardTitle>
+                {hiddenOrders > 0 && (
+                  <p className="text-sm text-gray-600 mt-2">
+                    <span className="font-medium">{hiddenOrders} سفارش دیگر</span> در سوابق خرید مخفی است
+                  </p>
+                )}
               </CardHeader>
               <CardContent>
                 {ordersLoading ? (

@@ -181,6 +181,67 @@ export class CustomerStorage implements ICustomerStorage {
       .orderBy(desc(customerOrders.createdAt));
   }
 
+  // Get orders for customer profile display with priority for temporary orders
+  async getOrdersForProfile(customerId: number): Promise<{ 
+    displayOrders: CustomerOrder[], 
+    totalOrders: number, 
+    hiddenOrders: number 
+  }> {
+    // Get all orders for the customer
+    const allOrders = await customerDb
+      .select()
+      .from(customerOrders)
+      .where(eq(customerOrders.customerId, customerId))
+      .orderBy(desc(customerOrders.createdAt));
+
+    const totalOrders = allOrders.length;
+
+    if (totalOrders <= 2) {
+      return {
+        displayOrders: allOrders,
+        totalOrders,
+        hiddenOrders: 0
+      };
+    }
+
+    // Separate temporary and regular orders
+    const temporaryOrders = allOrders.filter(order => 
+      order.orderType === 'temporary' || 
+      order.orderCategory === 'temporary' ||
+      order.paymentMethod === 'bank_transfer_grace'
+    );
+    
+    const regularOrders = allOrders.filter(order => 
+      order.orderType !== 'temporary' && 
+      order.orderCategory !== 'temporary' &&
+      order.paymentMethod !== 'bank_transfer_grace'
+    );
+
+    let displayOrders: CustomerOrder[] = [];
+
+    if (temporaryOrders.length > 0) {
+      // If there are temporary orders, show 1 temporary + 1 regular
+      displayOrders.push(temporaryOrders[0]); // Most recent temporary order
+      
+      if (regularOrders.length > 0) {
+        displayOrders.push(regularOrders[0]); // Most recent regular order
+      } else if (temporaryOrders.length > 1) {
+        displayOrders.push(temporaryOrders[1]); // Second temporary order if no regular orders
+      }
+    } else {
+      // If no temporary orders, show 2 most recent regular orders
+      displayOrders = regularOrders.slice(0, 2);
+    }
+
+    const hiddenOrders = totalOrders - displayOrders.length;
+
+    return {
+      displayOrders,
+      totalOrders,
+      hiddenOrders
+    };
+  }
+
   async updateOrder(id: number, orderUpdate: Partial<InsertCustomerOrder>): Promise<CustomerOrder> {
     const [order] = await customerDb
       .update(customerOrders)
