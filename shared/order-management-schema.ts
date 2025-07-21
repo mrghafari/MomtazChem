@@ -304,6 +304,19 @@ export const deliveryMethods = pgTable("delivery_methods", {
   index("delivery_methods_sort_idx").on(table.sortOrder),
 ]);
 
+// Order counter table for M[YY][NNNNN] pattern - M2511111, M2511112, etc.
+export const orderCounter = pgTable("order_counter", {
+  id: serial("id").primaryKey(),
+  year: integer("year").notNull(), // Current year (e.g., 2025)
+  counter: integer("counter").notNull().default(11111), // Sequential counter starting from 11111
+  prefix: varchar("prefix", { length: 1 }).notNull().default("M"), // Fixed prefix 'M'
+  lastReset: timestamp("last_reset").notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => [
+  index("order_counter_year_idx").on(table.year),
+]);
+
 // Insert schemas
 export const insertOrderManagementSchema = createInsertSchema(orderManagement).omit({
   id: true,
@@ -342,6 +355,16 @@ export const insertVatSettingSchema = createInsertSchema(vatSettings).omit({
   createdAt: true,
   updatedAt: true,
 });
+
+export const insertOrderCounterSchema = createInsertSchema(orderCounter).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Type definitions
+export type OrderCounter = typeof orderCounter.$inferSelect;
+export type InsertOrderCounter = z.infer<typeof insertOrderCounterSchema>;
 
 export const insertDeliveryMethodSchema = createInsertSchema(deliveryMethods).omit({
   id: true,

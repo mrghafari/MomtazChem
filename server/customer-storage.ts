@@ -142,8 +142,12 @@ export class CustomerStorage implements ICustomerStorage {
 
   // Customer orders
   async createOrder(orderData: InsertCustomerOrder): Promise<CustomerOrder> {
-    // Generate unique order number
-    const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+    // Import order management storage to use new numbering system
+    const { OrderManagementStorage } = await import('./order-management-storage');
+    const orderManagementStorage = new OrderManagementStorage();
+    
+    // Generate M[YY][NNNNN] order number (e.g., M2511111, M2511112)
+    const orderNumber = await orderManagementStorage.generateOrderNumber();
     
     const [order] = await customerDb
       .insert(customerOrders)

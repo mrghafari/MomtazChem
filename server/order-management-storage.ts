@@ -5,6 +5,7 @@ import {
   paymentReceipts,
   deliveryCodes,
   shippingRates,
+  orderCounter,
   type OrderManagement,
   type InsertOrderManagement,
   type OrderStatusHistory,
@@ -17,6 +18,8 @@ import {
   type InsertDeliveryCode,
   type ShippingRate,
   type InsertShippingRate,
+  type OrderCounter,
+  type InsertOrderCounter,
   type OrderStatus,
   type Department,
   orderStatuses
@@ -132,9 +135,9 @@ export interface IOrderManagementStorage {
     weight: number;
   }): Promise<number>;
   
-  // Simple order numbering
-  generateSimpleOrderNumber(): Promise<string>;
-  resetOrderCounter(): Promise<void>;
+  // M[YY][NNNNN] order numbering
+  generateOrderNumber(): Promise<string>;
+  resetOrderCounter(year?: number): Promise<void>;
   
   // Order details with items
   getOrderWithItems(orderId: number): Promise<any>;
@@ -1329,39 +1332,83 @@ export class OrderManagementStorage implements IOrderManagementStorage {
     }
   }
 
-  // Simple order numbering functions
-  async generateSimpleOrderNumber(): Promise<string> {
+  // M[YY][NNNNN] order numbering functions - M2511111, M2511112, etc.
+  async generateOrderNumber(): Promise<string> {
     try {
-      // Use raw SQL to handle atomic increment safely
+      const currentYear = new Date().getFullYear();
+      const yearSuffix = (currentYear % 100).toString().padStart(2, '0'); // Get last 2 digits of year
+      
+      // Check if we need to create/reset counter for current year
+      const yearCounterCheck = await db.execute(sql`
+        SELECT * FROM order_counter WHERE year = ${currentYear}
+      `);
+      
+      if (yearCounterCheck.rows.length === 0) {
+        // Create new counter for current year
+        await db.execute(sql`
+          INSERT INTO order_counter (year, counter, prefix, last_reset)
+          VALUES (${currentYear}, 11111, 'M', CURRENT_TIMESTAMP)
+        `);
+        return `M${yearSuffix}11111`;
+      }
+      
+      // Increment counter for current year atomically
       const result = await db.execute(sql`
-        UPDATE simple_order_counter 
-        SET counter = counter + 1 
-        WHERE id = 1 
+        UPDATE order_counter 
+        SET counter = counter + 1, 
+            updated_at = CURRENT_TIMESTAMP
+        WHERE year = ${currentYear}
         RETURNING counter, prefix
       `);
       
       const row = result.rows[0] as { counter: number; prefix: string };
       if (row) {
-        return `${row.prefix}-${row.counter}`;
+        // Format: M + YY + NNNNN (e.g., M2511111, M2511112)
+        const paddedCounter = row.counter.toString().padStart(5, '0');
+        return `${row.prefix}${yearSuffix}${paddedCounter}`;
       }
       
-      // Fallback if no counter exists
-      return `ORD-1001`;
+      // Fallback if something goes wrong
+      console.error('❌ Failed to generate order number, using fallback');
+      return `M${yearSuffix}${Date.now().toString().slice(-5)}`;
     } catch (error) {
-      console.error('Error generating simple order number:', error);
-      return `ORD-${Date.now()}`;
+      console.error('❌ Error generating order number:', error);
+      const currentYear = new Date().getFullYear();
+      const yearSuffix = (currentYear % 100).toString().padStart(2, '0');
+      return `M${yearSuffix}${Date.now().toString().slice(-5)}`;
     }
   }
 
-  async resetOrderCounter(): Promise<void> {
+  async resetOrderCounter(year?: number): Promise<void> {
     try {
-      await db.execute(sql`
-        UPDATE simple_order_counter 
-        SET counter = 1001, last_reset = CURRENT_DATE 
-        WHERE id = 1
+      const targetYear = year || new Date().getFullYear();
+      
+      // Check if counter exists for the year
+      const existingCounter = await db.execute(sql`
+        SELECT id FROM order_counter WHERE year = ${targetYear}
       `);
+      
+      if (existingCounter.rows.length > 0) {
+        // Reset existing counter
+        await db.execute(sql`
+          UPDATE order_counter 
+          SET counter = 11111, 
+              last_reset = CURRENT_TIMESTAMP,
+              updated_at = CURRENT_TIMESTAMP
+          WHERE year = ${targetYear}
+        `);
+        console.log(`✅ Reset order counter for year ${targetYear} to 11111`);
+      } else {
+        // Create new counter for the year
+        await db.execute(sql`
+          INSERT INTO order_counter (year, counter, prefix, last_reset)
+          VALUES (${targetYear}, 11111, 'M', CURRENT_TIMESTAMP)
+        `);
+        console.log(`✅ Created new order counter for year ${targetYear} starting at 11111`);
+      }
     } catch (error) {
-      console.error('Error resetting order counter:', error);
+      console.error('❌ Error resetting order counter:', error);
+      throw error;
     }
   }
   

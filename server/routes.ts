@@ -6207,21 +6207,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // =============================================================================
-  // SIMPLE ORDER NUMBERING ENDPOINTS
+  // M[YY][NNNNN] ORDER NUMBERING ENDPOINTS
   // =============================================================================
 
-  // Generate simple order number
-  app.get("/api/orders/generate-simple-number", async (req, res) => {
+  // Generate M[YY][NNNNN] order number (e.g., M2511111, M2511112)
+  app.get("/api/orders/generate-order-number", async (req, res) => {
     try {
-      const simpleNumber = await orderManagementStorage.generateSimpleOrderNumber();
+      const orderNumber = await orderManagementStorage.generateOrderNumber();
       
       res.json({ 
         success: true, 
-        orderNumber: simpleNumber,
-        message: "شماره سفارش ساده تولید شد"
+        orderNumber: orderNumber,
+        message: "شماره سفارش M[YY][NNNNN] تولید شد",
+        format: "M + سال دو رقمی + شماره ترتیبی پنج رقمی"
       });
     } catch (error) {
-      console.error("Error generating simple order number:", error);
+      console.error("Error generating order number:", error);
       res.status(500).json({ 
         success: false, 
         message: "خطا در تولید شماره سفارش" 
@@ -6229,14 +6230,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Reset order counter (admin only)
+  // Reset order counter for current or specific year (admin only)
   app.post("/api/orders/reset-counter", async (req, res) => {
     try {
-      await orderManagementStorage.resetOrderCounter();
+      const { year } = req.body;
+      await orderManagementStorage.resetOrderCounter(year);
+      
+      const currentYear = year || new Date().getFullYear();
+      const yearSuffix = (currentYear % 100).toString().padStart(2, '0');
       
       res.json({ 
         success: true, 
-        message: "شمارنده سفارشات به حالت اولیه بازگشت (1001)"
+        message: `شمارنده سفارشات سال ${currentYear} به M${yearSuffix}11111 بازنشانی شد`,
+        nextOrderNumber: `M${yearSuffix}11111`
       });
     } catch (error) {
       console.error("Error resetting order counter:", error);
