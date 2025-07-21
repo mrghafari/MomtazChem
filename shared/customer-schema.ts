@@ -450,3 +450,66 @@ export type WalletTransaction = typeof walletTransactions.$inferSelect;
 
 export type InsertWalletRechargeRequest = z.infer<typeof insertWalletRechargeRequestSchema>;
 export type WalletRechargeRequest = typeof walletRechargeRequests.$inferSelect;
+
+// =============================================================================
+// CUSTOMER VERIFICATION SYSTEM (SMS + EMAIL)
+// =============================================================================
+
+// Customer verification codes for SMS verification
+export const customerVerificationCodes = pgTable("customer_verification_codes", {
+  id: serial("id").primaryKey(),
+  customerId: integer("customer_id"), // Nullable for pre-registration verification
+  phoneNumber: text("phone_number").notNull(),
+  verificationCode: text("verification_code").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  isUsed: boolean("is_used").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Customer email verification codes table
+export const customerEmailVerificationCodes = pgTable("customer_email_verification_codes", {
+  id: serial("id").primaryKey(),
+  customerId: integer("customer_id"),
+  email: text("email").notNull(),
+  verificationCode: text("verification_code").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  isUsed: boolean("is_used").default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Customer verification settings - determines which verification methods are required
+export const customerVerificationSettings = pgTable("customer_verification_settings", {
+  id: serial("id").primaryKey(),
+  smsVerificationEnabled: boolean("sms_verification_enabled").default(true),
+  emailVerificationEnabled: boolean("email_verification_enabled").default(true),
+  requireBothVerifications: boolean("require_both_verifications").default(true), // Dual authentication requirement
+  allowSkipVerification: boolean("allow_skip_verification").default(false), // Allow skip during registration
+  updatedBy: integer("updated_by"), // Admin who updated settings
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Create insert schemas
+export const insertCustomerVerificationCodeSchema = createInsertSchema(customerVerificationCodes).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertCustomerEmailVerificationCodeSchema = createInsertSchema(customerEmailVerificationCodes).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertCustomerVerificationSettingsSchema = createInsertSchema(customerVerificationSettings).omit({
+  id: true,
+  updatedAt: true,
+});
+
+// Types
+export type InsertCustomerVerificationCode = z.infer<typeof insertCustomerVerificationCodeSchema>;
+export type CustomerVerificationCode = typeof customerVerificationCodes.$inferSelect;
+
+export type InsertCustomerEmailVerificationCode = z.infer<typeof insertCustomerEmailVerificationCodeSchema>;
+export type CustomerEmailVerificationCode = typeof customerEmailVerificationCodes.$inferSelect;
+
+export type InsertCustomerVerificationSettings = z.infer<typeof insertCustomerVerificationSettingsSchema>;
+export type CustomerVerificationSettings = typeof customerVerificationSettings.$inferSelect;

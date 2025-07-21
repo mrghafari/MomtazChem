@@ -74,6 +74,14 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
   const [verificationError, setVerificationError] = useState("");
   const [loginError, setLoginError] = useState<string | null>(null);
   const [selectedProvince, setSelectedProvince] = useState("");
+  
+  // Dual verification states
+  const [showDualVerification, setShowDualVerification] = useState(false);
+  const [smsCode, setSmsCode] = useState("");
+  const [emailCode, setEmailCode] = useState("");
+  const [verificationSettings, setVerificationSettings] = useState<any>(null);
+  const [verificationMethods, setVerificationMethods] = useState<any>({ sms: false, email: false });
+  const [dualVerificationError, setDualVerificationError] = useState("");
 
   // Fetch provinces
   const { data: provincesResponse } = useQuery({
@@ -82,6 +90,18 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
   });
   
   const provinces = (provincesResponse as any)?.data || [];
+
+  // Fetch verification settings
+  const { data: verificationSettingsResponse } = useQuery({
+    queryKey: ["/api/customer/verification-settings"],
+    enabled: true,
+  });
+
+  useEffect(() => {
+    if (verificationSettingsResponse?.success) {
+      setVerificationSettings(verificationSettingsResponse.settings);
+    }
+  }, [verificationSettingsResponse]);
 
   // Find selected province ID 
   const selectedProvinceData = Array.isArray(provinces) ? provinces.find((p: any) => p.nameEnglish === selectedProvince) : null;
@@ -243,52 +263,89 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
         }
       }
       
-      // Regular registration for new customer
-      const fullRegistrationData = {
-        ...registerData,
-        customerType: 'retail',
-        customerSource: 'website',
-        communicationPreference: registerData.communicationPreference || 'email',
-        preferredLanguage: registerData.preferredLanguage || 'en',
-        marketingConsent: registerData.marketingConsent || false,
-      };
-      
-      const response = await fetch('/api/customers/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(fullRegistrationData),
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        // Store registration data and show verification form
-        setRegistrationData(result.customer);
-        setShowVerificationForm(true);
+      // Check if dual verification is enabled
+      if (verificationSettings && (verificationSettings.smsVerificationEnabled || verificationSettings.emailVerificationEnabled)) {
+        // Store registration data for dual verification
+        setRegistrationData({ ...registerData });
         
-        toast({
-          title: "Registration Successful",
-          description: "A verification code has been sent to your mobile number",
+        // Send dual verification codes
+        const verificationResponse = await fetch('/api/customer/send-dual-verification', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            email: registerData.email,
+            phone: registerData.phone,
+            firstName: registerData.firstName,
+            lastName: registerData.lastName,
+          }),
         });
-      } else {
-        // Check for duplicate email error
-        if (result.message?.includes("already exists") || result.message?.includes("duplicate") || result.message?.includes("موجود")) {
-          setEmailExists(true);
-          setDuplicateEmail(data.email);
-          setActiveTab("login");
-          loginForm.setValue("email", data.email);
+
+        const verificationResult = await verificationResponse.json();
+
+        if (verificationResult.success) {
+          setVerificationMethods(verificationResult.verificationMethods);
+          setShowDualVerification(true);
+          
           toast({
-            title: "Email Already Registered",
-            description: "This email is already registered. Please login instead.",
-            variant: "destructive",
+            title: "کدهای تأیید ارسال شد",
+            description: verificationResult.message,
           });
         } else {
           toast({
             variant: "destructive",
-            title: "Registration Error",
-            description: result.message || "An error occurred during registration",
+            title: "خطا در ارسال کدهای تأیید",
+            description: verificationResult.message,
           });
+        }
+      } else {
+        // Regular registration without dual verification
+        const fullRegistrationData = {
+          ...registerData,
+          customerType: 'retail',
+          customerSource: 'website',
+          communicationPreference: registerData.communicationPreference || 'email',
+          preferredLanguage: registerData.preferredLanguage || 'en',
+          marketingConsent: registerData.marketingConsent || false,
+        };
+        
+        const response = await fetch('/api/customers/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(fullRegistrationData),
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          // Store registration data and show verification form
+          setRegistrationData(result.customer);
+          setShowVerificationForm(true);
+          
+          toast({
+            title: "Registration Successful",
+            description: "A verification code has been sent to your mobile number",
+          });
+        } else {
+          // Check for duplicate email error
+          if (result.message?.includes("already exists") || result.message?.includes("duplicate") || result.message?.includes("موجود")) {
+            setEmailExists(true);
+            setDuplicateEmail(data.email);
+            setActiveTab("login");
+            loginForm.setValue("email", data.email);
+            toast({
+              title: "Email Already Registered",
+              description: "This email is already registered. Please login instead.",
+              variant: "destructive",
+            });
+          } else {
+            toast({
+              variant: "destructive",
+              title: "Registration Error",
+              description: result.message || "An error occurred during registration",
+            });
+          }
         }
       }
     } catch (error) {
@@ -310,6 +367,76 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
     setActiveTab("login");
     setEmailExists(false);
     setDuplicateEmail("");
+  };
+
+  // Handle dual verification
+  const onDualVerification = async () => {
+    setIsLoading(true);
+    setDualVerificationError("");
+    
+    try {
+      const response = await fetch('/api/customer/verify-dual-codes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          email: registrationData?.email,
+          phone: registrationData?.phone,
+          smsCode: smsCode,
+          emailCode: emailCode,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success && result.verified.complete) {
+        // Complete customer registration after verification
+        const fullRegistrationData = {
+          ...registrationData,
+          customerType: 'retail',
+          customerSource: 'website',
+          communicationPreference: registrationData.communicationPreference || 'email',
+          preferredLanguage: registrationData.preferredLanguage || 'en',
+          marketingConsent: registrationData.marketingConsent || false,
+        };
+        
+        const registerResponse = await fetch('/api/customers/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(fullRegistrationData),
+        });
+
+        const registerResult = await registerResponse.json();
+
+        if (registerResult.success) {
+          toast({
+            title: "ثبت نام موفق",
+            description: "حساب کاربری شما با موفقیت ایجاد شد",
+          });
+          
+          // Auto-login after successful registration
+          onLoginSuccess(registerResult.customer);
+          onOpenChange(false);
+          
+          // Reset all forms
+          registerForm.reset();
+          setShowDualVerification(false);
+          setSmsCode("");
+          setEmailCode("");
+          setRegistrationData(null);
+        } else {
+          setDualVerificationError(registerResult.message || "خطا در ثبت نام");
+        }
+      } else {
+        setDualVerificationError(result.message || "کدهای تأیید نامعتبر است");
+      }
+    } catch (error) {
+      console.error("Dual verification error:", error);
+      setDualVerificationError("خطا در تأیید کدها. لطفاً دوباره تلاش کنید");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const onVerifyCode = async () => {
@@ -886,6 +1013,91 @@ export default function CustomerAuth({ open, onOpenChange, onLoginSuccess, onReg
             </Form>
           </TabsContent>
         </Tabs>
+        )}
+
+        {/* Dual Verification Form */}
+        {showDualVerification && (
+          <div className="p-6 space-y-4">
+            <div className="text-center">
+              <h3 className="text-lg font-semibold text-gray-900">
+                تأیید دوگانه حساب کاربری
+              </h3>
+              <p className="text-sm text-gray-600 mt-2">
+                کدهای تأیید به {verificationMethods?.sms ? 'شماره موبایل' : ''} 
+                {verificationMethods?.sms && verificationMethods?.email ? ' و ' : ''}
+                {verificationMethods?.email ? 'ایمیل' : ''} شما ارسال شد
+              </p>
+            </div>
+
+            {dualVerificationError && (
+              <div className="bg-red-50 border border-red-200 rounded-md p-3">
+                <p className="text-sm text-red-600 text-center">
+                  {dualVerificationError}
+                </p>
+              </div>
+            )}
+
+            <div className="space-y-4">
+              {verificationMethods?.sms && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    کد تأیید پیامک
+                  </label>
+                  <Input
+                    type="text"
+                    maxLength={4}
+                    placeholder="کد 4 رقمی"
+                    value={smsCode}
+                    onChange={(e) => setSmsCode(e.target.value.replace(/\D/g, ''))}
+                    className="text-center text-lg tracking-widest"
+                  />
+                </div>
+              )}
+
+              {verificationMethods?.email && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    کد تأیید ایمیل
+                  </label>
+                  <Input
+                    type="text"
+                    maxLength={6}
+                    placeholder="کد 6 رقمی"
+                    value={emailCode}
+                    onChange={(e) => setEmailCode(e.target.value.replace(/\D/g, ''))}
+                    className="text-center text-lg tracking-widest"
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Button 
+                onClick={onDualVerification} 
+                className="w-full"
+                disabled={isLoading || 
+                  (verificationMethods?.sms && (!smsCode || smsCode.length !== 4)) ||
+                  (verificationMethods?.email && (!emailCode || emailCode.length !== 6))
+                }
+              >
+                {isLoading ? "در حال تأیید..." : "تأیید کدها"}
+              </Button>
+
+              <Button 
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => {
+                  setShowDualVerification(false);
+                  setSmsCode("");
+                  setEmailCode("");
+                  setDualVerificationError("");
+                }}
+              >
+                بازگشت
+              </Button>
+            </div>
+          </div>
         )}
       </DialogContent>
     </Dialog>

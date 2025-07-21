@@ -4,6 +4,9 @@ import {
   orderItems,
   customerInquiries,
   inquiryResponses,
+  customerVerificationCodes,
+  customerEmailVerificationCodes,
+  customerVerificationSettings,
   type Customer,
   type InsertCustomer,
   type CustomerOrder,
@@ -14,6 +17,12 @@ import {
   type InsertCustomerInquiry,
   type InquiryResponse,
   type InsertInquiryResponse,
+  type CustomerVerificationCode,
+  type InsertCustomerVerificationCode,
+  type CustomerEmailVerificationCode,
+  type InsertCustomerEmailVerificationCode,
+  type CustomerVerificationSettings,
+  type InsertCustomerVerificationSettings,
   emailTemplates,
   type EmailTemplate,
   type InsertEmailTemplate,
@@ -30,6 +39,14 @@ export interface ICustomerStorage {
   updateCustomer(id: number, customer: Partial<InsertCustomer>): Promise<Customer>;
   verifyCustomerPassword(email: string, password: string): Promise<Customer | null>;
   updateCustomerPassword(id: number, newPassword: string): Promise<void>;
+  
+  // Dual verification system (SMS + Email)
+  createSmsVerificationCode(customerId: number | null, phone: string, code: string): Promise<CustomerVerificationCode>;
+  createEmailVerificationCode(customerId: number | null, email: string, code: string): Promise<CustomerEmailVerificationCode>;
+  verifySmsCode(phone: string, code: string): Promise<CustomerVerificationCode | null>;
+  verifyEmailCode(email: string, code: string): Promise<CustomerEmailVerificationCode | null>;
+  getVerificationSettings(): Promise<CustomerVerificationSettings | null>;
+  updateVerificationSettings(settings: Partial<InsertCustomerVerificationSettings>): Promise<CustomerVerificationSettings>;
   
   // Customer orders
   createOrder(order: InsertCustomerOrder): Promise<CustomerOrder>;
@@ -678,6 +695,154 @@ export class CustomerStorage implements ICustomerStorage {
     // Increment usage count separately
     await customerDb
       .execute(sql`UPDATE email_templates SET usage_count = usage_count + 1 WHERE id = ${id}`);
+  }
+
+  // =============================================================================
+  // DUAL VERIFICATION SYSTEM (SMS + EMAIL)
+  // =============================================================================
+
+  // Create SMS verification code
+  async createSmsVerificationCode(customerId: number | null, phone: string, code: string): Promise<CustomerVerificationCode> {
+    // Set expiration to 10 minutes from now
+    const expiresAt = new Date();
+    expiresAt.setMinutes(expiresAt.getMinutes() + 10);
+
+    const [verificationCode] = await customerDb
+      .insert(customerVerificationCodes)
+      .values({
+        customerId,
+        phoneNumber: phone,
+        verificationCode: code,
+        expiresAt,
+      })
+      .returning();
+    
+    console.log(`📱 SMS verification code created for phone: ${phone}`);
+    return verificationCode;
+  }
+
+  // Create email verification code
+  async createEmailVerificationCode(customerId: number | null, email: string, code: string): Promise<CustomerEmailVerificationCode> {
+    // Set expiration to 30 minutes from now
+    const expiresAt = new Date();
+    expiresAt.setMinutes(expiresAt.getMinutes() + 30);
+
+    const [verificationCode] = await customerDb
+      .insert(customerEmailVerificationCodes)
+      .values({
+        customerId,
+        email,
+        verificationCode: code,
+        expiresAt,
+      })
+      .returning();
+    
+    console.log(`📧 Email verification code created for email: ${email}`);
+    return verificationCode;
+  }
+
+  // Verify SMS code
+  async verifySmsCode(phone: string, code: string): Promise<CustomerVerificationCode | null> {
+    const [verificationCode] = await customerDb
+      .select()
+      .from(customerVerificationCodes)
+      .where(
+        and(
+          eq(customerVerificationCodes.phoneNumber, phone),
+          eq(customerVerificationCodes.verificationCode, code),
+          eq(customerVerificationCodes.isUsed, false),
+          sql`expires_at > NOW()`
+        )
+      )
+      .limit(1);
+
+    if (verificationCode) {
+      // Mark as used
+      await customerDb
+        .update(customerVerificationCodes)
+        .set({ isUsed: true })
+        .where(eq(customerVerificationCodes.id, verificationCode.id));
+
+      console.log(`✅ SMS verification successful for phone: ${phone}`);
+      return verificationCode;
+    }
+
+    console.log(`❌ SMS verification failed for phone: ${phone}`);
+    return null;
+  }
+
+  // Verify email code
+  async verifyEmailCode(email: string, code: string): Promise<CustomerEmailVerificationCode | null> {
+    const [verificationCode] = await customerDb
+      .select()
+      .from(customerEmailVerificationCodes)
+      .where(
+        and(
+          eq(customerEmailVerificationCodes.email, email),
+          eq(customerEmailVerificationCodes.verificationCode, code),
+          eq(customerEmailVerificationCodes.isUsed, false),
+          sql`expires_at > NOW()`
+        )
+      )
+      .limit(1);
+
+    if (verificationCode) {
+      // Mark as used
+      await customerDb
+        .update(customerEmailVerificationCodes)
+        .set({ isUsed: true })
+        .where(eq(customerEmailVerificationCodes.id, verificationCode.id));
+
+      console.log(`✅ Email verification successful for email: ${email}`);
+      return verificationCode;
+    }
+
+    console.log(`❌ Email verification failed for email: ${email}`);
+    return null;
+  }
+
+  // Get current verification settings
+  async getVerificationSettings(): Promise<CustomerVerificationSettings | null> {
+    const [settings] = await customerDb
+      .select()
+      .from(customerVerificationSettings)
+      .limit(1);
+    
+    return settings || null;
+  }
+
+  // Update verification settings
+  async updateVerificationSettings(settingsUpdate: Partial<InsertCustomerVerificationSettings>): Promise<CustomerVerificationSettings> {
+    // Check if settings exist
+    const existingSettings = await this.getVerificationSettings();
+    
+    if (existingSettings) {
+      // Update existing settings
+      const [updatedSettings] = await customerDb
+        .update(customerVerificationSettings)
+        .set({
+          ...settingsUpdate,
+          updatedAt: new Date(),
+        })
+        .where(eq(customerVerificationSettings.id, existingSettings.id))
+        .returning();
+      
+      return updatedSettings;
+    } else {
+      // Create new settings with defaults
+      const [newSettings] = await customerDb
+        .insert(customerVerificationSettings)
+        .values({
+          smsVerificationEnabled: true,
+          emailVerificationEnabled: true,
+          requireBothVerifications: true,
+          allowSkipVerification: false,
+          ...settingsUpdate,
+        })
+        .returning();
+      
+      return newSettings;
+    }
   }
 }
 

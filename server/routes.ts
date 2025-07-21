@@ -8524,6 +8524,221 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // =============================================================================
+  // DUAL VERIFICATION SYSTEM (SMS + EMAIL)
+  // =============================================================================
+
+  // Create dual verification codes (SMS + Email) during registration
+  app.post("/api/customer/send-dual-verification", async (req, res) => {
+    try {
+      const { email, phone, firstName, lastName } = req.body;
+      
+      if (!email || !phone || !firstName || !lastName) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "تمام فیلدها الزامی است" 
+        });
+      }
+
+      // Get verification settings to check what's enabled
+      const settings = await customerStorage.getVerificationSettings();
+      
+      if (!settings || (!settings.smsVerificationEnabled && !settings.emailVerificationEnabled)) {
+        return res.status(400).json({
+          success: false,
+          message: "سیستم احراز هویت غیرفعال است"
+        });
+      }
+
+      let smsCodeSent = false;
+      let emailCodeSent = false;
+
+      // Generate and send SMS verification code if enabled
+      if (settings.smsVerificationEnabled) {
+        const smsCode = Math.floor(1000 + Math.random() * 9000).toString();
+        await customerStorage.createSmsVerificationCode(null, phone, smsCode);
+        
+        // TODO: Integrate with SMS service to send actual SMS
+        console.log(`📱 SMS verification code for ${phone}: ${smsCode}`);
+        smsCodeSent = true;
+      }
+
+      // Generate and send email verification code if enabled
+      if (settings.emailVerificationEnabled) {
+        const emailCode = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit code
+        await customerStorage.createEmailVerificationCode(null, email, emailCode);
+
+        // Send email using universal email service
+        try {
+          const { UniversalEmailService } = await import('./universal-email-service');
+          
+          const emailSent = await UniversalEmailService.sendEmail({
+            categoryKey: 'customer_support',
+            to: [email],
+            subject: 'کد تأیید ایمیل - Momtaz Chemical',
+            html: `
+              <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right;">
+                <h2>کد تأیید ایمیل</h2>
+                <p>سلام ${firstName} ${lastName} عزیز،</p>
+                <p>کد تأیید ایمیل شما:</p>
+                <div style="background: #f0f0f0; padding: 20px; text-align: center; font-size: 24px; font-weight: bold; margin: 20px 0;">
+                  ${emailCode}
+                </div>
+                <p>این کد تا 30 دقیقه معتبر است.</p>
+                <p>با تشکر،<br>تیم Momtaz Chemical</p>
+              </div>
+            `,
+            variables: {
+              firstName,
+              lastName,
+              verificationCode: emailCode
+            }
+          });
+          
+          emailCodeSent = emailSent;
+          console.log(`📧 Email verification code sent to ${email}: ${emailCode}`);
+        } catch (emailError) {
+          console.error("Error sending email verification:", emailError);
+          emailCodeSent = false;
+        }
+      }
+
+      const response: any = {
+        success: true,
+        message: "کدهای تأیید ارسال شد",
+        verificationMethods: {
+          sms: smsCodeSent,
+          email: emailCodeSent
+        }
+      };
+
+      if (settings.requireBothVerifications) {
+        response.requiresBoth = true;
+        response.message = "لطفاً هر دو کد تأیید (SMS و ایمیل) را وارد کنید";
+      }
+
+      res.json(response);
+    } catch (error) {
+      console.error("Error sending dual verification:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در ارسال کدهای تأیید" 
+      });
+    }
+  });
+
+  // Verify dual codes (SMS + Email)
+  app.post("/api/customer/verify-dual-codes", async (req, res) => {
+    try {
+      const { email, phone, smsCode, emailCode } = req.body;
+      
+      if (!email || !phone) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "ایمیل و شماره تلفن الزامی است" 
+        });
+      }
+
+      // Get verification settings
+      const settings = await customerStorage.getVerificationSettings();
+      
+      if (!settings) {
+        return res.status(400).json({
+          success: false,
+          message: "تنظیمات احراز هویت یافت نشد"
+        });
+      }
+
+      let smsVerified = false;
+      let emailVerified = false;
+
+      // Verify SMS code if enabled
+      if (settings.smsVerificationEnabled && smsCode) {
+        const smsResult = await customerStorage.verifySmsCode(phone, smsCode);
+        smsVerified = !!smsResult;
+      } else if (!settings.smsVerificationEnabled) {
+        smsVerified = true; // Skip SMS if disabled
+      }
+
+      // Verify email code if enabled
+      if (settings.emailVerificationEnabled && emailCode) {
+        const emailResult = await customerStorage.verifyEmailCode(email, emailCode);
+        emailVerified = !!emailResult;
+      } else if (!settings.emailVerificationEnabled) {
+        emailVerified = true; // Skip email if disabled
+      }
+
+      // Check if verification is complete based on settings
+      const verificationComplete = settings.requireBothVerifications 
+        ? (smsVerified && emailVerified)
+        : (smsVerified || emailVerified);
+
+      if (verificationComplete) {
+        res.json({
+          success: true,
+          message: "احراز هویت با موفقیت انجام شد",
+          verified: {
+            sms: smsVerified,
+            email: emailVerified,
+            complete: true
+          }
+        });
+      } else {
+        res.status(400).json({
+          success: false,
+          message: "کدهای تأیید نامعتبر یا ناقص است",
+          verified: {
+            sms: smsVerified,
+            email: emailVerified,
+            complete: false
+          }
+        });
+      }
+    } catch (error) {
+      console.error("Error verifying dual codes:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در تأیید کدها" 
+      });
+    }
+  });
+
+  // Get verification settings (public endpoint)
+  app.get("/api/customer/verification-settings", async (req, res) => {
+    try {
+      const settings = await customerStorage.getVerificationSettings();
+      
+      if (!settings) {
+        // Return default settings if none exist
+        res.json({
+          success: true,
+          settings: {
+            smsVerificationEnabled: true,
+            emailVerificationEnabled: true,
+            requireBothVerifications: true,
+            allowSkipVerification: false
+          }
+        });
+      } else {
+        res.json({
+          success: true,
+          settings: {
+            smsVerificationEnabled: settings.smsVerificationEnabled,
+            emailVerificationEnabled: settings.emailVerificationEnabled,
+            requireBothVerifications: settings.requireBothVerifications,
+            allowSkipVerification: settings.allowSkipVerification
+          }
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching verification settings:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در دریافت تنظیمات احراز هویت" 
+      });
+    }
+  });
+
   app.post("/api/customers/logout", async (req, res) => {
     try {
       // Clear all session data (single session mode)
