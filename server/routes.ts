@@ -17480,8 +17480,8 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       
       console.log('📦 [WAREHOUSE] Order updated successfully:', updatedOrder);
       
-      // Auto-generate and send delivery code when order is approved to logistics
-      if (status === 'warehouse_approved') {
+      // Auto-generate and send delivery code when order is sent to logistics
+      if (status === 'logistics_assigned' || status === 'warehouse_approved') {
         try {
           console.log('🚚 [AUTO-CODE] Order approved to logistics, auto-generating delivery code...');
           
@@ -17529,6 +17529,40 @@ ${message ? `Additional Requirements:\n${message}` : ''}
               });
             } catch (smsError) {
               console.error('❌ [SMS-NOTIFICATION] Failed to send SMS:', smsError);
+            }
+
+            // Send email notification to customer
+            try {
+              if (orderDetails.customerEmail) {
+                const { emailService } = await import('./email-service');
+                
+                const emailSubject = `کد تحویل سفارش شما - ${deliveryCode}`;
+                const emailContent = `
+                  <div dir="rtl" style="font-family: Arial, sans-serif;">
+                    <h2>سلام ${customerName} عزیز</h2>
+                    <p>سفارش شما با شماره <strong>${deliveryCode}</strong> آماده ارسال است.</p>
+                    <p><strong>کد تحویل شما: ${deliveryCode}</strong></p>
+                    <p>این کد را هنگام تحویل سفارش ارائه دهید.</p>
+                    <hr>
+                    <p>با تشکر<br>تیم مُمتاز کِم</p>
+                  </div>
+                `;
+                
+                const emailResult = await emailService.sendEmail({
+                  to: orderDetails.customerEmail,
+                  subject: emailSubject,
+                  html: emailContent,
+                  category: 'order_notifications'
+                });
+                
+                console.log('📧 [EMAIL-NOTIFICATION] Email sent with delivery code:', {
+                  email: orderDetails.customerEmail,
+                  deliveryCode: deliveryCode,
+                  emailResult: emailResult.success
+                });
+              }
+            } catch (emailError) {
+              console.error('❌ [EMAIL-NOTIFICATION] Failed to send email:', emailError);
             }
             
             const codeResult = { success: true, deliveryCode };
