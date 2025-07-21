@@ -90,8 +90,26 @@ const CustomerProfile = () => {
     );
   }
 
-  const customer = customerData.data;
+  const customer = customerData?.data || null;
   const orders = orderData?.success ? orderData.data : [];
+  
+  // Safety check for customer data
+  if (!customer) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-8 flex items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardContent className="pt-6 text-center">
+            <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">لطفاً ابتدا وارد شوید</h2>
+            <p className="text-gray-600 mb-4">برای مشاهده پروفایل، ابتدا باید وارد حساب کاربری خود شوید</p>
+            <Button onClick={() => setLocation("/customer/auth")}>
+              ورود به حساب کاربری
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
   
   // Enhanced order categorization logic
   const categorizeOrders = (orders: any[]) => {
@@ -138,10 +156,10 @@ const CustomerProfile = () => {
           <div>
             <div className="mb-4">
               <h1 className="text-3xl font-bold text-gray-900">
-                خوش آمدید، {customer.firstName} {customer.lastName}!
+                خوش آمدید، {customer?.firstName || ''} {customer?.lastName || ''}!
               </h1>
               <p className="text-lg text-blue-600 mt-1">
-                {getPersonalizedWelcome(customer.firstName, 'customer', 'fa')}
+                {getPersonalizedWelcome(customer?.firstName || 'کاربر', 'customer', 'fa')}
               </p>
             </div>
             <div>
@@ -178,7 +196,7 @@ const CustomerProfile = () => {
               <AlertTriangle className="w-6 h-6 text-yellow-600" />
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-yellow-800">
-                  {customer.firstName} {customer.lastName} - توجه: سفارشات پرداخت نشده
+                  {customer?.firstName || ''} {customer?.lastName || ''} - توجه: سفارشات پرداخت نشده
                 </h3>
                 <p className="text-yellow-700 mt-1">
                   شما {unpaidOrders.length} سفارش پرداخت نشده دارید. لطفاً پرداخت کنید یا سفارش را لغو کنید تا موجودی آزاد شود.
@@ -339,14 +357,14 @@ const CustomerProfile = () => {
                   <User className="w-5 h-5 text-gray-400" />
                   <div>
                     <p className="text-sm text-gray-500">نام و نام خانوادگی</p>
-                    <p className="font-medium">{customer.firstName} {customer.lastName}</p>
+                    <p className="font-medium">{customer?.firstName || ''} {customer?.lastName || ''}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <Mail className="w-5 h-5 text-gray-400" />
                   <div>
                     <p className="text-sm text-gray-500">ایمیل</p>
-                    <p className="font-medium">{customer.email}</p>
+                    <p className="font-medium">{customer?.email || 'ثبت نشده'}</p>
                   </div>
                 </div>
               </div>
@@ -356,14 +374,14 @@ const CustomerProfile = () => {
                   <Phone className="w-5 h-5 text-gray-400" />
                   <div>
                     <p className="text-sm text-gray-500">شماره تلفن</p>
-                    <p className="font-medium">{customer.phone}</p>
+                    <p className="font-medium">{customer?.phone || 'ثبت نشده'}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <Building className="w-5 h-5 text-gray-400" />
                   <div>
                     <p className="text-sm text-gray-500">شرکت</p>
-                    <p className="font-medium">{customer.company || 'ثبت نشده'}</p>
+                    <p className="font-medium">{customer?.company || 'ثبت نشده'}</p>
                   </div>
                 </div>
               </div>
