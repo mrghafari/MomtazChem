@@ -52,7 +52,10 @@ import {
   Ticket,
   AlertTriangle,
   CheckCircle,
-  X
+  X,
+  Monitor,
+  Server,
+  LayoutDashboard
 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { apiRequest } from '@/lib/queryClient';
@@ -150,7 +153,7 @@ type Module = {
 
 // Function to extract modules dynamically from Site Management configuration
 const extractSiteManagementModules = (): Module[] => {
-  // Complete synchronized list with ALL 24 modules from Site Management - using original English names
+  // Complete synchronized list with ALL 30 modules from Site Management - using original English names
   const siteManagementModules = [
     { moduleId: 'syncing_shop', label: 'Syncing Shop', icon: Database, color: 'bg-blue-500' },
     { moduleId: 'shop_management', label: 'Shop Management', icon: ShoppingCart, color: 'bg-purple-500' },
@@ -175,7 +178,13 @@ const extractSiteManagementModules = (): Module[] => {
     { moduleId: 'factory', label: 'Factory Management', icon: Factory, color: 'bg-neutral-500' },
     { moduleId: 'procedures', label: 'Procedures', icon: BookOpen, color: 'bg-zinc-500' },
     { moduleId: 'refresh_control', label: 'Refresh Control', icon: RefreshCw, color: 'bg-green-500' },
-    { moduleId: 'ticketing_system', label: 'Ticketing System', icon: Ticket, color: 'bg-rose-500' }
+    { moduleId: 'ticketing_system', label: 'Ticketing System', icon: Ticket, color: 'bg-rose-500' },
+    { moduleId: 'remote_desktop', label: 'Remote Desktop', icon: Monitor, color: 'bg-slate-600' },
+    { moduleId: 'server_config', label: 'Server Config', icon: Server, color: 'bg-gray-600' },
+    { moduleId: 'kpi_dashboard', label: 'KPI Dashboard', icon: BarChart3, color: 'bg-purple-600' },
+    { moduleId: 'management_dashboard', label: 'Management Dashboard', icon: LayoutDashboard, color: 'bg-indigo-600' },
+    { moduleId: 'procedures_management', label: 'Procedures Management', icon: FileText, color: 'bg-blue-600' },
+    { moduleId: 'payment_management', label: 'Payment Management', icon: CreditCard, color: 'bg-green-600' }
   ];
 
   return siteManagementModules.map(module => ({
