@@ -6,6 +6,26 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: All Departments Now Display MOM Format Order Numbers (July 21, 2025)
+✅ **FULLY RESOLVED: All three departments (Financial, Warehouse, Logistics) now display proper MOM order numbers**
+- **Backend Enhancement**: Added orderNumber field to getOrdersByDepartment query in order-management-storage.ts
+- **Frontend Updates**: 
+  - Modified financial-department.tsx to display orderNumber field instead of customerOrderId
+  - Updated warehouse-management.tsx to show orderNumber in main table, sent orders table, and dialog titles
+  - Enhanced logistics-management.tsx to display orderNumber in both active and delivered order tables
+- **Interface Fix**: Added orderNumber field to OrderManagement TypeScript interface across all components
+- **Display Logic**: Shows actual order number (MOM2511129) with fallback to #ID format for legacy orders
+- **Dialog Integration**: All order details dialogs and modals updated to show proper order numbers
+- **Database Verification**: Orders 264-272 confirmed with proper MOM format in database (MOM2511113 through MOM2511129)
+- **Complete System Coverage**:
+  - ✅ Financial Department: MOM format order numbers displayed
+  - ✅ Warehouse Management: MOM format in all tables and dialogs  
+  - ✅ Logistics Management: MOM format in active and delivered order tables
+- **Result**: All departments now show consistent MOM format order numbers matching customer-facing displays
+- **Impact**: Staff across all departments can now reference orders using unified numbering system (MOM2511129)
+- **API Integration**: Backend correctly returns orderNumber field in all department endpoint responses
+- **Status**: Complete implementation - entire order management system displays MOM format consistently
+
 ### COMPLETED: Complete Order Numbering System Implementation with MOM Format (July 21, 2025)
 ✅ **FULLY IMPLEMENTED: New order numbering system with MOM + year + sequential format**
 - **Order Number Format**: MOM + 2-digit year + 5-digit sequential number

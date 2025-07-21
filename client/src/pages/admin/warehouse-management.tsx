@@ -1032,7 +1032,7 @@ const WarehouseManagement: React.FC = () => {
                     <tbody>
                       {filteredOrders.map((order) => (
                         <tr key={order.id} className="border-b hover:bg-gray-50">
-                          <td className="p-4 font-medium">#{order.id}</td>
+                          <td className="p-4 font-medium">{order.orderNumber || `#${order.id}`}</td>
                           <td className="p-4">
                             <div className="font-medium">{
                               order.customer?.firstName && order.customer?.lastName 
@@ -1170,7 +1170,7 @@ const WarehouseManagement: React.FC = () => {
                         <tr key={order.id} className="hover:bg-gray-50">
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm font-medium text-gray-900">
-                              #{order.id}
+                              {order.orderNumber || `#${order.id}`}
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
@@ -1693,7 +1693,7 @@ const WarehouseManagement: React.FC = () => {
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Package className="w-5 h-5" />
-                لیست کالاهای سفارش #{selectedOrderForItems.customerOrderId}
+                لیست کالاهای سفارش {(selectedOrderForItems as any).orderNumber || `#${selectedOrderForItems.customerOrderId}`}
               </DialogTitle>
               <p className="text-sm text-gray-600">
                 مشتری: {selectedOrderForItems.customer?.firstName} {selectedOrderForItems.customer?.lastName}
