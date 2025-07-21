@@ -211,6 +211,7 @@ function Router() {
           <Route path="/admin/warehouse-management" component={WarehouseManagementFixed} />
 
           <Route path="/admin/content-management" component={ContentManagement} />
+          <Route path="/content-management" component={ContentManagement} />
           <Route path="/admin/email-templates" component={EmailTemplates} />
           <Route path="/admin/email-templates-fixed" component={EmailTemplatesFixed} />
           <Route path="/admin/email-templates-central" component={EmailTemplatesCentral} />
