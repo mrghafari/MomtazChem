@@ -35,7 +35,8 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **API Endpoints**: New /api/orders/generate-order-number and /api/orders/reset-counter endpoints
 - **Annual Reset**: Automatic counter reset to 11111 for new years (M2611111 for 2026)
 - **Backward Compatibility**: Maintained existing order management workflow with new numbering
-- **Testing**: Verified order number generation working correctly (M2511111, M2511112 sequence)
+- **OLD PATTERN FIX**: Replaced legacy ORD-timestamp-randomString pattern in routes.ts with new M[YY][NNNNN] system
+- **Integration Point**: Fixed /api/customers/orders endpoint to use OrderManagementStorage.generateOrderNumber()
 - **Result**: All customer orders now follow consistent M[YY][NNNNN] pattern across all departments
 - **Impact**: Unified order identification system for financial, warehouse, and logistics departments
 

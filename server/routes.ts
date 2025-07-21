@@ -8939,8 +8939,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         notes: orderData.notes || '', // Add notes from form
       };
 
-      // Generate unique order number
-      const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
+      // Generate M[YY][NNNNN] order number using new system
+      const { OrderManagementStorage } = await import('./order-management-storage');
+      const orderManagementStorage = new OrderManagementStorage();
+      const orderNumber = await orderManagementStorage.generateOrderNumber();
       
       // Calculate order totals
       const subtotal = orderData.totalAmount || 0;
