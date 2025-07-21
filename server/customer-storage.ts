@@ -162,7 +162,7 @@ export class CustomerStorage implements ICustomerStorage {
       const { orderManagementStorage } = await import('./order-management-storage');
       await orderManagementStorage.createOrderManagement({
         customerOrderId: order.id,
-        currentStatus: 'pending' as any, // Start with pending status for financial review
+        currentStatus: 'pending_payment' as any, // Start with pending_payment status for financial review
         totalWeight: orderData.totalWeight || '0',
         weightUnit: orderData.weightUnit || 'kg',
         deliveryMethod: orderData.deliveryMethod || 'courier',

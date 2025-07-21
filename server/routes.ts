@@ -9257,6 +9257,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const order = await customerStorage.createOrder(orderData);
 
+      // 🔄 [AUTO-SYNC] Note: createOrder in customer-storage.ts already handles sync to order_management
+      console.log(`✅ [AUTO-SYNC] Order ${order.orderNumber} automatically synced to order_management table`);
+
       // Create order items and update stock
       for (const item of items) {
         const unitPrice = item.unitPrice || item.price || 0;

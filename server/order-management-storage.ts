@@ -431,7 +431,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       // Customer Order fields - مبلغ و کارنسی و شماره سفارش
       totalAmount: customerOrders.totalAmount,
       currency: customerOrders.currency,
-      orderNumber: customerOrders.orderNumber,
+      orderNumber: customerOrders.orderNumber, // شماره سفارش MOM از customer_orders
       
       // Shipping and delivery address from customer order
       shippingAddress: customerOrders.shippingAddress,
@@ -664,10 +664,10 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       deliveryCompanyName: orderManagement.deliveryCompanyName,
       deliveryCompanyPhone: orderManagement.deliveryCompanyPhone,
       
-      // Customer Order fields
+      // Customer Order fields  
       totalAmount: customerOrders.totalAmount,
       currency: customerOrders.currency,
-      orderNumber: customerOrders.orderNumber,
+      orderNumber: customerOrders.orderNumber, // شماره سفارش MOM از customer_orders
       
       // Customer info
       customerFirstName: crmCustomers.firstName,
