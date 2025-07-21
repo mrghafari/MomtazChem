@@ -57,7 +57,7 @@ import SalesAnalytics from "@/pages/sales-analytics";
 import Products from "@/pages/products";
 import ProductsPage from "@/pages/products";
 import BatchManagement from "@/pages/batch-management";
-import DetailedInventory from "@/pages/detailed-inventory";
+
 import ProductRecommendations from "@/pages/product-recommendations";
 import ProductReviews from "@/pages/product-reviews";
 import FuelAdditives from "@/pages/products/fuel-additives";
@@ -223,7 +223,7 @@ function Router() {
           <Route path="/admin/batch-management" component={BatchManagement} />
           <Route path="/admin/kpi-dashboard" component={KpiDashboard} />
           <Route path="/admin/management-dashboard" component={ManagementDashboard} />
-          <Route path="/admin/detailed-inventory" component={DetailedInventory} />
+
 
           
           {/* Department-specific routes */}

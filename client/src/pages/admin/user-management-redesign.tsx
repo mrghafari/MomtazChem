@@ -153,7 +153,7 @@ type Module = {
 
 // Function to extract modules dynamically from Site Management configuration
 const extractSiteManagementModules = (): Module[] => {
-  // Complete synchronized list with ALL 30 modules from Site Management - using original English names
+  // Complete synchronized list with ALL 29 modules from Site Management - using original English names
   const siteManagementModules = [
     { moduleId: 'syncing_shop', label: 'Syncing Shop', icon: Database, color: 'bg-blue-500' },
     { moduleId: 'shop_management', label: 'Shop Management', icon: ShoppingCart, color: 'bg-purple-500' },

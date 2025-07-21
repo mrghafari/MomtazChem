@@ -188,14 +188,7 @@ export default function SiteManagement() {
       className: "border-indigo-300 text-indigo-600 hover:bg-indigo-50",
       moduleId: "warehouse_management"
     },
-    {
-      id: "detailed-inventory",
-      label: "Detailed Inventory",
-      icon: Package,
-      onClick: () => trackButtonClick("detailed-inventory", () => setLocation("/admin/detailed-inventory")),
-      className: "border-teal-300 text-teal-600 hover:bg-teal-50",
-      moduleId: "warehouse_management"
-    },
+
 
     {
       id: "crm",
