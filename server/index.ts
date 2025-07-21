@@ -5,6 +5,7 @@ import path from "path";
 import { registerRoutes } from "./routes";
 import InventoryAlertService from "./inventory-alerts";
 import { expiredOrdersCleanup } from "./expired-orders-cleanup";
+import { abandonedCartCleanup } from "./abandoned-cart-cleanup";
 import { setupVite, serveStatic, log } from "./vite";
 
 // Global error handlers to prevent server crashes
@@ -135,6 +136,10 @@ app.use((req, res, next) => {
           // Start expired orders cleanup service
           expiredOrdersCleanup.start();
           log('🧹 Expired orders cleanup service started');
+          
+          // Start abandoned cart cleanup service
+          abandonedCartCleanup.start();
+          log('🛒 Abandoned cart cleanup service started');
           
           // Start inventory monitoring service
           InventoryAlertService.startInventoryMonitoring();

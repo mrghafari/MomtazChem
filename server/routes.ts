@@ -8773,6 +8773,113 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // =============================================================================
+  // ABANDONED CART ENDPOINTS (CUSTOMER SECTION)
+  // =============================================================================
+
+  // Customer abandoned carts
+  app.get("/api/customers/abandoned-carts", requireCustomerAuth, async (req, res) => {
+    try {
+      const customerId = (req.session as any).customerId;
+      const abandonedCarts = await cartStorage.getAbandonedCartsByCustomer(customerId);
+      
+      // Get cart details with items for each abandoned cart
+      const cartsWithDetails = await Promise.all(
+        abandonedCarts.map(async (cart) => {
+          const items = await cartStorage.getCartItems(cart.id);
+          return {
+            ...cart,
+            items: items,
+            hasItems: items.length > 0
+          };
+        })
+      );
+      
+      res.json({
+        success: true,
+        data: cartsWithDetails,
+        count: cartsWithDetails.length
+      });
+    } catch (error) {
+      console.error('Error getting abandoned carts:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در دریافت سبدهای رها شده'
+      });
+    }
+  });
+
+  // Complete abandoned cart (restore to active)
+  app.post("/api/customers/abandoned-carts/:cartId/restore", requireCustomerAuth, async (req, res) => {
+    try {
+      const customerId = (req.session as any).customerId;
+      const cartId = parseInt(req.params.cartId);
+      
+      // Verify cart ownership
+      const cart = await cartStorage.getCartSessionById(cartId);
+      if (!cart || cart.customerId !== customerId) {
+        return res.status(404).json({
+          success: false,
+          message: 'سبد خرید یافت نشد'
+        });
+      }
+      
+      // Restore cart to active state
+      await cartStorage.updateCartSession(cartId, {
+        isAbandoned: false,
+        abandonedAt: null,
+        lastActivity: new Date(),
+        isActive: true
+      });
+      
+      console.log(`🛒 [CART RESTORE] Customer ${customerId} restored cart ${cartId}`);
+      
+      res.json({
+        success: true,
+        message: 'سبد خرید با موفقیت بازیابی شد'
+      });
+    } catch (error) {
+      console.error('Error restoring abandoned cart:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در بازیابی سبد خرید'
+      });
+    }
+  });
+
+  // Delete abandoned cart permanently
+  app.delete("/api/customers/abandoned-carts/:cartId", requireCustomerAuth, async (req, res) => {
+    try {
+      const customerId = (req.session as any).customerId;
+      const cartId = parseInt(req.params.cartId);
+      
+      // Verify cart ownership
+      const cart = await cartStorage.getCartSessionById(cartId);
+      if (!cart || cart.customerId !== customerId) {
+        return res.status(404).json({
+          success: false,
+          message: 'سبد خرید یافت نشد'
+        });
+      }
+      
+      // Delete cart permanently
+      await cartStorage.deleteAbandonedCart(cartId);
+      
+      console.log(`🛒 [CART DELETE] Customer ${customerId} deleted abandoned cart ${cartId}`);
+      
+      res.json({
+        success: true,
+        message: 'سبد خرید با موفقیت حذف شد'
+      });
+    } catch (error) {
+      console.error('Error deleting abandoned cart:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در حذف سبد خرید'
+      });
+    }
+  });
+
   // Update customer profile
   app.patch("/api/customers/:id", async (req, res) => {
     try {
@@ -31157,6 +31264,156 @@ momtazchem.com
       res.status(500).json({
         success: false,
         message: "خطا در دریافت وضعیت تمیزکاری"
+      });
+    }
+  });
+
+  // =============================================================================
+  // ABANDONED CART MANAGEMENT ENDPOINTS
+  // =============================================================================
+
+  // Customer abandoned carts
+  app.get("/api/customers/abandoned-carts", requireCustomerAuth, async (req, res) => {
+    try {
+      const customerId = (req.session as any).customerId;
+      const abandonedCarts = await cartStorage.getAbandonedCartsByCustomer(customerId);
+      
+      // Get cart details with items for each abandoned cart
+      const cartsWithDetails = await Promise.all(
+        abandonedCarts.map(async (cart) => {
+          const items = await cartStorage.getCartItems(cart.id);
+          return {
+            ...cart,
+            items: items,
+            hasItems: items.length > 0
+          };
+        })
+      );
+      
+      res.json({
+        success: true,
+        data: cartsWithDetails,
+        count: cartsWithDetails.length
+      });
+    } catch (error) {
+      console.error('Error getting abandoned carts:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در دریافت سبدهای رها شده'
+      });
+    }
+  });
+
+  // Complete abandoned cart (restore to active)
+  app.post("/api/customers/abandoned-carts/:cartId/restore", requireCustomerAuth, async (req, res) => {
+    try {
+      const customerId = (req.session as any).customerId;
+      const cartId = parseInt(req.params.cartId);
+      
+      // Verify cart ownership
+      const cart = await cartStorage.getCartSessionById(cartId);
+      if (!cart || cart.customerId !== customerId) {
+        return res.status(404).json({
+          success: false,
+          message: 'سبد خرید یافت نشد'
+        });
+      }
+      
+      // Restore cart to active state
+      await cartStorage.updateCartSession(cartId, {
+        isAbandoned: false,
+        abandonedAt: null,
+        lastActivity: new Date(),
+        isActive: true
+      });
+      
+      console.log(`🛒 [CART RESTORE] Customer ${customerId} restored cart ${cartId}`);
+      
+      res.json({
+        success: true,
+        message: 'سبد خرید با موفقیت بازیابی شد'
+      });
+    } catch (error) {
+      console.error('Error restoring abandoned cart:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در بازیابی سبد خرید'
+      });
+    }
+  });
+
+  // Delete abandoned cart permanently
+  app.delete("/api/customers/abandoned-carts/:cartId", requireCustomerAuth, async (req, res) => {
+    try {
+      const customerId = (req.session as any).customerId;
+      const cartId = parseInt(req.params.cartId);
+      
+      // Verify cart ownership
+      const cart = await cartStorage.getCartSessionById(cartId);
+      if (!cart || cart.customerId !== customerId) {
+        return res.status(404).json({
+          success: false,
+          message: 'سبد خرید یافت نشد'
+        });
+      }
+      
+      // Delete cart permanently
+      await cartStorage.deleteAbandonedCart(cartId);
+      
+      console.log(`🛒 [CART DELETE] Customer ${customerId} deleted abandoned cart ${cartId}`);
+      
+      res.json({
+        success: true,
+        message: 'سبد خرید با موفقیت حذف شد'
+      });
+    } catch (error) {
+      console.error('Error deleting abandoned cart:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در حذف سبد خرید'
+      });
+    }
+  });
+
+  // Get abandoned cart settings (admin only)
+  app.get("/api/admin/abandoned-cart-settings", requireAuth, async (req, res) => {
+    try {
+      const settings = await cartStorage.getAbandonedCartSettings();
+      res.json({
+        success: true,
+        data: settings
+      });
+    } catch (error) {
+      console.error('Error getting abandoned cart settings:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در دریافت تنظیمات سبد رها شده'
+      });
+    }
+  });
+
+  // Update abandoned cart settings (admin only)
+  app.put("/api/admin/abandoned-cart-settings", requireAuth, async (req, res) => {
+    try {
+      const { timeoutMinutes, isEnabled, notificationTitle, notificationMessage } = req.body;
+      
+      const settings = await cartStorage.updateAbandonedCartSettings({
+        timeoutMinutes: timeoutMinutes || 60,
+        isEnabled: isEnabled !== undefined ? isEnabled : true,
+        notificationTitle: notificationTitle || 'سبد خرید رها شده',
+        notificationMessage: notificationMessage || 'کالاهای شما در سبد خرید منتظر تکمیل هستند'
+      });
+      
+      res.json({
+        success: true,
+        data: settings,
+        message: 'تنظیمات با موفقیت به‌روزرسانی شد'
+      });
+    } catch (error) {
+      console.error('Error updating abandoned cart settings:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در به‌روزرسانی تنظیمات'
       });
     }
   });

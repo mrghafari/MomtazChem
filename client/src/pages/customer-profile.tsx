@@ -37,6 +37,13 @@ const CustomerProfile = () => {
     enabled: !!customerData?.success, // Only fetch orders if customer data is available
   });
 
+  // Get abandoned carts
+  const { data: abandonedCartsData, isLoading: abandonedCartsLoading } = useQuery<any>({
+    queryKey: ["/api/customers/abandoned-carts"],
+    retry: 1,
+    enabled: !!customerData?.success,
+  });
+
   const handleLogout = async () => {
     try {
       const response = await fetch('/api/customers/logout', {
@@ -187,6 +194,79 @@ const CustomerProfile = () => {
     }
   };
 
+  const handleRestoreAbandonedCart = async (cartId: number) => {
+    try {
+      const response = await fetch(`/api/customers/abandoned-carts/${cartId}/restore`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to restore cart');
+      }
+
+      toast({
+        title: "بازیابی سبد خرید",
+        description: result.message,
+      });
+
+      // Refresh data
+      queryClient.invalidateQueries({ queryKey: ["/api/customers/abandoned-carts"] });
+      setLocation("/shop/cart");
+
+    } catch (error) {
+      console.error('Error restoring abandoned cart:', error);
+      toast({
+        variant: "destructive",
+        title: "خطا در بازیابی",
+        description: error.message || "امکان بازیابی سبد خرید وجود ندارد",
+      });
+    }
+  };
+
+  const handleDeleteAbandonedCart = async (cartId: number) => {
+    if (!confirm("آیا از حذف دائمی این سبد خرید اطمینان دارید؟")) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/customers/abandoned-carts/${cartId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to delete cart');
+      }
+
+      toast({
+        title: "حذف سبد خرید",
+        description: result.message,
+      });
+
+      // Refresh data
+      queryClient.invalidateQueries({ queryKey: ["/api/customers/abandoned-carts"] });
+
+    } catch (error) {
+      console.error('Error deleting abandoned cart:', error);
+      toast({
+        variant: "destructive",
+        title: "خطا در حذف",
+        description: error.message || "امکان حذف سبد خرید وجود ندارد",
+      });
+    }
+  };
+
   const handleActivateGracePeriodOrder = async (orderId: number) => {
     try {
       const response = await fetch(`/api/customers/orders/${orderId}/activate-grace-period`, {
@@ -323,11 +403,20 @@ const CustomerProfile = () => {
   const displayInfo = orderData?.displayInfo;
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    if (!dateString) return 'تاریخ نامشخص';
+    
+    const date = new Date(dateString);
+    const gregorianDate = date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
     });
+    const time = date.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    
+    return `${gregorianDate} - ${time}`;
   };
 
   const getStatusColor = (status: string) => {
@@ -522,6 +611,97 @@ const CustomerProfile = () => {
                       <span className="font-medium">{hiddenOrders} سفارش دیگر</span> در سوابق خرید مخفی است
                     </p>
                   )}
+                  {abandonedCartsData?.success && abandonedCartsData.count > 0 && (
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <button className="flex items-center gap-2 bg-orange-50 text-orange-700 px-3 py-1 rounded-md hover:bg-orange-100 transition-colors">
+                          <ShoppingCart className="w-4 h-4" />
+                          <span className="text-sm font-medium">
+                            {abandonedCartsData.count} سبد خرید رها شده
+                          </span>
+                        </button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle className="flex items-center gap-2">
+                            <ShoppingCart className="w-5 h-5 text-orange-600" />
+                            سبدهای خرید رها شده ({abandonedCartsData.count} سبد)
+                          </DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4 mt-4">
+                          <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                            <p className="text-orange-800 text-sm">
+                              <strong>توضیح:</strong> این سبدهای خرید حاوی محصولاتی هستند که اضافه کرده‌اید اما خرید را تکمیل نکرده‌اید. می‌توانید آن‌ها را بازیابی کرده یا حذف کنید.
+                            </p>
+                          </div>
+                          <div className="space-y-3">
+                            {abandonedCartsData.data.map((cart: any) => (
+                              <div key={cart.id} className="border border-orange-200 rounded-lg p-4 bg-white">
+                                <div className="flex justify-between items-start mb-3">
+                                  <div>
+                                    <p className="font-medium text-gray-900">سبد خرید #{cart.id}</p>
+                                    <p className="text-sm text-gray-500">
+                                      آخرین فعالیت: {new Date(cart.lastActivity).toLocaleDateString('fa-IR')}
+                                    </p>
+                                    {cart.abandonedAt && (
+                                      <p className="text-sm text-orange-600">
+                                        رها شده: {new Date(cart.abandonedAt).toLocaleDateString('fa-IR')}
+                                      </p>
+                                    )}
+                                  </div>
+                                  <div className="flex gap-2">
+                                    <Button
+                                      size="sm"
+                                      onClick={() => handleRestoreAbandonedCart(cart.id)}
+                                      className="bg-green-600 hover:bg-green-700 text-white"
+                                    >
+                                      <PlayCircle className="w-4 h-4 mr-1" />
+                                      تکمیل خرید
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => handleDeleteAbandonedCart(cart.id)}
+                                      className="text-red-600 border-red-200 hover:bg-red-50"
+                                    >
+                                      <Trash2 className="w-4 h-4 mr-1" />
+                                      حذف
+                                    </Button>
+                                  </div>
+                                </div>
+                                {cart.items && cart.items.length > 0 && (
+                                  <div className="border-t pt-3">
+                                    <p className="text-sm font-medium text-gray-700 mb-2">محصولات ({cart.items.length} محصول):</p>
+                                    <div className="space-y-1">
+                                      {cart.items.slice(0, 3).map((item: any, index: number) => (
+                                        <div key={index} className="flex justify-between text-sm">
+                                          <span className="text-gray-600">{item.productName}</span>
+                                          <span className="text-gray-500">تعداد: {item.quantity}</span>
+                                        </div>
+                                      ))}
+                                      {cart.items.length > 3 && (
+                                        <p className="text-sm text-gray-500">و {cart.items.length - 3} محصول دیگر...</p>
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                          <div className="flex justify-between items-center pt-4 border-t">
+                            <Button
+                              variant="outline"
+                              onClick={() => setLocation("/shop")}
+                              className="flex items-center gap-2"
+                            >
+                              <Plus className="w-4 h-4" />
+                              افزودن محصولات جدید
+                            </Button>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  )}
                   {hasAbandonedOrders && (
                     <Dialog>
                       <DialogTrigger asChild>
@@ -594,9 +774,9 @@ const CustomerProfile = () => {
                   {hasAbandonedCarts && (
                     <Dialog>
                       <DialogTrigger asChild>
-                        <button className="flex items-center gap-2 bg-orange-50 text-orange-700 px-3 py-1 rounded-md hover:bg-orange-100 transition-colors">
-                          <ShoppingCart className="w-4 h-4" />
-                          <span className="text-sm font-medium">
+                        <button className="flex items-center gap-3 bg-gradient-to-r from-rose-100 to-pink-100 text-rose-800 px-4 py-2 rounded-lg hover:from-rose-200 hover:to-pink-200 transition-all duration-200 border-2 border-rose-300 shadow-md hover:shadow-lg transform hover:scale-105">
+                          <ShoppingCart className="w-5 h-5 text-rose-600" />
+                          <span className="text-sm font-bold">
                             {abandonedCartsCount} سبد خرید رها شده
                           </span>
                         </button>
@@ -913,7 +1093,18 @@ const CustomerProfile = () => {
                                   <div className="flex items-center gap-4 text-sm text-gray-600">
                                     <span className="flex items-center gap-1">
                                       <Calendar className="w-4 h-4" />
-                                      {new Date(order.orderDate).toLocaleDateString('fa-IR')}
+                                      {order.createdAt ? 
+                                        new Date(order.createdAt).toLocaleDateString('en-US', {
+                                          year: 'numeric',
+                                          month: 'long',
+                                          day: 'numeric'
+                                        }) + ' - ' + 
+                                        new Date(order.createdAt).toLocaleTimeString('en-US', {
+                                          hour: '2-digit',
+                                          minute: '2-digit'
+                                        })
+                                        : 'تاریخ نامشخص'
+                                      }
                                     </span>
                                     <span className="flex items-center gap-1">
                                       <DollarSign className="w-4 h-4" />

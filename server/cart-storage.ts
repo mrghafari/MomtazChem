@@ -79,16 +79,19 @@ export class CartStorage {
   }
 
   async getActiveCartSessions(customerId?: number) {
-    const query = cartDb
+    let query = cartDb
       .select()
       .from(cartSessions)
       .where(eq(cartSessions.isActive, true));
     
     if (customerId) {
-      query.where(and(
-        eq(cartSessions.isActive, true),
-        eq(cartSessions.customerId, customerId)
-      ));
+      query = cartDb
+        .select()
+        .from(cartSessions)
+        .where(and(
+          eq(cartSessions.isActive, true),
+          eq(cartSessions.customerId, customerId)
+        ));
     }
     
     return await query.orderBy(desc(cartSessions.lastActivity));
@@ -142,9 +145,9 @@ export class CartStorage {
 
   async getAbandonedCartsByCustomer(customerId: number): Promise<CartSession[]> {
     try {
-      // Get settings for abandonment threshold
+      // Get settings for abandonment threshold (1 hour minimum)
       const settings = await this.getAbandonedCartSettings();
-      const thresholdHours = settings?.thresholdHours || 24;
+      const thresholdHours = Math.max(settings?.timeoutMinutes ? settings.timeoutMinutes / 60 : 1, 1); // Minimum 1 hour
       
       // Calculate cutoff time
       const cutoffTime = new Date();
@@ -179,6 +182,97 @@ export class CartStorage {
       console.error('Error getting abandoned carts by customer:', error);
       return [];
     }
+  }
+
+  // Process abandoned cart notifications and cleanup
+  async processAbandonedCartCleanup() {
+    try {
+      console.log('🛒 [CART CLEANUP] Starting abandoned cart processing...');
+      
+      const now = new Date();
+      
+      // Find carts that need first notification (1 hour)
+      const oneHourAgo = new Date(now.getTime() - (1 * 60 * 60 * 1000));
+      const cartsForFirstNotification = await cartDb
+        .select()
+        .from(cartSessions)
+        .where(and(
+          eq(cartSessions.isActive, true),
+          gte(cartSessions.itemCount, 1),
+          lte(cartSessions.lastActivity, oneHourAgo),
+          eq(cartSessions.isAbandoned, false)
+        ));
+      
+      // Find carts that need second notification (3 hours)
+      const threeHoursAgo = new Date(now.getTime() - (3 * 60 * 60 * 1000));
+      const cartsForSecondNotification = await cartDb
+        .select()
+        .from(cartSessions)
+        .where(and(
+          eq(cartSessions.isActive, true),
+          gte(cartSessions.itemCount, 1),
+          lte(cartSessions.lastActivity, threeHoursAgo),
+          eq(cartSessions.isAbandoned, true)
+        ));
+      
+      // Find carts to delete (4 hours)
+      const fourHoursAgo = new Date(now.getTime() - (4 * 60 * 60 * 1000));
+      const cartsToDelete = await cartDb
+        .select()
+        .from(cartSessions)
+        .where(and(
+          eq(cartSessions.isActive, true),
+          gte(cartSessions.itemCount, 1),
+          lte(cartSessions.lastActivity, fourHoursAgo)
+        ));
+      
+      console.log(`🛒 [CART CLEANUP] Found ${cartsForFirstNotification.length} carts for first notification`);
+      console.log(`🛒 [CART CLEANUP] Found ${cartsForSecondNotification.length} carts for second notification`);
+      console.log(`🛒 [CART CLEANUP] Found ${cartsToDelete.length} carts to delete`);
+      
+      return {
+        firstNotifications: cartsForFirstNotification.length,
+        secondNotifications: cartsForSecondNotification.length,
+        deletedCarts: cartsToDelete.length,
+        cartsForFirstNotification,
+        cartsForSecondNotification,
+        cartsToDelete
+      };
+      
+    } catch (error) {
+      console.error('🛒 [CART CLEANUP] Error in processing:', error);
+      return {
+        firstNotifications: 0,
+        secondNotifications: 0,
+        deletedCarts: 0,
+        cartsForFirstNotification: [],
+        cartsForSecondNotification: [],
+        cartsToDelete: []
+      };
+    }
+  }
+
+  // Mark cart as abandoned after first notification
+  async markCartAsAbandonedWithNotification(cartId: number) {
+    await cartDb
+      .update(cartSessions)
+      .set({
+        isAbandoned: true,
+        abandonedAt: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(cartSessions.id, cartId));
+  }
+
+  // Delete abandoned cart after 4 hours
+  async deleteAbandonedCart(cartId: number) {
+    await cartDb
+      .update(cartSessions)
+      .set({
+        isActive: false,
+        updatedAt: new Date()
+      })
+      .where(eq(cartSessions.id, cartId));
   }
 
   // =============================================================================
