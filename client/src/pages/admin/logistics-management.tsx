@@ -266,7 +266,7 @@ const LogisticsManagement = () => {
     queryKey: ['/api/admin/me'],
     queryFn: () => fetch('/api/admin/me').then(res => res.json()).then(data => data.user),
     staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes (replaces deprecated cacheTime)
   });
 
   // Get active logistics orders (not delivered)
@@ -454,7 +454,7 @@ const LogisticsManagement = () => {
     enabled: activeTab === 'companies'
   });
 
-  const companies = companiesResponse?.data || [];
+  const companies = (companiesResponse as any)?.data || [];
 
   // Complete delivery mutation (admin only)
   const completeDeliveryMutation = useMutation({
@@ -510,7 +510,7 @@ const LogisticsManagement = () => {
       'maintenance': { color: 'bg-red-500', text: 'تعمیر' },
       'offline': { color: 'bg-gray-500', text: 'آفلاین' },
     };
-    const config = statusMap[status] || { color: 'bg-gray-500', text: status };
+    const config = statusMap[status as keyof typeof statusMap] || { color: 'bg-gray-500', text: status };
     return <Badge className={config.color}>{config.text}</Badge>;
   };
 
