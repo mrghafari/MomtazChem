@@ -310,7 +310,7 @@ export default function FinancialDepartment() {
                     <div className="flex-1">
                       <div className="flex items-center gap-4 mb-3">
                         <Badge variant="secondary" className="px-3 py-1">
-                          سفارش #{order.customerOrderId}
+                          {order.orderNumber || `سفارش #${order.customerOrderId}`}
                         </Badge>
                         <Badge variant="outline" className="text-orange-600 border-orange-300">
                           در انتظار بررسی مالی
