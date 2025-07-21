@@ -9774,7 +9774,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         recipientAddress: row.recipient_address
       }));
 
-      // Get abandoned orders information from enhanced profile data
+      // Get abandoned orders and carts information from enhanced profile data
       const profileData = await customerStorage.getOrdersForProfile(finalCustomerId);
       
       res.json({
@@ -9785,6 +9785,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         abandonedOrders: profileData.abandonedOrders,
         hasAbandonedOrders: profileData.hasAbandonedOrders,
         abandonedCount: profileData.abandonedOrders.length,
+        abandonedCarts: profileData.abandonedCarts,
+        hasAbandonedCarts: profileData.hasAbandonedCarts,
+        abandonedCartsCount: profileData.abandonedCarts.length,
         displayInfo: {
           totalDisplayed: detailedOrders.length,
           hasTemporaryOrder: detailedOrders.some(order => order.orderType === 'temporary'),

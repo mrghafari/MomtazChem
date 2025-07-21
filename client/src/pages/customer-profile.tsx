@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { User, Package, Calendar, DollarSign, ShoppingBag, LogOut, MapPin, Building, Phone, Mail, Edit, FileText, Download, Clock, AlertTriangle, PlayCircle, Trash2, History, Search, X } from "lucide-react";
+import { User, Package, Calendar, DollarSign, ShoppingBag, LogOut, MapPin, Building, Phone, Mail, Edit, FileText, Download, Clock, AlertTriangle, PlayCircle, Trash2, History, Search, X, ShoppingCart, Plus } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { getPersonalizedWelcome, getDashboardMotivation } from "@/utils/greetings";
@@ -317,6 +317,9 @@ const CustomerProfile = () => {
   const abandonedOrders = orderData?.abandonedOrders || [];
   const hasAbandonedOrders = orderData?.hasAbandonedOrders || false;
   const abandonedCount = orderData?.abandonedCount || 0;
+  const abandonedCarts = orderData?.abandonedCarts || [];
+  const hasAbandonedCarts = orderData?.hasAbandonedCarts || false;
+  const abandonedCartsCount = orderData?.abandonedCartsCount || 0;
   const displayInfo = orderData?.displayInfo;
 
   const formatDate = (dateString: string) => {
@@ -578,6 +581,83 @@ const CustomerProfile = () => {
                                   >
                                     <ShoppingBag className="w-4 h-4 mr-2" />
                                     ثبت سفارش جدید
+                                  </Button>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  )}
+                  
+                  {hasAbandonedCarts && (
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <button className="flex items-center gap-2 bg-orange-50 text-orange-700 px-3 py-1 rounded-md hover:bg-orange-100 transition-colors">
+                          <ShoppingCart className="w-4 h-4" />
+                          <span className="text-sm font-medium">
+                            {abandonedCartsCount} سبد خرید رها شده
+                          </span>
+                        </button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle className="flex items-center gap-2">
+                            <ShoppingCart className="w-5 h-5 text-orange-600" />
+                            سبدهای خرید رها شده ({abandonedCartsCount} سبد)
+                          </DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4 mt-4">
+                          <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                            <p className="text-orange-800 text-sm">
+                              <strong>توضیح:</strong> این کالاها در سبد خرید شما قرار دارند ولی خرید تکمیل نشده است. می‌توانید سفارش خود را تکمیل کنید یا کالاهای جدید اضافه کنید.
+                            </p>
+                          </div>
+                          
+                          {abandonedCarts.map((cart: any) => (
+                            <Card key={cart.id} className="border-orange-200">
+                              <CardContent className="p-4">
+                                <div className="flex justify-between items-start mb-3">
+                                  <div>
+                                    <h3 className="font-semibold text-gray-900">
+                                      سبد خرید #{cart.id}
+                                    </h3>
+                                    <p className="text-sm text-gray-600">
+                                      آخرین فعالیت: {formatDate(cart.lastActivity)}
+                                    </p>
+                                  </div>
+                                  <div className="text-left">
+                                    <p className="text-lg font-bold text-orange-600">
+                                      ${parseFloat(cart.totalValue || 0).toFixed(2)}
+                                    </p>
+                                    <Badge className="bg-orange-100 text-orange-800">
+                                      {cart.itemCount} کالا
+                                    </Badge>
+                                  </div>
+                                </div>
+                                
+                                <div className="text-sm text-gray-600">
+                                  <p><strong>تعداد اقلام:</strong> {cart.itemCount} محصول</p>
+                                  <p><strong>وضعیت:</strong> در انتظار تکمیل خرید</p>
+                                </div>
+                                
+                                <div className="mt-3 pt-3 border-t border-orange-200 flex gap-2">
+                                  <Button 
+                                    size="sm" 
+                                    onClick={() => setLocation("/shop")}
+                                    className="bg-green-600 hover:bg-green-700"
+                                  >
+                                    <ShoppingCart className="w-4 h-4 mr-2" />
+                                    تکمیل خرید
+                                  </Button>
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    onClick={() => setLocation("/shop")}
+                                  >
+                                    <Plus className="w-4 h-4 mr-2" />
+                                    افزودن کالای جدید
                                   </Button>
                                 </div>
                               </CardContent>

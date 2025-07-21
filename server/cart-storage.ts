@@ -140,6 +140,47 @@ export class CartStorage {
       .where(eq(cartSessions.customerId, customerId));
   }
 
+  async getAbandonedCartsByCustomer(customerId: number): Promise<CartSession[]> {
+    try {
+      // Get settings for abandonment threshold
+      const settings = await this.getAbandonedCartSettings();
+      const thresholdHours = settings?.thresholdHours || 24;
+      
+      // Calculate cutoff time
+      const cutoffTime = new Date();
+      cutoffTime.setHours(cutoffTime.getHours() - thresholdHours);
+      
+      const abandonedCarts = await cartDb
+        .select()
+        .from(cartSessions)
+        .where(and(
+          eq(cartSessions.customerId, customerId),
+          eq(cartSessions.isActive, true),
+          gte(cartSessions.itemCount, 1), // Has items in cart
+          lte(cartSessions.lastActivity, cutoffTime) // Past threshold
+        ))
+        .orderBy(desc(cartSessions.lastActivity));
+      
+      // Mark as abandoned if not already marked
+      for (const cart of abandonedCarts) {
+        if (!cart.isAbandoned) {
+          await cartDb
+            .update(cartSessions)
+            .set({
+              isAbandoned: true,
+              abandonedAt: new Date()
+            })
+            .where(eq(cartSessions.id, cart.id));
+        }
+      }
+      
+      return abandonedCarts;
+    } catch (error) {
+      console.error('Error getting abandoned carts by customer:', error);
+      return [];
+    }
+  }
+
   // =============================================================================
   // ABANDONED CART SETTINGS
   // =============================================================================

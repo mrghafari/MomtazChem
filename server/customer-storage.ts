@@ -30,6 +30,7 @@ import {
 import { customerDb } from "./customer-db";
 import { eq, desc, and, or, ilike, count, sql, sum } from "drizzle-orm";
 import bcrypt from "bcryptjs";
+import { CartStorage } from "./cart-storage";
 
 export interface ICustomerStorage {
   // Customer authentication and management
@@ -99,6 +100,7 @@ export interface ICustomerStorage {
 }
 
 export class CustomerStorage implements ICustomerStorage {
+  private cartStorage = new CartStorage();
   // Customer authentication and management
   async createCustomer(customerData: InsertCustomer): Promise<Customer> {
     // Hash password before storing
@@ -205,7 +207,9 @@ export class CustomerStorage implements ICustomerStorage {
     totalOrders: number, 
     hiddenOrders: number,
     abandonedOrders: CustomerOrder[],
-    hasAbandonedOrders: boolean
+    hasAbandonedOrders: boolean,
+    abandonedCarts: any[],
+    hasAbandonedCarts: boolean
   }> {
     // Get all orders for the customer
     const allOrders = await customerDb
@@ -274,12 +278,17 @@ export class CustomerStorage implements ICustomerStorage {
 
     const hiddenOrders = activeOrders.length - displayOrders.length;
 
+    // Get abandoned carts (سبد خرید رها شده)
+    const abandonedCarts = await this.cartStorage.getAbandonedCartsByCustomer(customerId);
+
     return {
       displayOrders,
       totalOrders: activeOrders.length,
       hiddenOrders,
       abandonedOrders,
-      hasAbandonedOrders: abandonedOrders.length > 0
+      hasAbandonedOrders: abandonedOrders.length > 0,
+      abandonedCarts,
+      hasAbandonedCarts: abandonedCarts.length > 0
     };
   }
 
