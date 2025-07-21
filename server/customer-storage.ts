@@ -385,8 +385,9 @@ export class CustomerStorage implements ICustomerStorage {
         throw new Error('Order not found');
       }
 
-      if (order.orderType !== 'temporary' && order.orderCategory !== 'temporary') {
-        throw new Error('Only temporary orders can be deleted');
+      // Check if order is temporary (pending status or grace period)
+      if (order.status !== 'pending' && order.status !== 'payment_grace_period') {
+        throw new Error('فقط سفارشات موقت قابل حذف هستند');
       }
 
       // Get order items to release reservations
@@ -424,17 +425,16 @@ export class CustomerStorage implements ICustomerStorage {
         .delete(orderItems)
         .where(eq(orderItems.orderId, id));
 
-      // Mark order as deleted instead of removing it completely to preserve order numbering
+      // Update order status to 'deleted' instead of hard deletion to preserve numbering
       await customerDb
         .update(customerOrders)
         .set({
           status: 'deleted',
-          notes: order.notes ? `${order.notes} - سفارش حذف شده در ${new Date().toISOString()}` : `سفارش حذف شده در ${new Date().toISOString()}`,
           updatedAt: new Date()
         })
         .where(eq(customerOrders.id, id));
 
-      console.log(`✅ Temporary order ${id} marked as deleted and ${releasedProducts.length} products released`);
+      console.log(`✅ [DELETE TEMPORARY] Order ${order.orderNumber} marked as deleted with ${releasedProducts.length} products released`);
       
       return {
         success: true,
@@ -442,8 +442,11 @@ export class CustomerStorage implements ICustomerStorage {
       };
 
     } catch (error) {
-      console.error('Error deleting temporary order:', error);
-      throw error;
+      console.error('❌ [DELETE TEMPORARY] Error deleting temporary order:', error);
+      return {
+        success: false,
+        releasedProducts: []
+      };
     }
   }
 

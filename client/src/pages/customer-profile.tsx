@@ -534,14 +534,14 @@ const CustomerProfile = () => {
                 ) : (
                   <div className="space-y-4">
                     {orders.map((order: any) => (
-                      <div key={order.id} className={`border rounded-lg p-4 ${(order.orderType === 'temporary' || order.orderCategory === 'temporary') ? 'border-amber-200 bg-amber-50' : ''}`}>
+                      <div key={order.id} className={`border rounded-lg p-4 ${(order.status === 'pending' || order.status === 'payment_grace_period') ? 'border-amber-200 bg-amber-50' : ''}`}>
                         <div className="flex justify-between items-start mb-3">
                           <div>
                             <div className="flex items-center gap-2 mb-1">
                               <h4 className="font-semibold text-gray-900">
                                 {order.orderNumber}
                               </h4>
-                              {(order.orderType === 'temporary' || order.orderCategory === 'temporary') && (
+                              {(order.status === 'pending' || order.status === 'payment_grace_period') && (
                                 <Badge className="bg-orange-100 text-orange-800">
                                   <Clock className="w-3 h-3 mr-1" />
                                   سفارش موقت
@@ -552,7 +552,7 @@ const CustomerProfile = () => {
                               <Calendar className="w-4 h-4" />
                               {formatDate(order.createdAt)}
                             </p>
-                            {(order.orderType === 'temporary' || order.orderCategory === 'temporary') && (
+                            {(order.status === 'pending' || order.status === 'payment_grace_period') && (
                               <div className="mt-2 space-y-1">
                                 <div className="flex items-center gap-4 text-sm text-gray-600">
                                   <span className="flex items-center gap-1">
@@ -611,7 +611,7 @@ const CustomerProfile = () => {
 
                         {/* Actions */}
                         <div className="mt-4 pt-3 border-t flex gap-2 flex-wrap">
-                          {(order.orderType === 'temporary' || order.orderCategory === 'temporary') && order.gracePeriodStatus === 'active' ? (
+                          {(order.status === 'pending' || order.status === 'payment_grace_period') && order.gracePeriodStatus === 'active' ? (
                             <>
                               <Button
                                 size="sm"
@@ -640,7 +640,7 @@ const CustomerProfile = () => {
                                 حذف سفارش موقت
                               </Button>
                             </>
-                          ) : (order.orderType === 'temporary' || order.orderCategory === 'temporary') && order.gracePeriodStatus === 'expired' ? (
+                          ) : (order.status === 'pending' || order.status === 'payment_grace_period') && order.gracePeriodStatus === 'expired' ? (
                             <>
                               <div className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded">
                                 این سفارش منقضی شده است و قابل فعال‌سازی نیست
