@@ -391,26 +391,27 @@ export default function KPIDashboard() {
                 subtitle="تومان"
                 change={15.7}
                 changeType="increase"
-              icon={<DollarSign className="w-4 h-4 text-white" />}
-              color="bg-green-600"
-            />
-            <KPICard
-              title="تعداد سفارشات"
-              value="156"
-              change={5.8}
-              changeType="increase"
-              icon={<ShoppingCart className="w-4 h-4 text-white" />}
-              color="bg-blue-600"
-            />
-            <KPICard
-              title="نرخ تبدیل"
-              value="15.8%"
-              change={3.2}
-              changeType="increase"
-              icon={<Target className="w-4 h-4 text-white" />}
-              color="bg-orange-500"
-            />
-          </div>
+                icon={<DollarSign className="w-4 h-4 text-white" />}
+                color="bg-green-600"
+              />
+              <KPICard
+                title="تعداد سفارشات"
+                value="156"
+                change={5.8}
+                changeType="increase"
+                icon={<ShoppingCart className="w-4 h-4 text-white" />}
+                color="bg-blue-600"
+              />
+              <KPICard
+                title="نرخ تبدیل"
+                value="15.8%"
+                change={3.2}
+                changeType="increase"
+                icon={<Target className="w-4 h-4 text-white" />}
+                color="bg-orange-500"
+              />
+            </div>
+          )}
         </TabsContent>
 
         {/* Customers Tab */}
