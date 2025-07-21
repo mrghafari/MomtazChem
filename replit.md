@@ -6,6 +6,21 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Purchase History Feature with Slider Display and Search Capabilities (July 21, 2025)
+✅ **IMPLEMENTED: Complete purchase history modal with slider display and comprehensive search functionality**
+- **Purchase History Button**: Added purple-styled "مشاهده سابقه خرید کامل" button below customer orders section
+- **Slider Modal Interface**: Created responsive Dialog with max-w-4xl modal showing complete order history with vertical scroll
+- **Advanced Search System**: Real-time search functionality across order numbers, status, and product names with 500ms debounce
+- **Complete Order Loading**: getCompleteOrderHistory() method in customer-storage.ts retrieves all customer orders including deleted ones
+- **API Endpoint**: GET /api/customers/orders/complete-history endpoint with proper customer authentication
+- **Order Display Cards**: Each order shown in purple-bordered cards with order number, date, amount, status, and product details
+- **Product Items Preview**: Shows first 3 products per order with "و X محصول دیگر..." for additional items
+- **Action Buttons**: Each order includes download invoice and official invoice request buttons based on order status
+- **Search Results Counter**: Shows filtered results count with clear indication of search state
+- **Loading States**: Spinning loader during data fetch with proper error handling and empty state messages
+- **Clear Search**: X button to quickly clear search terms and reset to full history view
+- **Impact**: Customers can now access complete purchase history with powerful search capabilities without cluttering main profile
+
 ### COMPLETED: Temporary Order Deletion System with Sequential Numbering Preservation (July 21, 2025)
 ✅ **IMPLEMENTED: Complete temporary order deletion system that maintains order numbering sequence**
 - **Soft Delete Method**: Created deleteTemporaryOrder() method in customer-storage.ts that marks orders as 'deleted' instead of hard deletion

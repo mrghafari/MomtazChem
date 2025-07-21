@@ -325,6 +325,41 @@ export class CustomerStorage implements ICustomerStorage {
       .where(eq(orderItems.id, id));
   }
 
+  async getCompleteOrderHistory(customerId: number): Promise<any[]> {
+    try {
+      console.log(`🔍 [COMPLETE HISTORY] Loading complete order history for customer ${customerId}`);
+      
+      // Get all orders for this customer (including deleted ones)
+      const orders = await customerDb.select()
+        .from(customerOrders)
+        .where(eq(customerOrders.customerId, customerId))
+        .orderBy(desc(customerOrders.createdAt));
+
+      console.log(`📊 [COMPLETE HISTORY] Found ${orders.length} total orders (including deleted)`);
+
+      // Get order items for all orders
+      const ordersWithItems = await Promise.all(
+        orders.map(async (order) => {
+          const items = await customerDb.select()
+            .from(orderItems)
+            .where(eq(orderItems.orderId, order.id));
+
+          return {
+            ...order,
+            items: items || []
+          };
+        })
+      );
+
+      console.log(`✅ [COMPLETE HISTORY] Loaded complete history with ${ordersWithItems.length} orders`);
+      return ordersWithItems;
+
+    } catch (error) {
+      console.error('❌ [COMPLETE HISTORY] Error loading complete order history:', error);
+      return [];
+    }
+  }
+
   async deleteTemporaryOrder(id: number): Promise<{ success: boolean; releasedProducts: any[] }> {
     try {
       // First check if this is a temporary order

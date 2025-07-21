@@ -4,7 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { User, Package, Calendar, DollarSign, ShoppingBag, LogOut, MapPin, Building, Phone, Mail, Edit, FileText, Download, Clock, AlertTriangle, PlayCircle, Trash2 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { User, Package, Calendar, DollarSign, ShoppingBag, LogOut, MapPin, Building, Phone, Mail, Edit, FileText, Download, Clock, AlertTriangle, PlayCircle, Trash2, History, Search, X } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { getPersonalizedWelcome, getDashboardMotivation } from "@/utils/greetings";
@@ -15,6 +17,12 @@ const CustomerProfile = () => {
   const { toast } = useToast();
   const { t, language, direction } = useLanguage();
   const queryClient = useQueryClient();
+  
+  // Purchase history state
+  const [showPurchaseHistory, setShowPurchaseHistory] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [purchaseHistoryOrders, setPurchaseHistoryOrders] = useState<any[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
 
   // Get customer information
   const { data: customerData, isLoading: customerLoading, error: customerError } = useQuery<any>({
@@ -96,6 +104,41 @@ const CustomerProfile = () => {
       });
     }
   };
+
+  // Load complete purchase history
+  const loadPurchaseHistory = async () => {
+    setHistoryLoading(true);
+    try {
+      const response = await fetch('/api/customers/orders/complete-history', {
+        credentials: 'include'
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          setPurchaseHistoryOrders(result.orders || []);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading purchase history:', error);
+      toast({
+        variant: "destructive",
+        title: "خطا در بارگذاری",
+        description: "امکان بارگذاری سابقه خرید وجود ندارد"
+      });
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
+  // Filter orders based on search term
+  const filteredHistoryOrders = purchaseHistoryOrders.filter(order =>
+    order.orderNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    order.status?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    order.items?.some((item: any) => 
+      item.productName?.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
 
   const handleGenerateOfficialInvoice = async (orderId: number) => {
     try {
@@ -640,6 +683,158 @@ const CustomerProfile = () => {
                 )}
               </CardContent>
             </Card>
+
+            {/* Purchase History Button */}
+            <div className="mt-4">
+              <Dialog open={showPurchaseHistory} onOpenChange={setShowPurchaseHistory}>
+                <DialogTrigger asChild>
+                  <Button 
+                    onClick={loadPurchaseHistory}
+                    className="w-full flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700"
+                  >
+                    <History className="w-5 h-5" />
+                    مشاهده سابقه خرید کامل
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden">
+                  <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2 text-right">
+                      <History className="w-5 h-5" />
+                      سابقه خرید کامل
+                    </DialogTitle>
+                  </DialogHeader>
+
+                  {/* Search Bar */}
+                  <div className="relative mb-4">
+                    <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <Input
+                      type="text"
+                      placeholder="جستجو بر اساس شماره سفارش، وضعیت یا نام محصول..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pr-10 text-right"
+                    />
+                    {searchTerm && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="absolute left-2 top-1/2 transform -translate-y-1/2 p-1 h-6 w-6"
+                        onClick={() => setSearchTerm("")}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
+
+                  {/* Orders List with Slider */}
+                  <div className="overflow-y-auto max-h-[60vh] space-y-4">
+                    {historyLoading ? (
+                      <div className="text-center py-8">
+                        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+                        <p className="mt-2 text-gray-600">در حال بارگذاری سابقه خرید...</p>
+                      </div>
+                    ) : filteredHistoryOrders.length === 0 ? (
+                      <div className="text-center py-8">
+                        <Package className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                        <p className="text-gray-600">
+                          {searchTerm ? "سفارشی با این مشخصات یافت نشد" : "سابقه خریدی موجود نیست"}
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {filteredHistoryOrders.map((order: any) => (
+                          <Card key={order.id} className="border-l-4 border-l-purple-500">
+                            <CardContent className="p-4">
+                              <div className="flex justify-between items-start mb-3">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <Package className="w-4 h-4 text-purple-600" />
+                                    <span className="font-semibold text-purple-800">
+                                      {order.orderNumber || `سفارش #${order.id}`}
+                                    </span>
+                                    <Badge className={getStatusColor(order.status)}>
+                                      {getStatusLabel(order.status)}
+                                    </Badge>
+                                  </div>
+                                  <div className="flex items-center gap-4 text-sm text-gray-600">
+                                    <span className="flex items-center gap-1">
+                                      <Calendar className="w-4 h-4" />
+                                      {new Date(order.orderDate).toLocaleDateString('fa-IR')}
+                                    </span>
+                                    <span className="flex items-center gap-1">
+                                      <DollarSign className="w-4 h-4" />
+                                      {parseFloat(order.totalAmount).toFixed(2)} {order.currency || 'IQD'}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              {/* Order Items */}
+                              {order.items && order.items.length > 0 && (
+                                <div className="mt-3 pt-3 border-t">
+                                  <p className="text-sm font-medium text-gray-700 mb-2">محصولات:</p>
+                                  <div className="space-y-1">
+                                    {order.items.slice(0, 3).map((item: any) => (
+                                      <div key={item.id} className="flex justify-between text-sm">
+                                        <span className="text-gray-600">
+                                          {item.product_name || item.productName} × {parseFloat(item.quantity)}
+                                        </span>
+                                        <span className="font-medium">
+                                          {parseFloat(item.total_price || item.totalPrice).toFixed(2)} IQD
+                                        </span>
+                                      </div>
+                                    ))}
+                                    {order.items.length > 3 && (
+                                      <p className="text-sm text-gray-500">
+                                        و {order.items.length - 3} محصول دیگر...
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Action Buttons */}
+                              <div className="mt-3 pt-3 border-t flex gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleDownloadInvoice(order.id)}
+                                  className="flex items-center gap-1"
+                                >
+                                  <Download className="w-3 h-3" />
+                                  فاکتور
+                                </Button>
+                                {order.status === 'confirmed' && (
+                                  <Button
+                                    size="sm"
+                                    onClick={() => handleGenerateOfficialInvoice(order.id)}
+                                    className="flex items-center gap-1"
+                                  >
+                                    <FileText className="w-3 h-3" />
+                                    فاکتور رسمی
+                                  </Button>
+                                )}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Results Counter */}
+                  {!historyLoading && filteredHistoryOrders.length > 0 && (
+                    <div className="mt-4 pt-3 border-t text-center text-sm text-gray-600">
+                      {searchTerm ? (
+                        <span>{filteredHistoryOrders.length} سفارش از {purchaseHistoryOrders.length} سفارش یافت شد</span>
+                      ) : (
+                        <span>مجموعاً {purchaseHistoryOrders.length} سفارش در سابقه خرید</span>
+                      )}
+                    </div>
+                  )}
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
         </div>
       </div>

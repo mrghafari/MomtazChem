@@ -9464,6 +9464,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get complete customer order history for purchase history modal
+  app.get("/api/customers/orders/complete-history", async (req, res) => {
+    try {
+      console.log('🔍 [COMPLETE HISTORY API] Customer purchase history request received');
+      
+      // Get customer ID from session
+      const customerId = req.session?.customerId || req.session?.crmCustomerId;
+      
+      if (!customerId) {
+        console.log('❌ [COMPLETE HISTORY API] No customer session found');
+        return res.status(401).json({
+          success: false,
+          message: "احراز هویت نشده"
+        });
+      }
+
+      console.log(`🔍 [COMPLETE HISTORY API] Loading complete order history for customer ${customerId}`);
+      
+      // Use customerStorage to get complete order history
+      const orders = await customerStorage.getCompleteOrderHistory(customerId);
+      
+      console.log(`✅ [COMPLETE HISTORY API] Successfully loaded ${orders.length} orders for customer ${customerId}`);
+      
+      res.json({
+        success: true,
+        orders: orders,
+        totalCount: orders.length
+      });
+
+    } catch (error) {
+      console.error('❌ [COMPLETE HISTORY API] Error loading complete order history:', error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در بارگذاری سابقه خرید"
+      });
+    }
+  });
+
   // Delete temporary order with product reservation release
   app.delete("/api/customers/orders/:orderId/delete-temporary", async (req, res) => {
     try {
