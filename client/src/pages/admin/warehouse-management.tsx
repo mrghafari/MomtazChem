@@ -1693,7 +1693,7 @@ const WarehouseManagement: React.FC = () => {
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Package className="w-5 h-5" />
-                لیست کالاهای سفارش {(selectedOrderForItems as any).orderNumber || `#${selectedOrderForItems.customerOrderId}`}
+                لیست کالاهای سفارش MOM25{String(selectedOrderForItems.customerOrderId).padStart(5, '1')}
               </DialogTitle>
               <p className="text-sm text-gray-600">
                 مشتری: {selectedOrderForItems.customer?.firstName} {selectedOrderForItems.customer?.lastName}

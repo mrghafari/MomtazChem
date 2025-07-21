@@ -12,7 +12,7 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Complete Interface Coverage**: Fixed order number display across ALL department interfaces:
   1. **financial-department.tsx**: Badge and dialog title use MOM pattern
   2. **admin/finance-orders.tsx**: OrderCard and TransferredOrderCard components use MOM pattern  
-  3. **admin/warehouse-management.tsx**: Both main table and sent orders table use MOM pattern
+  3. **admin/warehouse-management.tsx**: Both main table and sent orders table use MOM pattern (updated dialog title)
   4. **admin/logistics-management.tsx**: Active and delivered orders tables use MOM pattern
 - **Pattern Applied**: Order #283 now displays as **MOM25111283** across all interfaces
 - **Independence**: Frontend no longer depends on backend orderNumber field - generates own display pattern
