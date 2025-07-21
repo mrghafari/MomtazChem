@@ -175,6 +175,16 @@ export default function CustomerProfileEdit() {
     }
   }, [customer, form]);
 
+  // Set selected province ID when provinces data and customer data are loaded
+  useEffect(() => {
+    if (customer?.customer?.province && provinces.length > 0) {
+      const customerProvince = provinces.find((p: any) => p.nameEnglish === customer.customer.province);
+      if (customerProvince) {
+        setSelectedProvinceId(customerProvince.id);
+      }
+    }
+  }, [customer, provinces]);
+
   // Send SMS verification code
   const sendSmsCodeMutation = useMutation({
     mutationFn: async (phone: string) => {
