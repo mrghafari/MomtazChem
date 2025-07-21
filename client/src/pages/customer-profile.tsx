@@ -506,10 +506,10 @@ const CustomerProfile = () => {
                 </div>
               )}
               
-              {orders.length > 5 && (
+              {(orders || []).length > 5 && (
                 <div className="text-center">
                   <Button variant="outline" onClick={() => setIsHistoryOpen(true)}>
-                    مشاهده همه سفارشات ({orders.length})
+                    مشاهده همه سفارشات ({(orders || []).length})
                   </Button>
                 </div>
               )}
