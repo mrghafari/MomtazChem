@@ -33555,6 +33555,65 @@ momtazchem.com
     }
   });
 
+  // Get customer activities data  
+  app.get("/api/management/customer-activities", requireAuth, async (req, res) => {
+    try {
+      console.log('👥 [CUSTOMER ACTIVITIES] Fetching customer activities data');
+      
+      // Sample activities data showing login/logout events
+      const customerActivities = [
+        {
+          type: "login",
+          customerName: "احمد محمدی",
+          phone: "+964 750 123 4567",
+          email: "ahmad@example.com",
+          timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString() // 5 minutes ago
+        },
+        {
+          type: "logout",
+          customerName: "فاطمه علیزاده",
+          phone: "+964 750 987 6543",
+          email: "fateme@example.com",
+          timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString() // 15 minutes ago
+        },
+        {
+          type: "login",
+          customerName: "حسین رضایی", 
+          phone: "+964 750 555 1234",
+          email: "hossein@example.com",
+          timestamp: new Date(Date.now() - 32 * 60 * 1000).toISOString() // 32 minutes ago
+        },
+        {
+          type: "login",
+          customerName: "مریم احمدی",
+          phone: "+964 750 777 8888",
+          email: "maryam@example.com", 
+          timestamp: new Date(Date.now() - 45 * 60 * 1000).toISOString() // 45 minutes ago
+        },
+        {
+          type: "logout",
+          customerName: "علی کریمی",
+          phone: "+964 750 333 4444",
+          email: "ali@example.com",
+          timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString() // 1 hour ago
+        }
+      ];
+
+      console.log('👥 [CUSTOMER ACTIVITIES] Customer activities data prepared');
+      
+      res.json({
+        success: true,
+        data: customerActivities
+      });
+    } catch (error) {
+      console.error('👥 [CUSTOMER ACTIVITIES] Error fetching customer activities:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در دریافت فعالیت‌های مشتریان'
+      });
+    }
+  });
+
   // Update company information
   app.put("/api/admin/company-information", requireAuth, async (req, res) => {
     try {
