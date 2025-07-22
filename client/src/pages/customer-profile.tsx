@@ -436,20 +436,17 @@ const CustomerProfile = () => {
                                         </div>
                                       )}
                                       
+                                      {/* هزینه حمل */}
+                                      <div className="flex justify-between text-sm text-blue-700">
+                                        <span>هزینه حمل:</span>
+                                        <span>{shippingCost.toFixed(2)} IQD</span>
+                                      </div>
+                                      
                                       {/* مالیات بر ارزش افزوده */}
                                       {vatAmount > 0 && (
                                         <div className="flex justify-between text-sm text-green-700 font-medium">
                                           <span>مالیات بر ارزش افزوده:</span>
                                           <span>{vatAmount.toFixed(2)} IQD</span>
-                                          {/* نوت: این مقدار در زمان ایجاد سفارش محاسبه شده */}
-                                        </div>
-                                      )}
-                                      
-                                      {/* هزینه حمل */}
-                                      {shippingCost > 0 && (
-                                        <div className="flex justify-between text-sm text-blue-700">
-                                          <span>هزینه حمل:</span>
-                                          <span>{shippingCost.toFixed(2)} IQD</span>
                                         </div>
                                       )}
                                       
@@ -460,6 +457,15 @@ const CustomerProfile = () => {
                                           <span>{surchargeAmount.toFixed(2)} IQD</span>
                                         </div>
                                       )}
+                                      
+                                      {/* خط جداکننده قبل از مجموع کل */}
+                                      <div className="border-t border-gray-300 my-2"></div>
+                                      
+                                      {/* مجموع کل */}
+                                      <div className="flex justify-between text-sm font-bold text-gray-800">
+                                        <span>مجموع کل:</span>
+                                        <span>{totalAmount.toFixed(2)} IQD</span>
+                                      </div>
                                     </>
                                   );
                                 })()}

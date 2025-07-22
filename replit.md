@@ -21,13 +21,15 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
   - Current VAT rate: 6% (rate=0.0600 in tax_settings)
   - Historical orders show varied VAT calculation accuracy due to past system changes
   - Example: Order M2511166 has 0.04 IQD VAT on 58.39 total (historically calculated)
-- **User Experience**: Customer profile now shows complete financial breakdown per order:
-  - مجموع اقلام (Items Subtotal) - calculated
-  - مالیات بر ارزش افزوده (VAT Amount) - from order history
-  - هزینه حمل (Shipping Cost) - from order data  
-  - عوارض (Surcharges) - if applicable
-- **Impact**: Transparent financial breakdown for customers with accurate historical order data display
-- **Result**: Complete order cost visibility with proper VAT and shipping cost breakdown
+- **User Experience**: Customer profile now shows complete financial breakdown per order in logical order:
+  1. مجموع اقلام (Items Subtotal) - calculated automatically
+  2. هزینه حمل (Shipping Cost) - always displayed from order data
+  3. مالیات بر ارزش افزوده (VAT Amount) - from historical order data  
+  4. عوارض (Surcharges) - if applicable
+  5. مجموع کل (Grand Total) - with separator line and bold formatting
+- **Enhanced Display**: Shipping cost now always visible (even when 0.00), professional formatting with color-coding
+- **Impact**: Transparent financial breakdown for customers with complete cost visibility including shipping
+- **Result**: Complete order cost breakdown with shipping cost always displayed and logical ordering
 
 ### COMPLETED: Complete Duties/Surcharge Removal and Simplified VAT-Only Tax System (July 22, 2025)
 ✅ **RESOLVED: Duties functionality completely removed from system per business requirements**
