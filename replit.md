@@ -6,6 +6,26 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Enhanced PDF Text Direction with Intelligent Mixed Language Support (July 22, 2025)
+✅ **IMPLEMENTED: Comprehensive bidirectional text formatting system for PDF generation**
+- **Issue**: User required Persian text to display RTL (right-to-left) and English text/numbers to display LTR (left-to-right) in PDF documents
+- **Root Cause**: Previous formatRTLText function was applying RTL formatting to all text instead of intelligent per-word formatting
+- **Advanced Solution**: Created formatMixedText() function with Unicode directional markers
+- **Technical Implementation**:
+  - Added Unicode RTL Override (\u202E....\u202C) for Persian/Arabic/Kurdish words
+  - Added Unicode LTR Override (\u202D....\u202C) for English words and numbers
+  - Implemented intelligent language detection for mixed-content text formatting
+  - Applied formatMixedText throughout PDF generator replacing all formatRTLText usage
+- **Test Results**: Generated 19,338-byte PDF with proper mixed text direction
+- **Features Enhanced**:
+  - Header titles: Persian "پیش‌فاکتور" displays RTL, English "Momtaz Chem" displays LTR
+  - Customer information: Persian labels RTL, phone/email numbers LTR
+  - Product names: Dynamic formatting based on language detection
+  - Invoice numbers and dates: Proper LTR formatting for numbers
+  - VAT and shipping calculations: Correct directional formatting
+- **Impact**: PDF documents now display authentic mixed Persian-English content with proper text direction for each language
+- **Testing**: Enhanced test-proforma.html page available at /test-proforma with comprehensive documentation
+
 ### COMPLETED: Complete CRM Form Integration with Data Preservation System (July 22, 2025)
 ✅ **IMPLEMENTED: Comprehensive CRM fields integration in customer profile edit form**
 - **Issue**: User requested complete integration of all CRM database fields into customer profile form with data preservation

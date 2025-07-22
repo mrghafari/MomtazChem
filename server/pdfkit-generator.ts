@@ -71,14 +71,30 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
           return 'right'; // Default to right for mixed content
         };
 
-        // Helper function to format Persian/Arabic text for proper RTL display
-        const formatRTLText = (text: string): string => {
-          if (!isRTLText(text)) return text;
+        // Helper function to format mixed RTL/LTR text properly
+        const formatMixedText = (text: string): string => {
+          if (!text) return text;
           
-          // For Persian/Arabic/Kurdish text, ensure proper RTL rendering
-          // Modern PDFKit with features: ['rtla'] handles most RTL correctly
-          // We don't need to reverse words, just ensure proper Unicode direction
-          return text;
+          // Split text into tokens (words and spaces)
+          const tokens = text.split(/(\s+)/);
+          const formattedTokens = [];
+          
+          for (let i = 0; i < tokens.length; i++) {
+            const token = tokens[i];
+            
+            if (token.trim() === '') {
+              // Preserve spaces
+              formattedTokens.push(token);
+            } else if (isRTLText(token)) {
+              // Persian/Arabic words - add RTL marker
+              formattedTokens.push('\u202E' + token + '\u202C');
+            } else {
+              // English/numbers - add LTR marker  
+              formattedTokens.push('\u202D' + token + '\u202C');
+            }
+          }
+          
+          return formattedTokens.join('');
         };
         
         // Header - Mixed language handling
@@ -89,9 +105,9 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
         doc.fontSize(20)
            .font('VazirBold')
            // Persian title - right aligned with proper RTL formatting
-           .text(formatRTLText(headerPersian), 50, 50, { align: 'right', width: 500, features: ['rtla'] })
+           .text(formatMixedText(headerPersian), 50, 50, { align: 'right', width: 500, features: ['rtla'] })
            // English company name - left aligned
-           .text(headerEnglish, 50, 50, { align: 'left' });
+           .text(formatMixedText(headerEnglish), 50, 50, { align: 'left' });
         
         // Invoice details - Mixed RTL/LTR format
         const invoiceNumberLabel = `شماره ${isProforma ? 'پیش‌فاکتور' : 'فاکتور'}:`;
@@ -105,16 +121,16 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
         doc.fontSize(12)
            .font('VazirRegular')
            // Invoice number: Persian label (right) + number (left) with proper RTL
-           .text(formatRTLText(invoiceNumberLabel), 50, 100, { align: 'right', width: 150, features: ['rtla'] })
+           .text(formatMixedText(invoiceNumberLabel), 50, 100, { align: 'right', width: 150, features: ['rtla'] })
            .text(invoiceNumber, 200, 100, { align: 'left' })
            // Date: Persian label (right) + date (left) with proper RTL
-           .text(formatRTLText(dateLabel), 50, 120, { align: 'right', width: 150, features: ['rtla'] })
+           .text(formatMixedText(dateLabel), 50, 120, { align: 'right', width: 150, features: ['rtla'] })
            .text(dateValue, 200, 120, { align: 'left' });
         
         // Customer info - Mixed language handling
         doc.fontSize(14)
            .font('VazirBold')
-           .text(formatRTLText('مشخصات مشتری:'), 50, 160, { align: 'right', width: 500, features: ['rtla'] });
+           .text(formatMixedText('مشخصات مشتری:'), 50, 160, { align: 'right', width: 500, features: ['rtla'] });
         
         // Customer data with proper language detection
         const customer = invoiceData.customer || {};
@@ -126,31 +142,31 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
         doc.fontSize(11)
            .font('VazirRegular')
            // Name: Persian label (right) + value based on language
-           .text(formatRTLText('نام مشتری:'), 50, 190, { align: 'right', width: 100, features: ['rtla'] })
-           .text(isRTLText(customerName) ? formatRTLText(customerName) : customerName, 150, 190, { align: getTextAlignment(customerName) })
+           .text(formatMixedText('نام مشتری:'), 50, 190, { align: 'right', width: 100, features: ['rtla'] })
+           .text(isRTLText(customerName) ? formatMixedText(customerName) : customerName, 150, 190, { align: getTextAlignment(customerName) })
            // Phone: Persian label (right) + number (left)
-           .text(formatRTLText('شماره تماس:'), 50, 210, { align: 'right', width: 100, features: ['rtla'] })
+           .text(formatMixedText('شماره تماس:'), 50, 210, { align: 'right', width: 100, features: ['rtla'] })
            .text(customerPhone, 150, 210, { align: 'left' })
            // Email: Persian label (right) + email (left)
-           .text(formatRTLText('ایمیل:'), 50, 230, { align: 'right', width: 100, features: ['rtla'] })
+           .text(formatMixedText('ایمیل:'), 50, 230, { align: 'right', width: 100, features: ['rtla'] })
            .text(customerEmail, 150, 230, { align: 'left' })
            // Address: Persian label (right) + address based on language
-           .text(formatRTLText('آدرس:'), 50, 250, { align: 'right', width: 100, features: ['rtla'] })
-           .text(isRTLText(customerAddress) ? formatRTLText(customerAddress) : customerAddress, 150, 250, { align: getTextAlignment(customerAddress) });
+           .text(formatMixedText('آدرس:'), 50, 250, { align: 'right', width: 100, features: ['rtla'] })
+           .text(isRTLText(customerAddress) ? formatMixedText(customerAddress) : customerAddress, 150, 250, { align: getTextAlignment(customerAddress) });
         
         // Items table
         doc.fontSize(14)
            .font('VazirBold')
-           .text(formatRTLText('کالاها و خدمات:'), 50, 290, { align: 'right', width: 500, features: ['rtla'] });
+           .text(formatMixedText('کالاها و خدمات:'), 50, 290, { align: 'right', width: 500, features: ['rtla'] });
         
         // Table headers - RTL alignment with proper spacing
         const startY = 320;
         doc.fontSize(10)
            .font('VazirBold')
-           .text(formatRTLText('شرح کالا'), 50, startY, { align: 'right', width: 200, features: ['rtla'] })
-           .text(formatRTLText('تعداد'), 280, startY, { align: 'center', width: 50, features: ['rtla'] })
-           .text(formatRTLText('قیمت واحد'), 350, startY, { align: 'center', width: 80, features: ['rtla'] })
-           .text(formatRTLText('مبلغ کل'), 450, startY, { align: 'center', width: 80, features: ['rtla'] });
+           .text(formatMixedText('شرح کالا'), 50, startY, { align: 'right', width: 200, features: ['rtla'] })
+           .text(formatMixedText('تعداد'), 280, startY, { align: 'center', width: 50, features: ['rtla'] })
+           .text(formatMixedText('قیمت واحد'), 350, startY, { align: 'center', width: 80, features: ['rtla'] })
+           .text(formatMixedText('مبلغ کل'), 450, startY, { align: 'center', width: 80, features: ['rtla'] });
         
         // Draw line under headers
         doc.moveTo(50, startY + 15)
@@ -168,7 +184,7 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
           // Product name - RTL alignment for Persian/Arabic/Kurdish, LTR for English
           const productName = item.name || 'نامشخص';
           const productNameAlign = getTextAlignment(productName);
-          const formattedProductName = isRTLText(productName) ? formatRTLText(productName) : productName;
+          const formattedProductName = isRTLText(productName) ? formatMixedText(productName) : productName;
           
           // Numbers and currency - always LTR
           const totalAmount = ((item.total || item.quantity || 1) * (item.unitPrice || 0)).toLocaleString('en-US') + `  ${currency}`;
@@ -198,7 +214,7 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
         
         doc.fontSize(11)
            .font('VazirRegular')
-           .text(formatRTLText('مجموع کالاها:'), 50, subtotalY, { align: 'right', width: 150, features: ['rtla'] })
+           .text(formatMixedText('مجموع کالاها:'), 50, subtotalY, { align: 'right', width: 150, features: ['rtla'] })
            .text(`${itemsSubtotal.toLocaleString('en-US')}  ${currency}`, 200, subtotalY, { align: 'left' });
         
         // Shipping cost
@@ -207,7 +223,7 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
         
         doc.fontSize(11)
            .font('VazirRegular')
-           .text(formatRTLText('هزینه حمل:'), 50, shippingY, { align: 'right', width: 150, features: ['rtla'] })
+           .text(formatMixedText('هزینه حمل:'), 50, shippingY, { align: 'right', width: 150, features: ['rtla'] })
            .text(`${parseFloat(shippingCost).toLocaleString('en-US')}  ${currency}`, 200, shippingY, { align: 'left' });
         
         // VAT (Value Added Tax)
@@ -218,7 +234,7 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
         if (vatRate > 0) {
           doc.fontSize(11)
              .font('VazirRegular')
-             .text(formatRTLText(`مالیات بر ارزش افزوده (${vatRate}%):`), 50, vatY, { align: 'right', width: 150, features: ['rtla'] })
+             .text(formatMixedText(`مالیات بر ارزش افزوده (${vatRate}%):`), 50, vatY, { align: 'right', width: 150, features: ['rtla'] })
              .text(`${vatAmount.toLocaleString('en-US')}  ${currency}`, 200, vatY, { align: 'left' });
         }
         
@@ -237,13 +253,13 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
         
         doc.fontSize(12)
            .font('VazirBold')
-           .text(formatRTLText(totalPersianText), 50, totalY, { align: 'right', width: 150, features: ['rtla'] })
+           .text(formatMixedText(totalPersianText), 50, totalY, { align: 'right', width: 150, features: ['rtla'] })
            .text(totalNumberText, 200, totalY, { align: 'left' });
         
         // Proforma invoice notes - RTL for Persian text
         if (isProforma && invoiceData.notes) {
           const notesAlign = getTextAlignment(invoiceData.notes);
-          const formattedNotes = isRTLText(invoiceData.notes) ? formatRTLText(invoiceData.notes) : invoiceData.notes;
+          const formattedNotes = isRTLText(invoiceData.notes) ? formatMixedText(invoiceData.notes) : invoiceData.notes;
           doc.fontSize(9)
              .font('VazirRegular')
              .text(formattedNotes, 50, totalY + 40, { align: notesAlign, width: 450, features: isRTLText(invoiceData.notes) ? ['rtla'] : undefined });
@@ -257,7 +273,7 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
         doc.fontSize(9)
            .font('VazirRegular')
            // Persian company name - right aligned with RTL formatting
-           .text(formatRTLText(footerPersian), 50, 750, { align: 'right', width: 500, features: ['rtla'] })
+           .text(formatMixedText(footerPersian), 50, 750, { align: 'right', width: 500, features: ['rtla'] })
            // English company name - left aligned  
            .text(footerEnglish, 50, 750, { align: 'left' })
            // Website and email - center aligned
