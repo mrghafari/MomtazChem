@@ -401,12 +401,19 @@ const CustomerProfile = () => {
                             <Separator className="mb-3" />
                             <div className="space-y-2">
                               <h5 className="font-medium text-gray-700">اقلام سفارش:</h5>
-                              {order.items.map((item: any) => (
-                                <div key={item.id} className="flex justify-between text-sm">
-                                  <span>{item.product_name} × {parseFloat(item.quantity)}</span>
-                                  <span>{parseFloat(item.total_price).toFixed(2)} IQD</span>
-                                </div>
-                              ))}
+                              {order.items.map((item: any, index: number) => {
+                                // Use correct field names from order_items schema
+                                const productName = item.productName || 'نامشخص';
+                                const quantity = parseFloat(item.quantity || 0);
+                                const totalPrice = parseFloat(item.totalPrice || 0);
+                                
+                                return (
+                                  <div key={item.id || index} className="flex justify-between text-sm">
+                                    <span>{productName} × {quantity}</span>
+                                    <span>{totalPrice.toFixed(2)} IQD</span>
+                                  </div>
+                                );
+                              })}
                             </div>
                           </div>
                         )}

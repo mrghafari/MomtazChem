@@ -36,6 +36,15 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Persian Labels**: "مجموع کالاها" (Items Total), "هزینه حمل" (Shipping Cost), "مجموع کل" (Grand Total)
 - **Implementation**: Dynamic shipping cost from invoiceData.shippingCost with fallback to 0
 
+✅ **FIXED: Customer profile order items display showing NaN instead of actual amounts**
+- **Issue**: Order items in customer profile were displaying "NaN IQD" instead of actual prices
+- **Root Cause**: Field name mismatch between order_items schema and frontend component
+- **Database Verification**: Confirmed order items data is correctly stored (product_name, quantity, unit_price, total_price)
+- **Solution**: Corrected field mapping in customer-profile.tsx to use proper schema field names
+- **Field Mapping**: Changed from item.total_price to item.totalPrice to match schema output
+- **Debug Enhancement**: Added proper fallback values and error handling for missing fields
+- **Impact**: Customer profile now displays correct order item amounts instead of NaN values
+
 ✅ **FIXED: Enhanced product table layout to prevent text overlap in "goods and services" section**
 - **Issue**: Product table columns in PDF invoices had overlapping text causing readability problems
 - **Solution**: Redesigned table column layout with proper spacing and alignment
