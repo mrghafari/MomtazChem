@@ -6,6 +6,17 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: PDF Date Format Fixed to Gregorian Calendar (July 22, 2025)
+✅ **FIXED: Proforma invoice and invoice date formatting to proper Gregorian format**
+- **Issue**: PDF invoices were showing Persian calendar dates (fa-IR locale) instead of Gregorian calendar
+- **Solution**: Modified pdfkit-generator.ts to use proper Gregorian date format (YYYY/MM/DD)
+- **Date Format**: Changed from `toLocaleDateString('fa-IR')` to manual Gregorian formatting
+- **Implementation**: `${year}/${month.padStart(2, '0')}/${day.padStart(2, '0')}` format
+- **Applied To**: Both main PDF generation and fallback code paths
+- **Language Handling**: Persian date label "تاریخ:" with Gregorian date value aligned left (LTR)
+- **Result**: All generated PDFs now display proper Gregorian calendar dates in YYYY/MM/DD format
+- **Impact**: Invoices and proforma invoices show standard international date format for business use
+
 ### COMPLETED: Customer Login Page Route Fix and Enhanced Proforma Invoice PDF (July 22, 2025)
 ✅ **RESOLVED: Customer login 404 error by creating dedicated login page route**
 - **Missing Route Issue**: Fixed 404 error for `/customer/login` URL by creating dedicated customer login page

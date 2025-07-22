@@ -87,7 +87,9 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
         const invoiceNumberLabel = `شماره ${isProforma ? 'پیش‌فاکتور' : 'فاکتور'}:`;
         const invoiceNumber = invoiceData.invoiceNumber || invoiceData.orderNumber || 'INV-001';
         const dateLabel = 'تاریخ:';
-        const dateValue = invoiceData.invoiceDate || new Date().toLocaleDateString('fa-IR');
+        // Format date in Gregorian calendar (YYYY/MM/DD)
+        const currentDate = invoiceData.invoiceDate ? new Date(invoiceData.invoiceDate) : new Date();
+        const dateValue = `${currentDate.getFullYear()}/${String(currentDate.getMonth() + 1).padStart(2, '0')}/${String(currentDate.getDate()).padStart(2, '0')}`;
         
         doc.fontSize(12)
            .font('VazirRegular')
@@ -218,7 +220,7 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
         
         doc.fontSize(12)
            .text(`Invoice Number: ${invoiceData.invoiceNumber || 'INV-001'}`, 50, 100)
-           .text(`Date: ${new Date().toLocaleDateString()}`, 350, 100);
+           .text(`Date: ${new Date().getFullYear()}/${String(new Date().getMonth() + 1).padStart(2, '0')}/${String(new Date().getDate()).padStart(2, '0')}`, 350, 100);
         
         doc.fontSize(14)
            .text('Customer Details:', 50, 150);
