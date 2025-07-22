@@ -686,7 +686,7 @@ export default function ProductsPage() {
     }
   };
 
-  const handleCatalogUpload = async (file: File, productId?: number) => {
+  const handleCatalogUpload = async (file: File) => {
     if (!file) return;
 
     setUploadingCatalog(true);
@@ -704,42 +704,14 @@ export default function ProductsPage() {
       }
 
       const { url, originalName } = await response.json();
+      form.setValue('pdfCatalogUrl', url);
+      form.setValue('catalogFileName', originalName);
+      setCatalogPreview(url);
       
-      // If productId is provided, update the specific product
-      if (productId) {
-        const updateResponse = await apiRequest(`/api/products/${productId}`, {
-          method: 'PUT',
-          body: JSON.stringify({
-            pdfCatalogUrl: url,
-            catalogFileName: originalName,
-            showCatalogToCustomers: true
-          }),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-        
-        if (updateResponse.ok) {
-          // Refresh the products list
-          queryClient.invalidateQueries({ queryKey: ["/api/products"] });
-          toast({
-            title: "موفقیت",
-            description: "کاتالوگ محصول با موفقیت آپلود شد",
-          });
-        } else {
-          throw new Error('Failed to update product');
-        }
-      } else {
-        // Original behavior for form dialog
-        form.setValue('pdfCatalogUrl', url);
-        form.setValue('catalogFileName', originalName);
-        setCatalogPreview(url);
-        
-        toast({
-          title: "Success",
-          description: "Catalog uploaded successfully",
-        });
-      }
+      toast({
+        title: "موفقیت",
+        description: "کاتالوگ با موفقیت آپلود شد",
+      });
     } catch (error) {
       toast({
         title: "خطا",
@@ -751,7 +723,7 @@ export default function ProductsPage() {
     }
   };
 
-  const handleMsdsUpload = async (file: File, productId?: number) => {
+  const handleMsdsUpload = async (file: File) => {
     if (!file) return;
 
     setUploadingMsds(true);
@@ -769,42 +741,14 @@ export default function ProductsPage() {
       }
 
       const { url, originalName } = await response.json();
+      form.setValue('msdsUrl', url);
+      form.setValue('msdsFileName', originalName);
+      setMsdsPreview(url);
       
-      // If productId is provided, update the specific product
-      if (productId) {
-        const updateResponse = await apiRequest(`/api/products/${productId}`, {
-          method: 'PUT',
-          body: JSON.stringify({
-            msdsUrl: url,
-            msdsFileName: originalName,
-            showMsdsToCustomers: true
-          }),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-        
-        if (updateResponse.ok) {
-          // Refresh the products list
-          queryClient.invalidateQueries({ queryKey: ["/api/products"] });
-          toast({
-            title: "موفقیت",
-            description: "فایل MSDS با موفقیت آپلود شد",
-          });
-        } else {
-          throw new Error('Failed to update product');
-        }
-      } else {
-        // Original behavior for form dialog
-        form.setValue('msdsUrl', url);
-        form.setValue('msdsFileName', originalName);
-        setMsdsPreview(url);
-        
-        toast({
-          title: "Success",
-          description: "MSDS file uploaded successfully",
-        });
-      }
+      toast({
+        title: "موفقیت",
+        description: "فایل MSDS با موفقیت آپلود شد",
+      });
     } catch (error) {
       toast({
         title: "خطا",
@@ -1300,7 +1244,7 @@ export default function ProductsPage() {
                       </div>
 
                       {/* Action Buttons */}
-                      <div className="flex items-center gap-1 flex-wrap">
+                      <div className="flex items-center gap-1">
                         <Button
                           variant="ghost"
                           size="sm"
@@ -1310,67 +1254,6 @@ export default function ProductsPage() {
                         >
                           {product.syncWithShop ? 'مخفی کردن' : 'نمایش'}
                         </Button>
-                        
-                        {/* Catalog Upload Button */}
-                        <div className="relative">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0 hover:bg-green-50 hover:text-green-600"
-                            title="آپلود کاتالوگ"
-                            onClick={() => {
-                              const fileInput = document.querySelector(`#catalog-upload-${product.id}`) as HTMLInputElement;
-                              fileInput?.click();
-                            }}
-                          >
-                            <Upload className="w-4 h-4" />
-                          </Button>
-                          <input
-                            id={`catalog-upload-${product.id}`}
-                            type="file"
-                            accept="application/pdf"
-                            className="hidden"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) {
-                                // Use existing handleCatalogUpload with product update
-                                handleCatalogUpload(file, product.id);
-                              }
-                            }}
-                          />
-                        </div>
-
-                        {/* MSDS Upload Button - Hidden for non-chemical products */}
-                        {!product.isNonChemical && (
-                          <div className="relative">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-8 w-8 p-0 hover:bg-orange-50 hover:text-orange-600"
-                              title="آپلود MSDS"
-                              onClick={() => {
-                                const fileInput = document.querySelector(`#msds-upload-${product.id}`) as HTMLInputElement;
-                                fileInput?.click();
-                              }}
-                            >
-                              <FileText className="w-4 h-4" />
-                            </Button>
-                            <input
-                              id={`msds-upload-${product.id}`}
-                              type="file"
-                              accept="application/pdf"
-                              className="hidden"
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) {
-                                  // Use existing handleMsdsUpload with product update
-                                  handleMsdsUpload(file, product.id);
-                                }
-                              }}
-                            />
-                          </div>
-                        )}
-
                         <Button
                           variant="ghost"
                           size="sm"
@@ -2547,18 +2430,50 @@ export default function ProductsPage() {
 
                     {/* آپلود کاتالوگ PDF */}
                     <div className="space-y-3 border-t pt-4">
-                      <FormLabel className="text-sm font-medium flex items-center gap-2">
-                        <Eye className="h-4 w-4" />
-                        کاتالوگ محصول (PDF)
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <HelpCircle className="h-3 w-3 text-gray-400" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>کاتالوگ یا بروشور محصول به فرمت PDF برای ارائه اطلاعات تکمیلی</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </FormLabel>
+                      <div className="flex items-center justify-between">
+                        <FormLabel className="text-sm font-medium flex items-center gap-2">
+                          <Eye className="h-4 w-4" />
+                          کاتالوگ محصول (PDF)
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <HelpCircle className="h-3 w-3 text-gray-400" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>کاتالوگ یا بروشور محصول به فرمت PDF برای ارائه اطلاعات تکمیلی</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </FormLabel>
+                        
+                        {/* دکمه آپلود سریع کاتالوگ */}
+                        <div className="relative">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="text-green-600 border-green-300 hover:bg-green-50"
+                            onClick={() => {
+                              const fileInput = document.querySelector('#quick-catalog-upload') as HTMLInputElement;
+                              fileInput?.click();
+                            }}
+                          >
+                            <Upload className="w-4 h-4 mr-1" />
+                            آپلود سریع
+                          </Button>
+                          <input
+                            id="quick-catalog-upload"
+                            type="file"
+                            accept="application/pdf"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                handleCatalogUpload(file);
+                                e.target.value = ''; // Reset input
+                              }
+                            }}
+                          />
+                        </div>
+                      </div>
                       
                       <div className="grid grid-cols-2 gap-4">
                         {/* آپلود کاتالوگ */}
@@ -2664,18 +2579,50 @@ export default function ProductsPage() {
                     {/* آپلود MSDS - مخفی برای کالای غیر شیمیایی */}
                     {!form.watch('isNonChemical') && (
                     <div className="space-y-3 border-t pt-4">
-                      <FormLabel className="text-sm font-medium flex items-center gap-2">
-                        <FileText className="h-4 w-4" />
-                        برگه اطلاعات ایمنی (MSDS)
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <HelpCircle className="h-3 w-3 text-gray-400" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>برگه اطلاعات ایمنی محصول (Material Safety Data Sheet) برای اطلاعات ایمنی</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </FormLabel>
+                      <div className="flex items-center justify-between">
+                        <FormLabel className="text-sm font-medium flex items-center gap-2">
+                          <FileText className="h-4 w-4" />
+                          برگه اطلاعات ایمنی (MSDS)
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <HelpCircle className="h-3 w-3 text-gray-400" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>برگه اطلاعات ایمنی محصول (Material Safety Data Sheet) برای اطلاعات ایمنی</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </FormLabel>
+                        
+                        {/* دکمه آپلود سریع MSDS */}
+                        <div className="relative">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="text-orange-600 border-orange-300 hover:bg-orange-50"
+                            onClick={() => {
+                              const fileInput = document.querySelector('#quick-msds-upload') as HTMLInputElement;
+                              fileInput?.click();
+                            }}
+                          >
+                            <FileText className="w-4 h-4 mr-1" />
+                            آپلود سریع
+                          </Button>
+                          <input
+                            id="quick-msds-upload"
+                            type="file"
+                            accept="application/pdf"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                handleMsdsUpload(file);
+                                e.target.value = ''; // Reset input
+                              }
+                            }}
+                          />
+                        </div>
+                      </div>
                       
                       <div className="grid grid-cols-2 gap-4">
                         {/* آپلود MSDS */}
