@@ -843,6 +843,186 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ============================================================================
+  // COMPANY INFORMATION MANAGEMENT
+  // ============================================================================
+
+  // Get all company information
+  app.get('/api/company-information', requireAuth, async (req, res) => {
+    try {
+      const companyInfo = await db
+        .select()
+        .from(companyInformation)
+        .where(eq(companyInformation.isActive, true))
+        .orderBy(desc(companyInformation.createdAt));
+      
+      res.json({ success: true, data: companyInfo });
+    } catch (error) {
+      console.error('Error fetching company information:', error);
+      res.status(500).json({ success: false, message: "خطا در دریافت اطلاعات شرکت" });
+    }
+  });
+
+  // Create company information record
+  app.post('/api/company-information', requireAuth, async (req, res) => {
+    try {
+      const validatedData = insertCompanyInformationSchema.parse(req.body);
+      
+      const [newCompanyInfo] = await db
+        .insert(companyInformation)
+        .values({
+          ...validatedData,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        })
+        .returning();
+      
+      res.json({ 
+        success: true, 
+        data: newCompanyInfo,
+        message: "اطلاعات شرکت با موفقیت اضافه شد" 
+      });
+    } catch (error) {
+      console.error('Error creating company information:', error);
+      res.status(500).json({ success: false, message: "خطا در ایجاد اطلاعات شرکت" });
+    }
+  });
+
+  // Update company information
+  app.put('/api/company-information/:id', requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const validatedData = insertCompanyInformationSchema.partial().parse(req.body);
+      
+      const [updatedCompanyInfo] = await db
+        .update(companyInformation)
+        .set({
+          ...validatedData,
+          updatedAt: new Date()
+        })
+        .where(eq(companyInformation.id, parseInt(id)))
+        .returning();
+      
+      if (!updatedCompanyInfo) {
+        return res.status(404).json({ success: false, message: "اطلاعات شرکت یافت نشد" });
+      }
+      
+      res.json({ 
+        success: true, 
+        data: updatedCompanyInfo,
+        message: "اطلاعات شرکت به‌روزرسانی شد" 
+      });
+    } catch (error) {
+      console.error('Error updating company information:', error);
+      res.status(500).json({ success: false, message: "خطا در به‌روزرسانی اطلاعات شرکت" });
+    }
+  });
+
+  // Get company images
+  app.get('/api/company-information/images', requireAuth, async (req, res) => {
+    try {
+      const images = await db
+        .select()
+        .from(companyImages)
+        .where(eq(companyImages.isActive, true))
+        .orderBy(desc(companyImages.createdAt));
+      
+      res.json({ success: true, data: images });
+    } catch (error) {
+      console.error('Error fetching company images:', error);
+      res.status(500).json({ success: false, message: "خطا در دریافت تصاویر شرکت" });
+    }
+  });
+
+  // Upload company image
+  app.post('/api/company-information/images', requireAuth, uploadImage.single('image'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ success: false, message: "فایل تصویر الزامی است" });
+      }
+
+      const { title, description, category } = req.body;
+      const imageUrl = `/uploads/images/${req.file.filename}`;
+
+      const [newImage] = await db
+        .insert(companyImages)
+        .values({
+          title,
+          description,
+          category,
+          imageUrl,
+          filename: req.file.filename,
+          fileSize: req.file.size,
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        })
+        .returning();
+
+      res.json({
+        success: true,
+        data: newImage,
+        message: "تصویر شرکت با موفقیت آپلود شد"
+      });
+    } catch (error) {
+      console.error('Error uploading company image:', error);
+      res.status(500).json({ success: false, message: "خطا در آپلود تصویر شرکت" });
+    }
+  });
+
+  // Get business cards
+  app.get('/api/company-information/business-cards', requireAuth, async (req, res) => {
+    try {
+      const businessCardsList = await db
+        .select()
+        .from(businessCards)
+        .where(eq(businessCards.isActive, true))
+        .orderBy(desc(businessCards.createdAt));
+      
+      res.json({ success: true, data: businessCardsList });
+    } catch (error) {
+      console.error('Error fetching business cards:', error);
+      res.status(500).json({ success: false, message: "خطا در دریافت کارت‌های ویزیت" });
+    }
+  });
+
+  // Upload business card
+  app.post('/api/company-information/business-cards', requireAuth, uploadImage.single('businessCard'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ success: false, message: "فایل کارت ویزیت الزامی است" });
+      }
+
+      const { personName, position, company, notes } = req.body;
+      const imageUrl = `/uploads/images/${req.file.filename}`;
+
+      const [newBusinessCard] = await db
+        .insert(businessCards)
+        .values({
+          personName,
+          position,
+          company,
+          notes,
+          imageUrl,
+          filename: req.file.filename,
+          fileSize: req.file.size,
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        })
+        .returning();
+
+      res.json({
+        success: true,
+        data: newBusinessCard,
+        message: "کارت ویزیت با موفقیت آپلود شد"
+      });
+    } catch (error) {
+      console.error('Error uploading business card:', error);
+      res.status(500).json({ success: false, message: "خطا در آپلود کارت ویزیت" });
+    }
+  });
+
   // =============================================================================
   // API MIDDLEWARE - ENSURE ALL /api ROUTES RETURN JSON
   // =============================================================================

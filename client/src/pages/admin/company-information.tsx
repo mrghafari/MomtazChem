@@ -902,151 +902,128 @@ export default function CompanyInformation() {
 
         {/* Business Cards Tab */}
         <TabsContent value="business-cards" className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold">کارت‌ویزیت‌های شرکت</h2>
-            <Button onClick={() => setIsAddingBusinessCard(true)}>
-              <Plus className="h-4 w-4 ml-1" />
-              کارت‌ویزیت جدید
-            </Button>
-          </div>
-
-          <div className="grid gap-4">
-            {businessCards?.map((card) => (
-              <Card key={card.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-4">
-                  <div className="flex justify-between items-start mb-3">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <User className="h-5 w-5 text-blue-600" />
-                        <span className="font-medium text-lg">{card.employeeName}</span>
-                        {getStatusBadge(card.cardStatus)}
-                      </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium">سمت:</span>
-                            <span>{card.jobTitle}</span>
-                          </div>
-                          {card.department && (
-                            <div className="flex items-center gap-2">
-                              <Building className="h-4 w-4" />
-                              <span>{card.department}</span>
-                            </div>
-                          )}
-                          {card.email && (
-                            <div className="flex items-center gap-2">
-                              <Mail className="h-4 w-4" />
-                              <span>{card.email}</span>
-                            </div>
-                          )}
-                          {card.mobilePhone && (
-                            <div className="flex items-center gap-2">
-                              <Phone className="h-4 w-4" />
-                              <span>{card.mobilePhone}</span>
-                            </div>
-                          )}
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium">طراحی:</span>
-                            <Badge variant="outline">{card.cardDesign}</Badge>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium">رنگ:</span>
-                            <Badge variant="outline">{card.cardColor}</Badge>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium">تعداد چاپ:</span>
-                            <span>{card.printQuantity}</span>
-                          </div>
-                          {card.includeQrCode && (
-                            <div className="flex items-center gap-2">
-                              <Hash className="h-4 w-4" />
-                              <span>QR Code دارد</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline" title="پیش‌نمایش">
-                        <FileText className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        title="ویرایش"
-                        onClick={() => {
-                          setEditingItem(card);
-                          setIsAddingBusinessCard(true);
-                        }}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      {card.cardStatus === 'draft' && (
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          title="تایید"
-                          onClick={() => approveBusinessCardMutation.mutate(card.id!)}
-                          disabled={approveBusinessCardMutation.isPending}
-                        >
-                          <CheckCircle className="h-4 w-4" />
-                        </Button>
-                      )}
-                      <Button size="sm" variant="outline" title="چاپ">
-                        <Download className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="destructive" 
-                        title="حذف"
-                        onClick={() => {
-                          if (window.confirm('آیا مطمئن هستید که می‌خواهید این کارت‌ویزیت را حذف کنید؟')) {
-                            deleteBusinessCardMutation.mutate(card.id!);
-                          }
-                        }}
-                        disabled={deleteBusinessCardMutation.isPending}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  {card.specialNotes && (
-                    <div className="mt-3 p-3 bg-gray-50 rounded text-sm">
-                      <span className="font-medium">یادداشت‌ها: </span>
-                      {card.specialNotes}
-                    </div>
-                  )}
-                  
-                  {card.lastPrintDate && (
-                    <div className="mt-2 text-xs text-gray-500">
-                      آخرین چاپ: {new Date(card.lastPrintDate).toLocaleDateString('fa-IR')}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-            
-            {(!businessCards || businessCards.length === 0) && (
-              <div className="text-center py-12">
-                <User className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-4 text-lg font-medium text-gray-900">کارت‌ویزیتی موجود نیست</h3>
-                <p className="mt-2 text-gray-500">برای شروع، اولین کارت‌ویزیت را ایجاد کنید</p>
-                <Button 
-                  onClick={() => setIsAddingBusinessCard(true)}
-                  className="mt-4"
-                >
-                  <Plus className="h-4 w-4 ml-1" />
-                  کارت‌ویزیت جدید
+          <Card>
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <User className="h-5 w-5" />
+                    کارت‌ویزیت‌های دریافتی
+                  </CardTitle>
+                  <CardDescription>مدیریت و مشاهده کارت‌ویزیت‌های دریافت شده از مشتریان و شرکا</CardDescription>
+                </div>
+                <Button onClick={() => setIsAddingBusinessCard(true)}>
+                  <Plus className="h-4 w-4 ml-2" />
+                  آپلود کارت‌ویزیت جدید
                 </Button>
               </div>
-            )}
-          </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filterBySearch(businessCards || [], ['employeeName', 'jobTitle', 'mobile', 'email', 'specialNotes']).map((card) => (
+                  <div key={card.id} className="border rounded-lg p-4 space-y-3 hover:shadow-md transition-shadow">
+                    <div className="aspect-[5/3] bg-gray-100 rounded-lg overflow-hidden border-2 border-dashed border-gray-300">
+                      {card.cardDesignUrl ? (
+                        <img 
+                          src={card.cardDesignUrl} 
+                          alt={`کارت‌ویزیت ${card.employeeName}`}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = '/placeholder-card.jpg';
+                          }}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-400">
+                          <div className="text-center">
+                            <User className="h-8 w-8 mx-auto mb-2" />
+                            <p className="text-xs">تصویر کارت‌ویزیت</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <h4 className="font-semibold text-sm">{card.employeeName}</h4>
+                      <p className="text-xs text-gray-600">{card.jobTitle}</p>
+                      {card.department && (
+                        <p className="text-xs text-blue-600 font-medium">{card.department}</p>
+                      )}
+                      
+                      <div className="flex flex-wrap gap-1 text-xs">
+                        {card.mobile && (
+                          <Badge variant="outline" className="text-xs">
+                            📞 {card.mobile}
+                          </Badge>
+                        )}
+                        {card.email && (
+                          <Badge variant="outline" className="text-xs">
+                            ✉️ {card.email}
+                          </Badge>
+                        )}
+                      </div>
+                      
+                      {card.specialNotes && (
+                        <p className="text-xs text-gray-500 line-clamp-2">{card.specialNotes}</p>
+                      )}
+                      
+                      <div className="flex justify-between items-center pt-2">
+                        <Badge variant="outline" className="text-xs">
+                          {card.createdAt ? new Date(card.createdAt).toLocaleDateString('fa-IR') : 'تاریخ نامشخص'}
+                        </Badge>
+                        <div className="flex space-x-1">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setSelectedImageView(card)}
+                            title="مشاهده"
+                          >
+                            <Eye className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setEditingItem(card);
+                              setIsAddingBusinessCard(true);
+                            }}
+                            title="ویرایش"
+                          >
+                            <Edit className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => {
+                              if (window.confirm('آیا مطمئن هستید که می‌خواهید این کارت‌ویزیت را حذف کنید؟')) {
+                                deleteBusinessCardMutation.mutate(card.id!);
+                              }
+                            }}
+                            disabled={deleteBusinessCardMutation.isPending}
+                            title="حذف"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              {(!businessCards || businessCards.length === 0) && (
+                <div className="text-center py-12 text-gray-500">
+                  <User className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+                  <h3 className="text-lg font-medium mb-2">هنوز کارت‌ویزیتی آپلود نشده</h3>
+                  <p className="text-sm mb-4">کارت‌ویزیت‌های دریافتی از مشتریان و شرکا را اینجا آپلود کنید</p>
+                  <Button onClick={() => setIsAddingBusinessCard(true)}>
+                    <Plus className="h-4 w-4 ml-2" />
+                    اولین کارت‌ویزیت را آپلود کنید
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         {/* Company Images Tab */}
@@ -1140,13 +1117,16 @@ export default function CompanyInformation() {
         </TabsContent>
       </Tabs>
 
-      {/* Business Card Add/Edit Dialog */}
+      {/* Business Card Upload Dialog */}
       <Dialog open={isAddingBusinessCard} onOpenChange={setIsAddingBusinessCard}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {editingItem ? 'ویرایش کارت‌ویزیت' : 'افزودن کارت‌ویزیت جدید'}
+              {editingItem ? 'ویرایش کارت‌ویزیت دریافتی' : 'آپلود کارت‌ویزیت جدید'}
             </DialogTitle>
+            <DialogDescription>
+              کارت‌ویزیت دریافت شده از مشتری یا شریک تجاری را آپلود کنید
+            </DialogDescription>
           </DialogHeader>
           
           <form onSubmit={(e) => {
@@ -1156,24 +1136,17 @@ export default function CompanyInformation() {
               employeeName: formData.get('employeeName') as string,
               jobTitle: formData.get('jobTitle') as string,
               department: formData.get('department') as string || undefined,
-              employeeNameArabic: formData.get('employeeNameArabic') as string || undefined,
-              employeeNameKurdish: formData.get('employeeNameKurdish') as string || undefined,
-              jobTitleArabic: formData.get('jobTitleArabic') as string || undefined,
-              jobTitleKurdish: formData.get('jobTitleKurdish') as string || undefined,
-              directPhone: formData.get('directPhone') as string || undefined,
-              mobilePhone: formData.get('mobilePhone') as string || undefined,
+              mobile: formData.get('mobile') as string || undefined,
               email: formData.get('email') as string || undefined,
-              officeLocation: formData.get('officeLocation') as string || undefined,
-              linkedinProfile: formData.get('linkedinProfile') as string || undefined,
-              whatsappNumber: formData.get('whatsappNumber') as string || undefined,
-              cardDesign: (formData.get('cardDesign') as 'standard' | 'executive' | 'creative') || 'standard',
-              cardColor: formData.get('cardColor') as string || 'blue',
-              includeQrCode: formData.get('includeQrCode') === 'on',
-              qrCodeData: formData.get('qrCodeData') as string || undefined,
               specialNotes: formData.get('specialNotes') as string || undefined,
-              printQuantity: parseInt(formData.get('printQuantity') as string) || 500,
-              isActive: formData.get('isActive') === 'on',
-              cardStatus: 'draft'
+              cardDesignUrl: formData.get('cardDesignUrl') as string || undefined,
+              // Set default values for upload system
+              cardDesign: 'standard',
+              cardColor: 'blue',
+              includeQrCode: false,
+              printQuantity: 1,
+              isActive: true,
+              cardStatus: 'active'
             };
 
             if (editingItem) {
@@ -1182,19 +1155,40 @@ export default function CompanyInformation() {
               addBusinessCardMutation.mutate(businessCardData);
             }
           }}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Employee Information */}
-              <div className="space-y-4">
-                <h3 className="font-semibold text-lg border-b pb-2">اطلاعات کارمند</h3>
-                
+            <div className="space-y-6">
+              {/* Card Image Upload */}
+              <div className="space-y-3">
+                <label className="block text-sm font-medium">تصویر کارت‌ویزیت</label>
+                <div className="flex items-center justify-center w-full">
+                  <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      <Upload className="w-8 h-8 mb-4 text-gray-500" />
+                      <p className="mb-2 text-sm text-gray-500">
+                        <span className="font-semibold">کلیک کنید تا آپلود کنید</span>
+                      </p>
+                      <p className="text-xs text-gray-500">PNG، JPG یا JPEG (حداکثر 5MB)</p>
+                    </div>
+                    <input 
+                      name="cardImage" 
+                      type="file" 
+                      className="hidden" 
+                      accept="image/*"
+                    />
+                  </label>
+                </div>
+              </div>
+
+              {/* Basic Information */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium">نام کارمند *</label>
+                  <label className="block text-sm font-medium">نام فرد *</label>
                   <input
                     name="employeeName"
                     type="text"
                     required
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     defaultValue={editingItem?.employeeName || ''}
+                    placeholder="نام شخص روی کارت‌ویزیت"
                   />
                 </div>
 
@@ -1206,229 +1200,89 @@ export default function CompanyInformation() {
                     required
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     defaultValue={editingItem?.jobTitle || ''}
+                    placeholder="سمت شغلی"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium">سمت عربی</label>
-                  <input
-                    name="jobTitleArabic"
-                    type="text"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    defaultValue={editingItem?.jobTitleArabic || ''}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium">سمت کردی</label>
-                  <input
-                    name="jobTitleKurdish"
-                    type="text"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    defaultValue={editingItem?.jobTitleKurdish || ''}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium">بخش/دپارتمان</label>
+                  <label className="block text-sm font-medium">نام شرکت</label>
                   <input
                     name="department"
                     type="text"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     defaultValue={editingItem?.department || ''}
+                    placeholder="نام شرکت یا سازمان"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium">نام عربی</label>
+                  <label className="block text-sm font-medium">شماره تماس</label>
                   <input
-                    name="employeeNameArabic"
+                    name="mobile"
                     type="text"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    defaultValue={editingItem?.employeeNameArabic || ''}
+                    defaultValue={editingItem?.mobile || ''}
+                    placeholder="شماره موبایل یا تلفن"
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium">نام کردی</label>
-                  <input
-                    name="employeeNameKurdish"
-                    type="text"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    defaultValue={editingItem?.employeeNameKurdish || ''}
-                  />
-                </div>
-              </div>
-
-              {/* Contact Information */}
-              <div className="space-y-4">
-                <h3 className="font-semibold text-lg border-b pb-2">اطلاعات تماس</h3>
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium">تلفن مستقیم</label>
-                  <input
-                    name="directPhone"
-                    type="text"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    defaultValue={editingItem?.directPhone || ''}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium">موبایل</label>
-                  <input
-                    name="mobilePhone"
-                    type="text"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    defaultValue={editingItem?.mobilePhone || ''}
-                  />
-                </div>
-
-                <div className="space-y-2">
+                <div className="space-y-2 md:col-span-2">
                   <label className="block text-sm font-medium">ایمیل</label>
                   <input
                     name="email"
                     type="email"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     defaultValue={editingItem?.email || ''}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium">محل دفتر</label>
-                  <input
-                    name="officeLocation"
-                    type="text"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    defaultValue={editingItem?.officeLocation || ''}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium">پروفایل LinkedIn</label>
-                  <input
-                    name="linkedinProfile"
-                    type="url"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    defaultValue={editingItem?.linkedinProfile || ''}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium">شماره واتساپ</label>
-                  <input
-                    name="whatsappNumber"
-                    type="text"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    defaultValue={editingItem?.whatsappNumber || ''}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium">تعداد چاپ</label>
-                  <input
-                    name="printQuantity"
-                    type="number"
-                    min="1"
-                    max="10000"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    defaultValue={editingItem?.printQuantity || 500}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Card Design Options */}
-            <div className="mt-6 space-y-4">
-              <h3 className="font-semibold text-lg border-b pb-2">تنظیمات کارت‌ویزیت</h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium">طراحی کارت</label>
-                  <select 
-                    name="cardDesign"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    defaultValue={editingItem?.cardDesign || 'standard'}
-                  >
-                    <option value="standard">استاندارد</option>
-                    <option value="executive">اجرایی</option>
-                    <option value="creative">خلاقانه</option>
-                  </select>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium">رنگ کارت</label>
-                  <input
-                    name="cardColor"
-                    type="text"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    defaultValue={editingItem?.cardColor || 'blue'}
-                    placeholder="blue, red, green, etc."
+                    placeholder="آدرس ایمیل"
                   />
                 </div>
               </div>
 
-              <div className="flex items-center space-x-2">
-                <input
-                  name="includeQrCode"
-                  type="checkbox"
-                  id="includeQrCode"
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  defaultChecked={editingItem?.includeQrCode || false}
-                />
-                <label htmlFor="includeQrCode" className="text-sm font-medium">
-                  شامل QR Code
-                </label>
-              </div>
-
+              {/* Notes */}
               <div className="space-y-2">
-                <label className="block text-sm font-medium">داده‌های QR Code</label>
-                <input
-                  name="qrCodeData"
-                  type="text"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  defaultValue={editingItem?.qrCodeData || ''}
-                  placeholder="vCard data, URL, یا اطلاعات تماس"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="block text-sm font-medium">یادداشت‌های ویژه</label>
+                <label className="block text-sm font-medium">یادداشت‌ها</label>
                 <textarea
                   name="specialNotes"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   defaultValue={editingItem?.specialNotes || ''}
-                  placeholder="درخواست‌های خاص برای طراحی یا چاپ..."
+                  placeholder="یادداشت‌های اضافی در مورد این کارت‌ویزیت یا شخص..."
                 />
               </div>
 
-              <div className="flex items-center space-x-2">
-                <input
-                  name="isActive"
-                  type="checkbox"
-                  id="isActive"
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  defaultChecked={editingItem?.isActive ?? true}
-                />
-                <label htmlFor="isActive" className="text-sm font-medium">
-                  فعال
-                </label>
-              </div>
+              {/* URL Field for uploaded image */}
+              <input
+                name="cardDesignUrl"
+                type="hidden"
+                defaultValue={editingItem?.cardDesignUrl || ''}
+              />
             </div>
 
-            <div className="flex justify-end space-x-2 mt-6">
-              <Button type="button" variant="outline" onClick={() => {
-                setIsAddingBusinessCard(false);
-                setEditingItem(null);
-              }}>
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setIsAddingBusinessCard(false);
+                  setEditingItem(null);
+                }}
+              >
                 انصراف
               </Button>
               <Button 
                 type="submit" 
                 disabled={addBusinessCardMutation.isPending || updateBusinessCardMutation.isPending}
               >
-                {addBusinessCardMutation.isPending || updateBusinessCardMutation.isPending ? 'در حال ذخیره...' : editingItem ? 'به‌روزرسانی' : 'ذخیره'}
+                {addBusinessCardMutation.isPending || updateBusinessCardMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    در حال پردازش...
+                  </>
+                ) : editingItem ? (
+                  'به‌روزرسانی کارت‌ویزیت'
+                ) : (
+                  'ذخیره کارت‌ویزیت'
+                )}
               </Button>
             </div>
           </form>

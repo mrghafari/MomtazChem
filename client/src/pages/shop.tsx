@@ -1342,7 +1342,11 @@ const Shop = () => {
                                 variant="ghost"
                                 size="sm"
                                 className="p-1 h-7 w-7 hover:bg-yellow-50/80 bg-transparent"
-                                onClick={() => navigate(`/product-reviews/${product.id}`)}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  navigate(`/product-reviews/${product.id}`);
+                                }}
                               >
                                 <StarRating
                                   rating={productStats[product.id].averageRating}
@@ -1350,6 +1354,13 @@ const Shop = () => {
                                   showNumber={false}
                                 />
                               </Button>
+                            </div>
+                          )}
+                          
+                          {/* Debug: Show if product has rating data */}
+                          {productStats?.[product.id] && (
+                            <div className="absolute top-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded">
+                              ★{productStats[product.id].averageRating.toFixed(1)}
                             </div>
                           )}
                           
@@ -1645,7 +1656,11 @@ const Shop = () => {
                                 variant="ghost"
                                 size="sm"
                                 className="p-1 h-7 w-7 hover:bg-yellow-50/80 bg-transparent"
-                                onClick={() => navigate(`/product-reviews/${product.id}`)}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  navigate(`/product-reviews/${product.id}`);
+                                }}
                               >
                                 <StarRating
                                   rating={productStats[product.id].averageRating}
@@ -1653,6 +1668,13 @@ const Shop = () => {
                                   showNumber={false}
                                 />
                               </Button>
+                            </div>
+                          )}
+                          
+                          {/* Debug: Show if product has rating data - List View */}
+                          {productStats?.[product.id] && (
+                            <div className="absolute top-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded">
+                              ★{productStats[product.id].averageRating.toFixed(1)}
                             </div>
                           )}
                           
