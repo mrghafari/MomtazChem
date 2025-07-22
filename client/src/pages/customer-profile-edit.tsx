@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { ArrowLeft, Save, Shield, Phone, Mail, Building, MapPin, User } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -578,6 +578,382 @@ export default function CustomerProfileEdit() {
                         </FormLabel>
                         <FormControl>
                           <Textarea {...field} placeholder="آدرس کامل" rows={3} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="secondaryAddress"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>آدرس دوم (اختیاری)</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="آدرس دوم یا محل کار" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="postalCode"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>کد پستی</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="کد پستی" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+
+                {/* Additional Contact Information */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-gray-900">اطلاعات تماس تکمیلی</h3>
+                  
+                  <FormField
+                    control={form.control}
+                    name="alternatePhone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>شماره تلفن دوم (اختیاری)</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="شماره تلفن ثابت یا همراه دوم" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Business Information */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-gray-900">اطلاعات تجاری</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="industry"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>صنعت فعالیت</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="انتخاب صنعت" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="chemical">شیمیایی</SelectItem>
+                              <SelectItem value="petrochemical">پتروشیمی</SelectItem>
+                              <SelectItem value="pharmaceutical">دارویی</SelectItem>
+                              <SelectItem value="agriculture">کشاورزی</SelectItem>
+                              <SelectItem value="construction">ساختمان</SelectItem>
+                              <SelectItem value="automotive">خودرویی</SelectItem>
+                              <SelectItem value="textile">نساجی</SelectItem>
+                              <SelectItem value="food">مواد غذایی</SelectItem>
+                              <SelectItem value="water_treatment">تصفیه آب</SelectItem>
+                              <SelectItem value="paint">رنگ و رزین</SelectItem>
+                              <SelectItem value="other">سایر</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="businessType"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>نوع کسب و کار</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="انتخاب نوع کسب و کار" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="manufacturer">تولیدکننده</SelectItem>
+                              <SelectItem value="distributor">توزیع کننده</SelectItem>
+                              <SelectItem value="retailer">خرده فروش</SelectItem>
+                              <SelectItem value="service_provider">ارائه دهنده خدمات</SelectItem>
+                              <SelectItem value="research">تحقیق و توسعه</SelectItem>
+                              <SelectItem value="consultant">مشاور</SelectItem>
+                              <SelectItem value="end_user">مصرف کننده نهایی</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="companySize"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>اندازه شرکت</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="انتخاب اندازه شرکت" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="1-10">1-10 نفر</SelectItem>
+                              <SelectItem value="11-50">11-50 نفر</SelectItem>
+                              <SelectItem value="51-200">51-200 نفر</SelectItem>
+                              <SelectItem value="201-500">201-500 نفر</SelectItem>
+                              <SelectItem value="500+">بیش از 500 نفر</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="website"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>وب سایت شرکت</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="https://www.example.com" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="taxId"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>شناسه مالیاتی</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="شناسه مالیاتی شرکت" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="registrationNumber"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>شماره ثبت شرکت</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="شماره ثبت رسمی شرکت" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+
+                {/* Customer Management */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-gray-900">تنظیمات مشتری</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="customerType"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>نوع مشتری</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="انتخاب نوع مشتری" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="regular">عادی</SelectItem>
+                              <SelectItem value="vip">VIP</SelectItem>
+                              <SelectItem value="wholesale">عمده فروشی</SelectItem>
+                              <SelectItem value="retail">خرده فروشی</SelectItem>
+                              <SelectItem value="industrial">صنعتی</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="preferredPaymentMethod"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>روش پرداخت ترجیحی</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="انتخاب روش پرداخت" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="cash">نقدی</SelectItem>
+                              <SelectItem value="bank_transfer">حواله بانکی</SelectItem>
+                              <SelectItem value="check">چک</SelectItem>
+                              <SelectItem value="credit">اعتباری</SelectItem>
+                              <SelectItem value="installment">قسطی</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="creditLimit"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>حد اعتبار (IQD)</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="مقدار حد اعتبار" type="number" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="leadSource"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>منبع مشتری</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="چگونه ما را پیدا کردید؟" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="website">وب سایت</SelectItem>
+                              <SelectItem value="referral">معرفی</SelectItem>
+                              <SelectItem value="social_media">شبکه های اجتماعی</SelectItem>
+                              <SelectItem value="advertising">تبلیغات</SelectItem>
+                              <SelectItem value="exhibition">نمایشگاه</SelectItem>
+                              <SelectItem value="cold_call">تماس سرد</SelectItem>
+                              <SelectItem value="other">سایر</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+
+                {/* Preferences */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-gray-900">تنظیمات کاربری</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="preferredLanguage"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>زبان ترجیحی</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="انتخاب زبان" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="persian">فارسی</SelectItem>
+                              <SelectItem value="arabic">عربی</SelectItem>
+                              <SelectItem value="english">انگلیسی</SelectItem>
+                              <SelectItem value="kurdish">کردی</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="communicationPreference"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>روش ارتباط ترجیحی</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="انتخاب روش ارتباط" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="phone">تلفن</SelectItem>
+                              <SelectItem value="email">ایمیل</SelectItem>
+                              <SelectItem value="sms">پیامک</SelectItem>
+                              <SelectItem value="whatsapp">واتساپ</SelectItem>
+                              <SelectItem value="telegram">تلگرام</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="marketingConsent"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                        <FormControl>
+                          <input
+                            type="checkbox"
+                            checked={field.value}
+                            onChange={field.onChange}
+                            className="mt-2"
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel>
+                            موافقت با دریافت اطلاعات بازاریابی
+                          </FormLabel>
+                          <FormDescription>
+                            اگر موافق هستید، اطلاعات محصولات جدید و پیشنهادات ویژه را برای شما ارسال خواهیم کرد.
+                          </FormDescription>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Notes */}
+                <div className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="notes"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>یادداشت های اضافی</FormLabel>
+                        <FormControl>
+                          <Textarea {...field} placeholder="یادداشت ها، نیازهای خاص، یا توضیحات اضافی" rows={4} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

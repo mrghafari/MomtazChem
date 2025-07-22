@@ -6,6 +6,23 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Comprehensive Customer Profile Edit Form Restoration with 27+ Fields (July 22, 2025)
+✅ **MAJOR ENHANCEMENT: Restored complete customer profile editing functionality with all database fields**
+- **Issue**: Customer profile edit form was severely limited showing only 9 basic fields instead of comprehensive customer data
+- **Root Cause**: Previous update had reduced the form from 27+ fields to minimal display (firstName, lastName, phone, email, company, country, province, city, address)
+- **Database Analysis**: crm_customers table has 51 total fields available for customer management
+- **Complete Restoration**: Added 18+ missing professional fields organized in logical sections:
+  - **Additional Contact**: secondaryAddress, postalCode, alternatePhone
+  - **Business Information**: industry (10 options), businessType (7 options), companySize (5 ranges), website, taxId, registrationNumber
+  - **Customer Management**: customerType (5 types), preferredPaymentMethod (5 methods), creditLimit, leadSource (7 sources)
+  - **User Preferences**: preferredLanguage (4 languages), communicationPreference (5 methods), marketingConsent checkbox
+  - **Notes Section**: notes field for additional customer information
+- **Professional UI**: Organized fields into clear sections with Persian labels and appropriate input types
+- **Smart Selectors**: Dropdown menus with relevant options for industry, business type, company size, payment methods
+- **Field Mapping**: Enhanced data loading to map all database fields correctly to form inputs
+- **User Experience**: Professional form layout with logical grouping and comprehensive business data capture
+- **Impact**: Customer profile editing now captures complete business information matching enterprise CRM standards
+
 ### COMPLETED: Enhanced Customer Profile Edit Form and PDF Date Formatting Fix (July 22, 2025)
 ✅ **FIXED: Customer profile edit form data loading and field mapping**
 - **Issue**: Customer profile edit form wasn't loading complete customer data and city selection was changing
