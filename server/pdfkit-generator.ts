@@ -156,18 +156,13 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
            .text(formatMixedText('آدرس:'), 350, 220, { align: 'right', width: 200, features: ['rtla'] })
            .text(customerAddress, 50, 240, { align: 'left', width: 400 });
         
-        // Add line separator before goods section like in Word
+        // Add line separator before table
         doc.moveTo(50, 270)
            .lineTo(500, 270)
            .stroke();
         
-        // Items table header - following Word template exactly
-        doc.fontSize(14)
-           .font('VazirBold')
-           .text(formatMixedText('کالاها و خدمات'), 50, 280, { align: 'right', width: 500, features: ['rtla'] });
-        
         // Create dynamic table structure based on number of items - RTL orientation
-        const tableStartY = 320;
+        const tableStartY = 290;
         const rowHeight = 30;
         const colWidths = [120, 80, 80, 200]; // مبلغ کل، قیمت واحد، تعداد، شرح کالا (reversed for RTL)
         const colStartX = [50, 170, 250, 330]; // RTL column positions

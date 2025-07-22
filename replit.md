@@ -16,6 +16,7 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
   - **Header Layout**: Company name "شرکت ممتاز شیمی" centered, followed by "پیش فاکتور" 
   - **Invoice Details**: Right-aligned Persian labels with left-aligned values for invoice number and date
   - **Customer Information**: Proper field layout with right-aligned labels matching Word format
+  - **Clean Table Design**: Removed "کالاها و خدمات" text for streamlined appearance, table starts directly after separator line
   - **Table Headers**: "شرح کالا", "تعداد", "قیمت واحد", "مبلغ کل" with proper column spacing
 - **Summary Section Enhancement**:
   - Right-aligned Persian labels: "مجموع کالاها", "مالیات بر ارزش افزوده", "هزینه حمل", "مجموع کل"
