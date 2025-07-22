@@ -277,7 +277,7 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
            .font('VazirBold')
            .text(formatMixedText('شرکت ممتاز شیمی'), leftColumnX, companyFooterY, { align: 'right', width: columnWidth, features: ['rtla'] });
         
-        const addressText = formatMixedText('آدرس: بغداد، عراق - منطقه الکرخ، شارع الرشید');
+        const addressText = formatMixedText('آدرس: NAGwer Road, Qaryataq Village, Erbil, Iraq');
         doc.fontSize(8)
            .font('VazirRegular')
            .text(addressText, leftColumnX, companyFooterY + 18, { align: 'right', width: columnWidth, features: ['rtla'] });

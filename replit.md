@@ -24,7 +24,7 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
   - Proper spacing and alignment matching Word template
 - **Footer Message**: Added exact footer text from Word template: "این پیش فاکتور است و پس تائید مالی، فاکتور نهایی صادر خواهد شد."
 - **Two-Column Company Footer**: Organized footer layout to prevent page overflow with clear separation:
-  - **Left Column (Persian)**: Company name "شرکت ممتاز شیمی", full address "آدرس: بغداد، عراق - منطقه الکرخ، شارع الرشید", Persian slogan
+  - **Left Column (Persian)**: Company name "شرکت ممتاز شیمی", updated address "آدرس: NAGwer Road, Qaryataq Village, Erbil, Iraq", Persian slogan
   - **Right Column (English)**: "Momtaz Chemical Solutions Company", website, email addresses, phone numbers, English slogan
   - Balanced column layout with proper spacing and alignment for professional appearance
 - **Technical Implementation**:
