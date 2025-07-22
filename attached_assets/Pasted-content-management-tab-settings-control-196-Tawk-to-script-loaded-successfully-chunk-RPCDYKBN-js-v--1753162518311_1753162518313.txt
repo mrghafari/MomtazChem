@@ -1,0 +1,179 @@
+content-management?tab=settings-control:196 Tawk.to script loaded successfully
+chunk-RPCDYKBN.js?v=09ef9b6d:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+chunk-RPCDYKBN.js?v=09ef9b6d:521 Warning: validateDOMNesting(...): <button> cannot appear as a descendant of <button>.
+    at button
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-AXMZZQ2X.js?v=09ef9b6d:42:13
+    at Provider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=09ef9b6d:38:15)
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-switch.js?v=09ef9b6d:41:7
+    at _c (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ui/switch.tsx:21:11)
+    at button
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-AXMZZQ2X.js?v=09ef9b6d:42:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=09ef9b6d:79:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=09ef9b6d:56:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-AXMZZQ2X.js?v=09ef9b6d:42:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=09ef9b6d:79:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=09ef9b6d:56:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-TPYHSINA.js?v=09ef9b6d:51:15
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-MDE5C6XH.js?v=09ef9b6d:145:7
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tabs.js?v=09ef9b6d:121:13
+    at _c3 (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ui/tabs.tsx:47:12)
+    at div
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-AXMZZQ2X.js?v=09ef9b6d:42:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=09ef9b6d:79:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=09ef9b6d:56:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-AXMZZQ2X.js?v=09ef9b6d:42:13
+    at Provider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=09ef9b6d:38:15)
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-MDE5C6XH.js?v=09ef9b6d:54:5
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=09ef9b6d:79:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=09ef9b6d:56:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-TPYHSINA.js?v=09ef9b6d:39:15
+    at Provider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=09ef9b6d:38:15)
+    at CollectionProvider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-TPYHSINA.js?v=09ef9b6d:29:13)
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-MDE5C6XH.js?v=09ef9b6d:48:76
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tabs.js?v=09ef9b6d:93:13
+    at _c (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ui/tabs.tsx:22:11)
+    at div
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-AXMZZQ2X.js?v=09ef9b6d:42:13
+    at Provider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=09ef9b6d:38:15)
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tabs.js?v=09ef9b6d:51:7
+    at div
+    at div
+    at ContentManagement (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/content-management.tsx:36:27)
+    at Route (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=09ef9b6d:265:16)
+    at Switch (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=09ef9b6d:321:17)
+    at main
+    at div
+    at Router
+    at Provider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=09ef9b6d:38:15)
+    at TooltipProvider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=09ef9b6d:63:5)
+    at LanguageProvider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/contexts/LanguageContext.tsx:21:36)
+    at QueryClientProvider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=09ef9b6d:2805:3)
+    at App
+printWarning @ chunk-RPCDYKBN.js?v=09ef9b6d:521
+error @ chunk-RPCDYKBN.js?v=09ef9b6d:505
+validateDOMNesting @ chunk-RPCDYKBN.js?v=09ef9b6d:8256
+createInstance @ chunk-RPCDYKBN.js?v=09ef9b6d:8328
+completeWork @ chunk-RPCDYKBN.js?v=09ef9b6d:16290
+completeUnitOfWork @ chunk-RPCDYKBN.js?v=09ef9b6d:19224
+performUnitOfWork @ chunk-RPCDYKBN.js?v=09ef9b6d:19206
+workLoopSync @ chunk-RPCDYKBN.js?v=09ef9b6d:19137
+renderRootSync @ chunk-RPCDYKBN.js?v=09ef9b6d:19116
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=09ef9b6d:18678
+workLoop @ chunk-RPCDYKBN.js?v=09ef9b6d:197
+flushWork @ chunk-RPCDYKBN.js?v=09ef9b6d:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=09ef9b6d:384
+queryClient.ts:81  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+(anonymous) @ queryClient.ts:81
+fetchFn @ @tanstack_react-query.js?v=09ef9b6d:840
+run @ @tanstack_react-query.js?v=09ef9b6d:494
+start @ @tanstack_react-query.js?v=09ef9b6d:536
+fetch @ @tanstack_react-query.js?v=09ef9b6d:926
+executeFetch_fn @ @tanstack_react-query.js?v=09ef9b6d:2211
+onSubscribe @ @tanstack_react-query.js?v=09ef9b6d:1898
+subscribe @ @tanstack_react-query.js?v=09ef9b6d:24
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=09ef9b6d:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=09ef9b6d:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=09ef9b6d:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=09ef9b6d:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=09ef9b6d:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=09ef9b6d:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=09ef9b6d:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=09ef9b6d:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=09ef9b6d:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=09ef9b6d:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=09ef9b6d:19432
+commitRoot @ chunk-RPCDYKBN.js?v=09ef9b6d:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=09ef9b6d:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=09ef9b6d:18718
+workLoop @ chunk-RPCDYKBN.js?v=09ef9b6d:197
+flushWork @ chunk-RPCDYKBN.js?v=09ef9b6d:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=09ef9b6d:384
+useAuth.ts:43 Auth check result: {success: true, user: {…}}
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:115737)
+    at t.value (twk-chunk-common.js:2:148821)
+    at p.updateUUID (twk-chunk-common.js:2:200473)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:122752)
+    at twk-chunk-common.js:2:122063
+value @ twk-chunk-common.js:2
+updateUUID @ twk-chunk-common.js:2
+(anonymous) @ twk-vendor.js:2
+p.dispatch @ twk-vendor.js:2
+dispatch @ twk-vendor.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+Promise.then
+value @ twk-chunk-common.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+56d7 @ twk-chunk-common.js:2
+a @ twk-runtime.js:1
+r @ twk-runtime.js:1
+t @ twk-runtime.js:1
+(anonymous) @ twk-chunk-vendors.js:2
+queryClient.ts:54  POST https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/content 400 (Bad Request)
+apiRequest @ queryClient.ts:54
+mutationFn @ content-management.tsx:106
+fn @ @tanstack_react-query.js?v=09ef9b6d:1189
+run @ @tanstack_react-query.js?v=09ef9b6d:494
+start @ @tanstack_react-query.js?v=09ef9b6d:536
+execute @ @tanstack_react-query.js?v=09ef9b6d:1225
+await in execute
+mutate @ @tanstack_react-query.js?v=09ef9b6d:2630
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:3295
+onCheckedChange @ content-management.tsx:516
+(anonymous) @ chunk-P6AUOPGQ.js?v=09ef9b6d:27
+(anonymous) @ chunk-P6AUOPGQ.js?v=09ef9b6d:48
+(anonymous) @ @radix-ui_react-switch.js?v=09ef9b6d:76
+handleEvent @ chunk-P6AUOPGQ.js?v=09ef9b6d:13
+callCallback2 @ chunk-RPCDYKBN.js?v=09ef9b6d:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=09ef9b6d:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=09ef9b6d:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=09ef9b6d:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=09ef9b6d:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=09ef9b6d:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=09ef9b6d:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=09ef9b6d:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=09ef9b6d:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=09ef9b6d:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=09ef9b6d:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=09ef9b6d:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=09ef9b6d:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=09ef9b6d:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=09ef9b6d:5449
+queryClient.ts:54  POST https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/content 400 (Bad Request)
+apiRequest @ queryClient.ts:54
+mutationFn @ content-management.tsx:106
+fn @ @tanstack_react-query.js?v=09ef9b6d:1189
+run @ @tanstack_react-query.js?v=09ef9b6d:494
+start @ @tanstack_react-query.js?v=09ef9b6d:536
+execute @ @tanstack_react-query.js?v=09ef9b6d:1225
+await in execute
+mutate @ @tanstack_react-query.js?v=09ef9b6d:2630
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:3295
+onCheckedChange @ content-management.tsx:446
+(anonymous) @ chunk-P6AUOPGQ.js?v=09ef9b6d:27
+(anonymous) @ chunk-P6AUOPGQ.js?v=09ef9b6d:48
+(anonymous) @ @radix-ui_react-switch.js?v=09ef9b6d:76
+handleEvent @ chunk-P6AUOPGQ.js?v=09ef9b6d:13
+callCallback2 @ chunk-RPCDYKBN.js?v=09ef9b6d:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=09ef9b6d:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=09ef9b6d:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=09ef9b6d:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=09ef9b6d:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=09ef9b6d:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=09ef9b6d:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=09ef9b6d:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=09ef9b6d:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=09ef9b6d:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=09ef9b6d:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=09ef9b6d:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=09ef9b6d:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=09ef9b6d:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=09ef9b6d:5449
+content-management?tab=settings-control:168 Tawk.to Live Chat loaded successfully

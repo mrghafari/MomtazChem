@@ -85,10 +85,10 @@ export default function ContentManagement() {
     mutationFn: async (data: { id: number; content: string; isActive: boolean }) => {
       return apiRequest(`/api/admin/content/${data.id}`, {
         method: 'PUT',
-        body: JSON.stringify({
+        body: {
           content: data.content,
           isActive: data.isActive
-        })
+        }
       });
     },
     onSuccess: () => {
@@ -102,10 +102,10 @@ export default function ContentManagement() {
 
   // Mutation for creating content
   const createContentMutation = useMutation({
-    mutationFn: async (data: { key: string; content: string; contentType: string; language: string; section: string }) => {
+    mutationFn: async (data: { key: string; content: string; contentType: string; language: string; section: string; isActive?: boolean }) => {
       return apiRequest('/api/admin/content', {
         method: 'POST',
-        body: JSON.stringify(data)
+        body: data
       });
     },
     onSuccess: () => {
