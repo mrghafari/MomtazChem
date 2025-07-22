@@ -14,7 +14,8 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Components Fixed**: 
   - bilingual-purchase-form.tsx: Updated from `/api/financial/vat-settings` to `/api/tax-settings`
   - accounting-management.tsx: Updated from `/api/accounting/tax-settings` to `/api/tax-settings` (all references)
-- **Data Consistency**: Both VAT (5%) and duties (2%) now display correctly across all interfaces
+- **Data Consistency**: Both VAT (11%) and duties (2%) now display correctly across all interfaces
+- **Database Cleanup**: Removed duplicate VAT entry (ID 3 with type="VAT" at 5%) leaving only ID 1 with type="vat" at 11%
 - **Frontend Enhancement**: Added proper VAT and duties display in purchase form with Persian labels
 - **Tax Calculation**: Enhanced to handle both VAT and duties with separate rate calculations
 - **Debug Features**: Added comprehensive console logging for tax calculation troubleshooting

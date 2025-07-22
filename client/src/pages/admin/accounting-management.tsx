@@ -453,7 +453,7 @@ function VatManagement() {
   // Update tax setting mutation
   const updateTaxMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: any }) => {
-      return apiRequest(`/api/tax-settings/${id}`, { method: 'PUT', body: data });
+      return apiRequest(`/api/accounting/tax-settings/${id}`, { method: 'PUT', body: data });
     },
     onSuccess: (result) => {
       toast({
@@ -474,7 +474,7 @@ function VatManagement() {
   // Toggle tax setting mutation
   const toggleTaxMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest(`/api/tax-settings/${id}/toggle`, { method: 'POST' });
+      return apiRequest(`/api/accounting/tax-settings/${id}/toggle`, { method: 'POST' });
     },
     onSuccess: (result) => {
       toast({
@@ -647,7 +647,7 @@ function DutiesManagement() {
   // Update tax setting mutation
   const updateTaxMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: any }) => {
-      return apiRequest(`/api/tax-settings/${id}`, { method: 'PUT', body: data });
+      return apiRequest(`/api/accounting/tax-settings/${id}`, { method: 'PUT', body: data });
     },
     onSuccess: (result) => {
       toast({
@@ -668,7 +668,7 @@ function DutiesManagement() {
   // Toggle tax setting mutation
   const toggleTaxMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest(`/api/tax-settings/${id}/toggle`, { method: 'POST' });
+      return apiRequest(`/api/accounting/tax-settings/${id}/toggle`, { method: 'POST' });
     },
     onSuccess: (result) => {
       toast({
