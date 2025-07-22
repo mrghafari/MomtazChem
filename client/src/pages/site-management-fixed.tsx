@@ -69,9 +69,9 @@ export default function SiteManagement() {
 
   useEffect(() => {
     console.log('🔍 [DEBUG] useEffect triggered, userPermissions:', userPermissions);
-    if (userPermissions?.success) {
+    if (userPermissions && typeof userPermissions === 'object' && 'success' in userPermissions && userPermissions.success) {
       startTransition(() => {
-        console.log('🔍 [DEBUG] userPermissions modules:', userPermissions.modules);
+        console.log('🔍 [DEBUG] userPermissions modules:', (userPermissions as any).modules);
         const filteredButtons = getFilteredButtons();
         console.log('🔍 [DEBUG] filtered buttons count:', filteredButtons.length);
         const clickCounts = JSON.parse(localStorage.getItem('site-management-click-counts') || '{}');
@@ -263,6 +263,14 @@ export default function SiteManagement() {
       moduleId: "content_management"
     },
     {
+      id: "banner-control",
+      label: "Banner Control",
+      icon: Edit,
+      onClick: () => trackButtonClick("banner-control", () => setLocation("/content-management?tab=settings-control")),
+      className: "border-orange-300 text-orange-600 hover:bg-orange-50",
+      moduleId: "content_management"
+    },
+    {
       id: "seo",
       label: "SEO Management",
       icon: Globe,
@@ -297,27 +305,11 @@ export default function SiteManagement() {
 
     {
       id: "ai-settings",
-      label: "AI Settings",
-      icon: Zap,
-      onClick: () => trackButtonClick("ai-settings", () => setLocation("/admin/ai-settings")),
-      className: "border-sky-300 text-sky-600 hover:bg-sky-50",
+      label: "AI Control",
+      icon: Brain,
+      onClick: () => trackButtonClick("ai-settings", () => setLocation("/admin/ai-seo-assistant")),
+      className: "border-purple-300 text-purple-600 hover:bg-purple-50",
       moduleId: "ai_settings"
-    },
-    {
-      id: "geography-analytics", 
-      label: "Geography Analytics",
-      icon: MapPin,
-      onClick: () => trackButtonClick("geography-analytics", () => setLocation("/admin/geographic-analytics")),
-      className: "border-teal-300 text-teal-600 hover:bg-teal-50",
-      moduleId: "geography_analytics"
-    },
-    {
-      id: "payment-settings",
-      label: "Payment Settings",
-      icon: CreditCard,
-      onClick: () => trackButtonClick("payment-settings", () => setLocation("/admin/payment-settings")),
-      className: "border-blue-300 text-blue-600 hover:bg-blue-50",
-      moduleId: "payment_management"
     },
     {
       id: "user-management",
@@ -398,14 +390,15 @@ export default function SiteManagement() {
   ];
 
   const getFilteredButtons = () => {
-    if (isLoadingPermissions || !userPermissions?.success) return [];
+    if (isLoadingPermissions || !userPermissions || typeof userPermissions !== 'object' || !('success' in userPermissions) || !userPermissions.success) return [];
     
-    console.log('🔍 [DEBUG] Full userPermissions response:', userPermissions);
-    console.log('🔍 [DEBUG] userPermissions.modules:', userPermissions.modules);
-    console.log('🔍 [DEBUG] userPermissions.permissions:', userPermissions.permissions);
+    const permissions = userPermissions as any;
+    console.log('🔍 [DEBUG] Full userPermissions response:', permissions);
+    console.log('🔍 [DEBUG] userPermissions.modules:', permissions.modules);
+    console.log('🔍 [DEBUG] userPermissions.permissions:', permissions.permissions);
     
     // Try both the modules array and permissions array for compatibility
-    const allowedModules = userPermissions.modules || userPermissions.permissions?.map((p: any) => p.moduleId) || [];
+    const allowedModules = permissions.modules || permissions.permissions?.map((p: any) => p.moduleId) || [];
     const allButtons = getInitialButtons();
     
     console.log('🔍 [DEBUG] allowedModules:', allowedModules);
@@ -413,6 +406,8 @@ export default function SiteManagement() {
     console.log('🔍 [DEBUG] management_dashboard in allowedModules?', allowedModules.includes('management_dashboard'));
     console.log('🔍 [DEBUG] finance in allowedModules?', allowedModules.includes('finance'));
     console.log('🔍 [DEBUG] geography_analytics in allowedModules?', allowedModules.includes('geography_analytics'));
+    console.log('🔍 [DEBUG] ai_settings in allowedModules?', allowedModules.includes('ai_settings'));
+    console.log('🔍 [DEBUG] content_management in allowedModules?', allowedModules.includes('content_management'));
     
     const filtered = allButtons.filter(button => 
       !button.moduleId || allowedModules.includes(button.moduleId)
@@ -420,8 +415,12 @@ export default function SiteManagement() {
     
     console.log('🔍 [DEBUG] finance button found in allButtons?', allButtons.find(b => b.moduleId === 'finance'));
     console.log('🔍 [DEBUG] geography_analytics button found in allButtons?', allButtons.find(b => b.moduleId === 'geography_analytics'));
+    console.log('🔍 [DEBUG] ai_settings button found in allButtons?', allButtons.find(b => b.moduleId === 'ai_settings'));
+    console.log('🔍 [DEBUG] content_management button found in allButtons?', allButtons.find(b => b.moduleId === 'content_management'));
     console.log('🔍 [DEBUG] finance button in filtered?', filtered.find(b => b.moduleId === 'finance'));
     console.log('🔍 [DEBUG] geography_analytics button in filtered?', filtered.find(b => b.moduleId === 'geography_analytics'));
+    console.log('🔍 [DEBUG] ai_settings button in filtered?', filtered.find(b => b.moduleId === 'ai_settings'));
+    console.log('🔍 [DEBUG] content_management button in filtered?', filtered.find(b => b.moduleId === 'content_management'));
     
     return filtered;
   };

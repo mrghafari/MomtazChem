@@ -6,6 +6,27 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Banner Control and AI Control Button Activation Fix (July 22, 2025)
+✅ **RESOLVED: Banner Control and AI Control buttons now active and functional in Site Management interface**
+- **Issue**: User reported "دکمه ههای کنترل بنر و ai فعال نیستند" (Banner control and AI control buttons not active)
+- **Root Cause Analysis**: 
+  - TypeScript property access errors in site-management-fixed.tsx preventing proper permission checking
+  - AI Settings button existed but pointed to non-existent route `/admin/ai-settings`
+  - Banner Control functionality was embedded in Content Management but not exposed as dedicated button
+  - Duplicate button entries causing configuration conflicts
+- **Solutions Implemented**:
+  - **TypeScript Fixes**: Fixed property access errors by adding proper type checking for userPermissions object
+  - **AI Control Button**: Updated AI Settings button to use "AI Control" label with Brain icon, pointing to functional `/admin/ai-seo-assistant` route
+  - **Banner Control Button**: Added dedicated "Banner Control" button that opens Content Management with settings-control tab for discount banner management
+  - **Duplicate Removal**: Cleaned up duplicate geography-analytics and payment-settings button entries
+  - **Enhanced Debugging**: Added comprehensive logging for ai_settings and content_management permissions tracking
+- **Button Configurations**:
+  - **AI Control**: Purple theme, Brain icon, routes to AI SEO Assistant with GPT-4o integration
+  - **Banner Control**: Orange theme, Edit icon, routes to Content Management settings tab for banner toggles
+- **Permission Integration**: Both buttons properly integrated with role-based access control using existing moduleIds
+- **Test Results**: Both buttons now appear correctly in Site Management interface and respond to clicks
+- **Impact**: Administrative users can now access AI functionality and banner control features directly from Site Management
+
 ### COMPLETED: Persian Text Direction Fix in PDF Generation (July 22, 2025)
 ✅ **RESOLVED: Persian/Farsi text direction corrected in proforma invoices and PDFs**
 - **Issue**: Persian text in PDF invoices was displaying left-to-right instead of proper right-to-left direction
