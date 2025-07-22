@@ -73,9 +73,20 @@ export default function CustomerProfileEdit() {
   type EditProfileForm = z.infer<typeof editProfileSchema>;
   type SmsVerificationForm = z.infer<typeof smsVerificationSchema>;
 
-  // Fetch customer data
+  // Get customer ID from query parameter
+  const urlParams = new URLSearchParams(window.location.search);
+  const customerId = urlParams.get('customerId');
+  
+  // Fetch customer data - either from CRM (if customerId provided) or customer portal
   const { data: customer, isLoading, error: customerError } = useQuery<any>({
-    queryKey: ["/api/customers/me"],
+    queryKey: customerId ? ["/api/crm/customers", customerId] : ["/api/customers/me"],
+    queryFn: async () => {
+      const endpoint = customerId ? `/api/crm/customers/${customerId}` : "/api/customers/me";
+      const response = await fetch(endpoint, { credentials: 'include' });
+      if (!response.ok) throw new Error('Failed to fetch customer data');
+      const result = await response.json();
+      return customerId ? result.data : result;
+    },
     retry: 1,
   });
 
@@ -350,7 +361,11 @@ export default function CustomerProfileEdit() {
   const updateProfileMutation = useMutation({
     mutationFn: async (data: EditProfileForm) => {
       console.log('📤 [FRONTEND] Sending profile update data:', data);
-      const response = await fetch('/api/customers/profile', {
+      
+      // Choose the appropriate endpoint based on whether we're editing from CRM or customer portal
+      const endpoint = customerId ? `/api/crm/customers/${customerId}` : '/api/customers/profile';
+      
+      const response = await fetch(endpoint, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -368,8 +383,15 @@ export default function CustomerProfileEdit() {
         title: t.save,
         description: "Profile updated successfully",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/customers/me"] });
-      setLocation("/customer/profile");
+      // Invalidate appropriate cache
+      if (customerId) {
+        queryClient.invalidateQueries({ queryKey: ["/api/crm/customers", customerId] });
+        queryClient.invalidateQueries({ queryKey: ["/api/crm/customers"] });
+        setLocation("/admin/crm");
+      } else {
+        queryClient.invalidateQueries({ queryKey: ["/api/customers/me"] });
+        setLocation("/customer/profile");
+      }
     },
     onError: (error: any) => {
       toast({
@@ -446,18 +468,18 @@ export default function CustomerProfileEdit() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setLocation("/customer/profile")}
+            onClick={() => setLocation(customerId ? "/admin/crm" : "/customer/profile")}
             className="flex items-center gap-2"
           >
             <ArrowLeft className={`h-4 w-4 ${direction === 'rtl' ? 'rotate-180' : ''}`} />
-            {t.cancel}
+            {customerId ? "بازگشت به CRM" : t.cancel}
           </Button>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
-              {t.editProfile}
+              {customerId ? "ویرایش مشتری (CRM)" : t.editProfile}
             </h1>
             <p className="text-gray-600">
-              {t.manageAccount}
+              {customerId ? "ویرایش اطلاعات مشتری از طریق سیستم CRM" : t.manageAccount}
             </p>
           </div>
         </div>

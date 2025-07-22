@@ -6,6 +6,24 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: CRM Edit Button Integration with Customer Profile Edit Form (July 22, 2025)
+✅ **IMPLEMENTED: CRM edit button now opens the comprehensive customer profile edit form**
+- **User Request**: CRM edit button should open the same customer profile edit form used in customer portal for consistency
+- **Navigation Enhancement**: Updated handleEditCustomer in CRM to navigate to `/customer-profile-edit?customerId=${customer.id}`
+- **Query Parameter Support**: Enhanced customer-profile-edit.tsx to accept customerId parameter from URL
+- **Dual API Support**: Modified fetch logic to use CRM API (`/api/crm/customers/${customerId}`) when editing from CRM vs customer portal API
+- **Dynamic Endpoint Selection**: Update mutations automatically choose correct endpoint based on editing context
+- **Header Customization**: Added contextual headers - "ویرایش مشتری (CRM)" when editing from CRM vs regular profile edit
+- **Navigation Consistency**: Back button returns to appropriate location (CRM vs customer profile) based on context
+- **Cache Management**: Proper cache invalidation for both CRM customers list and individual customer data
+- **Technical Implementation**:
+  - URL parameter parsing to detect CRM edit context
+  - Conditional API endpoint selection in queries and mutations
+  - Context-aware navigation and UI labels
+  - Unified form handling for both customer portal and CRM editing
+- **Impact**: Provides consistent, comprehensive editing experience whether accessed from customer portal or admin CRM system
+- **Result**: Single powerful edit form serves both customer self-service and admin management workflows
+
 ### COMPLETED: Final Cleanup of Hardcoded Tax Definitions and System Consolidation (July 22, 2025)
 ✅ **RESOLVED: Complete removal of all duplicate and hardcoded tax definitions throughout the codebase**
 - **Issue**: System had multiple hardcoded VAT rates and duplicate tax schema definitions causing inconsistencies
