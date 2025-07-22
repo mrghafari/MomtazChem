@@ -9321,7 +9321,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         companySize,
         communicationPreference,
         preferredLanguage,
-        marketingConsent
+        marketingConsent,
+        // Additional fields
+        taxId,
+        registrationNumber,
+        website,
+        creditLimit,
+        preferredPaymentMethod,
+        customerType,
+        leadSource,
+        assignedSalesRep,
+        notes,
+        // CRM fields
+        annualRevenue,
+        priceRange,
+        orderFrequency,
+        creditStatus,
+        smsEnabled,
+        emailEnabled
       } = req.body;
 
       // Prioritize updating CRM customer data
@@ -9343,7 +9360,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
           companySize: companySize || null,
           communicationPreference: communicationPreference || 'email',
           preferredLanguage: preferredLanguage || 'en',
-          marketingConsent: marketingConsent || false
+          marketingConsent: marketingConsent || false,
+          // Additional fields
+          taxId: taxId || null,
+          registrationNumber: registrationNumber || null,
+          website: website || null,
+          creditLimit: creditLimit || null,
+          preferredPaymentMethod: preferredPaymentMethod || null,
+          customerType: customerType || null,
+          leadSource: leadSource || null,
+          assignedSalesRep: assignedSalesRep || null,
+          notes: notes || null,
+          // CRM fields
+          annualRevenue: annualRevenue || null,
+          priceRange: priceRange || null,
+          orderFrequency: orderFrequency || null,
+          creditStatus: creditStatus || null,
+          smsEnabled: smsEnabled || false,
+          emailEnabled: emailEnabled || false
         };
 
         await crmStorage.updateCrmCustomer(crmCustomerId, updateData);
