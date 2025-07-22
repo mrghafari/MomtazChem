@@ -562,8 +562,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   }, [isLoadingShippingRates, shippingRatesError, shippingRatesData]);
 
   // Calculate VAT and duties amounts (only on product subtotal, not shipping)
-  const vatRate = vatData?.vatEnabled ? parseFloat(vatData.vatRate || '0') / 100 : 0;
-  const dutiesRate = vatData?.dutiesEnabled ? parseFloat(vatData.dutiesRate || '0') / 100 : 0;
+  const vatRate = vatData?.vatEnabled ? parseFloat(vatData.vatRate || '0') : 0;
+  const dutiesRate = vatData?.dutiesEnabled ? parseFloat(vatData.dutiesRate || '0') : 0;
   
   const vatAmount = vatData?.vatEnabled ? subtotalAmount * vatRate : 0;
   const dutiesAmount = vatData?.dutiesEnabled ? subtotalAmount * dutiesRate : 0;
