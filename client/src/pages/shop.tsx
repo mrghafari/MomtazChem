@@ -24,7 +24,7 @@ import PreCheckoutModal from "@/components/checkout/pre-checkout-modal";
 import CustomerAuth from "@/components/auth/customer-auth";
 import { useMultilingualToast } from "@/hooks/use-multilingual-toast";
 import VisualBarcode from "@/components/ui/visual-barcode";
-import { ProductRating } from "@/components/ProductRating";
+import ProductRating from "@/components/ProductRating";
 import StarRating from "@/components/StarRating";
 import { ProductSpecsModal } from "@/components/ProductSpecsModal";
 
@@ -209,8 +209,8 @@ const Shop = () => {
   
   // Debug current products with their IDs
   if (filteredProducts && filteredProducts.length > 0) {
-    console.log('🌟 [RATINGS DEBUG] Current products:', filteredProducts.map(p => ({ id: p.id, name: p.name })));
-    console.log('🌟 [RATINGS DEBUG] Products with ratings:', filteredProducts.filter(p => productStats?.[p.id]).map(p => ({ id: p.id, name: p.name, rating: productStats[p.id] })));
+    console.log('🌟 [RATINGS DEBUG] Current products:', filteredProducts.map((p: any) => ({ id: p.id, name: p.name })));
+    console.log('🌟 [RATINGS DEBUG] Products with ratings:', filteredProducts.filter((p: any) => productStats && productStats[p.id]).map((p: any) => ({ id: p.id, name: p.name, rating: productStats ? productStats[p.id] : null })));
   }
 
   // Initialize price range only once when first loaded
@@ -1335,28 +1335,40 @@ const Shop = () => {
                             </div>
                           )}
                           
-                          {/* Star Rating - More to the left */}
+                          {/* Star Rating Display */}
                           {productStats && productStats[product.id] && (
-                            <div className="absolute bottom-2 left-2 flex items-center bg-white/90 backdrop-blur-sm rounded-lg p-1 shadow-lg">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="p-1 h-8 w-8 hover:bg-yellow-50/80 bg-transparent"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  navigate(`/product-reviews/${product.id}`);
-                                }}
-                              >
-                                <StarRating
-                                  rating={productStats[product.id].averageRating}
-                                  size="sm"
-                                  showNumber={true}
-                                />
-                              </Button>
-                              <span className="text-xs text-gray-600 ml-1">
-                                ({productStats[product.id].totalReviews})
-                              </span>
+                            <div className="absolute bottom-2 left-2">
+                              <div className="bg-white/95 backdrop-blur-sm rounded-lg p-2 shadow-lg border border-yellow-200">
+                                <div 
+                                  className="flex items-center gap-1 cursor-pointer hover:bg-yellow-50 rounded p-1 transition-colors"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    navigate(`/product-reviews/${product.id}`);
+                                  }}
+                                >
+                                  <div className="flex">
+                                    {[1,2,3,4,5].map((starNum) => (
+                                      <Star 
+                                        key={starNum}
+                                        className={`w-4 h-4 ${
+                                          starNum <= Math.floor(productStats[product.id].averageRating) 
+                                            ? 'fill-yellow-400 text-yellow-400' 
+                                            : starNum <= Math.ceil(productStats[product.id].averageRating)
+                                            ? 'fill-yellow-200 text-yellow-200'
+                                            : 'fill-gray-200 text-gray-200'
+                                        }`}
+                                      />
+                                    ))}
+                                  </div>
+                                  <span className="text-xs font-medium text-gray-700">
+                                    {productStats[product.id].averageRating.toFixed(1)}
+                                  </span>
+                                  <span className="text-xs text-gray-500">
+                                    ({productStats[product.id].totalReviews})
+                                  </span>
+                                </div>
+                              </div>
                             </div>
                           )}
                           
