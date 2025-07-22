@@ -207,29 +207,34 @@ export default function CustomerProfileEdit() {
       );
       if (customerProvince) {
         setSelectedProvinceId(customerProvince.id);
+        // Set form value to the standardized name to ensure CRM integration
+        form.setValue('province', customerProvince.nameEnglish || customerProvince.name);
         console.log('📍 Province found and set:', customerProvince);
       } else {
         console.log('📍 Province not found for:', customer.customer.province, 'Available provinces:', provinces.map((p: any) => p.nameEnglish || p.name));
       }
     }
-  }, [customer, provinces]);
+  }, [customer, provinces, form]);
 
   // Set selected city when cities data and customer data are loaded
   useEffect(() => {
-    if (customer?.customer?.city && cities.length > 0 && selectedProvinceId) {
+    if (customer?.customer?.city && cities.length > 0) {
       const customerCity = cities.find((c: any) => 
         c.nameEnglish === customer.customer.city || 
         c.name === customer.customer.city ||
         c.namePersian === customer.customer.city
       );
       if (customerCity) {
+        // Use standardized name for CRM integration
         form.setValue('city', customerCity.nameEnglish || customerCity.name);
         console.log('🏙️ City found and set:', customerCity);
       } else {
-        console.log('🏙️ City not found for:', customer.customer.city, 'Available cities:', cities.map((c: any) => c.nameEnglish || c.name));
+        // If not found in current city list, preserve original value to prevent data loss
+        console.log('🏙️ City not found for:', customer.customer.city, 'Preserving original value');
+        form.setValue('city', customer.customer.city);
       }
     }
-  }, [customer, cities, selectedProvinceId, form]);
+  }, [customer, cities, form]);
 
   // Send SMS verification code
   const sendSmsCodeMutation = useMutation({
@@ -536,12 +541,16 @@ export default function CustomerProfileEdit() {
                         <FormLabel>Province / محافظة</FormLabel>
                         <Select 
                           onValueChange={(value) => {
+                            console.log('🏛️ Province changing to:', value);
                             field.onChange(value);
                             // Find the selected province to get its ID for city filtering
-                            const selectedProvince = provinces.find((p: any) => p.nameEnglish === value);
-                            setSelectedProvinceId(selectedProvince ? selectedProvince.id : null);
-                            // Clear city selection when province changes
-                            form.setValue('city', '');
+                            const selectedProvince = provinces.find((p: any) => p.nameEnglish === value || p.name === value);
+                            if (selectedProvince) {
+                              setSelectedProvinceId(selectedProvince.id);
+                              console.log('🏛️ Province ID set to:', selectedProvince.id);
+                            }
+                            // Don't clear city automatically - preserve data integrity
+                            console.log('🏛️ City preserved, will filter based on new province');
                           }} 
                           value={field.value}
                         >

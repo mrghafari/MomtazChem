@@ -15536,41 +15536,75 @@ Leading Chemical Solutions Provider
         });
       }
 
-      // Update customer profile in CRM with all fields
-      const updatedCustomer = await crmStorage.updateCrmCustomer(customerId, {
-        firstName,
-        lastName,
-        phone,
-        email: email || null,
-        company: company || null,
-        country,
-        province: province || null,
-        city,
-        address,
-        secondaryAddress: secondaryAddress || null,
-        postalCode: postalCode || null,
-        alternatePhone: alternatePhone || null,
-        industry: industry || null,
-        businessType: businessType || null,
-        companySize: companySize || null,
-        communicationPreference: communicationPreference || null,
-        preferredLanguage: preferredLanguage || null,
-        marketingConsent: marketingConsent || false,
-        publicNotes: notes || null,
-        customerType: customerType || null,
-        customerStatus: customerStatus || null,
-        preferredPaymentMethod: preferredPaymentMethod || null,
-        creditLimit: creditLimit ? parseFloat(creditLimit) : null,
-        // Additional CRM fields mapping
-        annualRevenue: annualRevenue || null,
-        priceRange: priceRange || null,
-        orderFrequency: orderFrequency || null,
-        creditStatus: creditStatus || null,
-        smsEnabled: smsEnabled || false,
-        emailEnabled: emailEnabled || false,
-        customerSource: leadSource || null,
-        assignedSalesRep: assignedSalesRep || null
-      });
+      console.log('🔄 [CRM INTEGRATION] Updating customer profile with data preservation');
+      
+      // Get current customer data first to preserve existing information
+      const currentCustomer = await crmStorage.getCrmCustomerById(customerId);
+      if (!currentCustomer) {
+        return res.status(404).json({
+          success: false,
+          message: "Customer not found"
+        });
+      }
+
+      // Merge new data with existing data to prevent data loss
+      const updateData = {
+        // Core fields
+        firstName: firstName || currentCustomer.firstName,
+        lastName: lastName || currentCustomer.lastName,
+        phone: phone || currentCustomer.phone,
+        email: email || currentCustomer.email,
+        company: company || currentCustomer.company,
+        country: country || currentCustomer.country,
+        province: province || currentCustomer.province,
+        city: city || currentCustomer.city,
+        address: address || currentCustomer.address,
+        
+        // Additional contact info
+        secondaryAddress: secondaryAddress || currentCustomer.secondaryAddress,
+        postalCode: postalCode || currentCustomer.postalCode,
+        alternatePhone: alternatePhone || currentCustomer.alternatePhone,
+        
+        // Business information
+        industry: industry || currentCustomer.industry,
+        businessType: businessType || currentCustomer.businessType,
+        companySize: companySize || currentCustomer.companySize,
+        website: website || currentCustomer.website,
+        taxId: taxId || currentCustomer.taxId,
+        registrationNumber: registrationNumber || currentCustomer.registrationNumber,
+        
+        // Customer management
+        customerType: customerType || currentCustomer.customerType,
+        customerStatus: customerStatus || currentCustomer.customerStatus,
+        preferredPaymentMethod: preferredPaymentMethod || currentCustomer.preferredPaymentMethod,
+        creditLimit: creditLimit ? parseFloat(creditLimit) : currentCustomer.creditLimit,
+        customerSource: leadSource || currentCustomer.customerSource,
+        assignedSalesRep: assignedSalesRep || currentCustomer.assignedSalesRep,
+        
+        // Preferences
+        communicationPreference: communicationPreference || currentCustomer.communicationPreference,
+        preferredLanguage: preferredLanguage || currentCustomer.preferredLanguage,
+        marketingConsent: marketingConsent !== undefined ? marketingConsent : currentCustomer.marketingConsent,
+        
+        // Additional CRM fields with data preservation
+        annualRevenue: annualRevenue || currentCustomer.annualRevenue,
+        priceRange: priceRange || currentCustomer.priceRange,
+        orderFrequency: orderFrequency || currentCustomer.orderFrequency,
+        creditStatus: creditStatus || currentCustomer.creditStatus,
+        smsEnabled: smsEnabled !== undefined ? smsEnabled : currentCustomer.smsEnabled,
+        emailEnabled: emailEnabled !== undefined ? emailEnabled : currentCustomer.emailEnabled,
+        
+        // Notes
+        publicNotes: notes || currentCustomer.publicNotes,
+        
+        // System fields
+        updatedAt: new Date()
+      };
+
+      console.log('🔄 [CRM INTEGRATION] Update data prepared with preservation:', Object.keys(updateData));
+
+      // Update customer profile in CRM with data preservation
+      const updatedCustomer = await crmStorage.updateCrmCustomer(customerId, updateData);
 
       // Log activity
       await crmStorage.logCustomerActivity({
