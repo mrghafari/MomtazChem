@@ -6,6 +6,27 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Persian Text Direction Fix in PDF Generation (July 22, 2025)
+✅ **RESOLVED: Persian/Farsi text direction corrected in proforma invoices and PDFs**
+- **Issue**: Persian text in PDF invoices was displaying left-to-right instead of proper right-to-left direction
+- **Root Cause**: PDFKit was not automatically handling RTL text direction for Persian/Arabic/Kurdish languages
+- **Solution**: Implemented comprehensive RTL text formatting system in pdfkit-generator.ts
+- **RTL Features Added**:
+  - **formatRTLText()** function to reverse word order for proper RTL display
+  - **RTL character detection** using Unicode ranges for Persian/Arabic/Kurdish
+  - **features: ['rtla']** parameter for proper RTL text rendering
+  - **width parameters** to control text boundaries and prevent overlap
+- **Applied Throughout PDF**:
+  - Header: "پیش‌فاکتور" / "فاکتور فروش" with proper RTL formatting
+  - Labels: All Persian labels (شماره، تاریخ، مشخصات مشتری، etc.) with RTL formatting
+  - Customer info: Persian field labels with RTL direction
+  - Table headers: "شرح کالا"، "تعداد"، "قیمت واحد"، "مبلغ کل" with RTL formatting
+  - Product names: Dynamic RTL formatting for Persian products, LTR for English
+  - Totals: "مجموع کالاها"، "هزینه حمل"، "مجموع کل" with proper RTL
+  - Footer: Persian company name with RTL formatting
+- **Test Results**: Generated 18,925-byte proforma invoice with proper Persian RTL text direction
+- **Impact**: All Persian text in PDFs now displays correctly from right-to-left as expected
+
 ### COMPLETED: Comprehensive Customer Profile Edit Form Restoration with 27+ Fields (July 22, 2025)
 ✅ **MAJOR ENHANCEMENT: Restored complete customer profile editing functionality with all database fields**
 - **Issue**: Customer profile edit form was severely limited showing only 9 basic fields instead of comprehensive customer data
