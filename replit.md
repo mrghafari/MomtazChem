@@ -6,21 +6,22 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
-### COMPLETED: Unified Tax Settings API Integration Across All Components (July 22, 2025)
-✅ **RESOLVED: All components now use single `/api/tax-settings` endpoint for consistent VAT and duties data**
-- **Issue**: accounting-management.tsx was using incorrect `/api/accounting/tax-settings` endpoint causing tax data inconsistency
-- **Root Cause**: Two different endpoints existed - public `/api/tax-settings` and admin `/api/accounting/tax-settings` with different data sources
-- **Solution**: Consolidated all components to use public `/api/tax-settings` endpoint
-- **Components Fixed**: 
-  - bilingual-purchase-form.tsx: Uses public `/api/tax-settings` endpoint for checkout VAT display
-  - accounting-management.tsx: Uses admin `/api/accounting/tax-settings` endpoint for administrative management
-- **Data Consistency**: Both VAT (11%) and duties (2%) now display correctly across all interfaces
-- **Database Cleanup**: Removed duplicate VAT entry (ID 3 with type="VAT" at 5%) leaving only ID 1 with type="vat" at 11%
-- **Frontend Enhancement**: Added proper VAT and duties display in purchase form with Persian labels
-- **Tax Calculation**: Enhanced to handle both VAT and duties with separate rate calculations
-- **Debug Features**: Added comprehensive console logging for tax calculation troubleshooting
-- **Impact**: Unified tax management system with consistent data across checkout, accounting, and purchase forms
-- **Result**: Single source of truth for all tax settings eliminating data discrepancies
+### COMPLETED: Complete Duties/Surcharge Removal and Simplified VAT-Only Tax System (July 22, 2025)
+✅ **RESOLVED: Duties functionality completely removed from system per business requirements**
+- **Business Decision**: User requested complete removal of duties/surcharge functionality as it's not used in their business
+- **Database Cleanup**: Completely removed all duties records from tax_settings table (deleted 2 records)
+- **Frontend Cleanup**: 
+  - Removed "عوارض بر ارزش افزوده" tab from accounting-management.tsx interface
+  - Changed TabsList from 4 columns to 3 columns layout
+  - Completely removed DutiesManagement component and all related code
+  - Updated StatisticsView to reference only VAT instead of "taxes and duties"
+- **Simplified Interface**: Accounting management now shows only 3 tabs: فاکتورها، مالیات بر ارزش افزوده، آمار و گزارشات
+- **API Integration**: 
+  - Admin interface reads from `/api/accounting/tax-settings` for VAT management
+  - Public components read from `/api/tax-settings` for checkout calculations
+- **Database State**: Single clean VAT entry (ID 1: type="vat", rate=11%, enabled) remains
+- **Impact**: Streamlined tax management system with VAT-only functionality matching business needs
+- **Result**: Simplified tax system without duties complexity, cleaner UI, and focused business workflow
 
 ### COMPLETED: Company Information Module Visibility Fix with Persian-to-Technical Permission Mapping (July 22, 2025)
 ✅ **RESOLVED: Company Information module now visible in Site Management interface**

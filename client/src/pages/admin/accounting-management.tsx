@@ -285,10 +285,9 @@ export default function AccountingManagement() {
 
       {/* Tabs for different accounting sections */}
       <Tabs defaultValue="invoices" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="invoices">فاکتورها</TabsTrigger>
           <TabsTrigger value="vat">مالیات بر ارزش افزوده</TabsTrigger>
-          <TabsTrigger value="duties">عوارض بر ارزش افزوده</TabsTrigger>
           <TabsTrigger value="statistics">آمار و گزارشات</TabsTrigger>
         </TabsList>
 
@@ -410,10 +409,7 @@ export default function AccountingManagement() {
           <VatManagement />
         </TabsContent>
 
-        {/* Duties Tab */}
-        <TabsContent value="duties" className="space-y-6">
-          <DutiesManagement />
-        </TabsContent>
+
 
         {/* Statistics Tab */}
         <TabsContent value="statistics" className="space-y-6">
@@ -629,159 +625,7 @@ function VatManagement() {
   );
 }
 
-// Duties Management Component  
-function DutiesManagement() {
-  const { toast } = useToast();
-  
-  // Fetch tax settings
-  const { data: taxSettings, isLoading, refetch } = useQuery({
-    queryKey: ['/api/accounting/tax-settings'],
-    queryFn: async () => {
-      const response = await fetch('/api/accounting/tax-settings');
-      if (!response.ok) throw new Error('Failed to fetch tax settings');
-      const result = await response.json();
-      return result.data;
-    }
-  });
 
-  // Update tax setting mutation
-  const updateTaxMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: any }) => {
-      return apiRequest(`/api/accounting/tax-settings/${id}`, { method: 'PUT', body: data });
-    },
-    onSuccess: (result) => {
-      toast({
-        title: "موفقیت",
-        description: result.message || "تنظیمات عوارض به‌روزرسانی شد"
-      });
-      refetch();
-    },
-    onError: (error: any) => {
-      toast({
-        title: "خطا",
-        description: error.message || "خطا در به‌روزرسانی تنظیمات",
-        variant: "destructive"
-      });
-    }
-  });
-
-  // Toggle tax setting mutation
-  const toggleTaxMutation = useMutation({
-    mutationFn: async (id: number) => {
-      return apiRequest(`/api/accounting/tax-settings/${id}/toggle`, { method: 'POST' });
-    },
-    onSuccess: (result) => {
-      toast({
-        title: "موفقیت",
-        description: result.message || "وضعیت عوارض تغییر کرد"
-      });
-      refetch();
-    },
-    onError: (error: any) => {
-      toast({
-        title: "خطا",
-        description: error.message || "خطا در تغییر وضعیت عوارض",
-        variant: "destructive"
-      });
-    }
-  });
-
-  const dutiesSetting = taxSettings?.find((setting: any) => setting.type === 'duties');
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>مدیریت عوارض بر ارزش افزوده</CardTitle>
-        <CardDescription>
-          تنظیمات عوارض بر ارزش افزوده برای فاکتورها و اسناد مالی
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {isLoading ? (
-          <div className="text-center py-8">در حال بارگیری...</div>
-        ) : dutiesSetting ? (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="duties-name">نام عوارض</Label>
-                  <Input
-                    id="duties-name"
-                    value={dutiesSetting.name}
-                    readOnly
-                    className="bg-gray-50"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="duties-rate">نرخ عوارض (درصد)</Label>
-                  <Input
-                    id="duties-rate"
-                    type="number"
-                    step="0.01"
-                    value={parseFloat(dutiesSetting.rate) * 100}
-                    onChange={(e) => {
-                      const newRate = parseFloat(e.target.value) / 100;
-                      updateTaxMutation.mutate({
-                        id: dutiesSetting.id,
-                        data: { rate: newRate.toString() }
-                      });
-                    }}
-                    placeholder="0.00"
-                  />
-                </div>
-              </div>
-              <div className="space-y-4">
-                <div>
-                  <Label>وضعیت فعال/غیرفعال</Label>
-                  <div className="flex items-center space-x-2 space-x-reverse mt-2">
-                    <Button
-                      variant={dutiesSetting.isEnabled ? "default" : "outline"}
-                      onClick={() => toggleTaxMutation.mutate(dutiesSetting.id)}
-                      disabled={toggleTaxMutation.isPending}
-                    >
-                      {dutiesSetting.isEnabled ? "فعال" : "غیرفعال"}
-                    </Button>
-                    <span className="text-sm text-gray-600">
-                      {dutiesSetting.isEnabled ? "عوارض در فاکتورها اعمال می‌شود" : "عوارض در فاکتورها اعمال نمی‌شود"}
-                    </span>
-                  </div>
-                </div>
-                <div>
-                  <Label htmlFor="duties-description">توضیحات</Label>
-                  <Textarea
-                    id="duties-description"
-                    value={dutiesSetting.description || ""}
-                    onChange={(e) => {
-                      updateTaxMutation.mutate({
-                        id: dutiesSetting.id,
-                        data: { description: e.target.value }
-                      });
-                    }}
-                    placeholder="توضیحات عوارض بر ارزش افزوده"
-                    rows={3}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-orange-50 p-4 rounded-lg">
-              <h4 className="font-semibold text-orange-900 mb-2">پیش‌نمایش محاسبه عوارض</h4>
-              <div className="text-sm text-orange-800 space-y-1">
-                <p>مبلغ کالا: 100,000 دینار</p>
-                <p>عوارض ({(parseFloat(dutiesSetting.rate) * 100).toFixed(2)}%): {(100000 * parseFloat(dutiesSetting.rate)).toLocaleString('fa-IR')} دینار</p>
-                <p className="font-semibold">مجموع با عوارض: {(100000 * (1 + parseFloat(dutiesSetting.rate))).toLocaleString('fa-IR')} دینار</p>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="text-center py-8 text-gray-500">
-            تنظیمات عوارض بر ارزش افزوده یافت نشد
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
 
 // Statistics View Component
 function StatisticsView() {
@@ -791,7 +635,7 @@ function StatisticsView() {
         <CardHeader>
           <CardTitle>آمار مالیاتی</CardTitle>
           <CardDescription>
-            آمار و گزارشات مالیات و عوارض
+            آمار و گزارشات مالیات بر ارزش افزوده
           </CardDescription>
         </CardHeader>
         <CardContent>
