@@ -411,6 +411,16 @@ export default function SiteManagement() {
       !button.moduleId || allowedModules.includes(button.moduleId)
     );
     
+    console.log('🔍 [CRITICAL] Missing button detection:');
+    const missingButtons = allButtons.filter(button => {
+      const included = !button.moduleId || allowedModules.includes(button.moduleId);
+      if (!included) {
+        console.log('🔍 [MISSING]', button.id, button.label, 'moduleId:', button.moduleId);
+      }
+      return !included;
+    });
+    console.log('🔍 [CRITICAL] Missing buttons count:', missingButtons.length);
+    
     console.log('🔍 [DEBUG] finance button found in allButtons?', allButtons.find(b => b.moduleId === 'finance'));
     console.log('🔍 [DEBUG] geography_analytics button found in allButtons?', allButtons.find(b => b.moduleId === 'geography_analytics'));
     console.log('🔍 [DEBUG] ai_settings button found in allButtons?', allButtons.find(b => b.moduleId === 'ai_settings'));
