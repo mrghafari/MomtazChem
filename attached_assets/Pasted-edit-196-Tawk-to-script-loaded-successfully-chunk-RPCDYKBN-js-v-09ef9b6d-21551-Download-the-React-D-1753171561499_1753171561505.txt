@@ -1,0 +1,62 @@
+edit:196 Tawk.to script loaded successfully
+chunk-RPCDYKBN.js?v=09ef9b6d:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+useAuth.ts:30  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 401 (Unauthorized)
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=09ef9b6d:840
+run @ @tanstack_react-query.js?v=09ef9b6d:494
+start @ @tanstack_react-query.js?v=09ef9b6d:536
+fetch @ @tanstack_react-query.js?v=09ef9b6d:926
+executeFetch_fn @ @tanstack_react-query.js?v=09ef9b6d:2211
+onSubscribe @ @tanstack_react-query.js?v=09ef9b6d:1898
+subscribe @ @tanstack_react-query.js?v=09ef9b6d:24
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=09ef9b6d:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=09ef9b6d:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=09ef9b6d:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=09ef9b6d:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=09ef9b6d:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=09ef9b6d:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=09ef9b6d:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=09ef9b6d:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=09ef9b6d:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=09ef9b6d:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=09ef9b6d:19432
+commitRoot @ chunk-RPCDYKBN.js?v=09ef9b6d:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=09ef9b6d:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=09ef9b6d:18718
+workLoop @ chunk-RPCDYKBN.js?v=09ef9b6d:197
+flushWork @ chunk-RPCDYKBN.js?v=09ef9b6d:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=09ef9b6d:384
+customer-profile-edit.tsx:160 🔍 [UI DEBUG] Customer data loaded
+customer-profile-edit.tsx:161 🔍 [CRM DEBUG] CRM Fields from API: {annualRevenue: undefined, priceRange: undefined, orderFrequency: undefined, creditStatus: undefined, smsEnabled: undefined, …}
+customer-profile-edit.tsx:169 🔍 [VALUES] Actual CRM values: annualRevenue=undefined priceRange=undefined orderFrequency=undefined creditStatus=undefined smsEnabled=undefined emailEnabled=undefined
+customer-profile-edit.tsx:217 ✅ [UI DEBUG] Form reset completed with CRM values: annualRevenue= priceRange= orderFrequency= creditStatus= smsEnabled=false emailEnabled=false
+customer-profile-edit.tsx:241 📍 Province found and set: {id: 7, name: 'اربیل', nameArabic: 'اربیل', nameEnglish: 'Erbil', capital: 'اربیل', …}
+customer-profile-edit.tsx:259 🏙️ City found and set: {id: 12, name: 'اربیل', nameArabic: 'اربیل', nameEnglish: 'Erbil', provinceName: 'اربیل', …}
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:115737)
+    at t.value (twk-chunk-common.js:2:148821)
+    at p.updateUUID (twk-chunk-common.js:2:200473)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:122752)
+    at twk-chunk-common.js:2:122063
+value @ twk-chunk-common.js:2
+updateUUID @ twk-chunk-common.js:2
+(anonymous) @ twk-vendor.js:2
+p.dispatch @ twk-vendor.js:2
+dispatch @ twk-vendor.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+Promise.then
+value @ twk-chunk-common.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+56d7 @ twk-chunk-common.js:2
+a @ twk-runtime.js:1
+r @ twk-runtime.js:1
+t @ twk-runtime.js:1
+(anonymous) @ twk-chunk-vendors.js:2
+customer-profile-edit.tsx:259 🏙️ City found and set: {id: 12, name: 'اربیل', nameArabic: 'اربیل', nameEnglish: 'Erbil', provinceName: 'اربیل', …}

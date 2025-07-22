@@ -9247,6 +9247,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
           lastOrderDate: crmCustomer?.lastOrderDate,
           customerStatus: crmCustomer?.customerStatus || 'active',
           customerType: crmCustomer?.customerType || 'retail',
+          // Additional fields for profile editing
+          secondaryAddress: customer.secondaryAddress,
+          alternatePhone: customer.alternatePhone,
+          industry: customer.industry,
+          businessType: customer.businessType,
+          companySize: customer.companySize,
+          communicationPreference: customer.communicationPreference,
+          preferredLanguage: customer.preferredLanguage,
+          marketingConsent: customer.marketingConsent,
+          notes: customer.publicNotes || customer.notes,
+          preferredPaymentMethod: customer.preferredPaymentMethod,
+          creditLimit: customer.creditLimit,
+          website: customer.website,
+          taxId: customer.taxId,
+          registrationNumber: customer.registrationNumber,
+          leadSource: customer.customerSource || customer.leadSource,
+          assignedSalesRep: customer.assignedSalesRep,
+          // Additional CRM fields that were missing
+          annualRevenue: customer.annualRevenue,
+          priceRange: customer.priceRange,
+          orderFrequency: customer.orderFrequency,
+          creditStatus: customer.creditStatus,
+          smsEnabled: customer.smsEnabled,
+          emailEnabled: customer.emailEnabled,
         }
       });
     } catch (error) {
