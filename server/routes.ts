@@ -19702,6 +19702,27 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     }
   });
 
+  // Get individual tax setting by ID
+  app.get('/api/accounting/tax-settings/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      const [taxSetting] = await db
+        .select()
+        .from(schema.taxSettings)
+        .where(eq(schema.taxSettings.id, parseInt(id)));
+      
+      if (!taxSetting) {
+        return res.status(404).json({ success: false, message: "تنظیمات مالیاتی یافت نشد" });
+      }
+      
+      res.json({ success: true, data: taxSetting });
+    } catch (error) {
+      console.error('Error fetching tax setting:', error);
+      res.status(500).json({ success: false, message: "خطا در دریافت تنظیمات مالیات" });
+    }
+  });
+
   // Update tax setting (VAT or Duties)
   app.put('/api/accounting/tax-settings/:id', async (req, res) => {
     try {
