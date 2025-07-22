@@ -175,6 +175,16 @@ export default function CustomerProfileEdit() {
         'emailEnabled=' + customerData.emailEnabled
       );
       
+      // Debug: Tax ID and Registration Number specifically
+      console.log('🏢 [TAX DEBUG] Tax & Registration from API:', {
+        taxId: customerData.taxId,
+        registrationNumber: customerData.registrationNumber
+      });
+      console.log('🏢 [TAX VALUES] Actual values:', 
+        'taxId=' + customerData.taxId,
+        'registrationNumber=' + customerData.registrationNumber
+      );
+      
       form.reset({
         firstName: customerData.firstName || "",
         lastName: customerData.lastName || "",
@@ -221,6 +231,11 @@ export default function CustomerProfileEdit() {
         'creditStatus=' + (customerData.creditStatus || ""),
         'smsEnabled=' + (customerData.smsEnabled || false),
         'emailEnabled=' + (customerData.emailEnabled || false)
+      );
+      
+      console.log('✅ [TAX DEBUG] Form reset completed with Tax values:', 
+        'taxId=' + (customerData.taxId || ""),
+        'registrationNumber=' + (customerData.registrationNumber || "")
       );
     }
   }, [customer, form]);
