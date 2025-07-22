@@ -46,7 +46,7 @@ export default function ContentManagement() {
   const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedLanguage, setSelectedLanguage] = useState<'en' | 'ar' | 'ku' | 'tr'>('en');
-  const [selectedSection, setSelectedSection] = useState<string>('discount_banner');
+  const [selectedSection, setSelectedSection] = useState<string>('contact');
   const [editingContent, setEditingContent] = useState<ContentItem | null>(null);
 
   // Check if user is super admin (id = 1)
@@ -189,21 +189,22 @@ export default function ContentManagement() {
   };
 
   const sections = [
-    { value: 'admin_dashboard', label: 'Admin Dashboard' },
-    { value: 'home', label: 'Home Page' },
-    { value: 'about', label: 'About Page' },
-    { value: 'services', label: 'Services Page' },
-    { value: 'contact', label: 'Contact Page' },
-    { value: 'paint_solvents', label: 'Paint & Solvents' },
-    { value: 'industrial_chemicals', label: 'Industrial Chemicals' },
-    { value: 'commercial_goods', label: 'Commercial Goods' },
-    { value: 'technical_equipment', label: 'Technical Equipment' },
+    { value: 'contact', label: 'Contact Page (104 آیتم)' },
+    { value: 'services', label: 'Services Page (52 آیتم)' },
+    { value: 'home', label: 'Home Page (47 آیتم)' },
+    { value: 'about', label: 'About Page (40 آیتم)' },
+    { value: 'technical_equipment', label: 'Technical Equipment (34 آیتم)' },
+    { value: 'admin_dashboard', label: 'Admin Dashboard (34 آیتم)' },
+    { value: 'industrial_chemicals', label: 'Industrial Chemicals (30 آیتم)' },
+    { value: 'paint_solvents', label: 'Paint & Solvents (30 آیتم)' },
+    { value: 'commercial_goods', label: 'Commercial Goods (30 آیتم)' },
+    { value: 'social_media', label: 'Social Media Links (24 آیتم)' },
+    { value: 'homepage', label: 'Homepage (4 آیتم)' },
+    { value: 'footer', label: 'Footer (1 آیتم)' },
     { value: 'products', label: 'Products' },
-    { value: 'footer', label: 'Footer' },
     { value: 'navigation', label: 'Navigation' },
     { value: 'hero', label: 'Hero Section' },
     { value: 'testimonials', label: 'Testimonials' },
-    { value: 'social_media', label: 'Social Media Links' },
     { value: 'discount_banner', label: 'بنر تخفیف (Discount Banner)' },
     { value: 'ai_settings', label: 'تنظیمات AI (AI Settings)' }
   ];
