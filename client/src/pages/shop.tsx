@@ -1336,12 +1336,12 @@ const Shop = () => {
                           )}
                           
                           {/* Star Rating - More to the left */}
-                          {productStats?.[product.id] && (
-                            <div className="absolute bottom-2 left-8 flex items-center">
+                          {productStats && productStats[product.id] && (
+                            <div className="absolute bottom-2 left-2 flex items-center bg-white/90 backdrop-blur-sm rounded-lg p-1 shadow-lg">
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="p-1 h-7 w-7 hover:bg-yellow-50/80 bg-transparent"
+                                className="p-1 h-8 w-8 hover:bg-yellow-50/80 bg-transparent"
                                 onClick={(e) => {
                                   e.preventDefault();
                                   e.stopPropagation();
@@ -1351,16 +1351,20 @@ const Shop = () => {
                                 <StarRating
                                   rating={productStats[product.id].averageRating}
                                   size="sm"
-                                  showNumber={false}
+                                  showNumber={true}
                                 />
                               </Button>
+                              <span className="text-xs text-gray-600 ml-1">
+                                ({productStats[product.id].totalReviews})
+                              </span>
                             </div>
                           )}
                           
-                          {/* Debug: Show if product has rating data */}
-                          {productStats?.[product.id] && (
-                            <div className="absolute top-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded">
-                              ★{productStats[product.id].averageRating.toFixed(1)}
+                          {/* Debug: Enhanced debug info */}
+                          {console.log('🌟 [PRODUCT DEBUG]', product.id, 'has stats:', !!productStats?.[product.id], productStats?.[product.id])}
+                          {productStats && productStats[product.id] && (
+                            <div className="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded">
+                              ID:{product.id} ★{productStats[product.id].averageRating.toFixed(1)} ({productStats[product.id].totalReviews})
                             </div>
                           )}
                           
