@@ -40,6 +40,18 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Test Results**: Generated 19,335-byte PDF with clean number formatting
 - **Impact**: All numerical values in PDF invoices now display as clean integers without commas or decimal places
 
+✅ **VERIFIED: Shipping costs display correctly in PDF invoices**
+- **Issue**: User reported shipping costs not appearing in generated PDFs
+- **Investigation**: Tested shipping cost functionality with multiple test cases
+- **Test Results**: Confirmed shipping costs display properly in separate line item section
+- **Format**: "هزینه حمل: 15000 IQD" appears correctly below items subtotal
+- **Integration**: Shipping costs included in VAT calculation and final total
+- **Multiple Tests Completed**: 
+  - Test 1: 5,000 IQD shipping cost - ✅ Working
+  - Test 2: 75,500 IQD shipping cost - ✅ Working  
+  - Test 3: 15,000 IQD shipping cost - ✅ Working
+- **Impact**: Shipping costs functionality confirmed operational in PDF generation system
+
 ### COMPLETED: Complete CRM Form Integration with Data Preservation System (July 22, 2025)
 ✅ **IMPLEMENTED: Comprehensive CRM fields integration in customer profile edit form**
 - **Issue**: User requested complete integration of all CRM database fields into customer profile form with data preservation
