@@ -6,14 +6,26 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
-### COMPLETED: PDF Invoice Enhancement with Shipping Cost and Number Formatting (July 22, 2025)
-✅ **FIXED: Number formatting and spacing in PDF invoices**
-- **Issue**: Numbers needed proper spacing with currency and quantities shouldn't use commas
-- **Solution**: Changed number formatting from Persian (fa-IR) to English (en-US) locale
-- **Spacing**: Added double space between amounts and IQD currency (e.g., "1,250  IQD")
-- **Quantity Format**: Quantities display as plain numbers without commas (e.g., "5" not "5,000")
-- **Applied To**: All price fields, totals, subtotals, shipping costs in both main and fallback code
-- **Currency Display**: Consistent "  IQD" format with double space throughout invoice
+### COMPLETED: Enhanced Customer Profile Edit Form and PDF Date Formatting Fix (July 22, 2025)
+✅ **FIXED: Customer profile edit form data loading and field mapping**
+- **Issue**: Customer profile edit form wasn't loading complete customer data and city selection was changing
+- **Solution**: Enhanced field mapping to use correct database field names from customer schema
+- **Field Mapping**: Added fallback mappings (state/secondaryAddress, publicNotes/notes, customerSource/leadSource)
+- **Credit Limit**: Added toString() conversion for decimal field display
+- **Province/City Selection**: Enhanced geographic selection with multiple name matching (English/Persian)
+- **Debug Logging**: Added console logs to track province and city selection process
+- **Smart Matching**: Form now finds provinces/cities by nameEnglish, name, or namePersian
+- **City Auto-Selection**: Added separate useEffect to automatically set city when customer data loads
+
+✅ **FIXED: PDF date formatting displaying NaN/NaN/NaN in generated invoices**
+- **Issue**: PDF generation was showing "NaN/NaN/NaN" instead of proper Gregorian dates
+- **Root Cause**: invoiceDate was not properly validated before Date object creation
+- **Solution**: Added date validation using !isNaN(new Date().getTime()) before processing
+- **Applied To**: Both main PDF code and fallback scenarios in pdfkit-generator.ts
+- **Invoice Endpoints**: Fixed both proforma and final invoice generation to use ISO string dates
+- **Date Format**: Changed from toLocaleDateString('fa-IR') to toISOString() for consistent parsing
+- **Test Results**: Confirmed PDF now shows "2025/07/22" (Gregorian) instead of "NaN/NaN/NaN"
+- **Impact**: All generated PDFs display proper Gregorian calendar dates in YYYY/MM/DD format
 
 ✅ **IMPLEMENTED: Separate shipping cost line item in proforma invoices**
 - **Issue**: User requested shipping cost to appear as separate line item below product subtotal

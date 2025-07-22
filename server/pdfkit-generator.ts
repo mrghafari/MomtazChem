@@ -88,7 +88,7 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
         const invoiceNumber = invoiceData.invoiceNumber || invoiceData.orderNumber || 'INV-001';
         const dateLabel = 'تاریخ:';
         // Format date in Gregorian calendar (YYYY/MM/DD)
-        const currentDate = invoiceData.invoiceDate ? new Date(invoiceData.invoiceDate) : new Date();
+        const currentDate = invoiceData.invoiceDate && !isNaN(new Date(invoiceData.invoiceDate).getTime()) ? new Date(invoiceData.invoiceDate) : new Date();
         const dateValue = `${currentDate.getFullYear()}/${String(currentDate.getMonth() + 1).padStart(2, '0')}/${String(currentDate.getDate()).padStart(2, '0')}`;
         console.log(`📅 [PDF DATE] Generated date value: ${dateValue} for ${isProforma ? 'Proforma' : 'Invoice'}`);
         
@@ -247,7 +247,7 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
            .text('Invoice - Momtaz Chem', 50, 50, { align: 'center' });
         
         // Format fallback date in Gregorian calendar (YYYY/MM/DD)
-        const fallbackDate = invoiceData.invoiceDate ? new Date(invoiceData.invoiceDate) : new Date();
+        const fallbackDate = invoiceData.invoiceDate && !isNaN(new Date(invoiceData.invoiceDate).getTime()) ? new Date(invoiceData.invoiceDate) : new Date();
         const fallbackDateValue = `${fallbackDate.getFullYear()}/${String(fallbackDate.getMonth() + 1).padStart(2, '0')}/${String(fallbackDate.getDate()).padStart(2, '0')}`;
         console.log(`📅 [PDF FALLBACK DATE] Generated fallback date value: ${fallbackDateValue}`);
         

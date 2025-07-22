@@ -93,8 +93,8 @@ export default function CustomerProfileEdit() {
     retry: 1,
   });
 
-  const provinces = provincesData?.data || [];
-  const cities = citiesData?.data || [];
+  const provinces = (provincesData && typeof provincesData === 'object' && 'data' in provincesData) ? provincesData.data : [];
+  const cities = (citiesData && typeof citiesData === 'object' && 'data' in citiesData) ? citiesData.data : [];
 
   const form = useForm<EditProfileForm>({
     resolver: zodResolver(editProfileSchema),
@@ -151,7 +151,7 @@ export default function CustomerProfileEdit() {
         province: customerData.province || "",
         city: customerData.city || "",
         address: customerData.address || "",
-        secondaryAddress: customerData.secondaryAddress || "",
+        secondaryAddress: customerData.state || customerData.secondaryAddress || "",
         postalCode: customerData.postalCode || "",
         alternatePhone: customerData.alternatePhone || "",
         industry: customerData.industry || "",
@@ -160,16 +160,16 @@ export default function CustomerProfileEdit() {
         communicationPreference: customerData.communicationPreference || "",
         preferredLanguage: customerData.preferredLanguage || "",
         marketingConsent: customerData.marketingConsent || false,
-        notes: customerData.notes || "",
+        notes: customerData.publicNotes || customerData.notes || "",
         customerType: customerData.customerType || "",
         customerStatus: customerData.customerStatus || "",
         preferredPaymentMethod: customerData.preferredPaymentMethod || "",
-        creditLimit: customerData.creditLimit || "",
+        creditLimit: customerData.creditLimit ? customerData.creditLimit.toString() : "",
         website: customerData.website || "",
         taxId: customerData.taxId || "",
         registrationNumber: customerData.registrationNumber || "",
 
-        leadSource: customerData.leadSource || "",
+        leadSource: customerData.customerSource || customerData.leadSource || "",
         assignedSalesRep: customerData.assignedSalesRep || "",
       });
     }
@@ -178,12 +178,37 @@ export default function CustomerProfileEdit() {
   // Set selected province ID when provinces data and customer data are loaded
   useEffect(() => {
     if (customer?.customer?.province && provinces.length > 0) {
-      const customerProvince = provinces.find((p: any) => p.nameEnglish === customer.customer.province);
+      // Try to find by English name first, then by Persian name
+      const customerProvince = provinces.find((p: any) => 
+        p.nameEnglish === customer.customer.province || 
+        p.name === customer.customer.province ||
+        p.namePersian === customer.customer.province
+      );
       if (customerProvince) {
         setSelectedProvinceId(customerProvince.id);
+        console.log('📍 Province found and set:', customerProvince);
+      } else {
+        console.log('📍 Province not found for:', customer.customer.province, 'Available provinces:', provinces.map((p: any) => p.nameEnglish || p.name));
       }
     }
   }, [customer, provinces]);
+
+  // Set selected city when cities data and customer data are loaded
+  useEffect(() => {
+    if (customer?.customer?.city && cities.length > 0 && selectedProvinceId) {
+      const customerCity = cities.find((c: any) => 
+        c.nameEnglish === customer.customer.city || 
+        c.name === customer.customer.city ||
+        c.namePersian === customer.customer.city
+      );
+      if (customerCity) {
+        form.setValue('city', customerCity.nameEnglish || customerCity.name);
+        console.log('🏙️ City found and set:', customerCity);
+      } else {
+        console.log('🏙️ City not found for:', customer.customer.city, 'Available cities:', cities.map((c: any) => c.nameEnglish || c.name));
+      }
+    }
+  }, [customer, cities, selectedProvinceId, form]);
 
   // Send SMS verification code
   const sendSmsCodeMutation = useMutation({

@@ -462,7 +462,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         invoiceType: 'PROFORMA', // نوع فاکتور: پیش فاکتور
         invoiceNumber: `P-${order.orderNumber}`, // P- برای پیش فاکتور
         orderNumber: order.orderNumber,
-        invoiceDate: new Date().toLocaleDateString('fa-IR'),
+        invoiceDate: new Date().toISOString(),
         customer: {
           name: order.customerName || 'مشتری',
           email: order.customerEmail,
@@ -585,7 +585,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         invoiceType: 'FINAL', // نوع فاکتور: فاکتور نهایی
         invoiceNumber: order.orderNumber,
         orderNumber: order.orderNumber,
-        invoiceDate: new Date().toLocaleDateString('fa-IR'),
+        invoiceDate: new Date().toISOString(),
         customer: {
           name: order.customerName || 'مشتری',
           email: order.customerEmail,
