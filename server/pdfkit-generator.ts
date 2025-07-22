@@ -271,34 +271,44 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
            .font('VazirRegular')
            .text(formatMixedText(footerMessage), 50, footerMessageY, { align: 'right', width: 500, features: ['rtla'] });
         
-        // Compact company information footer
+        // Two-column footer layout
         const companyFooterY = footerMessageY + 30;
+        const leftColumnX = 50;
+        const rightColumnX = 300;
+        const columnWidth = 240;
         
-        // Company name - Persian and English on same line
+        // Left Column - Persian information
         doc.fontSize(11)
            .font('VazirBold')
-           .text(formatMixedText('شرکت ممتاز شیمی'), 50, companyFooterY, { align: 'right', width: 230, features: ['rtla'] })
-           .text('Momtaz Chemical Solutions Company', 300, companyFooterY, { align: 'left', width: 250 });
+           .text(formatMixedText('شرکت ممتاز شیمی'), leftColumnX, companyFooterY, { align: 'right', width: columnWidth, features: ['rtla'] });
         
-        // Address and website on same line
         const addressText = formatMixedText('آدرس: بغداد، عراق - منطقه الکرخ، شارع الرشید');
         doc.fontSize(8)
            .font('VazirRegular')
-           .text(addressText, 50, companyFooterY + 18, { align: 'right', width: 350, features: ['rtla'] })
-           .text('www.momtazchem.com', 420, companyFooterY + 18, { align: 'left', width: 130 });
+           .text(addressText, leftColumnX, companyFooterY + 18, { align: 'right', width: columnWidth, features: ['rtla'] });
         
-        // Email and phone information on same line
-        doc.fontSize(8)
-           .font('VazirRegular')
-           .text('info@momtazchem.com | sales@momtazchem.com', 50, companyFooterY + 32, { align: 'left', width: 280 })
-           .text('+964 770 123 4567 | +964 780 987 6543', 330, companyFooterY + 32, { align: 'left', width: 220 });
-        
-        // Compact company slogan - Persian and English on same line
         const sloganText = formatMixedText('تامین کننده برتر مواد شیمیایی صنعتی و آزمایشگاهی در خاورمیانه');
         doc.fontSize(7)
            .font('VazirRegular')
-           .text(sloganText, 50, companyFooterY + 50, { align: 'right', width: 500, features: ['rtla'] })
-           .text('Leading Supplier of Industrial & Laboratory Chemicals in the Middle East', 50, companyFooterY + 62, { align: 'center', width: 500 });
+           .text(sloganText, leftColumnX, companyFooterY + 35, { align: 'right', width: columnWidth, features: ['rtla'] });
+        
+        // Right Column - English information
+        doc.fontSize(11)
+           .font('VazirBold')
+           .text('Momtaz Chemical Solutions Company', rightColumnX, companyFooterY, { align: 'left', width: columnWidth });
+        
+        doc.fontSize(8)
+           .font('VazirRegular')
+           .text('www.momtazchem.com', rightColumnX, companyFooterY + 18, { align: 'left', width: columnWidth })
+           .text('info@momtazchem.com', rightColumnX, companyFooterY + 30, { align: 'left', width: columnWidth })
+           .text('sales@momtazchem.com', rightColumnX, companyFooterY + 42, { align: 'left', width: columnWidth })
+           .text('+964 770 123 4567', rightColumnX, companyFooterY + 54, { align: 'left', width: columnWidth })
+           .text('+964 780 987 6543', rightColumnX, companyFooterY + 66, { align: 'left', width: columnWidth });
+        
+        doc.fontSize(7)
+           .font('VazirRegular')
+           .text('Leading Supplier of Industrial & Laboratory', rightColumnX, companyFooterY + 80, { align: 'left', width: columnWidth })
+           .text('Chemicals in the Middle East', rightColumnX, companyFooterY + 92, { align: 'left', width: columnWidth });
         
       } catch (fontError) {
         console.warn('⚠️ Font registration failed, using default font:', fontError);

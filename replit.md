@@ -22,11 +22,10 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
   - Left-aligned numerical values without commas or decimals
   - Proper spacing and alignment matching Word template
 - **Footer Message**: Added exact footer text from Word template: "این پیش فاکتور است و پس تائید مالی، فاکتور نهایی صادر خواهد شد."
-- **Compact Company Footer**: Optimized footer layout to prevent page overflow:
-  - Company name in Persian and English on same line: "شرکت ممتاز شیمی" / "Momtaz Chemical Solutions Company"
-  - Address and website on same line: "آدرس: بغداد، عراق - منطقه الکرخ، شارع الرشید" / www.momtazchem.com
-  - Email and phone information consolidated: info@momtazchem.com, sales@momtazchem.com / +964 770 123 4567, +964 780 987 6543
-  - Compact bilingual slogan: "تامین کننده برتر مواد شیمیایی صنعتی و آزمایشگاهی در خاورمیانه" / "Leading Supplier of Industrial & Laboratory Chemicals in the Middle East"
+- **Two-Column Company Footer**: Organized footer layout to prevent page overflow with clear separation:
+  - **Left Column (Persian)**: Company name "شرکت ممتاز شیمی", full address "آدرس: بغداد، عراق - منطقه الکرخ، شارع الرشید", Persian slogan
+  - **Right Column (English)**: "Momtaz Chemical Solutions Company", website, email addresses, phone numbers, English slogan
+  - Balanced column layout with proper spacing and alignment for professional appearance
 - **Technical Implementation**:
   - Table grid drawing with proper borders and cell divisions
   - Column width optimization: [200, 80, 80, 120] pixels
