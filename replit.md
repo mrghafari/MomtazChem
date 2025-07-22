@@ -6,6 +6,18 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Final UI Cleanup - Removed Redundant PDF/MSDS View Buttons (July 22, 2025)
+✅ **IMPLEMENTED: Complete interface cleanup with paired action buttons for catalog and MSDS management**
+- **User Request**: Remove redundant standalone "مشاهده PDF" and "مشاهده MSDS" buttons from upload sections
+- **UI Cleanup**: Removed duplicate view buttons that appeared in catalog and MSDS upload preview areas
+- **Streamlined Interface**: Now only paired action buttons remain in settings sections:
+  - "مشاهده کاتالوگ" (blue) + "آپلود کاتالوگ" (green) side by side
+  - "مشاهده MSDS" (blue) + "آپلود MSDS" (orange) side by side
+- **Button Placement**: All catalog/MSDS buttons positioned inline next to URL fields in settings sections
+- **Files Modified**: client/src/pages/products.tsx - removed redundant view buttons from upload preview areas
+- **Result**: Clean, consolidated interface with paired action buttons eliminating visual clutter
+- **Impact**: Improved user experience with streamlined catalog and MSDS file management workflow
+
 ### COMPLETED: CRM Edit Button Integration with Customer Profile Edit Form (July 22, 2025)
 ✅ **IMPLEMENTED: CRM edit button now opens the comprehensive customer profile edit form**
 - **User Request**: CRM edit button should open the same customer profile edit form used in customer portal for consistency
