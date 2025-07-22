@@ -33,7 +33,11 @@ import {
   Building,
   FileCheck,
   Globe,
-  Hash
+  Hash,
+  Search,
+  Image,
+  Eye,
+  X
 } from 'lucide-react';
 
 interface CompanyInfo {
@@ -64,6 +68,20 @@ interface CompanyInfo {
   descriptionEnglish: string;
   mission: string;
   vision: string;
+}
+
+interface CompanyImage {
+  id?: number;
+  title: string;
+  description: string;
+  imageUrl: string;
+  category: string;
+  tags?: string;
+  isActive?: boolean;
+  uploadedAt?: string;
+  uploadedBy?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 interface Correspondence {
@@ -130,6 +148,17 @@ interface BusinessCard {
   createdBy?: number;
 }
 
+interface CompanyImage {
+  id?: number;
+  title: string;
+  description: string;
+  imageUrl: string;
+  category: string;
+  tags?: string;
+  isActive: boolean;
+  uploadedAt?: string;
+}
+
 export default function CompanyInformation() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -138,7 +167,10 @@ export default function CompanyInformation() {
   const [isAddingOutgoing, setIsAddingOutgoing] = useState(false);
   const [isAddingDocument, setIsAddingDocument] = useState(false);
   const [isAddingBusinessCard, setIsAddingBusinessCard] = useState(false);
+  const [isAddingImage, setIsAddingImage] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedImageView, setSelectedImageView] = useState<CompanyImage | null>(null);
 
   // Fetch company information
   const { data: companyInfo, isLoading: infoLoading } = useQuery<CompanyInfo>({
@@ -190,6 +222,17 @@ export default function CompanyInformation() {
     queryFn: async () => {
       const response = await fetch('/api/business-cards', { credentials: 'include' });
       if (!response.ok) throw new Error('Failed to fetch business cards');
+      const result = await response.json();
+      return result.data || [];
+    }
+  });
+
+  // Fetch company images
+  const { data: companyImages } = useQuery<CompanyImage[]>({
+    queryKey: ['/api/company-images'],
+    queryFn: async () => {
+      const response = await fetch('/api/company-images', { credentials: 'include' });
+      if (!response.ok) throw new Error('Failed to fetch company images');
       const result = await response.json();
       return result.data || [];
     }
@@ -302,6 +345,86 @@ export default function CompanyInformation() {
     }
   });
 
+  // Company Images mutations
+  const addImageMutation = useMutation({
+    mutationFn: async (data: CompanyImage) => {
+      const response = await apiRequest('/api/company-images', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+      return response;
+    },
+    onSuccess: () => {
+      toast({ title: "موفقیت", description: "تصویر جدید با موفقیت اضافه شد" });
+      queryClient.invalidateQueries({ queryKey: ['/api/company-images'] });
+      setIsAddingImage(false);
+    },
+    onError: (error) => {
+      console.error('Error adding image:', error);
+      toast({ 
+        title: "خطا", 
+        description: "خطا در اضافه کردن تصویر", 
+        variant: "destructive" 
+      });
+    }
+  });
+
+  const updateImageMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: CompanyImage }) => {
+      const response = await apiRequest(`/api/company-images/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+      return response;
+    },
+    onSuccess: () => {
+      toast({ title: "موفقیت", description: "تصویر با موفقیت به‌روزرسانی شد" });
+      queryClient.invalidateQueries({ queryKey: ['/api/company-images'] });
+      setEditingItem(null);
+    },
+    onError: (error) => {
+      console.error('Error updating image:', error);
+      toast({ 
+        title: "خطا", 
+        description: "خطا در به‌روزرسانی تصویر", 
+        variant: "destructive" 
+      });
+    }
+  });
+
+  const deleteImageMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await apiRequest(`/api/company-images/${id}`, {
+        method: 'DELETE',
+      });
+      return response;
+    },
+    onSuccess: () => {
+      toast({ title: "موفقیت", description: "تصویر حذف شد" });
+      queryClient.invalidateQueries({ queryKey: ['/api/company-images'] });
+    },
+    onError: (error) => {
+      console.error('Error deleting image:', error);
+      toast({ 
+        title: "خطا", 
+        description: "خطا در حذف تصویر", 
+        variant: "destructive" 
+      });
+    }
+  });
+
+  // Search and filter functions
+  const filterBySearch = (items: any[], searchFields: string[]) => {
+    if (!searchQuery.trim()) return items;
+    
+    return items.filter(item =>
+      searchFields.some(field => {
+        const value = item[field];
+        return value && value.toString().toLowerCase().includes(searchQuery.toLowerCase());
+      })
+    );
+  };
+
   const getPriorityBadge = (priority: string) => {
     const colors = {
       high: 'bg-red-100 text-red-800',
@@ -364,11 +487,38 @@ export default function CompanyInformation() {
         </p>
       </div>
 
+      {/* Search Bar - Global */}
+      <div className="mb-4">
+        <div className="relative">
+          <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Input
+            placeholder="جستجو در تمام بخش‌ها..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pr-10"
+          />
+          {searchQuery && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSearchQuery('')}
+              className="absolute left-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+      </div>
+
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="info" className="flex items-center gap-2">
             <Building className="h-4 w-4" />
             اطلاعات کلی
+          </TabsTrigger>
+          <TabsTrigger value="images" className="flex items-center gap-2">
+            <Image className="h-4 w-4" />
+            تصاویر ({companyImages?.length || 0})
           </TabsTrigger>
           <TabsTrigger value="incoming" className="flex items-center gap-2">
             <Inbox className="h-4 w-4" />
@@ -898,6 +1048,96 @@ export default function CompanyInformation() {
             )}
           </div>
         </TabsContent>
+
+        {/* Company Images Tab */}
+        <TabsContent value="images" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Image className="h-5 w-5" />
+                    تصاویر شرکت
+                  </CardTitle>
+                  <CardDescription>مدیریت تصاویر و گالری شرکت</CardDescription>
+                </div>
+                <Button onClick={() => setIsAddingImage(true)}>
+                  <Plus className="h-4 w-4 ml-2" />
+                  افزودن تصویر جدید
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filterBySearch(companyImages || [], ['title', 'description', 'category', 'tags']).map((image) => (
+                  <div key={image.id} className="border rounded-lg p-4 space-y-3">
+                    <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                      <img 
+                        src={image.imageUrl} 
+                        alt={image.title}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = '/placeholder.jpg';
+                        }}
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <h4 className="font-semibold text-sm">{image.title}</h4>
+                      <p className="text-xs text-gray-600 line-clamp-2">{image.description}</p>
+                      <div className="flex justify-between items-center">
+                        <Badge variant="outline" className="text-xs">
+                          {image.category}
+                        </Badge>
+                        <div className="flex space-x-1">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setSelectedImageView(image)}
+                          >
+                            <Eye className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setEditingItem(image);
+                              setIsAddingImage(true);
+                            }}
+                          >
+                            <Edit className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => deleteImageMutation.mutate(image.id!)}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                
+                {(!companyImages || companyImages.length === 0) && !searchQuery && (
+                  <div className="col-span-full text-center py-8 text-gray-500">
+                    <Image className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                    <p>هیچ تصویری موجود نیست</p>
+                  </div>
+                )}
+
+                {searchQuery && filterBySearch(companyImages || [], ['title', 'description', 'category', 'tags']).length === 0 && (
+                  <div className="col-span-full text-center py-8 text-gray-500">
+                    <Search className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                    <p>نتیجه‌ای برای "{searchQuery}" پیدا نشد</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
 
       {/* Business Card Add/Edit Dialog */}
@@ -1192,6 +1432,181 @@ export default function CompanyInformation() {
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Company Image Add/Edit Dialog */}
+      <Dialog open={isAddingImage} onOpenChange={setIsAddingImage}>
+        <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {editingItem ? 'ویرایش تصویر' : 'افزودن تصویر جدید'}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            const formData = new FormData(e.currentTarget);
+            const imageData: CompanyImage = {
+              title: formData.get('title') as string,
+              description: formData.get('description') as string,
+              imageUrl: formData.get('imageUrl') as string,
+              category: formData.get('category') as string,
+              tags: formData.get('tags') as string || undefined,
+              isActive: formData.get('isActive') === 'on'
+            };
+
+            if (editingItem) {
+              updateImageMutation.mutate({ id: editingItem.id, data: imageData });
+            } else {
+              addImageMutation.mutate(imageData);
+            }
+          }}>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="block text-sm font-medium">عنوان تصویر *</label>
+                <input
+                  name="title"
+                  type="text"
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  defaultValue={editingItem?.title || ''}
+                  placeholder="عنوان تصویر..."
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-medium">توضیحات *</label>
+                <textarea
+                  name="description"
+                  required
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  defaultValue={editingItem?.description || ''}
+                  placeholder="توضیحات کامل تصویر..."
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-medium">URL تصویر *</label>
+                <input
+                  name="imageUrl"
+                  type="url"
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  defaultValue={editingItem?.imageUrl || ''}
+                  placeholder="https://example.com/image.jpg"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-medium">دسته‌بندی *</label>
+                <Select name="category" defaultValue={editingItem?.category || ''}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="انتخاب دسته‌بندی" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="logo">لوگو</SelectItem>
+                    <SelectItem value="building">ساختمان</SelectItem>
+                    <SelectItem value="products">محصولات</SelectItem>
+                    <SelectItem value="team">تیم</SelectItem>
+                    <SelectItem value="certificates">گواهینامه‌ها</SelectItem>
+                    <SelectItem value="equipment">تجهیزات</SelectItem>
+                    <SelectItem value="gallery">گالری</SelectItem>
+                    <SelectItem value="other">سایر</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-medium">برچسب‌ها</label>
+                <input
+                  name="tags"
+                  type="text"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  defaultValue={editingItem?.tags || ''}
+                  placeholder="برچسب1, برچسب2, برچسب3"
+                />
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <input
+                  name="isActive"
+                  type="checkbox"
+                  id="imageIsActive"
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  defaultChecked={editingItem?.isActive ?? true}
+                />
+                <label htmlFor="imageIsActive" className="text-sm font-medium">
+                  فعال
+                </label>
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-2 mt-6">
+              <Button type="button" variant="outline" onClick={() => {
+                setIsAddingImage(false);
+                setEditingItem(null);
+              }}>
+                انصراف
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={addImageMutation.isPending || updateImageMutation.isPending}
+              >
+                {addImageMutation.isPending || updateImageMutation.isPending ? 'در حال ذخیره...' : editingItem ? 'به‌روزرسانی' : 'ذخیره'}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Image View Dialog */}
+      <Dialog open={!!selectedImageView} onOpenChange={() => setSelectedImageView(null)}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{selectedImageView?.title}</DialogTitle>
+            <DialogDescription>{selectedImageView?.description}</DialogDescription>
+          </DialogHeader>
+          
+          {selectedImageView && (
+            <div className="space-y-4">
+              <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                <img 
+                  src={selectedImageView.imageUrl} 
+                  alt={selectedImageView.title}
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="font-medium">دسته‌بندی:</span>
+                  <Badge variant="outline" className="mr-2">
+                    {selectedImageView.category}
+                  </Badge>
+                </div>
+                {selectedImageView.tags && (
+                  <div>
+                    <span className="font-medium">برچسب‌ها:</span>
+                    <span className="mr-2">{selectedImageView.tags}</span>
+                  </div>
+                )}
+                {selectedImageView.uploadedAt && (
+                  <div>
+                    <span className="font-medium">تاریخ آپلود:</span>
+                    <span className="mr-2">{new Date(selectedImageView.uploadedAt).toLocaleDateString('fa-IR')}</span>
+                  </div>
+                )}
+                <div>
+                  <span className="font-medium">وضعیت:</span>
+                  <Badge variant={selectedImageView.isActive ? "default" : "secondary"} className="mr-2">
+                    {selectedImageView.isActive ? 'فعال' : 'غیرفعال'}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

@@ -135,6 +135,21 @@ export const businessCards = pgTable("business_cards", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Company Images table
+export const companyImages = pgTable("company_images", {
+  id: serial("id").primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description").notNull(),
+  imageUrl: varchar("image_url", { length: 500 }).notNull(),
+  category: varchar("category", { length: 100 }).notNull(), // logo, building, products, team, certificates, equipment, gallery, other
+  tags: text("tags"), // comma-separated tags
+  isActive: boolean("is_active").default(true),
+  uploadedAt: timestamp("uploaded_at").defaultNow(),
+  uploadedBy: integer("uploaded_by"), // admin user ID
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Create insert schemas
 export const insertCompanyInformationSchema = createInsertSchema(companyInformation).omit({
   id: true,
@@ -167,6 +182,13 @@ export const insertBusinessCardSchema = createInsertSchema(businessCards).omit({
   approvedAt: true,
 });
 
+export const insertCompanyImageSchema = createInsertSchema(companyImages).omit({
+  id: true,
+  uploadedAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type CompanyInformation = typeof companyInformation.$inferSelect;
 export type InsertCompanyInformation = z.infer<typeof insertCompanyInformationSchema>;
@@ -182,3 +204,6 @@ export type InsertCompanyDocument = z.infer<typeof insertCompanyDocumentSchema>;
 
 export type BusinessCard = typeof businessCards.$inferSelect;
 export type InsertBusinessCard = z.infer<typeof insertBusinessCardSchema>;
+
+export type CompanyImage = typeof companyImages.$inferSelect;
+export type InsertCompanyImage = z.infer<typeof insertCompanyImageSchema>;

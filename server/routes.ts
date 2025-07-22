@@ -49,16 +49,19 @@ import {
   outgoingCorrespondence, 
   companyDocuments,
   businessCards,
+  companyImages,
   insertCompanyInformationSchema,
   insertIncomingCorrespondenceSchema,
   insertOutgoingCorrespondenceSchema,
   insertCompanyDocumentSchema,
   insertBusinessCardSchema,
+  insertCompanyImageSchema,
   type CompanyInformation,
   type IncomingCorrespondence,
   type OutgoingCorrespondence,
   type CompanyDocument,
-  type BusinessCard
+  type BusinessCard,
+  type CompanyImage
 } from "@shared/company-info-schema";
 
 // SMS service will be imported dynamically when needed
@@ -32662,6 +32665,431 @@ momtazchem.com
       res.status(500).json({
         success: false,
         message: 'Failed to update print info'
+      });
+    }
+  });
+
+  // Company Images CRUD endpoints
+  
+  // Get all company images
+  app.get("/api/company-images", requireAuth, async (req, res) => {
+    try {
+      const result = await db
+        .select()
+        .from(companyImages)
+        .orderBy(desc(companyImages.createdAt));
+
+      res.json({
+        success: true,
+        data: result
+      });
+    } catch (error) {
+      console.error('Error fetching company images:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch company images'
+      });
+    }
+  });
+
+  // Create new company image
+  app.post("/api/company-images", requireAuth, async (req, res) => {
+    try {
+      const imageData = insertCompanyImageSchema.parse(req.body);
+
+      const result = await db
+        .insert(companyImages)
+        .values({
+          ...imageData,
+          uploadedBy: req.session.adminId
+        })
+        .returning();
+
+      res.status(201).json({
+        success: true,
+        data: result[0],
+        message: 'Company image created successfully'
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          success: false,
+          message: 'Validation error',
+          errors: error.errors
+        });
+      }
+
+      console.error('Error creating company image:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to create company image'
+      });
+    }
+  });
+
+  // Update company image
+  app.put("/api/company-images/:id", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const imageData = insertCompanyImageSchema.parse(req.body);
+
+      const result = await db
+        .update(companyImages)
+        .set({
+          ...imageData,
+          updatedAt: new Date()
+        })
+        .where(eq(companyImages.id, Number(id)))
+        .returning();
+
+      if (result.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'Company image not found'
+        });
+      }
+
+      res.json({
+        success: true,
+        data: result[0],
+        message: 'Company image updated successfully'
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          success: false,
+          message: 'Validation error',
+          errors: error.errors
+        });
+      }
+
+      console.error('Error updating company image:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to update company image'
+      });
+    }
+  });
+
+  // Delete company image
+  app.delete("/api/company-images/:id", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      const result = await db
+        .delete(companyImages)
+        .where(eq(companyImages.id, Number(id)))
+        .returning();
+
+      if (result.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'Company image not found'
+        });
+      }
+
+      res.json({
+        success: true,
+        message: 'Company image deleted successfully'
+      });
+    } catch (error) {
+      console.error('Error deleting company image:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to delete company image'
+      });
+    }
+  });
+
+  // Company Information CRUD endpoints
+  
+  // Get company information
+  app.get("/api/company-info", requireAuth, async (req, res) => {
+    try {
+      const result = await db
+        .select()
+        .from(companyInformation)
+        .limit(1);
+
+      res.json({
+        success: true,
+        data: result.length > 0 ? result[0] : null
+      });
+    } catch (error) {
+      console.error('Error fetching company information:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch company information'
+      });
+    }
+  });
+
+  // Update company information
+  app.put("/api/company-info", requireAuth, async (req, res) => {
+    try {
+      const companyData = insertCompanyInformationSchema.parse(req.body);
+
+      // Check if record exists
+      const existing = await db
+        .select()
+        .from(companyInformation)
+        .limit(1);
+
+      let result;
+      if (existing.length > 0) {
+        // Update existing record
+        result = await db
+          .update(companyInformation)
+          .set({
+            ...companyData,
+            updatedAt: new Date()
+          })
+          .where(eq(companyInformation.id, existing[0].id))
+          .returning();
+      } else {
+        // Create new record
+        result = await db
+          .insert(companyInformation)
+          .values(companyData)
+          .returning();
+      }
+
+      res.json({
+        success: true,
+        data: result[0],
+        message: existing.length > 0 ? 'Company information updated successfully' : 'Company information created successfully'
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          success: false,
+          message: 'Validation error',
+          errors: error.errors
+        });
+      }
+
+      console.error('Error updating company information:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to update company information'
+      });
+    }
+  });
+
+  // Correspondence endpoints
+  
+  // Get incoming correspondence
+  app.get("/api/correspondence/incoming", requireAuth, async (req, res) => {
+    try {
+      const result = await db
+        .select()
+        .from(incomingCorrespondence)
+        .orderBy(desc(incomingCorrespondence.receivedDate));
+
+      res.json({
+        success: true,
+        data: result
+      });
+    } catch (error) {
+      console.error('Error fetching incoming correspondence:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch incoming correspondence'
+      });
+    }
+  });
+
+  // Create incoming correspondence
+  app.post("/api/correspondence/incoming", requireAuth, async (req, res) => {
+    try {
+      const correspondenceData = insertIncomingCorrespondenceSchema.parse(req.body);
+
+      const result = await db
+        .insert(incomingCorrespondence)
+        .values(correspondenceData)
+        .returning();
+
+      res.status(201).json({
+        success: true,
+        data: result[0],
+        message: 'Incoming correspondence created successfully'
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          success: false,
+          message: 'Validation error',
+          errors: error.errors
+        });
+      }
+
+      console.error('Error creating incoming correspondence:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to create incoming correspondence'
+      });
+    }
+  });
+
+  // Get outgoing correspondence
+  app.get("/api/correspondence/outgoing", requireAuth, async (req, res) => {
+    try {
+      const result = await db
+        .select()
+        .from(outgoingCorrespondence)
+        .orderBy(desc(outgoingCorrespondence.sentDate));
+
+      res.json({
+        success: true,
+        data: result
+      });
+    } catch (error) {
+      console.error('Error fetching outgoing correspondence:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch outgoing correspondence'
+      });
+    }
+  });
+
+  // Create outgoing correspondence
+  app.post("/api/correspondence/outgoing", requireAuth, async (req, res) => {
+    try {
+      const correspondenceData = insertOutgoingCorrespondenceSchema.parse(req.body);
+
+      const result = await db
+        .insert(outgoingCorrespondence)
+        .values(correspondenceData)
+        .returning();
+
+      res.status(201).json({
+        success: true,
+        data: result[0],
+        message: 'Outgoing correspondence created successfully'
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          success: false,
+          message: 'Validation error',
+          errors: error.errors
+        });
+      }
+
+      console.error('Error creating outgoing correspondence:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to create outgoing correspondence'
+      });
+    }
+  });
+
+  // Company Documents endpoints
+  
+  // Get all company documents
+  app.get("/api/company-documents", requireAuth, async (req, res) => {
+    try {
+      const result = await db
+        .select()
+        .from(companyDocuments)
+        .orderBy(desc(companyDocuments.createdAt));
+
+      res.json({
+        success: true,
+        data: result
+      });
+    } catch (error) {
+      console.error('Error fetching company documents:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch company documents'
+      });
+    }
+  });
+
+  // Create company document
+  app.post("/api/company-documents", requireAuth, async (req, res) => {
+    try {
+      const documentData = insertCompanyDocumentSchema.parse(req.body);
+
+      const result = await db
+        .insert(companyDocuments)
+        .values(documentData)
+        .returning();
+
+      res.status(201).json({
+        success: true,
+        data: result[0],
+        message: 'Company document created successfully'
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          success: false,
+          message: 'Validation error',
+          errors: error.errors
+        });
+      }
+
+      console.error('Error creating company document:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to create company document'
+      });
+    }
+  });
+
+  // Business Cards endpoints
+  
+  // Get all business cards
+  app.get("/api/business-cards", requireAuth, async (req, res) => {
+    try {
+      const result = await db
+        .select()
+        .from(businessCards)
+        .orderBy(desc(businessCards.createdAt));
+
+      res.json({
+        success: true,
+        data: result
+      });
+    } catch (error) {
+      console.error('Error fetching business cards:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch business cards'
+      });
+    }
+  });
+
+  // Create business card
+  app.post("/api/business-cards", requireAuth, async (req, res) => {
+    try {
+      const cardData = insertBusinessCardSchema.parse(req.body);
+
+      const result = await db
+        .insert(businessCards)
+        .values(cardData)
+        .returning();
+
+      res.status(201).json({
+        success: true,
+        data: result[0],
+        message: 'Business card created successfully'
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          success: false,
+          message: 'Validation error',
+          errors: error.errors
+        });
+      }
+
+      console.error('Error creating business card:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to create business card'
       });
     }
   });
