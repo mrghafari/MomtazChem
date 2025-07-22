@@ -6,6 +6,18 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Enhanced Proforma Invoice PDF with RTL Layout and Customer Information Display (July 22, 2025)
+✅ **IMPLEMENTED: RTL-formatted proforma invoice PDF generation with complete customer information**
+- **Document Type Detection**: System automatically detects invoice type (PROFORMA vs regular) based on order approval status
+- **RTL Layout Enhancement**: Completely restructured PDF table headers and content for proper right-to-left text alignment
+- **Customer Information Integration**: Enhanced customer data extraction from route to display name, phone, email, and address
+- **Improved Data Structure**: Modified PDF generator to handle customer object structure from proforma invoice route
+- **Visual Improvements**: Headers display "پیش‌فاکتور" for proforma invoices with proper Persian formatting
+- **Table Structure**: RTL-formatted table with columns: مبلغ کل، قیمت واحد، تعداد، شرح کالا (right-to-left order)
+- **Currency Support**: Proper currency display (IQD) with Persian number formatting for amounts
+- **Additional Notes**: Proforma invoices include explanatory text about payment confirmation process
+- **Impact**: Customers now receive properly formatted Persian proforma invoices with complete information
+
 ### COMPLETED: Comprehensive Abandoned Cart Management System with Multi-Stage Automated Notifications (July 21, 2025)
 ✅ **IMPLEMENTED: Complete abandoned cart lifecycle management with automated notification algorithm**
 - **3-Stage Algorithm Implementation**: 1 hour (first reminder + mark as abandoned), 3 hours (final warning), 4 hours (permanent deletion)

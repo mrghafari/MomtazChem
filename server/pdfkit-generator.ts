@@ -52,67 +52,89 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
         // Set font for RTL text
         doc.font('VazirRegular');
         
-        // Header
+        // Header - تشخیص نوع فاکتور
+        const isProforma = invoiceData.invoiceType === 'PROFORMA';
+        const headerTitle = isProforma ? 'پیش‌فاکتور - Momtaz Chem' : 'فاکتور فروش - Momtaz Chem';
+        
         doc.fontSize(20)
            .font('VazirBold')
-           .text('فاکتور فروش - Momtaz Chem', 50, 50, { align: 'center' });
+           .text(headerTitle, 50, 50, { align: 'center' });
         
-        // Invoice details
+        // Invoice details - RTL format
         doc.fontSize(12)
            .font('VazirRegular')
-           .text(`شماره فاکتور: ${invoiceData.invoiceNumber || 'INV-001'}`, 50, 100, { align: 'right' })
-           .text(`تاریخ: ${new Date().toLocaleDateString('fa-IR')}`, 350, 100, { align: 'left' });
+           .text(`شماره ${isProforma ? 'پیش‌فاکتور' : 'فاکتور'}: ${invoiceData.invoiceNumber || invoiceData.orderNumber || 'INV-001'}`, 50, 100, { align: 'right' })
+           .text(`تاریخ: ${invoiceData.invoiceDate || new Date().toLocaleDateString('fa-IR')}`, 50, 120, { align: 'right' });
         
-        // Customer info
+        // Customer info - اطلاعات مشتری کامل
         doc.fontSize(14)
            .font('VazirBold')
-           .text('مشخصات مشتری:', 50, 150, { align: 'right' });
+           .text('مشخصات مشتری:', 50, 160, { align: 'right' });
+        
+        // اطلاعات مشتری با ساختار جدید customer object
+        const customer = invoiceData.customer || {};
+        const customerName = customer.name || invoiceData.customerName || 'نامشخص';
+        const customerPhone = customer.phone || invoiceData.customerPhone || 'نامشخص';
+        const customerEmail = customer.email || invoiceData.customerEmail || 'نامشخص';
+        const customerAddress = customer.address || invoiceData.customerAddress || 'نامشخص';
         
         doc.fontSize(11)
            .font('VazirRegular')
-           .text(`نام: ${invoiceData.customerName || 'نامشخص'}`, 50, 180, { align: 'right' })
-           .text(`تلفن: ${invoiceData.customerPhone || 'نامشخص'}`, 50, 200, { align: 'right' })
-           .text(`ایمیل: ${invoiceData.customerEmail || 'نامشخص'}`, 50, 220, { align: 'right' });
+           .text(`نام مشتری: ${customerName}`, 50, 190, { align: 'right' })
+           .text(`شماره تماس: ${customerPhone}`, 50, 210, { align: 'right' })
+           .text(`ایمیل: ${customerEmail}`, 50, 230, { align: 'right' })
+           .text(`آدرس: ${customerAddress}`, 50, 250, { align: 'right' });
         
         // Items table
         doc.fontSize(14)
            .font('VazirBold')
-           .text('کالاها و خدمات:', 50, 260, { align: 'right' });
+           .text('کالاها و خدمات:', 50, 290, { align: 'right' });
         
-        // Table headers
-        const startY = 290;
+        // Table headers - RTL alignment
+        const startY = 320;
         doc.fontSize(10)
            .font('VazirBold')
-           .text('شرح کالا', 50, startY, { align: 'right' })
-           .text('تعداد', 200, startY, { align: 'center' })
-           .text('قیمت واحد', 250, startY, { align: 'center' })
-           .text('مبلغ کل', 350, startY, { align: 'center' });
+           .text('مبلغ کل', 50, startY, { align: 'right' })
+           .text('قیمت واحد', 150, startY, { align: 'right' })
+           .text('تعداد', 250, startY, { align: 'right' })
+           .text('شرح کالا', 320, startY, { align: 'right' });
         
         // Draw line under headers
         doc.moveTo(50, startY + 15)
            .lineTo(500, startY + 15)
            .stroke();
         
-        // Items
+        // Items - RTL format
         let currentY = startY + 25;
         const items = invoiceData.items || [];
         
         items.forEach((item: any, index: number) => {
           const itemY = currentY + (index * 20);
+          const currency = invoiceData.currency || 'IQD';
           
           doc.fontSize(9)
              .font('VazirRegular')
-             .text(item.name || 'نامشخص', 50, itemY, { align: 'right' })
-             .text((item.quantity || 1).toString(), 200, itemY, { align: 'center' })
-             .text((item.unitPrice || 0).toLocaleString('fa-IR') + ' ریال', 250, itemY, { align: 'center' })
-             .text(((item.quantity || 1) * (item.unitPrice || 0)).toLocaleString('fa-IR') + ' ریال', 350, itemY, { align: 'center' });
+             .text(((item.total || item.quantity || 1) * (item.unitPrice || 0)).toLocaleString('fa-IR') + ` ${currency}`, 50, itemY, { align: 'right' })
+             .text((item.unitPrice || 0).toLocaleString('fa-IR') + ` ${currency}`, 150, itemY, { align: 'right' })
+             .text((item.quantity || 1).toString(), 250, itemY, { align: 'right' })
+             .text(item.name || 'نامشخص', 320, itemY, { align: 'right' });
         });
         
         // Total
         const totalY = currentY + (items.length * 20) + 30;
+        const totalAmount = invoiceData.total || invoiceData.totalAmount || 0;
+        const currency = invoiceData.currency || 'IQD';
+        
         doc.fontSize(12)
            .font('VazirBold')
-           .text(`مجموع کل: ${(invoiceData.totalAmount || 0).toLocaleString('fa-IR')} ریال`, 50, totalY, { align: 'right' });
+           .text(`مجموع کل: ${parseFloat(totalAmount).toLocaleString('fa-IR')} ${currency}`, 50, totalY, { align: 'right' });
+        
+        // پیام پیش‌فاکتور
+        if (isProforma && invoiceData.notes) {
+          doc.fontSize(9)
+             .font('VazirRegular')
+             .text(invoiceData.notes, 50, totalY + 40, { align: 'right', width: 450 });
+        }
         
         // Footer
         doc.fontSize(9)
