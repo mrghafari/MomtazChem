@@ -9767,8 +9767,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         finalCustomerInfo = crmCustomer;
       }
 
-      // Generate order number
-      const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+      // Generate order number using the M[YY][NNNNN] system
+      const { OrderManagementStorage } = await import('./order-management-storage');
+      const orderManagementStorage = new OrderManagementStorage();
+      const orderNumber = await orderManagementStorage.generateOrderNumber();
 
       // Handle wallet payments
       let finalPaymentStatus = "pending";

@@ -430,7 +430,20 @@ const CustomerProfile = () => {
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="font-semibold text-lg">{Math.floor(parseFloat(order.totalAmount))} {order.currency || 'IQD'}</p>
+                            {(() => {
+                              // Calculate correct total from actual order components
+                              const subtotalAmount = order.items ? order.items.reduce((sum: number, item: any) => {
+                                return sum + parseFloat(item.totalPrice || 0);
+                              }, 0) : 0;
+                              const vatAmount = parseFloat(order.vatAmount || '0');
+                              const shippingCost = parseFloat(order.shippingCost || '0');
+                              const surchargeAmount = parseFloat(order.surchargeAmount || '0');
+                              const correctTotal = subtotalAmount + vatAmount + shippingCost + surchargeAmount;
+                              
+                              return (
+                                <p className="font-semibold text-lg">{Math.floor(correctTotal)} {order.currency || 'IQD'}</p>
+                              );
+                            })()}
                             <Badge className={getStatusColor(order.status, order.paymentStatus)}>
                               {getStatusLabel(order.status, order.paymentStatus)}
                             </Badge>
