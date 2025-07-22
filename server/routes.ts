@@ -33597,16 +33597,39 @@ momtazchem.com
       
       const activities = await crmStorage.getRecentCustomerActivities(10);
       
-      // Map database activities to frontend format
-      const formattedActivities = activities
-        .filter(activity => activity.activityType === 'login' || activity.activityType === 'logout')
-        .map(activity => ({
-          type: activity.activityType,
-          customerName: activity.customerName || 'نام نامشخص',
-          phone: activity.activityData?.phone || '',
-          email: activity.activityData?.email || '',
-          timestamp: activity.createdAt.toISOString()
-        }));
+      // Get customer data for each activity
+      const formattedActivities = await Promise.all(
+        activities
+          .filter(activity => activity.activityType === 'login' || activity.activityType === 'logout')
+          .map(async (activity) => {
+            let activityData = {};
+            try {
+              // Parse JSON string from database
+              activityData = typeof activity.activityData === 'string' 
+                ? JSON.parse(activity.activityData) 
+                : activity.activityData || {};
+            } catch (error) {
+              console.error('Error parsing activity data:', error);
+              activityData = {};
+            }
+
+            // Get customer info from CRM
+            let customerInfo = null;
+            try {
+              customerInfo = await crmStorage.getCrmCustomerById(activity.customerId);
+            } catch (error) {
+              console.error('Error fetching customer info:', error);
+            }
+
+            return {
+              type: activity.activityType,
+              customerName: activity.customerName || 'نام نامشخص',
+              phone: customerInfo?.phone || activityData.phone || '',
+              email: customerInfo?.email || activityData.email || '',
+              timestamp: activity.createdAt.toISOString()
+            };
+          })
+      );
 
       console.log(`👥 [CUSTOMER ACTIVITIES] Found ${formattedActivities.length} login/logout activities`);
       

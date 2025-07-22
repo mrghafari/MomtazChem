@@ -6,6 +6,24 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Real Customer Login/Logout Activity Tracking from Database (July 22, 2025)
+✅ **IMPLEMENTED: Authentic customer activity tracking system with database integration**
+- **Backend Enhancement**: Added logCustomerActivity, getCustomerActivities, and getRecentCustomerActivities methods to CrmStorage
+- **Database Integration**: Customer activities now stored in customer_activities table with full activity details
+- **Login Tracking**: Customer login endpoint automatically logs activity with customer name, email, phone, session data
+- **Logout Tracking**: Customer logout endpoint logs session termination with customer information before clearing session
+- **API Enhancement**: Enhanced /api/management/customer-activities to fetch real data with proper JSON parsing
+- **Customer Data Integration**: Each activity fetches complete customer info from CRM for accurate phone/email display
+- **Frontend Display**: Management Dashboard Customer Activities section shows authentic login/logout data with:
+  - Real customer names from database (e.g., "ABAS ABASI")
+  - Actual phone numbers (e.g., "09124955173") 
+  - Valid email addresses (e.g., "oilstar@hotmail.com")
+  - Accurate timestamps from database
+  - Color-coded activities (green for login, red for logout)
+- **Data Flow**: Login → CRM Database → Customer Activities Table → Management Dashboard display
+- **Impact**: Complete elimination of sample/fake data - all customer activities now tracked authentically from database
+- **Status**: Customer login/logout tracking operational with real-time database integration
+
 ### COMPLETED: Fixed VAT Calculation Error in PDF Generation and Order Processing (July 22, 2025)
 ✅ **RESOLVED: Critical VAT calculation bug causing incorrect tax amounts in orders and PDFs**
 - **Issue**: VAT calculation was incorrect - VAT rate 0.06 (6%) was being divided by 100 again, resulting in 0.0006 rate
