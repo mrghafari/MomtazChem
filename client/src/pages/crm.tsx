@@ -250,6 +250,8 @@ export default function CRM() {
         customerType: "retail",
         customerSource: "website",
         customerStatus: "active",
+        preferredLanguage: "persian",
+        communicationPreference: "email",
         internalNotes: ""
       });
     },
