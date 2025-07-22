@@ -6,7 +6,16 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
-### COMPLETED: PDF Date Format Fixed to Gregorian Calendar (July 22, 2025)
+### COMPLETED: PDF Table Layout Enhancement and Date Format Fix (July 22, 2025)
+✅ **FIXED: Enhanced product table layout to prevent text overlap in "goods and services" section**
+- **Issue**: Product table columns in PDF invoices had overlapping text causing readability problems
+- **Solution**: Redesigned table column layout with proper spacing and alignment
+- **Column Reorder**: Changed order to: Product Description, Quantity, Unit Price, Total Amount
+- **Position Fix**: Set specific x-coordinates (50, 280, 350, 450) with defined widths for each column
+- **Alignment**: Product names use dynamic RTL/LTR based on language, numbers center-aligned
+- **Width Control**: Added width parameters to prevent text overflow between columns
+- **Line Extension**: Extended header underline to match new table width (530px)
+
 ✅ **FIXED: Proforma invoice and invoice date formatting to proper Gregorian format**
 - **Issue**: PDF invoices were showing Persian calendar dates (fa-IR locale) instead of Gregorian calendar
 - **Solution**: Modified pdfkit-generator.ts to use proper Gregorian date format (YYYY/MM/DD)

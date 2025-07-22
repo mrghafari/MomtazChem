@@ -132,18 +132,18 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
            .font('VazirBold')
            .text('کالاها و خدمات:', 50, 290, { align: 'right' });
         
-        // Table headers - RTL alignment
+        // Table headers - RTL alignment with proper spacing
         const startY = 320;
         doc.fontSize(10)
            .font('VazirBold')
-           .text('مبلغ کل', 50, startY, { align: 'right' })
-           .text('قیمت واحد', 150, startY, { align: 'right' })
-           .text('تعداد', 250, startY, { align: 'right' })
-           .text('شرح کالا', 320, startY, { align: 'right' });
+           .text('شرح کالا', 50, startY, { align: 'right', width: 200 })
+           .text('تعداد', 280, startY, { align: 'center', width: 50 })
+           .text('قیمت واحد', 350, startY, { align: 'center', width: 80 })
+           .text('مبلغ کل', 450, startY, { align: 'center', width: 80 });
         
         // Draw line under headers
         doc.moveTo(50, startY + 15)
-           .lineTo(500, startY + 15)
+           .lineTo(530, startY + 15)
            .stroke();
         
         // Items - Mixed RTL/LTR format
@@ -165,14 +165,14 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
           
           doc.fontSize(9)
              .font('VazirRegular')
-             // Total amount - left aligned for numbers
-             .text(totalAmount, 50, itemY, { align: 'left' })
-             // Unit price - left aligned for numbers  
-             .text(unitPrice, 150, itemY, { align: 'left' })
-             // Quantity - left aligned for numbers
-             .text(quantity, 250, itemY, { align: 'left' })
              // Product name - dynamic alignment based on language
-             .text(productName, 320, itemY, { align: productNameAlign });
+             .text(productName, 50, itemY, { align: productNameAlign, width: 200 })
+             // Quantity - center aligned for numbers
+             .text(quantity, 280, itemY, { align: 'center', width: 50 })
+             // Unit price - center aligned for numbers  
+             .text(unitPrice, 350, itemY, { align: 'center', width: 80 })
+             // Total amount - center aligned for numbers
+             .text(totalAmount, 450, itemY, { align: 'center', width: 80 });
         });
         
         // Total - Mixed language handling
