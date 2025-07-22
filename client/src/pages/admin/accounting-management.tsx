@@ -432,9 +432,9 @@ function VatManagement() {
   
   // Fetch tax settings
   const { data: taxSettings, isLoading, refetch } = useQuery({
-    queryKey: ['/api/tax-settings'],
+    queryKey: ['/api/accounting/tax-settings'],
     queryFn: async () => {
-      const response = await fetch('/api/tax-settings');
+      const response = await fetch('/api/accounting/tax-settings');
       if (!response.ok) throw new Error('Failed to fetch tax settings');
       const result = await response.json();
       return result.data;
@@ -635,9 +635,9 @@ function DutiesManagement() {
   
   // Fetch tax settings
   const { data: taxSettings, isLoading, refetch } = useQuery({
-    queryKey: ['/api/tax-settings'],
+    queryKey: ['/api/accounting/tax-settings'],
     queryFn: async () => {
-      const response = await fetch('/api/tax-settings');
+      const response = await fetch('/api/accounting/tax-settings');
       if (!response.ok) throw new Error('Failed to fetch tax settings');
       const result = await response.json();
       return result.data;

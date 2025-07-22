@@ -12,8 +12,8 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Root Cause**: Two different endpoints existed - public `/api/tax-settings` and admin `/api/accounting/tax-settings` with different data sources
 - **Solution**: Consolidated all components to use public `/api/tax-settings` endpoint
 - **Components Fixed**: 
-  - bilingual-purchase-form.tsx: Updated from `/api/financial/vat-settings` to `/api/tax-settings`
-  - accounting-management.tsx: Updated from `/api/accounting/tax-settings` to `/api/tax-settings` (all references)
+  - bilingual-purchase-form.tsx: Uses public `/api/tax-settings` endpoint for checkout VAT display
+  - accounting-management.tsx: Uses admin `/api/accounting/tax-settings` endpoint for administrative management
 - **Data Consistency**: Both VAT (11%) and duties (2%) now display correctly across all interfaces
 - **Database Cleanup**: Removed duplicate VAT entry (ID 3 with type="VAT" at 5%) leaving only ID 1 with type="vat" at 11%
 - **Frontend Enhancement**: Added proper VAT and duties display in purchase form with Persian labels
