@@ -418,18 +418,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const invoiceData = req.body;
       console.log('Invoice data received:', invoiceData);
       
-      // Calculate taxes for the invoice
-      if (invoiceData.items && Array.isArray(invoiceData.items)) {
-        const subtotal = invoiceData.items.reduce((sum: number, item: any) => {
-          return sum + (item.quantity * item.unitPrice);
-        }, 0);
-        
-        const taxCalculation = await calculateOrderTaxes(subtotal);
-        invoiceData.vatAmount = taxCalculation.vatAmount;
-        invoiceData.dutiesAmount = taxCalculation.dutiesAmount;
-        
-        console.log('Tax calculation applied:', taxCalculation);
-      }
+      // Use frozen tax amounts from order instead of recalculating
+      // This ensures consistency and prevents changes if tax settings are updated after order creation
+      console.log('📄 Using stored tax amounts from order data:', {
+        vatAmount: invoiceData.vatAmount,
+        surchargeAmount: invoiceData.dutiesAmount
+      });
       
       const pdfBuffer = await generateInvoicePDF(invoiceData);
       
@@ -458,7 +452,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ success: false, message: 'شناسه سفارش نامعتبر است' });
       }
 
-      // Get order data from customer_orders including shipping cost
+      // Get order data from customer_orders including shipping cost and frozen tax amounts
       const orderResult = await db
         .select({
           id: customerOrders.id,
@@ -469,6 +463,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           paymentMethod: customerOrders.paymentMethod,
           status: customerOrders.status,
           createdAt: customerOrders.createdAt,
+          vatAmount: customerOrders.vatAmount, // Frozen VAT amount from order creation
+          surchargeAmount: customerOrders.surchargeAmount, // Frozen surcharge amount from order creation
           customerName: sql<string>`CONCAT(${crmCustomers.firstName}, ' ', ${crmCustomers.lastName})`,
           customerEmail: crmCustomers.email,
           customerPhone: crmCustomers.phone,
@@ -500,8 +496,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return sum + (parseFloat(item.quantity.toString()) * parseFloat(item.unitPrice));
       }, 0);
       
-      // Calculate taxes
-      const taxCalculation = await calculateOrderTaxes(subtotal);
+      // Use frozen tax amounts stored in order (prevents changes if tax settings are updated)
+      const storedVatAmount = parseFloat(order.vatAmount || '0');
+      const storedSurchargeAmount = parseFloat(order.surchargeAmount || '0');
+      
+      console.log('📄 [PROFORMA] Using frozen tax amounts from order:', {
+        orderId: order.id,
+        orderNumber: order.orderNumber,
+        storedVatAmount,
+        storedSurchargeAmount
+      });
       
       const invoiceData = {
         invoiceType: 'PROFORMA', // نوع فاکتور: پیش فاکتور
@@ -521,16 +525,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           total: parseFloat(item.totalPrice || '0'),
         })),
         subtotal: subtotal,
-        vatAmount: taxCalculation.vatAmount,
-        dutiesAmount: taxCalculation.dutiesAmount,
+        vatAmount: storedVatAmount, // Use frozen amount from order creation
+        dutiesAmount: storedSurchargeAmount, // Use frozen amount from order creation
         shippingCost: parseFloat(order.shippingCost || '0'),
-        total: subtotal + taxCalculation.vatAmount + taxCalculation.dutiesAmount + parseFloat(order.shippingCost || '0'),
+        total: subtotal + storedVatAmount + storedSurchargeAmount + parseFloat(order.shippingCost || '0'),
         currency: order.currency || 'IQD',
         paymentStatus: 'در انتظار پرداخت', // برای پیش فاکتور
         notes: 'این پیش فاکتور است و پس از پرداخت و تأیید مالی، فاکتور نهایی صادر خواهد شد.'
       };
       
-      console.log('Proforma invoice tax calculation:', taxCalculation);
+      console.log('📄 [PROFORMA] Invoice data with frozen taxes:', {
+        subtotal,
+        vatAmount: invoiceData.vatAmount,
+        dutiesAmount: invoiceData.dutiesAmount,
+        total: invoiceData.total
+      });
 
       const { generateInvoicePDF } = await import('./pdfkit-generator');
       const pdfBuffer = await generateInvoicePDF(invoiceData);
@@ -587,7 +596,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ success: false, message: 'شناسه سفارش نامعتبر است' });
       }
 
-      // Get order data from customer_orders including shipping cost
+      // Get order data from customer_orders including shipping cost and frozen tax amounts
       const orderResult = await db
         .select({
           id: customerOrders.id,
@@ -598,6 +607,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           paymentMethod: customerOrders.paymentMethod,
           status: customerOrders.status,
           createdAt: customerOrders.createdAt,
+          vatAmount: customerOrders.vatAmount, // Frozen VAT amount from order creation
+          surchargeAmount: customerOrders.surchargeAmount, // Frozen surcharge amount from order creation
           customerName: sql<string>`CONCAT(${crmCustomers.firstName}, ' ', ${crmCustomers.lastName})`,
           customerEmail: crmCustomers.email,
           customerPhone: crmCustomers.phone,
@@ -637,8 +648,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return sum + (parseFloat(item.quantity.toString()) * parseFloat(item.unitPrice));
       }, 0);
       
-      // Calculate taxes
-      const taxCalculation = await calculateOrderTaxes(subtotal);
+      // Use frozen tax amounts stored in order (prevents changes if tax settings are updated)
+      const storedVatAmount = parseFloat(order.vatAmount || '0');
+      const storedSurchargeAmount = parseFloat(order.surchargeAmount || '0');
+      
+      console.log('📄 [FINAL INVOICE] Using frozen tax amounts from order:', {
+        orderId: order.id,
+        orderNumber: order.orderNumber,
+        storedVatAmount,
+        storedSurchargeAmount
+      });
       
       const invoiceData = {
         invoiceType: 'FINAL', // نوع فاکتور: فاکتور نهایی
@@ -658,16 +677,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           total: parseFloat(item.totalPrice || '0'),
         })),
         subtotal: subtotal,
-        vatAmount: taxCalculation.vatAmount,
-        dutiesAmount: taxCalculation.dutiesAmount,
+        vatAmount: storedVatAmount, // Use frozen amount from order creation
+        dutiesAmount: storedSurchargeAmount, // Use frozen amount from order creation
         shippingCost: parseFloat(order.shippingCost || '0'),
-        total: subtotal + taxCalculation.vatAmount + taxCalculation.dutiesAmount + parseFloat(order.shippingCost || '0'),
+        total: subtotal + storedVatAmount + storedSurchargeAmount + parseFloat(order.shippingCost || '0'),
         currency: order.currency || 'IQD',
         paymentStatus: 'پرداخت شده', // برای فاکتور نهایی
         notes: 'این فاکتور نهایی است و پس از تأیید مالی و آماده‌سازی در انبار صادر شده است.'
       };
       
-      console.log('Final invoice tax calculation:', taxCalculation);
+      console.log('📄 [FINAL INVOICE] Invoice data with frozen taxes:', {
+        subtotal,
+        vatAmount: invoiceData.vatAmount,
+        dutiesAmount: invoiceData.dutiesAmount,
+        total: invoiceData.total
+      });
 
       const { generateInvoicePDF } = await import('./pdfkit-generator');
       const pdfBuffer = await generateInvoicePDF(invoiceData);
@@ -9771,11 +9795,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const orderManagementStorage = new OrderManagementStorage();
       const orderNumber = await orderManagementStorage.generateOrderNumber();
       
-      // Calculate order totals (shipping cost comes from frontend)
+      // Calculate order totals and taxes (using dynamic tax settings)
       const subtotal = orderData.totalAmount || 0;
       const shippingAmount = orderData.shippingCost || 0;
-      const taxAmount = 0; // Remove automatic tax calculation
-      const totalAmount = subtotal + shippingAmount;
+      
+      // Get current tax rates from tax_settings table and freeze them for this order
+      const taxCalculation = await calculateOrderTaxes(subtotal);
+      const totalAmount = subtotal + shippingAmount + taxCalculation.vatAmount + taxCalculation.dutiesAmount;
+      
+      console.log('💰 [ORDER TAX] Tax calculation for order:', {
+        subtotal,
+        vatRate: taxCalculation.vatRate,
+        vatAmount: taxCalculation.vatAmount,
+        surchargeRate: taxCalculation.dutiesRate,
+        surchargeAmount: taxCalculation.dutiesAmount,
+        totalAmount
+      });
 
       // Create order with proper customer linking
       let finalCustomerId = customerId;
@@ -9869,6 +9904,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         shippingCost: shippingAmount.toString(),
         currency: orderData.currency || "IQD",
         notes: orderData.notes || "",
+        
+        // Store frozen tax rates at order creation time
+        vatRate: taxCalculation.vatRate.toString(),
+        vatAmount: taxCalculation.vatAmount.toString(),
+        surchargeRate: taxCalculation.dutiesRate.toString(),
+        surchargeAmount: taxCalculation.dutiesAmount.toString(),
+        
         billingAddress: JSON.stringify({
           name: customerInfo.name,
           phone: customerInfo.phone,
@@ -19674,29 +19716,48 @@ ${message ? `Additional Requirements:\n${message}` : ''}
   // TAX CALCULATION HELPER FUNCTIONS
   // ============================================================================
   
-  // Calculate taxes for an order
+  // Calculate taxes for an order and return both amounts and rates
   async function calculateOrderTaxes(subtotal: number) {
     try {
+      console.log('💰 [TAX] Calculating taxes for subtotal:', subtotal);
+      
       const taxSettingsList = await db
         .select()
         .from(schema.taxSettings)
         .where(eq(schema.taxSettings.isEnabled, true));
       
+      console.log('💰 [TAX] Found tax settings:', taxSettingsList);
+      
       const vatSetting = taxSettingsList.find(setting => setting.type === 'vat');
       const dutiesSetting = taxSettingsList.find(setting => setting.type === 'duties');
       
-      const vatAmount = vatSetting ? subtotal * parseFloat(vatSetting.rate) : 0;
-      const dutiesAmount = dutiesSetting ? subtotal * parseFloat(dutiesSetting.rate) : 0;
+      const vatRate = vatSetting ? parseFloat(vatSetting.rate) / 100 : 0; // Convert percentage to decimal
+      const dutiesRate = dutiesSetting ? parseFloat(dutiesSetting.rate) / 100 : 0; // Convert percentage to decimal
       
-      return {
-        vatAmount,
-        dutiesAmount,
-        vatRate: vatSetting ? parseFloat(vatSetting.rate) : 0,
-        dutiesRate: dutiesSetting ? parseFloat(dutiesSetting.rate) : 0
+      const vatAmount = vatRate > 0 ? subtotal * vatRate : 0;
+      const dutiesAmount = dutiesRate > 0 ? subtotal * dutiesRate : 0;
+      
+      const result = {
+        vatAmount: parseFloat(vatAmount.toFixed(2)),
+        dutiesAmount: parseFloat(dutiesAmount.toFixed(2)),
+        vatRate: vatSetting ? parseFloat(vatSetting.rate) : 0, // Return as percentage
+        dutiesRate: dutiesSetting ? parseFloat(dutiesSetting.rate) : 0, // Return as percentage
+        vatRateDecimal: vatRate, // For internal calculations
+        dutiesRateDecimal: dutiesRate // For internal calculations
       };
+      
+      console.log('💰 [TAX] Tax calculation result:', result);
+      return result;
     } catch (error) {
-      console.error('Error calculating taxes:', error);
-      return { vatAmount: 0, dutiesAmount: 0, vatRate: 0, dutiesRate: 0 };
+      console.error('❌ Error calculating taxes:', error);
+      return { 
+        vatAmount: 0, 
+        dutiesAmount: 0, 
+        vatRate: 0, 
+        dutiesRate: 0, 
+        vatRateDecimal: 0, 
+        dutiesRateDecimal: 0 
+      };
     }
   }
 

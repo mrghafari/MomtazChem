@@ -153,6 +153,13 @@ export const customerOrders = pgTable("customer_orders", {
   // Delivery method selected by customer during checkout
   deliveryMethod: text("delivery_method").default("courier"), // post, courier, truck, personal_pickup
   deliveryNotes: text("delivery_notes"), // Special delivery instructions from customer
+  
+  // Tax information saved at order creation time (frozen values)
+  vatRate: decimal("vat_rate", { precision: 5, scale: 2 }).default("0"), // VAT percentage at time of order
+  vatAmount: decimal("vat_amount", { precision: 10, scale: 2 }).default("0"), // Calculated VAT amount
+  surchargeRate: decimal("surcharge_rate", { precision: 5, scale: 2 }).default("0"), // Surcharge percentage at time of order
+  surchargeAmount: decimal("surcharge_amount", { precision: 10, scale: 2 }).default("0"), // Calculated surcharge amount
+  
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

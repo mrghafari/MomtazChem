@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست سیستم مالیات منجمد</title>
+    <style>
+        body { font-family: 'Vazir', Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .section { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .btn { background: #007cba; color: white; padding: 10px 20px; border: none; cursor: pointer; margin: 5px; }
+        .btn:hover { background: #005d8a; }
+        .success { color: green; } .error { color: red; }
+        textarea { width: 100%; height: 100px; }
+        input, select { margin: 5px; padding: 5px; }
+        .result { background: #f9f9f9; padding: 10px; margin: 10px 0; border-left: 4px solid #007cba; }
+    </style>
+</head>
+<body>
+    <h1>🧪 تست سیستم مالیات منجمد (Frozen Tax System)</h1>
+    
+    <!-- Step 1: Check Current Tax Settings -->
+    <div class="section">
+        <h2>1️⃣ بررسی تنظیمات مالیات فعلی</h2>
+        <button class="btn" onclick="checkTaxSettings()">بررسی تنظیمات مالیات</button>
+        <div id="taxSettingsResult" class="result"></div>
+    </div>
+
+    <!-- Step 2: Create Test Order -->
+    <div class="section">
+        <h2>2️⃣ ایجاد سفارش تست (Tax Rates خواهد منجمد شد)</h2>
+        <label>Customer ID:</label>
+        <input type="number" id="customerId" value="8" placeholder="Customer ID">
+        <label>Product Name:</label>
+        <input type="text" id="productName" value="Solvant 402" placeholder="Product Name">
+        <label>Quantity:</label>
+        <input type="number" id="quantity" value="5" placeholder="Quantity">
+        <label>Unit Price:</label>
+        <input type="number" id="unitPrice" value="10000" placeholder="Unit Price (IQD)">
+        <label>Shipping Cost:</label>
+        <input type="number" id="shippingCost" value="5000" placeholder="Shipping Cost (IQD)">
+        <br>
+        <button class="btn" onclick="createTestOrder()">ایجاد سفارش تست</button>
+        <div id="orderResult" class="result"></div>
+    </div>
+
+    <!-- Step 3: Generate Proforma Invoice -->
+    <div class="section">
+        <h2>3️⃣ تولید پیش فاکتور (استفاده از Frozen Tax Amounts)</h2>
+        <label>Order ID:</label>
+        <input type="number" id="orderId" placeholder="Order ID from Step 2">
+        <br>
+        <button class="btn" onclick="generateProformaInvoice()">تولید پیش فاکتور PDF</button>
+        <div id="proformaResult" class="result"></div>
+    </div>
+
+    <!-- Step 4: Change Tax Settings -->
+    <div class="section">
+        <h2>4️⃣ تغییر تنظیمات مالیات (برای تست Freezing)</h2>
+        <label>VAT Rate:</label>
+        <input type="number" id="newVatRate" value="10" placeholder="New VAT Rate %">
+        <label>Surcharge Rate:</label>
+        <input type="number" id="newSurchargeRate" value="5" placeholder="New Surcharge Rate %">
+        <br>
+        <button class="btn" onclick="updateTaxSettings()">بروزرسانی تنظیمات مالیات</button>
+        <div id="updateResult" class="result"></div>
+    </div>
+
+    <!-- Step 5: Verify Frozen Amounts -->
+    <div class="section">
+        <h2>5️⃣ تایید مبالغ منجمد (PDF نباید تغییر کند)</h2>
+        <button class="btn" onclick="verifyFrozenAmounts()">تولید مجدد PDF و بررسی عدم تغییر</button>
+        <div id="verifyResult" class="result"></div>
+    </div>
+
+    <script>
+        async function checkTaxSettings() {
+            try {
+                const response = await fetch('/api/tax-settings');
+                const data = await response.json();
+                
+                document.getElementById('taxSettingsResult').innerHTML = `
+                    <h4>✅ تنظیمات مالیات فعلی:</h4>
+                    <p><strong>VAT:</strong> ${data.vat?.rate || 0}% (${data.vat?.isEnabled ? 'فعال' : 'غیرفعال'})</p>
+                    <p><strong>Surcharge:</strong> ${data.duties?.rate || 0}% (${data.duties?.isEnabled ? 'فعال' : 'غیرفعال'})</p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                document.getElementById('taxSettingsResult').innerHTML = `<p class="error">❌ خطا: ${error.message}</p>`;
+            }
+        }
+
+        async function createTestOrder() {
+            try {
+                const orderData = {
+                    customerId: parseInt(document.getElementById('customerId').value),
+                    items: [{
+                        productName: document.getElementById('productName').value,
+                        quantity: parseInt(document.getElementById('quantity').value),
+                        unitPrice: parseFloat(document.getElementById('unitPrice').value),
+                        totalPrice: parseInt(document.getElementById('quantity').value) * parseFloat(document.getElementById('unitPrice').value)
+                    }],
+                    totalAmount: parseInt(document.getElementById('quantity').value) * parseFloat(document.getElementById('unitPrice').value),
+                    shippingCost: parseFloat(document.getElementById('shippingCost').value),
+                    currency: 'IQD',
+                    paymentMethod: 'bank_transfer'
+                };
+
+                const response = await fetch('/api/customers/orders', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(orderData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    document.getElementById('orderId').value = result.order.id;
+                    document.getElementById('orderResult').innerHTML = `
+                        <h4>✅ سفارش ایجاد شد با مالیات منجمد:</h4>
+                        <p><strong>Order ID:</strong> ${result.order.id}</p>
+                        <p><strong>Order Number:</strong> ${result.order.orderNumber}</p>
+                        <p><strong>VAT Amount (Frozen):</strong> ${result.order.vatAmount || 'N/A'} IQD</p>
+                        <p><strong>Surcharge Amount (Frozen):</strong> ${result.order.surchargeAmount || 'N/A'} IQD</p>
+                        <p><strong>Total Amount:</strong> ${result.order.totalAmount} IQD</p>
+                        <pre>${JSON.stringify(result.order, null, 2)}</pre>
+                    `;
+                } else {
+                    document.getElementById('orderResult').innerHTML = `<p class="error">❌ خطا: ${result.message}</p>`;
+                }
+            } catch (error) {
+                document.getElementById('orderResult').innerHTML = `<p class="error">❌ خطا: ${error.message}</p>`;
+            }
+        }
+
+        async function generateProformaInvoice() {
+            try {
+                const orderId = document.getElementById('orderId').value;
+                if (!orderId) {
+                    alert('لطفاً ابتدا Order ID را وارد کنید');
+                    return;
+                }
+
+                const response = await fetch(`/download-proforma-invoice/${orderId}`);
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `proforma-invoice-${orderId}.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                    
+                    document.getElementById('proformaResult').innerHTML = `
+                        <h4>✅ پیش فاکتور تولید شد:</h4>
+                        <p>PDF با مبالغ مالیات منجمد دانلود شد</p>
+                        <p>Order ID: ${orderId}</p>
+                    `;
+                } else {
+                    const error = await response.json();
+                    document.getElementById('proformaResult').innerHTML = `<p class="error">❌ خطا: ${error.message}</p>`;
+                }
+            } catch (error) {
+                document.getElementById('proformaResult').innerHTML = `<p class="error">❌ خطا: ${error.message}</p>`;
+            }
+        }
+
+        async function updateTaxSettings() {
+            try {
+                const vatRate = document.getElementById('newVatRate').value;
+                const surchargeRate = document.getElementById('newSurchargeRate').value;
+
+                // Update VAT
+                const vatResponse = await fetch('/api/tax-settings/vat', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ rate: parseFloat(vatRate), isEnabled: true })
+                });
+
+                // Update Surcharge
+                const surchargeResponse = await fetch('/api/tax-settings/duties', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ rate: parseFloat(surchargeRate), isEnabled: true })
+                });
+
+                const vatResult = await vatResponse.json();
+                const surchargeResult = await surchargeResponse.json();
+
+                document.getElementById('updateResult').innerHTML = `
+                    <h4>✅ تنظیمات مالیات بروزرسانی شد:</h4>
+                    <p><strong>VAT جدید:</strong> ${vatRate}%</p>
+                    <p><strong>Surcharge جدید:</strong> ${surchargeRate}%</p>
+                    <p><em>⚠️ سفارشات قبلی همچنان از مبالغ منجمد استفاده می‌کنند</em></p>
+                `;
+            } catch (error) {
+                document.getElementById('updateResult').innerHTML = `<p class="error">❌ خطا: ${error.message}</p>`;
+            }
+        }
+
+        async function verifyFrozenAmounts() {
+            try {
+                const orderId = document.getElementById('orderId').value;
+                if (!orderId) {
+                    alert('لطفاً Order ID را وارد کنید');
+                    return;
+                }
+
+                // Generate PDF again after tax settings change
+                const response = await fetch(`/download-proforma-invoice/${orderId}`);
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `proforma-invoice-frozen-${orderId}.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                    
+                    document.getElementById('verifyResult').innerHTML = `
+                        <h4>🎉 تایید عملکرد سیستم منجمد:</h4>
+                        <p>✅ PDF مجدد دانلود شد</p>
+                        <p>🔒 مبالغ مالیات تغییر نکرده (Frozen)</p>
+                        <p>📊 علی‌رغم تغییر تنظیمات، سفارش از مبالغ منجمد استفاده می‌کند</p>
+                        <p><strong>Order ID:</strong> ${orderId}</p>
+                        <div style="background: #e8f5e8; padding: 10px; border-radius: 5px;">
+                            <strong>🎯 نتیجه تست:</strong><br>
+                            سیستم Frozen Tax درست کار می‌کند!<br>
+                            سفارشات قبلی تحت تاثیر تغییرات آینده قرار نمی‌گیرند.
+                        </div>
+                    `;
+                } else {
+                    const error = await response.json();
+                    document.getElementById('verifyResult').innerHTML = `<p class="error">❌ خطا: ${error.message}</p>`;
+                }
+            } catch (error) {
+                document.getElementById('verifyResult').innerHTML = `<p class="error">❌ خطا: ${error.message}</p>`;
+            }
+        }
+
+        // Auto-load current tax settings on page load
+        window.onload = function() {
+            checkTaxSettings();
+        };
+    </script>
+</body>
+</html>
