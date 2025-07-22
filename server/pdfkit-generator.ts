@@ -166,11 +166,11 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
            .font('VazirBold')
            .text(formatMixedText('کالاها و خدمات'), 50, 280, { align: 'right', width: 500, features: ['rtla'] });
         
-        // Create dynamic table structure based on number of items
+        // Create dynamic table structure based on number of items - RTL orientation
         const tableStartY = 320;
         const rowHeight = 30;
-        const colWidths = [200, 80, 80, 120]; // شرح کالا، تعداد، قیمت واحد، مبلغ کل
-        const colStartX = [50, 250, 330, 410];
+        const colWidths = [120, 80, 80, 200]; // مبلغ کل، قیمت واحد، تعداد، شرح کالا (reversed for RTL)
+        const colStartX = [50, 170, 250, 330]; // RTL column positions
         const items = invoiceData.items || [];
         const numDataRows = Math.max(1, items.length); // At least 1 row, or match item count
         const totalRows = numDataRows + 1; // +1 for header row
@@ -193,17 +193,16 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
              .stroke();
         }
         
-        // Table headers - exactly matching Word template
+        // Table headers - RTL orientation (right to left)
         doc.fontSize(11)
            .font('VazirBold')
-           .text(formatMixedText('شرح کالا'), colStartX[0] + 10, tableStartY + 5, { align: 'right', width: colWidths[0] - 20, features: ['rtla'] })
-           .text(formatMixedText('تعداد'), colStartX[1] + 10, tableStartY + 5, { align: 'center', width: colWidths[1] - 20, features: ['rtla'] })
-           .text(formatMixedText('قیمت واحد'), colStartX[2] + 10, tableStartY + 5, { align: 'center', width: colWidths[2] - 20, features: ['rtla'] })
-           .text(formatMixedText('مبلغ کل'), colStartX[3] + 10, tableStartY + 5, { align: 'center', width: colWidths[3] - 20, features: ['rtla'] });
+           .text(formatMixedText('مبلغ کل'), colStartX[0] + 10, tableStartY + 5, { align: 'center', width: colWidths[0] - 20, features: ['rtla'] })
+           .text(formatMixedText('قیمت واحد'), colStartX[1] + 10, tableStartY + 5, { align: 'center', width: colWidths[1] - 20, features: ['rtla'] })
+           .text(formatMixedText('تعداد'), colStartX[2] + 10, tableStartY + 5, { align: 'center', width: colWidths[2] - 20, features: ['rtla'] })
+           .text(formatMixedText('شرح کالا'), colStartX[3] + 10, tableStartY + 5, { align: 'right', width: colWidths[3] - 20, features: ['rtla'] });
         
         // Fill in product items in the table rows - all items dynamically
         const currency = invoiceData.currency || 'IQD';
-        
         items.forEach((item: any, index: number) => { // All items, no limit
           const rowY = tableStartY + ((index + 1) * rowHeight) + 5;
           
@@ -219,18 +218,18 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
           
           doc.fontSize(10)
              .font('VazirRegular')
-             // Product name in first column
-             .text(formattedProductName, colStartX[0] + 10, rowY, { 
+             // Total amount in first column (RTL order)
+             .text(totalAmount, colStartX[0] + 10, rowY, { align: 'center', width: colWidths[0] - 20 })
+             // Unit price in second column
+             .text(unitPrice, colStartX[1] + 10, rowY, { align: 'center', width: colWidths[1] - 20 })
+             // Quantity in third column
+             .text(quantity, colStartX[2] + 10, rowY, { align: 'center', width: colWidths[2] - 20 })
+             // Product name in fourth column (rightmost)
+             .text(formattedProductName, colStartX[3] + 10, rowY, { 
                align: productNameAlign, 
-               width: colWidths[0] - 20, 
+               width: colWidths[3] - 20, 
                features: isRTLText(productName) ? ['rtla'] : undefined 
-             })
-             // Quantity in second column
-             .text(quantity, colStartX[1] + 10, rowY, { align: 'center', width: colWidths[1] - 20 })
-             // Unit price in third column
-             .text(unitPrice, colStartX[2] + 10, rowY, { align: 'center', width: colWidths[2] - 20 })
-             // Total amount in fourth column
-             .text(totalAmount, colStartX[3] + 10, rowY, { align: 'center', width: colWidths[3] - 20 });
+             });
         });
         
         // Summary section below table - dynamic position based on table height

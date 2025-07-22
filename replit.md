@@ -7,8 +7,10 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 ## Recent Changes
 
 ### COMPLETED: PDF Template Redesigned to Match Exact Word Document Format (July 22, 2025)
-✅ **IMPLEMENTED: Complete PDF redesign to match user's Word document template exactly**
+✅ **IMPLEMENTED: Complete PDF redesign with dynamic table structure and RTL orientation**
 - **User Request**: PDF format should replicate the exact structure and layout of the provided Word document template
+- **Dynamic Table Enhancement**: Table rows now match exact number of order items (5 items = 5 rows, 2 items = 2 rows)
+- **RTL Table Orientation**: Changed table direction to right-to-left with columns: مبلغ کل، قیمت واحد، تعداد، شرح کالا
 - **Major Layout Overhaul**:
   - **Table Structure**: Created proper table grid with borders matching Word template (5 rows × 4 columns)
   - **Header Layout**: Company name "شرکت ممتاز شیمی" centered, followed by "پیش فاکتور" 
