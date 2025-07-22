@@ -6,6 +6,20 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Fixed VAT Calculation Error in PDF Generation and Order Processing (July 22, 2025)
+✅ **RESOLVED: Critical VAT calculation bug causing incorrect tax amounts in orders and PDFs**
+- **Issue**: VAT calculation was incorrect - VAT rate 0.06 (6%) was being divided by 100 again, resulting in 0.0006 rate
+- **Root Cause**: calculateOrderTaxes function was treating database rate as percentage and dividing by 100 unnecessarily
+- **Database Storage**: VAT rate stored as decimal 0.0600 (which equals 6%) in tax_settings table
+- **Code Fix**: 
+  - Removed unnecessary division by 100 in vatRate calculation
+  - Fixed return value to properly convert decimal to percentage for display (0.06 * 100 = 6%)
+  - Updated comments to clarify rate format handling
+- **Impact**: New orders will now have correct VAT calculation (6% of subtotal instead of 0.006%)
+- **Test Results**: 100 IQD subtotal now correctly calculates 6.00 IQD VAT (6%) → 106.00 IQD total
+- **Verified**: Tax calculation API endpoint now returns accurate VAT amounts matching business requirements
+- **Result**: Both new order creation and PDF generation now use accurate VAT calculations
+
 ### COMPLETED: Customer Profile VAT Breakdown Display and Fixed Order API Response (July 22, 2025)
 ✅ **IMPLEMENTED: Complete VAT breakdown display in customer profile with historical data accuracy**
 - **Issue**: Customer profile orders were not showing VAT breakdown components (subtotal, VAT amount, shipping costs)

@@ -19924,8 +19924,8 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       const vatSetting = taxSettingsList.find(setting => setting.type === 'vat');
       const dutiesSetting = taxSettingsList.find(setting => setting.type === 'duties');
       
-      const vatRate = vatSetting ? parseFloat(vatSetting.rate) / 100 : 0; // Convert percentage to decimal
-      const dutiesRate = dutiesSetting ? parseFloat(dutiesSetting.rate) / 100 : 0; // Convert percentage to decimal
+      const vatRate = vatSetting ? parseFloat(vatSetting.rate) : 0; // Database stores as decimal (0.06 = 6%)
+      const dutiesRate = dutiesSetting ? parseFloat(dutiesSetting.rate) : 0; // Database stores as decimal
       
       const vatAmount = vatRate > 0 ? subtotal * vatRate : 0;
       const dutiesAmount = dutiesRate > 0 ? subtotal * dutiesRate : 0;
@@ -19933,9 +19933,9 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       const result = {
         vatAmount: parseFloat(vatAmount.toFixed(2)),
         dutiesAmount: parseFloat(dutiesAmount.toFixed(2)),
-        vatRate: vatSetting ? parseFloat(vatSetting.rate) : 0, // Return as percentage
-        dutiesRate: dutiesSetting ? parseFloat(dutiesSetting.rate) : 0, // Return as percentage
-        vatRateDecimal: vatRate, // For internal calculations
+        vatRate: vatSetting ? parseFloat(vatSetting.rate) * 100 : 0, // Return as percentage (6.00 for 6%)
+        dutiesRate: dutiesSetting ? parseFloat(dutiesSetting.rate) * 100 : 0, // Return as percentage
+        vatRateDecimal: vatRate, // For internal calculations (0.06 for 6%)
         dutiesRateDecimal: dutiesRate // For internal calculations
       };
       
