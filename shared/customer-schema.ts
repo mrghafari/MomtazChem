@@ -130,6 +130,7 @@ export const customerOrders = pgTable("customer_orders", {
   status: text("status").notNull().default("pending"), // pending, confirmed, processing, shipped, delivered, cancelled
   priority: text("priority").notNull().default("normal"), // low, normal, high, urgent
   totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull(),
+  shippingCost: decimal("shipping_cost", { precision: 10, scale: 2 }).default("0"),
   currency: text("currency").notNull().default("USD"),
   paymentStatus: text("payment_status").notNull().default("pending"), // pending, paid, failed, refunded
   paymentMethod: text("payment_method"), // bank_transfer, credit_card, check, cash

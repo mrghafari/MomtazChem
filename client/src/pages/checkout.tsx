@@ -361,6 +361,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
         unitPrice: parseFloat(item.price),
       })),
       totalAmount: beforeWalletTotal,
+      shippingCost: shippingCost,
       notes: data.notes || '',
       shippingMethod: data.shippingMethod,
       paymentMethod: actualWalletUsage >= beforeWalletTotal ? 'wallet_full' : 

@@ -422,12 +422,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ success: false, message: 'شناسه سفارش نامعتبر است' });
       }
 
-      // Get order data from customer_orders
+      // Get order data from customer_orders including shipping cost
       const orderResult = await db
         .select({
           id: customerOrders.id,
           orderNumber: customerOrders.orderNumber,
           totalAmount: customerOrders.totalAmount,
+          shippingCost: customerOrders.shippingCost,
           currency: customerOrders.currency,
           paymentMethod: customerOrders.paymentMethod,
           status: customerOrders.status,
@@ -476,6 +477,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           total: parseFloat(item.totalPrice || '0'),
         })),
         subtotal: parseFloat(order.totalAmount || '0'),
+        shippingCost: parseFloat(order.shippingCost || '0'),
         total: parseFloat(order.totalAmount || '0'),
         currency: order.currency || 'IQD',
         paymentStatus: 'در انتظار پرداخت', // برای پیش فاکتور
@@ -537,12 +539,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ success: false, message: 'شناسه سفارش نامعتبر است' });
       }
 
-      // Get order data from customer_orders
+      // Get order data from customer_orders including shipping cost
       const orderResult = await db
         .select({
           id: customerOrders.id,
           orderNumber: customerOrders.orderNumber,
           totalAmount: customerOrders.totalAmount,
+          shippingCost: customerOrders.shippingCost,
           currency: customerOrders.currency,
           paymentMethod: customerOrders.paymentMethod,
           status: customerOrders.status,
@@ -599,6 +602,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           total: parseFloat(item.totalPrice || '0'),
         })),
         subtotal: parseFloat(order.totalAmount || '0'),
+        shippingCost: parseFloat(order.shippingCost || '0'),
         total: parseFloat(order.totalAmount || '0'),
         currency: order.currency || 'IQD',
         paymentStatus: 'پرداخت شده', // برای فاکتور نهایی
@@ -9372,7 +9376,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const customerId = (req.session as any)?.customerId;
       const crmCustomerId = (req.session as any)?.crmCustomerId;
-      const { items, customerInfo, recipientInfo, totalAmount, notes, shippingMethod, paymentMethod, walletAmountUsed, remainingAmount } = req.body;
+      const { items, customerInfo, recipientInfo, totalAmount, shippingCost, notes, shippingMethod, paymentMethod, walletAmountUsed, remainingAmount } = req.body;
       
       console.log('🛒 [ORDER DEBUG] Order data received:', {
         paymentMethod,
@@ -9484,6 +9488,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         orderNumber,
         customerId: customerId || null,
         totalAmount: totalAmount.toString(),
+        shippingCost: (shippingCost || 0).toString(),
         status: 'pending' as const,
         paymentStatus: finalPaymentStatus,
         paymentMethod: finalPaymentMethod,
@@ -9637,11 +9642,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const orderManagementStorage = new OrderManagementStorage();
       const orderNumber = await orderManagementStorage.generateOrderNumber();
       
-      // Calculate order totals
+      // Calculate order totals (shipping cost comes from frontend)
       const subtotal = orderData.totalAmount || 0;
-      const taxAmount = subtotal * 0.1; // 10% tax
-      const shippingAmount = 50; // Fixed shipping amount
-      const totalAmount = subtotal + taxAmount + shippingAmount;
+      const shippingAmount = orderData.shippingCost || 0;
+      const taxAmount = 0; // Remove automatic tax calculation
+      const totalAmount = subtotal + shippingAmount;
 
       // Create order with proper customer linking
       let finalCustomerId = customerId;
@@ -9732,6 +9737,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         paymentStatus: finalPaymentStatus,
         paymentMethod: finalPaymentMethod,
         totalAmount: totalAmount.toString(),
+        shippingCost: shippingAmount.toString(),
         currency: orderData.currency || "IQD",
         notes: orderData.notes || "",
         billingAddress: JSON.stringify({
