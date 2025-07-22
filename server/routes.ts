@@ -43,6 +43,20 @@ import { generateSmartSKU, validateSKUUniqueness } from "./ai-sku-generator";
 import { deliveryVerificationStorage } from "./delivery-verification-storage";
 import { gpsDeliveryStorage } from "./gps-delivery-storage";
 import { insertGpsDeliveryConfirmationSchema } from "@shared/gps-delivery-schema";
+import { 
+  companyInformation, 
+  incomingCorrespondence, 
+  outgoingCorrespondence, 
+  companyDocuments,
+  insertCompanyInformationSchema,
+  insertIncomingCorrespondenceSchema,
+  insertOutgoingCorrespondenceSchema,
+  insertCompanyDocumentSchema,
+  type CompanyInformation,
+  type IncomingCorrespondence,
+  type OutgoingCorrespondence,
+  type CompanyDocument
+} from "@shared/company-info-schema";
 
 // SMS service will be imported dynamically when needed
 import { ticketingStorage } from "./ticketing-storage";
@@ -32010,6 +32024,372 @@ momtazchem.com
     } catch (error) {
       console.error("Error triggering expired cleanup:", error);
       res.status(500).json({ success: false, message: "Failed to trigger cleanup" });
+    }
+  });
+
+  // =====================================
+  // COMPANY INFORMATION MANAGEMENT
+  // =====================================
+
+  // Get company information
+  app.get("/api/company-info", requireAuth, async (req, res) => {
+    try {
+      const companyData = await db.select().from(companyInformation).limit(1);
+      
+      res.json({
+        success: true,
+        data: companyData.length > 0 ? companyData[0] : null
+      });
+    } catch (error) {
+      console.error('Error fetching company info:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch company information'
+      });
+    }
+  });
+
+  // Update company information
+  app.put("/api/company-info", requireAuth, async (req, res) => {
+    try {
+      const validatedData = insertCompanyInformationSchema.parse(req.body);
+      
+      // Check if company info exists
+      const existing = await db.select().from(companyInformation).limit(1);
+      
+      let result;
+      if (existing.length > 0) {
+        // Update existing record
+        result = await db
+          .update(companyInformation)
+          .set({ ...validatedData, updatedAt: new Date() })
+          .where(eq(companyInformation.id, existing[0].id))
+          .returning();
+      } else {
+        // Insert new record
+        result = await db
+          .insert(companyInformation)
+          .values(validatedData)
+          .returning();
+      }
+
+      res.json({
+        success: true,
+        data: result[0],
+        message: 'Company information updated successfully'
+      });
+    } catch (error) {
+      console.error('Error updating company info:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to update company information'
+      });
+    }
+  });
+
+  // Get incoming correspondence
+  app.get("/api/correspondence/incoming", requireAuth, async (req, res) => {
+    try {
+      const { limit = 50, offset = 0, status, priority } = req.query;
+      
+      let query = db.select().from(incomingCorrespondence);
+      
+      if (status) {
+        query = query.where(eq(incomingCorrespondence.status, status as string));
+      }
+      
+      if (priority) {
+        query = query.where(eq(incomingCorrespondence.priority, priority as string));
+      }
+      
+      const data = await query
+        .orderBy(desc(incomingCorrespondence.dateReceived))
+        .limit(Number(limit))
+        .offset(Number(offset));
+
+      res.json({
+        success: true,
+        data: data,
+        total: data.length
+      });
+    } catch (error) {
+      console.error('Error fetching incoming correspondence:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch incoming correspondence'
+      });
+    }
+  });
+
+  // Add incoming correspondence
+  app.post("/api/correspondence/incoming", requireAuth, async (req, res) => {
+    try {
+      const validatedData = insertIncomingCorrespondenceSchema.parse(req.body);
+      
+      const result = await db
+        .insert(incomingCorrespondence)
+        .values(validatedData)
+        .returning();
+
+      res.json({
+        success: true,
+        data: result[0],
+        message: 'Incoming correspondence added successfully'
+      });
+    } catch (error) {
+      console.error('Error adding incoming correspondence:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to add incoming correspondence'
+      });
+    }
+  });
+
+  // Update incoming correspondence
+  app.put("/api/correspondence/incoming/:id", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const validatedData = insertIncomingCorrespondenceSchema.parse(req.body);
+      
+      const result = await db
+        .update(incomingCorrespondence)
+        .set({ ...validatedData, updatedAt: new Date() })
+        .where(eq(incomingCorrespondence.id, Number(id)))
+        .returning();
+
+      if (result.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'Correspondence not found'
+        });
+      }
+
+      res.json({
+        success: true,
+        data: result[0],
+        message: 'Incoming correspondence updated successfully'
+      });
+    } catch (error) {
+      console.error('Error updating incoming correspondence:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to update incoming correspondence'
+      });
+    }
+  });
+
+  // Get outgoing correspondence
+  app.get("/api/correspondence/outgoing", requireAuth, async (req, res) => {
+    try {
+      const { limit = 50, offset = 0, status, priority } = req.query;
+      
+      let query = db.select().from(outgoingCorrespondence);
+      
+      if (status) {
+        query = query.where(eq(outgoingCorrespondence.status, status as string));
+      }
+      
+      if (priority) {
+        query = query.where(eq(outgoingCorrespondence.priority, priority as string));
+      }
+      
+      const data = await query
+        .orderBy(desc(outgoingCorrespondence.dateSent))
+        .limit(Number(limit))
+        .offset(Number(offset));
+
+      res.json({
+        success: true,
+        data: data,
+        total: data.length
+      });
+    } catch (error) {
+      console.error('Error fetching outgoing correspondence:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch outgoing correspondence'
+      });
+    }
+  });
+
+  // Add outgoing correspondence
+  app.post("/api/correspondence/outgoing", requireAuth, async (req, res) => {
+    try {
+      const validatedData = insertOutgoingCorrespondenceSchema.parse(req.body);
+      
+      const result = await db
+        .insert(outgoingCorrespondence)
+        .values(validatedData)
+        .returning();
+
+      res.json({
+        success: true,
+        data: result[0],
+        message: 'Outgoing correspondence added successfully'
+      });
+    } catch (error) {
+      console.error('Error adding outgoing correspondence:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to add outgoing correspondence'
+      });
+    }
+  });
+
+  // Update outgoing correspondence
+  app.put("/api/correspondence/outgoing/:id", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const validatedData = insertOutgoingCorrespondenceSchema.parse(req.body);
+      
+      const result = await db
+        .update(outgoingCorrespondence)
+        .set({ ...validatedData, updatedAt: new Date() })
+        .where(eq(outgoingCorrespondence.id, Number(id)))
+        .returning();
+
+      if (result.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'Correspondence not found'
+        });
+      }
+
+      res.json({
+        success: true,
+        data: result[0],
+        message: 'Outgoing correspondence updated successfully'
+      });
+    } catch (error) {
+      console.error('Error updating outgoing correspondence:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to update outgoing correspondence'
+      });
+    }
+  });
+
+  // Get company documents
+  app.get("/api/company-documents", requireAuth, async (req, res) => {
+    try {
+      const { limit = 50, offset = 0, status, documentType } = req.query;
+      
+      let query = db.select().from(companyDocuments);
+      
+      if (status) {
+        query = query.where(eq(companyDocuments.status, status as string));
+      }
+      
+      if (documentType) {
+        query = query.where(eq(companyDocuments.documentType, documentType as string));
+      }
+      
+      const data = await query
+        .orderBy(desc(companyDocuments.issueDate))
+        .limit(Number(limit))
+        .offset(Number(offset));
+
+      res.json({
+        success: true,
+        data: data,
+        total: data.length
+      });
+    } catch (error) {
+      console.error('Error fetching company documents:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch company documents'
+      });
+    }
+  });
+
+  // Add company document
+  app.post("/api/company-documents", requireAuth, async (req, res) => {
+    try {
+      const validatedData = insertCompanyDocumentSchema.parse(req.body);
+      
+      const result = await db
+        .insert(companyDocuments)
+        .values({
+          ...validatedData,
+          uploadedBy: req.session.adminId
+        })
+        .returning();
+
+      res.json({
+        success: true,
+        data: result[0],
+        message: 'Company document added successfully'
+      });
+    } catch (error) {
+      console.error('Error adding company document:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to add company document'
+      });
+    }
+  });
+
+  // Update company document
+  app.put("/api/company-documents/:id", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const validatedData = insertCompanyDocumentSchema.parse(req.body);
+      
+      const result = await db
+        .update(companyDocuments)
+        .set({ ...validatedData, updatedAt: new Date() })
+        .where(eq(companyDocuments.id, Number(id)))
+        .returning();
+
+      if (result.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'Document not found'
+        });
+      }
+
+      res.json({
+        success: true,
+        data: result[0],
+        message: 'Company document updated successfully'
+      });
+    } catch (error) {
+      console.error('Error updating company document:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to update company document'
+      });
+    }
+  });
+
+  // Delete company document
+  app.delete("/api/company-documents/:id", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      const result = await db
+        .delete(companyDocuments)
+        .where(eq(companyDocuments.id, Number(id)))
+        .returning();
+
+      if (result.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'Document not found'
+        });
+      }
+
+      res.json({
+        success: true,
+        message: 'Company document deleted successfully'
+      });
+    } catch (error) {
+      console.error('Error deleting company document:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to delete company document'
+      });
     }
   });
 

@@ -266,6 +266,14 @@ export default function SiteManagement() {
       moduleId: "content_management"
     },
     {
+      id: "company-information",
+      label: "Company Information",
+      icon: FileText,
+      onClick: () => trackButtonClick("company-information", () => setLocation("/admin/company-information")),
+      className: "border-slate-300 text-slate-600 hover:bg-slate-50",
+      moduleId: "company_information"
+    },
+    {
       id: "seo",
       label: "SEO Management",
       icon: Globe,

@@ -119,6 +119,7 @@ import TestLogistics from "@/pages/test-logistics";
 import KpiDashboard from "@/pages/kpi-dashboard";
 import ManagementDashboard from "@/pages/management-dashboard";
 import AccountingManagement from "@/pages/admin/accounting-management";
+import CompanyInformation from "@/pages/admin/company-information";
 
 import NotFound from "@/pages/not-found";
 
@@ -228,6 +229,7 @@ function Router() {
           <Route path="/admin/kpi-dashboard" component={KpiDashboard} />
           <Route path="/admin/management-dashboard" component={ManagementDashboard} />
           <Route path="/admin/accounting-management" component={AccountingManagement} />
+          <Route path="/admin/company-information" component={CompanyInformation} />
           <Route path="/admin/pdf-test" component={lazy(() => import("@/pages/admin/pdf-test"))} />
 
 
