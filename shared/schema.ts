@@ -62,6 +62,38 @@ export const seoAnalytics = pgTable("seo_analytics", {
   source: text("source").default("manual"), // 'google_search_console', 'manual', etc.
 });
 
+// Company Information table for business details
+export const companyInformation = pgTable("company_information", {
+  id: serial("id").primaryKey(),
+  companyName: text("company_name").notNull(),
+  companyNameEnglish: text("company_name_english"),
+  registrationNumber: text("registration_number"),
+  taxNumber: text("tax_number"),
+  address: text("address").notNull(),
+  addressEnglish: text("address_english"),
+  city: text("city").notNull(),
+  province: text("province").notNull(),
+  country: text("country").notNull().default("Iraq"),
+  postalCode: text("postal_code"),
+  phone: text("phone").notNull(),
+  fax: text("fax"),
+  email: text("email").notNull(),
+  website: text("website"),
+  businessType: text("business_type"), // e.g., "Chemical Trading", "Manufacturing"
+  industry: text("industry").notNull().default("Chemical Industry"),
+  establishedYear: integer("established_year"),
+  logoUrl: text("logo_url"),
+  bankName: text("bank_name"),
+  accountNumber: text("account_number"),
+  iban: text("iban"),
+  swiftCode: text("swift_code"),
+  description: text("description"),
+  descriptionEnglish: text("description_english"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 // Tax settings for invoices and financial documents
 export const taxSettings = pgTable("tax_settings", {
   id: serial("id").primaryKey(),
@@ -1066,3 +1098,13 @@ export const insertTaxSettingSchema = createInsertSchema(taxSettings).omit({
 
 export type InsertTaxSetting = z.infer<typeof insertTaxSettingSchema>;
 export type TaxSetting = typeof taxSettings.$inferSelect;
+
+// Company information types
+export const insertCompanyInformationSchema = createInsertSchema(companyInformation).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertCompanyInformation = z.infer<typeof insertCompanyInformationSchema>;
+export type CompanyInformation = typeof companyInformation.$inferSelect;

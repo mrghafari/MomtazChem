@@ -66,6 +66,7 @@ import {
 
 // SMS service will be imported dynamically when needed
 import { ticketingStorage } from "./ticketing-storage";
+import { companyStorage } from "./company-storage";
 import { getLocalizedMessage, getLocalizedEmailSubject, generateSMSMessage } from "./multilingual-messages";
 import { supportTickets } from "../shared/ticketing-schema";
 import { 
@@ -33301,6 +33302,57 @@ momtazchem.com
       res.status(500).json({
         success: false,
         message: 'Failed to create business card'
+      });
+    }
+  });
+
+  // =============================================================================
+  // COMPANY INFORMATION API ENDPOINTS
+  // =============================================================================
+
+  // Get company information
+  app.get("/api/admin/company-information", requireAuth, async (req, res) => {
+    try {
+      const companyInfo = await companyStorage.getCompanyInfo();
+      
+      res.json({
+        success: true,
+        data: companyInfo
+      });
+    } catch (error) {
+      console.error('Error fetching company information:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch company information'
+      });
+    }
+  });
+
+  // Update company information
+  app.put("/api/admin/company-information", requireAuth, async (req, res) => {
+    try {
+      const companyData = insertCompanyInformationSchema.parse(req.body);
+      
+      const result = await companyStorage.upsertCompanyInfo(companyData);
+
+      res.json({
+        success: true,
+        data: result,
+        message: 'Company information updated successfully'
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          success: false,
+          message: 'Validation error',
+          errors: error.errors
+        });
+      }
+
+      console.error('Error updating company information:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to update company information'
       });
     }
   });
