@@ -10187,6 +10187,146 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get detailed order information for financial review
+  app.get("/api/customers/orders/:orderNumber/details", async (req, res) => {
+    try {
+      const orderNumber = req.params.orderNumber;
+      
+      console.log(`🔍 [ORDER DETAILS] Fetching details for order: ${orderNumber}`);
+      
+      // Get order from customer_orders table with customer info
+      const orderQuery = await customerDb
+        .select({
+          id: customerOrders.id,
+          orderNumber: customerOrders.orderNumber,
+          totalAmount: customerOrders.totalAmount,
+          currency: customerOrders.currency,
+          paymentStatus: customerOrders.paymentStatus,
+          paymentMethod: customerOrders.paymentMethod,
+          status: customerOrders.status,
+          createdAt: customerOrders.createdAt,
+          updatedAt: customerOrders.updatedAt,
+          customerName: customerOrders.customerName,
+          phone: customerOrders.phone,
+          email: customerOrders.email,
+          address: customerOrders.address,
+          city: customerOrders.city,
+          province: customerOrders.province,
+          country: customerOrders.country,
+          postalCode: customerOrders.postalCode,
+          notes: customerOrders.notes,
+          shippingCost: customerOrders.shippingCost,
+          customerId: customerOrders.customerId
+        })
+        .from(customerOrders)
+        .where(eq(customerOrders.orderNumber, orderNumber))
+        .limit(1);
+
+      if (orderQuery.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "سفارش یافت نشد"
+        });
+      }
+
+      const order = orderQuery[0];
+
+      // Get order items
+      const items = await customerDb
+        .select({
+          id: orderItems.id,
+          productId: orderItems.productId,
+          productName: orderItems.productName,
+          quantity: orderItems.quantity,
+          unitPrice: orderItems.unitPrice,
+          totalPrice: orderItems.totalPrice,
+          specifications: orderItems.specifications
+        })
+        .from(orderItems)
+        .where(eq(orderItems.orderId, order.id));
+
+      // Get customer info from CRM if available
+      let customerDetails = {
+        firstName: order.customerName?.split(' ')[0] || '',
+        lastName: order.customerName?.split(' ').slice(1).join(' ') || '',
+        email: order.email,
+        phone: order.phone,
+        address: order.address,
+        city: order.city,
+        province: order.province,
+        country: order.country,
+        postalCode: order.postalCode
+      };
+
+      if (order.customerId) {
+        try {
+          const crmCustomer = await crmStorage.getCustomerById(order.customerId);
+          if (crmCustomer) {
+            customerDetails = {
+              firstName: crmCustomer.firstName || customerDetails.firstName,
+              lastName: crmCustomer.lastName || customerDetails.lastName,
+              email: crmCustomer.email || customerDetails.email,
+              phone: crmCustomer.phone || customerDetails.phone,
+              address: crmCustomer.address || customerDetails.address,
+              city: crmCustomer.city || customerDetails.city,
+              province: crmCustomer.province || customerDetails.province,
+              country: crmCustomer.country || customerDetails.country,
+              postalCode: crmCustomer.postalCode || customerDetails.postalCode
+            };
+          }
+        } catch (crmError) {
+          console.warn('Could not fetch CRM customer data:', crmError);
+        }
+      }
+
+      // Collect customer documents (payment receipts, etc.)
+      const documents = [];
+      
+      // Add payment receipt if exists from order management
+      try {
+        const { OrderManagementStorage } = await import('./order-management-storage');
+        const orderMgmtStorage = new OrderManagementStorage();
+        const orderMgmt = await orderMgmtStorage.getOrderByOrderNumber(orderNumber);
+        
+        if (orderMgmt && orderMgmt.paymentReceiptUrl) {
+          documents.push({
+            name: 'فیش بانکی پرداخت',
+            url: orderMgmt.paymentReceiptUrl,
+            type: 'image',
+            fileName: orderMgmt.receiptFileName || 'receipt.png'
+          });
+        }
+      } catch (mgmtError) {
+        console.warn('Could not fetch order management receipt:', mgmtError);
+      }
+
+      // Look for additional customer documents in uploads
+      // (This would require implementing a document tracking system)
+
+      const orderDetails = {
+        ...order,
+        customer: customerDetails,
+        items: items,
+        currentStatus: order.status
+      };
+
+      console.log(`✅ [ORDER DETAILS] Successfully fetched details for order ${orderNumber}`);
+
+      res.json({
+        success: true,
+        order: orderDetails,
+        documents: documents
+      });
+
+    } catch (error) {
+      console.error('❌ [ORDER DETAILS] Error fetching order details:', error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت جزئیات سفارش"
+      });
+    }
+  });
+
   // Get complete customer order history for purchase history modal
   app.get("/api/customers/orders/complete-history", async (req, res) => {
     try {

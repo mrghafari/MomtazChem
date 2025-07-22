@@ -113,6 +113,9 @@ function FinanceOrders() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [activeTab, setActiveTab] = useState("pending");
+  const [orderDetailsModalOpen, setOrderDetailsModalOpen] = useState(false);
+  const [orderDetails, setOrderDetails] = useState<any>(null);
+  const [orderDocuments, setOrderDocuments] = useState<any[]>([]);
 
   // Enable audio notifications for new orders
   const { orderCount } = useOrderNotifications({
@@ -380,6 +383,32 @@ function FinanceOrders() {
     setSelectedOrder(order);
     setReviewNotes(order.financialNotes || "");
     setDialogOpen(true);
+  };
+
+  // Function to fetch order details and documents
+  const fetchOrderDetails = async (orderNumber: string) => {
+    try {
+      const response = await fetch(`/api/customers/orders/${orderNumber}/details`);
+      const data = await response.json();
+      if (data.success) {
+        setOrderDetails(data.order);
+        setOrderDocuments(data.documents || []);
+        setOrderDetailsModalOpen(true);
+      } else {
+        toast({
+          variant: "destructive",
+          title: "خطا",
+          description: "امکان دریافت جزئیات سفارش وجود ندارد"
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching order details:', error);
+      toast({
+        variant: "destructive", 
+        title: "خطا",
+        description: "خطا در اتصال به سرور"
+      });
+    }
   };
 
   const handleApprove = () => {
@@ -883,6 +912,185 @@ function FinanceOrders() {
           </DialogContent>
         </Dialog>
 
+        {/* Order Details Modal */}
+        <Dialog open={orderDetailsModalOpen} onOpenChange={setOrderDetailsModalOpen}>
+          <DialogContent className="max-w-6xl max-h-[90vh] overflow-auto" dir="rtl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                جزئیات کامل سفارش {orderDetails?.orderNumber}
+              </DialogTitle>
+            </DialogHeader>
+            
+            {orderDetails && (
+              <div className="space-y-6">
+                {/* Customer Information */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Users className="h-5 w-5" />
+                      اطلاعات مشتری
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <Label className="text-sm font-medium text-gray-600">نام مشتری</Label>
+                        <p className="font-medium">{orderDetails.customer?.firstName} {orderDetails.customer?.lastName}</p>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium text-gray-600">ایمیل</Label>
+                        <p className="font-medium">{orderDetails.customer?.email}</p>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium text-gray-600">تلفن</Label>
+                        <p className="font-medium">{orderDetails.customer?.phone}</p>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium text-gray-600">آدرس</Label>
+                        <p className="font-medium">{orderDetails.customer?.address}</p>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium text-gray-600">شهر</Label>
+                        <p className="font-medium">{orderDetails.customer?.city}</p>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium text-gray-600">استان</Label>
+                        <p className="font-medium">{orderDetails.customer?.province}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Order Items */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <ShoppingCart className="h-5 w-5" />
+                      اقلام سفارش
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {orderDetails.items?.map((item: any, index: number) => (
+                        <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                              <span className="text-blue-600 font-bold">{item.quantity}</span>
+                            </div>
+                            <div>
+                              <p className="font-medium">{item.productName}</p>
+                              <p className="text-sm text-gray-600">قیمت واحد: {item.unitPrice?.toLocaleString()} {orderDetails.currency}</p>
+                            </div>
+                          </div>
+                          <div className="text-left">
+                            <p className="font-bold text-green-600">
+                              {item.totalPrice?.toLocaleString()} {orderDetails.currency}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Payment Information */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <CreditCard className="h-5 w-5" />
+                      اطلاعات پرداخت
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label className="text-sm font-medium text-gray-600">مبلغ کل</Label>
+                        <p className="font-bold text-lg text-green-600">
+                          {parseFloat(orderDetails.totalAmount)?.toLocaleString()} {orderDetails.currency}
+                        </p>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium text-gray-600">وضعیت پرداخت</Label>
+                        <Badge className="mt-1">{orderDetails.currentStatus}</Badge>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium text-gray-600">تاریخ سفارش</Label>
+                        <p className="font-medium">
+                          {new Date(orderDetails.createdAt).toLocaleDateString('fa-IR')}
+                        </p>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium text-gray-600">آخرین بروزرسانی</Label>
+                        <p className="font-medium">
+                          {new Date(orderDetails.updatedAt).toLocaleDateString('fa-IR')}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Customer Documents */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Download className="h-5 w-5" />
+                      مدارک ارسالی مشتری
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {orderDocuments.length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {orderDocuments.map((doc: any, index: number) => (
+                          <div key={index} className="border rounded-lg p-4 hover:bg-gray-50">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <div className="p-2 bg-blue-100 rounded">
+                                  {doc.type === 'image' ? (
+                                    <FileText className="h-5 w-5 text-blue-600" />
+                                  ) : (
+                                    <Download className="h-5 w-5 text-blue-600" />
+                                  )}
+                                </div>
+                                <div>
+                                  <p className="font-medium">{doc.name || doc.fileName}</p>
+                                  <p className="text-sm text-gray-600">{doc.type}</p>
+                                </div>
+                              </div>
+                              <div className="flex gap-2">
+                                {doc.type === 'image' && (
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    onClick={() => openImageModal(doc.url)}
+                                  >
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
+                                )}
+                                <Button 
+                                  size="sm"
+                                  onClick={() => window.open(doc.url, '_blank')}
+                                >
+                                  <ExternalLink className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        <Download className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                        <p>هیچ مدرک اضافی ارسال نشده است</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
         {/* Image Modal */}
         <Dialog open={imageModalOpen} onOpenChange={setImageModalOpen}>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-auto">
@@ -1026,7 +1234,16 @@ function OrderCard({ order, onOrderSelect, readOnly = false }: OrderCardProps) {
         )}
 
         {!readOnly && (
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-2">
+            <Button 
+              onClick={() => fetchOrderDetails(order.orderNumber!)}
+              size="sm"
+              variant="outline"
+              className="flex items-center space-x-2 space-x-reverse"
+            >
+              <FileText className="h-4 w-4" />
+              <span>مشاهده جزئیات</span>
+            </Button>
             <Button 
               onClick={onOrderSelect}
               size="sm"
