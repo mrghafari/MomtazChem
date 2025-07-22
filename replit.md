@@ -6,7 +6,16 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
-### COMPLETED: Enhanced Proforma Invoice PDF with RTL Layout and Customer Information Display (July 22, 2025)
+### COMPLETED: Customer Login Page Route Fix and Enhanced Proforma Invoice PDF (July 22, 2025)
+✅ **RESOLVED: Customer login 404 error by creating dedicated login page route**
+- **Missing Route Issue**: Fixed 404 error for `/customer/login` URL by creating dedicated customer login page
+- **Dedicated Login Page**: Created `customer-login.tsx` with professional Persian interface and form validation
+- **Route Integration**: Added `/customer/login` route to App.tsx routing system with proper import
+- **User Experience**: Professional login form with password visibility toggle, error display, and navigation links
+- **Authentication Flow**: Proper form submission with error handling and redirect to customer profile after login
+- **Persian Interface**: RTL-compatible design with Persian error messages and field labels
+- **Impact**: Customers can now access `/customer/login` URL directly without 404 errors
+
 ✅ **IMPLEMENTED: RTL-formatted proforma invoice PDF generation with complete customer information**
 - **Document Type Detection**: System automatically detects invoice type (PROFORMA vs regular) based on order approval status
 - **RTL Layout Enhancement**: Completely restructured PDF table headers and content for proper right-to-left text alignment
