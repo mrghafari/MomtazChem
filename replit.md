@@ -20,6 +20,12 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
   - Left-aligned numerical values without commas or decimals
   - Proper spacing and alignment matching Word template
 - **Footer Message**: Added exact footer text from Word template: "این پیش فاکتور است و پس تائید مالی، فاکتور نهایی صادر خواهد شد."
+- **Company Footer**: Added comprehensive company information including:
+  - Company name in Persian and English: "شرکت ممتاز شیمی" / "Momtaz Chemical Solutions Company"
+  - Complete address: "آدرس: بغداد، عراق - منطقه الکرخ، شارع الرشید"
+  - Website and email: www.momtazchem.com, info@momtazchem.com, sales@momtazchem.com
+  - Phone numbers: +964 770 123 4567, +964 780 987 6543
+  - Company slogan in Persian and English: "تامین کننده برتر مواد شیمیایی صنعتی و آزمایشگاهی در خاورمیانه"
 - **Technical Implementation**:
   - Table grid drawing with proper borders and cell divisions
   - Column width optimization: [200, 80, 80, 120] pixels

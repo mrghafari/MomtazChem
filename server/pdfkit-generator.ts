@@ -269,6 +269,37 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
            .font('VazirRegular')
            .text(formatMixedText(footerMessage), 50, footerMessageY, { align: 'right', width: 500, features: ['rtla'] });
         
+        // Company information footer
+        const companyFooterY = footerMessageY + 50;
+        
+        // Company name - Persian and English
+        doc.fontSize(12)
+           .font('VazirBold')
+           .text(formatMixedText('شرکت ممتاز شیمی'), 50, companyFooterY, { align: 'center', width: 500, features: ['rtla'] })
+           .fontSize(11)
+           .font('VazirRegular')
+           .text('Momtaz Chemical Solutions Company', 50, companyFooterY + 20, { align: 'center', width: 500 });
+        
+        // Address
+        const addressText = formatMixedText('آدرس: بغداد، عراق - منطقه الکرخ، شارع الرشید');
+        doc.fontSize(9)
+           .font('VazirRegular')
+           .text(addressText, 50, companyFooterY + 40, { align: 'center', width: 500, features: ['rtla'] });
+        
+        // Contact information
+        doc.fontSize(9)
+           .font('VazirRegular')
+           .text('www.momtazchem.com', 50, companyFooterY + 55, { align: 'center', width: 500 })
+           .text('info@momtazchem.com | sales@momtazchem.com', 50, companyFooterY + 68, { align: 'center', width: 500 })
+           .text('+964 770 123 4567 | +964 780 987 6543', 50, companyFooterY + 81, { align: 'center', width: 500 });
+        
+        // Company slogan/promotion
+        const sloganText = formatMixedText('تامین کننده برتر مواد شیمیایی صنعتی و آزمایشگاهی در خاورمیانه');
+        doc.fontSize(8)
+           .font('VazirRegular')
+           .text(sloganText, 50, companyFooterY + 100, { align: 'center', width: 500, features: ['rtla'] })
+           .text('Leading Supplier of Industrial & Laboratory Chemicals in the Middle East', 50, companyFooterY + 115, { align: 'center', width: 500 });
+        
       } catch (fontError) {
         console.warn('⚠️ Font registration failed, using default font:', fontError);
         
