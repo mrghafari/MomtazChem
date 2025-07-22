@@ -1566,31 +1566,36 @@ const Shop = () => {
                                 <Plus className="w-4 h-4" />
                               </Button>
                             </div>
-                              {/* Product Catalog Button */}
-                              {product.showCatalogToCustomers && product.pdfCatalogUrl && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="w-full mb-2 text-green-600 border-green-600 hover:bg-green-50"
-                                  onClick={() => window.open(product.pdfCatalogUrl, '_blank')}
-                                >
-                                  <Eye className="w-4 h-4 mr-2" />
-                                  مشاهده کاتالوگ
-                                </Button>
-                              )}
+                              {/* Product Catalog and MSDS Buttons - Horizontal Layout */}
+                              {(product.showCatalogToCustomers && product.pdfCatalogUrl) || (product.showMsdsToCustomers && product.msdsUrl) ? (
+                                <div className="grid grid-cols-2 gap-2 mb-2 p-2 bg-gray-50 rounded-lg border">
+                                  {/* Product Catalog Button */}
+                                  {product.showCatalogToCustomers && product.pdfCatalogUrl && (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="text-xs h-8 text-green-600 border-green-600 hover:bg-green-50"
+                                      onClick={() => window.open(product.pdfCatalogUrl, '_blank')}
+                                    >
+                                      <Eye className="w-3 h-3 mr-1" />
+                                      کاتالوگ
+                                    </Button>
+                                  )}
 
-                              {/* MSDS Download Button */}
-                              {product.showMsdsToCustomers && product.msdsUrl && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="w-full mb-2 text-blue-600 border-blue-600 hover:bg-blue-50"
-                                  onClick={() => window.open(product.msdsUrl, '_blank')}
-                                >
-                                  <FileText className="w-4 h-4 mr-2" />
-                                  دانلود MSDS
-                                </Button>
-                              )}
+                                  {/* MSDS Download Button */}
+                                  {product.showMsdsToCustomers && product.msdsUrl && (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="text-xs h-8 text-blue-600 border-blue-600 hover:bg-blue-50"
+                                      onClick={() => window.open(product.msdsUrl, '_blank')}
+                                    >
+                                      <FileText className="w-3 h-3 mr-1" />
+                                      MSDS
+                                    </Button>
+                                  )}
+                                </div>
+                              ) : null}
                               
                             {/* Add to Cart Button - Always show */}
                             <Button
@@ -1866,31 +1871,36 @@ const Shop = () => {
                                     <Plus className="w-4 h-4" />
                                   </Button>
                                 </div>
-                                  {/* Product Catalog Button */}
-                                  {product.showCatalogToCustomers && product.pdfCatalogUrl && (
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      className="w-full mb-2 text-green-600 border-green-600 hover:bg-green-50"
-                                      onClick={() => window.open(product.pdfCatalogUrl, '_blank')}
-                                    >
-                                      <Eye className="w-4 h-4 mr-2" />
-                                      مشاهده کاتالوگ
-                                    </Button>
-                                  )}
+                                  {/* Product Catalog and MSDS Buttons - Horizontal Layout */}
+                                  {(product.showCatalogToCustomers && product.pdfCatalogUrl) || (product.showMsdsToCustomers && product.msdsUrl) ? (
+                                    <div className="grid grid-cols-2 gap-2 mb-2 p-2 bg-gray-50 rounded-lg border">
+                                      {/* Product Catalog Button */}
+                                      {product.showCatalogToCustomers && product.pdfCatalogUrl && (
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          className="text-xs h-8 text-green-600 border-green-600 hover:bg-green-50"
+                                          onClick={() => window.open(product.pdfCatalogUrl, '_blank')}
+                                        >
+                                          <Eye className="w-3 h-3 mr-1" />
+                                          کاتالوگ
+                                        </Button>
+                                      )}
 
-                                  {/* MSDS Download Button */}
-                                  {product.showMsdsToCustomers && product.msdsUrl && (
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      className="w-full mb-2 text-blue-600 border-blue-600 hover:bg-blue-50"
-                                      onClick={() => window.open(product.msdsUrl, '_blank')}
-                                    >
-                                      <FileText className="w-4 h-4 mr-2" />
-                                      دانلود MSDS
-                                    </Button>
-                                  )}
+                                      {/* MSDS Download Button */}
+                                      {product.showMsdsToCustomers && product.msdsUrl && (
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          className="text-xs h-8 text-blue-600 border-blue-600 hover:bg-blue-50"
+                                          onClick={() => window.open(product.msdsUrl, '_blank')}
+                                        >
+                                          <FileText className="w-3 h-3 mr-1" />
+                                          MSDS
+                                        </Button>
+                                      )}
+                                    </div>
+                                  ) : null}
                                   
                                 {/* Add to Cart Button - Always show */}
                                 <Button
