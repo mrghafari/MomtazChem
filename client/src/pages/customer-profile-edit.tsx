@@ -157,7 +157,7 @@ export default function CustomerProfileEdit() {
       const customerData = customer.customer;
       
       // Debug: Log customer data to check CRM fields
-      console.log('🔍 [UI DEBUG] Loading customer data:', customerData);
+      console.log('🔍 [UI DEBUG] Customer data loaded');
       console.log('🔍 [CRM DEBUG] CRM Fields from API:', {
         annualRevenue: customerData.annualRevenue,
         priceRange: customerData.priceRange,
@@ -166,6 +166,14 @@ export default function CustomerProfileEdit() {
         smsEnabled: customerData.smsEnabled,
         emailEnabled: customerData.emailEnabled
       });
+      console.log('🔍 [VALUES] Actual CRM values:', 
+        'annualRevenue=' + customerData.annualRevenue,
+        'priceRange=' + customerData.priceRange,
+        'orderFrequency=' + customerData.orderFrequency,
+        'creditStatus=' + customerData.creditStatus,
+        'smsEnabled=' + customerData.smsEnabled,
+        'emailEnabled=' + customerData.emailEnabled
+      );
       
       form.reset({
         firstName: customerData.firstName || "",
@@ -206,14 +214,14 @@ export default function CustomerProfileEdit() {
         emailEnabled: customerData.emailEnabled || false,
       });
       
-      console.log('✅ [UI DEBUG] Form reset with CRM values:', {
-        annualRevenue: customerData.annualRevenue || "",
-        priceRange: customerData.priceRange || "",
-        orderFrequency: customerData.orderFrequency || "",
-        creditStatus: customerData.creditStatus || "",
-        smsEnabled: customerData.smsEnabled || false,
-        emailEnabled: customerData.emailEnabled || false
-      });
+      console.log('✅ [UI DEBUG] Form reset completed with CRM values:', 
+        'annualRevenue=' + (customerData.annualRevenue || ""),
+        'priceRange=' + (customerData.priceRange || ""),
+        'orderFrequency=' + (customerData.orderFrequency || ""),
+        'creditStatus=' + (customerData.creditStatus || ""),
+        'smsEnabled=' + (customerData.smsEnabled || false),
+        'emailEnabled=' + (customerData.emailEnabled || false)
+      );
     }
   }, [customer, form]);
 

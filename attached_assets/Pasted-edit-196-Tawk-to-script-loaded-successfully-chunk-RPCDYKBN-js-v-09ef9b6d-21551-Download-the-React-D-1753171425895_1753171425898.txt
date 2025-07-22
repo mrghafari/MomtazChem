@@ -1,0 +1,195 @@
+edit:196 Tawk.to script loaded successfully
+chunk-RPCDYKBN.js?v=09ef9b6d:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:115737)
+    at t.value (twk-chunk-common.js:2:148821)
+    at p.updateUUID (twk-chunk-common.js:2:200473)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:122752)
+    at twk-chunk-common.js:2:122063
+value @ twk-chunk-common.js:2
+edit:168 Tawk.to Live Chat loaded successfully
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+shop.tsx:208 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+shop.tsx:208 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:208 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:208 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:208 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:208 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:208 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:212 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:213 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+shop.tsx:208 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:212 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:213 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+shop.tsx:208 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:212 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:213 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+shop.tsx:208 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:212 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:213 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+shop.tsx:208 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:212 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:213 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+shop.tsx:456 🔐 [LOGIN] Starting handleLoginSuccess
+shop.tsx:457 🔐 [LOGIN] Customer data: Object
+shop.tsx:458 🔐 [LOGIN] Current cart state: Object
+shop.tsx:462 🔐 [LOGIN] Customer state set
+shop.tsx:465 🔐 [LOGIN] Wallet balance fetch initiated
+shop.tsx:469 🔐 [LOGIN] Auth modal closed
+shop.tsx:474 🔐 [LOGIN] Cache invalidated
+shop.tsx:478 🔐 [LOGIN] Has cart items: false
+shop.tsx:479 🔐 [LOGIN] Cart contents: Object
+shop.tsx:483 🔐 [LOGIN] Cart migration completed
+shop.tsx:489 🔐 [LOGIN] Welcome toast shown
+shop.tsx:503 🔐 [LOGIN] User cart data: null
+shop.tsx:504 🔐 [LOGIN] Total cart items after migration: 0
+shop.tsx:514 🔐 [LOGIN] No items in cart, navigating to profile
+shop.tsx:519 🔐 [LOGIN] handleLoginSuccess completed successfully
+customer-profile-edit.tsx:160 🔍 [UI DEBUG] Loading customer data: Object
+customer-profile-edit.tsx:161 🔍 [CRM DEBUG] CRM Fields from API: Object
+customer-profile-edit.tsx:209 ✅ [UI DEBUG] Form reset with CRM values: Object
+customer-profile-edit.tsx:233 📍 Province found and set: Object
+customer-profile-edit.tsx:251 🏙️ City found and set: Object
+customer-profile-edit.tsx:251 🏙️ City found and set: Object
+useAuth.ts:30  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 401 (Unauthorized)
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=09ef9b6d:840
+run @ @tanstack_react-query.js?v=09ef9b6d:494
+start @ @tanstack_react-query.js?v=09ef9b6d:536
+fetch @ @tanstack_react-query.js?v=09ef9b6d:926
+executeFetch_fn @ @tanstack_react-query.js?v=09ef9b6d:2211
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:2245
+useAuth.ts:30  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 401 (Unauthorized)
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=09ef9b6d:840
+run @ @tanstack_react-query.js?v=09ef9b6d:494
+start @ @tanstack_react-query.js?v=09ef9b6d:536
+fetch @ @tanstack_react-query.js?v=09ef9b6d:926
+executeFetch_fn @ @tanstack_react-query.js?v=09ef9b6d:2211
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=09ef9b6d:2243
+updateTimers_fn @ @tanstack_react-query.js?v=09ef9b6d:2250
+onQueryUpdate @ @tanstack_react-query.js?v=09ef9b6d:2206
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:998
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:997
+batch @ @tanstack_react-query.js?v=09ef9b6d:583
+dispatch_fn @ @tanstack_react-query.js?v=09ef9b6d:996
+setData @ @tanstack_react-query.js?v=09ef9b6d:696
+onSuccess @ @tanstack_react-query.js?v=09ef9b6d:897
+resolve @ @tanstack_react-query.js?v=09ef9b6d:456
+Promise.then
+run @ @tanstack_react-query.js?v=09ef9b6d:498
+start @ @tanstack_react-query.js?v=09ef9b6d:536
+fetch @ @tanstack_react-query.js?v=09ef9b6d:926
+executeFetch_fn @ @tanstack_react-query.js?v=09ef9b6d:2211
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:2245
+useAuth.ts:30  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 401 (Unauthorized)
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=09ef9b6d:840
+run @ @tanstack_react-query.js?v=09ef9b6d:494
+start @ @tanstack_react-query.js?v=09ef9b6d:536
+fetch @ @tanstack_react-query.js?v=09ef9b6d:926
+executeFetch_fn @ @tanstack_react-query.js?v=09ef9b6d:2211
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=09ef9b6d:2243
+updateTimers_fn @ @tanstack_react-query.js?v=09ef9b6d:2250
+onQueryUpdate @ @tanstack_react-query.js?v=09ef9b6d:2206
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:998
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:997
+batch @ @tanstack_react-query.js?v=09ef9b6d:583
+dispatch_fn @ @tanstack_react-query.js?v=09ef9b6d:996
+setData @ @tanstack_react-query.js?v=09ef9b6d:696
+onSuccess @ @tanstack_react-query.js?v=09ef9b6d:897
+resolve @ @tanstack_react-query.js?v=09ef9b6d:456
+Promise.then
+run @ @tanstack_react-query.js?v=09ef9b6d:498
+start @ @tanstack_react-query.js?v=09ef9b6d:536
+fetch @ @tanstack_react-query.js?v=09ef9b6d:926
+executeFetch_fn @ @tanstack_react-query.js?v=09ef9b6d:2211
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=09ef9b6d:2243
+updateTimers_fn @ @tanstack_react-query.js?v=09ef9b6d:2250
+onQueryUpdate @ @tanstack_react-query.js?v=09ef9b6d:2206
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:998
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:997
+batch @ @tanstack_react-query.js?v=09ef9b6d:583
+dispatch_fn @ @tanstack_react-query.js?v=09ef9b6d:996
+setData @ @tanstack_react-query.js?v=09ef9b6d:696
+onSuccess @ @tanstack_react-query.js?v=09ef9b6d:897
+resolve @ @tanstack_react-query.js?v=09ef9b6d:456
+Promise.then
+run @ @tanstack_react-query.js?v=09ef9b6d:498
+start @ @tanstack_react-query.js?v=09ef9b6d:536
+fetch @ @tanstack_react-query.js?v=09ef9b6d:926
+executeFetch_fn @ @tanstack_react-query.js?v=09ef9b6d:2211
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:2245
+customer-profile-edit.tsx:329 📤 [FRONTEND] Sending profile update data: {firstName: 'Omid', lastName: 'Mohammad', phone: '+9647503533769', email: 'water@momtazchem.com', company: 'Momtazchem Chemical Solutions', …}
+useAuth.ts:30  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 401 (Unauthorized)
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=09ef9b6d:840
+run @ @tanstack_react-query.js?v=09ef9b6d:494
+start @ @tanstack_react-query.js?v=09ef9b6d:536
+fetch @ @tanstack_react-query.js?v=09ef9b6d:926
+executeFetch_fn @ @tanstack_react-query.js?v=09ef9b6d:2211
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=09ef9b6d:2243
+updateTimers_fn @ @tanstack_react-query.js?v=09ef9b6d:2250
+onQueryUpdate @ @tanstack_react-query.js?v=09ef9b6d:2206
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:998
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:997
+batch @ @tanstack_react-query.js?v=09ef9b6d:583
+dispatch_fn @ @tanstack_react-query.js?v=09ef9b6d:996
+setData @ @tanstack_react-query.js?v=09ef9b6d:696
+onSuccess @ @tanstack_react-query.js?v=09ef9b6d:897
+resolve @ @tanstack_react-query.js?v=09ef9b6d:456
+Promise.then
+run @ @tanstack_react-query.js?v=09ef9b6d:498
+start @ @tanstack_react-query.js?v=09ef9b6d:536
+fetch @ @tanstack_react-query.js?v=09ef9b6d:926
+executeFetch_fn @ @tanstack_react-query.js?v=09ef9b6d:2211
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=09ef9b6d:2243
+updateTimers_fn @ @tanstack_react-query.js?v=09ef9b6d:2250
+onQueryUpdate @ @tanstack_react-query.js?v=09ef9b6d:2206
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:998
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:997
+batch @ @tanstack_react-query.js?v=09ef9b6d:583
+dispatch_fn @ @tanstack_react-query.js?v=09ef9b6d:996
+setData @ @tanstack_react-query.js?v=09ef9b6d:696
+onSuccess @ @tanstack_react-query.js?v=09ef9b6d:897
+resolve @ @tanstack_react-query.js?v=09ef9b6d:456
+Promise.then
+run @ @tanstack_react-query.js?v=09ef9b6d:498
+start @ @tanstack_react-query.js?v=09ef9b6d:536
+fetch @ @tanstack_react-query.js?v=09ef9b6d:926
+executeFetch_fn @ @tanstack_react-query.js?v=09ef9b6d:2211
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=09ef9b6d:2243
+updateTimers_fn @ @tanstack_react-query.js?v=09ef9b6d:2250
+onQueryUpdate @ @tanstack_react-query.js?v=09ef9b6d:2206
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:998
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:997
+batch @ @tanstack_react-query.js?v=09ef9b6d:583
+dispatch_fn @ @tanstack_react-query.js?v=09ef9b6d:996
+setData @ @tanstack_react-query.js?v=09ef9b6d:696
+onSuccess @ @tanstack_react-query.js?v=09ef9b6d:897
+resolve @ @tanstack_react-query.js?v=09ef9b6d:456
+Promise.then
+run @ @tanstack_react-query.js?v=09ef9b6d:498
+start @ @tanstack_react-query.js?v=09ef9b6d:536
+fetch @ @tanstack_react-query.js?v=09ef9b6d:926
+executeFetch_fn @ @tanstack_react-query.js?v=09ef9b6d:2211
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:2245
