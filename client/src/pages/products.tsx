@@ -686,7 +686,7 @@ export default function ProductsPage() {
     }
   };
 
-  const handleCatalogUpload = async (file: File) => {
+  const handleCatalogUpload = async (file: File, productId?: number) => {
     if (!file) return;
 
     setUploadingCatalog(true);
@@ -704,18 +704,46 @@ export default function ProductsPage() {
       }
 
       const { url, originalName } = await response.json();
-      form.setValue('pdfCatalogUrl', url);
-      form.setValue('catalogFileName', originalName);
-      setCatalogPreview(url);
       
-      toast({
-        title: "Success",
-        description: "Catalog uploaded successfully",
-      });
+      // If productId is provided, update the specific product
+      if (productId) {
+        const updateResponse = await apiRequest(`/api/products/${productId}`, {
+          method: 'PUT',
+          body: JSON.stringify({
+            pdfCatalogUrl: url,
+            catalogFileName: originalName,
+            showCatalogToCustomers: true
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (updateResponse.ok) {
+          // Refresh the products list
+          queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+          toast({
+            title: "موفقیت",
+            description: "کاتالوگ محصول با موفقیت آپلود شد",
+          });
+        } else {
+          throw new Error('Failed to update product');
+        }
+      } else {
+        // Original behavior for form dialog
+        form.setValue('pdfCatalogUrl', url);
+        form.setValue('catalogFileName', originalName);
+        setCatalogPreview(url);
+        
+        toast({
+          title: "Success",
+          description: "Catalog uploaded successfully",
+        });
+      }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to upload catalog",
+        title: "خطا",
+        description: "آپلود کاتالوگ با مشکل مواجه شد",
         variant: "destructive",
       });
     } finally {
@@ -723,7 +751,7 @@ export default function ProductsPage() {
     }
   };
 
-  const handleMsdsUpload = async (file: File) => {
+  const handleMsdsUpload = async (file: File, productId?: number) => {
     if (!file) return;
 
     setUploadingMsds(true);
@@ -741,18 +769,46 @@ export default function ProductsPage() {
       }
 
       const { url, originalName } = await response.json();
-      form.setValue('msdsUrl', url);
-      form.setValue('msdsFileName', originalName);
-      setMsdsPreview(url);
       
-      toast({
-        title: "Success",
-        description: "MSDS file uploaded successfully",
-      });
+      // If productId is provided, update the specific product
+      if (productId) {
+        const updateResponse = await apiRequest(`/api/products/${productId}`, {
+          method: 'PUT',
+          body: JSON.stringify({
+            msdsUrl: url,
+            msdsFileName: originalName,
+            showMsdsToCustomers: true
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (updateResponse.ok) {
+          // Refresh the products list
+          queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+          toast({
+            title: "موفقیت",
+            description: "فایل MSDS با موفقیت آپلود شد",
+          });
+        } else {
+          throw new Error('Failed to update product');
+        }
+      } else {
+        // Original behavior for form dialog
+        form.setValue('msdsUrl', url);
+        form.setValue('msdsFileName', originalName);
+        setMsdsPreview(url);
+        
+        toast({
+          title: "Success",
+          description: "MSDS file uploaded successfully",
+        });
+      }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to upload MSDS file",
+        title: "خطا",
+        description: "آپلود فایل MSDS با مشکل مواجه شد",
         variant: "destructive",
       });
     } finally {
@@ -1244,7 +1300,7 @@ export default function ProductsPage() {
                       </div>
 
                       {/* Action Buttons */}
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-1 flex-wrap">
                         <Button
                           variant="ghost"
                           size="sm"
@@ -1254,6 +1310,67 @@ export default function ProductsPage() {
                         >
                           {product.syncWithShop ? 'مخفی کردن' : 'نمایش'}
                         </Button>
+                        
+                        {/* Catalog Upload Button */}
+                        <div className="relative">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0 hover:bg-green-50 hover:text-green-600"
+                            title="آپلود کاتالوگ"
+                            onClick={() => {
+                              const fileInput = document.querySelector(`#catalog-upload-${product.id}`) as HTMLInputElement;
+                              fileInput?.click();
+                            }}
+                          >
+                            <Upload className="w-4 h-4" />
+                          </Button>
+                          <input
+                            id={`catalog-upload-${product.id}`}
+                            type="file"
+                            accept="application/pdf"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                // Use existing handleCatalogUpload with product update
+                                handleCatalogUpload(file, product.id);
+                              }
+                            }}
+                          />
+                        </div>
+
+                        {/* MSDS Upload Button - Hidden for non-chemical products */}
+                        {!product.isNonChemical && (
+                          <div className="relative">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0 hover:bg-orange-50 hover:text-orange-600"
+                              title="آپلود MSDS"
+                              onClick={() => {
+                                const fileInput = document.querySelector(`#msds-upload-${product.id}`) as HTMLInputElement;
+                                fileInput?.click();
+                              }}
+                            >
+                              <FileText className="w-4 h-4" />
+                            </Button>
+                            <input
+                              id={`msds-upload-${product.id}`}
+                              type="file"
+                              accept="application/pdf"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  // Use existing handleMsdsUpload with product update
+                                  handleMsdsUpload(file, product.id);
+                                }
+                              }}
+                            />
+                          </div>
+                        )}
+
                         <Button
                           variant="ghost"
                           size="sm"
