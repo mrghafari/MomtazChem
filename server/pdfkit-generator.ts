@@ -159,8 +159,8 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
           const productNameAlign = getTextAlignment(productName);
           
           // Numbers and currency - always LTR
-          const totalAmount = ((item.total || item.quantity || 1) * (item.unitPrice || 0)).toLocaleString('fa-IR') + ` ${currency}`;
-          const unitPrice = (item.unitPrice || 0).toLocaleString('fa-IR') + ` ${currency}`;
+          const totalAmount = ((item.total || item.quantity || 1) * (item.unitPrice || 0)).toLocaleString('en-US') + `  ${currency}`;
+          const unitPrice = (item.unitPrice || 0).toLocaleString('en-US') + `  ${currency}`;
           const quantity = (item.quantity || 1).toString();
           
           doc.fontSize(9)
@@ -187,7 +187,7 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
         doc.fontSize(11)
            .font('VazirRegular')
            .text('مجموع کالاها:', 50, subtotalY, { align: 'right' })
-           .text(`${itemsSubtotal.toLocaleString('fa-IR')} ${currency}`, 200, subtotalY, { align: 'left' });
+           .text(`${itemsSubtotal.toLocaleString('en-US')}  ${currency}`, 200, subtotalY, { align: 'left' });
         
         // Shipping cost
         const shippingY = subtotalY + 20;
@@ -196,7 +196,7 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
         doc.fontSize(11)
            .font('VazirRegular')
            .text('هزینه حمل:', 50, shippingY, { align: 'right' })
-           .text(`${parseFloat(shippingCost).toLocaleString('fa-IR')} ${currency}`, 200, shippingY, { align: 'left' });
+           .text(`${parseFloat(shippingCost).toLocaleString('en-US')}  ${currency}`, 200, shippingY, { align: 'left' });
         
         // Total amount
         const totalY = shippingY + 30;
@@ -209,7 +209,7 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
         
         // Split total text: Persian text (right) + numbers (left)
         const totalPersianText = 'مجموع کل:';
-        const totalNumberText = `${totalAmount.toLocaleString('fa-IR')} ${currency}`;
+        const totalNumberText = `${totalAmount.toLocaleString('en-US')}  ${currency}`;
         
         doc.fontSize(12)
            .font('VazirBold')
@@ -266,12 +266,12 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
         items.forEach((item: any, index: number) => {
           const itemY = currentY + (index * 20);
           doc.fontSize(10)
-             .text(`${item.name || 'Unknown'} - Qty: ${item.quantity || 1} - Price: ${(item.unitPrice || 0).toLocaleString()} IQD`, 50, itemY);
+             .text(`${item.name || 'Unknown'} - Qty: ${item.quantity || 1} - Price: ${(item.unitPrice || 0).toLocaleString('en-US')}  IQD`, 50, itemY);
         });
         
         const totalY = currentY + (items.length * 20) + 30;
         doc.fontSize(12)
-           .text(`Total: ${(invoiceData.totalAmount || 0).toLocaleString()} IQD`, 50, totalY);
+           .text(`Total: ${(invoiceData.totalAmount || 0).toLocaleString('en-US')}  IQD`, 50, totalY);
       }
 
       // Finalize the PDF

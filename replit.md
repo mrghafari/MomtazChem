@@ -6,7 +6,15 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
-### COMPLETED: PDF Invoice Enhancement with Shipping Cost and Layout Fix (July 22, 2025)
+### COMPLETED: PDF Invoice Enhancement with Shipping Cost and Number Formatting (July 22, 2025)
+✅ **FIXED: Number formatting and spacing in PDF invoices**
+- **Issue**: Numbers needed proper spacing with currency and quantities shouldn't use commas
+- **Solution**: Changed number formatting from Persian (fa-IR) to English (en-US) locale
+- **Spacing**: Added double space between amounts and IQD currency (e.g., "1,250  IQD")
+- **Quantity Format**: Quantities display as plain numbers without commas (e.g., "5" not "5,000")
+- **Applied To**: All price fields, totals, subtotals, shipping costs in both main and fallback code
+- **Currency Display**: Consistent "  IQD" format with double space throughout invoice
+
 ✅ **IMPLEMENTED: Separate shipping cost line item in proforma invoices**
 - **Issue**: User requested shipping cost to appear as separate line item below product subtotal
 - **Solution**: Added detailed cost breakdown with items subtotal, shipping cost, and final total
