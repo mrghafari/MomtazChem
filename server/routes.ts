@@ -20045,6 +20045,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
             'مدیریت کاربران': 'user_management',
             'مدیریت روش‌ها': 'procedures',
             'مدیریت پرداخت': 'payment_management',
+            'مدیریت حسابداری': 'accounting_management',
             'مدیریت مالی': 'finance',
             'مدیریت کیف پول': 'wallet_management',
             'آمار جغرافیایی': 'geography_analytics',
