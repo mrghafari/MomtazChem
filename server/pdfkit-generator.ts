@@ -97,6 +97,12 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
           return formattedTokens.join('');
         };
         
+        // Helper function to format numbers without commas and decimals
+        const formatNumber = (num: number): string => {
+          // Convert to integer (remove decimals) and format without commas
+          return Math.floor(num).toString();
+        };
+        
         // Header - Mixed language handling
         const isProforma = invoiceData.invoiceType === 'PROFORMA';
         const headerPersian = isProforma ? 'پیش‌فاکتور' : 'فاکتور فروش';
@@ -186,10 +192,10 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
           const productNameAlign = getTextAlignment(productName);
           const formattedProductName = isRTLText(productName) ? formatMixedText(productName) : productName;
           
-          // Numbers and currency - always LTR
-          const totalAmount = ((item.total || item.quantity || 1) * (item.unitPrice || 0)).toLocaleString('en-US') + `  ${currency}`;
-          const unitPrice = (item.unitPrice || 0).toLocaleString('en-US') + `  ${currency}`;
-          const quantity = (item.quantity || 1).toString();
+          // Numbers and currency - always LTR without commas and decimals
+          const totalAmount = formatNumber((item.total || item.quantity || 1) * (item.unitPrice || 0)) + `  ${currency}`;
+          const unitPrice = formatNumber(item.unitPrice || 0) + `  ${currency}`;
+          const quantity = formatNumber(item.quantity || 1);
           
           doc.fontSize(9)
              .font('VazirRegular')
@@ -215,7 +221,7 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
         doc.fontSize(11)
            .font('VazirRegular')
            .text(formatMixedText('مجموع کالاها:'), 50, subtotalY, { align: 'right', width: 150, features: ['rtla'] })
-           .text(`${itemsSubtotal.toLocaleString('en-US')}  ${currency}`, 200, subtotalY, { align: 'left' });
+           .text(`${formatNumber(itemsSubtotal)}  ${currency}`, 200, subtotalY, { align: 'left' });
         
         // Shipping cost
         const shippingY = subtotalY + 20;
@@ -224,7 +230,7 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
         doc.fontSize(11)
            .font('VazirRegular')
            .text(formatMixedText('هزینه حمل:'), 50, shippingY, { align: 'right', width: 150, features: ['rtla'] })
-           .text(`${parseFloat(shippingCost).toLocaleString('en-US')}  ${currency}`, 200, shippingY, { align: 'left' });
+           .text(`${formatNumber(parseFloat(shippingCost))}  ${currency}`, 200, shippingY, { align: 'left' });
         
         // VAT (Value Added Tax)
         const vatY = shippingY + 20;
@@ -235,7 +241,7 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
           doc.fontSize(11)
              .font('VazirRegular')
              .text(formatMixedText(`مالیات بر ارزش افزوده (${vatRate}%):`), 50, vatY, { align: 'right', width: 150, features: ['rtla'] })
-             .text(`${vatAmount.toLocaleString('en-US')}  ${currency}`, 200, vatY, { align: 'left' });
+             .text(`${formatNumber(vatAmount)}  ${currency}`, 200, vatY, { align: 'left' });
         }
         
         // Total amount
@@ -249,7 +255,7 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
         
         // Split total text: Persian text (right) + numbers (left)
         const totalPersianText = 'مجموع کل:';
-        const totalNumberText = `${totalAmount.toLocaleString('en-US')}  ${currency}`;
+        const totalNumberText = `${formatNumber(totalAmount)}  ${currency}`;
         
         doc.fontSize(12)
            .font('VazirBold')

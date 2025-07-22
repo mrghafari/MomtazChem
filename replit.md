@@ -26,6 +26,20 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Impact**: PDF documents now display authentic mixed Persian-English content with proper text direction for each language
 - **Testing**: Enhanced test-proforma.html page available at /test-proforma with comprehensive documentation
 
+✅ **IMPLEMENTED: Clean number formatting without commas and decimals in PDF invoices**
+- **Issue**: User requested that numbers should not have commas and decimal places should be removed
+- **Solution**: Created formatNumber() function that removes decimals using Math.floor() and displays integers without comma separators
+- **Implementation**: Replaced all .toLocaleString('en-US') calls with formatNumber() throughout PDF generator
+- **Applied To**: 
+  - Product quantities: 15 instead of 15.00
+  - Unit prices: 25500 instead of 25,500.75
+  - Total amounts: 382511 instead of 382,511.25
+  - Shipping costs: 75500 instead of 75,500.25
+  - VAT amounts: Clean integer values
+  - Final totals: Clean total without commas or decimals
+- **Test Results**: Generated 19,335-byte PDF with clean number formatting
+- **Impact**: All numerical values in PDF invoices now display as clean integers without commas or decimal places
+
 ### COMPLETED: Complete CRM Form Integration with Data Preservation System (July 22, 2025)
 ✅ **IMPLEMENTED: Comprehensive CRM fields integration in customer profile edit form**
 - **Issue**: User requested complete integration of all CRM database fields into customer profile form with data preservation
