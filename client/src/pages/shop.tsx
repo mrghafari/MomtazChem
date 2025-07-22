@@ -1360,8 +1360,7 @@ const Shop = () => {
                             </div>
                           )}
                           
-                          {/* Debug: Enhanced debug info */}
-                          {console.log('🌟 [PRODUCT DEBUG]', product.id, 'has stats:', !!productStats?.[product.id], productStats?.[product.id])}
+                          {/* Debug: Show product ID and rating if available */}
                           {productStats && productStats[product.id] && (
                             <div className="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded">
                               ID:{product.id} ★{productStats[product.id].averageRating.toFixed(1)} ({productStats[product.id].totalReviews})
