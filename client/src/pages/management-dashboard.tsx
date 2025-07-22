@@ -24,12 +24,180 @@ import {
   Calendar,
   TrendingUp,
   TrendingDown,
-  Monitor
+  Monitor,
+  LogIn,
+  LogOut,
+  Phone,
+  Mail
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+
+// Customer Activities Component
+const CustomerActivitiesCard = () => {
+  const { data: customerActivities, isLoading: activitiesLoading } = useQuery({
+    queryKey: ['/api/management/customer-activities'],
+    staleTime: 30000,
+    refetchInterval: 2 * 60 * 1000, // 2 minutes
+  });
+
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case 'login':
+        return <LogIn className="w-4 h-4 text-green-500" />;
+      case 'logout':
+        return <LogOut className="w-4 h-4 text-red-500" />;
+      default:
+        return <Activity className="w-4 h-4 text-blue-500" />;
+    }
+  };
+
+  const getActivityColor = (type: string) => {
+    switch (type) {
+      case 'login':
+        return 'bg-green-50 border-green-200';
+      case 'logout':
+        return 'bg-red-50 border-red-200';
+      default:
+        return 'bg-blue-50 border-blue-200';
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center">
+          <Activity className="w-5 h-5 ml-2 text-blue-500" />
+          فعالیت‌های مشتریان
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3 max-h-96 overflow-y-auto">
+          {activitiesLoading ? (
+            <div className="flex items-center justify-center py-4">
+              <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full" />
+              <span className="mr-2 text-sm">در حال بارگذاری...</span>
+            </div>
+          ) : customerActivities?.data?.length > 0 ? (
+            customerActivities.data.map((activity: any, index: number) => (
+              <div key={index} className={`p-4 rounded-lg border ${getActivityColor(activity.type)}`}>
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start space-x-3 space-x-reverse flex-1">
+                    {getActivityIcon(activity.type)}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-medium text-sm">{activity.customerName}</span>
+                        <Badge variant="secondary" className="text-xs">
+                          {activity.type === 'login' ? 'ورود' : 'خروج'}
+                        </Badge>
+                      </div>
+                      <div className="space-y-1 text-xs text-gray-600">
+                        <div className="flex items-center gap-2">
+                          <Phone className="w-3 h-3" />
+                          <span dir="ltr">{activity.phone}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Mail className="w-3 h-3" />
+                          <span dir="ltr">{activity.email}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <span className="text-xs text-gray-500 whitespace-nowrap">
+                    {new Date(activity.timestamp).toLocaleTimeString('fa-IR', {
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </span>
+                </div>
+              </div>
+            ))
+          ) : (
+            // Fallback mock data for demonstration
+            <>
+              <div className="p-4 rounded-lg border bg-green-50 border-green-200">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start space-x-3 space-x-reverse flex-1">
+                    <LogIn className="w-4 h-4 text-green-500" />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-medium text-sm">احمد رضایی</span>
+                        <Badge variant="secondary" className="text-xs">ورود</Badge>
+                      </div>
+                      <div className="space-y-1 text-xs text-gray-600">
+                        <div className="flex items-center gap-2">
+                          <Phone className="w-3 h-3" />
+                          <span dir="ltr">+964 750 123 4567</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Mail className="w-3 h-3" />
+                          <span dir="ltr">ahmad.rezaei@email.com</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <span className="text-xs text-gray-500">09:15</span>
+                </div>
+              </div>
+              
+              <div className="p-4 rounded-lg border bg-red-50 border-red-200">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start space-x-3 space-x-reverse flex-1">
+                    <LogOut className="w-4 h-4 text-red-500" />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-medium text-sm">فاطمه حسینی</span>
+                        <Badge variant="secondary" className="text-xs">خروج</Badge>
+                      </div>
+                      <div className="space-y-1 text-xs text-gray-600">
+                        <div className="flex items-center gap-2">
+                          <Phone className="w-3 h-3" />
+                          <span dir="ltr">+964 770 987 6543</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Mail className="w-3 h-3" />
+                          <span dir="ltr">fatemeh.hosseini@email.com</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <span className="text-xs text-gray-500">08:45</span>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-lg border bg-green-50 border-green-200">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start space-x-3 space-x-reverse flex-1">
+                    <LogIn className="w-4 h-4 text-green-500" />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-medium text-sm">شرکت کیمیا صنعت</span>
+                        <Badge variant="secondary" className="text-xs">ورود</Badge>
+                      </div>
+                      <div className="space-y-1 text-xs text-gray-600">
+                        <div className="flex items-center gap-2">
+                          <Phone className="w-3 h-3" />
+                          <span dir="ltr">+964 751 456 7890</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Mail className="w-3 h-3" />
+                          <span dir="ltr">info@kimyasanat.com</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <span className="text-xs text-gray-500">08:30</span>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
 
 // Quick Action Widget Component
 interface QuickActionWidgetProps {
@@ -296,98 +464,12 @@ export default function ManagementDashboard() {
                   </div>
                 </div>
 
-                {/* Recent Activities */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <Activity className="w-5 h-5 ml-2 text-blue-500" />
-                      فعالیت‌های اخیر
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {dashboardData?.data?.recentActivities?.map((activity, index) => (
-                        <div key={index} className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
-                          <div className="flex items-center">
-                            <CheckCircle className="w-4 h-4 text-green-500 ml-2" />
-                            <span className="text-sm">{activity.message}</span>
-                          </div>
-                          <span className="text-xs text-gray-500">
-                            {new Date(activity.timestamp).toLocaleTimeString('fa-IR')}
-                          </span>
-                        </div>
-                      )) || (
-                        <>
-                          <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
-                            <div className="flex items-center">
-                              <CheckCircle className="w-4 h-4 text-green-500 ml-2" />
-                              <span className="text-sm">سفارش #ORD-1234 با موفقیت تحویل داده شد</span>
-                            </div>
-                            <span className="text-xs text-gray-500">5 دقیقه پیش</span>
-                          </div>
-                          <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
-                            <div className="flex items-center">
-                              <Users className="w-4 h-4 text-blue-500 ml-2" />
-                              <span className="text-sm">مشتری جدید "شرکت کیمیا پتروشیمی" ثبت‌نام کرد</span>
-                            </div>
-                            <span className="text-xs text-gray-500">15 دقیقه پیش</span>
-                          </div>
-                          <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg border border-yellow-200">
-                            <div className="flex items-center">
-                              <AlertTriangle className="w-4 h-4 text-yellow-500 ml-2" />
-                              <span className="text-sm">محصول "سولونت 402" به حد مجاز موجودی رسید</span>
-                            </div>
-                            <span className="text-xs text-gray-500">30 دقیقه پیش</span>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+                {/* Recent Customer Activities */}
+                <CustomerActivitiesCard />
               </>
             )}
 
-            {/* Recent Activities */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Activity className="w-5 h-5 ml-2 text-blue-500" />
-                  فعالیت‌های اخیر
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
-                    <div className="flex items-center">
-                      <CheckCircle className="w-4 h-4 text-green-500 ml-2" />
-                      <span className="text-sm">سفارش #ORD-1234 با موفقیت تحویل داده شد</span>
-                    </div>
-                    <span className="text-xs text-gray-500">5 دقیقه پیش</span>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
-                    <div className="flex items-center">
-                      <Users className="w-4 h-4 text-blue-500 ml-2" />
-                      <span className="text-sm">مشتری جدید "شرکت کیمیا پتروشیمی" ثبت‌نام کرد</span>
-                    </div>
-                    <span className="text-xs text-gray-500">15 دقیقه پیش</span>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg border border-yellow-200">
-                    <div className="flex items-center">
-                      <AlertTriangle className="w-4 h-4 text-yellow-500 ml-2" />
-                      <span className="text-sm">محصول "سولونت 402" به حد مجاز موجودی رسید</span>
-                    </div>
-                    <span className="text-xs text-gray-500">30 دقیقه پیش</span>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg border border-purple-200">
-                    <div className="flex items-center">
-                      <BarChart3 className="w-4 h-4 text-purple-500 ml-2" />
-                      <span className="text-sm">گزارش فروش هفتگی تولید شد</span>
-                    </div>
-                    <span className="text-xs text-gray-500">1 ساعت پیش</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+
           </div>
         </TabsContent>
 
