@@ -6,6 +6,29 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Customer Profile VAT Breakdown Display and Fixed Order API Response (July 22, 2025)
+✅ **IMPLEMENTED: Complete VAT breakdown display in customer profile with historical data accuracy**
+- **Issue**: Customer profile orders were not showing VAT breakdown components (subtotal, VAT amount, shipping costs)
+- **API Enhancement**: Fixed `/api/customers/orders` endpoint to include missing VAT and cost fields:
+  - Added `shipping_cost`, `vat_amount`, `surcharge_amount`, `vat_rate`, `surcharge_rate` to SQL query
+  - Updated response mapping to include `shippingCost`, `vatAmount`, `surchargeAmount` fields
+- **Frontend Implementation**: 
+  - Added comprehensive cost breakdown calculation in customer-profile.tsx
+  - Automatic subtotal calculation: `totalAmount - vatAmount - shippingCost - surchargeAmount`
+  - Professional display with color-coded cost components (VAT in green, shipping in blue)
+  - Historical accuracy: displays actual VAT amounts from order creation time
+- **Data Analysis**: 
+  - Current VAT rate: 6% (rate=0.0600 in tax_settings)
+  - Historical orders show varied VAT calculation accuracy due to past system changes
+  - Example: Order M2511166 has 0.04 IQD VAT on 58.39 total (historically calculated)
+- **User Experience**: Customer profile now shows complete financial breakdown per order:
+  - مجموع اقلام (Items Subtotal) - calculated
+  - مالیات بر ارزش افزوده (VAT Amount) - from order history
+  - هزینه حمل (Shipping Cost) - from order data  
+  - عوارض (Surcharges) - if applicable
+- **Impact**: Transparent financial breakdown for customers with accurate historical order data display
+- **Result**: Complete order cost visibility with proper VAT and shipping cost breakdown
+
 ### COMPLETED: Complete Duties/Surcharge Removal and Simplified VAT-Only Tax System (July 22, 2025)
 ✅ **RESOLVED: Duties functionality completely removed from system per business requirements**
 - **Business Decision**: User requested complete removal of duties/surcharge functionality as it's not used in their business
@@ -19,7 +42,7 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **API Integration**: 
   - Admin interface reads from `/api/accounting/tax-settings` for VAT management
   - Public components read from `/api/tax-settings` for checkout calculations
-- **Database State**: Single clean VAT entry (ID 1: type="vat", rate=11%, enabled) remains
+- **Database State**: Single clean VAT entry (ID 1: type="vat", rate=6%, enabled) remains
 - **Impact**: Streamlined tax management system with VAT-only functionality matching business needs
 - **Result**: Simplified tax system without duties complexity, cleaner UI, and focused business workflow
 

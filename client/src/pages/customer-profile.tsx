@@ -416,6 +416,54 @@ const CustomerProfile = () => {
                                   </div>
                                 );
                               })}
+                              
+                              {/* نمایش جزئیات قیمت */}
+                              <div className="mt-3 pt-2 border-t border-gray-200 space-y-1">
+                                {(() => {
+                                  const totalAmount = parseFloat(order.totalAmount || '0');
+                                  const vatAmount = parseFloat(order.vatAmount || '0');
+                                  const shippingCost = parseFloat(order.shippingCost || '0');
+                                  const surchargeAmount = parseFloat(order.surchargeAmount || '0');
+                                  const subtotalAmount = totalAmount - vatAmount - shippingCost - surchargeAmount;
+                                  
+                                  return (
+                                    <>
+                                      {/* مجموع اقلام */}
+                                      {subtotalAmount > 0 && (
+                                        <div className="flex justify-between text-sm text-gray-600">
+                                          <span>مجموع اقلام:</span>
+                                          <span>{subtotalAmount.toFixed(2)} IQD</span>
+                                        </div>
+                                      )}
+                                      
+                                      {/* مالیات بر ارزش افزوده */}
+                                      {vatAmount > 0 && (
+                                        <div className="flex justify-between text-sm text-green-700 font-medium">
+                                          <span>مالیات بر ارزش افزوده:</span>
+                                          <span>{vatAmount.toFixed(2)} IQD</span>
+                                          {/* نوت: این مقدار در زمان ایجاد سفارش محاسبه شده */}
+                                        </div>
+                                      )}
+                                      
+                                      {/* هزینه حمل */}
+                                      {shippingCost > 0 && (
+                                        <div className="flex justify-between text-sm text-blue-700">
+                                          <span>هزینه حمل:</span>
+                                          <span>{shippingCost.toFixed(2)} IQD</span>
+                                        </div>
+                                      )}
+                                      
+                                      {/* عوارض (اگر وجود داشته باشد) */}
+                                      {surchargeAmount > 0 && (
+                                        <div className="flex justify-between text-sm text-orange-700">
+                                          <span>عوارض:</span>
+                                          <span>{surchargeAmount.toFixed(2)} IQD</span>
+                                        </div>
+                                      )}
+                                    </>
+                                  );
+                                })()}
+                              </div>
                             </div>
                           </div>
                         )}
