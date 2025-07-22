@@ -1,0 +1,137 @@
+VM32 admin:51 Tawk.to script loaded successfully
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 ()
+index-CHasW4Hn.js:961 Auth check result: Object
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:115737)
+    at t.value (twk-chunk-common.js:2:148821)
+    at p.updateUUID (twk-chunk-common.js:2:200473)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:122752)
+    at twk-chunk-common.js:2:122063
+value @ twk-chunk-common.js:2
+index-CHasW4Hn.js:1503 🔍 [DEBUG] Site Management component initialized
+index-CHasW4Hn.js:1503 🔍 [DEBUG] useEffect triggered, userPermissions: undefined
+VM32 admin:23 Tawk.to Live Chat loaded successfully
+index-CHasW4Hn.js:1503 🔍 [DEBUG] Site Management component initialized
+index-CHasW4Hn.js:1503 🔍 [DEBUG] useEffect triggered, userPermissions: Object
+index-CHasW4Hn.js:1503 🔍 [DEBUG] userPermissions modules: Array(31)
+index-CHasW4Hn.js:1503 🔍 [DEBUG] Full userPermissions response: Object
+index-CHasW4Hn.js:1503 🔍 [DEBUG] userPermissions.modules: Array(31)
+index-CHasW4Hn.js:1503 🔍 [DEBUG] userPermissions.permissions: Array(31)
+index-CHasW4Hn.js:1503 🔍 [DEBUG] Total allButtons count: 31
+index-CHasW4Hn.js:1503 🔍 [DEBUG] AI Settings exists in allButtons: true
+index-CHasW4Hn.js:1503 🔍 [DEBUG] Content Management exists in allButtons: true
+index-CHasW4Hn.js:1503 🔍 [DEBUG] allowedModules: Array(31)
+index-CHasW4Hn.js:1503 🔍 [DEBUG] kpi_dashboard in allowedModules? true
+index-CHasW4Hn.js:1503 🔍 [DEBUG] management_dashboard in allowedModules? true
+index-CHasW4Hn.js:1503 🔍 [DEBUG] finance in allowedModules? true
+index-CHasW4Hn.js:1503 🔍 [DEBUG] geography_analytics in allowedModules? true
+index-CHasW4Hn.js:1503 🔍 [DEBUG] ai_settings in allowedModules? true
+index-CHasW4Hn.js:1503 🔍 [DEBUG] content_management in allowedModules? true
+index-CHasW4Hn.js:1503 🔍 [CRITICAL] Missing button detection:
+index-CHasW4Hn.js:1503 🔍 [CRITICAL] Missing buttons count: 0
+index-CHasW4Hn.js:1503 🔍 [DEBUG] finance button found in allButtons? Object
+index-CHasW4Hn.js:1503 🔍 [DEBUG] geography_analytics button found in allButtons? Object
+index-CHasW4Hn.js:1503 🔍 [DEBUG] ai_settings button found in allButtons? Object
+index-CHasW4Hn.js:1503 🔍 [DEBUG] content_management button found in allButtons? Object
+index-CHasW4Hn.js:1503 🔍 [DEBUG] finance button in filtered? Object
+index-CHasW4Hn.js:1503 🔍 [DEBUG] geography_analytics button in filtered? Object
+index-CHasW4Hn.js:1503 🔍 [DEBUG] ai_settings button in filtered? Object
+index-CHasW4Hn.js:1503 🔍 [DEBUG] content_management button in filtered? Object
+index-CHasW4Hn.js:1503 🔍 [DEBUG] filtered buttons count: 31
+index-CHasW4Hn.js:1503 🔍 [DEBUG] First 5 filtered buttons: Array(5)
+index-CHasW4Hn.js:1503 🔍 [DEBUG] AI Control button in filtered: Object
+index-CHasW4Hn.js:1503 🔍 [DEBUG] Content Management button in filtered: Object
+index-CHasW4Hn.js:1503 🔍 [DEBUG] Site Management component initialized
+index-CHasW4Hn.js:961 Auth check result: Object
+/api/correspondence/incoming:1  Failed to load resource: the server responded with a status of 404 ()
+/api/admin/company-information:1  Failed to load resource: the server responded with a status of 404 ()
+/api/correspondence/outgoing:1  Failed to load resource: the server responded with a status of 404 ()
+/api/company-images:1  Failed to load resource: the server responded with a status of 404 ()
+/api/company-documents:1  Failed to load resource: the server responded with a status of 404 ()
+/api/business-cards:1  Failed to load resource: the server responded with a status of 404 ()
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 ()
+/api/admin/company-information:1  Failed to load resource: the server responded with a status of 404 ()
+/api/correspondence/outgoing:1  Failed to load resource: the server responded with a status of 404 ()
+/api/company-documents:1  Failed to load resource: the server responded with a status of 404 ()
+/api/business-cards:1  Failed to load resource: the server responded with a status of 404 ()
+/api/correspondence/incoming:1  Failed to load resource: the server responded with a status of 404 ()
+/api/company-images:1  Failed to load resource: the server responded with a status of 404 ()
+index-CHasW4Hn.js:961 Auth check result: Object
+/api/admin/company-information:1  Failed to load resource: the server responded with a status of 400 ()
+index-CHasW4Hn.js:1503 Error updating company information: Error: 400: {"success":false,"message":"Unexpected token '\"', \"\"{\\\"compan\"... is not valid JSON"}
+    at OG (index-CHasW4Hn.js:48:43801)
+    at async Je (index-CHasW4Hn.js:48:44059)
+    at async Object.mutationFn (index-CHasW4Hn.js:1503:368386)
+onError @ index-CHasW4Hn.js:1503
+/api/admin/company-information:1  Failed to load resource: the server responded with a status of 400 ()
+index-CHasW4Hn.js:1503 Error updating company information: Error: 400: {"success":false,"message":"Unexpected token '\"', \"\"{\\\"compan\"... is not valid JSON"}
+    at OG (index-CHasW4Hn.js:48:43801)
+    at async Je (index-CHasW4Hn.js:48:44059)
+    at async Object.mutationFn (index-CHasW4Hn.js:1503:368386)
+onError @ index-CHasW4Hn.js:1503
+/api/admin/company-information:1  Failed to load resource: the server responded with a status of 400 ()
+index-CHasW4Hn.js:1503 Error updating company information: Error: 400: {"success":false,"message":"Unexpected token '\"', \"\"{\\\"compan\"... is not valid JSON"}
+    at OG (index-CHasW4Hn.js:48:43801)
+    at async Je (index-CHasW4Hn.js:48:44059)
+    at async Object.mutationFn (index-CHasW4Hn.js:1503:368386)
+onError @ index-CHasW4Hn.js:1503
+/api/admin/company-information:1  Failed to load resource: the server responded with a status of 400 ()
+index-CHasW4Hn.js:1503 Error updating company information: Error: 400: {"success":false,"message":"Unexpected token '\"', \"\"{\\\"compan\"... is not valid JSON"}
+    at OG (index-CHasW4Hn.js:48:43801)
+    at async Je (index-CHasW4Hn.js:48:44059)
+    at async Object.mutationFn (index-CHasW4Hn.js:1503:368386)
+onError @ index-CHasW4Hn.js:1503
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 ()
+/api/correspondence/outgoing:1  Failed to load resource: the server responded with a status of 404 ()
+/api/company-images:1  Failed to load resource: the server responded with a status of 404 ()
+/api/business-cards:1  Failed to load resource: the server responded with a status of 404 ()
+/api/admin/company-information:1  Failed to load resource: the server responded with a status of 404 ()
+/api/correspondence/incoming:1  Failed to load resource: the server responded with a status of 404 ()
+/api/company-documents:1  Failed to load resource: the server responded with a status of 404 ()
+index-CHasW4Hn.js:961 Auth check result: Object
+index-CHasW4Hn.js:48  PUT https://momtaz-chem-website-admin3119.replit.app/api/admin/company-information 400 (Bad Request)
+Je @ index-CHasW4Hn.js:48
+mutationFn @ index-CHasW4Hn.js:1503
+fn @ index-CHasW4Hn.js:48
+b @ index-CHasW4Hn.js:48
+start @ index-CHasW4Hn.js:48
+execute @ index-CHasW4Hn.js:48
+await in execute
+mutate @ index-CHasW4Hn.js:48
+(anonymous) @ index-CHasW4Hn.js:48
+onChange @ index-CHasW4Hn.js:1503
+Wce @ index-CHasW4Hn.js:37
+Hce @ index-CHasW4Hn.js:37
+Kce @ index-CHasW4Hn.js:37
+FM @ index-CHasW4Hn.js:37
+sW @ index-CHasW4Hn.js:37
+(anonymous) @ index-CHasW4Hn.js:37
+lP @ index-CHasW4Hn.js:40
+_q @ index-CHasW4Hn.js:37
+AC @ index-CHasW4Hn.js:37
+Rk @ index-CHasW4Hn.js:37
+dde @ index-CHasW4Hn.js:37
+index-CHasW4Hn.js:1503 Error updating company information: Error: 400: {"success":false,"message":"Unexpected token '\"', \"\"{\\\"compan\"... is not valid JSON"}
+    at OG (index-CHasW4Hn.js:48:43801)
+    at async Je (index-CHasW4Hn.js:48:44059)
+    at async Object.mutationFn (index-CHasW4Hn.js:1503:368386)
+onError @ index-CHasW4Hn.js:1503
+execute @ index-CHasW4Hn.js:48
+await in execute
+mutate @ index-CHasW4Hn.js:48
+(anonymous) @ index-CHasW4Hn.js:48
+onChange @ index-CHasW4Hn.js:1503
+Wce @ index-CHasW4Hn.js:37
+Hce @ index-CHasW4Hn.js:37
+Kce @ index-CHasW4Hn.js:37
+FM @ index-CHasW4Hn.js:37
+sW @ index-CHasW4Hn.js:37
+(anonymous) @ index-CHasW4Hn.js:37
+lP @ index-CHasW4Hn.js:40
+_q @ index-CHasW4Hn.js:37
+AC @ index-CHasW4Hn.js:37
+Rk @ index-CHasW4Hn.js:37
+dde @ index-CHasW4Hn.js:37
