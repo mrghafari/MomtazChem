@@ -17,7 +17,7 @@ import { ArrowLeft, Save, Shield, Phone, Mail, Building, MapPin, User } from "lu
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-// Schema for profile editing - includes all registration fields
+// Schema for profile editing - includes all CRM fields
 const createEditProfileSchema = (t: any) => z.object({
   firstName: z.string().min(1, t.firstName + " is required"),
   lastName: z.string().min(1, t.lastName + " is required"),
@@ -47,6 +47,13 @@ const createEditProfileSchema = (t: any) => z.object({
   registrationNumber: z.string().optional(),
   leadSource: z.string().optional(),
   assignedSalesRep: z.string().optional(),
+  // Additional CRM fields
+  annualRevenue: z.string().optional(),
+  priceRange: z.string().optional(),
+  orderFrequency: z.string().optional(),
+  creditStatus: z.string().optional(),
+  smsEnabled: z.boolean().optional(),
+  emailEnabled: z.boolean().optional(),
 });
 
 const createSmsVerificationSchema = (t: any) => z.object({
@@ -127,6 +134,13 @@ export default function CustomerProfileEdit() {
       registrationNumber: "",
       leadSource: "",
       assignedSalesRep: "",
+      // Additional CRM fields
+      annualRevenue: "",
+      priceRange: "",
+      orderFrequency: "",
+      creditStatus: "",
+      smsEnabled: false,
+      emailEnabled: false,
     },
   });
 
@@ -171,6 +185,13 @@ export default function CustomerProfileEdit() {
 
         leadSource: customerData.customerSource || customerData.leadSource || "",
         assignedSalesRep: customerData.assignedSalesRep || "",
+        // Additional CRM fields
+        annualRevenue: customerData.annualRevenue || "",
+        priceRange: customerData.priceRange || "",
+        orderFrequency: customerData.orderFrequency || "",
+        creditStatus: customerData.creditStatus || "",
+        smsEnabled: customerData.smsEnabled || false,
+        emailEnabled: customerData.emailEnabled || false,
       });
     }
   }, [customer, form]);
@@ -942,6 +963,167 @@ export default function CustomerProfileEdit() {
                       </FormItem>
                     )}
                   />
+                </div>
+
+                {/* Additional CRM Fields */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-gray-900">اطلاعات تکمیلی CRM</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="annualRevenue"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>درآمد سالانه تقریبی</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="انتخاب درآمد سالانه" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="under_100m">کمتر از 100 میلیون دینار</SelectItem>
+                              <SelectItem value="100m_500m">100 تا 500 میلیون دینار</SelectItem>
+                              <SelectItem value="500m_1b">500 میلیون تا 1 میلیارد دینار</SelectItem>
+                              <SelectItem value="1b_5b">1 تا 5 میلیارد دینار</SelectItem>
+                              <SelectItem value="over_5b">بیش از 5 میلیارد دینار</SelectItem>
+                              <SelectItem value="confidential">محرمانه</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="priceRange"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>بازه قیمت مورد علاقه</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="انتخاب بازه قیمت" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="budget">اقتصادی (زیر 50 هزار دینار)</SelectItem>
+                              <SelectItem value="mid_range">متوسط (50-200 هزار دینار)</SelectItem>
+                              <SelectItem value="premium">بالا (200-500 هزار دینار)</SelectItem>
+                              <SelectItem value="enterprise">سازمانی (بالای 500 هزار دینار)</SelectItem>
+                              <SelectItem value="custom">قیمت مخصوص</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="orderFrequency"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>تناوب سفارش</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="انتخاب تناوب سفارش" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="weekly">هفتگی</SelectItem>
+                              <SelectItem value="monthly">ماهیانه</SelectItem>
+                              <SelectItem value="quarterly">فصلی</SelectItem>
+                              <SelectItem value="yearly">سالانه</SelectItem>
+                              <SelectItem value="as_needed">بر اساس نیاز</SelectItem>
+                              <SelectItem value="seasonal">فصلی</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="creditStatus"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>وضعیت اعتبار</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="انتخاب وضعیت اعتبار" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="excellent">عالی</SelectItem>
+                              <SelectItem value="good">خوب</SelectItem>
+                              <SelectItem value="fair">متوسط</SelectItem>
+                              <SelectItem value="poor">ضعیف</SelectItem>
+                              <SelectItem value="no_credit">بدون اعتبار</SelectItem>
+                              <SelectItem value="pending">در انتظار بررسی</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="smsEnabled"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                          <FormControl>
+                            <input
+                              type="checkbox"
+                              checked={field.value}
+                              onChange={field.onChange}
+                              className="mt-2"
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel>
+                              فعال‌سازی پیامک
+                            </FormLabel>
+                            <FormDescription>
+                              دریافت اطلاعیه‌ها و پیام‌های مهم از طریق پیامک
+                            </FormDescription>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="emailEnabled"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                          <FormControl>
+                            <input
+                              type="checkbox"
+                              checked={field.value}
+                              onChange={field.onChange}
+                              className="mt-2"
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel>
+                              فعال‌سازی ایمیل
+                            </FormLabel>
+                            <FormDescription>
+                              دریافت اطلاعیه‌ها و فاکتورها از طریق ایمیل
+                            </FormDescription>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </div>
 
                 {/* Notes */}

@@ -15494,13 +15494,38 @@ Leading Chemical Solutions Provider
         firstName,
         lastName,
         phone,
+        email,
         company,
         country,
+        province,
         city,
         address,
+        secondaryAddress,
         postalCode,
+        alternatePhone,
+        industry,
         businessType,
-        notes
+        companySize,
+        communicationPreference,
+        preferredLanguage,
+        marketingConsent,
+        notes,
+        customerType,
+        customerStatus,
+        preferredPaymentMethod,
+        creditLimit,
+        website,
+        taxId,
+        registrationNumber,
+        leadSource,
+        assignedSalesRep,
+        // Additional CRM fields
+        annualRevenue,
+        priceRange,
+        orderFrequency,
+        creditStatus,
+        smsEnabled,
+        emailEnabled
       } = req.body;
 
       // Validate required fields
@@ -15511,17 +15536,40 @@ Leading Chemical Solutions Provider
         });
       }
 
-      // Update customer profile in CRM
+      // Update customer profile in CRM with all fields
       const updatedCustomer = await crmStorage.updateCrmCustomer(customerId, {
         firstName,
         lastName,
         phone,
+        email: email || null,
         company: company || null,
         country,
+        province: province || null,
         city,
         address,
+        secondaryAddress: secondaryAddress || null,
         postalCode: postalCode || null,
-        businessType: businessType || null
+        alternatePhone: alternatePhone || null,
+        industry: industry || null,
+        businessType: businessType || null,
+        companySize: companySize || null,
+        communicationPreference: communicationPreference || null,
+        preferredLanguage: preferredLanguage || null,
+        marketingConsent: marketingConsent || false,
+        publicNotes: notes || null,
+        customerType: customerType || null,
+        customerStatus: customerStatus || null,
+        preferredPaymentMethod: preferredPaymentMethod || null,
+        creditLimit: creditLimit ? parseFloat(creditLimit) : null,
+        // Additional CRM fields mapping
+        annualRevenue: annualRevenue || null,
+        priceRange: priceRange || null,
+        orderFrequency: orderFrequency || null,
+        creditStatus: creditStatus || null,
+        smsEnabled: smsEnabled || false,
+        emailEnabled: emailEnabled || false,
+        customerSource: leadSource || null,
+        assignedSalesRep: assignedSalesRep || null
       });
 
       // Log activity
