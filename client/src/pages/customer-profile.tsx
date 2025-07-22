@@ -202,10 +202,21 @@ const CustomerProfile = () => {
           <div className="lg:col-span-1">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <User className="w-5 h-5" />
-                  اطلاعات حساب کاربری
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <User className="w-5 h-5" />
+                    اطلاعات حساب کاربری
+                  </CardTitle>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setLocation("/customer/profile/edit")}
+                    className="flex items-center gap-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200"
+                  >
+                    <Edit className="w-4 h-4" />
+                    ویرایش
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-3">
@@ -227,6 +238,23 @@ const CustomerProfile = () => {
                     <div className="flex items-center gap-3">
                       <Building className="w-4 h-4 text-gray-400" />
                       <span className="text-sm">{customerData.customer.company}</span>
+                    </div>
+                  )}
+                  {customerData.customer.address && (
+                    <div className="flex items-center gap-3">
+                      <MapPin className="w-4 h-4 text-gray-400" />
+                      <span className="text-sm">{customerData.customer.address}</span>
+                    </div>
+                  )}
+                  {(customerData.customer.city || customerData.customer.province) && (
+                    <div className="flex items-center gap-3">
+                      <MapPin className="w-4 h-4 text-gray-400" />
+                      <span className="text-sm">
+                        {customerData.customer.city && customerData.customer.province 
+                          ? `${customerData.customer.city}, ${customerData.customer.province}`
+                          : customerData.customer.city || customerData.customer.province
+                        }
+                      </span>
                     </div>
                   )}
                 </div>

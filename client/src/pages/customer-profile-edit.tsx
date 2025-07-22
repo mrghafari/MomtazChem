@@ -67,7 +67,7 @@ export default function CustomerProfileEdit() {
   type SmsVerificationForm = z.infer<typeof smsVerificationSchema>;
 
   // Fetch customer data
-  const { data: customer, isLoading, error: customerError } = useQuery({
+  const { data: customer, isLoading, error: customerError } = useQuery<any>({
     queryKey: ["/api/customers/me"],
     retry: 1,
   });
@@ -254,7 +254,7 @@ export default function CustomerProfileEdit() {
   // Update profile without SMS (if no phone change)
   const updateProfileMutation = useMutation({
     mutationFn: async (data: EditProfileForm) => {
-      const response = await fetch('/api/customers/me', {
+      const response = await fetch('/api/customers/profile', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -387,9 +387,9 @@ export default function CustomerProfileEdit() {
                     name="firstName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t.firstName}</FormLabel>
+                        <FormLabel>نام</FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Input {...field} placeholder="نام" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -400,9 +400,9 @@ export default function CustomerProfileEdit() {
                     name="lastName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t.lastName}</FormLabel>
+                        <FormLabel>نام خانوادگی</FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Input {...field} placeholder="نام خانوادگی" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -419,8 +419,7 @@ export default function CustomerProfileEdit() {
                       <FormItem>
                         <FormLabel className="flex items-center gap-2">
                           <Phone className="h-4 w-4" />
-                          {t.phone}
-                          <span className="text-xs text-gray-500">(Read-only)</span>
+                          شماره تلفن
                         </FormLabel>
                         <FormControl>
                           <Input {...field} readOnly className="bg-gray-50" />
@@ -431,12 +430,15 @@ export default function CustomerProfileEdit() {
                   />
                   <FormField
                     control={form.control}
-                    name="alternatePhone"
+                    name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Alternate Phone</FormLabel>
+                        <FormLabel className="flex items-center gap-2">
+                          <Mail className="h-4 w-4" />
+                          ایمیل
+                        </FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="Alternative phone number" />
+                          <Input {...field} type="email" placeholder="آدرس ایمیل" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -444,66 +446,38 @@ export default function CustomerProfileEdit() {
                   />
                 </div>
 
-                {/* Company & Industry Fields */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="company"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t.company}</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="industry"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Industry</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="Your industry" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                {/* Email Field - Read Only */}
+                {/* Company Field */}
                 <FormField
                   control={form.control}
-                  name="email"
+                  name="company"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="flex items-center gap-2">
-                        <Mail className="h-4 w-4" />
-                        Email
-                        <span className="text-xs text-gray-500">(Read-only)</span>
+                        <Building className="h-4 w-4" />
+                        نام شرکت
                       </FormLabel>
                       <FormControl>
-                        <Input {...field} readOnly className="bg-gray-50" />
+                        <Input {...field} placeholder="نام شرکت (اختیاری)" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
-                {/* Location Fields */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="country"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t.country}</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
+                {/* Address Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-gray-900">اطلاعات آدرس</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="country"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>کشور</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="کشور" />
+                          </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -568,254 +542,17 @@ export default function CustomerProfileEdit() {
                   />
                 </div>
 
-                {/* Address Fields */}
-                <FormField
-                  control={form.control}
-                  name="address"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t.address}</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="secondaryAddress"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Secondary Address</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="Secondary address (optional)" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
-                    name="postalCode"
+                    name="address"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Postal Code</FormLabel>
+                        <FormLabel className="flex items-center gap-2">
+                          <MapPin className="h-4 w-4" />
+                          آدرس کامل
+                        </FormLabel>
                         <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="businessType"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Business Type</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select business type" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="manufacturer">Manufacturer</SelectItem>
-                            <SelectItem value="distributor">Distributor</SelectItem>
-                            <SelectItem value="retailer">Retailer</SelectItem>
-                            <SelectItem value="end_user">End User</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                {/* Company Size & Communication Preferences */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="companySize"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Company Size</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select company size" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="small">Small (1-50 employees)</SelectItem>
-                            <SelectItem value="medium">Medium (51-200 employees)</SelectItem>
-                            <SelectItem value="large">Large (201-1000 employees)</SelectItem>
-                            <SelectItem value="enterprise">Enterprise (1000+ employees)</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="communicationPreference"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Communication Preference</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select preference" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="email">Email</SelectItem>
-                            <SelectItem value="phone">Phone</SelectItem>
-                            <SelectItem value="sms">SMS</SelectItem>
-                            <SelectItem value="whatsapp">WhatsApp</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                {/* Language & Marketing Preferences */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="preferredLanguage"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Preferred Language</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select language" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="en">English</SelectItem>
-                            <SelectItem value="fa">Persian (فارسی)</SelectItem>
-                            <SelectItem value="ar">Arabic (العربية)</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="marketingConsent"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                        <FormControl>
-                          <input
-                            type="checkbox"
-                            checked={field.value}
-                            onChange={field.onChange}
-                            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                          />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel>Marketing Consent</FormLabel>
-                          <p className="text-sm text-gray-600">
-                            I agree to receive marketing communications
-                          </p>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                {/* CRM Additional Fields */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="customerType"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Customer Type</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select customer type" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="regular">Regular</SelectItem>
-                            <SelectItem value="vip">VIP</SelectItem>
-                            <SelectItem value="wholesale">Wholesale</SelectItem>
-                            <SelectItem value="partner">Partner</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="customerStatus"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Customer Status</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select status" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="active">Active</SelectItem>
-                            <SelectItem value="inactive">Inactive</SelectItem>
-                            <SelectItem value="pending">Pending</SelectItem>
-                            <SelectItem value="suspended">Suspended</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="preferredPaymentMethod"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Preferred Payment Method</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select payment method" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
-                            <SelectItem value="cash">Cash</SelectItem>
-                            <SelectItem value="credit">Credit</SelectItem>
-                            <SelectItem value="check">Check</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="creditLimit"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Credit Limit</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="e.g., 10000" />
+                          <Textarea {...field} placeholder="آدرس کامل" rows={3} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -823,200 +560,66 @@ export default function CustomerProfileEdit() {
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="website"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Website</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="https://example.com" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="taxId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Tax ID</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="registrationNumber"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Registration Number</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="communicationPreference"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Preferred Communication</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select communication method" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="email">Email</SelectItem>
-                            <SelectItem value="phone">Phone</SelectItem>
-                            <SelectItem value="sms">SMS</SelectItem>
-                            <SelectItem value="whatsapp">WhatsApp</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="leadSource"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Lead Source</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select lead source" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="website">Website</SelectItem>
-                            <SelectItem value="referral">Referral</SelectItem>
-                            <SelectItem value="social_media">Social Media</SelectItem>
-                            <SelectItem value="advertising">Advertising</SelectItem>
-                            <SelectItem value="trade_show">Trade Show</SelectItem>
-                            <SelectItem value="cold_call">Cold Call</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="assignedSalesRep"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Assigned Sales Rep</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="Sales representative name" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                {/* Notes */}
-                <FormField
-                  control={form.control}
-                  name="notes"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Notes</FormLabel>
-                      <FormControl>
-                        <Textarea {...field} rows={3} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Submit Button */}
-                <div className="flex justify-end gap-4">
-                  <Button
-                    type="button"
+                {/* Save Button */}
+                <div className="flex gap-4 pt-6">
+                  <Button 
+                    type="submit" 
+                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
+                    disabled={updateProfileMutation.isPending}
+                  >
+                    <Save className="h-4 w-4" />
+                    {updateProfileMutation.isPending ? 'در حال ذخیره...' : 'ذخیره تغییرات'}
+                  </Button>
+                  <Button 
+                    type="button" 
                     variant="outline"
                     onClick={() => setLocation("/customer/profile")}
                   >
-                    {t.cancel}
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={updateProfileMutation.isPending}
-                    className="flex items-center gap-2"
-                  >
-                    <Save className="h-4 w-4" />
-                    {updateProfileMutation.isPending ? t.loading : t.save}
+                    انصراف
                   </Button>
                 </div>
               </form>
             </Form>
           </CardContent>
         </Card>
-
-        {/* SMS Verification Dialog */}
-        <Dialog open={showSmsDialog} onOpenChange={setShowSmsDialog}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5" />
-                SMS Verification
-              </DialogTitle>
-              <DialogDescription>
-                Enter the verification code sent to your phone
-              </DialogDescription>
-            </DialogHeader>
-            <Form {...smsForm}>
-              <form onSubmit={smsForm.handleSubmit(onSmsVerify)} className="space-y-4">
-                <FormField
-                  control={smsForm.control}
-                  name="code"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Verification Code</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="Enter 4-digit code" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="flex justify-end gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setShowSmsDialog(false)}
-                  >
-                    {t.cancel}
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={verifySmsAndUpdateMutation.isPending}
-                  >
-                    {verifySmsAndUpdateMutation.isPending ? t.loading : "Verify & Save"}
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </DialogContent>
-        </Dialog>
       </div>
+
+      {/* SMS Verification Dialog */}
+      <Dialog open={showSmsDialog} onOpenChange={setShowSmsDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>تأیید شماره تلفن</DialogTitle>
+            <DialogDescription>
+              کد تأیید به شماره جدید ارسال شد. لطفاً کد را وارد کنید.
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...smsForm}>
+            <form onSubmit={smsForm.handleSubmit(onSmsVerify)} className="space-y-4">
+              <FormField
+                control={smsForm.control}
+                name="code"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>کد تأیید</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="کد 4 رقمی" maxLength={6} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="flex gap-2">
+                <Button type="submit" disabled={verifySmsAndUpdateMutation.isPending}>
+                  {verifySmsAndUpdateMutation.isPending ? 'در حال تأیید...' : 'تأیید و ذخیره'}
+                </Button>
+                <Button type="button" variant="outline" onClick={() => setShowSmsDialog(false)}>
+                  انصراف
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
