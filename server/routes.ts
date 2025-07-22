@@ -4285,7 +4285,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { pool } = await import('./db');
       
-      // Define the main system modules - these are the 28 Site Management modules
+      // Define the main system modules - these are the 30 Site Management modules
       const mainModules = [
         'syncing_shop',
         'inquiries', 
@@ -4303,6 +4303,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'order_management',
         'product_management',
         'payment_management',
+        'accounting_management',
         'wallet_management',
         'geography_analytics',
         'ai_settings',
