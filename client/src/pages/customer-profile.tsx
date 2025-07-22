@@ -430,7 +430,7 @@ const CustomerProfile = () => {
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="font-semibold text-lg">{parseFloat(order.totalAmount).toFixed(2)} {order.currency || 'IQD'}</p>
+                            <p className="font-semibold text-lg">{Math.floor(parseFloat(order.totalAmount))} {order.currency || 'IQD'}</p>
                             <Badge className={getStatusColor(order.status, order.paymentStatus)}>
                               {getStatusLabel(order.status, order.paymentStatus)}
                             </Badge>
@@ -450,8 +450,8 @@ const CustomerProfile = () => {
                                 
                                 return (
                                   <div key={item.id || index} className="flex justify-between text-sm">
-                                    <span>{productName} × {quantity}</span>
-                                    <span>{totalPrice.toFixed(2)} IQD</span>
+                                    <span>{productName} × {Math.floor(quantity)}</span>
+                                    <span>{Math.floor(totalPrice)} IQD</span>
                                   </div>
                                 );
                               })}
@@ -475,21 +475,21 @@ const CustomerProfile = () => {
                                       {subtotalAmount > 0 && (
                                         <div className="flex justify-between text-sm text-gray-600">
                                           <span>مجموع اقلام:</span>
-                                          <span>{subtotalAmount.toFixed(2)} IQD</span>
+                                          <span>{Math.floor(subtotalAmount)} IQD</span>
                                         </div>
                                       )}
                                       
                                       {/* هزینه حمل */}
                                       <div className="flex justify-between text-sm text-blue-700">
                                         <span>هزینه حمل:</span>
-                                        <span>{shippingCost.toFixed(2)} IQD</span>
+                                        <span>{Math.floor(shippingCost)} IQD</span>
                                       </div>
                                       
                                       {/* مالیات بر ارزش افزوده - فقط اگر مبلغ بزرگتر از صفر باشد */}
                                       {vatAmount > 0 && (
                                         <div className="flex justify-between text-sm text-green-700 font-medium">
                                           <span>مالیات بر ارزش افزوده:</span>
-                                          <span>{vatAmount.toFixed(2)} IQD</span>
+                                          <span>{Math.floor(vatAmount)} IQD</span>
                                         </div>
                                       )}
                                       
@@ -497,7 +497,7 @@ const CustomerProfile = () => {
                                       {surchargeAmount > 0 && (
                                         <div className="flex justify-between text-sm text-orange-700">
                                           <span>عوارض:</span>
-                                          <span>{surchargeAmount.toFixed(2)} IQD</span>
+                                          <span>{Math.floor(surchargeAmount)} IQD</span>
                                         </div>
                                       )}
                                       
@@ -507,7 +507,7 @@ const CustomerProfile = () => {
                                       {/* مجموع کل */}
                                       <div className="flex justify-between text-sm font-bold text-gray-800">
                                         <span>مجموع کل:</span>
-                                        <span>{totalAmount.toFixed(2)} IQD</span>
+                                        <span>{Math.floor(totalAmount)} IQD</span>
                                       </div>
                                     </>
                                   );
