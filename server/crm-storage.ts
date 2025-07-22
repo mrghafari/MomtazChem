@@ -62,6 +62,7 @@ export interface ICrmStorage {
   // Customer Activities
   logCustomerActivity(activity: InsertCustomerActivity): Promise<CustomerActivity>;
   getCustomerActivities(customerId: number, limit?: number): Promise<CustomerActivity[]>;
+  getRecentCustomerActivities(limit?: number): Promise<CustomerActivity[]>;
   
   // Customer Segmentation
   createCustomerSegment(segment: InsertCustomerSegment): Promise<CustomerSegment>;
@@ -643,6 +644,31 @@ export class CrmStorage implements ICrmStorage {
   }
 
 
+
+  async logCustomerActivity(activity: InsertCustomerActivity): Promise<CustomerActivity> {
+    const [insertedActivity] = await customerDb
+      .insert(customerActivities)
+      .values(activity)
+      .returning();
+    return insertedActivity;
+  }
+
+  async getCustomerActivities(customerId: number, limit = 50): Promise<CustomerActivity[]> {
+    return await customerDb
+      .select()
+      .from(customerActivities)
+      .where(eq(customerActivities.customerId, customerId))
+      .orderBy(desc(customerActivities.createdAt))
+      .limit(limit);
+  }
+
+  async getRecentCustomerActivities(limit = 20): Promise<CustomerActivity[]> {
+    return await customerDb
+      .select()
+      .from(customerActivities)
+      .orderBy(desc(customerActivities.createdAt))
+      .limit(limit);
+  }
 
   async logActivity(customerId: number, activityType: string, description: string, metadata?: any): Promise<void> {
     try {

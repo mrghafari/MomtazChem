@@ -9000,10 +9000,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Log login activity in CRM
       await crmStorage.logCustomerActivity({
         customerId: crmCustomer.id,
+        customerName: `${crmCustomer.firstName || ''} ${crmCustomer.lastName || ''}`.trim(),
         activityType: 'login',
         description: 'مشتری وارد فروشگاه آنلاین شد',
         performedBy: 'customer',
         activityData: {
+          email: crmCustomer.email,
+          phone: crmCustomer.phone || '',
           source: 'website',
           loginDate: new Date().toISOString(),
           userAgent: req.headers['user-agent'] || 'unknown',
@@ -9253,6 +9256,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/customers/logout", async (req, res) => {
     try {
+      const customerId = (req.session as any).customerId;
+      const customerEmail = (req.session as any).customerEmail;
+      
+      // Log logout activity before clearing session
+      if (customerId) {
+        try {
+          // Get customer info for activity logging
+          const crmCustomer = await crmStorage.getCrmCustomerById(customerId);
+          
+          await crmStorage.logCustomerActivity({
+            customerId: customerId,
+            customerName: crmCustomer ? `${crmCustomer.firstName || ''} ${crmCustomer.lastName || ''}`.trim() : 'نام نامشخص',
+            activityType: 'logout',
+            description: 'مشتری از فروشگاه آنلاین خارج شد',
+            performedBy: 'customer',
+            activityData: {
+              email: customerEmail || crmCustomer?.email || '',
+              phone: crmCustomer?.phone || '',
+              source: 'website',
+              logoutDate: new Date().toISOString(),
+              userAgent: req.headers['user-agent'] || 'unknown',
+              sessionId: req.sessionID
+            }
+          });
+          
+          console.log(`📝 [CUSTOMER LOGOUT] Activity logged for customer ${customerId}`);
+        } catch (activityError) {
+          console.error('Error logging logout activity:', activityError);
+          // Continue with logout even if activity logging fails
+        }
+      }
+      
       // Clear all session data (single session mode)
       req.session.customerId = undefined;
       req.session.customerEmail = undefined;
@@ -33558,52 +33593,26 @@ momtazchem.com
   // Get customer activities data  
   app.get("/api/management/customer-activities", requireAuth, async (req, res) => {
     try {
-      console.log('👥 [CUSTOMER ACTIVITIES] Fetching customer activities data');
+      console.log('👥 [CUSTOMER ACTIVITIES] Fetching real customer activities from database');
       
-      // Sample activities data showing login/logout events
-      const customerActivities = [
-        {
-          type: "login",
-          customerName: "احمد محمدی",
-          phone: "+964 750 123 4567",
-          email: "ahmad@example.com",
-          timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString() // 5 minutes ago
-        },
-        {
-          type: "logout",
-          customerName: "فاطمه علیزاده",
-          phone: "+964 750 987 6543",
-          email: "fateme@example.com",
-          timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString() // 15 minutes ago
-        },
-        {
-          type: "login",
-          customerName: "حسین رضایی", 
-          phone: "+964 750 555 1234",
-          email: "hossein@example.com",
-          timestamp: new Date(Date.now() - 32 * 60 * 1000).toISOString() // 32 minutes ago
-        },
-        {
-          type: "login",
-          customerName: "مریم احمدی",
-          phone: "+964 750 777 8888",
-          email: "maryam@example.com", 
-          timestamp: new Date(Date.now() - 45 * 60 * 1000).toISOString() // 45 minutes ago
-        },
-        {
-          type: "logout",
-          customerName: "علی کریمی",
-          phone: "+964 750 333 4444",
-          email: "ali@example.com",
-          timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString() // 1 hour ago
-        }
-      ];
+      const activities = await crmStorage.getRecentCustomerActivities(10);
+      
+      // Map database activities to frontend format
+      const formattedActivities = activities
+        .filter(activity => activity.activityType === 'login' || activity.activityType === 'logout')
+        .map(activity => ({
+          type: activity.activityType,
+          customerName: activity.customerName || 'نام نامشخص',
+          phone: activity.activityData?.phone || '',
+          email: activity.activityData?.email || '',
+          timestamp: activity.createdAt.toISOString()
+        }));
 
-      console.log('👥 [CUSTOMER ACTIVITIES] Customer activities data prepared');
+      console.log(`👥 [CUSTOMER ACTIVITIES] Found ${formattedActivities.length} login/logout activities`);
       
       res.json({
         success: true,
-        data: customerActivities
+        data: formattedActivities
       });
     } catch (error) {
       console.error('👥 [CUSTOMER ACTIVITIES] Error fetching customer activities:', error);
