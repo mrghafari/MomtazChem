@@ -271,36 +271,34 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
            .font('VazirRegular')
            .text(formatMixedText(footerMessage), 50, footerMessageY, { align: 'right', width: 500, features: ['rtla'] });
         
-        // Company information footer
-        const companyFooterY = footerMessageY + 50;
+        // Compact company information footer
+        const companyFooterY = footerMessageY + 30;
         
-        // Company name - Persian and English
-        doc.fontSize(12)
+        // Company name - Persian and English on same line
+        doc.fontSize(11)
            .font('VazirBold')
-           .text(formatMixedText('شرکت ممتاز شیمی'), 50, companyFooterY, { align: 'center', width: 500, features: ['rtla'] })
-           .fontSize(11)
-           .font('VazirRegular')
-           .text('Momtaz Chemical Solutions Company', 50, companyFooterY + 20, { align: 'center', width: 500 });
+           .text(formatMixedText('شرکت ممتاز شیمی'), 50, companyFooterY, { align: 'right', width: 230, features: ['rtla'] })
+           .text('Momtaz Chemical Solutions Company', 300, companyFooterY, { align: 'left', width: 250 });
         
-        // Address
+        // Address and website on same line
         const addressText = formatMixedText('آدرس: بغداد، عراق - منطقه الکرخ، شارع الرشید');
-        doc.fontSize(9)
-           .font('VazirRegular')
-           .text(addressText, 50, companyFooterY + 40, { align: 'center', width: 500, features: ['rtla'] });
-        
-        // Contact information
-        doc.fontSize(9)
-           .font('VazirRegular')
-           .text('www.momtazchem.com', 50, companyFooterY + 55, { align: 'center', width: 500 })
-           .text('info@momtazchem.com | sales@momtazchem.com', 50, companyFooterY + 68, { align: 'center', width: 500 })
-           .text('+964 770 123 4567 | +964 780 987 6543', 50, companyFooterY + 81, { align: 'center', width: 500 });
-        
-        // Company slogan/promotion
-        const sloganText = formatMixedText('تامین کننده برتر مواد شیمیایی صنعتی و آزمایشگاهی در خاورمیانه');
         doc.fontSize(8)
            .font('VazirRegular')
-           .text(sloganText, 50, companyFooterY + 100, { align: 'center', width: 500, features: ['rtla'] })
-           .text('Leading Supplier of Industrial & Laboratory Chemicals in the Middle East', 50, companyFooterY + 115, { align: 'center', width: 500 });
+           .text(addressText, 50, companyFooterY + 18, { align: 'right', width: 350, features: ['rtla'] })
+           .text('www.momtazchem.com', 420, companyFooterY + 18, { align: 'left', width: 130 });
+        
+        // Email and phone information on same line
+        doc.fontSize(8)
+           .font('VazirRegular')
+           .text('info@momtazchem.com | sales@momtazchem.com', 50, companyFooterY + 32, { align: 'left', width: 280 })
+           .text('+964 770 123 4567 | +964 780 987 6543', 330, companyFooterY + 32, { align: 'left', width: 220 });
+        
+        // Compact company slogan - Persian and English on same line
+        const sloganText = formatMixedText('تامین کننده برتر مواد شیمیایی صنعتی و آزمایشگاهی در خاورمیانه');
+        doc.fontSize(7)
+           .font('VazirRegular')
+           .text(sloganText, 50, companyFooterY + 50, { align: 'right', width: 500, features: ['rtla'] })
+           .text('Leading Supplier of Industrial & Laboratory Chemicals in the Middle East', 50, companyFooterY + 62, { align: 'center', width: 500 });
         
       } catch (fontError) {
         console.warn('⚠️ Font registration failed, using default font:', fontError);
