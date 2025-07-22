@@ -43,6 +43,8 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
   5. مجموع کل (Grand Total) - with separator line and bold formatting
 - **Enhanced Display**: Shipping cost now always visible (even when 0.00), VAT hidden when zero, professional formatting with color-coding
 - **Impact**: Transparent financial breakdown for customers with complete cost visibility including shipping
+- **Enhanced Display**: Shipping cost now always visible (even when 0.00), VAT hidden when zero, professional formatting with color-coding
+- **Impact**: Transparent financial breakdown for customers with complete cost visibility including shipping
 - **Result**: Complete order cost breakdown with shipping cost always displayed and conditional VAT display
 
 ### COMPLETED: Complete Duties/Surcharge Removal and Simplified VAT-Only Tax System (July 22, 2025)
