@@ -661,20 +661,141 @@ const CustomerProfile = () => {
             )}
             
             {filteredHistory.map((order: any) => (
-              <div key={order.id} className="border border-purple-100 rounded-lg p-4">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h4 className="font-semibold">سفارش {order.orderNumber}</h4>
-                    <p className="text-sm text-gray-500">{formatDate(order.createdAt)}</p>
+              <Card key={order.id} className="border-purple-200 hover:border-purple-300 transition-colors">
+                <CardContent className="p-4">
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <h4 className="font-semibold text-gray-900">سفارش {order.orderNumber}</h4>
+                      <p className="text-sm text-gray-500 flex items-center gap-1">
+                        <Calendar className="w-4 h-4" />
+                        {formatDate(order.createdAt)}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      {(() => {
+                        // Calculate correct total from components
+                        const subtotalAmount = order.items ? order.items.reduce((sum: number, item: any) => {
+                          return sum + parseFloat(item.totalPrice || 0);
+                        }, 0) : 0;
+                        const vatAmount = parseFloat(order.vatAmount || '0');
+                        const shippingCost = parseFloat(order.shippingCost || '0');
+                        const surchargeAmount = parseFloat(order.surchargeAmount || '0');
+                        const correctTotal = subtotalAmount + vatAmount + shippingCost + surchargeAmount;
+                        
+                        return (
+                          <p className="font-semibold text-lg">{Math.floor(correctTotal)} IQD</p>
+                        );
+                      })()}
+                      <Badge className={getStatusColor(order.status, order.paymentStatus)}>
+                        {getStatusLabel(order.status, order.paymentStatus)}
+                      </Badge>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-semibold">{parseFloat(order.totalAmount || 0).toFixed(2)} IQD</p>
-                    <Badge className={getStatusColor(order.status, order.paymentStatus)}>
-                      {getStatusLabel(order.status, order.paymentStatus)}
-                    </Badge>
+
+                  {/* Order Items Preview */}
+                  {order.items && order.items.length > 0 && (
+                    <div className="mb-3">
+                      <Separator className="mb-2" />
+                      <h5 className="text-sm font-medium text-gray-700 mb-2">اقلام سفارش:</h5>
+                      {order.items.slice(0, 3).map((item: any, index: number) => (
+                        <div key={item.id || index} className="flex justify-between text-sm text-gray-600 mb-1">
+                          <span>{item.productName || 'نامشخص'} × {Math.floor(parseFloat(item.quantity || 0))}</span>
+                          <span>{Math.floor(parseFloat(item.totalPrice || 0))} IQD</span>
+                        </div>
+                      ))}
+                      {order.items.length > 3 && (
+                        <p className="text-sm text-gray-500">و {order.items.length - 3} محصول دیگر...</p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Cost Breakdown */}
+                  <div className="mb-3 p-2 bg-gray-50 rounded text-sm space-y-1">
+                    {(() => {
+                      const subtotalAmount = order.items ? order.items.reduce((sum: number, item: any) => {
+                        return sum + parseFloat(item.totalPrice || 0);
+                      }, 0) : 0;
+                      const vatAmount = parseFloat(order.vatAmount || '0');
+                      const shippingCost = parseFloat(order.shippingCost || '0');
+                      const surchargeAmount = parseFloat(order.surchargeAmount || '0');
+                      
+                      return (
+                        <>
+                          {subtotalAmount > 0 && (
+                            <div className="flex justify-between">
+                              <span>مجموع اقلام:</span>
+                              <span>{Math.floor(subtotalAmount)} IQD</span>
+                            </div>
+                          )}
+                          {shippingCost > 0 && (
+                            <div className="flex justify-between text-blue-700">
+                              <span>هزینه حمل:</span>
+                              <span>{Math.floor(shippingCost)} IQD</span>
+                            </div>
+                          )}
+                          {vatAmount > 0 && (
+                            <div className="flex justify-between text-green-700">
+                              <span>مالیات:</span>
+                              <span>{Math.floor(vatAmount)} IQD</span>
+                            </div>
+                          )}
+                          {surchargeAmount > 0 && (
+                            <div className="flex justify-between text-orange-700">
+                              <span>عوارض:</span>
+                              <span>{Math.floor(surchargeAmount)} IQD</span>
+                            </div>
+                          )}
+                          <Separator className="my-1" />
+                          <div className="flex justify-between font-bold">
+                            <span>مجموع کل:</span>
+                            <span>{Math.floor(subtotalAmount + vatAmount + shippingCost + surchargeAmount)} IQD</span>
+                          </div>
+                        </>
+                      );
+                    })()}
                   </div>
-                </div>
-              </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-2 flex-wrap">
+                    {/* دکمه دانلود فاکتور/پیش فاکتور بر اساس تأیید مالی */}
+                    {(order.status === 'confirmed' || order.paymentStatus === 'paid') ? (
+                      <Button
+                        size="sm"
+                        onClick={() => window.open(`/download-invoice/${order.id}`, '_blank')}
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        دانلود فاکتور
+                      </Button>
+                    ) : (
+                      <Button
+                        size="sm"
+                        onClick={() => window.open(`/download-proforma-invoice/${order.id}`, '_blank')}
+                        className="bg-blue-600 hover:bg-blue-700"
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        دانلود پیش‌فاکتور
+                      </Button>
+                    )}
+                    
+                    {/* دکمه درخواست فاکتور رسمی برای سفارشات پرداخت شده */}
+                    {order.paymentStatus === 'paid' && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          // Handle official invoice request
+                          window.open(`mailto:info@momtazchem.com?subject=درخواست فاکتور رسمی - سفارش ${order.orderNumber}&body=سلام، لطفاً فاکتور رسمی برای سفارش ${order.orderNumber} را ارسال کنید.`, '_blank');
+                        }}
+                        className="border-orange-300 text-orange-700 hover:bg-orange-50"
+                      >
+                        <FileText className="w-4 h-4 mr-2" />
+                        درخواست فاکتور رسمی
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </DialogContent>
