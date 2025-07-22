@@ -6,7 +6,16 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
-### COMPLETED: PDF Table Layout Enhancement and Date Format Fix (July 22, 2025)
+### COMPLETED: PDF Invoice Enhancement with Shipping Cost and Layout Fix (July 22, 2025)
+✅ **IMPLEMENTED: Separate shipping cost line item in proforma invoices**
+- **Issue**: User requested shipping cost to appear as separate line item below product subtotal
+- **Solution**: Added detailed cost breakdown with items subtotal, shipping cost, and final total
+- **Structure**: Items Subtotal → Shipping Cost → Total Amount with visual separation
+- **Calculation**: Automatic calculation of items subtotal, adding shipping cost for final total
+- **Visual Enhancement**: Added horizontal line above final total for better readability
+- **Persian Labels**: "مجموع کالاها" (Items Total), "هزینه حمل" (Shipping Cost), "مجموع کل" (Grand Total)
+- **Implementation**: Dynamic shipping cost from invoiceData.shippingCost with fallback to 0
+
 ✅ **FIXED: Enhanced product table layout to prevent text overlap in "goods and services" section**
 - **Issue**: Product table columns in PDF invoices had overlapping text causing readability problems
 - **Solution**: Redesigned table column layout with proper spacing and alignment

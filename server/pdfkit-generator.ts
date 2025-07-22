@@ -175,14 +175,41 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
              .text(totalAmount, 450, itemY, { align: 'center', width: 80 });
         });
         
-        // Total - Mixed language handling
-        const totalY = currentY + (items.length * 20) + 30;
-        const totalAmount = invoiceData.total || invoiceData.totalAmount || 0;
+        // Items subtotal
+        const subtotalY = currentY + (items.length * 20) + 30;
         const currency = invoiceData.currency || 'IQD';
+        
+        // Calculate items subtotal (without shipping)
+        const itemsSubtotal = items.reduce((sum: number, item: any) => {
+          return sum + ((item.total || item.quantity || 1) * (item.unitPrice || 0));
+        }, 0);
+        
+        doc.fontSize(11)
+           .font('VazirRegular')
+           .text('مجموع کالاها:', 50, subtotalY, { align: 'right' })
+           .text(`${itemsSubtotal.toLocaleString('fa-IR')} ${currency}`, 200, subtotalY, { align: 'left' });
+        
+        // Shipping cost
+        const shippingY = subtotalY + 20;
+        const shippingCost = invoiceData.shippingCost || 0;
+        
+        doc.fontSize(11)
+           .font('VazirRegular')
+           .text('هزینه حمل:', 50, shippingY, { align: 'right' })
+           .text(`${parseFloat(shippingCost).toLocaleString('fa-IR')} ${currency}`, 200, shippingY, { align: 'left' });
+        
+        // Total amount
+        const totalY = shippingY + 30;
+        const totalAmount = itemsSubtotal + parseFloat(shippingCost);
+        
+        // Draw line above total
+        doc.moveTo(50, totalY - 10)
+           .lineTo(300, totalY - 10)
+           .stroke();
         
         // Split total text: Persian text (right) + numbers (left)
         const totalPersianText = 'مجموع کل:';
-        const totalNumberText = `${parseFloat(totalAmount).toLocaleString('fa-IR')} ${currency}`;
+        const totalNumberText = `${totalAmount.toLocaleString('fa-IR')} ${currency}`;
         
         doc.fontSize(12)
            .font('VazirBold')
