@@ -6,6 +6,17 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Customer Profile Date Format Changed to Gregorian Calendar (July 22, 2025)
+✅ **IMPLEMENTED: Gregorian date display in customer profile orders section**
+- **Issue**: User requested that order dates in customer profile should display Gregorian dates instead of Persian dates
+- **Solution**: Updated formatDate function to use 'en-US' locale instead of 'fa-IR' locale
+- **Changes Applied**:
+  - Order creation dates now show in English format (e.g., "July 22, 2025" instead of "۱ مرداد ۱۴۰۴")
+  - Abandoned cart last activity dates converted to Gregorian format
+  - Maintains day/month/year structure with English month names
+- **Function Modified**: formatDate() in customer-profile.tsx changed from toLocaleDateString('fa-IR') to toLocaleDateString('en-US')
+- **Impact**: All customer profile order dates now display in international Gregorian calendar format for business consistency
+
 ### COMPLETED: PDF Template Redesigned to Match Exact Word Document Format (July 22, 2025)
 ✅ **IMPLEMENTED: Complete PDF redesign with dynamic table structure and RTL orientation**
 - **User Request**: PDF format should replicate the exact structure and layout of the provided Word document template
