@@ -1,0 +1,414 @@
+ Tawk.to script loaded successfully
+ Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+ Auth check result: Object
+api/customers/wallet/balance:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ 
+value @ twk-chunk-common.js:2
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ Tawk.to Live Chat loaded successfully
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ Cart clicked, total items: 3
+ Customer: null
+ User not logged in, showing pre-checkout modal
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🔐 [LOGIN] Login choice selected
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🔐 [LOGIN] Starting handleLoginSuccess
+ 🔐 [LOGIN] Customer data: Object
+ 🔐 [LOGIN] Current cart state: Object
+ 🔐 [LOGIN] Customer state set
+ 🔐 [LOGIN] Wallet balance fetch initiated
+ 🔐 [LOGIN] Auth modal closed
+ 🔐 [LOGIN] Cache invalidated
+ 🔐 [LOGIN] Has cart items: true
+ 🔐 [LOGIN] Cart contents: Object
+ 🔐 [LOGIN] Cart migration completed
+ 🔐 [LOGIN] Welcome toast shown
+ 🔐 [LOGIN] Showing checkout after login
+ 🔐 [LOGIN] handleLoginSuccess completed successfully
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 💳 [WALLET QUERY] Enabled check: Object
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+ Fetching shipping rates...
+ === BilingualPurchaseForm Debug ===
+ existingCustomer from parent: Object
+ customerData from API: Object
+ crmCustomerData from API: undefined
+ isLoadingCustomer: false
+ Using existingCustomer from parent
+ Customer object found: Object
+ Customer firstName: ABAS
+ Customer lastName: ABASI
+ Customer phone: 09124955173
+ Customer address: شهران، فلکه دوم، خ یکم، خ شیخ الاسلامی، کوچه اول، پ 18 واحد 10, , تهران, تهران, 1478815493, Iran
+ Customer secondaryAddress: undefined
+ Customer city: Erbil
+ Customer country: Iraq
+ Customer postalCode: undefined
+ Full name constructed: ABAS ABASI
+ Form data to reset: Object
+ Form reset completed
+ === End BilingualPurchaseForm Debug ===
+ 🚚 Shipping cost calculation: Object
+ 🔄 No shipping method selected or no data, resetting cost
+ Shipping rates state: Object
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+ 💰 [VAT] Tax settings API response: Object
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+ CRM Customer API response: Object
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+ === BilingualPurchaseForm Debug ===
+ existingCustomer from parent: Object
+ customerData from API: Object
+ crmCustomerData from API: Object
+ isLoadingCustomer: false
+ Using CRM customer data (most complete)
+ Customer object found: Object
+ Customer firstName: ABAS
+ Customer lastName: ABASI
+ Customer phone: 09124955173
+ Customer address: شهران، فلکه دوم، خ یکم، خ شیخ الاسلامی، کوچه اول، پ 18 واحد 10, , تهران, تهران, 1478815493, Iran
+ Customer secondaryAddress: NAGwer Road, Qaryataq Village, Erbil, Iraq
+ Customer city: Erbil
+ Customer country: Iraq
+ Customer postalCode: 1968913751
+ Full name constructed: ABAS ABASI
+ Form data to reset: Object
+ Form reset completed
+ === End BilingualPurchaseForm Debug ===
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+ Shipping rates API response: Object
+ Successfully loaded shipping rates: 29 methods
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+ 🚚 Shipping cost calculation: Object
+ 🔄 No shipping method selected or no data, resetting cost
+ Shipping rates state: Object
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+ 🚚 Shipping cost calculation: Object
+ 📦 Selected shipping rate: Object
+ 💰 Free shipping check: Object
+ 💳 Regular shipping cost applied: 200
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+ 🚀 [ORDER SUBMIT] Submitting order with complete data: Object
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+api/customers/orders?t=1753216450565:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+ 🚀 [ORDER SUBMIT] Submitting order with complete data: Object
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+api/customers/orders?t=1753216460400:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ Cart clicked, total items: 3
+ Customer: Object
+ User is logged in, showing checkout
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 💳 [WALLET QUERY] Enabled check: Object
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+ === BilingualPurchaseForm Debug ===
+ existingCustomer from parent: Object
+ customerData from API: Object
+ crmCustomerData from API: Object
+ isLoadingCustomer: false
+ Using CRM customer data (most complete)
+ Customer object found: Object
+ Customer firstName: ABAS
+ Customer lastName: ABASI
+ Customer phone: 09124955173
+ Customer address: شهران، فلکه دوم، خ یکم، خ شیخ الاسلامی، کوچه اول، پ 18 واحد 10, , تهران, تهران, 1478815493, Iran
+ Customer secondaryAddress: NAGwer Road, Qaryataq Village, Erbil, Iraq
+ Customer city: Erbil
+ Customer country: Iraq
+ Customer postalCode: 1968913751
+ Full name constructed: ABAS ABASI
+ Form data to reset: Object
+ Form reset completed
+ === End BilingualPurchaseForm Debug ===
+ 🚚 Shipping cost calculation: Object
+ 🔄 No shipping method selected or no data, resetting cost
+ Shipping rates state: Object
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+ 🚚 Shipping cost calculation: Object
+ 📦 Selected shipping rate: Object
+ 💰 Free shipping check: Object
+ 💳 Regular shipping cost applied: 11000
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+ 🚀 [ORDER SUBMIT] Submitting order with complete data: Object
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+api/customers/orders?t=1753216473460:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🔐 [LOGIN] Starting handleLoginSuccess
+ 🔐 [LOGIN] Customer data: Object
+ 🔐 [LOGIN] Current cart state: Object
+ 🔐 [LOGIN] Customer state set
+ 🔐 [LOGIN] Wallet balance fetch initiated
+ 🔐 [LOGIN] Auth modal closed
+ 🔐 [LOGIN] Cache invalidated
+ 🔐 [LOGIN] Has cart items: false
+ 🔐 [LOGIN] Cart contents: Object
+ 🔐 [LOGIN] Cart migration completed
+shop.tsx:489 🔐 [LOGIN] Welcome toast shown
+shop.tsx:503 🔐 [LOGIN] User cart data: {"475":3}
+shop.tsx:504 🔐 [LOGIN] Total cart items after migration: 1
+shop.tsx:507 🔐 [LOGIN] Showing checkout after migration
+shop.tsx:519 🔐 [LOGIN] handleLoginSuccess completed successfully
+shop.tsx:208 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:212 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:213 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+bilingual-purchase-form.tsx:284 💳 [WALLET QUERY] Enabled check: Object
+bilingual-purchase-form.tsx:572 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:592 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:395 === BilingualPurchaseForm Debug ===
+bilingual-purchase-form.tsx:396 existingCustomer from parent: Object
+bilingual-purchase-form.tsx:397 customerData from API: Object
+bilingual-purchase-form.tsx:398 crmCustomerData from API: Object
+bilingual-purchase-form.tsx:399 isLoadingCustomer: false
+bilingual-purchase-form.tsx:407 Using CRM customer data (most complete)
+bilingual-purchase-form.tsx:417 Customer object found: Object
+bilingual-purchase-form.tsx:418 Customer firstName: ABAS
+bilingual-purchase-form.tsx:419 Customer lastName: ABASI
+bilingual-purchase-form.tsx:420 Customer phone: 09124955173
+bilingual-purchase-form.tsx:421 Customer address: شهران، فلکه دوم، خ یکم، خ شیخ الاسلامی، کوچه اول، پ 18 واحد 10, , تهران, تهران, 1478815493, Iran
+bilingual-purchase-form.tsx:422 Customer secondaryAddress: NAGwer Road, Qaryataq Village, Erbil, Iraq
+bilingual-purchase-form.tsx:423 Customer city: Erbil
+bilingual-purchase-form.tsx:424 Customer country: Iraq
+bilingual-purchase-form.tsx:425 Customer postalCode: 1968913751
+bilingual-purchase-form.tsx:428 Full name constructed: ABAS ABASI
+bilingual-purchase-form.tsx:442 Form data to reset: Object
+bilingual-purchase-form.tsx:444 Form reset completed
+bilingual-purchase-form.tsx:448 === End BilingualPurchaseForm Debug ===
+bilingual-purchase-form.tsx:515 🚚 Shipping cost calculation: Object
+bilingual-purchase-form.tsx:549 🔄 No shipping method selected or no data, resetting cost
+bilingual-purchase-form.tsx:556 Shipping rates state: Object
+shop.tsx:208 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:212 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:213 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+bilingual-purchase-form.tsx:572 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:592 💳 [WALLET DEBUG] Complete wallet analysis: Object
+shop.tsx:208 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:212 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:213 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+bilingual-purchase-form.tsx:572 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:592 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:238 Customer API response: Object
+shop.tsx:208 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:212 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:213 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+bilingual-purchase-form.tsx:572 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:592 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:572 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:592 💳 [WALLET DEBUG] Complete wallet analysis: Object
+shop.tsx:208 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:212 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:213 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+bilingual-purchase-form.tsx:572 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:592 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:572 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:592 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:515 🚚 Shipping cost calculation: Object
+bilingual-purchase-form.tsx:523 📦 Selected shipping rate: Object
+bilingual-purchase-form.tsx:530 💰 Free shipping check: Object
+bilingual-purchase-form.tsx:541 💳 Regular shipping cost applied: 15000
+bilingual-purchase-form.tsx:572 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:592 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:804 🚀 [ORDER SUBMIT] Submitting order with complete data: Object
+bilingual-purchase-form.tsx:572 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:592 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:572 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:592 💳 [WALLET DEBUG] Complete wallet analysis: Object
+api/customers/orders?t=1753216500884:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+shop.tsx:208 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:212 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:213 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+bilingual-purchase-form.tsx:572 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:592 💳 [WALLET DEBUG] Complete wallet analysis: Object
+shop.tsx:208 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:212 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:213 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+bilingual-purchase-form.tsx:572 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:592 💳 [WALLET DEBUG] Complete wallet analysis: Object
+useAuth.ts:30  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 401 (Unauthorized)
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=09ef9b6d:840
+run @ @tanstack_react-query.js?v=09ef9b6d:494
+start @ @tanstack_react-query.js?v=09ef9b6d:536
+fetch @ @tanstack_react-query.js?v=09ef9b6d:926
+executeFetch_fn @ @tanstack_react-query.js?v=09ef9b6d:2211
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:2245
+shop.tsx:208 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:212 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:213 🌟 [RATINGS DEBUG] Products with ratings: []
+bilingual-purchase-form.tsx:572 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.03, dutiesRate: 0, subtotalAmount: 33, vatAmount: 0.99, …}
+bilingual-purchase-form.tsx:592 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 0.74, canUseWallet: {…}, totalAmount: 15033.99, existingCustomer: true, …}
+bilingual-purchase-form.tsx:804 🚀 [ORDER SUBMIT] Submitting order with complete data: {endpoint: '/api/customers/orders', paymentMethod: 'wallet_partial', totalAmount: 15033.99, walletAmountUsed: 0, remainingAmount: 15033.99, …}
+bilingual-purchase-form.tsx:572 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.03, dutiesRate: 0, subtotalAmount: 33, vatAmount: 0.99, …}
+bilingual-purchase-form.tsx:592 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 0.74, canUseWallet: {…}, totalAmount: 15033.99, existingCustomer: true, …}
+bilingual-purchase-form.tsx:572 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.03, dutiesRate: 0, subtotalAmount: 33, vatAmount: 0.99, …}
+bilingual-purchase-form.tsx:592 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 0.74, canUseWallet: {…}, totalAmount: 15033.99, existingCustomer: true, …}
+queryClient.ts:54  POST https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/orders?t=1753216516860 500 (Internal Server Error)
+apiRequest @ queryClient.ts:54
+mutationFn @ bilingual-purchase-form.tsx:688
+fn @ @tanstack_react-query.js?v=09ef9b6d:1189
+run @ @tanstack_react-query.js?v=09ef9b6d:494
+start @ @tanstack_react-query.js?v=09ef9b6d:536
+execute @ @tanstack_react-query.js?v=09ef9b6d:1225
+await in execute
+mutate @ @tanstack_react-query.js?v=09ef9b6d:2630
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:3295
+onSubmit @ bilingual-purchase-form.tsx:818
+(anonymous) @ chunk-4BFJKWC4.js?v=09ef9b6d:1465
+await in (anonymous)
+callCallback2 @ chunk-RPCDYKBN.js?v=09ef9b6d:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=09ef9b6d:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=09ef9b6d:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=09ef9b6d:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=09ef9b6d:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=09ef9b6d:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=09ef9b6d:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=09ef9b6d:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=09ef9b6d:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=09ef9b6d:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=09ef9b6d:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=09ef9b6d:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=09ef9b6d:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=09ef9b6d:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=09ef9b6d:5449
+shop.tsx:208 🌟 [RATINGS DEBUG] Product stats loaded: 20 products with ratings
+shop.tsx:212 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:213 🌟 [RATINGS DEBUG] Products with ratings: []
+bilingual-purchase-form.tsx:572 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.03, dutiesRate: 0, subtotalAmount: 33, vatAmount: 0.99, …}
+bilingual-purchase-form.tsx:592 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 0.74, canUseWallet: {…}, totalAmount: 15033.99, existingCustomer: true, …}
