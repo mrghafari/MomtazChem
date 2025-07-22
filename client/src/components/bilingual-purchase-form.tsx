@@ -295,26 +295,47 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     refetchOnMount: true, // Always refetch on mount for fresh data
   });
 
-  // Fetch VAT settings
+  // Fetch VAT settings from public endpoint
   const { data: vatData } = useQuery({
-    queryKey: ['/api/financial/vat-settings'],
+    queryKey: ['/api/tax-settings'],
     queryFn: async () => {
       try {
-        const response = await fetch('/api/financial/vat-settings', {
-          credentials: 'include'
-        });
+        const response = await fetch('/api/tax-settings');
         
         if (response.ok) {
           const result = await response.json();
-          console.log('VAT API response:', result);
-          if (result.success) {
-            return result.vatSettings;
+          console.log('💰 [VAT] Tax settings API response:', result);
+          if (result.success && result.data) {
+            // Convert to the expected format
+            const vatSetting = result.data.find((setting: any) => 
+              (setting.type === 'VAT' || setting.type === 'vat') && setting.isEnabled
+            );
+            const dutiesSetting = result.data.find((setting: any) => 
+              setting.type === 'duties' && setting.isEnabled
+            );
+            
+            return {
+              vatEnabled: vatSetting ? true : false,
+              vatRate: vatSetting ? vatSetting.rate : '0',
+              dutiesEnabled: dutiesSetting ? true : false,
+              dutiesRate: dutiesSetting ? dutiesSetting.rate : '0'
+            };
           }
         }
-        return null;
+        return {
+          vatEnabled: false,
+          vatRate: '0',
+          dutiesEnabled: false,
+          dutiesRate: '0'
+        };
       } catch (error) {
-        console.log('Error fetching VAT settings:', error);
-        return null;
+        console.log('💰 [VAT] Error fetching tax settings:', error);
+        return {
+          vatEnabled: false,
+          vatRate: '0',
+          dutiesEnabled: false,
+          dutiesRate: '0'
+        };
       }
     },
     retry: false,
@@ -540,12 +561,26 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     });
   }, [isLoadingShippingRates, shippingRatesError, shippingRatesData]);
 
-  // Calculate VAT amount (only on product subtotal, not shipping)
+  // Calculate VAT and duties amounts (only on product subtotal, not shipping)
   const vatRate = vatData?.vatEnabled ? parseFloat(vatData.vatRate || '0') / 100 : 0;
-  const vatAmount = vatData?.vatEnabled ? subtotalAmount * vatRate : 0;
+  const dutiesRate = vatData?.dutiesEnabled ? parseFloat(vatData.dutiesRate || '0') / 100 : 0;
   
-  // Calculate total amount (subtotal + VAT + shipping)
-  const totalAmount = subtotalAmount + vatAmount + shippingCost;
+  const vatAmount = vatData?.vatEnabled ? subtotalAmount * vatRate : 0;
+  const dutiesAmount = vatData?.dutiesEnabled ? subtotalAmount * dutiesRate : 0;
+  const totalTaxAmount = vatAmount + dutiesAmount;
+  
+  console.log('💰 [PURCHASE FORM] Tax calculation:', {
+    vatData,
+    vatRate,
+    dutiesRate,
+    subtotalAmount,
+    vatAmount,
+    dutiesAmount,
+    totalTaxAmount
+  });
+  
+  // Calculate total amount (subtotal + VAT + duties + shipping)
+  const totalAmount = subtotalAmount + totalTaxAmount + shippingCost;
 
   // Calculate wallet payment amounts
   const walletBalance = walletData?.data?.wallet ? parseFloat(walletData.data.wallet.balance) : 
@@ -736,7 +771,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       totalAmount,
       subtotalAmount,
       shippingCost,
-      vatAmount,
+      vatAmount: totalTaxAmount, // Include both VAT and duties
       selectedShippingMethod,
       currency: 'IQD',
       paymentMethod,
@@ -898,15 +933,23 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
               {/* VAT */}
               {vatData?.vatEnabled && vatAmount > 0 && (
                 <div className="flex justify-between text-sm">
-                  <span>{vatData.vatDisplayName || 'VAT'} ({(vatRate * 100).toFixed(0)}%)</span>
+                  <span>مالیات بر ارزش افزوده ({(vatRate * 100).toFixed(0)}%)</span>
                   <span>{formatCurrency(vatAmount)}</span>
+                </div>
+              )}
+              
+              {/* Duties */}
+              {vatData?.dutiesEnabled && dutiesAmount > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span>عوارض بر ارزش افزوده ({(dutiesRate * 100).toFixed(0)}%)</span>
+                  <span>{formatCurrency(dutiesAmount)}</span>
                 </div>
               )}
               
               {/* Total (without shipping) */}
               <div className="flex justify-between font-semibold text-base border-t pt-2">
-                <span>Total</span>
-                <span className="text-primary">{formatCurrency(subtotalAmount + vatAmount)}</span>
+                <span>مجموع (بدون هزینه حمل)</span>
+                <span className="text-primary">{formatCurrency(subtotalAmount + totalTaxAmount)}</span>
               </div>
               
               {/* Delivery Method Selection */}
