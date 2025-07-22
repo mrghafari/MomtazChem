@@ -581,6 +581,9 @@ export const crmCustomers = pgTable("crm_customers", {
   industry: text("industry"),
   businessType: text("business_type"), // manufacturer, distributor, retailer, end_user
   companySize: text("company_size"), // small, medium, large, enterprise
+  website: text("website"), // Company website URL
+  taxId: text("tax_id"), // Tax identification number
+  registrationNumber: text("registration_number"), // Company registration number
   annualRevenue: text("annual_revenue"),
   customerType: text("customer_type").notNull().default("retail"), // retail, wholesale, b2b, distributor
   customerStatus: text("customer_status").notNull().default("active"), // active, inactive, vip, blacklisted
