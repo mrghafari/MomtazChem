@@ -235,29 +235,50 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
           return sum + ((item.total || item.totalPrice || (item.quantity || 1) * (item.unitPrice || 0)));
         }, 0);
         
-        const vatRate = 0.05; // 5% VAT
-        const vatAmount = itemsSubtotal * vatRate;
+        // Calculate VAT using dynamic tax settings
+        const vatAmount = parseFloat(invoiceData.vatAmount || '0');
+        const dutiesAmount = parseFloat(invoiceData.dutiesAmount || '0');
         const shippingCost = parseFloat(invoiceData.shippingCost || '0');
-        const grandTotal = itemsSubtotal + vatAmount + shippingCost;
+        const grandTotal = itemsSubtotal + vatAmount + dutiesAmount + shippingCost;
         
         // Summary table matching Word template exactly
+        let currentSummaryY = summaryY;
+        
         doc.fontSize(11)
            .font('VazirRegular')
-           .text(formatMixedText('مجموع کالاها:'), 350, summaryY, { align: 'right', width: 150, features: ['rtla'] })
-           .text(`${formatNumber(itemsSubtotal)}`, 280, summaryY, { align: 'left', width: 60 })
+           .text(formatMixedText('مجموع کالاها:'), 350, currentSummaryY, { align: 'right', width: 150, features: ['rtla'] })
+           .text(`${formatNumber(itemsSubtotal)}`, 280, currentSummaryY, { align: 'left', width: 60 });
            
-           .text(formatMixedText('مالیات بر ارزش افزوده:'), 350, summaryY + 20, { align: 'right', width: 150, features: ['rtla'] })
-           .text(`${formatNumber(vatAmount)}`, 280, summaryY + 20, { align: 'left', width: 60 })
-           
-           .text(formatMixedText('هزینه حمل:'), 350, summaryY + 40, { align: 'right', width: 150, features: ['rtla'] })
-           .text(`${formatNumber(shippingCost)}`, 280, summaryY + 40, { align: 'left', width: 60 })
-           
-           .font('VazirBold')
-           .text(formatMixedText('مجموع کل:'), 350, summaryY + 60, { align: 'right', width: 150, features: ['rtla'] })
-           .text(`${formatNumber(grandTotal)}`, 280, summaryY + 60, { align: 'left', width: 60 });
+        currentSummaryY += 20;
         
-        // Footer message - exactly matching Word template
-        const footerMessageY = summaryY + 100;
+        // Show VAT only if amount > 0
+        if (vatAmount > 0) {
+          doc.text(formatMixedText('مالیات بر ارزش افزوده:'), 350, currentSummaryY, { align: 'right', width: 150, features: ['rtla'] })
+             .text(`${formatNumber(vatAmount)}`, 280, currentSummaryY, { align: 'left', width: 60 });
+          currentSummaryY += 20;
+        }
+        
+        // Show duties only if amount > 0
+        if (dutiesAmount > 0) {
+          doc.text(formatMixedText('عوارض بر ارزش افزوده:'), 350, currentSummaryY, { align: 'right', width: 150, features: ['rtla'] })
+             .text(`${formatNumber(dutiesAmount)}`, 280, currentSummaryY, { align: 'left', width: 60 });
+          currentSummaryY += 20;
+        }
+        
+        // Show shipping cost if > 0
+        if (shippingCost > 0) {
+          doc.text(formatMixedText('هزینه حمل:'), 350, currentSummaryY, { align: 'right', width: 150, features: ['rtla'] })
+             .text(`${formatNumber(shippingCost)}`, 280, currentSummaryY, { align: 'left', width: 60 });
+          currentSummaryY += 20;
+        }
+        
+        // Grand total
+        doc.font('VazirBold')
+           .text(formatMixedText('مجموع کل:'), 350, currentSummaryY, { align: 'right', width: 150, features: ['rtla'] })
+           .text(`${formatNumber(grandTotal)}`, 280, currentSummaryY, { align: 'left', width: 60 });
+        
+        // Footer message - exactly matching Word template  
+        const footerMessageY = currentSummaryY + 30;
         const footerMessage = isProforma ? 
           'این پیش فاکتور است و پس تائید مالی، فاکتور نهایی صادر خواهد شد.' : 
           'این فاکتور نهایی است.';

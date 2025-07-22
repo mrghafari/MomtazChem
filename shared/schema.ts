@@ -62,6 +62,19 @@ export const seoAnalytics = pgTable("seo_analytics", {
   source: text("source").default("manual"), // 'google_search_console', 'manual', etc.
 });
 
+// Tax settings for invoices and financial documents
+export const taxSettings = pgTable("tax_settings", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(), // e.g., "VAT", "Added Value Duties"
+  type: text("type").notNull(), // 'vat' or 'duties'
+  rate: decimal("rate", { precision: 5, scale: 4 }).notNull().default("0.0500"), // 5% as 0.0500
+  isEnabled: boolean("is_enabled").default(true),
+  isActive: boolean("is_active").default(true),
+  description: text("description"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 // Sitemap entries for XML sitemap generation
 export const sitemapEntries = pgTable("sitemap_entries", {
   id: serial("id").primaryKey(),
@@ -1043,3 +1056,13 @@ export const insertSimpleSmsTemplateSchema = createInsertSchema(simpleSmsTemplat
 
 export type InsertSimpleSmsTemplate = z.infer<typeof insertSimpleSmsTemplateSchema>;
 export type SimpleSmsTemplate = typeof simpleSmsTemplates.$inferSelect;
+
+// Tax settings types
+export const insertTaxSettingSchema = createInsertSchema(taxSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertTaxSetting = z.infer<typeof insertTaxSettingSchema>;
+export type TaxSetting = typeof taxSettings.$inferSelect;

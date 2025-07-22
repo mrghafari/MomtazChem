@@ -400,6 +400,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const invoiceData = req.body;
       console.log('Invoice data received:', invoiceData);
       
+      // Calculate taxes for the invoice
+      if (invoiceData.items && Array.isArray(invoiceData.items)) {
+        const subtotal = invoiceData.items.reduce((sum: number, item: any) => {
+          return sum + (item.quantity * item.unitPrice);
+        }, 0);
+        
+        const taxCalculation = await calculateOrderTaxes(subtotal);
+        invoiceData.vatAmount = taxCalculation.vatAmount;
+        invoiceData.dutiesAmount = taxCalculation.dutiesAmount;
+        
+        console.log('Tax calculation applied:', taxCalculation);
+      }
+      
       const pdfBuffer = await generateInvoicePDF(invoiceData);
       
       res.setHeader('Content-Type', 'application/pdf');
@@ -590,6 +603,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .from(orderItems)
         .where(eq(orderItems.orderId, orderId));
 
+      // Calculate subtotal from items
+      const subtotal = itemsResult.reduce((sum, item) => {
+        return sum + (item.quantity * parseFloat(item.unitPrice));
+      }, 0);
+      
+      // Calculate taxes
+      const taxCalculation = await calculateOrderTaxes(subtotal);
+      
       const invoiceData = {
         invoiceType: 'FINAL', // نوع فاکتور: فاکتور نهایی
         invoiceNumber: order.orderNumber,
@@ -607,13 +628,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           unitPrice: parseFloat(item.unitPrice),
           total: parseFloat(item.totalPrice || '0'),
         })),
-        subtotal: parseFloat(order.totalAmount || '0'),
+        subtotal: subtotal,
+        vatAmount: taxCalculation.vatAmount,
+        dutiesAmount: taxCalculation.dutiesAmount,
         shippingCost: parseFloat(order.shippingCost || '0'),
-        total: parseFloat(order.totalAmount || '0'),
+        total: subtotal + taxCalculation.vatAmount + taxCalculation.dutiesAmount + parseFloat(order.shippingCost || '0'),
         currency: order.currency || 'IQD',
         paymentStatus: 'پرداخت شده', // برای فاکتور نهایی
         notes: 'این فاکتور نهایی است و پس از تأیید مالی و آماده‌سازی در انبار صادر شده است.'
       };
+      
+      console.log('Final invoice tax calculation:', taxCalculation);
 
       const { generateInvoicePDF } = await import('./pdfkit-generator');
       const pdfBuffer = await generateInvoicePDF(invoiceData);
@@ -19569,6 +19594,167 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     } catch (error) {
       console.error('Error fetching shipping methods:', error);
       res.status(500).json({ success: false, message: "خطا در دریافت روش‌های ارسال" });
+    }
+  });
+
+  // ============================================================================
+  // ACCOUNTING MANAGEMENT ROUTES
+  // ============================================================================
+
+  // Get invoices (placeholder for now)
+  app.get('/api/accounting/invoices', async (req, res) => {
+    try {
+      // For now, return empty array - will be implemented with proper invoicing system
+      const invoices: any[] = [];
+      res.json({ success: true, data: invoices });
+    } catch (error) {
+      console.error('Error fetching invoices:', error);
+      res.status(500).json({ success: false, message: "خطا در دریافت فاکتورها" });
+    }
+  });
+
+  // Test tax calculation endpoint
+  app.post('/api/accounting/calculate-taxes', async (req, res) => {
+    try {
+      const { subtotal } = req.body;
+      
+      if (!subtotal || isNaN(subtotal)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'مبلغ کل کالاها باید عدد معتبری باشد' 
+        });
+      }
+      
+      const taxCalculation = await calculateOrderTaxes(parseFloat(subtotal));
+      
+      res.json({
+        success: true,
+        data: {
+          subtotal: parseFloat(subtotal),
+          ...taxCalculation,
+          total: parseFloat(subtotal) + taxCalculation.vatAmount + taxCalculation.dutiesAmount
+        }
+      });
+    } catch (error) {
+      console.error('Error calculating taxes:', error);
+      res.status(500).json({ success: false, message: "خطا در محاسبه مالیات" });
+    }
+  });
+
+  // ============================================================================
+  // TAX CALCULATION HELPER FUNCTIONS
+  // ============================================================================
+  
+  // Calculate taxes for an order
+  async function calculateOrderTaxes(subtotal: number) {
+    try {
+      const taxSettingsList = await db
+        .select()
+        .from(schema.taxSettings)
+        .where(eq(schema.taxSettings.isEnabled, true));
+      
+      const vatSetting = taxSettingsList.find(setting => setting.type === 'vat');
+      const dutiesSetting = taxSettingsList.find(setting => setting.type === 'duties');
+      
+      const vatAmount = vatSetting ? subtotal * parseFloat(vatSetting.rate) : 0;
+      const dutiesAmount = dutiesSetting ? subtotal * parseFloat(dutiesSetting.rate) : 0;
+      
+      return {
+        vatAmount,
+        dutiesAmount,
+        vatRate: vatSetting ? parseFloat(vatSetting.rate) : 0,
+        dutiesRate: dutiesSetting ? parseFloat(dutiesSetting.rate) : 0
+      };
+    } catch (error) {
+      console.error('Error calculating taxes:', error);
+      return { vatAmount: 0, dutiesAmount: 0, vatRate: 0, dutiesRate: 0 };
+    }
+  }
+
+  // ============================================================================
+  // TAX SETTINGS MANAGEMENT ROUTES  
+  // ============================================================================
+
+  // Get all tax settings (VAT and Duties)
+  app.get('/api/accounting/tax-settings', async (req, res) => {
+    try {
+      const taxSettingsList = await db
+        .select()
+        .from(schema.taxSettings)
+        .orderBy(schema.taxSettings.type, schema.taxSettings.id);
+      
+      res.json({ success: true, data: taxSettingsList });
+    } catch (error) {
+      console.error('Error fetching tax settings:', error);
+      res.status(500).json({ success: false, message: "خطا در دریافت تنظیمات مالیات" });
+    }
+  });
+
+  // Update tax setting (VAT or Duties)
+  app.put('/api/accounting/tax-settings/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { rate, isEnabled, description } = req.body;
+      
+      const [updatedTaxSetting] = await db
+        .update(schema.taxSettings)
+        .set({ 
+          rate: rate?.toString(),
+          isEnabled,
+          description,
+          updatedAt: new Date()
+        })
+        .where(eq(schema.taxSettings.id, parseInt(id)))
+        .returning();
+      
+      if (!updatedTaxSetting) {
+        return res.status(404).json({ success: false, message: "تنظیمات مالیاتی یافت نشد" });
+      }
+      
+      res.json({ 
+        success: true, 
+        data: updatedTaxSetting,
+        message: "تنظیمات مالیاتی به‌روزرسانی شد" 
+      });
+    } catch (error) {
+      console.error('Error updating tax settings:', error);
+      res.status(500).json({ success: false, message: "خطا در به‌روزرسانی تنظیمات مالیات" });
+    }
+  });
+
+  // Toggle tax setting enabled/disabled
+  app.post('/api/accounting/tax-settings/:id/toggle', async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      // Get current setting
+      const [currentSetting] = await db
+        .select()
+        .from(schema.taxSettings)
+        .where(eq(schema.taxSettings.id, parseInt(id)));
+      
+      if (!currentSetting) {
+        return res.status(404).json({ success: false, message: "تنظیمات مالیاتی یافت نشد" });
+      }
+      
+      // Toggle the enabled status
+      const [updatedSetting] = await db
+        .update(schema.taxSettings)
+        .set({ 
+          isEnabled: !currentSetting.isEnabled,
+          updatedAt: new Date()
+        })
+        .where(eq(schema.taxSettings.id, parseInt(id)))
+        .returning();
+      
+      res.json({ 
+        success: true, 
+        data: updatedSetting,
+        message: updatedSetting.isEnabled ? "مالیات فعال شد" : "مالیات غیرفعال شد"
+      });
+    } catch (error) {
+      console.error('Error toggling tax setting:', error);
+      res.status(500).json({ success: false, message: "خطا در تغییر وضعیت مالیات" });
     }
   });
 
