@@ -9981,15 +9981,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const orderNumber = await orderManagementStorage.generateOrderNumber();
       
       // Calculate order totals and taxes (using dynamic tax settings)
-      const subtotal = orderData.totalAmount || 0;
+      // Note: orderData.totalAmount from frontend already includes all components
+      // We need to extract the actual item subtotal for proper VAT calculation
+      const itemsSubtotal = orderData.items.reduce((sum: number, item: any) => {
+        return sum + (parseFloat(item.price) * parseInt(item.quantity));
+      }, 0);
       const shippingAmount = orderData.shippingCost || 0;
       
       // Get current tax rates from tax_settings table and freeze them for this order
-      const taxCalculation = await calculateOrderTaxes(subtotal);
-      const totalAmount = subtotal + shippingAmount + taxCalculation.vatAmount + taxCalculation.dutiesAmount;
+      const taxCalculation = await calculateOrderTaxes(itemsSubtotal);
+      const totalAmount = itemsSubtotal + shippingAmount + taxCalculation.vatAmount + taxCalculation.dutiesAmount;
       
       console.log('💰 [ORDER TAX] Tax calculation for order:', {
-        subtotal,
+        itemsSubtotal,
+        shippingAmount,
         vatRate: taxCalculation.vatRate,
         vatAmount: taxCalculation.vatAmount,
         surchargeRate: taxCalculation.dutiesRate,
