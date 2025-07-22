@@ -103,6 +103,38 @@ export const companyDocuments = pgTable("company_documents", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Business Cards table
+export const businessCards = pgTable("business_cards", {
+  id: serial("id").primaryKey(),
+  employeeName: varchar("employee_name", { length: 255 }).notNull(),
+  employeeNameArabic: varchar("employee_name_arabic", { length: 255 }),
+  employeeNameKurdish: varchar("employee_name_kurdish", { length: 255 }),
+  jobTitle: varchar("job_title", { length: 255 }).notNull(),
+  jobTitleArabic: varchar("job_title_arabic", { length: 255 }),
+  jobTitleKurdish: varchar("job_title_kurdish", { length: 255 }),
+  department: varchar("department", { length: 255 }),
+  directPhone: varchar("direct_phone", { length: 50 }),
+  mobilePhone: varchar("mobile_phone", { length: 50 }),
+  email: varchar("email", { length: 255 }),
+  officeLocation: varchar("office_location", { length: 255 }),
+  linkedinProfile: varchar("linkedin_profile", { length: 500 }),
+  whatsappNumber: varchar("whatsapp_number", { length: 50 }),
+  cardDesign: varchar("card_design", { length: 100 }).default("standard"), // standard, executive, creative
+  cardColor: varchar("card_color", { length: 50 }).default("corporate"), // corporate, blue, green, etc.
+  includeQrCode: boolean("include_qr_code").default(false),
+  qrCodeData: text("qr_code_data"), // vCard data or contact info
+  specialNotes: text("special_notes"),
+  isActive: boolean("is_active").default(true),
+  printQuantity: integer("print_quantity").default(500),
+  lastPrintDate: timestamp("last_print_date"),
+  cardStatus: varchar("card_status", { length: 50 }).default("draft"), // draft, approved, printed, distributed
+  approvedBy: integer("approved_by"),
+  approvedAt: timestamp("approved_at"),
+  createdBy: integer("created_by"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Create insert schemas
 export const insertCompanyInformationSchema = createInsertSchema(companyInformation).omit({
   id: true,
@@ -128,6 +160,13 @@ export const insertCompanyDocumentSchema = createInsertSchema(companyDocuments).
   updatedAt: true,
 });
 
+export const insertBusinessCardSchema = createInsertSchema(businessCards).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  approvedAt: true,
+});
+
 // Types
 export type CompanyInformation = typeof companyInformation.$inferSelect;
 export type InsertCompanyInformation = z.infer<typeof insertCompanyInformationSchema>;
@@ -140,3 +179,6 @@ export type InsertOutgoingCorrespondence = z.infer<typeof insertOutgoingCorrespo
 
 export type CompanyDocument = typeof companyDocuments.$inferSelect;
 export type InsertCompanyDocument = z.infer<typeof insertCompanyDocumentSchema>;
+
+export type BusinessCard = typeof businessCards.$inferSelect;
+export type InsertBusinessCard = z.infer<typeof insertBusinessCardSchema>;

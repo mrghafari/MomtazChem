@@ -48,14 +48,17 @@ import {
   incomingCorrespondence, 
   outgoingCorrespondence, 
   companyDocuments,
+  businessCards,
   insertCompanyInformationSchema,
   insertIncomingCorrespondenceSchema,
   insertOutgoingCorrespondenceSchema,
   insertCompanyDocumentSchema,
+  insertBusinessCardSchema,
   type CompanyInformation,
   type IncomingCorrespondence,
   type OutgoingCorrespondence,
-  type CompanyDocument
+  type CompanyDocument,
+  type BusinessCard
 } from "@shared/company-info-schema";
 
 // SMS service will be imported dynamically when needed
@@ -32389,6 +32392,213 @@ momtazchem.com
       res.status(500).json({
         success: false,
         message: 'Failed to delete company document'
+      });
+    }
+  });
+
+  // =====================================
+  // BUSINESS CARDS MANAGEMENT
+  // =====================================
+
+  // Get business cards
+  app.get("/api/business-cards", requireAuth, async (req, res) => {
+    try {
+      const { limit = 50, offset = 0, status, department, isActive } = req.query;
+      
+      let query = db.select().from(businessCards);
+      
+      if (status) {
+        query = query.where(eq(businessCards.cardStatus, status as string));
+      }
+      
+      if (department) {
+        query = query.where(eq(businessCards.department, department as string));
+      }
+      
+      if (isActive !== undefined) {
+        query = query.where(eq(businessCards.isActive, isActive === 'true'));
+      }
+      
+      const data = await query
+        .orderBy(desc(businessCards.createdAt))
+        .limit(Number(limit))
+        .offset(Number(offset));
+
+      res.json({
+        success: true,
+        data: data,
+        total: data.length
+      });
+    } catch (error) {
+      console.error('Error fetching business cards:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch business cards'
+      });
+    }
+  });
+
+  // Add business card
+  app.post("/api/business-cards", requireAuth, async (req, res) => {
+    try {
+      const validatedData = insertBusinessCardSchema.parse(req.body);
+      
+      const result = await db
+        .insert(businessCards)
+        .values({
+          ...validatedData,
+          createdBy: req.session.adminId
+        })
+        .returning();
+
+      res.json({
+        success: true,
+        data: result[0],
+        message: 'Business card added successfully'
+      });
+    } catch (error) {
+      console.error('Error adding business card:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to add business card'
+      });
+    }
+  });
+
+  // Update business card
+  app.put("/api/business-cards/:id", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const validatedData = insertBusinessCardSchema.parse(req.body);
+      
+      const result = await db
+        .update(businessCards)
+        .set({ ...validatedData, updatedAt: new Date() })
+        .where(eq(businessCards.id, Number(id)))
+        .returning();
+
+      if (result.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'Business card not found'
+        });
+      }
+
+      res.json({
+        success: true,
+        data: result[0],
+        message: 'Business card updated successfully'
+      });
+    } catch (error) {
+      console.error('Error updating business card:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to update business card'
+      });
+    }
+  });
+
+  // Delete business card
+  app.delete("/api/business-cards/:id", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      const result = await db
+        .delete(businessCards)
+        .where(eq(businessCards.id, Number(id)))
+        .returning();
+
+      if (result.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'Business card not found'
+        });
+      }
+
+      res.json({
+        success: true,
+        message: 'Business card deleted successfully'
+      });
+    } catch (error) {
+      console.error('Error deleting business card:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to delete business card'
+      });
+    }
+  });
+
+  // Approve business card
+  app.put("/api/business-cards/:id/approve", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      const result = await db
+        .update(businessCards)
+        .set({ 
+          cardStatus: 'approved',
+          approvedBy: req.session.adminId,
+          approvedAt: new Date(),
+          updatedAt: new Date()
+        })
+        .where(eq(businessCards.id, Number(id)))
+        .returning();
+
+      if (result.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'Business card not found'
+        });
+      }
+
+      res.json({
+        success: true,
+        data: result[0],
+        message: 'Business card approved successfully'
+      });
+    } catch (error) {
+      console.error('Error approving business card:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to approve business card'
+      });
+    }
+  });
+
+  // Update print info
+  app.put("/api/business-cards/:id/print", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { printQuantity } = req.body;
+      
+      const result = await db
+        .update(businessCards)
+        .set({ 
+          cardStatus: 'printed',
+          printQuantity: printQuantity || 500,
+          lastPrintDate: new Date(),
+          updatedAt: new Date()
+        })
+        .where(eq(businessCards.id, Number(id)))
+        .returning();
+
+      if (result.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'Business card not found'
+        });
+      }
+
+      res.json({
+        success: true,
+        data: result[0],
+        message: 'Business card print info updated successfully'
+      });
+    } catch (error) {
+      console.error('Error updating print info:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to update print info'
       });
     }
   });
