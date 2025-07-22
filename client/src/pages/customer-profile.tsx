@@ -442,7 +442,7 @@ const CustomerProfile = () => {
                                         <span>{shippingCost.toFixed(2)} IQD</span>
                                       </div>
                                       
-                                      {/* مالیات بر ارزش افزوده */}
+                                      {/* مالیات بر ارزش افزوده - فقط اگر مبلغ بزرگتر از صفر باشد */}
                                       {vatAmount > 0 && (
                                         <div className="flex justify-between text-sm text-green-700 font-medium">
                                           <span>مالیات بر ارزش افزوده:</span>

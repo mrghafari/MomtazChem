@@ -24,12 +24,12 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **User Experience**: Customer profile now shows complete financial breakdown per order in logical order:
   1. مجموع اقلام (Items Subtotal) - calculated automatically
   2. هزینه حمل (Shipping Cost) - always displayed from order data
-  3. مالیات بر ارزش افزوده (VAT Amount) - from historical order data  
+  3. مالیات بر ارزش افزوده (VAT Amount) - from historical order data (only shows if amount > 0)
   4. عوارض (Surcharges) - if applicable
   5. مجموع کل (Grand Total) - with separator line and bold formatting
-- **Enhanced Display**: Shipping cost now always visible (even when 0.00), professional formatting with color-coding
+- **Enhanced Display**: Shipping cost now always visible (even when 0.00), VAT hidden when zero, professional formatting with color-coding
 - **Impact**: Transparent financial breakdown for customers with complete cost visibility including shipping
-- **Result**: Complete order cost breakdown with shipping cost always displayed and logical ordering
+- **Result**: Complete order cost breakdown with shipping cost always displayed and conditional VAT display
 
 ### COMPLETED: Complete Duties/Surcharge Removal and Simplified VAT-Only Tax System (July 22, 2025)
 ✅ **RESOLVED: Duties functionality completely removed from system per business requirements**
