@@ -30,7 +30,8 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
   - Table grid drawing with proper borders and cell divisions
   - Column width optimization: [200, 80, 80, 120] pixels
   - Row height standardization: 30 pixels per row
-  - Maximum 4 items displayed in table to fit format
+  - **Dynamic table rows**: Table automatically adjusts to match exact number of order items (2 items = 2 rows, 10 items = 10 rows)
+  - Dynamic summary section positioning based on table height
 - **Test Results**: Generated 45,719-byte PDF with exact Word template structure
 - **Impact**: PDF invoices now perfectly match user's corporate Word template for professional consistency
 

@@ -166,24 +166,28 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
            .font('VazirBold')
            .text(formatMixedText('کالاها و خدمات'), 50, 280, { align: 'right', width: 500, features: ['rtla'] });
         
-        // Create table structure exactly like Word document
+        // Create dynamic table structure based on number of items
         const tableStartY = 320;
         const rowHeight = 30;
         const colWidths = [200, 80, 80, 120]; // شرح کالا، تعداد، قیمت واحد، مبلغ کل
         const colStartX = [50, 250, 330, 410];
+        const items = invoiceData.items || [];
+        const numDataRows = Math.max(1, items.length); // At least 1 row, or match item count
+        const totalRows = numDataRows + 1; // +1 for header row
+        const tableHeight = totalRows * rowHeight;
         
-        // Draw table grid
-        doc.rect(50, tableStartY, 500, 150).stroke();
+        // Draw table grid - dynamic height based on item count
+        doc.rect(50, tableStartY, 500, tableHeight).stroke();
         
         // Draw vertical lines for columns
         for (let i = 1; i < colStartX.length; i++) {
           doc.moveTo(colStartX[i], tableStartY)
-             .lineTo(colStartX[i], tableStartY + 150)
+             .lineTo(colStartX[i], tableStartY + tableHeight)
              .stroke();
         }
         
-        // Draw horizontal lines for rows (5 rows like in Word)
-        for (let i = 1; i <= 5; i++) {
+        // Draw horizontal lines for rows - dynamic based on item count
+        for (let i = 1; i <= totalRows; i++) {
           doc.moveTo(50, tableStartY + (i * rowHeight))
              .lineTo(550, tableStartY + (i * rowHeight))
              .stroke();
@@ -197,11 +201,10 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
            .text(formatMixedText('قیمت واحد'), colStartX[2] + 10, tableStartY + 5, { align: 'center', width: colWidths[2] - 20, features: ['rtla'] })
            .text(formatMixedText('مبلغ کل'), colStartX[3] + 10, tableStartY + 5, { align: 'center', width: colWidths[3] - 20, features: ['rtla'] });
         
-        // Fill in product items in the table rows
-        const items = invoiceData.items || [];
+        // Fill in product items in the table rows - all items dynamically
         const currency = invoiceData.currency || 'IQD';
         
-        items.slice(0, 4).forEach((item: any, index: number) => { // Maximum 4 items to fit table
+        items.forEach((item: any, index: number) => { // All items, no limit
           const rowY = tableStartY + ((index + 1) * rowHeight) + 5;
           
           // Product name - RTL alignment for Persian/Arabic/Kurdish, LTR for English
@@ -230,8 +233,8 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
              .text(totalAmount, colStartX[3] + 10, rowY, { align: 'center', width: colWidths[3] - 20 });
         });
         
-        // Summary section below table - exactly matching Word template
-        const summaryY = tableStartY + 180;
+        // Summary section below table - dynamic position based on table height
+        const summaryY = tableStartY + tableHeight + 30;
         
         // Calculate totals
         const itemsSubtotal = items.reduce((sum: number, item: any) => {
