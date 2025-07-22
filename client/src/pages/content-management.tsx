@@ -445,10 +445,11 @@ export default function ContentManagement() {
                         } else {
                           createContentMutation.mutate({
                             key: 'discount_banner_enabled',
-                            content: 'true',
+                            content: checked ? 'true' : 'false',
                             contentType: 'text',
                             language: selectedLanguage,
-                            section: 'discount_banner'
+                            section: 'discount_banner',
+                            isActive: checked
                           });
                         }
                       }}
@@ -514,10 +515,11 @@ export default function ContentManagement() {
                         } else {
                           createContentMutation.mutate({
                             key: 'ai_enabled',
-                            content: 'true',
+                            content: checked ? 'true' : 'false',
                             contentType: 'text',
                             language: selectedLanguage,
-                            section: 'ai_settings'
+                            section: 'ai_settings',
+                            isActive: checked
                           });
                         }
                       }}
