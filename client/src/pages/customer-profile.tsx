@@ -459,12 +459,13 @@ const CustomerProfile = () => {
                               {/* نمایش جزئیات قیمت */}
                               <div className="mt-3 pt-2 border-t border-gray-200 space-y-1">
                                 {(() => {
+                                  // Get values from order data (totalAmount already includes shipping, VAT, etc.)
                                   const totalAmount = parseFloat(order.totalAmount || '0');
                                   const vatAmount = parseFloat(order.vatAmount || '0');
                                   const shippingCost = parseFloat(order.shippingCost || '0');
                                   const surchargeAmount = parseFloat(order.surchargeAmount || '0');
                                   
-                                  // Calculate subtotal from actual order items (not by subtracting from total)
+                                  // Calculate subtotal from actual order items
                                   const subtotalAmount = order.items ? order.items.reduce((sum: number, item: any) => {
                                     return sum + parseFloat(item.totalPrice || 0);
                                   }, 0) : 0;
@@ -479,11 +480,13 @@ const CustomerProfile = () => {
                                         </div>
                                       )}
                                       
-                                      {/* هزینه حمل */}
-                                      <div className="flex justify-between text-sm text-blue-700">
-                                        <span>هزینه حمل:</span>
-                                        <span>{Math.floor(shippingCost)} IQD</span>
-                                      </div>
+                                      {/* هزینه حمل - جداگانه نمایش داده می‌شود */}
+                                      {shippingCost > 0 && (
+                                        <div className="flex justify-between text-sm text-blue-700">
+                                          <span>هزینه حمل:</span>
+                                          <span>{Math.floor(shippingCost)} IQD</span>
+                                        </div>
+                                      )}
                                       
                                       {/* مالیات بر ارزش افزوده - فقط اگر مبلغ بزرگتر از صفر باشد */}
                                       {vatAmount > 0 && (
@@ -504,7 +507,7 @@ const CustomerProfile = () => {
                                       {/* خط جداکننده قبل از مجموع کل */}
                                       <div className="border-t border-gray-300 my-2"></div>
                                       
-                                      {/* مجموع کل */}
+                                      {/* مجموع کل - استفاده از totalAmount از database (شامل همه هزینه‌ها) */}
                                       <div className="flex justify-between text-sm font-bold text-gray-800">
                                         <span>مجموع کل:</span>
                                         <span>{Math.floor(totalAmount)} IQD</span>
