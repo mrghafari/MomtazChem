@@ -115,7 +115,12 @@ const CustomerProfile = () => {
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string, paymentStatus?: string) => {
+    // اگر رسید آپلود شده باشد، رنگ آبی برای "منتظر تأیید مالی"
+    if (paymentStatus === 'receipt_uploaded') {
+      return 'bg-blue-100 text-blue-800';
+    }
+    
     switch (status) {
       case 'confirmed':
         return 'bg-green-100 text-green-800';
@@ -129,7 +134,12 @@ const CustomerProfile = () => {
     }
   };
 
-  const getStatusLabel = (status: string) => {
+  const getStatusLabel = (status: string, paymentStatus?: string) => {
+    // اگر رسید آپلود شده باشد، نمایش "منتظر تأیید مالی"
+    if (paymentStatus === 'receipt_uploaded') {
+      return 'منتظر تأیید مالی';
+    }
+    
     switch (status) {
       case 'confirmed':
         return 'تایید شده';
@@ -352,8 +362,8 @@ const CustomerProfile = () => {
                           </div>
                           <div className="text-right">
                             <p className="font-semibold text-lg">{parseFloat(order.totalAmount).toFixed(2)} {order.currency || 'IQD'}</p>
-                            <Badge className={getStatusColor(order.status)}>
-                              {getStatusLabel(order.status)}
+                            <Badge className={getStatusColor(order.status, order.paymentStatus)}>
+                              {getStatusLabel(order.status, order.paymentStatus)}
                             </Badge>
                           </div>
                         </div>
