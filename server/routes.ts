@@ -9208,6 +9208,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         crmCustomer = await crmStorage.getCrmCustomerById(crmCustomerId);
         if (crmCustomer) {
           customer = crmCustomer; // Use CRM as primary source
+          
+          // Debug log for customer data
+          console.log('🔍 [CRM GET] Customer data from DB:', {
+            id: customer.id,
+            website: customer.website,
+            taxId: customer.taxId,
+            registrationNumber: customer.registrationNumber,
+            annualRevenue: customer.annualRevenue,
+            priceRange: customer.priceRange
+          });
         }
       }
 
