@@ -32,11 +32,20 @@ export function ReviewForm({ productId, productName, onSuccess }: ReviewFormProp
 
   const submitReviewMutation = useMutation({
     mutationFn: async (data: any) => {
-      return apiRequest(`/api/products/${productId}/reviews`, {
-        method: "POST",
+      const response = await fetch(`/api/products/${productId}/reviews`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
         body: JSON.stringify(data),
-        headers: { "Content-Type": "application/json" }
       });
+      
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.message || 'خطا در ثبت نظر');
+      }
+      return result;
     },
     onSuccess: () => {
       toast({
@@ -127,7 +136,7 @@ export function ReviewForm({ productId, productName, onSuccess }: ReviewFormProp
         نظر شما درباره {productName}
       </h3>
       <p className="text-sm text-gray-600">
-        ثبت نظر به نام: {customer.firstName} {customer.lastName}
+        ثبت نظر به نام: {(customer as any)?.customer?.firstName || 'کاربر'} {(customer as any)?.customer?.lastName || ''}
       </p>
       
       <form onSubmit={handleSubmit} className="space-y-4">
