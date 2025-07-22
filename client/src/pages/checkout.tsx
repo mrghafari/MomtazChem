@@ -244,8 +244,8 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   
   // Fetch tax settings for dynamic VAT calculation
   const { data: taxSettings } = useQuery({
-    queryKey: ['/api/accounting/tax-settings'],
-    queryFn: () => apiRequest('/api/accounting/tax-settings', 'GET'),
+    queryKey: ['/api/tax-settings'],
+    queryFn: () => apiRequest('/api/tax-settings', 'GET'),
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
 
@@ -262,6 +262,19 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   const vatAmount = subtotal * vatRate;
   const dutiesAmount = subtotal * dutiesRate;
   const totalTaxAmount = vatAmount + dutiesAmount;
+  
+  // Debug logging for tax calculations
+  console.log('🧮 Tax Debug:', {
+    taxSettings,
+    vatSetting,
+    dutiesSetting,
+    vatRate,
+    dutiesRate,
+    subtotal,
+    vatAmount,
+    dutiesAmount,
+    totalTaxAmount
+  });
   
   const beforeWalletTotal = subtotal + shippingCost + totalTaxAmount;
   

@@ -19948,7 +19948,23 @@ ${message ? `Additional Requirements:\n${message}` : ''}
   // TAX SETTINGS MANAGEMENT ROUTES  
   // ============================================================================
 
-  // Get all tax settings (VAT and Duties)
+  // Public endpoint for tax settings (no authentication required for checkout)
+  app.get('/api/tax-settings', async (req, res) => {
+    try {
+      const taxSettingsList = await db
+        .select()
+        .from(schema.taxSettings)
+        .where(eq(schema.taxSettings.isActive, true))
+        .orderBy(schema.taxSettings.type, schema.taxSettings.id);
+      
+      res.json({ success: true, data: taxSettingsList });
+    } catch (error) {
+      console.error('Error fetching tax settings:', error);
+      res.status(500).json({ success: false, message: "خطا در دریافت تنظیمات مالیات" });
+    }
+  });
+
+  // Get all tax settings (VAT and Duties) - Admin only
   app.get('/api/accounting/tax-settings', async (req, res) => {
     try {
       const taxSettingsList = await db
