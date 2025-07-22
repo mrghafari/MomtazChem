@@ -103,40 +103,36 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
           return Math.floor(num).toString();
         };
         
-        // Header - Mixed language handling
+        // Header layout based on user's Word format
         const isProforma = invoiceData.invoiceType === 'PROFORMA';
-        const headerPersian = isProforma ? 'پیش‌فاکتور' : 'فاکتور فروش';
-        const headerEnglish = 'Momtaz Chem';
         
-        doc.fontSize(20)
+        // Company name - centered
+        doc.fontSize(16)
            .font('VazirBold')
-           // Persian title - right aligned with proper RTL formatting
-           .text(formatMixedText(headerPersian), 50, 50, { align: 'right', width: 500, features: ['rtla'] })
-           // English company name - left aligned
-           .text(formatMixedText(headerEnglish), 50, 50, { align: 'left' });
+           .text(formatMixedText('شرکت ممتاز شیمی'), 50, 50, { align: 'center', width: 500, features: ['rtla'] });
         
-        // Invoice details - Mixed RTL/LTR format
-        const invoiceNumberLabel = `شماره ${isProforma ? 'پیش‌فاکتور' : 'فاکتور'}:`;
+        // Invoice type - centered  
+        const invoiceTypeText = isProforma ? 'پیش فاکتور' : 'فاکتور';
+        doc.fontSize(14)
+           .font('VazirBold')
+           .text(formatMixedText(invoiceTypeText), 50, 80, { align: 'center', width: 500, features: ['rtla'] });
+        
+        // Invoice number - right aligned
         const invoiceNumber = invoiceData.invoiceNumber || invoiceData.orderNumber || 'INV-001';
-        const dateLabel = 'تاریخ:';
-        // Format date in Gregorian calendar (YYYY/MM/DD)
+        doc.fontSize(12)
+           .font('VazirRegular')
+           .text(formatMixedText(`شماره ${invoiceTypeText}:`), 350, 110, { align: 'right', width: 200, features: ['rtla'] })
+           .text(invoiceNumber, 200, 110, { align: 'left' });
+        
+        // Date - right aligned (DD/MM/YYYY format like Word)
         const currentDate = invoiceData.invoiceDate && !isNaN(new Date(invoiceData.invoiceDate).getTime()) ? new Date(invoiceData.invoiceDate) : new Date();
-        const dateValue = `${currentDate.getFullYear()}/${String(currentDate.getMonth() + 1).padStart(2, '0')}/${String(currentDate.getDate()).padStart(2, '0')}`;
+        const dateValue = `${String(currentDate.getDate()).padStart(2, '0')}/${String(currentDate.getMonth() + 1).padStart(2, '0')}/${currentDate.getFullYear()}`;
         console.log(`📅 [PDF DATE] Generated date value: ${dateValue} for ${isProforma ? 'Proforma' : 'Invoice'}`);
         
         doc.fontSize(12)
            .font('VazirRegular')
-           // Invoice number: Persian label (right) + number (left) with proper RTL
-           .text(formatMixedText(invoiceNumberLabel), 50, 100, { align: 'right', width: 150, features: ['rtla'] })
-           .text(invoiceNumber, 200, 100, { align: 'left' })
-           // Date: Persian label (right) + date (left) with proper RTL
-           .text(formatMixedText(dateLabel), 50, 120, { align: 'right', width: 150, features: ['rtla'] })
-           .text(dateValue, 200, 120, { align: 'left' });
-        
-        // Customer info - Mixed language handling
-        doc.fontSize(14)
-           .font('VazirBold')
-           .text(formatMixedText('مشخصات مشتری:'), 50, 160, { align: 'right', width: 500, features: ['rtla'] });
+           .text(formatMixedText('تاریخ:'), 350, 130, { align: 'right', width: 200, features: ['rtla'] })
+           .text(dateValue, 200, 130, { align: 'left' });
         
         // Customer data with proper language detection
         const customer = invoiceData.customer || {};
@@ -145,25 +141,30 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
         const customerEmail = customer.email || invoiceData.customerEmail || 'نامشخص';
         const customerAddress = customer.address || invoiceData.customerAddress || 'نامشخص';
         
-        doc.fontSize(11)
+        // Customer info layout - right aligned labels matching Word format
+        doc.fontSize(12)
            .font('VazirRegular')
-           // Name: Persian label (right) + value based on language
-           .text(formatMixedText('نام مشتری:'), 50, 190, { align: 'right', width: 100, features: ['rtla'] })
-           .text(isRTLText(customerName) ? formatMixedText(customerName) : customerName, 150, 190, { align: getTextAlignment(customerName) })
-           // Phone: Persian label (right) + number (left)
-           .text(formatMixedText('شماره تماس:'), 50, 210, { align: 'right', width: 100, features: ['rtla'] })
-           .text(customerPhone, 150, 210, { align: 'left' })
-           // Email: Persian label (right) + email (left)
-           .text(formatMixedText('ایمیل:'), 50, 230, { align: 'right', width: 100, features: ['rtla'] })
-           .text(customerEmail, 150, 230, { align: 'left' })
-           // Address: Persian label (right) + address based on language
-           .text(formatMixedText('آدرس:'), 50, 250, { align: 'right', width: 100, features: ['rtla'] })
-           .text(isRTLText(customerAddress) ? formatMixedText(customerAddress) : customerAddress, 150, 250, { align: getTextAlignment(customerAddress) });
+           .text(formatMixedText('نام مشتری :'), 350, 160, { align: 'right', width: 200, features: ['rtla'] })
+           .text(customerName, 200, 160, { align: 'left' })
+           
+           .text(formatMixedText('شماره تماس:'), 350, 180, { align: 'right', width: 200, features: ['rtla'] })
+           .text(customerPhone, 200, 180, { align: 'left' })
+           
+           .text(formatMixedText('ایمیل:'), 350, 200, { align: 'right', width: 200, features: ['rtla'] })
+           .text(customerEmail, 200, 200, { align: 'left' })
+           
+           .text(formatMixedText('آدرس:'), 350, 220, { align: 'right', width: 200, features: ['rtla'] })
+           .text(customerAddress, 50, 240, { align: 'left', width: 400 });
         
-        // Items table
+        // Add line separator before goods section like in Word
+        doc.moveTo(50, 270)
+           .lineTo(500, 270)
+           .stroke();
+        
+        // Items table header
         doc.fontSize(14)
            .font('VazirBold')
-           .text(formatMixedText('کالاها و خدمات:'), 50, 290, { align: 'right', width: 500, features: ['rtla'] });
+           .text(formatMixedText('کالاها و خدمات'), 50, 280, { align: 'right', width: 500, features: ['rtla'] });
         
         // Table headers - RTL alignment with proper spacing
         const startY = 320;
