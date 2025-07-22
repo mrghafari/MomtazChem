@@ -20,6 +20,16 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Verified**: Tax calculation API endpoint now returns accurate VAT amounts matching business requirements
 - **Result**: Both new order creation and PDF generation now use accurate VAT calculations
 
+### COMPLETED: Customer Profile Cost Breakdown Fix - Separated Items Subtotal from Shipping (July 22, 2025)
+✅ **RESOLVED: Fixed incorrect subtotal calculation in customer profile order display**
+- **Issue**: Items subtotal was being calculated by subtracting shipping from total, resulting in incorrect amounts
+- **Example**: Order with items 22.00 + 11.00 = 33.00 IQD + 18000.00 IQD shipping was showing items subtotal as 18033.00 IQD
+- **Root Cause**: `subtotalAmount = totalAmount - vatAmount - shippingCost - surchargeAmount` was mathematically wrong
+- **Solution**: Changed to calculate from actual order items: `order.items.reduce((sum, item) => sum + item.totalPrice, 0)`
+- **Impact**: Items subtotal now shows correct sum of product prices (33.00 IQD) separate from shipping (18000.00 IQD)
+- **Display Order**: Items subtotal → Shipping cost → VAT (if > 0) → Total with proper separation
+- **Result**: Customer profile now displays accurate cost breakdown with items and shipping properly separated
+
 ### COMPLETED: Customer Profile VAT Breakdown Display and Fixed Order API Response (July 22, 2025)
 ✅ **IMPLEMENTED: Complete VAT breakdown display in customer profile with historical data accuracy**
 - **Issue**: Customer profile orders were not showing VAT breakdown components (subtotal, VAT amount, shipping costs)

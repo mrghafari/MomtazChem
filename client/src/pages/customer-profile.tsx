@@ -424,7 +424,11 @@ const CustomerProfile = () => {
                                   const vatAmount = parseFloat(order.vatAmount || '0');
                                   const shippingCost = parseFloat(order.shippingCost || '0');
                                   const surchargeAmount = parseFloat(order.surchargeAmount || '0');
-                                  const subtotalAmount = totalAmount - vatAmount - shippingCost - surchargeAmount;
+                                  
+                                  // Calculate subtotal from actual order items (not by subtracting from total)
+                                  const subtotalAmount = order.items ? order.items.reduce((sum: number, item: any) => {
+                                    return sum + parseFloat(item.totalPrice || 0);
+                                  }, 0) : 0;
                                   
                                   return (
                                     <>
