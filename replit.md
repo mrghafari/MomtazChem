@@ -6,6 +6,20 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Company Information Module Visibility Fix with Persian-to-Technical Permission Mapping (July 22, 2025)
+✅ **RESOLVED: Company Information module now visible in Site Management interface**
+- **Issue**: "اطلاعات شرکت" (Company Information) module existed but was not visible in Site Management despite proper permissions
+- **Root Cause**: Persian permission name "اطلاعات شرکت" was missing from persianToTechnicalMap in user permissions API
+- **Technical Enhancement**: 
+  - Added "اطلاعات شرکت": "company_information" mapping to both Persian-to-technical conversion maps in /api/user/permissions endpoint
+  - Updated first mapping (lines 20469-20502) for custom users authentication flow
+  - Updated second mapping (lines 20564-20600) for legacy user to custom user conversion flow
+- **Database Verification**: Confirmed company_information module permissions exist in module_permissions table with admin role access
+- **Route Validation**: Verified /admin/company-information route exists in App.tsx and connects to CompanyInformation component
+- **Site Management Integration**: Company Information button exists in site-management-fixed.tsx with proper moduleId: "company_information"
+- **Impact**: Super Administrator and custom users with "اطلاعات شرکت" permission can now access Company Information module from Site Management
+- **Technical Result**: Permission mapping system now properly converts Persian display names to technical module IDs for visibility control
+
 ### COMPLETED: Final UI Cleanup - Removed Redundant PDF/MSDS View Buttons (July 22, 2025)
 ✅ **IMPLEMENTED: Complete interface cleanup with paired action buttons for catalog and MSDS management**
 - **User Request**: Remove redundant standalone "مشاهده PDF" and "مشاهده MSDS" buttons from upload sections

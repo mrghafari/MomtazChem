@@ -20495,7 +20495,8 @@ ${message ? `Additional Requirements:\n${message}` : ''}
             'آمار جغرافیایی': 'geography_analytics',
             'مدیریت دسته‌بندی‌ها': 'categories',
             'دستیار SEO هوشمند': 'seo_management',
-            'تنظیمات سرور': 'server_config'
+            'تنظیمات سرور': 'server_config',
+            'اطلاعات شرکت': 'company_information'
           };
 
           // Convert Persian names to technical IDs
@@ -20591,7 +20592,8 @@ ${message ? `Additional Requirements:\n${message}` : ''}
             'آمار جغرافیایی': 'geography_analytics',
             'مدیریت دسته‌بندی‌ها': 'categories',
             'دستیار SEO هوشمند': 'seo_management',
-            'تنظیمات سرور': 'server_config'
+            'تنظیمات سرور': 'server_config',
+            'اطلاعات شرکت': 'company_information'
           };
 
           // Convert Persian names to technical IDs
