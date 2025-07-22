@@ -74,6 +74,9 @@ export default function SiteManagement() {
         console.log('🔍 [DEBUG] userPermissions modules:', (userPermissions as any).modules);
         const filteredButtons = getFilteredButtons();
         console.log('🔍 [DEBUG] filtered buttons count:', filteredButtons.length);
+        console.log('🔍 [DEBUG] First 5 filtered buttons:', filteredButtons.slice(0, 5).map(b => ({ id: b.id, label: b.label, moduleId: b.moduleId })));
+        console.log('🔍 [DEBUG] AI Control button in filtered:', filteredButtons.find(b => b.id === 'ai-settings'));
+        console.log('🔍 [DEBUG] Content Management button in filtered:', filteredButtons.find(b => b.id === 'content-management'));
         const clickCounts = JSON.parse(localStorage.getItem('site-management-click-counts') || '{}');
         const savedOrder = localStorage.getItem('site-management-button-order');
         
