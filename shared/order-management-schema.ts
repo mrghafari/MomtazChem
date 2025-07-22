@@ -236,42 +236,7 @@ export const shippingRates = pgTable("shipping_rates", {
   index("shipping_rates_active_idx").on(table.isActive),
 ]);
 
-// VAT (Value Added Tax) settings table - for financial management
-export const vatSettings = pgTable("vat_settings", {
-  id: serial("id").primaryKey(),
-  
-  // VAT configuration
-  vatRate: decimal("vat_rate", { precision: 5, scale: 2 }).notNull().default("0"), // VAT percentage (e.g., 9.00 for 9%)
-  vatEnabled: boolean("vat_enabled").default(false), // Enable/disable VAT calculation
-  
-  // Product category exemptions
-  exemptCategories: json("exempt_categories"), // Array of product categories exempt from VAT
-  exemptProductIds: json("exempt_product_ids"), // Array of specific product IDs exempt from VAT
-  
-  // Geographic settings
-  applicableRegions: json("applicable_regions"), // Array of regions where VAT applies
-  defaultRegion: text("default_region").default("Iraq"), // Default region for VAT calculation
-  
-  // Billing and display settings
-  vatIncludedInPrice: boolean("vat_included_in_price").default(false), // Whether displayed prices include VAT
-  vatDisplayName: text("vat_display_name").default("مالیات بر ارزش افزوده"), // Display name for VAT on invoices
-  vatNumber: text("vat_number"), // Company VAT registration number
-  
-  // Special rules
-  shippingTaxable: boolean("shipping_taxable").default(false), // Whether shipping costs are taxable (usually false)
-  minimumTaxableAmount: decimal("minimum_taxable_amount", { precision: 10, scale: 2 }), // Minimum order amount for VAT
-  
-  // Administrative settings
-  isActive: boolean("is_active").default(true),
-  effectiveDate: timestamp("effective_date").defaultNow(), // When this VAT setting becomes effective
-  notes: text("notes"), // Administrative notes about VAT settings
-  
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-}, (table) => [
-  index("vat_settings_active_idx").on(table.isActive),
-  index("vat_settings_effective_idx").on(table.effectiveDate),
-]);
+
 
 // Delivery methods table - configurable delivery method types
 export const deliveryMethods = pgTable("delivery_methods", {
@@ -350,11 +315,7 @@ export const insertShippingRateSchema = createInsertSchema(shippingRates).omit({
   updatedAt: true,
 });
 
-export const insertVatSettingSchema = createInsertSchema(vatSettings).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
+
 
 export const insertOrderCounterSchema = createInsertSchema(orderCounter).omit({
   id: true,
@@ -391,8 +352,7 @@ export type InsertDeliveryCode = z.infer<typeof insertDeliveryCodeSchema>;
 export type ShippingRate = typeof shippingRates.$inferSelect;
 export type InsertShippingRate = z.infer<typeof insertShippingRateSchema>;
 
-export type VatSetting = typeof vatSettings.$inferSelect;
-export type InsertVatSetting = z.infer<typeof insertVatSettingSchema>;
+
 
 export type DeliveryMethod = typeof deliveryMethods.$inferSelect;
 export type InsertDeliveryMethod = z.infer<typeof insertDeliveryMethodSchema>;

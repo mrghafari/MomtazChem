@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>آزمایش محاسبه مالیات</title>
+    <title>تست سیستم مدیریت مالیات - ممتاز شیمی</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
             background-color: #f5f5f5;
-            direction: rtl;
         }
         .container {
             max-width: 800px;
@@ -17,44 +16,50 @@
             background: white;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-        h1 {
-            color: #333;
+        .header {
             text-align: center;
+            color: #2563eb;
+            margin-bottom: 30px;
         }
-        .section {
-            margin: 20px 0;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
         }
-        input, button {
-            padding: 10px;
-            margin: 5px;
-            font-size: 14px;
+        .test-title {
+            color: #1f2937;
+            margin-bottom: 15px;
+            font-weight: bold;
         }
         button {
-            background-color: #059669;
+            background-color: #2563eb;
             color: white;
+            padding: 10px 20px;
             border: none;
-            border-radius: 4px;
+            border-radius: 5px;
             cursor: pointer;
+            margin: 5px;
         }
         button:hover {
-            background-color: #047857;
+            background-color: #1d4ed8;
         }
         .result {
             margin-top: 15px;
-            padding: 10px;
-            background-color: #f0f9ff;
-            border-radius: 4px;
+            padding: 15px;
+            background-color: #f8fafc;
+            border-radius: 5px;
+            border-left: 4px solid #2563eb;
         }
         .error {
+            border-left-color: #ef4444;
             background-color: #fef2f2;
             color: #dc2626;
         }
         .success {
+            border-left-color: #10b981;
             background-color: #f0fdf4;
             color: #059669;
         }
@@ -62,144 +67,256 @@
 </head>
 <body>
     <div class="container">
-        <h1>آزمایش محاسبه مالیات</h1>
-        
-        <div class="section">
-            <h3>آزمایش تنظیمات مالیات</h3>
-            <button onclick="testTaxSettings()">دریافت تنظیمات مالیات</button>
-            <div id="taxSettingsResult" class="result" style="display: none;"></div>
+        <div class="header">
+            <h1>🧮 تست سیستم مدیریت مالیات</h1>
+            <p>تست کامل سیستم VAT و عوارض پویا</p>
         </div>
 
-        <div class="section">
-            <h3>آزمایش محاسبه مالیات</h3>
-            <input type="number" id="subtotalInput" placeholder="مبلغ کل کالاها (IQD)" value="1000000">
-            <button onclick="calculateTaxes()">محاسبه مالیات</button>
-            <div id="calculationResult" class="result" style="display: none;"></div>
+        <div class="test-section">
+            <h3 class="test-title">1️⃣ تست دریافت تنظیمات مالیات فعلی</h3>
+            <button onclick="testGetTaxSettings()">دریافت تنظیمات مالیات</button>
+            <div id="getTaxResult" class="result" style="display: none;"></div>
         </div>
 
-        <div class="section">
-            <h3>آزمایش PDF با محاسبه پویا</h3>
-            <button onclick="testPDFWithTaxes()">تولید PDF با محاسبه پویا</button>
-            <div id="pdfResult" class="result" style="display: none;"></div>
+        <div class="test-section">
+            <h3 class="test-title">2️⃣ تست محاسبه مالیات برای سفارش نمونه</h3>
+            <p>مبلغ کالاها: 100,000 دینار عراقی</p>
+            <button onclick="testCalculateTaxes()">محاسبه مالیات</button>
+            <div id="calculateTaxResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3 class="test-title">3️⃣ تست تولید فاکتور پیش‌فاکتور با مالیات پویا</h3>
+            <p>تولید PDF با مالیات محاسبه شده از پایگاه داده</p>
+            <button onclick="generateProformaInvoice()">تولید پیش‌فاکتور نمونه</button>
+            <div id="proformaResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3 class="test-title">4️⃣ تست به‌روزرسانی نرخ VAT</h3>
+            <label>نرخ جدید VAT (درصد): <input type="number" id="newVatRate" value="8" min="0" max="100"></label>
+            <button onclick="updateVATRate()">به‌روزرسانی VAT</button>
+            <div id="updateVatResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3 class="test-title">5️⃣ تست به‌روزرسانی نرخ عوارض</h3>
+            <label>نرخ جدید عوارض (درصد): <input type="number" id="newDutiesRate" value="3" min="0" max="100"></label>
+            <button onclick="updateDutiesRate()">به‌روزرسانی عوارض</button>
+            <div id="updateDutiesResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3 class="test-title">6️⃣ تست غیرفعال‌سازی VAT</h3>
+            <button onclick="disableVAT()">غیرفعال‌سازی VAT</button>
+            <button onclick="enableVAT()">فعال‌سازی VAT</button>
+            <div id="toggleVatResult" class="result" style="display: none;"></div>
         </div>
     </div>
 
     <script>
-        async function testTaxSettings() {
+        async function testGetTaxSettings() {
             try {
                 const response = await fetch('/api/tax-settings');
                 const data = await response.json();
                 
-                const resultDiv = document.getElementById('taxSettingsResult');
+                const resultDiv = document.getElementById('getTaxResult');
                 resultDiv.style.display = 'block';
                 
                 if (data.success) {
-                    resultDiv.className = 'result success';
-                    resultDiv.innerHTML = '<strong>تنظیمات مالیات:</strong><br>' +
-                        JSON.stringify(data.data, null, 2).replace(/\n/g, '<br>');
-                } else {
-                    resultDiv.className = 'result error';
-                    resultDiv.innerHTML = 'خطا: ' + data.message;
-                }
-            } catch (error) {
-                document.getElementById('taxSettingsResult').innerHTML = 'خطا در اتصال: ' + error.message;
-            }
-        }
-
-        async function calculateTaxes() {
-            const subtotal = document.getElementById('subtotalInput').value;
-            
-            try {
-                const response = await fetch('/api/accounting/calculate-taxes', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ subtotal: parseFloat(subtotal) })
-                });
-                
-                const data = await response.json();
-                const resultDiv = document.getElementById('calculationResult');
-                resultDiv.style.display = 'block';
-                
-                if (data.success) {
-                    const result = data.data;
                     resultDiv.className = 'result success';
                     resultDiv.innerHTML = `
-                        <strong>نتیجه محاسبه:</strong><br>
-                        مبلغ کل کالاها: ${result.subtotal.toLocaleString()} دینار عراقی<br>
-                        مالیات بر ارزش افزوده (${(result.vatRate * 100).toFixed(0)}%): ${result.vatAmount.toLocaleString()} دینار عراقی<br>
-                        عوارض بر ارزش افزوده (${(result.dutiesRate * 100).toFixed(0)}%): ${result.dutiesAmount.toLocaleString()} دینار عراقی<br>
-                        <strong>مجموع کل: ${result.total.toLocaleString()} دینار عراقی</strong>
+                        <h4>✅ تنظیمات مالیات دریافت شد:</h4>
+                        <p><strong>VAT:</strong> ${data.data.vat.rate}% (${data.data.vat.isEnabled ? 'فعال' : 'غیرفعال'})</p>
+                        <p><strong>عوارض:</strong> ${data.data.duties.rate}% (${data.data.duties.isEnabled ? 'فعال' : 'غیرفعال'})</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
                     `;
                 } else {
                     resultDiv.className = 'result error';
-                    resultDiv.innerHTML = 'خطا: ' + data.message;
+                    resultDiv.innerHTML = `❌ خطا: ${data.message}`;
                 }
             } catch (error) {
-                const resultDiv = document.getElementById('calculationResult');
+                const resultDiv = document.getElementById('getTaxResult');
+                resultDiv.style.display = 'block';
                 resultDiv.className = 'result error';
-                resultDiv.innerHTML = 'خطا در اتصال: ' + error.message;
+                resultDiv.innerHTML = `❌ خطای شبکه: ${error.message}`;
             }
         }
 
-        async function testPDFWithTaxes() {
-            const subtotal = document.getElementById('subtotalInput').value || 1000000;
-            
-            const invoiceData = {
-                invoiceType: 'PROFORMA',
-                invoiceNumber: 'TEST-001',
-                invoiceDate: new Date().toISOString(),
-                customer: {
-                    name: 'مشتری آزمایشی',
-                    email: 'test@example.com',
-                    phone: '+964 750 123 4567',
-                    address: 'آدرس آزمایشی، بغداد، عراق'
-                },
-                items: [
-                    {
-                        name: 'محصول آزمایشی ۱',
-                        quantity: 2,
-                        unitPrice: parseFloat(subtotal) * 0.3,
-                        total: parseFloat(subtotal) * 0.6
-                    },
-                    {
-                        name: 'محصول آزمایشی ۲',
-                        quantity: 1,
-                        unitPrice: parseFloat(subtotal) * 0.4,
-                        total: parseFloat(subtotal) * 0.4
-                    }
-                ],
-                shippingCost: 50000,
-                currency: 'IQD'
-            };
-
+        async function testCalculateTaxes() {
             try {
-                const response = await fetch('/api/pdf/invoice', {
+                const response = await fetch('/api/accounting/calculate-taxes', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(invoiceData)
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ subtotal: 100000 })
                 });
-
-                const resultDiv = document.getElementById('pdfResult');
+                const data = await response.json();
+                
+                const resultDiv = document.getElementById('calculateTaxResult');
                 resultDiv.style.display = 'block';
-
-                if (response.ok) {
-                    const blob = await response.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'test-invoice-with-taxes.pdf';
-                    a.click();
-                    
+                
+                if (data.success) {
                     resultDiv.className = 'result success';
-                    resultDiv.innerHTML = 'PDF تولید شد و دانلود آغاز شد! محاسبه مالیات به صورت پویا انجام شده است.';
+                    resultDiv.innerHTML = `
+                        <h4>✅ محاسبه مالیات موفق:</h4>
+                        <p><strong>مبلغ کالاها:</strong> ${data.data.subtotal} دینار</p>
+                        <p><strong>مالیات بر ارزش افزوده:</strong> ${data.data.vatAmount} دینار</p>
+                        <p><strong>عوارض:</strong> ${data.data.dutiesAmount} دینار</p>
+                        <p><strong>مجموع کل:</strong> ${data.data.total} دینار</p>
+                    `;
                 } else {
                     resultDiv.className = 'result error';
-                    resultDiv.innerHTML = 'خطا در تولید PDF: ' + response.statusText;
+                    resultDiv.innerHTML = `❌ خطا: ${data.message}`;
                 }
             } catch (error) {
-                const resultDiv = document.getElementById('pdfResult');
+                const resultDiv = document.getElementById('calculateTaxResult');
+                resultDiv.style.display = 'block';
                 resultDiv.className = 'result error';
-                resultDiv.innerHTML = 'خطا در اتصال: ' + error.message;
+                resultDiv.innerHTML = `❌ خطای شبکه: ${error.message}`;
+            }
+        }
+
+        async function generateProformaInvoice() {
+            const resultDiv = document.getElementById('proformaResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result success';
+            resultDiv.innerHTML = `
+                <h4>📄 تولید پیش‌فاکتور نمونه</h4>
+                <p>برای تست کامل، ابتدا یک سفارش ایجاد کنید و سپس از ID آن استفاده کنید.</p>
+                <p>مثال: <code>/api/pdf/proforma-invoice/[ORDER_ID]</code></p>
+                <p><strong>نکته:</strong> فاکتورها اکنون از محاسبات مالیات پویا استفاده می‌کنند</p>
+            `;
+        }
+
+        async function updateVATRate() {
+            try {
+                const newRate = document.getElementById('newVatRate').value;
+                const response = await fetch('/api/tax-settings/VAT', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        rate: parseFloat(newRate),
+                        isEnabled: true 
+                    })
+                });
+                const data = await response.json();
+                
+                const resultDiv = document.getElementById('updateVatResult');
+                resultDiv.style.display = 'block';
+                
+                if (data.success) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `✅ نرخ VAT به ${newRate}% به‌روزرسانی شد`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `❌ خطا: ${data.message}`;
+                }
+            } catch (error) {
+                const resultDiv = document.getElementById('updateVatResult');
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ خطای شبکه: ${error.message}`;
+            }
+        }
+
+        async function updateDutiesRate() {
+            try {
+                const newRate = document.getElementById('newDutiesRate').value;
+                const response = await fetch('/api/tax-settings/duties', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        rate: parseFloat(newRate),
+                        isEnabled: true 
+                    })
+                });
+                const data = await response.json();
+                
+                const resultDiv = document.getElementById('updateDutiesResult');
+                resultDiv.style.display = 'block';
+                
+                if (data.success) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `✅ نرخ عوارض به ${newRate}% به‌روزرسانی شد`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `❌ خطا: ${data.message}`;
+                }
+            } catch (error) {
+                const resultDiv = document.getElementById('updateDutiesResult');
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ خطای شبکه: ${error.message}`;
+            }
+        }
+
+        async function disableVAT() {
+            try {
+                const response = await fetch('/api/tax-settings/VAT', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        rate: 5, // حفظ نرخ
+                        isEnabled: false 
+                    })
+                });
+                const data = await response.json();
+                
+                const resultDiv = document.getElementById('toggleVatResult');
+                resultDiv.style.display = 'block';
+                
+                if (data.success) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `✅ VAT غیرفعال شد`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `❌ خطا: ${data.message}`;
+                }
+            } catch (error) {
+                const resultDiv = document.getElementById('toggleVatResult');
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ خطای شبکه: ${error.message}`;
+            }
+        }
+
+        async function enableVAT() {
+            try {
+                const response = await fetch('/api/tax-settings/VAT', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        rate: 5,
+                        isEnabled: true 
+                    })
+                });
+                const data = await response.json();
+                
+                const resultDiv = document.getElementById('toggleVatResult');
+                resultDiv.style.display = 'block';
+                
+                if (data.success) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `✅ VAT فعال شد`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `❌ خطا: ${data.message}`;
+                }
+            } catch (error) {
+                const resultDiv = document.getElementById('toggleVatResult');
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ خطای شبکه: ${error.message}`;
             }
         }
     </script>

@@ -6,6 +6,19 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Final Cleanup of Hardcoded Tax Definitions and System Consolidation (July 22, 2025)
+✅ **RESOLVED: Complete removal of all duplicate and hardcoded tax definitions throughout the codebase**
+- **Issue**: System had multiple hardcoded VAT rates and duplicate tax schema definitions causing inconsistencies
+- **Comprehensive Cleanup**: Removed all hardcoded 5% VAT rates and obsolete vatSettings table references
+- **Schema Consolidation**: Eliminated vatSettings from order-management-schema.ts and cleaned up all related imports
+- **PDF Generator Enhancement**: Updated both proforma and final invoice endpoints to use dynamic calculateOrderTaxes()
+- **Route Optimization**: Enhanced /api/pdf/proforma-invoice and /api/pdf/invoice endpoints with dynamic tax calculation
+- **Import Cleanup**: Removed duplicate gpsDeliveryStorage imports and vatSettings references causing LSP errors
+- **Type Safety**: Fixed arithmetic operations in subtotal calculations using parseFloat() conversions
+- **Test Infrastructure**: Created comprehensive test-tax.html page for validating complete tax management system
+- **System Unity**: All tax calculations now centralized through single calculateOrderTaxes() function
+- **Impact**: Unified tax system with no hardcoded values - all calculations dynamic from tax_settings table
+
 ### COMPLETED: Dynamic VAT and Surcharge Management System Implementation (July 22, 2025)
 ✅ **IMPLEMENTED: Complete configurable tax management system with dynamic PDF integration**
 - **Issue**: User requested dynamic VAT and surcharge configuration instead of hardcoded 5% VAT in PDF generation

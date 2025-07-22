@@ -37,12 +37,13 @@ import { sql, eq, and, or, isNull, isNotNull, desc, gte } from "drizzle-orm";
 import { z } from "zod";
 import * as schema from "@shared/schema";
 const { crmCustomers } = schema;
-import { orderManagement, shippingRates, vatSettings, deliveryMethods } from "@shared/order-management-schema";
+import { orderManagement, shippingRates, deliveryMethods } from "@shared/order-management-schema";
 import { generateEAN13Barcode, validateEAN13, parseEAN13Barcode, isMomtazchemBarcode } from "@shared/barcode-utils";
 import { generateSmartSKU, validateSKUUniqueness } from "./ai-sku-generator";
 import { deliveryVerificationStorage } from "./delivery-verification-storage";
 import { gpsDeliveryStorage } from "./gps-delivery-storage";
 import { insertGpsDeliveryConfirmationSchema } from "@shared/gps-delivery-schema";
+
 // SMS service will be imported dynamically when needed
 import { ticketingStorage } from "./ticketing-storage";
 import { getLocalizedMessage, getLocalizedEmailSubject, generateSMSMessage } from "./multilingual-messages";
@@ -65,7 +66,7 @@ import {
   type AbandonedCartSettings,
   type AbandonedCartNotification
 } from "@shared/cart-schema";
-import { gpsDeliveryStorage } from "./gps-delivery-storage";
+
 import { logisticsStorage } from "./logistics-storage";
 import { 
   transportationCompanies,
@@ -477,6 +478,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .from(orderItems)
         .where(eq(orderItems.orderId, orderId));
 
+      // Calculate subtotal from items
+      const subtotal = itemsResult.reduce((sum, item) => {
+        return sum + (parseFloat(item.quantity.toString()) * parseFloat(item.unitPrice));
+      }, 0);
+      
+      // Calculate taxes
+      const taxCalculation = await calculateOrderTaxes(subtotal);
+      
       const invoiceData = {
         invoiceType: 'PROFORMA', // نوع فاکتور: پیش فاکتور
         invoiceNumber: `P-${order.orderNumber}`, // P- برای پیش فاکتور
@@ -494,14 +503,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           unitPrice: parseFloat(item.unitPrice),
           total: parseFloat(item.totalPrice || '0'),
         })),
-        subtotal: parseFloat(order.totalAmount || '0'),
+        subtotal: subtotal,
+        vatAmount: taxCalculation.vatAmount,
+        dutiesAmount: taxCalculation.dutiesAmount,
         shippingCost: parseFloat(order.shippingCost || '0'),
-        vatRate: 5, // نرخ مالیات بر ارزش افزوده 5 درصد
-        total: parseFloat(order.totalAmount || '0'),
+        total: subtotal + taxCalculation.vatAmount + taxCalculation.dutiesAmount + parseFloat(order.shippingCost || '0'),
         currency: order.currency || 'IQD',
         paymentStatus: 'در انتظار پرداخت', // برای پیش فاکتور
         notes: 'این پیش فاکتور است و پس از پرداخت و تأیید مالی، فاکتور نهایی صادر خواهد شد.'
       };
+      
+      console.log('Proforma invoice tax calculation:', taxCalculation);
 
       const { generateInvoicePDF } = await import('./pdfkit-generator');
       const pdfBuffer = await generateInvoicePDF(invoiceData);
@@ -605,7 +617,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Calculate subtotal from items
       const subtotal = itemsResult.reduce((sum, item) => {
-        return sum + (item.quantity * parseFloat(item.unitPrice));
+        return sum + (parseFloat(item.quantity.toString()) * parseFloat(item.unitPrice));
       }, 0);
       
       // Calculate taxes
