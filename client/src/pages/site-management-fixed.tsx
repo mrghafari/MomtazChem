@@ -395,6 +395,9 @@ export default function SiteManagement() {
     // Try both the modules array and permissions array for compatibility
     const allowedModules = permissions.modules || permissions.permissions?.map((p: any) => p.moduleId) || [];
     const allButtons = getInitialButtons();
+    console.log('🔍 [DEBUG] Total allButtons count:', allButtons.length);
+    console.log('🔍 [DEBUG] AI Settings exists in allButtons:', !!allButtons.find(b => b.id === 'ai-settings'));
+    console.log('🔍 [DEBUG] Content Management exists in allButtons:', !!allButtons.find(b => b.id === 'content-management'));
     
     console.log('🔍 [DEBUG] allowedModules:', allowedModules);
     console.log('🔍 [DEBUG] kpi_dashboard in allowedModules?', allowedModules.includes('kpi_dashboard'));
