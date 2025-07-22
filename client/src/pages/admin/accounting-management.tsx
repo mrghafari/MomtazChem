@@ -65,7 +65,7 @@ export default function AccountingManagement() {
   }
 
   // Fetch invoices
-  const { data: invoices, isLoading, refetch } = useQuery({
+  const { data: invoicesResponse, isLoading, refetch } = useQuery({
     queryKey: ['/api/accounting/invoices'],
     queryFn: async () => {
       const response = await fetch('/api/accounting/invoices');
@@ -73,6 +73,9 @@ export default function AccountingManagement() {
       return response.json();
     }
   });
+
+  // Extract the invoices array from the response
+  const invoices = invoicesResponse?.data || [];
 
   // Create invoice mutation
   const createInvoiceMutation = useMutation({
