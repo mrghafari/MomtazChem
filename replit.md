@@ -6,6 +6,21 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Unified Tax Settings API Integration Across All Components (July 22, 2025)
+✅ **RESOLVED: All components now use single `/api/tax-settings` endpoint for consistent VAT and duties data**
+- **Issue**: accounting-management.tsx was using incorrect `/api/accounting/tax-settings` endpoint causing tax data inconsistency
+- **Root Cause**: Two different endpoints existed - public `/api/tax-settings` and admin `/api/accounting/tax-settings` with different data sources
+- **Solution**: Consolidated all components to use public `/api/tax-settings` endpoint
+- **Components Fixed**: 
+  - bilingual-purchase-form.tsx: Updated from `/api/financial/vat-settings` to `/api/tax-settings`
+  - accounting-management.tsx: Updated from `/api/accounting/tax-settings` to `/api/tax-settings` (all references)
+- **Data Consistency**: Both VAT (5%) and duties (2%) now display correctly across all interfaces
+- **Frontend Enhancement**: Added proper VAT and duties display in purchase form with Persian labels
+- **Tax Calculation**: Enhanced to handle both VAT and duties with separate rate calculations
+- **Debug Features**: Added comprehensive console logging for tax calculation troubleshooting
+- **Impact**: Unified tax management system with consistent data across checkout, accounting, and purchase forms
+- **Result**: Single source of truth for all tax settings eliminating data discrepancies
+
 ### COMPLETED: Company Information Module Visibility Fix with Persian-to-Technical Permission Mapping (July 22, 2025)
 ✅ **RESOLVED: Company Information module now visible in Site Management interface**
 - **Issue**: "اطلاعات شرکت" (Company Information) module existed but was not visible in Site Management despite proper permissions

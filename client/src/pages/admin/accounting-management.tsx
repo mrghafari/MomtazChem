@@ -432,9 +432,9 @@ function VatManagement() {
   
   // Fetch tax settings
   const { data: taxSettings, isLoading, refetch } = useQuery({
-    queryKey: ['/api/accounting/tax-settings'],
+    queryKey: ['/api/tax-settings'],
     queryFn: async () => {
-      const response = await fetch('/api/accounting/tax-settings');
+      const response = await fetch('/api/tax-settings');
       if (!response.ok) throw new Error('Failed to fetch tax settings');
       const result = await response.json();
       return result.data;
@@ -453,7 +453,7 @@ function VatManagement() {
   // Update tax setting mutation
   const updateTaxMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: any }) => {
-      return apiRequest(`/api/accounting/tax-settings/${id}`, { method: 'PUT', body: data });
+      return apiRequest(`/api/tax-settings/${id}`, { method: 'PUT', body: data });
     },
     onSuccess: (result) => {
       toast({
@@ -474,7 +474,7 @@ function VatManagement() {
   // Toggle tax setting mutation
   const toggleTaxMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest(`/api/accounting/tax-settings/${id}/toggle`, { method: 'POST' });
+      return apiRequest(`/api/tax-settings/${id}/toggle`, { method: 'POST' });
     },
     onSuccess: (result) => {
       toast({
@@ -635,9 +635,9 @@ function DutiesManagement() {
   
   // Fetch tax settings
   const { data: taxSettings, isLoading, refetch } = useQuery({
-    queryKey: ['/api/accounting/tax-settings'],
+    queryKey: ['/api/tax-settings'],
     queryFn: async () => {
-      const response = await fetch('/api/accounting/tax-settings');
+      const response = await fetch('/api/tax-settings');
       if (!response.ok) throw new Error('Failed to fetch tax settings');
       const result = await response.json();
       return result.data;
@@ -647,7 +647,7 @@ function DutiesManagement() {
   // Update tax setting mutation
   const updateTaxMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: any }) => {
-      return apiRequest(`/api/accounting/tax-settings/${id}`, { method: 'PUT', body: data });
+      return apiRequest(`/api/tax-settings/${id}`, { method: 'PUT', body: data });
     },
     onSuccess: (result) => {
       toast({
@@ -668,7 +668,7 @@ function DutiesManagement() {
   // Toggle tax setting mutation
   const toggleTaxMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest(`/api/accounting/tax-settings/${id}/toggle`, { method: 'POST' });
+      return apiRequest(`/api/tax-settings/${id}/toggle`, { method: 'POST' });
     },
     onSuccess: (result) => {
       toast({
