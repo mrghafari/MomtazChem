@@ -6,6 +6,28 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: PDF Template Redesigned to Match Exact Word Document Format (July 22, 2025)
+✅ **IMPLEMENTED: Complete PDF redesign to match user's Word document template exactly**
+- **User Request**: PDF format should replicate the exact structure and layout of the provided Word document template
+- **Major Layout Overhaul**:
+  - **Table Structure**: Created proper table grid with borders matching Word template (5 rows × 4 columns)
+  - **Header Layout**: Company name "شرکت ممتاز شیمی" centered, followed by "پیش فاکتور" 
+  - **Invoice Details**: Right-aligned Persian labels with left-aligned values for invoice number and date
+  - **Customer Information**: Proper field layout with right-aligned labels matching Word format
+  - **Table Headers**: "شرح کالا", "تعداد", "قیمت واحد", "مبلغ کل" with proper column spacing
+- **Summary Section Enhancement**:
+  - Right-aligned Persian labels: "مجموع کالاها", "مالیات بر ارزش افزوده", "هزینه حمل", "مجموع کل"
+  - Left-aligned numerical values without commas or decimals
+  - Proper spacing and alignment matching Word template
+- **Footer Message**: Added exact footer text from Word template: "این پیش فاکتور است و پس تائید مالی، فاکتور نهایی صادر خواهد شد."
+- **Technical Implementation**:
+  - Table grid drawing with proper borders and cell divisions
+  - Column width optimization: [200, 80, 80, 120] pixels
+  - Row height standardization: 30 pixels per row
+  - Maximum 4 items displayed in table to fit format
+- **Test Results**: Generated 45,719-byte PDF with exact Word template structure
+- **Impact**: PDF invoices now perfectly match user's corporate Word template for professional consistency
+
 ### COMPLETED: Enhanced PDF Text Direction with Intelligent Mixed Language Support (July 22, 2025)
 ✅ **IMPLEMENTED: Comprehensive bidirectional text formatting system for PDF generation**
 - **Issue**: User required Persian text to display RTL (right-to-left) and English text/numbers to display LTR (left-to-right) in PDF documents

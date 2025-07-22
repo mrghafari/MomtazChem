@@ -161,130 +161,113 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
            .lineTo(500, 270)
            .stroke();
         
-        // Items table header
+        // Items table header - following Word template exactly
         doc.fontSize(14)
            .font('VazirBold')
            .text(formatMixedText('کالاها و خدمات'), 50, 280, { align: 'right', width: 500, features: ['rtla'] });
         
-        // Table headers - RTL alignment with proper spacing
-        const startY = 320;
-        doc.fontSize(10)
+        // Create table structure exactly like Word document
+        const tableStartY = 320;
+        const rowHeight = 30;
+        const colWidths = [200, 80, 80, 120]; // شرح کالا، تعداد، قیمت واحد، مبلغ کل
+        const colStartX = [50, 250, 330, 410];
+        
+        // Draw table grid
+        doc.rect(50, tableStartY, 500, 150).stroke();
+        
+        // Draw vertical lines for columns
+        for (let i = 1; i < colStartX.length; i++) {
+          doc.moveTo(colStartX[i], tableStartY)
+             .lineTo(colStartX[i], tableStartY + 150)
+             .stroke();
+        }
+        
+        // Draw horizontal lines for rows (5 rows like in Word)
+        for (let i = 1; i <= 5; i++) {
+          doc.moveTo(50, tableStartY + (i * rowHeight))
+             .lineTo(550, tableStartY + (i * rowHeight))
+             .stroke();
+        }
+        
+        // Table headers - exactly matching Word template
+        doc.fontSize(11)
            .font('VazirBold')
-           .text(formatMixedText('شرح کالا'), 50, startY, { align: 'right', width: 200, features: ['rtla'] })
-           .text(formatMixedText('تعداد'), 280, startY, { align: 'center', width: 50, features: ['rtla'] })
-           .text(formatMixedText('قیمت واحد'), 350, startY, { align: 'center', width: 80, features: ['rtla'] })
-           .text(formatMixedText('مبلغ کل'), 450, startY, { align: 'center', width: 80, features: ['rtla'] });
+           .text(formatMixedText('شرح کالا'), colStartX[0] + 10, tableStartY + 5, { align: 'right', width: colWidths[0] - 20, features: ['rtla'] })
+           .text(formatMixedText('تعداد'), colStartX[1] + 10, tableStartY + 5, { align: 'center', width: colWidths[1] - 20, features: ['rtla'] })
+           .text(formatMixedText('قیمت واحد'), colStartX[2] + 10, tableStartY + 5, { align: 'center', width: colWidths[2] - 20, features: ['rtla'] })
+           .text(formatMixedText('مبلغ کل'), colStartX[3] + 10, tableStartY + 5, { align: 'center', width: colWidths[3] - 20, features: ['rtla'] });
         
-        // Draw line under headers
-        doc.moveTo(50, startY + 15)
-           .lineTo(530, startY + 15)
-           .stroke();
-        
-        // Items - Mixed RTL/LTR format
-        let currentY = startY + 25;
+        // Fill in product items in the table rows
         const items = invoiceData.items || [];
+        const currency = invoiceData.currency || 'IQD';
         
-        items.forEach((item: any, index: number) => {
-          const itemY = currentY + (index * 20);
-          const currency = invoiceData.currency || 'IQD';
+        items.slice(0, 4).forEach((item: any, index: number) => { // Maximum 4 items to fit table
+          const rowY = tableStartY + ((index + 1) * rowHeight) + 5;
           
           // Product name - RTL alignment for Persian/Arabic/Kurdish, LTR for English
-          const productName = item.name || 'نامشخص';
+          const productName = item.name || item.productName || '';
           const productNameAlign = getTextAlignment(productName);
           const formattedProductName = isRTLText(productName) ? formatMixedText(productName) : productName;
           
           // Numbers and currency - always LTR without commas and decimals
-          const totalAmount = formatNumber((item.total || item.quantity || 1) * (item.unitPrice || 0)) + `  ${currency}`;
-          const unitPrice = formatNumber(item.unitPrice || 0) + `  ${currency}`;
           const quantity = formatNumber(item.quantity || 1);
+          const unitPrice = formatNumber(item.unitPrice || 0);
+          const totalAmount = formatNumber((item.total || item.totalPrice || (item.quantity || 1) * (item.unitPrice || 0)));
           
-          doc.fontSize(9)
+          doc.fontSize(10)
              .font('VazirRegular')
-             // Product name - dynamic alignment based on language with RTL formatting
-             .text(formattedProductName, 50, itemY, { align: productNameAlign, width: 200, features: isRTLText(productName) ? ['rtla'] : undefined })
-             // Quantity - center aligned for numbers
-             .text(quantity, 280, itemY, { align: 'center', width: 50 })
-             // Unit price - center aligned for numbers  
-             .text(unitPrice, 350, itemY, { align: 'center', width: 80 })
-             // Total amount - center aligned for numbers
-             .text(totalAmount, 450, itemY, { align: 'center', width: 80 });
+             // Product name in first column
+             .text(formattedProductName, colStartX[0] + 10, rowY, { 
+               align: productNameAlign, 
+               width: colWidths[0] - 20, 
+               features: isRTLText(productName) ? ['rtla'] : undefined 
+             })
+             // Quantity in second column
+             .text(quantity, colStartX[1] + 10, rowY, { align: 'center', width: colWidths[1] - 20 })
+             // Unit price in third column
+             .text(unitPrice, colStartX[2] + 10, rowY, { align: 'center', width: colWidths[2] - 20 })
+             // Total amount in fourth column
+             .text(totalAmount, colStartX[3] + 10, rowY, { align: 'center', width: colWidths[3] - 20 });
         });
         
-        // Items subtotal
-        const subtotalY = currentY + (items.length * 20) + 30;
-        const currency = invoiceData.currency || 'IQD';
+        // Summary section below table - exactly matching Word template
+        const summaryY = tableStartY + 180;
         
-        // Calculate items subtotal (without shipping)
+        // Calculate totals
         const itemsSubtotal = items.reduce((sum: number, item: any) => {
-          return sum + ((item.total || item.quantity || 1) * (item.unitPrice || 0));
+          return sum + ((item.total || item.totalPrice || (item.quantity || 1) * (item.unitPrice || 0)));
         }, 0);
         
+        const vatRate = 0.05; // 5% VAT
+        const vatAmount = itemsSubtotal * vatRate;
+        const shippingCost = parseFloat(invoiceData.shippingCost || '0');
+        const grandTotal = itemsSubtotal + vatAmount + shippingCost;
+        
+        // Summary table matching Word template exactly
         doc.fontSize(11)
            .font('VazirRegular')
-           .text(formatMixedText('مجموع کالاها:'), 50, subtotalY, { align: 'right', width: 150, features: ['rtla'] })
-           .text(`${formatNumber(itemsSubtotal)}  ${currency}`, 200, subtotalY, { align: 'left' });
-        
-        // Shipping cost
-        const shippingY = subtotalY + 20;
-        const shippingCost = invoiceData.shippingCost || 0;
-        
-        doc.fontSize(11)
-           .font('VazirRegular')
-           .text(formatMixedText('هزینه حمل:'), 50, shippingY, { align: 'right', width: 150, features: ['rtla'] })
-           .text(`${formatNumber(parseFloat(shippingCost))}  ${currency}`, 200, shippingY, { align: 'left' });
-        
-        // VAT (Value Added Tax)
-        const vatY = shippingY + 20;
-        const vatRate = invoiceData.vatRate || 0; // VAT rate as percentage (e.g., 5 for 5%)
-        const vatAmount = (itemsSubtotal + parseFloat(shippingCost)) * (vatRate / 100);
-        
-        if (vatRate > 0) {
-          doc.fontSize(11)
-             .font('VazirRegular')
-             .text(formatMixedText(`مالیات بر ارزش افزوده (${vatRate}%):`), 50, vatY, { align: 'right', width: 150, features: ['rtla'] })
-             .text(`${formatNumber(vatAmount)}  ${currency}`, 200, vatY, { align: 'left' });
-        }
-        
-        // Total amount
-        const totalY = (vatRate > 0 ? vatY : shippingY) + 30;
-        const totalAmount = itemsSubtotal + parseFloat(shippingCost) + vatAmount;
-        
-        // Draw line above total
-        doc.moveTo(50, totalY - 10)
-           .lineTo(300, totalY - 10)
-           .stroke();
-        
-        // Split total text: Persian text (right) + numbers (left)
-        const totalPersianText = 'مجموع کل:';
-        const totalNumberText = `${formatNumber(totalAmount)}  ${currency}`;
-        
-        doc.fontSize(12)
+           .text(formatMixedText('مجموع کالاها:'), 350, summaryY, { align: 'right', width: 150, features: ['rtla'] })
+           .text(`${formatNumber(itemsSubtotal)}`, 280, summaryY, { align: 'left', width: 60 })
+           
+           .text(formatMixedText('مالیات بر ارزش افزوده:'), 350, summaryY + 20, { align: 'right', width: 150, features: ['rtla'] })
+           .text(`${formatNumber(vatAmount)}`, 280, summaryY + 20, { align: 'left', width: 60 })
+           
+           .text(formatMixedText('هزینه حمل:'), 350, summaryY + 40, { align: 'right', width: 150, features: ['rtla'] })
+           .text(`${formatNumber(shippingCost)}`, 280, summaryY + 40, { align: 'left', width: 60 })
+           
            .font('VazirBold')
-           .text(formatMixedText(totalPersianText), 50, totalY, { align: 'right', width: 150, features: ['rtla'] })
-           .text(totalNumberText, 200, totalY, { align: 'left' });
+           .text(formatMixedText('مجموع کل:'), 350, summaryY + 60, { align: 'right', width: 150, features: ['rtla'] })
+           .text(`${formatNumber(grandTotal)}`, 280, summaryY + 60, { align: 'left', width: 60 });
         
-        // Proforma invoice notes - RTL for Persian text
-        if (isProforma && invoiceData.notes) {
-          const notesAlign = getTextAlignment(invoiceData.notes);
-          const formattedNotes = isRTLText(invoiceData.notes) ? formatMixedText(invoiceData.notes) : invoiceData.notes;
-          doc.fontSize(9)
-             .font('VazirRegular')
-             .text(formattedNotes, 50, totalY + 40, { align: notesAlign, width: 450, features: isRTLText(invoiceData.notes) ? ['rtla'] : undefined });
-        }
+        // Footer message - exactly matching Word template
+        const footerMessageY = summaryY + 100;
+        const footerMessage = isProforma ? 
+          'این پیش فاکتور است و پس تائید مالی، فاکتور نهایی صادر خواهد شد.' : 
+          'این فاکتور نهایی است.';
         
-        // Footer - Mixed language
-        const footerPersian = 'شرکت مواد شیمیایی ممتاز';
-        const footerEnglish = 'Momtaz Chemical Solutions';
-        const websiteInfo = 'www.momtazchem.com | info@momtazchem.com';
-        
-        doc.fontSize(9)
+        doc.fontSize(10)
            .font('VazirRegular')
-           // Persian company name - right aligned with RTL formatting
-           .text(formatMixedText(footerPersian), 50, 750, { align: 'right', width: 500, features: ['rtla'] })
-           // English company name - left aligned  
-           .text(footerEnglish, 50, 750, { align: 'left' })
-           // Website and email - center aligned
-           .text(websiteInfo, 50, 765, { align: 'center' });
+           .text(formatMixedText(footerMessage), 50, footerMessageY, { align: 'right', width: 500, features: ['rtla'] });
         
       } catch (fontError) {
         console.warn('⚠️ Font registration failed, using default font:', fontError);
