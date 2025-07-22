@@ -52,26 +52,58 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
         // Set font for RTL text
         doc.font('VazirRegular');
         
-        // Header - تشخیص نوع فاکتور
+        // Helper function to detect if text contains RTL characters (Persian, Arabic, Kurdish)
+        const isRTLText = (text: string): boolean => {
+          const rtlPattern = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
+          return rtlPattern.test(text);
+        };
+
+        // Helper function to detect if text is purely numbers or English
+        const isLTRText = (text: string): boolean => {
+          const ltrPattern = /^[0-9A-Za-z\s\.\,\-\+\(\)]*$/;
+          return ltrPattern.test(text);
+        };
+
+        // Helper function to get text alignment based on content
+        const getTextAlignment = (text: string): 'left' | 'right' | 'center' => {
+          if (isRTLText(text)) return 'right';
+          if (isLTRText(text)) return 'left';
+          return 'right'; // Default to right for mixed content
+        };
+        
+        // Header - Mixed language handling
         const isProforma = invoiceData.invoiceType === 'PROFORMA';
-        const headerTitle = isProforma ? 'پیش‌فاکتور - Momtaz Chem' : 'فاکتور فروش - Momtaz Chem';
+        const headerPersian = isProforma ? 'پیش‌فاکتور' : 'فاکتور فروش';
+        const headerEnglish = 'Momtaz Chem';
         
         doc.fontSize(20)
            .font('VazirBold')
-           .text(headerTitle, 50, 50, { align: 'center' });
+           // Persian title - right aligned
+           .text(headerPersian, 50, 50, { align: 'right' })
+           // English company name - left aligned
+           .text(headerEnglish, 50, 50, { align: 'left' });
         
-        // Invoice details - RTL format
+        // Invoice details - Mixed RTL/LTR format
+        const invoiceNumberLabel = `شماره ${isProforma ? 'پیش‌فاکتور' : 'فاکتور'}:`;
+        const invoiceNumber = invoiceData.invoiceNumber || invoiceData.orderNumber || 'INV-001';
+        const dateLabel = 'تاریخ:';
+        const dateValue = invoiceData.invoiceDate || new Date().toLocaleDateString('fa-IR');
+        
         doc.fontSize(12)
            .font('VazirRegular')
-           .text(`شماره ${isProforma ? 'پیش‌فاکتور' : 'فاکتور'}: ${invoiceData.invoiceNumber || invoiceData.orderNumber || 'INV-001'}`, 50, 100, { align: 'right' })
-           .text(`تاریخ: ${invoiceData.invoiceDate || new Date().toLocaleDateString('fa-IR')}`, 50, 120, { align: 'right' });
+           // Invoice number: Persian label (right) + number (left)
+           .text(invoiceNumberLabel, 50, 100, { align: 'right' })
+           .text(invoiceNumber, 200, 100, { align: 'left' })
+           // Date: Persian label (right) + date (left)
+           .text(dateLabel, 50, 120, { align: 'right' })
+           .text(dateValue, 200, 120, { align: 'left' });
         
-        // Customer info - اطلاعات مشتری کامل
+        // Customer info - Mixed language handling
         doc.fontSize(14)
            .font('VazirBold')
            .text('مشخصات مشتری:', 50, 160, { align: 'right' });
         
-        // اطلاعات مشتری با ساختار جدید customer object
+        // Customer data with proper language detection
         const customer = invoiceData.customer || {};
         const customerName = customer.name || invoiceData.customerName || 'نامشخص';
         const customerPhone = customer.phone || invoiceData.customerPhone || 'نامشخص';
@@ -80,10 +112,18 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
         
         doc.fontSize(11)
            .font('VazirRegular')
-           .text(`نام مشتری: ${customerName}`, 50, 190, { align: 'right' })
-           .text(`شماره تماس: ${customerPhone}`, 50, 210, { align: 'right' })
-           .text(`ایمیل: ${customerEmail}`, 50, 230, { align: 'right' })
-           .text(`آدرس: ${customerAddress}`, 50, 250, { align: 'right' });
+           // Name: Persian label (right) + value based on language
+           .text('نام مشتری:', 50, 190, { align: 'right' })
+           .text(customerName, 150, 190, { align: getTextAlignment(customerName) })
+           // Phone: Persian label (right) + number (left)
+           .text('شماره تماس:', 50, 210, { align: 'right' })
+           .text(customerPhone, 150, 210, { align: 'left' })
+           // Email: Persian label (right) + email (left)
+           .text('ایمیل:', 50, 230, { align: 'right' })
+           .text(customerEmail, 150, 230, { align: 'left' })
+           // Address: Persian label (right) + address based on language
+           .text('آدرس:', 50, 250, { align: 'right' })
+           .text(customerAddress, 150, 250, { align: getTextAlignment(customerAddress) });
         
         // Items table
         doc.fontSize(14)
@@ -104,7 +144,7 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
            .lineTo(500, startY + 15)
            .stroke();
         
-        // Items - RTL format
+        // Items - Mixed RTL/LTR format
         let currentY = startY + 25;
         const items = invoiceData.items || [];
         
@@ -112,35 +152,62 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
           const itemY = currentY + (index * 20);
           const currency = invoiceData.currency || 'IQD';
           
+          // Product name - RTL alignment for Persian/Arabic/Kurdish, LTR for English
+          const productName = item.name || 'نامشخص';
+          const productNameAlign = getTextAlignment(productName);
+          
+          // Numbers and currency - always LTR
+          const totalAmount = ((item.total || item.quantity || 1) * (item.unitPrice || 0)).toLocaleString('fa-IR') + ` ${currency}`;
+          const unitPrice = (item.unitPrice || 0).toLocaleString('fa-IR') + ` ${currency}`;
+          const quantity = (item.quantity || 1).toString();
+          
           doc.fontSize(9)
              .font('VazirRegular')
-             .text(((item.total || item.quantity || 1) * (item.unitPrice || 0)).toLocaleString('fa-IR') + ` ${currency}`, 50, itemY, { align: 'right' })
-             .text((item.unitPrice || 0).toLocaleString('fa-IR') + ` ${currency}`, 150, itemY, { align: 'right' })
-             .text((item.quantity || 1).toString(), 250, itemY, { align: 'right' })
-             .text(item.name || 'نامشخص', 320, itemY, { align: 'right' });
+             // Total amount - left aligned for numbers
+             .text(totalAmount, 50, itemY, { align: 'left' })
+             // Unit price - left aligned for numbers  
+             .text(unitPrice, 150, itemY, { align: 'left' })
+             // Quantity - left aligned for numbers
+             .text(quantity, 250, itemY, { align: 'left' })
+             // Product name - dynamic alignment based on language
+             .text(productName, 320, itemY, { align: productNameAlign });
         });
         
-        // Total
+        // Total - Mixed language handling
         const totalY = currentY + (items.length * 20) + 30;
         const totalAmount = invoiceData.total || invoiceData.totalAmount || 0;
         const currency = invoiceData.currency || 'IQD';
         
+        // Split total text: Persian text (right) + numbers (left)
+        const totalPersianText = 'مجموع کل:';
+        const totalNumberText = `${parseFloat(totalAmount).toLocaleString('fa-IR')} ${currency}`;
+        
         doc.fontSize(12)
            .font('VazirBold')
-           .text(`مجموع کل: ${parseFloat(totalAmount).toLocaleString('fa-IR')} ${currency}`, 50, totalY, { align: 'right' });
+           .text(totalPersianText, 50, totalY, { align: 'right' })
+           .text(totalNumberText, 200, totalY, { align: 'left' });
         
-        // پیام پیش‌فاکتور
+        // Proforma invoice notes - RTL for Persian text
         if (isProforma && invoiceData.notes) {
+          const notesAlign = getTextAlignment(invoiceData.notes);
           doc.fontSize(9)
              .font('VazirRegular')
-             .text(invoiceData.notes, 50, totalY + 40, { align: 'right', width: 450 });
+             .text(invoiceData.notes, 50, totalY + 40, { align: notesAlign, width: 450 });
         }
         
-        // Footer
+        // Footer - Mixed language
+        const footerPersian = 'شرکت مواد شیمیایی ممتاز';
+        const footerEnglish = 'Momtaz Chemical Solutions';
+        const websiteInfo = 'www.momtazchem.com | info@momtazchem.com';
+        
         doc.fontSize(9)
            .font('VazirRegular')
-           .text('شرکت مواد شیمیایی ممتاز - Momtaz Chemical Solutions', 50, 750, { align: 'center' })
-           .text('www.momtazchem.com | info@momtazchem.com', 50, 765, { align: 'center' });
+           // Persian company name - right aligned
+           .text(footerPersian, 50, 750, { align: 'right' })
+           // English company name - left aligned  
+           .text(footerEnglish, 50, 750, { align: 'left' })
+           // Website and email - center aligned
+           .text(websiteInfo, 50, 765, { align: 'center' });
         
       } catch (fontError) {
         console.warn('⚠️ Font registration failed, using default font:', fontError);
