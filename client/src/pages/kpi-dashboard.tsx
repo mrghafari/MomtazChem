@@ -21,6 +21,7 @@ import {
   Download,
   ArrowLeft
 } from "lucide-react";
+import CustomerActivitiesCard from "@/components/CustomerActivitiesCard";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { Badge } from "@/components/ui/badge";
@@ -254,10 +255,11 @@ export default function KPIDashboard() {
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="overview">نمای کلی</TabsTrigger>
           <TabsTrigger value="sales">فروش</TabsTrigger>
           <TabsTrigger value="customers">مشتریان</TabsTrigger>
+          <TabsTrigger value="activities">فعالیت‌ها</TabsTrigger>
           <TabsTrigger value="inventory">موجودی</TabsTrigger>
           <TabsTrigger value="operations">عملیات</TabsTrigger>
           <TabsTrigger value="financial">مالی</TabsTrigger>
@@ -495,6 +497,13 @@ export default function KPIDashboard() {
               icon={<DollarSign className="w-4 h-4 text-white" />}
               color="bg-purple-600"
             />
+          </div>
+        </TabsContent>
+
+        {/* Customer Activities Tab */}
+        <TabsContent value="activities">
+          <div className="grid grid-cols-1 gap-6">
+            <CustomerActivitiesCard />
           </div>
         </TabsContent>
 

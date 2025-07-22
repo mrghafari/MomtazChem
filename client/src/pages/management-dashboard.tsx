@@ -25,7 +25,7 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import CustomerActivitiesCard from "@/components/CustomerActivitiesCard";
+
 
 // Summary Card Component
 const SummaryCard = ({ 
@@ -282,8 +282,7 @@ const ManagementDashboard = () => {
                     />
                   </div>
 
-                  {/* Recent Customer Activities */}
-                  <CustomerActivitiesCard />
+
                 </>
               )}
             </div>
