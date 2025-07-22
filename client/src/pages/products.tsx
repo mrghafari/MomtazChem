@@ -2452,15 +2452,7 @@ export default function ProductsPage() {
                                 <div className="bg-red-50 p-4 rounded-lg">
                                   <FileText className="mx-auto h-12 w-12 text-red-600" />
                                   <p className="mt-2 text-sm text-gray-700">{form.getValues('catalogFileName') || 'catalog.pdf'}</p>
-                                  <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="sm"
-                                    className="mt-2"
-                                    onClick={() => window.open(catalogPreview, '_blank')}
-                                  >
-                                    مشاهده PDF
-                                  </Button>
+
                                 </div>
                                 <Button
                                   type="button"
@@ -2614,15 +2606,7 @@ export default function ProductsPage() {
                                 <div className="bg-orange-50 p-4 rounded-lg">
                                   <FileText className="mx-auto h-12 w-12 text-orange-600" />
                                   <p className="mt-2 text-sm text-gray-700">{form.getValues('msdsFileName') || 'msds.pdf'}</p>
-                                  <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="sm"
-                                    className="mt-2"
-                                    onClick={() => window.open(msdsPreview, '_blank')}
-                                  >
-                                    مشاهده MSDS
-                                  </Button>
+
                                 </div>
                                 <Button
                                   type="button"
