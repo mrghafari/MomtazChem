@@ -155,6 +155,18 @@ export default function CustomerProfileEdit() {
   useEffect(() => {
     if (customer?.customer) {
       const customerData = customer.customer;
+      
+      // Debug: Log customer data to check CRM fields
+      console.log('🔍 [UI DEBUG] Loading customer data:', customerData);
+      console.log('🔍 [CRM DEBUG] CRM Fields from API:', {
+        annualRevenue: customerData.annualRevenue,
+        priceRange: customerData.priceRange,
+        orderFrequency: customerData.orderFrequency,
+        creditStatus: customerData.creditStatus,
+        smsEnabled: customerData.smsEnabled,
+        emailEnabled: customerData.emailEnabled
+      });
+      
       form.reset({
         firstName: customerData.firstName || "",
         lastName: customerData.lastName || "",
@@ -192,6 +204,15 @@ export default function CustomerProfileEdit() {
         creditStatus: customerData.creditStatus || "",
         smsEnabled: customerData.smsEnabled || false,
         emailEnabled: customerData.emailEnabled || false,
+      });
+      
+      console.log('✅ [UI DEBUG] Form reset with CRM values:', {
+        annualRevenue: customerData.annualRevenue || "",
+        priceRange: customerData.priceRange || "",
+        orderFrequency: customerData.orderFrequency || "",
+        creditStatus: customerData.creditStatus || "",
+        smsEnabled: customerData.smsEnabled || false,
+        emailEnabled: customerData.emailEnabled || false
       });
     }
   }, [customer, form]);
