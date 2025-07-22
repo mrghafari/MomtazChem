@@ -16,6 +16,12 @@ const CustomerProfile = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
+  // Purchase history modal states
+  const [showPurchaseHistory, setShowPurchaseHistory] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [completeHistory, setCompleteHistory] = useState<any[]>([]);
+  
   // Get customer information
   const { data: customerData, isLoading: customerLoading, error: customerError } = useQuery<any>({
     queryKey: ["/api/customers/me"],
@@ -41,6 +47,38 @@ const CustomerProfile = () => {
   const hiddenOrders = orderData?.hiddenOrders || 0;
   const abandonedCarts = abandonedCartsData?.carts || [];
   const abandonedCartsCount = abandonedCarts.length;
+
+  // Load complete purchase history
+  const loadCompleteHistory = async () => {
+    if (completeHistory.length > 0) return; // Already loaded
+    
+    setIsLoadingHistory(true);
+    try {
+      const response = await apiRequest('/api/customers/orders/complete-history');
+      if (response.success) {
+        setCompleteHistory(response.orders || []);
+      }
+    } catch (error) {
+      console.error('Error loading purchase history:', error);
+      toast({
+        variant: "destructive",
+        title: "خطا",
+        description: "خطا در بارگیری سابقه خرید",
+      });
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  };
+
+  // Filter history based on search
+  const filteredHistory = searchTerm ? 
+    completeHistory.filter(order => 
+      order.orderNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.status?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.items?.some((item: any) => 
+        item.productName?.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    ) : completeHistory;
 
   const handleLogout = async () => {
     try {
@@ -187,8 +225,9 @@ const CustomerProfile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <>
+      <div className="min-h-screen bg-gray-50 p-4">
+        <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -528,10 +567,103 @@ const CustomerProfile = () => {
                 )}
               </CardContent>
             </Card>
+
+            {/* Purchase History Button */}
+            {orders && orders.length > 0 && (
+              <div className="mt-4">
+                <Button
+                  onClick={() => {
+                    setShowPurchaseHistory(true);
+                    loadCompleteHistory();
+                  }}
+                  variant="outline"
+                  className="w-full border-purple-200 text-purple-700 hover:bg-purple-50 hover:border-purple-300"
+                >
+                  <Clock className="w-4 h-4 mr-2" />
+                  مشاهده سابقه خرید کامل
+                </Button>
+              </div>
+            )}
           </div>
         </div>
+        </div>
       </div>
-    </div>
+
+      {/* Purchase History Modal */}
+      <Dialog open={showPurchaseHistory} onOpenChange={setShowPurchaseHistory}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-purple-700">سابقه خرید کامل</DialogTitle>
+          </DialogHeader>
+          
+          {/* Search Bar */}
+          <div className="relative mb-4">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="جستجو در شماره سفارش، وضعیت یا نام محصول..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 pr-4"
+            />
+            {searchTerm && (
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setSearchTerm("")}
+                className="absolute right-2 top-2 h-6 w-6 p-0"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+
+          {/* Loading State */}
+          {isLoadingHistory && (
+            <div className="flex justify-center items-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+              <span className="mr-3">در حال بارگیری...</span>
+            </div>
+          )}
+
+          {/* Results Count */}
+          {!isLoadingHistory && (
+            <div className="mb-4 text-sm text-gray-600">
+              {searchTerm ? (
+                `${filteredHistory.length} سفارش پیدا شد از ${completeHistory.length} سفارش کل`
+              ) : (
+                `${completeHistory.length} سفارش کل`
+              )}
+            </div>
+          )}
+
+          {/* Simple Orders List */}
+          <div className="space-y-4 max-h-96 overflow-y-auto">
+            {filteredHistory.length === 0 && !isLoadingHistory && (
+              <div className="text-center py-8 text-gray-500">
+                {searchTerm ? "نتیجه‌ای یافت نشد" : "سفارشی موجود نیست"}
+              </div>
+            )}
+            
+            {filteredHistory.map((order: any) => (
+              <div key={order.id} className="border border-purple-100 rounded-lg p-4">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h4 className="font-semibold">سفارش {order.orderNumber}</h4>
+                    <p className="text-sm text-gray-500">{formatDate(order.createdAt)}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold">{parseFloat(order.totalAmount || 0).toFixed(2)} IQD</p>
+                    <Badge className={getStatusColor(order.status, order.paymentStatus)}>
+                      {getStatusLabel(order.status, order.paymentStatus)}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 
