@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
@@ -427,6 +427,8 @@ export default function AccountingManagement() {
 // VAT Management Component
 function VatManagement() {
   const { toast } = useToast();
+  const [vatRate, setVatRate] = useState<string>('');
+  const [vatDescription, setVatDescription] = useState<string>('');
   
   // Fetch tax settings
   const { data: taxSettings, isLoading, refetch } = useQuery({
@@ -439,10 +441,19 @@ function VatManagement() {
     }
   });
 
+  // Update local state when data loads
+  const vatSetting = taxSettings?.find((setting: any) => setting.type === 'vat');
+  useEffect(() => {
+    if (vatSetting) {
+      setVatRate((parseFloat(vatSetting.rate) * 100).toString());
+      setVatDescription(vatSetting.description || '');
+    }
+  }, [vatSetting]);
+
   // Update tax setting mutation
   const updateTaxMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: any }) => {
-      return apiRequest(`/api/accounting/tax-settings/${id}`, 'PUT', data);
+      return apiRequest(`/api/accounting/tax-settings/${id}`, { method: 'PUT', body: data });
     },
     onSuccess: (result) => {
       toast({
@@ -463,7 +474,7 @@ function VatManagement() {
   // Toggle tax setting mutation
   const toggleTaxMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest(`/api/accounting/tax-settings/${id}/toggle`, 'POST');
+      return apiRequest(`/api/accounting/tax-settings/${id}/toggle`, { method: 'POST' });
     },
     onSuccess: (result) => {
       toast({
@@ -481,7 +492,28 @@ function VatManagement() {
     }
   });
 
-  const vatSetting = taxSettings?.find((setting: any) => setting.type === 'vat');
+  // Handle save VAT settings
+  const handleSaveVatSettings = () => {
+    if (!vatSetting) return;
+    
+    const rateValue = parseFloat(vatRate) / 100;
+    if (isNaN(rateValue) || rateValue < 0 || rateValue > 100) {
+      toast({
+        title: "خطا",
+        description: "نرخ مالیات باید بین 0 تا 100 درصد باشد",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    updateTaxMutation.mutate({
+      id: vatSetting.id,
+      data: { 
+        rate: rateValue.toString(),
+        description: vatDescription
+      }
+    });
+  };
 
   return (
     <Card>
@@ -513,16 +545,15 @@ function VatManagement() {
                     id="vat-rate"
                     type="number"
                     step="0.01"
-                    value={parseFloat(vatSetting.rate) * 100}
-                    onChange={(e) => {
-                      const newRate = parseFloat(e.target.value) / 100;
-                      updateTaxMutation.mutate({
-                        id: vatSetting.id,
-                        data: { rate: newRate.toString() }
-                      });
-                    }}
+                    min="0"
+                    max="100"
+                    value={vatRate}
+                    onChange={(e) => setVatRate(e.target.value)}
                     placeholder="5.00"
                   />
+                  <p className="text-sm text-gray-500 mt-1">
+                    نرخ فعلی: {(parseFloat(vatSetting.rate) * 100).toFixed(2)}%
+                  </p>
                 </div>
               </div>
               <div className="space-y-4">
@@ -545,16 +576,36 @@ function VatManagement() {
                   <Label htmlFor="vat-description">توضیحات</Label>
                   <Textarea
                     id="vat-description"
-                    value={vatSetting.description || ""}
-                    onChange={(e) => {
-                      updateTaxMutation.mutate({
-                        id: vatSetting.id,
-                        data: { description: e.target.value }
-                      });
-                    }}
+                    value={vatDescription}
+                    onChange={(e) => setVatDescription(e.target.value)}
                     placeholder="توضیحات مالیات بر ارزش افزوده"
                     rows={3}
                   />
+                </div>
+                
+                <div className="flex gap-2 pt-4">
+                  <Button
+                    onClick={handleSaveVatSettings}
+                    disabled={updateTaxMutation.isPending}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    {updateTaxMutation.isPending ? "در حال ذخیره..." : "ذخیره تغییرات"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      if (vatSetting) {
+                        setVatRate((parseFloat(vatSetting.rate) * 100).toString());
+                        setVatDescription(vatSetting.description || '');
+                        toast({
+                          title: "اطلاع",
+                          description: "تغییرات لغو شد"
+                        });
+                      }
+                    }}
+                  >
+                    لغو تغییرات
+                  </Button>
                 </div>
               </div>
             </div>
@@ -596,7 +647,7 @@ function DutiesManagement() {
   // Update tax setting mutation
   const updateTaxMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: any }) => {
-      return apiRequest(`/api/accounting/tax-settings/${id}`, 'PUT', data);
+      return apiRequest(`/api/accounting/tax-settings/${id}`, { method: 'PUT', body: data });
     },
     onSuccess: (result) => {
       toast({
@@ -617,7 +668,7 @@ function DutiesManagement() {
   // Toggle tax setting mutation
   const toggleTaxMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest(`/api/accounting/tax-settings/${id}/toggle`, 'POST');
+      return apiRequest(`/api/accounting/tax-settings/${id}/toggle`, { method: 'POST' });
     },
     onSuccess: (result) => {
       toast({
