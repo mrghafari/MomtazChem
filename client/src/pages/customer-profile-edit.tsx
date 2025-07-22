@@ -305,6 +305,7 @@ export default function CustomerProfileEdit() {
   // Update profile without SMS (if no phone change)
   const updateProfileMutation = useMutation({
     mutationFn: async (data: EditProfileForm) => {
+      console.log('📤 [FRONTEND] Sending profile update data:', data);
       const response = await fetch('/api/customers/profile', {
         method: 'PUT',
         headers: {

@@ -15537,6 +15537,14 @@ Leading Chemical Solutions Provider
       }
 
       console.log('🔄 [CRM INTEGRATION] Updating customer profile with data preservation');
+      console.log('📥 [CRM INTEGRATION] Received data:', {
+        firstName, lastName, phone, email, company, country, province, city, address,
+        secondaryAddress, postalCode, alternatePhone, industry, businessType, companySize,
+        communicationPreference, preferredLanguage, marketingConsent, notes,
+        customerType, customerStatus, preferredPaymentMethod, creditLimit,
+        website, taxId, registrationNumber, leadSource, assignedSalesRep,
+        annualRevenue, priceRange, orderFrequency, creditStatus, smsEnabled, emailEnabled
+      });
       
       // Get current customer data first to preserve existing information
       const currentCustomer = await crmStorage.getCrmCustomerById(customerId);

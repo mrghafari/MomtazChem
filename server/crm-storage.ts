@@ -642,49 +642,7 @@ export class CrmStorage implements ICrmStorage {
     return customer || null;
   }
 
-  async updateCrmCustomer(customerId: number, updates: Partial<CrmCustomer>): Promise<CrmCustomer> {
-    console.log(`[CRM UPDATE] Updating customer ${customerId} with:`, updates);
-    
-    try {
-      const [updatedCustomer] = await crmDb
-        .update(crmCustomers)
-        .set(updates)
-        .where(eq(crmCustomers.id, customerId))
-        .returning();
-      
-      if (!updatedCustomer) {
-        throw new Error('Customer not found');
-      }
-      
-      console.log(`[CRM UPDATE] Successfully updated customer ${customerId}`);
-      return updatedCustomer;
-    } catch (error) {
-      console.error(`[CRM UPDATE] Error updating customer ${customerId}:`, error);
-      
-      // If Drizzle ORM update fails, try direct SQL as fallback
-      if (updates.passwordHash) {
-        await crmDb.execute(
-          sql`UPDATE crm_customers SET password_hash = ${updates.passwordHash} WHERE id = ${customerId}`
-        );
-        
-        // Fetch updated customer
-        const [customer] = await crmDb
-          .select()
-          .from(crmCustomers)
-          .where(eq(crmCustomers.id, customerId))
-          .limit(1);
-          
-        if (!customer) {
-          throw new Error('Customer not found');
-        }
-        
-        console.log(`[CRM UPDATE] Successfully updated customer ${customerId} using direct SQL`);
-        return customer;
-      }
-      
-      throw error;
-    }
-  }
+
 
   async logActivity(customerId: number, activityType: string, description: string, metadata?: any): Promise<void> {
     try {
