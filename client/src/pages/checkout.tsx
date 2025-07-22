@@ -242,9 +242,28 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
     }
   }
   
-  const taxRate = 0.09; // 9% tax
-  const taxAmount = subtotal * taxRate;
-  const beforeWalletTotal = subtotal + shippingCost + taxAmount;
+  // Fetch tax settings for dynamic VAT calculation
+  const { data: taxSettings } = useQuery({
+    queryKey: ['/api/accounting/tax-settings'],
+    queryFn: () => apiRequest('/api/accounting/tax-settings', 'GET'),
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+  });
+
+  // Calculate VAT and duties from database settings
+  // Handle both VAT and vat types for backward compatibility
+  const vatSetting = taxSettings?.find(setting => 
+    (setting.type === 'VAT' || setting.type === 'vat') && setting.isEnabled
+  );
+  const dutiesSetting = taxSettings?.find(setting => setting.type === 'duties' && setting.isEnabled);
+  
+  const vatRate = vatSetting ? parseFloat(vatSetting.rate) / 100 : 0; // Convert percentage to decimal
+  const dutiesRate = dutiesSetting ? parseFloat(dutiesSetting.rate) / 100 : 0;
+  
+  const vatAmount = subtotal * vatRate;
+  const dutiesAmount = subtotal * dutiesRate;
+  const totalTaxAmount = vatAmount + dutiesAmount;
+  
+  const beforeWalletTotal = subtotal + shippingCost + totalTaxAmount;
   
   // Auto-enable wallet usage when wallet payment methods are selected
   useEffect(() => {
@@ -1304,10 +1323,18 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                     <span>هزینه ارسال:</span>
                     <span>{shippingCost === 0 ? "رایگان" : `${shippingCost.toLocaleString()} IQD`}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>مالیات (9%):</span>
-                    <span>{taxAmount.toLocaleString()} IQD</span>
-                  </div>
+                  {vatAmount > 0 && (
+                    <div className="flex justify-between">
+                      <span>مالیات بر ارزش افزوده ({(vatRate * 100).toFixed(0)}%):</span>
+                      <span>{vatAmount.toLocaleString()} IQD</span>
+                    </div>
+                  )}
+                  {dutiesAmount > 0 && (
+                    <div className="flex justify-between">
+                      <span>عوارض بر ارزش افزوده ({(dutiesRate * 100).toFixed(0)}%):</span>
+                      <span>{dutiesAmount.toLocaleString()} IQD</span>
+                    </div>
+                  )}
                   <Separator />
                   {actualWalletUsage > 0 && (
                     <div className="flex justify-between text-green-600">
