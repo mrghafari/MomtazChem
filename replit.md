@@ -21,8 +21,8 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
   - **Duplicate Removal**: Cleaned up duplicate geography-analytics and payment-settings button entries
   - **Enhanced Debugging**: Added comprehensive logging for ai_settings and content_management permissions tracking
 - **Button Configurations**:
-  - **AI Control**: Purple theme, Brain icon, routes to AI SEO Assistant with GPT-4o integration
-  - **Banner Control**: Orange theme, Edit icon, routes to Content Management settings tab for banner toggles
+  - **AI Control**: Purple theme, Brain icon, routes to AI SEO Assistant with GPT-4o integration  
+  - **Content Management**: Updated to route directly to settings-control tab (?tab=settings-control) for banner control access
 - **Permission Integration**: Both buttons properly integrated with role-based access control using existing moduleIds
 - **Test Results**: Both buttons now appear correctly in Site Management interface and respond to clicks
 - **Impact**: Administrative users can now access AI functionality and banner control features directly from Site Management

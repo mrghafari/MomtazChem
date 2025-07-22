@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -48,6 +48,16 @@ export default function ContentManagement() {
   const [selectedLanguage, setSelectedLanguage] = useState<'en' | 'ar' | 'ku' | 'tr'>('en');
   const [selectedSection, setSelectedSection] = useState<string>('contact');
   const [editingContent, setEditingContent] = useState<ContentItem | null>(null);
+  const [activeTab, setActiveTab] = useState<string>('content');
+
+  // Check URL parameters on component mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tab = urlParams.get('tab');
+    if (tab === 'settings-control') {
+      setActiveTab('settings-control');
+    }
+  }, []);
 
   // Check if user is super admin (id = 1)
   const isSuperAdmin = user?.id === 1;
@@ -276,9 +286,9 @@ export default function ContentManagement() {
         </div>
 
         {/* Content Management Tabs */}
-        <Tabs defaultValue="text-content" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="text-content" className="flex items-center gap-2">
+            <TabsTrigger value="content" className="flex items-center gap-2">
               <Type className="w-4 h-4" />
               Text Content
             </TabsTrigger>
@@ -301,7 +311,7 @@ export default function ContentManagement() {
           </TabsList>
 
           {/* Text Content Tab */}
-          <TabsContent value="text-content" className="space-y-6">
+          <TabsContent value="content" className="space-y-6">
             <div className="grid gap-6">
               {loadingContent ? (
                 <div className="flex items-center justify-center p-8">

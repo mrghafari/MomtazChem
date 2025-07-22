@@ -258,16 +258,8 @@ export default function SiteManagement() {
       id: "content-management",
       label: "Content Management",
       icon: Edit3,
-      onClick: () => trackButtonClick("content-management", () => setLocation("/content-management")),
+      onClick: () => trackButtonClick("content-management", () => setLocation("/content-management?tab=settings-control")),
       className: "border-lime-300 text-lime-600 hover:bg-lime-50",
-      moduleId: "content_management"
-    },
-    {
-      id: "banner-control",
-      label: "Banner Control",
-      icon: Edit,
-      onClick: () => trackButtonClick("banner-control", () => setLocation("/content-management?tab=settings-control")),
-      className: "border-orange-300 text-orange-600 hover:bg-orange-50",
       moduleId: "content_management"
     },
     {
