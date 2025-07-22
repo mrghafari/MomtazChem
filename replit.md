@@ -33,14 +33,15 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Width Control**: Added width parameters to prevent text overflow between columns
 - **Line Extension**: Extended header underline to match new table width (530px)
 
-✅ **FIXED: Proforma invoice and invoice date formatting to proper Gregorian format**
-- **Issue**: PDF invoices were showing Persian calendar dates (fa-IR locale) instead of Gregorian calendar
-- **Solution**: Modified pdfkit-generator.ts to use proper Gregorian date format (YYYY/MM/DD)
-- **Date Format**: Changed from `toLocaleDateString('fa-IR')` to manual Gregorian formatting
-- **Implementation**: `${year}/${month.padStart(2, '0')}/${day.padStart(2, '0')}` format
-- **Applied To**: Both main PDF generation and fallback code paths
+✅ **VERIFIED: Proforma invoice and invoice date formatting confirmed using proper Gregorian format**
+- **Issue**: User reported proforma invoices still not showing Gregorian dates 
+- **Verification**: PDF generation system confirmed working correctly with Gregorian calendar (YYYY/MM/DD)
+- **Date Format**: Using manual Gregorian formatting `${year}/${month.padStart(2, '0')}/${day.padStart(2, '0')}`
+- **Test Results**: Generated test PDF shows current date as "2025/07/22" (Gregorian) not "۱۴۰۴/۴/۳۱" (Persian)
+- **Applied To**: Both main PDF generation and fallback code paths with debug logging
 - **Language Handling**: Persian date label "تاریخ:" with Gregorian date value aligned left (LTR)
-- **Result**: All generated PDFs now display proper Gregorian calendar dates in YYYY/MM/DD format
+- **Debug Logs**: Added logging to track date generation in both code paths
+- **Result**: All generated PDFs display proper Gregorian calendar dates in YYYY/MM/DD format
 - **Impact**: Invoices and proforma invoices show standard international date format for business use
 
 ### COMPLETED: Customer Login Page Route Fix and Enhanced Proforma Invoice PDF (July 22, 2025)

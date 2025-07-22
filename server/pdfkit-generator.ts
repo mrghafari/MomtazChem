@@ -90,6 +90,7 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
         // Format date in Gregorian calendar (YYYY/MM/DD)
         const currentDate = invoiceData.invoiceDate ? new Date(invoiceData.invoiceDate) : new Date();
         const dateValue = `${currentDate.getFullYear()}/${String(currentDate.getMonth() + 1).padStart(2, '0')}/${String(currentDate.getDate()).padStart(2, '0')}`;
+        console.log(`📅 [PDF DATE] Generated date value: ${dateValue} for ${isProforma ? 'Proforma' : 'Invoice'}`);
         
         doc.fontSize(12)
            .font('VazirRegular')
@@ -245,9 +246,14 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
         doc.fontSize(20)
            .text('Invoice - Momtaz Chem', 50, 50, { align: 'center' });
         
+        // Format fallback date in Gregorian calendar (YYYY/MM/DD)
+        const fallbackDate = invoiceData.invoiceDate ? new Date(invoiceData.invoiceDate) : new Date();
+        const fallbackDateValue = `${fallbackDate.getFullYear()}/${String(fallbackDate.getMonth() + 1).padStart(2, '0')}/${String(fallbackDate.getDate()).padStart(2, '0')}`;
+        console.log(`📅 [PDF FALLBACK DATE] Generated fallback date value: ${fallbackDateValue}`);
+        
         doc.fontSize(12)
            .text(`Invoice Number: ${invoiceData.invoiceNumber || 'INV-001'}`, 50, 100)
-           .text(`Date: ${new Date().getFullYear()}/${String(new Date().getMonth() + 1).padStart(2, '0')}/${String(new Date().getDate()).padStart(2, '0')}`, 350, 100);
+           .text(`Date: ${fallbackDateValue}`, 350, 100);
         
         doc.fontSize(14)
            .text('Customer Details:', 50, 150);
