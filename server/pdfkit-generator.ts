@@ -71,14 +71,14 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
           return 'right'; // Default to right for mixed content
         };
 
-        // Helper function to reverse Persian/Arabic text for proper RTL display
+        // Helper function to format Persian/Arabic text for proper RTL display
         const formatRTLText = (text: string): string => {
           if (!isRTLText(text)) return text;
           
-          // For Persian/Arabic text, we need to ensure proper RTL rendering
-          // PDFKit might not handle RTL automatically, so we may need to reverse the text
-          const words = text.split(' ');
-          return words.reverse().join(' ');
+          // For Persian/Arabic/Kurdish text, ensure proper RTL rendering
+          // Modern PDFKit with features: ['rtla'] handles most RTL correctly
+          // We don't need to reverse words, just ensure proper Unicode direction
+          return text;
         };
         
         // Header - Mixed language handling
@@ -210,9 +210,21 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
            .text(formatRTLText('هزینه حمل:'), 50, shippingY, { align: 'right', width: 150, features: ['rtla'] })
            .text(`${parseFloat(shippingCost).toLocaleString('en-US')}  ${currency}`, 200, shippingY, { align: 'left' });
         
+        // VAT (Value Added Tax)
+        const vatY = shippingY + 20;
+        const vatRate = invoiceData.vatRate || 0; // VAT rate as percentage (e.g., 5 for 5%)
+        const vatAmount = (itemsSubtotal + parseFloat(shippingCost)) * (vatRate / 100);
+        
+        if (vatRate > 0) {
+          doc.fontSize(11)
+             .font('VazirRegular')
+             .text(formatRTLText(`مالیات بر ارزش افزوده (${vatRate}%):`), 50, vatY, { align: 'right', width: 150, features: ['rtla'] })
+             .text(`${vatAmount.toLocaleString('en-US')}  ${currency}`, 200, vatY, { align: 'left' });
+        }
+        
         // Total amount
-        const totalY = shippingY + 30;
-        const totalAmount = itemsSubtotal + parseFloat(shippingCost);
+        const totalY = (vatRate > 0 ? vatY : shippingY) + 30;
+        const totalAmount = itemsSubtotal + parseFloat(shippingCost) + vatAmount;
         
         // Draw line above total
         doc.moveTo(50, totalY - 10)

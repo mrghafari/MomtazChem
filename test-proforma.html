@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تست پیش‌فاکتور PDF با مالیات و هزینه حمل</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      direction: rtl;
+    }
+    .form-group {
+      margin: 15px 0;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+    button {
+      background: #0066cc;
+      color: white;
+      padding: 15px 30px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 10px 5px;
+    }
+    button:hover {
+      background: #0052a3;
+    }
+    .success {
+      background: #28a745;
+    }
+    .success:hover {
+      background: #218838;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background: #f8f9fa;
+    }
+  </style>
+</head>
+<body>
+  <h1>تست پیش‌فاکتور PDF با VAT و هزینه حمل</h1>
+  
+  <form id="invoiceForm">
+    <div class="form-group">
+      <label>نوع فاکتور:</label>
+      <select id="invoiceType">
+        <option value="PROFORMA">پیش‌فاکتور</option>
+        <option value="INVOICE">فاکتور نهایی</option>
+      </select>
+    </div>
+    
+    <div class="form-group">
+      <label>شماره فاکتور:</label>
+      <input type="text" id="invoiceNumber" value="P-M25111001" placeholder="P-M25111001">
+    </div>
+    
+    <div class="form-group">
+      <label>نام مشتری:</label>
+      <input type="text" id="customerName" value="امید محمد" placeholder="نام مشتری">
+    </div>
+    
+    <div class="form-group">
+      <label>شماره تلفن:</label>
+      <input type="text" id="customerPhone" value="07501234567" placeholder="شماره تلفن">
+    </div>
+    
+    <div class="form-group">
+      <label>ایمیل:</label>
+      <input type="email" id="customerEmail" value="water@momtazchem.com" placeholder="ایمیل">
+    </div>
+    
+    <div class="form-group">
+      <label>آدرس:</label>
+      <textarea id="customerAddress" placeholder="آدرس کامل">بغداد، عراق</textarea>
+    </div>
+    
+    <div class="form-group">
+      <label>هزینه حمل (IQD):</label>
+      <input type="number" id="shippingCost" value="50000" placeholder="50000">
+    </div>
+    
+    <div class="form-group">
+      <label>نرخ مالیات بر ارزش افزوده (%):</label>
+      <input type="number" id="vatRate" value="5" placeholder="5" min="0" max="100">
+    </div>
+    
+    <div class="form-group">
+      <label>ارز:</label>
+      <select id="currency">
+        <option value="IQD">دینار عراق (IQD)</option>
+        <option value="USD">دلار آمریکا (USD)</option>
+        <option value="EUR">یورو (EUR)</option>
+      </select>
+    </div>
+    
+    <h3>اقلام فاکتور:</h3>
+    <div id="itemsContainer">
+      <div class="item-row">
+        <div class="form-group">
+          <label>نام محصول:</label>
+          <input type="text" class="item-name" value="Solvant 402" placeholder="نام محصول">
+        </div>
+        <div class="form-group">
+          <label>تعداد:</label>
+          <input type="number" class="item-quantity" value="10" placeholder="تعداد">
+        </div>
+        <div class="form-group">
+          <label>قیمت واحد:</label>
+          <input type="number" class="item-price" value="25000" placeholder="قیمت واحد">
+        </div>
+      </div>
+    </div>
+    
+    <button type="button" onclick="addItem()">افزودن قلم جدید</button>
+    <button type="button" onclick="generatePDF()" class="success">تولید پیش‌فاکتور PDF</button>
+  </form>
+  
+  <div id="result" class="result" style="display: none;"></div>
+
+  <script>
+    function addItem() {
+      const container = document.getElementById('itemsContainer');
+      const itemRow = document.createElement('div');
+      itemRow.className = 'item-row';
+      itemRow.innerHTML = `
+        <div class="form-group">
+          <label>نام محصول:</label>
+          <input type="text" class="item-name" placeholder="نام محصول">
+        </div>
+        <div class="form-group">
+          <label>تعداد:</label>
+          <input type="number" class="item-quantity" placeholder="تعداد">
+        </div>
+        <div class="form-group">
+          <label>قیمت واحد:</label>
+          <input type="number" class="item-price" placeholder="قیمت واحد">
+        </div>
+        <button type="button" onclick="this.parentElement.remove()" style="background: #dc3545;">حذف</button>
+      `;
+      container.appendChild(itemRow);
+    }
+
+    async function generatePDF() {
+      try {
+        // جمع‌آوری داده‌های فرم
+        const items = [];
+        const itemRows = document.querySelectorAll('.item-row');
+        
+        itemRows.forEach(row => {
+          const name = row.querySelector('.item-name').value;
+          const quantity = parseInt(row.querySelector('.item-quantity').value) || 1;
+          const unitPrice = parseFloat(row.querySelector('.item-price').value) || 0;
+          
+          if (name && quantity && unitPrice) {
+            items.push({
+              name: name,
+              quantity: quantity,
+              unitPrice: unitPrice,
+              total: quantity * unitPrice
+            });
+          }
+        });
+
+        if (items.length === 0) {
+          alert('لطفاً حداقل یک قلم وارد کنید');
+          return;
+        }
+
+        const invoiceData = {
+          invoiceType: document.getElementById('invoiceType').value,
+          invoiceNumber: document.getElementById('invoiceNumber').value,
+          invoiceDate: new Date().toISOString(),
+          customer: {
+            name: document.getElementById('customerName').value,
+            phone: document.getElementById('customerPhone').value,
+            email: document.getElementById('customerEmail').value,
+            address: document.getElementById('customerAddress').value
+          },
+          items: items,
+          shippingCost: parseFloat(document.getElementById('shippingCost').value) || 0,
+          vatRate: parseFloat(document.getElementById('vatRate').value) || 0,
+          currency: document.getElementById('currency').value,
+          notes: 'این پیش فاکتور شامل مالیات بر ارزش افزوده و هزینه حمل می‌باشد.'
+        };
+
+        console.log('ارسال داده‌ها به سرور:', invoiceData);
+
+        const response = await fetch('/api/pdf/invoice', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(invoiceData)
+        });
+
+        if (response.ok) {
+          // دانلود فایل PDF
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `proforma-${invoiceData.invoiceNumber}.pdf`;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          a.remove();
+
+          document.getElementById('result').innerHTML = 
+            '<h3>✅ موفقیت!</h3><p>پیش‌فاکتور با VAT و هزینه حمل تولید شد و دانلود آغاز شد.</p>';
+          document.getElementById('result').style.display = 'block';
+        } else {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'خطا در تولید PDF');
+        }
+      } catch (error) {
+        console.error('خطا:', error);
+        document.getElementById('result').innerHTML = 
+          `<h3>❌ خطا!</h3><p>${error.message}</p>`;
+        document.getElementById('result').style.display = 'block';
+      }
+    }
+  </script>
+</body>
+</html>

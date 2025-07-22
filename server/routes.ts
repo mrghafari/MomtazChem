@@ -380,6 +380,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Serve static files from uploads directory
   app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+  
+  // Serve test files
+  app.get('/test-proforma', (req, res) => {
+    res.sendFile(path.join(process.cwd(), 'test-proforma.html'));
+  });
 
   // ============================================
   // START: PDF Generation Routes
@@ -478,6 +483,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         })),
         subtotal: parseFloat(order.totalAmount || '0'),
         shippingCost: parseFloat(order.shippingCost || '0'),
+        vatRate: 5, // نرخ مالیات بر ارزش افزوده 5 درصد
         total: parseFloat(order.totalAmount || '0'),
         currency: order.currency || 'IQD',
         paymentStatus: 'در انتظار پرداخت', // برای پیش فاکتور
