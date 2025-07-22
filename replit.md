@@ -6,6 +6,35 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Dynamic VAT and Surcharge Management System Implementation (July 22, 2025)
+✅ **IMPLEMENTED: Complete configurable tax management system with dynamic PDF integration**
+- **Issue**: User requested dynamic VAT and surcharge configuration instead of hardcoded 5% VAT in PDF generation
+- **Database Schema**: Created tax_settings table with type (VAT/duties), rate, isEnabled, and description fields
+- **Frontend Enhancement**: 
+  - Added "مالیات بر ارزش افزوده" (VAT) and "عوارض بر ارزش افزوده" (surcharge) tabs in accounting management
+  - Toggle switches for enable/disable functionality with Persian interface
+  - Rate input fields with percentage validation (0-100%)
+  - Real-time form validation with error handling and success notifications
+- **Backend API**: Complete tax settings CRUD operations with GET, PUT endpoints
+- **PDF Integration**: Updated pdfkit-generator.ts to use dynamic tax amounts instead of hardcoded calculations
+- **Tax Calculation Engine**: 
+  - Created calculateOrderTaxes() helper function for backend calculations
+  - Dynamic tax calculation based on enabled settings from database
+  - Conditional PDF display - only shows VAT/duties if enabled and amount > 0
+- **API Endpoints**: 
+  - GET /api/tax-settings - Retrieve current tax configuration
+  - PUT /api/tax-settings/:type - Update VAT or duties settings
+  - POST /api/accounting/calculate-taxes - Test tax calculations
+- **Default Settings**: VAT 5% (enabled), Surcharge 2% (enabled) as business defaults
+- **Test Interface**: Created test-tax.html for comprehensive system testing
+- **Technical Implementation**:
+  - Enhanced PDF summary section with dynamic positioning based on displayed items
+  - Updated all PDF generation endpoints to use dynamic tax calculation
+  - Conditional rendering in PDF: only shows tax lines if amounts > 0
+  - Persian labels: "مالیات بر ارزش افزوده" and "عوارض بر ارزش افزوده"
+- **Impact**: Business can now configure VAT and surcharge rates independently with immediate PDF integration
+- **Status**: Complete tax management system operational with dynamic PDF generation
+
 ### COMPLETED: Customer Profile Date Format Changed to Gregorian Calendar (July 22, 2025)
 ✅ **IMPLEMENTED: Gregorian date display in customer profile orders section**
 - **Issue**: User requested that order dates in customer profile should display Gregorian dates instead of Persian dates
