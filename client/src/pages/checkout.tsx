@@ -1821,6 +1821,129 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                   
 
 
+                  {/* Second Delivery Address Section in Cart Management */}
+                  {isUserLoggedIn && (
+                    <div className="space-y-3 pt-3 border-t">
+                      <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">آدرس دوم یا شماره موبایل متفاوت</h4>
+                      
+                      {/* Second Address Option */}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-medium text-gray-700 dark:text-gray-300">آدرس دوم (اختیاری)</span>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => setShowSecondAddress(!showSecondAddress)}
+                            className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200 h-5 w-5 p-0"
+                          >
+                            {showSecondAddress ? '−' : '+'}
+                          </Button>
+                        </div>
+                        
+                        {showSecondAddress && (
+                          <div className="bg-white dark:bg-gray-700 p-2 rounded border text-xs space-y-2">
+                            <FormField
+                              control={form.control}
+                              name="secondDeliveryAddress"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel className="text-xs">آدرس کامل</FormLabel>
+                                  <FormControl>
+                                    <Textarea
+                                      {...field}
+                                      placeholder="آدرس دوم برای تحویل کالا..."
+                                      className="min-h-[50px] text-xs"
+                                    />
+                                  </FormControl>
+                                </FormItem>
+                              )}
+                            />
+                            <div className="grid grid-cols-3 gap-1">
+                              <FormField
+                                control={form.control}
+                                name="secondDeliveryProvince"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-xs">استان</FormLabel>
+                                    <FormControl>
+                                      <Input {...field} placeholder="Baghdad" className="text-xs h-7" />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={form.control}
+                                name="secondDeliveryCity"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-xs">شهر</FormLabel>
+                                    <FormControl>
+                                      <Input {...field} placeholder="Erbil" className="text-xs h-7" />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={form.control}
+                                name="secondDeliveryPostalCode"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-xs">کد پستی</FormLabel>
+                                    <FormControl>
+                                      <Input {...field} placeholder="12345" className="text-xs h-7" />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Recipient Mobile */}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-medium text-gray-700 dark:text-gray-300">شماره موبایل متفاوت</span>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => setShowRecipientMobile(!showRecipientMobile)}
+                            className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200 h-5 w-5 p-0"
+                          >
+                            {showRecipientMobile ? '−' : '+'}
+                          </Button>
+                        </div>
+                        
+                        {showRecipientMobile && (
+                          <div className="bg-white dark:bg-gray-700 p-2 rounded border">
+                            <FormField
+                              control={form.control}
+                              name="recipientMobile"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel className="text-xs">شماره موبایل گیرنده</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      {...field}
+                                      placeholder="09123456789"
+                                      className="text-xs h-7"
+                                      type="tel"
+                                    />
+                                  </FormControl>
+                                </FormItem>
+                              )}
+                            />
+                            <p className="mt-1 text-xs text-gray-500">
+                              این شماره برای تماس تحویل استفاده می‌شود
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Cart Actions */}
                   <div className="space-y-2 pt-3 border-t">
                     <Button
