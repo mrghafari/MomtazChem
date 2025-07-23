@@ -271,7 +271,7 @@ async function generateCustomerPDFWithPDFMake(
             fontSize: 20,
             bold: true,
             color: '#2563eb',
-            font: 'Vazirmatn'
+            font: 'Vazir'
           },
           subheader: {
             fontSize: 14,
@@ -282,41 +282,41 @@ async function generateCustomerPDFWithPDFMake(
             fontSize: 16,
             bold: true,
             color: '#333333',
-            font: 'Vazirmatn'
+            font: 'Vazir'
           },
           dateInfo: {
             fontSize: 10,
             color: '#666666',
-            font: 'Vazirmatn'
+            font: 'Vazir'
           },
           sectionHeader: {
             fontSize: 14,
             bold: true,
             color: '#2563eb',
-            font: 'Vazirmatn'
+            font: 'Vazir'
           },
           customerInfo: {
             fontSize: 11,
             color: '#333333',
-            font: 'Vazirmatn',
+            font: 'Vazir',
             margin: [0, 2, 0, 2]
           },
           tableHeader: {
             fontSize: 10,
             bold: true,
             color: '#374151',
-            font: 'Vazirmatn'
+            font: 'Vazir'
           },
           noData: {
             fontSize: 10,
             color: '#666666',
-            font: 'Vazirmatn',
+            font: 'Vazir',
             italics: true
           },
           footer: {
             fontSize: 9,
             color: '#666666',
-            font: 'Vazirmatn'
+            font: 'Vazir'
           }
         },
 
@@ -447,7 +447,7 @@ async function generateAnalyticsPDFWithPDFMake(
             fontSize: 22,
             bold: true,
             color: '#2563eb',
-            font: 'Vazirmatn'
+            font: 'Vazir'
           },
           subheader: {
             fontSize: 16,
@@ -457,7 +457,7 @@ async function generateAnalyticsPDFWithPDFMake(
           companyName: {
             fontSize: 14,
             color: '#2563eb',
-            font: 'Vazirmatn'
+            font: 'Vazir'
           },
           companyNameEn: {
             fontSize: 12,
@@ -467,12 +467,12 @@ async function generateAnalyticsPDFWithPDFMake(
           dateInfo: {
             fontSize: 10,
             color: '#666666',
-            font: 'Vazirmatn'
+            font: 'Vazir'
           },
           statLabel: {
             fontSize: 14,
             color: '#374151',
-            font: 'Vazirmatn'
+            font: 'Vazir'
           },
           statLabelEn: {
             fontSize: 11,
@@ -483,12 +483,12 @@ async function generateAnalyticsPDFWithPDFMake(
             fontSize: 18,
             bold: true,
             color: '#2563eb',
-            font: 'Vazirmatn'
+            font: 'Vazir'
           },
           footer: {
             fontSize: 9,
             color: '#666666',
-            font: 'Vazirmatn'
+            font: 'Vazir'
           }
         },
 
@@ -676,7 +676,7 @@ async function generateInvoicePDFWithPDFMake(
             fontSize: 22,
             bold: true,
             color: '#2563eb',
-            font: 'Vazirmatn'
+            font: 'Vazir'
           },
           subheader: {
             fontSize: 16,
@@ -686,47 +686,47 @@ async function generateInvoicePDFWithPDFMake(
           companyName: {
             fontSize: 14,
             color: '#2563eb',
-            font: 'Vazirmatn'
+            font: 'Vazir'
           },
           invoiceInfo: {
             fontSize: 12,
             color: '#333333',
-            font: 'Vazirmatn'
+            font: 'Vazir'
           },
           sectionHeader: {
             fontSize: 14,
             bold: true,
             color: '#2563eb',
-            font: 'Vazirmatn'
+            font: 'Vazir'
           },
           customerInfo: {
             fontSize: 11,
             color: '#333333',
-            font: 'Vazirmatn',
+            font: 'Vazir',
             margin: [0, 2, 0, 2]
           },
           tableHeader: {
             fontSize: 10,
             bold: true,
             color: '#374151',
-            font: 'Vazirmatn'
+            font: 'Vazir'
           },
           noData: {
             fontSize: 10,
             color: '#666666',
-            font: 'Vazirmatn',
+            font: 'Vazir',
             italics: true
           },
           totalAmount: {
             fontSize: 16,
             bold: true,
             color: '#2563eb',
-            font: 'Vazirmatn'
+            font: 'Vazir'
           },
           footer: {
             fontSize: 9,
             color: '#666666',
-            font: 'Vazirmatn'
+            font: 'Vazir'
           }
         },
 
@@ -805,33 +805,33 @@ async function generateDocumentationPDFWithPDFMake(
           header: {
             fontSize: 20,
             bold: true,
-            font: language === 'fa' ? 'Vazirmatn' : 'Roboto'
+            font: language === 'fa' ? 'Vazir' : 'Roboto'
           },
           sectionHeader: {
             fontSize: 14,
             bold: true,
             margin: [0, 15, 0, 5],
-            font: language === 'fa' ? 'Vazirmatn' : 'Roboto'
+            font: language === 'fa' ? 'Vazir' : 'Roboto'
           },
           paragraph: {
             fontSize: 11,
             margin: [0, 0, 0, 10],
-            font: language === 'fa' ? 'Vazirmatn' : 'Roboto'
+            font: language === 'fa' ? 'Vazir' : 'Roboto'
           },
           listItem: {
             fontSize: 11,
             margin: [20, 0, 0, 10],
-            font: language === 'fa' ? 'Vazirmatn' : 'Roboto'
+            font: language === 'fa' ? 'Vazir' : 'Roboto'
           },
           footer: {
             fontSize: 10,
             italics: true,
-            font: language === 'fa' ? 'Vazirmatn' : 'Roboto'
+            font: language === 'fa' ? 'Vazir' : 'Roboto'
           }
         },
         
         defaultStyle: {
-          font: language === 'fa' ? 'Vazirmatn' : 'Roboto',
+          font: language === 'fa' ? 'Vazir' : 'Roboto',
           fontSize: 10
         }
       };
