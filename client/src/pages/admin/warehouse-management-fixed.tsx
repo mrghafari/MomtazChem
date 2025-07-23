@@ -354,7 +354,7 @@ const WarehouseManagementFixed: React.FC = () => {
                         {filteredOrders.map((order: Order) => (
                           <tr key={order.id} className="border-b hover:bg-blue-50 transition-colors">
                             <td className="p-4" style={{ width: '120px' }}>
-                              <div className="font-bold text-blue-600 truncate">#{order.id}</div>
+                              <div className="font-bold text-blue-600 truncate">{order.orderNumber || `#${order.id}`}</div>
                             </td>
                             <td className="p-4" style={{ width: '250px' }}>
                               <div className="space-y-1">
