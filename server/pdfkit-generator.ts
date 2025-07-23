@@ -607,7 +607,7 @@ export async function generateAnalyticsPDF(analyticsData: any, title: string = '
         
         // Footer
         doc.fontSize(10)
-           .text('شرکت ممتاز شیمی', 50, 750, { align: 'center' })
+           .text('شرکت الانتاج الممتاز / Al-Entaj Al-Momtaz Company', 50, 750, { align: 'center' })
            .text('www.momtazchem.com | info@momtazchem.com', 50, 765, { align: 'center' });
         
       } catch (fontError) {
@@ -615,7 +615,7 @@ export async function generateAnalyticsPDF(analyticsData: any, title: string = '
         
         // Fallback to default font
         doc.fontSize(20)
-           .text('Analytics Report - Momtaz Chem', 50, 50, { align: 'center' });
+           .text('Analytics Report - Al-Entaj Al-Momtaz', 50, 50, { align: 'center' });
         
         doc.fontSize(14)
            .text('Dashboard Statistics:', 50, 100);
