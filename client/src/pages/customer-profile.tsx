@@ -535,26 +535,29 @@ const CustomerProfile = () => {
 
                         {/* Actions */}
                         <div className="mt-4 pt-3 border-t border-gray-200 flex gap-2 flex-wrap">
+                          {/* دکمه آپلود رسید بانکی فقط برای پرداخت بانکی */}
                           {(order.status === 'pending' || order.status === 'payment_grace_period') && order.paymentMethod === 'واریز بانکی با مهلت 3 روزه' && (
-                            <>
-                              <Button
-                                size="sm"
-                                onClick={() => window.open(`/customer/bank-receipt-upload?orderId=${order.id}`, '_blank')}
-                                className="bg-blue-600 hover:bg-blue-700"
-                              >
-                                <Upload className="w-4 h-4 mr-2" />
-                                آپلود رسید بانکی
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                onClick={() => handleDeleteTemporaryOrder(order.id, order.orderNumber)}
-                                className="bg-red-600 hover:bg-red-700"
-                              >
-                                <Trash2 className="w-4 h-4 mr-2" />
-                                حذف سفارش موقت
-                              </Button>
-                            </>
+                            <Button
+                              size="sm"
+                              onClick={() => window.open(`/customer/bank-receipt-upload?orderId=${order.id}`, '_blank')}
+                              className="bg-blue-600 hover:bg-blue-700"
+                            >
+                              <Upload className="w-4 h-4 mr-2" />
+                              آپلود رسید بانکی
+                            </Button>
+                          )}
+                          
+                          {/* دکمه حذف سفارش موقت برای همه سفارشات موقت */}
+                          {(order.status === 'pending' || order.status === 'payment_grace_period') && (
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => handleDeleteTemporaryOrder(order.id, order.orderNumber)}
+                              className="bg-red-600 hover:bg-red-700"
+                            >
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              حذف سفارش موقت
+                            </Button>
                           )}
                           {/* دکمه دانلود فاکتور/پیش فاکتور بر اساس تأیید مالی */}
                           {(order.status === 'confirmed' || order.paymentStatus === 'paid') ? (
@@ -757,6 +760,19 @@ const CustomerProfile = () => {
 
                   {/* Action Buttons */}
                   <div className="flex gap-2 flex-wrap">
+                    {/* دکمه حذف سفارش موقت در سابقه خرید */}
+                    {(order.status === 'pending' || order.status === 'payment_grace_period') && (
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleDeleteTemporaryOrder(order.id, order.orderNumber)}
+                        className="bg-red-600 hover:bg-red-700"
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        حذف سفارش موقت
+                      </Button>
+                    )}
+                    
                     {/* دکمه دانلود فاکتور/پیش فاکتور بر اساس تأیید مالی */}
                     {(order.status === 'confirmed' || order.paymentStatus === 'paid') ? (
                       <Button

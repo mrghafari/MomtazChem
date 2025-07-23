@@ -6,6 +6,19 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Enhanced Delete Button for Temporary Orders in Customer Profile (July 23, 2025)
+✅ **ENHANCED: Delete button now appears for ALL temporary orders, not just bank transfer orders**
+- **Issue**: Delete button was only showing for orders with `paymentMethod === 'واریز بانکی با مهلت 3 روزه'`
+- **Solution**: Separated delete button condition from upload receipt button condition
+- **Delete Button Logic**: Now shows for ANY order with `status === 'pending' || status === 'payment_grace_period'`
+- **Upload Receipt Logic**: Still restricted to bank transfer payment method orders
+- **Frontend Enhancement**: 
+  - Main profile orders section: Delete button appears for all temporary orders
+  - Purchase history modal: Delete button also available for temporary orders in complete history
+- **Functionality**: Uses existing `handleDeleteTemporaryOrder()` function with proper API integration
+- **User Experience**: Customers can now delete ANY temporary order regardless of payment method
+- **Impact**: Improved flexibility for customers to manage their temporary orders with consistent UI behavior
+
 ### COMPLETED: PDF Formatting Fix - Address and Postal Code Spacing Improved (July 23, 2025)
 ✅ **RESOLVED: Fixed PDF spacing issue in CRM customer output when addresses are long**
 - **Issue**: Long addresses were overlapping with postal code in customer profile PDF exports
