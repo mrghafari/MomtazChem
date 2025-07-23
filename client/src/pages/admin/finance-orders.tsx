@@ -1191,47 +1191,81 @@ function FinanceOrders() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {orderDetails.documents && orderDetails.documents.length > 0 ? (
-                      <div className="space-y-3">
-                        {orderDetails.documents.map((doc: any, index: number) => (
-                          <div key={doc.id || index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                            <div className="flex items-center gap-3">
-                              <FileText className="h-5 w-5 text-blue-600" />
-                              <div>
-                                <p className="font-medium text-gray-900">
-                                  {doc.description || doc.fileName || 'مدرک ارسالی'}
-                                </p>
-                                <p className="text-sm text-gray-500">
-                                  {new Date(doc.uploadedAt).toLocaleDateString('en-US')} 
-                                  {doc.fileName && ` • ${doc.fileName}`}
-                                </p>
+                    {(() => {
+                      // Collect all available documents
+                      const allDocuments = [];
+                      
+                      // Add documents from orderDetails.documents array if exists
+                      if (orderDetails.documents && orderDetails.documents.length > 0) {
+                        allDocuments.push(...orderDetails.documents);
+                      }
+                      
+                      // Add bank receipt if available from order details
+                      if (orderDetails.receiptPath || orderDetails.receipt_path) {
+                        allDocuments.push({
+                          id: 'bank_receipt',
+                          type: 'payment_receipt',
+                          description: 'فیش واریز بانکی',
+                          receiptUrl: orderDetails.receiptPath || orderDetails.receipt_path,
+                          fileName: 'فیش بانکی',
+                          uploadedAt: orderDetails.updatedAt || orderDetails.createdAt
+                        });
+                      }
+                      
+                      // Add receipt from selectedOrder if available
+                      if (selectedOrder?.receiptUrl && !allDocuments.find(doc => doc.receiptUrl === selectedOrder.receiptUrl)) {
+                        allDocuments.push({
+                          id: 'order_receipt',
+                          type: 'payment_receipt',
+                          description: 'فیش واریز بانکی',
+                          receiptUrl: selectedOrder.receiptUrl,
+                          fileName: 'فیش بانکی',
+                          uploadedAt: orderDetails.updatedAt || orderDetails.createdAt
+                        });
+                      }
+                      
+                      return allDocuments.length > 0 ? (
+                        <div className="space-y-3">
+                          {allDocuments.map((doc: any, index: number) => (
+                            <div key={doc.id || index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <FileText className="h-5 w-5 text-blue-600" />
+                                <div>
+                                  <p className="font-medium text-gray-900">
+                                    {doc.description || doc.fileName || 'مدرک ارسالی'}
+                                  </p>
+                                  <p className="text-sm text-gray-500">
+                                    {new Date(doc.uploadedAt).toLocaleDateString('en-US')} 
+                                    {doc.fileName && ` • ${doc.fileName}`}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline" className="text-xs">
+                                  {doc.type === 'payment_receipt' ? 'فیش بانکی' : doc.type}
+                                </Badge>
+                                {doc.receiptUrl && (
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    onClick={() => window.open(doc.receiptUrl, '_blank')}
+                                    className="h-8 px-3"
+                                  >
+                                    <Download className="h-3 w-3 mr-1" />
+                                    مشاهده
+                                  </Button>
+                                )}
                               </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <Badge variant="outline" className="text-xs">
-                                {doc.type === 'payment_receipt' ? 'فیش بانکی' : doc.type}
-                              </Badge>
-                              {doc.receiptUrl && (
-                                <Button 
-                                  size="sm" 
-                                  variant="outline"
-                                  onClick={() => window.open(doc.receiptUrl, '_blank')}
-                                  className="h-8 px-3"
-                                >
-                                  <Download className="h-3 w-3 mr-1" />
-                                  مشاهده
-                                </Button>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-8 text-gray-500">
-                        <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                        <p>هیچ مدرک اضافی ارسال نشده است</p>
-                      </div>
-                    )}
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8 text-gray-500">
+                          <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                          <p>هیچ مدرک اضافی ارسال نشده است</p>
+                        </div>
+                      );
+                    })()}
                   </CardContent>
                 </Card>
 
