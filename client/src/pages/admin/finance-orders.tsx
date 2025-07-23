@@ -192,6 +192,11 @@ function FinanceOrders() {
   const allOrders: OrderManagement[] = ordersResponse?.orders || [];
   const transferredOrders: OrderManagement[] = approvedOrdersResponse?.orders || [];
   
+  // Debug: Log order counts for troubleshooting
+  console.log('🔍 [STATS DEBUG] allOrders count:', allOrders.length);
+  console.log('🔍 [STATS DEBUG] transferredOrders count:', transferredOrders.length);
+  console.log('🔍 [STATS DEBUG] ordersResponse:', ordersResponse);
+  
   // Filter and search functionality
   const filteredOrders = allOrders.filter(order => {
     const searchMatch = !searchTerm || 
