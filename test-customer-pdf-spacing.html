@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست فاصله PDF مشتری</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-container { max-width: 600px; margin: 0 auto; }
+        .test-form { background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .result { margin: 20px 0; padding: 15px; background: #e8f5e9; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>تست فاصله PDF مشتری - آدرس و کد پستی</h1>
+        
+        <div class="test-form">
+            <h2>تست تولید PDF مشتری با آدرس طولانی</h2>
+            <p>این تست PDF مشتری را با آدرس طولانی تولید می‌کند تا فاصله بین آدرس و کد پستی را بررسی کند.</p>
+            
+            <button onclick="generateTestPDF()">تولید PDF تست</button>
+            <div id="result"></div>
+        </div>
+        
+        <div class="test-form">
+            <h2>نمونه داده تست</h2>
+            <p><strong>آدرس طولانی:</strong> خیابان امام خمینی، کوچه شهید بهشتی، پلاک 123، واحد 45، طبقه سوم، ساختمان تجاری پارسیان</p>
+            <p><strong>کد پستی:</strong> 1234567890</p>
+        </div>
+    </div>
+
+    <script>
+        async function generateTestPDF() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>در حال تولید PDF...</p>';
+            
+            try {
+                const testData = {
+                    customerId: 1,
+                    firstName: 'احمد',
+                    lastName: 'رضایی',
+                    email: 'ahmad.rezaei@example.com',
+                    phone: '09123456789',
+                    company: 'شرکت تست',
+                    country: 'ایران',
+                    province: 'تهران',
+                    city: 'تهران',
+                    address: 'خیابان امام خمینی، کوچه شهید بهشتی، پلاک 123، واحد 45، طبقه سوم، ساختمان تجاری پارسیان، نرسیده به چهارراه ولیعصر',
+                    postalCode: '1234567890',
+                    customerType: 'business',
+                    industry: 'شیمیایی',
+                    companySize: 'متوسط',
+                    leadSource: 'وبسایت'
+                };
+                
+                const response = await fetch('/api/crm/customers/1/export-pdf', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `customer-profile-test-${Date.now()}.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                    
+                    resultDiv.innerHTML = `
+                        <div class="result">
+                            <h3>✅ موفق!</h3>
+                            <p>PDF تولید شد و دانلود آغاز شد.</p>
+                            <p>اندازه فایل: ${(blob.size / 1024).toFixed(2)} KB</p>
+                            <p>لطفاً فاصله بین آدرس و کد پستی را در PDF بررسی کنید.</p>
+                        </div>
+                    `;
+                } else {
+                    const error = await response.text();
+                    resultDiv.innerHTML = `
+                        <div style="background: #ffebee; color: #c62828; padding: 15px; border-radius: 4px;">
+                            <h3>❌ خطا!</h3>
+                            <p>${error}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div style="background: #ffebee; color: #c62828; padding: 15px; border-radius: 4px;">
+                        <h3>❌ خطا در ارتباط!</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

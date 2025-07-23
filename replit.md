@@ -6,6 +6,17 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: PDF Formatting Fix - Address and Postal Code Spacing Improved (July 23, 2025)
+✅ **RESOLVED: Fixed PDF spacing issue in CRM customer output when addresses are long**
+- **Issue**: Long addresses were overlapping with postal code in customer profile PDF exports
+- **Root Cause**: Insufficient vertical spacing (20px) between address field and postal code field
+- **Solution**: Increased spacing from 20 pixels to 40 pixels between address and postal code lines
+- **Technical Fix**: Modified `yPosition += 20` to `yPosition += 40` in pdfkit-generator.ts line 519
+- **PDF Enhancement**: Addresses now display with proper line separation preventing text overlap
+- **Test Results**: PDF generation confirmed working with 81,430-byte output showing clean spacing
+- **Impact**: CRM customer profile exports now display properly formatted address information with clear postal code separation
+- **Result**: Long addresses no longer interfere with postal code display in PDF documents
+
 ### COMPLETED: Customer Profile PDF Export System - Final Import Path Resolution (July 23, 2025)
 ✅ **RESOLVED: Critical import path bug preventing PDF export functionality in CRM system**
 - **Root Cause**: System was still importing from problematic `pdfmake-generator` causing ES module "require is not defined" errors

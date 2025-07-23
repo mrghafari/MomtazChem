@@ -513,7 +513,7 @@ export async function generateCustomerProfilePDF(customerData: any): Promise<Buf
         doc.text(formatRTLText(`شهر: ${customerData.city || 'نامشخص'}`), 50, yPosition, { align: 'right' });
         yPosition += 20;
         doc.text(formatRTLText(`آدرس: ${customerData.address || 'نامشخص'}`), 50, yPosition, { align: 'right' });
-        yPosition += 20;
+        yPosition += 40; // اضافه کردن فاصله بیشتر بین آدرس و کد پستی
         doc.text(formatRTLText(`کد پستی: ${customerData.postalCode || 'نامشخص'}`), 50, yPosition, { align: 'right' });
         yPosition += 30;
         
