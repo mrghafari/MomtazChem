@@ -34,6 +34,23 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Business Logic**: Calculates remaining days until automatic order cancellation
 - **Impact**: Proactive customer engagement reducing order abandonment and improving payment completion rates
 
+### COMPLETED: Automatic Order Status Change from Temporary to Confirmed Upon Bank Receipt Upload (July 23, 2025)
+✅ **IMPLEMENTED: Complete order status transition system when bank receipts are uploaded**
+- **Order Status Transition**: Orders automatically change from `pending` to `confirmed` status when bank receipt is uploaded
+- **Payment Status Update**: Payment status changes to `receipt_uploaded` indicating successful receipt submission
+- **Database Integration**: Enhanced bank receipt upload endpoint `/api/payment/upload-receipt` to update both payment and order status
+- **Notes Tracking**: Automatic Persian timestamp logging when receipt is uploaded for audit trail
+- **UI Behavior Enhancement**: 
+  - Upload and delete buttons disappear after receipt upload preventing duplicate submissions
+  - Green confirmation message displays for orders with uploaded receipts: "✅ حواله بانکی آپلود شده - سفارش تأیید شد"
+  - Countdown timer only shows for orders without uploaded receipts
+- **Button Visibility Logic**: Refined conditions to show management buttons only for 3-day bank transfer orders without receipts
+- **Business Process**: Orders transition from temporary status to regular processing workflow upon receipt verification
+- **Test Results**: Successfully tested with order M25T003 - status changed from pending→confirmed, receipt properly stored
+- **Financial Integration**: Orders moved to financial review department for payment verification after receipt upload
+- **Impact**: Streamlined order processing eliminating manual status updates and providing clear customer feedback
+- **User Experience**: Customers receive immediate confirmation that their order moved from temporary to confirmed status
+
 ### COMPLETED: Concurrent Session Management for Super Admin and Customer Access (July 23, 2025)
 ✅ **IMPLEMENTED: Separate session management allowing concurrent access for super admin and customers**
 - **Separate Session Stores**: Created independent memory stores for admin and customer sessions
