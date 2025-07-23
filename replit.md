@@ -6,25 +6,29 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
-### COMPLETED: Enhanced Automatic Cleanup System for Unpaid Temporary Orders (July 23, 2025)
-✅ **IMPLEMENTED: Complete automatic cleanup system for unpaid temporary orders across all payment methods**
-- **Enhanced Delete Button**: Delete button now appears for temporary orders that haven't been paid
-  - Status: `'pending' || 'payment_grace_period'` AND Payment Status: `!paymentStatus || paymentStatus === 'pending' || paymentStatus === 'unpaid'`
+### COMPLETED: Enhanced Automatic Cleanup System for Unpaid Temporary Orders with Payment Protection (July 23, 2025)
+✅ **IMPLEMENTED: Complete automatic cleanup system with strict payment and receipt protection**
+- **Enhanced Delete Button**: Delete button appears only for truly unpaid orders without any payment evidence
+  - Status: `'pending' || 'payment_grace_period'` AND Payment Status: `!paymentStatus || paymentStatus === 'pending' || paymentStatus === 'unpaid'` AND No receipt uploaded
   - Upload receipt logic still restricted to bank transfer payment method orders
-  - Prevents deletion of orders that have been paid but are still in temporary status
-- **Automatic Cleanup Service**: Enhanced ExpiredOrdersCleanup class to handle all unpaid temporary orders, not just bank transfers
+  - **CRITICAL PROTECTION**: Never shows for orders with uploaded receipts or any payment status
+- **Automatic Cleanup Service**: Enhanced ExpiredOrdersCleanup class with multiple safety layers
   - **Bank Transfer Orders**: 3 days grace period + 1 hour buffer (73 hours total)
   - **Other Payment Methods**: 24 hours grace period + 1 hour buffer (25 hours total)
-  - **Cleanup Frequency**: Every hour instead of every 2 hours for faster processing
-  - **Conditions**: Status is pending/payment_grace_period AND no payment AND no receipt uploaded
+  - **Cleanup Frequency**: Every hour for faster processing
+  - **STRICT CONDITIONS**: Status is pending/payment_grace_period AND no payment AND no receipt uploaded AND payment status not paid/processing/confirmed
+- **Payment Protection**: Multiple safety checks prevent deletion of any order with payment evidence
+  - Backend validation prevents deletion if `paymentStatus === 'paid' || 'processing' || 'confirmed'`
+  - Receipt protection prevents deletion if `receiptPath` exists
+  - Frontend conditions match backend protection logic
 - **Inventory Release**: Automatic product reservation release when orders are cleaned up
   - Quantities automatically returned to shop inventory
   - Comprehensive logging of released products
 - **Soft Delete System**: Orders marked as 'deleted' status preserving order numbers in sequence
   - Notes field updated with cleanup timestamp and reason
   - M[YY][NNNNN] numbering sequence maintained
-- **Comprehensive Coverage**: System now handles ALL temporary orders regardless of payment method
-- **Impact**: Complete business automation preventing inventory lockup while maintaining order number integrity
+- **Business Safety**: Orders with any form of payment or uploaded documents are permanently protected from deletion
+- **Impact**: Complete business automation preventing inventory lockup while ensuring zero risk of deleting paid orders
 
 ### COMPLETED: PDF Formatting Fix - Address and Postal Code Spacing Improved (July 23, 2025)
 ✅ **RESOLVED: Fixed PDF spacing issue in CRM customer output when addresses are long**

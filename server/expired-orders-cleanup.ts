@@ -72,13 +72,17 @@ export class ExpiredOrdersCleanup {
           and(
             // Status is pending or payment_grace_period (temporary orders)
             sql`${customerOrders.status} IN ('pending', 'payment_grace_period')`,
-            // Payment status is not paid
+            // Payment status is not paid (must be unpaid)
             or(
               sql`${customerOrders.paymentStatus} IS NULL`,
               sql`${customerOrders.paymentStatus} IN ('pending', 'unpaid')`
             ),
-            // No receipt uploaded (receiptPath is null)
+            // No receipt uploaded (receiptPath is null) - CRITICAL: Never delete if receipt exists
             sql`${customerOrders.receiptPath} IS NULL`,
+            // Additional safety: Never delete if payment status indicates any form of payment
+            sql`${customerOrders.paymentStatus} != 'paid'`,
+            sql`${customerOrders.paymentStatus} != 'processing'`,
+            sql`${customerOrders.paymentStatus} != 'confirmed'`,
             // Grace period expired based on payment method:
             // - Bank transfer: 3 days + 1 hour buffer
             // - Other methods: 24 hours + 1 hour buffer

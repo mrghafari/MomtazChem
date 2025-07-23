@@ -431,6 +431,15 @@ export class CustomerStorage implements ICustomerStorage {
         throw new Error('فقط سفارشات موقت قابل حذف هستند');
       }
 
+      // CRITICAL: Never allow deletion if payment has been made or receipt uploaded
+      if (order.paymentStatus === 'paid' || order.paymentStatus === 'processing' || order.paymentStatus === 'confirmed') {
+        throw new Error('سفارشات پرداخت شده قابل حذف نیستند');
+      }
+
+      if (order.receiptPath) {
+        throw new Error('سفارشاتی که رسید آپلود شده قابل حذف نیستند');
+      }
+
       // Get order items to release reservations
       const items = await this.getOrderItems(id);
       const releasedProducts: any[] = [];
