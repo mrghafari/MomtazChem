@@ -29584,7 +29584,25 @@ momtazchem.com
       
       // Get reviews with customer names
       const reviewsResult = await pool.query(`
-        SELECT pr.*, ps.average_rating, ps.total_reviews
+        SELECT 
+          pr.id,
+          pr.product_id,
+          pr.customer_id,
+          pr.customer_name,
+          pr.rating,
+          pr.title,
+          pr.review,
+          pr.comment,
+          pr.pros,
+          pr.cons,
+          pr.is_verified_purchase,
+          pr.helpful_votes,
+          pr.not_helpful_votes,
+          pr.admin_response,
+          pr.admin_response_date,
+          pr.created_at,
+          ps.average_rating, 
+          ps.total_reviews
         FROM product_reviews pr
         LEFT JOIN product_stats ps ON pr.product_id = ps.product_id
         WHERE pr.product_id = $1 AND pr.is_approved = true
@@ -29602,10 +29620,11 @@ momtazchem.com
         id: row.id,
         productId: row.product_id,
         customerId: row.customer_id,
-        customerName: row.customer_name,
+        customer_name: row.customer_name,
         rating: row.rating,
         title: row.title,
         review: row.review,
+        comment: row.review || row.comment, // Use review field as primary comment
         pros: row.pros,
         cons: row.cons,
         isVerifiedPurchase: row.is_verified_purchase,
@@ -29613,7 +29632,7 @@ momtazchem.com
         notHelpfulVotes: row.not_helpful_votes,
         adminResponse: row.admin_response,
         adminResponseDate: row.admin_response_date,
-        createdAt: row.created_at
+        created_at: row.created_at
       }));
 
       const stats = statsResult.rows[0] || {
