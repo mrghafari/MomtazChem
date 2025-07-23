@@ -140,22 +140,37 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
       form.setValue("phone", customer.phone || "");
       form.setValue("company", customer.company || "");
       
-      // Auto-fill address data from CRM
+      // Auto-fill address data from CRM as default delivery address
       if (customer.address) {
         form.setValue("billingAddress1", customer.address);
+        form.setValue("shippingAddress1", customer.address); // Set as default shipping address
       }
       if (customer.city) {
         form.setValue("billingCity", customer.city);
+        form.setValue("shippingCity", customer.city); // Set as default shipping city
       }
       if (customer.country) {
         form.setValue("billingCountry", customer.country);
+        form.setValue("shippingCountry", customer.country); // Set as default shipping country
       }
       if (customer.postalCode) {
         form.setValue("billingPostalCode", customer.postalCode);
+        form.setValue("shippingPostalCode", customer.postalCode); // Set as default shipping postal code
       }
-      // Since customer has complete address info, set state/province to city for simplicity
-      if (customer.city) {
-        form.setValue("billingState", customer.city);
+      // Use province/state from CRM as default
+      const defaultState = customer.province || customer.state || customer.city || "";
+      if (defaultState) {
+        form.setValue("billingState", defaultState);
+        form.setValue("shippingState", defaultState); // Set as default shipping state
+      }
+      
+      // Auto-fill recipient information with customer data as default
+      if (customer.firstName && customer.lastName) {
+        form.setValue("recipientName", `${customer.firstName} ${customer.lastName}`);
+      }
+      if (customer.phone) {
+        form.setValue("recipientPhone", customer.phone);
+        form.setValue("recipientMobile", customer.phone); // Set as default recipient mobile
       }
     } else {
       setIsLoggedIn(false);
@@ -1066,14 +1081,14 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                       سفارش خرید شما شامل {cartItems.length} قلم محصول است
                     </div>
                     
-                    {/* CRM Address Information - Only for logged in users */}
+                    {/* CRM Default Address Information - Only for logged in users */}
                     {isUserLoggedIn && customerData?.customer && (
-                      <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg border border-green-200 dark:border-green-800">
-                        <div className="text-xs font-medium text-green-800 dark:text-green-300 mb-2 flex items-center gap-2">
+                      <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
+                        <div className="text-xs font-medium text-blue-800 dark:text-blue-300 mb-2 flex items-center gap-2">
                           <MapPin className="w-3 h-3" />
-                          اطلاعات آدرس از CRM
+                          آدرس پیش‌فرض تحویل (از CRM)
                         </div>
-                        <div className="space-y-1 text-xs text-green-700 dark:text-green-400">
+                        <div className="space-y-1 text-xs text-blue-700 dark:text-blue-400">
                           <div className="flex justify-between">
                             <span>استان:</span>
                             <span className="font-medium">{customerData.customer.province || customerData.customer.state || 'نامشخص'}</span>
@@ -1089,6 +1104,11 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                           <div className="flex justify-between">
                             <span>کد پستی:</span>
                             <span className="font-medium">{customerData.customer.postalCode || 'نامشخص'}</span>
+                          </div>
+                        </div>
+                        <div className="mt-2 pt-2 border-t border-blue-200 dark:border-blue-700">
+                          <div className="text-xs text-blue-600 dark:text-blue-400 italic">
+                            💡 این آدرس به عنوان آدرس پیش‌فرض تحویل استفاده می‌شود. برای تغییر، آدرس دوم یا شماره موبایل متفاوت وارد کنید.
                           </div>
                         </div>
                       </div>
