@@ -6773,6 +6773,155 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Find order by order number (for admin use)
+  app.get("/api/admin/orders/find-by-number/:orderNumber", requireAuth, async (req, res) => {
+    try {
+      const orderNumber = req.params.orderNumber;
+      
+      console.log(`🔍 [ADMIN] Finding order by number: ${orderNumber}`);
+
+      const orderResult = await db
+        .select({
+          id: customerOrders.id,
+          orderNumber: customerOrders.orderNumber,
+          status: customerOrders.status,
+          customerId: customerOrders.customerId
+        })
+        .from(customerOrders)
+        .where(eq(customerOrders.orderNumber, orderNumber))
+        .limit(1);
+
+      if (!orderResult.length) {
+        console.log(`❌ [ADMIN] Order not found: ${orderNumber}`);
+        return res.status(404).json({ 
+          success: false, 
+          message: "سفارش یافت نشد" 
+        });
+      }
+
+      console.log(`✅ [ADMIN] Order found: ${orderNumber} (ID: ${orderResult[0].id})`);
+      
+      res.json({ 
+        success: true, 
+        order: orderResult[0] 
+      });
+    } catch (error) {
+      console.error("Error finding order by number:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  // Get order details for admin (detailed view with items and customer info)
+  app.get("/api/admin/orders/:orderId/details", requireAuth, async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      
+      if (isNaN(orderId)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid order ID" 
+        });
+      }
+
+      console.log(`🔍 [ADMIN] Fetching order details for ID: ${orderId}`);
+
+      // Get order data with customer info in one query
+      const orderResult = await db
+        .select({
+          id: customerOrders.id,
+          orderNumber: customerOrders.orderNumber,
+          totalAmount: customerOrders.totalAmount,
+          shippingCost: customerOrders.shippingCost,
+          currency: customerOrders.currency,
+          paymentMethod: customerOrders.paymentMethod,
+          status: customerOrders.status,
+          createdAt: customerOrders.createdAt,
+          vatAmount: customerOrders.vatAmount,
+          surchargeAmount: customerOrders.surchargeAmount,
+          customerId: customerOrders.customerId,
+          // Customer info
+          firstName: crmCustomers.firstName,
+          lastName: crmCustomers.lastName,
+          email: crmCustomers.email,
+          phone: crmCustomers.phone,
+          address: crmCustomers.address,
+          country: crmCustomers.country,
+          province: crmCustomers.province,
+          city: crmCustomers.city,
+          postalCode: crmCustomers.postalCode
+        })
+        .from(customerOrders)
+        .leftJoin(crmCustomers, eq(customerOrders.customerId, crmCustomers.id))
+        .where(eq(customerOrders.id, orderId))
+        .limit(1);
+
+      if (!orderResult.length) {
+        console.log(`❌ [ADMIN] Order not found: ${orderId}`);
+        return res.status(404).json({ 
+          success: false, 
+          message: "سفارش یافت نشد" 
+        });
+      }
+
+      const order = orderResult[0];
+      
+      // Extract customer info from the joined result
+      const customer = {
+        firstName: order.firstName,
+        lastName: order.lastName,
+        email: order.email,
+        phone: order.phone,
+        address: order.address,
+        country: order.country,
+        province: order.province,
+        city: order.city,
+        postalCode: order.postalCode
+      };
+
+      // Get order items
+      const itemsResult = await db
+        .select({
+          id: orderItems.id,
+          productName: orderItems.productName,
+          quantity: orderItems.quantity,
+          unitPrice: orderItems.unitPrice,
+          totalPrice: sql<string>`${orderItems.quantity} * ${orderItems.unitPrice}`,
+        })
+        .from(orderItems)
+        .where(eq(orderItems.orderId, orderId));
+
+      console.log(`✅ [ADMIN] Order details retrieved: ${order.orderNumber} with ${itemsResult.length} items`);
+
+      res.json({ 
+        success: true, 
+        order: {
+          id: order.id,
+          orderNumber: order.orderNumber,
+          totalAmount: order.totalAmount,
+          shippingCost: order.shippingCost,
+          currency: order.currency,
+          paymentMethod: order.paymentMethod,
+          status: order.status,
+          createdAt: order.createdAt,
+          vatAmount: order.vatAmount,
+          surchargeAmount: order.surchargeAmount,
+          customer,
+          items: itemsResult
+        },
+        documents: [] // Can be extended later with document support
+      });
+    } catch (error) {
+      console.error("Error fetching order details:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
   // =============================================================================
   // KPI DASHBOARD ENDPOINTS
   // =============================================================================

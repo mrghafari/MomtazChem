@@ -1,0 +1,73 @@
+VM1456 admin:51 Tawk.to script loaded successfully
+chunk-RPCDYKBN.js?v=09ef9b6d:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+useAuth.ts:43 Auth check result: Object
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:115737)
+    at t.value (twk-chunk-common.js:2:148821)
+    at p.updateUUID (twk-chunk-common.js:2:200473)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:122752)
+    at twk-chunk-common.js:2:122063
+value @ twk-chunk-common.js:2
+content-all.js:60 [Intervention] Slow network is detected. See https://www.chromestatus.com/feature/5636954674692096 for more details. Fallback font will be used while loading: https://embed.tawk.to/_s/v4/assets/fonts/tawk-font-icon-3.woff?55755728=
+VM1456 admin:23 Tawk.to Live Chat loaded successfully
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+useAuth.ts:43 Auth check result: Object
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+site-management-fixed.tsx:71 🔍 [DEBUG] useEffect triggered, userPermissions: undefined
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+site-management-fixed.tsx:71 🔍 [DEBUG] useEffect triggered, userPermissions: Object
+site-management-fixed.tsx:74 🔍 [DEBUG] userPermissions modules: Array(31)
+site-management-fixed.tsx:399 🔍 [DEBUG] Full userPermissions response: Object
+site-management-fixed.tsx:400 🔍 [DEBUG] userPermissions.modules: Array(31)
+site-management-fixed.tsx:401 🔍 [DEBUG] userPermissions.permissions: Array(31)
+site-management-fixed.tsx:406 🔍 [DEBUG] Total allButtons count: 31
+site-management-fixed.tsx:407 🔍 [DEBUG] AI Settings exists in allButtons: true
+site-management-fixed.tsx:408 🔍 [DEBUG] Content Management exists in allButtons: true
+site-management-fixed.tsx:410 🔍 [DEBUG] allowedModules: Array(31)
+site-management-fixed.tsx:411 🔍 [DEBUG] kpi_dashboard in allowedModules? true
+site-management-fixed.tsx:412 🔍 [DEBUG] management_dashboard in allowedModules? true
+site-management-fixed.tsx:413 🔍 [DEBUG] finance in allowedModules? true
+site-management-fixed.tsx:414 🔍 [DEBUG] geography_analytics in allowedModules? true
+site-management-fixed.tsx:415 🔍 [DEBUG] ai_settings in allowedModules? true
+site-management-fixed.tsx:416 🔍 [DEBUG] content_management in allowedModules? true
+site-management-fixed.tsx:422 🔍 [CRITICAL] Missing button detection:
+site-management-fixed.tsx:430 🔍 [CRITICAL] Missing buttons count: 0
+site-management-fixed.tsx:432 🔍 [DEBUG] finance button found in allButtons? Object
+site-management-fixed.tsx:433 🔍 [DEBUG] geography_analytics button found in allButtons? Object
+site-management-fixed.tsx:434 🔍 [DEBUG] ai_settings button found in allButtons? Object
+site-management-fixed.tsx:435 🔍 [DEBUG] content_management button found in allButtons? Object
+site-management-fixed.tsx:436 🔍 [DEBUG] finance button in filtered? Object
+site-management-fixed.tsx:437 🔍 [DEBUG] geography_analytics button in filtered? Object
+site-management-fixed.tsx:438 🔍 [DEBUG] ai_settings button in filtered? Object
+site-management-fixed.tsx:439 🔍 [DEBUG] content_management button in filtered? Object
+site-management-fixed.tsx:76 🔍 [DEBUG] filtered buttons count: 31
+site-management-fixed.tsx:77 🔍 [DEBUG] First 5 filtered buttons: Array(5)
+site-management-fixed.tsx:78 🔍 [DEBUG] AI Control button in filtered: Object
+site-management-fixed.tsx:79 🔍 [DEBUG] Content Management button in filtered: Object
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+useOrderNotifications.ts:99 🔔 [FINANCIAL] نوتیفیکیشن: 198 سفارش جدید دریافت شد
+/api/customers/orders/undefined/details:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+/api/customers/orders/undefined/details:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+finance-orders.tsx:238  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/orders/undefined/details 500 (Internal Server Error)
+fetchOrderDetails @ finance-orders.tsx:238
+onClick @ finance-orders.tsx:1243
+callCallback2 @ chunk-RPCDYKBN.js?v=09ef9b6d:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=09ef9b6d:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=09ef9b6d:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=09ef9b6d:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=09ef9b6d:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=09ef9b6d:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=09ef9b6d:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=09ef9b6d:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=09ef9b6d:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=09ef9b6d:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=09ef9b6d:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=09ef9b6d:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=09ef9b6d:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=09ef9b6d:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=09ef9b6d:5449
+useAuth.ts:43 Auth check result: {success: true, user: {…}}

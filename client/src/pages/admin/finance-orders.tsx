@@ -232,28 +232,46 @@ function FinanceOrders() {
     sum + parseFloat(order.totalAmount || '0'), 0
   );
 
-  // Fetch order details function
+  // Fetch order details function for admin users
   const fetchOrderDetails = async (orderNumber: string) => {
     try {
-      const response = await fetch(`/api/customers/orders/${orderNumber}/details`);
-      const data = await response.json();
-      if (data.success) {
-        setOrderDetails(data.order);
-        setOrderDocuments(data.documents || []);
+      // For admin users, we need to find the order by orderNumber first, then get details by ID
+      const findOrderResponse = await fetch(`/api/admin/orders/find-by-number/${orderNumber}`, {
+        credentials: 'include'
+      });
+      
+      if (!findOrderResponse.ok) {
+        throw new Error('Failed to find order');
+      }
+      
+      const findOrderData = await findOrderResponse.json();
+      if (!findOrderData.success || !findOrderData.order) {
+        throw new Error('Order not found');
+      }
+      
+      // Now get the order details using the customer order ID
+      const detailsResponse = await fetch(`/api/admin/orders/${findOrderData.order.id}/details`, {
+        credentials: 'include'
+      });
+      
+      if (!detailsResponse.ok) {
+        throw new Error('Failed to fetch order details');
+      }
+      
+      const detailsData = await detailsResponse.json();
+      if (detailsData.success) {
+        setOrderDetails(detailsData.order);
+        setOrderDocuments(detailsData.documents || []);
         setOrderDetailsModalOpen(true);
       } else {
-        toast({
-          variant: "destructive",
-          title: "خطا",
-          description: "امکان دریافت جزئیات سفارش وجود ندارد"
-        });
+        throw new Error(detailsData.message || 'Failed to get order details');
       }
     } catch (error) {
       console.error('Error fetching order details:', error);
       toast({
         variant: "destructive", 
         title: "خطا",
-        description: "خطا در اتصال به سرور"
+        description: "امکان دریافت جزئیات سفارش وجود ندارد"
       });
     }
   };
@@ -1238,9 +1256,9 @@ function OrderCard({ order, onOrderSelect, readOnly = false, fetchOrderDetails }
 
         {!readOnly && (
           <div className="flex justify-end gap-2">
-            {fetchOrderDetails && (
+            {fetchOrderDetails && order.orderNumber && (
               <Button 
-                onClick={() => fetchOrderDetails(order.orderNumber!)}
+                onClick={() => fetchOrderDetails(order.orderNumber)}
                 size="sm"
                 variant="outline"
                 className="flex items-center space-x-2 space-x-reverse"
