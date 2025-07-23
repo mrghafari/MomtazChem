@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Manual Delivery Code - Logistics Debug</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            direction: rtl;
+            text-align: right;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border-left: 4px solid #3498db;
+            background-color: #f8f9fa;
+        }
+        .button {
+            background: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .button:hover {
+            background: #2980b9;
+        }
+        .success {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .error {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .result {
+            background: #ecf0f1;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            white-space: pre-wrap;
+        }
+        #statusDiv {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚚 تست ارسال دستی کد تحویل - Logistics Debug</h1>
+        
+        <div id="statusDiv" class="result">
+            آماده برای تست...
+        </div>
+
+        <div class="test-section">
+            <h3>📋 تست Manual Delivery Code Send</h3>
+            <p>کلیک کنید تا کد تحویل برای سفارش 88 (ABAS ABASI) ارسال شود:</p>
+            <button class="button" onclick="testManualDeliveryCode()">📱 ارسال کد تحویل</button>
+            <div id="manualResult" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔍 بررسی وضعیت سفارشات Logistics</h3>
+            <button class="button" onclick="checkLogisticsOrders()">📦 مشاهده سفارشات</button>
+            <div id="ordersResult" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>⚡ تست سریع Template ID 3</h3>
+            <button class="button" onclick="quickTemplateTest()">🧪 تست Template</button>
+            <div id="templateResult" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        function updateStatus(message, type = '') {
+            const statusDiv = document.getElementById('statusDiv');
+            statusDiv.textContent = message;
+            statusDiv.className = 'result ' + type;
+            console.log(message);
+        }
+
+        async function testManualDeliveryCode() {
+            updateStatus('🔄 در حال ارسال کد تحویل...', '');
+            const resultDiv = document.getElementById('manualResult');
+            
+            try {
+                // Test with order management ID 88 (ABAS ABASI)
+                const response = await fetch('/api/order-management/send-delivery-code', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        orderManagementId: 88,
+                        action: 'send'
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    updateStatus('✅ کد تحویل با موفقیت ارسال شد!', 'success');
+                    resultDiv.innerHTML = `<div class="success">
+                        ✅ موفق: کد تحویل ${result.deliveryCode || 'N/A'} ارسال شد
+                        📱 SMS به ABAS ABASI ارسال شد
+                        📋 سفارش M2511132
+                    </div>`;
+                } else {
+                    updateStatus('❌ خطا در ارسال کد تحویل', 'error');
+                    resultDiv.innerHTML = `<div class="error">
+                        ❌ خطا: ${result.error || 'نامشخص'}
+                        🔍 Response Status: ${response.status}
+                    </div>`;
+                }
+
+                console.log('Manual delivery code result:', result);
+                
+            } catch (error) {
+                console.error('Manual delivery code test error:', error);
+                updateStatus('❌ خطای اتصال', 'error');
+                resultDiv.innerHTML = `<div class="error">❌ خطای اتصال: ${error.message}</div>`;
+            }
+        }
+
+        async function checkLogisticsOrders() {
+            updateStatus('🔍 در حال بررسی سفارشات...', '');
+            const resultDiv = document.getElementById('ordersResult');
+            
+            try {
+                const response = await fetch('/api/order-management/logistics', {
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.success && data.orders) {
+                    updateStatus(`✅ ${data.orders.length} سفارش یافت شد`, 'success');
+                    
+                    const ordersHtml = data.orders.map(order => `
+                        📦 سفارش: ${order.orderNumber || '#' + order.customerOrderId}
+                        👤 مشتری: ${order.customer?.firstName} ${order.customer?.lastName}
+                        📱 تلفن: ${order.customer?.phone}
+                        🔢 کد تحویل: ${order.deliveryCode || 'ندارد'}
+                        📍 وضعیت: ${order.currentStatus}
+                        ---
+                    `).join('\n');
+                    
+                    resultDiv.innerHTML = `<div class="success">${ordersHtml}</div>`;
+                } else {
+                    updateStatus('❌ مشکل در دریافت سفارشات', 'error');
+                    resultDiv.innerHTML = `<div class="error">❌ پاسخ نامعتبر از سرور</div>`;
+                }
+                
+            } catch (error) {
+                console.error('Orders check error:', error);
+                updateStatus('❌ خطا در بررسی سفارشات', 'error');
+                resultDiv.innerHTML = `<div class="error">❌ خطا: ${error.message}</div>`;
+            }
+        }
+
+        async function quickTemplateTest() {
+            updateStatus('🧪 در حال تست Template...', '');
+            const resultDiv = document.getElementById('templateResult');
+            
+            try {
+                // Simulated template test data
+                const testData = {
+                    templateId: 3,
+                    testPhone: '09124955173',
+                    testData: {
+                        customer_name: 'ABAS ABASI',
+                        order_number: 'M2511132',
+                        delivery_code: '1119'
+                    }
+                };
+
+                updateStatus('✅ Template 3 آماده است', 'success');
+                resultDiv.innerHTML = `<div class="success">
+                    🧪 Template ID: ${testData.templateId}
+                    📱 تلفن تست: ${testData.testPhone}
+                    👤 نام مشتری: ${testData.testData.customer_name}
+                    📋 شماره سفارش: ${testData.testData.order_number}
+                    🔢 کد تحویل: ${testData.testData.delivery_code}
+                    
+                    متن پیامک:
+                    "سلام ${testData.testData.customer_name}
+                    کد تحویل سفارش ${testData.testData.order_number}: ${testData.testData.delivery_code}
+                    این کد را هنگام دریافت کالا به پیک ارائه دهید.
+                    ممتاز شیمی"
+                </div>`;
+                
+            } catch (error) {
+                console.error('Template test error:', error);
+                updateStatus('❌ خطا در تست Template', 'error');
+                resultDiv.innerHTML = `<div class="error">❌ خطا: ${error.message}</div>`;
+            }
+        }
+
+        // Auto-check orders on page load
+        window.onload = function() {
+            updateStatus('🚀 صفحه آماده - می‌توانید تست‌ها را شروع کنید', 'success');
+        };
+    </script>
+</body>
+</html>

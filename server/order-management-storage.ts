@@ -90,9 +90,10 @@ export interface IOrderManagementStorage {
   getDepartmentUsers(department: Department): Promise<DepartmentAssignment[]>;
   
   // Delivery codes
-  generateDeliveryCode(orderManagementId: number): Promise<DeliveryCode>;
+  generateDeliveryCode(orderManagementId: number, customerPhone?: string): Promise<string>;
   verifyDeliveryCode(code: string, verifiedBy: string): Promise<boolean>;
   getDeliveryCodeByOrder(orderManagementId: number): Promise<DeliveryCode | undefined>;
+  sendManualDeliveryCode(orderManagementId: number): Promise<{success: boolean, deliveryCode?: string, error?: string}>;
   
   // Status history
   getOrderStatusHistory(orderManagementId: number): Promise<OrderStatusHistory[]>;
@@ -1040,7 +1041,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
           id: orderManagement.id,
           customerOrderId: orderManagement.customerOrderId,
           deliveryCode: orderManagement.deliveryCode,
-          status: orderManagement.status
+          currentStatus: orderManagement.currentStatus
         })
         .from(orderManagement)
         .where(eq(orderManagement.id, orderManagementId))
@@ -1077,12 +1078,12 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       }
 
       const customer = customerResult.rows[0];
-      const customerName = `${customer.firstname} ${customer.lastname}`.trim();
+      const customerName = `${customer.firstName || ''} ${customer.lastName || ''}`.trim();
       
       console.log('📱 [DELIVERY CODE] Customer info:', { 
         name: customerName, 
         phone: customer.phone, 
-        orderNumber: customer.ordernumber 
+        orderNumber: customer.orderNumber 
       });
 
       // Generate delivery code if not exists
@@ -1100,7 +1101,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
         deliveryCode,
         orderData.customerOrderId,
         customerName,
-        customer.ordernumber
+        customer.orderNumber
       );
 
       if (smsSuccess) {
