@@ -6,7 +6,18 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
-### COMPLETED: CRM Customer Profile Export System with Individual PDF Generation (July 23, 2025)
+### COMPLETED: Customer Profile PDF Export System - Final Import Path Resolution (July 23, 2025)
+✅ **RESOLVED: Critical import path bug preventing PDF export functionality in CRM system**
+- **Root Cause**: System was still importing from problematic `pdfmake-generator` causing ES module "require is not defined" errors
+- **Complete Resolution**: Systematically replaced ALL remaining `pdfmake-generator` imports with `pdfkit-generator` throughout routes.ts
+- **Fixed Endpoints**: Customer export `/api/crm/customers/:id/export-pdf` + documentation endpoints converted to PDFKit
+- **Technical Fix**: Changed imports from `./pdfmake-generator.js` to `./pdfkit-generator` and function calls updated
+- **System Status**: Customer profile PDF export now fully operational with FileText icon in CRM table
+- **Features Confirmed**: Company branding, RTL Persian text, Gregorian dates, professional formatting all working
+- **Impact**: CRM administrators can now successfully export customer profiles as PDF reports without import conflicts
+- **Result**: Complete customer profile export system operational after resolving all ES module compatibility issues
+
+### COMPLETED: CRM Customer Profile Export System - Critical Import Fix (July 23, 2025)
 ✅ **IMPLEMENTED: Complete customer profile PDF export functionality in CRM system**
 - **Individual Customer Export**: Added capability to export individual customer profiles as comprehensive PDF reports
 - **API Endpoint**: Created `/api/crm/customers/:id/export-pdf` endpoint for single customer profile export
