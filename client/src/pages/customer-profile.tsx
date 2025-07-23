@@ -550,15 +550,16 @@ const CustomerProfile = () => {
 
                         {/* Actions */}
                         <div className="mt-4 pt-3 border-t border-gray-200 flex gap-2 flex-wrap">
-                          {/* دکمه آپلود رسید بانکی فقط برای پرداخت بانکی */}
-                          {(order.status === 'pending' || order.status === 'payment_grace_period') && order.paymentMethod === 'واریز بانکی با مهلت 3 روزه' && (
+                          {/* دکمه آپلود رسید بانکی برای سفارشات موقت با پرداخت بانکی */}
+                          {(order.status === 'pending' || order.status === 'payment_grace_period') && 
+                           order.paymentMethod === 'واریز بانکی با مهلت 3 روزه' && (
                             <Button
                               size="sm"
                               onClick={() => window.open(`/customer/bank-receipt-upload?orderId=${order.id}`, '_blank')}
-                              className="bg-blue-600 hover:bg-blue-700"
+                              className="bg-orange-600 hover:bg-orange-700 text-white"
                             >
                               <Upload className="w-4 h-4 mr-2" />
-                              آپلود رسید بانکی
+                              آپلود حواله بانکی
                             </Button>
                           )}
                           
