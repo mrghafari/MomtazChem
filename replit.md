@@ -6,6 +6,24 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Complete Database Cleanup - Removed 235 Invalid Format Orders (July 23, 2025)
+✅ **SYSTEM CLEANUP: Complete removal of orders not following M25XXXXX standardized format**
+- **User Request**: Delete all orders that don't follow M25XXXXX format (5-digit numeric sequence after M25)
+- **Identified Target Orders**: 235 total invalid format orders requiring removal:
+  - 4 test orders with M25TXXX format (M25T001-M25T004)
+  - 4 pure test orders with TEST-XXXXX format
+  - 227 legacy orders with ORD-XXXXXXXXX-XXXXXXX format
+- **Complete Database Cleanup Process**:
+  - **Step 1**: Deleted 67 order items from order_items table for invalid orders
+  - **Step 2**: Deleted 231 management records from order_management table
+  - **Step 3**: Deleted 235 orders from customer_orders table with non-M25XXXXX format
+- **Database Verification**: Final count shows 42 orders remaining, all with valid M25XXXXX format (0 invalid format orders)
+- **Format Standard Enforced**: Only orders matching M25[0-9]{5} pattern remain in system
+- **Financial Department Impact**: Order count reduced from 193 to 31 orders (162 invalid orders removed from financial workflow)
+- **System Integrity**: All remaining orders follow standardized numbering: M2511115, M2511124, M2511166, etc.
+- **Data Consistency**: Cascade delete maintained referential integrity across order_items and order_management tables
+- **Impact**: Clean, standardized order database with consistent M25XXXXX format throughout all departments
+
 ### COMPLETED: Receipt Display Fix for Bank Transfer Orders and Gregorian Date Display (July 23, 2025)
 ✅ **RESOLVED: Critical receipt display bug preventing bank receipt visibility in financial department**
 - **Root Cause Identified**: Receipt display API was reading from empty payment_receipts table instead of customer_orders.receipt_path where actual receipts are stored
