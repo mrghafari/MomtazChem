@@ -20,6 +20,143 @@ import { PasswordManagement } from "@/components/PasswordManagement";
 
 import { apiRequest } from "@/lib/queryClient";
 
+// Province and City components for Iraq geographical data
+function ProvinceSelect({ editingCustomer, setEditingCustomer }: {
+  editingCustomer: CrmCustomer | null;
+  setEditingCustomer: (customer: CrmCustomer | null) => void;
+}) {
+  const [selectedProvinceId, setSelectedProvinceId] = useState<number | null>(null);
+  
+  // Fetch provinces data only if country is Iraq
+  const { data: provincesData } = useQuery({
+    queryKey: ["/api/logistics/provinces"],
+    enabled: editingCustomer?.country === "Iraq",
+    retry: 1,
+  });
+
+  const provinces = (provincesData && typeof provincesData === 'object' && 'data' in provincesData) ? provincesData.data : [];
+
+  if (editingCustomer?.country !== "Iraq") {
+    return (
+      <div>
+        <Label htmlFor="editProvince">Province/State *</Label>
+        <Input
+          id="editProvince"
+          placeholder="Enter province"
+          value={editingCustomer?.province || ""}
+          onChange={(e) => setEditingCustomer({ ...editingCustomer, province: e.target.value })}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <Label htmlFor="editProvince">Province/محافظة *</Label>
+      <Select 
+        value={editingCustomer?.province || ""} 
+        onValueChange={(value) => {
+          setEditingCustomer({ ...editingCustomer, province: value });
+          // Find the selected province to get its ID for city filtering
+          const selectedProvince = provinces.find((p: any) => p.nameEnglish === value || p.name === value);
+          if (selectedProvince) {
+            setSelectedProvinceId(selectedProvince.id);
+          }
+        }}
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="Select province / اختر المحافظة" />
+        </SelectTrigger>
+        <SelectContent>
+          {provinces.map((province: any) => (
+            <SelectItem key={province.id} value={province.nameEnglish}>
+              {province.nameEnglish} / {province.nameArabic}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
+
+function CitySelect({ editingCustomer, setEditingCustomer }: {
+  editingCustomer: CrmCustomer | null;
+  setEditingCustomer: (customer: CrmCustomer | null) => void;
+}) {
+  const [selectedProvinceId, setSelectedProvinceId] = useState<number | null>(null);
+  
+  // Get province ID when province changes
+  const { data: provincesData } = useQuery({
+    queryKey: ["/api/logistics/provinces"],
+    enabled: editingCustomer?.country === "Iraq",
+    retry: 1,
+  });
+
+  const provinces = (provincesData && typeof provincesData === 'object' && 'data' in provincesData) ? provincesData.data : [];
+
+  // Update selectedProvinceId when province changes
+  useEffect(() => {
+    if (editingCustomer?.province && provinces.length > 0) {
+      const selectedProvince = provinces.find((p: any) => 
+        p.nameEnglish === editingCustomer.province || p.name === editingCustomer.province
+      );
+      if (selectedProvince) {
+        setSelectedProvinceId(selectedProvince.id);
+      }
+    }
+  }, [editingCustomer?.province, provinces]);
+
+  // Fetch cities data based on selected province
+  const { data: citiesData } = useQuery({
+    queryKey: ["/api/logistics/cities", selectedProvinceId],
+    queryFn: () => {
+      const url = selectedProvinceId 
+        ? `/api/logistics/cities?provinceId=${selectedProvinceId}`
+        : '/api/logistics/cities';
+      return fetch(url).then(res => res.json());
+    },
+    enabled: editingCustomer?.country === "Iraq" && selectedProvinceId !== null,
+    retry: 1,
+  });
+
+  const cities = (citiesData && typeof citiesData === 'object' && 'data' in citiesData) ? citiesData.data : [];
+
+  if (editingCustomer?.country !== "Iraq") {
+    return (
+      <div>
+        <Label htmlFor="editCity">City *</Label>
+        <Input
+          id="editCity"
+          placeholder="Enter city"
+          value={editingCustomer?.city || ""}
+          onChange={(e) => setEditingCustomer({ ...editingCustomer, city: e.target.value })}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <Label htmlFor="editCity">City/مدينة *</Label>
+      <Select 
+        value={editingCustomer?.city || ""} 
+        onValueChange={(value) => setEditingCustomer({ ...editingCustomer, city: value })}
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="Select city / اختر المدينة" />
+        </SelectTrigger>
+        <SelectContent>
+          {cities.map((city: any) => (
+            <SelectItem key={city.id} value={city.nameEnglish}>
+              {city.nameEnglish} / {city.nameArabic}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
+
 interface CrmCustomer {
   id: number;
   email: string;
@@ -1381,25 +1518,15 @@ export default function CRM() {
                     </Select>
                   </div>
 
-                  <div>
-                    <Label htmlFor="editProvince">Province/State *</Label>
-                    <Input
-                      id="editProvince"
-                      placeholder="Enter province"
-                      value={editingCustomer.province || ""}
-                      onChange={(e) => setEditingCustomer({ ...editingCustomer, province: e.target.value })}
-                    />
-                  </div>
+                  <ProvinceSelect 
+                    editingCustomer={editingCustomer}
+                    setEditingCustomer={setEditingCustomer}
+                  />
 
-                  <div>
-                    <Label htmlFor="editCity">City *</Label>
-                    <Input
-                      id="editCity"
-                      placeholder="Enter city"
-                      value={editingCustomer.city || ""}
-                      onChange={(e) => setEditingCustomer({ ...editingCustomer, city: e.target.value })}
-                    />
-                  </div>
+                  <CitySelect 
+                    editingCustomer={editingCustomer}
+                    setEditingCustomer={setEditingCustomer}
+                  />
                 </div>
 
                 <div>
