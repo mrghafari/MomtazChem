@@ -14,7 +14,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
-import { Search, Plus, Users, TrendingUp, DollarSign, ShoppingCart, Eye, Edit, Activity, Trash2, Download, FileText, UserCog, ArrowUpDown, ArrowUp, ArrowDown, Shield, Settings, MessageCircle, Mail } from "lucide-react";
+import { Search, Plus, Users, TrendingUp, DollarSign, ShoppingCart, Eye, Edit, Activity, Trash2, Download, FileText, UserCog, ArrowUpDown, ArrowUp, ArrowDown, Shield, Settings, MessageCircle, Mail, UserCheck } from "lucide-react";
 import UnifiedCustomerProfile from "@/components/unified-customer-profile";
 import { PasswordManagement } from "@/components/PasswordManagement";
 import CustomerActivitiesCard from "@/components/CustomerActivitiesCard";
@@ -86,6 +86,10 @@ export default function CRM() {
   const [sortField, setSortField] = useState<string>("createdAt");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [bulkActionsLoading, setBulkActionsLoading] = useState(false);
+  const [selectedCustomerForAuth, setSelectedCustomerForAuth] = useState<CrmCustomer | null>(null);
+  const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
+  const [authMethod, setAuthMethod] = useState<"sms" | "email">("email");
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [newCustomer, setNewCustomer] = useState({
     email: "",
     firstName: "",
@@ -496,6 +500,54 @@ export default function CRM() {
     }
   };
 
+  const handleCustomerAuthentication = async () => {
+    if (!selectedCustomerForAuth) return;
+
+    setIsAuthenticating(true);
+    try {
+      const response = await fetch('/api/crm/customer-authentication', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          customerId: selectedCustomerForAuth.id,
+          method: authMethod,
+          customerEmail: selectedCustomerForAuth.email,
+          customerPhone: selectedCustomerForAuth.phone,
+          customerName: `${selectedCustomerForAuth.firstName} ${selectedCustomerForAuth.lastName}`
+        })
+      });
+
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.message || 'خطا در ارسال کد احراز هویت');
+      }
+
+      toast({
+        title: "موفقیت",
+        description: `کد احراز هویت ${authMethod === 'sms' ? 'SMS' : 'ایمیل'} برای ${selectedCustomerForAuth.firstName} ${selectedCustomerForAuth.lastName} ارسال شد`,
+      });
+
+      // Refresh activities if needed
+      await queryClient.invalidateQueries({ queryKey: ["/api/crm/dashboard"] });
+
+      setIsAuthDialogOpen(false);
+      setSelectedCustomerForAuth(null);
+    } catch (error) {
+      console.error('Error sending authentication:', error);
+      toast({
+        title: "خطا",
+        description: error instanceof Error ? error.message : "خطا در ارسال کد احراز هویت",
+        variant: "destructive"
+      });
+    } finally {
+      setIsAuthenticating(false);
+    }
+  };
+
   const formatCurrency = (amount: string | number, currency: string = 'IQD') => {
     const validCurrencies = ['USD', 'EUR', 'IQD'];
     const currencyCode = validCurrencies.includes(currency) ? currency : 'IQD';
@@ -865,6 +917,18 @@ export default function CRM() {
                               className="text-blue-600 hover:text-blue-700 h-8 w-8 p-0"
                             >
                               <Shield className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedCustomerForAuth(customer);
+                                setIsAuthDialogOpen(true);
+                              }}
+                              title="ارسال کد احراز هویت (SMS/Email)"
+                              className="text-green-600 hover:text-green-700 h-8 w-8 p-0"
+                            >
+                              <UserCheck className="h-3 w-3" />
                             </Button>
                             <Button
                               variant="outline"
@@ -1386,6 +1450,61 @@ export default function CRM() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Customer Authentication Dialog */}
+      <Dialog open={isAuthDialogOpen} onOpenChange={setIsAuthDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-right">احراز هویت مشتری</DialogTitle>
+            <DialogDescription className="text-right">
+              احراز هویت برای: {selectedCustomerForAuth?.firstName} {selectedCustomerForAuth?.lastName}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4" dir="rtl">
+            <div>
+              <Label className="text-right">انتخاب روش احراز هویت</Label>
+              <Select value={authMethod} onValueChange={(value: "sms" | "email") => setAuthMethod(value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="email">
+                    <div className="flex items-center gap-2">
+                      <Mail className="h-4 w-4" />
+                      احراز هویت از طریق ایمیل
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="sms">
+                    <div className="flex items-center gap-2">
+                      <MessageCircle className="h-4 w-4" />
+                      احراز هویت از طریق SMS
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="text-sm text-gray-600 bg-blue-50 p-3 rounded-md">
+              <p className="font-medium">اطلاعات مشتری:</p>
+              <p>ایمیل: {selectedCustomerForAuth?.email}</p>
+              <p>تلفن: {selectedCustomerForAuth?.phone}</p>
+            </div>
+
+            <div className="flex justify-end space-x-2 space-x-reverse">
+              <Button variant="outline" onClick={() => setIsAuthDialogOpen(false)}>
+                انصراف
+              </Button>
+              <Button 
+                onClick={handleCustomerAuthentication}
+                disabled={isAuthenticating}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                {isAuthenticating ? "در حال ارسال..." : `ارسال کد ${authMethod === 'sms' ? 'SMS' : 'ایمیل'}`}
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

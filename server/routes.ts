@@ -15979,8 +15979,150 @@ Leading Chemical Solutions Provider
     }
   });
 
+  // Customer Authentication endpoint - Send SMS or Email verification
+  app.post("/api/crm/customer-authentication", requireAuth, async (req, res) => {
+    try {
+      const { customerId, method, customerEmail, customerPhone, customerName } = req.body;
+      
+      if (!customerId || !method || !customerName) {
+        return res.status(400).json({
+          success: false,
+          message: "اطلاعات ضروری کافی نیست"
+        });
+      }
+
+      if (method !== 'sms' && method !== 'email') {
+        return res.status(400).json({
+          success: false,
+          message: "روش احراز هویت باید 'sms' یا 'email' باشد"
+        });
+      }
+
+      // Validate email/phone based on method
+      if (method === 'email' && !customerEmail) {
+        return res.status(400).json({
+          success: false,
+          message: "ایمیل مشتری برای احراز هویت الزامی است"
+        });
+      }
+
+      if (method === 'sms' && !customerPhone) {
+        return res.status(400).json({
+          success: false,
+          message: "شماره تلفن مشتری برای احراز هویت الزامی است"
+        });
+      }
+
+      // Generate verification code (6 digits)
+      const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+      
+      let successMessage = "";
+      let authData = {};
+
+      if (method === 'sms') {
+        // Send SMS verification code
+        try {
+          const { smsStorage } = await import("./sms-storage");
+          const smsResult = await smsStorage.sendSMS({
+            to: customerPhone,
+            message: `کد احراز هویت شما: ${verificationCode}\nشرکت ممتاز شیمی\nاین کد تا 10 دقیقه معتبر است.`,
+            templateId: 2, // Authentication template
+            customerId: customerId
+          });
+
+          if (smsResult.success) {
+            successMessage = `کد احراز هویت SMS برای ${customerName} به شماره ${customerPhone} ارسال شد`;
+            authData = {
+              method: 'sms',
+              phone: customerPhone,
+              verificationCode,
+              sentAt: new Date().toISOString(),
+              smsId: smsResult.smsId
+            };
+          } else {
+            throw new Error('خطا در ارسال SMS');
+          }
+        } catch (smsError) {
+          console.error('SMS sending failed:', smsError);
+          return res.status(500).json({
+            success: false,
+            message: "خطا در ارسال SMS احراز هویت"
+          });
+        }
+      } else if (method === 'email') {
+        // Send Email verification code
+        try {
+          const { UniversalEmailService } = await import("./universal-email-service");
+          const emailResult = await UniversalEmailService.sendTemplateEmail({
+            to: customerEmail,
+            templateType: 'customer-authentication',
+            variables: {
+              customerName: customerName,
+              verificationCode: verificationCode,
+              validFor: '10 دقیقه',
+              companyName: 'شرکت ممتاز شیمی'
+            },
+            category: 'authentication'
+          });
+
+          if (emailResult.success) {
+            successMessage = `کد احراز هویت ایمیل برای ${customerName} به آدرس ${customerEmail} ارسال شد`;
+            authData = {
+              method: 'email',
+              email: customerEmail,
+              verificationCode,
+              sentAt: new Date().toISOString(),
+              emailId: emailResult.emailId
+            };
+          } else {
+            throw new Error('خطا در ارسال ایمیل');
+          }
+        } catch (emailError) {
+          console.error('Email sending failed:', emailError);
+          return res.status(500).json({
+            success: false,
+            message: "خطا در ارسال ایمیل احراز هویت"
+          });
+        }
+      }
+
+      // Log the authentication activity in CRM
+      try {
+        await crmStorage.logCustomerActivity({
+          customerId: customerId,
+          activityType: 'authentication_request',
+          description: `کد احراز هویت ${method === 'sms' ? 'SMS' : 'ایمیل'} توسط مدیر ارسال شد`,
+          performedBy: 'admin',
+          activityData: authData
+        });
+      } catch (logError) {
+        console.error('Failed to log authentication activity:', logError);
+        // Don't fail the request if logging fails
+      }
+
+      console.log(`🔐 [CUSTOMER AUTH] ${method.toUpperCase()} verification code sent to customer ${customerId} (${customerName})`);
+
+      res.json({
+        success: true,
+        message: successMessage,
+        data: {
+          method,
+          sentAt: new Date().toISOString(),
+          customerId,
+          customerName
+        }
+      });
+    } catch (error) {
+      console.error("Error sending customer authentication:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در ارسال کد احراز هویت"
+      });
+    }
+  });
+
   // Bulk toggle verification settings for all customers
-  app.post("/api/crm/customers/bulk-toggle-verification", async (req, res) => {
+  app.post("/api/crm/customers/bulk-toggle-verification", requireAuth, async (req, res) => {
     try {
       const { type, enabled } = req.body;
       
