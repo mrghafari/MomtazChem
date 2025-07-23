@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { User, Package, Calendar, DollarSign, ShoppingBag, LogOut, MapPin, Building, Phone, Mail, Edit, FileText, Download, Clock, AlertTriangle, PlayCircle, Trash2, History, Search, X, ShoppingCart, Plus, Upload } from "lucide-react";
+import { User, Package, Calendar, DollarSign, ShoppingBag, LogOut, MapPin, Building, Phone, Mail, Edit, FileText, Download, Clock, AlertTriangle, PlayCircle, Trash2, History, Search, X, ShoppingCart, Plus, Upload, AlertCircle } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -428,6 +428,21 @@ const CustomerProfile = () => {
                               <Calendar className="w-4 h-4" />
                               {formatDate(order.createdAt)}
                             </p>
+                            
+                            {/* نمایش پیام منتظر ارسال حواله برای سفارشات بانکی بدون رسید */}
+                            {order.paymentMethod === 'واریز بانکی با مهلت 3 روزه' && 
+                             (order.status === 'pending' || order.status === 'payment_grace_period') &&
+                             !order.receiptPath && (
+                              <div className="bg-orange-50 border border-orange-200 rounded-lg p-2 mt-2 text-right">
+                                <p className="text-sm text-orange-800 font-medium flex items-center gap-1">
+                                  <AlertCircle className="w-4 h-4" />
+                                  منتظر ارسال حواله وجه خرید
+                                </p>
+                                <p className="text-xs text-orange-700 mt-1">
+                                  لطفاً حواله بانکی را آپلود کنید
+                                </p>
+                              </div>
+                            )}
                           </div>
                           <div className="text-right">
                             {(() => {

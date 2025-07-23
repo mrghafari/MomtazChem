@@ -6,6 +6,29 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Automated Bank Receipt Reminder System Implementation (July 23, 2025)
+✅ **IMPLEMENTED: Complete automated reminder system for bank receipt submissions with 24-hour notification cycle**
+- **Bank Receipt Reminder Service**: Created comprehensive BankReceiptReminderService class with automatic notification algorithms
+- **Email & SMS Integration**: Dual notification system sending reminders via Universal Email Service and SMS for pending bank transfers
+- **Smart Filtering**: Automatically identifies orders requiring reminders:
+  - Payment method: 'واریز بانکی با مهلت 3 روزه' (3-day bank transfer)
+  - Status: 'pending' or 'payment_grace_period'
+  - No receipt uploaded (receiptPath is null)
+  - Created more than 24 hours ago but less than 3 days
+- **Automated Schedule**: Reminder checks every 2 hours with immediate check after 30 seconds on service start
+- **Customer Communication**: 
+  - **Email**: Professional Persian email with order details, remaining days, and upload instructions
+  - **SMS**: Concise reminder message with order number, amount, and deadline
+  - **Template Integration**: Uses 'bank-receipt-reminder' email template and 'bank_receipt_reminder' SMS template
+- **Visual Interface Enhancement**: Added "منتظر ارسال حواله وجه خرید" message card in customer profile
+  - Orange alert styling with AlertCircle icon for pending bank transfers without receipts
+  - Contextual message appears only for relevant orders
+  - Clear call-to-action encouraging receipt upload
+- **Service Integration**: Automatic startup in server initialization with proper logging
+- **Database Tracking**: Updates order notes to track reminder history and timestamps
+- **Business Logic**: Calculates remaining days until automatic order cancellation
+- **Impact**: Proactive customer engagement reducing order abandonment and improving payment completion rates
+
 ### COMPLETED: Concurrent Session Management for Super Admin and Customer Access (July 23, 2025)
 ✅ **IMPLEMENTED: Separate session management allowing concurrent access for super admin and customers**
 - **Separate Session Stores**: Created independent memory stores for admin and customer sessions

@@ -6,6 +6,7 @@ import { registerRoutes } from "./routes";
 import InventoryAlertService from "./inventory-alerts";
 import { expiredOrdersCleanup } from "./expired-orders-cleanup";
 import { abandonedCartCleanup } from "./abandoned-cart-cleanup";
+import { bankReceiptReminderService } from "./bank-receipt-reminder";
 import { setupVite, serveStatic, log } from "./vite";
 
 // Global error handlers to prevent server crashes
@@ -212,6 +213,10 @@ app.use((req, res, next) => {
           // Start abandoned cart cleanup service
           abandonedCartCleanup.start();
           log('🛒 Abandoned cart cleanup service started');
+          
+          // Start bank receipt reminder service
+          bankReceiptReminderService.start();
+          log('🔔 Bank receipt reminder service started');
           
           // Start inventory monitoring service
           InventoryAlertService.startInventoryMonitoring();
