@@ -273,7 +273,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
           // Generate delivery code
           const deliveryCode = await this.generateDeliveryCode(currentOrder.id, customerData.customerPhone);
           
-          // Send SMS using template 7
+          // Send SMS using template 3
           await this.sendDeliveryCodeSms(
             customerData.customerPhone, 
             deliveryCode, 
@@ -282,7 +282,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
             orderNumber
           );
           
-          console.log(`✅ [AUTO SMS TEMPLATE 7] Delivery code ${deliveryCode} sent to ${customerData.customerPhone} for order ${orderNumber}`);
+          console.log(`✅ [AUTO SMS TEMPLATE 3] Delivery code ${deliveryCode} sent to ${customerData.customerPhone} for order ${orderNumber}`);
         } else {
           console.log(`❌ [AUTO SMS] No customer phone found for order ${currentOrder.id}`);
         }
@@ -995,18 +995,18 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       const { createSmsService } = await import('./sms-service');
       const smsService = await createSmsService();
       
-      // Use template 7 for delivery code (قالب شماره 7)
-      const result = await smsService.sendSmsUsingTemplate(7, customerPhone, {
+      // Use template 3 for delivery code (قالب شماره 3 - کد تحویل سفارش)
+      const result = await smsService.sendSmsUsingTemplate(3, customerPhone, {
         customer_name: customerName,
         order_number: orderNumber,
         delivery_code: deliveryCode
       });
       
-      console.log(`📱 [SMS TEMPLATE 7] Delivery code ${deliveryCode} sent to ${customerPhone} for order ${orderNumber}:`, result);
+      console.log(`📱 [SMS TEMPLATE 3] Delivery code ${deliveryCode} sent to ${customerPhone} for order ${orderNumber}:`, result);
       
       return result.success;
     } catch (error) {
-      console.error('❌ [SMS] Error sending delivery code using template 7:', error);
+      console.error('❌ [SMS] Error sending delivery code using template 3:', error);
       return false;
     }
   }
