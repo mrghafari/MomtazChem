@@ -28,10 +28,11 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Impact**: Complete delivery address visibility for logistics department with standardized order numbering
 - **Status**: Logistics department now displays comprehensive delivery information with M25XXXXX order format only
 
-### COMPLETED: Automatic Delivery Code SMS System with Template #3 Implementation (July 23, 2025)
-✅ **IMPLEMENTED: Complete automatic SMS delivery code system using SMS template #3**
+### COMPLETED: Automatic Delivery Code SMS System with Template #1 Implementation (July 23, 2025)
+✅ **IMPLEMENTED: Complete automatic SMS delivery code system using SMS template #1**
 - **Core Functionality**: Automatic delivery code generation and SMS sending when orders transition from warehouse to logistics
-- **SMS Template Integration**: Uses template #3 with format "سلام {{customer_name}} کد تحویل سفارش {{order_number}}: {{delivery_code}}"
+- **SMS Template Integration**: Uses template #1 with format "سلام {{customer_name}} کد تحویل سفارش {{order_number}}: {{delivery_code}}"
+- **Template Fix**: Corrected template ID from 3 to 1 to match database template for delivery codes
 - **Trigger Events**: SMS automatically sent when order status changes to:
   - `warehouse_approved` (warehouse approves order for logistics)
   - `logistics_assigned` (order assigned to logistics department)

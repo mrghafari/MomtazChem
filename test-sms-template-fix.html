@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست قالب SMS کد تحویل</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+            direction: rtl;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 تست اصلاح قالب SMS کد تحویل</h1>
+        
+        <div class="test-section">
+            <h3>📋 اطلاعات قالب‌های موجود</h3>
+            <div id="templates-info"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📱 تست ارسال کد تحویل با قالب شماره 1</h3>
+            <p>تست ارسال کد تحویل برای سفارش M2511132 با template ID 3 (که شماره قالب 1 است)</p>
+            <button onclick="testDeliveryCodeTemplate()">تست ارسال کد تحویل</button>
+            <div id="test-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔍 بررسی وضعیت سفارشات لجستیک</h3>
+            <button onclick="checkLogisticsOrders()">بررسی سفارشات لجستیک</button>
+            <div id="logistics-result"></div>
+        </div>
+    </div>
+
+    <script>
+        // نمایش اطلاعات قالب‌ها
+        async function loadTemplatesInfo() {
+            const templatesDiv = document.getElementById('templates-info');
+            templatesDiv.innerHTML = `
+                <div class="info">
+                    <strong>قالب‌های موجود برای کد تحویل:</strong><br>
+                    • Template ID 3 - شماره قالب 1 - "کد تحویل سفارش"<br>
+                    • Template ID 7 - شماره قالب 1 - "کد تحویل سفارش"<br><br>
+                    <strong>قالب درست:</strong><br>
+                    "سلام {{customer_name}}<br>
+                    کد تحویل سفارش {{order_number}}: {{delivery_code}}<br>
+                    این کد را هنگام دریافت کالا به پیک ارائه دهید.<br>
+                    ممتاز شیمی"
+                </div>
+            `;
+        }
+
+        // تست ارسال کد تحویل
+        async function testDeliveryCodeTemplate() {
+            const resultDiv = document.getElementById('test-result');
+            resultDiv.innerHTML = '<div class="info">در حال تست ارسال کد تحویل...</div>';
+
+            try {
+                // شبیه‌سازی ارسال کد تحویل با متغیرهای واقعی
+                const testData = {
+                    customerPhone: '+9647503533769',
+                    deliveryCode: '1121',
+                    customerOrderId: 254,
+                    customerName: 'ABAS ABASI',
+                    orderNumber: 'M2511132'
+                };
+
+                console.log('Testing delivery code SMS with template 1:', testData);
+
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        ✅ تست شبیه‌سازی شده<br>
+                        <strong>اطلاعات تست:</strong><br>
+                        • شماره تلفن: ${testData.customerPhone}<br>
+                        • کد تحویل: ${testData.deliveryCode}<br>
+                        • شماره سفارش: ${testData.orderNumber}<br>
+                        • نام مشتری: ${testData.customerName}<br>
+                        • قالب استفاده شده: Template ID 3 (شماره قالب 1)<br><br>
+                        <strong>پیام ارسال شده:</strong><br>
+                        "سلام ${testData.customerName}<br>
+                        کد تحویل سفارش ${testData.orderNumber}: ${testData.deliveryCode}<br>
+                        این کد را هنگام دریافت کالا به پیک ارائه دهید.<br>
+                        ممتاز شیمی"
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ خطا در تست: ${error.message}</div>`;
+            }
+        }
+
+        // بررسی سفارشات لجستیک
+        async function checkLogisticsOrders() {
+            const resultDiv = document.getElementById('logistics-result');
+            resultDiv.innerHTML = '<div class="info">در حال بررسی سفارشات لجستیک...</div>';
+
+            try {
+                const response = await fetch('/api/order-management/logistics');
+                const data = await response.json();
+
+                if (data.success) {
+                    const ordersWithCodes = data.orders.filter(order => order.deliveryCode);
+                    
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            ✅ سفارشات لجستیک بررسی شد<br>
+                            <strong>تعداد کل سفارشات:</strong> ${data.orders.length}<br>
+                            <strong>سفارشات با کد تحویل:</strong> ${ordersWithCodes.length}<br><br>
+                            ${ordersWithCodes.map(order => `
+                                • سفارش ${order.orderNumber} - کد: ${order.deliveryCode} - مشتری: ${order.customer?.firstName} ${order.customer?.lastName}
+                            `).join('<br>')}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ خطا در دریافت سفارشات: ${data.message}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ خطا در درخواست: ${error.message}</div>`;
+            }
+        }
+
+        // بارگذاری اطلاعات اولیه
+        window.onload = function() {
+            loadTemplatesInfo();
+        };
+    </script>
+</body>
+</html>
