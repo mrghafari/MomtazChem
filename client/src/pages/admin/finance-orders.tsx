@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { 
   DollarSign, 
   CheckCircle, 
+  CheckCircle2,
   XCircle, 
   Eye, 
   Clock,
@@ -454,6 +455,24 @@ function FinanceOrders() {
   const openImageModal = (imageUrl: string) => {
     setSelectedImageUrl(imageUrl);
     setImageModalOpen(true);
+  };
+
+  // Handle accept order from order details modal
+  const handleAcceptOrder = (customerOrderId: number) => {
+    approveMutation.mutate({ 
+      orderId: customerOrderId, 
+      notes: `سفارش تأیید شد از طریق مودال جزئیات - ${new Date().toLocaleDateString('en-US')}` 
+    });
+    setOrderDetailsOpen(false);
+  };
+
+  // Handle reject order from order details modal  
+  const handleRejectOrder = (customerOrderId: number) => {
+    rejectMutation.mutate({ 
+      orderId: customerOrderId, 
+      notes: `سفارش رد شد از طریق مودال جزئیات - ${new Date().toLocaleDateString('en-US')}` 
+    });
+    setOrderDetailsOpen(false);
   };
 
   if (isLoading) {
@@ -1163,6 +1182,42 @@ function FinanceOrders() {
                         <p>هیچ مدرک اضافی ارسال نشده است</p>
                       </div>
                     )}
+                  </CardContent>
+                </Card>
+
+                {/* Action Buttons */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <CheckCircle2 className="h-5 w-5" />
+                      عملیات تأیید سفارش
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex gap-4 justify-center">
+                      <Button 
+                        onClick={() => handleAcceptOrder(orderDetails.customerOrderId)}
+                        className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 text-lg"
+                        disabled={orderDetails.currentStatus === 'financial_approved' || orderDetails.currentStatus === 'warehouse_pending'}
+                      >
+                        <CheckCircle2 className="h-5 w-5 mr-2" />
+                        قبول سفارش
+                      </Button>
+                      <Button 
+                        onClick={() => handleRejectOrder(orderDetails.customerOrderId)}
+                        variant="destructive"
+                        className="px-8 py-3 text-lg"
+                        disabled={orderDetails.currentStatus === 'financial_rejected'}
+                      >
+                        <XCircle className="h-5 w-5 mr-2" />
+                        رد سفارش
+                      </Button>
+                    </div>
+                    <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                      <p className="text-sm text-blue-800 text-center">
+                        پس از تأیید، سفارش به بخش انبارداری ارسال می‌شود
+                      </p>
+                    </div>
                   </CardContent>
                 </Card>
               </div>
