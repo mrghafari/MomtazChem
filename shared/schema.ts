@@ -931,18 +931,20 @@ export const customerOrders = pgTable("customer_orders", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-// Order Items Table
+// Order Items Table - Fixed to match actual database structure with product snapshot
 export const orderItems = pgTable("order_items", {
   id: serial("id").primaryKey(),
   orderId: integer("order_id").notNull().references(() => customerOrders.id),
-  productId: integer("product_id").notNull(),
+  productId: integer("product_id"),
   productName: text("product_name").notNull(),
-  productSku: text("product_sku"),
-  quantity: integer("quantity").notNull(),
+  productSku: text("product_sku").notNull(),
+  quantity: decimal("quantity", { precision: 10, scale: 3 }).notNull(),
   unitPrice: decimal("unit_price", { precision: 10, scale: 2 }).notNull(),
   totalPrice: decimal("total_price", { precision: 10, scale: 2 }).notNull(),
-  productImage: text("product_image"),
-  productCategory: text("product_category"),
+  productSnapshot: json("product_snapshot"), // Store complete frozen product data
+  unit: text("unit").notNull(),
+  specifications: json("specifications"),
+  notes: text("notes"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

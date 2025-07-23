@@ -10495,6 +10495,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
           try {
             const product = await shopStorage.getShopProductById(parseInt(productId as string));
             if (product) {
+              // Create complete product snapshot to freeze product data at order time
+              const productSnapshot = {
+                id: product.id,
+                name: product.name,
+                sku: product.sku,
+                price: product.price,
+                description: product.description,
+                technicalName: product.technicalName,
+                specifications: product.specifications,
+                category: product.category,
+                brand: product.brand,
+                model: product.model,
+                origin: product.origin,
+                packageSize: product.packageSize,
+                unit: product.unit,
+                purityGrade: product.purityGrade,
+                storageConditions: product.storageConditions,
+                safetyLevel: product.safetyLevel,
+                applications: product.applications,
+                casNumber: product.casNumber,
+                hsCode: product.hsCode,
+                stockQuantity: product.stockQuantity,
+                isActive: product.isActive,
+                createdAt: product.createdAt,
+                updatedAt: product.updatedAt,
+                // Snapshot metadata
+                snapshotCreatedAt: new Date().toISOString(),
+                orderNumber: orderNumber,
+                frozenPrice: product.price,
+                frozenStock: product.stockQuantity
+              };
+
               await customerStorage.createOrderItem({
                 orderId: order.id,
                 productId: parseInt(productId as string),
@@ -10503,6 +10535,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 quantity: (quantity as number).toString(),
                 unitPrice: product.price || "0",
                 totalPrice: (parseFloat(product.price || "0") * (quantity as number)).toString(),
+                unit: product.unit || "units",
+                specifications: product.specifications || null,
+                notes: `فریز شده در سفارش ${orderNumber} - قیمت: ${product.price}`,
+                productSnapshot: productSnapshot // Store complete frozen product data
               });
 
               // Update product stock with batch tracking
