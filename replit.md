@@ -6,6 +6,29 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Interactive Order Details Modal with Print Functionality Implementation (July 23, 2025)
+✅ **IMPLEMENTED: Complete interactive order details system in logistics management interface**
+- **Clickable Recipient Information**: Made "اطلاعات گیرنده" section clickable with hover effects for intuitive user interaction
+- **Order Details Modal**: Added comprehensive modal functionality with selectedOrder and isOrderDetailsOpen state management
+- **handleShowOrderDetails Function**: Created dedicated function to open order details modal with complete order information
+- **Price Information Removed**: Removed price/cost information from order details modal per user requirement, focusing on logistics-only data
+- **Print Functionality**: Implemented complete print capability for order details with professional RTL formatting
+- **Enhanced Print Template**: 
+  - Professional HTML template with proper RTL text direction and Persian formatting
+  - Company header with order number and print date
+  - Customer information section with contact details
+  - Delivery address section with recipient information and complete address
+  - Order details section showing weight and delivery method
+  - Enhanced typography: Phone numbers (20px, bold, blue), addresses (18px, bold, green) for better visibility
+- **Print Features**:
+  - Professional styling with borders, grids, and proper spacing
+  - Color-coded information (delivery codes in purple, phones in blue, addresses in green)
+  - Responsive grid layout for organized information display
+  - Delivery notes section when available
+  - Clean print-ready formatting with proper margins
+- **User Experience**: Complete workflow from clicking recipient info → viewing modal → printing detailed order information
+- **Business Impact**: Streamlined logistics workflow with immediate access to detailed order information and professional printing capability
+
 ### COMPLETED: Logistics Department Order Number Standardization and Delivery Address Integration (July 23, 2025)
 ✅ **IMPLEMENTED: Complete delivery address display with M25XXXXX order number standardization**
 - **Order Number Enforcement**: Updated logistics component to exclusively use new order number format (M25XXXXX) removing all fallback references

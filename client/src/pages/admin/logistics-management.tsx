@@ -236,7 +236,7 @@ const LogisticsManagement = () => {
               </div>
               <div class="info-item">
                 <span class="label">شماره تماس:</span>
-                <span class="value">${selectedOrder.customer?.phone || selectedOrder.customerPhone}</span>
+                <span class="value" style="font-size: 20px; font-weight: bold; color: #2563eb;">${selectedOrder.customer?.phone || selectedOrder.customerPhone}</span>
               </div>
               <div class="info-item">
                 <span class="label">ایمیل:</span>
@@ -259,11 +259,11 @@ const LogisticsManagement = () => {
               </div>
               <div class="info-item">
                 <span class="label">تلفن گیرنده:</span>
-                <span class="value">${selectedOrder.shippingAddress.phone}</span>
+                <span class="value" style="font-size: 20px; font-weight: bold; color: #2563eb;">${selectedOrder.shippingAddress.phone}</span>
               </div>
               <div class="info-item" style="grid-column: 1 / -1;">
                 <span class="label">آدرس کامل:</span>
-                <span class="value">${selectedOrder.shippingAddress.address}</span>
+                <span class="value" style="font-size: 18px; font-weight: bold; color: #059669; line-height: 1.5;">${selectedOrder.shippingAddress.address}</span>
               </div>
               <div class="info-item">
                 <span class="label">شهر:</span>
