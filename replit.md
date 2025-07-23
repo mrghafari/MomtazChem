@@ -6,18 +6,21 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
-### COMPLETED: Enhanced Delete Button for Temporary Orders in Customer Profile (July 23, 2025)
-✅ **ENHANCED: Delete button now appears for ALL temporary orders, not just bank transfer orders**
-- **Issue**: Delete button was only showing for orders with `paymentMethod === 'واریز بانکی با مهلت 3 روزه'`
-- **Solution**: Separated delete button condition from upload receipt button condition
-- **Delete Button Logic**: Now shows for ANY order with `status === 'pending' || status === 'payment_grace_period'`
+### COMPLETED: Enhanced Delete Button for Unpaid Temporary Orders in Customer Profile (July 23, 2025)
+✅ **ENHANCED: Delete button now appears for temporary orders that haven't been paid**
+- **Issue**: Delete button was only showing for orders with specific payment method `paymentMethod === 'واریز بانکی با مهلت 3 روزه'`
+- **Solution**: Enhanced button condition logic to check both order status AND payment status
+- **Delete Button Logic**: Now shows for orders with:
+  - Status: `'pending' || 'payment_grace_period'` AND
+  - Payment Status: `!paymentStatus || paymentStatus === 'pending' || paymentStatus === 'unpaid'`
 - **Upload Receipt Logic**: Still restricted to bank transfer payment method orders
+- **Business Logic**: Prevents deletion of orders that have been paid but are still in temporary status
 - **Frontend Enhancement**: 
-  - Main profile orders section: Delete button appears for all temporary orders
-  - Purchase history modal: Delete button also available for temporary orders in complete history
+  - Main profile orders section: Delete button appears only for unpaid temporary orders
+  - Purchase history modal: Delete button also available for unpaid temporary orders in complete history
 - **Functionality**: Uses existing `handleDeleteTemporaryOrder()` function with proper API integration
-- **User Experience**: Customers can now delete ANY temporary order regardless of payment method
-- **Impact**: Improved flexibility for customers to manage their temporary orders with consistent UI behavior
+- **User Experience**: Customers can only delete temporary orders that haven't been paid yet
+- **Impact**: Protects paid orders from accidental deletion while allowing management of unpaid temporary orders
 
 ### COMPLETED: PDF Formatting Fix - Address and Postal Code Spacing Improved (July 23, 2025)
 ✅ **RESOLVED: Fixed PDF spacing issue in CRM customer output when addresses are long**

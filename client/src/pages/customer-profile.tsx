@@ -547,8 +547,9 @@ const CustomerProfile = () => {
                             </Button>
                           )}
                           
-                          {/* دکمه حذف سفارش موقت برای همه سفارشات موقت */}
-                          {(order.status === 'pending' || order.status === 'payment_grace_period') && (
+                          {/* دکمه حذف سفارش موقت برای سفارشات پرداخت نشده */}
+                          {(order.status === 'pending' || order.status === 'payment_grace_period') && 
+                           (!order.paymentStatus || order.paymentStatus === 'pending' || order.paymentStatus === 'unpaid') && (
                             <Button
                               size="sm"
                               variant="destructive"
@@ -760,8 +761,9 @@ const CustomerProfile = () => {
 
                   {/* Action Buttons */}
                   <div className="flex gap-2 flex-wrap">
-                    {/* دکمه حذف سفارش موقت در سابقه خرید */}
-                    {(order.status === 'pending' || order.status === 'payment_grace_period') && (
+                    {/* دکمه حذف سفارش موقت در سابقه خرید - فقط برای سفارشات پرداخت نشده */}
+                    {(order.status === 'pending' || order.status === 'payment_grace_period') && 
+                     (!order.paymentStatus || order.paymentStatus === 'pending' || order.paymentStatus === 'unpaid') && (
                       <Button
                         size="sm"
                         variant="destructive"
