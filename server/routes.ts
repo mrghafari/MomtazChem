@@ -7142,6 +7142,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get logistics orders (warehouse-approved orders ready for shipping)
+  app.get("/api/order-management/logistics", requireAuth, async (req, res) => {
+    try {
+      console.log('🔍 [ROUTES] Logistics endpoint called - using getOrdersByDepartment');
+      const orders = await orderManagementStorage.getOrdersByDepartment('logistics');
+      
+      console.log('🔍 [ROUTES] Received', orders.length, 'orders from logistics department');
+      
+      // Log first order structure for debugging
+      if (orders.length > 0) {
+        console.log('🔍 [ROUTES] First order structure:', JSON.stringify(orders[0], null, 2));
+      }
+      
+      // Transform orders to ensure compatibility with frontend interface
+      const transformedOrders = orders.map(order => ({
+        ...order,
+        // Extract customer fields from nested customer object for legacy compatibility
+        customerName: `${order.customer?.firstName || ''} ${order.customer?.lastName || ''}`.trim() || 'نامشخص',
+        customerFirstName: order.customer?.firstName || '',
+        customerLastName: order.customer?.lastName || '',
+        customerEmail: order.customer?.email || '',
+        customerPhone: order.customer?.phone || '',
+        customerAddress: order.customer?.address || 'آدرس نامشخص',
+        // Map order total from totalAmount field
+        orderTotal: parseFloat(order.totalAmount || '0'),
+        // Extract warehouse details
+        warehouseProcessedAt: order.warehouseApprovedAt || order.createdAt,
+        orderDate: order.createdAt
+      }));
+      
+      res.json({ 
+        success: true, 
+        orders: transformedOrders 
+      });
+    } catch (error) {
+      console.error("Error fetching logistics orders:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
   // Get order status history
   app.get("/api/orders/:orderId/status-history", requireAuth, async (req, res) => {
     try {

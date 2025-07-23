@@ -26,6 +26,7 @@ import { formatCurrency } from "@/lib/utils";
 interface Order {
   id: number;
   customerOrderId: number;
+  orderNumber?: string;
   customerName: string;
   customerEmail: string;
   customerPhone: string;
@@ -62,10 +63,12 @@ export default function LogisticsOrders() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   // Get warehouse-approved orders for logistics processing
-  const { data: orders = [], isLoading, refetch } = useQuery({
-    queryKey: ['/api/logistics/orders'],
-    queryFn: () => fetch('/api/logistics/orders', { credentials: 'include' }).then(res => res.json())
+  const { data: response = { orders: [] }, isLoading, refetch } = useQuery({
+    queryKey: ['/api/order-management/logistics'],
+    queryFn: () => fetch('/api/order-management/logistics', { credentials: 'include' }).then(res => res.json())
   });
+  
+  const orders = response.orders || [];
 
   // Auto-refresh controlled by global settings
   useEffect(() => {
@@ -305,7 +308,7 @@ export default function LogisticsOrders() {
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-4">
                       <div>
-                        <h3 className="font-medium text-lg">سفارش #{order.customerOrderId}</h3>
+                        <h3 className="font-medium text-lg">سفارش {order.orderNumber || `#${order.customerOrderId}`}</h3>
                         <p className="text-sm text-gray-600">{order.customerName}</p>
                         {order.deliveryCode && (
                           <p className="text-sm text-purple-600 font-medium">کد تحویل: {order.deliveryCode}</p>
