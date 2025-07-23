@@ -6,21 +6,25 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
-### COMPLETED: Enhanced Delete Button for Unpaid Temporary Orders in Customer Profile (July 23, 2025)
-✅ **ENHANCED: Delete button now appears for temporary orders that haven't been paid**
-- **Issue**: Delete button was only showing for orders with specific payment method `paymentMethod === 'واریز بانکی با مهلت 3 روزه'`
-- **Solution**: Enhanced button condition logic to check both order status AND payment status
-- **Delete Button Logic**: Now shows for orders with:
-  - Status: `'pending' || 'payment_grace_period'` AND
-  - Payment Status: `!paymentStatus || paymentStatus === 'pending' || paymentStatus === 'unpaid'`
-- **Upload Receipt Logic**: Still restricted to bank transfer payment method orders
-- **Business Logic**: Prevents deletion of orders that have been paid but are still in temporary status
-- **Frontend Enhancement**: 
-  - Main profile orders section: Delete button appears only for unpaid temporary orders
-  - Purchase history modal: Delete button also available for unpaid temporary orders in complete history
-- **Functionality**: Uses existing `handleDeleteTemporaryOrder()` function with proper API integration
-- **User Experience**: Customers can only delete temporary orders that haven't been paid yet
-- **Impact**: Protects paid orders from accidental deletion while allowing management of unpaid temporary orders
+### COMPLETED: Enhanced Automatic Cleanup System for Unpaid Temporary Orders (July 23, 2025)
+✅ **IMPLEMENTED: Complete automatic cleanup system for unpaid temporary orders across all payment methods**
+- **Enhanced Delete Button**: Delete button now appears for temporary orders that haven't been paid
+  - Status: `'pending' || 'payment_grace_period'` AND Payment Status: `!paymentStatus || paymentStatus === 'pending' || paymentStatus === 'unpaid'`
+  - Upload receipt logic still restricted to bank transfer payment method orders
+  - Prevents deletion of orders that have been paid but are still in temporary status
+- **Automatic Cleanup Service**: Enhanced ExpiredOrdersCleanup class to handle all unpaid temporary orders, not just bank transfers
+  - **Bank Transfer Orders**: 3 days grace period + 1 hour buffer (73 hours total)
+  - **Other Payment Methods**: 24 hours grace period + 1 hour buffer (25 hours total)
+  - **Cleanup Frequency**: Every hour instead of every 2 hours for faster processing
+  - **Conditions**: Status is pending/payment_grace_period AND no payment AND no receipt uploaded
+- **Inventory Release**: Automatic product reservation release when orders are cleaned up
+  - Quantities automatically returned to shop inventory
+  - Comprehensive logging of released products
+- **Soft Delete System**: Orders marked as 'deleted' status preserving order numbers in sequence
+  - Notes field updated with cleanup timestamp and reason
+  - M[YY][NNNNN] numbering sequence maintained
+- **Comprehensive Coverage**: System now handles ALL temporary orders regardless of payment method
+- **Impact**: Complete business automation preventing inventory lockup while maintaining order number integrity
 
 ### COMPLETED: PDF Formatting Fix - Address and Postal Code Spacing Improved (July 23, 2025)
 ✅ **RESOLVED: Fixed PDF spacing issue in CRM customer output when addresses are long**

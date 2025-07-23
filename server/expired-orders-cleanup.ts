@@ -1,6 +1,6 @@
 import { customerDb } from "./customer-db";
 import { customerOrders, orderItems } from "@shared/customer-schema";
-import { eq, and, lt, sql } from "drizzle-orm";
+import { eq, and, lt, sql, or, ne } from "drizzle-orm";
 
 /**
  * خدمت تمیزکاری خودکار سفارشات منقضی شده
@@ -23,10 +23,10 @@ export class ExpiredOrdersCleanup {
     this.isRunning = true;
     console.log('🚀 [EXPIRED CLEANUP] Starting expired orders cleanup service');
 
-    // Run cleanup every 2 hours
+    // Run cleanup every hour to catch expired orders more quickly
     this.cleanupInterval = setInterval(async () => {
       await this.performCleanup();
-    }, 2 * 60 * 60 * 1000); // 2 hours
+    }, 1 * 60 * 60 * 1000); // 1 hour
 
     // Run initial cleanup
     setTimeout(() => {
@@ -55,7 +55,7 @@ export class ExpiredOrdersCleanup {
     try {
       console.log('🧹 [EXPIRED CLEANUP] Starting cleanup process...');
 
-      // Find expired temporary orders (3-day grace period expired)
+      // Find expired temporary orders (unpaid orders after specified time)
       const expiredOrders = await customerDb
         .select({
           id: customerOrders.id,
@@ -64,17 +64,34 @@ export class ExpiredOrdersCleanup {
           status: customerOrders.status,
           paymentStatus: customerOrders.paymentStatus,
           paymentMethod: customerOrders.paymentMethod,
+          receiptPath: customerOrders.receiptPath,
           createdAt: customerOrders.createdAt
         })
         .from(customerOrders)
         .where(
           and(
-            // Temporary orders with 3-day grace period
-            eq(customerOrders.paymentMethod, 'واریز بانکی با مهلت 3 روزه'),
-            // Status is pending or payment_grace_period
+            // Status is pending or payment_grace_period (temporary orders)
             sql`${customerOrders.status} IN ('pending', 'payment_grace_period')`,
-            // Grace period expired (3 days + 1 hour buffer)
-            lt(customerOrders.createdAt, sql`NOW() - INTERVAL '73 hours'`)
+            // Payment status is not paid
+            or(
+              sql`${customerOrders.paymentStatus} IS NULL`,
+              sql`${customerOrders.paymentStatus} IN ('pending', 'unpaid')`
+            ),
+            // No receipt uploaded (receiptPath is null)
+            sql`${customerOrders.receiptPath} IS NULL`,
+            // Grace period expired based on payment method:
+            // - Bank transfer: 3 days + 1 hour buffer
+            // - Other methods: 24 hours + 1 hour buffer
+            or(
+              and(
+                eq(customerOrders.paymentMethod, 'واریز بانکی با مهلت 3 روزه'),
+                lt(customerOrders.createdAt, sql`NOW() - INTERVAL '73 hours'`) // 3 days + 1 hour
+              ),
+              and(
+                ne(customerOrders.paymentMethod, 'واریز بانکی با مهلت 3 روزه'),
+                lt(customerOrders.createdAt, sql`NOW() - INTERVAL '25 hours'`) // 24 hours + 1 hour
+              )
+            )
           )
         );
 
@@ -123,17 +140,20 @@ export class ExpiredOrdersCleanup {
             .where(eq(orderItems.orderId, order.id));
 
           // Mark order as deleted instead of hard deletion to preserve numbering
+          const timeLimitNote = order.paymentMethod === 'واریز بانکی با مهلت 3 روزه' ? '3 روزه' : '24 ساعته';
+          const timeLimitLog = order.paymentMethod === 'واریز بانکی با مهلت 3 روزه' ? '3 روز' : '24 ساعت';
+          
           await customerDb
             .update(customerOrders)
             .set({
               status: 'deleted',
-              notes: sql`COALESCE(${customerOrders.notes}, '') || ' - سفارش منقضی شده حذف شد در ' || NOW()`,
+              notes: sql`COALESCE(${customerOrders.notes}, '') || ' - سفارش موقت ${timeLimitNote} منقضی شده حذف شد در ' || NOW()`,
               updatedAt: new Date()
             })
             .where(eq(customerOrders.id, order.id));
 
           cleanedCount++;
-          console.log(`🗑️ [EXPIRED CLEANUP] Cleaned expired order: ${order.orderNumber} (Customer: ${order.customerId})`);
+          console.log(`🗑️ [EXPIRED CLEANUP] Cleaned expired order: ${order.orderNumber} (Customer: ${order.customerId}, Method: ${order.paymentMethod}, Limit: ${timeLimitLog})`);
 
         } catch (error) {
           console.error(`❌ [EXPIRED CLEANUP] Error cleaning order ${order.orderNumber}:`, error);
