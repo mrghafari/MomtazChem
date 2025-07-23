@@ -1099,13 +1099,13 @@ function FinanceOrders() {
                         <div>
                           <Label className="text-sm font-medium text-gray-600">تاریخ سفارش</Label>
                           <p className="font-medium">
-                            {new Date(orderDetails.createdAt).toLocaleDateString('fa-IR')}
+                            {new Date(orderDetails.createdAt).toLocaleDateString('en-US')}
                           </p>
                         </div>
                         <div>
                           <Label className="text-sm font-medium text-gray-600">آخرین بروزرسانی</Label>
                           <p className="font-medium">
-                            {new Date(orderDetails.updatedAt).toLocaleDateString('fa-IR')}
+                            {new Date(orderDetails.updatedAt).toLocaleDateString('en-US')}
                           </p>
                         </div>
                       </div>
@@ -1122,9 +1122,9 @@ function FinanceOrders() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {data.documents && data.documents.length > 0 ? (
+                    {orderDetails.documents && orderDetails.documents.length > 0 ? (
                       <div className="space-y-3">
-                        {data.documents.map((doc: any, index: number) => (
+                        {orderDetails.documents.map((doc: any, index: number) => (
                           <div key={doc.id || index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                             <div className="flex items-center gap-3">
                               <FileText className="h-5 w-5 text-blue-600" />
@@ -1133,7 +1133,7 @@ function FinanceOrders() {
                                   {doc.description || doc.fileName || 'مدرک ارسالی'}
                                 </p>
                                 <p className="text-sm text-gray-500">
-                                  {new Date(doc.uploadedAt).toLocaleDateString('fa-IR')} 
+                                  {new Date(doc.uploadedAt).toLocaleDateString('en-US')} 
                                   {doc.fileName && ` • ${doc.fileName}`}
                                 </p>
                               </div>
