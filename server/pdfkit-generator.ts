@@ -3,6 +3,10 @@
 
 import PDFDocument from 'pdfkit';
 import { vazirRegular, vazirBold } from './vazir-base64';
+import fs from 'fs';
+
+// Company logo base64 data
+const companyLogoBase64 = fs.readFileSync('server/logo-base64.txt', 'utf8');
 
 // Generate Invoice PDF using PDFKit
 export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
@@ -531,6 +535,14 @@ export async function generateAnalyticsPDF(analyticsData: any, title: string = '
         
         doc.font('VazirBold');
         
+        // Add company logo
+        try {
+          const logoBuffer = Buffer.from(companyLogoBase64, 'base64');
+          doc.image(logoBuffer, 450, 30, { width: 80, height: 60 });
+        } catch (logoError) {
+          console.warn('⚠️ Logo embedding failed:', logoError);
+        }
+        
         // Title
         doc.fontSize(20)
            .text(title, 50, 50, { align: 'center' });
@@ -614,6 +626,14 @@ export async function generateAnalyticsPDF(analyticsData: any, title: string = '
         console.warn('⚠️ Font registration failed, using default font:', fontError);
         
         // Fallback to default font
+        // Add company logo
+        try {
+          const logoBuffer = Buffer.from(companyLogoBase64, 'base64');
+          doc.image(logoBuffer, 450, 30, { width: 80, height: 60 });
+        } catch (logoError) {
+          console.warn('⚠️ Logo embedding failed in fallback:', logoError);
+        }
+        
         doc.fontSize(20)
            .text('Analytics Report - Al-Entaj Al-Momtaz', 50, 50, { align: 'center' });
         
