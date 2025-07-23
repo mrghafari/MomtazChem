@@ -6,34 +6,37 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
-### COMPLETED: CRM Address Integration in Shopping Cart Interface (July 23, 2025)
-✅ **IMPLEMENTED: Complete CRM address display system in shopping cart for authenticated customers**
-- **Address Fields Display**: Shopping cart now shows comprehensive CRM address information including:
-  - استان (Province/State) - displays province or state from customer CRM data
-  - شهر (City) - customer's registered city information
-  - آدرس کامل (Complete Address) - full address text with proper RTL formatting
-  - کد پستی (Postal Code) - customer's postal code from CRM records
-- **Visual Design**: Professional green-themed address card with MapPin icon for clear identification
-- **Smart Data Mapping**: Enhanced data retrieval with fallbacks for province/state field compatibility
-- **Authentication Integration**: Address information only displays for logged-in customers with valid CRM data
-- **RTL Text Support**: Proper Persian text direction and formatting for address fields
-- **Data Safety**: Displays 'نامشخص' (Unknown) fallback for missing address components
-- **User Experience**: Integrated seamlessly into Purchase Order card without disrupting existing workflow
+### COMPLETED: Enhanced CRM Address Integration with Active Delivery Logic (July 23, 2025)
+✅ **IMPLEMENTED: Complete smart delivery address system with conditional logic for active address determination**
+- **CRM Default Logic**: CRM address and phone automatically serve as default values for all delivery fields
+- **Secondary Address Integration**: Added dedicated "آدرس دوم یا شماره موبایل متفاوت" section for logged-in users
+- **Smart Override Detection**: System automatically detects when customer enters second address or different mobile number
+- **Active Delivery Determination**: Order processing logic determines which address and phone to use based on filled fields:
+  - If `secondDeliveryAddress` is filled → Use second address for delivery
+  - If `recipientMobile` is filled → Use alternative mobile number for delivery
+  - Otherwise → Use CRM default address and phone
+- **Enhanced Form Schema**: Added new fields to checkout form:
+  - `secondDeliveryAddress` - Alternative delivery address
+  - `secondDeliveryCity` - City for second address
+  - `secondDeliveryPostalCode` - Postal code for second address
+  - `recipientMobile` - Alternative mobile number for delivery contact
+- **Visual User Interface**: 
+  - Expandable sections for "آدرس دوم" and "شماره موبایل متفاوت"
+  - Toggle buttons to show/hide additional address and mobile fields
+  - Clear labeling and Persian guidance text
+- **Order Processing Enhancement**: Modified onSubmit function with sophisticated logic:
+  - Determines active delivery address based on form input priority
+  - Creates `activeDeliveryInfo` object tracking which fields are being used
+  - Preserves CRM data integrity while allowing customer overrides
+  - Tracks whether second address or different phone is used for logistics
+- **Conditional Display System**: Enhanced visual feedback system with status indicators
+- **Business Logic**: Ensures proper delivery logistics by using most recent/specific customer input
 - **Technical Implementation**:
-  - Enhanced checkout.tsx component with CRM address integration
-  - Conditional rendering based on authentication status and data availability
-  - Professional styling with proper spacing and typography
-  - Responsive design maintaining existing Purchase Order card functionality
-- **Default Address System**: CRM address automatically fills all delivery address fields (billing, shipping, recipient) as default values
-- **Override Functionality**: Customers can specify different addresses using "Second Address" option or different recipient mobile numbers
-- **Smart Auto-Fill**: Customer name and phone from CRM automatically populate recipient information as defaults
-- **Clear User Guidance**: Informational message explains that CRM address is used as default unless customer specifies otherwise
-- **Dynamic Status Indication**: CRM address card becomes grayed out and disabled when customer enters second address or different mobile number
-- **Active Address Display**: New green card shows active delivery information when customer overrides default CRM data
-- **Visual Feedback**: Real-time visual changes with color transitions to clearly indicate which address/phone will be used for delivery
-- **Smart Override Detection**: System monitors form fields for secondDeliveryAddress and recipientMobile to determine active delivery details
-- **Business Impact**: Streamlined checkout process with CRM address as default while maintaining flexibility for custom delivery options with clear visual feedback
-- **Status**: Complete CRM address integration operational with dynamic status indication and override capabilities
+  - Complete form field integration with proper validation
+  - Smart data mapping between form values and order processing
+  - Conditional rendering based on authentication status
+  - Persian UI with proper RTL text support
+- **Status**: Advanced conditional delivery address system fully operational with smart address priority logic
 
 ### COMPLETED: Iraqi Geography Management Interface Implementation (July 23, 2025)
 ✅ **IMPLEMENTED: Complete Iraqi geography administration system with trilingual data support**

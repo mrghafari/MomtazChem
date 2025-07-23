@@ -363,11 +363,63 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   });
 
   const onSubmit = (data: CheckoutFormData) => {
-    // Use selected address for logged in users, otherwise use form data
+    // Determine active delivery address and phone based on user input
+    let deliveryAddress = '';
+    let deliveryCity = '';
+    let deliveryCountry = '';
+    let deliveryPostalCode = '';
+    let recipientPhone = '';
+    let recipientName = '';
+    
+    // For logged in users with CRM data
+    if (isUserLoggedIn && customerData?.customer) {
+      const customer = customerData.customer;
+      
+      // Check if second address is specified
+      if (data.secondDeliveryAddress) {
+        // Use second address information
+        deliveryAddress = data.secondDeliveryAddress;
+        deliveryCity = data.secondDeliveryCity || customer.city || '';
+        deliveryCountry = data.secondDeliveryCountry || customer.country || '';
+        deliveryPostalCode = data.secondDeliveryPostalCode || '';
+      } else {
+        // Use CRM default address
+        deliveryAddress = customer.address || '';
+        deliveryCity = customer.city || '';
+        deliveryCountry = customer.country || '';
+        deliveryPostalCode = customer.postalCode || '';
+      }
+      
+      // Check if different recipient mobile is specified
+      if (data.recipientMobile) {
+        // Use specified recipient mobile
+        recipientPhone = data.recipientMobile;
+      } else {
+        // Use customer's default phone from CRM
+        recipientPhone = customer.phone || '';
+      }
+      
+      // Use customer name as default recipient unless different name specified
+      recipientName = data.recipientName || `${customer.firstName} ${customer.lastName}`;
+    } else {
+      // For non-logged in users, use form data
+      const shippingAddress = data.sameAsShipping ? 
+        `${data.billingAddress1}, ${data.billingAddress2 || ''}, ${data.billingCity}, ${data.billingState}, ${data.billingPostalCode}, ${data.billingCountry}`.trim() :
+        `${data.shippingAddress1}, ${data.shippingAddress2 || ''}, ${data.shippingCity}, ${data.shippingState}, ${data.shippingPostalCode}, ${data.shippingCountry}`.trim();
+      
+      deliveryAddress = shippingAddress;
+      deliveryCity = data.billingCity;
+      deliveryCountry = data.billingCountry;
+      deliveryPostalCode = data.billingPostalCode;
+      recipientPhone = data.recipientPhone || data.phone;
+      recipientName = data.recipientName || `${data.firstName} ${data.lastName}`;
+    }
+
+    // Prepare customer info
     let customerInfo;
     
     if (isLoggedIn && selectedAddress) {
-      // Use selected address from address selector
+      // Use selected address from address selector (legacy functionality)
       customerInfo = {
         email: customerData?.customer?.email || data.email,
         firstName: selectedAddress.firstName,
@@ -378,30 +430,50 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
         city: selectedAddress.city,
         address: `${selectedAddress.address}${selectedAddress.postalCode ? `, ${selectedAddress.postalCode}` : ''}`,
       };
+    } else if (isUserLoggedIn && customerData?.customer) {
+      // Use CRM customer data
+      const customer = customerData.customer;
+      customerInfo = {
+        email: customer.email,
+        firstName: customer.firstName,
+        lastName: customer.lastName,
+        phone: customer.phone,
+        company: customer.company || '',
+        country: deliveryCountry,
+        city: deliveryCity,
+        address: deliveryAddress,
+      };
     } else {
       // Use form data for non-logged in users
-      const shippingAddress = data.sameAsShipping ? 
-        `${data.billingAddress1}, ${data.billingAddress2 || ''}, ${data.billingCity}, ${data.billingState}, ${data.billingPostalCode}, ${data.billingCountry}`.trim() :
-        `${data.shippingAddress1}, ${data.shippingAddress2 || ''}, ${data.shippingCity}, ${data.shippingState}, ${data.shippingPostalCode}, ${data.shippingCountry}`.trim();
-      
       customerInfo = {
         email: data.email,
         firstName: data.firstName,
         lastName: data.lastName,
         phone: data.phone,
         company: data.company || '',
-        country: data.billingCountry,
-        city: data.billingCity,
-        address: shippingAddress,
+        country: deliveryCountry,
+        city: deliveryCity,
+        address: deliveryAddress,
       };
     }
 
     const orderData = {
       customerInfo,
       recipientInfo: {
-        recipientName: data.recipientName || '',
-        recipientPhone: data.recipientPhone || '',
-        recipientAddress: data.recipientAddress || '',
+        recipientName: recipientName,
+        recipientPhone: recipientPhone,
+        recipientAddress: deliveryAddress,
+      },
+      // Add active delivery details for order tracking
+      activeDeliveryInfo: {
+        isSecondAddressUsed: !!(data.secondDeliveryAddress),
+        isDifferentPhoneUsed: !!(data.recipientMobile),
+        deliveryAddress: deliveryAddress,
+        deliveryCity: deliveryCity,
+        deliveryCountry: deliveryCountry,
+        deliveryPostalCode: deliveryPostalCode,
+        recipientPhone: recipientPhone,
+        recipientName: recipientName,
       },
       items: cartItems.map(item => ({
         productId: item.id,
@@ -802,6 +874,123 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                     </div>
                   </CardContent>
                 </Card>
+
+                {/* Second Address and Alternative Mobile - Only for logged in users */}
+                {isUserLoggedIn && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <MapPin className="w-5 h-5" />
+                        آدرس دوم یا شماره موبایل متفاوت
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="text-sm text-gray-600 mb-4">
+                          در صورت نیاز به آدرس متفاوت یا شماره موبایل جدید برای تحویل، این بخش را پر کنید
+                        </div>
+                        
+                        {/* Second Address Section */}
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <label className="text-sm font-medium">آدرس دوم (اختیاری)</label>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setShowSecondAddress(!showSecondAddress)}
+                              className="text-blue-600 hover:text-blue-800"
+                            >
+                              {showSecondAddress ? 'پنهان کردن' : 'افزودن آدرس دوم'}
+                            </Button>
+                          </div>
+                          
+                          {showSecondAddress && (
+                            <div className="space-y-4 p-4 bg-gray-50 rounded-lg border">
+                              <FormField
+                                control={form.control}
+                                name="secondDeliveryAddress"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>آدرس کامل دوم</FormLabel>
+                                    <FormControl>
+                                      <Textarea {...field} placeholder="آدرس کامل محل تحویل دوم" className="min-h-[80px]" />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <FormField
+                                  control={form.control}
+                                  name="secondDeliveryCity"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>شهر</FormLabel>
+                                      <FormControl>
+                                        <Input {...field} placeholder="شهر" />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                                
+                                <FormField
+                                  control={form.control}
+                                  name="secondDeliveryPostalCode"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>کد پستی</FormLabel>
+                                      <FormControl>
+                                        <Input {...field} placeholder="کد پستی" />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                        
+                        {/* Different Mobile Section */}
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <label className="text-sm font-medium">شماره موبایل متفاوت (اختیاری)</label>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setShowRecipientMobile(!showRecipientMobile)}
+                              className="text-blue-600 hover:text-blue-800"
+                            >
+                              {showRecipientMobile ? 'پنهان کردن' : 'افزودن شماره متفاوت'}
+                            </Button>
+                          </div>
+                          
+                          {showRecipientMobile && (
+                            <div className="p-4 bg-gray-50 rounded-lg border">
+                              <FormField
+                                control={form.control}
+                                name="recipientMobile"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>شماره موبایل تحویل‌گیرنده</FormLabel>
+                                    <FormControl>
+                                      <Input {...field} placeholder="09123456789" />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
                 {/* Delivery Method */}
                 <Card>
