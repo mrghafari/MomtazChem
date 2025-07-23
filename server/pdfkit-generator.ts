@@ -555,11 +555,54 @@ export async function generateAnalyticsPDF(analyticsData: any, title: string = '
         if (analyticsData) {
           doc.text(`کل مشتریان: ${analyticsData.totalCustomers || 0}`, 50, yPosition, { align: 'right' });
           yPosition += 20;
-          doc.text(`سفارشات فعال: ${analyticsData.activeOrders || 0}`, 50, yPosition, { align: 'right' });
+          doc.text(`مشتریان فعال: ${analyticsData.activeCustomers || 0}`, 50, yPosition, { align: 'right' });
           yPosition += 20;
-          doc.text(`فروش ماهانه: ${analyticsData.monthlySales || 0} دینار`, 50, yPosition, { align: 'right' });
+          doc.text(`مشتریان جدید این ماه: ${analyticsData.newCustomersThisMonth || 0}`, 50, yPosition, { align: 'right' });
           yPosition += 20;
-          doc.text(`مشتریان آنلاین: ${analyticsData.onlineCustomers || 0}`, 50, yPosition, { align: 'right' });
+          doc.text(`کل درآمد: ${Math.round(analyticsData.totalRevenue || 0)} دینار`, 50, yPosition, { align: 'right' });
+          yPosition += 20;
+          doc.text(`متوسط مبلغ سفارش: ${Math.round(analyticsData.averageOrderValue || 0)} دینار`, 50, yPosition, { align: 'right' });
+          yPosition += 30;
+          
+          // Top Customers section
+          if (analyticsData.topCustomers && analyticsData.topCustomers.length > 0) {
+            doc.fontSize(16).font('VazirBold').text('برترین مشتریان', 50, yPosition, { align: 'right' });
+            yPosition += 30;
+            doc.fontSize(11).font('VazirRegular');
+            
+            analyticsData.topCustomers.slice(0, 5).forEach((customer: any, index: number) => {
+              doc.text(`${index + 1}. ${customer.name} - ${Math.round(customer.totalSpent)} دینار (${customer.totalOrders} سفارش)`, 50, yPosition, { align: 'right' });
+              yPosition += 18;
+            });
+            yPosition += 20;
+          }
+          
+          // Customer Types section
+          if (analyticsData.customersByType && analyticsData.customersByType.length > 0) {
+            doc.fontSize(16).font('VazirBold').text('انواع مشتریان', 50, yPosition, { align: 'right' });
+            yPosition += 30;
+            doc.fontSize(11).font('VazirRegular');
+            
+            analyticsData.customersByType.forEach((type: any) => {
+              const typeName = type.type === 'business' ? 'شرکتی' : 'شخصی';
+              doc.text(`${typeName}: ${type.count} مشتری`, 50, yPosition, { align: 'right' });
+              yPosition += 18;
+            });
+            yPosition += 20;
+          }
+          
+          // Recent Activities section
+          if (analyticsData.recentActivities && analyticsData.recentActivities.length > 0) {
+            doc.fontSize(16).font('VazirBold').text('فعالیت‌های اخیر', 50, yPosition, { align: 'right' });
+            yPosition += 30;
+            doc.fontSize(11).font('VazirRegular');
+            
+            analyticsData.recentActivities.slice(0, 3).forEach((activity: any) => {
+              const activityText = activity.activityType === 'login' ? 'ورود به سیستم' : 'خروج از سیستم';
+              doc.text(`${activity.customerName}: ${activityText}`, 50, yPosition, { align: 'right' });
+              yPosition += 18;
+            });
+          }
         }
         
         // Footer
