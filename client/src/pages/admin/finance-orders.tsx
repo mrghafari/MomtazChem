@@ -463,7 +463,7 @@ function FinanceOrders() {
       orderId: customerOrderId, 
       notes: `سفارش تأیید شد از طریق مودال جزئیات - ${new Date().toLocaleDateString('en-US')}` 
     });
-    setOrderDetailsOpen(false);
+    setOrderDetailsModalOpen(false);
   };
 
   // Handle reject order from order details modal  
@@ -472,7 +472,7 @@ function FinanceOrders() {
       orderId: customerOrderId, 
       notes: `سفارش رد شد از طریق مودال جزئیات - ${new Date().toLocaleDateString('en-US')}` 
     });
-    setOrderDetailsOpen(false);
+    setOrderDetailsModalOpen(false);
   };
 
   if (isLoading) {
@@ -1010,7 +1010,7 @@ function FinanceOrders() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <ShoppingCart className="h-5 w-5" />
-                      اقلام سفارش
+                      اقلام سفارش ({orderDetails.items?.length || 0} قلم)
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -1020,16 +1020,16 @@ function FinanceOrders() {
                           <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                             <div className="flex items-center gap-3">
                               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                                <span className="text-blue-600 font-bold">{item.quantity}</span>
+                                <span className="text-blue-600 font-bold">{Math.floor(parseFloat(item.quantity || 0))}</span>
                               </div>
                               <div>
                                 <p className="font-medium">{item.productName}</p>
-                                <p className="text-sm text-gray-600">قیمت واحد: {parseFloat(item.unitPrice || 0).toLocaleString()} {orderDetails.currency}</p>
+                                <p className="text-sm text-gray-600">قیمت واحد: {Math.floor(parseFloat(item.unitPrice || 0)).toLocaleString()} {orderDetails.currency}</p>
                               </div>
                             </div>
                             <div className="text-left">
                               <p className="font-bold text-green-600">
-                                {parseFloat(item.totalPrice || 0).toLocaleString()} {orderDetails.currency}
+                                {Math.floor(parseFloat(item.totalPrice || 0)).toLocaleString()} {orderDetails.currency}
                               </p>
                             </div>
                           </div>
@@ -1040,9 +1040,9 @@ function FinanceOrders() {
                             <AlertCircle className="h-8 w-8 text-red-500" />
                           </div>
                           <p className="text-red-700 font-medium">⚠️ سفارش معیوب: بدون آیتم اما دارای مبلغ</p>
-                          <p className="text-sm text-red-600 mt-1">این سفارش دارای مبلغ {parseFloat(orderDetails.totalAmount || 0).toLocaleString()} {orderDetails.currency} است اما هیچ آیتمی ندارد</p>
+                          <p className="text-sm text-red-600 mt-1">این سفارش دارای مبلغ {Math.floor(parseFloat(orderDetails.totalAmount || 0)).toLocaleString()} {orderDetails.currency} است اما هیچ آیتمی ندارد</p>
                           <p className="text-xs text-red-500 mt-2">احتمالاً در فرآیند ثبت سفارش مشکلی پیش آمده است</p>
-                          {parseFloat(orderDetails.totalAmount || 0) > 0 && (
+                          {Math.floor(parseFloat(orderDetails.totalAmount || 0)) > 0 && (
                             <div className="mt-3 p-2 bg-red-100 rounded text-xs text-red-600">
                               <strong>توصیه:</strong> این سفارش نیاز به بررسی دقیق دارد. سفارش نباید بدون آیتم مبلغ داشته باشد.
                             </div>
@@ -1074,7 +1074,7 @@ function FinanceOrders() {
                               {(() => {
                                 const itemsTotal = orderDetails.items?.reduce((sum: number, item: any) => 
                                   sum + parseFloat(item.totalPrice || 0), 0) || 0;
-                                return itemsTotal.toLocaleString();
+                                return Math.floor(itemsTotal).toLocaleString();
                               })()} {orderDetails.currency}
                             </span>
                           </div>
@@ -1083,7 +1083,7 @@ function FinanceOrders() {
                           <div className="flex justify-between items-center">
                             <span className="text-blue-600">هزینه حمل:</span>
                             <span className="font-medium text-blue-600">
-                              {parseFloat(orderDetails.shippingCost || orderDetails.shipping_cost || 0).toLocaleString()} {orderDetails.currency}
+                              {Math.floor(parseFloat(orderDetails.shippingCost || orderDetails.shipping_cost || 0)).toLocaleString()} {orderDetails.currency}
                             </span>
                           </div>
                           
@@ -1092,7 +1092,7 @@ function FinanceOrders() {
                             <div className="flex justify-between items-center">
                               <span className="text-green-600">مالیات بر ارزش افزوده:</span>
                               <span className="font-medium text-green-600">
-                                {parseFloat(orderDetails.vatAmount || orderDetails.vat_amount || 0).toLocaleString()} {orderDetails.currency}
+                                {Math.floor(parseFloat(orderDetails.vatAmount || orderDetails.vat_amount || 0)).toLocaleString()} {orderDetails.currency}
                               </span>
                             </div>
                           )}
@@ -1102,7 +1102,7 @@ function FinanceOrders() {
                             <div className="flex justify-between items-center">
                               <span className="font-bold text-lg text-gray-900">مجموع کل:</span>
                               <span className="font-bold text-lg text-green-600">
-                                {parseFloat(orderDetails.totalAmount)?.toLocaleString()} {orderDetails.currency}
+                                {Math.floor(parseFloat(orderDetails.totalAmount)).toLocaleString()} {orderDetails.currency}
                               </span>
                             </div>
                           </div>
