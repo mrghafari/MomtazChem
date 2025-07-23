@@ -192,11 +192,6 @@ function FinanceOrders() {
   const allOrders: OrderManagement[] = ordersResponse?.orders || [];
   const transferredOrders: OrderManagement[] = approvedOrdersResponse?.orders || [];
   
-  // Debug: Log order counts for troubleshooting
-  console.log('🔍 [STATS DEBUG] allOrders count:', allOrders.length);
-  console.log('🔍 [STATS DEBUG] transferredOrders count:', transferredOrders.length);
-  console.log('🔍 [STATS DEBUG] ordersResponse:', ordersResponse);
-  
   // Filter and search functionality
   const filteredOrders = allOrders.filter(order => {
     const searchMatch = !searchTerm || 
@@ -495,10 +490,19 @@ function FinanceOrders() {
 
   // Handle accept order from order details modal
   const handleAcceptOrder = () => {
-    if (!orderDetails || !selectedOrder) return;
-    console.log('🔄 [FINANCE] Accepting order from modal - Management ID:', selectedOrder.id, 'Customer Order ID:', selectedOrder.customerOrderId);
+    if (!orderDetails) return;
+    
+    // Find the corresponding order from allOrders using orderDetails.id (customer order ID)
+    const correspondingOrder = allOrders.find(order => order.customerOrderId === orderDetails.id);
+    
+    if (!correspondingOrder) {
+      console.error('🚫 [FINANCE] Could not find corresponding order for customer order ID:', orderDetails.id);
+      return;
+    }
+    
+    console.log('🔄 [FINANCE] Accepting order from modal - Management ID:', correspondingOrder.id, 'Customer Order ID:', correspondingOrder.customerOrderId);
     approveMutation.mutate({ 
-      orderId: selectedOrder.customerOrderId, // FIXED: USE CUSTOMER ORDER ID FOR API
+      orderId: correspondingOrder.customerOrderId, // USE CUSTOMER ORDER ID FOR API
       notes: `سفارش تأیید شد از طریق مودال جزئیات - ${new Date().toLocaleDateString('en-US')}` 
     });
     // Don't close modal here - let the mutation success handler close it
@@ -506,10 +510,19 @@ function FinanceOrders() {
 
   // Handle reject order from order details modal  
   const handleRejectOrder = () => {
-    if (!orderDetails || !selectedOrder) return;
-    console.log('🔄 [FINANCE] Rejecting order from modal - Management ID:', selectedOrder.id, 'Customer Order ID:', selectedOrder.customerOrderId);
+    if (!orderDetails) return;
+    
+    // Find the corresponding order from allOrders using orderDetails.id (customer order ID)
+    const correspondingOrder = allOrders.find(order => order.customerOrderId === orderDetails.id);
+    
+    if (!correspondingOrder) {
+      console.error('🚫 [FINANCE] Could not find corresponding order for customer order ID:', orderDetails.id);
+      return;
+    }
+    
+    console.log('🔄 [FINANCE] Rejecting order from modal - Management ID:', correspondingOrder.id, 'Customer Order ID:', correspondingOrder.customerOrderId);
     rejectMutation.mutate({ 
-      orderId: selectedOrder.customerOrderId, // FIXED: USE CUSTOMER ORDER ID FOR API
+      orderId: correspondingOrder.customerOrderId, // USE CUSTOMER ORDER ID FOR API
       notes: `سفارش رد شد از طریق مودال جزئیات - ${new Date().toLocaleDateString('en-US')}` 
     });
     // Don't close modal here - let the mutation success handler close it

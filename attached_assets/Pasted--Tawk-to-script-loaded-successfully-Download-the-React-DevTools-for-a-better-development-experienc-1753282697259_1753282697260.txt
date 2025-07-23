@@ -1,0 +1,129 @@
+ Tawk.to script loaded successfully
+ Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ Auth check result: Object
+ 
+value @ twk-chunk-common.js:2
+ Tawk.to Live Chat loaded successfully
+ 🔍 [DEBUG] Site Management component initialized
+ 🔍 [DEBUG] useEffect triggered, userPermissions: undefined
+ 🔍 [DEBUG] Site Management component initialized
+ 🔍 [DEBUG] useEffect triggered, userPermissions: Object
+site-management-fixed.tsx:74 🔍 [DEBUG] userPermissions modules: Array(31)
+site-management-fixed.tsx:399 🔍 [DEBUG] Full userPermissions response: Object
+site-management-fixed.tsx:400 🔍 [DEBUG] userPermissions.modules: Array(31)
+site-management-fixed.tsx:401 🔍 [DEBUG] userPermissions.permissions: Array(31)
+site-management-fixed.tsx:406 🔍 [DEBUG] Total allButtons count: 31
+site-management-fixed.tsx:407 🔍 [DEBUG] AI Settings exists in allButtons: true
+site-management-fixed.tsx:408 🔍 [DEBUG] Content Management exists in allButtons: true
+site-management-fixed.tsx:410 🔍 [DEBUG] allowedModules: Array(31)
+site-management-fixed.tsx:411 🔍 [DEBUG] kpi_dashboard in allowedModules? true
+site-management-fixed.tsx:412 🔍 [DEBUG] management_dashboard in allowedModules? true
+site-management-fixed.tsx:413 🔍 [DEBUG] finance in allowedModules? true
+site-management-fixed.tsx:414 🔍 [DEBUG] geography_analytics in allowedModules? true
+site-management-fixed.tsx:415 🔍 [DEBUG] ai_settings in allowedModules? true
+site-management-fixed.tsx:416 🔍 [DEBUG] content_management in allowedModules? true
+site-management-fixed.tsx:422 🔍 [CRITICAL] Missing button detection:
+site-management-fixed.tsx:430 🔍 [CRITICAL] Missing buttons count: 0
+site-management-fixed.tsx:432 🔍 [DEBUG] finance button found in allButtons? Object
+site-management-fixed.tsx:433 🔍 [DEBUG] geography_analytics button found in allButtons? Object
+site-management-fixed.tsx:434 🔍 [DEBUG] ai_settings button found in allButtons? Object
+site-management-fixed.tsx:435 🔍 [DEBUG] content_management button found in allButtons? Object
+site-management-fixed.tsx:436 🔍 [DEBUG] finance button in filtered? Object
+site-management-fixed.tsx:437 🔍 [DEBUG] geography_analytics button in filtered? Object
+site-management-fixed.tsx:438 🔍 [DEBUG] ai_settings button in filtered? Object
+site-management-fixed.tsx:439 🔍 [DEBUG] content_management button in filtered? Object
+site-management-fixed.tsx:76 🔍 [DEBUG] filtered buttons count: 31
+site-management-fixed.tsx:77 🔍 [DEBUG] First 5 filtered buttons: Array(5)
+site-management-fixed.tsx:78 🔍 [DEBUG] AI Control button in filtered: Object
+site-management-fixed.tsx:79 🔍 [DEBUG] Content Management button in filtered: Object
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+finance-orders.tsx:196 🔍 [STATS DEBUG] allOrders count: 0
+finance-orders.tsx:197 🔍 [STATS DEBUG] transferredOrders count: 0
+finance-orders.tsx:198 🔍 [STATS DEBUG] ordersResponse: undefined
+finance-orders.tsx:196 🔍 [STATS DEBUG] allOrders count: 0
+finance-orders.tsx:197 🔍 [STATS DEBUG] transferredOrders count: 0
+finance-orders.tsx:198 🔍 [STATS DEBUG] ordersResponse: undefined
+useOrderNotifications.ts:99 🔔 [FINANCIAL] نوتیفیکیشن: 6 سفارش جدید دریافت شد
+finance-orders.tsx:196 🔍 [STATS DEBUG] allOrders count: 6
+finance-orders.tsx:197 🔍 [STATS DEBUG] transferredOrders count: 0
+finance-orders.tsx:198 🔍 [STATS DEBUG] ordersResponse: Object
+finance-orders.tsx:196 🔍 [STATS DEBUG] allOrders count: 6
+finance-orders.tsx:197 🔍 [STATS DEBUG] transferredOrders count: 12
+finance-orders.tsx:198 🔍 [STATS DEBUG] ordersResponse: Object
+finance-orders.tsx:270 📋 [ORDER DETAILS] Order fetched: M2511154
+finance-orders.tsx:271 📋 [ORDER DETAILS] Items count: 1
+finance-orders.tsx:272 📋 [ORDER DETAILS] Items data: Array(1)
+finance-orders.tsx:196 🔍 [STATS DEBUG] allOrders count: 6
+finance-orders.tsx:197 🔍 [STATS DEBUG] transferredOrders count: 12
+finance-orders.tsx:198 🔍 [STATS DEBUG] ordersResponse: Object
+chunk-C436OVJF.js?v=09ef9b6d:339 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-C436OVJF.js?v=09ef9b6d:339
+chrome-extension://d…kb/content-all.js:1 Uncaught (in promise) Error: Could not establish connection. Receiving end does not exist.
+    at y (chrome-extension://difoiogjjojoaoomphldepapgpbgkhkb/content-all.js:1:49937)
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+useAuth.ts:43 Auth check result: Object
+finance-orders.tsx:196 🔍 [STATS DEBUG] allOrders count: 6
+finance-orders.tsx:197 🔍 [STATS DEBUG] transferredOrders count: 12
+finance-orders.tsx:198 🔍 [STATS DEBUG] ordersResponse: Object
+finance-orders.tsx:196 🔍 [STATS DEBUG] allOrders count: 6
+finance-orders.tsx:197 🔍 [STATS DEBUG] transferredOrders count: 12
+finance-orders.tsx:198 🔍 [STATS DEBUG] ordersResponse: Object
+chunk-C436OVJF.js?v=09ef9b6d:339 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-C436OVJF.js?v=09ef9b6d:339
+finance-orders.tsx:196 🔍 [STATS DEBUG] allOrders count: 6
+finance-orders.tsx:197 🔍 [STATS DEBUG] transferredOrders count: 12
+finance-orders.tsx:198 🔍 [STATS DEBUG] ordersResponse: Object
+finance-orders.tsx:270 📋 [ORDER DETAILS] Order fetched: M2511154
+finance-orders.tsx:271 📋 [ORDER DETAILS] Items count: 1
+finance-orders.tsx:272 📋 [ORDER DETAILS] Items data: Array(1)
+finance-orders.tsx:196 🔍 [STATS DEBUG] allOrders count: 6
+finance-orders.tsx:197 🔍 [STATS DEBUG] transferredOrders count: 12
+finance-orders.tsx:198 🔍 [STATS DEBUG] ordersResponse: Object
+chunk-C436OVJF.js?v=09ef9b6d:339 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-C436OVJF.js?v=09ef9b6d:339
+finance-orders.tsx:499 🔄 [FINANCE] Accepting order from modal - Management ID: 99 Customer Order ID: 265
+finance-orders.tsx:327 🔄 [FINANCE] Sending approve request for order 265
+finance-orders.tsx:196 🔍 [STATS DEBUG] allOrders count: 6
+finance-orders.tsx:197 🔍 [STATS DEBUG] transferredOrders count: 12
+finance-orders.tsx:198 🔍 [STATS DEBUG] ordersResponse: Object
+finance-orders.tsx:334 ✅ [FINANCE] Order approved successfully: Object
+finance-orders.tsx:196 🔍 [STATS DEBUG] allOrders count: 6
+finance-orders.tsx:197 🔍 [STATS DEBUG] transferredOrders count: 12
+finance-orders.tsx:198 🔍 [STATS DEBUG] ordersResponse: Object
+finance-orders.tsx:196 🔍 [STATS DEBUG] allOrders count: 5
+finance-orders.tsx:197 🔍 [STATS DEBUG] transferredOrders count: 12
+finance-orders.tsx:198 🔍 [STATS DEBUG] ordersResponse: Object
+finance-orders.tsx:196 🔍 [STATS DEBUG] allOrders count: 5
+finance-orders.tsx:197 🔍 [STATS DEBUG] transferredOrders count: 12
+finance-orders.tsx:198 🔍 [STATS DEBUG] ordersResponse: Object
+finance-orders.tsx:270 📋 [ORDER DETAILS] Order fetched: M2511162
+finance-orders.tsx:271 📋 [ORDER DETAILS] Items count: 1
+finance-orders.tsx:272 📋 [ORDER DETAILS] Items data: [{…}]
+finance-orders.tsx:196 🔍 [STATS DEBUG] allOrders count: 5
+finance-orders.tsx:197 🔍 [STATS DEBUG] transferredOrders count: 12
+finance-orders.tsx:198 🔍 [STATS DEBUG] ordersResponse: {success: true, orders: Array(5)}
+chunk-C436OVJF.js?v=09ef9b6d:339 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-C436OVJF.js?v=09ef9b6d:339
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=09ef9b6d:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=09ef9b6d:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=09ef9b6d:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=09ef9b6d:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=09ef9b6d:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=09ef9b6d:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=09ef9b6d:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=09ef9b6d:19416
+commitRoot @ chunk-RPCDYKBN.js?v=09ef9b6d:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=09ef9b6d:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=09ef9b6d:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=09ef9b6d:19432
+commitRoot @ chunk-RPCDYKBN.js?v=09ef9b6d:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=09ef9b6d:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=09ef9b6d:18718
+workLoop @ chunk-RPCDYKBN.js?v=09ef9b6d:197
+flushWork @ chunk-RPCDYKBN.js?v=09ef9b6d:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=09ef9b6d:384
+finance-orders.tsx:196 🔍 [STATS DEBUG] allOrders count: 5
+finance-orders.tsx:197 🔍 [STATS DEBUG] transferredOrders count: 12
+finance-orders.tsx:198 🔍 [STATS DEBUG] ordersResponse: {success: true, orders: Array(5)}
+useAuth.ts:43 Auth check result: {success: true, user: {…}}
