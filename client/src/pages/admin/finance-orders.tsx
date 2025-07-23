@@ -1204,11 +1204,9 @@ function FinanceOrders() {
                       // Collect all available documents
                       const allDocuments = [];
                       
-                      // Check if documents exist in the API response structure
-                      // API returns: { success: true, order: {...}, documents: [...] }
-                      const apiDocuments = orderDetailsQuery.data?.documents;
-                      if (apiDocuments && Array.isArray(apiDocuments) && apiDocuments.length > 0) {
-                        allDocuments.push(...apiDocuments);
+                      // Use orderDocuments state that gets populated from fetchOrderDetails
+                      if (orderDocuments && Array.isArray(orderDocuments) && orderDocuments.length > 0) {
+                        allDocuments.push(...orderDocuments);
                       }
                       
                       // Fallback: Add documents from orderDetails.documents array if exists
