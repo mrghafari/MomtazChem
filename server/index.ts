@@ -49,7 +49,7 @@ const adminSessionMiddleware = session({
     httpOnly: false,
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
     sameSite: 'lax',
-    path: '/api/admin',
+    path: '/',
     domain: undefined
   },
   name: 'momtazchem.admin.sid'
@@ -85,7 +85,7 @@ const managementSessionMiddleware = session({
     httpOnly: false,
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
     sameSite: 'lax',
-    path: '/api/management',
+    path: '/',
     domain: undefined
   },
   name: 'momtazchem.mgmt.sid'
@@ -111,13 +111,25 @@ const generalSessionMiddleware = session({
   name: 'momtazchem.general.sid'
 });
 
-// Apply session middleware conditionally based on route
-app.use('/api/admin/*', adminSessionMiddleware);
-app.use('/api/customers/*', customerSessionMiddleware);
-app.use('/api/management/*', managementSessionMiddleware);
-app.use('/api/crm/*', managementSessionMiddleware); // CRM uses management session
-app.use('/api/user/*', managementSessionMiddleware); // User permissions use management session
-app.use('*', generalSessionMiddleware); // Fallback for all other routes
+// Use single unified session middleware for all routes
+const unifiedSessionMiddleware = session({
+  secret: process.env.SESSION_SECRET || "momtazchem-unified-secret-key",
+  store: adminSessionStore, // Use admin store for all sessions
+  resave: false,
+  saveUninitialized: false,
+  rolling: true,
+  cookie: {
+    secure: false,
+    httpOnly: false,
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    sameSite: 'lax',
+    path: '/',
+    domain: undefined
+  },
+  name: 'momtazchem.unified.sid'
+});
+
+app.use(unifiedSessionMiddleware);
 
 app.use((req, res, next) => {
   const start = Date.now();

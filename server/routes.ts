@@ -1756,17 +1756,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Send response immediately without waiting for session save
-      res.json({ 
-        success: true, 
-        message: "Login successful",
-        user: { 
-          id: user.id, 
-          username: user.username, 
-          email: user.email, 
-          roleId: user.roleId,
-          userType: isCustomUser ? 'custom' : 'admin'
+      // Save session explicitly before responding
+      req.session.save((err) => {
+        if (err) {
+          console.error('Session save error:', err);
+          return res.status(500).json({
+            success: false,
+            message: "Session save failed"
+          });
         }
+        
+        console.log(`💾 Session saved successfully for ${isCustomUser ? 'custom user' : 'admin'} ${user.id}`);
+        
+        // Send response after session is saved
+        res.json({ 
+          success: true, 
+          message: "Login successful",
+          user: { 
+            id: user.id, 
+            username: user.username, 
+            email: user.email, 
+            roleId: user.roleId,
+            userType: isCustomUser ? 'custom' : 'admin'
+          }
+        });
       });
     } catch (error) {
       console.error("Admin login error:", error);
