@@ -251,7 +251,7 @@ const LogisticsManagement = () => {
                       </h5>
                       <p className="text-lg font-bold text-blue-700 flex items-center">
                         <Package className="w-4 h-4 mr-1" />
-                        {order.calculatedWeight ? `${order.calculatedWeight} کیلوگرم` : 'محاسبه نشده'}
+                        {order.calculatedWeight || order.totalWeight ? `${order.calculatedWeight || order.totalWeight} کیلوگرم` : 'محاسبه نشده'}
                       </p>
                       <p className="text-xs text-blue-600 mt-1">مجموع وزن ناخالص کالاها</p>
                     </div>

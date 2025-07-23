@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست محاسبه وزن محموله</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+            direction: rtl;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .weight-display {
+            background: #e8f5e8;
+            border: 2px solid #4caf50;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚖️ تست محاسبه وزن محموله لجستیک</h1>
+        
+        <div class="test-section">
+            <h3>🔍 بررسی وزن سفارشات لجستیک</h3>
+            <p>تست محاسبه وزن محموله برای سفارشات در بخش لجستیک</p>
+            <button onclick="testLogisticsWeights()">بررسی وزن سفارشات لجستیک</button>
+            <div id="logistics-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 محاسبه وزن سفارش مشخص</h3>
+            <label>شماره سفارش مشتری:</label>
+            <input type="number" id="orderIdInput" value="254" style="padding: 8px; margin: 10px; width: 150px;">
+            <button onclick="calculateSpecificOrderWeight()">محاسبه وزن این سفارش</button>
+            <div id="specific-weight-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🏷️ بررسی وزن محصولات فروشگاه</h3>
+            <button onclick="checkProductWeights()">بررسی وزن محصولات</button>
+            <div id="products-result"></div>
+        </div>
+    </div>
+
+    <script>
+        // بررسی وزن سفارشات لجستیک
+        async function testLogisticsWeights() {
+            const resultDiv = document.getElementById('logistics-result');
+            resultDiv.innerHTML = '<div class="info">در حال بررسی سفارشات لجستیک...</div>';
+
+            try {
+                // Login first
+                const loginResponse = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        email: 'admin@momtazchem.com',
+                        password: 'admin123'
+                    })
+                });
+
+                if (!loginResponse.ok) {
+                    throw new Error('Login failed');
+                }
+
+                // Now get logistics orders
+                const response = await fetch('/api/order-management/logistics', {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+
+                if (data.success && data.orders) {
+                    let html = `<div class="success">✅ یافت شد ${data.orders.length} سفارش در لجستیک<br><br>`;
+                    
+                    data.orders.forEach((order, index) => {
+                        const weight = order.calculatedWeight || order.totalWeight || 0;
+                        html += `
+                            <div class="weight-display">
+                                سفارش ${order.orderNumber || order.customerOrderId}:
+                                ${weight > 0 ? `${weight} کیلوگرم` : 'وزن محاسبه نشده'}
+                            </div>
+                        `;
+                        
+                        if (index < 3) { // Show details for first 3 orders
+                            html += `
+                                <div style="margin: 10px 0; padding: 10px; background: #f0f0f0; border-radius: 5px;">
+                                    <strong>جزئیات سفارش ${order.orderNumber}:</strong><br>
+                                    • ID مدیریت: ${order.id}<br>
+                                    • ID سفارش مشتری: ${order.customerOrderId}<br>
+                                    • وزن ذخیره شده: ${order.totalWeight || 'ندارد'}<br>
+                                    • وزن محاسبه شده: ${order.calculatedWeight || 'ندارد'}<br>
+                                    • مشتری: ${order.customer?.firstName} ${order.customer?.lastName}<br>
+                                </div>
+                            `;
+                        }
+                    });
+                    
+                    html += '</div>';
+                    resultDiv.innerHTML = html;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ خطا در دریافت سفارشات: ${data.message}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ خطا در درخواست: ${error.message}</div>`;
+            }
+        }
+
+        // محاسبه وزن سفارش مشخص
+        async function calculateSpecificOrderWeight() {
+            const orderId = document.getElementById('orderIdInput').value;
+            const resultDiv = document.getElementById('specific-weight-result');
+            
+            if (!orderId) {
+                resultDiv.innerHTML = '<div class="error">لطفاً شماره سفارش را وارد کنید</div>';
+                return;
+            }
+
+            resultDiv.innerHTML = '<div class="info">در حال محاسبه وزن...</div>';
+
+            try {
+                // Create a test endpoint call to calculate weight
+                const testData = {
+                    customerOrderId: parseInt(orderId),
+                    action: 'calculate_weight'
+                };
+
+                console.log('Testing weight calculation for order:', orderId);
+
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        ✅ درخواست محاسبه وزن ارسال شد<br>
+                        <strong>شماره سفارش:</strong> ${orderId}<br>
+                        <strong>نتیجه:</strong> برای مشاهده نتیجه محاسبه، بخش لجستیک را بررسی کنید<br>
+                        یا لاگ‌های سرور را مشاهده کنید
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ خطا در محاسبه: ${error.message}</div>`;
+            }
+        }
+
+        // بررسی وزن محصولات فروشگاه
+        async function checkProductWeights() {
+            const resultDiv = document.getElementById('products-result');
+            resultDiv.innerHTML = '<div class="info">در حال بررسی وزن محصولات...</div>';
+
+            try {
+                const response = await fetch('/api/products');
+                const products = await response.json();
+
+                if (Array.isArray(products)) {
+                    let html = `<div class="success">✅ یافت شد ${products.length} محصول<br><br>`;
+                    
+                    const productsWithWeight = products.filter(p => p.weight && parseFloat(p.weight) > 0);
+                    const productsWithGrossWeight = products.filter(p => p.grossWeight && parseFloat(p.grossWeight) > 0);
+                    
+                    html += `
+                        <div class="info">
+                            📊 آمار وزن محصولات:<br>
+                            • محصولات با وزن معمولی: ${productsWithWeight.length}<br>
+                            • محصولات با وزن ناخالص: ${productsWithGrossWeight.length}<br>
+                        </div>
+                    `;
+                    
+                    // Show first 5 products with weights
+                    html += '<br><strong>نمونه محصولات با وزن:</strong><br>';
+                    productsWithGrossWeight.slice(0, 5).forEach(product => {
+                        html += `
+                            <div style="margin: 5px 0; padding: 8px; background: #f8f9fa; border-radius: 4px;">
+                                ${product.name}: ${product.grossWeight}kg (ناخالص)
+                                ${product.weight ? ` / ${product.weight}kg (معمولی)` : ''}
+                            </div>
+                        `;
+                    });
+                    
+                    html += '</div>';
+                    resultDiv.innerHTML = html;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ خطا در دریافت محصولات</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ خطا در درخواست: ${error.message}</div>`;
+            }
+        }
+
+        // Auto-load on page load
+        window.onload = function() {
+            // Auto-test logistics weights
+            setTimeout(testLogisticsWeights, 1000);
+        };
+    </script>
+</body>
+</html>

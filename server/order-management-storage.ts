@@ -591,6 +591,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
         
         // Weight and delivery information - with calculated weight
         totalWeight: calculatedWeight,
+        calculatedWeight: calculatedWeight, // For frontend compatibility
         weightUnit: row.weightUnit || 'kg',
         deliveryMethod: row.deliveryMethod,
         transportationType: row.transportationType,
