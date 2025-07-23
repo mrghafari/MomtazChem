@@ -1140,11 +1140,7 @@ const LogisticsManagement = () => {
                   <Package className="w-5 h-5 mr-2" />
                   جزئیات سفارش
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <Label className="text-sm text-gray-600">مبلغ کل</Label>
-                    <p className="font-bold text-lg">{selectedOrder.totalAmount} {selectedOrder.currency}</p>
-                  </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label className="text-sm text-gray-600">وزن محموله</Label>
                     <p className="font-medium">
