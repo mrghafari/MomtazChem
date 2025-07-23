@@ -32,6 +32,33 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Impact**: Complete universal rating system where customers can rate and review every product, not just selected ones
 - **Result**: Star rating and review functionality operational for 100% of shop products with authentication-protected submission
 
+### COMPLETED: CRM Customer Edit Form Aligned with Registration Form Structure (July 23, 2025)
+✅ **IMPLEMENTED: Complete alignment of CRM edit form with original customer registration form fields**
+- **Issue**: User requested CRM customer edit form to match exactly the registration form that customers originally fill out
+- **Form Structure Analysis**: Analyzed both customer-register.tsx and customer-auth.tsx to identify exact field structure
+- **Original Registration Fields**: firstName/lastName, email, company, phone, country/province/city, address, postalCode, communicationPreference, preferredLanguage, marketingConsent
+- **Form Redesign**: Completely restructured CRM edit form with proper sections:
+  - **Personal Information**: firstName, lastName, email (read-only), company
+  - **Contact Information**: phone (read-only), country dropdown, province, city, address, postalCode
+  - **Communication Preferences**: communicationPreference (Email/Phone/WhatsApp), preferredLanguage (English/Persian/Arabic)
+  - **Customer Management**: customerType, customerStatus (CRM-only fields)
+  - **Authentication Settings**: SMS/Email verification switches (CRM-only controls)
+- **UI Enhancements**: Professional sectioned layout with proper labels, placeholders matching registration form
+- **Field Validation**: Required field markers (*) for mandatory fields, proper input types and constraints
+- **Security Controls**: Email and phone remain read-only to prevent critical data modification
+- **Responsive Design**: Grid layouts with MD breakpoints for proper mobile/desktop display
+- **Impact**: CRM edit form now provides identical experience to customer registration with additional CRM management controls
+- **Result**: Complete form alignment ensuring data consistency and familiar editing experience for administrators
+
+### COMPLETED: Customer Activities Section Removed from CRM Dashboard (July 23, 2025)
+✅ **IMPLEMENTED: Clean CRM dashboard with Customer Activities section completely removed**
+- **User Request**: Remove Customer Activities card from CRM Dashboard tab to simplify interface
+- **Frontend Cleanup**: Removed CustomerActivitiesCard component from CRM dashboard layout
+- **Layout Enhancement**: Top Customers section now displays with full width without Activities constraint
+- **Import Cleanup**: Removed unused CustomerActivitiesCard import from crm.tsx
+- **UI Result**: Streamlined dashboard focusing solely on Top Customers with improved visual layout
+- **Impact**: Cleaner, focused CRM dashboard interface without customer activity tracking clutter
+
 ### COMPLETED: Real Customer Login/Logout Activity Tracking from Database (July 22, 2025)
 ✅ **IMPLEMENTED: Authentic customer activity tracking system with database integration**
 - **Backend Enhancement**: Added logCustomerActivity, getCustomerActivities, and getRecentCustomerActivities methods to CrmStorage

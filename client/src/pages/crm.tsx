@@ -1264,144 +1264,224 @@ export default function CRM() {
 
       {/* Edit Customer Dialog */}
       <Dialog open={isEditCustomerDialogOpen} onOpenChange={setIsEditCustomerDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Customer</DialogTitle>
-            <DialogDescription>Edit customer information</DialogDescription>
+            <DialogDescription>Edit customer information - matching registration form fields</DialogDescription>
           </DialogHeader>
           {editingCustomer && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-6">
+              {/* Personal Information */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">
+                  Personal Information
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="editFirstName">First Name *</Label>
+                    <Input
+                      id="editFirstName"
+                      placeholder="Enter first name"
+                      value={editingCustomer.firstName}
+                      onChange={(e) => setEditingCustomer({ ...editingCustomer, firstName: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="editLastName">Last Name *</Label>
+                    <Input
+                      id="editLastName"
+                      placeholder="Enter last name"
+                      value={editingCustomer.lastName}
+                      onChange={(e) => setEditingCustomer({ ...editingCustomer, lastName: e.target.value })}
+                    />
+                  </div>
+                </div>
+
                 <div>
-                  <Label htmlFor="editFirstName">First Name</Label>
+                  <Label htmlFor="editEmail">Email Address * (Read Only)</Label>
                   <Input
-                    id="editFirstName"
-                    value={editingCustomer.firstName}
-                    onChange={(e) => setEditingCustomer({ ...editingCustomer, firstName: e.target.value })}
+                    id="editEmail"
+                    type="email"
+                    value={editingCustomer.email}
+                    disabled
+                    className="bg-gray-100 cursor-not-allowed"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="editLastName">Last Name</Label>
-                  <Input
-                    id="editLastName"
-                    value={editingCustomer.lastName}
-                    onChange={(e) => setEditingCustomer({ ...editingCustomer, lastName: e.target.value })}
-                  />
-                </div>
-              </div>
-              
-              <div>
-                <Label htmlFor="editEmail">Email (Read Only)</Label>
-                <Input
-                  id="editEmail"
-                  type="email"
-                  value={editingCustomer.email}
-                  disabled
-                  className="bg-gray-100 cursor-not-allowed"
-                />
-              </div>
 
-              <div>
-                <Label htmlFor="editCompany">Company</Label>
-                <Input
-                  id="editCompany"
-                  value={editingCustomer.company || ""}
-                  onChange={(e) => setEditingCustomer({ ...editingCustomer, company: e.target.value })}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="editPhone">Phone (Read Only)</Label>
-                <Input
-                  id="editPhone"
-                  value={editingCustomer.phone || ""}
-                  disabled
-                  className="bg-gray-100 cursor-not-allowed"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="editCountry">Country</Label>
+                  <Label htmlFor="editCompany">Company</Label>
                   <Input
-                    id="editCountry"
-                    value={editingCustomer.country || ""}
-                    onChange={(e) => setEditingCustomer({ ...editingCustomer, country: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="editCity">City</Label>
-                  <Input
-                    id="editCity"
-                    value={editingCustomer.city || ""}
-                    onChange={(e) => setEditingCustomer({ ...editingCustomer, city: e.target.value })}
+                    id="editCompany"
+                    placeholder="Enter company name"
+                    value={editingCustomer.company || ""}
+                    onChange={(e) => setEditingCustomer({ ...editingCustomer, company: e.target.value })}
                   />
                 </div>
               </div>
 
-              <div>
-                <Label htmlFor="editAddress">Address</Label>
-                <Input
-                  id="editAddress"
-                  value={editingCustomer.address || ""}
-                  onChange={(e) => setEditingCustomer({ ...editingCustomer, address: e.target.value })}
-                />
-              </div>
+              {/* Contact Information */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">
+                  Contact Information
+                </h3>
 
-              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="editSecondaryAddress">Secondary Address</Label>
+                  <Label htmlFor="editPhone">Phone Number * (Read Only)</Label>
                   <Input
-                    id="editSecondaryAddress"
-                    value={editingCustomer.secondaryAddress || ""}
-                    onChange={(e) => setEditingCustomer({ ...editingCustomer, secondaryAddress: e.target.value })}
+                    id="editPhone"
+                    placeholder="+964 XXX XXX XXXX"
+                    value={editingCustomer.phone || ""}
+                    disabled
+                    className="bg-gray-100 cursor-not-allowed"
                   />
                 </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="editCountry">Country *</Label>
+                    <Select value={editingCustomer.country || ""} onValueChange={(value) => setEditingCustomer({ ...editingCustomer, country: value })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select country" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Iraq">Iraq</SelectItem>
+                        <SelectItem value="Iran">Iran</SelectItem>
+                        <SelectItem value="Turkey">Turkey</SelectItem>
+                        <SelectItem value="Syria">Syria</SelectItem>
+                        <SelectItem value="Jordan">Jordan</SelectItem>
+                        <SelectItem value="Lebanon">Lebanon</SelectItem>
+                        <SelectItem value="Kuwait">Kuwait</SelectItem>
+                        <SelectItem value="Saudi Arabia">Saudi Arabia</SelectItem>
+                        <SelectItem value="UAE">UAE</SelectItem>
+                        <SelectItem value="Other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="editProvince">Province/State *</Label>
+                    <Input
+                      id="editProvince"
+                      placeholder="Enter province"
+                      value={editingCustomer.province || ""}
+                      onChange={(e) => setEditingCustomer({ ...editingCustomer, province: e.target.value })}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="editCity">City *</Label>
+                    <Input
+                      id="editCity"
+                      placeholder="Enter city"
+                      value={editingCustomer.city || ""}
+                      onChange={(e) => setEditingCustomer({ ...editingCustomer, city: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="editAddress">Address *</Label>
+                  <Input
+                    id="editAddress"
+                    placeholder="Enter full address"
+                    value={editingCustomer.address || ""}
+                    onChange={(e) => setEditingCustomer({ ...editingCustomer, address: e.target.value })}
+                  />
+                </div>
+
                 <div>
                   <Label htmlFor="editPostalCode">Postal Code</Label>
                   <Input
                     id="editPostalCode"
+                    placeholder="Enter postal code"
                     value={editingCustomer.postalCode || ""}
                     onChange={(e) => setEditingCustomer({ ...editingCustomer, postalCode: e.target.value })}
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="editCustomerType">Customer Type</Label>
-                  <Select value={editingCustomer.customerType} onValueChange={(value) => setEditingCustomer({ ...editingCustomer, customerType: value })}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="retail">Retail</SelectItem>
-                      <SelectItem value="wholesale">Wholesale</SelectItem>
-                      <SelectItem value="b2b">B2B</SelectItem>
-                      <SelectItem value="distributor">Distributor</SelectItem>
-                    </SelectContent>
-                  </Select>
+              {/* Communication Preferences */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">
+                  Communication Preferences
+                </h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="editCommunicationPreference">Preferred Communication</Label>
+                    <Select value={editingCustomer.communicationPreference || "email"} onValueChange={(value) => setEditingCustomer({ ...editingCustomer, communicationPreference: value })}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="email">Email</SelectItem>
+                        <SelectItem value="phone">Phone</SelectItem>
+                        <SelectItem value="whatsapp">WhatsApp</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="editPreferredLanguage">Preferred Language</Label>
+                    <Select value={editingCustomer.preferredLanguage || "en"} onValueChange={(value) => setEditingCustomer({ ...editingCustomer, preferredLanguage: value })}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="en">English</SelectItem>
+                        <SelectItem value="fa">Persian</SelectItem>
+                        <SelectItem value="ar">Arabic</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
-                <div>
-                  <Label htmlFor="editCustomerStatus">Status</Label>
-                  <Select value={editingCustomer.customerStatus} onValueChange={(value) => setEditingCustomer({ ...editingCustomer, customerStatus: value })}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="active">Active</SelectItem>
-                      <SelectItem value="inactive">Inactive</SelectItem>
-                      <SelectItem value="vip">VIP</SelectItem>
-                      <SelectItem value="blacklisted">Blacklisted</SelectItem>
-                    </SelectContent>
-                  </Select>
+              </div>
+
+              {/* Customer Management (CRM Only) */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">
+                  Customer Management
+                </h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="editCustomerType">Customer Type</Label>
+                    <Select value={editingCustomer.customerType} onValueChange={(value) => setEditingCustomer({ ...editingCustomer, customerType: value })}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="retail">Retail</SelectItem>
+                        <SelectItem value="wholesale">Wholesale</SelectItem>
+                        <SelectItem value="b2b">B2B</SelectItem>
+                        <SelectItem value="distributor">Distributor</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="editCustomerStatus">Status</Label>
+                    <Select value={editingCustomer.customerStatus} onValueChange={(value) => setEditingCustomer({ ...editingCustomer, customerStatus: value })}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="active">Active</SelectItem>
+                        <SelectItem value="inactive">Inactive</SelectItem>
+                        <SelectItem value="vip">VIP</SelectItem>
+                        <SelectItem value="blacklisted">Blacklisted</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
 
               {/* Authentication Settings */}
-              <div className="border-t pt-4">
-                <Label className="text-lg font-semibold">Authentication Settings</Label>
-                <div className="grid grid-cols-2 gap-6 mt-4">
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">
+                  Authentication Settings
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="flex items-center justify-between p-4 border rounded-lg">
                     <div>
                       <Label htmlFor="sms-auth" className="font-medium">SMS Authentication</Label>
