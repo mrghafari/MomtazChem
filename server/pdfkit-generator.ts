@@ -19,7 +19,13 @@ function formatRTLText(text: string): string {
   
   // Split text into words and reverse their order for RTL display
   const words = text.split(' ');
-  return words.reverse().join(' ');
+  const reversedText = words.reverse().join(' ');
+  
+  // Reverse parentheses for proper RTL display
+  return reversedText
+    .replace(/\(/g, '###TEMP_OPEN###')
+    .replace(/\)/g, '(')
+    .replace(/###TEMP_OPEN###/g, ')');
 }
 
 // Helper function to format mixed RTL/LTR text with Unicode markers

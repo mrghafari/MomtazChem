@@ -25,6 +25,7 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
   - **Solution**: Implemented formatRTLText() function to reverse word order for Persian text
   - **Applied Throughout**: All Persian text (titles, statistics, section headers, content) now properly formatted RTL
   - **Features**: Automatic RTL detection, word reversal for Persian/Arabic/Kurdish text, LTR preservation for English/numbers
+  - **Parentheses Fix**: Reversed parentheses direction for proper RTL display - opening becomes closing and vice versa
 - **Content Enhancement**: 
   - Basic Statistics: Total customers, active customers, new customers this month, total revenue, average order value
   - Top Customers: Top 5 customers with spend amounts and order counts
