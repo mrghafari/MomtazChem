@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Documents Modal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-2xl font-bold mb-6">تست نمایش مدارک سفارش M2511144</h1>
+        
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h2 class="text-lg font-semibold mb-4">مدارک ارسالی مشتری</h2>
+            <div id="documentsContainer">
+                <p class="text-gray-500">در حال بارگذاری مدارک...</p>
+            </div>
+        </div>
+        
+        <div class="mt-6">
+            <button onclick="testDocuments()" class="bg-blue-600 text-white px-4 py-2 rounded">
+                تست دریافت مدارک
+            </button>
+        </div>
+        
+        <div class="mt-6">
+            <h3 class="text-lg font-semibold mb-2">Debug Info:</h3>
+            <pre id="debugInfo" class="bg-gray-900 text-green-400 p-4 rounded text-sm overflow-auto"></pre>
+        </div>
+    </div>
+
+    <script>
+        async function testDocuments() {
+            const debugEl = document.getElementById('debugInfo');
+            const containerEl = document.getElementById('documentsContainer');
+            
+            try {
+                debugEl.textContent = 'شروع درخواست API...';
+                
+                // Test API call to get order details
+                const response = await fetch('/api/admin/orders/260/details', {
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                debugEl.textContent = JSON.stringify(data, null, 2);
+                
+                if (data.success && data.documents && data.documents.length > 0) {
+                    containerEl.innerHTML = '';
+                    
+                    data.documents.forEach(doc => {
+                        const docEl = document.createElement('div');
+                        docEl.className = 'flex items-center justify-between p-3 bg-gray-50 rounded-lg mb-3';
+                        docEl.innerHTML = `
+                            <div class="flex items-center gap-3">
+                                <div class="w-5 h-5 bg-blue-600 rounded"></div>
+                                <div>
+                                    <p class="font-medium text-gray-900">${doc.description}</p>
+                                    <p class="text-sm text-gray-500">${doc.fileName}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">${doc.type}</span>
+                                <a href="${doc.receiptUrl}" target="_blank" 
+                                   class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">
+                                   مشاهده
+                                </a>
+                            </div>
+                        `;
+                        containerEl.appendChild(docEl);
+                    });
+                } else {
+                    containerEl.innerHTML = `
+                        <div class="text-center py-8 text-gray-500">
+                            <p>هیچ مدرک اضافی ارسال نشده است</p>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                debugEl.textContent = 'خطا: ' + error.message;
+                containerEl.innerHTML = `
+                    <div class="text-center py-8 text-red-500">
+                        <p>خطا در دریافت مدارک: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Auto load on page load
+        window.onload = testDocuments;
+    </script>
+</body>
+</html>

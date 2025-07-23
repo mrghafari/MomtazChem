@@ -1199,30 +1199,25 @@ function FinanceOrders() {
                       // Collect all available documents
                       const allDocuments = [];
                       
-                      // Add documents from orderDetails.documents array if exists
-                      if (orderDetails.documents && orderDetails.documents.length > 0) {
+                      // Check if documents exist in the API response structure
+                      // API returns: { success: true, order: {...}, documents: [...] }
+                      const apiDocuments = orderDetailsQuery.data?.documents;
+                      if (apiDocuments && Array.isArray(apiDocuments) && apiDocuments.length > 0) {
+                        allDocuments.push(...apiDocuments);
+                      }
+                      
+                      // Fallback: Add documents from orderDetails.documents array if exists
+                      if (orderDetails.documents && Array.isArray(orderDetails.documents) && orderDetails.documents.length > 0) {
                         allDocuments.push(...orderDetails.documents);
                       }
                       
-                      // Add bank receipt from multiple sources - prioritize orderDetails over selectedOrder
-                      let receiptUrl = null;
-                      
-                      // First check orderDetails for receipt
-                      if (orderDetails.receiptPath || orderDetails.receipt_path) {
-                        receiptUrl = orderDetails.receiptPath || orderDetails.receipt_path;
-                      }
-                      // Fallback to selectedOrder if orderDetails doesn't have receipt
-                      else if (selectedOrder?.receiptUrl) {
-                        receiptUrl = selectedOrder.receiptUrl;
-                      }
-                      
-                      // Add receipt to documents if found
-                      if (receiptUrl) {
+                      // Fallback: Add bank receipt from selectedOrder if no documents found
+                      if (allDocuments.length === 0 && selectedOrder?.receiptUrl) {
                         allDocuments.push({
                           id: 'bank_receipt',
                           type: 'payment_receipt',
                           description: 'فیش واریز بانکی',
-                          receiptUrl: receiptUrl,
+                          receiptUrl: selectedOrder.receiptUrl,
                           fileName: 'فیش بانکی',
                           uploadedAt: orderDetails.updatedAt || orderDetails.createdAt
                         });
