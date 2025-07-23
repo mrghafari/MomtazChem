@@ -11041,6 +11041,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin delete order (for test orders or administrative deletion)
+  app.delete("/api/admin/orders/:orderId/delete", requireAuth, async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.orderId); 
+      
+      console.log(`🗑️ [ADMIN DELETE ORDER] Request to delete order ${orderId} by admin ${req.session.adminId}`);
+      
+      // Get order details first
+      const order = await customerStorage.getOrderById(orderId);
+      if (!order) {
+        return res.status(404).json({
+          success: false,
+          message: "سفارش یافت نشد"
+        });
+      }
+      
+      // Delete order and release product reservations
+      const result = await customerStorage.deleteTemporaryOrder(orderId);
+      
+      console.log(`✅ [ADMIN DELETE ORDER] Order ${orderId} (${order.orderNumber}) successfully deleted by admin with ${result.releasedProducts.length} products released`);
+      
+      res.json({
+        success: true,
+        message: `سفارش ${order.orderNumber} با موفقیت حذف شد`,
+        data: {
+          deletedOrderId: orderId,
+          deletedOrderNumber: order.orderNumber,
+          releasedProducts: result.releasedProducts,
+          message: `${result.releasedProducts.length} محصول رزرو شده آزاد شد`
+        }
+      });
+      
+    } catch (error: any) {
+      console.error(`❌ [ADMIN DELETE ORDER] Error deleting order:`, error);
+      res.status(500).json({
+        success: false,
+        message: error.message || "خطا در حذف سفارش"
+      });
+    }
+  });
+
   // Delete temporary order with product reservation release
   app.delete("/api/customers/orders/:orderId/delete-temporary", async (req, res) => {
     try {
