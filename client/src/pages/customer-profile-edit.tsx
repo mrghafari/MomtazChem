@@ -483,8 +483,8 @@ export default function CustomerProfileEdit() {
     );
   }
 
-  // Check for authentication errors or missing data
-  if (customerError || (!isLoading && (!customer || !customer.success))) {
+  // Check for authentication errors or missing data (skip for create mode)
+  if (!isCreateMode && (customerError || (!isLoading && (!customer || !customer.success)))) {
     return (
       <div className={`min-h-screen bg-gray-50 flex items-center justify-center ${direction === 'rtl' ? 'rtl' : 'ltr'}`}>
         <Card className="w-full max-w-md">

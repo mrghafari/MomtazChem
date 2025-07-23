@@ -807,7 +807,7 @@ export default function CRM() {
             <Download className="h-4 w-4" />
             Export Analytics
           </Button>
-          <Button onClick={() => window.location.href = '/customer-profile-edit?mode=create'}>
+          <Button onClick={() => setLocation('/customer-profile-edit?mode=create')}>
             <Plus className="h-4 w-4 mr-2" />
             New Customer
           </Button>
