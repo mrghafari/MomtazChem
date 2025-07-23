@@ -582,9 +582,11 @@ export async function generateAnalyticsPDF(analyticsData: any, title: string = '
         
         doc.font('VazirRegular');
         
-        // Date
+        // Date - Gregorian format
+        const currentDate = new Date();
+        const gregorianDate = `${currentDate.getFullYear()}/${String(currentDate.getMonth() + 1).padStart(2, '0')}/${String(currentDate.getDate()).padStart(2, '0')}`;
         doc.fontSize(12)
-           .text(formatRTLText(`تاریخ گزارش: ${new Date().toLocaleDateString('fa-IR')}`), 50, 90, { align: 'right' });
+           .text(formatRTLText(`تاریخ گزارش: ${gregorianDate}`), 50, 90, { align: 'right' });
         
         let yPosition = 130;
         
