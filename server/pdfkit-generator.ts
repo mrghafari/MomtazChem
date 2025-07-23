@@ -199,13 +199,13 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
            .text(formatMixedText('آدرس:'), 350, 220, { align: 'right', width: 200, features: ['rtla'] })
            .text(customerAddress, 50, 240, { align: 'left', width: 400 });
         
-        // Add line separator before table
-        doc.moveTo(50, 270)
-           .lineTo(500, 270)
+        // Add line separator before table (moved down one line)
+        doc.moveTo(50, 290)
+           .lineTo(500, 290)
            .stroke();
         
         // Create dynamic table structure based on number of items - RTL orientation
-        const tableStartY = 290;
+        const tableStartY = 310;
         const rowHeight = 30;
         const colWidths = [120, 80, 80, 200]; // مبلغ کل، قیمت واحد، تعداد، شرح کالا (reversed for RTL)
         const colStartX = [50, 170, 250, 330]; // RTL column positions
