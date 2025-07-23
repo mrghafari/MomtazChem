@@ -113,7 +113,9 @@ const CustomerProfile = () => {
     
     setIsLoadingHistory(true);
     try {
-      const response = await apiRequest('/api/customers/orders/complete-history');
+      const response = await apiRequest('/api/customers/orders/complete-history', {
+        method: 'GET'
+      });
       if (response.success) {
         setCompleteHistory(response.orders || []);
       }
@@ -615,32 +617,35 @@ const CustomerProfile = () => {
 
                         {/* Actions */}
                         <div className="mt-4 pt-3 border-t border-gray-200 flex gap-2 flex-wrap">
-                          {/* دکمه آپلود رسید بانکی برای سفارشات موقت با پرداخت بانکی */}
-                          {(order.status === 'pending' || order.status === 'payment_grace_period') && 
-                           order.paymentMethod === 'واریز بانکی با مهلت 3 روزه' && (
-                            <Button
-                              size="sm"
-                              onClick={() => window.open(`/customer/bank-receipt-upload?orderId=${order.id}`, '_blank')}
-                              className="bg-orange-600 hover:bg-orange-700 text-white"
-                            >
-                              <Upload className="w-4 h-4 mr-2" />
-                              آپلود حواله بانکی
-                            </Button>
-                          )}
-                          
-                          {/* دکمه حذف سفارش موقت برای سفارشات پرداخت نشده و بدون رسید */}
-                          {(order.status === 'pending' || order.status === 'payment_grace_period') && 
-                           (!order.paymentStatus || order.paymentStatus === 'pending' || order.paymentStatus === 'unpaid') &&
-                           !order.receiptPath && (
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => handleDeleteTemporaryOrder(order.id, order.orderNumber)}
-                              className="bg-red-600 hover:bg-red-700 text-white"
-                            >
-                              <Trash2 className="w-4 h-4 mr-2" />
-                              حذف سفارش موقت
-                            </Button>
+                          {/* Debug: Always show for pending orders */}
+                          {(order.status === 'pending' || order.status === 'payment_grace_period') && (
+                            <>
+                              {/* دکمه آپلود رسید بانکی برای سفارشات موقت با پرداخت بانکی */}
+                              {order.paymentMethod === 'واریز بانکی با مهلت 3 روزه' && (
+                                <Button
+                                  size="sm"
+                                  onClick={() => window.open(`/customer/bank-receipt-upload?orderId=${order.id}`, '_blank')}
+                                  className="bg-orange-600 hover:bg-orange-700 text-white"
+                                >
+                                  <Upload className="w-4 h-4 mr-2" />
+                                  آپلود حواله بانکی
+                                </Button>
+                              )}
+                              
+                              {/* دکمه حذف سفارش موقت برای سفارشات پرداخت نشده و بدون رسید */}
+                              {(!order.paymentStatus || order.paymentStatus === 'pending' || order.paymentStatus === 'unpaid') &&
+                               !order.receiptPath && (
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => handleDeleteTemporaryOrder(order.id, order.orderNumber)}
+                                  className="bg-red-600 hover:bg-red-700 text-white"
+                                >
+                                  <Trash2 className="w-4 h-4 mr-2" />
+                                  حذف سفارش موقت
+                                </Button>
+                              )}
+                            </>
                           )}
                           {/* دکمه دانلود فاکتور/پیش فاکتور بر اساس تأیید مالی */}
                           {(order.status === 'confirmed' || order.paymentStatus === 'paid') ? (
