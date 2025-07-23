@@ -1171,8 +1171,8 @@ function OrderCard({ order, onOrderSelect, readOnly = false }: OrderCardProps) {
               <Receipt className="h-5 w-5 text-blue-600" />
             </div>
             <div>
-              <h3 className="font-bold text-lg text-gray-900">سفارش {order.orderNumber}</h3>
-              <p className="text-sm text-gray-600">{order.customer?.firstName} {order.customer?.lastName}</p>
+              <h3 className="font-bold text-lg text-gray-900">سفارش {order.orderNumber || `#${order.customerOrderId}`}</h3>
+              <p className="text-sm text-gray-600">{customerInfo.firstName} {customerInfo.lastName}</p>
             </div>
           </div>
           <div className="flex items-center space-x-3 space-x-reverse">
@@ -1268,6 +1268,7 @@ interface TransferredOrderCardProps {
 }
 
 function TransferredOrderCard({ order }: TransferredOrderCardProps) {
+  const customerInfo = getCustomerInfo(order);
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
       case 'warehouse_pending':
@@ -1307,8 +1308,8 @@ function TransferredOrderCard({ order }: TransferredOrderCardProps) {
               <ChevronRight className="h-5 w-5 text-blue-600" />
             </div>
             <div>
-              <h3 className="font-bold text-lg text-gray-900">سفارش {order.orderNumber}</h3>
-              <p className="text-sm text-gray-600">{order.customer?.firstName} {order.customer?.lastName}</p>
+              <h3 className="font-bold text-lg text-gray-900">سفارش {order.orderNumber || `#${order.customerOrderId}`}</h3>
+              <p className="text-sm text-gray-600">{customerInfo.firstName} {customerInfo.lastName}</p>
             </div>
           </div>
           <div className="flex items-center space-x-3 space-x-reverse">
