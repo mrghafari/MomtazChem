@@ -94,8 +94,7 @@ const LogisticsManagement = () => {
   }}>({});
   const [selectedOrderForLabel, setSelectedOrderForLabel] = useState<any>(null);
   const [isLabelDialogOpen, setIsLabelDialogOpen] = useState(false);
-  const [resendingCodes, setResendingCodes] = useState<{[key: number]: boolean}>({});
-  const [resentCodes, setResentCodes] = useState<{[key: number]: boolean}>({});
+
   const [selectedCity, setSelectedCity] = useState<string>('');
   const [selectedProvince, setSelectedProvince] = useState<string>('');
   const [shippingWeight, setShippingWeight] = useState<number>(1);
@@ -183,56 +182,7 @@ const LogisticsManagement = () => {
     return <Badge className={config.color}>{config.text}</Badge>;
   };
 
-  // Function to send or resend delivery code
-  const handleSendDeliveryCode = async (orderManagementId: number, hasExistingCode: boolean) => {
-    try {
-      setResendingCodes(prev => ({ ...prev, [orderManagementId]: true }));
-      
-      // Use appropriate endpoint based on whether code exists
-      const endpoint = hasExistingCode 
-        ? `/api/order-management/${orderManagementId}/resend-delivery-code`
-        : `/api/order-management/${orderManagementId}/generate-delivery-code`;
-      
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      const result = await response.json();
-      
-      if (result.success) {
-        setResentCodes(prev => ({ ...prev, [orderManagementId]: true }));
-        
-        // Refresh the orders to show the new delivery code
-        queryClient.invalidateQueries({ queryKey: ['/api/order-management/logistics'] });
-        
-        toast({
-          title: "✅ موفقیت",
-          description: hasExistingCode 
-            ? `کد تحویل ${result.deliveryCode} مجدداً ارسال شد`
-            : `کد تحویل ${result.deliveryCode} تولید و ارسال شد`,
-          variant: "default",
-        });
-      } else {
-        toast({
-          title: "❌ خطا",
-          description: result.message || "خطا در ارسال کد",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error('Error sending delivery code:', error);
-      toast({
-        title: "❌ خطا",
-        description: "خطا در ارسال کد تحویل",
-        variant: "destructive",
-      });
-    } finally {
-      setResendingCodes(prev => ({ ...prev, [orderManagementId]: false }));
-    }
-  };
+
 
   const OrdersTab = () => {
     return (
@@ -334,35 +284,7 @@ const LogisticsManagement = () => {
                       }`}>
                         کد 4 رقمی تحویل
                       </p>
-                      {order.deliveryCode && (
-                        <Button
-                          size="sm"
-                          onClick={() => handleResendDeliveryCode(order.id)}
-                          disabled={resendingCodes[order.id]}
-                          className={`w-full text-xs ${
-                            resentCodes[order.id] 
-                              ? 'bg-red-600 hover:bg-red-700 text-white' 
-                              : 'bg-blue-600 hover:bg-blue-700 text-white'
-                          }`}
-                        >
-                          {resendingCodes[order.id] ? (
-                            <>
-                              <Send className="w-3 h-3 mr-1 animate-spin" />
-                              در حال ارسال...
-                            </>
-                          ) : resentCodes[order.id] ? (
-                            <>
-                              <Send className="w-3 h-3 mr-1" />
-                              ارسال شد ✓
-                            </>
-                          ) : (
-                            <>
-                              <Send className="w-3 h-3 mr-1" />
-                              ارسال مجدد
-                            </>
-                          )}
-                        </Button>
-                      )}
+
                     </div>
 
                     {/* Delivery Address Block */}
