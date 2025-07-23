@@ -260,6 +260,9 @@ function FinanceOrders() {
       
       const detailsData = await detailsResponse.json();
       if (detailsData.success) {
+        console.log('📋 [ORDER DETAILS] Order fetched:', detailsData.order.orderNumber);
+        console.log('📋 [ORDER DETAILS] Items count:', detailsData.order.items?.length || 0);
+        console.log('📋 [ORDER DETAILS] Items data:', detailsData.order.items);
         setOrderDetails(detailsData.order);
         setOrderDocuments(detailsData.documents || []);
         setOrderDetailsModalOpen(true);
@@ -992,24 +995,34 @@ function FinanceOrders() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      {orderDetails.items?.map((item: any, index: number) => (
-                        <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                          <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                              <span className="text-blue-600 font-bold">{item.quantity}</span>
+                      {orderDetails.items && orderDetails.items.length > 0 ? (
+                        orderDetails.items.map((item: any, index: number) => (
+                          <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <span className="text-blue-600 font-bold">{item.quantity}</span>
+                              </div>
+                              <div>
+                                <p className="font-medium">{item.productName}</p>
+                                <p className="text-sm text-gray-600">قیمت واحد: {parseFloat(item.unitPrice || 0).toLocaleString()} {orderDetails.currency}</p>
+                              </div>
                             </div>
-                            <div>
-                              <p className="font-medium">{item.productName}</p>
-                              <p className="text-sm text-gray-600">قیمت واحد: {item.unitPrice?.toLocaleString()} {orderDetails.currency}</p>
+                            <div className="text-left">
+                              <p className="font-bold text-green-600">
+                                {parseFloat(item.totalPrice || 0).toLocaleString()} {orderDetails.currency}
+                              </p>
                             </div>
                           </div>
-                          <div className="text-left">
-                            <p className="font-bold text-green-600">
-                              {item.totalPrice?.toLocaleString()} {orderDetails.currency}
-                            </p>
+                        ))
+                      ) : (
+                        <div className="text-center py-8 bg-gray-50 rounded-lg">
+                          <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <ShoppingCart className="h-8 w-8 text-gray-400" />
                           </div>
+                          <p className="text-gray-600 font-medium">هیچ آیتمی برای این سفارش ثبت نشده است</p>
+                          <p className="text-sm text-gray-500 mt-1">احتمالاً این سفارش در فرآیند ثبت کامل نشده است</p>
                         </div>
-                      ))}
+                      )}
                     </div>
                   </CardContent>
                 </Card>
