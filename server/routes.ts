@@ -7249,6 +7249,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           vatAmount: customerOrders.vatAmount,
           surchargeAmount: customerOrders.surchargeAmount,
           customerId: customerOrders.customerId,
+          receiptPath: customerOrders.receiptPath, // ADD RECEIPT PATH
           // Customer info
           firstName: crmCustomers.firstName,
           lastName: crmCustomers.lastName,
@@ -7300,8 +7301,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .from(orderItems)
         .where(eq(orderItems.orderId, orderId));
 
-      // Get customer documents and payment receipts
-      const documentsResult = await db
+      // Get customer documents and payment receipts - CHECK RECEIPT FROM customer_orders.receipt_path
+      let documentsResult = [];
+      
+      // If order has receipt_path, create document entry for it
+      if (order.receiptPath) {
+        documentsResult.push({
+          id: `receipt_${orderId}`,
+          fileName: order.receiptPath.split('/').pop() || 'فیش بانکی',
+          receiptUrl: order.receiptPath,
+          mimeType: 'image/*',
+          uploadedAt: order.createdAt,
+          type: 'payment_receipt',
+          description: 'فیش بانکی پرداخت'
+        });
+      }
+      
+      // Also check payment_receipts table for any additional documents
+      const paymentReceiptsResult = await db
         .select({
           id: paymentReceipts.id,
           fileName: paymentReceipts.originalFileName,
@@ -7313,6 +7330,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         })
         .from(paymentReceipts)
         .where(eq(paymentReceipts.customerOrderId, orderId));
+      
+      // Combine both sources
+      documentsResult = [...documentsResult, ...paymentReceiptsResult];
 
       console.log(`✅ [ADMIN] Order details retrieved: ${order.orderNumber} with ${itemsResult.length} items and ${documentsResult.length} documents`);
 
