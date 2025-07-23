@@ -15,15 +15,19 @@ function setupVazirFont() {
       pdfMake.vfs = {};
     }
     
-    // Add our custom fonts with proper base64 data
+    // Validate that we have font data
+    if (!vazirRegular || !vazirBold || vazirRegular.length < 1000 || vazirBold.length < 1000) {
+      throw new Error('Invalid font data - font files too small or empty');
+    }
+    
+    // Add our custom fonts with proper base64 data - use only Regular font to avoid VFS issues
     pdfMake.vfs["Vazir-Regular.ttf"] = vazirRegular;
-    pdfMake.vfs["Vazir-Bold.ttf"] = vazirBold;
     
     console.log('Regular font data length:', vazirRegular.length);
     console.log('Bold font data length:', vazirBold.length);
-    console.log('VFS keys:', Object.keys(pdfMake.vfs));
+    console.log('VFS keys after font addition:', Object.keys(pdfMake.vfs).filter(k => k.includes('Vazir')));
 
-    // Setup font families
+    // Setup font families with validation
     pdfMake.fonts = {
       Roboto: {
         normal: 'Roboto-Regular.ttf',
@@ -33,17 +37,18 @@ function setupVazirFont() {
       },
       Vazir: {
         normal: "Vazir-Regular.ttf",
-        bold: "Vazir-Bold.ttf", 
+        bold: "Vazir-Regular.ttf", // Use Regular for Bold to avoid VFS issues
         italics: "Vazir-Regular.ttf",
-        bolditalics: "Vazir-Bold.ttf",
+        bolditalics: "Vazir-Regular.ttf",
       },
     };
     
     console.log('✅ Font setup completed successfully');
     console.log('Available fonts:', Object.keys(pdfMake.fonts));
+    console.log('Vazir font config:', pdfMake.fonts.Vazir);
   } catch (error) {
     console.error('❌ Error setting up fonts:', error);
-    // Ultimate fallback - use only default fonts
+    // Ultimate fallback - use only Roboto fonts
     pdfMake.vfs = pdfFonts?.pdfMake?.vfs || {};
     pdfMake.fonts = {
       Roboto: {
@@ -53,7 +58,7 @@ function setupVazirFont() {
         bolditalics: 'Roboto-MediumItalic.ttf'
       }
     };
-    console.log('Using fallback font setup');
+    console.log('Using fallback Roboto-only font setup');
   }
 }
 
