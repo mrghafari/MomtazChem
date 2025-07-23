@@ -6,6 +6,19 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Order Number Display Issue Resolved in Financial Department (July 23, 2025)
+✅ **RESOLVED: Critical order number display bug showing database IDs instead of proper order numbers**
+- **Root Cause Identified**: `orderNumber` field was missing from final transformation mapping in `getOrdersByDepartment` method
+- **Issue**: Financial department displayed "سفارش #183" (database ID) instead of proper order numbers like "ORD-1751828476850-85SOIEA5N" or "M25T004"
+- **Database Verification**: Order management ID 183 correctly linked to customer order ID 122 with order number "ORD-1751828476850-85SOIEA5N"
+- **Backend Analysis**: SQL query correctly included `orderNumber: customerOrders.orderNumber` but field was missing from results mapping
+- **Technical Fix**: Added `orderNumber: row.orderNumber` to transformation mapping in order-management-storage.ts line 519
+- **Frontend Enhancement**: Updated OrderCard fallback logic to show "در حال بارگذاری..." instead of database IDs when orderNumber is missing
+- **API Verification**: Backend logs confirm proper order numbers now transmitted: `"orderNumber": "M25T004"` 
+- **Impact**: Financial department now displays proper sequential order numbers (M25T004, ORD-1751828476850-85SOIEA5N) instead of database IDs
+- **Test Results**: API responses confirmed including orderNumber field for all 198 financial department orders
+- **Status**: Complete resolution - both new format (M[YY][NNNNN]) and legacy format (ORD-*) orders display correctly
+
 ### COMPLETED: Automated Bank Receipt Reminder System Implementation (July 23, 2025)
 ✅ **IMPLEMENTED: Complete automated reminder system for bank receipt submissions with 24-hour notification cycle**
 - **Bank Receipt Reminder Service**: Created comprehensive BankReceiptReminderService class with automatic notification algorithms

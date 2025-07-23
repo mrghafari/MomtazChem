@@ -514,6 +514,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       deliveryCode: row.deliveryCode,
       totalAmount: row.totalAmount,
       currency: row.currency,
+      orderNumber: row.orderNumber, // شماره سفارش M[YY][NNNNN] یا فرمت قدیمی
       
       // Weight and delivery information
       totalWeight: row.totalWeight,
