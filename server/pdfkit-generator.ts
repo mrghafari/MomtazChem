@@ -8,6 +8,39 @@ import fs from 'fs';
 // Company logo base64 data
 const companyLogoBase64 = fs.readFileSync('server/logo-base64.txt', 'utf8');
 
+// Helper function to format RTL text for proper display
+function formatRTLText(text: string): string {
+  // Check if text contains RTL characters (Persian, Arabic, Kurdish)
+  const rtlPattern = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
+  
+  if (!rtlPattern.test(text)) {
+    return text; // Return as-is for non-RTL text
+  }
+  
+  // Split text into words and reverse their order for RTL display
+  const words = text.split(' ');
+  return words.reverse().join(' ');
+}
+
+// Helper function to format mixed RTL/LTR text with Unicode markers
+function formatMixedText(text: string): string {
+  // Split text into words
+  const words = text.split(' ');
+  
+  return words.map(word => {
+    // Check if word contains RTL characters
+    const rtlPattern = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
+    
+    if (rtlPattern.test(word)) {
+      // RTL word - add RTL override markers
+      return `\u202E${word}\u202C`;
+    } else {
+      // LTR word (English/numbers) - add LTR override markers
+      return `\u202D${word}\u202C`;
+    }
+  }).join(' ');
+}
+
 // Generate Invoice PDF using PDFKit
 export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
   return new Promise((resolve, reject) => {
@@ -545,45 +578,46 @@ export async function generateAnalyticsPDF(analyticsData: any, title: string = '
         
         // Title
         doc.fontSize(20)
-           .text(title, 50, 50, { align: 'center' });
+           .text(formatRTLText(title), 50, 50, { align: 'center' });
         
         doc.font('VazirRegular');
         
         // Date
         doc.fontSize(12)
-           .text(`تاریخ گزارش: ${new Date().toLocaleDateString('fa-IR')}`, 50, 90, { align: 'right' });
+           .text(formatRTLText(`تاریخ گزارش: ${new Date().toLocaleDateString('fa-IR')}`), 50, 90, { align: 'right' });
         
         let yPosition = 130;
         
         // Dashboard Statistics
         doc.fontSize(16)
            .font('VazirBold')
-           .text('آمار داشبورد', 50, yPosition, { align: 'right' });
+           .text(formatRTLText('آمار داشبورد'), 50, yPosition, { align: 'right' });
         
         yPosition += 30;
         doc.font('VazirRegular').fontSize(11);
         
         // Stats
         if (analyticsData) {
-          doc.text(`کل مشتریان: ${analyticsData.totalCustomers || 0}`, 50, yPosition, { align: 'right' });
+          doc.text(formatRTLText(`کل مشتریان: ${analyticsData.totalCustomers || 0}`), 50, yPosition, { align: 'right' });
           yPosition += 20;
-          doc.text(`مشتریان فعال: ${analyticsData.activeCustomers || 0}`, 50, yPosition, { align: 'right' });
+          doc.text(formatRTLText(`مشتریان فعال: ${analyticsData.activeCustomers || 0}`), 50, yPosition, { align: 'right' });
           yPosition += 20;
-          doc.text(`مشتریان جدید این ماه: ${analyticsData.newCustomersThisMonth || 0}`, 50, yPosition, { align: 'right' });
+          doc.text(formatRTLText(`مشتریان جدید این ماه: ${analyticsData.newCustomersThisMonth || 0}`), 50, yPosition, { align: 'right' });
           yPosition += 20;
-          doc.text(`کل درآمد: ${Math.round(analyticsData.totalRevenue || 0)} دینار`, 50, yPosition, { align: 'right' });
+          doc.text(formatRTLText(`کل درآمد: ${Math.round(analyticsData.totalRevenue || 0)} دینار`), 50, yPosition, { align: 'right' });
           yPosition += 20;
-          doc.text(`متوسط مبلغ سفارش: ${Math.round(analyticsData.averageOrderValue || 0)} دینار`, 50, yPosition, { align: 'right' });
+          doc.text(formatRTLText(`متوسط مبلغ سفارش: ${Math.round(analyticsData.averageOrderValue || 0)} دینار`), 50, yPosition, { align: 'right' });
           yPosition += 30;
           
           // Top Customers section
           if (analyticsData.topCustomers && analyticsData.topCustomers.length > 0) {
-            doc.fontSize(16).font('VazirBold').text('برترین مشتریان', 50, yPosition, { align: 'right' });
+            doc.fontSize(16).font('VazirBold').text(formatRTLText('برترین مشتریان'), 50, yPosition, { align: 'right' });
             yPosition += 30;
             doc.fontSize(11).font('VazirRegular');
             
             analyticsData.topCustomers.slice(0, 5).forEach((customer: any, index: number) => {
-              doc.text(`${index + 1}. ${customer.name} - ${Math.round(customer.totalSpent)} دینار (${customer.totalOrders} سفارش)`, 50, yPosition, { align: 'right' });
+              const customerText = `${index + 1}. ${customer.name} - ${Math.round(customer.totalSpent)} دینار (${customer.totalOrders} سفارش)`;
+              doc.text(formatRTLText(customerText), 50, yPosition, { align: 'right' });
               yPosition += 18;
             });
             yPosition += 20;
@@ -591,13 +625,14 @@ export async function generateAnalyticsPDF(analyticsData: any, title: string = '
           
           // Customer Types section
           if (analyticsData.customersByType && analyticsData.customersByType.length > 0) {
-            doc.fontSize(16).font('VazirBold').text('انواع مشتریان', 50, yPosition, { align: 'right' });
+            doc.fontSize(16).font('VazirBold').text(formatRTLText('انواع مشتریان'), 50, yPosition, { align: 'right' });
             yPosition += 30;
             doc.fontSize(11).font('VazirRegular');
             
             analyticsData.customersByType.forEach((type: any) => {
               const typeName = type.type === 'business' ? 'شرکتی' : 'شخصی';
-              doc.text(`${typeName}: ${type.count} مشتری`, 50, yPosition, { align: 'right' });
+              const typeText = `${typeName}: ${type.count} مشتری`;
+              doc.text(formatRTLText(typeText), 50, yPosition, { align: 'right' });
               yPosition += 18;
             });
             yPosition += 20;
@@ -605,13 +640,14 @@ export async function generateAnalyticsPDF(analyticsData: any, title: string = '
           
           // Recent Activities section
           if (analyticsData.recentActivities && analyticsData.recentActivities.length > 0) {
-            doc.fontSize(16).font('VazirBold').text('فعالیت‌های اخیر', 50, yPosition, { align: 'right' });
+            doc.fontSize(16).font('VazirBold').text(formatRTLText('فعالیت‌های اخیر'), 50, yPosition, { align: 'right' });
             yPosition += 30;
             doc.fontSize(11).font('VazirRegular');
             
             analyticsData.recentActivities.slice(0, 3).forEach((activity: any) => {
               const activityText = activity.activityType === 'login' ? 'ورود به سیستم' : 'خروج از سیستم';
-              doc.text(`${activity.customerName}: ${activityText}`, 50, yPosition, { align: 'right' });
+              const activityLine = `${activity.customerName}: ${activityText}`;
+              doc.text(formatRTLText(activityLine), 50, yPosition, { align: 'right' });
               yPosition += 18;
             });
           }
@@ -619,7 +655,7 @@ export async function generateAnalyticsPDF(analyticsData: any, title: string = '
         
         // Footer
         doc.fontSize(10)
-           .text('شرکت الانتاج الممتاز / Al-Entaj Al-Momtaz Company', 50, 750, { align: 'center' })
+           .text(formatRTLText('شرکت الانتاج الممتاز / Al-Entaj Al-Momtaz Company'), 50, 750, { align: 'center' })
            .text('www.momtazchem.com | info@momtazchem.com', 50, 765, { align: 'center' });
         
       } catch (fontError) {
