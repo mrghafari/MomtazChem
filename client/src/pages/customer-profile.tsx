@@ -636,7 +636,7 @@ const CustomerProfile = () => {
                               size="sm"
                               variant="destructive"
                               onClick={() => handleDeleteTemporaryOrder(order.id, order.orderNumber)}
-                              className="bg-red-600 hover:bg-red-700"
+                              className="bg-red-600 hover:bg-red-700 text-white"
                             >
                               <Trash2 className="w-4 h-4 mr-2" />
                               حذف سفارش موقت
