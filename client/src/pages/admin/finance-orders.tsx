@@ -308,13 +308,14 @@ function FinanceOrders() {
           const settings = JSON.parse(currentSettings);
           if (settings.departments.finance.autoRefresh) {
             refetch();
+            refetchApproved();
           }
         }
       }, intervalMs);
 
       return () => clearInterval(interval);
     }
-  }, [allOrders, refetch]);
+  }, [allOrders, refetch, refetchApproved]);
 
   // Mutations for approve/reject
   const approveMutation = useMutation({
@@ -584,12 +585,16 @@ function FinanceOrders() {
                 <span>پردازش خودکار درگاه</span>
               </Button>
               <Button 
-                onClick={() => refetch()}
+                onClick={() => {
+                  refetch();
+                  refetchApproved();
+                }}
                 variant="outline"
                 className="flex items-center space-x-2 space-x-reverse"
+                disabled={isLoading || isLoadingApproved}
               >
-                <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-                <span>تازه‌سازی</span>
+                <RefreshCw className={`h-4 w-4 ${(isLoading || isLoadingApproved) ? 'animate-spin' : ''}`} />
+                <span>تازه‌سازی سفارشات</span>
               </Button>
             </div>
           </div>

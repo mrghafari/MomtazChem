@@ -6,6 +6,24 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Financial Department Refresh Button and Auto-Refresh Scoped to Orders Only (July 23, 2025)
+✅ **IMPLEMENTED: Refined refresh functionality to target only financial department orders instead of entire page**
+- **Issue**: User requested that refresh button and auto-refresh should only refresh financial orders data, not the entire page
+- **Root Cause**: Manual refresh button only called `refetch()` for pending orders, missing approved orders refresh
+- **Solution Implemented**:
+  - **Manual Refresh Button**: Enhanced to call both `refetch()` and `refetchApproved()` simultaneously
+  - **Auto-Refresh Function**: Modified interval to refresh both pending and approved orders when auto-refresh is enabled
+  - **Button Enhancement**: Added loading states for both queries and improved button text to "تازه‌سازی سفارشات"
+  - **Dependency Update**: Added `refetchApproved` to useEffect dependencies for proper hook behavior
+- **Technical Implementation**:
+  - Button onClick: `refetch(); refetchApproved();` - refreshes both pending and approved financial orders
+  - Auto-refresh interval: Both `refetch()` and `refetchApproved()` called during scheduled refresh cycles
+  - Loading states: Button disabled when either `isLoading || isLoadingApproved` is true
+  - Spinning animation: Shows when either query is loading for visual feedback
+- **User Experience**: Refresh functionality now targets only orders data without full page reload
+- **Impact**: Faster, more efficient refresh that updates financial orders without losing page state or user interactions
+- **Result**: Complete scoped refresh system for financial department orders only
+
 ### COMPLETED: Complete Database Cleanup - Removed 235 Invalid Format Orders (July 23, 2025)
 ✅ **SYSTEM CLEANUP: Complete removal of orders not following M25XXXXX standardized format**
 - **User Request**: Delete all orders that don't follow M25XXXXX format (5-digit numeric sequence after M25)
