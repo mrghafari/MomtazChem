@@ -245,7 +245,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       if (notes) updateData.logisticsNotes = notes;
     }
     
-    // Generate delivery code when order reaches logistics (from any department) and send SMS using template 7
+    // Generate delivery code when order reaches logistics (from any department) and send SMS using template 3
     if (newStatus === orderStatuses.LOGISTICS_DISPATCHED || 
         newStatus === orderStatuses.LOGISTICS_ASSIGNED ||
         newStatus === orderStatuses.WAREHOUSE_APPROVED) {
@@ -1013,18 +1013,18 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       const { createSmsService } = await import('./sms-service');
       const smsService = await createSmsService();
       
-      // Use template 1 for delivery code (قالب شماره 1 - کد تحویل سفارش) 
-      const result = await smsService.sendSmsUsingTemplate(1, customerPhone, {
+      // Use template 3 for delivery code (قالب شماره 3 - کد تحویل سفارش) 
+      const result = await smsService.sendSmsUsingTemplate(3, customerPhone, {
         customer_name: customerName,
         order_number: orderNumber,
         delivery_code: deliveryCode
       });
       
-      console.log(`📱 [SMS TEMPLATE 1] Delivery code ${deliveryCode} sent to ${customerPhone} for order ${orderNumber}:`, result);
+      console.log(`📱 [SMS TEMPLATE 3] Delivery code ${deliveryCode} sent to ${customerPhone} for order ${orderNumber}:`, result);
       
       return result.success;
     } catch (error) {
-      console.error('❌ [SMS] Error sending delivery code using template 1:', error);
+      console.error('❌ [SMS] Error sending delivery code using template 3:', error);
       return false;
     }
   }

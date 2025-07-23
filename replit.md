@@ -28,11 +28,25 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Impact**: Complete delivery address visibility for logistics department with standardized order numbering
 - **Status**: Logistics department now displays comprehensive delivery information with M25XXXXX order format only
 
-### COMPLETED: Automatic Delivery Code SMS System with Template #1 Implementation (July 23, 2025)
-✅ **IMPLEMENTED: Complete automatic SMS delivery code system using SMS template #1**
+### COMPLETED: SMS Template ID Critical Fix - Backend Now Uses Correct Template #3 (July 23, 2025)
+✅ **RESOLVED: Fixed critical SMS template mismatch causing wrong delivery code format**
+- **Root Cause**: Backend was using template ID 1 instead of correct template ID 3 for delivery codes
+- **Database Issue**: Multiple duplicate templates existed (ID 3 and 7) for delivery codes with different content
+- **Technical Fix**: Updated sendDeliveryCodeSms() method to use template ID 3 instead of template ID 1
+- **Template Content Verified**: Template ID 3 contains correct format: "سلام {{customer_name}}\nکد تحویل سفارش {{order_number}}: {{delivery_code}}\nاین کد را هنگام دریافت کالا به پیک ارائه دهید.\nممتاز شیمی"
+- **Code Changes**:
+  - Modified template ID from 1 to 3 in order-management-storage.ts line 1020
+  - Updated all logging references to reflect template ID 3 usage
+  - Fixed comment references from template 7 to template 3
+- **Impact**: SMS delivery codes now use proper template with correct Persian content format
+- **Test Infrastructure**: Created test-sms-template-3.html for comprehensive template verification
+- **Result**: Backend and UI now synchronized - both use template ID 3 for delivery code SMS notifications
+
+### COMPLETED: Automatic Delivery Code SMS System with Template #3 Implementation (July 23, 2025)
+✅ **IMPLEMENTED: Complete automatic SMS delivery code system using SMS template #3**
 - **Core Functionality**: Automatic delivery code generation and SMS sending when orders transition from warehouse to logistics
-- **SMS Template Integration**: Uses template #1 with format "سلام {{customer_name}} کد تحویل سفارش {{order_number}}: {{delivery_code}}"
-- **Template Fix**: Corrected template ID from 3 to 1 to match database template for delivery codes
+- **SMS Template Integration**: Uses template #3 with format "سلام {{customer_name}} کد تحویل سفارش {{order_number}}: {{delivery_code}}"
+- **Template Fix**: Corrected template ID from 1 to 3 to match database template for delivery codes
 - **Trigger Events**: SMS automatically sent when order status changes to:
   - `warehouse_approved` (warehouse approves order for logistics)
   - `logistics_assigned` (order assigned to logistics department)
