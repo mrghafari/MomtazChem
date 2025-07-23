@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست خروجی پروفایل مشتری</title>
+    <style>
+        body {
+            font-family: 'Tahoma', Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+            direction: rtl;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background: #007cba;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #005a85;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        .info {
+            background: #e7f3ff;
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 4px solid #007cba;
+            margin: 10px 0;
+        }
+        input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin: 5px;
+            width: 100px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>تست سیستم خروجی پروفایل مشتری CRM</h1>
+        <p>این صفحه برای تست عملکرد خروجی گیری پروفایل مشتری از سیستم CRM طراحی شده است.</p>
+
+        <div class="info">
+            <strong>راهنما:</strong> شماره ID مشتری را وارد کنید و دکمه "تست خروجی" را کلیک کنید.
+            <br>
+            مشتری باید از قبل در سیستم CRM موجود باشد.
+        </div>
+
+        <div class="test-section">
+            <h3>🧪 تست خروجی PDF پروفایل مشتری</h3>
+            
+            <label>شماره ID مشتری:</label>
+            <input type="number" id="customerId" value="1" min="1">
+            
+            <button onclick="testCustomerProfileExport()">تست خروجی PDF</button>
+            
+            <div id="testResults" style="margin-top: 15px;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📄 ویژگی‌های سیستم خروجی</h3>
+            <ul>
+                <li>✅ خروجی PDF با فونت فارسی Vazir</li>
+                <li>✅ نمایش لوگوی شرکت</li>
+                <li>✅ فرمت RTL برای متون فارسی</li>
+                <li>✅ تاریخ میلادی (Gregorian)</li>
+                <li>✅ اطلاعات کامل مشتری در بخش‌های مختلف</li>
+                <li>✅ اطلاعات شخصی، تماس، تجاری و ارتباط</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h3>🔗 API Endpoints</h3>
+            <ul>
+                <li><code>GET /api/crm/customers/:id/export-pdf</code> - خروجی پروفایل مشتری</li>
+                <li><code>GET /api/crm/analytics/export-pdf</code> - خروجی آنالیتیک کل</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        async function testCustomerProfileExport() {
+            const resultsDiv = document.getElementById('testResults');
+            const customerId = document.getElementById('customerId').value;
+            
+            if (!customerId) {
+                resultsDiv.innerHTML = '<div class="error">لطفاً شماره ID مشتری را وارد کنید</div>';
+                return;
+            }
+
+            resultsDiv.innerHTML = '<div>در حال تست...</div>';
+
+            try {
+                console.log(`Testing customer profile export for ID: ${customerId}`);
+                
+                const response = await fetch(`/api/crm/customers/${customerId}/export-pdf`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const blob = await response.blob();
+                const pdfSize = blob.size;
+                
+                // Create download link
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `customer-profile-${customerId}-${new Date().toISOString().split('T')[0]}.pdf`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+
+                resultsDiv.innerHTML = `
+                    <div class="success">
+                        ✅ تست موفق!<br>
+                        📄 فایل PDF تولید شد (${pdfSize.toLocaleString()} بایت)<br>
+                        💾 فایل دانلود شد
+                    </div>
+                `;
+
+            } catch (error) {
+                console.error('Test failed:', error);
+                resultsDiv.innerHTML = `
+                    <div class="error">
+                        ❌ تست ناموفق: ${error.message}<br>
+                        🔍 جزئیات در کنسول مرورگر موجود است
+                    </div>
+                `;
+            }
+        }
+
+        // Auto-populate customer ID if available
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Customer profile export test page loaded');
+        });
+    </script>
+</body>
+</html>

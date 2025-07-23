@@ -420,6 +420,187 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
   });
 }
 
+// Generate Customer Profile PDF using PDFKit
+export async function generateCustomerProfilePDF(customerData: any): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    try {
+      console.log('👤 Generating customer profile PDF with PDFKit...');
+      
+      // Create a PDF document
+      const doc = new PDFDocument({
+        size: 'A4',
+        margin: 50,
+        info: {
+          Title: `Customer Profile - ${customerData.firstName || ''} ${customerData.lastName || ''}`,
+          Author: 'Momtaz Chem',
+          Subject: 'Customer Profile Report'
+        }
+      });
+
+      const chunks: Buffer[] = [];
+      
+      doc.on('data', (chunk: Buffer) => {
+        chunks.push(chunk);
+      });
+
+      doc.on('end', () => {
+        const result = Buffer.concat(chunks);
+        console.log('✅ Customer profile PDF generated successfully, size:', result.length);
+        resolve(result);
+      });
+
+      doc.on('error', (error: Error) => {
+        console.error('❌ PDF generation error:', error);
+        reject(error);
+      });
+
+      // Add content to PDF
+      try {
+        // Try to register custom fonts
+        const vazirRegularBuffer = Buffer.from(vazirRegular, 'base64');
+        const vazirBoldBuffer = Buffer.from(vazirBold, 'base64');
+        
+        doc.registerFont('VazirRegular', vazirRegularBuffer);
+        doc.registerFont('VazirBold', vazirBoldBuffer);
+        
+        doc.font('VazirBold');
+        
+        // Add company logo
+        try {
+          const logoBuffer = Buffer.from(companyLogoBase64, 'base64');
+          doc.image(logoBuffer, 450, 30, { width: 80, height: 60 });
+        } catch (logoError) {
+          console.warn('⚠️ Logo embedding failed:', logoError);
+        }
+        
+        // Title
+        doc.fontSize(20)
+           .text(formatRTLText('پروفایل مشتری'), 50, 50, { align: 'center' });
+        
+        doc.font('VazirRegular');
+        
+        // Date - Gregorian format
+        const currentDate = new Date();
+        const gregorianDate = `${currentDate.getFullYear()}/${String(currentDate.getMonth() + 1).padStart(2, '0')}/${String(currentDate.getDate()).padStart(2, '0')}`;
+        doc.fontSize(12)
+           .text(formatRTLText(`تاریخ گزارش: ${gregorianDate}`), 50, 90, { align: 'right' });
+        
+        let yPosition = 130;
+        
+        // Personal Information Section
+        doc.fontSize(16).font('VazirBold').text(formatRTLText('اطلاعات شخصی'), 50, yPosition, { align: 'right' });
+        yPosition += 30;
+        doc.fontSize(12).font('VazirRegular');
+        
+        doc.text(formatRTLText(`نام: ${customerData.firstName || ''} ${customerData.lastName || ''}`), 50, yPosition, { align: 'right' });
+        yPosition += 20;
+        doc.text(formatRTLText(`ایمیل: ${customerData.email || 'نامشخص'}`), 50, yPosition, { align: 'right' });
+        yPosition += 20;
+        doc.text(formatRTLText(`شماره تماس: ${customerData.phone || 'نامشخص'}`), 50, yPosition, { align: 'right' });
+        yPosition += 20;
+        doc.text(formatRTLText(`شرکت: ${customerData.company || 'نامشخص'}`), 50, yPosition, { align: 'right' });
+        yPosition += 30;
+        
+        // Contact Information Section
+        doc.fontSize(16).font('VazirBold').text(formatRTLText('اطلاعات تماس'), 50, yPosition, { align: 'right' });
+        yPosition += 30;
+        doc.fontSize(12).font('VazirRegular');
+        
+        doc.text(formatRTLText(`کشور: ${customerData.country || 'نامشخص'}`), 50, yPosition, { align: 'right' });
+        yPosition += 20;
+        doc.text(formatRTLText(`استان: ${customerData.province || 'نامشخص'}`), 50, yPosition, { align: 'right' });
+        yPosition += 20;
+        doc.text(formatRTLText(`شهر: ${customerData.city || 'نامشخص'}`), 50, yPosition, { align: 'right' });
+        yPosition += 20;
+        doc.text(formatRTLText(`آدرس: ${customerData.address || 'نامشخص'}`), 50, yPosition, { align: 'right' });
+        yPosition += 20;
+        doc.text(formatRTLText(`کد پستی: ${customerData.postalCode || 'نامشخص'}`), 50, yPosition, { align: 'right' });
+        yPosition += 30;
+        
+        // Business Information Section  
+        doc.fontSize(16).font('VazirBold').text(formatRTLText('اطلاعات تجاری'), 50, yPosition, { align: 'right' });
+        yPosition += 30;
+        doc.fontSize(12).font('VazirRegular');
+        
+        const customerType = customerData.customerType === 'business' ? 'شرکتی' : 'شخصی';
+        doc.text(formatRTLText(`نوع مشتری: ${customerType}`), 50, yPosition, { align: 'right' });
+        yPosition += 20;
+        doc.text(formatRTLText(`صنعت: ${customerData.industry || 'نامشخص'}`), 50, yPosition, { align: 'right' });
+        yPosition += 20;
+        doc.text(formatRTLText(`اندازه شرکت: ${customerData.companySize || 'نامشخص'}`), 50, yPosition, { align: 'right' });
+        yPosition += 20;
+        doc.text(formatRTLText(`منبع ارجاع: ${customerData.leadSource || 'نامشخص'}`), 50, yPosition, { align: 'right' });
+        yPosition += 30;
+        
+        // Communication Preferences Section
+        doc.fontSize(16).font('VazirBold').text(formatRTLText('تنظیمات ارتباط'), 50, yPosition, { align: 'right' });
+        yPosition += 30;
+        doc.fontSize(12).font('VazirRegular');
+        
+        doc.text(formatRTLText(`زبان ترجیحی: ${customerData.preferredLanguage || 'نامشخص'}`), 50, yPosition, { align: 'right' });
+        yPosition += 20;
+        doc.text(formatRTLText(`روش ارتباط: ${customerData.communicationPreference || 'نامشخص'}`), 50, yPosition, { align: 'right' });
+        yPosition += 20;
+        
+        const smsStatus = customerData.smsEnabled ? 'فعال' : 'غیرفعال';
+        const emailStatus = customerData.emailEnabled ? 'فعال' : 'غیرفعال';
+        doc.text(formatRTLText(`پیامک: ${smsStatus}`), 50, yPosition, { align: 'right' });
+        yPosition += 20;
+        doc.text(formatRTLText(`ایمیل: ${emailStatus}`), 50, yPosition, { align: 'right' });
+        yPosition += 30;
+        
+        // Registration Information
+        if (customerData.createdAt) {
+          const regDate = new Date(customerData.createdAt);
+          const regDateFormatted = `${regDate.getFullYear()}/${String(regDate.getMonth() + 1).padStart(2, '0')}/${String(regDate.getDate()).padStart(2, '0')}`;
+          doc.fontSize(16).font('VazirBold').text(formatRTLText('اطلاعات ثبت‌نام'), 50, yPosition, { align: 'right' });
+          yPosition += 30;
+          doc.fontSize(12).font('VazirRegular');
+          doc.text(formatRTLText(`تاریخ ثبت‌نام: ${regDateFormatted}`), 50, yPosition, { align: 'right' });
+          yPosition += 20;
+        }
+
+      } catch (fontError) {
+        console.warn('⚠️ Font loading failed, using fallback approach:', fontError);
+        
+        // Fallback to default font
+        doc.fontSize(20)
+           .text('Customer Profile - Momtaz Chem', 50, 50, { align: 'center' });
+        
+        doc.fontSize(14)
+           .text('Personal Information:', 50, 100);
+        
+        doc.fontSize(12)
+           .text(`Name: ${customerData.firstName || ''} ${customerData.lastName || ''}`, 50, 130)
+           .text(`Email: ${customerData.email || 'Unknown'}`, 50, 150)
+           .text(`Phone: ${customerData.phone || 'Unknown'}`, 50, 170)
+           .text(`Company: ${customerData.company || 'Unknown'}`, 50, 190);
+           
+        doc.fontSize(14)
+           .text('Contact Information:', 50, 230);
+        
+        doc.fontSize(12)
+           .text(`Country: ${customerData.country || 'Unknown'}`, 50, 260)
+           .text(`Province: ${customerData.province || 'Unknown'}`, 50, 280)
+           .text(`City: ${customerData.city || 'Unknown'}`, 50, 300)
+           .text(`Address: ${customerData.address || 'Unknown'}`, 50, 320);
+      }
+      
+      // Footer
+      doc.fontSize(10)
+         .text(formatRTLText('شرکت الانتاج الممتاز / Al-Entaj Al-Momtaz Company'), 50, 750, { align: 'center' })
+         .text('www.momtazchem.com | info@momtazchem.com', 50, 765, { align: 'center' });
+
+      // Finalize the PDF
+      doc.end();
+      
+    } catch (error) {
+      console.error('❌ Error in generateCustomerProfilePDF:', error);
+      reject(error);
+    }
+  });
+}
+
 // Generate Customer Report PDF using PDFKit
 export async function generateCustomerReportPDF(customerData: any, orders: any[] = [], activities: any[] = []): Promise<Buffer> {
   return new Promise((resolve, reject) => {

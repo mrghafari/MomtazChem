@@ -17349,6 +17349,47 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     }
   });
 
+  // CRM Customer Profile PDF export
+  app.get("/api/crm/customers/:id/export-pdf", requireAuth, async (req, res) => {
+    try {
+      const customerId = parseInt(req.params.id);
+      if (isNaN(customerId)) {
+        return res.status(400).json({ success: false, message: "Invalid customer ID" });
+      }
+
+      // Get customer data
+      const customer = await crmStorage.getCrmCustomerById(customerId);
+      if (!customer) {
+        return res.status(404).json({ success: false, message: "Customer not found" });
+      }
+
+      // Generate PDF using PDFKit
+      const { generateCustomerProfilePDF } = await import('./pdfkit-generator.js');
+      const pdfBuffer = await generateCustomerProfilePDF(customer);
+
+      // Validate PDF buffer before sending
+      if (!pdfBuffer || pdfBuffer.length === 0) {
+        throw new Error('Generated PDF is empty');
+      }
+      
+      console.log('Customer profile PDF generated successfully, size:', pdfBuffer.length, 'bytes');
+      
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="customer-profile-${customerId}-${new Date().toISOString().split('T')[0]}.pdf"`);
+      res.setHeader('Cache-Control', 'no-cache');
+      
+      // Send PDF buffer
+      res.end(pdfBuffer);
+      
+    } catch (error) {
+      console.error("Error generating customer profile PDF:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to generate customer profile PDF" 
+      });
+    }
+  });
+
 
 
   // Toggle SMS system (admin only)

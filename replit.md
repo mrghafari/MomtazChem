@@ -6,6 +6,27 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: CRM Customer Profile Export System with Individual PDF Generation (July 23, 2025)
+✅ **IMPLEMENTED: Complete customer profile PDF export functionality in CRM system**
+- **Individual Customer Export**: Added capability to export individual customer profiles as comprehensive PDF reports
+- **API Endpoint**: Created `/api/crm/customers/:id/export-pdf` endpoint for single customer profile export
+- **PDF Generator Function**: `generateCustomerProfilePDF()` function generates detailed customer reports with:
+  - **Personal Information**: Name, email, phone, company details
+  - **Contact Information**: Country, province, city, address, postal code with geographic data support
+  - **Business Information**: Customer type (business/personal), industry, company size, lead source
+  - **Communication Preferences**: Preferred language, communication method, SMS/email status
+  - **Registration Details**: Account creation date and authentication settings
+- **Company Branding**: Full company logo and name integration ("شرکت الانتاج الممتاز / Al-Entaj Al-Momtaz Company")
+- **RTL Text Support**: Complete Persian text formatting with proper right-to-left direction using formatRTLText()
+- **Date Format**: Gregorian calendar format (YYYY/MM/DD) for all dates throughout PDF
+- **CRM Integration**: Export button already integrated in CRM table actions with FileText icon
+- **Frontend Handler**: `handleExportCustomer(customerId)` function manages PDF download with proper error handling
+- **File Naming**: Dynamic filename pattern: `customer-profile-{customerId}-{date}.pdf`
+- **Test Interface**: Created comprehensive test page at `/test-customer-profile-export.html`
+- **Authentication**: Requires admin authentication through CRM system
+- **Impact**: CRM administrators can now export detailed individual customer profiles as professional PDF reports
+- **Result**: Complete customer profile export system operational alongside existing analytics export functionality
+
 ### COMPLETED: Export Analytics PDF Generation System with Company Logo and RTL Text Direction Fix (July 23, 2025)
 ✅ **RESOLVED: Complete Export Analytics PDF with company branding and proper Persian text direction**
 - **Critical Issue**: Export Analytics button was failing with "pdfFonts.pdfMake.vfs is undefined" error due to VFS font loading problems
