@@ -43,6 +43,7 @@ interface TransportationCompany {
 interface LogisticsOrder {
   id: number;
   customerOrderId: number;
+  orderNumber?: string;
   currentStatus: string;
   calculatedWeight?: number;
   weightUnit?: string;
@@ -108,6 +109,17 @@ const LogisticsManagement = () => {
   });
   
   const logisticsOrders = logisticsOrdersResponse?.orders || [];
+  
+  // Debug: Log first order to check orderNumber field
+  if (logisticsOrders.length > 0) {
+    console.log('🔍 [LOGISTICS MGMT] First order data:', {
+      id: logisticsOrders[0].id,
+      customerOrderId: logisticsOrders[0].customerOrderId,
+      orderNumber: logisticsOrders[0].orderNumber,
+      hasOrderNumber: !!logisticsOrders[0].orderNumber,
+      allFields: Object.keys(logisticsOrders[0])
+    });
+  }
   
   // Map data to add customer object structure for compatibility
   const mappedLogisticsOrders = logisticsOrders.map((order: any) => ({
@@ -246,7 +258,7 @@ const LogisticsManagement = () => {
               <Card key={order.id} className="border-r-4 border-r-green-500 bg-green-50">
                 <CardContent className="p-4">
                   <div className="flex justify-between items-center mb-3">
-                    <h4 className="font-semibold text-green-800 text-lg">سفارش #{order.customerOrderId}</h4>
+                    <h4 className="font-semibold text-green-800 text-lg">{order.orderNumber ? `سفارش ${order.orderNumber}` : `سفارش #${order.customerOrderId}`}</h4>
                     <Badge variant="default" className="bg-green-600 text-white">
                       تایید شده انبار
                     </Badge>
