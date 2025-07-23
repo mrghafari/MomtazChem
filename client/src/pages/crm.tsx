@@ -347,8 +347,9 @@ export default function CRM() {
   };
 
   const handleEditCustomer = (customer: CrmCustomer) => {
-    // Navigate to customer profile edit page
-    setLocation(`/customer-profile-edit?customerId=${customer.id}`);
+    // Open CRM edit dialog instead of navigating to customer portal
+    setEditingCustomer(customer);
+    setIsEditCustomerDialogOpen(true);
   };
 
   const handleUpdateCustomer = () => {
