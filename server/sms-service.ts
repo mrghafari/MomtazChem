@@ -29,8 +29,15 @@ interface SmsMessage {
 export class SmsService {
   private settings: SmsSettings;
 
-  constructor(settings: SmsSettings) {
-    this.settings = settings;
+  constructor(settings?: SmsSettings) {
+    this.settings = settings || {
+      isEnabled: true,
+      provider: 'infobip',
+      codeLength: 6,
+      codeExpiry: 300,
+      maxAttempts: 3,
+      rateLimitMinutes: 5
+    };
   }
 
   async sendSms(message: SmsMessage): Promise<{ success: boolean; messageId?: string; error?: string }> {
@@ -360,6 +367,46 @@ export class SmsService {
     return await this.sendSms(message);
   }
 
+  async sendSmsUsingTemplate(templateId: number, phone: string, variables: Record<string, string>): Promise<{ success: boolean; messageId?: string; error?: string }> {
+    try {
+      const { pool } = await import('./db');
+      
+      // Get template from database
+      const templateResult = await pool.query('SELECT * FROM sms_templates WHERE id = $1 AND is_active = true', [templateId]);
+      
+      if (templateResult.rows.length === 0) {
+        return { success: false, error: `Template ${templateId} not found or inactive` };
+      }
+      
+      const template = templateResult.rows[0];
+      let message = template.template_content;
+      
+      // Replace template variables
+      for (const [key, value] of Object.entries(variables)) {
+        const regex = new RegExp(`{{${key}}}`, 'g');
+        message = message.replace(regex, value);
+      }
+      
+      console.log(`📱 [SMS TEMPLATE ${templateId}] Sending to ${phone}:`, message);
+      
+      // Send SMS
+      const result = await this.sendSms({ to: phone, message });
+      
+      // Update template usage count
+      if (result.success) {
+        await pool.query(
+          'UPDATE sms_templates SET usage_count = usage_count + 1, last_used = NOW() WHERE id = $1',
+          [templateId]
+        );
+      }
+      
+      return result;
+    } catch (error: any) {
+      console.error(`❌ [SMS TEMPLATE ${templateId}] Error:`, error);
+      return { success: false, error: error.message };
+    }
+  }
+
   async testConnection(): Promise<{ success: boolean; error?: string }> {
     try {
       const testResult = await this.sendSms({
@@ -375,17 +422,45 @@ export class SmsService {
 }
 
 export async function createSmsService(): Promise<SmsService> {
-  const { pool } = await import('./db');
-  
-  const result = await pool.query('SELECT * FROM sms_settings WHERE id = 1');
-  const settings = result.rows[0] || {
-    isEnabled: false,
-    provider: 'infobip',
-    codeLength: 6,
-    codeExpiry: 300,
-    maxAttempts: 3,
-    rateLimitMinutes: 5
-  };
+  try {
+    const { pool } = await import('./db');
+    
+    const result = await pool.query('SELECT * FROM sms_settings WHERE id = 1');
+    const dbSettings = result.rows[0];
+    
+    const settings: SmsSettings = {
+      isEnabled: dbSettings?.is_enabled ?? true,
+      provider: dbSettings?.provider ?? 'infobip',
+      customProviderName: dbSettings?.custom_provider_name,
+      apiKey: dbSettings?.api_key,
+      apiSecret: dbSettings?.api_secret,
+      username: dbSettings?.username,
+      password: dbSettings?.password,
+      senderNumber: dbSettings?.sender_number,
+      apiEndpoint: dbSettings?.api_endpoint,
+      serviceType: dbSettings?.service_type,
+      patternId: dbSettings?.pattern_id,
+      serviceCode: dbSettings?.service_code,
+      codeLength: dbSettings?.code_length ?? 6,
+      codeExpiry: dbSettings?.code_expiry ?? 300,
+      maxAttempts: dbSettings?.max_attempts ?? 3,
+      rateLimitMinutes: dbSettings?.rate_limit_minutes ?? 5
+    };
 
-  return new SmsService(settings);
+    return new SmsService(settings);
+  } catch (error) {
+    console.error('Error loading SMS settings from database, using defaults:', error);
+    
+    // Fallback to default settings
+    const defaultSettings: SmsSettings = {
+      isEnabled: true,
+      provider: 'infobip',
+      codeLength: 6,
+      codeExpiry: 300,
+      maxAttempts: 3,
+      rateLimitMinutes: 5
+    };
+    
+    return new SmsService(defaultSettings);
+  }
 }

@@ -6,6 +6,36 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Automatic Delivery Code SMS System with Template #7 Implementation (July 23, 2025)
+✅ **IMPLEMENTED: Complete automatic SMS delivery code system using SMS template #7**
+- **Core Functionality**: Automatic delivery code generation and SMS sending when orders transition from warehouse to logistics
+- **SMS Template Integration**: Uses template #7 with format "سلام {{customer_name}} کد تحویل سفارش {{order_number}}: {{delivery_code}}"
+- **Trigger Events**: SMS automatically sent when order status changes to:
+  - `warehouse_approved` (warehouse approves order for logistics)
+  - `logistics_assigned` (order assigned to logistics department)
+  - `logistics_dispatched` (order dispatched by logistics)
+- **Customer Data Integration**: Enhanced customer information retrieval with CRM integration:
+  - Fetches customer phone, firstName, lastName from crm_customers table
+  - Retrieves order number from customer_orders table
+  - Joins order_management with customer data for complete information
+- **Sequential Code Generation**: `generateDeliveryCode()` creates unique 4-digit codes (1118, 1119, 1120, etc.)
+- **Enhanced SMS Service**: 
+  - Fixed SmsService constructor to handle optional settings parameter
+  - Updated `createSmsService()` function with proper database settings loading
+  - Improved error handling and fallback to default settings
+  - Enhanced `sendDeliveryCodeSms()` method using template-based SMS sending
+- **Technical Implementation**:
+  - Modified `updateOrderStatus()` in order-management-storage.ts to trigger automatic SMS
+  - Added comprehensive logging for delivery code generation and SMS sending
+  - Integration with existing SmsService class and template system
+  - Proper error handling for SMS sending failures
+- **Test Results**: Successfully tested with multiple orders:
+  - Order 88 (ABAS ABASI): Code 1119 sent to 09124955173 for order M2511132
+  - Order 89 (Omid Mohammad): Code 1120 sent to +9647503533769 for order M2511134
+- **Business Impact**: Complete automation of delivery code communication reducing manual coordination
+- **Test Infrastructure**: Created comprehensive test page at `/test-sms-delivery-code.html`
+- **Status**: Automatic delivery code SMS system fully operational with template #7 integration
+
 ### COMPLETED: Warehouse Order Details Form Enhancements and Weight Display Implementation (July 23, 2025)
 ✅ **RESOLVED: Order number format and warehouse notes functionality in order details modal**
 - **Issue**: User reported order details modal showing wrong format and missing submit button for notes

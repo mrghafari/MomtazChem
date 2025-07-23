@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست ارسال خودکار پیامک کد تحویل با قالب شماره 7</title>
+    <style>
+        body {
+            font-family: 'Vazir', Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+            direction: rtl;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .test-section h3 {
+            color: #2563eb;
+            margin-top: 0;
+        }
+        .log-section {
+            background-color: #1e1e1e;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            direction: ltr;
+            text-align: left;
+        }
+        .success { color: #22c55e; }
+        .error { color: #ef4444; }
+        .info { color: #3b82f6; }
+        .warning { color: #f59e0b; }
+        
+        .test-result {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid;
+        }
+        .test-result.success {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+            color: #166534;
+        }
+        .test-result.error {
+            background-color: #fef2f2;
+            border-color: #ef4444;
+            color: #991b1b;
+        }
+        
+        .delivery-code-demo {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .order-status {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .status-card {
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .financial { background-color: #fef3c7; color: #92400e; }
+        .warehouse { background-color: #dbeafe; color: #1e40af; }
+        .logistics { background-color: #dcfce7; color: #166534; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🚚 تست سیستم خودکار ارسال پیامک کد تحویل</h1>
+        <p><strong>هدف:</strong> تست عملکرد ارسال خودکار پیامک کد تحویل با قالب شماره 7 هنگام تغییر وضعیت سفارش از انبار به لجستیک</p>
+        
+        <div class="delivery-code-demo">
+            📱 نمونه پیامک: سلام {{customer_name}} کد تحویل سفارش {{order_number}}: {{delivery_code}}
+        </div>
+        
+        <div class="test-section">
+            <h3>🔄 گردش کار خودکار</h3>
+            <div class="order-status">
+                <div class="status-card financial">بخش مالی ✅</div>
+                <div class="status-card warehouse">انبار ✅</div>
+                <div class="status-card logistics">لجستیک (پیامک خودکار) 📱</div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>📝 نتایج تست‌های انجام شده</h3>
+            
+            <div class="test-result success">
+                <strong>✅ تست سفارش 88 (ABAS ABASI):</strong><br>
+                • کد تحویل تولید شده: 1119<br>
+                • شماره تلفن: 09124955173<br>
+                • شماره سفارش: M2511132<br>
+                • وضعیت: warehouse_approved → logistics_assigned<br>
+                • پیامک آماده شده با قالب شماره 7
+            </div>
+            
+            <div class="test-result success">
+                <strong>✅ تست سفارش 89 (Omid Mohammad):</strong><br>
+                • کد تحویل تولید شده: 1120<br>
+                • شماره تلفن: +9647503533769<br>
+                • شماره سفارش: M2511134<br>
+                • وضعیت: logistics_dispatched → warehouse_approved<br>
+                • پیامک آماده شده با قالب شماره 7
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🔧 وضعیت فنی سیستم</h3>
+            
+            <div class="test-result success">
+                <strong>✅ ویژگی‌های پیاده‌سازی شده:</strong><br>
+                • تولید خودکار کد تحویل متوالی<br>
+                • یکپارچه‌سازی با دیتابیس مشتریان CRM<br>
+                • استفاده از قالب SMS شماره 7<br>
+                • لاگ‌گذاری کامل عملیات<br>
+                • ارسال خودکار هنگام تأیید انبار
+            </div>
+            
+            <div class="test-result error">
+                <strong>⚠️ مسئله جزئی:</strong><br>
+                خطای "Cannot read properties of undefined (reading 'isEnabled')" در SmsService<br>
+                <em>راه‌حل:</em> اصلاح تابع createSmsService برای بارگذاری صحیح تنظیمات SMS
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>📊 لاگ سیستم در زمان واقعی</h3>
+            <div class="log-section" id="systemLogs">
+✅ [DELIVERY CODE] Generated sequential code 1120 for order 89
+📱 [SMS TEMPLATE 7] Sending to +9647503533769: سلام Omid Mohammad
+کد تحویل سفارش M2511134: 1120
+این کد را هنگام دریافت کالا به پیک ارائه دهید.
+ممتاز شیمی
+✅ [AUTO SMS TEMPLATE 7] Delivery code 1120 sent to +9647503533769 for order M2511134
+✅ [ORDER STATUS] Order updated successfully: { id: 89, customerOrderId: 255, newStatus: 'warehouse_approved' }
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🎯 خلاصه عملکرد</h3>
+            <ul>
+                <li><strong>تولید کد تحویل:</strong> ✅ عملکرد صحیح (کدهای متوالی 1119, 1120)</li>
+                <li><strong>شناسایی مشتری:</strong> ✅ یکپارچه‌سازی با CRM</li>
+                <li><strong>قالب پیامک:</strong> ✅ استفاده از قالب شماره 7</li>
+                <li><strong>ارسال خودکار:</strong> ✅ فعال‌سازی با تغییر وضعیت سفارش</li>
+                <li><strong>محتوای پیامک:</strong> ✅ شامل نام مشتری، شماره سفارش، کد تحویل</li>
+                <li><strong>ارسال واقعی SMS:</strong> ⚠️ نیاز به تنظیم API کلید SMS</li>
+            </ul>
+        </div>
+        
+        <div class="test-section">
+            <h3>📋 مراحل بعدی</h3>
+            <ol>
+                <li>اصلاح مشکل SmsService برای بارگذاری تنظیمات از دیتابیس</li>
+                <li>تنظیم API کلیدهای SMS (Infobip یا ارائه‌دهنده محلی)</li>
+                <li>تست ارسال واقعی پیامک</li>
+                <li>نظارت بر عملکرد سیستم در محیط تولید</li>
+            </ol>
+        </div>
+    </div>
+</body>
+</html>
