@@ -6,7 +6,7 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
-### COMPLETED: Enhanced CRM Address Integration with Active Delivery Logic (July 23, 2025)
+### COMPLETED: Enhanced CRM Address Integration with Active Delivery Logic and Province Field (July 23, 2025)
 ✅ **IMPLEMENTED: Complete smart delivery address system with conditional logic for active address determination**
 - **CRM Default Logic**: CRM address and phone automatically serve as default values for all delivery fields
 - **Secondary Address Integration**: Added dedicated "آدرس دوم یا شماره موبایل متفاوت" section for logged-in users
@@ -18,25 +18,37 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Enhanced Form Schema**: Added new fields to checkout form:
   - `secondDeliveryAddress` - Alternative delivery address
   - `secondDeliveryCity` - City for second address
+  - `secondDeliveryProvince` - Province/state for second address
   - `secondDeliveryPostalCode` - Postal code for second address
   - `recipientMobile` - Alternative mobile number for delivery contact
 - **Visual User Interface**: 
   - Expandable sections for "آدرس دوم" and "شماره موبایل متفاوت"
+  - Visual graying out effect when primary CRM fields are deactivated
   - Toggle buttons to show/hide additional address and mobile fields
   - Clear labeling and Persian guidance text
+  - Province field added to complete address collection
 - **Order Processing Enhancement**: Modified onSubmit function with sophisticated logic:
-  - Determines active delivery address based on form input priority
-  - Creates `activeDeliveryInfo` object tracking which fields are being used
+  - Determines active delivery address and phone based on priority system
+  - Creates comprehensive `activeDeliveryInfo` object tracking field sources
   - Preserves CRM data integrity while allowing customer overrides
   - Tracks whether second address or different phone is used for logistics
-- **Conditional Display System**: Enhanced visual feedback system with status indicators
-- **Business Logic**: Ensures proper delivery logistics by using most recent/specific customer input
+  - Includes warehouse notes indicating which fields are active
+- **Visual Feedback System**: 
+  - Primary CRM fields become disabled and grayed out when secondary options activated
+  - Immediate visual confirmation of which fields are active for order processing
+  - Status text changes to indicate "آدرس پیش‌فرض (غیرفعال)" when overridden
+- **Logistics Integration**: Active field information flows to warehouse and logistics systems:
+  - `activeDeliveryInfo` object contains all delivery logistics data
+  - Source tracking for both address and phone number origins
+  - Warehouse notes automatically generated indicating active field sources
+- **Business Logic**: Ensures proper delivery logistics by using most recent/specific customer input with complete province information
 - **Technical Implementation**:
-  - Complete form field integration with proper validation
+  - Complete form field integration with proper validation including province field
   - Smart data mapping between form values and order processing
   - Conditional rendering based on authentication status
   - Persian UI with proper RTL text support
-- **Status**: Advanced conditional delivery address system fully operational with smart address priority logic
+  - Console logging for debugging active delivery logic
+- **Status**: Advanced conditional delivery address system fully operational with smart address priority logic, visual feedback, and complete logistics integration
 
 ### COMPLETED: Iraqi Geography Management Interface Implementation (July 23, 2025)
 ✅ **IMPLEMENTED: Complete Iraqi geography administration system with trilingual data support**

@@ -52,6 +52,7 @@ const createCheckoutFormSchema = (isLoggedIn: boolean) => z.object({
   // Second Address Fields
   secondDeliveryAddress: z.string().optional(),
   secondDeliveryCity: z.string().optional(),
+  secondDeliveryProvince: z.string().optional(),
   secondDeliveryPostalCode: z.string().optional(),
   recipientMobile: z.string().optional(),
   
@@ -366,37 +367,54 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
     // Determine active delivery address and phone based on user input
     let deliveryAddress = '';
     let deliveryCity = '';
+    let deliveryProvince = '';
     let deliveryCountry = '';
     let deliveryPostalCode = '';
     let recipientPhone = '';
     let recipientName = '';
+    let activeDeliveryInfo = {
+      addressSource: '',
+      phoneSource: '',
+      isSecondAddress: false,
+      isDifferentMobile: false
+    };
     
     // For logged in users with CRM data
     if (isUserLoggedIn && customerData?.customer) {
       const customer = customerData.customer;
       
-      // Check if second address is specified
+      // Check if second address is specified (PRIORITY 1: Second Address)
       if (data.secondDeliveryAddress) {
         // Use second address information
         deliveryAddress = data.secondDeliveryAddress;
         deliveryCity = data.secondDeliveryCity || customer.city || '';
+        deliveryProvince = data.secondDeliveryProvince || customer.province || customer.state || '';
         deliveryCountry = customer.country || '';
         deliveryPostalCode = data.secondDeliveryPostalCode || '';
+        activeDeliveryInfo.addressSource = 'second_address';
+        activeDeliveryInfo.isSecondAddress = true;
       } else {
         // Use CRM default address
         deliveryAddress = customer.address || '';
         deliveryCity = customer.city || '';
+        deliveryProvince = customer.province || customer.state || '';
         deliveryCountry = customer.country || '';
         deliveryPostalCode = customer.postalCode || '';
+        activeDeliveryInfo.addressSource = 'crm_default';
+        activeDeliveryInfo.isSecondAddress = false;
       }
       
-      // Check if different recipient mobile is specified
+      // Check if different recipient mobile is specified (PRIORITY 2: Different Mobile)
       if (data.recipientMobile) {
         // Use specified recipient mobile
         recipientPhone = data.recipientMobile;
+        activeDeliveryInfo.phoneSource = 'different_mobile';
+        activeDeliveryInfo.isDifferentMobile = true;
       } else {
         // Use customer's default phone from CRM
         recipientPhone = customer.phone || '';
+        activeDeliveryInfo.phoneSource = 'crm_default';
+        activeDeliveryInfo.isDifferentMobile = false;
       }
       
       // Use customer name as default recipient unless different name specified
@@ -409,10 +427,13 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
       
       deliveryAddress = shippingAddress;
       deliveryCity = data.billingCity;
+      deliveryProvince = data.billingState;
       deliveryCountry = data.billingCountry;
       deliveryPostalCode = data.billingPostalCode;
       recipientPhone = data.recipientPhone || data.phone || '';
       recipientName = data.recipientName || `${data.firstName} ${data.lastName}`;
+      activeDeliveryInfo.addressSource = 'guest_form';
+      activeDeliveryInfo.phoneSource = 'guest_form';
     }
 
     // Prepare customer info
@@ -457,23 +478,44 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
       };
     }
 
+    // Console log for debugging active delivery logic
+    console.log('📍 Active Delivery Info:', {
+      addressSource: activeDeliveryInfo.addressSource,
+      phoneSource: activeDeliveryInfo.phoneSource,
+      isSecondAddress: activeDeliveryInfo.isSecondAddress,
+      isDifferentMobile: activeDeliveryInfo.isDifferentMobile,
+      deliveryAddress,
+      deliveryCity,
+      deliveryProvince,
+      recipientPhone
+    });
+
     const orderData = {
       customerInfo,
       recipientInfo: {
         recipientName: recipientName,
         recipientPhone: recipientPhone,
         recipientAddress: deliveryAddress,
-      },
-      // Add active delivery details for order tracking
-      activeDeliveryInfo: {
-        isSecondAddressUsed: !!(data.secondDeliveryAddress),
-        isDifferentPhoneUsed: !!(data.recipientMobile),
-        deliveryAddress: deliveryAddress,
         deliveryCity: deliveryCity,
+        deliveryProvince: deliveryProvince,
         deliveryCountry: deliveryCountry,
         deliveryPostalCode: deliveryPostalCode,
-        recipientPhone: recipientPhone,
-        recipientName: recipientName,
+      },
+      // Critical: Active delivery details for warehouse and logistics
+      activeDeliveryInfo: {
+        addressSource: activeDeliveryInfo.addressSource,
+        phoneSource: activeDeliveryInfo.phoneSource,
+        isSecondAddressUsed: activeDeliveryInfo.isSecondAddress,
+        isDifferentPhoneUsed: activeDeliveryInfo.isDifferentMobile,
+        activeDeliveryAddress: deliveryAddress,
+        activeDeliveryCity: deliveryCity,
+        activeDeliveryProvince: deliveryProvince,
+        activeDeliveryCountry: deliveryCountry,
+        activeDeliveryPostalCode: deliveryPostalCode,
+        activeRecipientPhone: recipientPhone,
+        activeRecipientName: recipientName,
+        // For warehouse and logistics tracking
+        warehouseNotes: `آدرس فعال: ${activeDeliveryInfo.isSecondAddress ? 'آدرس دوم' : 'آدرس CRM'} | تلفن فعال: ${activeDeliveryInfo.isDifferentMobile ? 'موبایل متفاوت' : 'تلفن CRM'}`,
       },
       items: cartItems.map(item => ({
         productId: item.id,
@@ -932,7 +974,21 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                 )}
                               />
                               
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <FormField
+                                  control={form.control}
+                                  name="secondDeliveryProvince"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>استان</FormLabel>
+                                      <FormControl>
+                                        <Input {...field} placeholder="استان" />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                                
                                 <FormField
                                   control={form.control}
                                   name="secondDeliveryCity"
