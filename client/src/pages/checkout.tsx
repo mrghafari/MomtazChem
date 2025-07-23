@@ -136,6 +136,14 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   const isPrimaryAddressDisabled = !!(watchSecondAddress && watchSecondAddress.trim());
   const isPrimaryMobileDisabled = !!(watchRecipientMobile && watchRecipientMobile.trim());
 
+  // Debug conditional graying out
+  console.log('🎯 [CONDITIONAL DEBUG] Watch values:', {
+    watchSecondAddress,
+    watchRecipientMobile,
+    isPrimaryAddressDisabled,
+    isPrimaryMobileDisabled
+  });
+
   // Auto-fill form with customer data when available
   useEffect(() => {
     if (customerData?.success && customerData.customer) {
@@ -1356,22 +1364,22 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                     {/* CRM Default Address Information - Only for logged in users */}
                     {isUserLoggedIn && customerData?.customer && (
                       <div className={`p-3 rounded-lg border transition-all duration-300 ${
-                        (form.watch('secondDeliveryAddress') || form.watch('recipientMobile')) 
+                        (isPrimaryAddressDisabled || isPrimaryMobileDisabled) 
                           ? 'bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600 opacity-60' 
                           : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
                       }`}>
                         <div className={`text-xs font-medium mb-2 flex items-center gap-2 ${
-                          (form.watch('secondDeliveryAddress') || form.watch('recipientMobile'))
+                          (isPrimaryAddressDisabled || isPrimaryMobileDisabled)
                             ? 'text-gray-600 dark:text-gray-400'
                             : 'text-blue-800 dark:text-blue-300'
                         }`}>
                           <MapPin className="w-3 h-3" />
-                          {(form.watch('secondDeliveryAddress') || form.watch('recipientMobile')) 
+                          {(isPrimaryAddressDisabled || isPrimaryMobileDisabled) 
                             ? 'آدرس پیش‌فرض (غیرفعال)' 
                             : 'آدرس پیش‌فرض تحویل (از CRM)'}
                         </div>
                         <div className={`space-y-1 text-xs ${
-                          (form.watch('secondDeliveryAddress') || form.watch('recipientMobile'))
+                          (isPrimaryAddressDisabled || isPrimaryMobileDisabled)
                             ? 'text-gray-500 dark:text-gray-500'
                             : 'text-blue-700 dark:text-blue-400'
                         }`}>
@@ -1393,16 +1401,16 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                           </div>
                         </div>
                         <div className={`mt-2 pt-2 border-t transition-colors ${
-                          (form.watch('secondDeliveryAddress') || form.watch('recipientMobile'))
+                          (isPrimaryAddressDisabled || isPrimaryMobileDisabled)
                             ? 'border-gray-300 dark:border-gray-600'
                             : 'border-blue-200 dark:border-blue-700'
                         }`}>
                           <div className={`text-xs italic ${
-                            (form.watch('secondDeliveryAddress') || form.watch('recipientMobile'))
+                            (isPrimaryAddressDisabled || isPrimaryMobileDisabled)
                               ? 'text-gray-500 dark:text-gray-500'
                               : 'text-blue-600 dark:text-blue-400'
                           }`}>
-                            {(form.watch('secondDeliveryAddress') || form.watch('recipientMobile')) 
+                            {(isPrimaryAddressDisabled || isPrimaryMobileDisabled) 
                               ? '⚠️ آدرس یا شماره جدید مشخص شده - این آدرس استفاده نخواهد شد'
                               : '💡 این آدرس به عنوان آدرس پیش‌فرض تحویل استفاده می‌شود. برای تغییر، آدرس دوم یا شماره موبایل متفاوت وارد کنید.'}
                           </div>
@@ -1411,7 +1419,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                     )}
 
                     {/* Active Address/Phone Information - Shows when second address or different phone is specified */}
-                    {isUserLoggedIn && (form.watch('secondDeliveryAddress') || form.watch('recipientMobile')) && (
+                    {isUserLoggedIn && (isPrimaryAddressDisabled || isPrimaryMobileDisabled) && (
                       <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg border border-green-200 dark:border-green-800">
                         <div className="text-xs font-medium text-green-800 dark:text-green-300 mb-2 flex items-center gap-2">
                           <MapPin className="w-3 h-3" />
@@ -1832,25 +1840,29 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                   {/* CRM Default Address Information in Cart Management */}
                   {isUserLoggedIn && customerData?.customer && (
                     <div className={`p-2 rounded border transition-all duration-300 ${
-                      (form.watch('secondDeliveryAddress') || form.watch('recipientMobile')) 
+                      (isPrimaryAddressDisabled || isPrimaryMobileDisabled) 
                         ? 'bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600 opacity-60' 
                         : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
                     }`}>
                       <div className={`text-xs font-medium mb-1 flex items-center gap-1 ${
-                        (form.watch('secondDeliveryAddress') || form.watch('recipientMobile'))
+                        (isPrimaryAddressDisabled || isPrimaryMobileDisabled)
                           ? 'text-gray-600 dark:text-gray-400'
                           : 'text-blue-800 dark:text-blue-300'
                       }`}>
                         <MapPin className="w-3 h-3" />
-                        {(form.watch('secondDeliveryAddress') || form.watch('recipientMobile')) 
+                        {(isPrimaryAddressDisabled || isPrimaryMobileDisabled) 
                           ? 'آدرس پیش‌فرض (غیرفعال)' 
                           : 'آدرس پیش‌فرض (CRM)'}
                       </div>
                       <div className={`space-y-1 text-xs ${
-                        (form.watch('secondDeliveryAddress') || form.watch('recipientMobile'))
+                        (isPrimaryAddressDisabled || isPrimaryMobileDisabled)
                           ? 'text-gray-500 dark:text-gray-500'
                           : 'text-blue-700 dark:text-blue-400'
                       }`}>
+                        <div className="flex justify-between">
+                          <span>استان:</span>
+                          <span className="font-medium">{customerData.customer.province || customerData.customer.state || 'نامشخص'}</span>
+                        </div>
                         <div className="flex justify-between">
                           <span>شهر:</span>
                           <span className="font-medium">{customerData.customer.city || 'نامشخص'}</span>
