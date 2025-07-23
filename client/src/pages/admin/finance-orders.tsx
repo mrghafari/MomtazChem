@@ -600,7 +600,7 @@ function FinanceOrders() {
                   <OrderCard key={order.id} order={order} onOrderSelect={() => {
                     setSelectedOrder(order);
                     setDialogOpen(true);
-                  }} />
+                  }} fetchOrderDetails={fetchOrderDetails} />
                 ))}
               </div>
             )}
@@ -635,7 +635,7 @@ function FinanceOrders() {
             ) : (
               <div className="space-y-4">
                 {rejectedOrders.map((order) => (
-                  <OrderCard key={order.id} order={order} readOnly />
+                  <OrderCard key={order.id} order={order} readOnly fetchOrderDetails={fetchOrderDetails} />
                 ))}
               </div>
             )}
@@ -1120,9 +1120,10 @@ interface OrderCardProps {
   order: OrderManagement;
   onOrderSelect?: () => void;
   readOnly?: boolean;
+  fetchOrderDetails?: (orderNumber: string) => void;
 }
 
-function OrderCard({ order, onOrderSelect, readOnly = false }: OrderCardProps) {
+function OrderCard({ order, onOrderSelect, readOnly = false, fetchOrderDetails }: OrderCardProps) {
   const customerInfo = getCustomerInfo(order);
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
@@ -1237,15 +1238,17 @@ function OrderCard({ order, onOrderSelect, readOnly = false }: OrderCardProps) {
 
         {!readOnly && (
           <div className="flex justify-end gap-2">
-            <Button 
-              onClick={() => fetchOrderDetails(order.orderNumber!)}
-              size="sm"
-              variant="outline"
-              className="flex items-center space-x-2 space-x-reverse"
-            >
-              <FileText className="h-4 w-4" />
-              <span>مشاهده جزئیات</span>
-            </Button>
+            {fetchOrderDetails && (
+              <Button 
+                onClick={() => fetchOrderDetails(order.orderNumber!)}
+                size="sm"
+                variant="outline"
+                className="flex items-center space-x-2 space-x-reverse"
+              >
+                <FileText className="h-4 w-4" />
+                <span>مشاهده جزئیات</span>
+              </Button>
+            )}
             <Button 
               onClick={onOrderSelect}
               size="sm"
