@@ -1028,6 +1028,93 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       return false;
     }
   }
+
+  // Manual delivery code sending - used by logistics for resending codes
+  async sendManualDeliveryCode(orderManagementId: number): Promise<{success: boolean, deliveryCode?: string, error?: string}> {
+    try {
+      console.log('📱 [DELIVERY CODE] Manual send request for order management ID:', orderManagementId);
+      
+      // Get order details
+      const order = await db
+        .select({
+          id: orderManagement.id,
+          customerOrderId: orderManagement.customerOrderId,
+          deliveryCode: orderManagement.deliveryCode,
+          status: orderManagement.status
+        })
+        .from(orderManagement)
+        .where(eq(orderManagement.id, orderManagementId))
+        .limit(1);
+
+      if (!order.length) {
+        return { success: false, error: 'سفارش یافت نشد' };
+      }
+
+      const orderData = order[0];
+      console.log('📱 [DELIVERY CODE] Found order:', { 
+        id: orderData.id, 
+        customerOrderId: orderData.customerOrderId, 
+        hasDeliveryCode: !!orderData.deliveryCode 
+      });
+
+      // Get customer information
+      const { pool } = await import('./db');
+      const customerQuery = `
+        SELECT 
+          co.order_number as orderNumber,
+          c.first_name as firstName,
+          c.last_name as lastName,
+          c.phone as phone
+        FROM customer_orders co
+        LEFT JOIN crm_customers c ON co.customer_id = c.id
+        WHERE co.id = $1
+      `;
+      
+      const customerResult = await pool.query(customerQuery, [orderData.customerOrderId]);
+      
+      if (!customerResult.rows.length) {
+        return { success: false, error: 'اطلاعات مشتری یافت نشد' };
+      }
+
+      const customer = customerResult.rows[0];
+      const customerName = `${customer.firstname} ${customer.lastname}`.trim();
+      
+      console.log('📱 [DELIVERY CODE] Customer info:', { 
+        name: customerName, 
+        phone: customer.phone, 
+        orderNumber: customer.ordernumber 
+      });
+
+      // Generate delivery code if not exists
+      let deliveryCode = orderData.deliveryCode;
+      if (!deliveryCode) {
+        deliveryCode = await this.generateDeliveryCode(orderManagementId, customer.phone);
+        console.log('📱 [DELIVERY CODE] Generated new code:', deliveryCode);
+      } else {
+        console.log('📱 [DELIVERY CODE] Using existing code:', deliveryCode);
+      }
+
+      // Send SMS using template 3
+      const smsSuccess = await this.sendDeliveryCodeSms(
+        customer.phone,
+        deliveryCode,
+        orderData.customerOrderId,
+        customerName,
+        customer.ordernumber
+      );
+
+      if (smsSuccess) {
+        console.log('✅ [DELIVERY CODE] Manual SMS sent successfully');
+        return { success: true, deliveryCode };
+      } else {
+        return { success: false, error: 'خطا در ارسال پیامک' };
+      }
+
+    } catch (error) {
+      console.error('❌ [DELIVERY CODE] Manual send error:', error);
+      return { success: false, error: 'خطا در سرور هنگام ارسال کد تحویل' };
+    }
+  }
   
   async verifyDeliveryCode(code: string, verifiedBy: string): Promise<boolean> {
     const [deliveryCode] = await db

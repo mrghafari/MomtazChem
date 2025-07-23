@@ -94,6 +94,10 @@ const LogisticsManagement = () => {
   }}>({});
   const [selectedOrderForLabel, setSelectedOrderForLabel] = useState<any>(null);
   const [isLabelDialogOpen, setIsLabelDialogOpen] = useState(false);
+  
+  // States for delivery code resending
+  const [resendingCodes, setResendingCodes] = useState<{[orderId: number]: boolean}>({});
+  const [resentCodes, setResentCodes] = useState<{[orderId: number]: boolean}>({});
 
   const [selectedCity, setSelectedCity] = useState<string>('');
   const [selectedProvince, setSelectedProvince] = useState<string>('');
@@ -180,6 +184,57 @@ const LogisticsManagement = () => {
     };
     const config = statusMap[status] || { color: 'bg-gray-500', text: status };
     return <Badge className={config.color}>{config.text}</Badge>;
+  };
+
+  // Send or resend delivery code SMS using template #3
+  const handleSendDeliveryCode = async (orderManagementId: number, hasExistingCode: boolean) => {
+    setResendingCodes(prev => ({ ...prev, [orderManagementId]: true }));
+    
+    try {
+      const response = await fetch(`/api/order-management/send-delivery-code`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          orderManagementId,
+          action: hasExistingCode ? 'resend' : 'send'
+        }),
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        setResentCodes(prev => ({ ...prev, [orderManagementId]: true }));
+        toast({
+          title: '✅ کد تحویل ارسال شد',
+          description: `کد تحویل ${result.deliveryCode} با استفاده از قالب شماره 3 ارسال شد`,
+        });
+        
+        // Reset success state after 3 seconds
+        setTimeout(() => {
+          setResentCodes(prev => ({ ...prev, [orderManagementId]: false }));
+        }, 3000);
+        
+        // Refresh orders to show updated delivery code
+        queryClient.invalidateQueries({ queryKey: ['/api/order-management/logistics'] });
+      } else {
+        toast({
+          title: '❌ خطا در ارسال کد',
+          description: result.message || 'خطا در ارسال پیامک کد تحویل',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      console.error('❌ Error sending delivery code:', error);
+      toast({
+        title: '❌ خطا در ارسال',
+        description: 'خطا در اتصال به سرور برای ارسال کد تحویل',
+        variant: 'destructive',
+      });
+    } finally {
+      setResendingCodes(prev => ({ ...prev, [orderManagementId]: false }));
+    }
   };
 
 

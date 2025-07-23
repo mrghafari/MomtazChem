@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Logistics Delivery Code Manual Sending</title>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; }
+        button { padding: 10px 15px; margin: 5px; background: #007bff; color: white; border: none; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .result { margin-top: 10px; padding: 10px; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        .loading { background: #fff3cd; color: #856404; }
+        input { padding: 8px; margin: 5px; width: 200px; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 5px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Test Logistics Delivery Code Manual Sending</h1>
+    <p>این صفحه برای تست ارسال دستی کد تحویل از طریق logistics interface است</p>
+
+    <div class="test-section">
+        <h3>🧪 Test Manual Delivery Code Sending</h3>
+        <p>Test the new manual delivery code endpoint using logistics order management ID</p>
+        
+        <div>
+            <label>Order Management ID:</label>
+            <input type="number" id="orderManagementId" value="88" placeholder="88">
+            <button onclick="testManualDeliveryCode()">📱 Send Delivery Code</button>
+        </div>
+        
+        <div id="deliveryCodeResult" class="result" style="display: none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>📋 Check Logistics Orders</h3>
+        <p>First check what orders are available in logistics</p>
+        <button onclick="checkLogisticsOrders()">📦 Get Logistics Orders</button>
+        <div id="logisticsOrdersResult" class="result" style="display: none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>📊 System Information</h3>
+        <div id="systemInfo">
+            <p><strong>Endpoint:</strong> POST /api/order-management/send-delivery-code</p>
+            <p><strong>Template Used:</strong> SMS Template #3</p>
+            <p><strong>Purpose:</strong> Manual delivery code resending from logistics interface</p>
+            <p><strong>Authentication:</strong> Admin session required</p>
+        </div>
+    </div>
+
+    <script>
+        async function testManualDeliveryCode() {
+            const orderManagementId = document.getElementById('orderManagementId').value;
+            const resultDiv = document.getElementById('deliveryCodeResult');
+            
+            if (!orderManagementId) {
+                showResult(resultDiv, 'Please enter an order management ID', 'error');
+                return;
+            }
+
+            showResult(resultDiv, 'Sending delivery code...', 'loading');
+
+            try {
+                const response = await fetch('/api/order-management/send-delivery-code', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        orderManagementId: parseInt(orderManagementId),
+                        action: 'send'
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    showResult(resultDiv, 
+                        `✅ SUCCESS: Delivery code ${result.deliveryCode} sent successfully!\n${JSON.stringify(result, null, 2)}`, 
+                        'success'
+                    );
+                } else {
+                    showResult(resultDiv, 
+                        `❌ FAILED: ${result.message}\n${JSON.stringify(result, null, 2)}`, 
+                        'error'
+                    );
+                }
+            } catch (error) {
+                showResult(resultDiv, `❌ ERROR: ${error.message}`, 'error');
+            }
+        }
+
+        async function checkLogisticsOrders() {
+            const resultDiv = document.getElementById('logisticsOrdersResult');
+            
+            showResult(resultDiv, 'Fetching logistics orders...', 'loading');
+
+            try {
+                const response = await fetch('/api/order-management/logistics');
+                const result = await response.json();
+                
+                if (result.success && result.orders) {
+                    const ordersInfo = result.orders.map(order => ({
+                        id: order.id,
+                        customerOrderId: order.customerOrderId,
+                        orderNumber: order.orderNumber,
+                        deliveryCode: order.deliveryCode,
+                        customer: order.customer?.firstName + ' ' + order.customer?.lastName,
+                        phone: order.customer?.phone
+                    }));
+                    
+                    showResult(resultDiv, 
+                        `📦 Found ${result.orders.length} logistics orders:\n${JSON.stringify(ordersInfo, null, 2)}`, 
+                        'success'
+                    );
+                } else {
+                    showResult(resultDiv, 
+                        `❌ FAILED: ${result.message}\n${JSON.stringify(result, null, 2)}`, 
+                        'error'
+                    );
+                }
+            } catch (error) {
+                showResult(resultDiv, `❌ ERROR: ${error.message}`, 'error');
+            }
+        }
+
+        function showResult(element, message, type) {
+            element.style.display = 'block';
+            element.className = `result ${type}`;
+            element.innerHTML = `<pre>${message}</pre>`;
+        }
+
+        // Auto-load logistics orders on page load
+        window.addEventListener('load', () => {
+            setTimeout(checkLogisticsOrders, 1000);
+        });
+    </script>
+</body>
+</html>

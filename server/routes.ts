@@ -19409,6 +19409,40 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     }
   });
 
+  // Send or resend delivery code SMS using template #3
+  app.post('/api/order-management/send-delivery-code', requireAuth, async (req, res) => {
+    try {
+      const { orderManagementId, action } = req.body;
+      
+      console.log('📱 [DELIVERY CODE] Manual request:', { orderManagementId, action });
+      
+      if (!orderManagementId) {
+        return res.status(400).json({ success: false, message: 'شناسه سفارش الزامی است' });
+      }
+
+      // Send delivery code using template #3
+      const result = await orderManagementStorage.sendManualDeliveryCode(orderManagementId);
+      
+      if (result.success) {
+        console.log('✅ [DELIVERY CODE] Manual SMS sent successfully');
+        res.json({ 
+          success: true, 
+          deliveryCode: result.deliveryCode,
+          message: 'کد تحویل با موفقیت ارسال شد'
+        });
+      } else {
+        console.error('❌ [DELIVERY CODE] Manual SMS failed:', result.error);
+        res.status(500).json({ 
+          success: false, 
+          message: result.error || 'خطا در ارسال پیامک کد تحویل' 
+        });
+      }
+    } catch (error) {
+      console.error('❌ [DELIVERY CODE] Manual endpoint error:', error);
+      res.status(500).json({ success: false, message: 'خطا در سرور هنگام ارسال کد تحویل' });
+    }
+  });
+
   // =============================================================================
   // WAREHOUSE DEPARTMENT API ROUTES
   // =============================================================================
