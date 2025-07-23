@@ -490,11 +490,11 @@ const CustomerProfile = () => {
                               {formatDate(order.createdAt)}
                             </p>
                             
-                            {/* نمایش پیام منتظر ارسال حواله برای سفارشات بانکی بدون رسید */}
+                            {/* نمایش پیام منتظر ارسال حواله و کنتور زمانی برای سفارشات بانکی 3 روزه */}
                             {order.paymentMethod === 'واریز بانکی با مهلت 3 روزه' && 
                              (order.status === 'pending' || order.status === 'payment_grace_period') &&
                              !order.receiptPath && (
-                              <div className="bg-orange-50 border border-orange-200 rounded-lg p-2 mt-2 text-right">
+                              <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 mt-2 text-right">
                                 <p className="text-sm text-orange-800 font-medium flex items-center gap-1">
                                   <AlertCircle className="w-4 h-4" />
                                   منتظر ارسال حواله وجه خرید
@@ -504,10 +504,12 @@ const CustomerProfile = () => {
                                 </p>
                                 
                                 {/* کنتور زمانی برای ارسال وجه */}
-                                <BankTransferCountdown 
-                                  orderDate={order.createdAt}
-                                  gracePeriodHours={72}
-                                />
+                                <div className="mt-2">
+                                  <BankTransferCountdown 
+                                    orderDate={order.createdAt}
+                                    gracePeriodHours={72}
+                                  />
+                                </div>
                               </div>
                             )}
                           </div>
@@ -617,24 +619,21 @@ const CustomerProfile = () => {
 
                         {/* Actions */}
                         <div className="mt-4 pt-3 border-t border-gray-200 flex gap-2 flex-wrap">
-                          {/* دکمه‌های مدیریت سفارش برای سفارشات pending */}
-                          {(order.status === 'pending' || order.status === 'payment_grace_period') && (
+                          {/* دکمه‌های مدیریت سفارش فقط برای سفارشات بانکی 3 روزه */}
+                          {(order.status === 'pending' || order.status === 'payment_grace_period') && 
+                           order.paymentMethod === 'واریز بانکی با مهلت 3 روزه' && (
                             <>
-                              {/* دکمه آپلود رسید بانکی - نمایش برای همه روش‌های بانکی */}
-                              {(order.paymentMethod === 'واریز بانکی با مهلت 3 روزه' || 
-                                order.paymentMethod === 'bank_transfer_grace' || 
-                                order.paymentMethod === 'bank_receipt') && (
-                                <Button
-                                  size="sm"
-                                  onClick={() => window.open(`/customer/bank-receipt-upload?orderId=${order.id}`, '_blank')}
-                                  className="bg-orange-600 hover:bg-orange-700 text-white"
-                                >
-                                  <Upload className="w-4 h-4 mr-2" />
-                                  آپلود حواله بانکی
-                                </Button>
-                              )}
+                              {/* دکمه آپلود رسید بانکی */}
+                              <Button
+                                size="sm"
+                                onClick={() => window.open(`/customer/bank-receipt-upload?orderId=${order.id}`, '_blank')}
+                                className="bg-orange-600 hover:bg-orange-700 text-white"
+                              >
+                                <Upload className="w-4 h-4 mr-2" />
+                                آپلود حواله بانکی
+                              </Button>
                               
-                              {/* دکمه حذف سفارش موقت برای سفارشات پرداخت نشده و بدون رسید */}
+                              {/* دکمه حذف سفارش موقت */}
                               {(!order.paymentStatus || order.paymentStatus === 'pending' || order.paymentStatus === 'unpaid') &&
                                !order.receiptPath && (
                                 <Button
@@ -649,7 +648,8 @@ const CustomerProfile = () => {
                               )}
                             </>
                           )}
-                          {/* دکمه دانلود فاکتور/پیش فاکتور بر اساس تأیید مالی */}
+                          
+                          {/* دکمه دانلود فاکتور/پیش فاکتور برای همه سفارشات */}
                           {(order.status === 'confirmed' || order.paymentStatus === 'paid') ? (
                             <Button
                               size="sm"
