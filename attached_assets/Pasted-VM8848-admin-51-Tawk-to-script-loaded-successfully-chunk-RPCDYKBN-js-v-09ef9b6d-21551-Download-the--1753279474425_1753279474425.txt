@@ -1,0 +1,149 @@
+VM8848 admin:51 Tawk.to script loaded successfully
+chunk-RPCDYKBN.js?v=09ef9b6d:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+useAuth.ts:43 Auth check result: Object
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:117574)
+    at t.value (twk-chunk-common.js:2:150658)
+    at p.updateUUID (twk-chunk-common.js:2:202310)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:124589)
+    at twk-chunk-common.js:2:123900
+value @ twk-chunk-common.js:2
+VM8848 admin:23 Tawk.to Live Chat loaded successfully
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+site-management-fixed.tsx:71 🔍 [DEBUG] useEffect triggered, userPermissions: undefined
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+site-management-fixed.tsx:71 🔍 [DEBUG] useEffect triggered, userPermissions: Object
+site-management-fixed.tsx:74 🔍 [DEBUG] userPermissions modules: Array(31)
+site-management-fixed.tsx:399 🔍 [DEBUG] Full userPermissions response: Object
+site-management-fixed.tsx:400 🔍 [DEBUG] userPermissions.modules: Array(31)
+site-management-fixed.tsx:401 🔍 [DEBUG] userPermissions.permissions: Array(31)
+site-management-fixed.tsx:406 🔍 [DEBUG] Total allButtons count: 31
+site-management-fixed.tsx:407 🔍 [DEBUG] AI Settings exists in allButtons: true
+site-management-fixed.tsx:408 🔍 [DEBUG] Content Management exists in allButtons: true
+site-management-fixed.tsx:410 🔍 [DEBUG] allowedModules: Array(31)
+site-management-fixed.tsx:411 🔍 [DEBUG] kpi_dashboard in allowedModules? true
+site-management-fixed.tsx:412 🔍 [DEBUG] management_dashboard in allowedModules? true
+site-management-fixed.tsx:413 🔍 [DEBUG] finance in allowedModules? true
+site-management-fixed.tsx:414 🔍 [DEBUG] geography_analytics in allowedModules? true
+site-management-fixed.tsx:415 🔍 [DEBUG] ai_settings in allowedModules? true
+site-management-fixed.tsx:416 🔍 [DEBUG] content_management in allowedModules? true
+site-management-fixed.tsx:422 🔍 [CRITICAL] Missing button detection:
+site-management-fixed.tsx:430 🔍 [CRITICAL] Missing buttons count: 0
+site-management-fixed.tsx:432 🔍 [DEBUG] finance button found in allButtons? Object
+site-management-fixed.tsx:433 🔍 [DEBUG] geography_analytics button found in allButtons? Object
+site-management-fixed.tsx:434 🔍 [DEBUG] ai_settings button found in allButtons? Object
+site-management-fixed.tsx:435 🔍 [DEBUG] content_management button found in allButtons? Object
+site-management-fixed.tsx:436 🔍 [DEBUG] finance button in filtered? Object
+site-management-fixed.tsx:437 🔍 [DEBUG] geography_analytics button in filtered? Object
+site-management-fixed.tsx:438 🔍 [DEBUG] ai_settings button in filtered? Object
+site-management-fixed.tsx:439 🔍 [DEBUG] content_management button in filtered? Object
+site-management-fixed.tsx:76 🔍 [DEBUG] filtered buttons count: 31
+site-management-fixed.tsx:77 🔍 [DEBUG] First 5 filtered buttons: Array(5)
+site-management-fixed.tsx:78 🔍 [DEBUG] AI Control button in filtered: Object
+site-management-fixed.tsx:79 🔍 [DEBUG] Content Management button in filtered: Object
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+useOrderNotifications.ts:99 🔔 [FINANCIAL] نوتیفیکیشن: 195 سفارش جدید دریافت شد
+finance-orders.tsx:265 📋 [ORDER DETAILS] Order fetched: M2511115
+finance-orders.tsx:266 📋 [ORDER DETAILS] Items count: 0
+finance-orders.tsx:267 📋 [ORDER DETAILS] Items data: Array(0)
+chunk-C436OVJF.js?v=09ef9b6d:339 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-C436OVJF.js?v=09ef9b6d:339
+finance-orders.tsx:351 🔄 [FINANCE] Sending reject request for order undefined
+/api/finance/orders/undefined/reject:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+finance-orders.tsx:369 ❌ [FINANCE] Reject error: Error: 500: {"success":false,"message":"خطا در رد پرداخت"}
+    at throwIfResNotOk (queryClient.ts:41:13)
+    at async apiRequest (queryClient.ts:63:5)
+onError @ finance-orders.tsx:369
+finance-orders.tsx:265 📋 [ORDER DETAILS] Order fetched: M2511115
+finance-orders.tsx:266 📋 [ORDER DETAILS] Items count: 0
+finance-orders.tsx:267 📋 [ORDER DETAILS] Items data: Array(0)
+chunk-C436OVJF.js?v=09ef9b6d:339 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-C436OVJF.js?v=09ef9b6d:339
+finance-orders.tsx:351 🔄 [FINANCE] Sending reject request for order undefined
+/api/finance/orders/undefined/reject:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+finance-orders.tsx:369 ❌ [FINANCE] Reject error: Error: 500: {"success":false,"message":"خطا در رد پرداخت"}
+    at throwIfResNotOk (queryClient.ts:41:13)
+    at async apiRequest (queryClient.ts:63:5)
+onError @ finance-orders.tsx:369
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+useAuth.ts:43 Auth check result: Object
+finance-orders.tsx:265 📋 [ORDER DETAILS] Order fetched: M2511115
+finance-orders.tsx:266 📋 [ORDER DETAILS] Items count: 0
+finance-orders.tsx:267 📋 [ORDER DETAILS] Items data: []
+chunk-C436OVJF.js?v=09ef9b6d:339 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-C436OVJF.js?v=09ef9b6d:339
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=09ef9b6d:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=09ef9b6d:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=09ef9b6d:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=09ef9b6d:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=09ef9b6d:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=09ef9b6d:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=09ef9b6d:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=09ef9b6d:19416
+commitRoot @ chunk-RPCDYKBN.js?v=09ef9b6d:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=09ef9b6d:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=09ef9b6d:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=09ef9b6d:19432
+commitRoot @ chunk-RPCDYKBN.js?v=09ef9b6d:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=09ef9b6d:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=09ef9b6d:18718
+workLoop @ chunk-RPCDYKBN.js?v=09ef9b6d:197
+flushWork @ chunk-RPCDYKBN.js?v=09ef9b6d:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=09ef9b6d:384
+finance-orders.tsx:351 🔄 [FINANCE] Sending reject request for order undefined
+queryClient.ts:54  POST https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/finance/orders/undefined/reject 500 (Internal Server Error)
+apiRequest @ queryClient.ts:54
+mutationFn @ finance-orders.tsx:352
+fn @ @tanstack_react-query.js?v=09ef9b6d:1189
+run @ @tanstack_react-query.js?v=09ef9b6d:494
+start @ @tanstack_react-query.js?v=09ef9b6d:536
+execute @ @tanstack_react-query.js?v=09ef9b6d:1225
+await in execute
+mutate @ @tanstack_react-query.js?v=09ef9b6d:2630
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:3295
+handleRejectOrder @ finance-orders.tsx:498
+onClick @ finance-orders.tsx:1263
+callCallback2 @ chunk-RPCDYKBN.js?v=09ef9b6d:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=09ef9b6d:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=09ef9b6d:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=09ef9b6d:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=09ef9b6d:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=09ef9b6d:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=09ef9b6d:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=09ef9b6d:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=09ef9b6d:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=09ef9b6d:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=09ef9b6d:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=09ef9b6d:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=09ef9b6d:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=09ef9b6d:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=09ef9b6d:5449
+finance-orders.tsx:369 ❌ [FINANCE] Reject error: Error: 500: {"success":false,"message":"خطا در رد پرداخت"}
+    at throwIfResNotOk (queryClient.ts:41:13)
+    at async apiRequest (queryClient.ts:63:5)
+onError @ finance-orders.tsx:369
+execute @ @tanstack_react-query.js?v=09ef9b6d:1254
+await in execute
+mutate @ @tanstack_react-query.js?v=09ef9b6d:2630
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:3295
+handleRejectOrder @ finance-orders.tsx:498
+onClick @ finance-orders.tsx:1263
+callCallback2 @ chunk-RPCDYKBN.js?v=09ef9b6d:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=09ef9b6d:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=09ef9b6d:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=09ef9b6d:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=09ef9b6d:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=09ef9b6d:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=09ef9b6d:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=09ef9b6d:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=09ef9b6d:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=09ef9b6d:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=09ef9b6d:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=09ef9b6d:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=09ef9b6d:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=09ef9b6d:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=09ef9b6d:5449
