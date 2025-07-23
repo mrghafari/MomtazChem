@@ -232,6 +232,32 @@ function FinanceOrders() {
     sum + parseFloat(order.totalAmount || '0'), 0
   );
 
+  // Fetch order details function
+  const fetchOrderDetails = async (orderNumber: string) => {
+    try {
+      const response = await fetch(`/api/customers/orders/${orderNumber}/details`);
+      const data = await response.json();
+      if (data.success) {
+        setOrderDetails(data.order);
+        setOrderDocuments(data.documents || []);
+        setOrderDetailsModalOpen(true);
+      } else {
+        toast({
+          variant: "destructive",
+          title: "خطا",
+          description: "امکان دریافت جزئیات سفارش وجود ندارد"
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching order details:', error);
+      toast({
+        variant: "destructive", 
+        title: "خطا",
+        description: "خطا در اتصال به سرور"
+      });
+    }
+  };
+
   // Auto-refresh controlled by global settings
   useEffect(() => {
     if (allOrders && allOrders.length >= 0) {
@@ -385,31 +411,7 @@ function FinanceOrders() {
     setDialogOpen(true);
   };
 
-  // Function to fetch order details and documents
-  const fetchOrderDetails = async (orderNumber: string) => {
-    try {
-      const response = await fetch(`/api/customers/orders/${orderNumber}/details`);
-      const data = await response.json();
-      if (data.success) {
-        setOrderDetails(data.order);
-        setOrderDocuments(data.documents || []);
-        setOrderDetailsModalOpen(true);
-      } else {
-        toast({
-          variant: "destructive",
-          title: "خطا",
-          description: "امکان دریافت جزئیات سفارش وجود ندارد"
-        });
-      }
-    } catch (error) {
-      console.error('Error fetching order details:', error);
-      toast({
-        variant: "destructive", 
-        title: "خطا",
-        description: "خطا در اتصال به سرور"
-      });
-    }
-  };
+
 
   const handleApprove = () => {
     if (!selectedOrder) return;
