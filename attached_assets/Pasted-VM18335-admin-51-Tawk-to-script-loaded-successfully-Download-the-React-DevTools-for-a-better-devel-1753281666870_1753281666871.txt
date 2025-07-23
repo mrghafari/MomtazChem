@@ -1,0 +1,393 @@
+VM18335 admin:51 Tawk.to script loaded successfully
+ Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ Auth check result: Object
+ Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:117574)
+    at t.value (twk-chunk-common.js:2:150658)
+    at p.updateUUID (twk-chunk-common.js:2:202310)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:124589)
+    at twk-chunk-common.js:2:123900
+value @ twk-chunk-common.js:2
+VM18335 admin:23 Tawk.to Live Chat loaded successfully
+ 🔍 [DEBUG] Site Management component initialized
+ 🔍 [DEBUG] useEffect triggered, userPermissions: undefined
+ 🔍 [DEBUG] Site Management component initialized
+ 🔍 [DEBUG] useEffect triggered, userPermissions: Object
+ 🔍 [DEBUG] userPermissions modules: Array(31)
+ 🔍 [DEBUG] Full userPermissions response: Object
+ 🔍 [DEBUG] userPermissions.modules: Array(31)
+ 🔍 [DEBUG] userPermissions.permissions: Array(31)
+ 🔍 [DEBUG] Total allButtons count: 31
+ 🔍 [DEBUG] AI Settings exists in allButtons: true
+ 🔍 [DEBUG] Content Management exists in allButtons: true
+ 🔍 [DEBUG] allowedModules: Array(31)
+ 🔍 [DEBUG] kpi_dashboard in allowedModules? true
+ 🔍 [DEBUG] management_dashboard in allowedModules? true
+ 🔍 [DEBUG] finance in allowedModules? true
+ 🔍 [DEBUG] geography_analytics in allowedModules? true
+ 🔍 [DEBUG] ai_settings in allowedModules? true
+ 🔍 [DEBUG] content_management in allowedModules? true
+ 🔍 [CRITICAL] Missing button detection:
+ 🔍 [CRITICAL] Missing buttons count: 0
+ 🔍 [DEBUG] finance button found in allButtons? Object
+ 🔍 [DEBUG] geography_analytics button found in allButtons? Object
+ 🔍 [DEBUG] ai_settings button found in allButtons? Object
+ 🔍 [DEBUG] content_management button found in allButtons? Object
+ 🔍 [DEBUG] finance button in filtered? Object
+ 🔍 [DEBUG] geography_analytics button in filtered? Object
+ 🔍 [DEBUG] ai_settings button in filtered? Object
+ 🔍 [DEBUG] content_management button in filtered? Object
+ 🔍 [DEBUG] filtered buttons count: 31
+ 🔍 [DEBUG] First 5 filtered buttons: Array(5)
+ 🔍 [DEBUG] AI Control button in filtered: Object
+ 🔍 [DEBUG] Content Management button in filtered: Object
+ 🔍 [DEBUG] Site Management component initialized
+ 🔔 [FINANCIAL] نوتیفیکیشن: 11 سفارش جدید دریافت شد
+ Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-C436OVJF.js:339
+ 📋 [ORDER DETAILS] Order fetched: M2511138
+ 📋 [ORDER DETAILS] Items count: 3
+ 📋 [ORDER DETAILS] Items data: (3) [{…}, {…}, {…}]
+ 🔍 [DOCUMENTS DEBUG] orderDetails: {id: 257, customerOrderId: 257, orderNumber: 'M2511138', totalAmount: '36036.30', shippingCost: '18000.00', …}
+ 🔍 [DOCUMENTS DEBUG] selectedOrder: {id: 91, customerOrderId: 257, currentStatus: 'payment_uploaded', deliveryCode: null, totalAmount: '36036.30', …}
+ 🔍 [DOCUMENTS DEBUG] orderDocuments: [{…}]
+ 🔍 [DOCUMENTS DEBUG] Found selectedOrder.receiptUrl: /uploads/receipts/receipt-1753177776137-423057865.jpg
+ 🔍 [DOCUMENTS DEBUG] Final allDocuments array: [{…}]
+ Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-C436OVJF.js:339
+commitHookEffectListMount @ chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js:19447
+commitRootImpl @ chunk-RPCDYKBN.js:19416
+commitRoot @ chunk-RPCDYKBN.js:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js:9119
+commitRootImpl @ chunk-RPCDYKBN.js:19432
+commitRoot @ chunk-RPCDYKBN.js:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js:18718
+workLoop @ chunk-RPCDYKBN.js:197
+flushWork @ chunk-RPCDYKBN.js:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js:384
+ 🔄 [FINANCE] Accepting order from modal - Management ID: 91 Customer Order ID: 257
+ 🔍 [DOCUMENTS DEBUG] orderDetails: {id: 257, customerOrderId: 257, orderNumber: 'M2511138', totalAmount: '36036.30', shippingCost: '18000.00', …}
+ 🔍 [DOCUMENTS DEBUG] selectedOrder: {id: 91, customerOrderId: 257, currentStatus: 'payment_uploaded', deliveryCode: null, totalAmount: '36036.30', …}
+ 🔍 [DOCUMENTS DEBUG] orderDocuments: [{…}]
+ 🔍 [DOCUMENTS DEBUG] Found selectedOrder.receiptUrl: /uploads/receipts/receipt-1753177776137-423057865.jpg
+ 🔍 [DOCUMENTS DEBUG] Final allDocuments array: [{…}]
+ 🔄 [FINANCE] Sending approve request for order 257
+ ✅ [FINANCE] Order approved successfully: {success: true, order: {…}, message: 'پرداخت تایید شد و به انبار ارسال گردید'}
+ 🔍 [DOCUMENTS DEBUG] orderDetails: {id: 257, customerOrderId: 257, orderNumber: 'M2511138', totalAmount: '36036.30', shippingCost: '18000.00', …}
+ 🔍 [DOCUMENTS DEBUG] selectedOrder: null
+ 🔍 [DOCUMENTS DEBUG] orderDocuments: [{…}]
+ 🔍 [DOCUMENTS DEBUG] Final allDocuments array: []
+ 🔍 [DOCUMENTS DEBUG] orderDetails: {id: 257, customerOrderId: 257, orderNumber: 'M2511138', totalAmount: '36036.30', shippingCost: '18000.00', …}
+ 🔍 [DOCUMENTS DEBUG] selectedOrder: null
+ 🔍 [DOCUMENTS DEBUG] orderDocuments: [{…}]
+ 🔍 [DOCUMENTS DEBUG] Final allDocuments array: []
+ 📋 [ORDER DETAILS] Order fetched: M2511140
+ 📋 [ORDER DETAILS] Items count: 6
+ 📋 [ORDER DETAILS] Items data: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+ 🔍 [DOCUMENTS DEBUG] orderDetails: {id: 258, customerOrderId: 258, orderNumber: 'M2511140', totalAmount: '24188.11', shippingCost: '12000.00', …}
+ 🔍 [DOCUMENTS DEBUG] selectedOrder: null
+ 🔍 [DOCUMENTS DEBUG] orderDocuments: [{…}]
+ 🔍 [DOCUMENTS DEBUG] Final allDocuments array: []
+ Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-C436OVJF.js:339
+commitHookEffectListMount @ chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js:19447
+commitRootImpl @ chunk-RPCDYKBN.js:19416
+commitRoot @ chunk-RPCDYKBN.js:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js:9119
+commitRootImpl @ chunk-RPCDYKBN.js:19432
+commitRoot @ chunk-RPCDYKBN.js:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js:18718
+workLoop @ chunk-RPCDYKBN.js:197
+flushWork @ chunk-RPCDYKBN.js:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js:384
+ Auth check result: {success: true, user: {…}}
+ 🔍 [DOCUMENTS DEBUG] orderDetails: {id: 258, customerOrderId: 258, orderNumber: 'M2511140', totalAmount: '24188.11', shippingCost: '12000.00', …}
+ 🔍 [DOCUMENTS DEBUG] selectedOrder: null
+ 🔍 [DOCUMENTS DEBUG] orderDocuments: [{…}]
+ 🔍 [DOCUMENTS DEBUG] Final allDocuments array: []
+ 🔍 [DOCUMENTS DEBUG] orderDetails: {id: 258, customerOrderId: 258, orderNumber: 'M2511140', totalAmount: '24188.11', shippingCost: '12000.00', …}
+ 🔍 [DOCUMENTS DEBUG] selectedOrder: null
+ 🔍 [DOCUMENTS DEBUG] orderDocuments: [{…}]
+ 🔍 [DOCUMENTS DEBUG] Final allDocuments array: []
+ 🔍 [DOCUMENTS DEBUG] orderDetails: {id: 258, customerOrderId: 258, orderNumber: 'M2511140', totalAmount: '24188.11', shippingCost: '12000.00', …}
+ 🔍 [DOCUMENTS DEBUG] selectedOrder: null
+ 🔍 [DOCUMENTS DEBUG] orderDocuments: [{…}]
+ 🔍 [DOCUMENTS DEBUG] Final allDocuments array: []
+ 🔍 [DOCUMENTS DEBUG] orderDetails: {id: 258, customerOrderId: 258, orderNumber: 'M2511140', totalAmount: '24188.11', shippingCost: '12000.00', …}
+ 🔍 [DOCUMENTS DEBUG] selectedOrder: {id: 92, customerOrderId: 258, currentStatus: 'payment_uploaded', deliveryCode: null, totalAmount: '24188.11', …}
+ 🔍 [DOCUMENTS DEBUG] orderDocuments: [{…}]
+ 🔍 [DOCUMENTS DEBUG] Found selectedOrder.receiptUrl: /uploads/receipts/receipt-1753177848633-338117727.jpg
+ 🔍 [DOCUMENTS DEBUG] Final allDocuments array: [{…}]
+ Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-C436OVJF.js:339
+commitHookEffectListMount @ chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js:19447
+commitRootImpl @ chunk-RPCDYKBN.js:19416
+commitRoot @ chunk-RPCDYKBN.js:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js:9119
+(anonymous) @ chunk-RPCDYKBN.js:18627
+ 🔍 [DOCUMENTS DEBUG] orderDetails: {id: 258, customerOrderId: 258, orderNumber: 'M2511140', totalAmount: '24188.11', shippingCost: '12000.00', …}
+ 🔍 [DOCUMENTS DEBUG] selectedOrder: {id: 92, customerOrderId: 258, currentStatus: 'payment_uploaded', deliveryCode: null, totalAmount: '24188.11', …}
+ 🔍 [DOCUMENTS DEBUG] orderDocuments: [{…}]
+ 🔍 [DOCUMENTS DEBUG] Found selectedOrder.receiptUrl: /uploads/receipts/receipt-1753177848633-338117727.jpg
+ 🔍 [DOCUMENTS DEBUG] Final allDocuments array: [{…}]
+ 📋 [ORDER DETAILS] Order fetched: M2511140
+ 📋 [ORDER DETAILS] Items count: 6
+ 📋 [ORDER DETAILS] Items data: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+ 🔍 [DOCUMENTS DEBUG] orderDetails: {id: 258, customerOrderId: 258, orderNumber: 'M2511140', totalAmount: '24188.11', shippingCost: '12000.00', …}
+ 🔍 [DOCUMENTS DEBUG] selectedOrder: {id: 92, customerOrderId: 258, currentStatus: 'payment_uploaded', deliveryCode: null, totalAmount: '24188.11', …}
+ 🔍 [DOCUMENTS DEBUG] orderDocuments: [{…}]
+ 🔍 [DOCUMENTS DEBUG] Found selectedOrder.receiptUrl: /uploads/receipts/receipt-1753177848633-338117727.jpg
+ 🔍 [DOCUMENTS DEBUG] Final allDocuments array: [{…}]
+ Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-C436OVJF.js:339
+commitHookEffectListMount @ chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js:19447
+commitRootImpl @ chunk-RPCDYKBN.js:19416
+commitRoot @ chunk-RPCDYKBN.js:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js:9119
+commitRootImpl @ chunk-RPCDYKBN.js:19432
+commitRoot @ chunk-RPCDYKBN.js:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js:18718
+workLoop @ chunk-RPCDYKBN.js:197
+flushWork @ chunk-RPCDYKBN.js:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js:384
+ 🔄 [FINANCE] Accepting order from modal - Management ID: 92 Customer Order ID: 258
+ 🔍 [DOCUMENTS DEBUG] orderDetails: {id: 258, customerOrderId: 258, orderNumber: 'M2511140', totalAmount: '24188.11', shippingCost: '12000.00', …}
+ 🔍 [DOCUMENTS DEBUG] selectedOrder: {id: 92, customerOrderId: 258, currentStatus: 'payment_uploaded', deliveryCode: null, totalAmount: '24188.11', …}
+ 🔍 [DOCUMENTS DEBUG] orderDocuments: [{…}]
+ 🔍 [DOCUMENTS DEBUG] Found selectedOrder.receiptUrl: /uploads/receipts/receipt-1753177848633-338117727.jpg
+ 🔍 [DOCUMENTS DEBUG] Final allDocuments array: [{…}]
+ 🔄 [FINANCE] Sending approve request for order 258
+ ✅ [FINANCE] Order approved successfully: {success: true, order: {…}, message: 'پرداخت تایید شد و به انبار ارسال گردید'}
+ 🔍 [DOCUMENTS DEBUG] orderDetails: {id: 258, customerOrderId: 258, orderNumber: 'M2511140', totalAmount: '24188.11', shippingCost: '12000.00', …}
+ 🔍 [DOCUMENTS DEBUG] selectedOrder: null
+ 🔍 [DOCUMENTS DEBUG] orderDocuments: [{…}]
+ 🔍 [DOCUMENTS DEBUG] Final allDocuments array: []
+ 🔍 [DOCUMENTS DEBUG] orderDetails: {id: 258, customerOrderId: 258, orderNumber: 'M2511140', totalAmount: '24188.11', shippingCost: '12000.00', …}
+ 🔍 [DOCUMENTS DEBUG] selectedOrder: null
+ 🔍 [DOCUMENTS DEBUG] orderDocuments: [{…}]
+ 🔍 [DOCUMENTS DEBUG] Final allDocuments array: []
+ 🔍 [DOCUMENTS DEBUG] orderDetails: {id: 258, customerOrderId: 258, orderNumber: 'M2511140', totalAmount: '24188.11', shippingCost: '12000.00', …}
+ 🔍 [DOCUMENTS DEBUG] selectedOrder: null
+ 🔍 [DOCUMENTS DEBUG] orderDocuments: [{…}]
+ 🔍 [DOCUMENTS DEBUG] Final allDocuments array: []
+ 🔍 [DOCUMENTS DEBUG] orderDetails: {id: 258, customerOrderId: 258, orderNumber: 'M2511140', totalAmount: '24188.11', shippingCost: '12000.00', …}
+ 🔍 [DOCUMENTS DEBUG] selectedOrder: {id: 94, customerOrderId: 260, currentStatus: 'payment_uploaded', deliveryCode: null, totalAmount: '36024.20', …}
+ 🔍 [DOCUMENTS DEBUG] orderDocuments: [{…}]
+ 🔍 [DOCUMENTS DEBUG] Found selectedOrder.receiptUrl: /uploads/receipts/receipt-1753180254186-335210593.jpg
+ 🔍 [DOCUMENTS DEBUG] Final allDocuments array: [{…}]
+ Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-C436OVJF.js:339
+commitHookEffectListMount @ chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js:19447
+commitRootImpl @ chunk-RPCDYKBN.js:19416
+commitRoot @ chunk-RPCDYKBN.js:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js:9119
+(anonymous) @ chunk-RPCDYKBN.js:18627
+ Auth check result: {success: true, user: {…}}
+ 🔍 [DOCUMENTS DEBUG] orderDetails: {id: 258, customerOrderId: 258, orderNumber: 'M2511140', totalAmount: '24188.11', shippingCost: '12000.00', …}
+ 🔍 [DOCUMENTS DEBUG] selectedOrder: {id: 94, customerOrderId: 260, currentStatus: 'payment_uploaded', deliveryCode: null, totalAmount: '36024.20', …}
+ 🔍 [DOCUMENTS DEBUG] orderDocuments: [{…}]
+ 🔍 [DOCUMENTS DEBUG] Found selectedOrder.receiptUrl: /uploads/receipts/receipt-1753180254186-335210593.jpg
+ 🔍 [DOCUMENTS DEBUG] Final allDocuments array: [{…}]
+ 🔍 [DOCUMENTS DEBUG] orderDetails: {id: 258, customerOrderId: 258, orderNumber: 'M2511140', totalAmount: '24188.11', shippingCost: '12000.00', …}
+ 🔍 [DOCUMENTS DEBUG] selectedOrder: {id: 94, customerOrderId: 260, currentStatus: 'payment_uploaded', deliveryCode: null, totalAmount: '36024.20', …}
+ 🔍 [DOCUMENTS DEBUG] orderDocuments: [{…}]
+ 🔍 [DOCUMENTS DEBUG] Found selectedOrder.receiptUrl: /uploads/receipts/receipt-1753180254186-335210593.jpg
+ 🔍 [DOCUMENTS DEBUG] Final allDocuments array: [{…}]
+ 📋 [ORDER DETAILS] Order fetched: M2511144
+ 📋 [ORDER DETAILS] Items count: 2
+ 📋 [ORDER DETAILS] Items data: (2) [{…}, {…}]
+ 🔍 [DOCUMENTS DEBUG] orderDetails: {id: 260, customerOrderId: 260, orderNumber: 'M2511144', totalAmount: '36024.20', shippingCost: '18000.00', …}
+ 🔍 [DOCUMENTS DEBUG] selectedOrder: {id: 94, customerOrderId: 260, currentStatus: 'payment_uploaded', deliveryCode: null, totalAmount: '36024.20', …}
+ 🔍 [DOCUMENTS DEBUG] orderDocuments: [{…}]
+ 🔍 [DOCUMENTS DEBUG] Found selectedOrder.receiptUrl: /uploads/receipts/receipt-1753180254186-335210593.jpg
+ 🔍 [DOCUMENTS DEBUG] Final allDocuments array: [{…}]
+ Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-C436OVJF.js:339
+commitHookEffectListMount @ chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js:19447
+commitRootImpl @ chunk-RPCDYKBN.js:19416
+commitRoot @ chunk-RPCDYKBN.js:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js:9119
+commitRootImpl @ chunk-RPCDYKBN.js:19432
+commitRoot @ chunk-RPCDYKBN.js:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js:18718
+workLoop @ chunk-RPCDYKBN.js:197
+flushWork @ chunk-RPCDYKBN.js:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js:384
+ 🔄 [FINANCE] Rejecting order from modal - Management ID: 94 Customer Order ID: 260
+ 🔍 [DOCUMENTS DEBUG] orderDetails: {id: 260, customerOrderId: 260, orderNumber: 'M2511144', totalAmount: '36024.20', shippingCost: '18000.00', …}
+ 🔍 [DOCUMENTS DEBUG] selectedOrder: {id: 94, customerOrderId: 260, currentStatus: 'payment_uploaded', deliveryCode: null, totalAmount: '36024.20', …}
+ 🔍 [DOCUMENTS DEBUG] orderDocuments: [{…}]
+ 🔍 [DOCUMENTS DEBUG] Found selectedOrder.receiptUrl: /uploads/receipts/receipt-1753180254186-335210593.jpg
+ 🔍 [DOCUMENTS DEBUG] Final allDocuments array: [{…}]
+ 🔄 [FINANCE] Sending reject request for order 260
+ ❌ [FINANCE] Order rejected successfully: {success: true, order: {…}, message: 'پرداخت رد شد'}
+ 🔍 [DOCUMENTS DEBUG] orderDetails: {id: 260, customerOrderId: 260, orderNumber: 'M2511144', totalAmount: '36024.20', shippingCost: '18000.00', …}
+ 🔍 [DOCUMENTS DEBUG] selectedOrder: null
+ 🔍 [DOCUMENTS DEBUG] orderDocuments: [{…}]
+ 🔍 [DOCUMENTS DEBUG] Final allDocuments array: []
+ 🔍 [DOCUMENTS DEBUG] orderDetails: {id: 260, customerOrderId: 260, orderNumber: 'M2511144', totalAmount: '36024.20', shippingCost: '18000.00', …}
+ 🔍 [DOCUMENTS DEBUG] selectedOrder: null
+ 🔍 [DOCUMENTS DEBUG] orderDocuments: [{…}]
+ 🔍 [DOCUMENTS DEBUG] Final allDocuments array: []
+ 📋 [ORDER DETAILS] Order fetched: M2511148
+ 📋 [ORDER DETAILS] Items count: 1
+ 📋 [ORDER DETAILS] Items data: [{…}]
+ 🔍 [DOCUMENTS DEBUG] orderDetails: {id: 262, customerOrderId: 262, orderNumber: 'M2511148', totalAmount: '10012.10', shippingCost: '5000.00', …}
+ 🔍 [DOCUMENTS DEBUG] selectedOrder: null
+ 🔍 [DOCUMENTS DEBUG] orderDocuments: [{…}]
+ 🔍 [DOCUMENTS DEBUG] Final allDocuments array: []
+ Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-C436OVJF.js:339
+commitHookEffectListMount @ chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js:19447
+commitRootImpl @ chunk-RPCDYKBN.js:19416
+commitRoot @ chunk-RPCDYKBN.js:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js:9119
+commitRootImpl @ chunk-RPCDYKBN.js:19432
+commitRoot @ chunk-RPCDYKBN.js:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js:18718
+workLoop @ chunk-RPCDYKBN.js:197
+flushWork @ chunk-RPCDYKBN.js:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js:384
+ 🔍 [DOCUMENTS DEBUG] orderDetails: {id: 262, customerOrderId: 262, orderNumber: 'M2511148', totalAmount: '10012.10', shippingCost: '5000.00', …}
+ 🔍 [DOCUMENTS DEBUG] selectedOrder: null
+ 🔍 [DOCUMENTS DEBUG] orderDocuments: [{…}]
+ 🔍 [DOCUMENTS DEBUG] Final allDocuments array: []
+ 🔍 [DOCUMENTS DEBUG] orderDetails: {id: 262, customerOrderId: 262, orderNumber: 'M2511148', totalAmount: '10012.10', shippingCost: '5000.00', …}
+ 🔍 [DOCUMENTS DEBUG] selectedOrder: null
+ 🔍 [DOCUMENTS DEBUG] orderDocuments: [{…}]
+ 🔍 [DOCUMENTS DEBUG] Final allDocuments array: []
+ 🔍 [DOCUMENTS DEBUG] orderDetails: {id: 262, customerOrderId: 262, orderNumber: 'M2511148', totalAmount: '10012.10', shippingCost: '5000.00', …}
+ 🔍 [DOCUMENTS DEBUG] selectedOrder: null
+ 🔍 [DOCUMENTS DEBUG] orderDocuments: [{…}]
+ 🔍 [DOCUMENTS DEBUG] Final allDocuments array: []
+ 🔍 [DOCUMENTS DEBUG] orderDetails: {id: 262, customerOrderId: 262, orderNumber: 'M2511148', totalAmount: '10012.10', shippingCost: '5000.00', …}
+ 🔍 [DOCUMENTS DEBUG] selectedOrder: {id: 97, customerOrderId: 263, currentStatus: 'payment_uploaded', deliveryCode: null, totalAmount: '16084.70', …}
+ 🔍 [DOCUMENTS DEBUG] orderDocuments: [{…}]
+ 🔍 [DOCUMENTS DEBUG] Found selectedOrder.receiptUrl: /uploads/receipts/receipt-1753181582764-268688918.jpg
+ 🔍 [DOCUMENTS DEBUG] Final allDocuments array: [{…}]
+ Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-C436OVJF.js:339
+commitHookEffectListMount @ chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js:19447
+commitRootImpl @ chunk-RPCDYKBN.js:19416
+commitRoot @ chunk-RPCDYKBN.js:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js:9119
+(anonymous) @ chunk-RPCDYKBN.js:18627
+ 🔍 [DOCUMENTS DEBUG] orderDetails: {id: 262, customerOrderId: 262, orderNumber: 'M2511148', totalAmount: '10012.10', shippingCost: '5000.00', …}
+ 🔍 [DOCUMENTS DEBUG] selectedOrder: {id: 97, customerOrderId: 263, currentStatus: 'payment_uploaded', deliveryCode: null, totalAmount: '16084.70', …}
+ 🔍 [DOCUMENTS DEBUG] orderDocuments: [{…}]
+ 🔍 [DOCUMENTS DEBUG] Found selectedOrder.receiptUrl: /uploads/receipts/receipt-1753181582764-268688918.jpg
+ 🔍 [DOCUMENTS DEBUG] Final allDocuments array: [{…}]
+ Auth check result: {success: true, user: {…}}
+ 📋 [ORDER DETAILS] Order fetched: M2511150
+ 📋 [ORDER DETAILS] Items count: 1
+ 📋 [ORDER DETAILS] Items data: [{…}]
+ 🔍 [DOCUMENTS DEBUG] orderDetails: {id: 263, customerOrderId: 263, orderNumber: 'M2511150', totalAmount: '16084.70', shippingCost: '8000.00', …}
+ 🔍 [DOCUMENTS DEBUG] selectedOrder: {id: 97, customerOrderId: 263, currentStatus: 'payment_uploaded', deliveryCode: null, totalAmount: '16084.70', …}
+ 🔍 [DOCUMENTS DEBUG] orderDocuments: [{…}]
+ 🔍 [DOCUMENTS DEBUG] Found selectedOrder.receiptUrl: /uploads/receipts/receipt-1753181582764-268688918.jpg
+ 🔍 [DOCUMENTS DEBUG] Final allDocuments array: [{…}]
+ Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-C436OVJF.js:339
+commitHookEffectListMount @ chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js:19447
+commitRootImpl @ chunk-RPCDYKBN.js:19416
+commitRoot @ chunk-RPCDYKBN.js:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js:9119
+commitRootImpl @ chunk-RPCDYKBN.js:19432
+commitRoot @ chunk-RPCDYKBN.js:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js:18718
+workLoop @ chunk-RPCDYKBN.js:197
+flushWork @ chunk-RPCDYKBN.js:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js:384
+ 🔄 [FINANCE] Accepting order from modal - Management ID: 97 Customer Order ID: 263
+ 🔍 [DOCUMENTS DEBUG] orderDetails: {id: 263, customerOrderId: 263, orderNumber: 'M2511150', totalAmount: '16084.70', shippingCost: '8000.00', …}
+ 🔍 [DOCUMENTS DEBUG] selectedOrder: {id: 97, customerOrderId: 263, currentStatus: 'payment_uploaded', deliveryCode: null, totalAmount: '16084.70', …}
+ 🔍 [DOCUMENTS DEBUG] orderDocuments: [{…}]
+ 🔍 [DOCUMENTS DEBUG] Found selectedOrder.receiptUrl: /uploads/receipts/receipt-1753181582764-268688918.jpg
+ 🔍 [DOCUMENTS DEBUG] Final allDocuments array: [{…}]
+ 🔄 [FINANCE] Sending approve request for order 263
+ ✅ [FINANCE] Order approved successfully: {success: true, order: {…}, message: 'پرداخت تایید شد و به انبار ارسال گردید'}
+ 🔍 [DOCUMENTS DEBUG] orderDetails: {id: 263, customerOrderId: 263, orderNumber: 'M2511150', totalAmount: '16084.70', shippingCost: '8000.00', …}
+ 🔍 [DOCUMENTS DEBUG] selectedOrder: null
+ 🔍 [DOCUMENTS DEBUG] orderDocuments: [{…}]
+ 🔍 [DOCUMENTS DEBUG] Final allDocuments array: []
+ 🔍 [DOCUMENTS DEBUG] orderDetails: {id: 263, customerOrderId: 263, orderNumber: 'M2511150', totalAmount: '16084.70', shippingCost: '8000.00', …}
+ 🔍 [DOCUMENTS DEBUG] selectedOrder: null
+ 🔍 [DOCUMENTS DEBUG] orderDocuments: [{…}]
+ 🔍 [DOCUMENTS DEBUG] Final allDocuments array: []
+ 🔍 [DOCUMENTS DEBUG] orderDetails: {id: 263, customerOrderId: 263, orderNumber: 'M2511150', totalAmount: '16084.70', shippingCost: '8000.00', …}
+ 🔍 [DOCUMENTS DEBUG] selectedOrder: null
+ 🔍 [DOCUMENTS DEBUG] orderDocuments: [{…}]
+ 🔍 [DOCUMENTS DEBUG] Final allDocuments array: []

@@ -332,7 +332,9 @@ function FinanceOrders() {
         description: "پرداخت تایید شد و سفارش به واحد انبار منتقل شد"
       });
       queryClient.invalidateQueries({ queryKey: ['/api/order-management/financial'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/financial/orders'] });
       setDialogOpen(false);
+      setOrderDetailsModalOpen(false); // Close both modals
       setSelectedOrder(null);
       setReviewNotes("");
     },
@@ -361,7 +363,9 @@ function FinanceOrders() {
         description: "پرداخت رد شد و به قسمت سفارشات رد شده منتقل شد"
       });
       queryClient.invalidateQueries({ queryKey: ['/api/order-management/financial'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/financial/orders'] });
       setDialogOpen(false);
+      setOrderDetailsModalOpen(false); // Close both modals
       setSelectedOrder(null);
       setReviewNotes("");
     },
@@ -492,7 +496,7 @@ function FinanceOrders() {
       orderId: selectedOrder.customerOrderId, // FIXED: USE CUSTOMER ORDER ID FOR API
       notes: `سفارش تأیید شد از طریق مودال جزئیات - ${new Date().toLocaleDateString('en-US')}` 
     });
-    setOrderDetailsModalOpen(false);
+    // Don't close modal here - let the mutation success handler close it
   };
 
   // Handle reject order from order details modal  
@@ -503,7 +507,7 @@ function FinanceOrders() {
       orderId: selectedOrder.customerOrderId, // FIXED: USE CUSTOMER ORDER ID FOR API
       notes: `سفارش رد شد از طریق مودال جزئیات - ${new Date().toLocaleDateString('en-US')}` 
     });
-    setOrderDetailsModalOpen(false);
+    // Don't close modal here - let the mutation success handler close it
   };
 
   if (isLoading) {
@@ -1192,47 +1196,37 @@ function FinanceOrders() {
                   </CardHeader>
                   <CardContent>
                     {(() => {
-                      // DEBUG: Log all available data
-                      console.log('🔍 [DOCUMENTS DEBUG] orderDetails:', orderDetails);
-                      console.log('🔍 [DOCUMENTS DEBUG] selectedOrder:', selectedOrder);
-                      console.log('🔍 [DOCUMENTS DEBUG] orderDocuments:', orderDocuments);
-                      
                       // Collect all available documents
                       const allDocuments = [];
                       
                       // Add documents from orderDetails.documents array if exists
                       if (orderDetails.documents && orderDetails.documents.length > 0) {
-                        console.log('🔍 [DOCUMENTS DEBUG] Found orderDetails.documents:', orderDetails.documents);
                         allDocuments.push(...orderDetails.documents);
                       }
                       
-                      // Add bank receipt if available from order details
+                      // Add bank receipt from multiple sources - prioritize orderDetails over selectedOrder
+                      let receiptUrl = null;
+                      
+                      // First check orderDetails for receipt
                       if (orderDetails.receiptPath || orderDetails.receipt_path) {
-                        console.log('🔍 [DOCUMENTS DEBUG] Found receiptPath:', orderDetails.receiptPath || orderDetails.receipt_path);
+                        receiptUrl = orderDetails.receiptPath || orderDetails.receipt_path;
+                      }
+                      // Fallback to selectedOrder if orderDetails doesn't have receipt
+                      else if (selectedOrder?.receiptUrl) {
+                        receiptUrl = selectedOrder.receiptUrl;
+                      }
+                      
+                      // Add receipt to documents if found
+                      if (receiptUrl) {
                         allDocuments.push({
                           id: 'bank_receipt',
                           type: 'payment_receipt',
                           description: 'فیش واریز بانکی',
-                          receiptUrl: orderDetails.receiptPath || orderDetails.receipt_path,
+                          receiptUrl: receiptUrl,
                           fileName: 'فیش بانکی',
                           uploadedAt: orderDetails.updatedAt || orderDetails.createdAt
                         });
                       }
-                      
-                      // Add receipt from selectedOrder if available
-                      if (selectedOrder?.receiptUrl && !allDocuments.find(doc => doc.receiptUrl === selectedOrder.receiptUrl)) {
-                        console.log('🔍 [DOCUMENTS DEBUG] Found selectedOrder.receiptUrl:', selectedOrder.receiptUrl);
-                        allDocuments.push({
-                          id: 'order_receipt',
-                          type: 'payment_receipt',
-                          description: 'فیش واریز بانکی',
-                          receiptUrl: selectedOrder.receiptUrl,
-                          fileName: 'فیش بانکی',
-                          uploadedAt: orderDetails.updatedAt || orderDetails.createdAt
-                        });
-                      }
-                      
-                      console.log('🔍 [DOCUMENTS DEBUG] Final allDocuments array:', allDocuments);
                       
                       return allDocuments.length > 0 ? (
                         <div className="space-y-3">
