@@ -18673,6 +18673,67 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     }
   });
 
+  // Delete corrupted orders (Admin only)
+  app.delete("/api/admin/orders/corrupted/:orderNumber", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const orderNumber = req.params.orderNumber;
+      
+      // Security check - only allow deletion of M25T003 and M25T004
+      if (orderNumber !== 'M25T003' && orderNumber !== 'M25T004') {
+        return res.status(403).json({ 
+          success: false, 
+          message: "فقط سفارشات معیوب M25T003 و M25T004 قابل حذف هستند" 
+        });
+      }
+
+      console.log(`🗑️ [ADMIN DELETE] Starting deletion of corrupted order: ${orderNumber}`);
+      
+      // Get order details first
+      const order = await customerDb
+        .select()
+        .from(customerOrders)
+        .where(eq(customerOrders.orderNumber, orderNumber))
+        .limit(1);
+
+      if (!order.length) {
+        return res.status(404).json({ success: false, message: "سفارش یافت نشد" });
+      }
+
+      const orderId = order[0].id;
+      const orderAmount = order[0].totalAmount;
+
+      // Delete from order_management table
+      await orderManagementDb
+        .delete(orderManagement)
+        .where(eq(orderManagement.customerOrderId, orderId));
+
+      // Mark as deleted in customer_orders table
+      await customerDb
+        .update(customerOrders)
+        .set({ 
+          status: 'deleted',
+          notes: `حذف سفارش معیوب - ${new Date().toLocaleDateString('fa-IR')} - بدون آیتم اما دارای مبلغ ${orderAmount} دینار`
+        })
+        .where(eq(customerOrders.id, orderId));
+
+      console.log(`✅ [ADMIN DELETE] Successfully deleted corrupted order ${orderNumber} (ID: ${orderId}, Amount: ${orderAmount} IQD)`);
+
+      res.json({ 
+        success: true, 
+        message: `سفارش معیوب ${orderNumber} با موفقیت حذف شد`,
+        deletedOrder: {
+          orderNumber,
+          orderId,
+          amount: orderAmount
+        }
+      });
+
+    } catch (error) {
+      console.error("Error deleting corrupted order:", error);
+      res.status(500).json({ success: false, message: "خطا در حذف سفارش معیوب" });
+    }
+  });
+
   // Accept recommendation
   app.post("/api/admin/widgets/recommendations/:recommendationId/accept", requireAuth, async (req: Request, res: Response) => {
     try {
