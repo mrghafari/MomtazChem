@@ -23,7 +23,8 @@ import {
   User,
   Shield,
   AlertTriangle,
-  FileText
+  FileText,
+  Printer
 } from 'lucide-react';
 import { useOrderNotifications } from '@/hooks/useOrderNotifications';
 
@@ -194,6 +195,118 @@ const LogisticsManagement = () => {
   const handleShowOrderDetails = (order: LogisticsOrder) => {
     setSelectedOrder(order);
     setIsOrderDetailsOpen(true);
+  };
+
+  // Print order details
+  const handlePrintOrderDetails = () => {
+    if (!selectedOrder) return;
+    
+    const printContent = `
+      <html>
+        <head>
+          <title>جزئیات سفارش ${selectedOrder.orderNumber}</title>
+          <style>
+            body { font-family: Arial, sans-serif; direction: rtl; text-align: right; padding: 20px; }
+            .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 10px; }
+            .section { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+            .section h3 { color: #333; margin-bottom: 10px; }
+            .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+            .info-item { margin-bottom: 8px; }
+            .label { font-weight: bold; color: #555; }
+            .value { margin-right: 10px; }
+            @media print {
+              body { margin: 0; }
+              .no-print { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>جزئیات سفارش لجستیک</h1>
+            <h2>سفارش ${selectedOrder.orderNumber}</h2>
+            <p>تاریخ چاپ: ${new Date().toLocaleDateString('fa-IR')}</p>
+          </div>
+
+          <div class="section">
+            <h3>🧑‍💼 اطلاعات مشتری</h3>
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="label">نام و نام خانوادگی:</span>
+                <span class="value">${(selectedOrder.customer?.firstName || selectedOrder.customerFirstName)} ${(selectedOrder.customer?.lastName || selectedOrder.customerLastName)}</span>
+              </div>
+              <div class="info-item">
+                <span class="label">شماره تماس:</span>
+                <span class="value">${selectedOrder.customer?.phone || selectedOrder.customerPhone}</span>
+              </div>
+              <div class="info-item">
+                <span class="label">ایمیل:</span>
+                <span class="value">${selectedOrder.customer?.email || selectedOrder.customerEmail || 'ثبت نشده'}</span>
+              </div>
+              <div class="info-item">
+                <span class="label">کد تحویل:</span>
+                <span class="value" style="font-size: 18px; font-weight: bold; color: #7c3aed;">${selectedOrder.deliveryCode || 'کد ندارد'}</span>
+              </div>
+            </div>
+          </div>
+
+          ${selectedOrder.shippingAddress ? `
+          <div class="section">
+            <h3>📍 آدرس تحویل</h3>
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="label">گیرنده:</span>
+                <span class="value">${selectedOrder.shippingAddress.name}</span>
+              </div>
+              <div class="info-item">
+                <span class="label">تلفن گیرنده:</span>
+                <span class="value">${selectedOrder.shippingAddress.phone}</span>
+              </div>
+              <div class="info-item" style="grid-column: 1 / -1;">
+                <span class="label">آدرس کامل:</span>
+                <span class="value">${selectedOrder.shippingAddress.address}</span>
+              </div>
+              <div class="info-item">
+                <span class="label">شهر:</span>
+                <span class="value">${selectedOrder.shippingAddress.city}</span>
+              </div>
+              <div class="info-item">
+                <span class="label">کد پستی:</span>
+                <span class="value">${selectedOrder.shippingAddress.postalCode}</span>
+              </div>
+            </div>
+          </div>
+          ` : ''}
+
+          <div class="section">
+            <h3>📦 جزئیات سفارش</h3>
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="label">وزن محموله:</span>
+                <span class="value">${selectedOrder.calculatedWeight || selectedOrder.totalWeight} کیلوگرم</span>
+              </div>
+              <div class="info-item">
+                <span class="label">روش تحویل:</span>
+                <span class="value">${selectedOrder.deliveryMethod || 'پیک'}</span>
+              </div>
+            </div>
+          </div>
+
+          ${selectedOrder.deliveryNotes ? `
+          <div class="section">
+            <h3>📝 یادداشت‌های تحویل</h3>
+            <p>${selectedOrder.deliveryNotes}</p>
+          </div>
+          ` : ''}
+        </body>
+      </html>
+    `;
+
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+      printWindow.print();
+    }
   };
 
   // Send or resend delivery code SMS using template #3
@@ -1056,12 +1169,25 @@ const LogisticsManagement = () => {
       <Dialog open={isOrderDetailsOpen} onOpenChange={setIsOrderDetailsOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-right">
-              جزئیات سفارش {selectedOrder?.orderNumber || `#${selectedOrder?.customerOrderId}`}
-            </DialogTitle>
-            <DialogDescription className="text-right">
-              مشاهده کامل اطلاعات سفارش و آدرس تحویل
-            </DialogDescription>
+            <div className="flex justify-between items-center">
+              <div className="text-right flex-1">
+                <DialogTitle className="text-right">
+                  جزئیات سفارش {selectedOrder?.orderNumber || `#${selectedOrder?.customerOrderId}`}
+                </DialogTitle>
+                <DialogDescription className="text-right">
+                  مشاهده کامل اطلاعات سفارش و آدرس تحویل
+                </DialogDescription>
+              </div>
+              <Button
+                onClick={handlePrintOrderDetails}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <Printer className="w-4 h-4" />
+                پرینت
+              </Button>
+            </div>
           </DialogHeader>
           
           {selectedOrder && (
