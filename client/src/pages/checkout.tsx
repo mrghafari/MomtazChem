@@ -238,7 +238,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   const subtotal = cartItems.reduce((sum, item) => sum + item.totalPrice, 0);
   
   // Calculate shipping cost based on selected delivery method
-  const selectedMethod = deliveryMethods.find(method => method.id.toString() === form.watch('shippingMethod'));
+  const selectedMethod = (deliveryMethods as any[])?.find((method: any) => method.id.toString() === form.watch('shippingMethod'));
   let shippingCost = 0;
   
   if (selectedMethod) {
@@ -380,7 +380,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
         // Use second address information
         deliveryAddress = data.secondDeliveryAddress;
         deliveryCity = data.secondDeliveryCity || customer.city || '';
-        deliveryCountry = data.secondDeliveryCountry || customer.country || '';
+        deliveryCountry = customer.country || '';
         deliveryPostalCode = data.secondDeliveryPostalCode || '';
       } else {
         // Use CRM default address
@@ -411,7 +411,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
       deliveryCity = data.billingCity;
       deliveryCountry = data.billingCountry;
       deliveryPostalCode = data.billingPostalCode;
-      recipientPhone = data.recipientPhone || data.phone;
+      recipientPhone = data.recipientPhone || data.phone || '';
       recipientName = data.recipientName || `${data.firstName} ${data.lastName}`;
     }
 
@@ -898,7 +898,18 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                               type="button"
                               size="sm"
                               variant="ghost"
-                              onClick={() => setShowSecondAddress(!showSecondAddress)}
+                              onClick={() => {
+                                setShowSecondAddress(!showSecondAddress);
+                                // Disable primary CRM address fields when second address is activated
+                                if (!showSecondAddress) {
+                                  // When activating second address, clear and disable primary fields
+                                  form.setValue("billingAddress1", "");
+                                  form.setValue("billingCity", "");
+                                  form.setValue("billingState", "");
+                                  form.setValue("billingPostalCode", "");
+                                  form.setValue("billingCountry", "");
+                                }
+                              }}
                               className="text-blue-600 hover:text-blue-800"
                             >
                               {showSecondAddress ? 'پنهان کردن' : 'افزودن آدرس دوم'}
@@ -962,7 +973,15 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                               type="button"
                               size="sm"
                               variant="ghost"
-                              onClick={() => setShowRecipientMobile(!showRecipientMobile)}
+                              onClick={() => {
+                                setShowRecipientMobile(!showRecipientMobile);
+                                // Disable primary CRM phone fields when different mobile is activated
+                                if (!showRecipientMobile) {
+                                  // When activating different mobile, clear primary phone fields
+                                  form.setValue("phone", "");
+                                  form.setValue("recipientPhone", "");
+                                }
+                              }}
                               className="text-blue-600 hover:text-blue-800"
                             >
                               {showRecipientMobile ? 'پنهان کردن' : 'افزودن شماره متفاوت'}
@@ -1013,7 +1032,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                 <SelectValue placeholder="روش ارسال را انتخاب کنید" />
                               </SelectTrigger>
                               <SelectContent>
-                                {deliveryMethods.map((method: any) => {
+                                {(deliveryMethods as any[])?.map((method: any) => {
                                   const freeShippingThreshold = parseFloat(method.freeShippingThreshold || '0');
                                   const qualifiesForFreeShipping = freeShippingThreshold > 0 && subtotal >= freeShippingThreshold;
                                   const baseCost = parseFloat(method.baseCost || '0');
