@@ -1956,7 +1956,7 @@ function ScheduleManager({ schedules, notificationSettings }: ScheduleManagerPro
                 بررسی روزانه سفارشات در مهلت 3 روزه
               </p>
               <div className="text-xs text-gray-500">
-                آخرین اجرا: {new Date().toLocaleDateString('fa-IR')} - {new Date().toLocaleTimeString('fa-IR')}
+                آخرین اجرا: {new Date().toLocaleDateString('en-US')} - {new Date().toLocaleTimeString('en-US')}
               </div>
             </CardContent>
           </Card>
@@ -1971,7 +1971,7 @@ function ScheduleManager({ schedules, notificationSettings }: ScheduleManagerPro
                 ارسال هشدار برای سفارشات نزدیک به انقضا
               </p>
               <div className="text-xs text-gray-500">
-                آخرین اجرا: {new Date().toLocaleDateString('fa-IR')} - {new Date().toLocaleTimeString('fa-IR')}
+                آخرین اجرا: {new Date().toLocaleDateString('en-US')} - {new Date().toLocaleTimeString('en-US')}
               </div>
             </CardContent>
           </Card>

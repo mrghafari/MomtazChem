@@ -6,6 +6,17 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Receipt Display Fix for Bank Transfer Orders and Gregorian Date Display (July 23, 2025)
+✅ **RESOLVED: Critical receipt display bug preventing bank receipt visibility in financial department**
+- **Root Cause Identified**: Receipt display API was reading from empty payment_receipts table instead of customer_orders.receipt_path where actual receipts are stored
+- **Database Investigation**: Order M2511200 receipt stored in customer_orders.receipt_path (/uploads/receipts/receipt-1753278095535-893189175.png) but not in payment_receipts table
+- **Backend Fix**: Modified server/order-management-storage.ts to use customerOrders.receiptPath instead of paymentReceipts.receiptUrl in both getOrdersByDepartment and getOrdersByStatus methods
+- **API Enhancement**: Fixed receiptUrl field mapping to read from correct database source ensuring receipt visibility in financial interface
+- **Date Format Fix**: Changed financial department date display from Persian calendar ('fa-IR') to Gregorian calendar ('en-US') for "آخرین اجرا" timestamps
+- **Test Infrastructure**: Created test-receipt-display-M2511200.html for comprehensive receipt display verification
+- **Impact**: Financial department can now properly view bank transfer receipts and all dates display in international Gregorian format
+- **Result**: Bank receipt display system fully operational with correct data source and proper date formatting
+
 ### COMPLETED: Complete Automatic Bank Payment Approval System Implementation (July 23, 2025)
 ✅ **IMPLEMENTED: Full automatic financial approval system for bank gateway orders with confirmed payments**
 - **Core Functionality**: Created `processAutomaticBankPaymentApproval` method in OrderManagementStorage class for seamless automatic approval workflow
