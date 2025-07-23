@@ -38,7 +38,7 @@ import { findCorruptedOrders, getDataIntegrityStats, validateOrderIntegrity, mar
 import { z } from "zod";
 import * as schema from "@shared/schema";
 const { crmCustomers } = schema;
-import { orderManagement, shippingRates, deliveryMethods } from "@shared/order-management-schema";
+import { orderManagement, shippingRates, deliveryMethods, paymentReceipts } from "@shared/order-management-schema";
 import { generateEAN13Barcode, validateEAN13, parseEAN13Barcode, isMomtazchemBarcode } from "@shared/barcode-utils";
 import { generateSmartSKU, validateSKUUniqueness } from "./ai-sku-generator";
 import { deliveryVerificationStorage } from "./delivery-verification-storage";
@@ -7148,7 +7148,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .from(orderItems)
         .where(eq(orderItems.orderId, orderId));
 
-      console.log(`✅ [ADMIN] Order details retrieved: ${order.orderNumber} with ${itemsResult.length} items`);
+      // Get customer documents and payment receipts
+      const documentsResult = await db
+        .select({
+          id: paymentReceipts.id,
+          fileName: paymentReceipts.originalFileName,
+          receiptUrl: paymentReceipts.receiptUrl,
+          mimeType: paymentReceipts.mimeType,
+          uploadedAt: paymentReceipts.uploadedAt,
+          type: sql<string>`'payment_receipt'`,
+          description: sql<string>`'فیش بانکی پرداخت'`
+        })
+        .from(paymentReceipts)
+        .where(eq(paymentReceipts.customerOrderId, orderId));
+
+      console.log(`✅ [ADMIN] Order details retrieved: ${order.orderNumber} with ${itemsResult.length} items and ${documentsResult.length} documents`);
 
       res.json({ 
         success: true, 
@@ -7166,7 +7180,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           customer,
           items: itemsResult
         },
-        documents: [] // Can be extended later with document support
+        documents: documentsResult
       });
     } catch (error) {
       console.error("Error fetching order details:", error);

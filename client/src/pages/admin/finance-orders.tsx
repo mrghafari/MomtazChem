@@ -1117,53 +1117,49 @@ function FinanceOrders() {
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Download className="h-5 w-5" />
+                      <FileText className="h-5 w-5" />
                       مدارک ارسالی مشتری
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {orderDocuments.length > 0 ? (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {orderDocuments.map((doc: any, index: number) => (
-                          <div key={index} className="border rounded-lg p-4 hover:bg-gray-50">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-3">
-                                <div className="p-2 bg-blue-100 rounded">
-                                  {doc.type === 'image' ? (
-                                    <FileText className="h-5 w-5 text-blue-600" />
-                                  ) : (
-                                    <Download className="h-5 w-5 text-blue-600" />
-                                  )}
-                                </div>
-                                <div>
-                                  <p className="font-medium">{doc.name || doc.fileName}</p>
-                                  <p className="text-sm text-gray-600">{doc.type}</p>
-                                </div>
+                    {data.documents && data.documents.length > 0 ? (
+                      <div className="space-y-3">
+                        {data.documents.map((doc: any, index: number) => (
+                          <div key={doc.id || index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <FileText className="h-5 w-5 text-blue-600" />
+                              <div>
+                                <p className="font-medium text-gray-900">
+                                  {doc.description || doc.fileName || 'مدرک ارسالی'}
+                                </p>
+                                <p className="text-sm text-gray-500">
+                                  {new Date(doc.uploadedAt).toLocaleDateString('fa-IR')} 
+                                  {doc.fileName && ` • ${doc.fileName}`}
+                                </p>
                               </div>
-                              <div className="flex gap-2">
-                                {doc.type === 'image' && (
-                                  <Button 
-                                    size="sm" 
-                                    variant="outline"
-                                    onClick={() => openImageModal(doc.url)}
-                                  >
-                                    <Eye className="h-4 w-4" />
-                                  </Button>
-                                )}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline" className="text-xs">
+                                {doc.type === 'payment_receipt' ? 'فیش بانکی' : doc.type}
+                              </Badge>
+                              {doc.receiptUrl && (
                                 <Button 
-                                  size="sm"
-                                  onClick={() => window.open(doc.url, '_blank')}
+                                  size="sm" 
+                                  variant="outline"
+                                  onClick={() => window.open(doc.receiptUrl, '_blank')}
+                                  className="h-8 px-3"
                                 >
-                                  <ExternalLink className="h-4 w-4" />
+                                  <Download className="h-3 w-3 mr-1" />
+                                  مشاهده
                                 </Button>
-                              </div>
+                              )}
                             </div>
                           </div>
                         ))}
                       </div>
                     ) : (
                       <div className="text-center py-8 text-gray-500">
-                        <Download className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                        <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
                         <p>هیچ مدرک اضافی ارسال نشده است</p>
                       </div>
                     )}
