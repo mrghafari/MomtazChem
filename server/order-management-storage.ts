@@ -392,6 +392,39 @@ export class OrderManagementStorage implements IOrderManagementStorage {
     });
   }
   
+  // Helper method to calculate order weight from items
+  async calculateOrderWeight(customerOrderId: number): Promise<number> {
+    try {
+      console.log('🏋️ [WEIGHT] Calculating weight for customer order:', customerOrderId);
+      
+      const items = await db.select({
+        itemId: orderItems.itemId,
+        quantity: orderItems.quantity,
+        productWeight: shopProducts.weight // وزن از جدول shop_products
+      })
+      .from(orderItems)
+      .leftJoin(shopProducts, eq(orderItems.itemId, shopProducts.id))
+      .where(eq(orderItems.orderId, customerOrderId));
+      
+      let totalWeight = 0;
+      
+      for (const item of items) {
+        const weight = parseFloat(item.productWeight || '0');
+        const quantity = item.quantity;
+        const itemTotalWeight = weight * quantity;
+        
+        console.log(`🏋️ [WEIGHT] Item ${item.itemId}: ${weight}kg x ${quantity} = ${itemTotalWeight}kg`);
+        totalWeight += itemTotalWeight;
+      }
+      
+      console.log(`🏋️ [WEIGHT] Total calculated weight for order ${customerOrderId}: ${totalWeight}kg`);
+      return totalWeight;
+    } catch (error) {
+      console.error('❌ [WEIGHT] Error calculating order weight:', error);
+      return 0;
+    }
+  }
+
   async getOrdersByDepartment(department: Department, statuses?: OrderStatus[]): Promise<any[]> {
     console.log('🔍 [DEPARTMENT] getOrdersByDepartment called with department:', department);
     
@@ -509,55 +542,62 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       console.log('📊 [DEPARTMENT] Total orders in order_management table:', basicCount[0]);
     }
     
-    // Transform results to include customer info and receipt info in nested structure
-    return results.map(row => ({
-      id: row.id,
-      customerOrderId: row.customerOrderId,
-      currentStatus: row.currentStatus,
-      deliveryCode: row.deliveryCode,
-      totalAmount: row.totalAmount,
-      currency: row.currency,
-      orderNumber: row.orderNumber, // شماره سفارش M[YY][NNNNN] یا فرمت قدیمی
+    // Transform results to include customer info, receipt info, and calculated weight
+    const transformedResults = await Promise.all(results.map(async (row) => {
+      // Calculate weight if not already stored
+      const calculatedWeight = row.totalWeight || await this.calculateOrderWeight(row.customerOrderId);
       
-      // Weight and delivery information
-      totalWeight: row.totalWeight,
-      weightUnit: row.weightUnit,
-      deliveryMethod: row.deliveryMethod,
-      transportationType: row.transportationType,
-      trackingNumber: row.trackingNumber,
-      estimatedDeliveryDate: row.estimatedDeliveryDate,
-      actualDeliveryDate: row.actualDeliveryDate,
-      deliveryPersonName: row.deliveryPersonName,
-      deliveryPersonPhone: row.deliveryPersonPhone,
-      postalServiceName: row.postalServiceName,
-      postalTrackingCode: row.postalTrackingCode,
-      vehicleType: row.vehicleType,
-      vehiclePlate: row.vehiclePlate,
-      vehicleModel: row.vehicleModel,
-      vehicleColor: row.vehicleColor,
-      driverName: row.driverName,
-      driverPhone: row.driverPhone,
-      deliveryCompanyName: row.deliveryCompanyName,
-      deliveryCompanyPhone: row.deliveryCompanyPhone,
-      
-      financialReviewerId: row.financialReviewerId,
-      financialReviewedAt: row.financialReviewedAt,
-      financialNotes: row.financialNotes,
-      paymentReceiptUrl: row.paymentReceiptUrl || row.receiptUrl, // Use receipt from payment_receipts if available
-      createdAt: row.createdAt,
-      updatedAt: row.updatedAt,
-      customer: {
-        firstName: row.customerFirstName,
-        lastName: row.customerLastName,
-        email: row.customerEmail,
-        phone: row.customerPhone,
-      },
-      receipt: row.receiptUrl ? {
-        url: row.receiptUrl,
-        fileName: row.receiptFileName,
-        mimeType: row.receiptMimeType,
-      } : null
+      return {
+        id: row.id,
+        customerOrderId: row.customerOrderId,
+        currentStatus: row.currentStatus,
+        deliveryCode: row.deliveryCode,
+        totalAmount: row.totalAmount,
+        currency: row.currency,
+        orderNumber: row.orderNumber, // شماره سفارش M[YY][NNNNN] یا فرمت قدیمی
+        
+        // Weight and delivery information - with calculated weight
+        totalWeight: calculatedWeight,
+        weightUnit: row.weightUnit || 'kg',
+        deliveryMethod: row.deliveryMethod,
+        transportationType: row.transportationType,
+        trackingNumber: row.trackingNumber,
+        estimatedDeliveryDate: row.estimatedDeliveryDate,
+        actualDeliveryDate: row.actualDeliveryDate,
+        deliveryPersonName: row.deliveryPersonName,
+        deliveryPersonPhone: row.deliveryPersonPhone,
+        postalServiceName: row.postalServiceName,
+        postalTrackingCode: row.postalTrackingCode,
+        vehicleType: row.vehicleType,
+        vehiclePlate: row.vehiclePlate,
+        vehicleModel: row.vehicleModel,
+        vehicleColor: row.vehicleColor,
+        driverName: row.driverName,
+        driverPhone: row.driverPhone,
+        deliveryCompanyName: row.deliveryCompanyName,
+        deliveryCompanyPhone: row.deliveryCompanyPhone,
+        
+        financialReviewerId: row.financialReviewerId,
+        financialReviewedAt: row.financialReviewedAt,
+        financialNotes: row.financialNotes,
+        paymentReceiptUrl: row.paymentReceiptUrl || row.receiptUrl, // Use receipt from payment_receipts if available
+        createdAt: row.createdAt,
+        updatedAt: row.updatedAt,
+        customer: {
+          firstName: row.customerFirstName,
+          lastName: row.customerLastName,
+          email: row.customerEmail,
+          phone: row.customerPhone,
+        },
+        receipt: row.receiptUrl ? {
+          url: row.receiptUrl,
+          fileName: row.receiptFileName,
+          mimeType: row.receiptMimeType,
+        } : null
+      };
     }));
+    
+    return transformedResults;
   }
   
   async getFinancialPendingOrders(): Promise<OrderManagement[]> {
