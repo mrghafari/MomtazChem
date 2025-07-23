@@ -17,7 +17,7 @@ import { useLocation } from "wouter";
 import { Search, Plus, Users, TrendingUp, DollarSign, ShoppingCart, Eye, Edit, Activity, Trash2, Download, FileText, UserCog, ArrowUpDown, ArrowUp, ArrowDown, Shield, Settings, MessageCircle, Mail, UserCheck } from "lucide-react";
 import UnifiedCustomerProfile from "@/components/unified-customer-profile";
 import { PasswordManagement } from "@/components/PasswordManagement";
-import CustomerActivitiesCard from "@/components/CustomerActivitiesCard";
+
 import { apiRequest } from "@/lib/queryClient";
 
 interface CrmCustomer {
@@ -673,41 +673,35 @@ export default function CRM() {
                 </Card>
               </div>
 
-              {/* Two Column Layout */}
-              <div className="grid gap-6 md:grid-cols-2">
-                {/* Left Column - Top Customers */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Top Customers</CardTitle>
-                    <CardDescription>Customers with highest purchase amounts</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Name</TableHead>
-                          <TableHead>Email</TableHead>
-                          <TableHead>Total Spent</TableHead>
-                          <TableHead>Orders</TableHead>
+              {/* Top Customers Card - Full Width */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Top Customers</CardTitle>
+                  <CardDescription>Customers with highest purchase amounts</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Total Spent</TableHead>
+                        <TableHead>Orders</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {dashboardStats?.topCustomers?.map((customer) => (
+                        <TableRow key={customer.id}>
+                          <TableCell className="font-medium">{customer.name}</TableCell>
+                          <TableCell>{customer.email}</TableCell>
+                          <TableCell>{formatCurrency(customer.totalSpent)}</TableCell>
+                          <TableCell>{customer.totalOrders}</TableCell>
                         </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {dashboardStats?.topCustomers?.map((customer) => (
-                          <TableRow key={customer.id}>
-                            <TableCell className="font-medium">{customer.name}</TableCell>
-                            <TableCell>{customer.email}</TableCell>
-                            <TableCell>{formatCurrency(customer.totalSpent)}</TableCell>
-                            <TableCell>{customer.totalOrders}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </CardContent>
-                </Card>
-
-                {/* Right Column - Customer Activities */}
-                <CustomerActivitiesCard />
-              </div>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
             </>
           )}
         </TabsContent>
