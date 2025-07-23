@@ -145,7 +145,18 @@ const WarehouseManagementFixed: React.FC = () => {
     
     // Use currentStatus from API instead of status
     const orderStatus = order.currentStatus || order.status || '';
-    const matchesStatus = selectedStatus === 'all' || orderStatus === selectedStatus;
+    
+    // Check for notes filter
+    let matchesStatus = false;
+    if (selectedStatus === 'all') {
+      matchesStatus = true;
+    } else if (selectedStatus === 'with_notes') {
+      matchesStatus = !!(order.notes && order.notes.trim().length > 0);
+    } else if (selectedStatus === 'without_notes') {
+      matchesStatus = !(order.notes && order.notes.trim().length > 0);
+    } else {
+      matchesStatus = orderStatus === selectedStatus;
+    }
     
     // Header filters
     const matchesOrderId = orderIdFilter === '' || order.id.toString().includes(orderIdFilter);
@@ -321,6 +332,8 @@ const WarehouseManagementFixed: React.FC = () => {
                 <option value="warehouse_processing">در حال پردازش</option>
                 <option value="warehouse_approved">تایید شده</option>
                 <option value="warehouse_rejected">رد شده</option>
+                <option value="with_notes">دارای یادداشت</option>
+                <option value="without_notes">بدون یادداشت</option>
               </select>
               <Button 
                 variant="outline" 
@@ -395,7 +408,14 @@ const WarehouseManagementFixed: React.FC = () => {
                         {filteredOrders.map((order: Order) => (
                           <tr key={order.id} className="border-b hover:bg-blue-50 transition-colors">
                             <td className="p-4" style={{ width: '120px' }}>
-                              <div className="font-bold text-blue-600 truncate">{order.orderNumber || `#${order.id}`}</div>
+                              <div className="flex items-center gap-2">
+                                <div className="font-bold text-blue-600 truncate">{order.orderNumber || `#${order.id}`}</div>
+                                {order.notes && order.notes.trim().length > 0 && (
+                                  <div className="bg-orange-100 text-orange-600 p-1 rounded-full" title="دارای یادداشت">
+                                    <Edit3 className="w-3 h-3" />
+                                  </div>
+                                )}
+                              </div>
                             </td>
                             <td className="p-4" style={{ width: '250px' }}>
                               <div className="space-y-1">
