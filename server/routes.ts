@@ -17289,9 +17289,9 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       // Get customer activities
       const activities = await crmStorage.getCustomerActivities(customerId, 20);
 
-      // Generate PDF using PDFMake with Vazir font support
-      const { generateCustomerPDFWithPDFMake } = await import('./pdfmake-generator.js');
-      const pdfBuffer = await generateCustomerPDFWithPDFMake(customer, analytics.orders || [], activities, `مشتری ${customer.name}`);
+      // Generate PDF using PDFKit with proper customer profile format
+      const { generateCustomerProfilePDF } = await import('./pdfkit-generator');
+      const pdfBuffer = await generateCustomerProfilePDF(customer);
 
       // Validate PDF buffer before sending
       if (!pdfBuffer || pdfBuffer.length === 0) {
@@ -17364,7 +17364,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       }
 
       // Generate PDF using PDFKit
-      const { generateCustomerProfilePDF } = await import('./pdfkit-generator.js');
+      const { generateCustomerProfilePDF } = await import('./pdfkit-generator');
       const pdfBuffer = await generateCustomerProfilePDF(customer);
 
       // Validate PDF buffer before sending
