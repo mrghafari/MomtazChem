@@ -11,6 +11,65 @@ import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
+// کامپوننت کنتور زمانی برای ارسال حواله بانکی
+const BankTransferCountdown = ({ orderDate, gracePeriodHours = 72 }: { orderDate: string, gracePeriodHours?: number }) => {
+  const [timeRemaining, setTimeRemaining] = useState<string>("");
+  const [isExpired, setIsExpired] = useState(false);
+
+  useEffect(() => {
+    const updateCountdown = () => {
+      const orderTime = new Date(orderDate).getTime();
+      const expiryTime = orderTime + (gracePeriodHours * 60 * 60 * 1000);
+      const now = new Date().getTime();
+      const timeDiff = expiryTime - now;
+
+      if (timeDiff <= 0) {
+        setIsExpired(true);
+        setTimeRemaining("مهلت به پایان رسیده");
+        return;
+      }
+
+      const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+
+      if (days > 0) {
+        setTimeRemaining(`${days} روز و ${hours} ساعت باقی مانده`);
+      } else if (hours > 0) {
+        setTimeRemaining(`${hours} ساعت و ${minutes} دقیقه باقی مانده`);
+      } else {
+        setTimeRemaining(`${minutes} دقیقه باقی مانده`);
+      }
+    };
+
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 60000); // هر دقیقه به‌روزرسانی
+
+    return () => clearInterval(interval);
+  }, [orderDate, gracePeriodHours]);
+
+  return (
+    <div className={`text-xs mt-2 p-2 rounded ${isExpired ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}`}>
+      <div className="flex items-center gap-1">
+        <Clock className="w-3 h-3" />
+        <span className="font-medium">
+          {isExpired ? "⚠️ مهلت ارسال حواله به پایان رسیده" : `⏰ ${timeRemaining}`}
+        </span>
+      </div>
+      {!isExpired && (
+        <p className="text-xs mt-1 text-blue-600">
+          برای جلوگیری از لغو خودکار سفارش، حواله را ارسال کنید
+        </p>
+      )}
+      {isExpired && (
+        <p className="text-xs mt-1 text-red-600">
+          سفارش در معرض لغو خودکار قرار دارد
+        </p>
+      )}
+    </div>
+  );
+};
+
 const CustomerProfile = () => {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -441,6 +500,12 @@ const CustomerProfile = () => {
                                 <p className="text-xs text-orange-700 mt-1">
                                   لطفاً حواله بانکی را آپلود کنید
                                 </p>
+                                
+                                {/* کنتور زمانی برای ارسال وجه */}
+                                <BankTransferCountdown 
+                                  orderDate={order.createdAt}
+                                  gracePeriodHours={72}
+                                />
                               </div>
                             )}
                           </div>

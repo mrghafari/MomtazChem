@@ -24,6 +24,11 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
   - Orange alert styling with AlertCircle icon for pending bank transfers without receipts
   - Contextual message appears only for relevant orders
   - Clear call-to-action encouraging receipt upload
+  - **Real-time Countdown Timer**: Added BankTransferCountdown component showing remaining time for payment
+    - 72-hour grace period countdown with days, hours, and minutes display
+    - Visual indicators: blue for active countdown, red when expired
+    - Automatic updates every minute with expiration warnings
+    - Contextual messages encouraging timely payment submission
 - **Service Integration**: Automatic startup in server initialization with proper logging
 - **Database Tracking**: Updates order notes to track reminder history and timestamps
 - **Business Logic**: Calculates remaining days until automatic order cancellation
