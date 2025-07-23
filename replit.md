@@ -6,6 +6,38 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Delete Button for Temporary Orders with Automatic Inventory Restoration (July 23, 2025)
+✅ **IMPLEMENTED: Complete temporary order deletion system with product reservation release**
+- **User Request**: User requested delete button for temporary orders with automatic return of reserved products to shop inventory
+- **Button Implementation**: Added delete button for ALL temporary orders (status: 'pending' and 'payment_grace_period')
+- **UI Enhancement**: 
+  - Separate delete button from bank receipt upload button
+  - Red destructive styling with trash icon
+  - Shows for ALL temporary orders regardless of payment method
+  - Confirmation dialog with clear warning about inventory restoration
+- **Backend Integration**: 
+  - Uses existing `deleteTemporaryOrder` function in customer-storage.ts
+  - API endpoint: DELETE `/api/customers/orders/:orderId/delete-temporary`
+  - Automatic product reservation release back to shop inventory
+  - Soft delete approach preserving order numbers in sequence
+- **Inventory Restoration Process**:
+  - Retrieves all order items from temporary order
+  - Adds quantities back to shop_products.stock_quantity using SQL increment
+  - Logs released products with names and quantities
+  - Returns detailed response about released inventory
+- **User Experience**: 
+  - Clear confirmation dialog explaining inventory restoration
+  - Success message showing number of products released
+  - Smart cache refresh only for orders section
+  - Maintains order numbering sequence by marking as 'deleted' instead of hard deletion
+- **Technical Features**:
+  - Customer authentication verification
+  - Order ownership validation
+  - Foreign key constraint handling (delete items first, then update order)
+  - Comprehensive error handling and logging
+- **Impact**: Customers can safely delete temporary orders knowing reserved products automatically return to available inventory
+- **Result**: Complete temporary order management with intelligent inventory restoration system
+
 ### COMPLETED: Smart Orders Cache Refresh System Implementation (July 23, 2025)
 ✅ **IMPLEMENTED: Selective orders section refresh when customer places new order and returns to profile**
 - **Issue Resolution**: User requested that only orders section should refresh when customer places order and returns to profile, not entire page reload
