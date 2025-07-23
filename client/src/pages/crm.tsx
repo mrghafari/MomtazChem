@@ -530,13 +530,40 @@ export default function CRM() {
       lastName: editingCustomer.lastName,
       company: editingCustomer.company || null,
       country: editingCustomer.country,
+      province: editingCustomer.province || null,
       city: editingCustomer.city,
       address: editingCustomer.address,
       secondaryAddress: editingCustomer.secondaryAddress || null,
       postalCode: editingCustomer.postalCode || null,
+      alternatePhone: editingCustomer.alternatePhone || null,
+      // Business Information
+      industry: editingCustomer.industry || null,
+      businessType: editingCustomer.businessType || null,
+      companySize: editingCustomer.companySize || null,
+      website: editingCustomer.website || null,
+      taxId: editingCustomer.taxId || null,
+      registrationNumber: editingCustomer.registrationNumber || null,
+      // Customer Management
+      preferredPaymentMethod: editingCustomer.preferredPaymentMethod || null,
+      creditLimit: editingCustomer.creditLimit || null,
+      leadSource: editingCustomer.leadSource || null,
+      marketingConsent: editingCustomer.marketingConsent || false,
+      notes: editingCustomer.notes || null,
+      // CRM Fields
+      annualRevenue: editingCustomer.annualRevenue || null,
+      priceRange: editingCustomer.priceRange || null,
+      orderFrequency: editingCustomer.orderFrequency || null,
+      creditStatus: editingCustomer.creditStatus || null,
+      // Communication Preferences
+      communicationPreference: editingCustomer.communicationPreference,
+      preferredLanguage: editingCustomer.preferredLanguage,
+      // Customer Status
       customerType: editingCustomer.customerType,
       customerStatus: editingCustomer.customerStatus,
       customerSource: editingCustomer.customerSource,
+      // Authentication Settings
+      smsEnabled: editingCustomer.smsEnabled ?? true,
+      emailEnabled: editingCustomer.emailEnabled ?? true,
     };
 
     console.log("Frontend updateData being sent:", updateData);
