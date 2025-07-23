@@ -1,5 +1,5 @@
 import { customerDb } from "./customer-db";
-import { customerOrders, orderItems } from "@shared/customer-schema";
+import { customerOrders, orderItems } from "@shared/schema";
 import { eq, and, lt, sql } from "drizzle-orm";
 
 /**

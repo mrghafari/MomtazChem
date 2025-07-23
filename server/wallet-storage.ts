@@ -9,7 +9,7 @@ import {
   type InsertWalletTransaction,
   type WalletRechargeRequest,
   type InsertWalletRechargeRequest
-} from "@shared/customer-schema";
+} from "@shared/schema";
 import { eq, desc, sum, and } from "drizzle-orm";
 
 export interface IWalletStorage {

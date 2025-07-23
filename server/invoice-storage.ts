@@ -2,7 +2,7 @@ import { shopDb } from "./shop-db";
 import { db } from "./db";
 import { invoices, invoiceItems, orders, orderItems, customers, type Invoice, type InvoiceItem, type InsertInvoice, type InsertInvoiceItem } from "@shared/shop-schema";
 import { orderManagement } from "@shared/order-management-schema";
-import { customerOrders } from "@shared/customer-schema";
+import { customerOrders } from "@shared/schema";
 import { eq, desc, and, isNotNull } from "drizzle-orm";
 
 export interface IInvoiceStorage {

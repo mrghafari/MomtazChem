@@ -1,5 +1,5 @@
 import {
-  customers,
+  crmCustomers as customers,
   customerOrders,
   orderItems,
   customerInquiries,
@@ -7,8 +7,8 @@ import {
   customerVerificationCodes,
   customerEmailVerificationCodes,
   customerVerificationSettings,
-  type Customer,
-  type InsertCustomer,
+  type CrmCustomer as Customer,
+  type InsertCrmCustomer as InsertCustomer,
   type CustomerOrder,
   type InsertCustomerOrder,
   type OrderItem,
@@ -26,7 +26,7 @@ import {
   emailTemplates,
   type EmailTemplate,
   type InsertEmailTemplate,
-} from "@shared/customer-schema";
+} from "@shared/schema";
 import { customerDb } from "./customer-db";
 import { eq, desc, and, or, ilike, count, sql, sum } from "drizzle-orm";
 import bcrypt from "bcryptjs";

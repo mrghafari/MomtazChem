@@ -1,7 +1,7 @@
 import { 
   shopProducts, 
   shopCategories,
-  customers,
+  crmCustomers as customers,
   customerAddresses,
   orders,
   orderItems,
@@ -15,8 +15,8 @@ import {
   type InsertShopProduct,
   type ShopCategory,
   type InsertShopCategory,
-  type Customer,
-  type InsertCustomer,
+  type CrmCustomer as Customer,
+  type InsertCrmCustomer as InsertCustomer,
   type CustomerAddress,
   type InsertCustomerAddress,
   type Order,
@@ -35,7 +35,7 @@ import {
   type InsertSalesReport,
   type ProductReturn,
   type InsertProductReturn
-} from "@shared/shop-schema";
+} from "@shared/schema";
 import { shopDb } from "./shop-db";
 import { eq, desc, and, gte, lte, gt, sql, count, or, like, ilike, asc } from "drizzle-orm";
 

@@ -24,7 +24,7 @@ import {
   type Department,
   orderStatuses
 } from "@shared/order-management-schema";
-import { customerOrders, orderItems } from "@shared/customer-schema";
+import { customerOrders, orderItems } from "@shared/schema";
 import { crmCustomers } from "@shared/schema";
 import { showcaseProducts as products } from "@shared/showcase-schema";
 import { shopProducts } from "@shared/shop-schema";

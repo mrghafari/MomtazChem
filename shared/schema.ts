@@ -2,7 +2,7 @@ import { pgTable, text, serial, timestamp, decimal, boolean, integer, json, varc
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { sql } from "drizzle-orm";
-import { customers, insertCustomerSchema, type InsertCustomer, type Customer } from "./customer-schema";
+// Customer schema now unified with CRM - import from this file
 
 // =============================================================================
 // MAIN CRM & ADMIN SYSTEM SCHEMA
@@ -800,6 +800,305 @@ export const insertCrmCustomerSchema = createInsertSchema(crmCustomers).omit({
 
 export type InsertCrmCustomer = z.infer<typeof insertCrmCustomerSchema>;
 export type CrmCustomer = typeof crmCustomers.$inferSelect;
+
+// Customer Inquiries Table
+export const customerInquiries = pgTable("customer_inquiries", {
+  id: serial("id").primaryKey(),
+  customerId: integer("customer_id").references(() => crmCustomers.id),
+  subject: text("subject").notNull(),
+  message: text("message").notNull(),
+  status: text("status").notNull().default("open"), // 'open', 'in_progress', 'resolved', 'closed'
+  priority: text("priority").default("medium"), // 'low', 'medium', 'high', 'urgent'
+  department: text("department"), // 'sales', 'support', 'technical', 'general'
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Inquiry Responses Table  
+export const inquiryResponses = pgTable("inquiry_responses", {
+  id: serial("id").primaryKey(),
+  inquiryId: integer("inquiry_id").notNull().references(() => customerInquiries.id),
+  responderId: integer("responder_id"), // Admin user ID
+  message: text("message").notNull(),
+  isInternal: boolean("is_internal").default(false), // Internal notes vs customer-visible responses
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertCustomerInquirySchema = createInsertSchema(customerInquiries).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertCustomerInquiry = z.infer<typeof insertCustomerInquirySchema>;
+export type CustomerInquiry = typeof customerInquiries.$inferSelect;
+
+export const insertInquiryResponseSchema = createInsertSchema(inquiryResponses).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertInquiryResponse = z.infer<typeof insertInquiryResponseSchema>;
+export type InquiryResponse = typeof inquiryResponses.$inferSelect;
+
+// Customer verification codes (SMS)
+export const customerVerificationCodes = pgTable("customer_verification_codes", {
+  id: serial("id").primaryKey(),
+  customerId: integer("customer_id").references(() => crmCustomers.id),
+  phone: text("phone").notNull(),
+  code: text("code").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  isUsed: boolean("is_used").default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Customer email verification codes
+export const customerEmailVerificationCodes = pgTable("customer_email_verification_codes", {
+  id: serial("id").primaryKey(),
+  customerId: integer("customer_id").references(() => crmCustomers.id),
+  email: text("email").notNull(),
+  code: text("code").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  isUsed: boolean("is_used").default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Customer verification settings
+export const customerVerificationSettings = pgTable("customer_verification_settings", {
+  id: serial("id").primaryKey(),
+  customerId: integer("customer_id").references(() => crmCustomers.id),
+  smsVerificationEnabled: boolean("sms_verification_enabled").default(true),
+  emailVerificationEnabled: boolean("email_verification_enabled").default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertCustomerVerificationCodeSchema = createInsertSchema(customerVerificationCodes).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertCustomerVerificationCode = z.infer<typeof insertCustomerVerificationCodeSchema>;
+export type CustomerVerificationCode = typeof customerVerificationCodes.$inferSelect;
+
+export const insertCustomerEmailVerificationCodeSchema = createInsertSchema(customerEmailVerificationCodes).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertCustomerEmailVerificationCode = z.infer<typeof insertCustomerEmailVerificationCodeSchema>;
+export type CustomerEmailVerificationCode = typeof customerEmailVerificationCodes.$inferSelect;
+
+export const insertCustomerVerificationSettingsSchema = createInsertSchema(customerVerificationSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertCustomerVerificationSettings = z.infer<typeof insertCustomerVerificationSettingsSchema>;
+export type CustomerVerificationSettings = typeof customerVerificationSettings.$inferSelect;
+
+// Customer Orders Table
+export const customerOrders = pgTable("customer_orders", {
+  id: serial("id").primaryKey(),
+  customerId: integer("customer_id").references(() => crmCustomers.id),
+  orderNumber: text("order_number").notNull().unique(),
+  status: text("status").notNull().default("temporary"), // temporary, confirmed, processing, shipped, delivered, cancelled, deleted
+  totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull(),
+  currencyCode: text("currency_code").default("IQD"),
+  shippingCost: decimal("shipping_cost", { precision: 10, scale: 2 }).default("0"),
+  vatAmount: decimal("vat_amount", { precision: 10, scale: 2 }).default("0"),
+  surchargeAmount: decimal("surcharge_amount", { precision: 10, scale: 2 }).default("0"),
+  vatRate: decimal("vat_rate", { precision: 5, scale: 4 }).default("0.0600"),
+  surchargeRate: decimal("surcharge_rate", { precision: 5, scale: 4 }).default("0.0200"),
+  paymentStatus: text("payment_status").default("pending"), // pending, paid, partial, failed, refunded
+  paymentMethod: text("payment_method"), // credit_card, bank_transfer, cash, wallet
+  paymentReference: text("payment_reference"),
+  shippingAddress: json("shipping_address"),
+  billingAddress: json("billing_address"),
+  notes: text("notes"),
+  gracePeriodEnd: timestamp("grace_period_end"),
+  invoiceDate: timestamp("invoice_date"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Order Items Table
+export const orderItems = pgTable("order_items", {
+  id: serial("id").primaryKey(),
+  orderId: integer("order_id").notNull().references(() => customerOrders.id),
+  productId: integer("product_id").notNull(),
+  productName: text("product_name").notNull(),
+  productSku: text("product_sku"),
+  quantity: integer("quantity").notNull(),
+  unitPrice: decimal("unit_price", { precision: 10, scale: 2 }).notNull(),
+  totalPrice: decimal("total_price", { precision: 10, scale: 2 }).notNull(),
+  productImage: text("product_image"),
+  productCategory: text("product_category"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertCustomerOrderSchema = createInsertSchema(customerOrders).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertCustomerOrder = z.infer<typeof insertCustomerOrderSchema>;
+export type CustomerOrder = typeof customerOrders.$inferSelect;
+
+export const insertOrderItemSchema = createInsertSchema(orderItems).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertOrderItem = z.infer<typeof insertOrderItemSchema>;
+export type OrderItem = typeof orderItems.$inferSelect;
+
+// Email Templates Table
+export const emailTemplates = pgTable("email_templates", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  subject: text("subject").notNull(),
+  htmlContent: text("html_content").notNull(),
+  textContent: text("text_content"),
+  templateType: text("template_type").notNull(), // welcome, reset_password, order_confirmation, inquiry_response, etc.
+  isActive: boolean("is_active").default(true),
+  variables: json("variables"), // Template variables like {{customerName}}, {{orderNumber}}
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Customer Addresses Table
+export const customerAddresses = pgTable("customer_addresses", {
+  id: serial("id").primaryKey(),
+  customerId: integer("customer_id").notNull().references(() => crmCustomers.id),
+  label: text("label").notNull(), // home, work, billing, shipping
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  company: text("company"),
+  addressLine1: text("address_line_1").notNull(),
+  addressLine2: text("address_line_2"),
+  city: text("city").notNull(),
+  state: text("state"),
+  postalCode: text("postal_code"),
+  country: text("country").notNull(),
+  phone: text("phone"),
+  isDefault: boolean("is_default").default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Wallet Tables  
+export const customerWallets = pgTable("customer_wallets", {
+  id: serial("id").primaryKey(),
+  customerId: integer("customer_id").notNull().references(() => crmCustomers.id),
+  balance: decimal("balance", { precision: 12, scale: 2 }).default("0.00"),
+  currency: text("currency").default("IQD"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const walletTransactions = pgTable("wallet_transactions", {
+  id: serial("id").primaryKey(),
+  walletId: integer("wallet_id").notNull().references(() => customerWallets.id),
+  customerId: integer("customer_id").notNull().references(() => crmCustomers.id),
+  transactionType: text("transaction_type").notNull(), // credit, debit
+  amount: decimal("amount", { precision: 12, scale: 2 }).notNull(),
+  balanceBefore: decimal("balance_before", { precision: 12, scale: 2 }).notNull(),
+  balanceAfter: decimal("balance_after", { precision: 12, scale: 2 }).notNull(),
+  description: text("description").notNull(),
+  referenceType: text("reference_type"), // order, refund, deposit, bonus
+  referenceId: integer("reference_id"),
+  processedBy: integer("processed_by"), // Admin ID
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const walletRechargeRequests = pgTable("wallet_recharge_requests", {
+  id: serial("id").primaryKey(),
+  customerId: integer("customer_id").notNull().references(() => crmCustomers.id),
+  amount: decimal("amount", { precision: 12, scale: 2 }).notNull(),
+  currency: text("currency").default("IQD"),
+  paymentMethod: text("payment_method").notNull(),
+  paymentReference: text("payment_reference"),
+  status: text("status").default("pending"), // pending, approved, rejected, processed
+  customerNotes: text("customer_notes"),
+  adminNotes: text("admin_notes"),
+  requestedAt: timestamp("requested_at").notNull().defaultNow(),
+  processedAt: timestamp("processed_at"),
+  approvedBy: integer("approved_by"),
+});
+
+export const insertEmailTemplateSchema = createInsertSchema(emailTemplates).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertEmailTemplate = z.infer<typeof insertEmailTemplateSchema>;
+export type EmailTemplate = typeof emailTemplates.$inferSelect;
+
+export const insertCustomerAddressSchema = createInsertSchema(customerAddresses).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertCustomerAddress = z.infer<typeof insertCustomerAddressSchema>;
+export type CustomerAddress = typeof customerAddresses.$inferSelect;
+
+export const insertCustomerWalletSchema = createInsertSchema(customerWallets).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertCustomerWallet = z.infer<typeof insertCustomerWalletSchema>;
+export type CustomerWallet = typeof customerWallets.$inferSelect;
+
+export const insertWalletTransactionSchema = createInsertSchema(walletTransactions).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertWalletTransaction = z.infer<typeof insertWalletTransactionSchema>;
+export type WalletTransaction = typeof walletTransactions.$inferSelect;
+
+export const insertWalletRechargeRequestSchema = createInsertSchema(walletRechargeRequests).omit({
+  id: true,
+  requestedAt: true,
+});
+export type InsertWalletRechargeRequest = z.infer<typeof insertWalletRechargeRequestSchema>;
+export type WalletRechargeRequest = typeof walletRechargeRequests.$inferSelect;
+
+// Customer Activities Table
+export const customerActivities = pgTable("customer_activities", {
+  id: serial("id").primaryKey(),
+  customerId: integer("customer_id").notNull().references(() => crmCustomers.id),
+  activityType: text("activity_type").notNull(), // login, logout, order_placed, inquiry_submitted, profile_updated
+  description: text("description").notNull(),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  metadata: json("metadata"), // Additional activity-specific data
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Customer Segments Table
+export const customerSegments = pgTable("customer_segments", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  description: text("description"),
+  criteria: json("criteria"), // Segment criteria as JSON
+  color: text("color").default("#3B82F6"), // Hex color for UI
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertCustomerActivitySchema = createInsertSchema(customerActivities).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertCustomerActivity = z.infer<typeof insertCustomerActivitySchema>;
+export type CustomerActivity = typeof customerActivities.$inferSelect;
+
+export const insertCustomerSegmentSchema = createInsertSchema(customerSegments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertCustomerSegment = z.infer<typeof insertCustomerSegmentSchema>;
+export type CustomerSegment = typeof customerSegments.$inferSelect;
 
 // Leads table for CRM system
 export const leads = pgTable("leads", {

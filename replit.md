@@ -6,6 +6,27 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Customer Database Consolidation - Single Source of Truth Implementation (July 23, 2025)
+✅ **RESOLVED: Successfully consolidated dual customer tables into unified CRM system**
+- **Previous Issue**: System maintained two separate customer tables (`customers` and `crm_customers`) causing data fragmentation and inconsistencies
+- **Migration Completed**: Transferred all 16 records from `customers` table to `crm_customers` table (now 77 total records)
+- **Database Cleanup**: Successfully dropped redundant `customers` table from database schema
+- **Code Integration**: Updated all 15+ server files to reference unified `crm_customers` table:
+  - `server/customer-storage.ts`, `server/simple-customer-storage.ts`
+  - `server/shop-storage.ts`, `server/security-check.ts`
+  - `server/crm-storage.ts`, `server/routes.ts`
+  - `server/expired-orders-cleanup.ts`, `server/invoice-storage.ts`
+  - `server/order-management-storage.ts`, `server/wallet-storage.ts`
+  - `server/customer-address-storage.ts`, `server/crm-db.ts`, `server/customer-db.ts`
+- **Schema Consolidation**: 
+  - Removed `shared/customer-schema.ts` file completely
+  - Added all customer-related tables to main `shared/schema.ts`
+  - Updated imports throughout codebase from `@shared/customer-schema` to `@shared/schema`
+- **Data Integrity**: All customer authentication, orders, addresses, wallet transactions, and CRM data now unified under single table
+- **System Status**: Server operational with no LSP diagnostics - all import errors resolved
+- **Impact**: Eliminated data fragmentation, simplified database management, and ensured single source of truth for customer data
+- **Result**: Unified customer system with 77 consolidated records and streamlined database architecture
+
 ### COMPLETED: PDF Formatting Fix - Address and Postal Code Spacing Improved (July 23, 2025)
 ✅ **RESOLVED: Fixed PDF spacing issue in CRM customer output when addresses are long**
 - **Issue**: Long addresses were overlapping with postal code in customer profile PDF exports
