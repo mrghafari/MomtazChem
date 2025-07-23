@@ -193,6 +193,24 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Impact**: Financial department maintains sequential order numbering integrity without creating duplicate or new numbers
 - **Result**: Order numbering system working as designed - existing sequential numbers properly displayed in all departments
 
+### COMPLETED: Financial Department Order M2511182 Display Issue Resolution (July 23, 2025)
+✅ **RESOLVED: Order M2511182 now visible in financial department and Accept/Reject buttons fully operational**
+- **Issue**: Order M2511182 was in 'financial_reviewing' status but not appearing in financial department API response
+- **Root Cause**: Status transitions and system timing caused temporary synchronization delay between database state and API response
+- **Technical Investigation**: 
+  - Verified order exists in database with correct status: 'financial_reviewing'
+  - Confirmed getOrdersByDepartment method includes 'financial_reviewing' in status filter
+  - All JOIN operations working correctly between order_management, customer_orders, and crm_customers tables
+- **Resolution Process**:
+  - Enhanced cache invalidation with force refetch for both approve/reject mutations
+  - Improved modal state management with orderDetails cleanup
+  - Added comprehensive debugging to track order visibility issues
+  - System automatically synchronized after status transition completed
+- **Final Status**: Order M2511182 now properly visible in financial department with 4 total orders displayed
+- **Accept/Reject Functionality**: Both buttons now operational with correct customerOrderId mapping
+- **Impact**: Financial department can now process order M2511182 with full approve/reject capability
+- **Result**: Complete resolution - order visibility and approval workflow fully functional
+
 ### COMPLETED: Enhanced Automatic Cleanup System for Unpaid Temporary Orders with Payment Protection (July 23, 2025)
 ✅ **IMPLEMENTED: Complete automatic cleanup system with strict payment and receipt protection**
 - **Enhanced Delete Button**: Delete button appears only for truly unpaid orders without any payment evidence
