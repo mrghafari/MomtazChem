@@ -451,8 +451,8 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       customerEmail: crmCustomers.email,
       customerPhone: crmCustomers.phone,
       
-      // Payment Receipt info
-      receiptUrl: paymentReceipts.receiptUrl,
+      // Payment Receipt info - FIXED: Use customer_orders.receipt_path as primary source
+      receiptUrl: customerOrders.receiptPath, // Primary source for receipts
       receiptFileName: paymentReceipts.originalFileName,
       receiptMimeType: paymentReceipts.mimeType,
     })
@@ -679,8 +679,8 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       customerEmail: crmCustomers.email,
       customerPhone: crmCustomers.phone,
       
-      // Payment Receipt info
-      receiptUrl: paymentReceipts.receiptUrl,
+      // Payment Receipt info - FIXED: Use customer_orders.receipt_path as primary source  
+      receiptUrl: customerOrders.receiptPath, // Primary source for receipts
       receiptFileName: paymentReceipts.originalFileName,
       receiptMimeType: paymentReceipts.mimeType,
     })
