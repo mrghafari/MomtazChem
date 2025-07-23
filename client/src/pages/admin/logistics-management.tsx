@@ -363,10 +363,50 @@ const LogisticsManagement = () => {
                         <MapPin className="w-4 h-4 mr-2" />
                         آدرس تحویل
                       </h5>
-                      <p className="text-sm text-orange-700">
-                        {order.customerAddress || order.shippingAddress || 'آدرس ثبت نشده'}
+                      <div className="space-y-1">
+                        {(() => {
+                          try {
+                            // Parse shipping address JSON
+                            const shippingData = order.shippingAddress ? JSON.parse(order.shippingAddress) : null;
+                            if (shippingData) {
+                              return (
+                                <>
+                                  <p className="text-sm font-medium text-orange-800">
+                                    {shippingData.name}
+                                  </p>
+                                  <p className="text-xs text-orange-600 flex items-center">
+                                    <Phone className="w-3 h-3 mr-1" />
+                                    {shippingData.phone}
+                                  </p>
+                                  <p className="text-sm text-orange-700">
+                                    {shippingData.address}
+                                  </p>
+                                  <p className="text-xs text-orange-600">
+                                    {shippingData.city} - {shippingData.postalCode}
+                                  </p>
+                                </>
+                              );
+                            }
+                            // Fallback to recipient address or customer address
+                            return (
+                              <p className="text-sm text-orange-700">
+                                {order.recipientAddress || order.customerAddress || 'آدرس ثبت نشده'}
+                              </p>
+                            );
+                          } catch (e) {
+                            // Fallback for invalid JSON
+                            return (
+                              <p className="text-sm text-orange-700">
+                                {order.recipientAddress || order.customerAddress || 'آدرس ثبت نشده'}
+                              </p>
+                            );
+                          }
+                        })()}
+                      </div>
+                      <p className="text-xs text-orange-600 mt-2 flex items-center">
+                        <MapPin className="w-3 h-3 mr-1" />
+                        آدرس دریافت کالا
                       </p>
-                      <p className="text-xs text-orange-600 mt-1">آدرس دریافت کالا</p>
                     </div>
 
                     {/* Order Date Block */}

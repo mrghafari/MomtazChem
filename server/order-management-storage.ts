@@ -509,6 +509,14 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       customerEmail: crmCustomers.email,
       customerPhone: crmCustomers.phone,
       
+      // Delivery Address info - JSON fields from customer_orders
+      shippingAddress: customerOrders.shippingAddress,
+      billingAddress: customerOrders.billingAddress,
+      recipientName: customerOrders.recipientName,
+      recipientPhone: customerOrders.recipientPhone,
+      recipientAddress: customerOrders.recipientAddress,
+      deliveryNotes: customerOrders.deliveryNotes,
+      
       // Payment Receipt info - FIXED: Use customer_orders.receipt_path as primary source
       receiptUrl: customerOrders.receiptPath, // Primary source for receipts
       receiptFileName: paymentReceipts.originalFileName,
@@ -614,6 +622,15 @@ export class OrderManagementStorage implements IOrderManagementStorage {
           email: row.customerEmail,
           phone: row.customerPhone,
         },
+        
+        // Delivery Address information
+        shippingAddress: row.shippingAddress,
+        billingAddress: row.billingAddress,
+        recipientName: row.recipientName,
+        recipientPhone: row.recipientPhone,
+        recipientAddress: row.recipientAddress,
+        deliveryNotes: row.deliveryNotes,
+        
         receipt: row.receiptUrl ? {
           url: row.receiptUrl,
           fileName: row.receiptFileName,
