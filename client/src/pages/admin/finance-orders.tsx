@@ -1043,28 +1043,71 @@ function FinanceOrders() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label className="text-sm font-medium text-gray-600">مبلغ کل</Label>
-                        <p className="font-bold text-lg text-green-600">
-                          {parseFloat(orderDetails.totalAmount)?.toLocaleString()} {orderDetails.currency}
-                        </p>
+                    <div className="space-y-6">
+                      {/* Cost Breakdown */}
+                      <div className="bg-gray-50 rounded-lg p-4">
+                        <h4 className="font-medium text-gray-900 mb-4">تفکیک هزینه‌ها</h4>
+                        <div className="space-y-3">
+                          {/* Items Subtotal */}
+                          <div className="flex justify-between items-center">
+                            <span className="text-gray-600">مجموع اقلام:</span>
+                            <span className="font-medium">
+                              {(() => {
+                                const itemsTotal = orderDetails.items?.reduce((sum: number, item: any) => 
+                                  sum + parseFloat(item.totalPrice || 0), 0) || 0;
+                                return itemsTotal.toLocaleString();
+                              })()} {orderDetails.currency}
+                            </span>
+                          </div>
+                          
+                          {/* Shipping Cost - Always show */}
+                          <div className="flex justify-between items-center">
+                            <span className="text-blue-600">هزینه حمل:</span>
+                            <span className="font-medium text-blue-600">
+                              {parseFloat(orderDetails.shippingCost || orderDetails.shipping_cost || 0).toLocaleString()} {orderDetails.currency}
+                            </span>
+                          </div>
+                          
+                          {/* VAT - Only show if non-zero */}
+                          {(parseFloat(orderDetails.vatAmount || orderDetails.vat_amount || 0) > 0) && (
+                            <div className="flex justify-between items-center">
+                              <span className="text-green-600">مالیات بر ارزش افزوده:</span>
+                              <span className="font-medium text-green-600">
+                                {parseFloat(orderDetails.vatAmount || orderDetails.vat_amount || 0).toLocaleString()} {orderDetails.currency}
+                              </span>
+                            </div>
+                          )}
+                          
+                          {/* Total with separator */}
+                          <div className="border-t pt-3">
+                            <div className="flex justify-between items-center">
+                              <span className="font-bold text-lg text-gray-900">مجموع کل:</span>
+                              <span className="font-bold text-lg text-green-600">
+                                {parseFloat(orderDetails.totalAmount)?.toLocaleString()} {orderDetails.currency}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <Label className="text-sm font-medium text-gray-600">وضعیت پرداخت</Label>
-                        <Badge className="mt-1">{orderDetails.currentStatus}</Badge>
-                      </div>
-                      <div>
-                        <Label className="text-sm font-medium text-gray-600">تاریخ سفارش</Label>
-                        <p className="font-medium">
-                          {new Date(orderDetails.createdAt).toLocaleDateString('fa-IR')}
-                        </p>
-                      </div>
-                      <div>
-                        <Label className="text-sm font-medium text-gray-600">آخرین بروزرسانی</Label>
-                        <p className="font-medium">
-                          {new Date(orderDetails.updatedAt).toLocaleDateString('fa-IR')}
-                        </p>
+
+                      {/* Order Status & Dates */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Label className="text-sm font-medium text-gray-600">وضعیت پرداخت</Label>
+                          <Badge className="mt-1">{orderDetails.currentStatus}</Badge>
+                        </div>
+                        <div>
+                          <Label className="text-sm font-medium text-gray-600">تاریخ سفارش</Label>
+                          <p className="font-medium">
+                            {new Date(orderDetails.createdAt).toLocaleDateString('fa-IR')}
+                          </p>
+                        </div>
+                        <div>
+                          <Label className="text-sm font-medium text-gray-600">آخرین بروزرسانی</Label>
+                          <p className="font-medium">
+                            {new Date(orderDetails.updatedAt).toLocaleDateString('fa-IR')}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </CardContent>
