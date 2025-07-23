@@ -45,24 +45,21 @@ import { gpsDeliveryStorage } from "./gps-delivery-storage";
 import { insertGpsDeliveryConfirmationSchema } from "@shared/gps-delivery-schema";
 import { 
   companyInformation, 
-  incomingCorrespondence, 
-  outgoingCorrespondence, 
+  correspondence, 
   companyDocuments,
   businessCards,
   companyImages,
   insertCompanyInformationSchema,
-  insertIncomingCorrespondenceSchema,
-  insertOutgoingCorrespondenceSchema,
-  insertCompanyDocumentSchema,
-  insertBusinessCardSchema,
-  insertCompanyImageSchema,
+  insertCorrespondenceSchema,
+  insertCompanyDocumentsSchema,
+  insertBusinessCardsSchema,
+  insertCompanyImagesSchema,
   type CompanyInformation,
-  type IncomingCorrespondence,
-  type OutgoingCorrespondence,
+  type Correspondence,
   type CompanyDocument,
   type BusinessCard,
   type CompanyImage
-} from "@shared/company-info-schema";
+} from "@shared/schema";
 
 // SMS service will be imported dynamically when needed
 import { ticketingStorage } from "./ticketing-storage";
@@ -848,15 +845,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // COMPANY INFORMATION MANAGEMENT
   // ============================================================================
 
-  // Get all company information
-  app.get('/api/company-information', requireAuth, async (req, res) => {
+  // Get company information - Admin endpoint
+  app.get('/api/admin/company-information', requireAuth, async (req, res) => {
     try {
-      const companyInfo = await db
-        .select()
-        .from(companyInformation)
-        .where(eq(companyInformation.isActive, true))
-        .orderBy(desc(companyInformation.createdAt));
-      
+      const companyInfo = await companyStorage.getCompanyInformation();
       res.json({ success: true, data: companyInfo });
     } catch (error) {
       console.error('Error fetching company information:', error);
@@ -864,54 +856,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create company information record
-  app.post('/api/company-information', requireAuth, async (req, res) => {
+  // Update company information - Admin endpoint
+  app.put('/api/admin/company-information', requireAuth, async (req, res) => {
     try {
-      const validatedData = insertCompanyInformationSchema.parse(req.body);
-      
-      const [newCompanyInfo] = await db
-        .insert(companyInformation)
-        .values({
-          ...validatedData,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        })
-        .returning();
-      
-      res.json({ 
-        success: true, 
-        data: newCompanyInfo,
-        message: "اطلاعات شرکت با موفقیت اضافه شد" 
-      });
-    } catch (error) {
-      console.error('Error creating company information:', error);
-      res.status(500).json({ success: false, message: "خطا در ایجاد اطلاعات شرکت" });
-    }
-  });
-
-  // Update company information
-  app.put('/api/company-information/:id', requireAuth, async (req, res) => {
-    try {
-      const { id } = req.params;
       const validatedData = insertCompanyInformationSchema.partial().parse(req.body);
-      
-      const [updatedCompanyInfo] = await db
-        .update(companyInformation)
-        .set({
-          ...validatedData,
-          updatedAt: new Date()
-        })
-        .where(eq(companyInformation.id, parseInt(id)))
-        .returning();
-      
-      if (!updatedCompanyInfo) {
-        return res.status(404).json({ success: false, message: "اطلاعات شرکت یافت نشد" });
-      }
+      const updatedInfo = await companyStorage.updateCompanyInformation(validatedData);
       
       res.json({ 
         success: true, 
-        data: updatedCompanyInfo,
-        message: "اطلاعات شرکت به‌روزرسانی شد" 
+        data: updatedInfo,
+        message: "اطلاعات شرکت با موفقیت به‌روزرسانی شد" 
       });
     } catch (error) {
       console.error('Error updating company information:', error);
@@ -919,15 +873,339 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ============================================================================
+  // CORRESPONDENCE MANAGEMENT
+  // ============================================================================
+
+  // Get incoming correspondence
+  app.get('/api/correspondence/incoming', requireAuth, async (req, res) => {
+    try {
+      const correspondence = await companyStorage.getCorrespondence('incoming');
+      res.json({ success: true, data: correspondence });
+    } catch (error) {
+      console.error('Error fetching incoming correspondence:', error);
+      res.status(500).json({ success: false, message: "خطا در دریافت نامه‌های وارده" });
+    }
+  });
+
+  // Get outgoing correspondence
+  app.get('/api/correspondence/outgoing', requireAuth, async (req, res) => {
+    try {
+      const correspondence = await companyStorage.getCorrespondence('outgoing');
+      res.json({ success: true, data: correspondence });
+    } catch (error) {
+      console.error('Error fetching outgoing correspondence:', error);
+      res.status(500).json({ success: false, message: "خطا در دریافت نامه‌های صادره" });
+    }
+  });
+
+  // Create correspondence
+  app.post('/api/correspondence', requireAuth, async (req, res) => {
+    try {
+      const validatedData = insertCorrespondenceSchema.parse(req.body);
+      const newCorrespondence = await companyStorage.createCorrespondence(validatedData);
+      
+      res.json({ 
+        success: true, 
+        data: newCorrespondence,
+        message: "نامه با موفقیت اضافه شد" 
+      });
+    } catch (error) {
+      console.error('Error creating correspondence:', error);
+      res.status(500).json({ success: false, message: "خطا در ایجاد نامه" });
+    }
+  });
+
+  // Update correspondence
+  app.put('/api/correspondence/:id', requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const validatedData = insertCorrespondenceSchema.partial().parse(req.body);
+      const updatedCorrespondence = await companyStorage.updateCorrespondence(parseInt(id), validatedData);
+      
+      if (!updatedCorrespondence) {
+        return res.status(404).json({ success: false, message: "نامه یافت نشد" });
+      }
+      
+      res.json({ 
+        success: true, 
+        data: updatedCorrespondence,
+        message: "نامه به‌روزرسانی شد" 
+      });
+    } catch (error) {
+      console.error('Error updating correspondence:', error);
+      res.status(500).json({ success: false, message: "خطا در به‌روزرسانی نامه" });
+    }
+  });
+
+  // Delete correspondence
+  app.delete('/api/correspondence/:id', requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const deleted = await companyStorage.deleteCorrespondence(parseInt(id));
+      
+      if (!deleted) {
+        return res.status(404).json({ success: false, message: "نامه یافت نشد" });
+      }
+      
+      res.json({ 
+        success: true, 
+        message: "نامه حذف شد" 
+      });
+    } catch (error) {
+      console.error('Error deleting correspondence:', error);
+      res.status(500).json({ success: false, message: "خطا در حذف نامه" });
+    }
+  });
+
+  // ============================================================================
+  // COMPANY DOCUMENTS MANAGEMENT
+  // ============================================================================
+
+  // Get company documents
+  app.get('/api/company-documents', requireAuth, async (req, res) => {
+    try {
+      const documents = await companyStorage.getCompanyDocuments();
+      res.json({ success: true, data: documents });
+    } catch (error) {
+      console.error('Error fetching company documents:', error);
+      res.status(500).json({ success: false, message: "خطا در دریافت مدارک شرکت" });
+    }
+  });
+
+  // Create company document
+  app.post('/api/company-documents', requireAuth, async (req, res) => {
+    try {
+      const validatedData = insertCompanyDocumentsSchema.parse(req.body);
+      const newDocument = await companyStorage.createCompanyDocument(validatedData);
+      
+      res.json({ 
+        success: true, 
+        data: newDocument,
+        message: "مدرک با موفقیت اضافه شد" 
+      });
+    } catch (error) {
+      console.error('Error creating company document:', error);
+      res.status(500).json({ success: false, message: "خطا در ایجاد مدرک" });
+    }
+  });
+
+  // Update company document
+  app.put('/api/company-documents/:id', requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const validatedData = insertCompanyDocumentsSchema.partial().parse(req.body);
+      const updatedDocument = await companyStorage.updateCompanyDocument(parseInt(id), validatedData);
+      
+      if (!updatedDocument) {
+        return res.status(404).json({ success: false, message: "مدرک یافت نشد" });
+      }
+      
+      res.json({ 
+        success: true, 
+        data: updatedDocument,
+        message: "مدرک به‌روزرسانی شد" 
+      });
+    } catch (error) {
+      console.error('Error updating company document:', error);
+      res.status(500).json({ success: false, message: "خطا در به‌روزرسانی مدرک" });
+    }
+  });
+
+  // Delete company document
+  app.delete('/api/company-documents/:id', requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const deleted = await companyStorage.deleteCompanyDocument(parseInt(id));
+      
+      if (!deleted) {
+        return res.status(404).json({ success: false, message: "مدرک یافت نشد" });
+      }
+      
+      res.json({ 
+        success: true, 
+        message: "مدرک حذف شد" 
+      });
+    } catch (error) {
+      console.error('Error deleting company document:', error);
+      res.status(500).json({ success: false, message: "خطا در حذف مدرک" });
+    }
+  });
+
+  // ============================================================================
+  // BUSINESS CARDS MANAGEMENT
+  // ============================================================================
+
+  // Get business cards
+  app.get('/api/business-cards', requireAuth, async (req, res) => {
+    try {
+      const businessCards = await companyStorage.getBusinessCards();
+      res.json({ success: true, data: businessCards });
+    } catch (error) {
+      console.error('Error fetching business cards:', error);
+      res.status(500).json({ success: false, message: "خطا در دریافت کارت‌ویزیت‌ها" });
+    }
+  });
+
+  // Create business card
+  app.post('/api/business-cards', requireAuth, async (req, res) => {
+    try {
+      const validatedData = insertBusinessCardsSchema.parse(req.body);
+      const newBusinessCard = await companyStorage.createBusinessCard(validatedData);
+      
+      res.json({ 
+        success: true, 
+        data: newBusinessCard,
+        message: "کارت‌ویزیت با موفقیت اضافه شد" 
+      });
+    } catch (error) {
+      console.error('Error creating business card:', error);
+      res.status(500).json({ success: false, message: "خطا در ایجاد کارت‌ویزیت" });
+    }
+  });
+
+  // Update business card
+  app.put('/api/business-cards/:id', requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const validatedData = insertBusinessCardsSchema.partial().parse(req.body);
+      const updatedBusinessCard = await companyStorage.updateBusinessCard(parseInt(id), validatedData);
+      
+      if (!updatedBusinessCard) {
+        return res.status(404).json({ success: false, message: "کارت‌ویزیت یافت نشد" });
+      }
+      
+      res.json({ 
+        success: true, 
+        data: updatedBusinessCard,
+        message: "کارت‌ویزیت به‌روزرسانی شد" 
+      });
+    } catch (error) {
+      console.error('Error updating business card:', error);
+      res.status(500).json({ success: false, message: "خطا در به‌روزرسانی کارت‌ویزیت" });
+    }
+  });
+
+  // Approve business card
+  app.put('/api/business-cards/:id/approve', requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const approvedBy = req.session.adminId || req.session.customUserId || 1;
+      const approvedBusinessCard = await companyStorage.approveBusinessCard(parseInt(id), approvedBy);
+      
+      if (!approvedBusinessCard) {
+        return res.status(404).json({ success: false, message: "کارت‌ویزیت یافت نشد" });
+      }
+      
+      res.json({ 
+        success: true, 
+        data: approvedBusinessCard,
+        message: "کارت‌ویزیت تایید شد" 
+      });
+    } catch (error) {
+      console.error('Error approving business card:', error);
+      res.status(500).json({ success: false, message: "خطا در تایید کارت‌ویزیت" });
+    }
+  });
+
+  // Delete business card
+  app.delete('/api/business-cards/:id', requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const deleted = await companyStorage.deleteBusinessCard(parseInt(id));
+      
+      if (!deleted) {
+        return res.status(404).json({ success: false, message: "کارت‌ویزیت یافت نشد" });
+      }
+      
+      res.json({ 
+        success: true, 
+        message: "کارت‌ویزیت حذف شد" 
+      });
+    } catch (error) {
+      console.error('Error deleting business card:', error);
+      res.status(500).json({ success: false, message: "خطا در حذف کارت‌ویزیت" });
+    }
+  });
+
+  // ============================================================================
+  // COMPANY IMAGES MANAGEMENT
+  // ============================================================================
+
   // Get company images
+  app.get('/api/company-images', requireAuth, async (req, res) => {
+    try {
+      const images = await companyStorage.getCompanyImages();
+      res.json({ success: true, data: images });
+    } catch (error) {
+      console.error('Error fetching company images:', error);
+      res.status(500).json({ success: false, message: "خطا در دریافت تصاویر شرکت" });
+    }
+  });
+
+  // Create company image
+  app.post('/api/company-images', requireAuth, async (req, res) => {
+    try {
+      const validatedData = insertCompanyImagesSchema.parse(req.body);
+      const newImage = await companyStorage.createCompanyImage(validatedData);
+      
+      res.json({ 
+        success: true, 
+        data: newImage,
+        message: "تصویر با موفقیت اضافه شد" 
+      });
+    } catch (error) {
+      console.error('Error creating company image:', error);
+      res.status(500).json({ success: false, message: "خطا در ایجاد تصویر" });
+    }
+  });
+
+  // Update company image
+  app.put('/api/company-images/:id', requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const validatedData = insertCompanyImagesSchema.partial().parse(req.body);
+      const updatedImage = await companyStorage.updateCompanyImage(parseInt(id), validatedData);
+      
+      if (!updatedImage) {
+        return res.status(404).json({ success: false, message: "تصویر یافت نشد" });
+      }
+      
+      res.json({ 
+        success: true, 
+        data: updatedImage,
+        message: "تصویر به‌روزرسانی شد" 
+      });
+    } catch (error) {
+      console.error('Error updating company image:', error);
+      res.status(500).json({ success: false, message: "خطا در به‌روزرسانی تصویر" });
+    }
+  });
+
+  // Delete company image
+  app.delete('/api/company-images/:id', requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const deleted = await companyStorage.deleteCompanyImage(parseInt(id));
+      
+      if (!deleted) {
+        return res.status(404).json({ success: false, message: "تصویر یافت نشد" });
+      }
+      
+      res.json({ 
+        success: true, 
+        message: "تصویر حذف شد" 
+      });
+    } catch (error) {
+      console.error('Error deleting company image:', error);
+      res.status(500).json({ success: false, message: "خطا در حذف تصویر" });
+    }
+  });
+
+  // Legacy endpoint - backward compatibility  
   app.get('/api/company-information/images', requireAuth, async (req, res) => {
     try {
-      const images = await db
-        .select()
-        .from(companyImages)
-        .where(eq(companyImages.isActive, true))
-        .orderBy(desc(companyImages.createdAt));
-      
+      const images = await companyStorage.getCompanyImages();
       res.json({ success: true, data: images });
     } catch (error) {
       console.error('Error fetching company images:', error);

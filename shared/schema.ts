@@ -94,6 +94,119 @@ export const companyInformation = pgTable("company_information", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+// Correspondence management for incoming and outgoing mail
+export const correspondence = pgTable("correspondence", {
+  id: serial("id").primaryKey(),
+  referenceNumber: text("reference_number").notNull().unique(),
+  type: text("type").notNull(), // 'incoming' or 'outgoing'
+  subject: text("subject").notNull(),
+  senderName: text("sender_name"),
+  recipientName: text("recipient_name"),
+  senderOrganization: text("sender_organization"),
+  recipientOrganization: text("recipient_organization"),
+  senderEmail: text("sender_email"),
+  recipientEmail: text("recipient_email"),
+  dateReceived: timestamp("date_received"),
+  dateSent: timestamp("date_sent"),
+  priority: text("priority").notNull().default("medium"), // 'high', 'medium', 'low'
+  status: text("status").notNull().default("pending"), // 'pending', 'in_progress', 'completed', 'archived'
+  category: text("category").notNull(),
+  content: text("content").notNull(),
+  attachmentUrl: text("attachment_url"),
+  notes: text("notes"),
+  tags: text("tags"),
+  createdBy: integer("created_by"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Company documents management
+export const companyDocuments = pgTable("company_documents", {
+  id: serial("id").primaryKey(),
+  documentName: text("document_name").notNull(),
+  documentType: text("document_type").notNull(), // 'license', 'certificate', 'permit', 'contract', 'other'
+  documentNumber: text("document_number").notNull(),
+  issueDate: timestamp("issue_date").notNull(),
+  expiryDate: timestamp("expiry_date"),
+  issuingAuthority: text("issuing_authority").notNull(),
+  fileUrl: text("file_url").notNull(),
+  status: text("status").notNull().default("active"), // 'active', 'expired', 'renewed', 'cancelled'
+  description: text("description"),
+  tags: text("tags"),
+  reminderDays: integer("reminder_days").default(30), // Days before expiry to remind
+  uploadedBy: integer("uploaded_by"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Business cards management
+export const businessCards = pgTable("business_cards", {
+  id: serial("id").primaryKey(),
+  employeeName: text("employee_name").notNull(),
+  employeeNameArabic: text("employee_name_arabic"),
+  employeeNameKurdish: text("employee_name_kurdish"),
+  jobTitle: text("job_title").notNull(),
+  jobTitleArabic: text("job_title_arabic"),
+  jobTitleKurdish: text("job_title_kurdish"),
+  department: text("department"),
+  directPhone: text("direct_phone"),
+  mobilePhone: text("mobile_phone"),
+  email: text("email"),
+  officeLocation: text("office_location"),
+  linkedinProfile: text("linkedin_profile"),
+  whatsappNumber: text("whatsapp_number"),
+  cardDesign: text("card_design").notNull().default("standard"), // 'standard', 'executive', 'creative'
+  cardColor: text("card_color").notNull().default("#1e40af"),
+  includeQrCode: boolean("include_qr_code").default(false),
+  qrCodeData: text("qr_code_data"),
+  specialNotes: text("special_notes"),
+  isActive: boolean("is_active").default(true),
+  printQuantity: integer("print_quantity").default(50),
+  lastPrintDate: timestamp("last_print_date"),
+  cardStatus: text("card_status").notNull().default("draft"), // 'draft', 'approved', 'printed', 'distributed'
+  approvedBy: integer("approved_by"),
+  approvedAt: timestamp("approved_at"),
+  createdBy: integer("created_by"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Company images and media management
+export const companyImages = pgTable("company_images", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description"),
+  imageUrl: text("image_url").notNull(),
+  category: text("category").notNull(), // 'logo', 'office', 'products', 'team', 'events', 'certificates', 'other'
+  tags: text("tags"),
+  fileSize: integer("file_size"), // in bytes
+  dimensions: text("dimensions"), // width x height
+  mimeType: text("mime_type"),
+  isActive: boolean("is_active").default(true),
+  uploadedAt: timestamp("uploaded_at").notNull().defaultNow(),
+  uploadedBy: integer("uploaded_by"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Zod schemas for all company information tables
+export const insertCorrespondenceSchema = createInsertSchema(correspondence);
+export const insertCompanyDocumentsSchema = createInsertSchema(companyDocuments);
+export const insertBusinessCardsSchema = createInsertSchema(businessCards);
+export const insertCompanyImagesSchema = createInsertSchema(companyImages);
+
+// Type exports
+export type Correspondence = typeof correspondence.$inferSelect;
+export type InsertCorrespondence = typeof correspondence.$inferInsert;
+export type CompanyDocument = typeof companyDocuments.$inferSelect;
+export type InsertCompanyDocument = typeof companyDocuments.$inferInsert;
+export type BusinessCard = typeof businessCards.$inferSelect;
+export type InsertBusinessCard = typeof businessCards.$inferInsert;
+export type CompanyImage = typeof companyImages.$inferSelect;
+export type InsertCompanyImage = typeof companyImages.$inferInsert;
+
 // Tax settings for invoices and financial documents
 export const taxSettings = pgTable("tax_settings", {
   id: serial("id").primaryKey(),
