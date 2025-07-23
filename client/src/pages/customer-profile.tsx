@@ -617,11 +617,13 @@ const CustomerProfile = () => {
 
                         {/* Actions */}
                         <div className="mt-4 pt-3 border-t border-gray-200 flex gap-2 flex-wrap">
-                          {/* Debug: Always show for pending orders */}
+                          {/* دکمه‌های مدیریت سفارش برای سفارشات pending */}
                           {(order.status === 'pending' || order.status === 'payment_grace_period') && (
                             <>
-                              {/* دکمه آپلود رسید بانکی برای سفارشات موقت با پرداخت بانکی */}
-                              {order.paymentMethod === 'واریز بانکی با مهلت 3 روزه' && (
+                              {/* دکمه آپلود رسید بانکی - نمایش برای همه روش‌های بانکی */}
+                              {(order.paymentMethod === 'واریز بانکی با مهلت 3 روزه' || 
+                                order.paymentMethod === 'bank_transfer_grace' || 
+                                order.paymentMethod === 'bank_receipt') && (
                                 <Button
                                   size="sm"
                                   onClick={() => window.open(`/customer/bank-receipt-upload?orderId=${order.id}`, '_blank')}
