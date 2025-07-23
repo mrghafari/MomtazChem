@@ -487,9 +487,9 @@ function FinanceOrders() {
   // Handle accept order from order details modal
   const handleAcceptOrder = () => {
     if (!orderDetails || !selectedOrder) return;
-    console.log('🔄 [FINANCE] Accepting order from modal:', selectedOrder.id);
+    console.log('🔄 [FINANCE] Accepting order from modal - Management ID:', selectedOrder.id, 'Customer Order ID:', selectedOrder.customerOrderId);
     approveMutation.mutate({ 
-      orderId: selectedOrder.id, // USE ORDER MANAGEMENT ID FROM SELECTED ORDER
+      orderId: selectedOrder.customerOrderId, // FIXED: USE CUSTOMER ORDER ID FOR API
       notes: `سفارش تأیید شد از طریق مودال جزئیات - ${new Date().toLocaleDateString('en-US')}` 
     });
     setOrderDetailsModalOpen(false);
@@ -498,9 +498,9 @@ function FinanceOrders() {
   // Handle reject order from order details modal  
   const handleRejectOrder = () => {
     if (!orderDetails || !selectedOrder) return;
-    console.log('🔄 [FINANCE] Rejecting order from modal:', selectedOrder.id);
+    console.log('🔄 [FINANCE] Rejecting order from modal - Management ID:', selectedOrder.id, 'Customer Order ID:', selectedOrder.customerOrderId);
     rejectMutation.mutate({ 
-      orderId: selectedOrder.id, // USE ORDER MANAGEMENT ID FROM SELECTED ORDER
+      orderId: selectedOrder.customerOrderId, // FIXED: USE CUSTOMER ORDER ID FOR API
       notes: `سفارش رد شد از طریق مودال جزئیات - ${new Date().toLocaleDateString('en-US')}` 
     });
     setOrderDetailsModalOpen(false);

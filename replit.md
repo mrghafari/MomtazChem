@@ -26,6 +26,18 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Final Result**: Clean database with 20 valid orders containing actual products (1-3 items each)
 - **Impact**: Complete standardized order database with consistent M25XXXXX format and real order content throughout all departments
 
+### COMPLETED: Finance Department Order Details Modal Accept/Reject Buttons Fix (July 23, 2025)
+✅ **RESOLVED: Accept/Reject buttons in order details modal now working properly**
+- **Issue**: Accept and Reject buttons in finance department order details modal were not functional
+- **Root Cause**: Handler functions were using `selectedOrder.id` (order management ID) instead of `selectedOrder.customerOrderId` (customer order ID) for API calls
+- **Technical Fix**: 
+  - Modified `handleAcceptOrder` to use `selectedOrder.customerOrderId` instead of `selectedOrder.id`
+  - Modified `handleRejectOrder` to use `selectedOrder.customerOrderId` instead of `selectedOrder.id`
+  - Added enhanced logging to track both management ID and customer order ID for debugging
+- **API Integration**: Finance approval/rejection endpoints expect customer order ID, not order management ID
+- **Impact**: Financial department can now properly approve or reject orders from the detailed order view modal
+- **Result**: Complete resolution of modal action buttons - approve/reject functionality operational from order details interface
+
 ### COMPLETED: Receipt Display Fix for Bank Transfer Orders and Gregorian Date Display (July 23, 2025)
 ✅ **RESOLVED: Critical receipt display bug preventing bank receipt visibility in financial department**
 - **Root Cause Identified**: Receipt display API was reading from empty payment_receipts table instead of customer_orders.receipt_path where actual receipts are stored
