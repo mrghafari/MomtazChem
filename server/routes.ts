@@ -406,6 +406,260 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.sendFile(path.join(process.cwd(), 'test-proforma.html'));
   });
 
+  // Data Integrity Test Page
+  app.get("/test-data-integrity", (req, res) => {
+    const html = `<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بررسی یکپارچگی داده‌ها - سفارشات معیوب</title>
+    <style>
+        body {
+            font-family: Vazir, Arial, sans-serif;
+            margin: 20px;
+            direction: rtl;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .header h1 {
+            color: #c41e3a;
+            margin: 0 0 10px 0;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #c41e3a;
+        }
+        .stat-label {
+            color: #666;
+            margin-top: 10px;
+        }
+        .corrupted-orders {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .table-header {
+            background: #f8f9fa;
+            padding: 15px;
+            font-weight: bold;
+            border-bottom: 1px solid #ddd;
+        }
+        .order-row {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr auto;
+            gap: 20px;
+            align-items: center;
+        }
+        .order-row:last-child {
+            border-bottom: none;
+        }
+        .order-number {
+            font-weight: bold;
+            color: #c41e3a;
+        }
+        .amount {
+            font-weight: bold;
+            color: #28a745;
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.9em;
+        }
+        .status.confirmed {
+            background: #d4edda;
+            color: #155724;
+        }
+        .warning-badge {
+            background: #fff3cd;
+            color: #856404;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+        }
+        .solution-section {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .solution-header {
+            color: #c41e3a;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .solution-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .solution-option {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .solution-option:hover {
+            border-color: #c41e3a;
+            background-color: #fef2f2;
+        }
+        .solution-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .solution-desc {
+            font-size: 0.9em;
+            color: #666;
+        }
+        .risk-warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 6px;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 0.85em;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 بررسی یکپارچگی داده‌ها</h1>
+            <p>شناسایی سفارشات معیوب (دارای مبلغ اما بدون آیتم)</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">2</div>
+                <div class="stat-label">سفارشات معیوب</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">350,000</div>
+                <div class="stat-label">ارزش کل (دینار عراقی)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">2</div>
+                <div class="stat-label">سفارشات تایید شده معیوب</div>
+            </div>
+        </div>
+
+        <div class="corrupted-orders">
+            <div class="table-header">
+                سفارشات معیوب شناسایی شده
+            </div>
+            <div class="order-row">
+                <div class="order-number">M25T004</div>
+                <div class="amount">200,000 IQD</div>
+                <div class="status confirmed">confirmed</div>
+                <div>2025/07/23</div>
+                <div class="warning-badge">بدون آیتم</div>
+            </div>
+            <div class="order-row">
+                <div class="order-number">M25T003</div>
+                <div class="amount">150,000 IQD</div>
+                <div class="status confirmed">confirmed</div>
+                <div>2025/07/23</div>
+                <div class="warning-badge">بدون آیتم</div>
+            </div>
+        </div>
+
+        <div class="solution-section">
+            <div class="solution-header">
+                🔧 راه‌حل‌های پیشنهادی برای سفارشات معیوب
+            </div>
+            
+            <div class="solution-options">
+                <div class="solution-option" onclick="selectSolution('delete')">
+                    <div class="solution-title">🗑️ حذف سفارشات معیوب</div>
+                    <div class="solution-desc">حذف کامل سفارشات M25T003 و M25T004 از سیستم</div>
+                    <div class="risk-warning">
+                        ⚠️ توجه: این عمل غیرقابل برگشت است
+                    </div>
+                </div>
+                
+                <div class="solution-option" onclick="selectSolution('investigate')">
+                    <div class="solution-title">🔍 بررسی عمیق‌تر</div>
+                    <div class="solution-desc">تحلیل دقیق‌تر برای یافتن علت ایجاد این سفارشات</div>
+                    <div class="risk-warning">
+                        💡 گزینه محافظه‌کارانه‌تر
+                    </div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 6px;">
+                <strong>تحلیل وضعیت:</strong>
+                <ul style="margin: 10px 0; padding-right: 20px;">
+                    <li>سفارش M25T002: سالم (1 آیتم، 60,000 دینار)</li>
+                    <li>سفارش M25T003: معیوب (0 آیتم، 150,000 دینار)</li>
+                    <li>سفارش M25T004: معیوب (0 آیتم، 200,000 دینار)</li>
+                </ul>
+                <p style="color: #c41e3a; font-weight: bold;">
+                    مجموع ارزش سفارشات معیوب: 350,000 دینار عراقی
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function selectSolution(type) {
+            if (type === 'delete') {
+                if (confirm('آیا مطمئن هستید که می‌خواهید سفارشات معیوب حذف شوند؟\\n\\nاین عمل غیرقابل برگشت است.')) {
+                    alert('برای اجرای این عمل، به صفحه مدیریت مالی مراجعه کرده و از طریق API admin حذف انجام دهید.');
+                }
+            } else if (type === 'investigate') {
+                alert('برای بررسی عمیق‌تر، لاگ‌های ایجاد سفارش و تاریخچه تغییرات بررسی خواهد شد.');
+            }
+        }
+
+        console.log('🔍 CRITICAL DATA INTEGRITY ISSUE CONFIRMED:');
+        console.log('- M25T002 (healthy): 75,000 IQD with 1 item worth 60,000 IQD');
+        console.log('- M25T003 (corrupted): 150,000 IQD with 0 items');
+        console.log('- M25T004 (corrupted): 200,000 IQD with 0 items');
+        console.log('- Business Impact: HIGH - Customer orders show monetary values without corresponding products');
+    </script>
+</body>
+</html>`;
+    res.send(html);
+  });
+
   // ============================================
   // START: PDF Generation Routes
   // ============================================

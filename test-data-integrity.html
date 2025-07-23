@@ -121,6 +121,55 @@
         button:hover {
             background: #a01729;
         }
+        .solution-section {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .solution-header {
+            color: #c41e3a;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .solution-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .solution-option {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .solution-option:hover {
+            border-color: #c41e3a;
+            background-color: #fef2f2;
+        }
+        .solution-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .solution-desc {
+            font-size: 0.9em;
+            color: #666;
+        }
+        .risk-warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 6px;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 0.85em;
+            color: #856404;
+        }
     </style>
 </head>
 <body>
@@ -137,10 +186,14 @@
         <div id="ordersContainer" class="corrupted-orders">
             <div class="loading">در حال بارگذاری سفارشات معیوب...</div>
         </div>
+
+        <div id="solutionContainer" style="margin-top: 30px;">
+            <!-- Solution options will be added here -->
+        </div>
     </div>
 
     <script>
-        // Manual data based on database query results
+        // Manual data based on database query results - CONFIRMED CORRUPTED ORDERS
         const corruptedOrdersData = [
             {
                 id: 285,
@@ -149,7 +202,8 @@
                 status: 'confirmed',
                 createdAt: '2025-07-23 07:33:37',
                 itemCount: 0,
-                currency: 'IQD'
+                currency: 'IQD',
+                businessImpact: 'HIGH'
             },
             {
                 id: 284,
@@ -158,9 +212,21 @@
                 status: 'confirmed',
                 createdAt: '2025-07-23 07:30:49',
                 itemCount: 0,
-                currency: 'IQD'
+                currency: 'IQD',
+                businessImpact: 'HIGH'
             }
         ];
+
+        // HEALTHY ORDER FOR COMPARISON
+        const healthyOrderExample = {
+            id: 283,
+            orderNumber: 'M25T002',
+            totalAmount: '75000.00',
+            status: 'confirmed',
+            itemCount: 1,
+            itemsValue: '60000.00',
+            currency: 'IQD'
+        };
 
         const stats = {
             totalCorrupted: corruptedOrdersData.length,
@@ -219,18 +285,78 @@
             document.getElementById('ordersContainer').innerHTML = ordersHtml;
         }
 
+        function displaySolutionOptions() {
+            const solutionHtml = `
+                <div class="solution-section">
+                    <div class="solution-header">
+                        🔧 راه‌حل‌های پیشنهادی برای سفارشات معیوب
+                    </div>
+                    
+                    <div class="solution-options">
+                        <div class="solution-option" onclick="selectSolution('delete')">
+                            <div class="solution-title">🗑️ حذف سفارشات معیوب</div>
+                            <div class="solution-desc">حذف کامل سفارشات M25T003 و M25T004 از سیستم</div>
+                            <div class="risk-warning">
+                                ⚠️ توجه: این عمل غیرقابل برگشت است
+                            </div>
+                        </div>
+                        
+                        <div class="solution-option" onclick="selectSolution('investigate')">
+                            <div class="solution-title">🔍 بررسی عمیق‌تر</div>
+                            <div class="solution-desc">تحلیل دقیق‌تر برای یافتن علت ایجاد این سفارشات</div>
+                            <div class="risk-warning">
+                                💡 گزینه محافظه‌کارانه‌تر
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 6px;">
+                        <strong>تحلیل وضعیت:</strong>
+                        <ul style="margin: 10px 0; padding-right: 20px;">
+                            <li>سفارش M25T002: سالم (1 آیتم، 60,000 دینار)</li>
+                            <li>سفارش M25T003: معیوب (0 آیتم، 150,000 دینار)</li>
+                            <li>سفارش M25T004: معیوب (0 آیتم، 200,000 دینار)</li>
+                        </ul>
+                        <p style="color: #c41e3a; font-weight: bold;">
+                            مجموع ارزش سفارشات معیوب: 350,000 دینار عراقی
+                        </p>
+                    </div>
+                </div>
+            `;
+            document.getElementById('solutionContainer').innerHTML = solutionHtml;
+        }
+
+        function selectSolution(type) {
+            if (type === 'delete') {
+                if (confirm('آیا مطمئن هستید که می‌خواهید سفارشات معیوب حذف شوند؟\n\nاین عمل غیرقابل برگشت است.')) {
+                    alert('برای اجرای این عمل، به صفحه مدیریت مالی مراجعه کرده و از طریق API admin حذف انجام دهید.');
+                }
+            } else if (type === 'investigate') {
+                alert('برای بررسی عمیق‌تر، لاگ‌های ایجاد سفارش و تاریخچه تغییرات بررسی خواهد شد.');
+            }
+        }
+
         // Initialize page
         displayStats();
         displayCorruptedOrders();
+        displaySolutionOptions();
 
         // Add diagnostic information
         console.log('🔍 Data Integrity Check Results:');
         console.log('Corrupted Orders:', corruptedOrdersData);
+        console.log('Healthy Order Example:', healthyOrderExample);
         console.log('Statistics:', stats);
         
         // Show critical business issue
         if (stats.totalCorrupted > 0) {
             console.warn(`⚠️ CRITICAL: ${stats.totalCorrupted} corrupted orders found with total value of ${stats.totalCorruptedValue.toLocaleString()} IQD`);
+            
+            // Additional analysis
+            console.log('📊 ANALYSIS:');
+            console.log('- M25T002 (healthy): 75,000 IQD with 1 item worth 60,000 IQD');
+            console.log('- M25T003 (corrupted): 150,000 IQD with 0 items');
+            console.log('- M25T004 (corrupted): 200,000 IQD with 0 items');
+            console.log('- Business Impact: HIGH - Customer orders show monetary values without corresponding products');
         }
     </script>
 </body>
