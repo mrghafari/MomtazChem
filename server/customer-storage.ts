@@ -28,7 +28,7 @@ import {
   type InsertEmailTemplate,
 } from "@shared/customer-schema";
 import { customerDb } from "./customer-db";
-import { eq, desc, and, or, ilike, count, sql, sum } from "drizzle-orm";
+import { eq, desc, and, or, ilike, count, sql, sum, ne } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { CartStorage } from "./cart-storage";
 
@@ -202,7 +202,10 @@ export class CustomerStorage implements ICustomerStorage {
     return await customerDb
       .select()
       .from(customerOrders)
-      .where(eq(customerOrders.customerId, customerId))
+      .where(and(
+        eq(customerOrders.customerId, customerId),
+        ne(customerOrders.status, 'deleted') // فیلتر کردن سفارشات حذف شده
+      ))
       .orderBy(desc(customerOrders.createdAt));
   }
 
@@ -216,11 +219,14 @@ export class CustomerStorage implements ICustomerStorage {
     abandonedCarts: any[],
     hasAbandonedCarts: boolean
   }> {
-    // Get all orders for the customer
+    // Get all orders for the customer (excluding deleted orders)
     const allOrders = await customerDb
       .select()
       .from(customerOrders)
-      .where(eq(customerOrders.customerId, customerId))
+      .where(and(
+        eq(customerOrders.customerId, customerId),
+        ne(customerOrders.status, 'deleted') // فیلتر کردن سفارشات حذف شده از نمایش پروفایل
+      ))
       .orderBy(desc(customerOrders.createdAt));
 
     const totalOrders = allOrders.length;
