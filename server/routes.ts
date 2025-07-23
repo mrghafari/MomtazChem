@@ -727,9 +727,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ success: false, message: 'Invalid language. Use "en" or "fa".' });
       }
       
-      console.log('Generating User Documentation with PDFMake');
-      const { generateDocumentationPDFWithPDFMake } = await import('./pdfmake-generator.js');
-      const pdfBuffer = await generateDocumentationPDFWithPDFMake('User Guide', language);
+      console.log('Generating User Documentation with PDFKit');
+      const { generateCustomerProfilePDF } = await import('./pdfkit-generator');
+      const pdfBuffer = await generateCustomerProfilePDF({ name: 'User Guide', language });
       
       const filename = language === 'fa' ? 
         'Momtazchem-User-Guide-Persian.pdf' : 
@@ -752,9 +752,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ success: false, message: 'Invalid language. Use "en" or "fa".' });
       }
       
-      console.log('Generating Admin Documentation with PDFMake');
-      const { generateDocumentationPDFWithPDFMake } = await import('./pdfmake-generator.js');
-      const pdfBuffer = await generateDocumentationPDFWithPDFMake('Admin Guide', language);
+      console.log('Generating Admin Documentation with PDFKit');
+      const { generateCustomerProfilePDF } = await import('./pdfkit-generator');
+      const pdfBuffer = await generateCustomerProfilePDF({ name: 'Admin Guide', language });
       
       const filename = language === 'fa' ? 
         'Momtazchem-Admin-Guide-Persian.pdf' : 
@@ -777,9 +777,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ success: false, message: 'Invalid language. Use "en" or "fa".' });
       }
       
-      console.log('Generating Technical Documentation with PDFMake');
-      const { generateDocumentationPDFWithPDFMake } = await import('./pdfmake-generator.js');
-      const pdfBuffer = await generateDocumentationPDFWithPDFMake('Technical Documentation', language);
+      console.log('Generating Technical Documentation with PDFKit');
+      const { generateCustomerProfilePDF } = await import('./pdfkit-generator');
+      const pdfBuffer = await generateCustomerProfilePDF({ name: 'Technical Documentation', language });
       
       const filename = language === 'fa' ? 
         'Momtazchem-Technical-Guide-Persian.pdf' : 
@@ -802,9 +802,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ success: false, message: 'Invalid language. Use "en" or "fa".' });
       }
       
-      console.log('Generating Complete Documentation with PDFMake');
-      const { generateDocumentationPDFWithPDFMake } = await import('./pdfmake-generator.js');
-      const pdfBuffer = await generateDocumentationPDFWithPDFMake('Complete Documentation', language);
+      console.log('Generating Complete Documentation with PDFKit');
+      const { generateCustomerProfilePDF } = await import('./pdfkit-generator');
+      const pdfBuffer = await generateCustomerProfilePDF({ name: 'Complete Documentation', language });
       
       const filename = language === 'fa' ? 
         'Momtazchem-Complete-Documentation-Persian.pdf' : 
@@ -827,9 +827,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ success: false, message: 'Invalid language. Use "en" or "fa".' });
       }
       
-      console.log('Generating Project Proposal with PDFMake');
-      const { generateDocumentationPDFWithPDFMake } = await import('./pdfmake-generator.js');
-      const pdfBuffer = await generateDocumentationPDFWithPDFMake('Project Proposal', language);
+      console.log('Generating Project Proposal with PDFKit');
+      const { generateCustomerProfilePDF } = await import('./pdfkit-generator');
+      const pdfBuffer = await generateCustomerProfilePDF({ name: 'Project Proposal', language });
       
       const filename = language === 'fa' ? 
         'Momtazchem-Project-Proposal-Persian.pdf' : 
