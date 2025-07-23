@@ -151,7 +151,7 @@ export class ExpiredOrdersCleanup {
             .update(customerOrders)
             .set({
               status: 'deleted',
-              notes: sql`COALESCE(${customerOrders.notes}, '') || ' - سفارش موقت ${timeLimitNote} منقضی شده حذف شد در ' || NOW()`,
+              notes: sql`COALESCE(${customerOrders.notes}, '') || ' - سفارش موقت ' || ${timeLimitNote} || ' منقضی شده حذف شد در ' || NOW()`,
               updatedAt: new Date()
             })
             .where(eq(customerOrders.id, order.id));

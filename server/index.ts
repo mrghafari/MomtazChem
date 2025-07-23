@@ -23,28 +23,100 @@ app.use(express.urlencoded({ extended: false }));
 
 
 
-// Create memory store for session persistence
+// Create separate memory stores for different session types
 const MemoryStoreSession = MemoryStore(session);
 
-// Session configuration with proper store
-app.use(session({
+// Admin Session Store
+const adminSessionStore = new MemoryStoreSession({
+  checkPeriod: 86400000 // prune expired entries every 24h
+});
+
+// Customer Session Store
+const customerSessionStore = new MemoryStoreSession({
+  checkPeriod: 86400000 // prune expired entries every 24h
+});
+
+// Session middleware for admin routes
+const adminSessionMiddleware = session({
   secret: process.env.SESSION_SECRET || "momtazchem-admin-secret-key",
-  store: new MemoryStoreSession({
-    checkPeriod: 86400000 // prune expired entries every 24h
-  }),
-  resave: false, // Don't save unchanged sessions
-  saveUninitialized: false, // Don't save uninitialized sessions
-  rolling: true, // Reset maxAge on each request
+  store: adminSessionStore,
+  resave: false,
+  saveUninitialized: false,
+  rolling: true,
   cookie: {
-    secure: false, // Set to true in production with HTTPS
-    httpOnly: false, // Allow frontend access for debugging
+    secure: false,
+    httpOnly: false,
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    sameSite: 'lax',
+    path: '/api/admin',
+    domain: undefined
+  },
+  name: 'momtazchem.admin.sid'
+});
+
+// Session middleware for customer routes
+const customerSessionMiddleware = session({
+  secret: process.env.SESSION_SECRET || "momtazchem-customer-secret-key",
+  store: customerSessionStore,
+  resave: false,
+  saveUninitialized: false,
+  rolling: true,
+  cookie: {
+    secure: false,
+    httpOnly: false,
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    sameSite: 'lax',
+    path: '/api/customers',
+    domain: undefined
+  },
+  name: 'momtazchem.customer.sid'
+});
+
+// Session middleware for management/CRM routes
+const managementSessionMiddleware = session({
+  secret: process.env.SESSION_SECRET || "momtazchem-management-secret-key",
+  store: adminSessionStore, // Use same store as admin but different session name
+  resave: false,
+  saveUninitialized: false,
+  rolling: true,
+  cookie: {
+    secure: false,
+    httpOnly: false,
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    sameSite: 'lax',
+    path: '/api/management',
+    domain: undefined
+  },
+  name: 'momtazchem.mgmt.sid'
+});
+
+// General session middleware for other routes
+const generalSessionMiddleware = session({
+  secret: process.env.SESSION_SECRET || "momtazchem-general-secret-key",
+  store: new MemoryStoreSession({
+    checkPeriod: 86400000
+  }),
+  resave: false,
+  saveUninitialized: false,
+  rolling: true,
+  cookie: {
+    secure: false,
+    httpOnly: false,
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
     sameSite: 'lax',
     path: '/',
-    domain: undefined // Let browser handle domain
+    domain: undefined
   },
-  name: 'momtazchem.sid'
-}));
+  name: 'momtazchem.general.sid'
+});
+
+// Apply session middleware conditionally based on route
+app.use('/api/admin/*', adminSessionMiddleware);
+app.use('/api/customers/*', customerSessionMiddleware);
+app.use('/api/management/*', managementSessionMiddleware);
+app.use('/api/crm/*', managementSessionMiddleware); // CRM uses management session
+app.use('/api/user/*', managementSessionMiddleware); // User permissions use management session
+app.use('*', generalSessionMiddleware); // Fallback for all other routes
 
 app.use((req, res, next) => {
   const start = Date.now();
