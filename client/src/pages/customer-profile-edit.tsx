@@ -73,14 +73,18 @@ export default function CustomerProfileEdit() {
   type EditProfileForm = z.infer<typeof editProfileSchema>;
   type SmsVerificationForm = z.infer<typeof smsVerificationSchema>;
 
-  // Get customer ID from query parameter
+  // Get parameters from query string
   const urlParams = new URLSearchParams(window.location.search);
   const customerId = urlParams.get('customerId');
+  const mode = urlParams.get('mode'); // 'create' for new customer creation
+  const isCreateMode = mode === 'create';
   
-  // Fetch customer data - either from CRM (if customerId provided) or customer portal
+  // Fetch customer data - only if not in create mode
   const { data: customer, isLoading, error: customerError } = useQuery<any>({
     queryKey: customerId ? ["/api/crm/customers", customerId] : ["/api/customers/me"],
     queryFn: async () => {
+      if (isCreateMode) return null; // Skip loading for create mode
+      
       const endpoint = customerId ? `/api/crm/customers/${customerId}` : "/api/customers/me";
       const response = await fetch(endpoint, { credentials: 'include' });
       if (!response.ok) throw new Error('Failed to fetch customer data');
@@ -88,6 +92,7 @@ export default function CustomerProfileEdit() {
       return customerId ? result.data : result;
     },
     retry: 1,
+    enabled: !isCreateMode, // Only fetch if not in create mode
   });
 
   // Fetch provinces data
@@ -357,6 +362,41 @@ export default function CustomerProfileEdit() {
     }
   });
 
+  // Create new customer mutation
+  const createCustomerMutation = useMutation({
+    mutationFn: async (data: EditProfileForm) => {
+      console.log('📤 [FRONTEND] Creating new customer:', data);
+      
+      const response = await fetch('/api/crm/customers', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        throw new Error('Customer creation failed');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "موفقیت",
+        description: "مشتری جدید با موفقیت ایجاد شد",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/crm/customers"] });
+      setLocation("/admin/crm");
+    },
+    onError: (error: any) => {
+      toast({
+        variant: "destructive",
+        title: "خطا",
+        description: error.message || "ایجاد مشتری ناموفق بود",
+      });
+    }
+  });
+
   // Update profile without SMS (if no phone change)
   const updateProfileMutation = useMutation({
     mutationFn: async (data: EditProfileForm) => {
@@ -403,18 +443,24 @@ export default function CustomerProfileEdit() {
   });
 
   const onSubmit = (data: EditProfileForm) => {
-    // Check if phone number changed
-    const currentPhone = customer?.customer?.phone;
-    const newPhone = data.phone;
-    
-    if (currentPhone !== newPhone) {
-      // Phone changed, require SMS verification
-      setPendingChanges(data);
-      sendSmsCodeMutation.mutate(newPhone);
-      setShowSmsDialog(true);
+    if (isCreateMode) {
+      // Creating new customer
+      createCustomerMutation.mutate(data);
     } else {
-      // No phone change, update directly
-      updateProfileMutation.mutate(data);
+      // Updating existing customer
+      // Check if phone number changed
+      const currentPhone = customer?.customer?.phone;
+      const newPhone = data.phone;
+      
+      if (currentPhone !== newPhone) {
+        // Phone changed, require SMS verification
+        setPendingChanges(data);
+        sendSmsCodeMutation.mutate(newPhone);
+        setShowSmsDialog(true);
+      } else {
+        // No phone change, update directly
+        updateProfileMutation.mutate(data);
+      }
     }
   };
 
@@ -468,18 +514,18 @@ export default function CustomerProfileEdit() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setLocation(customerId ? "/admin/crm" : "/customer/profile")}
+            onClick={() => setLocation(isCreateMode || customerId ? "/admin/crm" : "/customer/profile")}
             className="flex items-center gap-2"
           >
             <ArrowLeft className={`h-4 w-4 ${direction === 'rtl' ? 'rotate-180' : ''}`} />
-            {customerId ? "بازگشت به CRM" : t.cancel}
+            {isCreateMode || customerId ? "بازگشت به CRM" : t.cancel}
           </Button>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
-              {customerId ? "ویرایش مشتری (CRM)" : t.editProfile}
+              {isCreateMode ? "ایجاد مشتری جدید (CRM)" : (customerId ? "ویرایش مشتری (CRM)" : t.editProfile)}
             </h1>
             <p className="text-gray-600">
-              {customerId ? "ویرایش اطلاعات مشتری از طریق سیستم CRM" : t.manageAccount}
+              {isCreateMode ? "ایجاد مشتری جدید از طریق سیستم CRM" : (customerId ? "ویرایش اطلاعات مشتری از طریق سیستم CRM" : t.manageAccount)}
             </p>
           </div>
         </div>
@@ -540,7 +586,7 @@ export default function CustomerProfileEdit() {
                           شماره تلفن
                         </FormLabel>
                         <FormControl>
-                          <Input {...field} readOnly className="bg-gray-50" />
+                          <Input {...field} readOnly={!isCreateMode} className={isCreateMode ? "" : "bg-gray-50"} placeholder={isCreateMode ? "شماره تلفن" : ""} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -556,7 +602,7 @@ export default function CustomerProfileEdit() {
                           ایمیل
                         </FormLabel>
                         <FormControl>
-                          <Input {...field} type="email" placeholder="آدرس ایمیل" />
+                          <Input {...field} type="email" placeholder="آدرس ایمیل" readOnly={!isCreateMode} className={isCreateMode ? "" : "bg-gray-50"} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -1224,15 +1270,18 @@ export default function CustomerProfileEdit() {
                   <Button 
                     type="submit" 
                     className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
-                    disabled={updateProfileMutation.isPending}
+                    disabled={isCreateMode ? createCustomerMutation.isPending : updateProfileMutation.isPending}
                   >
                     <Save className="h-4 w-4" />
-                    {updateProfileMutation.isPending ? 'در حال ذخیره...' : 'ذخیره تغییرات'}
+                    {isCreateMode 
+                      ? (createCustomerMutation.isPending ? 'در حال ایجاد...' : 'ایجاد مشتری')
+                      : (updateProfileMutation.isPending ? 'در حال ذخیره...' : 'ذخیره تغییرات')
+                    }
                   </Button>
                   <Button 
                     type="button" 
                     variant="outline"
-                    onClick={() => setLocation("/customer/profile")}
+                    onClick={() => setLocation(isCreateMode || customerId ? "/admin/crm" : "/customer/profile")}
                   >
                     انصراف
                   </Button>
