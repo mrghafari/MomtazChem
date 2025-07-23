@@ -29530,25 +29530,38 @@ momtazchem.com
   // Get all product stats for shop display - includes all products for rating capability
   app.get("/api/shop/product-stats", async (req, res) => {
     try {
-      const { pool } = await import('./db');
+      // Get all current shop products first - using the same method as /api/shop/products
+      const shopProducts = await shopStorage.getShopProducts();
+      console.log(`🛍️ [SHOP PRODUCTS] Found ${shopProducts.length} products in shop`);
+      console.log(`🛍️ [SHOP PRODUCTS] Product IDs:`, shopProducts.map(p => p.id).join(', '));
       
-      // Get all products from showcase_products and their stats - Using main pool for both tables
-      const result = await pool.query(`
-        SELECT 
-          sp.id as product_id,
-          COALESCE(ps.total_reviews, 0) as total_reviews,
-          COALESCE(ps.average_rating, 0) as average_rating
-        FROM showcase_products sp
-        LEFT JOIN product_stats ps ON sp.id = ps.product_id
-      `);
-
+      // Then get their stats from product_stats table
+      const { pool } = await import('./db');
       const statsMap = {};
-      result.rows.forEach(row => {
-        statsMap[row.product_id] = {
-          totalReviews: parseInt(row.total_reviews) || 0,
-          averageRating: parseFloat(row.average_rating) || 0
-        };
-      });
+      
+      for (const product of shopProducts) {
+        try {
+          const result = await pool.query(`
+            SELECT 
+              COALESCE(total_reviews, 0) as total_reviews,
+              COALESCE(average_rating, 0) as average_rating
+            FROM product_stats 
+            WHERE product_id = $1
+          `, [product.id]);
+
+          const stats = result.rows[0];
+          statsMap[product.id] = {
+            totalReviews: stats ? parseInt(stats.total_reviews) || 0 : 0,
+            averageRating: stats ? parseFloat(stats.average_rating) || 0 : 0
+          };
+        } catch (err) {
+          // If no stats found, default to 0
+          statsMap[product.id] = {
+            totalReviews: 0,
+            averageRating: 0
+          };
+        }
+      }
 
       console.log(`📊 [PRODUCT STATS] Loaded stats for ${Object.keys(statsMap).length} shop products`);
       console.log(`📊 [PRODUCT STATS] Product IDs included:`, Object.keys(statsMap).join(', '));
