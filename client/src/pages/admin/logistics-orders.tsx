@@ -65,10 +65,23 @@ export default function LogisticsOrders() {
   // Get warehouse-approved orders for logistics processing
   const { data: response = { orders: [] }, isLoading, refetch } = useQuery({
     queryKey: ['/api/order-management/logistics'],
-    queryFn: () => fetch('/api/order-management/logistics', { credentials: 'include' }).then(res => res.json())
+    queryFn: () => fetch('/api/order-management/logistics', { 
+      credentials: 'include',
+      cache: 'no-cache'
+    }).then(res => res.json())
   });
   
   const orders = response.orders || [];
+  
+  // Debug: Log the first order to check orderNumber field
+  if (orders.length > 0) {
+    console.log('🔍 [LOGISTICS] First order:', {
+      id: orders[0].id,
+      customerOrderId: orders[0].customerOrderId,
+      orderNumber: orders[0].orderNumber,
+      fullOrder: orders[0]
+    });
+  }
 
   // Auto-refresh controlled by global settings
   useEffect(() => {
@@ -308,7 +321,7 @@ export default function LogisticsOrders() {
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-4">
                       <div>
-                        <h3 className="font-medium text-lg">سفارش {order.orderNumber || `#${order.customerOrderId}`}</h3>
+                        <h3 className="font-medium text-lg">{order.orderNumber ? `سفارش ${order.orderNumber}` : `سفارش #${order.customerOrderId}`}</h3>
                         <p className="text-sm text-gray-600">{order.customerName}</p>
                         {order.deliveryCode && (
                           <p className="text-sm text-purple-600 font-medium">کد تحویل: {order.deliveryCode}</p>
