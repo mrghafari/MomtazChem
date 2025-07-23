@@ -29540,7 +29540,6 @@ momtazchem.com
           COALESCE(ps.average_rating, 0) as average_rating
         FROM showcase_products sp
         LEFT JOIN product_stats ps ON sp.id = ps.product_id
-        WHERE sp.visible_in_shop = true
       `);
 
       const statsMap = {};

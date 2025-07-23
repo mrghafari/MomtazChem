@@ -1382,12 +1382,7 @@ const Shop = () => {
                             </div>
                           )}
                           
-                          {/* Debug: Show product ID and rating if available */}
-                          {productStats && productStats[product.id] && (
-                            <div className="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded">
-                              ID:{product.id} ★{productStats[product.id].averageRating.toFixed(1)} ({productStats[product.id].totalReviews})
-                            </div>
-                          )}
+
                           
 
 
@@ -1713,12 +1708,7 @@ const Shop = () => {
                             </div>
                           )}
                           
-                          {/* Debug: Show if product has rating data - List View */}
-                          {productStats?.[product.id] && (
-                            <div className="absolute top-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded">
-                              ★{productStats[product.id].averageRating.toFixed(1)}
-                            </div>
-                          )}
+
                           
 
 
