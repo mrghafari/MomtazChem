@@ -20,6 +20,7 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
   - Delivery address section with recipient information and complete address
   - Order details section showing weight and delivery method
   - Enhanced typography: Phone numbers (20px, bold, blue), addresses (18px, bold, green) for better visibility
+  - Gregorian date format for print timestamps instead of Persian calendar
 - **Print Features**:
   - Professional styling with borders, grids, and proper spacing
   - Color-coded information (delivery codes in purple, phones in blue, addresses in green)

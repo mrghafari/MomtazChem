@@ -224,7 +224,7 @@ const LogisticsManagement = () => {
           <div class="header">
             <h1>جزئیات سفارش لجستیک</h1>
             <h2>سفارش ${selectedOrder.orderNumber}</h2>
-            <p>تاریخ چاپ: ${new Date().toLocaleDateString('fa-IR')}</p>
+            <p>تاریخ چاپ: ${new Date().toLocaleDateString('en-US')}</p>
           </div>
 
           <div class="section">
