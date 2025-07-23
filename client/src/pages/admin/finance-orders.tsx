@@ -225,8 +225,8 @@ function FinanceOrders() {
     order.currentStatus === 'financial_rejected'
   );
 
-  // Statistics
-  const totalAmount = allOrders.reduce((sum, order) => 
+  // Statistics - Only calculate total for approved/transferred orders
+  const totalAmount = transferredOrders.reduce((sum, order) => 
     sum + parseFloat(order.totalAmount || '0'), 0
   );
   
@@ -580,15 +580,15 @@ function FinanceOrders() {
 
       {/* Statistics Dashboard */}
       <div className="container mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white border-0 shadow-lg">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-blue-100 text-sm font-medium">کل سفارشات</p>
-                  <p className="text-3xl font-bold text-white">{allOrders.length}</p>
+                  <p className="text-blue-100 text-sm font-medium">تایید شده</p>
+                  <p className="text-3xl font-bold text-white">{transferredOrders.length}</p>
                 </div>
-                <ShoppingCart className="h-8 w-8 text-blue-200" />
+                <CheckCircle className="h-8 w-8 text-blue-200" />
               </div>
             </CardContent>
           </Card>
@@ -605,17 +605,6 @@ function FinanceOrders() {
             </CardContent>
           </Card>
           
-          <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white border-0 shadow-lg">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-green-100 text-sm font-medium">تایید شده</p>
-                  <p className="text-3xl font-bold text-white">{transferredOrders.length}</p>
-                </div>
-                <CheckCircle className="h-8 w-8 text-green-200" />
-              </div>
-            </CardContent>
-          </Card>
           
           <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white border-0 shadow-lg">
             <CardContent className="p-6">
