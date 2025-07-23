@@ -1061,16 +1061,18 @@ export const insertWalletRechargeRequestSchema = createInsertSchema(walletRechar
 export type InsertWalletRechargeRequest = z.infer<typeof insertWalletRechargeRequestSchema>;
 export type WalletRechargeRequest = typeof walletRechargeRequests.$inferSelect;
 
-// Customer Activities Table
+// Customer Activities Table - matching existing database structure
 export const customerActivities = pgTable("customer_activities", {
   id: serial("id").primaryKey(),
   customerId: integer("customer_id").notNull().references(() => crmCustomers.id),
   activityType: text("activity_type").notNull(), // login, logout, order_placed, inquiry_submitted, profile_updated
+  activityData: json("activity_data"), // Additional activity-specific data
   description: text("description").notNull(),
-  ipAddress: text("ip_address"),
-  userAgent: text("user_agent"),
-  metadata: json("metadata"), // Additional activity-specific data
+  performedBy: text("performed_by"),
+  relatedOrderId: integer("related_order_id"),
+  relatedInquiryId: integer("related_inquiry_id"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
+  customerName: text("customer_name"),
 });
 
 // Customer Segments Table

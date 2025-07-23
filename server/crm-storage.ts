@@ -639,22 +639,7 @@ export class CrmStorage implements ICrmStorage {
 
 
 
-  async logCustomerActivity(activity: InsertCustomerActivity): Promise<CustomerActivity> {
-    const [insertedActivity] = await customerDb
-      .insert(customerActivities)
-      .values(activity)
-      .returning();
-    return insertedActivity;
-  }
 
-  async getCustomerActivities(customerId: number, limit = 50): Promise<CustomerActivity[]> {
-    return await customerDb
-      .select()
-      .from(customerActivities)
-      .where(eq(customerActivities.customerId, customerId))
-      .orderBy(desc(customerActivities.createdAt))
-      .limit(limit);
-  }
 
   async getRecentCustomerActivities(limit = 20): Promise<CustomerActivity[]> {
     return await customerDb
