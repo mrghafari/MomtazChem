@@ -34,6 +34,7 @@ import TemplateProcessor from "./template-processor";
 import InventoryAlertService from "./inventory-alerts";
 import { db } from "./db";
 import { sql, eq, and, or, isNull, isNotNull, desc, gte } from "drizzle-orm";
+import { findCorruptedOrders, getDataIntegrityStats, validateOrderIntegrity, markCorruptedOrderAsDeleted } from './data-integrity-tools';
 import { z } from "zod";
 import * as schema from "@shared/schema";
 const { crmCustomers } = schema;
@@ -34419,6 +34420,109 @@ momtazchem.com
       res.status(500).json({
         success: false,
         message: 'خطا در به‌روزرسانی اطلاعات شرکت'
+      });
+    }
+  });
+
+  // Data Integrity Management Endpoints
+  app.get("/api/admin/data-integrity/corrupted-orders", requireAuth, async (req, res) => {
+    try {
+      console.log('🔍 [DATA INTEGRITY] Getting corrupted orders');
+      const corruptedOrders = await findCorruptedOrders();
+      console.log(`✅ [DATA INTEGRITY] Found ${corruptedOrders.length} corrupted orders`);
+      
+      res.json({
+        success: true,
+        corruptedOrders
+      });
+    } catch (error) {
+      console.error("Error getting corrupted orders:", error);
+      res.status(500).json({
+        success: false,
+        message: "Internal server error"
+      });
+    }
+  });
+
+  app.get("/api/admin/data-integrity/stats", requireAuth, async (req, res) => {
+    try {
+      console.log('📊 [DATA INTEGRITY] Getting data integrity stats');
+      const stats = await getDataIntegrityStats();
+      console.log(`✅ [DATA INTEGRITY] Stats: ${stats.totalCorrupted} corrupted orders, total value: ${stats.totalCorruptedValue}`);
+      
+      res.json({
+        success: true,
+        stats
+      });
+    } catch (error) {
+      console.error("Error getting data integrity stats:", error);
+      res.status(500).json({
+        success: false,
+        message: "Internal server error"
+      });
+    }
+  });
+
+  app.get("/api/admin/data-integrity/validate/:orderId", requireAuth, async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      if (isNaN(orderId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid order ID"
+        });
+      }
+
+      console.log(`🔍 [DATA INTEGRITY] Validating order ${orderId}`);
+      const validation = await validateOrderIntegrity(orderId);
+      console.log(`✅ [DATA INTEGRITY] Order ${orderId} validation: ${validation.valid ? 'VALID' : 'INVALID'}`);
+      
+      res.json({
+        success: true,
+        validation
+      });
+    } catch (error) {
+      console.error("Error validating order integrity:", error);
+      res.status(500).json({
+        success: false,
+        message: "Internal server error"
+      });
+    }
+  });
+
+  app.post("/api/admin/data-integrity/mark-deleted/:orderId", requireAuth, async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      const { reason } = req.body;
+      
+      if (isNaN(orderId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid order ID"
+        });
+      }
+
+      if (!reason) {
+        return res.status(400).json({
+          success: false,
+          message: "Reason is required"
+        });
+      }
+
+      console.log(`🗑️ [DATA INTEGRITY] Marking order ${orderId} as deleted: ${reason}`);
+      const result = await markCorruptedOrderAsDeleted(orderId, reason);
+      console.log(`✅ [DATA INTEGRITY] Order ${orderId} marked as deleted`);
+      
+      res.json({
+        success: true,
+        message: "Order marked as deleted",
+        result
+      });
+    } catch (error) {
+      console.error("Error marking order as deleted:", error);
+      res.status(500).json({
+        success: false,
+        message: "Internal server error"
       });
     }
   });

@@ -42,7 +42,8 @@ import {
   MessageSquare,
   Save,
   Edit,
-  Trash2
+  Trash2,
+  AlertCircle
 } from "lucide-react";
 import InternalBarcodeCard from "@/components/InternalBarcodeCard";
 import GlobalRefreshControl from "@/components/GlobalRefreshControl";
@@ -1015,12 +1016,18 @@ function FinanceOrders() {
                           </div>
                         ))
                       ) : (
-                        <div className="text-center py-8 bg-gray-50 rounded-lg">
-                          <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <ShoppingCart className="h-8 w-8 text-gray-400" />
+                        <div className="text-center py-8 bg-red-50 rounded-lg border border-red-200">
+                          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <AlertCircle className="h-8 w-8 text-red-500" />
                           </div>
-                          <p className="text-gray-600 font-medium">هیچ آیتمی برای این سفارش ثبت نشده است</p>
-                          <p className="text-sm text-gray-500 mt-1">احتمالاً این سفارش در فرآیند ثبت کامل نشده است</p>
+                          <p className="text-red-700 font-medium">⚠️ سفارش معیوب: بدون آیتم اما دارای مبلغ</p>
+                          <p className="text-sm text-red-600 mt-1">این سفارش دارای مبلغ {parseFloat(orderDetails.totalAmount || 0).toLocaleString()} {orderDetails.currency} است اما هیچ آیتمی ندارد</p>
+                          <p className="text-xs text-red-500 mt-2">احتمالاً در فرآیند ثبت سفارش مشکلی پیش آمده است</p>
+                          {parseFloat(orderDetails.totalAmount || 0) > 0 && (
+                            <div className="mt-3 p-2 bg-red-100 rounded text-xs text-red-600">
+                              <strong>توصیه:</strong> این سفارش نیاز به بررسی دقیق دارد. سفارش نباید بدون آیتم مبلغ داشته باشد.
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
