@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>تست حذف سفارش موقت</title>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; direction: rtl; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        button { padding: 10px 15px; margin: 5px; border: none; border-radius: 3px; cursor: pointer; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <h1>تست سیستم حذف سفارش موقت</h1>
+    
+    <div class="test-section">
+        <h3>1. ورود مشتری</h3>
+        <input type="email" id="email" placeholder="oilstar@hotmail.com" value="oilstar@hotmail.com">
+        <input type="password" id="password" placeholder="123456" value="123456">
+        <button onclick="loginCustomer()">ورود مشتری</button>
+        <div id="loginResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>2. دریافت سفارشات مشتری</h3>
+        <button onclick="getCustomerOrders()">دریافت سفارشات</button>
+        <div id="ordersResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>3. حذف سفارش موقت</h3>
+        <input type="number" id="orderIdToDelete" placeholder="شماره ID سفارش">
+        <button onclick="deleteTemporaryOrder()">حذف سفارش موقت</button>
+        <div id="deleteResult"></div>
+    </div>
+
+    <script>
+        async function loginCustomer() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const resultDiv = document.getElementById('loginResult');
+            
+            try {
+                const response = await fetch('/api/customers/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                console.log('Login Response:', data);
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `<div class="success">✅ ورود موفق - مشتری: ${data.customer.firstName} ${data.customer.lastName}</div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ خطا: ${data.message}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ خطا در اتصال: ${error.message}</div>`;
+            }
+        }
+
+        async function getCustomerOrders() {
+            const resultDiv = document.getElementById('ordersResult');
+            
+            try {
+                const response = await fetch('/api/customers/orders');
+                const data = await response.json();
+                console.log('Orders Response:', data);
+                
+                if (data.success) {
+                    const orders = data.orders;
+                    let ordersHtml = `<div class="success">✅ ${orders.length} سفارش یافت شد:</div><ul>`;
+                    
+                    orders.forEach(order => {
+                        const statusText = (order.status === 'pending' || order.status === 'payment_grace_period') ? 'سفارش موقت' : order.status;
+                        const isTemporary = (order.status === 'pending' || order.status === 'payment_grace_period');
+                        ordersHtml += `
+                            <li>
+                                <strong>سفارش ${order.orderNumber}</strong> (ID: ${order.id}) - 
+                                وضعیت: ${statusText} - 
+                                مبلغ: ${order.totalAmount} IQD
+                                ${isTemporary ? '<span style="color: orange;"> - قابل حذف</span>' : ''}
+                            </li>
+                        `;
+                    });
+                    ordersHtml += '</ul>';
+                    resultDiv.innerHTML = ordersHtml;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ خطا: ${data.message}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ خطا در دریافت سفارشات: ${error.message}</div>`;
+            }
+        }
+
+        async function deleteTemporaryOrder() {
+            const orderId = document.getElementById('orderIdToDelete').value;
+            const resultDiv = document.getElementById('deleteResult');
+            
+            if (!orderId) {
+                resultDiv.innerHTML = `<div class="error">❌ لطفاً شماره ID سفارش را وارد کنید</div>`;
+                return;
+            }
+            
+            if (!confirm(`آیا از حذف سفارش موقت ${orderId} اطمینان دارید؟`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/customers/orders/${orderId}/delete-temporary`, {
+                    method: 'DELETE'
+                });
+                
+                const data = await response.json();
+                console.log('Delete Response:', data);
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            ✅ ${data.message}<br>
+                            سفارش حذف شده: ${data.data.deletedOrderNumber}<br>
+                            ${data.data.message}<br>
+                            تعداد محصولات آزاد شده: ${data.data.releasedProducts.length}
+                        </div>
+                    `;
+                    
+                    // Refresh orders list
+                    getCustomerOrders();
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ خطا: ${data.message}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ خطا در حذف سفارش: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>
