@@ -6,6 +6,28 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Logistics Department Order Number Standardization and Delivery Address Integration (July 23, 2025)
+✅ **IMPLEMENTED: Complete delivery address display with M25XXXXX order number standardization**
+- **Order Number Enforcement**: Updated logistics component to exclusively use new order number format (M25XXXXX) removing all fallback references
+- **Delivery Address Integration**: Enhanced logistics API to include shipping address fields for complete delivery information
+- **JSON Address Parsing**: Added sophisticated JSON parsing in logistics component to display:
+  - Recipient name from shipping address JSON
+  - Contact phone number with phone icon
+  - Complete delivery address
+  - City and postal code information
+- **API Enhancement**: Extended order-management-storage.ts to include delivery address fields in transformation:
+  - `shippingAddress` - JSON formatted delivery information
+  - `billingAddress` - Billing address information
+  - `recipientName` - Delivery recipient name
+  - `recipientPhone` - Delivery contact number
+  - `recipientAddress` - Complete delivery address
+  - `deliveryNotes` - Special delivery instructions
+- **Frontend Display**: Professional address card layout with icons and structured information display
+- **Fallback Handling**: Graceful fallback to alternative address sources when JSON parsing fails
+- **User Requirement**: Per user instruction, only new M25XXXXX format order numbers used throughout logistics interface
+- **Impact**: Complete delivery address visibility for logistics department with standardized order numbering
+- **Status**: Logistics department now displays comprehensive delivery information with M25XXXXX order format only
+
 ### COMPLETED: Automatic Delivery Code SMS System with Template #3 Implementation (July 23, 2025)
 ✅ **IMPLEMENTED: Complete automatic SMS delivery code system using SMS template #3**
 - **Core Functionality**: Automatic delivery code generation and SMS sending when orders transition from warehouse to logistics

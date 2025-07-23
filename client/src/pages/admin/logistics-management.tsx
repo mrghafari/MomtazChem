@@ -64,6 +64,14 @@ interface LogisticsOrder {
   isVerified?: boolean;
   customerAddress?: string;
   
+  // Delivery Address information
+  shippingAddress?: string;
+  billingAddress?: string;
+  recipientName?: string;
+  recipientPhone?: string;
+  recipientAddress?: string;
+  deliveryNotes?: string;
+  
   // Customer information
   customerFirstName?: string;
   customerLastName?: string;
@@ -258,7 +266,7 @@ const LogisticsManagement = () => {
               <Card key={order.id} className="border-r-4 border-r-green-500 bg-green-50">
                 <CardContent className="p-4">
                   <div className="flex justify-between items-center mb-3">
-                    <h4 className="font-semibold text-green-800 text-lg">{order.orderNumber ? `سفارش ${order.orderNumber}` : `سفارش #${order.customerOrderId}`}</h4>
+                    <h4 className="font-semibold text-green-800 text-lg">سفارش {order.orderNumber}</h4>
                     <Badge variant="default" className="bg-green-600 text-white">
                       تایید شده انبار
                     </Badge>
@@ -365,42 +373,37 @@ const LogisticsManagement = () => {
                       </h5>
                       <div className="space-y-1">
                         {(() => {
-                          try {
-                            // Parse shipping address JSON
-                            const shippingData = order.shippingAddress ? JSON.parse(order.shippingAddress) : null;
-                            if (shippingData) {
-                              return (
-                                <>
-                                  <p className="text-sm font-medium text-orange-800">
-                                    {shippingData.name}
-                                  </p>
-                                  <p className="text-xs text-orange-600 flex items-center">
-                                    <Phone className="w-3 h-3 mr-1" />
-                                    {shippingData.phone}
-                                  </p>
-                                  <p className="text-sm text-orange-700">
-                                    {shippingData.address}
-                                  </p>
-                                  <p className="text-xs text-orange-600">
-                                    {shippingData.city} - {shippingData.postalCode}
-                                  </p>
-                                </>
-                              );
-                            }
-                            // Fallback to recipient address or customer address
+                          // Check if shipping address is already an object (parsed by API)
+                          const shippingData = typeof order.shippingAddress === 'object' && order.shippingAddress !== null
+                            ? order.shippingAddress
+                            : null;
+                            
+                          if (shippingData) {
                             return (
-                              <p className="text-sm text-orange-700">
-                                {order.recipientAddress || order.customerAddress || 'آدرس ثبت نشده'}
-                              </p>
-                            );
-                          } catch (e) {
-                            // Fallback for invalid JSON
-                            return (
-                              <p className="text-sm text-orange-700">
-                                {order.recipientAddress || order.customerAddress || 'آدرس ثبت نشده'}
-                              </p>
+                              <>
+                                <p className="text-sm font-medium text-orange-800">
+                                  {shippingData.name}
+                                </p>
+                                <p className="text-xs text-orange-600 flex items-center">
+                                  <Phone className="w-3 h-3 mr-1" />
+                                  {shippingData.phone}
+                                </p>
+                                <p className="text-sm text-orange-700">
+                                  {shippingData.address}
+                                </p>
+                                <p className="text-xs text-orange-600">
+                                  {shippingData.city} - {shippingData.postalCode}
+                                </p>
+                              </>
                             );
                           }
+                          
+                          // Fallback to recipient address or customer address
+                          return (
+                            <p className="text-sm text-orange-700">
+                              {order.recipientAddress || order.customerAddress || 'آدرس ثبت نشده'}
+                            </p>
+                          );
                         })()}
                       </div>
                       <p className="text-xs text-orange-600 mt-2 flex items-center">
