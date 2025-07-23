@@ -93,6 +93,7 @@ import SuperAdminSettings from "@/pages/super-admin-settings";
 import SiteManagementFixed from "@/pages/site-management-fixed";
 import GeographicReports from "@/pages/geographic-reports";
 import GeographicAnalytics from "@/pages/admin/geographic-analytics";
+import IraqiGeography from "@/pages/admin/iraqi-geography";
 import AISettings from "@/pages/admin/ai-settings";
 import DocumentationPage from "@/pages/documentation";
 import WarehouseOrders from "@/pages/admin/warehouse-orders";
@@ -200,6 +201,7 @@ function Router() {
           <Route path="/admin/product-variants" component={ProductVariants} />
           <Route path="/admin/geographic-reports" component={GeographicReports} />
           <Route path="/admin/geographic-analytics" component={GeographicAnalytics} />
+          <Route path="/admin/iraqi-geography" component={IraqiGeography} />
           <Route path="/admin/ai-settings" component={AISettings} />
           <Route path="/documentation" component={DocumentationPage} />
           

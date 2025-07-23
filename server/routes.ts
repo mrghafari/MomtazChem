@@ -37,7 +37,7 @@ import { sql, eq, and, or, isNull, isNotNull, desc, gte } from "drizzle-orm";
 import { findCorruptedOrders, getDataIntegrityStats, validateOrderIntegrity, markCorruptedOrderAsDeleted } from './data-integrity-tools';
 import { z } from "zod";
 import * as schema from "@shared/schema";
-const { crmCustomers } = schema;
+const { crmCustomers, iraqiProvinces, iraqiCities } = schema;
 import { orderManagement, shippingRates, deliveryMethods, paymentReceipts } from "@shared/order-management-schema";
 import { generateEAN13Barcode, validateEAN13, parseEAN13Barcode, isMomtazchemBarcode } from "@shared/barcode-utils";
 import { generateSmartSKU, validateSKUUniqueness } from "./ai-sku-generator";
@@ -3365,6 +3365,119 @@ export async function registerRoutes(app: Express): Promise<Server> {
           error: error instanceof Error ? error.message : String(error)
         });
       }
+    }
+  });
+
+  // =============================================================================
+  // IRAQI GEOGRAPHIC DATA API ENDPOINTS
+  // =============================================================================
+
+  // Get all Iraqi provinces with trilingual support
+  app.get('/api/iraqi-provinces', async (req, res) => {
+    try {
+      console.log('[DEBUG] Iraqi provinces endpoint called');
+      const provinces = await db
+        .select()
+        .from(iraqiProvinces)
+        .orderBy(iraqiProvinces.nameArabic);
+
+      console.log('[DEBUG] Provinces found:', provinces.length);
+      res.json({
+        success: true,
+        data: provinces,
+        count: provinces.length
+      });
+    } catch (error) {
+      console.error('[ERROR] Iraqi provinces fetch error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در دریافت استان‌های عراق',
+        error: error.message
+      });
+    }
+  });
+
+  // Get all Iraqi cities with province information
+  app.get('/api/iraqi-cities', async (req, res) => {
+    try {
+      console.log('[DEBUG] Iraqi cities endpoint called');
+      const { provinceId } = req.query;
+      
+      let query = db
+        .select()
+        .from(iraqiCities)
+        .where(eq(iraqiCities.isActive, true));
+
+      if (provinceId) {
+        query = query.where(eq(iraqiCities.provinceId, parseInt(provinceId as string)));
+      }
+
+      const cities = await query.orderBy(iraqiCities.nameArabic);
+
+      console.log('[DEBUG] Cities found:', cities.length);
+      res.json({
+        success: true,
+        data: cities,
+        count: cities.length
+      });
+    } catch (error) {
+      console.error('[ERROR] Iraqi cities fetch error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در دریافت شهرهای عراق',
+        error: error.message
+      });
+    }
+  });
+
+  // Get comprehensive Iraqi geographical statistics
+  app.get('/api/iraqi-geography-stats', async (req, res) => {
+    try {
+      console.log('[DEBUG] Iraqi geography stats endpoint called');
+      const [provinceCount] = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(iraqiProvinces)
+        .where(eq(iraqiProvinces.isActive, true));
+
+      const [cityCount] = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(iraqiCities)
+        .where(eq(iraqiCities.isActive, true));
+
+      const [capitalCount] = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(iraqiCities)
+        .where(and(
+          eq(iraqiCities.isActive, true),
+          eq(iraqiCities.isProvinceCapital, true)
+        ));
+
+      const regionStats = await db
+        .select({
+          region: iraqiCities.region,
+          count: sql<number>`count(*)`
+        })
+        .from(iraqiCities)
+        .where(eq(iraqiCities.isActive, true))
+        .groupBy(iraqiCities.region);
+
+      res.json({
+        success: true,
+        data: {
+          totalProvinces: provinceCount.count,
+          totalCities: cityCount.count,
+          provincialCapitals: capitalCount.count,
+          regionBreakdown: regionStats,
+          lastUpdated: new Date().toISOString()
+        }
+      });
+    } catch (error) {
+      console.error('[ERROR] Iraqi geography stats error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در دریافت آمار جغرافیایی عراق',
+        error: error.message
+      });
     }
   });
 
@@ -35137,6 +35250,187 @@ momtazchem.com
       res.status(500).json({
         success: false,
         message: "Internal server error"
+      });
+    }
+  });
+
+  // =============================================================================
+  // IRAQI GEOGRAPHIC DATA API ENDPOINTS
+  // =============================================================================
+
+  // Get all Iraqi provinces with trilingual support
+  app.get('/api/iraqi-provinces', async (req, res) => {
+    try {
+      console.log('[DEBUG] Iraqi provinces endpoint called');
+      const provinces = await db
+        .select()
+        .from(iraqiProvinces)
+        .orderBy(iraqiProvinces.nameArabic);
+
+      console.log('[DEBUG] Provinces found:', provinces.length);
+      res.json({
+        success: true,
+        data: provinces,
+        count: provinces.length
+      });
+    } catch (error) {
+      console.error('[ERROR] Iraqi provinces fetch error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در دریافت استان‌های عراق',
+        error: error.message
+      });
+    }
+  });
+
+  // Get all Iraqi cities with province information
+  app.get('/api/iraqi-cities', async (req, res) => {
+    try {
+      const { provinceId } = req.query;
+      
+      let query = db
+        .select()
+        .from(iraqiCities)
+        .where(eq(iraqiCities.isActive, true));
+
+      if (provinceId) {
+        query = query.where(eq(iraqiCities.provinceId, parseInt(provinceId as string)));
+      }
+
+      const cities = await query.orderBy(iraqiCities.nameArabic);
+
+      res.json({
+        success: true,
+        data: cities,
+        count: cities.length
+      });
+    } catch (error) {
+      console.error('Error fetching Iraqi cities:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در دریافت شهرهای عراق'
+      });
+    }
+  });
+
+  // Get comprehensive Iraqi geographical statistics
+  app.get('/api/iraqi-geography-stats', async (req, res) => {
+    try {
+      const [provinceCount] = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(iraqiProvinces)
+        .where(eq(iraqiProvinces.isActive, true));
+
+      const [cityCount] = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(iraqiCities)
+        .where(eq(iraqiCities.isActive, true));
+
+      const [capitalCityCount] = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(iraqiCities)
+        .where(and(
+          eq(iraqiCities.isActive, true),
+          eq(iraqiCities.isProvinceCapital, true)
+        ));
+
+      // Cities by region
+      const regionStats = await db
+        .select({
+          region: iraqiCities.region,
+          count: sql<number>`count(*)`,
+        })
+        .from(iraqiCities)
+        .where(eq(iraqiCities.isActive, true))
+        .groupBy(iraqiCities.region);
+
+      res.json({
+        success: true,
+        data: {
+          totalProvinces: provinceCount.count,
+          totalCities: cityCount.count,
+          capitalCities: capitalCityCount.count,
+          regionDistribution: regionStats,
+          lastUpdated: new Date().toISOString()
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching Iraqi geography stats:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در دریافت آمار جغرافیای عراق'
+      });
+    }
+  });
+
+  // Update Iraqi province information
+  app.put('/api/admin/iraqi-provinces/:id', requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updateData = req.body;
+
+      const [updatedProvince] = await db
+        .update(iraqiProvinces)
+        .set({
+          ...updateData,
+          updatedAt: new Date()
+        })
+        .where(eq(iraqiProvinces.id, parseInt(id)))
+        .returning();
+
+      if (!updatedProvince) {
+        return res.status(404).json({
+          success: false,
+          message: 'استان یافت نشد'
+        });
+      }
+
+      res.json({
+        success: true,
+        data: updatedProvince,
+        message: 'اطلاعات استان با موفقیت به‌روزرسانی شد'
+      });
+    } catch (error) {
+      console.error('Error updating Iraqi province:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در به‌روزرسانی اطلاعات استان'
+      });
+    }
+  });
+
+  // Update Iraqi city information
+  app.put('/api/admin/iraqi-cities/:id', requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updateData = req.body;
+
+      const [updatedCity] = await db
+        .update(iraqiCities)
+        .set({
+          ...updateData,
+          updatedAt: new Date()
+        })
+        .where(eq(iraqiCities.id, parseInt(id)))
+        .returning();
+
+      if (!updatedCity) {
+        return res.status(404).json({
+          success: false,
+          message: 'شهر یافت نشد'
+        });
+      }
+
+      res.json({
+        success: true,
+        data: updatedCity,
+        message: 'اطلاعات شهر با موفقیت به‌روزرسانی شد'
+      });
+    } catch (error) {
+      console.error('Error updating Iraqi city:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در به‌روزرسانی اطلاعات شهر'
       });
     }
   });

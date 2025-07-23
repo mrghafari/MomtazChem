@@ -1127,6 +1127,69 @@ export type InsertSmsLog = z.infer<typeof insertSmsLogSchema>;
 export type SmsLog = typeof smsLogs.$inferSelect;
 
 // =============================================================================
+// IRAQI GEOGRAPHIC DATA SCHEMA
+// =============================================================================
+
+// Iraqi provinces table with trilingual support
+export const iraqiProvinces = pgTable("iraqi_provinces", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  nameArabic: text("name_arabic").notNull(),
+  nameEnglish: text("name_english").notNull(),
+  nameKurdish: text("name_kurdish"),
+  capital: text("capital").notNull(),
+  region: text("region"), // center, north, south
+  population: integer("population"),
+  area: integer("area"), // in square kilometers
+  notes: text("notes"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Iraqi cities table with comprehensive information
+export const iraqiCities = pgTable("iraqi_cities", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  nameArabic: text("name_arabic").notNull(),
+  nameEnglish: text("name_english").notNull(),
+  nameKurdish: text("name_kurdish"),
+  provinceId: integer("province_id").notNull().references(() => iraqiProvinces.id),
+  provinceName: text("province_name").notNull(),
+  region: text("region"), // center, north, south
+  population: integer("population"),
+  elevation: integer("elevation"), // in meters
+  coordinates: text("coordinates"), // lat,lng format
+  postalCode: text("postal_code"),
+  economicActivity: text("economic_activity"),
+  distanceFromBaghdad: integer("distance_from_baghdad"), // in kilometers
+  distanceFromProvinceCapital: integer("distance_from_province_capital"),
+  isProvinceCapital: boolean("is_province_capital").default(false),
+  notes: text("notes"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertIraqiProvinceSchema = createInsertSchema(iraqiProvinces).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertIraqiCitySchema = createInsertSchema(iraqiCities).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertIraqiProvince = z.infer<typeof insertIraqiProvinceSchema>;
+export type IraqiProvince = typeof iraqiProvinces.$inferSelect;
+
+export type InsertIraqiCity = z.infer<typeof insertIraqiCitySchema>;
+export type IraqiCity = typeof iraqiCities.$inferSelect;
+
+// =============================================================================
 // ROLE-BASED ACCESS CONTROL SCHEMA
 // =============================================================================
 
