@@ -142,6 +142,9 @@ export interface IOrderManagementStorage {
   
   // Order details with items
   getOrderWithItems(orderId: number): Promise<any>;
+  
+  // Automatic bank payment approval for gateway orders
+  processAutomaticBankPaymentApproval(customerOrderId: number): Promise<void>;
 }
 
 export class OrderManagementStorage implements IOrderManagementStorage {
@@ -1561,6 +1564,99 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       
     } catch (error) {
       console.error('❌ [ORDER ITEMS] Error getting order with items:', error);
+      throw error;
+    }
+  }
+
+  // Automatic financial approval for bank gateway orders with confirmed payment
+  async processAutomaticBankPaymentApproval(customerOrderId: number): Promise<void> {
+    console.log(`🏦 [AUTO APPROVAL] Processing automatic bank payment approval for order ${customerOrderId}`);
+    
+    try {
+      // Get customer order details
+      const [customerOrder] = await db
+        .select({
+          id: customerOrders.id,
+          orderNumber: customerOrders.orderNumber,
+          paymentMethod: customerOrders.paymentMethod,
+          paymentStatus: customerOrders.paymentStatus,
+          status: customerOrders.status,
+          totalAmount: customerOrders.totalAmount,
+          currency: customerOrders.currency
+        })
+        .from(customerOrders)
+        .where(eq(customerOrders.id, customerOrderId));
+
+      if (!customerOrder) {
+        console.log(`❌ [AUTO APPROVAL] Customer order ${customerOrderId} not found`);
+        return;
+      }
+
+      console.log(`🔍 [AUTO APPROVAL] Order details:`, {
+        orderNumber: customerOrder.orderNumber,
+        paymentMethod: customerOrder.paymentMethod,
+        paymentStatus: customerOrder.paymentStatus,
+        status: customerOrder.status
+      });
+
+      // Check if this is a bank gateway order with confirmed payment
+      const isBankGatewayOrder = customerOrder.paymentMethod === 'درگاه بانکی' || 
+                                customerOrder.paymentMethod === 'bank_gateway' ||
+                                customerOrder.paymentMethod === 'gateway';
+      
+      const isPaymentConfirmed = customerOrder.paymentStatus === 'paid' || 
+                               customerOrder.paymentStatus === 'confirmed' ||
+                               customerOrder.paymentStatus === 'successful';
+
+      if (!isBankGatewayOrder) {
+        console.log(`⏭️ [AUTO APPROVAL] Order ${customerOrder.orderNumber} is not a bank gateway order (${customerOrder.paymentMethod})`);
+        return;
+      }
+
+      if (!isPaymentConfirmed) {
+        console.log(`⏭️ [AUTO APPROVAL] Order ${customerOrder.orderNumber} payment not confirmed (${customerOrder.paymentStatus})`);
+        return;
+      }
+
+      // Check if order is already in management system
+      let orderManagementRecord = await this.getOrderManagementByCustomerOrderId(customerOrderId);
+      
+      // If not in management system, add it
+      if (!orderManagementRecord) {
+        console.log(`➕ [AUTO APPROVAL] Adding order to management system`);
+        orderManagementRecord = await this.addCustomerOrderToManagement(customerOrderId);
+      }
+
+      // Check current status
+      if (orderManagementRecord.currentStatus !== 'pending') {
+        console.log(`⏭️ [AUTO APPROVAL] Order ${customerOrder.orderNumber} is not pending (${orderManagementRecord.currentStatus})`);
+        return;
+      }
+
+      // Automatically approve the order in financial department
+      console.log(`✅ [AUTO APPROVAL] Automatically approving order ${customerOrder.orderNumber} in financial department`);
+      
+      await this.updateOrderStatus(
+        orderManagementRecord.id,
+        'financial_approved' as OrderStatus,
+        999999, // System auto-approval user ID
+        'financial',
+        `تأیید اتوماتیک پرداخت درگاه بانکی - مبلغ: ${customerOrder.totalAmount} ${customerOrder.currency} - تاریخ: ${new Date().toLocaleDateString('fa-IR')}`
+      );
+
+      // Update customer order status to confirmed
+      await db
+        .update(customerOrders)
+        .set({
+          status: 'confirmed',
+          updatedAt: new Date()
+        })
+        .where(eq(customerOrders.id, customerOrderId));
+
+      console.log(`🎉 [AUTO APPROVAL] Order ${customerOrder.orderNumber} automatically approved and transferred to warehouse`);
+      
+    } catch (error) {
+      console.error(`❌ [AUTO APPROVAL] Error processing automatic approval for order ${customerOrderId}:`, error);
       throw error;
     }
   }

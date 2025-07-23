@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست سیستم تأیید خودکار درگاه بانکی</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 40px; direction: rtl; text-align: right; }
+        .container { max-width: 800px; margin: 0 auto; }
+        h1 { color: #2563eb; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; }
+        h2 { color: #059669; margin-top: 30px; }
+        .test-section { background: #f9fafb; padding: 20px; margin: 20px 0; border-radius: 8px; border-left: 4px solid #2563eb; }
+        .button { background: #2563eb; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; margin: 5px; }
+        .button:hover { background: #1d4ed8; }
+        .success { background: #10b981; }
+        .success:hover { background: #059669; }
+        .danger { background: #ef4444; }
+        .danger:hover { background: #dc2626; }
+        .warning { background: #f59e0b; }
+        .warning:hover { background: #d97706; }
+        .result { margin: 15px 0; padding: 15px; border-radius: 6px; }
+        .result.success { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+        .result.error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+        .result.info { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+        .order-info { background: #fff; padding: 15px; margin: 10px 0; border-radius: 6px; border: 1px solid #e5e7eb; }
+        .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-auto-approved { background: #d1fae5; color: #065f46; }
+        .status-confirmed { background: #dbeafe; color: #1e40af; }
+        .loading { display: none; margin-left: 10px; }
+        .loading.show { display: inline; }
+        .code { background: #f3f4f6; padding: 10px; border-radius: 4px; font-family: monospace; margin: 10px 0; }
+        .webhook-example { background: #fef7cd; padding: 15px; border-radius: 6px; border-left: 4px solid #f59e0b; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏦 تست سیستم تأیید خودکار درگاه بانکی</h1>
+        
+        <div class="test-section">
+            <h2>📋 توضیحات سیستم</h2>
+            <p>این سیستم برای تأیید خودکار سفارشاتی که از طریق درگاه بانکی پرداخت شده‌اند، طراحی شده است.</p>
+            <ul>
+                <li><strong>پرداخت درگاه:</strong> سفارشات با روش پرداخت "درگاه بانکی" که وضعیت "paid" دارند</li>
+                <li><strong>تأیید خودکار:</strong> بدون نیاز به دخالت کاربر مالی</li>
+                <li><strong>انتقال به انبار:</strong> مستقیماً به بخش انبارداری ارسال می‌شوند</li>
+                <li><strong>ثبت فعالیت:</strong> تمام تغییرات در لاگ ثبت می‌شود</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h2>🧪 تست‌های سیستم</h2>
+            
+            <div style="margin: 20px 0;">
+                <h3>1. پردازش سفارشات معلق درگاه بانکی</h3>
+                <p>این تست تمام سفارشات پرداخت‌شده درگاه بانکی را پیدا کرده و خودکار تأیید می‌کند.</p>
+                <button class="button success" onclick="processPendingBankPayments()">
+                    پردازش خودکار سفارشات درگاه
+                </button>
+                <span class="loading" id="processingLoader">در حال پردازش...</span>
+                <div id="processingResult"></div>
+            </div>
+
+            <div style="margin: 20px 0;">
+                <h3>2. تست Webhook درگاه پرداخت</h3>
+                <p>شبیه‌سازی callback از درگاه بانکی برای تأیید پرداخت</p>
+                <input type="number" id="webhookOrderId" placeholder="شناسه سفارش" style="padding: 8px; margin: 5px; border: 1px solid #ccc; border-radius: 4px;">
+                <button class="button warning" onclick="simulateWebhook()">
+                    شبیه‌سازی Webhook
+                </button>
+                <span class="loading" id="webhookLoader">در حال ارسال...</span>
+                <div id="webhookResult"></div>
+            </div>
+
+            <div style="margin: 20px 0;">
+                <h3>3. تأیید دستی یک سفارش خاص</h3>
+                <p>تأیید خودکار یک سفارش مشخص</p>
+                <input type="number" id="manualOrderId" placeholder="شناسه سفارش مشتری" style="padding: 8px; margin: 5px; border: 1px solid #ccc; border-radius: 4px;">
+                <button class="button" onclick="manualAutoApprove()">
+                    تأیید خودکار دستی
+                </button>
+                <span class="loading" id="manualLoader">در حال پردازش...</span>
+                <div id="manualResult"></div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>📡 مثال Webhook</h2>
+            <div class="webhook-example">
+                <p><strong>Endpoint:</strong> <code>/api/payment/gateway/webhook</code></p>
+                <p><strong>Method:</strong> POST</p>
+                <p><strong>نمونه JSON:</strong></p>
+                <div class="code">
+{
+  "orderId": "123",
+  "paymentStatus": "paid",
+  "transactionId": "TXN123456789",
+  "amount": "100000",
+  "currency": "IQD"
+}
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>📊 وضعیت‌های سفارش</h2>
+            <ul>
+                <li><span class="status-badge status-pending">pending</span> - در انتظار بررسی</li>
+                <li><span class="status-badge status-confirmed">confirmed</span> - تأیید شده</li>
+                <li><span class="status-badge status-auto-approved">auto_approved</span> - تأیید خودکار درگاه</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h2>🔄 لاگ‌های سیستم</h2>
+            <p>برای مشاهده جزئیات پردازش، کنسول مرورگر و terminal سرور را بررسی کنید.</p>
+            <button class="button" onclick="openConsole()">
+                باز کردن کنسول مرورگر
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function showResult(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="result ${type}">${message}</div>`;
+        }
+
+        function showLoader(loaderId, show = true) {
+            const loader = document.getElementById(loaderId);
+            if (show) {
+                loader.classList.add('show');
+            } else {
+                loader.classList.remove('show');
+            }
+        }
+
+        async function processPendingBankPayments() {
+            showLoader('processingLoader', true);
+            showResult('processingResult', 'در حال پردازش...', 'info');
+            
+            try {
+                const response = await fetch('/api/admin/orders/process-pending-bank-payments', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showResult('processingResult', 
+                        `✅ موفقیت: ${data.data?.processed || 0} سفارش از ${data.data?.totalFound || 0} سفارش پردازش شد<br>${data.message}`, 
+                        'success'
+                    );
+                } else {
+                    showResult('processingResult', `❌ خطا: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                showResult('processingResult', `❌ خطای شبکه: ${error.message}`, 'error');
+            } finally {
+                showLoader('processingLoader', false);
+            }
+        }
+
+        async function simulateWebhook() {
+            const orderId = document.getElementById('webhookOrderId').value;
+            if (!orderId) {
+                showResult('webhookResult', '❌ شناسه سفارش الزامی است', 'error');
+                return;
+            }
+
+            showLoader('webhookLoader', true);
+            showResult('webhookResult', 'در حال ارسال webhook...', 'info');
+            
+            try {
+                const webhookData = {
+                    orderId: orderId,
+                    paymentStatus: 'paid',
+                    transactionId: `TXN${Date.now()}`,
+                    amount: '100000',
+                    currency: 'IQD'
+                };
+
+                const response = await fetch('/api/payment/gateway/webhook', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(webhookData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showResult('webhookResult', 
+                        `✅ موفقیت: ${data.message}<br>سفارش ${orderId} خودکار تأیید شد`, 
+                        'success'
+                    );
+                } else {
+                    showResult('webhookResult', `❌ خطا: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                showResult('webhookResult', `❌ خطای شبکه: ${error.message}`, 'error');
+            } finally {
+                showLoader('webhookLoader', false);
+            }
+        }
+
+        async function manualAutoApprove() {
+            const orderId = document.getElementById('manualOrderId').value;
+            if (!orderId) {
+                showResult('manualResult', '❌ شناسه سفارش الزامی است', 'error');
+                return;
+            }
+
+            showLoader('manualLoader', true);
+            showResult('manualResult', 'در حال تأیید خودکار...', 'info');
+            
+            try {
+                const response = await fetch('/api/admin/orders/auto-approve-bank-payment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        customerOrderId: parseInt(orderId)
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showResult('manualResult', 
+                        `✅ موفقیت: ${data.message}<br>سفارش ${orderId} خودکار تأیید شد`, 
+                        'success'
+                    );
+                } else {
+                    showResult('manualResult', `❌ خطا: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                showResult('manualResult', `❌ خطای شبکه: ${error.message}`, 'error');
+            } finally {
+                showLoader('manualLoader', false);
+            }
+        }
+
+        function openConsole() {
+            console.log('🏦 سیستم تأیید خودکار درگاه بانکی');
+            console.log('برای مشاهده جزئیات پردازش، F12 را فشار دهید');
+            alert('کنسول مرورگر باز شد. F12 را فشار دهید تا جزئیات را مشاهده کنید.');
+        }
+
+        // Auto-refresh every 30 seconds for live monitoring
+        setInterval(() => {
+            console.log('🔄 Auto-refresh: ', new Date().toLocaleString('fa-IR'));
+        }, 30000);
+
+        console.log('🏦 صفحه تست سیستم تأیید خودکار درگاه بانکی آماده است');
+    </script>
+</body>
+</html>

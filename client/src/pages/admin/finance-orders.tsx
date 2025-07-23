@@ -375,6 +375,29 @@ function FinanceOrders() {
     }
   });
 
+  // Process pending bank gateway payments
+  const processPendingBankPayments = useMutation({
+    mutationFn: async () => {
+      return apiRequest('/api/admin/orders/process-pending-bank-payments', {
+        method: 'POST'
+      });
+    },
+    onSuccess: (response) => {
+      toast({
+        title: "پردازش خودکار انجام شد",
+        description: `${response.data?.processed} سفارش از ${response.data?.totalFound} سفارش پردازش شد`
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/financial/orders'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "خطا در پردازش خودکار",
+        description: error.message || "امکان پردازش سفارشات وجود ندارد",
+        variant: "destructive"
+      });
+    }
+  });
+
   // Generate tracking codes for order
   const generateTrackingCodes = useMutation({
     mutationFn: async (orderId: number) => {
@@ -423,6 +446,10 @@ function FinanceOrders() {
         return <Badge variant="outline" className="bg-yellow-50 text-yellow-700">در انتظار بررسی مالی</Badge>;
       case 'financial_reviewing':
         return <Badge variant="outline" className="bg-blue-50 text-blue-700">در حال بررسی</Badge>;
+      case 'financial_approved':
+        return <Badge variant="outline" className="bg-green-50 text-green-700">تأیید شده</Badge>;
+      case 'auto_approved':
+        return <Badge variant="outline" className="bg-emerald-50 text-emerald-700">تأیید خودکار درگاه</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -504,6 +531,14 @@ function FinanceOrders() {
               </div>
             </div>
             <div className="flex items-center space-x-4 space-x-reverse">
+              <Button 
+                onClick={processPendingBankPayments.mutate}
+                disabled={processPendingBankPayments.isPending}
+                className="flex items-center space-x-2 space-x-reverse bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
+              >
+                <Timer className={`h-4 w-4 ${processPendingBankPayments.isPending ? 'animate-spin' : ''}`} />
+                <span>پردازش خودکار درگاه</span>
+              </Button>
               <Button 
                 onClick={() => refetch()}
                 variant="outline"
@@ -932,23 +967,34 @@ function FinanceOrders() {
                 </div>
 
                 <div className="flex justify-between gap-4 pt-4">
-                  <Button
-                    variant="destructive"
-                    onClick={handleReject}
-                    disabled={rejectMutation.isPending}
-                    className="flex items-center gap-2"
-                  >
-                    <XCircle className="h-4 w-4" />
-                    {rejectMutation.isPending ? 'در حال رد...' : 'رد پرداخت'}
-                  </Button>
-                  <Button
-                    onClick={handleApprove}
-                    disabled={approveMutation.isPending}
-                    className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
-                  >
-                    <CheckCircle className="h-4 w-4" />
-                    {approveMutation.isPending ? 'در حال تایید...' : 'تایید پرداخت'}
-                  </Button>
+                  {selectedOrder.currentStatus === 'auto_approved' ? (
+                    <div className="flex items-center justify-center p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
+                      <CheckCircle className="h-6 w-6 text-emerald-600 mr-2" />
+                      <span className="text-emerald-700 font-medium">
+                        این سفارش به صورت خودکار از طریق درگاه بانکی تأیید شده است
+                      </span>
+                    </div>
+                  ) : (
+                    <>
+                      <Button
+                        variant="destructive"
+                        onClick={handleReject}
+                        disabled={rejectMutation.isPending}
+                        className="flex items-center gap-2"
+                      >
+                        <XCircle className="h-4 w-4" />
+                        {rejectMutation.isPending ? 'در حال رد...' : 'رد پرداخت'}
+                      </Button>
+                      <Button
+                        onClick={handleApprove}
+                        disabled={approveMutation.isPending}
+                        className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+                      >
+                        <CheckCircle className="h-4 w-4" />
+                        {approveMutation.isPending ? 'در حال تایید...' : 'تایید پرداخت'}
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
             )}
@@ -1195,23 +1241,35 @@ function FinanceOrders() {
                   </CardHeader>
                   <CardContent>
                     <div className="flex gap-4 justify-center">
-                      <Button 
-                        onClick={() => handleAcceptOrder(orderDetails.customerOrderId)}
-                        className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 text-lg"
-                        disabled={orderDetails.currentStatus === 'financial_approved' || orderDetails.currentStatus === 'warehouse_pending'}
-                      >
-                        <CheckCircle2 className="h-5 w-5 mr-2" />
-                        قبول سفارش
-                      </Button>
-                      <Button 
-                        onClick={() => handleRejectOrder(orderDetails.customerOrderId)}
-                        variant="destructive"
-                        className="px-8 py-3 text-lg"
-                        disabled={orderDetails.currentStatus === 'financial_rejected'}
-                      >
-                        <XCircle className="h-5 w-5 mr-2" />
-                        رد سفارش
-                      </Button>
+                      {orderDetails.currentStatus === 'auto_approved' ? (
+                        <div className="col-span-2 flex items-center justify-center p-6 bg-emerald-50 border border-emerald-200 rounded-lg">
+                          <CheckCircle className="h-8 w-8 text-emerald-600 mr-3" />
+                          <div className="text-center">
+                            <p className="text-lg font-bold text-emerald-700">تأیید خودکار درگاه بانکی</p>
+                            <p className="text-sm text-emerald-600 mt-1">این سفارش خودکار تأیید شده و به انبار ارسال گردیده</p>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <Button 
+                            onClick={() => handleAcceptOrder(orderDetails.customerOrderId)}
+                            className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 text-lg"
+                            disabled={orderDetails.currentStatus === 'financial_approved' || orderDetails.currentStatus === 'warehouse_pending'}
+                          >
+                            <CheckCircle2 className="h-5 w-5 mr-2" />
+                            قبول سفارش
+                          </Button>
+                          <Button 
+                            onClick={() => handleRejectOrder(orderDetails.customerOrderId)}
+                            variant="destructive"
+                            className="px-8 py-3 text-lg"
+                            disabled={orderDetails.currentStatus === 'financial_rejected'}
+                          >
+                            <XCircle className="h-5 w-5 mr-2" />
+                            رد سفارش
+                          </Button>
+                        </>
+                      )}
                     </div>
                     <div className="mt-4 p-3 bg-blue-50 rounded-lg">
                       <p className="text-sm text-blue-800 text-center">

@@ -6078,6 +6078,158 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Automatic bank payment approval endpoint
+  app.post("/api/admin/orders/auto-approve-bank-payment", requireAuth, async (req, res) => {
+    try {
+      const { customerOrderId } = req.body;
+      
+      if (!customerOrderId) {
+        return res.status(400).json({
+          success: false,
+          message: "شناسه سفارش مشتری الزامی است"
+        });
+      }
+
+      console.log(`🏦 [AUTO APPROVAL API] Processing automatic bank payment approval for order ${customerOrderId}`);
+      
+      await orderManagementStorage.processAutomaticBankPaymentApproval(customerOrderId);
+      
+      res.json({
+        success: true,
+        message: "تأیید اتوماتیک پرداخت درگاه بانکی با موفقیت انجام شد"
+      });
+      
+    } catch (error) {
+      console.error('❌ [AUTO APPROVAL API] Error processing automatic approval:', error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در تأیید اتوماتیک پرداخت"
+      });
+    }
+  });
+
+  // Bank payment gateway webhook endpoint (for real-time payment confirmations)
+  app.post("/api/payment/gateway/webhook", async (req, res) => {
+    try {
+      const { orderId, paymentStatus, transactionId, amount, currency } = req.body;
+      
+      console.log(`🏦 [GATEWAY WEBHOOK] Received payment notification:`, {
+        orderId,
+        paymentStatus,
+        transactionId,
+        amount,
+        currency
+      });
+
+      if (!orderId || !paymentStatus) {
+        return res.status(400).json({
+          success: false,
+          message: "شناسه سفارش و وضعیت پرداخت الزامی است"
+        });
+      }
+
+      // Check if payment is successful
+      const isPaymentSuccessful = paymentStatus === 'paid' || 
+                                paymentStatus === 'confirmed' || 
+                                paymentStatus === 'successful' ||
+                                paymentStatus === 'success';
+
+      if (isPaymentSuccessful) {
+        // Update customer order payment status
+        await db
+          .update(customerOrders)
+          .set({
+            paymentStatus: 'paid',
+            status: 'confirmed',
+            updatedAt: new Date()
+          })
+          .where(eq(customerOrders.id, parseInt(orderId)));
+
+        console.log(`✅ [GATEWAY WEBHOOK] Order ${orderId} payment confirmed via gateway`);
+
+        // Trigger automatic financial approval
+        try {
+          await orderManagementStorage.processAutomaticBankPaymentApproval(parseInt(orderId));
+          console.log(`🎉 [GATEWAY WEBHOOK] Order ${orderId} automatically approved and transferred to warehouse`);
+        } catch (approvalError) {
+          console.error(`❌ [GATEWAY WEBHOOK] Auto approval failed for order ${orderId}:`, approvalError);
+        }
+      }
+
+      res.json({
+        success: true,
+        message: "وضعیت پرداخت با موفقیت به‌روزرسانی شد"
+      });
+      
+    } catch (error) {
+      console.error('❌ [GATEWAY WEBHOOK] Error processing payment webhook:', error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در پردازش اطلاعات پرداخت"
+      });
+    }
+  });
+
+  // Process pending bank gateway orders (manual trigger or scheduled service)
+  app.post("/api/admin/orders/process-pending-bank-payments", requireAuth, async (req, res) => {
+    try {
+      console.log(`🔄 [PROCESS PENDING] Processing all pending bank gateway orders...`);
+      
+      // Get all orders with bank gateway payment that are paid but not yet approved
+      const pendingBankOrders = await db
+        .select({
+          id: customerOrders.id,
+          orderNumber: customerOrders.orderNumber,
+          paymentMethod: customerOrders.paymentMethod,
+          paymentStatus: customerOrders.paymentStatus,
+          status: customerOrders.status
+        })
+        .from(customerOrders)
+        .where(and(
+          or(
+            eq(customerOrders.paymentMethod, 'درگاه بانکی'),
+            eq(customerOrders.paymentMethod, 'bank_gateway'),
+            eq(customerOrders.paymentMethod, 'gateway')
+          ),
+          or(
+            eq(customerOrders.paymentStatus, 'paid'),
+            eq(customerOrders.paymentStatus, 'confirmed'),
+            eq(customerOrders.paymentStatus, 'successful')
+          ),
+          eq(customerOrders.status, 'pending')
+        ));
+
+      console.log(`🔍 [PROCESS PENDING] Found ${pendingBankOrders.length} pending bank gateway orders`);
+
+      let processedCount = 0;
+      for (const order of pendingBankOrders) {
+        try {
+          await orderManagementStorage.processAutomaticBankPaymentApproval(order.id);
+          processedCount++;
+          console.log(`✅ [PROCESS PENDING] Auto-approved order ${order.orderNumber} (${processedCount}/${pendingBankOrders.length})`);
+        } catch (error) {
+          console.error(`❌ [PROCESS PENDING] Failed to auto-approve order ${order.orderNumber}:`, error);
+        }
+      }
+
+      res.json({
+        success: true,
+        message: `${processedCount} سفارش از ${pendingBankOrders.length} سفارش با موفقیت پردازش شد`,
+        data: {
+          totalFound: pendingBankOrders.length,
+          processed: processedCount
+        }
+      });
+      
+    } catch (error) {
+      console.error('❌ [PROCESS PENDING] Error processing pending bank payments:', error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در پردازش سفارشات معلق"
+      });
+    }
+  });
+
   // Send SMS to users
   app.post("/api/admin/send-sms", requireAuth, async (req, res) => {
     try {
