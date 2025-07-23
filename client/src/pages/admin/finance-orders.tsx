@@ -127,8 +127,8 @@ function FinanceOrders() {
 
   // Get orders for financial review
   const { data: ordersResponse, isLoading, refetch } = useQuery({
-    queryKey: ['/api/order-management/financial'],
-    queryFn: () => fetch('/api/order-management/financial', { credentials: 'include' }).then(res => res.json())
+    queryKey: ['/api/financial/orders'],
+    queryFn: () => fetch('/api/financial/orders', { credentials: 'include' }).then(res => res.json())
   });
 
   // Fetch approved orders that have been transferred to warehouse
