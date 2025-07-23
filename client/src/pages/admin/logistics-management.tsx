@@ -1170,14 +1170,6 @@ const LogisticsManagement = () => {
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <div className="flex justify-between items-center">
-              <div className="text-right flex-1">
-                <DialogTitle className="text-right">
-                  جزئیات سفارش {selectedOrder?.orderNumber || `#${selectedOrder?.customerOrderId}`}
-                </DialogTitle>
-                <DialogDescription className="text-right">
-                  مشاهده کامل اطلاعات سفارش و آدرس تحویل
-                </DialogDescription>
-              </div>
               <Button
                 onClick={handlePrintOrderDetails}
                 variant="outline"
@@ -1187,6 +1179,14 @@ const LogisticsManagement = () => {
                 <Printer className="w-4 h-4" />
                 پرینت
               </Button>
+              <div className="text-right flex-1">
+                <DialogTitle className="text-right">
+                  جزئیات سفارش {selectedOrder?.orderNumber || `#${selectedOrder?.customerOrderId}`}
+                </DialogTitle>
+                <DialogDescription className="text-right">
+                  مشاهده کامل اطلاعات سفارش و آدرس تحویل
+                </DialogDescription>
+              </div>
             </div>
           </DialogHeader>
           
