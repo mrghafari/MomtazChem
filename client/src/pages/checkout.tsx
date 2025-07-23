@@ -1083,12 +1083,26 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                     
                     {/* CRM Default Address Information - Only for logged in users */}
                     {isUserLoggedIn && customerData?.customer && (
-                      <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
-                        <div className="text-xs font-medium text-blue-800 dark:text-blue-300 mb-2 flex items-center gap-2">
+                      <div className={`p-3 rounded-lg border transition-all duration-300 ${
+                        (form.watch('secondDeliveryAddress') || form.watch('recipientMobile')) 
+                          ? 'bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600 opacity-60' 
+                          : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
+                      }`}>
+                        <div className={`text-xs font-medium mb-2 flex items-center gap-2 ${
+                          (form.watch('secondDeliveryAddress') || form.watch('recipientMobile'))
+                            ? 'text-gray-600 dark:text-gray-400'
+                            : 'text-blue-800 dark:text-blue-300'
+                        }`}>
                           <MapPin className="w-3 h-3" />
-                          آدرس پیش‌فرض تحویل (از CRM)
+                          {(form.watch('secondDeliveryAddress') || form.watch('recipientMobile')) 
+                            ? 'آدرس پیش‌فرض (غیرفعال)' 
+                            : 'آدرس پیش‌فرض تحویل (از CRM)'}
                         </div>
-                        <div className="space-y-1 text-xs text-blue-700 dark:text-blue-400">
+                        <div className={`space-y-1 text-xs ${
+                          (form.watch('secondDeliveryAddress') || form.watch('recipientMobile'))
+                            ? 'text-gray-500 dark:text-gray-500'
+                            : 'text-blue-700 dark:text-blue-400'
+                        }`}>
                           <div className="flex justify-between">
                             <span>استان:</span>
                             <span className="font-medium">{customerData.customer.province || customerData.customer.state || 'نامشخص'}</span>
@@ -1106,9 +1120,62 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                             <span className="font-medium">{customerData.customer.postalCode || 'نامشخص'}</span>
                           </div>
                         </div>
-                        <div className="mt-2 pt-2 border-t border-blue-200 dark:border-blue-700">
-                          <div className="text-xs text-blue-600 dark:text-blue-400 italic">
-                            💡 این آدرس به عنوان آدرس پیش‌فرض تحویل استفاده می‌شود. برای تغییر، آدرس دوم یا شماره موبایل متفاوت وارد کنید.
+                        <div className={`mt-2 pt-2 border-t transition-colors ${
+                          (form.watch('secondDeliveryAddress') || form.watch('recipientMobile'))
+                            ? 'border-gray-300 dark:border-gray-600'
+                            : 'border-blue-200 dark:border-blue-700'
+                        }`}>
+                          <div className={`text-xs italic ${
+                            (form.watch('secondDeliveryAddress') || form.watch('recipientMobile'))
+                              ? 'text-gray-500 dark:text-gray-500'
+                              : 'text-blue-600 dark:text-blue-400'
+                          }`}>
+                            {(form.watch('secondDeliveryAddress') || form.watch('recipientMobile')) 
+                              ? '⚠️ آدرس یا شماره جدید مشخص شده - این آدرس استفاده نخواهد شد'
+                              : '💡 این آدرس به عنوان آدرس پیش‌فرض تحویل استفاده می‌شود. برای تغییر، آدرس دوم یا شماره موبایل متفاوت وارد کنید.'}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Active Address/Phone Information - Shows when second address or different phone is specified */}
+                    {isUserLoggedIn && (form.watch('secondDeliveryAddress') || form.watch('recipientMobile')) && (
+                      <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg border border-green-200 dark:border-green-800">
+                        <div className="text-xs font-medium text-green-800 dark:text-green-300 mb-2 flex items-center gap-2">
+                          <MapPin className="w-3 h-3" />
+                          آدرس و اطلاعات فعال برای تحویل
+                        </div>
+                        <div className="space-y-1 text-xs text-green-700 dark:text-green-400">
+                          {form.watch('secondDeliveryAddress') && (
+                            <>
+                              <div className="flex justify-between">
+                                <span>آدرس فعال:</span>
+                                <span className="font-medium text-right max-w-[60%]">{form.watch('secondDeliveryAddress')}</span>
+                              </div>
+                              {form.watch('secondDeliveryCity') && (
+                                <div className="flex justify-between">
+                                  <span>شهر:</span>
+                                  <span className="font-medium">{form.watch('secondDeliveryCity')}</span>
+                                </div>
+                              )}
+                              {form.watch('secondDeliveryPostalCode') && (
+                                <div className="flex justify-between">
+                                  <span>کد پستی:</span>
+                                  <span className="font-medium">{form.watch('secondDeliveryPostalCode')}</span>
+                                </div>
+                              )}
+                            </>
+                          )}
+                          {form.watch('recipientMobile') && (
+                            <div className="flex justify-between">
+                              <span>شماره تحویل‌گیرنده:</span>
+                              <span className="font-medium">{form.watch('recipientMobile')}</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="mt-2 pt-2 border-t border-green-200 dark:border-green-700">
+                          <div className="text-xs text-green-600 dark:text-green-400 italic">
+                            ✅ این اطلاعات برای تحویل سفارش استفاده خواهد شد
                           </div>
                         </div>
                       </div>

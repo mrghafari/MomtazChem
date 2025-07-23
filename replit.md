@@ -28,8 +28,12 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Override Functionality**: Customers can specify different addresses using "Second Address" option or different recipient mobile numbers
 - **Smart Auto-Fill**: Customer name and phone from CRM automatically populate recipient information as defaults
 - **Clear User Guidance**: Informational message explains that CRM address is used as default unless customer specifies otherwise
-- **Business Impact**: Streamlined checkout process with CRM address as default while maintaining flexibility for custom delivery options
-- **Status**: Complete CRM address integration operational with default address system and override capabilities
+- **Dynamic Status Indication**: CRM address card becomes grayed out and disabled when customer enters second address or different mobile number
+- **Active Address Display**: New green card shows active delivery information when customer overrides default CRM data
+- **Visual Feedback**: Real-time visual changes with color transitions to clearly indicate which address/phone will be used for delivery
+- **Smart Override Detection**: System monitors form fields for secondDeliveryAddress and recipientMobile to determine active delivery details
+- **Business Impact**: Streamlined checkout process with CRM address as default while maintaining flexibility for custom delivery options with clear visual feedback
+- **Status**: Complete CRM address integration operational with dynamic status indication and override capabilities
 
 ### COMPLETED: Iraqi Geography Management Interface Implementation (July 23, 2025)
 ✅ **IMPLEMENTED: Complete Iraqi geography administration system with trilingual data support**
