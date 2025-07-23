@@ -6,6 +6,36 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Customer Purchase History Display System Fully Operational (July 23, 2025)
+✅ **RESOLVED: Complete customer purchase history functionality restored and operational**
+- **Authentication Fixed**: Customer login system working properly with correct password hashing
+- **Database Schema Issues Fixed**: Resolved all schema mismatches between Drizzle ORM and actual database structure:
+  - Fixed `currency` field naming (was `currencyCode` in schema, actually `currency` in database)
+  - Removed non-existent `product_image` and `product_category` columns from order items queries
+  - Updated all SQL queries to use direct database queries instead of problematic Drizzle ORM calls
+- **Customer Data Access**: Customer ABAS ABASI (oilstar@hotmail.com) with 63 orders now fully accessible:
+  - Login credentials: oilstar@hotmail.com / 123456
+  - 2 recent orders displayed (M2511200, M2511194)
+  - 61 orders available in purchase history
+  - Complete order items with product details (Diesel Fuel Additive DFA-100)
+- **Financial Data Display**: Complete cost breakdown showing:
+  - Items subtotal calculation from order items
+  - Shipping costs (9,500-11,000 IQD)
+  - VAT calculation (3% rate properly applied)
+  - Grand total with all components
+- **Purchase History Features**: 
+  - "مشاهده سابقه خرید کامل" button functional
+  - Search capabilities across order numbers and product names
+  - Abandoned cart tracking (5 abandoned carts displayed)
+  - Professional Persian interface with proper RTL support
+- **Technical Resolution**: 
+  - Converted all problematic Drizzle queries to direct SQL in customer-storage.ts
+  - Fixed getOrdersForProfile() and getOrderItems() methods
+  - Eliminated schema cache issues through workflow restart
+- **Test Results**: Complete API functionality verified - orders endpoint returning full data with items, pricing, and financial breakdowns
+- **Impact**: Customer purchase history system now fully operational with complete order visibility and financial transparency
+- **Result**: Customers can access complete purchase history with proper financial calculations and detailed order information
+
 ### COMPLETED: Customer Database Consolidation - Single Source of Truth Implementation (July 23, 2025)
 ✅ **RESOLVED: Successfully consolidated dual customer tables into unified CRM system**
 - **Previous Issue**: System maintained two separate customer tables (`customers` and `crm_customers`) causing data fragmentation and inconsistencies
