@@ -29527,27 +29527,32 @@ momtazchem.com
   // PRODUCT REVIEWS & RATINGS ENDPOINTS - نظرسنجی و امتیازدهی محصولات
   // =============================================================================
 
-  // Get all product stats for shop display
+  // Get all product stats for shop display - includes all products for rating capability
   app.get("/api/shop/product-stats", async (req, res) => {
     try {
       const { pool } = await import('./db');
+      
+      // Get all products from showcase_products and their stats - Using main pool for both tables
       const result = await pool.query(`
         SELECT 
-          product_id,
-          total_reviews,
-          average_rating
-        FROM product_stats
-        WHERE total_reviews > 0
+          sp.id as product_id,
+          COALESCE(ps.total_reviews, 0) as total_reviews,
+          COALESCE(ps.average_rating, 0) as average_rating
+        FROM showcase_products sp
+        LEFT JOIN product_stats ps ON sp.id = ps.product_id
+        WHERE sp.visible_in_shop = true
       `);
 
       const statsMap = {};
       result.rows.forEach(row => {
         statsMap[row.product_id] = {
-          totalReviews: row.total_reviews,
-          averageRating: parseFloat(row.average_rating)
+          totalReviews: parseInt(row.total_reviews) || 0,
+          averageRating: parseFloat(row.average_rating) || 0
         };
       });
 
+      console.log(`📊 [PRODUCT STATS] Loaded stats for ${Object.keys(statsMap).length} shop products`);
+      console.log(`📊 [PRODUCT STATS] Product IDs included:`, Object.keys(statsMap).join(', '));
       res.json(statsMap);
     } catch (error) {
       console.error("Error fetching product stats:", error);

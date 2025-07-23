@@ -1335,7 +1335,7 @@ const Shop = () => {
                             </div>
                           )}
                           
-                          {/* Star Rating Display */}
+                          {/* Star Rating Display - Show for all products */}
                           {productStats && productStats[product.id] && (
                             <div className="absolute bottom-2 left-2">
                               <div className="bg-white/95 backdrop-blur-sm rounded-lg p-2 shadow-lg border border-yellow-200">
@@ -1352,21 +1352,31 @@ const Shop = () => {
                                       <Star 
                                         key={starNum}
                                         className={`w-4 h-4 ${
-                                          starNum <= Math.floor(productStats[product.id].averageRating) 
-                                            ? 'fill-yellow-400 text-yellow-400' 
-                                            : starNum <= Math.ceil(productStats[product.id].averageRating)
-                                            ? 'fill-yellow-200 text-yellow-200'
-                                            : 'fill-gray-200 text-gray-200'
+                                          productStats[product.id].totalReviews > 0 
+                                            ? (starNum <= Math.floor(productStats[product.id].averageRating) 
+                                                ? 'fill-yellow-400 text-yellow-400' 
+                                                : starNum <= Math.ceil(productStats[product.id].averageRating)
+                                                ? 'fill-yellow-200 text-yellow-200'
+                                                : 'fill-gray-200 text-gray-200')
+                                            : 'fill-gray-200 text-gray-200 hover:fill-yellow-300'
                                         }`}
                                       />
                                     ))}
                                   </div>
-                                  <span className="text-xs font-medium text-gray-700">
-                                    {productStats[product.id].averageRating.toFixed(1)}
-                                  </span>
-                                  <span className="text-xs text-gray-500">
-                                    ({productStats[product.id].totalReviews})
-                                  </span>
+                                  {productStats[product.id].totalReviews > 0 ? (
+                                    <>
+                                      <span className="text-xs font-medium text-gray-700">
+                                        {productStats[product.id].averageRating.toFixed(1)}
+                                      </span>
+                                      <span className="text-xs text-gray-500">
+                                        ({productStats[product.id].totalReviews})
+                                      </span>
+                                    </>
+                                  ) : (
+                                    <span className="text-xs text-gray-500">
+                                      ثبت نظر
+                                    </span>
+                                  )}
                                 </div>
                               </div>
                             </div>
@@ -1664,7 +1674,7 @@ const Shop = () => {
                             </div>
                           )}
                           
-                          {/* Star Rating - More to the left - List View */}
+                          {/* Star Rating - More to the left - List View - Show for all products */}
                           {productStats?.[product.id] && (
                             <div className="absolute bottom-2 left-8 flex items-center">
                               <Button
@@ -1677,11 +1687,28 @@ const Shop = () => {
                                   navigate(`/product-reviews/${product.id}`);
                                 }}
                               >
-                                <StarRating
-                                  rating={productStats[product.id].averageRating}
-                                  size="sm"
-                                  showNumber={false}
-                                />
+                                <div className="flex items-center gap-1">
+                                  <div className="flex">
+                                    {[1,2,3,4,5].map((starNum) => (
+                                      <Star 
+                                        key={starNum}
+                                        size={12}
+                                        className={`${
+                                          productStats[product.id].totalReviews > 0 
+                                            ? (starNum <= Math.floor(productStats[product.id].averageRating) 
+                                                ? 'fill-yellow-400 text-yellow-400' 
+                                                : 'fill-gray-200 text-gray-200')
+                                            : 'fill-gray-200 text-gray-200 hover:fill-yellow-300'
+                                        }`}
+                                      />
+                                    ))}
+                                  </div>
+                                  {productStats[product.id].totalReviews > 0 && (
+                                    <span className="text-xs text-gray-600 ml-1">
+                                      {productStats[product.id].averageRating.toFixed(1)}
+                                    </span>
+                                  )}
+                                </div>
                               </Button>
                             </div>
                           )}
