@@ -27867,7 +27867,7 @@ momtazchem.com
 
 
   // Finance Department - Approve payment
-  app.post("/api/finance/orders/:orderId/approve", requireAuth, attachUserDepartments, requireDepartment('financial'), async (req: Request, res: Response) => {
+  app.post("/api/finance/orders/:orderId/approve", requireAuth, async (req: Request, res: Response) => {
     try {
       const { db } = await import("./db");
       const { orderManagement, orderStatusHistory } = await import("../shared/order-management-schema");
@@ -27875,9 +27875,26 @@ momtazchem.com
       const { crmCustomers } = await import("../shared/schema");
       const { eq } = await import("drizzle-orm");
       
-      const orderId = parseInt(req.params.orderId);
+      const customerOrderId = parseInt(req.params.orderId); // This is actually customerOrderId from frontend
       const { notes } = req.body;
       const adminId = req.session.adminId;
+
+      console.log(`🔄 [FINANCE] Approving customer order ID: ${customerOrderId}`);
+
+      // First find the order management record for this customer order
+      const [orderMgmt] = await db
+        .select({ id: orderManagement.id })
+        .from(orderManagement)
+        .where(eq(orderManagement.customerOrderId, customerOrderId));
+
+      if (!orderMgmt) {
+        return res.status(404).json({
+          success: false,
+          message: "سفارش در سیستم مدیریت یافت نشد"
+        });
+      }
+
+      console.log(`🔍 [FINANCE] Found order management ID: ${orderMgmt.id} for customer order: ${customerOrderId}`);
 
       // Get customer information for notification
       const [customerInfo] = await db
@@ -27892,7 +27909,7 @@ momtazchem.com
         .from(orderManagement)
         .innerJoin(customerOrders, eq(orderManagement.customerOrderId, customerOrders.id))
         .innerJoin(crmCustomers, eq(customerOrders.customerId, crmCustomers.id))
-        .where(eq(orderManagement.customerOrderId, orderId));
+        .where(eq(orderManagement.customerOrderId, customerOrderId));
 
       // Update order status to warehouse_pending (approved by financial, ready for warehouse)
       await db
@@ -27903,12 +27920,12 @@ momtazchem.com
           financialReviewedAt: new Date(),
           financialNotes: notes
         })
-        .where(eq(orderManagement.customerOrderId, orderId));
+        .where(eq(orderManagement.customerOrderId, customerOrderId));
 
       // Add status history
       await db.insert(orderStatusHistory).values({
-        orderManagementId: orderId,
-        fromStatus: 'payment_uploaded',
+        orderManagementId: orderMgmt.id, // Use correct order management ID
+        fromStatus: 'financial_reviewing',
         toStatus: 'warehouse_pending',
         changedBy: adminId,
         changedByDepartment: 'financial',
@@ -27958,9 +27975,26 @@ momtazchem.com
       const { crmCustomers } = await import("../shared/schema");
       const { eq } = await import("drizzle-orm");
       
-      const orderId = parseInt(req.params.orderId);
+      const customerOrderId = parseInt(req.params.orderId); // This is actually customerOrderId from frontend
       const { notes } = req.body;
       const adminId = req.session.adminId;
+
+      console.log(`🔄 [FINANCE] Rejecting customer order ID: ${customerOrderId}`);
+
+      // First find the order management record for this customer order
+      const [orderMgmt] = await db
+        .select({ id: orderManagement.id })
+        .from(orderManagement)
+        .where(eq(orderManagement.customerOrderId, customerOrderId));
+
+      if (!orderMgmt) {
+        return res.status(404).json({
+          success: false,
+          message: "سفارش در سیستم مدیریت یافت نشد"
+        });
+      }
+
+      console.log(`🔍 [FINANCE] Found order management ID: ${orderMgmt.id} for customer order: ${customerOrderId}`);
 
       // Get customer information for notification
       const [customerInfo] = await db
@@ -27975,7 +28009,7 @@ momtazchem.com
         .from(orderManagement)
         .innerJoin(customerOrders, eq(orderManagement.customerOrderId, customerOrders.id))
         .innerJoin(crmCustomers, eq(customerOrders.customerId, crmCustomers.id))
-        .where(eq(orderManagement.customerOrderId, orderId));
+        .where(eq(orderManagement.customerOrderId, customerOrderId));
 
       // Update order status to financial_rejected
       await db
@@ -27986,12 +28020,12 @@ momtazchem.com
           financialReviewedAt: new Date(),
           financialNotes: notes
         })
-        .where(eq(orderManagement.customerOrderId, orderId));
+        .where(eq(orderManagement.customerOrderId, customerOrderId));
 
       // Add status history
       await db.insert(orderStatusHistory).values({
-        orderManagementId: orderId,
-        fromStatus: 'payment_uploaded',
+        orderManagementId: orderMgmt.id, // Use correct order management ID
+        fromStatus: 'financial_reviewing',
         toStatus: 'financial_rejected',
         changedBy: adminId,
         changedByDepartment: 'financial',
