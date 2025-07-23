@@ -128,6 +128,14 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
     },
   });
 
+  // Watch for changes in second address and mobile fields to gray out primary fields
+  const watchSecondAddress = form.watch('secondDeliveryAddress');
+  const watchRecipientMobile = form.watch('recipientMobile');
+  
+  // Determine if primary fields should be disabled (grayed out)
+  const isPrimaryAddressDisabled = !!(watchSecondAddress && watchSecondAddress.trim());
+  const isPrimaryMobileDisabled = !!(watchRecipientMobile && watchRecipientMobile.trim());
+
   // Auto-fill form with customer data when available
   useEffect(() => {
     if (customerData?.success && customerData.customer) {
@@ -1820,6 +1828,40 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                   </div>
                   
 
+
+                  {/* CRM Default Address Information in Cart Management */}
+                  {isUserLoggedIn && customerData?.customer && (
+                    <div className={`p-2 rounded border transition-all duration-300 ${
+                      (form.watch('secondDeliveryAddress') || form.watch('recipientMobile')) 
+                        ? 'bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600 opacity-60' 
+                        : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
+                    }`}>
+                      <div className={`text-xs font-medium mb-1 flex items-center gap-1 ${
+                        (form.watch('secondDeliveryAddress') || form.watch('recipientMobile'))
+                          ? 'text-gray-600 dark:text-gray-400'
+                          : 'text-blue-800 dark:text-blue-300'
+                      }`}>
+                        <MapPin className="w-3 h-3" />
+                        {(form.watch('secondDeliveryAddress') || form.watch('recipientMobile')) 
+                          ? 'آدرس پیش‌فرض (غیرفعال)' 
+                          : 'آدرس پیش‌فرض (CRM)'}
+                      </div>
+                      <div className={`space-y-1 text-xs ${
+                        (form.watch('secondDeliveryAddress') || form.watch('recipientMobile'))
+                          ? 'text-gray-500 dark:text-gray-500'
+                          : 'text-blue-700 dark:text-blue-400'
+                      }`}>
+                        <div className="flex justify-between">
+                          <span>شهر:</span>
+                          <span className="font-medium">{customerData.customer.city || 'نامشخص'}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>تلفن:</span>
+                          <span className="font-medium">{customerData.customer.phone || 'نامشخص'}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Second Delivery Address Section in Cart Management */}
                   {isUserLoggedIn && (

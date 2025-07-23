@@ -6,6 +6,30 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Conditional Graying Out Logic for CRM Default Fields Implementation (July 23, 2025)
+✅ **IMPLEMENTED: Complete conditional styling system that grays out primary CRM fields when secondary fields are filled**
+- **Watch Functions Integration**: Added form.watch for 'secondDeliveryAddress' and 'recipientMobile' fields to monitor real-time changes
+- **Conditional Logic Variables**: 
+  - `isPrimaryAddressDisabled` - activates when second delivery address is filled
+  - `isPrimaryMobileDisabled` - activates when recipient mobile is filled  
+- **Purchase Order Card Enhancement**: Primary CRM address section now dynamically changes styling based on secondary field status:
+  - **Active State**: Blue background (bg-blue-50) with blue text when primary fields are active
+  - **Disabled State**: Gray background (bg-gray-100) with gray text and 60% opacity when secondary fields are filled
+  - **Dynamic Status Text**: Changes from "آدرس پیش‌فرض تحویل (از CRM)" to "آدرس پیش‌فرض (غیرفعال)" with warning icons
+- **Cart Management Integration**: Added CRM default address display section in Cart Management with identical conditional logic:
+  - Compact layout suitable for sidebar display with city and phone information
+  - Same conditional styling system as Purchase Order card
+  - Synchronized visual feedback across both interfaces
+- **Visual Feedback System**: 
+  - Transition animations for smooth styling changes
+  - Color-coded status indicators (blue for active, gray for disabled)
+  - Dynamic warning messages when primary fields are overridden
+- **User Experience**: Clear visual indication of which address and phone will be used for delivery
+- **Business Logic**: Ensures customers understand which contact information will be active for order delivery
+- **Technical Implementation**: Form watching system with proper dependency handling after form initialization
+- **Dual Interface Coverage**: Both Purchase Order card and Cart Management show conditional CRM field status
+- **Status**: Conditional graying out system fully operational across all delivery address interfaces
+
 ### COMPLETED: Enhanced CRM Address Integration with Active Delivery Logic and Province Field - Cart Management Integration (July 23, 2025)
 ✅ **IMPLEMENTED: Complete smart delivery address system with conditional logic for active address determination**
 - **CRM Default Logic**: CRM address and phone automatically serve as default values for all delivery fields

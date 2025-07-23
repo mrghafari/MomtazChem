@@ -1,0 +1,151 @@
+ Tawk.to script loaded successfully
+ Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ 
+value @ twk-chunk-common.js:2
+ Tawk.to Live Chat loaded successfully
+api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(6)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(6)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(6)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(6)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(6)
+ Cart clicked, total items: 2
+ Customer: Object
+ User is logged in, showing checkout
+ 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(6)
+ 💳 [WALLET QUERY] Enabled check: Object
+ 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:592 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:349 Fetching shipping rates...
+bilingual-purchase-form.tsx:395 === BilingualPurchaseForm Debug ===
+bilingual-purchase-form.tsx:396 existingCustomer from parent: Object
+bilingual-purchase-form.tsx:397 customerData from API: Object
+bilingual-purchase-form.tsx:398 crmCustomerData from API: undefined
+bilingual-purchase-form.tsx:399 isLoadingCustomer: false
+bilingual-purchase-form.tsx:410 Using existingCustomer from parent
+bilingual-purchase-form.tsx:417 Customer object found: Object
+bilingual-purchase-form.tsx:418 Customer firstName: ABAS
+bilingual-purchase-form.tsx:419 Customer lastName: ABASI
+bilingual-purchase-form.tsx:420 Customer phone: 09124955173
+bilingual-purchase-form.tsx:421 Customer address: شهران، فلکه دوم، خ یکم، خ شیخ الاسلامی، کوچه اول، پ 18 واحد 10
+bilingual-purchase-form.tsx:422 Customer secondaryAddress: NAGwer Road, Qaryataq Village, Erbil, Iraq
+bilingual-purchase-form.tsx:423 Customer city: Erbil
+bilingual-purchase-form.tsx:424 Customer country: Iraq
+bilingual-purchase-form.tsx:425 Customer postalCode: 1968913751
+bilingual-purchase-form.tsx:428 Full name constructed: ABAS ABASI
+bilingual-purchase-form.tsx:442 Form data to reset: Object
+bilingual-purchase-form.tsx:444 Form reset completed
+bilingual-purchase-form.tsx:448 === End BilingualPurchaseForm Debug ===
+bilingual-purchase-form.tsx:515 🚚 Shipping cost calculation: Object
+bilingual-purchase-form.tsx:549 🔄 No shipping method selected or no data, resetting cost
+bilingual-purchase-form.tsx:556 Shipping rates state: Object
+bilingual-purchase-form.tsx:572 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:592 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:266 CRM Customer API response: Object
+bilingual-purchase-form.tsx:307 💰 [VAT] Tax settings API response: Object
+bilingual-purchase-form.tsx:572 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:592 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:395 === BilingualPurchaseForm Debug ===
+bilingual-purchase-form.tsx:396 existingCustomer from parent: Object
+bilingual-purchase-form.tsx:397 customerData from API: Object
+bilingual-purchase-form.tsx:398 crmCustomerData from API: Object
+bilingual-purchase-form.tsx:399 isLoadingCustomer: false
+bilingual-purchase-form.tsx:407 Using CRM customer data (most complete)
+bilingual-purchase-form.tsx:417 Customer object found: Object
+bilingual-purchase-form.tsx:418 Customer firstName: ABAS
+bilingual-purchase-form.tsx:419 Customer lastName: ABASI
+bilingual-purchase-form.tsx:420 Customer phone: 09124955173
+bilingual-purchase-form.tsx:421 Customer address: شهران، فلکه دوم، خ یکم، خ شیخ الاسلامی، کوچه اول، پ 18 واحد 10
+bilingual-purchase-form.tsx:422 Customer secondaryAddress: NAGwer Road, Qaryataq Village, Erbil, Iraq
+bilingual-purchase-form.tsx:423 Customer city: Erbil
+bilingual-purchase-form.tsx:424 Customer country: Iraq
+bilingual-purchase-form.tsx:425 Customer postalCode: 1968913751
+bilingual-purchase-form.tsx:428 Full name constructed: ABAS ABASI
+bilingual-purchase-form.tsx:442 Form data to reset: Object
+bilingual-purchase-form.tsx:444 Form reset completed
+bilingual-purchase-form.tsx:448 === End BilingualPurchaseForm Debug ===
+bilingual-purchase-form.tsx:572 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:592 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:356 Shipping rates API response: Object
+bilingual-purchase-form.tsx:358 Successfully loaded shipping rates: 29 methods
+bilingual-purchase-form.tsx:572 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:592 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:515 🚚 Shipping cost calculation: Object
+bilingual-purchase-form.tsx:549 🔄 No shipping method selected or no data, resetting cost
+bilingual-purchase-form.tsx:556 Shipping rates state: Object
+bilingual-purchase-form.tsx:572 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:592 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:572 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:592 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:515 🚚 Shipping cost calculation: Object
+bilingual-purchase-form.tsx:523 📦 Selected shipping rate: Object
+bilingual-purchase-form.tsx:530 💰 Free shipping check: Object
+bilingual-purchase-form.tsx:541 💳 Regular shipping cost applied: 11000
+bilingual-purchase-form.tsx:572 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:592 💳 [WALLET DEBUG] Complete wallet analysis: Object
+shop.tsx:208 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:212 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:213 🌟 [RATINGS DEBUG] Products with ratings: Array(6)
+bilingual-purchase-form.tsx:572 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:592 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:572 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:592 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:572 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:592 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:572 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:592 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:572 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:592 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:572 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:592 💳 [WALLET DEBUG] Complete wallet analysis: Object
+api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+shop.tsx:208 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:212 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:213 🌟 [RATINGS DEBUG] Products with ratings: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+bilingual-purchase-form.tsx:572 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.03, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0.6599999999999999, …}
+bilingual-purchase-form.tsx:592 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 0.74, canUseWallet: {…}, totalAmount: 11022.66, existingCustomer: true, …}
+bilingual-purchase-form.tsx:804 🚀 [ORDER SUBMIT] Submitting order with complete data: {endpoint: '/api/customers/orders', paymentMethod: 'wallet_partial', totalAmount: 11022.66, walletAmountUsed: 0, remainingAmount: 11022.66, …}
+bilingual-purchase-form.tsx:572 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.03, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0.6599999999999999, …}
+bilingual-purchase-form.tsx:592 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 0.74, canUseWallet: {…}, totalAmount: 11022.66, existingCustomer: true, …}
+bilingual-purchase-form.tsx:572 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.03, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0.6599999999999999, …}
+bilingual-purchase-form.tsx:592 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 0.74, canUseWallet: {…}, totalAmount: 11022.66, existingCustomer: true, …}
+bilingual-purchase-form.tsx:696 🎯 [ORDER SUCCESS] Order response received: {success: true, message: 'Order created successfully', orderId: 294, orderNumber: 'M2511214', paymentMethod: 'wallet_partial', …}
+bilingual-purchase-form.tsx:697 🎯 [ORDER SUCCESS] Response type: object
+bilingual-purchase-form.tsx:698 🎯 [ORDER SUCCESS] Response keys: (7) ['success', 'message', 'orderId', 'orderNumber', 'paymentMethod', 'totalAmount', 'walletAmountUsed']
+shop.tsx:208 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:212 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:213 🌟 [RATINGS DEBUG] Products with ratings: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:208 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:212 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:213 🌟 [RATINGS DEBUG] Products with ratings: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
