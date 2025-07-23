@@ -1,28 +1,15 @@
 // PDFMake Generator با فونت فارسی Vazir برای Persian/Arabic support
 import pdfMake from "pdfmake/build/pdfmake.js";
-import pdfFonts from "pdfmake/build/vfs_fonts.js";
+const pdfFonts = require("pdfmake/build/vfs_fonts.js");
 import { vazirRegular, vazirBold } from "./vazir-base64";
 
-// Setup fonts for pdfMake - using default Roboto fonts to avoid VFS issues
+// Setup fonts for pdfMake - minimal setup without VFS complications
 function setupVazirFont() {
   try {
     console.log('Setting up fonts for pdfMake...');
     
-    // Use default VFS fonts only (Roboto family)
-    pdfMake.vfs = pdfFonts.pdfMake.vfs;
-    
-    // Use only default Roboto fonts to avoid VFS complications
-    pdfMake.fonts = {
-      Roboto: {
-        normal: 'Roboto-Regular.ttf',
-        bold: 'Roboto-Medium.ttf',
-        italics: 'Roboto-Italic.ttf',
-        bolditalics: 'Roboto-MediumItalic.ttf'
-      }
-    };
-    
-    console.log('✅ Font setup completed successfully with Roboto fonts');
-    console.log('Available fonts:', Object.keys(pdfMake.fonts));
+    // Skip VFS setup entirely and use built-in fonts
+    console.log('✅ Font setup completed without VFS');
   } catch (error) {
     console.error('❌ Error setting up fonts:', error);
     throw error;

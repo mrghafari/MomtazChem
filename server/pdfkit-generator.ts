@@ -485,3 +485,117 @@ export async function generateCustomerReportPDF(customerData: any, orders: any[]
     }
   });
 }
+
+// Generate Analytics PDF using PDFKit
+export async function generateAnalyticsPDF(analyticsData: any, title: string = 'گزارش آمارها'): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    try {
+      console.log('📊 Generating analytics PDF with PDFKit...');
+      
+      // Create a PDF document
+      const doc = new PDFDocument({
+        size: 'A4',
+        margin: 50,
+        info: {
+          Title: title,
+          Author: 'Momtaz Chem',
+          Subject: 'Analytics Report'
+        }
+      });
+
+      const chunks: Buffer[] = [];
+      
+      doc.on('data', (chunk: Buffer) => {
+        chunks.push(chunk);
+      });
+
+      doc.on('end', () => {
+        const result = Buffer.concat(chunks);
+        console.log('✅ Analytics PDF generated successfully, size:', result.length);
+        resolve(result);
+      });
+
+      doc.on('error', (error: Error) => {
+        console.error('❌ PDF generation error:', error);
+        reject(error);
+      });
+
+      // Add content to PDF with fallback approach
+      try {
+        // Try to register custom fonts
+        const vazirRegularBuffer = Buffer.from(vazirRegular, 'base64');
+        const vazirBoldBuffer = Buffer.from(vazirBold, 'base64');
+        
+        doc.registerFont('VazirRegular', vazirRegularBuffer);
+        doc.registerFont('VazirBold', vazirBoldBuffer);
+        
+        doc.font('VazirBold');
+        
+        // Title
+        doc.fontSize(20)
+           .text(title, 50, 50, { align: 'center' });
+        
+        doc.font('VazirRegular');
+        
+        // Date
+        doc.fontSize(12)
+           .text(`تاریخ گزارش: ${new Date().toLocaleDateString('fa-IR')}`, 50, 90, { align: 'right' });
+        
+        let yPosition = 130;
+        
+        // Dashboard Statistics
+        doc.fontSize(16)
+           .font('VazirBold')
+           .text('آمار داشبورد', 50, yPosition, { align: 'right' });
+        
+        yPosition += 30;
+        doc.font('VazirRegular').fontSize(11);
+        
+        // Stats
+        if (analyticsData) {
+          doc.text(`کل مشتریان: ${analyticsData.totalCustomers || 0}`, 50, yPosition, { align: 'right' });
+          yPosition += 20;
+          doc.text(`سفارشات فعال: ${analyticsData.activeOrders || 0}`, 50, yPosition, { align: 'right' });
+          yPosition += 20;
+          doc.text(`فروش ماهانه: ${analyticsData.monthlySales || 0} دینار`, 50, yPosition, { align: 'right' });
+          yPosition += 20;
+          doc.text(`مشتریان آنلاین: ${analyticsData.onlineCustomers || 0}`, 50, yPosition, { align: 'right' });
+        }
+        
+        // Footer
+        doc.fontSize(10)
+           .text('شرکت ممتاز شیمی', 50, 750, { align: 'center' })
+           .text('www.momtazchem.com | info@momtazchem.com', 50, 765, { align: 'center' });
+        
+      } catch (fontError) {
+        console.warn('⚠️ Font registration failed, using default font:', fontError);
+        
+        // Fallback to default font
+        doc.fontSize(20)
+           .text('Analytics Report - Momtaz Chem', 50, 50, { align: 'center' });
+        
+        doc.fontSize(14)
+           .text('Dashboard Statistics:', 50, 100);
+        
+        let yPos = 130;
+        if (analyticsData) {
+          doc.fontSize(11)
+             .text(`Total Customers: ${analyticsData.totalCustomers || 0}`, 50, yPos);
+          yPos += 20;
+          doc.text(`Active Orders: ${analyticsData.activeOrders || 0}`, 50, yPos);
+          yPos += 20;
+          doc.text(`Monthly Sales: ${analyticsData.monthlySales || 0} IQD`, 50, yPos);
+          yPos += 20;
+          doc.text(`Online Customers: ${analyticsData.onlineCustomers || 0}`, 50, yPos);
+        }
+      }
+
+      // Finalize the PDF
+      doc.end();
+      
+    } catch (error) {
+      console.error('❌ Error in generateAnalyticsPDF:', error);
+      reject(error);
+    }
+  });
+}

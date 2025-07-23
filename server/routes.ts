@@ -17322,9 +17322,9 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       // Get dashboard statistics
       const dashboardStats = await crmStorage.getCrmDashboardStats();
       
-      // Generate PDF using PDFMake with Vazir font support
-      const { generateAnalyticsPDFWithPDFMake } = await import('./pdfmake-generator.js');
-      const pdfBuffer = await generateAnalyticsPDFWithPDFMake(dashboardStats, 'گزارش آمارها');
+      // Generate PDF using PDFKit for better reliability
+      const { generateAnalyticsPDF } = await import('./pdfkit-generator.js');
+      const pdfBuffer = await generateAnalyticsPDF(dashboardStats, 'گزارش آمارها');
 
       // Validate PDF buffer before sending
       if (!pdfBuffer || pdfBuffer.length === 0) {
