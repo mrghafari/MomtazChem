@@ -485,18 +485,22 @@ function FinanceOrders() {
   };
 
   // Handle accept order from order details modal
-  const handleAcceptOrder = (customerOrderId: number) => {
+  const handleAcceptOrder = () => {
+    if (!orderDetails || !selectedOrder) return;
+    console.log('🔄 [FINANCE] Accepting order from modal:', selectedOrder.id);
     approveMutation.mutate({ 
-      orderId: customerOrderId, 
+      orderId: selectedOrder.id, // USE ORDER MANAGEMENT ID FROM SELECTED ORDER
       notes: `سفارش تأیید شد از طریق مودال جزئیات - ${new Date().toLocaleDateString('en-US')}` 
     });
     setOrderDetailsModalOpen(false);
   };
 
   // Handle reject order from order details modal  
-  const handleRejectOrder = (customerOrderId: number) => {
+  const handleRejectOrder = () => {
+    if (!orderDetails || !selectedOrder) return;
+    console.log('🔄 [FINANCE] Rejecting order from modal:', selectedOrder.id);
     rejectMutation.mutate({ 
-      orderId: customerOrderId, 
+      orderId: selectedOrder.id, // USE ORDER MANAGEMENT ID FROM SELECTED ORDER
       notes: `سفارش رد شد از طریق مودال جزئیات - ${new Date().toLocaleDateString('en-US')}` 
     });
     setOrderDetailsModalOpen(false);
@@ -1252,7 +1256,7 @@ function FinanceOrders() {
                       ) : (
                         <>
                           <Button 
-                            onClick={() => handleAcceptOrder(orderDetails.customerOrderId)}
+                            onClick={handleAcceptOrder}
                             className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 text-lg"
                             disabled={orderDetails.currentStatus === 'financial_approved' || orderDetails.currentStatus === 'warehouse_pending'}
                           >
@@ -1260,7 +1264,7 @@ function FinanceOrders() {
                             قبول سفارش
                           </Button>
                           <Button 
-                            onClick={() => handleRejectOrder(orderDetails.customerOrderId)}
+                            onClick={handleRejectOrder}
                             variant="destructive"
                             className="px-8 py-3 text-lg"
                             disabled={orderDetails.currentStatus === 'financial_rejected'}

@@ -7340,12 +7340,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: true, 
         order: {
           id: order.id,
+          customerOrderId: order.id, // USE SAME ID FOR COMPATIBILITY WITH FRONTEND
           orderNumber: order.orderNumber,
           totalAmount: order.totalAmount,
           shippingCost: order.shippingCost,
           currency: order.currency,
           paymentMethod: order.paymentMethod,
           status: order.status,
+          currentStatus: order.status, // ADD CURRENT STATUS FOR MODAL
           createdAt: order.createdAt,
           vatAmount: order.vatAmount,
           surchargeAmount: order.surchargeAmount,
