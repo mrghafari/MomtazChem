@@ -331,11 +331,20 @@ function FinanceOrders() {
         title: "✅ سفارش تایید شد",
         description: "پرداخت تایید شد و سفارش به واحد انبار منتقل شد"
       });
+      // Invalidate all finance-related queries
       queryClient.invalidateQueries({ queryKey: ['/api/order-management/financial'] });
       queryClient.invalidateQueries({ queryKey: ['/api/financial/orders'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/financial/approved-orders'] });
+      
+      // Force refresh the data immediately
+      refetch();
+      refetchApproved();
+      
+      // Close modals and reset state
       setDialogOpen(false);
-      setOrderDetailsModalOpen(false); // Close both modals
+      setOrderDetailsModalOpen(false);
       setSelectedOrder(null);
+      setOrderDetails(null);
       setReviewNotes("");
     },
     onError: (error: any) => {
@@ -362,11 +371,20 @@ function FinanceOrders() {
         title: "❌ سفارش رد شد",
         description: "پرداخت رد شد و به قسمت سفارشات رد شده منتقل شد"
       });
+      // Invalidate all finance-related queries
       queryClient.invalidateQueries({ queryKey: ['/api/order-management/financial'] });
       queryClient.invalidateQueries({ queryKey: ['/api/financial/orders'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/financial/approved-orders'] });
+      
+      // Force refresh the data immediately
+      refetch();
+      refetchApproved();
+      
+      // Close modals and reset state
       setDialogOpen(false);
-      setOrderDetailsModalOpen(false); // Close both modals
+      setOrderDetailsModalOpen(false);
       setSelectedOrder(null);
+      setOrderDetails(null);
       setReviewNotes("");
     },
     onError: (error: any) => {
