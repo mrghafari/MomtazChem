@@ -6,6 +6,25 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Smart Orders Cache Refresh System Implementation (July 23, 2025)
+✅ **IMPLEMENTED: Selective orders section refresh when customer places new order and returns to profile**
+- **Issue Resolution**: User requested that only orders section should refresh when customer places order and returns to profile, not entire page reload
+- **Technical Implementation**: Added intelligent cache invalidation system in bilingual-purchase-form.tsx submitOrderMutation
+- **Cache Strategy**: 
+  - Added useQueryClient import to bilingual-purchase-form component
+  - Implemented selective cache invalidation in onSuccess callback of order submission
+  - Only invalidates ["/api/customers/orders"] and ["/api/customers/abandoned-carts"] queries
+  - Preserves all other customer data (profile info, wallet balance, etc.) without refresh
+- **User Experience Enhancement**: 
+  - Customer places order → Form closes → Profile shows immediately
+  - Only orders section displays new order without page reload
+  - Other profile sections remain unchanged and don't re-fetch data
+  - Maintains smooth shopping experience with minimal disruption
+- **Smart Refresh Logic**: Targets specific React Query cache keys instead of full page refresh
+- **Performance Benefit**: Reduces API calls and improves perceived performance by refreshing only relevant sections
+- **Impact**: Customers now see new orders immediately in profile without waiting for full page reload or losing their current browsing state
+- **Result**: Seamless order placement to profile viewing experience with intelligent cache management
+
 ### COMPLETED: Customer Purchase History Display System Fully Operational (July 23, 2025)
 ✅ **RESOLVED: Complete customer purchase history functionality restored and operational**
 - **Authentication Fixed**: Customer login system working properly with correct password hashing
