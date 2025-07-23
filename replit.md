@@ -6,7 +6,7 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
-### COMPLETED: Enhanced CRM Address Integration with Active Delivery Logic and Province Field (July 23, 2025)
+### COMPLETED: Enhanced CRM Address Integration with Active Delivery Logic and Province Field - Cart Management Integration (July 23, 2025)
 ✅ **IMPLEMENTED: Complete smart delivery address system with conditional logic for active address determination**
 - **CRM Default Logic**: CRM address and phone automatically serve as default values for all delivery fields
 - **Secondary Address Integration**: Added dedicated "آدرس دوم یا شماره موبایل متفاوت" section for logged-in users
@@ -27,6 +27,13 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
   - Toggle buttons to show/hide additional address and mobile fields
   - Clear labeling and Persian guidance text
   - Province field added to complete address collection
+- **Cart Management Integration**: Added second delivery address and recipient mobile forms to Cart Management section:
+  - Compact form layout optimized for sidebar display
+  - 3-column grid layout (Province | City | Postal Code) in Cart Management
+  - Smaller form inputs (text-xs, h-7) for space efficiency
+  - Persian labels and placeholder text
+  - Toggle buttons for show/hide functionality
+  - Only visible for logged-in users with CRM data
 - **Order Processing Enhancement**: Modified onSubmit function with sophisticated logic:
   - Determines active delivery address and phone based on priority system
   - Creates comprehensive `activeDeliveryInfo` object tracking field sources
@@ -48,7 +55,8 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
   - Conditional rendering based on authentication status
   - Persian UI with proper RTL text support
   - Console logging for debugging active delivery logic
-- **Status**: Advanced conditional delivery address system fully operational with smart address priority logic, visual feedback, and complete logistics integration
+  - Dual form locations: Main Purchase Order form + Cart Management sidebar
+- **Status**: Advanced conditional delivery address system fully operational with smart address priority logic, visual feedback, complete logistics integration, and Cart Management integration
 
 ### COMPLETED: Iraqi Geography Management Interface Implementation (July 23, 2025)
 ✅ **IMPLEMENTED: Complete Iraqi geography administration system with trilingual data support**
