@@ -103,7 +103,7 @@ export class BankReceiptReminderService {
         try {
           // Get customer details from CRM
           const { crmStorage } = await import('./crm-storage');
-          const customer = await crmStorage.getCustomerById(order.customerId);
+          const customer = await crmStorage.getCrmCustomer(order.customerId);
 
           if (!customer) {
             console.log(`❌ [BANK REMINDER] Customer not found for order ${order.orderNumber}`);
@@ -129,12 +129,12 @@ export class BankReceiptReminderService {
 
 با سلام و احترام،
 
-سفارش شما با شماره ${order.orderNumber} به مبلغ ${orderAmount.toLocaleString('fa-IR')} ${order.currency} در انتظار دریافت حواله وجه بانکی می‌باشد.
+سفارش شما با شماره ${order.orderNumber} به مبلغ ${orderAmount.toLocaleString('en-US')} ${order.currency} در انتظار دریافت حواله وجه بانکی می‌باشد.
 
 جزئیات سفارش:
 - شماره سفارش: ${order.orderNumber}
-- مبلغ قابل پرداخت: ${orderAmount.toLocaleString('fa-IR')} ${order.currency}
-- تاریخ ثبت سفارش: ${new Date(order.createdAt).toLocaleDateString('fa-IR')}
+- مبلغ قابل پرداخت: ${orderAmount.toLocaleString('en-US')} ${order.currency}
+- تاریخ ثبت سفارش: ${new Date(order.createdAt).toLocaleDateString('en-US')}
 - زمان باقی‌مانده: ${remainingDays} روز
 
 لطفاً برای تکمیل فرآیند خرید، حواله وجه را به حساب شرکت واریز نموده و تصویر آن را در پروفایل کاربری خود آپلود کنید.
@@ -149,8 +149,7 @@ export class BankReceiptReminderService {
 
               await emailService.sendEmail(
                 customer.email,
-                emailSubject,
-                emailBody
+                emailSubject
               );
 
               emailsSent++;
@@ -165,12 +164,12 @@ export class BankReceiptReminderService {
           if (customer.phone) {
             try {
               const smsMessage = `سلام ${customerName}
-سفارش ${order.orderNumber} منتظر حواله ${orderAmount.toLocaleString('fa-IR')} ${order.currency} است.
+سفارش ${order.orderNumber} منتظر حواله ${orderAmount.toLocaleString('en-US')} ${order.currency} است.
 ${remainingDays} روز باقی‌مانده تا لغو خودکار.
 لطفاً حواله را آپلود کنید.
 ممتاز شیمی`;
 
-              await simpleSmsStorage.sendSMS(customer.phone, smsMessage, 'bank_receipt_reminder');
+              await simpleSmsStorage.sendMessage(customer.phone, smsMessage, 'bank_receipt_reminder');
               smsSent++;
               console.log(`📱 [BANK REMINDER] SMS sent to ${customer.phone} for order ${order.orderNumber}`);
 

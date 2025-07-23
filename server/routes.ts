@@ -24140,7 +24140,7 @@ momtazchem.com
           receiptPath: filePath,
           paymentStatus: 'receipt_uploaded',
           status: 'confirmed', // تغییر وضعیت از pending/payment_grace_period به confirmed
-          notes: order.notes ? `${order.notes} | فیش بانکی آپلود شد در ${new Date().toLocaleString('fa-IR')}` : `فیش بانکی آپلود شد در ${new Date().toLocaleString('fa-IR')}`
+          notes: order.notes ? `${order.notes} | فیش بانکی آپلود شد در ${new Date().toLocaleString('en-US')}` : `فیش بانکی آپلود شد در ${new Date().toLocaleString('en-US')}`
         })
         .where(eq(customerOrders.id, order.id));
 
