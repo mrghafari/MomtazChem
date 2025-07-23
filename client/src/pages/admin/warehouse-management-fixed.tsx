@@ -215,11 +215,17 @@ const WarehouseManagementFixed: React.FC = () => {
 
     setSavingNotes(true);
     try {
-      await updateOrderMutation.mutateAsync({
-        orderId: selectedOrder.id,
-        status: selectedOrder.currentStatus, // Keep current status
-        notes: warehouseNotes
+      // Use the warehouse process endpoint without closing the form
+      await apiRequest(`/api/order-management/warehouse/${selectedOrder.id}/process`, {
+        method: 'PATCH',
+        body: { 
+          status: selectedOrder.currentStatus, // Keep current status
+          notes: warehouseNotes 
+        }
       });
+      
+      // Update the cache but don't close the dialog
+      queryClient.invalidateQueries({ queryKey: ['/api/order-management/warehouse'] });
       
       toast({
         title: "یادداشت ذخیره شد",
