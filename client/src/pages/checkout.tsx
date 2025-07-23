@@ -1653,7 +1653,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                     <FormItem>
                                       <FormLabel className="text-sm">استان</FormLabel>
                                       <FormControl>
-                                        <Input {...field} placeholder="Baghdad" />
+                                        <Input {...field} placeholder="بغداد" />
                                       </FormControl>
                                     </FormItem>
                                   )}
@@ -1665,7 +1665,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                     <FormItem>
                                       <FormLabel className="text-sm">شهر</FormLabel>
                                       <FormControl>
-                                        <Input {...field} placeholder="Erbil" />
+                                        <Input {...field} placeholder="اربیل" />
                                       </FormControl>
                                     </FormItem>
                                   )}
@@ -1867,7 +1867,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                   <FormItem>
                                     <FormLabel className="text-xs">استان</FormLabel>
                                     <FormControl>
-                                      <Input {...field} placeholder="Baghdad" className="text-xs h-7" />
+                                      <Input {...field} placeholder="بغداد" className="text-xs h-7" />
                                     </FormControl>
                                   </FormItem>
                                 )}
@@ -1879,7 +1879,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                   <FormItem>
                                     <FormLabel className="text-xs">شهر</FormLabel>
                                     <FormControl>
-                                      <Input {...field} placeholder="Erbil" className="text-xs h-7" />
+                                      <Input {...field} placeholder="اربیل" className="text-xs h-7" />
                                     </FormControl>
                                   </FormItem>
                                 )}
