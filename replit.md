@@ -6,6 +6,27 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: CRM Address Integration in Shopping Cart Interface (July 23, 2025)
+✅ **IMPLEMENTED: Complete CRM address display system in shopping cart for authenticated customers**
+- **Address Fields Display**: Shopping cart now shows comprehensive CRM address information including:
+  - استان (Province/State) - displays province or state from customer CRM data
+  - شهر (City) - customer's registered city information
+  - آدرس کامل (Complete Address) - full address text with proper RTL formatting
+  - کد پستی (Postal Code) - customer's postal code from CRM records
+- **Visual Design**: Professional green-themed address card with MapPin icon for clear identification
+- **Smart Data Mapping**: Enhanced data retrieval with fallbacks for province/state field compatibility
+- **Authentication Integration**: Address information only displays for logged-in customers with valid CRM data
+- **RTL Text Support**: Proper Persian text direction and formatting for address fields
+- **Data Safety**: Displays 'نامشخص' (Unknown) fallback for missing address components
+- **User Experience**: Integrated seamlessly into Purchase Order card without disrupting existing workflow
+- **Technical Implementation**:
+  - Enhanced checkout.tsx component with CRM address integration
+  - Conditional rendering based on authentication status and data availability
+  - Professional styling with proper spacing and typography
+  - Responsive design maintaining existing Purchase Order card functionality
+- **Business Impact**: Customers can now verify their delivery address information directly in shopping cart before checkout
+- **Status**: CRM address display fully operational in shopping cart interface for authenticated users
+
 ### COMPLETED: Iraqi Geography Management Interface Implementation (July 23, 2025)
 ✅ **IMPLEMENTED: Complete Iraqi geography administration system with trilingual data support**
 - **API Endpoints Creation**: Successfully implemented three working endpoints:

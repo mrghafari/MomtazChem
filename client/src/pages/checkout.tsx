@@ -243,11 +243,14 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   }
   
   // Fetch tax settings for dynamic VAT calculation
-  const { data: taxSettings } = useQuery({
+  const { data: taxSettingsResponse } = useQuery({
     queryKey: ['/api/tax-settings'],
     queryFn: () => apiRequest('/api/tax-settings', 'GET'),
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
+
+  // Extract tax settings array from response
+  const taxSettings = taxSettingsResponse?.data || [];
 
   // Calculate VAT and duties from database settings
   // Handle both VAT and vat types for backward compatibility
@@ -1062,6 +1065,35 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                     <div className="text-sm text-gray-600">
                       سفارش خرید شما شامل {cartItems.length} قلم محصول است
                     </div>
+                    
+                    {/* CRM Address Information - Only for logged in users */}
+                    {isUserLoggedIn && customerData?.customer && (
+                      <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg border border-green-200 dark:border-green-800">
+                        <div className="text-xs font-medium text-green-800 dark:text-green-300 mb-2 flex items-center gap-2">
+                          <MapPin className="w-3 h-3" />
+                          اطلاعات آدرس از CRM
+                        </div>
+                        <div className="space-y-1 text-xs text-green-700 dark:text-green-400">
+                          <div className="flex justify-between">
+                            <span>استان:</span>
+                            <span className="font-medium">{customerData.customer.province || customerData.customer.state || 'نامشخص'}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>شهر:</span>
+                            <span className="font-medium">{customerData.customer.city || 'نامشخص'}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>آدرس کامل:</span>
+                            <span className="font-medium text-right max-w-[60%]">{customerData.customer.address || 'نامشخص'}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>کد پستی:</span>
+                            <span className="font-medium">{customerData.customer.postalCode || 'نامشخص'}</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
                       <div className="text-xs font-medium text-blue-800 dark:text-blue-300 mb-2">
                         خلاصه سفارش
