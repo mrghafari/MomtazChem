@@ -165,6 +165,23 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Verified**: Tax calculation API endpoint now returns accurate VAT amounts matching business requirements
 - **Result**: Both new order creation and PDF generation now use accurate VAT calculations
 
+### COMPLETED: CRM Top Customers Data Source Fix - Switched to Live Calculation from Orders Table (July 23, 2025)
+✅ **RESOLVED: Fixed CRM Dashboard top customers to show accurate real-time data from order calculations**
+- **Issue**: CRM Dashboard was displaying incorrect top customers data due to using outdated stored values in crm_customers.total_spent (all showing 0.00)
+- **Root Cause**: CRM customers table had stored analytics fields (total_spent, total_orders_count) that were not being updated with actual order data
+- **Investigation**: Database analysis revealed live order data existed in customer_orders table with accurate amounts (ABAS ABASI: 613,966.79 IQD, Omid Mohammad: 212,102.59 IQD, etc.)
+- **Solution**: Modified getCrmDashboardStats() in crm-storage.ts to use live calculation from customer_orders table instead of stored values
+- **Technical Implementation**:
+  - Changed topCustomers query to JOIN crm_customers with customer_orders table
+  - Added real-time SUM(total_amount) calculation for accurate spending amounts  
+  - Used COUNT(orders.id) for precise order counts
+  - Maintained proper LEFT JOIN to include customers with zero orders
+  - Applied DESC NULLS LAST ordering for correct ranking by spending
+- **Data Accuracy**: Now shows authentic top customers: ABAS ABASI (613,966.79 IQD), Omid Mohammad (212,102.59 IQD), علی احمدی (110,100.00 IQD)
+- **Database Sources**: Changed from crm_customers stored fields to live customer_orders calculations for all top customer statistics
+- **Impact**: CRM Dashboard now displays accurate, real-time customer spending data matching actual order history
+- **Result**: Complete resolution of data inconsistency between stored CRM values and actual customer order amounts
+
 ### COMPLETED: Customer Profile Cost Breakdown Fix - Separated Items Subtotal from Shipping (July 22, 2025)
 ✅ **RESOLVED: Fixed incorrect subtotal calculation in customer profile order display**
 - **Issue**: Items subtotal was being calculated by subtracting shipping from total, resulting in incorrect amounts

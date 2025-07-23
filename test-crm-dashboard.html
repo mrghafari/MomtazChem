@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test CRM Dashboard API</title>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <h1>تست API داشبورد CRM</h1>
+    <button onclick="testCrmDashboard()">تست داشبورد CRM</button>
+    <div id="result"></div>
+
+    <script>
+        async function testCrmDashboard() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>در حال تست...</p>';
+            
+            try {
+                const response = await fetch('/api/crm/dashboard', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                console.log('CRM Dashboard Response:', data);
+                
+                if (data.success) {
+                    const topCustomers = data.data.topCustomers;
+                    resultDiv.innerHTML = `
+                        <h2>✅ داده‌های CRM Dashboard:</h2>
+                        <h3>مشتریان برتر:</h3>
+                        <table border="1" style="border-collapse: collapse; margin: 10px 0;">
+                            <tr>
+                                <th>ID</th>
+                                <th>نام</th>
+                                <th>ایمیل</th>
+                                <th>مجموع خرید</th>
+                                <th>تعداد سفارش</th>
+                            </tr>
+                            ${topCustomers.map(customer => `
+                                <tr>
+                                    <td>${customer.id}</td>
+                                    <td>${customer.name}</td>
+                                    <td>${customer.email}</td>
+                                    <td>${customer.totalSpent} IQD</td>
+                                    <td>${customer.totalOrders}</td>
+                                </tr>
+                            `).join('')}
+                        </table>
+                        <p><strong>کل مشتریان:</strong> ${data.data.totalCustomers}</p>
+                        <p><strong>مشتریان فعال:</strong> ${data.data.activeCustomers}</p>
+                        <p><strong>مشتریان جدید این ماه:</strong> ${data.data.newCustomersThisMonth}</p>
+                        <p><strong>کل درآمد:</strong> ${data.data.totalRevenue} IQD</p>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<h2>❌ خطا: ${data.message}</h2>`;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `<h2>❌ خطا در اتصال: ${error.message}</h2>`;
+            }
+        }
+    </script>
+</body>
+</html>
