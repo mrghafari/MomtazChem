@@ -24133,12 +24133,14 @@ momtazchem.com
       // ایجاد مسیر نسبی برای ذخیره در دیتابیس
       const filePath = `/uploads/receipts/${file.filename}`;
 
-      // به‌روزرسانی سفارش با مسیر فیش بانکی
+      // به‌روزرسانی سفارش با مسیر فیش بانکی و تغییر وضعیت از موقت به عادی
       await customerDb
         .update(customerOrders)
         .set({
           receiptPath: filePath,
-          paymentStatus: 'receipt_uploaded'
+          paymentStatus: 'receipt_uploaded',
+          status: 'confirmed', // تغییر وضعیت از pending/payment_grace_period به confirmed
+          notes: order.notes ? `${order.notes} | فیش بانکی آپلود شد در ${new Date().toLocaleString('fa-IR')}` : `فیش بانکی آپلود شد در ${new Date().toLocaleString('fa-IR')}`
         })
         .where(eq(customerOrders.id, order.id));
 
@@ -24179,19 +24181,22 @@ momtazchem.com
         console.log('Warning: Could not create financial transaction, but receipt uploaded successfully');
       }
 
-      console.log(`Receipt uploaded for order ${orderId}:`, {
+      console.log(`✅ [ORDER STATUS] Order ${orderId} status changed from temporary to confirmed after receipt upload:`, {
         fileName: file.originalname,
         filePath,
-        fileSize: file.size
+        fileSize: file.size,
+        previousStatus: order.status,
+        newStatus: 'confirmed'
       });
 
       res.json({ 
         success: true, 
-        message: 'فیش بانکی با موفقیت آپلود شد',
+        message: 'فیش بانکی با موفقیت آپلود شد و سفارش شما تأیید شد',
         data: { 
           filePath,
           fileName: file.originalname,
-          orderId: parseInt(orderId)
+          orderId: parseInt(orderId),
+          orderStatus: 'confirmed'
         }
       });
 

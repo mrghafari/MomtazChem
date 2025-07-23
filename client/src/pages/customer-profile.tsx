@@ -490,7 +490,7 @@ const CustomerProfile = () => {
                               {formatDate(order.createdAt)}
                             </p>
                             
-                            {/* نمایش پیام منتظر ارسال حواله و کنتور زمانی برای سفارشات بانکی 3 روزه */}
+                            {/* نمایش پیام منتظر ارسال حواله و کنتور زمانی برای سفارشات بانکی 3 روزه بدون رسید */}
                             {order.paymentMethod === 'واریز بانکی با مهلت 3 روزه' && 
                              (order.status === 'pending' || order.status === 'payment_grace_period') &&
                              !order.receiptPath && (
@@ -621,7 +621,8 @@ const CustomerProfile = () => {
                         <div className="mt-4 pt-3 border-t border-gray-200 flex gap-2 flex-wrap">
                           {/* دکمه‌های مدیریت سفارش فقط برای سفارشات بانکی 3 روزه */}
                           {(order.status === 'pending' || order.status === 'payment_grace_period') && 
-                           order.paymentMethod === 'واریز بانکی با مهلت 3 روزه' && (
+                           order.paymentMethod === 'واریز بانکی با مهلت 3 روزه' && 
+                           !order.receiptPath && (
                             <>
                               {/* دکمه آپلود رسید بانکی */}
                               <Button
@@ -634,8 +635,7 @@ const CustomerProfile = () => {
                               </Button>
                               
                               {/* دکمه حذف سفارش موقت */}
-                              {(!order.paymentStatus || order.paymentStatus === 'pending' || order.paymentStatus === 'unpaid') &&
-                               !order.receiptPath && (
+                              {(!order.paymentStatus || order.paymentStatus === 'pending' || order.paymentStatus === 'unpaid') && (
                                 <Button
                                   size="sm"
                                   variant="destructive"
@@ -647,6 +647,21 @@ const CustomerProfile = () => {
                                 </Button>
                               )}
                             </>
+                          )}
+                          
+                          {/* نمایش وضعیت تأیید شده برای سفارشات با رسید آپلود شده */}
+                          {order.paymentMethod === 'واریز بانکی با مهلت 3 روزه' && 
+                           order.receiptPath && 
+                           order.status === 'confirmed' && (
+                            <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                              <p className="text-sm text-green-800 font-medium flex items-center gap-1">
+                                <AlertCircle className="w-4 h-4" />
+                                ✅ حواله بانکی آپلود شده - سفارش تأیید شد
+                              </p>
+                              <p className="text-xs text-green-700 mt-1">
+                                سفارش شما از حالت موقت خارج شده و در حال پردازش است
+                              </p>
+                            </div>
                           )}
                           
                           {/* دکمه دانلود فاکتور/پیش فاکتور برای همه سفارشات */}
