@@ -560,6 +560,62 @@ export class OrderManagementStorage implements IOrderManagementStorage {
     return this.getOrdersByDepartment('financial');
   }
 
+  // Add customer order to order management system
+  async addCustomerOrderToManagement(customerOrderId: number): Promise<OrderManagement> {
+    console.log(`📋 [ORDER MANAGEMENT] Adding customer order ${customerOrderId} to management system`);
+    
+    // Check if already exists
+    const existing = await this.getOrderManagementByCustomerOrderId(customerOrderId);
+    if (existing) {
+      console.log(`📋 [ORDER MANAGEMENT] Order ${customerOrderId} already exists in management system`);
+      return existing;
+    }
+
+    // Create new order management entry
+    const orderData: InsertOrderManagement = {
+      customerOrderId,
+      currentStatus: 'pending' as OrderStatus,
+      deliveryMethod: 'courier',
+      weightUnit: 'kg'
+    };
+
+    const newOrder = await this.createOrderManagement(orderData);
+    console.log(`✅ [ORDER MANAGEMENT] Added customer order ${customerOrderId} to management system with ID ${newOrder.id}`);
+    return newOrder;
+  }
+
+  // Migrate all customer orders to order management system
+  async migrateCustomerOrdersToManagement(): Promise<void> {
+    console.log(`🔄 [MIGRATION] Starting customer orders migration to order management system`);
+    
+    // Get all customer orders that are not in order management using isNull
+    const customerOrdersWithoutManagement = await db
+      .select({
+        id: customerOrders.id,
+        orderNumber: customerOrders.orderNumber,
+        status: customerOrders.status,
+        paymentStatus: customerOrders.paymentStatus
+      })
+      .from(customerOrders)
+      .leftJoin(orderManagement, eq(customerOrders.id, orderManagement.customerOrderId))
+      .where(sql`${orderManagement.id} IS NULL`);
+
+    console.log(`🔄 [MIGRATION] Found ${customerOrdersWithoutManagement.length} customer orders to migrate`);
+
+    let migratedCount = 0;
+    for (const customerOrder of customerOrdersWithoutManagement) {
+      try {
+        await this.addCustomerOrderToManagement(customerOrder.id);
+        migratedCount++;
+        console.log(`✅ [MIGRATION] Migrated order ${customerOrder.orderNumber} (${migratedCount}/${customerOrdersWithoutManagement.length})`);
+      } catch (error) {
+        console.error(`❌ [MIGRATION] Failed to migrate order ${customerOrder.orderNumber}:`, error);
+      }
+    }
+
+    console.log(`🎉 [MIGRATION] Completed migration: ${migratedCount}/${customerOrdersWithoutManagement.length} orders migrated`);
+  }
+
   // Get orders that have been approved by financial and transferred to warehouse
   async getFinancialApprovedOrders(): Promise<any[]> {
     console.log('🔍 [FINANCIAL APPROVED] Getting orders transferred to warehouse...');

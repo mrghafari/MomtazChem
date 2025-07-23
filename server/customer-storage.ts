@@ -182,6 +182,14 @@ export class CustomerStorage implements ICustomerStorage {
       })
       .returning();
     
+    // Add customer order to order management system for financial processing
+    try {
+      await orderManagementStorage.addCustomerOrderToManagement(order.id);
+      console.log(`✅ [ORDER CREATION] Customer order ${order.orderNumber} added to management system`);
+    } catch (error) {
+      console.error(`❌ [ORDER CREATION] Failed to add order ${order.orderNumber} to management system:`, error);
+    }
+    
     // Update customer metrics after creating order
     if (order.customerId) {
       await this.updateCustomerMetricsAfterOrder(order.customerId);

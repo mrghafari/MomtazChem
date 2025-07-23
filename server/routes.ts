@@ -20945,6 +20945,24 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     }
   });
 
+  // Migrate customer orders to order management system
+  app.post('/api/admin/migrate-customer-orders', requireAuth, async (req, res) => {
+    try {
+      console.log('🔄 [ADMIN] Starting customer orders migration...');
+      await orderManagementStorage.migrateCustomerOrdersToManagement();
+      res.json({ 
+        success: true, 
+        message: "سفارشات مشتریان با موفقیت به سیستم مدیریت سفارشات منتقل شدند" 
+      });
+    } catch (error) {
+      console.error('Error migrating customer orders:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در انتقال سفارشات: " + error.message 
+      });
+    }
+  });
+
   // Get approved orders that have been transferred to warehouse
   app.get('/api/financial/approved-orders', async (req, res) => {
     try {

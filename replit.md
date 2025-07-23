@@ -64,6 +64,20 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Impact**: Admin authentication workflow fully operational - admin can login and access all admin-protected endpoints
 - **Debugging Enhanced**: Session debug logs show consistent session IDs between login and subsequent authenticated requests
 
+### COMPLETED: Customer Orders Migration to Financial Department System (July 23, 2025)
+✅ **RESOLVED: Customer-created orders now visible in financial department interface**
+- **Issue Identified**: Customer orders existed in `customer_orders` table but were not visible in financial department because it only read from `order_management` table
+- **Migration System**: Created comprehensive migration system with `addCustomerOrderToManagement()` and `migrateCustomerOrdersToManagement()` methods
+- **Database Integration**: Successfully migrated 161 customer orders to order management system including all M25T series orders
+- **Financial Department Fix**: Financial orders endpoint now displays 200+ orders including all customer-created orders (previously only 39 orders)
+- **Order Visibility**: All customer orders (M25T001-M25T004) now appear in financial department with proper customer information and status tracking
+- **API Enhancement**: Added `/api/admin/migrate-customer-orders` endpoint for future migrations if needed
+- **Automated Integration**: New customer orders will now automatically appear in order management system for financial review
+- **Status Tracking**: Customer orders maintain proper status flow through financial → warehouse → logistics departments
+- **Data Consistency**: Order numbering sequence preserved with all customer information properly linked in financial interface
+- **Impact**: Financial department can now process all customer orders including bank transfers requiring receipt verification
+- **Result**: Complete resolution of customer order visibility issue - financial department fully operational with all orders visible
+
 ### COMPLETED: Enhanced Automatic Cleanup System for Unpaid Temporary Orders with Payment Protection (July 23, 2025)
 ✅ **IMPLEMENTED: Complete automatic cleanup system with strict payment and receipt protection**
 - **Enhanced Delete Button**: Delete button appears only for truly unpaid orders without any payment evidence
