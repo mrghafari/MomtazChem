@@ -1416,6 +1416,12 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                 <span>آدرس فعال:</span>
                                 <span className="font-medium text-right max-w-[60%]">{form.watch('secondDeliveryAddress')}</span>
                               </div>
+                              {form.watch('secondDeliveryProvince') && (
+                                <div className="flex justify-between">
+                                  <span>استان:</span>
+                                  <span className="font-medium">{form.watch('secondDeliveryProvince')}</span>
+                                </div>
+                              )}
                               {form.watch('secondDeliveryCity') && (
                                 <div className="flex justify-between">
                                   <span>شهر:</span>
@@ -1502,7 +1508,23 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                               )}
                             />
                           </div>
-                          <div className="grid grid-cols-2 gap-2">
+                          <div className="grid grid-cols-3 gap-2">
+                            <div>
+                              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Province
+                              </label>
+                              <FormField
+                                control={form.control}
+                                name="secondDeliveryProvince"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormControl>
+                                      <Input {...field} placeholder="Baghdad" className="text-sm" />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
                             <div>
                               <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 City
@@ -1513,7 +1535,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                 render={({ field }) => (
                                   <FormItem>
                                     <FormControl>
-                                      <Input {...field} placeholder="تهران" className="text-sm" />
+                                      <Input {...field} placeholder="Erbil" className="text-sm" />
                                     </FormControl>
                                   </FormItem>
                                 )}
