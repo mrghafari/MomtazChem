@@ -25,7 +25,7 @@ import { widgetRecommendationStorage } from "./widget-recommendation-storage";
 import { orderManagementStorage } from "./order-management-storage";
 import { walletStorage } from "./wallet-storage";
 import { requireDepartment, attachUserDepartments } from "./department-auth";
-import { insertCustomerInquirySchema, insertEmailTemplateSchema, insertCrmCustomerSchema as insertCustomerSchema, insertCustomerAddressSchema, walletRechargeRequests, customerOrders, orderItems } from "@shared/schema";
+import { insertCustomerInquirySchema, insertEmailTemplateSchema, insertCustomerSchema, insertCustomerAddressSchema, walletRechargeRequests, customerOrders, orderItems } from "@shared/customer-schema";
 import { customerDb, customerPool } from "./customer-db";
 import { insertEmailCategorySchema, insertSmtpSettingSchema, insertEmailRecipientSchema, smtpConfigSchema, emailLogs, emailCategories, smtpSettings, emailRecipients, categoryEmailAssignments, insertCategoryEmailAssignmentSchema } from "@shared/email-schema";
 import { insertShopProductSchema, insertShopCategorySchema, paymentGateways, orders, shopProducts } from "@shared/shop-schema";
@@ -10495,38 +10495,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           try {
             const product = await shopStorage.getShopProductById(parseInt(productId as string));
             if (product) {
-              // Create complete product snapshot to freeze product data at order time
-              const productSnapshot = {
-                id: product.id,
-                name: product.name,
-                sku: product.sku,
-                price: product.price,
-                description: product.description,
-                technicalName: product.technicalName,
-                specifications: product.specifications,
-                category: product.category,
-                brand: product.brand,
-                model: product.model,
-                origin: product.origin,
-                packageSize: product.packageSize,
-                unit: product.unit,
-                purityGrade: product.purityGrade,
-                storageConditions: product.storageConditions,
-                safetyLevel: product.safetyLevel,
-                applications: product.applications,
-                casNumber: product.casNumber,
-                hsCode: product.hsCode,
-                stockQuantity: product.stockQuantity,
-                isActive: product.isActive,
-                createdAt: product.createdAt,
-                updatedAt: product.updatedAt,
-                // Snapshot metadata
-                snapshotCreatedAt: new Date().toISOString(),
-                orderNumber: orderNumber,
-                frozenPrice: product.price,
-                frozenStock: product.stockQuantity
-              };
-
               await customerStorage.createOrderItem({
                 orderId: order.id,
                 productId: parseInt(productId as string),
@@ -10535,10 +10503,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 quantity: (quantity as number).toString(),
                 unitPrice: product.price || "0",
                 totalPrice: (parseFloat(product.price || "0") * (quantity as number)).toString(),
-                unit: product.unit || "units",
-                specifications: product.specifications || null,
-                notes: `فریز شده در سفارش ${orderNumber} - قیمت: ${product.price}`,
-                productSnapshot: productSnapshot // Store complete frozen product data
               });
 
               // Update product stock with batch tracking
@@ -27177,7 +27141,7 @@ momtazchem.com
     try {
       const { db } = await import("./db");
       const { orderManagement, orderStatusHistory } = await import("../shared/order-management-schema");
-      const { customerOrders } = await import("@shared/schema");
+      const { customerOrders } = await import("../shared/customer-schema");
       const { crmCustomers } = await import("../shared/schema");
       const { eq } = await import("drizzle-orm");
       
@@ -27260,7 +27224,7 @@ momtazchem.com
     try {
       const { db } = await import("./db");
       const { orderManagement, orderStatusHistory } = await import("../shared/order-management-schema");
-      const { customerOrders } = await import("@shared/schema");
+      const { customerOrders } = await import("../shared/customer-schema");
       const { crmCustomers } = await import("../shared/schema");
       const { eq } = await import("drizzle-orm");
       
@@ -27448,7 +27412,7 @@ momtazchem.com
       console.log(`📦 [WAREHOUSE] Processing approval for order ${orderId}`);
 
       // Get order details with customer information first
-      const { customerOrders } = await import("@shared/schema");
+      const { customerOrders } = await import("../shared/customer-schema");
       const { crmCustomers } = await import("../shared/crm-schema");
       
       const orderDetailsQuery = await db
@@ -27685,7 +27649,7 @@ momtazchem.com
     try {
       const { db } = await import("./db");
       const { orderManagement } = await import("../shared/order-management-schema");
-      const { customerOrders } = await import("@shared/schema");
+      const { customerOrders } = await import("../shared/customer-schema");
       const { orderItems } = await import("../shared/shop-schema");
       const { crmCustomers } = await import("../shared/schema");
       const { eq, inArray } = await import("drizzle-orm");
@@ -27787,7 +27751,7 @@ momtazchem.com
 
       // Get customer phone number for SMS
       const { crmCustomers } = await import("../shared/schema");
-      const { customerOrders } = await import("@shared/schema");
+      const { customerOrders } = await import("../shared/customer-schema");
       const orderResult = await db
         .select()
         .from(customerOrders)
@@ -27848,7 +27812,7 @@ momtazchem.com
     try {
       const { db } = await import("./db");
       const { orderManagement } = await import("../shared/order-management-schema");
-      const { customerOrders } = await import("@shared/schema");
+      const { customerOrders } = await import("../shared/customer-schema");
       const { orderItems } = await import("../shared/shop-schema");
       const { crmCustomers } = await import("../shared/schema");
       const { eq, inArray } = await import("drizzle-orm");
@@ -32326,9 +32290,9 @@ momtazchem.com
       const { db } = await import('./db');
       const { eq, and, gt } = await import('drizzle-orm');
       const { orderManagement } = await import('../shared/order-management-schema');
-      const { customerOrders } = await import('@shared/schema');
+      const { customerOrders } = await import('../shared/customer-schema');
       const { crmCustomers } = await import('../shared/schema');
-      const { paymentReceipts } = await import('@shared/schema');
+      const { paymentReceipts } = await import('../shared/customer-schema');
       
       const result = await db.select({
         // Order Management fields

@@ -1,14 +1,14 @@
 import {
-  crmCustomers as customers,
+  customers,
   customerInquiries,
   inquiryResponses,
-  type CrmCustomer as Customer,
-  type InsertCrmCustomer as InsertCustomer,
+  type Customer,
+  type InsertCustomer,
   type CustomerInquiry,
   type InsertCustomerInquiry,
   type InquiryResponse,
   type InsertInquiryResponse,
-} from "@shared/schema";
+} from "@shared/customer-schema";
 import { customerDb } from "./customer-db";
 import { eq, desc, and, or, ilike, count, sql } from "drizzle-orm";
 import bcrypt from "bcryptjs";

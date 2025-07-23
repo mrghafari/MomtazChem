@@ -1,6 +1,6 @@
 import { eq, and, desc } from "drizzle-orm";
 import { customerDb } from "./customer-db.js";
-import { customerAddresses, type InsertCustomerAddress, type CustomerAddress } from "@shared/schema";
+import { customerAddresses, type InsertCustomerAddress, type CustomerAddress } from "../shared/customer-schema.js";
 
 export interface ICustomerAddressStorage {
   // Address management

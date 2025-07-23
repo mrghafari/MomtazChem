@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -214,7 +214,6 @@ const getCurrentLocation = (): Promise<{latitude: number, longitude: number}> =>
 export default function BilingualPurchaseForm({ cart, products, onOrderComplete, onClose, existingCustomer, onUpdateQuantity, onRemoveItem }: PurchaseFormProps) {
   const { toast } = useToast();
   const { language, direction } = useLanguage();
-  const queryClient = useQueryClient();
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [locationData, setLocationData] = useState<{latitude: number, longitude: number} | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<'online_payment' | 'wallet_full' | 'wallet_partial' | 'bank_receipt'>('online_payment');
@@ -697,17 +696,6 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       console.log('🎯 [ORDER SUCCESS] Order response received:', response);
       console.log('🎯 [ORDER SUCCESS] Response type:', typeof response);
       console.log('🎯 [ORDER SUCCESS] Response keys:', Object.keys(response || {}));
-      
-      // 🔄 Smart Cache Invalidation - Only refresh orders section in customer profile
-      try {
-        // Invalidate customer orders cache for smart refresh (only orders section, not entire page)
-        queryClient.invalidateQueries({ queryKey: ["/api/customers/orders"] });
-        queryClient.invalidateQueries({ queryKey: ["/api/customers/abandoned-carts"] });
-        
-        console.log('🔄 [CACHE REFRESH] Customer orders cache invalidated - only orders section will refresh');
-      } catch (error) {
-        console.log('⚠️ [CACHE REFRESH] Error invalidating cache:', error);
-      }
       
       // Check if payment gateway redirect is needed
       if (response.redirectToPayment && response.paymentGatewayUrl) {

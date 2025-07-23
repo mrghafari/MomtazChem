@@ -1,5 +1,5 @@
 import {
-  crmCustomers as customers,
+  customers,
   customerOrders,
   orderItems,
   customerInquiries,
@@ -7,8 +7,8 @@ import {
   customerVerificationCodes,
   customerEmailVerificationCodes,
   customerVerificationSettings,
-  type CrmCustomer as Customer,
-  type InsertCrmCustomer as InsertCustomer,
+  type Customer,
+  type InsertCustomer,
   type CustomerOrder,
   type InsertCustomerOrder,
   type OrderItem,
@@ -26,7 +26,7 @@ import {
   emailTemplates,
   type EmailTemplate,
   type InsertEmailTemplate,
-} from "@shared/schema";
+} from "@shared/customer-schema";
 import { customerDb } from "./customer-db";
 import { eq, desc, and, or, ilike, count, sql, sum } from "drizzle-orm";
 import bcrypt from "bcryptjs";
@@ -216,23 +216,12 @@ export class CustomerStorage implements ICustomerStorage {
     abandonedCarts: any[],
     hasAbandonedCarts: boolean
   }> {
-    // Use direct SQL query to avoid schema mismatch issues
-    const { pool } = await import('./db');
-    const result = await pool.query(`
-      SELECT 
-        id, order_number, customer_id, status, total_amount, currency, priority,
-        payment_status, payment_method, shipping_address, billing_address, notes,
-        guest_email, guest_name, tracking_number, estimated_delivery, actual_delivery,
-        internal_notes, shipped_at, carrier, delivered_at, receipt_path,
-        delivery_method, delivery_notes, recipient_name, recipient_phone,
-        recipient_address, shipping_cost, vat_rate, vat_amount, surcharge_rate,
-        surcharge_amount, created_at, updated_at
-      FROM customer_orders 
-      WHERE customer_id = $1 
-      ORDER BY created_at DESC
-    `, [customerId]);
-    
-    const allOrders = result.rows;
+    // Get all orders for the customer
+    const allOrders = await customerDb
+      .select()
+      .from(customerOrders)
+      .where(eq(customerOrders.customerId, customerId))
+      .orderBy(desc(customerOrders.createdAt));
 
     const totalOrders = allOrders.length;
 
@@ -367,18 +356,10 @@ export class CustomerStorage implements ICustomerStorage {
   }
 
   async getOrderItems(orderId: number): Promise<OrderItem[]> {
-    // Use direct SQL to avoid schema mismatch issues
-    const { pool } = await import('./db');
-    const result = await pool.query(`
-      SELECT 
-        id, order_id, product_id, product_name, product_sku,
-        quantity, unit_price, total_price, product_snapshot, created_at,
-        unit, specifications, notes
-      FROM order_items 
-      WHERE order_id = $1
-    `, [orderId]);
-    
-    return result.rows;
+    return await customerDb
+      .select()
+      .from(orderItems)
+      .where(eq(orderItems.orderId, orderId));
   }
 
   async updateOrderItem(id: number, itemUpdate: Partial<InsertOrderItem>): Promise<OrderItem> {
@@ -408,10 +389,12 @@ export class CustomerStorage implements ICustomerStorage {
 
       console.log(`📊 [COMPLETE HISTORY] Found ${orders.length} total orders (including deleted)`);
 
-      // Get order items for all orders using the fixed getOrderItems method
+      // Get order items for all orders
       const ordersWithItems = await Promise.all(
         orders.map(async (order) => {
-          const items = await this.getOrderItems(order.id);
+          const items = await customerDb.select()
+            .from(orderItems)
+            .where(eq(orderItems.orderId, order.id));
 
           return {
             ...order,

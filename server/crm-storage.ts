@@ -12,7 +12,7 @@ import {
   type CustomerActivity,
   type InsertCustomerSegment,
   type CustomerSegment
-} from "@shared/schema";
+} from "../shared/customer-schema";
 import {
   crmCustomers,
   type CrmCustomer,
@@ -485,31 +485,31 @@ export class CrmStorage implements ICrmStorage {
     }>;
     recentActivities: CustomerActivity[];
   }> {
-    // Get total customers from crm_customers
-    const [totalCustomersResult] = await crmDb
+    // Get total customers
+    const [totalCustomersResult] = await customerDb
       .select({ count: count() })
-      .from(crmCustomers)
-      .where(eq(crmCustomers.isActive, true));
+      .from(customers)
+      .where(eq(customers.isActive, true));
     
     // Get active customers (ordered in last 90 days)
-    const [activeCustomersResult] = await crmDb
+    const [activeCustomersResult] = await customerDb
       .select({ count: count() })
-      .from(crmCustomers)
+      .from(customers)
       .where(
         and(
-          eq(crmCustomers.isActive, true),
-          sql`${crmCustomers.lastOrderDate} > NOW() - INTERVAL '90 days'`
+          eq(customers.isActive, true),
+          sql`${customers.lastOrderDate} > NOW() - INTERVAL '90 days'`
         )
       );
     
     // Get new customers this month
-    const [newCustomersResult] = await crmDb
+    const [newCustomersResult] = await customerDb
       .select({ count: count() })
-      .from(crmCustomers)
+      .from(customers)
       .where(
         and(
-          eq(crmCustomers.isActive, true),
-          sql`${crmCustomers.createdAt} > DATE_TRUNC('month', NOW())`
+          eq(customers.isActive, true),
+          sql`${customers.createdAt} > DATE_TRUNC('month', NOW())`
         )
       );
     
@@ -521,31 +521,37 @@ export class CrmStorage implements ICrmStorage {
       })
       .from(customerOrders);
     
-    // Get top customers based on actual order data from crm_customers
-    const topCustomers = await crmDb
+    // Get top customers based on actual order data
+    const topCustomers = await customerDb
       .select({
-        id: crmCustomers.id,
-        name: sql<string>`${crmCustomers.firstName} || ' ' || ${crmCustomers.lastName}`,
-        email: crmCustomers.email,
+        id: customers.id,
+        name: sql<string>`${customers.firstName} || ' ' || ${customers.lastName}`,
+        email: customers.email,
         totalSpent: sql<string>`COALESCE(SUM(${customerOrders.totalAmount}), 0)`,
         totalOrders: sql<number>`COUNT(${customerOrders.id})`,
       })
-      .from(crmCustomers)
-      .leftJoin(customerOrders, eq(crmCustomers.id, customerOrders.customerId))
-      .where(eq(crmCustomers.isActive, true))
-      .groupBy(crmCustomers.id, crmCustomers.firstName, crmCustomers.lastName, crmCustomers.email)
+      .from(customers)
+      .leftJoin(customerOrders, eq(customers.id, customerOrders.customerId))
+      .where(eq(customers.isActive, true))
+      .groupBy(customers.id, customers.firstName, customers.lastName, customers.email)
       .orderBy(sql`SUM(${customerOrders.totalAmount}) DESC NULLS LAST`)
       .limit(10);
     
-    // Get customers by type using crm_customers with better categorization
-    const customersByType = await crmDb
+    // Get customers by type (using available customer_type if exists, otherwise default categorization)
+    const customersByType = await customerDb
       .select({
-        type: crmCustomers.customerType,
+        type: sql<string>`CASE 
+          WHEN ${customers.company} IS NOT NULL AND ${customers.company} != '' THEN 'business'
+          ELSE 'individual'
+        END`,
         count: count()
       })
-      .from(crmCustomers)
-      .where(eq(crmCustomers.isActive, true))
-      .groupBy(crmCustomers.customerType);
+      .from(customers)
+      .where(eq(customers.isActive, true))
+      .groupBy(sql`CASE 
+        WHEN ${customers.company} IS NOT NULL AND ${customers.company} != '' THEN 'business'
+        ELSE 'individual'
+      END`);
     
     // Get recent activities
     const recentActivities = await customerDb
@@ -639,7 +645,22 @@ export class CrmStorage implements ICrmStorage {
 
 
 
+  async logCustomerActivity(activity: InsertCustomerActivity): Promise<CustomerActivity> {
+    const [insertedActivity] = await customerDb
+      .insert(customerActivities)
+      .values(activity)
+      .returning();
+    return insertedActivity;
+  }
 
+  async getCustomerActivities(customerId: number, limit = 50): Promise<CustomerActivity[]> {
+    return await customerDb
+      .select()
+      .from(customerActivities)
+      .where(eq(customerActivities.customerId, customerId))
+      .orderBy(desc(customerActivities.createdAt))
+      .limit(limit);
+  }
 
   async getRecentCustomerActivities(limit = 20): Promise<CustomerActivity[]> {
     return await customerDb

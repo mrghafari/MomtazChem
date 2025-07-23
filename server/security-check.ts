@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { users, crmCustomers as customers } from "@shared/schema";
+import { users, customers } from "@shared/schema";
 import { count, sql, and, gte } from "drizzle-orm";
 
 interface SecurityCheckResult {
