@@ -98,6 +98,10 @@ const LogisticsManagement = () => {
   // States for delivery code resending
   const [resendingCodes, setResendingCodes] = useState<{[orderId: number]: boolean}>({});
   const [resentCodes, setResentCodes] = useState<{[orderId: number]: boolean}>({});
+  
+  // States for order details modal
+  const [selectedOrder, setSelectedOrder] = useState<LogisticsOrder | null>(null);
+  const [isOrderDetailsOpen, setIsOrderDetailsOpen] = useState(false);
 
   const [selectedCity, setSelectedCity] = useState<string>('');
   const [selectedProvince, setSelectedProvince] = useState<string>('');
@@ -184,6 +188,12 @@ const LogisticsManagement = () => {
     };
     const config = statusMap[status] || { color: 'bg-gray-500', text: status };
     return <Badge className={config.color}>{config.text}</Badge>;
+  };
+
+  // Show order details in modal
+  const handleShowOrderDetails = (order: LogisticsOrder) => {
+    setSelectedOrder(order);
+    setIsOrderDetailsOpen(true);
   };
 
   // Send or resend delivery code SMS using template #3
@@ -278,11 +288,15 @@ const LogisticsManagement = () => {
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-4">
-                    {/* Customer Info Block */}
-                    <div className="bg-white rounded-lg p-3 border border-green-200">
+                    {/* Customer Info Block - Clickable */}
+                    <div 
+                      className="bg-white rounded-lg p-3 border border-green-200 cursor-pointer hover:bg-green-50 hover:border-green-300 transition-all duration-200"
+                      onClick={() => handleShowOrderDetails(order)}
+                    >
                       <h5 className="font-medium text-green-800 mb-2 flex items-center">
                         <User className="w-4 h-4 mr-2" />
                         اطلاعات گیرنده
+                        <span className="text-xs text-green-600 mr-auto">(کلیک کنید)</span>
                       </h5>
                       <div className="space-y-2">
                         <div className="bg-gray-50 rounded p-2">
@@ -1037,6 +1051,127 @@ const LogisticsManagement = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Order Details Modal */}
+      <Dialog open={isOrderDetailsOpen} onOpenChange={setIsOrderDetailsOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-right">
+              جزئیات سفارش {selectedOrder?.orderNumber || `#${selectedOrder?.customerOrderId}`}
+            </DialogTitle>
+            <DialogDescription className="text-right">
+              مشاهده کامل اطلاعات سفارش و آدرس تحویل
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedOrder && (
+            <div className="space-y-6">
+              {/* Customer Information */}
+              <div className="bg-blue-50 rounded-lg p-4">
+                <h3 className="text-lg font-semibold text-blue-800 mb-3 flex items-center">
+                  <User className="w-5 h-5 mr-2" />
+                  اطلاعات مشتری
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm text-gray-600">نام و نام خانوادگی</Label>
+                    <p className="font-medium">
+                      {selectedOrder.customer?.firstName || selectedOrder.customerFirstName} {selectedOrder.customer?.lastName || selectedOrder.customerLastName}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-sm text-gray-600">شماره تماس</Label>
+                    <p className="font-medium flex items-center">
+                      <Phone className="w-4 h-4 mr-2 text-blue-600" />
+                      {selectedOrder.customer?.phone || selectedOrder.customerPhone}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-sm text-gray-600">ایمیل</Label>
+                    <p className="font-medium">{selectedOrder.customer?.email || selectedOrder.customerEmail || 'ثبت نشده'}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm text-gray-600">کد تحویل</Label>
+                    <p className="font-bold text-purple-700 text-lg">
+                      {selectedOrder.deliveryCode || 'کد ندارد'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Shipping Address */}
+              {selectedOrder.shippingAddress && (
+                <div className="bg-green-50 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold text-green-800 mb-3 flex items-center">
+                    <MapPin className="w-5 h-5 mr-2" />
+                    آدرس تحویل
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-sm text-gray-600">گیرنده</Label>
+                      <p className="font-medium">{selectedOrder.shippingAddress.name}</p>
+                    </div>
+                    <div>
+                      <Label className="text-sm text-gray-600">تلفن گیرنده</Label>
+                      <p className="font-medium flex items-center">
+                        <Phone className="w-4 h-4 mr-2 text-green-600" />
+                        {selectedOrder.shippingAddress.phone}
+                      </p>
+                    </div>
+                    <div className="md:col-span-2">
+                      <Label className="text-sm text-gray-600">آدرس کامل</Label>
+                      <p className="font-medium">{selectedOrder.shippingAddress.address}</p>
+                    </div>
+                    <div>
+                      <Label className="text-sm text-gray-600">شهر</Label>
+                      <p className="font-medium">{selectedOrder.shippingAddress.city}</p>
+                    </div>
+                    <div>
+                      <Label className="text-sm text-gray-600">کد پستی</Label>
+                      <p className="font-medium">{selectedOrder.shippingAddress.postalCode}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Order Details */}
+              <div className="bg-orange-50 rounded-lg p-4">
+                <h3 className="text-lg font-semibold text-orange-800 mb-3 flex items-center">
+                  <Package className="w-5 h-5 mr-2" />
+                  جزئیات سفارش
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label className="text-sm text-gray-600">مبلغ کل</Label>
+                    <p className="font-bold text-lg">{selectedOrder.totalAmount} {selectedOrder.currency}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm text-gray-600">وزن محموله</Label>
+                    <p className="font-medium">
+                      {selectedOrder.calculatedWeight || selectedOrder.totalWeight} کیلوگرم
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-sm text-gray-600">روش تحویل</Label>
+                    <p className="font-medium">{selectedOrder.deliveryMethod || 'پیک'}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Delivery Notes */}
+              {selectedOrder.deliveryNotes && (
+                <div className="bg-yellow-50 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold text-yellow-800 mb-3 flex items-center">
+                    <FileText className="w-5 h-5 mr-2" />
+                    یادداشت‌های تحویل
+                  </h3>
+                  <p className="text-gray-700">{selectedOrder.deliveryNotes}</p>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
