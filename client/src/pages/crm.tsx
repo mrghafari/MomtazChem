@@ -28,15 +28,37 @@ interface CrmCustomer {
   company?: string;
   phone?: string;
   country?: string;
+  province?: string;
   city?: string;
   address?: string;
   secondaryAddress?: string;
   postalCode?: string;
+  alternatePhone?: string;
   customerType: string;
   customerStatus: string;
-  customerSource: string;
+  customerSource?: string;
+  leadSource?: string;
   preferredLanguage: string;
   communicationPreference: string;
+  // Business Information
+  industry?: string;
+  businessType?: string;
+  companySize?: string;
+  website?: string;
+  taxId?: string;
+  registrationNumber?: string;
+  // Customer Management
+  preferredPaymentMethod?: string;
+  creditLimit?: string;
+  assignedSalesRep?: string;
+  marketingConsent?: boolean;
+  notes?: string;
+  // CRM Fields
+  annualRevenue?: string;
+  priceRange?: string;
+  orderFrequency?: string;
+  creditStatus?: string;
+  // Statistics
   totalOrdersCount: number;
   totalSpent: string;
   averageOrderValue: string;
@@ -1390,13 +1412,42 @@ export default function CRM() {
                   />
                 </div>
 
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="editSecondaryAddress">Secondary Address</Label>
+                    <Input
+                      id="editSecondaryAddress"
+                      placeholder="Secondary address or workplace"
+                      value={editingCustomer.secondaryAddress || ""}
+                      onChange={(e) => setEditingCustomer({ ...editingCustomer, secondaryAddress: e.target.value })}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="editPostalCode">Postal Code</Label>
+                    <Input
+                      id="editPostalCode"
+                      placeholder="Enter postal code"
+                      value={editingCustomer.postalCode || ""}
+                      onChange={(e) => setEditingCustomer({ ...editingCustomer, postalCode: e.target.value })}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Additional Contact Information */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">
+                  Additional Contact Information
+                </h3>
+                
                 <div>
-                  <Label htmlFor="editPostalCode">Postal Code</Label>
+                  <Label htmlFor="editAlternatePhone">Alternate Phone</Label>
                   <Input
-                    id="editPostalCode"
-                    placeholder="Enter postal code"
-                    value={editingCustomer.postalCode || ""}
-                    onChange={(e) => setEditingCustomer({ ...editingCustomer, postalCode: e.target.value })}
+                    id="editAlternatePhone"
+                    placeholder="Secondary phone number"
+                    value={editingCustomer.alternatePhone || ""}
+                    onChange={(e) => setEditingCustomer({ ...editingCustomer, alternatePhone: e.target.value })}
                   />
                 </div>
               </div>
@@ -1438,7 +1489,106 @@ export default function CRM() {
                 </div>
               </div>
 
-              {/* Customer Management (CRM Only) */}
+              {/* Business Information */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">
+                  Business Information
+                </h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="editIndustry">Industry</Label>
+                    <Select value={editingCustomer.industry || ""} onValueChange={(value) => setEditingCustomer({ ...editingCustomer, industry: value })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select industry" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="chemical">Chemical</SelectItem>
+                        <SelectItem value="petrochemical">Petrochemical</SelectItem>
+                        <SelectItem value="pharmaceutical">Pharmaceutical</SelectItem>
+                        <SelectItem value="agriculture">Agriculture</SelectItem>
+                        <SelectItem value="construction">Construction</SelectItem>
+                        <SelectItem value="automotive">Automotive</SelectItem>
+                        <SelectItem value="textile">Textile</SelectItem>
+                        <SelectItem value="food">Food</SelectItem>
+                        <SelectItem value="water_treatment">Water Treatment</SelectItem>
+                        <SelectItem value="paint">Paint & Resin</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="editBusinessType">Business Type</Label>
+                    <Select value={editingCustomer.businessType || ""} onValueChange={(value) => setEditingCustomer({ ...editingCustomer, businessType: value })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select business type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="manufacturer">Manufacturer</SelectItem>
+                        <SelectItem value="distributor">Distributor</SelectItem>
+                        <SelectItem value="retailer">Retailer</SelectItem>
+                        <SelectItem value="service_provider">Service Provider</SelectItem>
+                        <SelectItem value="research">Research & Development</SelectItem>
+                        <SelectItem value="consultant">Consultant</SelectItem>
+                        <SelectItem value="end_user">End User</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="editCompanySize">Company Size</Label>
+                    <Select value={editingCustomer.companySize || ""} onValueChange={(value) => setEditingCustomer({ ...editingCustomer, companySize: value })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select company size" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1-10">1-10 employees</SelectItem>
+                        <SelectItem value="11-50">11-50 employees</SelectItem>
+                        <SelectItem value="51-200">51-200 employees</SelectItem>
+                        <SelectItem value="201-500">201-500 employees</SelectItem>
+                        <SelectItem value="500+">500+ employees</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="editWebsite">Website</Label>
+                    <Input
+                      id="editWebsite"
+                      placeholder="https://www.example.com"
+                      value={editingCustomer.website || ""}
+                      onChange={(e) => setEditingCustomer({ ...editingCustomer, website: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="editTaxId">Tax ID</Label>
+                    <Input
+                      id="editTaxId"
+                      placeholder="Tax identification number"
+                      value={editingCustomer.taxId || ""}
+                      onChange={(e) => setEditingCustomer({ ...editingCustomer, taxId: e.target.value })}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="editRegistrationNumber">Registration Number</Label>
+                    <Input
+                      id="editRegistrationNumber"
+                      placeholder="Company registration number"
+                      value={editingCustomer.registrationNumber || ""}
+                      onChange={(e) => setEditingCustomer({ ...editingCustomer, registrationNumber: e.target.value })}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Customer Management */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">
                   Customer Management
@@ -1447,32 +1597,166 @@ export default function CRM() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="editCustomerType">Customer Type</Label>
-                    <Select value={editingCustomer.customerType} onValueChange={(value) => setEditingCustomer({ ...editingCustomer, customerType: value })}>
+                    <Select value={editingCustomer.customerType || ""} onValueChange={(value) => setEditingCustomer({ ...editingCustomer, customerType: value })}>
                       <SelectTrigger>
-                        <SelectValue />
+                        <SelectValue placeholder="Select customer type" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="retail">Retail</SelectItem>
-                        <SelectItem value="wholesale">Wholesale</SelectItem>
-                        <SelectItem value="b2b">B2B</SelectItem>
-                        <SelectItem value="distributor">Distributor</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="editCustomerStatus">Status</Label>
-                    <Select value={editingCustomer.customerStatus} onValueChange={(value) => setEditingCustomer({ ...editingCustomer, customerStatus: value })}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="inactive">Inactive</SelectItem>
+                        <SelectItem value="regular">Regular</SelectItem>
                         <SelectItem value="vip">VIP</SelectItem>
-                        <SelectItem value="blacklisted">Blacklisted</SelectItem>
+                        <SelectItem value="wholesale">Wholesale</SelectItem>
+                        <SelectItem value="retail">Retail</SelectItem>
+                        <SelectItem value="industrial">Industrial</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
+
+                  <div>
+                    <Label htmlFor="editPreferredPaymentMethod">Payment Method</Label>
+                    <Select value={editingCustomer.preferredPaymentMethod || ""} onValueChange={(value) => setEditingCustomer({ ...editingCustomer, preferredPaymentMethod: value })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select payment method" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="cash">Cash</SelectItem>
+                        <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
+                        <SelectItem value="check">Check</SelectItem>
+                        <SelectItem value="credit">Credit</SelectItem>
+                        <SelectItem value="installments">Installments</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="editCreditLimit">Credit Limit (IQD)</Label>
+                    <Input
+                      id="editCreditLimit"
+                      placeholder="Enter credit limit"
+                      value={editingCustomer.creditLimit || ""}
+                      onChange={(e) => setEditingCustomer({ ...editingCustomer, creditLimit: e.target.value })}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="editLeadSource">Lead Source</Label>
+                    <Select value={editingCustomer.leadSource || ""} onValueChange={(value) => setEditingCustomer({ ...editingCustomer, leadSource: value })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select lead source" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="website">Website</SelectItem>
+                        <SelectItem value="referral">Referral</SelectItem>
+                        <SelectItem value="social_media">Social Media</SelectItem>
+                        <SelectItem value="advertising">Advertising</SelectItem>
+                        <SelectItem value="trade_show">Trade Show</SelectItem>
+                        <SelectItem value="cold_call">Cold Call</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="editCustomerStatus">Customer Status</Label>
+                  <Select value={editingCustomer.customerStatus || ""} onValueChange={(value) => setEditingCustomer({ ...editingCustomer, customerStatus: value })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="inactive">Inactive</SelectItem>
+                      <SelectItem value="vip">VIP</SelectItem>
+                      <SelectItem value="blacklisted">Blacklisted</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* CRM Fields */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">
+                  CRM Information
+                </h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="editAnnualRevenue">Annual Revenue (IQD)</Label>
+                    <Select value={editingCustomer.annualRevenue || ""} onValueChange={(value) => setEditingCustomer({ ...editingCustomer, annualRevenue: value })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select annual revenue" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="under_100m">Under 100M IQD</SelectItem>
+                        <SelectItem value="100m_500m">100M - 500M IQD</SelectItem>
+                        <SelectItem value="500m_1b">500M - 1B IQD</SelectItem>
+                        <SelectItem value="1b_5b">1B - 5B IQD</SelectItem>
+                        <SelectItem value="over_5b">Over 5B IQD</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="editPriceRange">Price Range</Label>
+                    <Select value={editingCustomer.priceRange || ""} onValueChange={(value) => setEditingCustomer({ ...editingCustomer, priceRange: value })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select price range" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="budget">Budget (&lt; 50K IQD)</SelectItem>
+                        <SelectItem value="mid_range">Mid-range (50K - 500K IQD)</SelectItem>
+                        <SelectItem value="premium">Premium (500K - 2M IQD)</SelectItem>
+                        <SelectItem value="enterprise">Enterprise (&gt; 2M IQD)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="editOrderFrequency">Order Frequency</Label>
+                    <Select value={editingCustomer.orderFrequency || ""} onValueChange={(value) => setEditingCustomer({ ...editingCustomer, orderFrequency: value })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select order frequency" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="weekly">Weekly</SelectItem>
+                        <SelectItem value="monthly">Monthly</SelectItem>
+                        <SelectItem value="quarterly">Quarterly</SelectItem>
+                        <SelectItem value="yearly">Yearly</SelectItem>
+                        <SelectItem value="as_needed">As Needed</SelectItem>
+                        <SelectItem value="seasonal">Seasonal</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="editCreditStatus">Credit Status</Label>
+                    <Select value={editingCustomer.creditStatus || ""} onValueChange={(value) => setEditingCustomer({ ...editingCustomer, creditStatus: value })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select credit status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="excellent">Excellent</SelectItem>
+                        <SelectItem value="good">Good</SelectItem>
+                        <SelectItem value="fair">Fair</SelectItem>
+                        <SelectItem value="poor">Poor</SelectItem>
+                        <SelectItem value="no_credit">No Credit</SelectItem>
+                        <SelectItem value="pending">Pending Review</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="editNotes">Notes</Label>
+                  <Input
+                    id="editNotes"
+                    placeholder="Additional notes about the customer"
+                    value={editingCustomer.notes || ""}
+                    onChange={(e) => setEditingCustomer({ ...editingCustomer, notes: e.target.value })}
+                  />
                 </div>
               </div>
 
