@@ -261,7 +261,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   // Fetch tax settings for dynamic VAT calculation
   const { data: taxSettingsResponse } = useQuery({
     queryKey: ['/api/tax-settings'],
-    queryFn: () => apiRequest('/api/tax-settings', 'GET'),
+    queryFn: () => apiRequest('/api/tax-settings', { method: 'GET' }),
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
 
@@ -270,10 +270,10 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
 
   // Calculate VAT and duties from database settings
   // Handle both VAT and vat types for backward compatibility
-  const vatSetting = taxSettings?.find(setting => 
+  const vatSetting = taxSettings?.find((setting: any) => 
     (setting.type === 'VAT' || setting.type === 'vat') && setting.isEnabled
   );
-  const dutiesSetting = taxSettings?.find(setting => setting.type === 'duties' && setting.isEnabled);
+  const dutiesSetting = taxSettings?.find((setting: any) => setting.type === 'duties' && setting.isEnabled);
   
   const vatRate = vatSetting ? parseFloat(vatSetting.rate) / 100 : 0; // Convert percentage to decimal
   const dutiesRate = dutiesSetting ? parseFloat(dutiesSetting.rate) / 100 : 0;
@@ -319,7 +319,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
 
   const createOrderMutation = useMutation({
     mutationFn: async (orderData: any) => {
-      return apiRequest("/api/shop/orders", "POST", orderData);
+      return apiRequest("/api/shop/orders", { method: "POST", body: orderData });
     },
     onSuccess: (data: any) => {
       const orderId = data.order.id;
