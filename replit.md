@@ -6,19 +6,27 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
-### COMPLETED: Order Number Display Consistency Verified Across All Departments (July 23, 2025)
-✅ **VERIFIED: Complete order number consistency across customer → financial → warehouse departments**
-- **Issue**: User required verification that order numbers remain identical throughout all department workflows
-- **Database Analysis**: Confirmed 15 warehouse orders all display correct M25XXXXX format matching original customer creation
-- **Frontend Fix**: Updated warehouse management to display `order.orderNumber` instead of `order.id` (management ID)
-- **API Verification**: Warehouse API correctly includes orderNumber field (e.g., "M2511132", "M2511182") in response
-- **Workflow Confirmation**: 
-  - Customer creates order M2511182 → Financial department sees M2511182 → Warehouse receives M2511182
-  - No order number duplication or changes during department transitions
-  - Order management IDs are internal only, customer-facing numbers remain consistent
-- **Test Results**: 5 orders verified (M2511182, M2511198, M2511164, M2511162, M2511154) maintain exact numbering
-- **Impact**: Complete assurance that order numbers never change during department processing workflow
-- **Status**: Order numbering system fully verified and operational across all departments
+### COMPLETED: Warehouse Order Details Form Enhancements and Weight Display Implementation (July 23, 2025)
+✅ **RESOLVED: Order number format and warehouse notes functionality in order details modal**
+- **Issue**: User reported order details modal showing wrong format and missing submit button for notes
+- **Order Number Fix**: Updated order details modal title to display proper M25XXXXX format instead of internal management ID
+  - Changed from `#{selectedOrder?.customerOrderId}` to `{selectedOrder?.orderNumber || `#${selectedOrder?.customerOrderId}`}`
+  - Maintains fallback for orders without proper format
+- **Warehouse Notes Enhancement**: 
+  - Added submit button for warehouse notes with "ثبت یادداشت" label
+  - Created `handleSaveNotes` function with proper error handling and loading states
+  - Added `savingNotes` state for loading indication during save operations
+  - Notes now load from existing `order.warehouseNotes` when opening details
+- **Weight Display Implementation**:
+  - Enhanced `getOrdersByDepartment` to calculate missing weights using `calculateOrderWeight` method
+  - Dynamic weight calculation from order items using Promise.all for async processing
+  - Weights now display properly in warehouse list view with fallback to calculation
+- **Interface Updates**:
+  - Added `orderNumber` field to Order interface for proper TypeScript support
+  - Enhanced note loading when order details modal opens
+  - Professional button styling with blue theme for consistency
+- **Impact**: Complete warehouse management workflow with proper order numbering and functional note-taking
+- **Status**: Order details modal fully operational with M25XXXXX format and working note submission
 
 ### COMPLETED: Financial Department Refresh Button and Auto-Refresh Scoped to Orders Only (July 23, 2025)
 ✅ **IMPLEMENTED: Refined refresh functionality to target only financial department orders instead of entire page**

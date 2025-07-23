@@ -18,6 +18,7 @@ import { Switch } from '@/components/ui/switch';
 interface Order {
   id: number;
   customerOrderId: number;
+  orderNumber?: string;
   currentStatus: string;
   status: string;
   deliveryCode: string | null;
@@ -66,6 +67,7 @@ const WarehouseManagementFixed: React.FC = () => {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const [warehouseNotes, setWarehouseNotes] = useState('');
+  const [savingNotes, setSavingNotes] = useState(false);
   const [activeTab, setActiveTab] = useState("orders");
   const [orderDetails, setOrderDetails] = useState<any>(null);
   const [loadingOrderDetails, setLoadingOrderDetails] = useState(false);
@@ -199,6 +201,39 @@ const WarehouseManagementFixed: React.FC = () => {
       notes: warehouseNotes
     });
     setWarehouseNotes('');
+  };
+
+  const handleSaveNotes = async () => {
+    if (!selectedOrder || !warehouseNotes.trim()) {
+      toast({
+        title: "خطا",
+        description: "لطفاً یادداشت را وارد کنید",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSavingNotes(true);
+    try {
+      await updateOrderMutation.mutateAsync({
+        orderId: selectedOrder.id,
+        status: selectedOrder.currentStatus, // Keep current status
+        notes: warehouseNotes
+      });
+      
+      toast({
+        title: "یادداشت ذخیره شد",
+        description: "یادداشت انبار با موفقیت ذخیره شد",
+      });
+    } catch (error) {
+      toast({
+        title: "خطا در ذخیره",
+        description: "خطایی در ذخیره یادداشت رخ داد",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingNotes(false);
+    }
   };
 
   const clearAllFilters = () => {
@@ -397,6 +432,7 @@ const WarehouseManagementFixed: React.FC = () => {
                                   variant="outline"
                                   onClick={() => {
                                     setSelectedOrder(order);
+                                    setWarehouseNotes(order.warehouseNotes || ''); // Load existing notes
                                     setShowOrderDetails(true);
                                     // Fetch complete order details
                                     fetchOrderDetails(order.customerOrderId);
@@ -459,7 +495,7 @@ const WarehouseManagementFixed: React.FC = () => {
         <Dialog open={showOrderDetails} onOpenChange={setShowOrderDetails}>
           <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>جزئیات سفارش #{selectedOrder?.customerOrderId}</DialogTitle>
+              <DialogTitle>جزئیات سفارش {selectedOrder?.orderNumber || `#${selectedOrder?.customerOrderId}`}</DialogTitle>
             </DialogHeader>
             {loadingOrderDetails ? (
               <div className="text-center py-8">
@@ -596,6 +632,16 @@ const WarehouseManagementFixed: React.FC = () => {
                     placeholder="یادداشت برای این سفارش..."
                     className="mt-2"
                   />
+                  <div className="flex justify-end mt-2">
+                    <Button
+                      size="sm"
+                      onClick={handleSaveNotes}
+                      disabled={savingNotes}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      {savingNotes ? 'در حال ذخیره...' : 'ثبت یادداشت'}
+                    </Button>
+                  </div>
                 </div>
 
                 {/* Actions */}
