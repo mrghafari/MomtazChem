@@ -90,6 +90,20 @@ const translations = {
     selectDeliveryMethod: "Select delivery method",
     shippingCost: "Shipping Cost",
     freeShipping: "Free Shipping",
+    
+    // Second address and recipient mobile options
+    secondDeliveryAddress: "Second Delivery Address",
+    addSecondAddress: "Add Second Address",
+    removeSecondAddress: "Remove Second Address",
+    secondAddressPlaceholder: "Enter different delivery address...",
+    secondAddressInstruction: "If delivery address differs from above, please enter new address",
+    recipientMobileNumber: "Recipient Mobile Number",
+    addRecipientMobile: "Add Recipient Mobile",
+    removeRecipientMobile: "Remove Recipient Mobile",
+    recipientMobilePlaceholder: "Enter recipient's mobile number...",
+    recipientMobileInstruction: "If recipient is different person, enter their mobile number",
+    crmAddressDisabled: "Default Address (Disabled)",
+    crmPhoneDisabled: "Default Phone (Disabled)",
 
   },
   ar: {
@@ -164,10 +178,12 @@ const translations = {
     addSecondAddress: "افزودن آدرس دوم",
     removeSecondAddress: "حذف آدرس دوم", 
     secondAddressPlaceholder: "آدرس جایگزین برای تحویل (مثل: بغداد، خیابان الرشید)",
+    secondAddressInstruction: "چنانچه آدرس دریافت کالا با آدرس بالا متفاوت است، آدرس جدید را بنویسید",
     recipientMobileNumber: "شماره موبایل گیرنده",
     addRecipientMobile: "افزودن شماره گیرنده",
     removeRecipientMobile: "حذف شماره گیرنده",
     recipientMobilePlaceholder: "شماره موبایل گیرنده برای تأیید تحویل (مثل: 0791XXXXXXX)",
+    recipientMobileInstruction: "اگر گیرنده کالا شخص دیگری است، شماره موبایل ایشان را وارد کنید",
     crmAddressDisabled: "آدرس پیش‌فرض (غیرفعال)",
     crmPhoneDisabled: "شماره پیش‌فرض (غیرفعال)",
   }
@@ -234,6 +250,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const [selectedShippingMethod, setSelectedShippingMethod] = useState<number | null>(null);
   const [shippingCost, setShippingCost] = useState<number>(0);
   const [selectedProvinceId, setSelectedProvinceId] = useState<number | null>(null);
+  const [selectedSecondProvinceId, setSelectedSecondProvinceId] = useState<number | null>(null);
   
 
 
@@ -329,6 +346,22 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       return response.json();
     },
     enabled: !!selectedProvinceId,
+    retry: 1,
+    staleTime: 10 * 60 * 1000, // 10 minutes cache
+  });
+
+  // Fetch Iraqi cities for second address based on selected second province  
+  const { data: secondCitiesData } = useQuery({
+    queryKey: ['/api/iraqi-cities', selectedSecondProvinceId, 'second'],
+    queryFn: async () => {
+      const url = selectedSecondProvinceId 
+        ? `/api/iraqi-cities?provinceId=${selectedSecondProvinceId}`
+        : '/api/iraqi-cities';
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Failed to fetch cities');
+      return response.json();
+    },
+    enabled: !!selectedSecondProvinceId,
     retry: 1,
     staleTime: 10 * 60 * 1000, // 10 minutes cache
   });
@@ -1417,6 +1450,11 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                 {/* Second Address Option - Only show for CRM customers */}
                 {hasCrmData && (
                   <div className="space-y-3 p-4 bg-blue-50 rounded-lg border">
+                    {/* Instruction text */}
+                    <div className={`text-sm text-blue-700 mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+                      <span className="font-medium">📍 {t.secondAddressInstruction}</span>
+                    </div>
+                    
                     <div className="flex items-center justify-between">
                       <label className={`text-sm font-medium ${isRTL ? 'text-right' : 'text-left'}`}>
                         {t.secondDeliveryAddress}
@@ -1445,25 +1483,98 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                             />
                           </FormControl>
                         </FormItem>
-                        <div className="grid grid-cols-3 gap-2">
-                          <Input
-                            value={secondProvince}
-                            onChange={(e) => setSecondProvince(e.target.value)}
-                            placeholder={isRTL ? "استان" : "Province"}
-                            className={`text-xs h-7 ${isRTL ? 'text-right' : 'text-left'} bg-white`}
-                          />
-                          <Input
-                            value={secondCity}
-                            onChange={(e) => setSecondCity(e.target.value)}
-                            placeholder={isRTL ? "شهر" : "City"}
-                            className={`text-xs h-7 ${isRTL ? 'text-right' : 'text-left'} bg-white`}
-                          />
-                          <Input
-                            value={secondPostalCode}
-                            onChange={(e) => setSecondPostalCode(e.target.value)}
-                            placeholder={isRTL ? "کد پستی" : "Postal Code"}
-                            className={`text-xs h-7 ${isRTL ? 'text-right' : 'text-left'} bg-white`}
-                          />
+                        
+                        {/* Second Address Province and City Dropdowns */}
+                        <div className="space-y-2">
+                          {/* Second Province Selection */}
+                          <FormItem>
+                            <FormLabel className="text-xs">
+                              {isRTL ? 'المحافظة' : 'Province'} *
+                            </FormLabel>
+                            <Select 
+                              value={selectedSecondProvinceId?.toString() || ""}
+                              onValueChange={(value) => {
+                                const provinceId = parseInt(value);
+                                setSelectedSecondProvinceId(provinceId);
+                                
+                                // Find selected province and update second province
+                                const provinces = provincesData?.data || [];
+                                const selectedProvince = provinces.find((p: any) => p.id === provinceId);
+                                if (selectedProvince) {
+                                  setSecondProvince(selectedProvince.nameArabic || selectedProvince.nameEnglish);
+                                }
+                              }}
+                            >
+                              <SelectTrigger className={`text-xs h-7 ${isRTL ? 'text-right' : 'text-left'} bg-white`}>
+                                <SelectValue placeholder={isRTL ? "اختر المحافظة" : "Select Province"} />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {(provincesData?.data || []).map((province: any) => (
+                                  <SelectItem key={province.id} value={province.id.toString()}>
+                                    <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                                      <span className="font-medium text-xs">
+                                        {isRTL ? province.nameArabic : province.nameEnglish}
+                                      </span>
+                                      <span className="text-xs text-muted-foreground">
+                                        ({province.nameKurdish})
+                                      </span>
+                                    </div>
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </FormItem>
+
+                          {/* Second City Selection */}
+                          <FormItem>
+                            <FormLabel className="text-xs">
+                              {isRTL ? 'المدينة' : 'City'} *
+                            </FormLabel>
+                            {selectedSecondProvinceId && secondCitiesData?.data?.length > 0 ? (
+                              <Select 
+                                value={secondCity || ""}
+                                onValueChange={(value) => setSecondCity(value)}
+                              >
+                                <SelectTrigger className={`text-xs h-7 ${isRTL ? 'text-right' : 'text-left'} bg-white`}>
+                                  <SelectValue placeholder={isRTL ? "اختر المدينة" : "Select City"} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {(secondCitiesData?.data || []).map((city: any) => (
+                                    <SelectItem key={city.id} value={city.nameArabic || city.nameEnglish}>
+                                      <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                                        <span className="font-medium text-xs">
+                                          {isRTL ? city.nameArabic : city.nameEnglish}
+                                        </span>
+                                        <span className="text-xs text-muted-foreground">
+                                          ({city.nameKurdish})
+                                        </span>
+                                      </div>
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            ) : (
+                              <Input
+                                value={secondCity}
+                                onChange={(e) => setSecondCity(e.target.value)}
+                                placeholder={isRTL ? "شهر" : "City"}
+                                className={`text-xs h-7 ${isRTL ? 'text-right' : 'text-left'} bg-white`}
+                              />
+                            )}
+                          </FormItem>
+
+                          {/* Second Postal Code */}
+                          <FormItem>
+                            <FormLabel className="text-xs">
+                              {isRTL ? 'الرمز البريدي' : 'Postal Code'}
+                            </FormLabel>
+                            <Input
+                              value={secondPostalCode}
+                              onChange={(e) => setSecondPostalCode(e.target.value)}
+                              placeholder={isRTL ? "کد پستی" : "Postal Code"}
+                              className={`text-xs h-7 ${isRTL ? 'text-right' : 'text-left'} bg-white`}
+                            />
+                          </FormItem>
                         </div>
                       </div>
                     )}
@@ -1473,6 +1584,11 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                 {/* Recipient Mobile Number - Only show for CRM customers */}
                 {hasCrmData && (
                   <div className="space-y-3 p-4 bg-purple-50 rounded-lg border">
+                    {/* Instruction text */}
+                    <div className={`text-sm text-purple-700 mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+                      <span className="font-medium">📱 {t.recipientMobileInstruction}</span>
+                    </div>
+                    
                     <div className="flex items-center justify-between">
                       <label className={`text-sm font-medium ${isRTL ? 'text-right' : 'text-left'}`}>
                         {t.recipientMobileNumber}
