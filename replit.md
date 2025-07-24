@@ -6,6 +6,28 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Logistics Print Function Enhancement - No More New Window Opening (July 24, 2025)
+✅ **RESOLVED: Fixed logistics print function to use print preview instead of opening new browser window**
+- **User Issue**: Print button in logistics order details was opening unnecessary new browser window
+- **Root Cause**: `window.open('', '_blank')` was used for printing, creating additional tab/window
+- **Technical Solution**: 
+  - Replaced window.open approach with invisible iframe method
+  - Created temporary iframe element for print content rendering
+  - Used `iframe.contentWindow?.print()` for direct printing
+  - Automatic cleanup removes iframe after printing completes
+- **Implementation Details**:
+  - Hidden iframe with zero dimensions for background processing
+  - 500ms delay for content loading before triggering print
+  - 1000ms cleanup timeout to remove iframe after printing
+  - Maintains all existing print formatting and RTL Persian text
+- **User Experience**: 
+  - Print button now shows standard browser print preview
+  - No additional windows or tabs opened
+  - Same professional print layout with order details
+  - Clean workflow without browser navigation disruption
+- **Impact**: Streamlined printing process in logistics management interface
+- **Result**: Print functionality now uses browser's native print preview without opening new windows
+
 ### COMPLETED: Order Details Invalid Date Error Fix Across All Admin Interfaces (July 24, 2025)
 ✅ **RESOLVED: Fixed "Invalid Date" errors displayed in order details across all administrative components**
 - **User Issue**: "Invalid Date" text appearing in order details sections instead of proper formatted dates
