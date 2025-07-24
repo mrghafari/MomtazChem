@@ -1165,7 +1165,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                     <RadioGroupItem value="wallet_partial" id="wallet_partial" />
                     <Label htmlFor="wallet_partial" className="flex items-center gap-2 cursor-pointer">
                       <Wallet className="w-4 h-4 text-orange-600" />
-                      پرداخت بخشی از والت - مبلغ از والت (حداکثر {formatCurrency(walletBalance)})
+                      پرداخت همه یا بخشی از والت - مبلغ از والت (حداکثر {formatCurrency(walletBalance)})
                     </Label>
                   </div>
                 )}

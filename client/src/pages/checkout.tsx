@@ -1187,7 +1187,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                   <SelectItem value="wallet_payment">پرداخت با کیف پول - مبلغ از والت (حداکثر {walletBalance.toLocaleString()} IQD)</SelectItem>
                                 )}
                                 {isUserLoggedIn && walletBalance > 0 && (
-                                  <SelectItem value="wallet_combined">پرداخت بخشی از والت - مبلغ از والت (حداکثر {walletBalance.toLocaleString()} IQD)</SelectItem>
+                                  <SelectItem value="wallet_combined">پرداخت همه یا بخشی از والت - مبلغ از والت (حداکثر {walletBalance.toLocaleString()} IQD)</SelectItem>
                                 )}
                               </SelectContent>
                             </Select>

@@ -39,6 +39,22 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Impact**: Wallet Management now properly integrated under Financial section while maintaining full functionality and enhanced organizational structure
 - **Result**: Complete financial module reorganization operational with Wallet Management successfully positioned under Financial section with all features intact
 
+### COMPLETED: Wallet Payment Interface Enhancement with Explanatory Text and Updated Labels (July 24, 2025)
+✅ **IMPLEMENTED: Complete wallet payment interface enhancement with explanatory text and updated terminology**
+- **User Request**: "این توضیح را 'مبلغ از والت (حداکثر IQD 500,008.00)' ببر روبروی پرداخت از والت و الاین کن باهاش" and "این را هم بگن 'پرداخت همه یا بخشی از والت' پرداخت بخشی از والت"
+- **Explanatory Text Added**: Added wallet balance explanation "مبلغ از والت (حداکثر {walletBalance})" inline with all wallet payment options
+- **Enhanced Payment Options**: Updated wallet payment labels across all interfaces:
+  - **Full Wallet Payment**: "پرداخت از والت - مبلغ از والت (حداکثر {walletBalance})"
+  - **Partial Wallet Payment**: "پرداخت همه یا بخشی از والت - مبلغ از والت (حداکثر {walletBalance})"
+- **Multi-Interface Implementation**: Updated wallet payment text in both:
+  - Bilingual Purchase Form (shop interface)
+  - Checkout Page (dedicated checkout flow)
+- **Dynamic Balance Display**: Wallet balance shows actual customer balance (e.g., 500,008 IQD) with proper formatting
+- **User Experience Enhancement**: Clear indication of wallet limits helps customers understand available payment options
+- **Terminology Improvement**: Changed "پرداخت بخشی از والت" to "پرداخت همه یا بخشی از والت" for better clarity
+- **Impact**: Customers now see clear wallet balance limits alongside payment options for better informed purchasing decisions
+- **Result**: Complete wallet payment interface enhancement operational with explanatory text and improved terminology
+
 ### COMPLETED: Enhanced Payment Interface with Detailed Breakdown Table and Bank Transfer Instructions (July 24, 2025)
 ✅ **IMPLEMENTED: Payment breakdown table with structured financial information per user mockup design**
 - **User Request**: "این را پیاده کن" with table mockup showing Final Amount, wallet payment, bank card payment, and wallet limits
