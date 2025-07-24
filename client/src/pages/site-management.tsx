@@ -113,7 +113,7 @@ export default function SiteManagement() {
     'payment-settings': 'payment-settings',
     'accounting-management': 'accounting',
     'finance-orders': 'order-management',
-    'financial-department': 'financial_department',
+    'financial-department': 'finance',
     'geography-analytics': 'geography-analytics',
     'warehouse-orders': 'order-management',
     'logistics-orders': 'order-management',
@@ -327,7 +327,7 @@ export default function SiteManagement() {
       icon: TrendingUp,
       onClick: () => trackButtonClick("financial-department", () => setLocation("/financial-department")),
       className: "border-blue-300 text-blue-600 hover:bg-blue-50",
-      moduleId: "financial_department"
+      moduleId: "finance"
     },
     {
       id: "geography-analytics", 
