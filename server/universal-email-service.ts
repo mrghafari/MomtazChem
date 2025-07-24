@@ -28,7 +28,7 @@ export class UniversalEmailService {
         try {
           const template = await emailStorage.getTemplateByNumber(options.templateNumber);
           if (template) {
-            console.log(`📧 Template ${options.templateNumber} found: ${template.templateName}`);
+            console.log(`📧 Template ${options.templateNumber} found: ${template.name}`);
             
             // Process template with variables if provided
             if (options.variables && template.htmlContent && template.subject) {
@@ -46,10 +46,10 @@ export class UniversalEmailService {
               options.subject = processedSubject;
               options.text = template.textContent || processedHtml.replace(/<[^>]*>/g, ''); // Strip HTML for text version
             } else {
-              // Use template as-is
-              options.html = template.htmlContent;
-              options.subject = template.subject;
-              options.text = template.textContent || template.htmlContent.replace(/<[^>]*>/g, '');
+              // Use template as-is with null safety
+              options.html = template.htmlContent || options.html;
+              options.subject = template.subject || options.subject;
+              options.text = template.textContent || (template.htmlContent ? template.htmlContent.replace(/<[^>]*>/g, '') : options.text);
             }
           } else {
             console.warn(`⚠️ Template ${options.templateNumber} not found, using provided content`);
@@ -109,11 +109,13 @@ export class UniversalEmailService {
       let finalText = options.text || '';
       let finalSubject = options.subject;
 
-      if (options.variables) {
+      if (options.variables && finalHtml && finalSubject) {
         for (const [key, value] of Object.entries(options.variables)) {
           const placeholder = `{{${key}}}`;
           finalHtml = finalHtml.replace(new RegExp(placeholder, 'g'), value);
-          finalText = finalText.replace(new RegExp(placeholder, 'g'), value);
+          if (finalText) {
+            finalText = finalText.replace(new RegExp(placeholder, 'g'), value);
+          }
           finalSubject = finalSubject.replace(new RegExp(placeholder, 'g'), value);
         }
       }

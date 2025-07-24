@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Email Recipients Issue</title>
+</head>
+<body>
+    <h1>Email Recipients Test</h1>
+    <button onclick="testContactForm()">Test Contact Form Email</button>
+    <div id="result"></div>
+
+    <script>
+    async function testContactForm() {
+        try {
+            // Test contact form submission
+            const response = await fetch('/api/contact', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    firstName: 'محمد',
+                    lastName: 'احمدی',
+                    email: 'testuser@example.com',
+                    phone: '09123456789',
+                    message: 'این یک پیام تست برای بررسی ارسال ایمیل است.',
+                    category: 'general',
+                    productInterest: 'مواد شیمیایی'
+                })
+            });
+            
+            const result = await response.json();
+            document.getElementById('result').innerHTML = `
+                <h3>Contact Form Test Result:</h3>
+                <pre>${JSON.stringify(result, null, 2)}</pre>
+            `;
+        } catch (error) {
+            document.getElementById('result').innerHTML = `
+                <h3>Error:</h3>
+                <pre>${error.message}</pre>
+            `;
+        }
+    }
+    </script>
+</body>
+</html>
