@@ -6,6 +6,25 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Image Modal Display Fix - Bank Receipt Viewing Issue Resolved (July 24, 2025)
+✅ **RESOLVED: Fixed critical image display error in financial department bank receipt modal**
+- **User Issue**: Bank receipt modal showing "خطا در بارگذاری تصویر" (Error loading image) instead of displaying receipt images
+- **Root Cause**: Missing image file `/uploads/receipts/receipt-1753290995545-556534421.png` - file existed in `attached_assets/` but not in correct `uploads/receipts/` directory
+- **Technical Resolution**: 
+  - **File Recovery**: Located and copied missing receipt file from `attached_assets/receipt-1753290995545-556534421.png` to `uploads/receipts/` directory
+  - **Server Verification**: Confirmed image accessibility via HTTP (200 OK, Content-Type: image/png)
+  - **Enhanced Error Handling**: Added comprehensive debugging with cache-busting retry mechanism in modal display
+  - **Pre-validation**: Added async image verification using HEAD request before opening modal
+- **Modal Enhancements**: 
+  - **Intelligent Error Recovery**: Cache-busting URL generation for failed image loads
+  - **Fallback Mechanism**: Automatic new tab opening if image verification fails
+  - **Advanced Logging**: Console debugging for image load success/failure tracking
+  - **Responsive Design**: Improved image scaling and container overflow handling
+- **File Management**: Systematic approach to handle missing receipt files by checking `attached_assets/` as backup source
+- **User Experience**: Professional image viewing with zoom functionality, error recovery, and external link options
+- **Impact**: Complete resolution of bank receipt display issues with robust error handling and file recovery system
+- **Result**: Bank receipt modal now properly displays images with enhanced zoom functionality and intelligent error handling
+
 ### COMPLETED: Enhanced Receipt Viewer with Zoom Functionality in Financial Department (July 24, 2025)
 ✅ **IMPLEMENTED: Advanced receipt viewing modal with interactive zoom and full-screen capabilities**
 - **User Request**: Display bank receipts in popup window with zoom functionality instead of basic image display

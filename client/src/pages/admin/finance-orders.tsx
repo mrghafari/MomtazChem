@@ -521,8 +521,24 @@ function FinanceOrders() {
     });
   };
 
-  const openImageModal = (imageUrl: string) => {
+  const openImageModal = async (imageUrl: string) => {
     console.log('🖼️ [IMAGE MODAL] Opening image modal with URL:', imageUrl);
+    
+    // Verify image exists before opening modal
+    try {
+      const response = await fetch(imageUrl, { method: 'HEAD' });
+      if (!response.ok) {
+        console.error('❌ [IMAGE MODAL] Image not accessible:', imageUrl, 'Status:', response.status);
+        // Try to open in new tab instead
+        window.open(imageUrl, '_blank');
+        return;
+      }
+      console.log('✅ [IMAGE MODAL] Image verified accessible:', imageUrl);
+    } catch (error) {
+      console.error('❌ [IMAGE MODAL] Failed to verify image:', error);
+      // Still try to open modal, let the image component handle the error
+    }
+    
     setSelectedImageUrl(imageUrl);
     setImageModalOpen(true);
   };
@@ -1422,20 +1438,35 @@ function FinanceOrders() {
                       }}
                       onError={(e) => {
                         console.error('❌ [IMAGE MODAL] Image failed to load:', selectedImageUrl);
-                        const img = e.target as HTMLImageElement;
-                        img.style.display = 'none';
+                        console.error('❌ [IMAGE MODAL] Error event:', e);
                         
-                        // Show error message
-                        const errorDiv = document.createElement('div');
-                        errorDiv.className = 'text-center text-red-500 p-8';
-                        errorDiv.innerHTML = `
-                          <div class="text-lg mb-2">❌ خطا در بارگذاری تصویر</div>
-                          <div class="text-sm text-gray-600">URL: ${selectedImageUrl}</div>
-                          <button onclick="window.open('${selectedImageUrl}', '_blank')" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-                            تلاش مجدد در تب جدید
-                          </button>
-                        `;
-                        img.parentElement!.replaceChild(errorDiv, img);
+                        const img = e.target as HTMLImageElement;
+                        
+                        // Try to reload the image with cache busting
+                        const originalSrc = img.src;
+                        const cacheBustingSrc = originalSrc + (originalSrc.includes('?') ? '&' : '?') + 't=' + Date.now();
+                        
+                        // First attempt with cache busting
+                        img.src = cacheBustingSrc;
+                        
+                        // If still fails, show error message
+                        setTimeout(() => {
+                          if (img.complete && img.naturalHeight === 0) {
+                            img.style.display = 'none';
+                            
+                            const errorDiv = document.createElement('div');
+                            errorDiv.className = 'text-center text-red-500 p-8';
+                            errorDiv.innerHTML = `
+                              <div class="text-lg mb-2">❌ خطا در بارگذاری تصویر</div>
+                              <div class="text-sm text-gray-600 mb-2">URL: ${selectedImageUrl}</div>
+                              <div class="text-xs text-gray-500 mb-4">Cache Busting URL: ${cacheBustingSrc}</div>
+                              <button onclick="window.open('${selectedImageUrl}', '_blank')" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                                تلاش مجدد در تب جدید
+                              </button>
+                            `;
+                            img.parentElement!.replaceChild(errorDiv, img);
+                          }
+                        }, 2000);
                       }}
                     />
                   </div>
