@@ -1367,19 +1367,50 @@ function FinanceOrders() {
           </DialogContent>
         </Dialog>
 
-        {/* Image Modal */}
+        {/* Enhanced Image Modal with Zoom */}
         <Dialog open={imageModalOpen} onOpenChange={setImageModalOpen}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-auto">
+          <DialogContent className="max-w-6xl max-h-[95vh] overflow-hidden">
             <DialogHeader>
-              <DialogTitle>مشاهده فیش بانکی</DialogTitle>
+              <DialogTitle className="text-right">مشاهده فیش بانکی</DialogTitle>
             </DialogHeader>
             {selectedImageUrl && (
-              <div className="flex justify-center">
-                <img 
-                  src={selectedImageUrl} 
-                  alt="Bank Receipt Full Size" 
-                  className="max-w-full h-auto rounded-lg shadow-lg"
-                />
+              <div className="relative overflow-auto max-h-[80vh] bg-gray-50 rounded-lg">
+                <div className="flex justify-center items-center min-h-[400px] p-4">
+                  <img 
+                    src={selectedImageUrl} 
+                    alt="Bank Receipt Full Size" 
+                    className="max-w-none h-auto cursor-zoom-in hover:scale-110 transition-transform duration-300 rounded-lg shadow-lg"
+                    style={{
+                      maxWidth: 'none',
+                      maxHeight: 'none',
+                      objectFit: 'contain'
+                    }}
+                    onClick={(e) => {
+                      const img = e.target as HTMLImageElement;
+                      if (img.style.transform === 'scale(2)') {
+                        img.style.transform = 'scale(1)';
+                        img.style.cursor = 'zoom-in';
+                      } else {
+                        img.style.transform = 'scale(2)';
+                        img.style.cursor = 'zoom-out';
+                      }
+                    }}
+                  />
+                </div>
+                <div className="absolute top-2 right-2 bg-black bg-opacity-50 text-white px-3 py-1 rounded text-sm">
+                  کلیک برای زوم
+                </div>
+                <div className="absolute bottom-2 left-2">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => window.open(selectedImageUrl, '_blank')}
+                    className="bg-white bg-opacity-90 hover:bg-opacity-100"
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    باز کردن در تب جدید
+                  </Button>
+                </div>
               </div>
             )}
           </DialogContent>

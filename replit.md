@@ -6,6 +6,33 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Enhanced Receipt Viewer with Zoom Functionality in Financial Department (July 24, 2025)
+✅ **IMPLEMENTED: Advanced receipt viewing modal with interactive zoom and full-screen capabilities**
+- **User Request**: Display bank receipts in popup window with zoom functionality instead of basic image display
+- **Enhanced Modal Features**:
+  - **Larger Display Area**: Increased modal size to max-w-6xl for better viewing
+  - **Interactive Zoom**: Click-to-zoom functionality - click once for 2x zoom, click again to return to normal
+  - **Visual Feedback**: Cursor changes between zoom-in and zoom-out states
+  - **Hover Animation**: Smooth scale transition on hover (110%) for better UX
+  - **Scrollable Container**: Auto-scrolling container for zoomed images
+- **Advanced Controls**:
+  - **Zoom Indicator**: "کلیک برای زوم" overlay in top-right corner
+  - **External Link Button**: "باز کردن در تب جدید" button for full browser viewing
+  - **Background Enhancement**: Gray background for better image contrast
+  - **Responsive Design**: Maintains aspect ratio and proper containment
+- **Technical Implementation**:
+  - Dynamic transform scaling with JavaScript click handler
+  - CSS transitions for smooth zoom animations
+  - Absolute positioning for control overlays
+  - Semi-transparent background overlays for better visibility
+- **User Experience Improvements**:
+  - Professional image viewing experience similar to modern gallery apps
+  - Multiple viewing options (modal zoom + external tab)
+  - Clear visual indicators for available interactions
+  - Smooth animations and responsive feedback
+- **Business Impact**: Enhanced financial review process with better receipt examination capabilities
+- **Result**: Bank receipt viewing now provides professional zoom functionality with multiple viewing options
+
 ### COMPLETED: Logistics Print Function Enhancement - No More New Window Opening (July 24, 2025)
 ✅ **RESOLVED: Fixed logistics print function to use print preview instead of opening new browser window**
 - **User Issue**: Print button in logistics order details was opening unnecessary new browser window
