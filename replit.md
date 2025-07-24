@@ -6,6 +6,35 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Enhanced Payment Interface with Detailed Breakdown Table and Bank Transfer Instructions (July 24, 2025)
+✅ **IMPLEMENTED: Payment breakdown table with structured financial information per user mockup design**
+- **User Request**: "این را پیاده کن" with table mockup showing Final Amount, wallet payment, bank card payment, and wallet limits
+- **Payment Breakdown Table Implementation**: Created detailed payment table based on exact user design:
+  - **Final Amount Row**: Shows total order amount with gray background header
+  - **Wallet Payment Row**: Displays selected wallet amount with blue-highlighted wallet limit section
+  - **Bank Card Payment Row**: Shows remaining amount for bank payment in orange color
+  - **Additional Note**: "پرداخت در حواله بانکی یا موقعیت سه روزه" guidance text
+- **Structured Table Design**: Professional table layout with borders, proper spacing, and color-coded sections:
+  - Final Amount: 100,000 (bold, centered)
+  - Wallet payment amount: Dynamic based on user input
+  - Wallet limit: 50,000 (blue background with limit indicator)
+  - Bank card payment: Calculated remaining amount (orange text)
+- **Bank Transfer Instructions**: Added instructional text "برای ارسال حواله بانکی به پروفایل مراجعه کنید" for 3-day grace period option
+- **Form Organization Cleanup**: Removed "ارسال فیش واریزی بانکی" from main purchase form as it belongs in separate upload form
+- **Payment Option Finalization**: Clean payment options structure:
+  - آنلاین پرداخت (Online payment)
+  - پرداخت کامل از والت (Full wallet payment)
+  - پرداخت بخشی از والت (Partial wallet payment) **with detailed breakdown table**
+  - واریز بانکی با مهلت 3 روزه (Bank transfer with 3-day grace period) **with profile instructions**
+- **User Experience Enhancement**: 
+  - Clear visual separation between immediate payment methods and grace period options
+  - Detailed financial breakdown for transparency in partial wallet payments
+  - Proper guidance directing users to profile for bank transfer receipt uploads
+- **Technical Implementation**: Complete removal of bank receipt upload functionality from purchase form and hidden file inputs
+- **Business Logic**: Streamlined purchase flow with appropriate separation of payment methods and upload processes
+- **Impact**: Purchase form now has clean payment options with detailed financial breakdown and proper user guidance
+- **Result**: Enhanced payment interface operational with structured breakdown table matching user's exact design specifications
+
 ### COMPLETED: Bank Account Holder Field Implementation and Database Integration (July 24, 2025)
 ✅ **IMPLEMENTED: Complete bank account holder name field addition to company information module**
 - **User Request**: "نام صاحب حساب را در فرم اطلاعات بانکی در ماژول اطلاعات شرکت ایجاد کن و در دیتابانک بساز"
