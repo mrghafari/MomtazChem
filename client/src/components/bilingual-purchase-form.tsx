@@ -233,6 +233,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const [selectedReceiptFile, setSelectedReceiptFile] = useState<File | null>(null);
   const [selectedShippingMethod, setSelectedShippingMethod] = useState<number | null>(null);
   const [shippingCost, setShippingCost] = useState<number>(0);
+  const [selectedProvinceId, setSelectedProvinceId] = useState<number | null>(null);
   
 
 
@@ -307,6 +308,29 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     staleTime: 10000, // 10 seconds cache
     refetchOnWindowFocus: false,
     refetchOnMount: true, // Always refetch on mount for fresh data
+  });
+
+  // Fetch Iraqi provinces for dropdown
+  const { data: provincesData } = useQuery({
+    queryKey: ['/api/iraqi-provinces'],
+    retry: 1,
+    staleTime: 10 * 60 * 1000, // 10 minutes cache
+  });
+
+  // Fetch Iraqi cities based on selected province  
+  const { data: citiesData } = useQuery({
+    queryKey: ['/api/iraqi-cities', selectedProvinceId],
+    queryFn: async () => {
+      const url = selectedProvinceId 
+        ? `/api/iraqi-cities?provinceId=${selectedProvinceId}`
+        : '/api/iraqi-cities';
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Failed to fetch cities');
+      return response.json();
+    },
+    enabled: !!selectedProvinceId,
+    retry: 1,
+    staleTime: 10 * 60 * 1000, // 10 minutes cache
   });
 
   // Fetch VAT settings from public endpoint
@@ -1482,33 +1506,128 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                   </div>
                 )}
 
-                {/* City and Postal Code with conditional graying */}
-                <div className="grid grid-cols-2 gap-4">
+                {/* Province and City with Iraqi geographical data */}
+                <div className="space-y-4">
+                  {/* Province Selection */}
+                  <FormItem className={isPrimaryAddressDisabled ? 'opacity-60' : ''}>
+                    <FormLabel className={isPrimaryAddressDisabled ? 'text-gray-500' : ''}>
+                      {isRTL ? 'المحافظة' : 'Province'} *
+                    </FormLabel>
+                    <Select 
+                      value={selectedProvinceId?.toString() || ""}
+                      onValueChange={(value) => {
+                        const provinceId = parseInt(value);
+                        setSelectedProvinceId(provinceId);
+                        
+                        // Find selected province and update form
+                        const provinces = provincesData?.data || [];
+                        const selectedProvince = provinces.find((p: any) => p.id === provinceId);
+                        if (selectedProvince) {
+                          form.setValue('city', selectedProvince.nameArabic || selectedProvince.nameEnglish);
+                        }
+                      }}
+                      disabled={isPrimaryAddressDisabled}
+                    >
+                      <SelectTrigger className={`${isRTL ? 'text-right' : 'text-left'} ${
+                        isPrimaryAddressDisabled 
+                          ? 'bg-gray-100 text-gray-500 border-gray-300' 
+                          : ''
+                      }`}>
+                        <SelectValue placeholder={isRTL ? "اختر المحافظة" : "Select Province"} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {(provincesData?.data || []).map((province: any) => (
+                          <SelectItem key={province.id} value={province.id.toString()}>
+                            <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                              <span className="font-medium">
+                                {isRTL ? province.nameArabic : province.nameEnglish}
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                ({province.nameKurdish})
+                              </span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+
+                  {/* City Selection */}
                   <FormField
                     control={form.control}
                     name="city"
-                    render={({ field }) => (
-                      <FormItem className={isPrimaryAddressDisabled ? 'opacity-60' : ''}>
-                        <FormLabel className={isPrimaryAddressDisabled ? 'text-gray-500' : ''}>
-                          {t.city}
-                        </FormLabel>
-                        <FormControl>
-                          <Input 
-                            {...field} 
-                            placeholder={t.cityPlaceholder}
-                            className={`${isRTL ? 'text-right' : 'text-left'} ${
-                              isPrimaryAddressDisabled 
-                                ? 'bg-gray-100 text-gray-500 border-gray-300' 
-                                : ''
-                            }`}
-                            readOnly={isPrimaryAddressDisabled}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    render={({ field }) => {
+                      // Show city dropdown if province is selected and cities are available
+                      const showCityDropdown = selectedProvinceId && citiesData?.data?.length > 0;
+                      
+                      if (showCityDropdown) {
+                        return (
+                          <FormItem className={isPrimaryAddressDisabled ? 'opacity-60' : ''}>
+                            <FormLabel className={isPrimaryAddressDisabled ? 'text-gray-500' : ''}>
+                              {isRTL ? 'المدينة' : 'City'} *
+                            </FormLabel>
+                            <Select 
+                              value={field.value || ""}
+                              onValueChange={field.onChange}
+                              disabled={isPrimaryAddressDisabled}
+                            >
+                              <SelectTrigger className={`${isRTL ? 'text-right' : 'text-left'} ${
+                                isPrimaryAddressDisabled 
+                                  ? 'bg-gray-100 text-gray-500 border-gray-300' 
+                                  : ''
+                              }`}>
+                                <SelectValue placeholder={isRTL ? "اختر المدينة" : "Select City"} />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {(citiesData?.data || []).map((city: any) => (
+                                  <SelectItem key={city.id} value={city.nameArabic || city.nameEnglish}>
+                                    <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                                      <span className="font-medium">
+                                        {isRTL ? city.nameArabic : city.nameEnglish}
+                                      </span>
+                                      <span className="text-xs text-muted-foreground">
+                                        ({city.nameKurdish})
+                                      </span>
+                                      {city.population && (
+                                        <span className="text-xs text-muted-foreground">
+                                          - {parseInt(city.population).toLocaleString()}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        );
+                      } else {
+                        // Show regular input if no province selected or cities not loaded
+                        return (
+                          <FormItem className={isPrimaryAddressDisabled ? 'opacity-60' : ''}>
+                            <FormLabel className={isPrimaryAddressDisabled ? 'text-gray-500' : ''}>
+                              {t.city}
+                            </FormLabel>
+                            <FormControl>
+                              <Input 
+                                {...field} 
+                                placeholder={t.cityPlaceholder}
+                                className={`${isRTL ? 'text-right' : 'text-left'} ${
+                                  isPrimaryAddressDisabled 
+                                    ? 'bg-gray-100 text-gray-500 border-gray-300' 
+                                    : ''
+                                }`}
+                                readOnly={isPrimaryAddressDisabled}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        );
+                      }
+                    }}
                   />
 
+                  {/* Postal Code */}
                   <FormField
                     control={form.control}
                     name="postalCode"
