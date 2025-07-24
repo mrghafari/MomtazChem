@@ -77,6 +77,7 @@ interface CompanyInfo {
   licenseExpiryDate?: string;
   bankName?: string;
   bankAccount?: string;
+  bankAccountHolder?: string;
   bankIban?: string;
   bankSwift?: string;
   contactPersonName?: string;
@@ -1013,6 +1014,15 @@ export default function CompanyInformation() {
                     value={formData?.bankAccount || ''} 
                     placeholder="1234567890"
                     onChange={(e) => handleFieldChange('bankAccount', e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>نام صاحب حساب</Label>
+                  <Input 
+                    id="bankAccountHolder"
+                    value={formData?.bankAccountHolder || ''} 
+                    placeholder="نام کامل صاحب حساب"
+                    onChange={(e) => handleFieldChange('bankAccountHolder', e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">

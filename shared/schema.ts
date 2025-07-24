@@ -98,6 +98,7 @@ export const companyInformation = pgTable("company_information", {
   licenseExpiryDate: date("license_expiry_date"),
   bankName: text("bank_name"),
   bankAccount: text("bank_account"),
+  bankAccountHolder: text("bank_account_holder"),
   bankIban: text("bank_iban"),
   bankSwift: text("bank_swift"),
   contactPersonName: text("contact_person_name"),

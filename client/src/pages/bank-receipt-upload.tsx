@@ -255,7 +255,7 @@ export default function BankReceiptUpload() {
                 <div>
                   <span className="font-medium">نام صاحب حساب:</span>
                   <p className="text-muted-foreground">
-                    {companyInfo?.companyNameAr || companyInfo?.companyNameEn || 'شرکت ممتاز شیمی'}
+                    {companyInfo?.bankAccountHolder || companyInfo?.companyNameAr || companyInfo?.companyNameEn || 'شرکت ممتاز شیمی'}
                   </p>
                 </div>
                 <div>

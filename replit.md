@@ -6,6 +6,41 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Bank Account Holder Field Implementation and Database Integration (July 24, 2025)
+✅ **IMPLEMENTED: Complete bank account holder name field addition to company information module**
+- **User Request**: "نام صاحب حساب را در فرم اطلاعات بانکی در ماژول اطلاعات شرکت ایجاد کن و در دیتابانک بساز"
+- **Database Schema Enhancement**: Added `bankAccountHolder` field to `companyInformation` table:
+  - **Schema Update**: Added `bankAccountHolder: text("bank_account_holder")` to shared/schema.ts
+  - **Database Migration**: Executed SQL `ALTER TABLE company_information ADD COLUMN bank_account_holder TEXT`
+  - **Field Verification**: Confirmed successful column creation in PostgreSQL database
+- **Interface Updates**: Enhanced CompanyInfo interface with new field:
+  - **TypeScript Interface**: Added `bankAccountHolder?: string` to CompanyInfo interface
+  - **Form Integration**: Added input field in Banking Information section with proper validation
+  - **Manual Save Support**: Field integrates with existing manual save workflow in company information
+- **UI Form Implementation**: Professional input field for account holder name:
+  - **Field Label**: "نام صاحب حساب" (Account holder name)
+  - **Placeholder**: "نام کامل صاحب حساب" (Full account holder name)
+  - **Form Integration**: Uses `handleFieldChange` for local state management
+  - **Position**: Placed between "شماره حساب" and "شماره IBAN" fields
+- **Payment Forms Integration**: Updated dynamic banking display across all payment forms:
+  - **Bank Receipt Upload**: Shows `bankAccountHolder` with fallback to company names
+  - **Customer Wallet**: Displays account holder from dedicated field or company names
+  - **Priority Logic**: `bankAccountHolder || companyNameAr || companyNameEn || default`
+- **Complete Banking Fields**: Full banking information now includes:
+  - `bankName` - نام بانک (Bank name)
+  - `bankAccount` - شماره حساب (Account number)
+  - `bankAccountHolder` - نام صاحب حساب (Account holder name) **NEW**
+  - `bankIban` - شماره IBAN (IBAN number)
+  - `bankSwift` - کد SWIFT (SWIFT code)
+- **Real-time Synchronization**: Account holder name changes in Company Information instantly reflect in payment forms
+- **Technical Implementation**:
+  - Clean database schema extension without breaking existing functionality
+  - Type-safe field addition across all interfaces and components
+  - Consistent pattern with existing banking field implementation
+  - Proper fallback hierarchy for display logic
+- **Business Impact**: Companies can now specify exact account holder name for banking transactions separate from company names
+- **Result**: Complete bank account holder field operational - available in admin forms and automatically displayed in all customer payment interfaces
+
 ### COMPLETED: Dynamic Banking Information Integration Across Payment Forms (July 24, 2025)
 ✅ **IMPLEMENTED: Complete integration of dynamic banking information from Company Information module into all payment forms**
 - **User Request**: "یکپارچگی اطلاعات بانکی دینامیک از ماژول اطلاعات شرکت در فرم‌های پرداخت"
