@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 تشخیص مشکل - Bank Receipt Upload</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .diagnostic-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 15px 0;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .test-link {
+            background: #3b82f6;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 8px;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        .test-link:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+        }
+        .status-check {
+            background: #f0f9ff;
+            border: 2px solid #bae6fd;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        .success { 
+            color: #059669; 
+            background: #d1fae5;
+            border-color: #6ee7b7;
+        }
+        .error { 
+            color: #dc2626; 
+            background: #fee2e2;
+            border-color: #fca5a5;
+        }
+        .warning { 
+            color: #d97706; 
+            background: #fef3c7;
+            border-color: #fde68a;
+        }
+        .info { 
+            color: #0369a1; 
+            background: #e0f2fe;
+            border-color: #7dd3fc;
+        }
+        .header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            text-align: center;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .icon {
+            font-size: 24px;
+            margin-left: 10px;
+        }
+        .code-block {
+            background: #1f2937;
+            color: #e5e7eb;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔧 صفحه تشخیص مشکل</h1>
+        <p>راه‌حل کامل برای مشکل 404 در آپلود فیش بانکی</p>
+    </div>
+
+    <div class="diagnostic-card">
+        <h2>🎯 لینک‌های مستقیم برای تست</h2>
+        <p>این لینک‌ها باید کار کنند:</p>
+        
+        <div class="grid">
+            <div>
+                <h4>🏠 صفحه اصلی</h4>
+                <a href="/" class="test-link">صفحه اصلی</a>
+            </div>
+            
+            <div>
+                <h4>👤 پروفایل مشتری</h4>
+                <a href="/customer/profile" class="test-link">پروفایل مشتری</a>
+                <small>مشتری 8 لاگین باشد</small>
+            </div>
+            
+            <div>
+                <h4>🛍️ فروشگاه</h4>
+                <a href="/shop" class="test-link">فروشگاه</a>
+            </div>
+            
+            <div>
+                <h4>📋 آپلود فیش بانکی</h4>
+                <a href="/bank-receipt-upload/M2507240103" class="test-link">آپلود فیش (سفارش نمونه)</a>
+                <a href="/customer/bank-receipt-upload" class="test-link">آپلود فیش (مسیر قدیمی)</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="diagnostic-card">
+        <h2>✅ وضعیت سرور</h2>
+        <div id="server-status" class="status-check info">
+            🔄 در حال بررسی وضعیت سرور...
+        </div>
+        
+        <div id="route-status" class="status-check info">
+            🔄 در حال بررسی مسیرها...
+        </div>
+        
+        <div id="auth-status" class="status-check info">
+            🔄 در حال بررسی احراز هویت...
+        </div>
+    </div>
+
+    <div class="diagnostic-card">
+        <h2>🔍 راه‌حل‌های مشکل 404</h2>
+        
+        <div class="status-check warning">
+            <h4>⚠️ اگر صفحه 404 می‌بینید:</h4>
+            <ol>
+                <li><strong>کش مرورگر را پاک کنید:</strong> Ctrl+F5 یا Ctrl+Shift+R</li>
+                <li><strong>URL را بررسی کنید:</strong> مطمئن شوید URL درست تایپ شده</li>
+                <li><strong>از پروفایل استفاده کنید:</strong> از دکمه‌های داخل پروفایل مشتری استفاده کنید</li>
+                <li><strong>لاگین مجدد:</strong> از حساب مشتری خارج شده و دوباره لاگین کنید</li>
+            </ol>
+        </div>
+
+        <div class="status-check success">
+            <h4>✅ مسیر صحیح آپلود فیش بانکی:</h4>
+            <div class="code-block">
+1. برگ به: /customer/profile
+2. لاگین با: customer8@example.com / customer123  
+3. روی سفارش با "حواله بانکی" کلیک کن
+4. دکمه "آپلود حواله بانکی" را فشار بده
+            </div>
+        </div>
+    </div>
+
+    <div class="diagnostic-card">
+        <h2>📊 اطلاعات فنی</h2>
+        <div id="technical-info" class="code-block">
+            <div>URL فعلی: <span id="current-url"></span></div>
+            <div>User Agent: <span id="user-agent"></span></div>
+            <div>زمان: <span id="current-time"></span></div>
+        </div>
+    </div>
+
+    <script>
+        // تست وضعیت سرور
+        async function checkServerStatus() {
+            const statusDiv = document.getElementById('server-status');
+            try {
+                const response = await fetch('/api/products');
+                if (response.ok) {
+                    statusDiv.className = 'status-check success';
+                    statusDiv.innerHTML = '✅ سرور فعال است و API کار می‌کند';
+                } else {
+                    statusDiv.className = 'status-check error';
+                    statusDiv.innerHTML = `❌ مشکل در API: ${response.status}`;
+                }
+            } catch (error) {
+                statusDiv.className = 'status-check error';
+                statusDiv.innerHTML = `❌ خطای ارتباط با سرور: ${error.message}`;
+            }
+        }
+
+        // تست مسیرها
+        async function checkRoutes() {
+            const routeDiv = document.getElementById('route-status');
+            const routes = [
+                '/customer/profile',
+                '/bank-receipt-upload/M2507240103'
+            ];
+            
+            try {
+                let allWorking = true;
+                for (const route of routes) {
+                    const response = await fetch(route, { method: 'HEAD' });
+                    if (!response.ok) {
+                        allWorking = false;
+                        break;
+                    }
+                }
+                
+                if (allWorking) {
+                    routeDiv.className = 'status-check success';
+                    routeDiv.innerHTML = '✅ همه مسیرها در دسترس هستند';
+                } else {
+                    routeDiv.className = 'status-check warning';
+                    routeDiv.innerHTML = '⚠️ برخی مسیرها مشکل دارند';
+                }
+            } catch (error) {
+                routeDiv.className = 'status-check error';
+                routeDiv.innerHTML = `❌ خطا در بررسی مسیرها: ${error.message}`;
+            }
+        }
+
+        // تست احراز هویت
+        async function checkAuth() {
+            const authDiv = document.getElementById('auth-status');
+            try {
+                const response = await fetch('/api/customers/me');
+                if (response.ok) {
+                    const data = await response.json();
+                    authDiv.className = 'status-check success';
+                    authDiv.innerHTML = `✅ مشتری لاگین است: ${data.customer?.firstName || 'ناشناس'}`;
+                } else if (response.status === 401) {
+                    authDiv.className = 'status-check warning';
+                    authDiv.innerHTML = '⚠️ مشتری لاگین نیست - لطفاً ابتدا لاگین کنید';
+                } else {
+                    authDiv.className = 'status-check error';
+                    authDiv.innerHTML = `❌ خطا در احراز هویت: ${response.status}`;
+                }
+            } catch (error) {
+                authDiv.className = 'status-check error';
+                authDiv.innerHTML = `❌ خطای احراز هویت: ${error.message}`;
+            }
+        }
+
+        // نمایش اطلاعات فنی
+        function showTechnicalInfo() {
+            document.getElementById('current-url').textContent = window.location.href;
+            document.getElementById('user-agent').textContent = navigator.userAgent;
+            document.getElementById('current-time').textContent = new Date().toLocaleString('fa-IR');
+        }
+
+        // اجرای تست‌ها
+        async function runDiagnostics() {
+            console.log('🔧 Starting diagnostics...');
+            showTechnicalInfo();
+            
+            await Promise.all([
+                checkServerStatus(),
+                checkRoutes(),
+                checkAuth()
+            ]);
+            
+            console.log('✅ Diagnostics completed');
+        }
+
+        // شروع تست‌ها
+        document.addEventListener('DOMContentLoaded', runDiagnostics);
+        
+        // رفرش اتوماتیک هر 30 ثانیه
+        setInterval(runDiagnostics, 30000);
+    </script>
+</body>
+</html>
