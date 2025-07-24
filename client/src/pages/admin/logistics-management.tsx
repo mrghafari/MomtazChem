@@ -611,9 +611,9 @@ const LogisticsManagement = () => {
                             const url = `https://www.google.com/maps?q=${lat},${lng}`;
                             window.open(url, '_blank');
                           }}
-                          className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
+                          className="px-1 py-0.5 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors text-[10px]"
                         >
-                          🗺️ Google Maps
+                          🗺️
                         </button>
                       </div>
                     )}
