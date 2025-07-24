@@ -1,0 +1,126 @@
+VM9:51 Tawk.to script loaded successfully
+ Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:117574)
+    at t.value (twk-chunk-common.js:2:150658)
+    at p.updateUUID (twk-chunk-common.js:2:202310)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at push.2f62.p.dispatch (twk-vendor.js:2:78106)
+    at push.2f62.p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:124589)
+    at twk-chunk-common.js:2:123900
+value @ twk-chunk-common.js:2
+VM9:23 Tawk.to Live Chat loaded successfully
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+ 🔐 [LOGIN] Starting handleLoginSuccess
+ 🔐 [LOGIN] Customer data: Object
+ 🔐 [LOGIN] Current cart state: Object
+ 🔐 [LOGIN] Customer state set
+ 🔐 [LOGIN] Wallet balance fetch initiated
+ 🔐 [LOGIN] Auth modal closed
+ 🔐 [LOGIN] Cache invalidated
+ 🔐 [LOGIN] Has cart items: false
+ 🔐 [LOGIN] Cart contents: Object
+ 🔐 [LOGIN] Cart migration completed
+ 🔐 [LOGIN] Welcome toast shown
+ 🔐 [LOGIN] Staying in shop after successful login
+ 🔐 [LOGIN] handleLoginSuccess completed successfully
+ 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+ 🔍 [UI DEBUG] Customer data loaded
+ 🔍 [CRM DEBUG] CRM Fields from API: Object
+ 🔍 [VALUES] Actual CRM values: annualRevenue=null priceRange=null orderFrequency=null creditStatus=good smsEnabled=false emailEnabled=false
+ 🏢 [TAX DEBUG] Tax & Registration from API: Object
+ 🏢 [TAX VALUES] Actual values: taxId=110 registrationNumber=1111
+ ✅ [UI DEBUG] Form reset completed with CRM values: annualRevenue= priceRange= orderFrequency= creditStatus=good smsEnabled=false emailEnabled=false
+ ✅ [TAX DEBUG] Form reset completed with Tax values: taxId=110 registrationNumber=1111
+ 📍 Province found and set: Object
+ 🏙️ City found and set: Object
+ Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-C436OVJF.js:339
+/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+/api/customers/export-orders-csv?startDate=2025-07-01&endDate=2025-07-24:1  Failed to load resource: the server responded with a status of 404 (Not Found)
+ CSV export error: Error: API endpoint not found
+    at handleCsvExport (/src/pages/customer-profile.tsx:258:15)
+handleCsvExport @ /src/pages/customer-profile.tsx:278
+  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/export-orders-csv?startDate=2025-07-01&endDate=2025-07-24 404 (Not Found)
+handleCsvExport @ /src/pages/customer-profile.tsx:252
+callCallback2 @ chunk-RPCDYKBN.js:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js:3736
+executeDispatch @ chunk-RPCDYKBN.js:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js:7034
+processDispatchQueue @ chunk-RPCDYKBN.js:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js:7051
+(anonymous) @ chunk-RPCDYKBN.js:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js:18913
+batchedUpdates @ chunk-RPCDYKBN.js:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js:5478
+dispatchEvent @ chunk-RPCDYKBN.js:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js:5449
+ CSV export error: Error: API endpoint not found
+    at handleCsvExport (/src/pages/customer-profile.tsx:258:15)
+handleCsvExport @ /src/pages/customer-profile.tsx:278
+await in handleCsvExport
+callCallback2 @ chunk-RPCDYKBN.js:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js:3736
+executeDispatch @ chunk-RPCDYKBN.js:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js:7034
+processDispatchQueue @ chunk-RPCDYKBN.js:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js:7051
+(anonymous) @ chunk-RPCDYKBN.js:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js:18913
+batchedUpdates @ chunk-RPCDYKBN.js:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js:5478
+dispatchEvent @ chunk-RPCDYKBN.js:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js:5449

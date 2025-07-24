@@ -12087,6 +12087,140 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // CSV Export for completed orders
+  app.get("/api/customers/export-orders-csv", async (req, res) => {
+    console.log('📊 [CSV EXPORT] Called with query:', req.query);
+    
+    try {
+      if (!req.session.isAuthenticated || !req.session.customerId) {
+        console.log('❌ [CSV EXPORT] Unauthorized access attempt');
+        return res.status(401).json({
+          success: false,
+          message: "احراز هویت مشتری مورد نیاز است"
+        });
+      }
+
+      const customerId = req.session.customerId;
+      const { startDate, endDate } = req.query;
+      
+      console.log(`📊 [CSV EXPORT] Exporting CSV for customer ${customerId}, startDate: ${startDate}, endDate: ${endDate}`);
+      
+      // Get all orders for customer
+      const allOrders = await customerStorage.getCompleteOrderHistory(customerId);
+      console.log(`📊 [CSV EXPORT] Found ${allOrders.length} total orders`);
+      
+      // Filter for completed orders only
+      const completedOrders = allOrders.filter(order => {
+        const isCompleted = order.status === 'confirmed' || 
+                           order.status === 'delivered' || 
+                           order.paymentStatus === 'paid';
+        return isCompleted;
+      });
+      
+      console.log(`📊 [CSV EXPORT] Found ${completedOrders.length} completed orders`);
+      
+      // Apply date filtering if provided
+      let filteredOrders = completedOrders;
+      if (startDate || endDate) {
+        filteredOrders = completedOrders.filter(order => {
+          const orderDate = new Date(order.createdAt);
+          
+          if (startDate && endDate) {
+            return orderDate >= new Date(startDate) && orderDate <= new Date(endDate + 'T23:59:59');
+          } else if (startDate) {
+            return orderDate >= new Date(startDate);
+          } else if (endDate) {
+            return orderDate <= new Date(endDate + 'T23:59:59');
+          }
+          
+          return true;
+        });
+      }
+      
+      console.log(`📊 [CSV EXPORT] After date filtering: ${filteredOrders.length} orders`);
+      
+      // Generate CSV headers in Persian
+      const headers = [
+        'شماره سفارش',
+        'تاریخ سفارش', 
+        'وضعیت',
+        'وضعیت پرداخت',
+        'روش پرداخت',
+        'مبلغ کل (دینار)',
+        'محصولات',
+        'تعداد اقلام',
+        'آدرس تحویل'
+      ];
+      
+      // Generate CSV rows
+      const csvRows = [headers.join(',')];
+      
+      for (const order of filteredOrders) {
+        const orderDate = new Date(order.createdAt).toLocaleDateString('fa-IR');
+        const statusMap = {
+          'pending': 'در انتظار',
+          'confirmed': 'تایید شده',
+          'processing': 'در حال پردازش',
+          'shipped': 'ارسال شده',
+          'delivered': 'تحویل داده شده',
+          'cancelled': 'لغو شده'
+        };
+        
+        const paymentStatusMap = {
+          'pending': 'در انتظار پرداخت',
+          'paid': 'پرداخت شده',
+          'failed': 'ناموفق',
+          'refunded': 'برگشت داده شده'
+        };
+        
+        const paymentMethodMap = {
+          'online': 'آنلاین پرداخت',
+          'cash': 'نقدی',
+          'bank_transfer': 'واریز بانکی',
+          'wallet': 'والت',
+          'partial_wallet': 'پرداخت ترکیبی',
+          'bank_transfer_grace': 'واریز بانکی با مهلت 3 روزه'
+        };
+        
+        const products = order.items ? order.items.map(item => `${item.productName} (${item.quantity})`).join('; ') : 'نامشخص';
+        const totalItems = order.items ? order.items.reduce((sum, item) => sum + item.quantity, 0) : 0;
+        
+        const row = [
+          order.orderNumber || 'نامشخص',
+          orderDate,
+          statusMap[order.status] || order.status,
+          paymentStatusMap[order.paymentStatus] || order.paymentStatus,
+          paymentMethodMap[order.paymentMethod] || order.paymentMethod,
+          order.totalAmount ? order.totalAmount.toLocaleString('fa-IR') : '0',
+          `"${products}"`, // Wrap in quotes to handle commas
+          totalItems,
+          `"${order.address || 'نامشخص'}"` // Wrap in quotes to handle commas
+        ];
+        
+        csvRows.push(row.join(','));
+      }
+      
+      const csvContent = csvRows.join('\n');
+      
+      // Set CSV headers
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="completed-orders-${customerId}-${new Date().toISOString().split('T')[0]}.csv"`);
+      
+      // Add BOM for proper Persian character display
+      res.write('\ufeff');
+      res.end(csvContent);
+      
+      console.log(`✅ [CSV EXPORT] CSV generated successfully with ${filteredOrders.length} orders`);
+
+    } catch (error) {
+      console.error('❌ [CSV EXPORT] Error:', error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در تولید فایل CSV"
+      });
+    }
+  });
+
   // Admin delete order (for test orders or administrative deletion)
   app.delete("/api/admin/orders/:orderId/delete", requireAuth, async (req, res) => {
     try {
