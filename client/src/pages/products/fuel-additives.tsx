@@ -17,7 +17,7 @@ const FuelAdditives = () => {
     queryFn: () => fetch("/api/products?category=fuel-additives").then(res => res.json()),
   });
 
-  const { data: productStats } = useQuery({
+  const { data: productStatsData } = useQuery({
     queryKey: ['/api/shop/product-stats'],
     queryFn: () => fetch('/api/shop/product-stats').then(res => res.json()).then(data => data.data),
   });
@@ -147,7 +147,7 @@ const FuelAdditives = () => {
                       />
                       
                       {/* Star Rating Display - Bottom Left Corner */}
-                      {productStats && productStats[product.id] && (
+                      {productStatsData && productStatsDataData[product.id] && (
                         <div className="absolute bottom-2 left-2">
                           <div 
                             className="bg-white/90 backdrop-blur-sm rounded-md px-2 py-1 shadow-sm border border-yellow-200/50 cursor-pointer hover:bg-yellow-50/80 transition-colors"
@@ -163,10 +163,10 @@ const FuelAdditives = () => {
                                   <Star 
                                     key={starNum}
                                     className={`w-3 h-3 ${
-                                      productStats[product.id].totalReviews > 0 
-                                        ? (starNum <= Math.floor(productStats[product.id].averageRating) 
+                                      productStatsData[product.id].totalReviews > 0 
+                                        ? (starNum <= Math.floor(productStatsData[product.id].averageRating) 
                                             ? 'fill-yellow-400 text-yellow-400' 
-                                            : starNum <= Math.ceil(productStats[product.id].averageRating)
+                                            : starNum <= Math.ceil(productStatsData[product.id].averageRating)
                                             ? 'fill-yellow-200 text-yellow-200'
                                             : 'fill-gray-200 text-gray-200')
                                         : 'fill-gray-200 text-gray-200 hover:fill-yellow-300'
@@ -174,9 +174,9 @@ const FuelAdditives = () => {
                                   />
                                 ))}
                               </div>
-                              {productStats[product.id].totalReviews > 0 ? (
+                              {productStatsData[product.id].totalReviews > 0 ? (
                                 <span className="text-xs font-medium text-gray-700">
-                                  {productStats[product.id].averageRating.toFixed(1)}
+                                  {productStatsData[product.id].averageRating.toFixed(1)}
                                 </span>
                               ) : (
                                 <span className="text-xs text-gray-500">

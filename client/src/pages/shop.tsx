@@ -1294,8 +1294,7 @@ const Shop = () => {
                             </div>
                           )}
                           
-                          {/* Star Rating Display - Bottom Left Corner */}
-                          {/* Star Rating Display - Always show */}
+                          {/* Star Rating Display - Bottom Left Corner - Always Show */}
                           <div className="absolute bottom-2 left-2">
                             <div 
                               className="bg-white/90 backdrop-blur-sm rounded-md px-2 py-1 shadow-sm border border-yellow-200/50 cursor-pointer hover:bg-yellow-50/80 transition-colors"
@@ -1307,30 +1306,32 @@ const Shop = () => {
                             >
                               <div className="flex items-center gap-1">
                                 <div className="flex">
-                                  {[1,2,3,4,5].map((starNum) => (
-                                    <Star 
-                                      key={starNum}
-                                      className={`w-3 h-3 ${
-                                        productStatsData && productStatsData[product.id] && productStatsData[product.id].totalReviews > 0 
-                                          ? (starNum <= Math.floor(productStatsData[product.id].averageRating) 
-                                              ? 'fill-yellow-400 text-yellow-400' 
-                                              : starNum <= Math.ceil(productStatsData[product.id].averageRating)
-                                              ? 'fill-yellow-200 text-yellow-200'
-                                              : 'fill-gray-200 text-gray-200')
-                                          : 'fill-gray-200 text-gray-200 hover:fill-yellow-300'
-                                      }`}
-                                    />
-                                  ))}
+                                  {[1,2,3,4,5].map((starNum) => {
+                                    const stats = productStatsData?.[product.id];
+                                    const hasReviews = stats && stats.totalReviews > 0;
+                                    const rating = hasReviews ? stats.averageRating : 0;
+                                    
+                                    return (
+                                      <Star 
+                                        key={starNum}
+                                        className={`w-3 h-3 ${
+                                          hasReviews 
+                                            ? (starNum <= Math.floor(rating) 
+                                                ? 'fill-yellow-400 text-yellow-400' 
+                                                : starNum <= Math.ceil(rating)
+                                                ? 'fill-yellow-200 text-yellow-200'
+                                                : 'fill-gray-200 text-gray-200')
+                                            : 'fill-gray-200 text-gray-200 hover:fill-yellow-300'
+                                        }`}
+                                      />
+                                    );
+                                  })}
                                 </div>
-                                {productStatsData && productStatsData[product.id] && productStatsData[product.id].totalReviews > 0 ? (
-                                  <span className="text-xs font-medium text-gray-700">
-                                    {productStatsData[product.id].averageRating.toFixed(1)}
-                                  </span>
-                                ) : (
-                                  <span className="text-xs text-gray-500">
-                                    نظر
-                                  </span>
-                                )}
+                                <span className="text-xs text-gray-600">
+                                  {productStatsData?.[product.id]?.totalReviews > 0 
+                                    ? productStatsData[product.id].averageRating.toFixed(1)
+                                    : 'نظر'}
+                                </span>
                               </div>
                             </div>
                           </div>
@@ -1638,7 +1639,7 @@ const Shop = () => {
                             </div>
                           )}
                           
-                          {/* Star Rating - Bottom Left Corner - List View */}
+                          {/* Star Rating - Bottom Left Corner - List View - Always Show */}
                           <div className="absolute bottom-2 left-2">
                             <div 
                               className="bg-white/90 backdrop-blur-sm rounded-md px-2 py-1 shadow-sm border border-yellow-200/50 cursor-pointer hover:bg-yellow-50/80 transition-colors"
@@ -1650,28 +1651,32 @@ const Shop = () => {
                             >
                               <div className="flex items-center gap-1">
                                 <div className="flex">
-                                  {[1,2,3,4,5].map((starNum) => (
-                                    <Star 
-                                      key={starNum}
-                                      className={`w-3 h-3 ${
-                                        productStatsData && productStatsData[product.id] && productStatsData[product.id].totalReviews > 0 
-                                          ? (starNum <= Math.floor(productStatsData[product.id].averageRating) 
-                                              ? 'fill-yellow-400 text-yellow-400' 
-                                              : 'fill-gray-200 text-gray-200')
-                                          : 'fill-gray-200 text-gray-200 hover:fill-yellow-300'
-                                      }`}
-                                    />
-                                  ))}
+                                  {[1,2,3,4,5].map((starNum) => {
+                                    const stats = productStatsData?.[product.id];
+                                    const hasReviews = stats && stats.totalReviews > 0;
+                                    const rating = hasReviews ? stats.averageRating : 0;
+                                    
+                                    return (
+                                      <Star 
+                                        key={starNum}
+                                        className={`w-3 h-3 ${
+                                          hasReviews 
+                                            ? (starNum <= Math.floor(rating) 
+                                                ? 'fill-yellow-400 text-yellow-400' 
+                                                : starNum <= Math.ceil(rating)
+                                                ? 'fill-yellow-200 text-yellow-200'
+                                                : 'fill-gray-200 text-gray-200')
+                                            : 'fill-gray-200 text-gray-200 hover:fill-yellow-300'
+                                        }`}
+                                      />
+                                    );
+                                  })}
                                 </div>
-                                {productStatsData && productStatsData[product.id] && productStatsData[product.id].totalReviews > 0 ? (
-                                  <span className="text-xs text-gray-600 ml-1">
-                                    {productStatsData[product.id].averageRating.toFixed(1)}
-                                  </span>
-                                ) : (
-                                  <span className="text-xs text-gray-500">
-                                    نظر
-                                  </span>
-                                )}
+                                <span className="text-xs text-gray-600">
+                                  {productStatsData?.[product.id]?.totalReviews > 0 
+                                    ? productStatsData[product.id].averageRating.toFixed(1)
+                                    : 'نظر'}
+                                </span>
                               </div>
                             </div>
                           </div>
