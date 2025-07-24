@@ -1,0 +1,340 @@
+ Tawk.to script loaded successfully
+ 🔍 DEBUGGING REVIEWS ISSUE:
+ Product ID: 475
+ Reviews Data Full: undefined
+ Reviews Array Length: 0
+ Reviews Array: Array(0)
+ Product Stats: Object
+ Product: undefined
+me:1  Failed to load resource: the server responded with a status of 401 ()
+ 🔍 DEBUGGING REVIEWS ISSUE:
+ Product ID: 475
+ Reviews Data Full: undefined
+ Reviews Array Length: 0
+ Reviews Array: Array(0)
+ Product Stats: Object
+ Product: Object
+ 🔍 DEBUGGING REVIEWS ISSUE:
+ Product ID: 475
+ Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "averageRating": 0,
+      "totalReviews": 0,
+      "ratingDistribution": {}
+    }
+  }
+}
+ Reviews Array Length: 0
+ Reviews Array: Array(0)
+ Product Stats: Object
+ Product: Object
+ ReviewsData type: object
+ ReviewsData keys: Array(2)
+ ReviewsData.data keys: Array(2)
+ ReviewsData.data.reviews: Array(0)
+ ProductRating Props: Object
+ 
+value @ twk-chunk-common.js:2
+ Tawk.to Live Chat loaded successfully
+ 🔍 DEBUGGING REVIEWS ISSUE:
+ Product ID: 475
+ Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "averageRating": 0,
+      "totalReviews": 0,
+      "ratingDistribution": {}
+    }
+  }
+}
+ Reviews Array Length: 0
+ Reviews Array: Array(0)
+ Product Stats: Object
+ Product: Object
+ ReviewsData type: object
+ ReviewsData keys: Array(2)
+ ReviewsData.data keys: Array(2)
+ ReviewsData.data.reviews: Array(0)
+ ProductRating Props: Object
+ 🔍 DEBUGGING REVIEWS ISSUE:
+ Product ID: 475
+ Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "averageRating": 0,
+      "totalReviews": 0,
+      "ratingDistribution": {}
+    }
+  }
+}
+ Reviews Array Length: 0
+ Reviews Array: Array(0)
+ Product Stats: Object
+ Product: Object
+ ReviewsData type: object
+ ReviewsData keys: Array(2)
+ ReviewsData.data keys: Array(2)
+ ReviewsData.data.reviews: Array(0)
+ ProductRating Props: Object
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(6)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(6)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(6)
+ Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ index-DFY73R0D.js:970
+ 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(6)
+me:1  Failed to load resource: the server responded with a status of 401 ()
+me:1  Failed to load resource: the server responded with a status of 401 ()
+ 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+index-DFY73R0D.js:970 🌟 [RATINGS DEBUG] Current products: Array(6)
+index-DFY73R0D.js:970 🌟 [RATINGS DEBUG] Products with ratings: Array(6)
+index-DFY73R0D.js:970 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+index-DFY73R0D.js:970 🌟 [RATINGS DEBUG] Current products: Array(6)
+index-DFY73R0D.js:970 🌟 [RATINGS DEBUG] Products with ratings: Array(6)
+/api/admin/me:1  Failed to load resource: the server responded with a status of 401 ()
+index-DFY73R0D.js:1431 🔍 DEBUGGING REVIEWS ISSUE:
+index-DFY73R0D.js:1431 Product ID: 475
+index-DFY73R0D.js:1431 Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "averageRating": 0,
+      "totalReviews": 0,
+      "ratingDistribution": {}
+    }
+  }
+}
+index-DFY73R0D.js:1431 Reviews Array Length: 0
+index-DFY73R0D.js:1431 Reviews Array: Array(0)
+index-DFY73R0D.js:1431 Product Stats: Object
+index-DFY73R0D.js:1431 Product: Object
+index-DFY73R0D.js:1431 ReviewsData type: object
+index-DFY73R0D.js:1431 ReviewsData keys: Array(2)
+index-DFY73R0D.js:1431 ReviewsData.data keys: Array(2)
+index-DFY73R0D.js:1431 ReviewsData.data.reviews: Array(0)
+index-DFY73R0D.js:1431 ProductRating Props: Object
+index-DFY73R0D.js:1431 ProductRating Props: Object
+index-DFY73R0D.js:1431 🔍 DEBUGGING REVIEWS ISSUE:
+index-DFY73R0D.js:1431 Product ID: 475
+index-DFY73R0D.js:1431 Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "averageRating": 0,
+      "totalReviews": 0,
+      "ratingDistribution": {}
+    }
+  }
+}
+index-DFY73R0D.js:1431 Reviews Array Length: 0
+index-DFY73R0D.js:1431 Reviews Array: Array(0)
+index-DFY73R0D.js:1431 Product Stats: Object
+index-DFY73R0D.js:1431 Product: Object
+index-DFY73R0D.js:1431 ReviewsData type: object
+index-DFY73R0D.js:1431 ReviewsData keys: Array(2)
+index-DFY73R0D.js:1431 ReviewsData.data keys: Array(2)
+index-DFY73R0D.js:1431 ReviewsData.data.reviews: Array(0)
+index-DFY73R0D.js:1431 ProductRating Props: Object
+index-DFY73R0D.js:1431 🔍 DEBUGGING REVIEWS ISSUE:
+index-DFY73R0D.js:1431 Product ID: 475
+index-DFY73R0D.js:1431 Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "averageRating": 0,
+      "totalReviews": 0,
+      "ratingDistribution": {}
+    }
+  }
+}
+index-DFY73R0D.js:1431 Reviews Array Length: 0
+index-DFY73R0D.js:1431 Reviews Array: Array(0)
+index-DFY73R0D.js:1431 Product Stats: Object
+index-DFY73R0D.js:1431 Product: Object
+index-DFY73R0D.js:1431 ReviewsData type: object
+index-DFY73R0D.js:1431 ReviewsData keys: Array(2)
+index-DFY73R0D.js:1431 ReviewsData.data keys: Array(2)
+index-DFY73R0D.js:1431 ReviewsData.data.reviews: Array(0)
+index-DFY73R0D.js:1431 ProductRating Props: Object
+index-DFY73R0D.js:1431 ProductRating Props: Object
+index-DFY73R0D.js:1431 ProductRating Props: Object
+index-DFY73R0D.js:1431 ProductRating Props: Object
+index-DFY73R0D.js:1431 ProductRating Props: Object
+index-DFY73R0D.js:1431 ProductRating Props: Object
+index-DFY73R0D.js:1431 🔍 DEBUGGING REVIEWS ISSUE:
+index-DFY73R0D.js:1431 Product ID: 475
+index-DFY73R0D.js:1431 Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "averageRating": 0,
+      "totalReviews": 0,
+      "ratingDistribution": {}
+    }
+  }
+}
+index-DFY73R0D.js:1431 Reviews Array Length: 0
+index-DFY73R0D.js:1431 Reviews Array: Array(0)
+index-DFY73R0D.js:1431 Product Stats: Object
+index-DFY73R0D.js:1431 Product: Object
+index-DFY73R0D.js:1431 ReviewsData type: object
+index-DFY73R0D.js:1431 ReviewsData keys: Array(2)
+index-DFY73R0D.js:1431 ReviewsData.data keys: Array(2)
+index-DFY73R0D.js:1431 ReviewsData.data.reviews: Array(0)
+index-DFY73R0D.js:1431 ProductRating Props: Object
+index-DFY73R0D.js:1431 🔍 DEBUGGING REVIEWS ISSUE:
+index-DFY73R0D.js:1431 Product ID: 475
+index-DFY73R0D.js:1431 Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "averageRating": 0,
+      "totalReviews": 0,
+      "ratingDistribution": {}
+    }
+  }
+}
+index-DFY73R0D.js:1431 Reviews Array Length: 0
+index-DFY73R0D.js:1431 Reviews Array: Array(0)
+index-DFY73R0D.js:1431 Product Stats: Object
+index-DFY73R0D.js:1431 Product: Object
+index-DFY73R0D.js:1431 ReviewsData type: object
+index-DFY73R0D.js:1431 ReviewsData keys: Array(2)
+index-DFY73R0D.js:1431 ReviewsData.data keys: Array(2)
+index-DFY73R0D.js:1431 ReviewsData.data.reviews: Array(0)
+index-DFY73R0D.js:1431 ProductRating Props: Object
+index-DFY73R0D.js:1431 🔍 DEBUGGING REVIEWS ISSUE:
+index-DFY73R0D.js:1431 Product ID: 475
+index-DFY73R0D.js:1431 Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "averageRating": 0,
+      "totalReviews": 0,
+      "ratingDistribution": {}
+    }
+  }
+}
+index-DFY73R0D.js:1431 Reviews Array Length: 0
+index-DFY73R0D.js:1431 Reviews Array: Array(0)
+index-DFY73R0D.js:1431 Product Stats: Object
+index-DFY73R0D.js:1431 Product: Object
+index-DFY73R0D.js:1431 ReviewsData type: object
+index-DFY73R0D.js:1431 ReviewsData keys: Array(2)
+index-DFY73R0D.js:1431 ReviewsData.data keys: Array(2)
+index-DFY73R0D.js:1431 ReviewsData.data.reviews: Array(0)
+index-DFY73R0D.js:1431 ProductRating Props: Object
+/api/admin/me:1  Failed to load resource: the server responded with a status of 401 ()
+index-DFY73R0D.js:1431 ProductRating Props: {productId: 475, productName: 'Diesel Fuel Additive DFA-100', averageRating: 0, totalReviews: 0, reviews: 0}
+index-DFY73R0D.js:1431 ProductRating Props: {productId: 475, productName: 'Diesel Fuel Additive DFA-100', averageRating: 0, totalReviews: 0, reviews: 0}
+index-DFY73R0D.js:1431 ProductRating Props: {productId: 475, productName: 'Diesel Fuel Additive DFA-100', averageRating: 0, totalReviews: 0, reviews: 0}
+index-DFY73R0D.js:1431 ProductRating Props: {productId: 475, productName: 'Diesel Fuel Additive DFA-100', averageRating: 0, totalReviews: 0, reviews: 0}
+index-DFY73R0D.js:1431 ProductRating Props: {productId: 475, productName: 'Diesel Fuel Additive DFA-100', averageRating: 0, totalReviews: 0, reviews: 0}
+index-DFY73R0D.js:1431 ProductRating Props: {productId: 475, productName: 'Diesel Fuel Additive DFA-100', averageRating: 0, totalReviews: 0, reviews: 0}
+index-DFY73R0D.js:1431 ProductRating Props: {productId: 475, productName: 'Diesel Fuel Additive DFA-100', averageRating: 0, totalReviews: 0, reviews: 0}
+index-DFY73R0D.js:1431 ProductRating Props: {productId: 475, productName: 'Diesel Fuel Additive DFA-100', averageRating: 0, totalReviews: 0, reviews: 0}
+index-DFY73R0D.js:1431 ProductRating Props: {productId: 475, productName: 'Diesel Fuel Additive DFA-100', averageRating: 0, totalReviews: 0, reviews: 0}
+index-DFY73R0D.js:1431 ProductRating Props: {productId: 475, productName: 'Diesel Fuel Additive DFA-100', averageRating: 0, totalReviews: 0, reviews: 0}
+index-DFY73R0D.js:1431 ProductRating Props: {productId: 475, productName: 'Diesel Fuel Additive DFA-100', averageRating: 0, totalReviews: 0, reviews: 0}
+index-DFY73R0D.js:1431 ProductRating Props: {productId: 475, productName: 'Diesel Fuel Additive DFA-100', averageRating: 0, totalReviews: 0, reviews: 0}
+index-DFY73R0D.js:1431 ProductRating Props: {productId: 475, productName: 'Diesel Fuel Additive DFA-100', averageRating: 0, totalReviews: 0, reviews: 0}
+index-DFY73R0D.js:1431 ProductRating Props: {productId: 475, productName: 'Diesel Fuel Additive DFA-100', averageRating: 0, totalReviews: 0, reviews: 0}
+index-DFY73R0D.js:1431 🔍 DEBUGGING REVIEWS ISSUE:
+index-DFY73R0D.js:1431 Product ID: 475
+index-DFY73R0D.js:1431 Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "averageRating": 0,
+      "totalReviews": 0,
+      "ratingDistribution": {}
+    }
+  }
+}
+index-DFY73R0D.js:1431 Reviews Array Length: 0
+index-DFY73R0D.js:1431 Reviews Array: []
+index-DFY73R0D.js:1431 Product Stats: {averageRating: 0, totalReviews: 0, ratingDistribution: {…}}
+index-DFY73R0D.js:1431 Product: {id: 475, name: 'Diesel Fuel Additive DFA-100', category: 'fuel-additives', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+index-DFY73R0D.js:1431 ReviewsData type: object
+index-DFY73R0D.js:1431 ReviewsData keys: (2) ['success', 'data']
+index-DFY73R0D.js:1431 ReviewsData.data keys: (2) ['reviews', 'stats']
+index-DFY73R0D.js:1431 ReviewsData.data.reviews: []
+index-DFY73R0D.js:1431 ProductRating Props: {productId: 475, productName: 'Diesel Fuel Additive DFA-100', averageRating: 0, totalReviews: 0, reviews: 0}
+index-DFY73R0D.js:1431 🔍 DEBUGGING REVIEWS ISSUE:
+index-DFY73R0D.js:1431 Product ID: 475
+index-DFY73R0D.js:1431 Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "averageRating": 0,
+      "totalReviews": 0,
+      "ratingDistribution": {}
+    }
+  }
+}
+index-DFY73R0D.js:1431 Reviews Array Length: 0
+index-DFY73R0D.js:1431 Reviews Array: []
+index-DFY73R0D.js:1431 Product Stats: {averageRating: 0, totalReviews: 0, ratingDistribution: {…}}
+index-DFY73R0D.js:1431 Product: {id: 475, name: 'Diesel Fuel Additive DFA-100', category: 'fuel-additives', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+index-DFY73R0D.js:1431 ReviewsData type: object
+index-DFY73R0D.js:1431 ReviewsData keys: (2) ['success', 'data']
+index-DFY73R0D.js:1431 ReviewsData.data keys: (2) ['reviews', 'stats']
+index-DFY73R0D.js:1431 ReviewsData.data.reviews: []
+index-DFY73R0D.js:1431 ProductRating Props: {productId: 475, productName: 'Diesel Fuel Additive DFA-100', averageRating: 0, totalReviews: 0, reviews: 0}
+index-DFY73R0D.js:966  GET https://momtaz-chem-website-admin3119.replit.app/api/admin/me 401 (Unauthorized)
+queryFn @ index-DFY73R0D.js:966
+i @ index-DFY73R0D.js:48
+b @ index-DFY73R0D.js:48
+start @ index-DFY73R0D.js:48
+fetch @ index-DFY73R0D.js:48
+Jg @ index-DFY73R0D.js:48
+(anonymous) @ index-DFY73R0D.js:48

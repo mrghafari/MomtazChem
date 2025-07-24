@@ -150,6 +150,16 @@ export const customerOrders = pgTable("customer_orders", {
   recipientPhone: text("recipient_phone"), // شماره موبایل گیرنده
   recipientAddress: text("recipient_address"), // آدرس دریافت کالا
   
+  // Second delivery address fields for CRM conditional logic
+  secondDeliveryAddress: text("second_delivery_address"), // آدرس دوم تحویل
+  secondDeliveryCity: text("second_delivery_city"), // شهر آدرس دوم
+  secondDeliveryProvince: text("second_delivery_province"), // استان آدرس دوم
+  secondDeliveryPostalCode: text("second_delivery_postal_code"), // کد پستی آدرس دوم
+  recipientMobile: text("recipient_mobile"), // شماره موبایل گیرنده برای تحویل
+  
+  // Active delivery information tracking
+  activeDeliveryInfo: json("active_delivery_info"), // Track which fields are active for delivery
+  
   // Delivery method selected by customer during checkout
   deliveryMethod: text("delivery_method").default("courier"), // post, courier, truck, personal_pickup
   deliveryNotes: text("delivery_notes"), // Special delivery instructions from customer

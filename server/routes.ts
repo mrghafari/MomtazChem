@@ -11245,9 +11245,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
           gpsLatitude: orderData.gpsLatitude,
           gpsLongitude: orderData.gpsLongitude,
         }),
+        
+        // Second delivery address fields from CRM conditional logic
+        secondDeliveryAddress: orderData.secondDeliveryAddress || null,
+        secondDeliveryCity: orderData.secondDeliveryCity || null,
+        secondDeliveryProvince: orderData.secondDeliveryProvince || null,
+        secondDeliveryPostalCode: orderData.secondDeliveryPostalCode || null,
+        recipientMobile: orderData.recipientMobile || null,
+        
+        // Active delivery information tracking
+        activeDeliveryInfo: orderData.activeDeliveryInfo ? JSON.stringify(orderData.activeDeliveryInfo) : null,
+        
+        // Warehouse notes from frontend logic
+        internalNotes: orderData.warehouseNotes || "",
+        
         trackingNumber: null,
         carrier: null,
 
+      });
+
+      console.log('🚚 [ORDER CREATED] Enhanced order with delivery tracking:', {
+        orderId: order.id,
+        orderNumber: order.orderNumber,
+        hasSecondAddress: !!orderData.secondDeliveryAddress,
+        hasRecipientMobile: !!orderData.recipientMobile,
+        activeDeliveryInfo: orderData.activeDeliveryInfo
       });
 
       // Create order items from cart

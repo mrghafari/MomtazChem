@@ -158,6 +158,18 @@ const translations = {
     selectDeliveryMethod: "اختر طريقة التوصيل",
     shippingCost: "تكلفة الشحن",
     freeShipping: "شحن مجاني",
+    
+    // Second address and recipient mobile options
+    secondDeliveryAddress: "آدرس دوم تحویل",
+    addSecondAddress: "افزودن آدرس دوم",
+    removeSecondAddress: "حذف آدرس دوم", 
+    secondAddressPlaceholder: "آدرس جایگزین برای تحویل (مثل: بغداد، خیابان الرشید)",
+    recipientMobileNumber: "شماره موبایل گیرنده",
+    addRecipientMobile: "افزودن شماره گیرنده",
+    removeRecipientMobile: "حذف شماره گیرنده",
+    recipientMobilePlaceholder: "شماره موبایل گیرنده برای تأیید تحویل (مثل: 0791XXXXXXX)",
+    crmAddressDisabled: "آدرس پیش‌فرض (غیرفعال)",
+    crmPhoneDisabled: "شماره پیش‌فرض (غیرفعال)",
   }
 };
 
@@ -221,6 +233,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const [selectedReceiptFile, setSelectedReceiptFile] = useState<File | null>(null);
   const [selectedShippingMethod, setSelectedShippingMethod] = useState<number | null>(null);
   const [shippingCost, setShippingCost] = useState<number>(0);
+  
+
 
 
 
@@ -451,11 +465,19 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   // Get current translations based on site language
   const t = translations[language] || translations['en']; // fallback to English
   const isRTL = direction === 'rtl';
+  
+  // Conditional graying out logic for CRM fields
+  const isPrimaryAddressDisabled = showSecondAddress && secondAddress.trim().length > 0;
+  const isPrimaryMobileDisabled = showRecipientMobile && recipientMobile.trim().length > 0;
+  const hasCrmData = !!(crmCustomerData || (customerData?.success && customerData.customer));
 
-  // State for additional recipient fields
+  // State for additional recipient fields - CRM conditional logic
   const [showSecondAddress, setShowSecondAddress] = useState(false);
-  const [showRecipientMobile, setShowRecipientMobile] = useState(false);
+  const [showRecipientMobile, setShowRecipientMobile] = useState(false);  
   const [secondAddress, setSecondAddress] = useState('');
+  const [secondCity, setSecondCity] = useState('');
+  const [secondProvince, setSecondProvince] = useState('');
+  const [secondPostalCode, setSecondPostalCode] = useState('');
   const [recipientMobile, setRecipientMobile] = useState('');
 
 
@@ -765,22 +787,60 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       return;
     }
 
+    // Determine active delivery info based on conditional logic
+    const activeDeliveryInfo = {
+      // Address determination - use second address if provided, otherwise primary
+      activeAddress: (showSecondAddress && secondAddress.trim()) 
+        ? secondAddress.trim() 
+        : data.address,
+      activeCity: (showSecondAddress && secondCity.trim()) 
+        ? secondCity.trim() 
+        : data.city,
+      activeProvince: (showSecondAddress && secondProvince.trim()) 
+        ? secondProvince.trim() 
+        : (crmCustomerData?.province || ''),
+      activePostalCode: (showSecondAddress && secondPostalCode.trim()) 
+        ? secondPostalCode.trim() 
+        : data.postalCode,
+      
+      // Phone determination - use recipient mobile if provided, otherwise primary
+      activePhone: (showRecipientMobile && recipientMobile.trim()) 
+        ? recipientMobile.trim() 
+        : data.phone,
+      
+      // Source tracking for logistics
+      isUsingSecondAddress: !!(showSecondAddress && secondAddress.trim()),
+      isUsingRecipientMobile: !!(showRecipientMobile && recipientMobile.trim()),
+    };
+
     let orderData = {
       ...data,
       cart,
       totalAmount,
       subtotalAmount,
       shippingCost,
-      vatAmount: totalTaxAmount, // Include both VAT and duties
+      vatAmount: totalTaxAmount,
       selectedShippingMethod,
       currency: 'IQD',
       paymentMethod,
       walletAmountUsed: 0,
       remainingAmount: totalAmount,
-      // Add new recipient fields
-      secondAddress: showSecondAddress ? secondAddress : null,
+      
+      // Enhanced delivery information
+      secondDeliveryAddress: showSecondAddress ? secondAddress : null,
+      secondDeliveryCity: showSecondAddress ? secondCity : null, 
+      secondDeliveryProvince: showSecondAddress ? secondProvince : null,
+      secondDeliveryPostalCode: showSecondAddress ? secondPostalCode : null,
       recipientMobile: showRecipientMobile ? recipientMobile : null,
+      
+      // Active delivery logistics data
+      activeDeliveryInfo,
+      
+      // Add warehouse notes for logistics clarity
+      warehouseNotes: `تحویل فعال: ${activeDeliveryInfo.isUsingSecondAddress ? 'آدرس دوم' : 'آدرس اول'} | تماس فعال: ${activeDeliveryInfo.isUsingRecipientMobile ? 'موبایل گیرنده' : 'موبایل اصلی'}`
     };
+
+    console.log('🚚 [DELIVERY LOGIC] Active delivery information:', activeDeliveryInfo);
 
     // Handle wallet payment calculations
     if (paymentMethod === 'wallet_full') {
@@ -1270,20 +1330,29 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                   )}
                 />
 
-                {/* Phone Number */}
+                {/* Phone Number with conditional graying */}
                 <FormField
                   control={form.control}
                   name="phone"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t.deliveryPhone}</FormLabel>
+                    <FormItem className={isPrimaryMobileDisabled ? 'opacity-60' : ''}>
+                      <FormLabel className={isPrimaryMobileDisabled ? 'text-gray-500' : ''}>
+                        {isPrimaryMobileDisabled ? t.crmPhoneDisabled : t.deliveryPhone}
+                        {isPrimaryMobileDisabled && hasCrmData && (
+                          <span className="text-orange-500 mr-2">⚠️</span>
+                        )}
+                      </FormLabel>
                       <FormControl>
                         <Input 
                           {...field} 
                           type="tel"
                           placeholder={t.phonePlaceholder}
-                          className={`${isRTL ? 'text-right' : 'text-left'} bg-gray-100 dark:bg-gray-700`}
-                          readOnly={!!(customerData?.success && customerData.customer)}
+                          className={`${isRTL ? 'text-right' : 'text-left'} ${
+                            isPrimaryMobileDisabled 
+                              ? 'bg-gray-100 text-gray-500 border-gray-300' 
+                              : 'bg-gray-100 dark:bg-gray-700'
+                          }`}
+                          readOnly={!!(customerData?.success && customerData.customer) || isPrimaryMobileDisabled}
                         />
                       </FormControl>
                       <FormMessage />
@@ -1291,19 +1360,29 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                   )}
                 />
 
-                {/* Delivery Address */}
+                {/* Delivery Address with conditional graying */}
                 <FormField
                   control={form.control}
                   name="address"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t.deliveryAddress}</FormLabel>
+                    <FormItem className={isPrimaryAddressDisabled ? 'opacity-60' : ''}>
+                      <FormLabel className={isPrimaryAddressDisabled ? 'text-gray-500' : ''}>
+                        {isPrimaryAddressDisabled ? t.crmAddressDisabled : t.deliveryAddress}
+                        {isPrimaryAddressDisabled && hasCrmData && (
+                          <span className="text-orange-500 mr-2">⚠️</span>
+                        )}
+                      </FormLabel>
                       <FormControl>
                         <Textarea 
                           {...field} 
                           rows={3}
                           placeholder={t.addressPlaceholder}
-                          className={isRTL ? 'text-right' : 'text-left'}
+                          className={`${isRTL ? 'text-right' : 'text-left'} ${
+                            isPrimaryAddressDisabled 
+                              ? 'bg-gray-100 text-gray-500 border-gray-300' 
+                              : ''
+                          }`}
+                          readOnly={isPrimaryAddressDisabled}
                         />
                       </FormControl>
                       <FormMessage />
@@ -1311,83 +1390,118 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                   )}
                 />
 
-                {/* Second Address Option */}
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium">Second Delivery Address</label>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setShowSecondAddress(!showSecondAddress)}
-                      className="text-blue-600 border-blue-200"
-                    >
-                      <Plus className="w-4 h-4 mr-1" />
-                      {showSecondAddress ? 'Remove' : 'Add'}
-                    </Button>
-                  </div>
-                  {showSecondAddress && (
-                    <div className="pl-4 border-l-2 border-blue-200">
-                      <FormItem>
-                        <FormControl>
-                          <Textarea 
-                            value={secondAddress}
-                            onChange={(e) => setSecondAddress(e.target.value)}
-                            rows={2}
-                            placeholder="Enter alternative delivery address"
-                            className="text-left"
-                          />
-                        </FormControl>
-                      </FormItem>
+                {/* Second Address Option - Only show for CRM customers */}
+                {hasCrmData && (
+                  <div className="space-y-3 p-4 bg-blue-50 rounded-lg border">
+                    <div className="flex items-center justify-between">
+                      <label className={`text-sm font-medium ${isRTL ? 'text-right' : 'text-left'}`}>
+                        {t.secondDeliveryAddress}
+                      </label>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowSecondAddress(!showSecondAddress)}
+                        className="text-blue-600 border-blue-200 hover:bg-blue-100"
+                      >
+                        <Plus className="w-4 h-4 mr-1" />
+                        {showSecondAddress ? t.removeSecondAddress : t.addSecondAddress}
+                      </Button>
                     </div>
-                  )}
-                </div>
-
-                {/* Recipient Mobile Number */}
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium">Recipient Mobile Number</label>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setShowRecipientMobile(!showRecipientMobile)}
-                      className="text-purple-600 border-purple-200"
-                    >
-                      <Plus className="w-4 h-4 mr-1" />
-                      {showRecipientMobile ? 'Remove' : 'Add'}
-                    </Button>
-                  </div>
-                  {showRecipientMobile && (
-                    <div className="pl-4 border-l-2 border-purple-200">
-                      <FormItem>
-                        <FormControl>
-                          <Input 
-                            value={recipientMobile}
-                            onChange={(e) => setRecipientMobile(e.target.value)}
-                            type="tel"
-                            placeholder="Enter recipient mobile number for delivery verification"
-                            className="text-left"
+                    {showSecondAddress && (
+                      <div className="space-y-3">
+                        <FormItem>
+                          <FormControl>
+                            <Textarea 
+                              value={secondAddress}
+                              onChange={(e) => setSecondAddress(e.target.value)}
+                              rows={2}
+                              placeholder={t.secondAddressPlaceholder}
+                              className={`${isRTL ? 'text-right' : 'text-left'} bg-white`}
+                            />
+                          </FormControl>
+                        </FormItem>
+                        <div className="grid grid-cols-3 gap-2">
+                          <Input
+                            value={secondProvince}
+                            onChange={(e) => setSecondProvince(e.target.value)}
+                            placeholder={isRTL ? "استان" : "Province"}
+                            className={`text-xs h-7 ${isRTL ? 'text-right' : 'text-left'} bg-white`}
                           />
-                        </FormControl>
-                      </FormItem>
-                    </div>
-                  )}
-                </div>
+                          <Input
+                            value={secondCity}
+                            onChange={(e) => setSecondCity(e.target.value)}
+                            placeholder={isRTL ? "شهر" : "City"}
+                            className={`text-xs h-7 ${isRTL ? 'text-right' : 'text-left'} bg-white`}
+                          />
+                          <Input
+                            value={secondPostalCode}
+                            onChange={(e) => setSecondPostalCode(e.target.value)}
+                            placeholder={isRTL ? "کد پستی" : "Postal Code"}
+                            className={`text-xs h-7 ${isRTL ? 'text-right' : 'text-left'} bg-white`}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
 
-                {/* City and Postal Code */}
+                {/* Recipient Mobile Number - Only show for CRM customers */}
+                {hasCrmData && (
+                  <div className="space-y-3 p-4 bg-purple-50 rounded-lg border">
+                    <div className="flex items-center justify-between">
+                      <label className={`text-sm font-medium ${isRTL ? 'text-right' : 'text-left'}`}>
+                        {t.recipientMobileNumber}
+                      </label>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowRecipientMobile(!showRecipientMobile)}
+                        className="text-purple-600 border-purple-200 hover:bg-purple-100"
+                      >
+                        <Plus className="w-4 h-4 mr-1" />
+                        {showRecipientMobile ? t.removeRecipientMobile : t.addRecipientMobile}
+                      </Button>
+                    </div>
+                    {showRecipientMobile && (
+                      <div className="space-y-3">
+                        <FormItem>
+                          <FormControl>
+                            <Input 
+                              value={recipientMobile}
+                              onChange={(e) => setRecipientMobile(e.target.value)}
+                              type="tel"
+                              placeholder={t.recipientMobilePlaceholder}
+                              className={`${isRTL ? 'text-right' : 'text-left'} bg-white`}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* City and Postal Code with conditional graying */}
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="city"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t.city}</FormLabel>
+                      <FormItem className={isPrimaryAddressDisabled ? 'opacity-60' : ''}>
+                        <FormLabel className={isPrimaryAddressDisabled ? 'text-gray-500' : ''}>
+                          {t.city}
+                        </FormLabel>
                         <FormControl>
                           <Input 
                             {...field} 
                             placeholder={t.cityPlaceholder}
-                            className={isRTL ? 'text-right' : 'text-left'}
+                            className={`${isRTL ? 'text-right' : 'text-left'} ${
+                              isPrimaryAddressDisabled 
+                                ? 'bg-gray-100 text-gray-500 border-gray-300' 
+                                : ''
+                            }`}
+                            readOnly={isPrimaryAddressDisabled}
                           />
                         </FormControl>
                         <FormMessage />
@@ -1399,13 +1513,20 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                     control={form.control}
                     name="postalCode"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t.postalCode}</FormLabel>
+                      <FormItem className={isPrimaryAddressDisabled ? 'opacity-60' : ''}>
+                        <FormLabel className={isPrimaryAddressDisabled ? 'text-gray-500' : ''}>
+                          {t.postalCode}
+                        </FormLabel>
                         <FormControl>
                           <Input 
                             {...field} 
                             placeholder={t.postalCodePlaceholder}
-                            className={isRTL ? 'text-right' : 'text-left'}
+                            className={`${isRTL ? 'text-right' : 'text-left'} ${
+                              isPrimaryAddressDisabled 
+                                ? 'bg-gray-100 text-gray-500 border-gray-300' 
+                                : ''
+                            }`}
+                            readOnly={isPrimaryAddressDisabled}
                           />
                         </FormControl>
                         <FormMessage />
