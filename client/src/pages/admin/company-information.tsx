@@ -1038,60 +1038,79 @@ export default function CompanyInformation() {
                   <Label>نام بانک</Label>
                   <Input 
                     id="bankName"
-                    value={companyInfo?.bankName || ''} 
+                    value={formData?.bankName || ''} 
                     placeholder="بانک ملی عراق"
-                    onChange={(e) => {
-                      const updatedInfo = { ...companyInfo, bankName: e.target.value };
-                      updateCompanyInfoMutation.mutate(updatedInfo);
-                    }}
+                    onChange={(e) => handleFieldChange('bankName', e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>شماره حساب</Label>
                   <Input 
                     id="bankAccount"
-                    value={companyInfo?.bankAccount || ''} 
+                    value={formData?.bankAccount || ''} 
                     placeholder="1234567890"
-                    onChange={(e) => {
-                      const updatedInfo = { ...companyInfo, bankAccount: e.target.value };
-                      updateCompanyInfoMutation.mutate(updatedInfo);
-                    }}
+                    onChange={(e) => handleFieldChange('bankAccount', e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>شماره IBAN</Label>
                   <Input 
                     id="bankIban"
-                    value={companyInfo?.bankIban || ''} 
+                    value={formData?.bankIban || ''} 
                     placeholder="IQ123456789012345678"
-                    onChange={(e) => {
-                      const updatedInfo = { ...companyInfo, bankIban: e.target.value };
-                      updateCompanyInfoMutation.mutate(updatedInfo);
-                    }}
+                    onChange={(e) => handleFieldChange('bankIban', e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>کد SWIFT</Label>
                   <Input 
                     id="bankSwift"
-                    value={companyInfo?.bankSwift || ''} 
+                    value={formData?.bankSwift || ''} 
                     placeholder="BANKIQ22"
-                    onChange={(e) => {
-                      const updatedInfo = { ...companyInfo, bankSwift: e.target.value };
-                      updateCompanyInfoMutation.mutate(updatedInfo);
-                    }}
+                    onChange={(e) => handleFieldChange('bankSwift', e.target.value)}
                   />
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Auto-save notification */}
+          {/* Manual save section */}
           <div className="flex justify-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 rounded-lg text-sm">
-              <CheckCircle className="h-4 w-4" />
-              تغییرات به‌صورت خودکار در دیتابیس ذخیره می‌شوند
-            </div>
+            <Card className="w-full max-w-md">
+              <CardContent className="p-4">
+                <div className="text-center space-y-3">
+                  {hasUnsavedChanges ? (
+                    <div className="flex items-center gap-2 justify-center text-orange-600">
+                      <AlertCircle className="h-4 w-4" />
+                      <span className="text-sm">تغییرات ذخیره نشده‌ای دارید. برای ذخیره در دیتابیس کلیک کنید.</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 justify-center text-green-600">
+                      <CheckCircle className="h-4 w-4" />
+                      <span className="text-sm">تمام اطلاعات ذخیره شده است.</span>
+                    </div>
+                  )}
+                  
+                  <Button 
+                    onClick={handleSaveCompanyInfo}
+                    disabled={!hasUnsavedChanges || updateCompanyInfoMutation.isPending}
+                    className="w-full"
+                  >
+                    {updateCompanyInfoMutation.isPending ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin ml-2" />
+                        در حال ذخیره...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="h-4 w-4 ml-2" />
+                        ذخیره اطلاعات شرکت
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </TabsContent>
 

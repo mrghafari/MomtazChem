@@ -6,6 +6,50 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Manual Save System Enforced for Company Information Forms (July 24, 2025)
+✅ **IMPLEMENTED: Complete removal of automatic saving functionality per user request**
+- **User Request**: "در اطلاعات شرکت وقتی هنوز در حال پر کردن اطلاعات هستیم نباید دائم ذخیره کند اتو سیو را کلا بردار خودمان سیو میکنیم"
+- **Auto-Save Removal**: Eliminated all automatic `updateCompanyInfoMutation.mutate()` calls on field changes:
+  - **Banking Information**: Removed immediate save calls for bank name, account number, IBAN, and SWIFT code fields
+  - **All Form Fields**: Converted to use `formData` state and `handleFieldChange` pattern only
+  - **No Database Calls**: Form changes only update local state without triggering server requests
+- **Manual Save Interface**: Enhanced save section with comprehensive status feedback:
+  - **Status Indicators**: Clear visual feedback showing saved vs unsaved state
+  - **Warning Message**: "تغییرات ذخیره نشده‌ای دارید. برای ذخیره در دیتابیس کلیک کنید." when changes exist
+  - **Confirmation Message**: "تمام اطلاعات ذخیره شده است." when no pending changes
+  - **Save Button**: Only enabled when unsaved changes exist, disabled during save operation
+  - **Loading States**: Professional spinner and "در حال ذخیره..." message during save process
+- **User Control**: Users have complete control over when form data is committed to database
+- **Logo Upload Integration**: Logo upload functionality properly integrated with manual save workflow
+- **Data Flow**: Form initialization → local state updates → manual save → database persistence
+- **Impact**: Company information module now requires explicit user action to persist changes, preventing accidental database updates
+- **Result**: Complete manual save workflow operational - users must click "ذخیره اطلاعات شرکت" button to commit all changes to database
+
+### COMPLETED: Logo Upload Functionality Implementation with Manual Save Integration (July 24, 2025)
+✅ **IMPLEMENTED: Complete company logo upload system with file validation and manual save workflow**
+- **File Upload Handler**: Professional upload functionality with comprehensive validation:
+  - **File Type Validation**: Only accepts image files (JPEG, PNG, WebP, SVG)
+  - **Size Limits**: 5MB maximum file size with Persian error messages
+  - **Loading States**: Spinner animation during upload process
+  - **Success Feedback**: Persian success/error toast notifications
+- **Backend Infrastructure**: Complete server-side upload system:
+  - **Multer Configuration**: Dedicated `uploadLogo` middleware with file filtering
+  - **Storage Directory**: Created `/uploads/logos/` directory for company logo files
+  - **API Endpoint**: `/api/upload/company-logo` with admin authentication
+  - **File Naming**: Unique timestamp-based filename generation
+- **Frontend Integration**: Professional user interface elements:
+  - **Hidden File Input**: Triggered by upload button click
+  - **Preview Display**: Automatic logo preview when uploaded successfully
+  - **Manual Save Integration**: Logo URL updates form state but requires manual save
+  - **Error Handling**: Graceful error handling with image load failure detection
+- **Manual Save Workflow**: Logo uploads integrated with overall manual save system:
+  - **Form State Update**: Logo URL stored in `formData` state via `handleFieldChange`
+  - **Unsaved Changes**: Upload triggers "unsaved changes" status indicator
+  - **Database Persistence**: Logo URL saved to database only when user clicks save button
+- **User Experience**: Complete file-to-database workflow with user control over when changes are committed
+- **Impact**: Professional logo management system that respects manual save preference and provides comprehensive upload functionality
+- **Result**: Logo upload fully operational with manual save integration as requested by user
+
 ### COMPLETED: Iraqi Geography Selection Card Removed from Purchase Form (July 24, 2025)
 ✅ **REMOVED: Iraqi province and city selection card successfully removed from purchase form without layout disruption**
 - **User Request**: Remove the green-background Iraqi geography selection card from purchase form
