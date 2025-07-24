@@ -31560,9 +31560,41 @@ momtazchem.com
       `, [productId, customerId]);
       
       if (existingReview.rows.length > 0) {
-        return res.status(400).json({ 
-          success: false, 
-          message: "شما قبلاً روی این محصول نظر داده‌اید" 
+        // Update existing review instead of rejecting
+        const reviewId = existingReview.rows[0].id;
+        
+        console.log(`🔄 [REVIEW UPDATE] Customer ${customerId} updating existing review ${reviewId} for product ${productId}`);
+        
+        const updateResult = await pool.query(`
+          UPDATE product_reviews SET
+            rating = $1,
+            title = $2,
+            review = $3,
+            pros = $4,
+            cons = $5,
+            updated_at = NOW()
+          WHERE id = $6
+          RETURNING id, updated_at
+        `, [
+          rating,
+          title || '',
+          reviewText.trim(),
+          JSON.stringify(pros || []),
+          JSON.stringify(cons || []),
+          reviewId
+        ]);
+
+        // Update product statistics after review update
+        await updateProductStats(productId);
+
+        return res.json({
+          success: true,
+          message: "نظر شما با موفقیت به‌روزرسانی شد",
+          data: {
+            id: reviewId,
+            updatedAt: updateResult.rows[0].updated_at,
+            isUpdate: true
+          }
         });
       }
 
