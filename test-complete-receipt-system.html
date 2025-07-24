@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست سیستم کامل آپلود فیش بانکی</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Tahoma', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 p-6">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-center mb-8 text-blue-600">تست سیستم کامل آپلود فیش بانکی</h1>
+        
+        <!-- Customer Login -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">1. ورود مشتری</h2>
+            <div class="flex gap-4">
+                <input type="text" id="customerId" placeholder="شناسه مشتری (مثلاً 8)" class="border p-2 rounded flex-1">
+                <button onclick="loginCustomer()" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600">
+                    ورود
+                </button>
+            </div>
+        </div>
+
+        <!-- Customer Info Display -->
+        <div id="customerInfo" class="bg-white rounded-lg shadow-md p-6 mb-6 hidden">
+            <h2 class="text-xl font-semibold mb-4">اطلاعات مشتری</h2>
+            <div id="customerDetails"></div>
+        </div>
+
+        <!-- Order Selection -->
+        <div id="orderSelection" class="bg-white rounded-lg shadow-md p-6 mb-6 hidden">
+            <h2 class="text-xl font-semibold mb-4">2. انتخاب سفارش</h2>
+            <div id="ordersList"></div>
+        </div>
+
+        <!-- Receipt Upload Test -->
+        <div id="receiptUpload" class="bg-white rounded-lg shadow-md p-6 mb-6 hidden">
+            <h2 class="text-xl font-semibold mb-4">3. آپلود فیش بانکی</h2>
+            
+            <!-- Order Debt Display -->
+            <div id="orderDebtInfo" class="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-4"></div>
+            
+            <!-- Receipt Amount Input with Side-by-Side Display -->
+            <div class="flex gap-4 mb-4">
+                <div class="flex-1">
+                    <label class="block text-sm font-medium mb-2">مبلغ فیش بانکی (اجباری)</label>
+                    <input type="number" id="receiptAmount" placeholder="مبلغ واریزی به دینار عراقی" 
+                           class="w-full border p-3 rounded" onchange="validateAmount()">
+                </div>
+                <div class="flex-1">
+                    <label class="block text-sm font-medium mb-2">مبلغ بدهی سفارش</label>
+                    <div id="debtAmountDisplay" class="p-3 bg-orange-50 border border-orange-200 rounded text-center">
+                        <div class="text-2xl font-bold text-orange-800" id="debtAmount">-</div>
+                        <div class="text-xs text-orange-600">دینار عراقی</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Validation Feedback -->
+            <div id="validationFeedback" class="mb-4"></div>
+            
+            <!-- File Selection -->
+            <div class="mb-4">
+                <label class="block text-sm font-medium mb-2">انتخاب فایل فیش</label>
+                <input type="file" id="receiptFile" accept="image/*,.pdf" class="w-full border p-2 rounded">
+            </div>
+            
+            <!-- Upload Button -->
+            <button onclick="uploadReceipt()" id="uploadBtn" disabled 
+                    class="w-full bg-gray-400 text-white py-3 rounded font-medium">
+                آپلود فیش بانکی
+            </button>
+        </div>
+
+        <!-- Test Scenarios -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">سناریوهای تست</h2>
+            <div class="grid md:grid-cols-3 gap-4">
+                <button onclick="testScenario('overpayment')" class="bg-green-500 text-white p-3 rounded hover:bg-green-600">
+                    تست پرداخت اضافی<br>
+                    <small>(مبلغ > بدهی)</small>
+                </button>
+                <button onclick="testScenario('exact')" class="bg-blue-500 text-white p-3 rounded hover:bg-blue-600">
+                    تست پرداخت دقیق<br>
+                    <small>(مبلغ = بدهی)</small>
+                </button>
+                <button onclick="testScenario('underpayment_covered')" class="bg-yellow-500 text-white p-3 rounded hover:bg-yellow-600">
+                    تست کمبود با پوشش والت<br>
+                    <small>(مبلغ < بدهی + والت کافی)</small>
+                </button>
+                <button onclick="testScenario('underpayment_insufficient')" class="bg-orange-500 text-white p-3 rounded hover:bg-orange-600">
+                    تست کمبود بدون پوشش<br>
+                    <small>(مبلغ + والت < بدهی)</small>
+                </button>
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div id="results" class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4">نتایج تست</h2>
+            <div id="resultsList"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentCustomer = null;
+        let currentOrder = null;
+        let customerOrders = [];
+
+        async function loginCustomer() {
+            const customerId = document.getElementById('customerId').value;
+            if (!customerId) {
+                alert('لطفاً شناسه مشتری را وارد کنید');
+                return;
+            }
+
+            try {
+                // Login customer
+                const loginResponse = await fetch('/api/customers/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        username: `customer${customerId}`, 
+                        password: 'password123' 
+                    })
+                });
+
+                if (!loginResponse.ok) {
+                    throw new Error('ورود ناموفق');
+                }
+
+                // Get customer info
+                const customerResponse = await fetch('/api/customers/me');
+                const customerData = await customerResponse.json();
+                currentCustomer = customerData.customer;
+
+                // Get customer orders
+                const ordersResponse = await fetch('/api/customers/orders');
+                const ordersData = await ordersResponse.json();
+                customerOrders = ordersData.orders || [];
+
+                displayCustomerInfo();
+                displayOrders();
+
+            } catch (error) {
+                console.error('خطا در ورود:', error);
+                addResult(`خطا در ورود مشتری ${customerId}: ${error.message}`, 'error');
+            }
+        }
+
+        function displayCustomerInfo() {
+            const customerInfo = document.getElementById('customerInfo');
+            const customerDetails = document.getElementById('customerDetails');
+            
+            customerDetails.innerHTML = `
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <strong>نام:</strong> ${currentCustomer.firstName} ${currentCustomer.lastName}<br>
+                        <strong>شناسه:</strong> ${currentCustomer.id}<br>
+                        <strong>موجودی والت:</strong> ${currentCustomer.walletBalance?.toLocaleString() || 0} دینار
+                    </div>
+                    <div>
+                        <strong>ایمیل:</strong> ${currentCustomer.email}<br>
+                        <strong>تلفن:</strong> ${currentCustomer.phone}<br>
+                        <strong>تعداد سفارشات:</strong> ${customerOrders.length}
+                    </div>
+                </div>
+            `;
+            
+            customerInfo.classList.remove('hidden');
+        }
+
+        function displayOrders() {
+            const orderSelection = document.getElementById('orderSelection');
+            const ordersList = document.getElementById('ordersList');
+            
+            if (customerOrders.length === 0) {
+                ordersList.innerHTML = '<p class="text-red-500">هیچ سفارشی یافت نشد</p>';
+                return;
+            }
+
+            const ordersHtml = customerOrders.map(order => `
+                <div class="border p-3 rounded mb-2 cursor-pointer hover:bg-gray-50" onclick="selectOrder('${order.orderNumber}')">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <strong>سفارش:</strong> ${order.orderNumber}<br>
+                            <strong>مبلغ:</strong> ${parseFloat(order.totalAmount).toLocaleString()} دینار<br>
+                            <strong>وضعیت:</strong> ${order.status}
+                        </div>
+                        <div class="text-sm text-gray-600">
+                            ${new Date(order.createdAt).toLocaleDateString('fa-IR')}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            ordersList.innerHTML = ordersHtml;
+            orderSelection.classList.remove('hidden');
+        }
+
+        function selectOrder(orderNumber) {
+            currentOrder = customerOrders.find(o => o.orderNumber === orderNumber);
+            if (!currentOrder) return;
+
+            // Display order debt info
+            const orderDebtInfo = document.getElementById('orderDebtInfo');
+            orderDebtInfo.innerHTML = `
+                <h3 class="font-medium mb-2">اطلاعات بدهی سفارش ${currentOrder.orderNumber}</h3>
+                <div class="grid md:grid-cols-3 gap-4">
+                    <div>
+                        <strong>مبلغ کل سفارش:</strong><br>
+                        <span class="text-2xl font-bold text-orange-800">${parseFloat(currentOrder.totalAmount).toLocaleString()}</span> دینار
+                    </div>
+                    <div>
+                        <strong>موجودی والت:</strong><br>
+                        <span class="text-xl font-bold text-blue-600">${currentCustomer.walletBalance?.toLocaleString() || 0}</span> دینار
+                    </div>
+                    <div>
+                        <strong>وضعیت پرداخت:</strong><br>
+                        <span class="text-sm ${currentOrder.paymentStatus === 'paid' ? 'text-green-600' : 'text-red-600'}">${currentOrder.paymentStatus}</span>
+                    </div>
+                </div>
+            `;
+
+            // Update debt amount display
+            document.getElementById('debtAmount').textContent = parseFloat(currentOrder.totalAmount).toLocaleString();
+            
+            document.getElementById('receiptUpload').classList.remove('hidden');
+            addResult(`سفارش ${orderNumber} انتخاب شد - بدهی: ${parseFloat(currentOrder.totalAmount).toLocaleString()} دینار`, 'info');
+        }
+
+        function validateAmount() {
+            const receiptAmount = parseFloat(document.getElementById('receiptAmount').value) || 0;
+            const orderAmount = parseFloat(currentOrder?.totalAmount || 0);
+            const walletBalance = currentCustomer?.walletBalance || 0;
+            const uploadBtn = document.getElementById('uploadBtn');
+            const validationFeedback = document.getElementById('validationFeedback');
+            
+            if (!receiptAmount || !currentOrder) {
+                validationFeedback.innerHTML = '';
+                uploadBtn.disabled = true;
+                uploadBtn.className = "w-full bg-gray-400 text-white py-3 rounded font-medium";
+                return;
+            }
+
+            let feedbackHtml = '';
+            let canUpload = false;
+
+            if (receiptAmount >= orderAmount) {
+                const excess = receiptAmount - orderAmount;
+                if (excess > 0) {
+                    feedbackHtml = `<div class="p-3 bg-green-50 border border-green-200 rounded">
+                        <p class="text-green-800">✅ مبلغ اضافی ${excess.toLocaleString()} دینار به والت شما اضافه خواهد شد</p>
+                    </div>`;
+                } else {
+                    feedbackHtml = `<div class="p-3 bg-green-50 border border-green-200 rounded">
+                        <p class="text-green-800">✅ مبلغ دقیقاً برابر با بدهی شما است</p>
+                    </div>`;
+                }
+                canUpload = true;
+            } else {
+                const deficit = orderAmount - receiptAmount;
+                if (walletBalance >= deficit) {
+                    feedbackHtml = `<div class="p-3 bg-yellow-50 border border-yellow-200 rounded">
+                        <p class="text-yellow-800">⚠️ کمبود ${deficit.toLocaleString()} دینار از والت شما (${walletBalance.toLocaleString()} دینار) کسر خواهد شد</p>
+                    </div>`;
+                    canUpload = true;
+                } else {
+                    feedbackHtml = `<div class="p-3 bg-orange-50 border border-orange-200 rounded">
+                        <p class="text-orange-800">⚠️ کمبود ${deficit.toLocaleString()} دینار - موجودی والت ${walletBalance.toLocaleString()} دینار کافی نیست</p>
+                        <p class="text-sm text-orange-600 mt-1">فیش برای تایید مدیر مالی ارسال خواهد شد</p>
+                    </div>`;
+                    canUpload = true; // Can still upload for manager approval
+                }
+            }
+
+            validationFeedback.innerHTML = feedbackHtml;
+            
+            const fileSelected = document.getElementById('receiptFile').files.length > 0;
+            uploadBtn.disabled = !(canUpload && fileSelected && receiptAmount > 0);
+            uploadBtn.className = uploadBtn.disabled 
+                ? "w-full bg-gray-400 text-white py-3 rounded font-medium"
+                : "w-full bg-blue-500 text-white py-3 rounded font-medium hover:bg-blue-600";
+        }
+
+        // Enable upload button when file is selected
+        document.getElementById('receiptFile').addEventListener('change', validateAmount);
+
+        async function uploadReceipt() {
+            const receiptAmount = document.getElementById('receiptAmount').value;
+            const receiptFile = document.getElementById('receiptFile').files[0];
+            
+            if (!receiptAmount || !receiptFile || !currentOrder) {
+                alert('لطفاً تمام فیلدها را پر کنید');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('receipt', receiptFile);
+            formData.append('orderId', currentOrder.orderNumber);
+            formData.append('amount', receiptAmount);
+            formData.append('notes', 'تست آپلود سیستم');
+
+            try {
+                const response = await fetch('/api/payment/upload-receipt', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    addResult(`✅ آپلود موفق: ${result.message}`, 'success');
+                    addResult(`📊 جزئیات: مبلغ فیش=${result.data.receiptAmount.toLocaleString()}, مبلغ سفارش=${result.data.orderAmount.toLocaleString()}, اضافی والت=${result.data.walletCredit || 0}, کسر والت=${result.data.walletDeduction || 0}`, 'info');
+                } else {
+                    addResult(`❌ خطا در آپلود: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                addResult(`❌ خطا در ارتباط: ${error.message}`, 'error');
+            }
+        }
+
+        function testScenario(scenario) {
+            if (!currentOrder) {
+                alert('لطفاً ابتدا سفارشی را انتخاب کنید');
+                return;
+            }
+
+            const orderAmount = parseFloat(currentOrder.totalAmount);
+            const walletBalance = currentCustomer?.walletBalance || 0;
+            let testAmount;
+
+            switch (scenario) {
+                case 'overpayment':
+                    testAmount = orderAmount + 50000; // 50,000 excess
+                    break;
+                case 'exact':
+                    testAmount = orderAmount;
+                    break;
+                case 'underpayment_covered':
+                    testAmount = Math.max(orderAmount - Math.min(walletBalance - 10000, 30000), 1000);
+                    break;
+                case 'underpayment_insufficient':
+                    testAmount = Math.max(orderAmount - walletBalance - 50000, 1000);
+                    break;
+            }
+
+            document.getElementById('receiptAmount').value = testAmount;
+            validateAmount();
+            
+            addResult(`🧪 تست سناریو: ${scenario} - مبلغ تست: ${testAmount.toLocaleString()} دینار`, 'info');
+        }
+
+        function addResult(message, type) {
+            const resultsList = document.getElementById('resultsList');
+            const timestamp = new Date().toLocaleTimeString('fa-IR');
+            const colorClass = {
+                'success': 'text-green-600 border-green-200 bg-green-50',
+                'error': 'text-red-600 border-red-200 bg-red-50',
+                'info': 'text-blue-600 border-blue-200 bg-blue-50'
+            }[type];
+            
+            resultsList.innerHTML = `
+                <div class="border rounded p-3 mb-2 ${colorClass}">
+                    <span class="text-xs text-gray-500">[${timestamp}]</span> ${message}
+                </div>
+            ` + resultsList.innerHTML;
+        }
+    </script>
+</body>
+</html>

@@ -371,28 +371,45 @@ export default function BankReceiptUpload() {
               <span className="text-red-500">*</span>
             </Label>
             
-            {/* Order Amount Display */}
+            <div className="flex gap-3 items-end">
+              {/* Receipt Amount Input */}
+              <div className="flex-1">
+                <Input
+                  id="receipt-amount"
+                  type="number"
+                  placeholder="مبلغ واریزی به دینار عراقی"
+                  value={receiptAmount}
+                  onChange={(e) => setReceiptAmount(e.target.value)}
+                  className="mt-1"
+                  required
+                  min={order ? parseFloat(order.totalAmount) : 0}
+                />
+              </div>
+              
+              {/* Order Debt Amount Display */}
+              {order && (
+                <div className="flex-1">
+                  <Label className="text-sm text-gray-600">مبلغ بدهی سفارش</Label>
+                  <div className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800 mt-1">
+                    <p className="text-lg font-bold text-orange-800 dark:text-orange-200 text-center">
+                      {parseFloat(order.totalAmount).toLocaleString()}
+                    </p>
+                    <p className="text-xs text-orange-600 dark:text-orange-300 text-center">
+                      دینار عراقی
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {/* Additional Information */}
             {order && (
-              <div className="mb-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
-                  💰 مبلغ سفارش شما: {parseFloat(order.totalAmount).toLocaleString()} دینار عراقی
-                </p>
-                <p className="text-xs text-blue-600 dark:text-blue-300 mt-1">
-                  حداقل همین مبلغ را واریز کنید. در صورت واریز بیشتر، مبلغ اضافی به والت شما اضافه می‌شود.
+              <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <p className="text-xs text-blue-600 dark:text-blue-300">
+                  💡 حداقل مبلغ واریزی باید برابر با بدهی سفارش باشد. در صورت واریز بیشتر، مبلغ اضافی به والت شما اضافه می‌شود. در صورت واریز کمتر و کفایت موجودی والت، کمبود از والت کسر خواهد شد.
                 </p>
               </div>
             )}
-            
-            <Input
-              id="receipt-amount"
-              type="number"
-              placeholder="مبلغ واریزی به دینار عراقی"
-              value={receiptAmount}
-              onChange={(e) => setReceiptAmount(e.target.value)}
-              className="mt-1"
-              required
-              min={order ? parseFloat(order.totalAmount) : 0}
-            />
             
             {receiptAmount && (
               <div className="mt-2 space-y-1">
@@ -412,7 +429,7 @@ export default function BankReceiptUpload() {
                             {customer.walletBalance >= (parseFloat(order.totalAmount) - parseInt(receiptAmount)) ? (
                               <span className="text-green-600 block">✅ والت شما کمبود را پوشش می‌دهد - کمبود از والت کسر خواهد شد</span>
                             ) : (
-                              <span className="text-red-600 block">❌ موجودی والت برای پوشش کمبود کافی نیست</span>
+                              <span className="text-yellow-600 block">⚠️ موجودی والت برای پوشش کمبود کافی نیست - فیش برای تایید مدیر مالی ارسال خواهد شد</span>
                             )}
                           </p>
                         )}

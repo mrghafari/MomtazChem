@@ -25319,10 +25319,9 @@ momtazchem.com
             });
           }
         } else {
-          return res.status(400).json({ 
-            success: false, 
-            message: `مبلغ فیش (${amount.toLocaleString()} دینار) کمتر از بدهی شما (${orderAmount.toLocaleString()} دینار) است. کمبود: ${deficit.toLocaleString()} دینار. موجودی والت شما (${walletBalance.toLocaleString()} دینار) کافی نیست.` 
-          });
+          // والت کافی نیست - فیش برای بررسی مدیر مالی ارسال می‌شود
+          amountStatus = `مبلغ فیش (${amount.toLocaleString()} دینار) کمتر از بدهی (${orderAmount.toLocaleString()} دینار) است. کمبود: ${deficit.toLocaleString()} دینار. موجودی والت: ${walletBalance.toLocaleString()} دینار. فیش برای بررسی مدیر مالی ارسال شد.`;
+          console.log(`⚠️ [WALLET] Insufficient funds for customer ${order.customerId}: Receipt ${amount}, Order ${orderAmount}, Wallet ${walletBalance}, Deficit ${deficit}`);
         }
       } else if (amount > orderAmount) {
         // مبلغ اضافی به والت اضافه می‌شود

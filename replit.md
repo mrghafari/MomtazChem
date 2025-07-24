@@ -105,6 +105,42 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Impact**: Complete payment flexibility with automatic wallet utilization for optimal customer experience
 - **Result**: Advanced receipt validation with automatic wallet deduction operational for insufficient payments with wallet coverage
 
+### COMPLETED: Customer Debt Display Implementation and Manager Approval System (July 24, 2025)
+✅ **IMPLEMENTED: Customer debt amount display next to receipt field with manager approval workflow for insufficient payments**
+- **User Request**: "مبلغ بدهی مشتری که بابت آن باید پول واریز میکرد را نزدیک مبلغ فیش بگذارید تا خودش هم کنترلی داشته باشد"
+- **Side-by-Side Display**: Enhanced receipt upload form with prominent debt amount display:
+  - **Receipt Amount Input**: Left side with number input for customer receipt amount
+  - **Debt Amount Display**: Right side with orange-themed card showing exact order debt amount
+  - **Visual Comparison**: Clear side-by-side layout for easy amount comparison by customers
+  - **Control Enhancement**: Customers can now easily verify payment amounts before submission
+- **Manager Approval Workflow**: Implemented flexible approval system for insufficient payments:
+  - **Automatic Processing**: Receipt + wallet >= debt → automatic approval and processing
+  - **Manager Review**: Receipt + wallet < debt → sent to financial manager for decision
+  - **No Rejection**: System no longer rejects insufficient payments, always allows upload for review
+  - **Decision Authority**: Financial managers retain final approval/rejection authority
+- **Enhanced User Feedback**: Comprehensive payment status indicators:
+  - **Overpayment**: Green indicators showing wallet credit for excess amounts
+  - **Exact Payment**: Confirmation of precise payment matching debt
+  - **Wallet Coverage**: Green indicators when wallet can cover payment deficit
+  - **Manager Review**: Yellow indicators when payment requires manager approval
+- **Complete Payment Logic**: Three-tier processing system:
+  - **Scenario 1**: Receipt >= Order Debt → Process automatically (credit excess to wallet)
+  - **Scenario 2**: Receipt < Order Debt + Wallet >= Deficit → Deduct from wallet automatically
+  - **Scenario 3**: Receipt + Wallet < Order Debt → Send to manager for approval decision
+- **Customer Control Interface**: 
+  - **Debt Visibility**: Large, clear display of exact debt amount in orange-themed card
+  - **Real-time Validation**: Live feedback showing payment status as customer types
+  - **Amount Guidance**: Clear instructions on minimum payment requirements
+  - **Manager Process**: Transparent explanation when payment goes to manager review
+- **Business Logic Enhancement**:
+  - **Flexible Payments**: Customers can submit any receipt amount for processing
+  - **Manager Authority**: Financial managers make final decisions on insufficient payments
+  - **Audit Trail**: Complete tracking of all payment decisions and processing
+  - **Customer Transparency**: Clear visibility of debt amounts and payment requirements
+- **Test Infrastructure**: Comprehensive test page with all payment scenarios and debt display verification
+- **Impact**: Customers have complete control and visibility over payment amounts with clear debt comparison
+- **Result**: Customer debt display operational with side-by-side layout and manager approval workflow for all payment scenarios
+
 ### COMPLETED: Banking API Authentication Fixed - Public Endpoint Created for Customer Access (July 24, 2025)
 ✅ **RESOLVED: Fixed critical authentication issue preventing customers from accessing banking information in payment forms**
 - **Root Cause**: Customer-facing payment forms were using admin-only endpoint `/api/admin/company-information` causing 401 authentication errors
