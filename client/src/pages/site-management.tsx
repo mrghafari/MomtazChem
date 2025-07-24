@@ -115,7 +115,6 @@ export default function SiteManagement() {
     'finance-orders': 'order-management',
     'financial-department': 'financial_department',
     'geography-analytics': 'geography-analytics',
-    'finance-orders': 'order-management',
     'warehouse-orders': 'order-management',
     'logistics-orders': 'order-management',
     'email-settings': 'email-settings',
