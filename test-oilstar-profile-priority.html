@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test ABAS ABASI Profile Order Priority</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; direction: rtl; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .form-group { margin-bottom: 15px; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        .result { margin-top: 20px; padding: 15px; background: #f8f9fa; border: 1px solid #ddd; border-radius: 4px; }
+        .error { background: #f8d7da; border-color: #f5c6cb; color: #721c24; }  
+        .success { background: #d4edda; border-color: #c3e6cb; color: #155724; }
+        .order { padding: 15px; margin: 10px 0; border: 2px solid #ddd; border-radius: 8px; }
+        .grace-period { background: #fff3cd; border-color: #ffc107; border-width: 3px; }
+        .regular { background: #f8f9fa; border-color: #6c757d; }
+        .order-header { font-weight: bold; font-size: 16px; margin-bottom: 10px; }
+        .order-details { font-size: 14px; line-height: 1.5; }
+        .priority-badge { padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+        .grace-badge { background: #ffc107; color: #000; }
+        .regular-badge { background: #6c757d; color: #fff; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 اختبار أولوية الطلبات - عباس عباسي</h1>
+        <p><strong>Customer:</strong> ABAS ABASI (oilstar@hotmail.com)</p>
+        <p><strong>Test Goal:</strong> Verify that bank_transfer_grace orders appear first in customer profile</p>
+        
+        <div class="form-group">
+            <h3>📋 Test Steps:</h3>
+            <button onclick="loginAsCustomer()">1️⃣ Login as ABAS ABASI</button>
+            <button onclick="getCustomerOrders()">2️⃣ Get Customer Orders</button>
+            <button onclick="analyzeOrderPriority()">3️⃣ Analyze Order Priority</button>
+        </div>
+        
+        <div id="result" class="result" style="display: none;"></div>
+    </div>
+
+    <script>
+        let orders = [];
+
+        async function loginAsCustomer() {
+            try {
+                const response = await fetch('/api/customers/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: 'oilstar@hotmail.com',
+                        password: 'test123'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showResult(`✅ تم تسجيل الدخول بنجاح!\n👤 العميل: ${data.customer.firstName} ${data.customer.lastName}\n📧 البريد: ${data.customer.email}`, 'success');
+                } else {
+                    showResult(`❌ فشل تسجيل الدخول: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                showResult(`❌ خطأ في تسجيل الدخول: ${error.message}`, 'error');
+            }
+        }
+
+        async function getCustomerOrders() {
+            try {
+                const response = await fetch('/api/customers/orders', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    orders = data.orders || [];
+                    
+                    let resultHtml = `✅ تم استرداد الطلبات بنجاح!\n`;
+                    resultHtml += `📊 إجمالي الطلبات: ${orders.length}\n\n`;
+                    
+                    if (orders.length > 0) {
+                        resultHtml += `📋 قائمة الطلبات (بترتيب الأولوية):\n\n`;
+                        
+                        orders.forEach((order, index) => {
+                            const isGracePeriod = order.paymentMethod === 'bank_transfer_grace' || order.paymentMethod === 'واریز بانکی با مهلت 3 روزه';
+                            const priorityIcon = isGracePeriod ? '🟡' : '🔵';
+                            const priorityText = isGracePeriod ? 'GRACE PERIOD (مهلة 3 أيام)' : 'REGULAR (عادي)';
+                            
+                            resultHtml += `${index + 1}. ${priorityIcon} ${priorityText}\n`;
+                            resultHtml += `   📦 رقم الطلب: ${order.orderNumber}\n`;
+                            resultHtml += `   💳 طريقة الدفع: ${order.paymentMethod}\n`;
+                            resultHtml += `   💰 المبلغ: ${order.totalAmount} IQD\n`;
+                            resultHtml += `   📊 الحالة: ${order.status}\n`;
+                            resultHtml += `   📅 تاريخ الإنشاء: ${new Date(order.createdAt).toLocaleString('ar-EG')}\n\n`;
+                        });
+                    } else {
+                        resultHtml += `⚠️ لم يتم العثور على طلبات لهذا العميل`;
+                    }
+                    
+                    showResult(resultHtml, 'success');
+                } else {
+                    showResult(`❌ فشل في استرداد الطلبات: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                showResult(`❌ خطأ في الطلبات: ${error.message}`, 'error');
+            }
+        }
+
+        async function analyzeOrderPriority() {
+            if (orders.length === 0) {
+                showResult(`⚠️ لا توجد طلبات للتحليل. يرجى الحصول على الطلبات أولاً.`, 'error');
+                return;
+            }
+
+            let analysisHtml = `🔍 تحليل أولوية الطلبات:\n\n`;
+            
+            // Count grace period and regular orders
+            const gracePeriodOrders = orders.filter(order => 
+                order.paymentMethod === 'bank_transfer_grace' || order.paymentMethod === 'واریز بانکی با مهلت 3 روزه'
+            );
+            const regularOrders = orders.filter(order => 
+                order.paymentMethod !== 'bank_transfer_grace' && order.paymentMethod !== 'واریز بانکی با مهلت 3 روزه'
+            );
+            
+            analysisHtml += `📊 إحصائيات الطلبات:\n`;
+            analysisHtml += `🟡 طلبات مهلة 3 أيام: ${gracePeriodOrders.length}\n`;
+            analysisHtml += `🔵 طلبات عادية: ${regularOrders.length}\n\n`;
+            
+            // Check if first orders are grace period orders
+            let priorityTestPassed = true;
+            let firstGracePeriodIndex = -1;
+            let firstRegularIndex = -1;
+            
+            for (let i = 0; i < orders.length; i++) {
+                const isGracePeriod = orders[i].paymentMethod === 'bank_transfer_grace' || orders[i].paymentMethod === 'واریز بانکی با مهلت 3 روزه';
+                
+                if (isGracePeriod && firstGracePeriodIndex === -1) {
+                    firstGracePeriodIndex = i;
+                }
+                if (!isGracePeriod && firstRegularIndex === -1) {
+                    firstRegularIndex = i;
+                }
+            }
+            
+            analysisHtml += `🎯 نتائج اختبار الأولوية:\n`;
+            
+            if (gracePeriodOrders.length > 0) {
+                if (firstRegularIndex === -1 || firstGracePeriodIndex < firstRegularIndex) {
+                    analysisHtml += `✅ PASS: طلبات مهلة 3 أيام تظهر أولاً!\n`;
+                    analysisHtml += `   🟡 أول طلب مهلة 3 أيام في الموضع: ${firstGracePeriodIndex + 1}\n`;
+                    if (firstRegularIndex !== -1) {
+                        analysisHtml += `   🔵 أول طلب عادي في الموضع: ${firstRegularIndex + 1}\n`;
+                    }
+                } else {
+                    analysisHtml += `❌ FAIL: طلبات مهلة 3 أيام لا تظهر أولاً!\n`;
+                    analysisHtml += `   🟡 أول طلب مهلة 3 أيام في الموضع: ${firstGracePeriodIndex + 1}\n`;
+                    analysisHtml += `   🔵 أول طلب عادي في الموضع: ${firstRegularIndex + 1}\n`;
+                    priorityTestPassed = false;
+                }
+            } else {
+                analysisHtml += `ℹ️ INFO: لا توجد طلبات مهلة 3 أيام للاختبار\n`;
+            }
+            
+            // Detailed order sequence analysis
+            analysisHtml += `\n📋 تحليل تسلسل الطلبات:\n`;
+            orders.slice(0, 10).forEach((order, index) => {
+                const isGracePeriod = order.paymentMethod === 'bank_transfer_grace' || order.paymentMethod === 'واریز بانکی با مهلت 3 روزه';
+                const icon = isGracePeriod ? '🟡' : '🔵';
+                const type = isGracePeriod ? 'GRACE' : 'REGULAR';
+                analysisHtml += `${index + 1}. ${icon} ${order.orderNumber} (${type}) - ${order.paymentMethod}\n`;
+            });
+            
+            if (orders.length > 10) {
+                analysisHtml += `... و${orders.length - 10} طلبات أخرى\n`;
+            }
+            
+            const resultType = priorityTestPassed ? 'success' : 'error';
+            showResult(analysisHtml, resultType);
+        }
+
+        function showResult(message, type) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            resultDiv.className = `result ${type}`;
+            resultDiv.innerHTML = `<pre style="white-space: pre-wrap; font-family: 'Courier New', monospace;">${message}</pre>`;
+        }
+    </script>
+</body>
+</html>
