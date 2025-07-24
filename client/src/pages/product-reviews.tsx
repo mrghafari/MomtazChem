@@ -60,7 +60,7 @@ export default function ProductReviews() {
     mutationFn: async (reviewData: { rating: number; comment: string }) => {
       const payload = {
         rating: reviewData.rating,
-        review: reviewData.comment, // Map comment to review field
+        comment: reviewData.comment, // Use comment field to match API
         title: '', // Optional field
         pros: [], // Optional field
         cons: [] // Optional field

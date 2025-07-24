@@ -134,7 +134,7 @@ export default function ProductRating({
   };
 
   // Debug logging
-  console.log('ProductRating Props:', { productId, productName, averageRating, totalReviews, reviews: reviews.length });
+  console.log('ProductRating Props:', { productId, productName, averageRating, totalReviews, reviews: reviews });
 
   return (
     <div className="space-y-6" dir={direction}>
