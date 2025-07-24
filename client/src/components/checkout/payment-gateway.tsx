@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,6 +32,12 @@ const PaymentGateway = ({
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  // Fetch company information for dynamic banking details
+  const { data: companyInfo, isLoading: isLoadingCompanyInfo } = useQuery({
+    queryKey: ['/api/admin/company-information'],
+    retry: false,
+  });
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -146,13 +153,20 @@ const PaymentGateway = ({
       <CardContent className="space-y-4">
         <div className="bg-blue-50 p-4 rounded-lg">
           <h4 className="font-semibold text-blue-900 mb-2">Bank Transfer Instructions</h4>
-          <div className="space-y-2 text-sm text-blue-800">
-            <p><strong>Bank Name:</strong> Rasheed Bank (مصرف الرشید)</p>
-            <p><strong>Account Number:</strong> 1234567890123456</p>
-            <p><strong>SWIFT Code:</strong> RSHDIQBA</p>
-            <p><strong>Account Name:</strong> Momtaz Chemical Solutions Ltd</p>
-            <p><strong>Reference:</strong> Order #{orderId}</p>
-          </div>
+          {isLoadingCompanyInfo ? (
+            <div className="text-center py-2">
+              <p className="text-sm text-muted-foreground">در حال بارگذاری اطلاعات بانکی...</p>
+            </div>
+          ) : (
+            <div className="space-y-2 text-sm text-blue-800">
+              <p><strong>Bank Name:</strong> {companyInfo?.bankName || 'Rasheed Bank (مصرف الرشید)'}</p>
+              <p><strong>Account Number:</strong> {companyInfo?.bankAccount || '1234567890123456'}</p>
+              <p><strong>Account Holder:</strong> {companyInfo?.bankAccountHolder || companyInfo?.companyNameAr || companyInfo?.companyNameEn || 'Momtaz Chemical Solutions Ltd'}</p>
+              {companyInfo?.bankIban && <p><strong>IBAN:</strong> {companyInfo.bankIban}</p>}
+              {companyInfo?.bankSwift && <p><strong>SWIFT Code:</strong> {companyInfo.bankSwift}</p>}
+              <p><strong>Reference:</strong> Order #{orderId}</p>
+            </div>
+          )}
         </div>
         
         <div>
@@ -379,14 +393,21 @@ const PaymentGateway = ({
       <CardContent className="space-y-4">
         <div className="bg-blue-50 p-4 rounded-lg">
           <h4 className="font-semibold text-blue-900 mb-2">International Wire Transfer Details</h4>
-          <div className="space-y-2 text-sm text-blue-800">
-            <p><strong>Beneficiary Bank:</strong> Trade Bank of Iraq (TBI)</p>
-            <p><strong>SWIFT Code:</strong> TBIRIQBA</p>
-            <p><strong>Account Number:</strong> 9876543210987654</p>
-            <p><strong>Beneficiary Name:</strong> Momtaz Chemical Solutions Ltd</p>
-            <p><strong>Beneficiary Address:</strong> Baghdad, Iraq</p>
-            <p><strong>Reference:</strong> Order #{orderId}</p>
-          </div>
+          {isLoadingCompanyInfo ? (
+            <div className="text-center py-2">
+              <p className="text-sm text-muted-foreground">در حال بارگذاری اطلاعات بانکی...</p>
+            </div>
+          ) : (
+            <div className="space-y-2 text-sm text-blue-800">
+              <p><strong>Beneficiary Bank:</strong> {companyInfo?.bankName || 'Trade Bank of Iraq (TBI)'}</p>
+              {companyInfo?.bankSwift && <p><strong>SWIFT Code:</strong> {companyInfo.bankSwift}</p>}
+              <p><strong>Account Number:</strong> {companyInfo?.bankAccount || '9876543210987654'}</p>
+              <p><strong>Beneficiary Name:</strong> {companyInfo?.bankAccountHolder || companyInfo?.companyNameAr || companyInfo?.companyNameEn || 'Momtaz Chemical Solutions Ltd'}</p>
+              {companyInfo?.bankIban && <p><strong>IBAN:</strong> {companyInfo.bankIban}</p>}
+              <p><strong>Beneficiary Address:</strong> Baghdad, Iraq</p>
+              <p><strong>Reference:</strong> Order #{orderId}</p>
+            </div>
+          )}
         </div>
 
         <div>
