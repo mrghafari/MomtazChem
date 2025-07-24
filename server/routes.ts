@@ -138,8 +138,9 @@ const imagesDir = path.join(uploadsDir, 'images');
 const catalogsDir = path.join(uploadsDir, 'catalogs');
 const documentsDir = path.join(uploadsDir, 'documents');
 const receiptsDir = path.join(uploadsDir, 'receipts');
+const logosDir = path.join(uploadsDir, 'logos');
 
-[uploadsDir, imagesDir, catalogsDir, documentsDir, receiptsDir].forEach(dir => {
+[uploadsDir, imagesDir, catalogsDir, documentsDir, receiptsDir, logosDir].forEach(dir => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
@@ -272,6 +273,39 @@ const uploadReceipt = multer({
       cb(null, true);
     } else {
       cb(new Error('Only JPEG, PNG, and PDF files are allowed for receipt uploads'));
+    }
+  }
+});
+
+// Logo upload configuration
+const logoStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, logosDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, `logo-${uniqueSuffix}${path.extname(file.originalname)}`);
+  }
+});
+
+const uploadLogo = multer({
+  storage: logoStorage,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit for logos
+  },
+  fileFilter: (req, file, cb) => {
+    const allowedMimeTypes = [
+      'image/jpeg',
+      'image/jpg', 
+      'image/png',
+      'image/webp',
+      'image/svg+xml'
+    ];
+    
+    if (allowedMimeTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only JPEG, PNG, WebP, and SVG files are allowed for logo uploads'));
     }
   }
 });
@@ -2765,6 +2799,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         success: false, 
         message: "Failed to upload MSDS file" 
+      });
+    }
+  });
+
+  // Company logo upload endpoint
+  app.post("/api/upload/company-logo", requireAuth, uploadLogo.single('file'), (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "No logo file uploaded" 
+        });
+      }
+
+      const logoUrl = `/uploads/logos/${req.file.filename}`;
+      res.json({ 
+        success: true, 
+        url: logoUrl,
+        filename: req.file.filename,
+        originalName: req.file.originalname,
+        size: req.file.size
+      });
+    } catch (error) {
+      console.error('Logo upload error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to upload logo file" 
       });
     }
   });

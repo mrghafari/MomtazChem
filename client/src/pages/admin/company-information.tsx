@@ -203,6 +203,7 @@ export default function CompanyInformation() {
   const [selectedImageView, setSelectedImageView] = useState<CompanyImage | null>(null);
   const [formData, setFormData] = useState<CompanyInfo>({});
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [logoUploading, setLogoUploading] = useState(false);
 
   // Fetch company information from database
   const { data: companyInfo, isLoading: infoLoading } = useQuery<CompanyInfo>({
@@ -333,6 +334,68 @@ export default function CompanyInformation() {
   // Handle save button click
   const handleSaveCompanyInfo = () => {
     updateCompanyInfoMutation.mutate(formData);
+  };
+
+  // Handle logo upload
+  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+      toast({ 
+        title: "خطا", 
+        description: "لطفاً فایل تصویری انتخاب کنید", 
+        variant: "destructive" 
+      });
+      return;
+    }
+
+    // Check file size (5MB limit)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ 
+        title: "خطا", 
+        description: "حجم فایل نباید بیشتر از 5 مگابایت باشد", 
+        variant: "destructive" 
+      });
+      return;
+    }
+
+    setLogoUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('type', 'logo');
+
+      const response = await fetch('/api/upload/company-logo', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const result = await response.json();
+      
+      // Update logo URL in form data
+      handleFieldChange('logoUrl', result.url);
+      
+      toast({ 
+        title: "موفقیت", 
+        description: "لوگو با موفقیت آپلود شد" 
+      });
+    } catch (error) {
+      console.error('Logo upload error:', error);
+      toast({ 
+        title: "خطا", 
+        description: "خطا در آپلود لوگو", 
+        variant: "destructive" 
+      });
+    } finally {
+      setLogoUploading(false);
+    }
   };
 
   // Business Cards mutations
@@ -702,10 +765,37 @@ export default function CompanyInformation() {
                       placeholder="آدرس URL لوگو"
                       onChange={(e) => handleFieldChange('logoUrl', e.target.value)}
                     />
-                    <Button size="sm">
-                      <Upload className="h-4 w-4" />
+                    <input
+                      type="file"
+                      id="logoFileInput"
+                      accept="image/*"
+                      style={{ display: 'none' }}
+                      onChange={handleLogoUpload}
+                    />
+                    <Button 
+                      size="sm" 
+                      onClick={() => document.getElementById('logoFileInput')?.click()}
+                      disabled={logoUploading}
+                    >
+                      {logoUploading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Upload className="h-4 w-4" />
+                      )}
                     </Button>
                   </div>
+                  {formData?.logoUrl && (
+                    <div className="mt-2">
+                      <img 
+                        src={formData.logoUrl} 
+                        alt="لوگوی شرکت" 
+                        className="h-16 w-16 object-contain border rounded-lg"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
