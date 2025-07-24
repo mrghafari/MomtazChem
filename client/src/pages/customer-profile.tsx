@@ -105,6 +105,31 @@ const CustomerProfile = () => {
     enabled: !!customerData?.success,
   });
 
+  // Get order status category
+  const getOrderCategory = (order: any) => {
+    const status = order.status?.toLowerCase();
+    const paymentStatus = order.paymentStatus?.toLowerCase();
+    const paymentMethod = order.paymentMethod;
+    
+    // Check for bank transfer orders
+    if (paymentMethod === 'واریز بانکی با مهلت 3 روزه' || paymentMethod === 'bank_transfer_grace') {
+      return 'bank_transfer';
+    }
+    
+    // Check for completed orders
+    if (status === 'confirmed' || status === 'delivered' || paymentStatus === 'paid') {
+      return 'completed';
+    }
+    
+    // Check for processing orders
+    if (status === 'processing' || status === 'shipped' || status === 'ready_for_delivery') {
+      return 'processing';
+    }
+    
+    // Default to pending payment
+    return 'pending';
+  };
+
   // Sort orders: 3-day bank transfer orders first, then regular orders
   const rawOrders = orderData?.orders || [];
   const sortedOrders = rawOrders.sort((a: any, b: any) => {
@@ -161,31 +186,6 @@ const CustomerProfile = () => {
       loadCompleteHistory();
     }
   }, [customerData?.success]);
-
-  // Get order status category
-  const getOrderCategory = (order: any) => {
-    const status = order.status?.toLowerCase();
-    const paymentStatus = order.paymentStatus?.toLowerCase();
-    const paymentMethod = order.paymentMethod;
-    
-    // Check for bank transfer orders
-    if (paymentMethod === 'واریز بانکی با مهلت 3 روزه' || paymentMethod === 'bank_transfer_grace') {
-      return 'bank_transfer';
-    }
-    
-    // Check for completed orders
-    if (status === 'confirmed' || status === 'delivered' || paymentStatus === 'paid') {
-      return 'completed';
-    }
-    
-    // Check for processing orders
-    if (status === 'processing' || status === 'shipped' || status === 'ready_for_delivery') {
-      return 'processing';
-    }
-    
-    // Default to pending payment
-    return 'pending';
-  };
 
   // Filter history based on search and category filter
   let filteredHistory = completeHistory;
