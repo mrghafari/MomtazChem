@@ -1148,18 +1148,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                   </Label>
                 </div>
                 
-                {/* دوم: پرداخت از والت */}
-                {walletBalance >= totalAmount && (
-                  <div className="flex items-center space-x-2 space-x-reverse">
-                    <RadioGroupItem value="wallet_full" id="wallet_full" />
-                    <Label htmlFor="wallet_full" className="flex items-center gap-2 cursor-pointer">
-                      <Wallet className="w-4 h-4 text-green-600" />
-                      پرداخت از والت ({formatCurrency(totalAmount)}) - مبلغ از والت (حداکثر {formatCurrency(walletBalance)})
-                    </Label>
-                  </div>
-                )}
-                
-                {/* سوم: پرداخت بخشی از والت - نمایش همیشه */}
+                {/* دوم: پرداخت بخشی از والت - نمایش همیشه */}
                 {canUseWallet && (
                   <div className="flex items-center space-x-2 space-x-reverse">
                     <RadioGroupItem value="wallet_partial" id="wallet_partial" />

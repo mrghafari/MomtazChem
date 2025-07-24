@@ -1184,9 +1184,6 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                 <SelectItem value="cash_on_delivery">پرداخت نقدی هنگام تحویل (Cash on Delivery)</SelectItem>
                                 <SelectItem value="company_credit">حساب اعتباری شرکت (Company Credit)</SelectItem>
                                 {isUserLoggedIn && walletBalance > 0 && (
-                                  <SelectItem value="wallet_payment">پرداخت با کیف پول - مبلغ از والت (حداکثر {walletBalance.toLocaleString()} IQD)</SelectItem>
-                                )}
-                                {isUserLoggedIn && walletBalance > 0 && (
                                   <SelectItem value="wallet_combined">پرداخت همه یا بخشی از والت - مبلغ از والت (حداکثر {walletBalance.toLocaleString()} IQD)</SelectItem>
                                 )}
                               </SelectContent>

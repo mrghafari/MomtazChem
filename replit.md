@@ -44,8 +44,7 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **User Request**: "این توضیح را 'مبلغ از والت (حداکثر IQD 500,008.00)' ببر روبروی پرداخت از والت و الاین کن باهاش" and "این را هم بگن 'پرداخت همه یا بخشی از والت' پرداخت بخشی از والت"
 - **Explanatory Text Added**: Added wallet balance explanation "مبلغ از والت (حداکثر {walletBalance})" inline with all wallet payment options
 - **Enhanced Payment Options**: Updated wallet payment labels across all interfaces:
-  - **Full Wallet Payment**: "پرداخت از والت - مبلغ از والت (حداکثر {walletBalance})"
-  - **Partial Wallet Payment**: "پرداخت همه یا بخشی از والت - مبلغ از والت (حداکثر {walletBalance})"
+  - **Wallet Payment**: "پرداخت همه یا بخشی از والت - مبلغ از والت (حداکثر {walletBalance})" (Full wallet payment option removed per user request)
 - **Multi-Interface Implementation**: Updated wallet payment text in both:
   - Bilingual Purchase Form (shop interface)
   - Checkout Page (dedicated checkout flow)
