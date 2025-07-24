@@ -456,11 +456,11 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
            .text(primaryPhone, rightColumnX, companyFooterY + 54, { align: 'left', width: columnWidth })
            .text(secondaryPhone, rightColumnX, companyFooterY + 66, { align: 'left', width: columnWidth });
         
-        // Dynamic English address from database
-        const englishAddress = companyInfo?.addressEnglish || companyInfo?.mainAddress || 'Leading Supplier of Industrial & Laboratory Chemicals in the Middle East';
+        // Company English name from database
+        const englishCompanySlogan = companyInfo?.companyNameEn || companyInfo?.companyNameEnglish || 'Leading Supplier of Industrial & Laboratory Chemicals in the Middle East';
         doc.fontSize(7)
            .font('VazirRegular')
-           .text(englishAddress, rightColumnX, companyFooterY + 80, { align: 'left', width: columnWidth });
+           .text(englishCompanySlogan, rightColumnX, companyFooterY + 80, { align: 'left', width: columnWidth });
         
       } catch (fontError) {
         console.warn('⚠️ Font registration failed, using default font:', fontError);

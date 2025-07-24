@@ -25,7 +25,7 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
   - Dynamic logo loading from database with proper error handling
 - **Two-Column Footer Layout**: Professional footer design with dynamic content:
   - **Left Column**: Persian/Arabic company name, address, and company slogan
-  - **Right Column**: English company name, contact details (website, emails, phones), and English address
+  - **Right Column**: Contact details (website, emails, phones), and English company name
   - **Fallback Handling**: Graceful fallback to default values when database fields are empty
 - **Real-time Updates**: PDF reports automatically reflect all company information changes:
   - Address changes in company information instantly appear in all PDF types
