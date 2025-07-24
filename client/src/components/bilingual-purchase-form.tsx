@@ -535,6 +535,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   // Conditional graying out logic for CRM fields
   const isPrimaryAddressDisabled = showSecondAddress && secondAddress.trim().length > 0;
   const isPrimaryMobileDisabled = showRecipientMobile && recipientMobile.trim().length > 0;
+  const isPrimaryPostalCodeDisabled = secondPostalCode.trim().length > 0; // Separate logic for postal code
   const hasCrmData = !!(crmCustomerData || (customerData?.success && customerData.customer));
 
 
@@ -856,7 +857,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       activeProvince: (showSecondAddress && secondProvince.trim()) 
         ? secondProvince.trim() 
         : (crmCustomerData?.province || ''),
-      activePostalCode: (showSecondAddress && secondPostalCode.trim()) 
+      activePostalCode: secondPostalCode.trim() 
         ? secondPostalCode.trim() 
         : data.postalCode,
       
@@ -1707,21 +1708,24 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                       )}
                     </div>
 
-                    {/* Postal Code */}
-                    <div className={isPrimaryAddressDisabled ? 'opacity-60' : ''}>
-                      <label className="text-xs font-medium block mb-1">
+                    {/* Postal Code with separate conditional logic */}
+                    <div className={isPrimaryPostalCodeDisabled ? 'opacity-60' : ''}>
+                      <label className={`text-xs font-medium block mb-1 ${isPrimaryPostalCodeDisabled ? 'text-gray-500' : ''}`}>
                         {isRTL ? 'الرمز البريدي' : 'Postal Code'}
+                        {isPrimaryPostalCodeDisabled && (
+                          <span className="text-orange-500 mr-1">⚠️</span>
+                        )}
                       </label>
                       <Input
                         value={form.watch('postalCode') || ""}
                         onChange={(e) => form.setValue('postalCode', e.target.value)}
                         placeholder={isRTL ? "کد پستی" : "Postal Code"}
                         className={`text-xs h-7 ${isRTL ? 'text-right' : 'text-left'} ${
-                          isPrimaryAddressDisabled 
+                          isPrimaryPostalCodeDisabled 
                             ? 'bg-gray-100 text-gray-500 border-gray-300' 
                             : 'bg-white'
                         }`}
-                        disabled={isPrimaryAddressDisabled}
+                        disabled={isPrimaryPostalCodeDisabled}
                       />
                     </div>
                   </div>

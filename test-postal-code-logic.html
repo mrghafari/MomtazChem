@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست منطق کد پستی</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            direction: rtl; 
+            text-align: right; 
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #2563eb; margin-bottom: 20px; }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+        .expected-behavior {
+            background: #dbeafe;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #3b82f6;
+        }
+        .primary-postal {
+            background: #f3f4f6;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .second-postal {
+            background: #eff6ff;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .result {
+            background: #f0fdf4;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #22c55e;
+        }
+        code {
+            background: #f1f5f9;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: monospace;
+            color: #1e40af;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏷️ تست منطق کد پستی جداگانه</h1>
+        
+        <div class="expected-behavior">
+            <h3>📋 رفتار مورد انتظار:</h3>
+            <ul>
+                <li>کد پستی اول: همیشه نمایش داده شود و قابل ویرایش باشد (بدون تغییر)</li>
+                <li>کد پستی اول: اگر کد پستی دوم پر شد، غیرفعال و خاکستری شود</li>
+                <li>کد پستی دوم: فقط در بخش آدرس دوم نمایش داده شود</li>
+                <li>منطق پردازش: اگر کد پستی دوم پر باشد، به عنوان کد پستی اصلی استفاده شود</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h3>🔍 سناریوهای تست:</h3>
+            
+            <div class="primary-postal">
+                <h4>1️⃣ حالت اولیه (کد پستی دوم خالی)</h4>
+                <p><strong>کد پستی اول:</strong> 1968913751 (فعال - رنگ عادی)</p>
+                <p><strong>کد پستی دوم:</strong> خالی</p>
+                <div class="result">
+                    <strong>✅ نتیجه:</strong> کد پستی اول (1968913751) در سفارش استفاده می‌شود
+                </div>
+            </div>
+
+            <div class="second-postal">
+                <h4>2️⃣ حالت پر شدن کد پستی دوم</h4>
+                <p><strong>کد پستی اول:</strong> 1968913751 (غیرفعال - خاکستری با ⚠️)</p>
+                <p><strong>کد پستی دوم:</strong> 44001 (فعال)</p>
+                <div class="result">
+                    <strong>✅ نتیجه:</strong> کد پستی دوم (44001) در سفارش استفاده می‌شود
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔧 تغییرات پیاده‌سازی شده:</h3>
+            <ul>
+                <li><code>isPrimaryPostalCodeDisabled</code> - متغیر جداگانه برای غیرفعال کردن کد پستی اول</li>
+                <li><code>secondPostalCode.trim().length > 0</code> - شرط فعال‌سازی بر اساس کد پستی دوم</li>
+                <li><code>activePostalCode</code> - منطق انتخاب کد پستی نهایی در پردازش سفارش</li>
+                <li>علامت ⚠️ هنگام غیرفعال شدن کد پستی اول</li>
+                <li>طراحی بصری متمایز (opacity-60 + bg-gray-100)</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h3>🎯 نکات مهم پیاده‌سازی:</h3>
+            <ul>
+                <li><strong>استقلال از آدرس:</strong> کد پستی مستقل از آدرس دوم عمل می‌کند</li>
+                <li><strong>حفظ کد پستی اول:</strong> کد پستی اول دست نخورده باقی می‌ماند</li>
+                <li><strong>منطق شرطی جداگانه:</strong> هر فیلد منطق مستقل خود را دارد</li>
+                <li><strong>UI منطقی:</strong> نمایش بصری واضح از وضعیت فعال/غیرفعال</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h3>📝 کد منطق پیاده‌سازی شده:</h3>
+            <pre style="background: #f8fafc; padding: 10px; border-radius: 5px; overflow-x: auto;">
+// منطق شرطی جداگانه برای کد پستی
+const isPrimaryPostalCodeDisabled = secondPostalCode.trim().length > 0;
+
+// منطق انتخاب کد پستی فعال در پردازش سفارش
+activePostalCode: secondPostalCode.trim() 
+  ? secondPostalCode.trim() 
+  : data.postalCode,
+            </pre>
+        </div>
+    </div>
+</body>
+</html>
