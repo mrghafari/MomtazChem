@@ -25237,7 +25237,7 @@ momtazchem.com
   });
 
   // Upload bank receipt
-  app.post('/api/payment/upload-receipt', uploadReceipt.single('receipt'), async (req, res) => {
+  app.post('/api/payment/upload-receipt', requireCustomerAuth, uploadReceipt.single('receipt'), async (req, res) => {
     try {
       const { orderId } = req.body;
       const file = req.file;

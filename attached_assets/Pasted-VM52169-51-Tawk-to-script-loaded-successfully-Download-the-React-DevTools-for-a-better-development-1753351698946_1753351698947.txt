@@ -1,0 +1,93 @@
+VM52169:51 Tawk.to script loaded successfully
+ Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:117574)
+    at t.value (twk-chunk-common.js:2:150658)
+    at p.updateUUID (twk-chunk-common.js:2:202310)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at push.2f62.p.dispatch (twk-vendor.js:2:78106)
+    at push.2f62.p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:124589)
+    at twk-chunk-common.js:2:123900
+value @ twk-chunk-common.js:2
+VM52169:23 Tawk.to Live Chat loaded successfully
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(5)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(5)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(5)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(5)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(5)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 5 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(5)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(5)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 5 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(5)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(5)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 5 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(5)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(5)
+ 🔐 [LOGIN] Starting handleLoginSuccess
+ 🔐 [LOGIN] Customer data: Object
+ 🔐 [LOGIN] Current cart state: Object
+ 🔐 [LOGIN] Customer state set
+ 🔐 [LOGIN] Wallet balance fetch initiated
+ 🔐 [LOGIN] Auth modal closed
+ 🔐 [LOGIN] Cache invalidated
+ 🔐 [LOGIN] Has cart items: false
+ 🔐 [LOGIN] Cart contents: Object
+ 🔐 [LOGIN] Cart migration completed
+ 🔐 [LOGIN] Welcome toast shown
+ 🔐 [LOGIN] Staying in shop after successful login
+ 🔐 [LOGIN] handleLoginSuccess completed successfully
+ 🌟 [RATINGS DEBUG] Product stats loaded: 5 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(5)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(5)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 5 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(5)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(5)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 5 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: Array(5)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(5)
+/api/payment/upload-receipt:1  Failed to load resource: the server responded with a status of 400 (Bad Request)
+  POST https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/payment/upload-receipt 400 (Bad Request)
+(anonymous) @ /src/pages/bank-receipt-upload.tsx:87
+mutationFn @ /src/pages/bank-receipt-upload.tsx:68
+fn @ @tanstack_react-query.js:1189
+run @ @tanstack_react-query.js:494
+start @ @tanstack_react-query.js:536
+execute @ @tanstack_react-query.js:1225
+await in execute
+mutate @ @tanstack_react-query.js:2630
+(anonymous) @ @tanstack_react-query.js:3295
+handleUpload @ /src/pages/bank-receipt-upload.tsx:147
+callCallback2 @ chunk-RPCDYKBN.js:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js:3736
+executeDispatch @ chunk-RPCDYKBN.js:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js:7034
+processDispatchQueue @ chunk-RPCDYKBN.js:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js:7051
+(anonymous) @ chunk-RPCDYKBN.js:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js:18913
+batchedUpdates @ chunk-RPCDYKBN.js:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js:5478
+dispatchEvent @ chunk-RPCDYKBN.js:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js:5449
