@@ -216,8 +216,8 @@ export default function LogisticsDepartment() {
     queryKey: ["/api/logistics/shipping-rates"],
   });
 
-  const orders = ordersData?.orders || [];
-  const shippingRates = shippingRatesData?.data || [];
+  const orders = (ordersData as any)?.orders || [];
+  const shippingRates = (shippingRatesData as any)?.data || [];
 
   // Update delivery info mutation
   const updateDeliveryMutation = useMutation({
@@ -315,19 +315,7 @@ export default function LogisticsDepartment() {
 
   const handleShippingRateEdit = (rate: ShippingRate) => {
     setEditingRate(rate);
-    shippingRateForm.reset({
-      deliveryMethod: rate.deliveryMethod,
-      transportationType: rate.transportationType || "",
-      cityName: rate.cityName || "",
-      provinceName: rate.provinceName || "",
-      basePrice: rate.basePrice,
-      pricePerKg: rate.pricePerKg || "",
-      freeShippingThreshold: rate.freeShippingThreshold || "",
-      estimatedDays: rate.estimatedDays || undefined,
-      trackingAvailable: rate.trackingAvailable,
-      insuranceAvailable: rate.insuranceAvailable,
-      description: rate.description || "",
-    });
+    shippingRateForm.reset(rate as any);
     setShippingRateDialogOpen(true);
   };
 
