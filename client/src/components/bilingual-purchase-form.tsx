@@ -1238,11 +1238,6 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                           </tr>
                         </tbody>
                       </table>
-                      
-                      {/* Additional note */}
-                      <div className="px-4 py-2 bg-orange-50 text-sm text-orange-700 border-t">
-                        پرداخت در حواله بانکی یا موقعیت سه روزه
-                      </div>
                     </div>
                   )}
                 </div>
