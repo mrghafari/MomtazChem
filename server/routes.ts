@@ -31388,24 +31388,38 @@ momtazchem.com
         return res.status(400).json({ success: false, message: "Invalid product ID" });
       }
 
-      // Check if user is authenticated - DEBUG SESSION
+      // Enhanced session debugging
       console.log('🔍 [REVIEW AUTH DEBUG] Session data (POST /api/products/:id/reviews):', {
         sessionId: req.sessionID,
         customerId: (req.session as any)?.customerId,
         isAuthenticated: (req.session as any)?.isAuthenticated,
         adminId: (req.session as any)?.adminId,
         crmCustomerId: (req.session as any)?.crmCustomerId,
-        customerEmail: (req.session as any)?.customerEmail
+        customerEmail: (req.session as any)?.customerEmail,
+        fullSessionData: req.session,
+        cookies: req.headers.cookie
       });
       
-      // Use same authentication pattern as other working endpoints
+      // Check authentication using same pattern as /api/customers/me
       const customerId = (req.session as any)?.customerId || (req.session as any)?.crmCustomerId;
-      if (!customerId) {
+      const isAuthenticated = (req.session as any)?.isAuthenticated;
+      
+      console.log('🔐 [REVIEW AUTH] Authentication check:', {
+        customerId,
+        isAuthenticated,
+        hasCustomerId: !!customerId,
+        hasAuth: !!isAuthenticated
+      });
+      
+      if (!customerId || !isAuthenticated) {
+        console.log('❌ [REVIEW AUTH] Authentication failed - missing customerId or isAuthenticated');
         return res.status(401).json({ 
           success: false, 
           message: "برای ثبت نظر ابتدا وارد حساب کاربری خود شوید" 
         });
       }
+      
+      console.log('✅ [REVIEW AUTH] Authentication successful for customer:', customerId);
 
       const { rating, title, review, comment, pros, cons } = req.body;
       

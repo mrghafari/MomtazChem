@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 تست Session و ثبت نظر</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .btn {
+            background: #3b82f6;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+            font-weight: bold;
+        }
+        .btn:hover { background: #2563eb; }
+        .result {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .success { background: #d1fae5; border-color: #059669; color: #059669; }
+        .error { background: #fee2e2; border-color: #dc2626; color: #dc2626; }
+        h1 { text-align: center; color: white; margin-bottom: 30px; }
+        h2 { color: #333; margin-bottom: 15px; font-size: 18px; }
+    </style>
+</head>
+<body>
+    <h1>🔍 تشخیص مشکل Session در ثبت نظرات</h1>
+
+    <div class="card">
+        <h2>🔐 مرحله 1: تست احراز هویت Customer</h2>
+        <button class="btn" onclick="testCustomerAuth()">تست احراز هویت</button>
+        <div id="authResult" class="result">منتظر تست...</div>
+    </div>
+
+    <div class="card">
+        <h2>⭐ مرحله 2: ثبت نظر فوری</h2>
+        <button class="btn" onclick="submitTestReview()">ثبت نظر</button>
+        <div id="reviewResult" class="result">منتظر ثبت نظر...</div>
+    </div>
+
+    <div class="card">
+        <h2>📝 مرحله 3: مشاهده نظرات</h2>
+        <button class="btn" onclick="checkReviews()">مشاهده نظرات</button>
+        <div id="reviewsResult" class="result">منتظر بارگذاری نظرات...</div>
+    </div>
+
+    <script>
+        async function testCustomerAuth() {
+            const div = document.getElementById('authResult');
+            try {
+                div.className = 'result';
+                div.textContent = '🔄 تست احراز هویت...\n';
+                
+                const res = await fetch('/api/customers/me', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                
+                const data = await res.json();
+                console.log('🔐 Customer Auth Response:', data);
+                
+                if (res.ok && data.success && data.customer) {
+                    div.className = 'result success';
+                    div.textContent = `✅ احراز هویت موفق!\n\nشناسه: ${data.customer.id}\nنام: ${data.customer.firstName} ${data.customer.lastName}\nایمیل: ${data.customer.email}\nتلفن: ${data.customer.phone || 'نامشخص'}\n\n🎯 آماده ثبت نظر!`;
+                } else {
+                    div.className = 'result error';
+                    div.textContent = `❌ احراز هویت ناموفق!\n\nوضعیت: ${res.status}\nپیام: ${data.message || 'خطای ناشناخته'}\n\nلطفاً ابتدا وارد شوید.`;
+                }
+            } catch (error) {
+                div.className = 'result error'; 
+                div.textContent = `❌ خطای شبکه!\nجزئیات: ${error.message}`;
+                console.error('Customer auth error:', error);
+            }
+        }
+
+        async function submitTestReview() {
+            const div = document.getElementById('reviewResult');
+            try {
+                div.className = 'result';
+                div.textContent = '🔄 در حال ثبت نظر...\n';
+                
+                const reviewData = {
+                    rating: 5,
+                    title: 'تست نهایی سیستم نظرات - Customer 8',
+                    comment: 'این یک تست کامل برای بررسی عملکرد سیستم ثبت نظرات است. اگر این پیام را می‌بینید، یعنی مشکل حل شده!',
+                    review: 'این یک تست کامل برای بررسی عملکرد سیستم ثبت نظرات است. اگر این پیام را می‌بینید، یعنی مشکل حل شده!'
+                };
+                
+                console.log('📤 Review data being sent:', reviewData);
+                
+                const res = await fetch('/api/products/472/reviews', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(reviewData)
+                });
+                
+                const data = await res.json();
+                console.log('📨 Review submit response:', data);
+                
+                if (res.ok && data.success) {
+                    div.className = 'result success';
+                    div.textContent = `🎉 نظر با موفقیت ثبت شد!\n\nشناسه نظر: ${data.data.id}\nتاریخ ثبت: ${new Date(data.data.createdAt).toLocaleString('fa-IR')}\nامتیاز: ${data.data.rating}/5\nعنوان: ${data.data.title}\n\nپیام سیستم: ${data.message}\n\n✅ سیستم نظرات کار می‌کند!`;
+                } else {
+                    div.className = 'result error';
+                    div.textContent = `❌ خطا در ثبت نظر!\n\nکد خطا: ${res.status}\nپیام: ${data.message || 'خطای ناشناخته'}\n\nجزئیات کامل:\n${JSON.stringify(data, null, 2)}`;
+                }
+            } catch (error) {
+                div.className = 'result error';
+                div.textContent = `❌ خطای شبکه در ثبت نظر!\nجزئیات: ${error.message}`;
+                console.error('Review submit error:', error);
+            }
+        }
+
+        async function checkReviews() {
+            const div = document.getElementById('reviewsResult');
+            try {
+                div.className = 'result';
+                div.textContent = '🔄 بارگذاری نظرات...\n';
+                
+                const res = await fetch('/api/products/472/reviews', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                
+                const data = await res.json();
+                console.log('📋 Reviews response:', data);
+                
+                if (res.ok && data.success) {
+                    const reviews = data.data.reviews;
+                    const stats = data.data.stats;
+                    
+                    div.className = 'result success';
+                    let output = `📊 نظرات محصول NPK Fertilizer Complex:\n\n`;
+                    output += `آمار کلی:\n`;
+                    output += `- تعداد نظرات: ${stats.totalReviews}\n`;
+                    output += `- میانگین امتیاز: ${stats.averageRating.toFixed(1)}/5\n\n`;
+                    
+                    if (reviews.length === 0) {
+                        output += `📝 هیچ نظری ثبت نشده است.\n`;
+                    } else {
+                        output += `📝 نظرات ثبت شده:\n\n`;
+                        reviews.forEach((review, index) => {
+                            output += `${index + 1}. ${review.title || 'بدون عنوان'}\n`;
+                            output += `   👤 ${review.customerName}\n`;
+                            output += `   ⭐ ${review.rating}/5\n`;
+                            output += `   📝 ${review.review}\n`;
+                            output += `   📅 ${new Date(review.createdAt).toLocaleString('fa-IR')}\n\n`;
+                        });
+                    }
+                    
+                    div.textContent = output;
+                } else {
+                    div.className = 'result error';
+                    div.textContent = `❌ خطا در بارگذاری نظرات!\n\nکد: ${res.status}\nپیام: ${data.message || 'خطای ناشناخته'}`;
+                }
+            } catch (error) {
+                div.className = 'result error';
+                div.textContent = `❌ خطای شبکه!\nجزئیات: ${error.message}`;
+                console.error('Reviews fetch error:', error);
+            }
+        }
+
+        // تست خودکار احراز هویت هنگام بارگذاری صفحه
+        window.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Starting authentication test...');
+            testCustomerAuth();
+        });
+    </script>
+</body>
+</html>

@@ -3,392 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌟 تست ثبت نظرات محصول</title>
+    <title>🚀 تست نهایی ثبت نظر</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 1200px;
+            font-family: Arial, sans-serif;
+            max-width: 800px;
             margin: 0 auto;
             padding: 20px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
         }
-        .test-card {
+        .card {
             background: white;
-            border-radius: 15px;
-            padding: 25px;
-            margin: 15px 0;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         }
-        .test-button {
+        .btn {
             background: #3b82f6;
             color: white;
-            padding: 12px 24px;
+            padding: 12px 20px;
             border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            margin: 8px;
-            transition: all 0.3s ease;
-            font-weight: 500;
-        }
-        .test-button:hover {
-            background: #2563eb;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
-        }
-        .success { color: #059669; background: #d1fae5; border-color: #6ee7b7; }
-        .error { color: #dc2626; background: #fee2e2; border-color: #fca5a5; }
-        .warning { color: #d97706; background: #fef3c7; border-color: #fde68a; }
-        .result-box {
-            background: #f8fafc;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 20px;
-            margin: 15px 0;
-            min-height: 200px;
-            font-family: 'Courier New', monospace;
-            white-space: pre-wrap;
-            font-size: 14px;
-        }
-        .header {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            text-align: center;
-            padding: 30px;
-            border-radius: 15px;
-            margin-bottom: 25px;
-        }
-        .review-form {
-            background: #f0f9ff;
-            border: 2px solid #bae6fd;
-            border-radius: 10px;
-            padding: 20px;
-            margin: 15px 0;
-        }
-        .form-row {
-            display: flex;
-            gap: 15px;
-            margin: 10px 0;
-            align-items: center;
-        }
-        .form-row label {
-            min-width: 100px;
-            font-weight: bold;
-        }
-        .form-row input, .form-row select, .form-row textarea {
-            flex: 1;
-            padding: 8px 12px;
-            border: 1px solid #d1d5db;
             border-radius: 6px;
-        }
-        .rating-stars {
-            display: flex;
-            gap: 5px;
-        }
-        .star {
-            font-size: 24px;
             cursor: pointer;
-            color: #d1d5db;
-            transition: color 0.2s;
+            font-weight: bold;
+            margin: 5px;
         }
-        .star.active {
-            color: #fbbf24;
+        .btn:hover { background: #2563eb; }
+        .result {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            font-size: 13px;
+            min-height: 80px;
         }
-        .star:hover {
-            color: #f59e0b;
-        }
+        .success { background: #d1fae5; border-color: #059669; color: #059669; }
+        .error { background: #fee2e2; border-color: #dc2626; color: #dc2626; }
+        h1 { text-align: center; color: white; margin-bottom: 30px; }
+        h2 { color: #333; margin-bottom: 15px; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>🌟 تست ثبت نظرات محصول</h1>
-        <p>تست کامل سیستم ثبت نظرات و امتیازدهی به محصولات</p>
+    <h1>🚀 تست نهایی ثبت نظر Customer 8</h1>
+
+    <div class="card">
+        <h2>✅ احراز هویت</h2>
+        <button class="btn" onclick="checkAuth()">بررسی وضعیت ورود</button>
+        <div id="authStatus" class="result">آماده تست...</div>
     </div>
 
-    <div class="test-card">
-        <h2>🔐 گام اول: ورود به حساب کاربری</h2>
-        <div class="form-row">
-            <label>ایمیل:</label>
-            <input type="email" id="loginEmail" value="oilstar@hotmail.com" placeholder="ایمیل مشتری">
-        </div>
-        <div class="form-row">
-            <label>رمز عبور:</label>
-            <input type="password" id="loginPassword" value="customer123" placeholder="رمز عبور">
-        </div>
-        <button class="test-button" onclick="testCustomerLogin()">ورود به حساب</button>
-        <div id="loginResult" class="result-box">آماده تست ورود...</div>
-    </div>
-
-    <div class="test-card">
-        <h2>⭐ گام دوم: ثبت نظر برای محصول</h2>
-        <div class="review-form">
-            <div class="form-row">
-                <label>محصول:</label>
-                <select id="productId">
-                    <option value="472">NPK Fertilizer Complex (ID: 472)</option>
-                    <option value="475">Diesel Fuel Additive (ID: 475)</option>
-                    <option value="470">Industrial Paint Thinner (ID: 470)</option>
-                    <option value="473">Water Treatment Chemical (ID: 473)</option>
-                    <option value="477">Agricultural Pesticide (ID: 477)</option>
-                </select>
-            </div>
-            <div class="form-row">
-                <label>امتیاز:</label>
-                <div class="rating-stars" id="ratingStars">
-                    <span class="star" data-rating="1">⭐</span>
-                    <span class="star" data-rating="2">⭐</span>
-                    <span class="star" data-rating="3">⭐</span>
-                    <span class="star" data-rating="4">⭐</span>
-                    <span class="star" data-rating="5">⭐</span>
-                </div>
-                <span id="selectedRating">0</span>
-            </div>
-            <div class="form-row">
-                <label>عنوان نظر:</label>
-                <input type="text" id="reviewTitle" placeholder="عنوان نظر (اختیاری)" value="تست عملکرد سیستم نظرات">
-            </div>
-            <div class="form-row">
-                <label>متن نظر:</label>
-                <textarea id="reviewComment" rows="4" placeholder="متن نظر خود را بنویسید...">این یک تست کامل برای سیستم ثبت نظرات محصول است. کیفیت محصول بسیار عالی بود و رضایت کامل دارم.</textarea>
-            </div>
-        </div>
-        <button class="test-button" onclick="testReviewSubmission()">ثبت نظر</button>
-        <div id="reviewResult" class="result-box">آماده تست ثبت نظر...</div>
-    </div>
-
-    <div class="test-card">
-        <h2>📊 گام سوم: بررسی نظرات ثبت شده</h2>
-        <button class="test-button" onclick="testReviewRetrieval()">دریافت نظرات محصول</button>
-        <div id="retrievalResult" class="result-box">آماده بررسی نظرات...</div>
-    </div>
-
-    <div class="test-card">
-        <h2>🔍 گام چهارم: تست احراز هویت</h2>
-        <button class="test-button" onclick="testAuthentication()">بررسی وضعیت احراز هویت</button>
-        <div id="authResult" class="result-box">آماده تست احراز هویت...</div>
+    <div class="card">
+        <h2>⭐ ثبت نظر</h2>
+        <p><strong>محصول:</strong> NPK Fertilizer Complex (ID: 472)</p>
+        <button class="btn" onclick="submitReview()">ثبت نظر فوری</button>
+        <div id="reviewStatus" class="result">آماده ثبت نظر...</div>
     </div>
 
     <script>
-        let currentRating = 0;
-        let isLoggedIn = false;
-
-        // Rating star functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const stars = document.querySelectorAll('.star');
-            stars.forEach(star => {
-                star.addEventListener('click', function() {
-                    currentRating = parseInt(this.getAttribute('data-rating'));
-                    updateStarDisplay();
-                    document.getElementById('selectedRating').textContent = currentRating;
-                });
-                
-                star.addEventListener('mouseover', function() {
-                    const rating = parseInt(this.getAttribute('data-rating'));
-                    highlightStars(rating);
-                });
-            });
-            
-            document.getElementById('ratingStars').addEventListener('mouseleave', function() {
-                updateStarDisplay();
-            });
-        });
-
-        function highlightStars(rating) {
-            const stars = document.querySelectorAll('.star');
-            stars.forEach((star, index) => {
-                if (index < rating) {
-                    star.classList.add('active');
-                } else {
-                    star.classList.remove('active');
-                }
-            });
-        }
-
-        function updateStarDisplay() {
-            highlightStars(currentRating);
-        }
-
-        // Test customer login
-        async function testCustomerLogin() {
-            const resultDiv = document.getElementById('loginResult');
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            
+        async function checkAuth() {
+            const div = document.getElementById('authStatus');
             try {
-                resultDiv.textContent = '🔄 در حال تست ورود مشتری...\n';
+                div.textContent = 'بررسی احراز هویت...';
                 
-                const response = await fetch('/api/customers/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({ email, password })
+                const res = await fetch('/api/customers/me', {
+                    credentials: 'include'
                 });
+                const data = await res.json();
                 
-                const result = await response.json();
-                
-                if (response.ok) {
-                    isLoggedIn = true;
-                    resultDiv.className = 'result-box success';
-                    resultDiv.textContent = `✅ ورود موفق!\n\nنام: ${result.customer.firstName} ${result.customer.lastName}\nایمیل: ${result.customer.email}\nشناسه مشتری: ${result.customer.id}\n\nSessionID: ${result.sessionId || 'نامشخص'}\n\nوضعیت: آماده برای ثبت نظر`;
+                if (res.ok) {
+                    div.className = 'result success';
+                    div.textContent = `✅ وارد شده!\nنام: ${data.customer.firstName} ${data.customer.lastName}\nایمیل: ${data.customer.email}\nشناسه: ${data.customer.id}`;
                 } else {
-                    isLoggedIn = false;
-                    resultDiv.className = 'result-box error';
-                    resultDiv.textContent = `❌ خطا در ورود!\n\nپیام خطا: ${result.message}\nکد وضعیت: ${response.status}\n\nلطفاً اطلاعات ورود را بررسی کنید.`;
+                    div.className = 'result error';
+                    div.textContent = `❌ وارد نشده: ${data.message}`;
                 }
-            } catch (error) {
-                isLoggedIn = false;
-                resultDiv.className = 'result-box error';
-                resultDiv.textContent = `❌ خطای شبکه!\n\nجزئیات خطا: ${error.message}\n\nلطفاً اتصال اینترنت را بررسی کنید.`;
+            } catch (e) {
+                div.className = 'result error';
+                div.textContent = `❌ خطا: ${e.message}`;
             }
         }
 
-        // Test review submission
-        async function testReviewSubmission() {
-            const resultDiv = document.getElementById('reviewResult');
-            
-            if (!isLoggedIn) {
-                resultDiv.className = 'result-box warning';
-                resultDiv.textContent = '⚠️ ابتدا باید وارد حساب کاربری شوید!';
-                return;
-            }
-            
-            if (currentRating === 0) {
-                resultDiv.className = 'result-box warning';
-                resultDiv.textContent = '⚠️ لطفاً امتیاز خود را انتخاب کنید!';
-                return;
-            }
-            
-            const productId = document.getElementById('productId').value;
-            const title = document.getElementById('reviewTitle').value;
-            const comment = document.getElementById('reviewComment').value;
-            
-            if (!comment.trim()) {
-                resultDiv.className = 'result-box warning';
-                resultDiv.textContent = '⚠️ لطفاً متن نظر خود را بنویسید!';
-                return;
-            }
-            
+        async function submitReview() {
+            const div = document.getElementById('reviewStatus');
             try {
-                resultDiv.className = 'result-box';
-                resultDiv.textContent = '🔄 در حال ارسال نظر...\n';
+                div.className = 'result';
+                div.textContent = 'در حال ثبت نظر...';
                 
                 const reviewData = {
-                    rating: currentRating,
-                    title: title,
-                    comment: comment,
-                    review: comment // Send both for compatibility
+                    rating: 5,
+                    title: 'نظر تست نهایی - اصلاح کامل',
+                    comment: 'این تست نهایی برای بررسی کامل سیستم نظرات است. اگر این نظر ثبت شود، یعنی مشکل کاملاً حل شده!',
+                    review: 'این تست نهایی برای بررسی کامل سیستم نظرات است. اگر این نظر ثبت شود، یعنی مشکل کاملاً حل شده!'
                 };
                 
-                console.log('🌟 Sending review data:', reviewData);
-                
-                const response = await fetch(`/api/products/${productId}/reviews`, {
+                const res = await fetch('/api/products/472/reviews', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {'Content-Type': 'application/json'},
                     credentials: 'include',
                     body: JSON.stringify(reviewData)
                 });
                 
-                const result = await response.json();
-                console.log('🌟 Review response:', result);
+                const data = await res.json();
                 
-                if (response.ok) {
-                    resultDiv.className = 'result-box success';
-                    resultDiv.textContent = `✅ نظر با موفقیت ثبت شد!\n\nشناسه نظر: ${result.data.id}\nتاریخ ثبت: ${new Date(result.data.createdAt).toLocaleString('fa-IR')}\nامتیاز: ${currentRating} ستاره\nعنوان: ${title}\nمتن: ${comment}\n\nپیام: ${result.message}`;
+                if (res.ok) {
+                    div.className = 'result success';
+                    div.textContent = `🎉 موفق!\n\nشناسه نظر: ${data.data.id}\nتاریخ: ${new Date(data.data.createdAt).toLocaleString('fa-IR')}\nپیام: ${data.message}`;
                 } else {
-                    resultDiv.className = 'result-box error';
-                    resultDiv.textContent = `❌ خطا در ثبت نظر!\n\nپیام خطا: ${result.message}\nکد وضعیت: ${response.status}\n\nجزئیات: ${JSON.stringify(result, null, 2)}`;
+                    div.className = 'result error';
+                    div.textContent = `❌ خطا!\n\nکد: ${res.status}\nپیام: ${data.message}\n\nجزئیات کامل:\n${JSON.stringify(data, null, 2)}`;
                 }
-            } catch (error) {
-                resultDiv.className = 'result-box error';
-                resultDiv.textContent = `❌ خطای شبکه در ثبت نظر!\n\nجزئیات خطا: ${error.message}\n\nلطفاً دوباره تلاش کنید.`;
+            } catch (e) {
+                div.className = 'result error';
+                div.textContent = `❌ خطای شبکه: ${e.message}`;
             }
         }
 
-        // Test review retrieval
-        async function testReviewRetrieval() {
-            const resultDiv = document.getElementById('retrievalResult');
-            const productId = document.getElementById('productId').value;
-            
-            try {
-                resultDiv.className = 'result-box';
-                resultDiv.textContent = '🔄 در حال دریافت نظرات...\n';
-                
-                const response = await fetch(`/api/products/${productId}/reviews`, {
-                    method: 'GET',
-                    credentials: 'include'
-                });
-                
-                const result = await response.json();
-                
-                if (response.ok) {
-                    const reviews = result.data.reviews;
-                    const stats = result.data.stats;
-                    
-                    resultDiv.className = 'result-box success';
-                    let output = `✅ نظرات با موفقیت دریافت شد!\n\n`;
-                    output += `📊 آمار محصول:\n`;
-                    output += `- تعداد نظرات: ${stats.totalReviews}\n`;
-                    output += `- میانگین امتیاز: ${stats.averageRating.toFixed(1)}\n\n`;
-                    
-                    if (reviews.length === 0) {
-                        output += `📝 هیچ نظری برای این محصول ثبت نشده است.\n`;
-                    } else {
-                        output += `📝 نظرات ثبت شده (${reviews.length} نظر):\n\n`;
-                        reviews.forEach((review, index) => {
-                            output += `${index + 1}. نظر شناسه ${review.id}:\n`;
-                            output += `   - نام: ${review.customerName}\n`;
-                            output += `   - امتیاز: ${review.rating} ستاره\n`;
-                            output += `   - عنوان: ${review.title || 'بدون عنوان'}\n`;
-                            output += `   - متن: ${review.review}\n`;
-                            output += `   - تاریخ: ${new Date(review.createdAt).toLocaleString('fa-IR')}\n`;
-                            output += `   - خرید تایید شده: ${review.isVerifiedPurchase ? 'بله' : 'خیر'}\n\n`;
-                        });
-                    }
-                    
-                    resultDiv.textContent = output;
-                } else {
-                    resultDiv.className = 'result-box error';
-                    resultDiv.textContent = `❌ خطا در دریافت نظرات!\n\nپیام خطا: ${result.message}\nکد وضعیت: ${response.status}`;
-                }
-            } catch (error) {
-                resultDiv.className = 'result-box error';
-                resultDiv.textContent = `❌ خطای شبکه در دریافت نظرات!\n\nجزئیات خطا: ${error.message}`;
-            }
-        }
-
-        // Test authentication status
-        async function testAuthentication() {
-            const resultDiv = document.getElementById('authResult');
-            
-            try {
-                resultDiv.className = 'result-box';
-                resultDiv.textContent = '🔄 در حال بررسی احراز هویت...\n';
-                
-                const response = await fetch('/api/customers/me', {
-                    method: 'GET',
-                    credentials: 'include'
-                });
-                
-                const result = await response.json();
-                
-                if (response.ok) {
-                    resultDiv.className = 'result-box success';
-                    resultDiv.textContent = `✅ احراز هویت موفق!\n\nاطلاعات مشتری:\n- نام: ${result.customer.firstName} ${result.customer.lastName}\n- ایمیل: ${result.customer.email}\n- شناسه: ${result.customer.id}\n- تلفن: ${result.customer.phone || 'نامشخص'}\n\nوضعیت: کاربر وارد شده و آماده برای ثبت نظر`;
-                } else {
-                    resultDiv.className = 'result-box error';
-                    resultDiv.textContent = `❌ احراز هویت ناموفق!\n\nپیام خطا: ${result.message}\nکد وضعیت: ${response.status}\n\nلطفاً ابتدا وارد حساب کاربری خود شوید.`;
-                }
-            } catch (error) {
-                resultDiv.className = 'result-box error';
-                resultDiv.textContent = `❌ خطای شبکه در احراز هویت!\n\nجزئیات خطا: ${error.message}`;
-            }
-        }
-
-        // Initialize rating to 4 stars
-        currentRating = 4;
-        updateStarDisplay();
-        document.getElementById('selectedRating').textContent = currentRating;
+        // Auto-check auth on page load
+        window.onload = () => checkAuth();
     </script>
 </body>
 </html>
