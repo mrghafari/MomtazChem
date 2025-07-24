@@ -388,10 +388,6 @@ export default function LogisticsDepartment() {
               <BarChart3 className="w-4 h-4" />
               تعرفه‌های ارسال
             </TabsTrigger>
-            <TabsTrigger value="reports" className="flex items-center gap-2 px-4 py-2">
-              <BarChart3 className="w-4 h-4" />
-              گزارشات
-            </TabsTrigger>
           </TabsList>
 
           {/* Orders Tab */}
@@ -599,18 +595,6 @@ export default function LogisticsDepartment() {
           {/* Shipping Rates Tab */}
           <TabsContent value="shipping-rates">
             <ShippingRatesManagement />
-          </TabsContent>
-
-          {/* Reports Tab */}
-          <TabsContent value="reports">
-            <Card>
-              <CardHeader>
-                <CardTitle>گزارشات لجستیک</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">گزارشات عملکرد لجستیک در حال توسعه است...</p>
-              </CardContent>
-            </Card>
           </TabsContent>
         </Tabs>
 
