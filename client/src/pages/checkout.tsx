@@ -1184,10 +1184,10 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                 <SelectItem value="cash_on_delivery">پرداخت نقدی هنگام تحویل (Cash on Delivery)</SelectItem>
                                 <SelectItem value="company_credit">حساب اعتباری شرکت (Company Credit)</SelectItem>
                                 {isUserLoggedIn && walletBalance > 0 && (
-                                  <SelectItem value="wallet_payment">پرداخت با کیف پول (Wallet Payment)</SelectItem>
+                                  <SelectItem value="wallet_payment">پرداخت با کیف پول - مبلغ از والت (حداکثر {walletBalance.toLocaleString()} IQD)</SelectItem>
                                 )}
                                 {isUserLoggedIn && walletBalance > 0 && (
-                                  <SelectItem value="wallet_combined">پرداخت بخشی از والت</SelectItem>
+                                  <SelectItem value="wallet_combined">پرداخت بخشی از والت - مبلغ از والت (حداکثر {walletBalance.toLocaleString()} IQD)</SelectItem>
                                 )}
                               </SelectContent>
                             </Select>

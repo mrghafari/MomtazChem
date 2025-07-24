@@ -1154,7 +1154,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                     <RadioGroupItem value="wallet_full" id="wallet_full" />
                     <Label htmlFor="wallet_full" className="flex items-center gap-2 cursor-pointer">
                       <Wallet className="w-4 h-4 text-green-600" />
-                      پرداخت از والت ({formatCurrency(totalAmount)})
+                      پرداخت از والت ({formatCurrency(totalAmount)}) - مبلغ از والت (حداکثر {formatCurrency(walletBalance)})
                     </Label>
                   </div>
                 )}
@@ -1165,7 +1165,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                     <RadioGroupItem value="wallet_partial" id="wallet_partial" />
                     <Label htmlFor="wallet_partial" className="flex items-center gap-2 cursor-pointer">
                       <Wallet className="w-4 h-4 text-orange-600" />
-                      پرداخت بخشی از والت
+                      پرداخت بخشی از والت - مبلغ از والت (حداکثر {formatCurrency(walletBalance)})
                     </Label>
                   </div>
                 )}
