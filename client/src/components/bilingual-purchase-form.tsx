@@ -244,8 +244,9 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const { language, direction } = useLanguage();
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [locationData, setLocationData] = useState<{latitude: number, longitude: number} | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<'online_payment' | 'wallet_full' | 'wallet_partial' | 'bank_transfer_grace'>('online_payment');
+  const [paymentMethod, setPaymentMethod] = useState<'online_payment' | 'wallet_full' | 'wallet_partial' | 'bank_receipt' | 'bank_transfer_grace'>('online_payment');
   const [walletAmount, setWalletAmount] = useState<number>(0);
+  const [selectedReceiptFile, setSelectedReceiptFile] = useState<File | null>(null);
   const [selectedShippingMethod, setSelectedShippingMethod] = useState<number | null>(null);
   const [shippingCost, setShippingCost] = useState<number>(0);
 
@@ -688,15 +689,51 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   // Submit order mutation
   const submitOrderMutation = useMutation({
     mutationFn: async (orderData: any) => {
-      // Standard order submission - add timestamp to bypass cache
-      const timestamp = Date.now();
-      const endpoint = `/api/customers/orders?t=${timestamp}`;
-      
-      const response = await apiRequest(endpoint, {
-        method: "POST",
-        body: orderData
-      });
-      return response;
+      // Handle bank receipt upload separately if file is selected
+      if (paymentMethod === 'bank_receipt' && selectedReceiptFile) {
+        // First create the order
+        const orderResponse = await apiRequest("/api/customers/orders", {
+          method: "POST",
+          body: orderData
+        });
+        
+        // Then upload the receipt file
+        if (orderResponse.orderId) {
+          const formData = new FormData();
+          formData.append('receipt', selectedReceiptFile);
+          formData.append('orderId', orderResponse.orderId.toString());
+          formData.append('notes', orderData.notes || '');
+          
+          try {
+            const uploadResponse = await fetch('/api/payment/upload-receipt', {
+              method: 'POST',
+              body: formData,
+              credentials: 'include'
+            });
+            
+            if (uploadResponse.ok) {
+              const uploadResult = await uploadResponse.json();
+              console.log('Receipt uploaded successfully:', uploadResult);
+            } else {
+              console.error('Failed to upload receipt');
+            }
+          } catch (error) {
+            console.error('Error uploading receipt:', error);
+          }
+        }
+        
+        return orderResponse;
+      } else {
+        // Normal order without receipt - add timestamp to bypass cache
+        const timestamp = Date.now();
+        const endpoint = `/api/customers/orders?t=${timestamp}`;
+        
+        const response = await apiRequest(endpoint, {
+          method: "POST",
+          body: orderData
+        });
+        return response;
+      }
     },
     onSuccess: (response: any) => {
       console.log('🎯 [ORDER SUCCESS] Order response received:', response);
@@ -715,6 +752,27 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
           window.location.href = response.paymentGatewayUrl;
         }, 1500);
       } 
+      // Check if bank receipt upload is needed
+      else if (paymentMethod === 'bank_receipt') {
+        if (selectedReceiptFile) {
+          toast({
+            title: "✅ سفارش و فیش بانکی ثبت شد",
+            description: "سفارش شما با فیش بانکی با موفقیت ثبت شد"
+          });
+        } else {
+          toast({
+            title: "سفارش ثبت شد",
+            description: "لطفاً فیش واریزی خود را آپلود کنید"
+          });
+          
+          // Redirect to bank receipt upload page only if no file was uploaded
+          setTimeout(() => {
+            window.location.href = `/bank-receipt-upload/${response.orderId}`;
+          }, 1500);
+          return; // Don't call onOrderComplete if redirecting
+        }
+        onOrderComplete();
+      }
       // Handle bank transfer with grace period
       else if (paymentMethod === 'bank_transfer_grace') {
         toast({
@@ -1112,10 +1170,97 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                   </div>
                 )}
                 
-
+                {/* چهارم: ارسال فیش واریزی بانکی */}
+                <div className="flex items-center space-x-2 space-x-reverse">
+                  <RadioGroupItem 
+                    value="bank_receipt" 
+                    id="bank_receipt"
+                    onClick={() => {
+                      // Open file dialog immediately when bank receipt is selected
+                      const fileInput = document.getElementById('hidden-receipt-input') as HTMLInputElement;
+                      if (fileInput) {
+                        fileInput.click();
+                      }
+                    }}
+                  />
+                  <Label htmlFor="bank_receipt" className="flex items-center gap-2 cursor-pointer">
+                    <Upload className="w-4 h-4 text-purple-600" />
+                    ارسال فیش واریزی بانکی
+                  </Label>
+                  
+                  {/* علامت مهلت 3 روزه کنار فیش بانکی */}
+                  <div className="flex items-center gap-1 mr-2">
+                    <Clock className="w-4 h-4 text-amber-600" />
+                    <RadioGroupItem 
+                      value="bank_transfer_grace" 
+                      id="bank_transfer_grace_inline"
+                      className="w-4 h-4"
+                    />
+                    <Label htmlFor="bank_transfer_grace_inline" className="text-xs text-amber-600 cursor-pointer">
+                      مهلت 3 روز - برای ارسال حواله بانکی به پروفایل مراجعه کنید
+                    </Label>
+                  </div>
+                </div>
 
                 
-
+                {/* Hidden file input for immediate file selection */}
+                <input
+                  id="hidden-receipt-input"
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png,image/webp,application/pdf"
+                  style={{ display: 'none' }}
+                  key={selectedReceiptFile ? selectedReceiptFile.name : 'file-input'}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      // Validate file type
+                      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'application/pdf'];
+                      if (!allowedTypes.includes(file.type)) {
+                        toast({
+                          title: "فرمت فایل نامعتبر",
+                          description: "لطفاً فایل‌های JPG، PNG، WebP یا PDF انتخاب کنید",
+                          variant: "destructive",
+                        });
+                        setSelectedReceiptFile(null);
+                        return;
+                      }
+                      
+                      // Validate file size (max 10MB)
+                      if (file.size > 10 * 1024 * 1024) {
+                        toast({
+                          title: "حجم فایل زیاد",
+                          description: "حداکثر حجم فایل 10 مگابایت است",
+                          variant: "destructive",
+                        });
+                        setSelectedReceiptFile(null);
+                        return;
+                      }
+                      
+                      // Store selected file and show success message
+                      setSelectedReceiptFile(file);
+                      toast({
+                        title: "✅ فیش بانکی انتخاب شد",
+                        description: `فایل ${file.name} آماده آپلود است`,
+                      });
+                    } else {
+                      setSelectedReceiptFile(null);
+                    }
+                  }}
+                />
+                
+                {/* Display selected file */}
+                {paymentMethod === 'bank_receipt' && selectedReceiptFile && (
+                  <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 border border-green-200 dark:border-green-800">
+                    <div className="flex items-center gap-2 text-sm text-green-800 dark:text-green-200">
+                      <Upload className="w-4 h-4" />
+                      <span className="font-medium">فایل آماده آپلود:</span>
+                      <span className="text-green-600 dark:text-green-400">{selectedReceiptFile.name}</span>
+                    </div>
+                    <div className="text-xs text-green-600 dark:text-green-400 mt-1">
+                      حجم: {(selectedReceiptFile.size / (1024 * 1024)).toFixed(2)} مگابایت
+                    </div>
+                  </div>
+                )}
               </RadioGroup>
 
               {/* Partial Payment Amount Input */}
