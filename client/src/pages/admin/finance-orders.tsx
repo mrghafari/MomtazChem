@@ -522,6 +522,7 @@ function FinanceOrders() {
   };
 
   const openImageModal = (imageUrl: string) => {
+    console.log('🖼️ [IMAGE MODAL] Opening image modal with URL:', imageUrl);
     setSelectedImageUrl(imageUrl);
     setImageModalOpen(true);
   };
@@ -1386,43 +1387,86 @@ function FinanceOrders() {
             <DialogHeader>
               <DialogTitle className="text-right">مشاهده فیش بانکی</DialogTitle>
             </DialogHeader>
-            {selectedImageUrl && (
-              <div className="relative overflow-auto max-h-[80vh] bg-gray-50 rounded-lg">
-                <div className="flex justify-center items-center min-h-[400px] p-4">
-                  <img 
-                    src={selectedImageUrl} 
-                    alt="Bank Receipt Full Size" 
-                    className="max-w-none h-auto cursor-zoom-in hover:scale-110 transition-transform duration-300 rounded-lg shadow-lg"
-                    style={{
-                      maxWidth: 'none',
-                      maxHeight: 'none',
-                      objectFit: 'contain'
-                    }}
-                    onClick={(e) => {
-                      const img = e.target as HTMLImageElement;
-                      if (img.style.transform === 'scale(2)') {
-                        img.style.transform = 'scale(1)';
-                        img.style.cursor = 'zoom-in';
-                      } else {
-                        img.style.transform = 'scale(2)';
-                        img.style.cursor = 'zoom-out';
-                      }
-                    }}
-                  />
+            {selectedImageUrl ? (
+              <div className="relative bg-gray-100 rounded-lg" style={{ minHeight: '500px' }}>
+                <div className="overflow-auto max-h-[75vh] p-4">
+                  <div className="flex justify-center items-center min-h-[400px]">
+                    <img 
+                      src={selectedImageUrl} 
+                      alt="Bank Receipt" 
+                      className="max-w-full h-auto cursor-zoom-in hover:scale-105 transition-transform duration-200 rounded-lg shadow-lg border border-gray-300"
+                      style={{
+                        maxWidth: '90%',
+                        height: 'auto',
+                        objectFit: 'contain',
+                        display: 'block'
+                      }}
+                      onClick={(e) => {
+                        const img = e.target as HTMLImageElement;
+                        const container = img.parentElement!.parentElement!;
+                        
+                        if (img.style.transform.includes('scale(2)')) {
+                          img.style.transform = 'scale(1)';
+                          img.style.cursor = 'zoom-in';
+                          container.style.overflow = 'auto';
+                        } else {
+                          img.style.transform = 'scale(2)';
+                          img.style.cursor = 'zoom-out';
+                          container.style.overflow = 'scroll';
+                        }
+                      }}
+                      onLoad={(e) => {
+                        console.log('✅ [IMAGE MODAL] Image loaded successfully:', selectedImageUrl);
+                        const img = e.target as HTMLImageElement;
+                        console.log('🖼️ [IMAGE MODAL] Image dimensions:', img.naturalWidth, 'x', img.naturalHeight);
+                      }}
+                      onError={(e) => {
+                        console.error('❌ [IMAGE MODAL] Image failed to load:', selectedImageUrl);
+                        const img = e.target as HTMLImageElement;
+                        img.style.display = 'none';
+                        
+                        // Show error message
+                        const errorDiv = document.createElement('div');
+                        errorDiv.className = 'text-center text-red-500 p-8';
+                        errorDiv.innerHTML = `
+                          <div class="text-lg mb-2">❌ خطا در بارگذاری تصویر</div>
+                          <div class="text-sm text-gray-600">URL: ${selectedImageUrl}</div>
+                          <button onclick="window.open('${selectedImageUrl}', '_blank')" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                            تلاش مجدد در تب جدید
+                          </button>
+                        `;
+                        img.parentElement!.replaceChild(errorDiv, img);
+                      }}
+                    />
+                  </div>
                 </div>
-                <div className="absolute top-2 right-2 bg-black bg-opacity-50 text-white px-3 py-1 rounded text-sm">
+                
+                {/* Zoom indicator */}
+                <div className="absolute top-4 right-4 bg-black bg-opacity-70 text-white px-3 py-1 rounded-lg text-sm">
                   کلیک برای زوم
                 </div>
-                <div className="absolute bottom-2 left-2">
+                
+                {/* External link button */}
+                <div className="absolute bottom-4 left-4">
                   <Button
                     variant="secondary"
                     size="sm"
-                    onClick={() => window.open(selectedImageUrl, '_blank')}
-                    className="bg-white bg-opacity-90 hover:bg-opacity-100"
+                    onClick={() => {
+                      console.log('🔗 [IMAGE MODAL] Opening in new tab:', selectedImageUrl);
+                      window.open(selectedImageUrl, '_blank');
+                    }}
+                    className="bg-white bg-opacity-95 hover:bg-opacity-100 shadow-lg"
                   >
                     <ExternalLink className="h-4 w-4 mr-2" />
                     باز کردن در تب جدید
                   </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex justify-center items-center min-h-[400px] text-gray-500 bg-gray-50 rounded-lg">
+                <div className="text-center">
+                  <div className="text-lg mb-2">⚠️ هیچ تصویری انتخاب نشده</div>
+                  <div className="text-sm">لطفاً دوباره تلاش کنید</div>
                 </div>
               </div>
             )}
