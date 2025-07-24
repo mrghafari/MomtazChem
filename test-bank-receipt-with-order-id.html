@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Bank Receipt Upload with Order ID</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-button {
+            background: #3b82f6;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .test-button:hover {
+            background: #2563eb;
+        }
+        .order-info {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .success { color: #059669; }
+        .error { color: #dc2626; }
+        .warning { color: #d97706; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Bank Receipt Upload with Order ID</h1>
+    <p>Testing bank receipt upload page with order ID parameter passing</p>
+
+    <div class="test-card">
+        <h3>📝 Available Customer 8 Orders for Testing</h3>
+        <div class="order-info">
+            <p><strong>Customer:</strong> Customer 8 (Login: customer8@example.com / customer123)</p>
+            <p><strong>Wallet Balance:</strong> 469,000 IQD</p>
+            <p><strong>Total Orders:</strong> 27 orders available</p>
+        </div>
+        
+        <h4>🎯 Test Scenarios:</h4>
+        
+        <!-- Test with a known 3-day bank transfer order -->
+        <div class="order-info">
+            <h5>Scenario 1: Direct URL Navigation (Order Parameter)</h5>
+            <p>Test bank receipt upload with order number in URL parameter</p>
+            <a href="http://localhost:5000/customer/bank-receipt-upload/M2507240103" 
+               class="test-button" target="_blank">
+                Open Bank Receipt Upload: M2507240103
+            </a>
+        </div>
+
+        <div class="order-info">
+            <h5>Scenario 2: Query String Navigation</h5>
+            <p>Test bank receipt upload with order ID in query string</p>
+            <a href="http://localhost:5000/customer/bank-receipt-upload?orderId=305" 
+               class="test-button" target="_blank">
+                Open Bank Receipt Upload: Query Order ID 305
+            </a>
+        </div>
+
+        <div class="order-info">
+            <h5>Scenario 3: Customer Profile Navigation Test</h5>
+            <p>Test navigation from customer profile to bank receipt upload</p>
+            <a href="http://localhost:5000/customer/profile" 
+               class="test-button" target="_blank">
+                Go to Customer Profile
+            </a>
+            <small>Look for "آپلود حواله بانکی" button on bank transfer orders</small>
+        </div>
+
+        <div class="order-info">
+            <h5>Scenario 4: No Order ID (Should show error)</h5>
+            <p>Test bank receipt upload without order ID</p>
+            <a href="http://localhost:5000/customer/bank-receipt-upload" 
+               class="test-button" target="_blank">
+                Open Bank Receipt Upload: No Order ID
+            </a>
+        </div>
+    </div>
+
+    <div class="test-card">
+        <h3>✅ Expected Results:</h3>
+        <ul>
+            <li><span class="success">✓</span> Order ID should be properly extracted from URL parameter</li>
+            <li><span class="success">✓</span> Customer debt amount should display next to receipt amount field</li>
+            <li><span class="success">✓</span> Order information should load (total amount, order number)</li>
+            <li><span class="success">✓</span> Customer wallet balance should display for payment calculations</li>
+            <li><span class="warning">⚠</span> Without order ID: Should show "شناسه سفارش مشخص نیست" message</li>
+        </ul>
+    </div>
+
+    <div class="test-card">
+        <h3>🔍 Debug Information:</h3>
+        <p>Check browser console for debug messages:</p>
+        <ul>
+            <li>🔍 [URL DEBUG] paramOrderId: [should show order ID]</li>
+            <li>🔍 [ORDER DEBUG] Fetching orders for orderId: [should show order ID]</li>
+            <li>🔍 [ORDER DEBUG] Found order: [should show order data]</li>
+        </ul>
+    </div>
+
+    <script>
+        // Add debug information
+        console.log('🧪 Bank Receipt Upload Test Page Loaded');
+        console.log('🔍 Testing URL parameter passing for order ID');
+        console.log('📊 Customer 8 has 27 orders available for testing');
+    </script>
+</body>
+</html>

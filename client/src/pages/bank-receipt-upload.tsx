@@ -35,8 +35,11 @@ export default function BankReceiptUpload() {
       if (queryOrderId) {
         console.log('🔍 [URL DEBUG] Setting orderId from query:', queryOrderId);
         setOrderId(queryOrderId);
+      } else {
+        console.log('🔍 [URL DEBUG] No order ID found in URL or query parameters');
       }
     }
+    console.log('🔍 [URL DEBUG] Final orderId state will be:', paramOrderId || new URLSearchParams(window.location.search).get('orderId'));
   }, [paramOrderId]);
 
   // Fetch order details

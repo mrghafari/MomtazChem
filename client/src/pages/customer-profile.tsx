@@ -683,7 +683,7 @@ const CustomerProfile = () => {
                                       <Button 
                                         size="sm" 
                                         className="bg-orange-600 hover:bg-orange-700 text-white text-xs"
-                                        onClick={() => setLocation("/customer/bank-receipt-upload")}
+                                        onClick={() => setLocation(`/customer/bank-receipt-upload/${order.orderNumber}`)}
                                       >
                                         <Upload className="w-3 h-3 mr-1" />
                                         آپلود حواله بانکی
@@ -828,7 +828,7 @@ const CustomerProfile = () => {
                               {/* دکمه آپلود رسید بانکی */}
                               <Button
                                 size="sm"
-                                onClick={() => window.open(`/customer/bank-receipt-upload?orderId=${order.id}`, '_blank')}
+                                onClick={() => window.open(`/customer/bank-receipt-upload/${order.orderNumber}`, '_blank')}
                                 className="bg-orange-600 hover:bg-orange-700 text-white"
                               >
                                 <Upload className="w-4 h-4 mr-2" />
