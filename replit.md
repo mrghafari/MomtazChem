@@ -6,6 +6,25 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Iraqi Geography Selection Card Removed from Purchase Form (July 24, 2025)
+✅ **REMOVED: Iraqi province and city selection card successfully removed from purchase form without layout disruption**
+- **User Request**: Remove the green-background Iraqi geography selection card from purchase form
+- **Card Removal**: Completely removed the Iraqi province and city selection card (lines 1666-1776)
+  - Green background card with province/city/postal code dropdowns
+  - Title "🌍 Select Iraqi Province and City / اختر المحافظة والمدينة العراقية"
+  - Three-column grid layout with province, city, and postal code fields
+- **Clean Code Removal**: Eliminated unused API calls and state variables:
+  - Removed `/api/iraqi-provinces` and `/api/iraqi-cities` queries
+  - Removed `selectedProvinceId` and `selectedSecondProvinceId` state variables
+  - Cleaned up all related province/city handling logic
+- **Layout Preservation**: Form layout remains intact with no visual disruption
+  - GPS location section properly positioned
+  - Order notes and submit buttons unchanged
+  - All other form functionality preserved
+- **User Experience**: Purchase form now has cleaner interface without Iraqi geography selection
+- **Technical Impact**: Reduced API calls and simplified form state management
+- **Result**: Iraqi geography card completely removed with clean code and preserved form functionality
+
 ### COMPLETED: GPS Location Display Restored and Primary Postal Code Block Maintained (July 24, 2025)
 ✅ **RESTORED: GPS location display functionality back in logistics management interface for distribution partner coordination**
 - **GPS Display Restored**: Added GPS location card section back to logistics order display with red-themed design
