@@ -200,8 +200,11 @@ export default function WalletManagement() {
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
                 Wallet Management
               </h1>
+              <p className="text-blue-600 dark:text-blue-400 text-sm font-medium mb-1">
+                Financial Department Module
+              </p>
               <p className="text-gray-600 dark:text-gray-400 mt-1">
-                Manage customer wallet recharge requests and balances
+                Manage customer wallet recharge requests and balances - Part of Financial Operations
               </p>
             </div>
           </div>

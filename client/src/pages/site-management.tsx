@@ -5,7 +5,7 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ArrowLeft, Settings, Globe, Users, Database, Monitor, Shield, Zap, Package, RefreshCw, BarChart3, QrCode, Mail, MessageSquare, Factory, UserCog, Users2, DollarSign, BookOpen, TestTube, Truck, Box, CreditCard, Wallet, MapPin, Barcode, CheckCircle, GripVertical, Edit3, Calculator, Ticket, ShoppingCart, Warehouse, Smartphone, Server } from "lucide-react";
+import { ArrowLeft, Settings, Globe, Users, Database, Monitor, Shield, Zap, Package, RefreshCw, BarChart3, QrCode, Mail, MessageSquare, Factory, UserCog, Users2, DollarSign, BookOpen, TestTube, Truck, Box, CreditCard, Wallet, MapPin, Barcode, CheckCircle, GripVertical, Edit3, Calculator, Ticket, ShoppingCart, Warehouse, Smartphone, Server, BarChart, TrendingUp } from "lucide-react";
 import { KardexSyncPanel } from "@/components/KardexSyncPanel";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -111,6 +111,9 @@ export default function SiteManagement() {
     'crm': 'crm',
     'wallet-management': 'wallet-management',
     'payment-settings': 'payment-settings',
+    'accounting-management': 'accounting',
+    'finance-orders': 'order-management',
+    'financial-department': 'financial_department',
     'geography-analytics': 'geography-analytics',
     'finance-orders': 'order-management',
     'warehouse-orders': 'order-management',
@@ -286,6 +289,7 @@ export default function SiteManagement() {
       className: "border-amber-300 text-amber-600 hover:bg-amber-50",
       moduleId: "procedures"
     },
+    // Financial Section - Grouped together
     {
       id: "payment-settings",
       label: "Payment Settings",
@@ -296,11 +300,35 @@ export default function SiteManagement() {
     },
     {
       id: "wallet-management",
-      label: "Wallet Management",
+      label: "Wallet Management (Financial)",
       icon: Wallet,
       onClick: () => trackButtonClick("wallet-management", () => setLocation("/admin/wallet-management")),
-      className: "border-yellow-300 text-yellow-600 hover:bg-yellow-50",
+      className: "border-blue-300 text-blue-600 hover:bg-blue-50",
       moduleId: "wallet_management"
+    },
+    {
+      id: "accounting-management",
+      label: "Accounting Management",
+      icon: Calculator,
+      onClick: () => trackButtonClick("accounting-management", () => setLocation("/admin/accounting-management")),
+      className: "border-blue-300 text-blue-600 hover:bg-blue-50",
+      moduleId: "accounting"
+    },
+    {
+      id: "finance-orders",
+      label: "Financial Orders",
+      icon: DollarSign,
+      onClick: () => trackButtonClick("finance-orders", () => setLocation("/admin/finance-orders")),
+      className: "border-blue-300 text-blue-600 hover:bg-blue-50",
+      moduleId: "order_management"
+    },
+    {
+      id: "financial-department",
+      label: "Financial Department",
+      icon: TrendingUp,
+      onClick: () => trackButtonClick("financial-department", () => setLocation("/financial-department")),
+      className: "border-blue-300 text-blue-600 hover:bg-blue-50",
+      moduleId: "financial_department"
     },
     {
       id: "geography-analytics", 
