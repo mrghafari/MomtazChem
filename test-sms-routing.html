@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست مسیردهی SMS</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            direction: rtl; 
+            text-align: right; 
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #2563eb; margin-bottom: 20px; }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #1d4ed8; }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+        .success { background: #dcfce7; color: #16a34a; }
+        .error { background: #fecaca; color: #dc2626; }
+        .info { background: #dbeafe; color: #2563eb; }
+        .phone-info {
+            background: #f3f4f6;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 تست سیستم مسیردهی SMS - کد تحویل</h1>
+        
+        <div class="phone-info">
+            <h3>📱 قانون مسیردهی SMS:</h3>
+            <ul>
+                <li><strong>کد تحویل سفارش:</strong> به موبایل گیرنده ارسال می‌شود (اگر وارد شده)</li>
+                <li><strong>سایر پیام‌ها:</strong> به موبایل اصلی مشتری ارسال می‌شود</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h3>1️⃣ شبیه‌سازی سفارش با موبایل گیرنده</h3>
+            <p>تست سفارشی که موبایل گیرنده دارد - کد تحویل باید به موبایل گیرنده برود</p>
+            <button onclick="testWithRecipientMobile()">تست با موبایل گیرنده</button>
+            <div id="result1" class="result" style="display:none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>2️⃣ شبیه‌سازی سفارش بدون موبایل گیرنده</h3>
+            <p>تست سفارشی که موبایل گیرنده ندارد - کد تحویل باید به موبایل اصلی مشتری برود</p>
+            <button onclick="testWithoutRecipientMobile()">تست بدون موبایل گیرنده</button>
+            <div id="result2" class="result" style="display:none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>3️⃣ بررسی لاگ‌های سرور</h3>
+            <p>بررسی کنید که در console سرور پیام‌های زیر نمایش داده می‌شود:</p>
+            <ul>
+                <li><code>📱 [SMS ROUTING] Delivery code sent to recipient mobile: [شماره موبایل گیرنده]</code></li>
+                <li><code>📱 [SMS ROUTING] Delivery code sent to customer phone: [شماره موبایل اصلی]</code></li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        async function testWithRecipientMobile() {
+            const resultDiv = document.getElementById('result1');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result info';
+            resultDiv.innerHTML = '🔄 در حال تست...';
+
+            try {
+                // شبیه‌سازی سفارش با موبایل گیرنده
+                const mockOrderData = {
+                    customerPhone: '09124955173',
+                    recipientMobile: '07503533769',
+                    customerName: 'Abbas Abasi',
+                    orderNumber: 'M2512001'
+                };
+
+                resultDiv.innerHTML = `
+                    <strong>📋 داده‌های تست:</strong><br>
+                    - موبایل مشتری: ${mockOrderData.customerPhone}<br>
+                    - موبایل گیرنده: ${mockOrderData.recipientMobile}<br>
+                    - شماره سفارش: ${mockOrderData.orderNumber}<br><br>
+                    
+                    <strong>🎯 انتظار:</strong><br>
+                    کد تحویل باید به شماره ${mockOrderData.recipientMobile} ارسال شود<br><br>
+                    
+                    <strong>📝 بررسی لاگ سرور:</strong><br>
+                    دنبال پیام "[SMS ROUTING] Delivery code sent to recipient mobile" باشید
+                `;
+                resultDiv.className = 'result success';
+
+            } catch (error) {
+                resultDiv.innerHTML = `❌ خطا: ${error.message}`;
+                resultDiv.className = 'result error';
+            }
+        }
+
+        async function testWithoutRecipientMobile() {
+            const resultDiv = document.getElementById('result2');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result info';
+            resultDiv.innerHTML = '🔄 در حال تست...';
+
+            try {
+                // شبیه‌سازی سفارش بدون موبایل گیرنده
+                const mockOrderData = {
+                    customerPhone: '09124955173',
+                    recipientMobile: null,
+                    customerName: 'Abbas Abasi',
+                    orderNumber: 'M2512002'
+                };
+
+                resultDiv.innerHTML = `
+                    <strong>📋 داده‌های تست:</strong><br>
+                    - موبایل مشتری: ${mockOrderData.customerPhone}<br>
+                    - موبایل گیرنده: ${mockOrderData.recipientMobile || 'وارد نشده'}<br>
+                    - شماره سفارش: ${mockOrderData.orderNumber}<br><br>
+                    
+                    <strong>🎯 انتظار:</strong><br>
+                    کد تحویل باید به شماره ${mockOrderData.customerPhone} ارسال شود<br><br>
+                    
+                    <strong>📝 بررسی لاگ سرور:</strong><br>
+                    دنبال پیام "[SMS ROUTING] Delivery code sent to customer phone" باشید
+                `;
+                resultDiv.className = 'result success';
+
+            } catch (error) {
+                resultDiv.innerHTML = `❌ خطا: ${error.message}`;
+                resultDiv.className = 'result error';
+            }
+        }
+
+        // نمایش وضعیت اولیه
+        window.onload = function() {
+            console.log('🔄 [SMS ROUTING TEST] Test page loaded - ready to test SMS routing logic');
+        };
+    </script>
+</body>
+</html>

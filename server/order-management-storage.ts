@@ -251,10 +251,11 @@ export class OrderManagementStorage implements IOrderManagementStorage {
         newStatus === orderStatuses.LOGISTICS_ASSIGNED ||
         newStatus === orderStatuses.WAREHOUSE_APPROVED) {
       try {
-        // Get customer information and order details
+        // Get customer information and order details including recipient mobile
         const orderWithCustomer = await db
           .select({
             customerPhone: crmCustomers.phone,
+            recipientMobile: customerOrders.recipientMobile,
             customerFirstName: crmCustomers.firstName,
             customerLastName: crmCustomers.lastName,
             customerOrderId: orderManagement.customerOrderId,
@@ -271,19 +272,23 @@ export class OrderManagementStorage implements IOrderManagementStorage {
           const customerName = `${customerData.customerFirstName || ''} ${customerData.customerLastName || ''}`.trim();
           const orderNumber = customerData.orderNumber || `سفارش #${customerData.customerOrderId}`;
           
-          // Generate delivery code
-          const deliveryCode = await this.generateDeliveryCode(currentOrder.id, customerData.customerPhone);
+          // Determine target phone: use recipient mobile if provided, otherwise customer phone
+          const targetPhone = customerData.recipientMobile || customerData.customerPhone;
+          const phoneSource = customerData.recipientMobile ? 'recipient mobile' : 'customer phone';
           
-          // Send SMS using template 3
+          // Generate delivery code
+          const deliveryCode = await this.generateDeliveryCode(currentOrder.id, targetPhone);
+          
+          // Send SMS using template 3 to target phone
           await this.sendDeliveryCodeSms(
-            customerData.customerPhone, 
+            targetPhone, 
             deliveryCode, 
             customerData.customerOrderId,
             customerName || 'مشتری عزیز',
             orderNumber
           );
           
-          console.log(`✅ [AUTO SMS TEMPLATE 3] Delivery code ${deliveryCode} sent to ${customerData.customerPhone} for order ${orderNumber}`);
+          console.log(`✅ [AUTO SMS TEMPLATE 3] Delivery code ${deliveryCode} sent to ${phoneSource}: ${targetPhone} for order ${orderNumber}`);
         } else {
           console.log(`❌ [AUTO SMS] No customer phone found for order ${currentOrder.id}`);
         }
@@ -1058,11 +1063,12 @@ export class OrderManagementStorage implements IOrderManagementStorage {
         hasDeliveryCode: !!orderData.deliveryCode 
       });
 
-      // Get customer information
+      // Get customer information including recipient mobile
       const { pool } = await import('./db');
       const customerQuery = `
         SELECT 
           co.order_number as orderNumber,
+          co.recipient_mobile as recipientMobile,
           c.first_name as firstName,
           c.last_name as lastName,
           c.phone as phone
@@ -1080,29 +1086,38 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       const customer = customerResult.rows[0];
       const customerName = `${customer.firstName || ''} ${customer.lastName || ''}`.trim();
       
+      // Determine target phone: use recipient mobile if provided, otherwise customer phone
+      const targetPhone = customer.recipientmobile || customer.phone;
+      const phoneSource = customer.recipientmobile ? 'recipient mobile' : 'customer phone';
+      
       console.log('📱 [DELIVERY CODE] Customer info:', { 
         name: customerName, 
-        phone: customer.phone, 
+        customerPhone: customer.phone,
+        recipientMobile: customer.recipientmobile,
+        targetPhone: targetPhone,
+        phoneSource: phoneSource,
         orderNumber: customer.orderNumber 
       });
 
       // Generate delivery code if not exists
       let deliveryCode = orderData.deliveryCode;
       if (!deliveryCode) {
-        deliveryCode = await this.generateDeliveryCode(orderManagementId, customer.phone);
+        deliveryCode = await this.generateDeliveryCode(orderManagementId, targetPhone);
         console.log('📱 [DELIVERY CODE] Generated new code:', deliveryCode);
       } else {
         console.log('📱 [DELIVERY CODE] Using existing code:', deliveryCode);
       }
 
-      // Send SMS using template 3
+      // Send SMS using template 3 to target phone (recipient mobile if provided, otherwise customer phone)
       const smsSuccess = await this.sendDeliveryCodeSms(
-        customer.phone,
+        targetPhone,
         deliveryCode,
         orderData.customerOrderId,
         customerName,
         customer.orderNumber
       );
+      
+      console.log(`📱 [SMS ROUTING] Delivery code sent to ${phoneSource}: ${targetPhone}`);
 
       if (smsSuccess) {
         console.log('✅ [DELIVERY CODE] Manual SMS sent successfully');
