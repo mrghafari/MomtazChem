@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست ارسال ایمیل تأیید فرم تماس</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            direction: rtl;
+            text-align: right;
+        }
+        .form-container {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .form-field {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background: #007cba;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #005a87;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <h1>تست ارسال ایمیل تأیید فرم تماس</h1>
+    <p>این صفحه برای تست کردن سیستم ارسال ایمیل تأیید به فرستنده پیام فرم تماس است.</p>
+    
+    <div class="form-container">
+        <h2>فرم تماس تست</h2>
+        <form id="contactForm">
+            <div class="form-field">
+                <label for="firstName">نام:</label>
+                <input type="text" id="firstName" name="firstName" value="احمد" required>
+            </div>
+            
+            <div class="form-field">
+                <label for="lastName">نام خانوادگی:</label>
+                <input type="text" id="lastName" name="lastName" value="محمدی" required>
+            </div>
+            
+            <div class="form-field">
+                <label for="email">ایمیل:</label>
+                <input type="email" id="email" name="email" value="test@example.com" required>
+            </div>
+            
+            <div class="form-field">
+                <label for="company">شرکت:</label>
+                <input type="text" id="company" name="company" value="شرکت تست">
+            </div>
+            
+            <div class="form-field">
+                <label for="productInterest">علاقه‌مندی محصول:</label>
+                <select id="productInterest" name="productInterest" required>
+                    <option value="water-treatment">تصفیه آب</option>
+                    <option value="fuel-additives">افزودنی‌های سوخت</option>
+                    <option value="paint-solvents">حلال رنگ</option>
+                    <option value="agricultural-products">محصولات کشاورزی</option>
+                    <option value="industrial-chemicals">مواد شیمیایی صنعتی</option>
+                </select>
+            </div>
+            
+            <div class="form-field">
+                <label for="message">پیام:</label>
+                <textarea id="message" name="message" rows="5" required>سلام، من علاقه‌مند به دریافت اطلاعات بیشتر در مورد محصولات شما هستم.</textarea>
+            </div>
+            
+            <button type="submit">ارسال پیام</button>
+        </form>
+    </div>
+    
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('contactForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>در حال ارسال...</p>';
+            
+            try {
+                const formData = new FormData(this);
+                const data = Object.fromEntries(formData.entries());
+                
+                console.log('Sending contact form data:', data);
+                
+                const response = await fetch('/api/contact', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                console.log('Response:', result);
+                
+                if (response.ok && result.success) {
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            <h3>✅ پیام با موفقیت ارسال شد!</h3>
+                            <p>• ایمیل به مدیریت ارسال شد</p>
+                            <p>• ایمیل تأیید به آدرس ${data.email} ارسال شد</p>
+                            <p>• از قالب #08 - Customer Inquiry Confirmation استفاده شد</p>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="result error">
+                            <h3>❌ خطا در ارسال پیام</h3>
+                            <p>پیام خطا: ${result.message || 'خطای نامشخص'}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h3>❌ خطا در اتصال</h3>
+                        <p>خطا: ${error.message}</p>
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

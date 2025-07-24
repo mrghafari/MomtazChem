@@ -3003,6 +3003,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error("Failed to send email:", emailError);
         // Continue processing even if email fails
       }
+
+      // Send confirmation email to customer using Template #08
+      try {
+        const { UniversalEmailService } = await import('./universal-email-service');
+        
+        // Generate inquiry number for reference
+        const inquiryNumber = `INQ-${Date.now()}-${contact.id}`;
+        
+        await UniversalEmailService.sendEmail({
+          templateNumber: '#08',
+          categoryKey: 'admin',
+          to: [contact.email],
+          subject: 'Contact Form Confirmation', // Will be replaced by template
+          html: '', // Will be replaced by template
+          variables: {
+            inquiry_number: inquiryNumber,
+            customer_name: `${contact.firstName} ${contact.lastName}`,
+            expected_response_time: '24 hours'
+          }
+        });
+        
+        console.log(`Confirmation email sent to customer: ${contact.email} using Template #08`);
+      } catch (confirmationError) {
+        console.error("Failed to send confirmation email to customer:", confirmationError);
+        // Continue processing even if confirmation email fails
+      }
       
       console.log("New contact form submission:", contact);
       
