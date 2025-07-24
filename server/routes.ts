@@ -3004,32 +3004,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Continue processing even if email fails
       }
 
-      // Send confirmation email to customer using Template #08
+      // Send receipt acknowledgment email to customer using Template #09
       try {
         const { UniversalEmailService } = await import('./universal-email-service');
         
         // Generate inquiry number for reference
         const inquiryNumber = `INQ-${Date.now()}-${contact.id}`;
+        const currentDate = new Date().toLocaleDateString('fa-IR', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
         
         await UniversalEmailService.sendEmail({
-          templateNumber: '#08',
+          templateNumber: '#09',
           categoryKey: 'admin',
           to: [contact.email],
-          subject: 'Contact Form Confirmation', // Will be replaced by template
+          subject: 'پیام رسید تماس', // Will be replaced by template
           html: '', // Will be replaced by template
           variables: {
             inquiry_number: inquiryNumber,
             customer_name: `${contact.firstName} ${contact.lastName}`,
-            expected_response_time: '24 hours',
+            expected_response_time: '24 ساعت',
             product_interest: contact.productInterest,
-            company: contact.company || 'Not specified',
-            message: contact.message || 'No message provided'
+            company: contact.company || 'مشخص نشده',
+            message: contact.message || 'پیامی ارسال نشده',
+            received_date: currentDate
           }
         });
         
-        console.log(`Confirmation email sent to customer: ${contact.email} using Template #08`);
+        console.log(`Receipt acknowledgment email sent to customer: ${contact.email} using Template #09`);
       } catch (confirmationError) {
-        console.error("Failed to send confirmation email to customer:", confirmationError);
+        console.error("Failed to send receipt acknowledgment email to customer:", confirmationError);
         // Continue processing even if confirmation email fails
       }
       
