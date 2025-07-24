@@ -48,9 +48,21 @@ export default function ProductRating({
   // Find existing review by current customer 
   const existingReview = React.useMemo(() => {
     if (!customer) return null;
-    return reviews.find(review => 
+    
+    // Debug logging for customer matching
+    console.log('🔍 CUSTOMER MATCHING DEBUG:');
+    console.log('Current customer:', customer);
+    console.log('Customer full name:', `${customer.firstName} ${customer.lastName}`);
+    console.log('Available reviews:', reviews);
+    reviews.forEach((review, index) => {
+      console.log(`Review ${index}:`, review.customerName, '===', `${customer.firstName} ${customer.lastName}`, '?', review.customerName === `${customer.firstName} ${customer.lastName}`);
+    });
+    
+    const found = reviews.find(review => 
       review.customerName === `${customer.firstName} ${customer.lastName}`
     );
+    console.log('Found existing review:', found);
+    return found;
   }, [reviews, customer]);
 
   // Initialize form with existing review data if editing
