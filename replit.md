@@ -6,6 +6,24 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Persian Tooltips for Product Icons Implementation (July 24, 2025)
+✅ **IMPLEMENTED: Persian hover tooltips added to product interaction icons in shop interface**
+- **User Request**: Add Persian tooltip text when hovering over technical specifications and comments icons
+- **Technical Implementation**: 
+  - Added TooltipProvider and Tooltip components from shadcn UI library
+  - Updated both grid view and list view product icons with tooltips
+  - Imported Tooltip components into shop.tsx component
+- **Icon Tooltips Added**:
+  - **MessageSquare (comments)**: "نظرات و امتیاز محصول" (Product reviews and ratings)
+  - **Package (specifications)**: "مشخصات فنی محصول" (Product technical specifications)
+- **Coverage**: Tooltips implemented in both display modes:
+  - Grid view product cards
+  - List view product cards
+- **User Experience**: Clear Persian guidance for customers understanding icon functionality
+- **Accessibility**: Enhanced interface usability with hover explanations for all product interaction elements
+- **Impact**: Improved customer understanding of available product actions with native Persian tooltips
+- **Result**: All product icons now provide clear Persian explanations when hovered
+
 ### COMPLETED: Customer Login Redirect to Profile Implementation (July 24, 2025)
 ✅ **IMPLEMENTED: Customer login and registration now redirect to profile instead of shop**
 - **User Request**: Customer login should redirect to profile page instead of remaining in shop

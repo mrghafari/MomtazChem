@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { ShopProduct, ShopCategory } from "@shared/shop-schema";
 import Checkout from "./checkout";
 import BilingualPurchaseForm from "@/components/bilingual-purchase-form";
@@ -1344,25 +1345,41 @@ const Shop = () => {
 
                           {/* Reviews and Specs - Right side */}
                           <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-lg p-1 shadow-lg">
-                            {/* Reviews Button */}
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="p-1 h-7 w-7 hover:bg-green-50"
-                              onClick={() => navigate(`/product-reviews/${product.id}`)}
-                            >
-                              <MessageSquare className="w-3 h-3 text-green-600" />
-                            </Button>
-                            
-                            {/* Product Specifications */}
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="p-1 h-7 w-7 hover:bg-blue-50"
-                              onClick={() => handleShowSpecs(product)}
-                            >
-                              <Package className="w-3 h-3 text-blue-600" />
-                            </Button>
+                            <TooltipProvider>
+                              {/* Reviews Button */}
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="p-1 h-7 w-7 hover:bg-green-50"
+                                    onClick={() => navigate(`/product-reviews/${product.id}`)}
+                                  >
+                                    <MessageSquare className="w-3 h-3 text-green-600" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>نظرات و امتیاز محصول</p>
+                                </TooltipContent>
+                              </Tooltip>
+                              
+                              {/* Product Specifications */}
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="p-1 h-7 w-7 hover:bg-blue-50"
+                                    onClick={() => handleShowSpecs(product)}
+                                  >
+                                    <Package className="w-3 h-3 text-blue-600" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>مشخصات فنی محصول</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           </div>
                         </div>
                         <CardContent className="p-4">
@@ -1670,25 +1687,41 @@ const Shop = () => {
 
                           {/* Reviews and Specs - Right side - List View */}
                           <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-lg p-1 shadow-lg">
-                            {/* Reviews Button */}
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="p-1 h-7 w-7 hover:bg-green-50"
-                              onClick={() => navigate(`/product-reviews/${product.id}`)}
-                            >
-                              <MessageSquare className="w-3 h-3 text-green-600" />
-                            </Button>
-                            
-                            {/* Product Specifications */}
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="p-1 h-7 w-7 hover:bg-blue-50"
-                              onClick={() => handleShowSpecs(product)}
-                            >
-                              <Package className="w-3 h-3 text-blue-600" />
-                            </Button>
+                            <TooltipProvider>
+                              {/* Reviews Button */}
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="p-1 h-7 w-7 hover:bg-green-50"
+                                    onClick={() => navigate(`/product-reviews/${product.id}`)}
+                                  >
+                                    <MessageSquare className="w-3 h-3 text-green-600" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>نظرات و امتیاز محصول</p>
+                                </TooltipContent>
+                              </Tooltip>
+                              
+                              {/* Product Specifications */}
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="p-1 h-7 w-7 hover:bg-blue-50"
+                                    onClick={() => handleShowSpecs(product)}
+                                  >
+                                    <Package className="w-3 h-3 text-blue-600" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>مشخصات فنی محصول</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           </div>
                         </div>
                         <CardContent className="p-6 flex-1">
