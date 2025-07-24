@@ -631,8 +631,18 @@ const CustomerProfile = () => {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {orders.map((order: any) => (
-                      <div key={order.id} className={`border rounded-lg p-4 ${(order.status === 'pending' || order.status === 'payment_grace_period') ? 'border-amber-200 bg-amber-50' : ''}`}>
+                    {orders.map((order: any) => {
+                      // Check if this is a 3-day bank transfer order
+                      const is3DayBankTransfer = order.paymentMethod === 'واریز بانکی با مهلت 3 روزه' || order.paymentMethod === 'bank_transfer_grace';
+                      
+                      return (
+                      <div key={order.id} className={`border rounded-lg p-4 ${
+                        is3DayBankTransfer 
+                          ? 'border-orange-300 bg-orange-50' 
+                          : (order.status === 'pending' || order.status === 'payment_grace_period') 
+                            ? 'border-amber-200 bg-amber-50' 
+                            : ''
+                      }`}>
                         <div className="flex justify-between items-start mb-3">
                           <div>
                             <div className="flex items-center gap-2 mb-1">
@@ -651,18 +661,48 @@ const CustomerProfile = () => {
                               {formatDate(order.createdAt)}
                             </p>
                             
-                            {/* نمایش پیام منتظر ارسال حواله و کنتور زمانی برای سفارشات بانکی 3 روزه بدون رسید */}
-                            {(order.paymentMethod === 'واریز بانکی با مهلت 3 روزه' || order.paymentMethod === 'bank_transfer_grace') && 
-                             (order.status === 'pending' || order.status === 'payment_grace_period') &&
-                             !order.receiptPath && (
-                              <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 mt-2 text-right">
-                                <p className="text-sm text-orange-800 font-medium flex items-center gap-1">
-                                  <AlertCircle className="w-4 h-4" />
-                                  منتظر ارسال حواله وجه خرید
-                                </p>
-                                <p className="text-xs text-orange-700 mt-1">
-                                  لطفاً حواله بانکی را آپلود کنید
-                                </p>
+                            {/* نمایش پیام منتظر ارسال حواله و کنتور زمانی برای سفارشات بانکی 3 روزه */}
+                            {is3DayBankTransfer && (order.status === 'pending' || order.status === 'payment_grace_period') && (
+                              <div className="bg-orange-100 border border-orange-300 rounded-lg p-3 mt-2 text-right">
+                                <div className="flex items-center justify-between mb-2">
+                                  <p className="text-sm text-orange-900 font-bold flex items-center gap-1">
+                                    <AlertCircle className="w-4 h-4" />
+                                    سفارش با مهلت 3 روزه پرداخت
+                                  </p>
+                                  <Badge className="bg-orange-200 text-orange-800 text-xs">
+                                    مهلت ویژه
+                                  </Badge>
+                                </div>
+                                
+                                {!order.receiptPath ? (
+                                  <>
+                                    <p className="text-xs text-orange-800 mb-2">
+                                      منتظر ارسال حواله وجه خرید - لطفاً حواله بانکی را آپلود کنید
+                                    </p>
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <Button 
+                                        size="sm" 
+                                        className="bg-orange-600 hover:bg-orange-700 text-white text-xs"
+                                        onClick={() => setLocation("/customer/bank-receipt-upload")}
+                                      >
+                                        <Upload className="w-3 h-3 mr-1" />
+                                        آپلود حواله بانکی
+                                      </Button>
+                                      <span className="text-xs text-orange-700">
+                                        مهلت پرداخت: 72 ساعت از زمان سفارش
+                                      </span>
+                                    </div>
+                                  </>
+                                ) : (
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <Badge className="bg-green-100 text-green-800 text-xs">
+                                      حواله آپلود شده
+                                    </Badge>
+                                    <span className="text-xs text-orange-700">
+                                      در انتظار بررسی مالی
+                                    </span>
+                                  </div>
+                                )}
                                 
                                 {/* کنتور زمانی برای ارسال وجه */}
                                 <div className="mt-2">
@@ -847,7 +887,7 @@ const CustomerProfile = () => {
                           )}
                         </div>
                       </div>
-                    ))}
+                    )})}
                   </div>
                 )}
               </CardContent>

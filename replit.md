@@ -71,7 +71,13 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
   - Filter logic works with full order dataset for comprehensive order management
 - **User Experience**: Clear visual overview of complete order distribution with instant filtering capability on main profile page
 - **Impact**: Customers can quickly see their complete order status breakdown and filter orders without opening purchase history modal
-- **Result**: Main profile page now shows clickable order status counts with colored indicators and filtering functionality next to "سفارشات شما" covering ALL orders
+- **Enhanced 3-Day Bank Transfer Design**: Special background color and detailed payment information for bank transfer orders:
+  - **Orange Background**: Distinct orange background (bg-orange-50, border-orange-300) for 3-day grace period orders
+  - **Payment Deadline Display**: Clear indication of 72-hour payment deadline from order creation time
+  - **Upload Link Integration**: Direct "آپلود حواله بانکی" button linking to bank receipt upload page
+  - **Status Differentiation**: Different messaging for orders with/without uploaded receipts
+  - **Payment Timeline**: Visual countdown timer showing remaining time for payment
+- **Result**: Main profile page now shows clickable order status counts with colored indicators and filtering functionality next to "سفارشات شما" covering ALL orders with enhanced 3-day bank transfer order display
 
 ### COMPLETED: Purchase History Header Creation with Order Types Categorization (July 24, 2025)
 ✅ **IMPLEMENTED: Professional header above search field in customer purchase history to categorize different order types**
