@@ -417,50 +417,14 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
         const rightColumnX = 300;
         const columnWidth = 240;
         
-        // Left Column - Persian information (from database)
+        // Simple footer with company names only
         const companyNameAr = companyInfo?.companyNameAr || companyInfo?.companyName || 'شرکت ممتاز شیمی';
-        doc.fontSize(11)
-           .font('VazirBold')
-           .text(formatMixedText(companyNameAr), leftColumnX, companyFooterY, { align: 'right', width: columnWidth, features: ['rtla'] });
-        
-        // Dynamic Arabic/Persian address from database
-        const arabicAddress = companyInfo?.mainAddress || companyInfo?.address || 'NAGwer Road, Qaryataq Village, Erbil, Iraq';
-        const addressText = formatMixedText(`آدرس: ${arabicAddress}`);
-        doc.fontSize(8)
-           .font('VazirRegular')
-           .text(addressText, leftColumnX, companyFooterY + 18, { align: 'right', width: columnWidth, features: ['rtla'] });
-        
-        const sloganText = formatMixedText('تامین کننده برتر مواد شیمیایی صنعتی و آزمایشگاهی در خاورمیانه');
-        doc.fontSize(7)
-           .font('VazirRegular')
-           .text(sloganText, leftColumnX, companyFooterY + 35, { align: 'right', width: columnWidth, features: ['rtla'] });
-        
-        // Right Column - English information (from database)
         const companyNameEn = companyInfo?.companyNameEn || companyInfo?.companyNameEnglish || 'Momtaz Chemical Solutions Company';
+        
+        // Center the company names
         doc.fontSize(11)
            .font('VazirBold')
-           .text(companyNameEn, rightColumnX, companyFooterY, { align: 'left', width: columnWidth });
-        
-        // Dynamic company contact information from database
-        const websiteUrl = companyInfo?.websiteUrl || companyInfo?.website || 'www.momtazchem.com';
-        const primaryEmail = companyInfo?.emailPrimary || companyInfo?.email || 'info@momtazchem.com';
-        const salesEmail = companyInfo?.emailSecondary || companyInfo?.salesEmail || 'sales@momtazchem.com';
-        const primaryPhone = companyInfo?.phonePrimary || companyInfo?.phone || '+964 770 123 4567';
-        const secondaryPhone = companyInfo?.phoneSecondary || companyInfo?.supportPhone || '+964 780 987 6543';
-        
-        doc.fontSize(8)
-           .font('VazirRegular')
-           .text(websiteUrl, rightColumnX, companyFooterY + 18, { align: 'left', width: columnWidth })
-           .text(primaryEmail, rightColumnX, companyFooterY + 30, { align: 'left', width: columnWidth })
-           .text(salesEmail, rightColumnX, companyFooterY + 42, { align: 'left', width: columnWidth })
-           .text(primaryPhone, rightColumnX, companyFooterY + 54, { align: 'left', width: columnWidth })
-           .text(secondaryPhone, rightColumnX, companyFooterY + 66, { align: 'left', width: columnWidth });
-        
-        // Company English name from database
-        const englishCompanySlogan = companyInfo?.companyNameEn || companyInfo?.companyNameEnglish || 'Leading Supplier of Industrial & Laboratory Chemicals in the Middle East';
-        doc.fontSize(7)
-           .font('VazirRegular')
-           .text(englishCompanySlogan, rightColumnX, companyFooterY + 80, { align: 'left', width: columnWidth });
+           .text(formatMixedText(`${companyNameAr} - ${companyNameEn}`), 50, companyFooterY, { align: 'center', width: 500, features: ['rtla'] });
         
       } catch (fontError) {
         console.warn('⚠️ Font registration failed, using default font:', fontError);
@@ -688,15 +652,12 @@ export async function generateCustomerProfilePDF(customerData: any): Promise<Buf
            .text(`Address: ${customerData.address || 'Unknown'}`, 50, 320);
       }
       
-      // Footer - Dynamic from database
+      // Footer - Simple company names only
       const companyNameFooter = companyInfo?.companyNameAr || companyInfo?.companyName || 'شرکت الانتاج الممتاز';
       const companyNameEnFooter = companyInfo?.companyNameEn || companyInfo?.companyNameEnglish || 'Al-Entaj Al-Momtaz Company';
-      const websiteFooter = companyInfo?.websiteUrl || companyInfo?.website || 'www.momtazchem.com';
-      const emailFooter = companyInfo?.emailPrimary || companyInfo?.email || 'info@momtazchem.com';
       
       doc.fontSize(10)
-         .text(formatRTLText(`${companyNameFooter} / ${companyNameEnFooter}`), 50, 750, { align: 'center' })
-         .text(`${websiteFooter} | ${emailFooter}`, 50, 765, { align: 'center' });
+         .text(formatRTLText(`${companyNameFooter} / ${companyNameEnFooter}`), 50, 750, { align: 'center' });
 
       // Finalize the PDF
       doc.end();
@@ -783,17 +744,13 @@ export async function generateCustomerReportPDF(customerData: any, orders: any[]
            .font('VazirRegular')
            .text(orders.length > 0 ? `تعداد سفارشات: ${orders.length}` : 'هیچ سفارشی یافت نشد.', 50, 240, { align: 'right' });
         
-        // Footer
-        // Footer - Dynamic from database
+        // Footer - Simple company names only
         const companyNameReportFooter = companyInfo?.companyNameAr || companyInfo?.companyName || 'شرکت مواد شیمیایی ممتاز';
         const companyNameEnReportFooter = companyInfo?.companyNameEn || companyInfo?.companyNameEnglish || 'Momtaz Chemical Solutions';
-        const websiteReportFooter = companyInfo?.websiteUrl || companyInfo?.website || 'www.momtazchem.com';
-        const emailReportFooter = companyInfo?.emailPrimary || companyInfo?.email || 'info@momtazchem.com';
         
         doc.fontSize(9)
            .font('VazirRegular')
-           .text(`${companyNameReportFooter} - ${companyNameEnReportFooter}`, 50, 750, { align: 'center' })
-           .text(`${websiteReportFooter} | ${emailReportFooter}`, 50, 765, { align: 'center' });
+           .text(`${companyNameReportFooter} - ${companyNameEnReportFooter}`, 50, 750, { align: 'center' });
         
       } catch (fontError) {
         console.warn('⚠️ Font registration failed, using default font:', fontError);
@@ -968,15 +925,12 @@ export async function generateAnalyticsPDF(analyticsData: any, title: string = '
           }
         }
         
-        // Footer - Dynamic from database
+        // Footer - Simple company names only
         const companyNameAnalyticsFooter = companyInfo?.companyNameAr || companyInfo?.companyName || 'شرکت الانتاج الممتاز';
         const companyNameEnAnalyticsFooter = companyInfo?.companyNameEn || companyInfo?.companyNameEnglish || 'Al-Entaj Al-Momtaz Company';
-        const websiteAnalyticsFooter = companyInfo?.websiteUrl || companyInfo?.website || 'www.momtazchem.com';
-        const emailAnalyticsFooter = companyInfo?.emailPrimary || companyInfo?.email || 'info@momtazchem.com';
         
         doc.fontSize(10)
-           .text(formatRTLText(`${companyNameAnalyticsFooter} / ${companyNameEnAnalyticsFooter}`), 50, 750, { align: 'center' })
-           .text(`${websiteAnalyticsFooter} | ${emailAnalyticsFooter}`, 50, 765, { align: 'center' });
+           .text(formatRTLText(`${companyNameAnalyticsFooter} / ${companyNameEnAnalyticsFooter}`), 50, 750, { align: 'center' });
         
       } catch (fontError) {
         console.warn('⚠️ Font registration failed, using default font:', fontError);
