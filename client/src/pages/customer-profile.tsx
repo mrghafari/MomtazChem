@@ -80,6 +80,7 @@ const CustomerProfile = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [completeHistory, setCompleteHistory] = useState<any[]>([]);
+  const [selectedFilter, setSelectedFilter] = useState<string>("all");
   
   // Get customer information
   const { data: customerData, isLoading: customerLoading, error: customerError } = useQuery<any>({
@@ -145,15 +146,49 @@ const CustomerProfile = () => {
     }
   };
 
-  // Filter history based on search
-  const filteredHistory = searchTerm ? 
-    completeHistory.filter(order => 
+  // Get order status category
+  const getOrderCategory = (order: any) => {
+    const status = order.status?.toLowerCase();
+    const paymentStatus = order.paymentStatus?.toLowerCase();
+    const paymentMethod = order.paymentMethod;
+    
+    // Check for bank transfer orders
+    if (paymentMethod === 'واریز بانکی با مهلت 3 روزه' || paymentMethod === 'bank_transfer_grace') {
+      return 'bank_transfer';
+    }
+    
+    // Check for completed orders
+    if (status === 'confirmed' || status === 'delivered' || paymentStatus === 'paid') {
+      return 'completed';
+    }
+    
+    // Check for processing orders
+    if (status === 'processing' || status === 'shipped' || status === 'ready_for_delivery') {
+      return 'processing';
+    }
+    
+    // Default to pending payment
+    return 'pending';
+  };
+
+  // Filter history based on search and category filter
+  let filteredHistory = completeHistory;
+  
+  // Apply category filter
+  if (selectedFilter !== "all") {
+    filteredHistory = filteredHistory.filter(order => getOrderCategory(order) === selectedFilter);
+  }
+  
+  // Apply search filter
+  if (searchTerm) {
+    filteredHistory = filteredHistory.filter(order => 
       order.orderNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       order.status?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       order.items?.some((item: any) => 
         item.productName?.toLowerCase().includes(searchTerm.toLowerCase())
       )
-    ) : completeHistory;
+    );
+  }
 
   const handleLogout = async () => {
     try {
@@ -734,29 +769,77 @@ const CustomerProfile = () => {
             <DialogTitle className="text-purple-700">سابقه خرید کامل</DialogTitle>
           </DialogHeader>
           
-          {/* Order Types Header */}
+          {/* Order Types Header with Filters */}
           <div className="mb-4 p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200">
             <h3 className="text-lg font-semibold text-purple-800 mb-3 text-center">انواع سفارشات</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-              <div className="flex items-center gap-2 p-2 bg-white rounded-md shadow-sm">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-sm">
+              {/* All Orders Filter */}
+              <button
+                onClick={() => setSelectedFilter("all")}
+                className={`flex items-center gap-2 p-2 rounded-md shadow-sm transition-all cursor-pointer ${
+                  selectedFilter === "all" 
+                    ? "bg-purple-100 border-2 border-purple-400 shadow-md" 
+                    : "bg-white hover:bg-gray-50 border border-gray-200"
+                }`}
+              >
+                <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
+                <span className={selectedFilter === "all" ? "text-purple-800 font-medium" : "text-gray-700"}>همه</span>
+              </button>
+              
+              {/* Completed Orders Filter */}
+              <button
+                onClick={() => setSelectedFilter("completed")}
+                className={`flex items-center gap-2 p-2 rounded-md shadow-sm transition-all cursor-pointer ${
+                  selectedFilter === "completed" 
+                    ? "bg-green-100 border-2 border-green-400 shadow-md" 
+                    : "bg-white hover:bg-gray-50 border border-gray-200"
+                }`}
+              >
                 <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                <span className="text-gray-700">تکمیل شده</span>
-              </div>
-              <div className="flex items-center gap-2 p-2 bg-white rounded-md shadow-sm">
+                <span className={selectedFilter === "completed" ? "text-green-800 font-medium" : "text-gray-700"}>تکمیل شده</span>
+              </button>
+              
+              {/* Pending Payment Filter */}
+              <button
+                onClick={() => setSelectedFilter("pending")}
+                className={`flex items-center gap-2 p-2 rounded-md shadow-sm transition-all cursor-pointer ${
+                  selectedFilter === "pending" 
+                    ? "bg-yellow-100 border-2 border-yellow-400 shadow-md" 
+                    : "bg-white hover:bg-gray-50 border border-gray-200"
+                }`}
+              >
                 <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                <span className="text-gray-700">در انتظار پرداخت</span>
-              </div>
-              <div className="flex items-center gap-2 p-2 bg-white rounded-md shadow-sm">
+                <span className={selectedFilter === "pending" ? "text-yellow-800 font-medium" : "text-gray-700"}>در انتظار پرداخت</span>
+              </button>
+              
+              {/* Processing Orders Filter */}
+              <button
+                onClick={() => setSelectedFilter("processing")}
+                className={`flex items-center gap-2 p-2 rounded-md shadow-sm transition-all cursor-pointer ${
+                  selectedFilter === "processing" 
+                    ? "bg-blue-100 border-2 border-blue-400 shadow-md" 
+                    : "bg-white hover:bg-gray-50 border border-gray-200"
+                }`}
+              >
                 <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                <span className="text-gray-700">در حال پردازش</span>
-              </div>
-              <div className="flex items-center gap-2 p-2 bg-white rounded-md shadow-sm">
+                <span className={selectedFilter === "processing" ? "text-blue-800 font-medium" : "text-gray-700"}>در حال پردازش</span>
+              </button>
+              
+              {/* Bank Transfer Filter */}
+              <button
+                onClick={() => setSelectedFilter("bank_transfer")}
+                className={`flex items-center gap-2 p-2 rounded-md shadow-sm transition-all cursor-pointer ${
+                  selectedFilter === "bank_transfer" 
+                    ? "bg-orange-100 border-2 border-orange-400 shadow-md" 
+                    : "bg-white hover:bg-gray-50 border border-gray-200"
+                }`}
+              >
                 <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
-                <span className="text-gray-700">حواله بانکی</span>
-              </div>
+                <span className={selectedFilter === "bank_transfer" ? "text-orange-800 font-medium" : "text-gray-700"}>حواله بانکی</span>
+              </button>
             </div>
             <div className="mt-3 text-xs text-purple-600 text-center">
-              نکته: سفارشات با حواله بانکی سه‌روزه در اولویت نمایش قرار می‌گیرند
+              نکته: سفارشات با حواله بانکی سه‌روزه در اولویت نمایش قرار می‌گیرند • کلیک کنید تا فیلتر شود
             </div>
           </div>
           
@@ -791,11 +874,24 @@ const CustomerProfile = () => {
 
           {/* Results Count */}
           {!isLoadingHistory && (
-            <div className="mb-4 text-sm text-gray-600">
-              {searchTerm ? (
-                `${filteredHistory.length} سفارش پیدا شد از ${completeHistory.length} سفارش کل`
-              ) : (
-                `${completeHistory.length} سفارش کل`
+            <div className="mb-4 text-sm text-gray-600 flex justify-between items-center">
+              <span>
+                {searchTerm || selectedFilter !== "all" ? (
+                  `${filteredHistory.length} سفارش پیدا شد از ${completeHistory.length} سفارش کل`
+                ) : (
+                  `${completeHistory.length} سفارش کل`
+                )}
+              </span>
+              {(searchTerm || selectedFilter !== "all") && (
+                <button
+                  onClick={() => {
+                    setSearchTerm("");
+                    setSelectedFilter("all");
+                  }}
+                  className="text-xs text-purple-600 hover:text-purple-800 underline"
+                >
+                  پاک کردن فیلترها
+                </button>
               )}
             </div>
           )}

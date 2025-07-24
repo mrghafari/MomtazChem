@@ -60,8 +60,21 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
   - Professional design maintains consistency with existing purple theme
   - Educational element showing order priority system
 - **Positioning**: Header placed strategically above search field for immediate visibility
-- **Impact**: Customers now have clear visual guidance on order types before searching through their purchase history
-- **Result**: Complete order types categorization header operational above search field in purchase history modal
+- **Filtering Functionality**: Enhanced header with clickable filter buttons for order type categorization:
+  - **All Orders**: Shows all orders without filtering (default state)
+  - **Completed**: Filters confirmed, delivered, and paid orders
+  - **Pending Payment**: Shows orders awaiting payment
+  - **Processing**: Displays orders in processing, shipped, or ready for delivery states
+  - **Bank Transfer**: Shows 3-day grace period bank transfer orders
+- **Interactive Design**: 
+  - Clickable buttons with hover effects and active state highlighting
+  - Selected filter shows colored background with darker border
+  - Visual feedback with color-coded active states matching order type colors
+- **Smart Filtering Logic**: Comprehensive order categorization based on status, payment status, and payment method
+- **Clear Filters Option**: Added "پاک کردن فیلترها" button when filters are active
+- **Combined Filtering**: Search and category filters work together for precise order finding
+- **Impact**: Customers now have clear visual guidance on order types before searching through their purchase history with full filtering capabilities
+- **Result**: Complete order types categorization header operational above search field in purchase history modal with interactive filtering functionality
 
 ### COMPLETED: Wallet Payment Interface Enhancement with Explanatory Text and Updated Labels (July 24, 2025)
 ✅ **IMPLEMENTED: Complete wallet payment interface enhancement with explanatory text and updated terminology**
