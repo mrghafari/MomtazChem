@@ -42,31 +42,55 @@ import {
 
 interface CompanyInfo {
   id?: number;
-  companyName: string;
-  companyNameEnglish?: string;
+  companyNameEn?: string;
+  companyNameAr?: string;
+  companyNameTr?: string;
+  companyNameKu?: string;
+  tradeName?: string;
   registrationNumber?: string;
   taxNumber?: string;
-  address: string;
-  addressEnglish?: string;
-  city: string;
-  province: string;
-  country: string;
-  postalCode?: string;
-  phone: string;
-  fax?: string;
-  email: string;
-  website?: string;
-  businessType?: string;
-  industry: string;
-  establishedYear?: number;
-  logoUrl?: string;
+  legalForm?: string;
+  establishedDate?: string;
+  capitalAmount?: number;
+  capitalCurrency?: string;
+  numberOfEmployees?: number;
+  annualRevenue?: number;
+  businessSector?: string;
+  businessDescription?: string;
+  mainAddress?: string;
+  mailingAddress?: string;
+  phonePrimary?: string;
+  phoneSecondary?: string;
+  emailPrimary?: string;
+  emailSecondary?: string;
+  websiteUrl?: string;
+  licenseNumber?: string;
+  licenseType?: string;
+  licenseAuthority?: string;
+  licenseExpiryDate?: string;
   bankName?: string;
-  accountNumber?: string;
-  iban?: string;
-  swiftCode?: string;
-  description?: string;
-  descriptionEnglish?: string;
-  isActive?: boolean;
+  bankAccount?: string;
+  bankIban?: string;
+  bankSwift?: string;
+  contactPersonName?: string;
+  contactPersonTitle?: string;
+  contactPersonPhone?: string;
+  contactPersonEmail?: string;
+  parentCompany?: string;
+  subsidiaries?: string;
+  branches?: string;
+  partnerships?: string;
+  certifications?: string;
+  awards?: string;
+  socialLinkedin?: string;
+  socialFacebook?: string;
+  socialTwitter?: string;
+  socialInstagram?: string;
+  logoUrl?: string;
+  companySealUrl?: string;
+  letterheadUrl?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 interface CompanyImage {
@@ -556,62 +580,73 @@ export default function CompanyInformation() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label>نام شرکت</Label>
+                  <Label>نام شرکت (عربی)</Label>
                   <Input 
-                    id="companyName"
-                    value={companyInfo?.companyName || ''} 
-                    placeholder="شرکت ممتاز شیمی"
+                    id="companyNameAr"
+                    value={companyInfo?.companyNameAr || ''} 
+                    placeholder="ممتاز شیمی"
                     onChange={(e) => {
-                      const updatedInfo = { ...companyInfo, companyName: e.target.value };
+                      const updatedInfo = { ...companyInfo, companyNameAr: e.target.value };
                       updateCompanyInfoMutation.mutate(updatedInfo);
                     }}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Company Name (English)</Label>
+                  <Label>نام شرکت (انگلیسی)</Label>
                   <Input 
-                    id="companyNameEnglish"
-                    value={companyInfo?.companyNameEnglish || ''} 
-                    placeholder="Momtaz Chemical Solutions"
+                    id="companyNameEn"
+                    value={companyInfo?.companyNameEn || ''} 
+                    placeholder="Momtazchem"
                     onChange={(e) => {
-                      const updatedInfo = { ...companyInfo, companyNameEnglish: e.target.value };
+                      const updatedInfo = { ...companyInfo, companyNameEn: e.target.value };
                       updateCompanyInfoMutation.mutate(updatedInfo);
                     }}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>صنعت</Label>
+                  <Label>نام تجاری</Label>
                   <Input 
-                    id="industry"
-                    value={companyInfo?.industry || ''} 
-                    placeholder="شیمیایی"
+                    id="tradeName"
+                    value={companyInfo?.tradeName || ''} 
+                    placeholder="Al-Entaj Al-Momtaz Company"
                     onChange={(e) => {
-                      const updatedInfo = { ...companyInfo, industry: e.target.value };
+                      const updatedInfo = { ...companyInfo, tradeName: e.target.value };
                       updateCompanyInfoMutation.mutate(updatedInfo);
                     }}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>نوع کسب‌وکار</Label>
+                  <Label>بخش تجاری</Label>
                   <Input 
-                    id="businessType"
-                    value={companyInfo?.businessType || ''} 
-                    placeholder="تولیدی"
+                    id="businessSector"
+                    value={companyInfo?.businessSector || ''} 
+                    placeholder="Chemical Products Trading"
                     onChange={(e) => {
-                      const updatedInfo = { ...companyInfo, businessType: e.target.value };
+                      const updatedInfo = { ...companyInfo, businessSector: e.target.value };
                       updateCompanyInfoMutation.mutate(updatedInfo);
                     }}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>سال تأسیس</Label>
-                  <Input 
-                    id="establishedYear"
-                    type="number"
-                    value={companyInfo?.establishedYear || ''} 
-                    placeholder="1400"
+                  <Label>توضیحات کسب‌وکار</Label>
+                  <Textarea 
+                    id="businessDescription"
+                    value={companyInfo?.businessDescription || ''} 
+                    placeholder="شرح کامل فعالیت‌های تجاری شرکت"
                     onChange={(e) => {
-                      const updatedInfo = { ...companyInfo, establishedYear: parseInt(e.target.value) || null };
+                      const updatedInfo = { ...companyInfo, businessDescription: e.target.value };
+                      updateCompanyInfoMutation.mutate(updatedInfo);
+                    }}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>تاریخ تأسیس</Label>
+                  <Input 
+                    id="establishedDate"
+                    type="date"
+                    value={companyInfo?.establishedDate || ''} 
+                    onChange={(e) => {
+                      const updatedInfo = { ...companyInfo, establishedDate: e.target.value };
                       updateCompanyInfoMutation.mutate(updatedInfo);
                     }}
                   />
@@ -619,11 +654,11 @@ export default function CompanyInformation() {
                 <div className="space-y-2">
                   <Label>سایت وب</Label>
                   <Input 
-                    id="website"
-                    value={companyInfo?.website || ''} 
+                    id="websiteUrl"
+                    value={companyInfo?.websiteUrl || ''} 
                     placeholder="https://momtazchem.com"
                     onChange={(e) => {
-                      const updatedInfo = { ...companyInfo, website: e.target.value };
+                      const updatedInfo = { ...companyInfo, websiteUrl: e.target.value };
                       updateCompanyInfoMutation.mutate(updatedInfo);
                     }}
                   />
@@ -661,11 +696,23 @@ export default function CompanyInformation() {
                 <div className="space-y-2">
                   <Label>ایمیل اصلی</Label>
                   <Input 
-                    id="email"
-                    value={companyInfo?.email || ''} 
+                    id="emailPrimary"
+                    value={companyInfo?.emailPrimary || ''} 
                     placeholder="info@momtazchem.com"
                     onChange={(e) => {
-                      const updatedInfo = { ...companyInfo, email: e.target.value };
+                      const updatedInfo = { ...companyInfo, emailPrimary: e.target.value };
+                      updateCompanyInfoMutation.mutate(updatedInfo);
+                    }}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>ایمیل فرعی</Label>
+                  <Input 
+                    id="emailSecondary"
+                    value={companyInfo?.emailSecondary || ''} 
+                    placeholder="sales@momtazchem.com"
+                    onChange={(e) => {
+                      const updatedInfo = { ...companyInfo, emailSecondary: e.target.value };
                       updateCompanyInfoMutation.mutate(updatedInfo);
                     }}
                   />
@@ -673,11 +720,23 @@ export default function CompanyInformation() {
                 <div className="space-y-2">
                   <Label>تلفن اصلی</Label>
                   <Input 
-                    id="phone"
-                    value={companyInfo?.phone || ''} 
-                    placeholder="+964 750 123 4567"
+                    id="phonePrimary"
+                    value={companyInfo?.phonePrimary || ''} 
+                    placeholder="+964-1-234-5678"
                     onChange={(e) => {
-                      const updatedInfo = { ...companyInfo, phone: e.target.value };
+                      const updatedInfo = { ...companyInfo, phonePrimary: e.target.value };
+                      updateCompanyInfoMutation.mutate(updatedInfo);
+                    }}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>تلفن فرعی</Label>
+                  <Input 
+                    id="phoneSecondary"
+                    value={companyInfo?.phoneSecondary || ''} 
+                    placeholder="+964-1-234-5679"
+                    onChange={(e) => {
+                      const updatedInfo = { ...companyInfo, phoneSecondary: e.target.value };
                       updateCompanyInfoMutation.mutate(updatedInfo);
                     }}
                   />
@@ -695,13 +754,13 @@ export default function CompanyInformation() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>آدرس</Label>
+                  <Label>آدرس اصلی</Label>
                   <Textarea 
-                    id="address"
-                    value={companyInfo?.address || ''} 
+                    id="mainAddress"
+                    value={companyInfo?.mainAddress || ''} 
                     placeholder="آدرس کامل شرکت"
                     onChange={(e) => {
-                      const updatedInfo = { ...companyInfo, address: e.target.value };
+                      const updatedInfo = { ...companyInfo, mainAddress: e.target.value };
                       updateCompanyInfoMutation.mutate(updatedInfo);
                     }}
                   />
@@ -817,27 +876,14 @@ export default function CompanyInformation() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label>درباره شرکت</Label>
+                  <Label>توضیحات تجاری</Label>
                   <Textarea 
-                    id="description"
-                    value={companyInfo?.description || ''} 
-                    placeholder="توضیح کاملی از شرکت و فعالیت‌های آن..."
+                    id="businessDescription"
+                    value={companyInfo?.businessDescription || ''} 
+                    placeholder="شرح کامل فعالیت‌های تجاری شرکت"
                     rows={3}
                     onChange={(e) => {
-                      const updatedInfo = { ...companyInfo, description: e.target.value };
-                      updateCompanyInfoMutation.mutate(updatedInfo);
-                    }}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Description (English)</Label>
-                  <Textarea 
-                    id="descriptionEnglish"
-                    value={companyInfo?.descriptionEnglish || ''} 
-                    placeholder="Complete description about company and its activities..."
-                    rows={3}
-                    onChange={(e) => {
-                      const updatedInfo = { ...companyInfo, descriptionEnglish: e.target.value };
+                      const updatedInfo = { ...companyInfo, businessDescription: e.target.value };
                       updateCompanyInfoMutation.mutate(updatedInfo);
                     }}
                   />
@@ -870,11 +916,11 @@ export default function CompanyInformation() {
                 <div className="space-y-2">
                   <Label>شماره حساب</Label>
                   <Input 
-                    id="accountNumber"
-                    value={companyInfo?.accountNumber || ''} 
+                    id="bankAccount"
+                    value={companyInfo?.bankAccount || ''} 
                     placeholder="1234567890"
                     onChange={(e) => {
-                      const updatedInfo = { ...companyInfo, accountNumber: e.target.value };
+                      const updatedInfo = { ...companyInfo, bankAccount: e.target.value };
                       updateCompanyInfoMutation.mutate(updatedInfo);
                     }}
                   />
@@ -882,11 +928,11 @@ export default function CompanyInformation() {
                 <div className="space-y-2">
                   <Label>شماره IBAN</Label>
                   <Input 
-                    id="iban"
-                    value={companyInfo?.iban || ''} 
+                    id="bankIban"
+                    value={companyInfo?.bankIban || ''} 
                     placeholder="IQ123456789012345678"
                     onChange={(e) => {
-                      const updatedInfo = { ...companyInfo, iban: e.target.value };
+                      const updatedInfo = { ...companyInfo, bankIban: e.target.value };
                       updateCompanyInfoMutation.mutate(updatedInfo);
                     }}
                   />
@@ -894,11 +940,11 @@ export default function CompanyInformation() {
                 <div className="space-y-2">
                   <Label>کد SWIFT</Label>
                   <Input 
-                    id="swiftCode"
-                    value={companyInfo?.swiftCode || ''} 
+                    id="bankSwift"
+                    value={companyInfo?.bankSwift || ''} 
                     placeholder="BANKIQ22"
                     onChange={(e) => {
-                      const updatedInfo = { ...companyInfo, swiftCode: e.target.value };
+                      const updatedInfo = { ...companyInfo, bankSwift: e.target.value };
                       updateCompanyInfoMutation.mutate(updatedInfo);
                     }}
                   />
