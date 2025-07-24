@@ -857,9 +857,6 @@ export default function CompanyInformation() {
                 </div>
                 <div className="space-y-2">
                   <Label>آدرس اصلی</Label>
-                  <div className="text-sm text-muted-foreground mb-2">
-                    اگر می‌خواهید کالای خود را در آدرس دیگری دریافت کنید کلیک کنید
-                  </div>
                   <Textarea 
                     id="mainAddress"
                     value={formData?.mainAddress || ''} 
