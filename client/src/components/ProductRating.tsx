@@ -8,7 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import StarRating from './StarRating';
 import { User, MessageSquare, Lock } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useQuery } from '@tanstack/react-query';
+import { useCustomer } from '@/hooks/useCustomer';
 
 interface Review {
   id: number;
@@ -42,10 +42,7 @@ export default function ProductRating({
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   // Check if user is authenticated
-  const { data: customer, isLoading: isLoadingCustomer } = useQuery({
-    queryKey: ['/api/customers/me'],
-    enabled: true
-  });
+  const { customer, isLoading: isLoadingCustomer } = useCustomer();
 
   const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
