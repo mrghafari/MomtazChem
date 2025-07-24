@@ -6,6 +6,33 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Required Receipt Amount Field Added to Bank Receipt Upload Form (July 24, 2025)
+✅ **IMPLEMENTED: Mandatory amount field ("مبلغ فیش") in bank receipt upload form per user request**
+- **User Request**: "فیلدی در فرم آپلود فیش بانکی به صورت اجباری بزن تا ملغ فیش را پر کند" (Add a required field to the bank receipt upload form for receipt amount)
+- **Frontend Enhancement**: Added required "مبلغ فیش بانکی (اجباری)" field with validation:
+  - **Input Type**: Number input with placeholder "مبلغ واریزی به دینار عراقی"
+  - **Visual Feedback**: Red asterisk (*) indicating required field
+  - **Real-time Display**: Live formatting showing entered amount in localized format
+  - **Form Validation**: Upload button disabled until both file and amount are provided
+  - **Client-side Validation**: Checks for empty, zero, negative, or invalid amounts with Persian error messages
+- **Backend Integration**: Enhanced `/api/payment/upload-receipt` endpoint to handle receipt amounts:
+  - **Validation**: Server-side validation for required amount field with error responses
+  - **Amount Parsing**: Converts string to number and validates for positive values
+  - **Database Storage**: Receipt amount stored in order notes with formatted display
+  - **Audit Trail**: Amount included in financial transaction metadata and descriptions
+  - **Response Enhancement**: Success message includes formatted receipt amount
+- **Form State Management**: Added `receiptAmount` state variable and proper form data transmission
+- **User Experience**: 
+  - Upload button requires both file selection AND amount entry
+  - Clear validation messages in Persian for all error cases
+  - Live amount formatting showing "X,XXX دینار عراقی" as user types
+  - Amount included in upload success confirmation
+- **Business Logic**: Receipt amounts now tracked for financial verification and audit purposes
+- **Test Infrastructure**: Created comprehensive test file `test-receipt-amount.html` for validation testing
+- **Database Integration**: Receipt amounts stored in order notes with timestamp and formatting
+- **Impact**: Financial department can now see exact receipt amounts for verification against order totals
+- **Result**: Bank receipt upload form now requires amount entry with complete validation and backend storage
+
 ### COMPLETED: Banking API Authentication Fixed - Public Endpoint Created for Customer Access (July 24, 2025)
 ✅ **RESOLVED: Fixed critical authentication issue preventing customers from accessing banking information in payment forms**
 - **Root Cause**: Customer-facing payment forms were using admin-only endpoint `/api/admin/company-information` causing 401 authentication errors

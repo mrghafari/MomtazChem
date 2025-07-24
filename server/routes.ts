@@ -25239,7 +25239,7 @@ momtazchem.com
   // Upload bank receipt
   app.post('/api/payment/upload-receipt', requireCustomerAuth, uploadReceipt.single('receipt'), async (req, res) => {
     try {
-      const { orderId } = req.body;
+      const { orderId, receiptAmount, notes } = req.body;
       const file = req.file;
 
       if (!file) {
@@ -25253,6 +25253,21 @@ momtazchem.com
         return res.status(400).json({ 
           success: false, 
           message: 'شناسه سفارش ضروری است' 
+        });
+      }
+
+      if (!receiptAmount) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'مبلغ فیش بانکی اجباری است' 
+        });
+      }
+
+      const amount = parseFloat(receiptAmount);
+      if (isNaN(amount) || amount <= 0) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'مبلغ وارد شده نامعتبر است' 
         });
       }
 
@@ -25280,14 +25295,17 @@ momtazchem.com
       // ایجاد مسیر نسبی برای ذخیره در دیتابیس
       const filePath = `/uploads/receipts/${file.filename}`;
 
-      // به‌روزرسانی سفارش با مسیر فیش بانکی و تغییر وضعیت از موقت به عادی
+      // به‌روزرسانی سفارش با مسیر فیش بانکی و مبلغ فیش
+      const uploadNote = `فیش بانکی آپلود شد در ${new Date().toLocaleString('fa-IR')} | مبلغ فیش: ${amount.toLocaleString()} دینار${notes ? ` | توضیحات: ${notes}` : ''}`;
+      const updatedNotes = order.notes ? `${order.notes} | ${uploadNote}` : uploadNote;
+      
       await customerDb
         .update(customerOrders)
         .set({
           receiptPath: filePath,
           paymentStatus: 'receipt_uploaded',
           status: 'confirmed', // تغییر وضعیت از pending/payment_grace_period به confirmed
-          notes: order.notes ? `${order.notes} | فیش بانکی آپلود شد در ${new Date().toLocaleString('en-US')}` : `فیش بانکی آپلود شد در ${new Date().toLocaleString('en-US')}`
+          notes: updatedNotes
         })
         .where(eq(customerOrders.id, order.id));
 
@@ -25313,7 +25331,7 @@ momtazchem.com
           type: 'receipt_uploaded',
           orderId: order.id,
           amount: order.totalAmount,
-          description: `فیش بانکی آپلود شد - ${file.originalname}`,
+          description: `فیش بانکی آپلود شد - ${file.originalname} | مبلغ فیش: ${amount.toLocaleString()} دینار`,
           referenceNumber: order.orderNumber,
           status: 'pending_review',
           processingDate: new Date(),
@@ -25321,7 +25339,8 @@ momtazchem.com
             receiptPath: filePath,
             fileName: file.originalname,
             fileSize: file.size,
-            mimeType: file.mimetype
+            mimeType: file.mimetype,
+            receiptAmount: amount
           }
         });
       } catch (error) {
@@ -25338,12 +25357,13 @@ momtazchem.com
 
       res.json({ 
         success: true, 
-        message: 'فیش بانکی با موفقیت آپلود شد و سفارش شما تأیید شد',
+        message: `فیش بانکی با موفقیت آپلود شد. مبلغ فیش: ${amount.toLocaleString()} دینار عراقی`,
         data: { 
           filePath,
           fileName: file.originalname,
           orderId: parseInt(orderId),
-          orderStatus: 'confirmed'
+          orderStatus: 'confirmed',
+          receiptAmount: amount
         }
       });
 

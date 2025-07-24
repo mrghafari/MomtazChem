@@ -18,6 +18,7 @@ export default function BankReceiptUpload() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [notes, setNotes] = useState("");
+  const [receiptAmount, setReceiptAmount] = useState("");
   const [orderId, setOrderId] = useState<string | null>(null);
 
   // Get orderId from URL parameters or query string
@@ -147,9 +148,29 @@ export default function BankReceiptUpload() {
       return;
     }
 
+    if (!receiptAmount || receiptAmount.trim() === '') {
+      toast({
+        title: "مبلغ فیش بانکی اجباری است",
+        description: "لطفاً مبلغ واریزی را وارد کنید",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const amount = parseFloat(receiptAmount);
+    if (isNaN(amount) || amount <= 0) {
+      toast({
+        title: "مبلغ نامعتبر",
+        description: "لطفاً مبلغ صحیح وارد کنید",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const formData = new FormData();
     formData.append('receipt', selectedFile);
     formData.append('notes', notes);
+    formData.append('receiptAmount', receiptAmount);
     formData.append('orderId', orderId || '');
 
     uploadMutation.mutate(formData);
@@ -334,6 +355,28 @@ export default function BankReceiptUpload() {
             </div>
           )}
 
+          {/* Receipt Amount - Required Field */}
+          <div>
+            <Label htmlFor="receipt-amount" className="flex items-center gap-2">
+              مبلغ فیش بانکی (اجباری)
+              <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              id="receipt-amount"
+              type="number"
+              placeholder="مبلغ واریزی به دینار عراقی"
+              value={receiptAmount}
+              onChange={(e) => setReceiptAmount(e.target.value)}
+              className="mt-1"
+              required
+            />
+            {receiptAmount && (
+              <p className="text-sm text-gray-600 mt-1">
+                مبلغ وارد شده: {parseInt(receiptAmount).toLocaleString()} دینار عراقی
+              </p>
+            )}
+          </div>
+
           {/* Notes */}
           <div>
             <Label htmlFor="notes">توضیحات (اختیاری)</Label>
@@ -350,7 +393,7 @@ export default function BankReceiptUpload() {
           {/* Upload Button */}
           <Button
             onClick={handleUpload}
-            disabled={!selectedFile || uploadMutation.isPending}
+            disabled={!selectedFile || !receiptAmount || uploadMutation.isPending}
             className="w-full"
             size="lg"
           >

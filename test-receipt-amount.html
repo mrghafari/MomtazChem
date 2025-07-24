@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست فیلد مبلغ فیش بانکی</title>
+    <style>
+        body {
+            font-family: 'Tahoma', Arial, sans-serif;
+            direction: rtl;
+            text-align: right;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .required {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>تست فیلد مبلغ فیش بانکی</h1>
+    
+    <div class="test-card">
+        <h3>تست فرم آپلود فیش بانکی با فیلد مبلغ اجباری</h3>
+        
+        <form id="receiptForm" enctype="multipart/form-data">
+            <label for="orderId">شناسه سفارش:</label>
+            <input type="text" id="orderId" name="orderId" value="M2501220001" required>
+            
+            <label for="receiptFile">فایل فیش بانکی: <span class="required">*</span></label>
+            <input type="file" id="receiptFile" name="receipt" accept="image/*,application/pdf" required>
+            
+            <label for="receiptAmount">مبلغ فیش بانکی (دینار عراقی): <span class="required">*</span></label>
+            <input type="number" id="receiptAmount" name="receiptAmount" placeholder="مبلغ واریزی" required>
+            <div id="amountDisplay" style="font-size: 12px; color: gray; margin-top: 5px;"></div>
+            
+            <label for="notes">توضیحات (اختیاری):</label>
+            <textarea id="notes" name="notes" rows="3" placeholder="توضیحات اضافی..."></textarea>
+            
+            <button type="submit" id="submitBtn">آپلود فیش بانکی</button>
+        </form>
+        
+        <div id="validationResult"></div>
+        <div id="testResult"></div>
+    </div>
+
+    <div class="test-card">
+        <h3>تست‌های خودکار</h3>
+        <button onclick="testValidation()">تست اعتبارسنجی فیلدها</button>
+        <button onclick="testAmountFormatting()">تست فرمت‌بندی مبلغ</button>
+        <button onclick="checkBankingInfo()">بررسی اطلاعات بانکی</button>
+        <div id="automaticTestResults"></div>
+    </div>
+
+    <script>
+        // تابع فرمت‌بندی مبلغ
+        function formatAmount(amount) {
+            if (!amount || isNaN(amount)) return '';
+            return parseInt(amount).toLocaleString() + ' دینار عراقی';
+        }
+
+        // نمایش مبلغ فرمت شده
+        document.getElementById('receiptAmount').addEventListener('input', function(e) {
+            const amount = e.target.value;
+            const display = document.getElementById('amountDisplay');
+            
+            if (amount && !isNaN(amount) && amount > 0) {
+                display.textContent = 'مبلغ وارد شده: ' + formatAmount(amount);
+                display.style.color = 'green';
+            } else if (amount) {
+                display.textContent = 'مبلغ نامعتبر';
+                display.style.color = 'red';
+            } else {
+                display.textContent = '';
+            }
+        });
+
+        // ارسال فرم
+        document.getElementById('receiptForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const receiptAmount = formData.get('receiptAmount');
+            const file = formData.get('receipt');
+            
+            // اعتبارسنجی
+            let errors = [];
+            
+            if (!file || file.size === 0) {
+                errors.push('فایل فیش بانکی انتخاب نشده');
+            }
+            
+            if (!receiptAmount || receiptAmount.trim() === '') {
+                errors.push('مبلغ فیش بانکی اجباری است');
+            } else {
+                const amount = parseFloat(receiptAmount);
+                if (isNaN(amount) || amount <= 0) {
+                    errors.push('مبلغ وارد شده نامعتبر است');
+                }
+            }
+            
+            const resultDiv = document.getElementById('testResult');
+            
+            if (errors.length > 0) {
+                resultDiv.innerHTML = '<div class="error"><strong>خطاهای اعتبارسنجی:</strong><ul>' + 
+                    errors.map(error => '<li>' + error + '</li>').join('') + '</ul></div>';
+                return;
+            }
+            
+            resultDiv.innerHTML = '<div class="info">در حال ارسال فرم...</div>';
+            
+            // ارسال درخواست
+            fetch('/api/payment/upload-receipt', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    resultDiv.innerHTML = '<div class="success"><strong>موفق:</strong> ' + data.message + 
+                        '<br>مبلغ فیش: ' + formatAmount(data.data.receiptAmount) + '</div>';
+                } else {
+                    resultDiv.innerHTML = '<div class="error"><strong>خطا:</strong> ' + data.message + '</div>';
+                }
+            })
+            .catch(error => {
+                resultDiv.innerHTML = '<div class="error"><strong>خطا در ارتباط:</strong> ' + error.message + '</div>';
+            });
+        });
+
+        // تست اعتبارسنجی
+        function testValidation() {
+            const tests = [
+                { amount: '', expected: false, description: 'مبلغ خالی' },
+                { amount: '0', expected: false, description: 'مبلغ صفر' },
+                { amount: '-100', expected: false, description: 'مبلغ منفی' },
+                { amount: 'abc', expected: false, description: 'متن به جای عدد' },
+                { amount: '50000', expected: true, description: 'مبلغ معتبر' },
+                { amount: '1000000', expected: true, description: 'مبلغ بزرگ' }
+            ];
+            
+            let results = '<h4>نتایج تست اعتبارسنجی:</h4>';
+            
+            tests.forEach(test => {
+                const amount = parseFloat(test.amount);
+                const isValid = !isNaN(amount) && amount > 0;
+                const passed = isValid === test.expected;
+                
+                results += '<div class="' + (passed ? 'success' : 'error') + '">' +
+                    test.description + ': ' + (passed ? '✓' : '✗') + 
+                    ' (مقدار: "' + test.amount + '", انتظار: ' + (test.expected ? 'معتبر' : 'نامعتبر') + ')</div>';
+            });
+            
+            document.getElementById('automaticTestResults').innerHTML = results;
+        }
+
+        // تست فرمت‌بندی مبلغ
+        function testAmountFormatting() {
+            const amounts = [50000, 1000000, 750000, 25000];
+            let results = '<h4>نتایج تست فرمت‌بندی:</h4>';
+            
+            amounts.forEach(amount => {
+                const formatted = formatAmount(amount);
+                results += '<div class="info">مبلغ ' + amount + ' → ' + formatted + '</div>';
+            });
+            
+            document.getElementById('automaticTestResults').innerHTML = results;
+        }
+
+        // بررسی اطلاعات بانکی
+        function checkBankingInfo() {
+            document.getElementById('automaticTestResults').innerHTML = '<div class="info">در حال بررسی اطلاعات بانکی...</div>';
+            
+            fetch('/api/company/banking-info')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.data) {
+                    const banking = data.data;
+                    let info = '<h4>اطلاعات بانکی فعلی:</h4>';
+                    info += '<div class="success">نام بانک: ' + (banking.bankName || 'تعریف نشده') + '</div>';
+                    info += '<div class="success">شماره حساب: ' + (banking.bankAccount || 'تعریف نشده') + '</div>';
+                    info += '<div class="success">صاحب حساب: ' + (banking.bankAccountHolder || banking.companyNameAr || 'تعریف نشده') + '</div>';
+                    info += '<div class="success">IBAN: ' + (banking.bankIban || 'تعریف نشده') + '</div>';
+                    info += '<div class="success">SWIFT: ' + (banking.bankSwift || 'تعریف نشده') + '</div>';
+                    
+                    document.getElementById('automaticTestResults').innerHTML = info;
+                } else {
+                    document.getElementById('automaticTestResults').innerHTML = 
+                        '<div class="error">خطا در دریافت اطلاعات بانکی: ' + (data.message || 'خطای نامشخص') + '</div>';
+                }
+            })
+            .catch(error => {
+                document.getElementById('automaticTestResults').innerHTML = 
+                    '<div class="error">خطا در ارتباط با سرور: ' + error.message + '</div>';
+            });
+        }
+
+        // اجرای تست اولیه
+        window.onload = function() {
+            console.log('صفحه تست فیلد مبلغ فیش بانکی آماده است');
+        };
+    </script>
+</body>
+</html>
