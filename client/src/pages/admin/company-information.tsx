@@ -59,8 +59,13 @@ interface CompanyInfo {
   businessDescription?: string;
   mainAddress?: string;
   mailingAddress?: string;
+  province?: string;
+  city?: string;
+  country?: string;
+  postalCode?: string;
   phonePrimary?: string;
   phoneSecondary?: string;
+  fax?: string;
   emailPrimary?: string;
   emailSecondary?: string;
   websiteUrl?: string;
@@ -203,6 +208,28 @@ export default function CompanyInformation() {
       if (!response.ok) throw new Error('Failed to fetch company information');
       const result = await response.json();
       return result.data || null;
+    }
+  });
+
+  // Fetch Iraqi provinces
+  const { data: provinces } = useQuery({
+    queryKey: ['/api/iraqi-provinces'],
+    queryFn: async () => {
+      const response = await fetch('/api/iraqi-provinces');
+      if (!response.ok) throw new Error('Failed to fetch provinces');
+      const result = await response.json();
+      return result.data || [];
+    }
+  });
+
+  // Fetch Iraqi cities
+  const { data: cities } = useQuery({
+    queryKey: ['/api/iraqi-cities'],
+    queryFn: async () => {
+      const response = await fetch('/api/iraqi-cities');
+      if (!response.ok) throw new Error('Failed to fetch cities');
+      const result = await response.json();
+      return result.data || [];
     }
   });
 
@@ -719,6 +746,9 @@ export default function CompanyInformation() {
                 </div>
                 <div className="space-y-2">
                   <Label>تلفن اصلی</Label>
+                  <div className="text-sm text-muted-foreground mb-2">
+                    چنانچه گیرنده کالا شخص دیگری است شماره موبایل ایشان را وارد کنید
+                  </div>
                   <Input 
                     id="phonePrimary"
                     value={companyInfo?.phonePrimary || ''} 
@@ -755,6 +785,9 @@ export default function CompanyInformation() {
                 </div>
                 <div className="space-y-2">
                   <Label>آدرس اصلی</Label>
+                  <div className="text-sm text-muted-foreground mb-2">
+                    اگر می‌خواهید کالای خود را در آدرس دیگری دریافت کنید کلیک کنید
+                  </div>
                   <Textarea 
                     id="mainAddress"
                     value={companyInfo?.mainAddress || ''} 
@@ -765,18 +798,51 @@ export default function CompanyInformation() {
                     }}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label>Address (English)</Label>
-                  <Textarea 
-                    id="addressEnglish"
-                    value={companyInfo?.addressEnglish || ''} 
-                    placeholder="Company Full Address in English"
-                    onChange={(e) => {
-                      const updatedInfo = { ...companyInfo, addressEnglish: e.target.value };
-                      updateCompanyInfoMutation.mutate(updatedInfo);
-                    }}
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>استان</Label>
+                    <Select
+                      value={companyInfo?.province || ''}
+                      onValueChange={(value) => {
+                        const updatedInfo = { ...companyInfo, province: value };
+                        updateCompanyInfoMutation.mutate(updatedInfo);
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="انتخاب استان" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {provinces?.map((province: any) => (
+                          <SelectItem key={province.id} value={province.nameArabic}>
+                            {province.nameArabic} ({province.nameEnglish})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>شهر</Label>
+                    <Select
+                      value={companyInfo?.city || ''}
+                      onValueChange={(value) => {
+                        const updatedInfo = { ...companyInfo, city: value };
+                        updateCompanyInfoMutation.mutate(updatedInfo);
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="انتخاب شهر" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {cities?.map((city: any) => (
+                          <SelectItem key={city.id} value={city.nameArabic}>
+                            {city.nameArabic} ({city.nameEnglish}) - {city.provinceName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
+
               </CardContent>
             </Card>
 
@@ -815,40 +881,17 @@ export default function CompanyInformation() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>شهر</Label>
-                  <Input 
-                    id="city"
-                    value={companyInfo?.city || ''} 
-                    placeholder="اربیل"
-                    onChange={(e) => {
-                      const updatedInfo = { ...companyInfo, city: e.target.value };
-                      updateCompanyInfoMutation.mutate(updatedInfo);
-                    }}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>استان</Label>
-                  <Input 
-                    id="province"
-                    value={companyInfo?.province || ''} 
-                    placeholder="کردستان عراق"
-                    onChange={(e) => {
-                      const updatedInfo = { ...companyInfo, province: e.target.value };
-                      updateCompanyInfoMutation.mutate(updatedInfo);
-                    }}
-                  />
-                </div>
-                <div className="space-y-2">
                   <Label>کشور</Label>
                   <Input 
                     id="country"
-                    value={companyInfo?.country || ''} 
+                    value={companyInfo?.country || ''}
+                    disabled 
                     placeholder="عراق"
-                    onChange={(e) => {
-                      const updatedInfo = { ...companyInfo, country: e.target.value };
-                      updateCompanyInfoMutation.mutate(updatedInfo);
-                    }}
+                    className="bg-gray-50"
                   />
+                  <div className="text-sm text-muted-foreground">
+                    کشور به‌صورت پیشفرض عراق تنظیم شده است
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label>کد پستی</Label>
