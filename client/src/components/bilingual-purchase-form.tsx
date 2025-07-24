@@ -1154,7 +1154,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                     <RadioGroupItem value="wallet_partial" id="wallet_partial" />
                     <Label htmlFor="wallet_partial" className="flex items-center gap-2 cursor-pointer">
                       <Wallet className="w-4 h-4 text-orange-600" />
-                      پرداخت همه یا بخشی از والت - مبلغ از والت (حداکثر {formatCurrency(walletBalance)})
+                      پرداخت همه یا بخشی از والت - مبلغ از والت (حداکثر {formatCurrency(Math.min(walletBalance, totalAmount))})
                     </Label>
                   </div>
                 )}
@@ -1181,16 +1181,16 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
               {paymentMethod === 'wallet_partial' && (
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="walletAmount">مبلغ از والت (حداکثر {formatCurrency(walletBalance)})</Label>
+                    <Label htmlFor="walletAmount">مبلغ از والت (حداکثر {formatCurrency(Math.min(walletBalance, totalAmount))})</Label>
                     <Input
                       id="walletAmount"
                       type="number"
                       min="0"
-                      max={walletBalance}
+                      max={Math.min(walletBalance, totalAmount)}
                       value={walletAmount || ''}
                       onChange={(e) => {
                         const value = parseFloat(e.target.value) || 0;
-                        setWalletAmount(Math.min(value, walletBalance));
+                        setWalletAmount(Math.min(value, Math.min(walletBalance, totalAmount)));
                       }}
                       placeholder="مبلغ از والت"
                       className="text-right"
