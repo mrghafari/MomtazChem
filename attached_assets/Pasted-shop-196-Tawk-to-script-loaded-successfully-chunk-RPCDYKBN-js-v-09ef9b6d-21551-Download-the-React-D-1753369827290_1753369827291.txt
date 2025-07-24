@@ -1,0 +1,124 @@
+shop:196 Tawk.to script loaded successfully
+chunk-RPCDYKBN.js?v=09ef9b6d:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:117574)
+    at t.value (twk-chunk-common.js:2:150658)
+    at p.updateUUID (twk-chunk-common.js:2:202310)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:124589)
+    at twk-chunk-common.js:2:123900
+value @ twk-chunk-common.js:2
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: Array(6)
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: Array(6)
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: Array(6)
+shop:168 Tawk.to Live Chat loaded successfully
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 477
+product-reviews.tsx:42 Reviews Data Full: undefined
+product-reviews.tsx:43 Reviews Array Length: 0
+product-reviews.tsx:44 Reviews Array: []
+product-reviews.tsx:45 Product Stats: {averageRating: 0, totalReviews: 0}
+product-reviews.tsx:46 Product: {id: 477, name: 'تینر فوری 10000', category: 'paint-thinner', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 477
+product-reviews.tsx:42 Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "averageRating": 0,
+      "totalReviews": 0,
+      "ratingDistribution": {}
+    }
+  }
+}
+product-reviews.tsx:43 Reviews Array Length: 0
+product-reviews.tsx:44 Reviews Array: []
+product-reviews.tsx:45 Product Stats: {averageRating: 0, totalReviews: 0, ratingDistribution: {…}}
+product-reviews.tsx:46 Product: {id: 477, name: 'تینر فوری 10000', category: 'paint-thinner', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+product-reviews.tsx:50 ReviewsData type: object
+product-reviews.tsx:51 ReviewsData keys: (2) ['success', 'data']
+product-reviews.tsx:53 ReviewsData.data keys: (2) ['reviews', 'stats']
+product-reviews.tsx:54 ReviewsData.data.reviews: []
+ProductRating.tsx:109 ProductRating Props: {productId: 477, productName: 'تینر فوری 10000', averageRating: 0, totalReviews: 0, reviews: 0}
+ProductRating.tsx:109 ProductRating Props: {productId: 477, productName: 'تینر فوری 10000', averageRating: 0, totalReviews: 0, reviews: 0}
+ProductRating.tsx:109 ProductRating Props: {productId: 477, productName: 'تینر فوری 10000', averageRating: 0, totalReviews: 0, reviews: 0}
+ProductRating.tsx:109 ProductRating Props: {productId: 477, productName: 'تینر فوری 10000', averageRating: 0, totalReviews: 0, reviews: 0}
+ProductRating.tsx:109 ProductRating Props: {productId: 477, productName: 'تینر فوری 10000', averageRating: 0, totalReviews: 0, reviews: 0}
+ProductRating.tsx:109 ProductRating Props: {productId: 477, productName: 'تینر فوری 10000', averageRating: 0, totalReviews: 0, reviews: 0}
+ProductRating.tsx:109 ProductRating Props: {productId: 477, productName: 'تینر فوری 10000', averageRating: 0, totalReviews: 0, reviews: 0}
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 477
+product-reviews.tsx:42 Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "averageRating": 0,
+      "totalReviews": 0,
+      "ratingDistribution": {}
+    }
+  }
+}
+product-reviews.tsx:43 Reviews Array Length: 0
+product-reviews.tsx:44 Reviews Array: []
+product-reviews.tsx:45 Product Stats: {averageRating: 0, totalReviews: 0, ratingDistribution: {…}}
+product-reviews.tsx:46 Product: {id: 477, name: 'تینر فوری 10000', category: 'paint-thinner', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+product-reviews.tsx:50 ReviewsData type: object
+product-reviews.tsx:51 ReviewsData keys: (2) ['success', 'data']
+product-reviews.tsx:53 ReviewsData.data keys: (2) ['reviews', 'stats']
+product-reviews.tsx:54 ReviewsData.data.reviews: []
+ProductRating.tsx:109 ProductRating Props: {productId: 477, productName: 'تینر فوری 10000', averageRating: 0, totalReviews: 0, reviews: 0}
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 477
+product-reviews.tsx:42 Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "averageRating": 0,
+      "totalReviews": 0,
+      "ratingDistribution": {}
+    }
+  }
+}
+product-reviews.tsx:43 Reviews Array Length: 0
+product-reviews.tsx:44 Reviews Array: []
+product-reviews.tsx:45 Product Stats: {averageRating: 0, totalReviews: 0, ratingDistribution: {…}}
+product-reviews.tsx:46 Product: {id: 477, name: 'تینر فوری 10000', category: 'paint-thinner', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+product-reviews.tsx:50 ReviewsData type: object
+product-reviews.tsx:51 ReviewsData keys: (2) ['success', 'data']
+product-reviews.tsx:53 ReviewsData.data keys: (2) ['reviews', 'stats']
+product-reviews.tsx:54 ReviewsData.data.reviews: []
+ProductRating.tsx:109 ProductRating Props: {productId: 477, productName: 'تینر فوری 10000', averageRating: 0, totalReviews: 0, reviews: 0}
