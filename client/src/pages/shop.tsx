@@ -1294,7 +1294,7 @@ const Shop = () => {
                             </div>
                           )}
                           
-                          {/* Star Rating Display - Bottom Left Corner - Always Show */}
+                          {/* Star Rating Display - Bottom Left Corner - Grid View - Always Show */}
                           <div className="absolute bottom-2 left-2">
                             <div 
                               className="bg-white/90 backdrop-blur-sm rounded-md px-2 py-1 shadow-sm border border-yellow-200/50 cursor-pointer hover:bg-yellow-50/80 transition-colors"
@@ -1307,6 +1307,16 @@ const Shop = () => {
                               <div className="flex items-center gap-1">
                                 <div className="flex">
                                   {[1,2,3,4,5].map((starNum) => {
+                                    // Show loading state with pulse animation
+                                    if (statsLoading) {
+                                      return (
+                                        <Star 
+                                          key={starNum}
+                                          className="w-3 h-3 fill-gray-300 text-gray-300 animate-pulse"
+                                        />
+                                      );
+                                    }
+                                    
                                     const stats = productStatsData?.[product.id];
                                     const hasReviews = stats && stats.totalReviews > 0;
                                     const rating = hasReviews ? stats.averageRating : 0;
@@ -1328,9 +1338,9 @@ const Shop = () => {
                                   })}
                                 </div>
                                 <span className="text-xs text-gray-600">
-                                  {productStatsData?.[product.id]?.totalReviews > 0 
+                                  {statsLoading ? '...' : (productStatsData?.[product.id]?.totalReviews > 0 
                                     ? productStatsData[product.id].averageRating.toFixed(1)
-                                    : 'نظر'}
+                                    : 'نظر')}
                                 </span>
                               </div>
                             </div>
@@ -1652,6 +1662,16 @@ const Shop = () => {
                               <div className="flex items-center gap-1">
                                 <div className="flex">
                                   {[1,2,3,4,5].map((starNum) => {
+                                    // Show loading state with pulse animation
+                                    if (statsLoading) {
+                                      return (
+                                        <Star 
+                                          key={starNum}
+                                          className="w-3 h-3 fill-gray-300 text-gray-300 animate-pulse"
+                                        />
+                                      );
+                                    }
+                                    
                                     const stats = productStatsData?.[product.id];
                                     const hasReviews = stats && stats.totalReviews > 0;
                                     const rating = hasReviews ? stats.averageRating : 0;
@@ -1673,9 +1693,9 @@ const Shop = () => {
                                   })}
                                 </div>
                                 <span className="text-xs text-gray-600">
-                                  {productStatsData?.[product.id]?.totalReviews > 0 
+                                  {statsLoading ? '...' : (productStatsData?.[product.id]?.totalReviews > 0 
                                     ? productStatsData[product.id].averageRating.toFixed(1)
-                                    : 'نظر'}
+                                    : 'نظر')}
                                 </span>
                               </div>
                             </div>

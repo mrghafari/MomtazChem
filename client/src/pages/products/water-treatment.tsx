@@ -18,7 +18,7 @@ const WaterTreatment = () => {
     queryFn: () => fetch("/api/products?category=water-treatment").then(res => res.json()),
   });
 
-  const { data: productStatsData } = useQuery({
+  const { data: productStatsData, isLoading: statsLoading } = useQuery({
     queryKey: ['/api/shop/product-stats'],
     queryFn: () => fetch('/api/shop/product-stats').then(res => res.json()).then(data => data.data),
   });
@@ -161,47 +161,57 @@ const WaterTreatment = () => {
                         }}
                       />
                       
-                      {/* Star Rating Display - Bottom Left Corner */}
-                      {productStatsData && productStatsDataData[product.id] && (
-                        <div className="absolute bottom-2 left-2">
-                          <div 
-                            className="bg-white/90 backdrop-blur-sm rounded-md px-2 py-1 shadow-sm border border-yellow-200/50 cursor-pointer hover:bg-yellow-50/80 transition-colors"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              navigate(`/product-reviews/${product.id}`);
-                            }}
-                          >
-                            <div className="flex items-center gap-1">
-                              <div className="flex">
-                                {[1,2,3,4,5].map((starNum) => (
+                      {/* Star Rating Display - Bottom Left Corner - Always Show */}
+                      <div className="absolute bottom-2 left-2">
+                        <div 
+                          className="bg-white/90 backdrop-blur-sm rounded-md px-2 py-1 shadow-sm border border-yellow-200/50 cursor-pointer hover:bg-yellow-50/80 transition-colors"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            navigate(`/product-reviews/${product.id}`);
+                          }}
+                        >
+                          <div className="flex items-center gap-1">
+                            <div className="flex">
+                              {[1,2,3,4,5].map((starNum) => {
+                                // Show loading state with pulse animation
+                                if (statsLoading) {
+                                  return (
+                                    <Star 
+                                      key={starNum}
+                                      className="w-3 h-3 fill-gray-300 text-gray-300 animate-pulse"
+                                    />
+                                  );
+                                }
+                                
+                                const stats = productStatsData?.[product.id];
+                                const hasReviews = stats && stats.totalReviews > 0;
+                                const rating = hasReviews ? stats.averageRating : 0;
+                                
+                                return (
                                   <Star 
                                     key={starNum}
                                     className={`w-3 h-3 ${
-                                      productStatsData[product.id].totalReviews > 0 
-                                        ? (starNum <= Math.floor(productStatsData[product.id].averageRating) 
+                                      hasReviews 
+                                        ? (starNum <= Math.floor(rating) 
                                             ? 'fill-yellow-400 text-yellow-400' 
-                                            : starNum <= Math.ceil(productStatsData[product.id].averageRating)
+                                            : starNum <= Math.ceil(rating)
                                             ? 'fill-yellow-200 text-yellow-200'
                                             : 'fill-gray-200 text-gray-200')
                                         : 'fill-gray-200 text-gray-200 hover:fill-yellow-300'
                                     }`}
                                   />
-                                ))}
-                              </div>
-                              {productStatsData[product.id].totalReviews > 0 ? (
-                                <span className="text-xs font-medium text-gray-700">
-                                  {productStatsData[product.id].averageRating.toFixed(1)}
-                                </span>
-                              ) : (
-                                <span className="text-xs text-gray-500">
-                                  نظر
-                                </span>
-                              )}
+                                );
+                              })}
                             </div>
+                            <span className="text-xs text-gray-600">
+                              {statsLoading ? '...' : (productStatsData?.[product.id]?.totalReviews > 0 
+                                ? productStatsData[product.id].averageRating.toFixed(1)
+                                : 'نظر')}
+                            </span>
                           </div>
                         </div>
-                      )}
+                      </div>
                     </div>
                   )}
                   <CardContent className="p-8">
