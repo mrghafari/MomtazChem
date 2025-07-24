@@ -17,7 +17,6 @@ const RangeSlider = React.forwardRef<
   RangeSliderProps
 >(({ className, value, onValueChange, min, max, step = 1, disabled, ...props }, ref) => {
   const [localValue, setLocalValue] = React.useState<[number, number]>(value);
-  const timeoutRef = React.useRef<NodeJS.Timeout>();
 
   React.useEffect(() => {
     setLocalValue(value);
@@ -26,29 +25,9 @@ const RangeSlider = React.forwardRef<
   const handleValueChange = (newValue: number[]) => {
     if (newValue.length === 2) {
       setLocalValue([newValue[0], newValue[1]]);
-      
-      // Clear existing timeout
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-      
-      // Set new timeout for debounced update
-      timeoutRef.current = setTimeout(() => {
-        onValueChange([newValue[0], newValue[1]]);
-      }, 150);
+      // Auto-save removed per user request - manual save required
     }
   };
-
-  // Cleanup timeout on unmount
-  React.useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, []);
-
-
 
   return (
     <SliderPrimitive.Root
@@ -59,7 +38,6 @@ const RangeSlider = React.forwardRef<
       )}
       value={localValue}
       onValueChange={handleValueChange}
-
       min={min}
       max={max}
       step={step}
