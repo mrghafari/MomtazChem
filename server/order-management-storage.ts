@@ -643,6 +643,12 @@ export class OrderManagementStorage implements IOrderManagementStorage {
         recipientAddress: row.recipientAddress,
         deliveryNotes: row.deliveryNotes,
         
+        // GPS Location data for distribution partner coordination
+        gpsLatitude: row.gpsLatitude,
+        gpsLongitude: row.gpsLongitude,
+        locationAccuracy: row.locationAccuracy,
+        hasGpsLocation: !!(row.gpsLatitude && row.gpsLongitude),
+        
         receipt: row.receiptUrl ? {
           url: row.receiptUrl,
           fileName: row.receiptFileName,

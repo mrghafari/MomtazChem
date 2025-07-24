@@ -1920,6 +1920,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test GPS data retrieval for specific order
+  app.get("/api/test/gps/:orderNumber", async (req, res) => {
+    try {
+      const { orderNumber } = req.params;
+      
+      // Direct SQL query to get GPS data
+      const result = await db
+        .select({
+          orderNumber: customerOrders.orderNumber,
+          gpsLatitude: customerOrders.gpsLatitude,
+          gpsLongitude: customerOrders.gpsLongitude,
+          locationAccuracy: customerOrders.locationAccuracy,
+        })
+        .from(customerOrders)
+        .where(eq(customerOrders.orderNumber, orderNumber));
+      
+      if (result.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: `Order ${orderNumber} not found`
+        });
+      }
+      
+      const order = result[0];
+      const hasGpsLocation = !!(order.gpsLatitude && order.gpsLongitude);
+      
+      res.json({
+        success: true,
+        data: {
+          orderNumber: order.orderNumber,
+          gpsLatitude: order.gpsLatitude,
+          gpsLongitude: order.gpsLongitude,
+          locationAccuracy: order.locationAccuracy,
+          hasGpsLocation
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching GPS data:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch GPS data: ' + error.message
+      });
+    }
+  });
+
   // Admin authentication routes
   app.post("/api/admin/login", async (req, res) => {
     try {
