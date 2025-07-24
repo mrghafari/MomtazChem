@@ -361,6 +361,19 @@ export default function BankReceiptUpload() {
               مبلغ فیش بانکی (اجباری)
               <span className="text-red-500">*</span>
             </Label>
+            
+            {/* Order Amount Display */}
+            {order && (
+              <div className="mb-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                  💰 مبلغ سفارش شما: {parseFloat(order.totalAmount).toLocaleString()} دینار عراقی
+                </p>
+                <p className="text-xs text-blue-600 dark:text-blue-300 mt-1">
+                  حداقل همین مبلغ را واریز کنید. در صورت واریز بیشتر، مبلغ اضافی به والت شما اضافه می‌شود.
+                </p>
+              </div>
+            )}
+            
             <Input
               id="receipt-amount"
               type="number"
@@ -369,11 +382,32 @@ export default function BankReceiptUpload() {
               onChange={(e) => setReceiptAmount(e.target.value)}
               className="mt-1"
               required
+              min={order ? parseFloat(order.totalAmount) : 0}
             />
+            
             {receiptAmount && (
-              <p className="text-sm text-gray-600 mt-1">
-                مبلغ وارد شده: {parseInt(receiptAmount).toLocaleString()} دینار عراقی
-              </p>
+              <div className="mt-2 space-y-1">
+                <p className="text-sm text-gray-600">
+                  مبلغ وارد شده: {parseInt(receiptAmount).toLocaleString()} دینار عراقی
+                </p>
+                {order && receiptAmount && (
+                  <div>
+                    {parseInt(receiptAmount) < parseFloat(order.totalAmount) ? (
+                      <p className="text-sm text-red-600">
+                        ⚠️ مبلغ کمتر از بدهی شما است. کمبود: {(parseFloat(order.totalAmount) - parseInt(receiptAmount)).toLocaleString()} دینار
+                      </p>
+                    ) : parseInt(receiptAmount) > parseFloat(order.totalAmount) ? (
+                      <p className="text-sm text-green-600">
+                        ✅ مبلغ اضافی {(parseInt(receiptAmount) - parseFloat(order.totalAmount)).toLocaleString()} دینار به والت شما اضافه خواهد شد
+                      </p>
+                    ) : (
+                      <p className="text-sm text-green-600">
+                        ✅ مبلغ دقیقاً برابر با بدهی شما است
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
             )}
           </div>
 

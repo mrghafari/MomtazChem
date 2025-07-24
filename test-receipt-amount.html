@@ -167,13 +167,16 @@
 
         // تست اعتبارسنجی
         function testValidation() {
+            const orderAmount = 100000; // مبلغ نمونه سفارش
             const tests = [
                 { amount: '', expected: false, description: 'مبلغ خالی' },
                 { amount: '0', expected: false, description: 'مبلغ صفر' },
                 { amount: '-100', expected: false, description: 'مبلغ منفی' },
                 { amount: 'abc', expected: false, description: 'متن به جای عدد' },
-                { amount: '50000', expected: true, description: 'مبلغ معتبر' },
-                { amount: '1000000', expected: true, description: 'مبلغ بزرگ' }
+                { amount: '50000', expected: false, description: 'مبلغ کمتر از سفارش (50K < 100K)' },
+                { amount: '100000', expected: true, description: 'مبلغ برابر با سفارش (100K = 100K)' },
+                { amount: '150000', expected: true, description: 'مبلغ بیشتر از سفارش (150K > 100K) - 50K به والت' },
+                { amount: '1000000', expected: true, description: 'مبلغ خیلی بیشتر (1M > 100K) - 900K به والت' }
             ];
             
             let results = '<h4>نتایج تست اعتبارسنجی:</h4>';

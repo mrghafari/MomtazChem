@@ -25292,11 +25292,37 @@ momtazchem.com
         });
       }
 
+      // اعتبارسنجی مبلغ فیش در مقایسه با مبلغ سفارش
+      const orderAmount = parseFloat(order.totalAmount);
+      let walletCredit = 0;
+      let amountStatus = '';
+
+      if (amount < orderAmount) {
+        return res.status(400).json({ 
+          success: false, 
+          message: `مبلغ فیش (${amount.toLocaleString()} دینار) کمتر از بدهی شما (${orderAmount.toLocaleString()} دینار) است. لطفاً حداقل ${orderAmount.toLocaleString()} دینار واریز کنید.` 
+        });
+      } else if (amount > orderAmount) {
+        // مبلغ اضافی به والت اضافه می‌شود
+        walletCredit = amount - orderAmount;
+        amountStatus = `مبلغ اضافی ${walletCredit.toLocaleString()} دینار به والت شما اضافه خواهد شد`;
+        
+        // اضافه کردن مبلغ اضافی به والت مشتری
+        try {
+          await customerStorage.addWalletBalance(order.customerId, walletCredit);
+          console.log(`✅ [WALLET] Added ${walletCredit} to customer ${order.customerId} wallet from excess receipt amount`);
+        } catch (error) {
+          console.error('Warning: Could not add excess amount to wallet:', error);
+        }
+      } else {
+        amountStatus = 'مبلغ فیش دقیقاً برابر با بدهی شما است';
+      }
+
       // ایجاد مسیر نسبی برای ذخیره در دیتابیس
       const filePath = `/uploads/receipts/${file.filename}`;
 
       // به‌روزرسانی سفارش با مسیر فیش بانکی و مبلغ فیش
-      const uploadNote = `فیش بانکی آپلود شد در ${new Date().toLocaleString('fa-IR')} | مبلغ فیش: ${amount.toLocaleString()} دینار${notes ? ` | توضیحات: ${notes}` : ''}`;
+      const uploadNote = `فیش بانکی آپلود شد در ${new Date().toLocaleString('fa-IR')} | مبلغ فیش: ${amount.toLocaleString()} دینار | مبلغ سفارش: ${orderAmount.toLocaleString()} دینار${walletCredit > 0 ? ` | مبلغ اضافی ${walletCredit.toLocaleString()} دینار به والت اضافه شد` : ''}${notes ? ` | توضیحات: ${notes}` : ''}`;
       const updatedNotes = order.notes ? `${order.notes} | ${uploadNote}` : uploadNote;
       
       await customerDb
@@ -25331,7 +25357,7 @@ momtazchem.com
           type: 'receipt_uploaded',
           orderId: order.id,
           amount: order.totalAmount,
-          description: `فیش بانکی آپلود شد - ${file.originalname} | مبلغ فیش: ${amount.toLocaleString()} دینار`,
+          description: `فیش بانکی آپلود شد - ${file.originalname} | مبلغ فیش: ${amount.toLocaleString()} دینار | مبلغ سفارش: ${orderAmount.toLocaleString()} دینار${walletCredit > 0 ? ` | مبلغ اضافی ${walletCredit.toLocaleString()} دینار به والت اضافه شد` : ''}`,
           referenceNumber: order.orderNumber,
           status: 'pending_review',
           processingDate: new Date(),
@@ -25340,7 +25366,10 @@ momtazchem.com
             fileName: file.originalname,
             fileSize: file.size,
             mimeType: file.mimetype,
-            receiptAmount: amount
+            receiptAmount: amount,
+            orderAmount: orderAmount,
+            walletCredit: walletCredit,
+            amountStatus: amountStatus
           }
         });
       } catch (error) {
@@ -25357,13 +25386,16 @@ momtazchem.com
 
       res.json({ 
         success: true, 
-        message: `فیش بانکی با موفقیت آپلود شد. مبلغ فیش: ${amount.toLocaleString()} دینار عراقی`,
+        message: `فیش بانکی با موفقیت آپلود شد. ${amountStatus}`,
         data: { 
           filePath,
           fileName: file.originalname,
           orderId: parseInt(orderId),
           orderStatus: 'confirmed',
-          receiptAmount: amount
+          receiptAmount: amount,
+          orderAmount: orderAmount,
+          walletCredit: walletCredit,
+          amountStatus: amountStatus
         }
       });
 
