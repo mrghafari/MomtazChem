@@ -635,50 +635,85 @@ const LogisticsManagement = () => {
                         تحویل شد
                       </Button>
                       {order.hasGpsLocation && (
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          className="border-red-500 text-red-700 hover:bg-red-100 px-2"
-                          onClick={() => {
-                            const lat = parseFloat(order.gpsLatitude?.toString() || '0').toFixed(6);
-                            const lng = parseFloat(order.gpsLongitude?.toString() || '0').toFixed(6);
-                            const gpsText = `GPS: ${lat}, ${lng}`;
-                            const mapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
-                            
-                            // Try to copy to clipboard
-                            if (navigator.clipboard) {
-                              navigator.clipboard.writeText(`${gpsText}\n${mapsUrl}`).then(() => {
-                                // Show success feedback
-                                console.log('GPS coordinates copied to clipboard');
-                              }).catch(() => {
-                                // Fallback: open share dialog or copy manually
-                                if (navigator.share) {
-                                  navigator.share({
-                                    title: 'GPS Location',
+                        <div className="flex gap-1 mr-2">
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            className="border-blue-500 text-blue-700 hover:bg-blue-100 px-3 py-1.5"
+                            onClick={async () => {
+                              const lat = parseFloat(order.gpsLatitude?.toString() || '0').toFixed(6);
+                              const lng = parseFloat(order.gpsLongitude?.toString() || '0').toFixed(6);
+                              const gpsText = `GPS موقعیت: ${lat}, ${lng}`;
+                              const mapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
+                              const fullText = `${gpsText}\nGoogle Maps: ${mapsUrl}`;
+                              
+                              try {
+                                await navigator.clipboard.writeText(fullText);
+                                alert('📋 مختصات GPS کپی شد!');
+                              } catch (err) {
+                                console.error('Copy failed:', err);
+                                alert('خطا در کپی کردن');
+                              }
+                            }}
+                            title="کپی مختصات GPS"
+                          >
+                            📋 کپی
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            className="border-green-500 text-green-700 hover:bg-green-100 px-3 py-1.5"
+                            onClick={async () => {
+                              const lat = parseFloat(order.gpsLatitude?.toString() || '0').toFixed(6);
+                              const lng = parseFloat(order.gpsLongitude?.toString() || '0').toFixed(6);
+                              const gpsText = `GPS موقعیت سفارش ${order.orderNumber}: ${lat}, ${lng}`;
+                              const mapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
+                              
+                              if (navigator.share) {
+                                try {
+                                  await navigator.share({
+                                    title: `موقعیت GPS سفارش ${order.orderNumber}`,
                                     text: gpsText,
                                     url: mapsUrl
                                   });
-                                } else {
-                                  // Open Google Maps as fallback
+                                } catch (err) {
+                                  // If share fails, copy to clipboard as fallback
+                                  try {
+                                    await navigator.clipboard.writeText(`${gpsText}\n${mapsUrl}`);
+                                    alert('📋 مختصات GPS کپی شد!');
+                                  } catch (copyErr) {
+                                    window.open(mapsUrl, '_blank');
+                                  }
+                                }
+                              } else {
+                                // Fallback: copy to clipboard
+                                try {
+                                  await navigator.clipboard.writeText(`${gpsText}\n${mapsUrl}`);
+                                  alert('📋 مختصات GPS کپی شد!');
+                                } catch (err) {
                                   window.open(mapsUrl, '_blank');
                                 }
-                              });
-                            } else {
-                              // Fallback for older browsers
-                              if (navigator.share) {
-                                navigator.share({
-                                  title: 'GPS Location',
-                                  text: gpsText,
-                                  url: mapsUrl
-                                });
-                              } else {
-                                window.open(mapsUrl, '_blank');
                               }
-                            }
-                          }}
-                        >
-                          📍
-                        </Button>
+                            }}
+                            title="اشتراک گذاری موقعیت GPS"
+                          >
+                            📤 اشتراک
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            className="border-red-500 text-red-700 hover:bg-red-100 px-3 py-1.5"
+                            onClick={() => {
+                              const lat = parseFloat(order.gpsLatitude?.toString() || '0');
+                              const lng = parseFloat(order.gpsLongitude?.toString() || '0');
+                              const mapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
+                              window.open(mapsUrl, '_blank');
+                            }}
+                            title="باز کردن در Google Maps"
+                          >
+                            🗺️ نقشه
+                          </Button>
+                        </div>
                       )}
                     </div>
                 </CardContent>
