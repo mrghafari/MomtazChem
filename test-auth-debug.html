@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 تست احراز هویت و ثبت نظر</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .test-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 15px 0;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        .test-button {
+            background: #3b82f6;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 8px;
+            font-weight: 500;
+        }
+        .test-button:hover { background: #2563eb; }
+        .success { color: #059669; background: #d1fae5; }
+        .error { color: #dc2626; background: #fee2e2; }
+        .result-box {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            min-height: 100px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            font-size: 13px;
+        }
+        .header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            text-align: center;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔧 آزمایش کامل ثبت نظرات</h1>
+        <p>تست احراز هویت و ثبت نظر با Customer 8</p>
+    </div>
+
+    <div class="test-card">
+        <h2>🔐 تست 1: احراز هویت مشتری</h2>
+        <button class="test-button" onclick="testCustomerAuth()">بررسی وضعیت لاگین</button>
+        <div id="authResult" class="result-box">منتظر تست...</div>
+    </div>
+
+    <div class="test-card">
+        <h2>⭐ تست 2: ثبت نظر فوری</h2>
+        <button class="test-button" onclick="submitReview()">ثبت نظر تست</button>
+        <div id="reviewResult" class="result-box">منتظر ثبت نظر...</div>
+    </div>
+
+    <script>
+        async function testCustomerAuth() {
+            const resultDiv = document.getElementById('authResult');
+            
+            try {
+                resultDiv.textContent = '🔄 بررسی احراز هویت...\n';
+                
+                const response = await fetch('/api/customers/me', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.className = 'result-box success';
+                    resultDiv.textContent = `✅ مشتری وارد شده!\n\nنام: ${result.customer.firstName} ${result.customer.lastName}\nایمیل: ${result.customer.email}\nشناسه: ${result.customer.id}\n\n✅ آماده ثبت نظر`;
+                } else {
+                    resultDiv.className = 'result-box error';
+                    resultDiv.textContent = `❌ مشتری وارد نشده!\n\nخطا: ${result.message}\nلطفاً ابتدا با Customer 8 لاگین کنید`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result-box error';
+                resultDiv.textContent = `❌ خطای شبکه: ${error.message}`;
+            }
+        }
+
+        async function submitReview() {
+            const resultDiv = document.getElementById('reviewResult');
+            
+            try {
+                resultDiv.className = 'result-box';
+                resultDiv.textContent = '🔄 ثبت نظر...\n';
+                
+                const reviewData = {
+                    rating: 5,
+                    title: 'تست نهایی سیستم نظرات',
+                    comment: 'این تست نهایی برای بررسی کارکرد سیستم ثبت نظرات است.',
+                    review: 'این تست نهایی برای بررسی کارکرد سیستم ثبت نظرات است.'
+                };
+                
+                const response = await fetch('/api/products/472/reviews', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(reviewData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.className = 'result-box success';
+                    resultDiv.textContent = `🎉 نظر ثبت شد!\n\nشناسه: ${result.data.id}\nتاریخ: ${new Date(result.data.createdAt).toLocaleString('fa-IR')}\nپیام: ${result.message}\n\n✅ سیستم نظرات کار می‌کند!`;
+                } else {
+                    resultDiv.className = 'result-box error';
+                    resultDiv.textContent = `❌ خطا در ثبت!\n\nخطا: ${result.message}\nکد: ${response.status}\n\nجزئیات:\n${JSON.stringify(result, null, 2)}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result-box error';
+                resultDiv.textContent = `❌ خطای شبکه: ${error.message}`;
+            }
+        }
+
+        // Auto-test on load
+        document.addEventListener('DOMContentLoaded', function() {
+            testCustomerAuth();
+        });
+    </script>
+</body>
+</html>

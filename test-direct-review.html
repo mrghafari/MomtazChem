@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 تست مستقیم ثبت نظر</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .btn {
+            background: #3b82f6;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn:hover { background: #2563eb; }
+        .result {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            font-size: 13px;
+            min-height: 80px;
+        }
+        .success { background: #d1fae5; border-color: #059669; color: #059669; }
+        .error { background: #fee2e2; border-color: #dc2626; color: #dc2626; }
+        h1 { text-align: center; color: white; margin-bottom: 30px; }
+        h2 { color: #333; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+    <h1>🚀 تست مستقیم ثبت نظر Customer 8</h1>
+
+    <div class="card">
+        <h2>✅ مرحله 1: تست احراز هویت کنونی</h2>
+        <button class="btn" onclick="checkAuth()">بررسی وضعیت ورود</button>
+        <div id="authStatus" class="result">آماده تست...</div>
+    </div>
+
+    <div class="card">
+        <h2>⭐ مرحله 2: ثبت نظر مستقیم</h2>
+        <p><strong>محصول:</strong> NPK Fertilizer Complex (ID: 472)</p>
+        <button class="btn" onclick="directReviewSubmit()">ثبت نظر فوری</button>
+        <div id="reviewStatus" class="result">آماده ثبت نظر...</div>
+    </div>
+
+    <script>
+        async function checkAuth() {
+            const div = document.getElementById('authStatus');
+            try {
+                div.textContent = 'بررسی احراز هویت...';
+                
+                const res = await fetch('/api/customers/me', {
+                    credentials: 'include'
+                });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    div.className = 'result success';
+                    div.textContent = `✅ وارد شده!\nنام: ${data.customer.firstName} ${data.customer.lastName}\nایمیل: ${data.customer.email}\nشناسه: ${data.customer.id}`;
+                } else {
+                    div.className = 'result error';
+                    div.textContent = `❌ وارد نشده: ${data.message}`;
+                }
+            } catch (e) {
+                div.className = 'result error';
+                div.textContent = `❌ خطا: ${e.message}`;
+            }
+        }
+
+        async function directReviewSubmit() {
+            const div = document.getElementById('reviewStatus');
+            try {
+                div.className = 'result';
+                div.textContent = 'در حال ثبت نظر...';
+                
+                const reviewData = {
+                    rating: 5,
+                    title: 'نظر تست - اصلاح احراز هویت',
+                    comment: 'این نظر تست برای بررسی عملکرد سیستم اصلاح شده است.',
+                    review: 'این نظر تست برای بررسی عملکرد سیستم اصلاح شده است.'
+                };
+                
+                console.log('🔄 Submitting review:', reviewData);
+                
+                const res = await fetch('/api/products/472/reviews', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    credentials: 'include',
+                    body: JSON.stringify(reviewData)
+                });
+                
+                const data = await res.json();
+                console.log('📨 Response:', data);
+                
+                if (res.ok) {
+                    div.className = 'result success';
+                    div.textContent = `🎉 موفق!\n\nشناسه نظر: ${data.data.id}\nتاریخ: ${new Date(data.data.createdAt).toLocaleString('fa-IR')}\nپیام: ${data.message}`;
+                } else {
+                    div.className = 'result error';
+                    div.textContent = `❌ خطا!\n\nکد: ${res.status}\nپیام: ${data.message}\n\nجزئیات کامل:\n${JSON.stringify(data, null, 2)}`;
+                }
+            } catch (e) {
+                div.className = 'result error';
+                div.textContent = `❌ خطای شبکه: ${e.message}`;
+            }
+        }
+
+        // Auto-check auth on page load
+        window.onload = () => checkAuth();
+    </script>
+</body>
+</html>
