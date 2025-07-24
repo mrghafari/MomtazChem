@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Customer Profile Order Priority</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, textarea { width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .result { margin-top: 20px; padding: 15px; background: #f8f9fa; border: 1px solid #ddd; border-radius: 4px; }
+        .error { background: #f8d7da; border-color: #f5c6cb; color: #721c24; }  
+        .success { background: #d4edda; border-color: #c3e6cb; color: #155724; }
+        .order { padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px; }
+        .grace-period { background: #fff3cd; border-color: #ffeaa7; }
+        .regular { background: #f8f9fa; border-color: #e9ecef; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Test Customer Profile Order Priority</h1>
+        <p>Testing that 3-day grace period bank transfer orders appear first in customer profile</p>
+        
+        <div class="form-group">
+            <h3>Step 1: Login as Customer</h3>
+            <button onclick="loginAsCustomer()">Login as احمد کریمی (ID: 98)</button>
+        </div>
+        
+        <div class="form-group">
+            <h3>Step 2: Get Customer Orders</h3>
+            <button onclick="getCustomerOrders()">Get Orders for Customer Profile</button>
+        </div>
+        
+        <div class="form-group">
+            <h3>Step 3: Verify Order Priority</h3>
+            <p>Expected behavior: Bank transfer grace period orders should appear first</p>
+        </div>
+        
+        <div id="result" class="result" style="display: none;"></div>
+    </div>
+
+    <script>
+        let authToken = null;
+
+        async function loginAsCustomer() {
+            try {
+                const response = await fetch('/api/customers/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: 'testcrm3@example.com',
+                        password: 'test123'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    authToken = data.token || 'session-based';
+                    showResult(`✅ Customer login successful!\nCustomer: ${data.customer.firstName} ${data.customer.lastName}`, 'success');
+                } else {
+                    showResult(`❌ Login failed: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                showResult(`❌ Login error: ${error.message}`, 'error');
+            }
+        }
+
+        async function getCustomerOrders() {
+            try {
+                const response = await fetch('/api/customers/orders', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    const orders = data.orders || [];
+                    
+                    let resultHtml = `✅ Customer orders retrieved successfully!\n`;
+                    resultHtml += `📊 Total orders: ${orders.length}\n\n`;
+                    
+                    if (orders.length > 0) {
+                        resultHtml += `📋 Order List (showing priority order):\n`;
+                        orders.forEach((order, index) => {
+                            const isGracePeriod = order.paymentMethod === 'bank_transfer_grace' || order.paymentMethod === 'واریز بانکی با مهلت 3 روزه';
+                            const priority = isGracePeriod ? '🟡 GRACE PERIOD' : '🔵 REGULAR';
+                            resultHtml += `\n${index + 1}. ${priority}\n`;
+                            resultHtml += `   Order: ${order.orderNumber}\n`;
+                            resultHtml += `   Payment Method: ${order.paymentMethod}\n`;
+                            resultHtml += `   Amount: ${order.totalAmount} IQD\n`;
+                            resultHtml += `   Status: ${order.status}\n`;
+                            resultHtml += `   Created: ${new Date(order.createdAt).toLocaleString()}\n`;
+                        });
+                        
+                        // Check if grace period orders are first
+                        const firstOrder = orders[0];
+                        const isFirstOrderGracePeriod = firstOrder.paymentMethod === 'bank_transfer_grace' || firstOrder.paymentMethod === 'واریز بانکی با مهلت 3 روزه';
+                        
+                        if (isFirstOrderGracePeriod) {
+                            resultHtml += `\n✅ PRIORITY TEST PASSED: Grace period order appears first!`;
+                        } else {
+                            resultHtml += `\n❌ PRIORITY TEST FAILED: Grace period order not first in list`;
+                        }
+                    } else {
+                        resultHtml += `⚠️ No orders found for this customer`;
+                    }
+                    
+                    showResult(resultHtml, 'success');
+                } else {
+                    showResult(`❌ Failed to get orders: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                showResult(`❌ Orders error: ${error.message}`, 'error');
+            }
+        }
+
+        function showResult(message, type) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            resultDiv.className = `result ${type}`;
+            resultDiv.innerHTML = `<pre>${message}</pre>`;
+        }
+    </script>
+</body>
+</html>

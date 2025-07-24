@@ -104,9 +104,9 @@ const CustomerProfile = () => {
   // Sort orders: 3-day bank transfer orders first, then regular orders
   const rawOrders = orderData?.orders || [];
   const orders = rawOrders.sort((a: any, b: any) => {
-    // Check if order is 3-day bank transfer
-    const aIs3DayBank = a.paymentMethod === 'واریز بانکی با مهلت 3 روزه';
-    const bIs3DayBank = b.paymentMethod === 'واریز بانکی با مهلت 3 روزه';
+    // Check if order is 3-day bank transfer (both Persian display name and English API name)
+    const aIs3DayBank = a.paymentMethod === 'واریز بانکی با مهلت 3 روزه' || a.paymentMethod === 'bank_transfer_grace';
+    const bIs3DayBank = b.paymentMethod === 'واریز بانکی با مهلت 3 روزه' || b.paymentMethod === 'bank_transfer_grace';
     
     // 3-day bank transfers come first
     if (aIs3DayBank && !bIs3DayBank) return -1;
@@ -505,7 +505,7 @@ const CustomerProfile = () => {
                             </p>
                             
                             {/* نمایش پیام منتظر ارسال حواله و کنتور زمانی برای سفارشات بانکی 3 روزه بدون رسید */}
-                            {order.paymentMethod === 'واریز بانکی با مهلت 3 روزه' && 
+                            {(order.paymentMethod === 'واریز بانکی با مهلت 3 روزه' || order.paymentMethod === 'bank_transfer_grace') && 
                              (order.status === 'pending' || order.status === 'payment_grace_period') &&
                              !order.receiptPath && (
                               <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 mt-2 text-right">
@@ -635,7 +635,7 @@ const CustomerProfile = () => {
                         <div className="mt-4 pt-3 border-t border-gray-200 flex gap-2 flex-wrap">
                           {/* دکمه‌های مدیریت سفارش فقط برای سفارشات بانکی 3 روزه */}
                           {(order.status === 'pending' || order.status === 'payment_grace_period') && 
-                           order.paymentMethod === 'واریز بانکی با مهلت 3 روزه' && 
+                           (order.paymentMethod === 'واریز بانکی با مهلت 3 روزه' || order.paymentMethod === 'bank_transfer_grace') && 
                            !order.receiptPath && (
                             <>
                               {/* دکمه آپلود رسید بانکی */}
@@ -664,7 +664,7 @@ const CustomerProfile = () => {
                           )}
                           
                           {/* نمایش وضعیت تأیید شده برای سفارشات با رسید آپلود شده */}
-                          {order.paymentMethod === 'واریز بانکی با مهلت 3 روزه' && 
+                          {(order.paymentMethod === 'واریز بانکی با مهلت 3 روزه' || order.paymentMethod === 'bank_transfer_grace') && 
                            order.receiptPath && 
                            order.status === 'confirmed' && (
                             <div className="bg-green-50 border border-green-200 rounded-lg p-3">
