@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Customer Login & Review System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            direction: rtl;
+        }
+        .section {
+            background: #f5f5f5;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .response {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            white-space: pre-wrap;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <h1>Customer Login & Review System Test</h1>
+
+    <!-- Step 1: Customer Login -->
+    <div class="section">
+        <h2>1️⃣ Customer Login</h2>
+        <input type="email" id="loginEmail" placeholder="ایمیل مشتری" value="oilstar@hotmail.com">
+        <input type="password" id="loginPassword" placeholder="کلمه عبور" value="oilstar123">
+        <button onclick="loginCustomer()">ورود مشتری</button>
+        <div id="loginResponse" class="response"></div>
+    </div>
+
+    <!-- Step 2: Check Authentication -->
+    <div class="section">
+        <h2>2️⃣ Check Customer Authentication</h2>
+        <button onclick="checkAuth()">بررسی احراز هویت</button>
+        <div id="authResponse" class="response"></div>
+    </div>
+
+    <!-- Step 3: Submit Review -->
+    <div class="section">
+        <h2>3️⃣ Submit Product Review</h2>
+        <input type="number" id="productId" placeholder="شناسه محصول" value="475" min="1" max="5">
+        <input type="number" id="rating" placeholder="امتیاز (1-5)" value="5" min="1" max="5">
+        <input type="text" id="reviewTitle" placeholder="عنوان نظر" value="محصول عالی">
+        <textarea id="reviewComment" placeholder="متن نظر" rows="3">محصول با کیفیت بالا و قیمت مناسب. کاملاً راضی هستم.</textarea>
+        <button onclick="submitReview()">ثبت نظر</button>
+        <div id="reviewResponse" class="response"></div>
+    </div>
+
+    <!-- Step 4: Get Product Reviews -->
+    <div class="section">
+        <h2>4️⃣ Check Product Reviews</h2>
+        <input type="number" id="checkProductId" placeholder="شناسه محصول" value="475">
+        <button onclick="checkReviews()">مشاهده نظرات</button>
+        <div id="reviewsResponse" class="response"></div>
+    </div>
+
+    <script>
+        // Step 1: Customer Login
+        async function loginCustomer() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            try {
+                const response = await fetch('/api/customers/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                const responseEl = document.getElementById('loginResponse');
+                
+                if (response.ok) {
+                    responseEl.textContent = `✅ ورود موفق: ${JSON.stringify(data, null, 2)}`;
+                    responseEl.className = 'response success';
+                } else {
+                    responseEl.textContent = `❌ خطا در ورود: ${JSON.stringify(data, null, 2)}`;
+                    responseEl.className = 'response error';
+                }
+            } catch (error) {
+                document.getElementById('loginResponse').textContent = `❌ خطای شبکه: ${error.message}`;
+                document.getElementById('loginResponse').className = 'response error';
+            }
+        }
+
+        // Step 2: Check Authentication
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/customers/me', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                const responseEl = document.getElementById('authResponse');
+                
+                if (response.ok) {
+                    responseEl.textContent = `✅ احراز هویت موفق: ${JSON.stringify(data, null, 2)}`;
+                    responseEl.className = 'response success';
+                } else {
+                    responseEl.textContent = `❌ احراز هویت ناموفق: ${JSON.stringify(data, null, 2)}`;
+                    responseEl.className = 'response error';
+                }
+            } catch (error) {
+                document.getElementById('authResponse').textContent = `❌ خطای شبکه: ${error.message}`;
+                document.getElementById('authResponse').className = 'response error';
+            }
+        }
+
+        // Step 3: Submit Review
+        async function submitReview() {
+            const productId = document.getElementById('productId').value;
+            const rating = parseInt(document.getElementById('rating').value);
+            const title = document.getElementById('reviewTitle').value;
+            const comment = document.getElementById('reviewComment').value;
+            
+            try {
+                const response = await fetch(`/api/products/${productId}/reviews`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ rating, title, comment })
+                });
+                
+                const data = await response.json();
+                const responseEl = document.getElementById('reviewResponse');
+                
+                if (response.ok) {
+                    responseEl.textContent = `✅ نظر با موفقیت ثبت شد: ${JSON.stringify(data, null, 2)}`;
+                    responseEl.className = 'response success';
+                } else {
+                    responseEl.textContent = `❌ خطا در ثبت نظر: ${JSON.stringify(data, null, 2)}`;
+                    responseEl.className = 'response error';
+                }
+            } catch (error) {
+                document.getElementById('reviewResponse').textContent = `❌ خطای شبکه: ${error.message}`;
+                document.getElementById('reviewResponse').className = 'response error';
+            }
+        }
+
+        // Step 4: Check Reviews
+        async function checkReviews() {
+            const productId = document.getElementById('checkProductId').value;
+            
+            try {
+                const response = await fetch(`/api/products/${productId}/reviews`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                const responseEl = document.getElementById('reviewsResponse');
+                
+                if (response.ok) {
+                    responseEl.textContent = `✅ نظرات محصول: ${JSON.stringify(data, null, 2)}`;
+                    responseEl.className = 'response success';
+                } else {
+                    responseEl.textContent = `❌ خطا در دریافت نظرات: ${JSON.stringify(data, null, 2)}`;
+                    responseEl.className = 'response error';
+                }
+            } catch (error) {
+                document.getElementById('reviewsResponse').textContent = `❌ خطای شبکه: ${error.message}`;
+                document.getElementById('reviewsResponse').className = 'response error';
+            }
+        }
+    </script>
+</body>
+</html>

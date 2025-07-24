@@ -31103,8 +31103,17 @@ momtazchem.com
         return res.status(400).json({ success: false, message: "Invalid product ID" });
       }
 
-      // Check if user is authenticated
-      const customerId = req.session.customerId;
+      // Check if user is authenticated - DEBUG SESSION
+      console.log('🔍 [REVIEW AUTH DEBUG] Session data (POST /api/products/:id/reviews):', {
+        sessionId: req.sessionID,
+        customerId: (req.session as any)?.customerId,
+        isAuthenticated: (req.session as any)?.isAuthenticated,
+        adminId: (req.session as any)?.adminId,
+        crmCustomerId: (req.session as any)?.crmCustomerId,
+        customerEmail: (req.session as any)?.customerEmail
+      });
+      
+      const customerId = (req.session as any)?.customerId;
       if (!customerId) {
         return res.status(401).json({ 
           success: false, 
