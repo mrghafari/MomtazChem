@@ -29,14 +29,18 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Business Impact**: Logistics staff can access vehicle optimization algorithms without navigation complexity
 - **Result**: Vehicle Optimization system now accessible via prominent button below logistics tabs as user-requested workaround solution
 
-### COMPLETED: Analytics Tab Removed from Logistics Page (July 24, 2025)
-✅ **REMOVED: Reports/Analytics tab completely removed from logistics department interface**
+### COMPLETED: Analytics Tab Removed from Logistics Pages (July 24, 2025)
+✅ **REMOVED: Analytics tabs completely removed from both logistics interfaces**
 - **User Request**: "تب آنالتیک را حذف کن" (Remove the analytics tab)
-- **Tab Removal**: Eliminated "گزارشات" (Reports) tab from TabsList including its trigger and content
-- **Clean Interface**: Logistics page now contains only essential tabs: Orders, Vehicle Optimization, Delivery Methods, and Shipping Rates
-- **Code Cleanup**: Removed TabsContent for reports section and associated BarChart3 icon trigger
-- **Impact**: Simplified logistics interface focusing on core operational functions without analytics reporting
-- **Result**: Analytics/Reports tab completely removed from logistics department page
+- **Multiple Page Updates**: 
+  - **logistics-department.tsx**: Eliminated "گزارشات" (Reports) tab from TabsList including its trigger and content
+  - **logistics-management.tsx**: Removed "آنالیتیک" (Analytics) tab from admin interface, adjusted grid from 6 to 5 columns
+- **Clean Interface**: Both logistics pages now contain only essential operational tabs:
+  - **Department Page**: Orders, Vehicle Optimization, Delivery Methods, and Shipping Rates
+  - **Management Page**: Orders, Transportation Companies, Iraqi Cities, Shipping Rates, and Vehicles
+- **Code Cleanup**: Removed TabsContent for analytics sections and associated icon triggers
+- **Impact**: Simplified logistics interfaces focusing on core operational functions without analytics reporting
+- **Result**: Analytics tabs completely removed from all logistics department pages
 
 ### COMPLETED: Star Rating Loading State Fix - Resolved Timing Issue (July 24, 2025)
 ✅ **RESOLVED: Critical timing issue preventing proper initial display of star ratings across all product pages**

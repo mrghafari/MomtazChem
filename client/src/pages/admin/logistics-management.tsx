@@ -1251,13 +1251,12 @@ const LogisticsManagement = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="orders">سفارشات</TabsTrigger>
           <TabsTrigger value="companies">شرکت‌های حمل</TabsTrigger>
           <TabsTrigger value="cities">شهرهای عراق</TabsTrigger>
           <TabsTrigger value="shipping">نرخ‌های حمل</TabsTrigger>
           <TabsTrigger value="vehicles">وسایل نقلیه</TabsTrigger>
-          <TabsTrigger value="analytics">آنالیتیک</TabsTrigger>
         </TabsList>
 
         <TabsContent value="orders">
@@ -1281,15 +1280,6 @@ const LogisticsManagement = () => {
             <CardContent className="p-6 text-center">
               <Truck className="w-12 h-12 mx-auto mb-4 text-gray-400" />
               <p className="text-gray-500">مدیریت وسایل نقلیه در دست توسعه است</p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="analytics">
-          <Card>
-            <CardContent className="p-6 text-center">
-              <FileText className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-              <p className="text-gray-500">آنالیتیک لجستیک در دست توسعه است</p>
             </CardContent>
           </Card>
         </TabsContent>
