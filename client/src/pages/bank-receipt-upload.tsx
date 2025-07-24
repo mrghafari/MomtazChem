@@ -23,12 +23,17 @@ export default function BankReceiptUpload() {
 
   // Get orderId from URL parameters or query string
   useEffect(() => {
+    console.log('🔍 [URL DEBUG] paramOrderId:', paramOrderId);
+    console.log('🔍 [URL DEBUG] window.location:', window.location.href);
     if (paramOrderId) {
+      console.log('🔍 [URL DEBUG] Setting orderId from param:', paramOrderId);
       setOrderId(paramOrderId);
     } else {
       const urlParams = new URLSearchParams(window.location.search);
       const queryOrderId = urlParams.get('orderId');
+      console.log('🔍 [URL DEBUG] Query orderId:', queryOrderId);
       if (queryOrderId) {
+        console.log('🔍 [URL DEBUG] Setting orderId from query:', queryOrderId);
         setOrderId(queryOrderId);
       }
     }
@@ -38,9 +43,14 @@ export default function BankReceiptUpload() {
   const { data: order, isLoading: isLoadingOrder } = useQuery({
     queryKey: [`/api/customers/orders`, orderId],
     queryFn: async () => {
-      const response = await apiRequest('/api/customers/orders');
+      console.log('🔍 [ORDER DEBUG] Fetching orders for orderId:', orderId);
+      const response = await apiRequest({ url: '/api/customers/orders' });
+      console.log('🔍 [ORDER DEBUG] Orders response:', response);
       const orders = response.orders || [];
-      return orders.find((o: any) => o.orderNumber === orderId || o.id.toString() === orderId);
+      console.log('🔍 [ORDER DEBUG] Available orders:', orders.map((o: any) => ({ id: o.id, orderNumber: o.orderNumber, totalAmount: o.totalAmount })));
+      const foundOrder = orders.find((o: any) => o.orderNumber === orderId || o.id.toString() === orderId);
+      console.log('🔍 [ORDER DEBUG] Found order:', foundOrder);
+      return foundOrder;
     },
     enabled: !!orderId,
   });
@@ -49,7 +59,7 @@ export default function BankReceiptUpload() {
   const { data: companyInfo, isLoading: isLoadingCompanyInfo } = useQuery({
     queryKey: ['/api/company/banking-info'],
     queryFn: async () => {
-      const response = await apiRequest('/api/company/banking-info');
+      const response = await apiRequest({ url: '/api/company/banking-info' });
       return response.data;
     },
   });
@@ -58,7 +68,7 @@ export default function BankReceiptUpload() {
   const { data: customer } = useQuery({
     queryKey: ['/api/customers/me'],
     queryFn: async () => {
-      const response = await apiRequest('/api/customers/me');
+      const response = await apiRequest({ url: '/api/customers/me' });
       return response.customer;
     },
   });
@@ -387,7 +397,7 @@ export default function BankReceiptUpload() {
               </div>
               
               {/* Order Debt Amount Display */}
-              {order && (
+              {order ? (
                 <div className="flex-1">
                   <Label className="text-sm text-gray-600">مبلغ بدهی سفارش</Label>
                   <div className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800 mt-1">
@@ -396,6 +406,18 @@ export default function BankReceiptUpload() {
                     </p>
                     <p className="text-xs text-orange-600 dark:text-orange-300 text-center">
                       دینار عراقی
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex-1">
+                  <Label className="text-sm text-gray-600">مبلغ بدهی سفارش</Label>
+                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 mt-1">
+                    <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
+                      {isLoadingOrder ? 'در حال بارگذاری...' : orderId ? 'سفارش یافت نشد' : 'شناسه سفارش مشخص نیست'}
+                    </p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 text-center">
+                      {orderId && `شناسه: ${orderId}`}
                     </p>
                   </div>
                 </div>
