@@ -1187,7 +1187,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                   <SelectItem value="wallet_payment">پرداخت با کیف پول (Wallet Payment)</SelectItem>
                                 )}
                                 {isUserLoggedIn && walletBalance > 0 && (
-                                  <SelectItem value="wallet_combined">پرداخت ترکیبی (کیف پول + روش دیگر)</SelectItem>
+                                  <SelectItem value="wallet_combined">پرداخت بخشی از والت</SelectItem>
                                 )}
                               </SelectContent>
                             </Select>
@@ -1274,24 +1274,41 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
 
                     {/* Secondary Payment Method for Combined Payments */}
                     {form.watch('paymentMethod') === 'wallet_combined' && (
-                      <div className="p-4 bg-blue-50 rounded-lg">
-                        <h4 className="font-medium text-blue-800 mb-3">انتخاب روش پرداخت ثانویه برای مبلغ باقی‌مانده</h4>
-                        <Select value={secondaryPaymentMethod} onValueChange={setSecondaryPaymentMethod}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="روش پرداخت ثانویه را انتخاب کنید" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="bank_receipt">ارسال فیش واریزی بانکی</SelectItem>
-                            <SelectItem value="online_payment">پرداخت آنلاین</SelectItem>
-                            <SelectItem value="cash_on_delivery">پرداخت نقدی هنگام تحویل</SelectItem>
-                            <SelectItem value="company_credit">حساب اعتباری شرکت</SelectItem>
-                          </SelectContent>
-                        </Select>
+                      <div className="space-y-4">
+                        {/* Remaining Amount Card */}
                         {totalAmount > 0 && (
-                          <p className="mt-2 text-sm text-blue-600">
-                            مبلغ قابل پرداخت با روش ثانویه: {totalAmount.toLocaleString()} IQD
-                          </p>
+                          <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <h4 className="font-medium text-orange-800">مبلغ باقی‌مانده برای پرداخت</h4>
+                                <p className="text-sm text-orange-600">
+                                  بعد از کسر مبلغ والت ({actualWalletUsage.toLocaleString()} IQD)
+                                </p>
+                              </div>
+                              <div className="text-right">
+                                <span className="text-2xl font-bold text-orange-900">
+                                  {totalAmount.toLocaleString()} IQD
+                                </span>
+                              </div>
+                            </div>
+                          </div>
                         )}
+                        
+                        {/* Payment Method Selection */}
+                        <div className="p-4 bg-blue-50 rounded-lg">
+                          <h4 className="font-medium text-blue-800 mb-3">انتخاب روش پرداخت برای مبلغ باقی‌مانده</h4>
+                          <Select value={secondaryPaymentMethod} onValueChange={setSecondaryPaymentMethod}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="روش پرداخت را انتخاب کنید" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="bank_receipt">پرداخت بانکی - ارسال فیش واریزی</SelectItem>
+                              <SelectItem value="online_payment">پرداخت آنلاین</SelectItem>
+                              <SelectItem value="cash_on_delivery">پرداخت نقدی هنگام تحویل</SelectItem>
+                              <SelectItem value="company_credit">حساب اعتباری شرکت</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
                     )}
 
