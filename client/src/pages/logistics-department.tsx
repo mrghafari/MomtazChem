@@ -614,6 +614,20 @@ export default function LogisticsDepartment() {
           </TabsContent>
         </Tabs>
 
+        {/* Vehicle Optimization Button */}
+        <div className="mt-6 text-center">
+          <Button 
+            onClick={() => window.location.href = '/admin/vehicle-optimization'} 
+            className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-3 mx-auto"
+          >
+            <Car className="w-5 h-5" />
+            سیستم انتخاب وسیله نقلیه بهینه
+          </Button>
+          <p className="text-sm text-gray-600 mt-2">
+            الگوریتم هوشمند انتخاب وسیله نقلیه بر اساس وزن، مسافت و هزینه
+          </p>
+        </div>
+
         {/* Delivery Info Dialog */}
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
