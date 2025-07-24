@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Beautiful Template #08 - Momtaz Chemical</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            padding: 30px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+        }
+        .test-form {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .loading {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>تست قالب زیبای Template #08</h1>
+            <p>Momtaz Chemical - Beautiful Email Template Test</p>
+        </div>
+
+        <div class="test-form">
+            <h3>📧 ارسال ایمیل تست با قالب جدید</h3>
+            <form id="contactForm">
+                <div class="form-group">
+                    <label>نام:</label>
+                    <input type="text" id="firstName" value="علی" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>نام خانوادگی:</label>
+                    <input type="text" id="lastName" value="محمدی" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>ایمیل:</label>
+                    <input type="email" id="email" value="test@example.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>شرکت:</label>
+                    <input type="text" id="company" value="شرکت تست">
+                </div>
+                
+                <div class="form-group">
+                    <label>علاقه‌مندی محصول:</label>
+                    <select id="productInterest" required>
+                        <option value="Water Treatment Chemical A1">Water Treatment Chemical A1</option>
+                        <option value="مواد شیمیایی صنعتی">مواد شیمیایی صنعتی</option>
+                        <option value="سوخت و مواد افزودنی">سوخت و مواد افزودنی</option>
+                        <option value="کودهای کشاورزی">کودهای کشاورزی</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>پیام:</label>
+                    <textarea id="message" rows="4" required>تست قالب جدید Template #08 با فرمت زیبا مشابه Template #05. این پیام برای بررسی ظاهر حرفه‌ای ایمیل تأیید ارسال می‌شود.</textarea>
+                </div>
+                
+                <button type="submit">📤 ارسال درخواست تماس</button>
+            </form>
+        </div>
+
+        <div id="result" class="result"></div>
+
+        <div style="margin-top: 30px; padding: 20px; background: #e8f5e8; border-radius: 8px; border-left: 4px solid #27ae60;">
+            <h4>✨ ویژگی‌های قالب جدید:</h4>
+            <ul>
+                <li>🎨 فرمت زیبا مشابه Template #05</li>
+                <li>📋 بخش "Your Original Inquiry" با جزئیات کامل</li>
+                <li>💬 بخش "Our Response" با پاسخ حرفه‌ای</li>
+                <li>📞 بخش "Need Further Assistance" با اطلاعات تماس</li>
+                <li>🏢 هدر Momtaz Chemical با طراحی زیبا</li>
+                <li>📧 شماره استعلام خودکار (INQ-timestamp-id)</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('contactForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.className = 'result loading';
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '⏳ در حال ارسال درخواست...';
+            
+            const formData = {
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                email: document.getElementById('email').value,
+                phone: '09123456789',
+                company: document.getElementById('company').value,
+                productInterest: document.getElementById('productInterest').value,
+                message: document.getElementById('message').value,
+                category: 'general'
+            };
+            
+            try {
+                const response = await fetch('/api/contact', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        <h4>✅ موفقیت!</h4>
+                        <p>درخواست شما با موفقیت ارسال شد.</p>
+                        <p>🎯 ایمیل تأیید با قالب زیبای جدید به آدرس <strong>${formData.email}</strong> ارسال شد.</p>
+                        <p>📧 این ایمیل شامل شماره استعلام، جزئیات درخواست و اطلاعات تماس است.</p>
+                        <p>⏰ پاسخ ما طی 24 ساعت دریافت خواهید کرد.</p>
+                    `;
+                } else {
+                    throw new Error(result.message || 'خطا در ارسال درخواست');
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <h4>❌ خطا!</h4>
+                    <p>مشکلی در ارسال درخواست رخ داده است:</p>
+                    <p><code>${error.message}</code></p>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>
