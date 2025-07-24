@@ -1159,8 +1159,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                   </div>
                 )}
                 
-                {/* سوم: پرداخت بخشی از والت */}
-                {walletBalance > 0 && walletBalance < totalAmount && (
+                {/* سوم: پرداخت بخشی از والت - نمایش همیشه */}
+                {canUseWallet && (
                   <div className="flex items-center space-x-2 space-x-reverse">
                     <RadioGroupItem value="wallet_partial" id="wallet_partial" />
                     <Label htmlFor="wallet_partial" className="flex items-center gap-2 cursor-pointer">

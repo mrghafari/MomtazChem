@@ -67,10 +67,14 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Impact**: Customer profiles now intelligently prioritize orders requiring urgent attention while maintaining chronological order within categories
 - **Result**: Complete order prioritization system operational - 3-day bank transfer orders consistently appear first in customer profiles
 
-### COMPLETED: Partial Wallet Payment Enhancement in Bilingual Purchase Form (July 24, 2025)
-✅ **IMPLEMENTED: "پرداخت بخشی از والت" functionality enhancement in bilingual-purchase-form.tsx**
+### COMPLETED: Partial Wallet Payment Enhancement and Option Reordering in Bilingual Purchase Form (July 24, 2025)
+✅ **IMPLEMENTED: "پرداخت بخشی از والت" functionality enhancement and payment option reordering in bilingual-purchase-form.tsx**
 - **User Request**: "این قسمت را اصلاح کن و بنویس پرداخت بخشی از والت و هر مقداری که از والت انتخاب کرد از کل وجه کم کند و در کادری در نزدیکی پرداخت بانکی بگذارد برای پرداخت از طریق بانک"
 - **Text Enhancement**: Changed "پرداخت ترکیبی (والت + آنلاین)" to "پرداخت بخشی از والت" for clearer user understanding
+- **Payment Option Reordering**: Successfully moved "پرداخت بخشی از والت" above "ارسال فیش واریزی بانکی" as requested:
+  - **Previous Order**: Online → Full Wallet → **Bank Receipt** → Partial Wallet (at end)
+  - **New Order**: Online → Full Wallet → **Partial Wallet** → Bank Receipt
+  - **Always Visible**: Changed condition from `walletBalance < totalAmount` to `canUseWallet` for consistent display
 - **Amount Selection Interface**: Enhanced wallet amount input field with proper validation and limits
 - **Remaining Amount Card**: Added dedicated orange-themed card showing remaining amount for bank payment:
   - **Visual Design**: Orange background with border for remaining amount display
@@ -82,12 +86,12 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
   - **Visual Feedback**: Remaining amount card only appears when wallet amount > 0
   - **Clear Hierarchy**: Wallet amount input followed by remaining amount card
   - **RTL Design**: Proper right-to-left text alignment for Persian interface
+- **TypeScript Error Resolution**: Fixed all compilation errors including payment method types, wallet API types, and language configuration
 - **Payment Flow Integration**: Partial wallet payment seamlessly integrated with existing order processing logic
 - **bilingual-purchase-form.tsx Updates**: All changes applied to correct file per user specification
-- **Payment Option Ordering**: Moved "پرداخت بخشی از والت" above "ارسال فیش واریزی بانکی" per user request
-- **User Interface Priority**: Payment options now ordered: Online Payment → Full Wallet → Partial Wallet → Bank Receipt
-- **Impact**: Users can now easily see how much they're paying from wallet and exact remaining amount for bank transfer
-- **Result**: Complete partial wallet payment functionality operational with enhanced visual feedback and clear remaining amount display
+- **User Interface Priority**: Payment options now properly ordered: Online Payment → Full Wallet → **Partial Wallet** → Bank Receipt
+- **Impact**: Users can now easily see partial wallet payment option positioned above bank receipt option as requested
+- **Result**: Complete partial wallet payment functionality operational with correct option ordering and enhanced visual feedback
 
 ### COMPLETED: Dynamic Banking Information Integration Across Payment Forms (July 24, 2025)
 ✅ **IMPLEMENTED: Complete integration of dynamic banking information from Company Information module into all payment forms**
