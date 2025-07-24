@@ -92,6 +92,12 @@ interface LogisticsOrder {
   recipientAddress?: string;
   deliveryNotes?: string;
   
+  // GPS Location data for logistics coordination
+  gpsLatitude?: number | string | null;
+  gpsLongitude?: number | string | null;
+  locationAccuracy?: number | string | null;
+  hasGpsLocation?: boolean;
+  
   // Customer information
   customerFirstName?: string;
   customerLastName?: string;
@@ -167,7 +173,9 @@ const LogisticsManagement = () => {
       phone: order.customerPhone
     },
     // Ensure customerAddress is available for display
-    customerAddress: order.customerAddress || 'آدرس ثبت نشده'
+    customerAddress: order.customerAddress || 'آدرس ثبت نشده',
+    // Add GPS location availability flag
+    hasGpsLocation: !!(order.gpsLatitude && order.gpsLongitude)
   }));
 
   const { data: companiesResponse, isLoading: loadingCompanies } = useQuery({
@@ -551,6 +559,59 @@ const LogisticsManagement = () => {
                         <MapPin className="w-3 h-3 mr-1" />
                         آدرس دریافت کالا
                       </p>
+                    </div>
+
+                    {/* GPS Location Block for Distribution Partners */}
+                    <div className={`rounded-lg p-3 border ${
+                      order.hasGpsLocation
+                        ? 'bg-red-50 border-red-200' 
+                        : 'bg-gray-50 border-gray-200'
+                    }`}>
+                      <h5 className={`font-medium mb-2 flex items-center ${
+                        order.hasGpsLocation
+                          ? 'text-red-800' 
+                          : 'text-gray-600'
+                      }`}>
+                        <MapPin className="w-4 h-4 mr-2" />
+                        موقعیت GPS
+                      </h5>
+                      {order.hasGpsLocation ? (
+                        <>
+                          <div className="space-y-1 mb-2">
+                            <p className="text-xs text-red-600">عرض جغرافیایی:</p>
+                            <p className="text-sm font-mono text-red-800 bg-red-100 px-2 py-1 rounded">
+                              {Number(order.gpsLatitude).toFixed(6)}
+                            </p>
+                            <p className="text-xs text-red-600">طول جغرافیایی:</p>
+                            <p className="text-sm font-mono text-red-800 bg-red-100 px-2 py-1 rounded">
+                              {Number(order.gpsLongitude).toFixed(6)}
+                            </p>
+                            {order.locationAccuracy && (
+                              <>
+                                <p className="text-xs text-red-600">دقت موقعیت:</p>
+                                <p className="text-xs text-red-700">±{order.locationAccuracy} متر</p>
+                              </>
+                            )}
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="w-full text-xs border-red-300 text-red-700 hover:bg-red-100"
+                            onClick={() => {
+                              const url = `https://www.google.com/maps?q=${order.gpsLatitude},${order.gpsLongitude}`;
+                              window.open(url, '_blank');
+                            }}
+                          >
+                            <MapPin className="w-3 h-3 mr-1" />
+                            نمایش در نقشه
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-sm text-gray-500 mb-2">موقعیت GPS ثبت نشده</p>
+                          <p className="text-xs text-gray-400">مختصات جغرافیایی مشتری در دسترس نیست</p>
+                        </>
+                      )}
                     </div>
 
                     {/* Order Date Block */}

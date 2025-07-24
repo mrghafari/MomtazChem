@@ -7319,7 +7319,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         orderTotal: parseFloat(order.totalAmount || '0'),
         // Extract warehouse details
         warehouseProcessedAt: order.warehouseApprovedAt || order.createdAt,
-        orderDate: order.createdAt
+        orderDate: order.createdAt,
+        // GPS location data for logistics coordination
+        gpsLatitude: order.gpsLatitude,
+        gpsLongitude: order.gpsLongitude,
+        locationAccuracy: order.locationAccuracy,
+        hasGpsLocation: !!(order.gpsLatitude && order.gpsLongitude)
       }));
       
       res.json({ 
@@ -11304,6 +11309,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Active delivery information tracking
         activeDeliveryInfo: orderData.activeDeliveryInfo ? JSON.stringify(orderData.activeDeliveryInfo) : null,
+        
+        // GPS location data for logistics coordination
+        gpsLatitude: orderData.gpsLatitude || null,
+        gpsLongitude: orderData.gpsLongitude || null,
+        locationAccuracy: orderData.locationAccuracy || null,
         
         // Warehouse notes from frontend logic
         internalNotes: orderData.warehouseNotes || "",

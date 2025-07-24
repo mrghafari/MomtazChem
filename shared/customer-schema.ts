@@ -160,6 +160,11 @@ export const customerOrders = pgTable("customer_orders", {
   // Active delivery information tracking
   activeDeliveryInfo: json("active_delivery_info"), // Track which fields are active for delivery
   
+  // GPS Location fields for delivery assistance
+  gpsLatitude: decimal("gps_latitude", { precision: 10, scale: 8 }), // GPS موقعیت عرض جغرافیایی
+  gpsLongitude: decimal("gps_longitude", { precision: 11, scale: 8 }), // GPS موقعیت طول جغرافیایی
+  locationAccuracy: decimal("location_accuracy", { precision: 6, scale: 2 }), // دقت موقعیت به متر
+  
   // Delivery method selected by customer during checkout
   deliveryMethod: text("delivery_method").default("courier"), // post, courier, truck, personal_pickup
   deliveryNotes: text("delivery_notes"), // Special delivery instructions from customer

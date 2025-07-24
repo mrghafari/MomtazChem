@@ -523,6 +523,11 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       recipientAddress: customerOrders.recipientAddress,
       deliveryNotes: customerOrders.deliveryNotes,
       
+      // GPS Location data for logistics coordination
+      gpsLatitude: customerOrders.gpsLatitude,
+      gpsLongitude: customerOrders.gpsLongitude,
+      locationAccuracy: customerOrders.locationAccuracy,
+      
       // Payment Receipt info - FIXED: Use customer_orders.receipt_path as primary source
       receiptUrl: customerOrders.receiptPath, // Primary source for receipts
       receiptFileName: paymentReceipts.originalFileName,
