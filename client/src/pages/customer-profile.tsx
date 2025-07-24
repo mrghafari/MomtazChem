@@ -85,6 +85,12 @@ const CustomerProfile = () => {
   // Main profile filter state
   const [mainProfileFilter, setMainProfileFilter] = useState<string>("all");
   
+  // CSV export states
+  const [showCsvExport, setShowCsvExport] = useState(false);
+  const [csvStartDate, setCsvStartDate] = useState("");
+  const [csvEndDate, setCsvEndDate] = useState("");
+  const [isExportingCsv, setIsExportingCsv] = useState(false);
+  
   // Get customer information
   const { data: customerData, isLoading: customerLoading, error: customerError } = useQuery<any>({
     queryKey: ["/api/customers/me"],
@@ -267,6 +273,65 @@ const CustomerProfile = () => {
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+
+  // CSV Export Function
+  const handleCsvExport = async () => {
+    // No date validation required - user can export all orders if no dates selected
+
+    setIsExportingCsv(true);
+    try {
+      const params = new URLSearchParams();
+      if (csvStartDate) params.append('startDate', csvStartDate);
+      if (csvEndDate) params.append('endDate', csvEndDate);
+
+      const response = await fetch(`/api/customers/export-orders-csv?${params}`, {
+        method: 'GET',
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'خطا در دریافت فایل CSV');
+      }
+
+      // Create download link
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      
+      const dateRange = csvStartDate && csvEndDate 
+        ? `${csvStartDate}_to_${csvEndDate}`
+        : csvStartDate 
+        ? `from_${csvStartDate}`
+        : `until_${csvEndDate}`;
+      
+      link.download = `completed-orders-${dateRange}-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: "خروجی CSV آماده شد",
+        description: "فایل CSV سفارشات تکمیل شده با موفقیت دانلود شد",
+      });
+
+      setShowCsvExport(false);
+      setCsvStartDate("");
+      setCsvEndDate("");
+
+    } catch (error: any) {
+      console.error('CSV export error:', error);
+      toast({
+        variant: "destructive",
+        title: "خطا در خروجی CSV",
+        description: error.message || "خطا در ایجاد فایل CSV",
+      });
+    } finally {
+      setIsExportingCsv(false);
+    }
   };
 
   const formatTimeRemaining = (hours: number) => {
@@ -893,9 +958,9 @@ const CustomerProfile = () => {
               </CardContent>
             </Card>
 
-            {/* Purchase History Button */}
+            {/* Purchase History and CSV Export Buttons */}
             {orders && orders.length > 0 && (
-              <div className="mt-4">
+              <div className="mt-4 space-y-2">
                 <Button
                   onClick={() => {
                     setShowPurchaseHistory(true);
@@ -906,6 +971,15 @@ const CustomerProfile = () => {
                 >
                   <Clock className="w-4 h-4 mr-2" />
                   مشاهده سابقه خرید کامل
+                </Button>
+                
+                <Button
+                  onClick={() => setShowCsvExport(true)}
+                  variant="outline"
+                  className="w-full border-green-200 text-green-700 hover:bg-green-50 hover:border-green-300"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  خروجی CSV سفارشات تکمیل شده
                 </Button>
               </div>
             )}
@@ -1208,6 +1282,89 @@ const CustomerProfile = () => {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* CSV Export Modal */}
+      <Dialog open={showCsvExport} onOpenChange={setShowCsvExport}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-green-700 flex items-center gap-2">
+              <Download className="w-5 h-5" />
+              خروجی CSV سفارشات تکمیل شده
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600">
+              انتخاب بازه زمانی برای خروجی فایل CSV سفارشات تکمیل شده
+            </p>
+            
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  از تاریخ (اختیاری)
+                </label>
+                <Input
+                  type="date"
+                  value={csvStartDate}
+                  onChange={(e) => setCsvStartDate(e.target.value)}
+                  className="w-full"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  تا تاریخ (اختیاری)
+                </label>
+                <Input
+                  type="date"
+                  value={csvEndDate}
+                  onChange={(e) => setCsvEndDate(e.target.value)}
+                  className="w-full"
+                />
+              </div>
+            </div>
+            
+            <div className="bg-blue-50 p-3 rounded-lg">
+              <p className="text-sm text-blue-700">
+                💡 اگر تاریخی انتخاب نکنید، تمام سفارشات تکمیل شده صادر می‌شود.
+                فایل CSV شامل سفارشات تایید شده، تحویل داده شده، یا پرداخت شده خواهد بود.
+              </p>
+            </div>
+            
+            <div className="flex gap-2 pt-2">
+              <Button
+                onClick={handleCsvExport}
+                disabled={isExportingCsv}
+                className="flex-1 bg-green-600 hover:bg-green-700"
+              >
+                {isExportingCsv ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                    در حال ایجاد CSV...
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-4 h-4 mr-2" />
+                    دانلود CSV
+                  </>
+                )}
+              </Button>
+              
+              <Button
+                onClick={() => {
+                  setShowCsvExport(false);
+                  setCsvStartDate("");
+                  setCsvEndDate("");
+                }}
+                variant="outline"
+                disabled={isExportingCsv}
+              >
+                انصراف
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

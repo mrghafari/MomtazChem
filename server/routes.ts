@@ -35598,6 +35598,124 @@ momtazchem.com
     }
   });
 
+  // Export completed orders as CSV with date range filter
+  app.get("/api/customers/export-orders-csv", requireCustomerAuth, async (req, res) => {
+    try {
+      const customerId = req.session.customerId;
+      const { startDate, endDate } = req.query;
+      
+      const customer = await customerStorage.getCustomer(customerId);
+      if (!customer) {
+        return res.status(404).json({ success: false, message: "مشتری یافت نشد" });
+      }
+      
+      // Get all orders for customer
+      const allOrders = await customerStorage.getOrdersForProfile(customerId);
+      
+      // Filter for completed orders only (confirmed, delivered, or paid status)
+      const completedOrders = allOrders.filter(order => 
+        order.status === 'confirmed' || 
+        order.status === 'delivered' || 
+        order.paymentStatus === 'paid'
+      );
+      
+      // Apply date range filter if provided
+      let filteredOrders = completedOrders;
+      if (startDate || endDate) {
+        filteredOrders = completedOrders.filter(order => {
+          const orderDate = new Date(order.createdAt);
+          const start = startDate ? new Date(startDate as string) : null;
+          const end = endDate ? new Date(endDate as string) : null;
+          
+          // Set end date to end of day for inclusive filtering
+          if (end) {
+            end.setHours(23, 59, 59, 999);
+          }
+          
+          if (start && end) {
+            return orderDate >= start && orderDate <= end;
+          } else if (start) {
+            return orderDate >= start;
+          } else if (end) {
+            return orderDate <= end;
+          }
+          return true;
+        });
+      }
+      
+      if (filteredOrders.length === 0) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "هیچ سفارش تکمیل شده‌ای در بازه زمانی انتخابی یافت نشد" 
+        });
+      }
+      
+      // Generate CSV content with Persian headers
+      const csvHeaders = [
+        'شماره سفارش',
+        'تاریخ سفارش',
+        'مبلغ کل (دینار عراقی)',
+        'وضعیت سفارش',
+        'وضعیت پرداخت',
+        'روش پرداخت',
+        'تعداد اقلام',
+        'آدرس تحویل',
+        'یادداشت مشتری'
+      ];
+      
+      const csvRows = filteredOrders.map(order => [
+        order.orderNumber || `M${order.id}`,
+        new Date(order.createdAt).toLocaleDateString('fa-IR'),
+        order.totalAmount?.toLocaleString('fa-IR') || '0',
+        order.status === 'confirmed' ? 'تایید شده' :
+        order.status === 'delivered' ? 'تحویل داده شده' :
+        order.status === 'processing' ? 'در حال پردازش' :
+        order.status === 'shipped' ? 'ارسال شده' : order.status || 'نامشخص',
+        order.paymentStatus === 'paid' ? 'پرداخت شده' :
+        order.paymentStatus === 'pending' ? 'در انتظار پرداخت' :
+        order.paymentStatus === 'failed' ? 'پرداخت ناموفق' : order.paymentStatus || 'نامشخص',
+        order.paymentMethod === 'online_payment' ? 'پرداخت آنلاین' :
+        order.paymentMethod === 'wallet_payment' ? 'پرداخت از کیف پول' :
+        order.paymentMethod === 'bank_transfer_grace' ? 'حواله بانکی' :
+        order.paymentMethod === 'cash_on_delivery' ? 'پرداخت در محل' : order.paymentMethod || 'نامشخص',
+        order.items?.length || 0,
+        order.deliveryAddress || 'آدرس ثبت نشده',
+        order.customerNotes || 'بدون یادداشت'
+      ]);
+      
+      // Convert to CSV format
+      const csvContent = [
+        csvHeaders.join(','),
+        ...csvRows.map(row => row.map(cell => `"${cell}"`).join(','))
+      ].join('\n');
+      
+      // Generate filename with date range
+      const dateRange = startDate && endDate 
+        ? `${startDate}_to_${endDate}`
+        : startDate 
+        ? `from_${startDate}`
+        : endDate 
+        ? `until_${endDate}`
+        : 'all_time';
+      
+      const fileName = `completed-orders-${customer.id}-${dateRange}-${new Date().toISOString().split('T')[0]}.csv`;
+      
+      // Set response headers for CSV download
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+      res.setHeader('Cache-Control', 'no-cache');
+      
+      // Add BOM for UTF-8 support in Excel
+      res.write('\uFEFF');
+      res.write(csvContent);
+      res.end();
+      
+    } catch (error) {
+      console.error('Error exporting orders CSV:', error);
+      res.status(500).json({ success: false, message: "خطا در ایجاد فایل CSV" });
+    }
+  });
+
   // Global error handler for all API routes
   app.use('/api/*', (err: any, req: Request, res: Response, next: NextFunction) => {
     console.error('API Error:', err);
