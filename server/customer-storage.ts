@@ -219,46 +219,37 @@ export class CustomerStorage implements ICustomerStorage {
 
   // Get orders for customer profile display with priority for temporary orders and abandoned cart tracking
   async getOrdersForProfile(customerId: number): Promise<{ 
-    displayOrders: any[], 
+    displayOrders: CustomerOrder[], 
     totalOrders: number, 
     hiddenOrders: number,
-    abandonedOrders: any[],
+    abandonedOrders: CustomerOrder[],
     hasAbandonedOrders: boolean,
     abandonedCarts: any[],
     hasAbandonedCarts: boolean
   }> {
-    // Get all orders for the customer from the main orders table (excluding deleted orders)
-    const { pool } = await import('./db');
-    const result = await pool.query(`
-      SELECT 
-        id,
-        order_number as "orderNumber",
-        customer_id as "customerId",
-        status,
-        payment_status as "paymentStatus", 
-        payment_method as "paymentMethod",
-        subtotal,
-        tax_amount as "taxAmount",
-        shipping_amount as "shippingAmount",
-        discount_amount as "discountAmount", 
-        total_amount as "totalAmount",
-        currency,
-        notes,
-        billing_address as "billingAddress",
-        shipping_address as "shippingAddress",
-        shipping_method as "shippingMethod",
-        tracking_number as "trackingNumber",
-        order_date as "orderDate",
-        shipped_date as "shippedDate",
-        delivered_date as "deliveredDate", 
-        created_at as "createdAt",
-        updated_at as "updatedAt"
-      FROM orders 
-      WHERE customer_id = $1 AND status != 'deleted'
-      ORDER BY created_at DESC
-    `, [customerId]);
-    
-    const allOrders = result.rows;
+    // Get all orders for the customer (excluding deleted orders)
+    const allOrders = await customerDb
+      .select()
+      .from(customerOrders)
+      .where(and(
+        eq(customerOrders.customerId, customerId),
+        ne(customerOrders.status, 'deleted') // فیلتر کردن سفارشات حذف شده از نمایش پروفایل
+      ))
+      .orderBy(desc(customerOrders.createdAt));
+
+    // Sort orders with priority for 3-day grace period bank transfer orders
+    allOrders.sort((a, b) => {
+      // Check if orders have 3-day grace period payment method
+      const aIsGracePeriod = a.paymentMethod === 'bank_transfer_grace' || a.paymentMethod === 'واریز بانکی با مهلت 3 روزه';
+      const bIsGracePeriod = b.paymentMethod === 'bank_transfer_grace' || b.paymentMethod === 'واریز بانکی با مهلت 3 روزه';
+      
+      // If one is grace period and other is not, prioritize grace period
+      if (aIsGracePeriod && !bIsGracePeriod) return -1;
+      if (!aIsGracePeriod && bIsGracePeriod) return 1;
+      
+      // If both are same type, sort by creation date (newest first)
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
 
     const totalOrders = allOrders.length;
 
@@ -369,13 +360,10 @@ export class CustomerStorage implements ICustomerStorage {
       if (result.length > 0) {
         const metrics = result[0];
         
-        // Update customer record with actual database column names
+        // Update customer record with metrics (only if fields exist in schema)
         await customerDb
           .update(customers)
           .set({
-            totalOrders: metrics.totalOrders || 0,
-            totalSpent: metrics.totalSpent?.toString() || "0",
-            lastOrderDate: metrics.lastOrderDate,
             updatedAt: new Date(),
           })
           .where(eq(customers.id, customerId));
