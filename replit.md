@@ -41,20 +41,49 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Business Impact**: Companies can now specify exact account holder name for banking transactions separate from company names
 - **Result**: Complete bank account holder field operational - available in admin forms and automatically displayed in all customer payment interfaces
 
+### COMPLETED: Customer Profile Order Prioritization - 3-Day Bank Transfer Orders Display First (July 24, 2025)
+✅ **IMPLEMENTED: Smart order sorting in customer profiles to prioritize 3-day grace period bank transfer orders**
+- **User Request**: "قرار شد اگر مشتری سفارش با مهلت سه روزه را درخواست کرد اینگونه سفارشات در لیست پروفایل او در اول قرار گیرد"
+- **Order Prioritization Logic**: Enhanced customer profile to sort orders with smart priority system:
+  - **Primary Priority**: Orders with `paymentMethod === 'واریز بانکی با مهلت 3 روزه'` appear first
+  - **Secondary Priority**: Regular orders appear after 3-day bank transfer orders
+  - **Tertiary Sort**: Within each group, orders sorted by creation date (newest first)
+- **Technical Implementation**: Added custom sort function in customer-profile.tsx:
+  - Smart comparison logic to detect 3-day bank transfer orders
+  - Fallback to chronological sorting within same payment method
+  - Maintains existing order display functionality while changing sequence
+- **User Experience**: Customers see their urgent 3-day bank transfer orders at the top of their order history:
+  - Critical payment deadline orders receive visual priority
+  - Easier access to orders requiring immediate action (receipt upload)
+  - Countdown timers and payment reminders more prominently displayed
+- **Business Logic**: Ensures customers address time-sensitive bank transfer orders first:
+  - Reduces risk of automatic order cancellation due to missed deadlines
+  - Improves customer awareness of pending payment requirements
+  - Streamlines order management workflow for customers with multiple orders
+- **Sorting Algorithm**: 
+  - Orders with 3-day bank transfer payment method: Priority 1
+  - All other orders (wallet, cash, other methods): Priority 2
+  - Creation date descending within each priority group
+- **Impact**: Customer profiles now intelligently prioritize orders requiring urgent attention while maintaining chronological order within categories
+- **Result**: Complete order prioritization system operational - 3-day bank transfer orders consistently appear first in customer profiles
+
 ### COMPLETED: Dynamic Banking Information Integration Across Payment Forms (July 24, 2025)
 ✅ **IMPLEMENTED: Complete integration of dynamic banking information from Company Information module into all payment forms**
 - **User Request**: "یکپارچگی اطلاعات بانکی دینامیک از ماژول اطلاعات شرکت در فرم‌های پرداخت"
 - **Dynamic Banking Integration**: Replaced all hardcoded banking information with real-time data from company information module:
   - **Bank Receipt Upload Page**: Complete banking information card with dynamic data fetching
   - **Customer Wallet Page**: Banking information card appears when "bank_transfer" payment method is selected
+  - **Payment Gateway Page**: Both Iraqi Bank Transfer and International Wire Transfer sections use dynamic data
   - **Real-time Synchronization**: Banking information updates automatically when changed in Company Information module
-- **API Integration**: Added `/api/admin/company-information` calls to both payment forms:
+- **API Integration**: Added `/api/admin/company-information` calls to all payment forms:
   - Bank receipt upload page fetches company banking data for display
   - Customer wallet page shows banking information only during bank transfer recharge requests
-  - Consistent API structure across both forms for maintainability
-- **Schema Utilization**: Leveraged existing banking fields from company information schema:
+  - Payment gateway page loads banking data for checkout process
+  - Consistent API structure across all forms for maintainability
+- **Schema Utilization**: Leveraged banking fields from company information schema including new account holder field:
   - `bankName` - نام بانک (Bank name)
   - `bankAccount` - شماره حساب (Account number)
+  - `bankAccountHolder` - نام صاحب حساب (Account holder name) **NEW**
   - `bankIban` - شماره IBAN (IBAN number)
   - `bankSwift` - کد SWIFT (SWIFT code)
 - **Enhanced User Experience**: 
@@ -62,22 +91,23 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
   - **Fallback Values**: Default values displayed when banking information is not available
   - **Conditional Display**: Banking card only appears when relevant (bank transfer method selected)
   - **Responsive Design**: Grid layout with proper styling and visual hierarchy
+- **Account Holder Field Integration**: Complete integration of new account holder name field:
+  - **Display Priority**: `bankAccountHolder || companyNameAr || companyNameEn || default`
+  - **Payment Gateway**: Both Iraqi and International transfer sections show account holder
+  - **Real-time Updates**: Account holder changes in admin instantly reflect in payment forms
 - **Visual Design**: 
   - Blue-themed banking information cards for consistency
   - Building2 icon for banking sections
   - Proper spacing and typography for banking details
-  - Grid layout showing bank name, account number, account holder, IBAN, and SWIFT code
-- **Company Name Integration**: Account holder name dynamically sourced from company names:
-  - Uses `companyNameAr` or `companyNameEn` from company information
-  - Fallback to default company name if not available
+  - Grid layout showing all banking fields including account holder name
 - **Technical Implementation**:
   - Clean separation of concerns with proper API integration
   - Error handling for failed API requests
   - Type-safe implementation with proper interfaces
-  - Consistent code patterns across both payment forms
-- **Business Impact**: Banking information changes in Company Information module now instantly reflect across all customer-facing payment forms
-- **Test Infrastructure**: Created comprehensive test page `test-banking-integration.html` for verification
-- **Result**: Complete dynamic banking integration operational - customers see current banking information in all payment scenarios
+  - Consistent code patterns across all payment forms
+- **Business Impact**: Banking information changes in Company Information module now instantly reflect across all customer-facing payment forms with complete account holder details
+- **Test Infrastructure**: Created comprehensive test pages for verification of all payment forms
+- **Result**: Complete dynamic banking integration operational - customers see current banking information with account holder names in all payment scenarios
 
 ### COMPLETED: Simplified Footer Implementation for All PDF Reports (July 24, 2025)
 ✅ **IMPLEMENTED: Simplified footer design with company names only across all PDF reports**

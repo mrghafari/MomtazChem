@@ -101,7 +101,21 @@ const CustomerProfile = () => {
     enabled: !!customerData?.success,
   });
 
-  const orders = orderData?.orders || [];
+  // Sort orders: 3-day bank transfer orders first, then regular orders
+  const rawOrders = orderData?.orders || [];
+  const orders = rawOrders.sort((a: any, b: any) => {
+    // Check if order is 3-day bank transfer
+    const aIs3DayBank = a.paymentMethod === 'واریز بانکی با مهلت 3 روزه';
+    const bIs3DayBank = b.paymentMethod === 'واریز بانکی با مهلت 3 روزه';
+    
+    // 3-day bank transfers come first
+    if (aIs3DayBank && !bIs3DayBank) return -1;
+    if (!aIs3DayBank && bIs3DayBank) return 1;
+    
+    // If both are same type, sort by creation date (newest first)
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
+  
   const totalOrders = orderData?.totalOrders || 0;
   const hiddenOrders = orderData?.hiddenOrders || 0;
   const abandonedCarts = abandonedCartsData?.carts || [];
