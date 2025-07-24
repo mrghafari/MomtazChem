@@ -4,9 +4,54 @@
 import PDFDocument from 'pdfkit';
 import { vazirRegular, vazirBold } from './vazir-base64';
 import fs from 'fs';
+import { CompanyStorage } from './company-storage';
 
-// Company logo base64 data
-const companyLogoBase64 = fs.readFileSync('server/logo-base64.txt', 'utf8');
+// Get company logo from database
+async function getCompanyLogo(): Promise<string | null> {
+  try {
+    const companyStorage = new CompanyStorage();
+    const companyInfo = await companyStorage.getCompanyInformation();
+    
+    if (companyInfo?.logoUrl) {
+      // If logoUrl starts with /uploads/, read the file from filesystem
+      if (companyInfo.logoUrl.startsWith('/uploads/')) {
+        const logoPath = companyInfo.logoUrl.replace('/uploads/', 'uploads/');
+        if (fs.existsSync(logoPath)) {
+          const logoBuffer = fs.readFileSync(logoPath);
+          return logoBuffer.toString('base64');
+        }
+      }
+      
+      // If logoUrl is already base64 data
+      if (companyInfo.logoUrl.startsWith('data:image')) {
+        return companyInfo.logoUrl.split(',')[1]; // Extract base64 part
+      }
+      
+      // If logoUrl is a direct base64 string
+      return companyInfo.logoUrl;
+    }
+    
+    // Fallback to default logo if exists
+    if (fs.existsSync('server/logo-base64.txt')) {
+      return fs.readFileSync('server/logo-base64.txt', 'utf8');
+    }
+    
+    return null;
+  } catch (error) {
+    console.warn('⚠️ Could not load company logo:', error);
+    
+    // Fallback to default logo if exists
+    try {
+      if (fs.existsSync('server/logo-base64.txt')) {
+        return fs.readFileSync('server/logo-base64.txt', 'utf8');
+      }
+    } catch (fallbackError) {
+      console.warn('⚠️ Fallback logo also failed:', fallbackError);
+    }
+    
+    return null;
+  }
+}
 
 // Helper function to format RTL text for proper display
 function formatRTLText(text: string): string {
@@ -49,9 +94,12 @@ function formatMixedText(text: string): string {
 
 // Generate Invoice PDF using PDFKit
 export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     try {
       console.log('📄 Generating invoice PDF with PDFKit...');
+      
+      // Get company logo from database
+      const companyLogoBase64 = await getCompanyLogo();
       
       // Create a PDF document
       const doc = new PDFDocument({
@@ -422,9 +470,12 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
 
 // Generate Customer Profile PDF using PDFKit
 export async function generateCustomerProfilePDF(customerData: any): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     try {
       console.log('👤 Generating customer profile PDF with PDFKit...');
+      
+      // Get company logo from database
+      const companyLogoBase64 = await getCompanyLogo();
       
       // Create a PDF document
       const doc = new PDFDocument({
@@ -465,12 +516,17 @@ export async function generateCustomerProfilePDF(customerData: any): Promise<Buf
         
         doc.font('VazirBold');
         
-        // Add company logo
-        try {
-          const logoBuffer = Buffer.from(companyLogoBase64, 'base64');
-          doc.image(logoBuffer, 450, 30, { width: 80, height: 60 });
-        } catch (logoError) {
-          console.warn('⚠️ Logo embedding failed:', logoError);
+        // Add company logo if available
+        if (companyLogoBase64) {
+          try {
+            const logoBuffer = Buffer.from(companyLogoBase64, 'base64');
+            doc.image(logoBuffer, 450, 30, { width: 80, height: 60 });
+            console.log('✅ Company logo added to customer profile PDF');
+          } catch (logoError) {
+            console.warn('⚠️ Logo embedding failed:', logoError);
+          }
+        } else {
+          console.log('ℹ️ No company logo available for customer profile PDF');
         }
         
         // Title
@@ -603,9 +659,12 @@ export async function generateCustomerProfilePDF(customerData: any): Promise<Buf
 
 // Generate Customer Report PDF using PDFKit
 export async function generateCustomerReportPDF(customerData: any, orders: any[] = [], activities: any[] = []): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     try {
       console.log('📄 Generating customer report PDF with PDFKit...');
+      
+      // Get company logo from database
+      const companyLogoBase64 = await getCompanyLogo();
       
       // Create a PDF document
       const doc = new PDFDocument({
@@ -712,9 +771,12 @@ export async function generateCustomerReportPDF(customerData: any, orders: any[]
 
 // Generate Analytics PDF using PDFKit
 export async function generateAnalyticsPDF(analyticsData: any, title: string = 'گزارش آمارها'): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     try {
       console.log('📊 Generating analytics PDF with PDFKit...');
+      
+      // Get company logo from database
+      const companyLogoBase64 = await getCompanyLogo();
       
       // Create a PDF document
       const doc = new PDFDocument({
@@ -755,12 +817,17 @@ export async function generateAnalyticsPDF(analyticsData: any, title: string = '
         
         doc.font('VazirBold');
         
-        // Add company logo
-        try {
-          const logoBuffer = Buffer.from(companyLogoBase64, 'base64');
-          doc.image(logoBuffer, 450, 30, { width: 80, height: 60 });
-        } catch (logoError) {
-          console.warn('⚠️ Logo embedding failed:', logoError);
+        // Add company logo if available
+        if (companyLogoBase64) {
+          try {
+            const logoBuffer = Buffer.from(companyLogoBase64, 'base64');
+            doc.image(logoBuffer, 450, 30, { width: 80, height: 60 });
+            console.log('✅ Company logo added to analytics PDF');
+          } catch (logoError) {
+            console.warn('⚠️ Logo embedding failed:', logoError);
+          }
+        } else {
+          console.log('ℹ️ No company logo available for analytics PDF');
         }
         
         // Title
@@ -851,12 +918,17 @@ export async function generateAnalyticsPDF(analyticsData: any, title: string = '
         console.warn('⚠️ Font registration failed, using default font:', fontError);
         
         // Fallback to default font
-        // Add company logo
-        try {
-          const logoBuffer = Buffer.from(companyLogoBase64, 'base64');
-          doc.image(logoBuffer, 450, 30, { width: 80, height: 60 });
-        } catch (logoError) {
-          console.warn('⚠️ Logo embedding failed in fallback:', logoError);
+        // Add company logo if available
+        if (companyLogoBase64) {
+          try {
+            const logoBuffer = Buffer.from(companyLogoBase64, 'base64');
+            doc.image(logoBuffer, 450, 30, { width: 80, height: 60 });
+            console.log('✅ Company logo added to analytics PDF (fallback)');
+          } catch (logoError) {
+            console.warn('⚠️ Logo embedding failed in fallback:', logoError);
+          }
+        } else {
+          console.log('ℹ️ No company logo available for analytics PDF (fallback)');
         }
         
         doc.fontSize(20)
