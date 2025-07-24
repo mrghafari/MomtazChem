@@ -244,7 +244,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const { language, direction } = useLanguage();
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [locationData, setLocationData] = useState<{latitude: number, longitude: number} | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<'online_payment' | 'wallet_full' | 'wallet_partial' | 'bank_receipt'>('online_payment');
+  const [paymentMethod, setPaymentMethod] = useState<'online_payment' | 'wallet_full' | 'wallet_partial' | 'bank_receipt' | 'bank_transfer_grace'>('online_payment');
   const [walletAmount, setWalletAmount] = useState<number>(0);
   const [selectedReceiptFile, setSelectedReceiptFile] = useState<File | null>(null);
   const [selectedShippingMethod, setSelectedShippingMethod] = useState<number | null>(null);
@@ -625,9 +625,10 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const totalAmount = subtotalAmount + totalTaxAmount + shippingCost;
 
   // Calculate wallet payment amounts
-  const walletBalance = walletData?.data?.wallet ? parseFloat(walletData.data.wallet.balance) : 
-                       walletData?.wallet ? parseFloat(walletData.wallet.balance) : 0;
-  const canUseWallet = walletBalance > 0 && (existingCustomer || customerData?.success);
+  const walletBalance = (walletData as any)?.data?.wallet ? parseFloat((walletData as any).data.wallet.balance) : 
+                       (walletData as any)?.wallet ? parseFloat((walletData as any).wallet.balance) : 
+                       (walletData as any)?.balance ? parseFloat((walletData as any).balance) : 0;
+  const canUseWallet = walletBalance > 0 && (existingCustomer || (customerData as any)?.success);
   const maxWalletAmount = Math.min(walletBalance, totalAmount);
   const remainingAfterWallet = totalAmount - (paymentMethod === 'wallet_partial' ? walletAmount : (paymentMethod === 'wallet_full' ? totalAmount : 0));
   
@@ -637,16 +638,16 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     canUseWallet, 
     totalAmount,
     existingCustomer: !!existingCustomer,
-    customerDataSuccess: !!customerData?.success,
+    customerDataSuccess: !!(customerData as any)?.success,
     walletDataStructure: walletData ? Object.keys(walletData) : 'no data',
     isLoadingWallet,
     walletError: walletError?.message,
     walletQueryEnabled,
     'Raw wallet response': walletData,
-    'Wallet success flag': walletData?.success,
-    'Wallet balance path 1': walletData?.data?.wallet?.balance,
-    'Wallet balance path 2': walletData?.wallet?.balance,
-    'Wallet balance path 3': walletData?.balance
+    'Wallet success flag': (walletData as any)?.success,
+    'Wallet balance path 1': (walletData as any)?.data?.wallet?.balance,
+    'Wallet balance path 2': (walletData as any)?.wallet?.balance,
+    'Wallet balance path 3': (walletData as any)?.balance
   });
 
 
@@ -1137,7 +1138,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
               </div>
 
               {/* Payment Options */}
-              <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="space-y-3">
+              <RadioGroup value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as any)} className="space-y-3">
                 {/* اولویت اول: پرداخت آنلاین */}
                 <div className="flex items-center space-x-2 space-x-reverse">
                   <RadioGroupItem value="online_payment" id="online_payment" />
@@ -1158,7 +1159,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                   </div>
                 )}
                 
-                {/* سوم: پرداخت ترکیبی (والت + آنلاین) */}
+                {/* سوم: پرداخت بخشی از والت */}
                 {walletBalance > 0 && walletBalance < totalAmount && (
                   <div className="flex items-center space-x-2 space-x-reverse">
                     <RadioGroupItem value="wallet_partial" id="wallet_partial" />

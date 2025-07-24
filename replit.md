@@ -84,6 +84,8 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
   - **RTL Design**: Proper right-to-left text alignment for Persian interface
 - **Payment Flow Integration**: Partial wallet payment seamlessly integrated with existing order processing logic
 - **bilingual-purchase-form.tsx Updates**: All changes applied to correct file per user specification
+- **Payment Option Ordering**: Moved "پرداخت بخشی از والت" above "ارسال فیش واریزی بانکی" per user request
+- **User Interface Priority**: Payment options now ordered: Online Payment → Full Wallet → Partial Wallet → Bank Receipt
 - **Impact**: Users can now easily see how much they're paying from wallet and exact remaining amount for bank transfer
 - **Result**: Complete partial wallet payment functionality operational with enhanced visual feedback and clear remaining amount display
 
