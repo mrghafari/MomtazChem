@@ -39,6 +39,25 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Impact**: Wallet Management now properly integrated under Financial section while maintaining full functionality and enhanced organizational structure
 - **Result**: Complete financial module reorganization operational with Wallet Management successfully positioned under Financial section with all features intact
 
+### COMPLETED: Main Profile Order Status Indicators Added Next to "سفارشات شما" (July 24, 2025)
+✅ **IMPLEMENTED: Order status indicators with color-coded badges on main customer profile page**
+- **User Request**: "اینجا هم در صفحه اصلی پروفایل در کنار 'سفارشات شما' انواع وضعیت را با فانگ"
+- **Status Indicators Implementation**: Added dynamic status counters below "سفارشات شما" title:
+  - **Completed Orders**: Green badges showing count of confirmed/delivered orders
+  - **Pending Payment**: Yellow badges for orders awaiting payment
+  - **Processing Orders**: Blue badges for orders in processing/shipping states
+  - **Bank Transfer**: Orange badges for 3-day grace period bank transfer orders
+- **Visual Design**: 
+  - Rounded pill-shaped badges with colored dots and borders
+  - Color-coded text matching each order category (green, yellow, blue, orange)
+  - Small size badges (text-xs) positioned under main title
+  - Only displays categories that have orders > 0
+- **Dynamic Counting**: Real-time calculation using getOrderCategory function to categorize and count orders
+- **Status Logic**: Uses same categorization logic as purchase history filtering for consistency
+- **User Experience**: Clear visual overview of order distribution on main profile page
+- **Impact**: Customers can quickly see their order status breakdown without opening purchase history modal
+- **Result**: Main profile page now shows order status counts with colored indicators next to "سفارشات شما"
+
 ### COMPLETED: Purchase History Header Creation with Order Types Categorization (July 24, 2025)
 ✅ **IMPLEMENTED: Professional header above search field in customer purchase history to categorize different order types**
 - **User Request**: "در سابقه خرید هدری درست کن بالای فیلد سرچ برای انواع سفارشات"

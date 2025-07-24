@@ -426,15 +426,59 @@ const CustomerProfile = () => {
           <div className="lg:col-span-2">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <Package className="w-5 h-5" />
-                  سفارشات شما
+                <div className="flex flex-col gap-3">
+                  <CardTitle className="flex items-center gap-2">
+                    <Package className="w-5 h-5" />
+                    سفارشات شما
+                    {orders.length > 0 && (
+                      <Badge variant="secondary">
+                        {orders.length} سفارش
+                      </Badge>
+                    )}
+                  </CardTitle>
+                  
+                  {/* Order Status Indicators */}
                   {orders.length > 0 && (
-                    <Badge variant="secondary">
-                      {orders.length} سفارش
-                    </Badge>
+                    <div className="flex items-center gap-3 text-xs">
+                      {(() => {
+                        const statusCounts = orders.reduce((acc: any, order: any) => {
+                          const category = getOrderCategory(order);
+                          acc[category] = (acc[category] || 0) + 1;
+                          return acc;
+                        }, {});
+                        
+                        return (
+                          <>
+                            {statusCounts.completed > 0 && (
+                              <div className="flex items-center gap-1 px-2 py-1 bg-green-50 rounded-full border border-green-200">
+                                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                <span className="text-green-700 font-medium">{statusCounts.completed} تکمیل شده</span>
+                              </div>
+                            )}
+                            {statusCounts.pending > 0 && (
+                              <div className="flex items-center gap-1 px-2 py-1 bg-yellow-50 rounded-full border border-yellow-200">
+                                <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                                <span className="text-yellow-700 font-medium">{statusCounts.pending} در انتظار پرداخت</span>
+                              </div>
+                            )}
+                            {statusCounts.processing > 0 && (
+                              <div className="flex items-center gap-1 px-2 py-1 bg-blue-50 rounded-full border border-blue-200">
+                                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                <span className="text-blue-700 font-medium">{statusCounts.processing} در حال پردازش</span>
+                              </div>
+                            )}
+                            {statusCounts.bank_transfer > 0 && (
+                              <div className="flex items-center gap-1 px-2 py-1 bg-orange-50 rounded-full border border-orange-200">
+                                <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                                <span className="text-orange-700 font-medium">{statusCounts.bank_transfer} حواله بانکی</span>
+                              </div>
+                            )}
+                          </>
+                        );
+                      })()}
+                    </div>
                   )}
-                </CardTitle>
+                </div>
                 
                 <div className="flex items-center gap-2">
                   {abandonedCartsCount > 0 && (
