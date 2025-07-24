@@ -962,41 +962,7 @@ export default function CompanyInformation() {
               </CardContent>
             </Card>
 
-            {/* Save Button */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Save className="h-5 w-5" />
-                  ذخیره اطلاعات
-                </CardTitle>
-                <CardDescription>
-                  {hasUnsavedChanges 
-                    ? "تغییرات ذخیره نشده‌ای دارید. برای ذخیره در دیتابیس کلیک کنید." 
-                    : "تمام اطلاعات ذخیره شده است."
-                  }
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button 
-                  onClick={handleSaveCompanyInfo}
-                  disabled={!hasUnsavedChanges || updateCompanyInfoMutation.isPending}
-                  className="w-full"
-                  size="lg"
-                >
-                  {updateCompanyInfoMutation.isPending ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      در حال ذخیره...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="ml-2 h-4 w-4" />
-                      ذخیره اطلاعات شرکت
-                    </>
-                  )}
-                </Button>
-              </CardContent>  
-            </Card>
+
 
             {/* Company Description */}
             <Card>

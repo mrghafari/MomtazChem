@@ -6,6 +6,25 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Phone Field Mapping Fix and Single Save Button Implementation (July 24, 2025)
+✅ **RESOLVED: Fixed phone number save issue by correcting field mapping between frontend and backend**
+- **User Feedback**: "یک دکمه ذخیره اطلاعات برای کل فرم کافی است همان انتهایی خوب است" - User confirmed single save button preference
+- **Field Mapping Fix**: Corrected mismatch between frontend field names and database schema:
+  - **Frontend Fixed**: Changed `phonePrimary` → `phone`, `phoneSecondary` → `supportPhone`
+  - **Interface Updated**: Updated CompanyInfo interface to match schema field names
+  - **Schema Alignment**: Frontend now sends data with exact field names expected by backend
+- **Backend Method Fixes**: 
+  - **Added Missing Method**: Created `upsertCompanyInfo` method in company storage
+  - **Fixed Method Name**: Corrected `getCompanyInfo` → `getCompanyInformation` in API endpoint
+  - **Error Resolution**: Fixed Drizzle query syntax error in correspondence method
+- **Single Save Button**: Removed duplicate save button, keeping only the one at form end:
+  - **Location**: Single save button positioned at bottom of company information form
+  - **Status Display**: Shows saved vs unsaved state with clear Persian messages
+  - **User Control**: Complete manual save workflow - no auto-save functionality
+- **Data Flow**: Form fields → local state → manual save button → database persistence
+- **Impact**: Phone numbers and all company information now save correctly with single save action
+- **Result**: Complete resolution of phone save issue with streamlined single-button save interface
+
 ### COMPLETED: Manual Save System Enforced for Company Information Forms (July 24, 2025)
 ✅ **IMPLEMENTED: Complete removal of automatic saving functionality per user request**
 - **User Request**: "در اطلاعات شرکت وقتی هنوز در حال پر کردن اطلاعات هستیم نباید دائم ذخیره کند اتو سیو را کلا بردار خودمان سیو میکنیم"

@@ -61,10 +61,10 @@ export class CompanyStorage {
   // Correspondence methods
   async getCorrespondence(type?: 'incoming' | 'outgoing'): Promise<Correspondence[]> {
     try {
-      const query = db.select().from(correspondence).where(eq(correspondence.isActive, true));
+      let query = db.select().from(correspondence).where(eq(correspondence.isActive, true));
       
       if (type) {
-        query.where(and(eq(correspondence.isActive, true), eq(correspondence.type, type)));
+        query = db.select().from(correspondence).where(and(eq(correspondence.isActive, true), eq(correspondence.type, type)));
       }
       
       return await query.orderBy(desc(correspondence.createdAt));
