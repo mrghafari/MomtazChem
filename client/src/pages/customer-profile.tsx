@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -120,6 +120,9 @@ const CustomerProfile = () => {
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 
+  // Get all orders for status counting (including hidden ones)
+  const allOrdersForCounting = completeHistory.length > 0 ? completeHistory : sortedOrders;
+  
   // Filter orders based on main profile filter
   const orders = mainProfileFilter === "all" ? sortedOrders : sortedOrders.filter(order => getOrderCategory(order) === mainProfileFilter);
   
@@ -151,6 +154,13 @@ const CustomerProfile = () => {
       setIsLoadingHistory(false);
     }
   };
+
+  // Load complete history on component mount for accurate status counting
+  useEffect(() => {
+    if (customerData?.success) {
+      loadCompleteHistory();
+    }
+  }, [customerData?.success]);
 
   // Get order status category
   const getOrderCategory = (order: any) => {
@@ -444,11 +454,11 @@ const CustomerProfile = () => {
                   </CardTitle>
                   
                   {/* Order Status Indicators */}
-                  {orders.length > 0 && (
+                  {(orders.length > 0 || completeHistory.length > 0) && (
                     <div className="flex items-center gap-3 text-xs">
                       {(() => {
-                        // Count all orders (not filtered ones) for accurate status display
-                        const statusCounts = sortedOrders.reduce((acc: any, order: any) => {
+                        // Count all orders (including complete history) for accurate status display
+                        const statusCounts = allOrdersForCounting.reduce((acc: any, order: any) => {
                           const category = getOrderCategory(order);
                           acc[category] = (acc[category] || 0) + 1;
                           return acc;
@@ -467,7 +477,7 @@ const CustomerProfile = () => {
                             >
                               <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
                               <span className={`font-medium ${mainProfileFilter === "all" ? "text-purple-700" : "text-gray-700"}`}>
-                                {sortedOrders.length} همه
+                                {allOrdersForCounting.length} همه
                               </span>
                             </button>
 
