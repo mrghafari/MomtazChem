@@ -830,9 +830,6 @@ export default function CompanyInformation() {
                 </div>
                 <div className="space-y-2">
                   <Label>تلفن اصلی</Label>
-                  <div className="text-sm text-muted-foreground mb-2">
-                    چنانچه گیرنده کالا شخص دیگری است شماره موبایل ایشان را وارد کنید
-                  </div>
                   <Input 
                     id="phonePrimary"
                     value={formData?.phonePrimary || ''} 
