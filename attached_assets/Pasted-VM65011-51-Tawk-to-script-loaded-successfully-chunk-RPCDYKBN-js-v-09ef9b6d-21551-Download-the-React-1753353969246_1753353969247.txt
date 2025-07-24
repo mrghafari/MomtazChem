@@ -1,0 +1,96 @@
+VM65011:51 Tawk.to script loaded successfully
+chunk-RPCDYKBN.js?v=09ef9b6d:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:117574)
+    at t.value (twk-chunk-common.js:2:150658)
+    at p.updateUUID (twk-chunk-common.js:2:202310)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at push.2f62.p.dispatch (twk-vendor.js:2:78106)
+    at push.2f62.p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:124589)
+    at twk-chunk-common.js:2:123900
+value @ twk-chunk-common.js:2
+Promise.then
+value @ twk-chunk-common.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+56d7 @ twk-chunk-common.js:2
+a @ twk-runtime.js:1
+r @ twk-runtime.js:1
+t @ twk-runtime.js:1
+(anonymous) @ twk-runtime.js:1
+(anonymous) @ twk-runtime.js:1
+VM65011:23 Tawk.to Live Chat loaded successfully
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 5 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: Array(5)
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 5 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: Array(5)
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 5 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: Array(5)
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 5 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: Array(5)
+shop.tsx:457 🔐 [LOGIN] Starting handleLoginSuccess
+shop.tsx:458 🔐 [LOGIN] Customer data: Object
+shop.tsx:459 🔐 [LOGIN] Current cart state: Object
+shop.tsx:463 🔐 [LOGIN] Customer state set
+shop.tsx:466 🔐 [LOGIN] Wallet balance fetch initiated
+shop.tsx:470 🔐 [LOGIN] Auth modal closed
+shop.tsx:475 🔐 [LOGIN] Cache invalidated
+shop.tsx:479 🔐 [LOGIN] Has cart items: false
+shop.tsx:480 🔐 [LOGIN] Cart contents: Object
+shop.tsx:484 🔐 [LOGIN] Cart migration completed
+shop.tsx:490 🔐 [LOGIN] Welcome toast shown
+shop.tsx:493 🔐 [LOGIN] Staying in shop after successful login
+shop.tsx:495 🔐 [LOGIN] handleLoginSuccess completed successfully
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 5 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: Array(5)
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 5 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: Array(5)
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 5 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: Array(5)
+/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+chunk-C436OVJF.js?v=09ef9b6d:339 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-C436OVJF.js?v=09ef9b6d:339
+content-all.js:1 Uncaught (in promise) Error: Could not establish connection. Receiving end does not exist.
+    at y (content-all.js:1:49937)
+y @ content-all.js:1
+/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+content-all.js:1 Uncaught (in promise) Error: Could not establish connection. Receiving end does not exist.
+    at y (content-all.js:1:49937)
+y @ content-all.js:1
+/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+content-all.js:1 Uncaught (in promise) Error: Could not establish connection. Receiving end does not exist.
+    at y (content-all.js:1:49937)
+y @ content-all.js:1
+/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
