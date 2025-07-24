@@ -382,10 +382,14 @@ export default function LogisticsDepartment() {
         </div>
 
         <Tabs defaultValue="orders" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="orders" className="flex items-center gap-2">
               <Package className="w-4 h-4" />
               سفارشات
+            </TabsTrigger>
+            <TabsTrigger value="vehicle-optimization" className="flex items-center gap-2">
+              <Car className="w-4 h-4" />
+              انتخاب وسیله نقلیه
             </TabsTrigger>
             <TabsTrigger value="delivery-methods" className="flex items-center gap-2">
               <Truck className="w-4 h-4" />
@@ -523,6 +527,77 @@ export default function LogisticsDepartment() {
                 ))
               )}
             </div>
+          </TabsContent>
+
+          {/* Vehicle Optimization Tab */}
+          <TabsContent value="vehicle-optimization">
+            <Card>
+              <CardHeader>
+                <CardTitle>انتخاب بهینه وسیله نقلیه</CardTitle>
+                <p className="text-sm text-gray-600">
+                  سیستم هوشمند انتخاب بهینه وسیله نقلیه برای سفارشات بر اساس وزن، مقصد و معیارهای لجستیکی
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {orders.length === 0 ? (
+                    <div className="text-center py-8">
+                      <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-600">هیچ سفارشی برای انتخاب وسیله نقلیه وجود ندارد</p>
+                    </div>
+                  ) : (
+                    orders.map((order: LogisticsOrder) => (
+                      <Card key={order.id} className="hover:shadow-md transition-shadow bg-purple-50 border-purple-200">
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-4 mb-2">
+                                <h3 className="text-lg font-semibold text-purple-800">سفارش {order.orderNumber}</h3>
+                                {getStatusBadge(order.currentStatus)}
+                              </div>
+                              
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                                <div>
+                                  <span className="font-medium text-purple-700">مشتری:</span>
+                                  <p className="text-gray-700">
+                                    {order.customer?.firstName && order.customer?.lastName 
+                                      ? `${order.customer.firstName} ${order.customer.lastName}`
+                                      : 'نام مشتری ناشناس'
+                                    }
+                                  </p>
+                                </div>
+                                
+                                <div>
+                                  <span className="font-medium text-purple-700">وزن کل:</span>
+                                  <p className="text-gray-700">
+                                    {order.totalWeight ? `${order.totalWeight} ${order.weightUnit || 'kg'}` : 'محاسبه نشده'}
+                                  </p>
+                                </div>
+                                
+                                <div>
+                                  <span className="font-medium text-purple-700">مقصد:</span>
+                                  <p className="text-gray-700">
+                                    {order.shippingAddress?.city || 'نامشخص'}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <Button
+                              onClick={() => window.open(`/admin/vehicle-optimization?orderId=${order.id}&weight=${order.totalWeight}&destination=${encodeURIComponent(order.shippingAddress?.city || '')}`, '_blank')}
+                              className="bg-purple-600 hover:bg-purple-700"
+                            >
+                              <Car className="w-4 h-4 mr-2" />
+                              انتخاب وسیله نقلیه
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Delivery Methods Tab */}
