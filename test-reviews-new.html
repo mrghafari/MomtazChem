@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست سیستم نظرات و امتیازدهی جدید</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; }
+        .login-section { background: #e3f2fd; }
+        .review-section { background: #f3e5f5; }
+        .display-section { background: #e8f5e8; }
+        input, textarea, select, button { margin: 5px; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+        button { background: #007bff; color: white; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .star-rating { font-size: 24px; direction: ltr; }
+        .star { cursor: pointer; color: #ddd; }
+        .star.active { color: #ffc107; }
+        .result { margin: 10px 0; padding: 10px; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .reviews-list { max-height: 400px; overflow-y: auto; }
+        .review-item { border: 1px solid #ddd; margin: 10px 0; padding: 15px; border-radius: 8px; background: #fafafa; }
+        .review-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .review-stars { color: #ffc107; }
+        .review-meta { font-size: 12px; color: #666; }
+        .helpful-buttons { margin-top: 10px; }
+        .helpful-btn { background: #28a745; margin-left: 5px; padding: 5px 10px; font-size: 12px; }
+        .not-helpful-btn { background: #dc3545; margin-left: 5px; padding: 5px 10px; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌟 تست سیستم نظرات و امتیازدهی جدید</h1>
+        
+        <!-- Login Section -->
+        <div class="section login-section">
+            <h3>🔑 ورود مشتری</h3>
+            <input type="email" id="loginEmail" placeholder="ایمیل" value="water@momtazchem.com">
+            <input type="password" id="loginPassword" placeholder="رمز عبور" value="finalpassword789">
+            <button onclick="loginCustomer()">ورود</button>
+            <div id="loginResult"></div>
+        </div>
+
+        <!-- Review Section -->
+        <div class="section review-section">
+            <h3>✍️ ثبت/ویرایش نظر</h3>
+            <input type="number" id="productId" placeholder="شناسه محصول" value="475">
+            <input type="text" id="reviewTitle" placeholder="عنوان نظر (اختیاری)">
+            <textarea id="reviewComment" placeholder="متن نظر" rows="4">این محصول عالی است! کیفیت بسیار خوبی دارد.</textarea>
+            
+            <div class="star-rating">
+                <span>امتیاز: </span>
+                <span class="star" data-rating="1">★</span>
+                <span class="star" data-rating="2">★</span>
+                <span class="star" data-rating="3">★</span>
+                <span class="star" data-rating="4">★</span>
+                <span class="star" data-rating="5">★</span>
+                <span id="selectedRating">0</span> ستاره
+            </div>
+            
+            <button onclick="submitReview()">ثبت/ویرایش نظر</button>
+            <div id="reviewResult"></div>
+        </div>
+
+        <!-- Display Section -->
+        <div class="section display-section">
+            <h3>👀 نمایش نظرات (همه کاربران - حتی مهمان‌ها)</h3>
+            <input type="number" id="displayProductId" placeholder="شناسه محصول برای نمایش" value="475">
+            <button onclick="loadReviews()">بارگذاری نظرات</button>
+            
+            <div id="productStats"></div>
+            <div id="reviewsList" class="reviews-list"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentRating = 0;
+
+        // Star rating functionality
+        document.querySelectorAll('.star').forEach(star => {
+            star.addEventListener('click', function() {
+                currentRating = parseInt(this.dataset.rating);
+                updateStars();
+            });
+        });
+
+        function updateStars() {
+            document.querySelectorAll('.star').forEach((star, index) => {
+                if (index < currentRating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+            document.getElementById('selectedRating').textContent = currentRating;
+        }
+
+        async function loginCustomer() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            try {
+                const response = await fetch('/api/customers/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const result = await response.json();
+                const resultDiv = document.getElementById('loginResult');
+                
+                if (result.success) {
+                    resultDiv.innerHTML = `<div class="result success">✅ ورود موفق: ${result.user.name}</div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="result error">❌ خطا: ${result.message}</div>`;
+                }
+            } catch (error) {
+                document.getElementById('loginResult').innerHTML = `<div class="result error">❌ خطا: ${error.message}</div>`;
+            }
+        }
+
+        async function submitReview() {
+            const productId = document.getElementById('productId').value;
+            const title = document.getElementById('reviewTitle').value;
+            const comment = document.getElementById('reviewComment').value;
+            
+            if (!currentRating) {
+                alert('لطفاً امتیاز را انتخاب کنید');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/products/${productId}/reviews`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        rating: currentRating,
+                        title: title,
+                        comment: comment
+                    })
+                });
+                
+                const result = await response.json();
+                const resultDiv = document.getElementById('reviewResult');
+                
+                if (result.success) {
+                    resultDiv.innerHTML = `<div class="result success">✅ ${result.message} (Review ID: ${result.reviewId})</div>`;
+                    if (document.getElementById('displayProductId').value === productId) {
+                        loadReviews(); // Refresh reviews if viewing same product
+                    }
+                } else {
+                    resultDiv.innerHTML = `<div class="result error">❌ خطا: ${result.message}</div>`;
+                }
+            } catch (error) {
+                document.getElementById('reviewResult').innerHTML = `<div class="result error">❌ خطا: ${error.message}</div>`;
+            }
+        }
+
+        async function loadReviews() {
+            const productId = document.getElementById('displayProductId').value;
+            
+            try {
+                const response = await fetch(`/api/products/${productId}/reviews`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayStats(result.data.stats);
+                    displayReviews(result.data.reviews);
+                } else {
+                    document.getElementById('reviewsList').innerHTML = `<div class="result error">❌ خطا: ${result.message}</div>`;
+                }
+            } catch (error) {
+                document.getElementById('reviewsList').innerHTML = `<div class="result error">❌ خطا: ${error.message}</div>`;
+            }
+        }
+
+        function displayStats(stats) {
+            const statsDiv = document.getElementById('productStats');
+            statsDiv.innerHTML = `
+                <div style="background: #fff3cd; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                    <strong>📊 آمار محصول:</strong><br>
+                    تعداد نظرات: ${stats.totalReviews}<br>
+                    میانگین امتیاز: ${stats.averageRating.toFixed(1)} از 5<br>
+                    توزیع امتیازها: ${JSON.stringify(stats.ratingDistribution)}
+                </div>
+            `;
+        }
+
+        function displayReviews(reviews) {
+            const reviewsDiv = document.getElementById('reviewsList');
+            
+            if (reviews.length === 0) {
+                reviewsDiv.innerHTML = '<div style="text-align: center; color: #666;">هنوز نظری ثبت نشده است</div>';
+                return;
+            }
+            
+            reviewsDiv.innerHTML = reviews.map(review => `
+                <div class="review-item">
+                    <div class="review-header">
+                        <div>
+                            <strong>${review.customerName}</strong>
+                            ${review.isVerifiedPurchase ? '<span style="color: #28a745;">✓ خرید تایید شده</span>' : ''}
+                        </div>
+                        <div class="review-stars">${'★'.repeat(review.rating)}${'☆'.repeat(5-review.rating)}</div>
+                    </div>
+                    ${review.title ? `<div style="font-weight: bold; margin-bottom: 5px;">${review.title}</div>` : ''}
+                    <div style="margin-bottom: 10px;">${review.comment}</div>
+                    <div class="review-meta">
+                        ثبت شده: ${new Date(review.createdAt).toLocaleDateString('fa-IR')}
+                        ${review.updatedAt !== review.createdAt ? `| ویرایش شده: ${new Date(review.updatedAt).toLocaleDateString('fa-IR')}` : ''}
+                    </div>
+                    ${review.adminResponse ? `<div style="background: #e8f4fd; padding: 8px; margin-top: 10px; border-radius: 4px;"><strong>پاسخ مدیریت:</strong> ${review.adminResponse}</div>` : ''}
+                    <div class="helpful-buttons">
+                        <button class="helpful-btn" onclick="voteHelpful(${review.id}, true)">
+                            👍 مفید (${review.helpfulVotes})
+                        </button>
+                        <button class="not-helpful-btn" onclick="voteHelpful(${review.id}, false)">
+                            👎 غیرمفید (${review.notHelpfulVotes})
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function voteHelpful(reviewId, isHelpful) {
+            try {
+                const response = await fetch(`/api/reviews/${reviewId}/helpful`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ isHelpful })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('✅ ' + result.message);
+                    loadReviews(); // Refresh to show updated vote counts
+                } else {
+                    alert('❌ ' + result.message);
+                }
+            } catch (error) {
+                alert('❌ خطا: ' + error.message);
+            }
+        }
+
+        // Load reviews on page load
+        window.onload = () => {
+            loadReviews();
+        };
+    </script>
+</body>
+</html>

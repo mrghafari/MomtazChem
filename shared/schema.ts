@@ -1312,3 +1312,78 @@ export const insertCompanyInformationSchema = createInsertSchema(companyInformat
 
 export type InsertCompanyInformation = z.infer<typeof insertCompanyInformationSchema>;
 export type CompanyInformation = typeof companyInformation.$inferSelect;
+
+// =============================================================================
+// PRODUCT REVIEWS & RATINGS SCHEMA
+// =============================================================================
+
+// Product Reviews table for customer comments and ratings
+export const productReviews = pgTable("product_reviews", {
+  id: serial("id").primaryKey(),
+  productId: integer("product_id").notNull(), // Reference to product
+  customerId: integer("customer_id").notNull(), // Reference to customer from CRM
+  customerName: text("customer_name").notNull(), // Customer display name
+  customerEmail: text("customer_email").notNull(), // Customer email for verification
+  rating: integer("rating").notNull(), // 1-5 star rating
+  title: text("title"), // Review title (optional)
+  comment: text("comment").notNull(), // Main review text
+  isVerifiedPurchase: boolean("is_verified_purchase").default(false), // Did customer buy this product
+  isApproved: boolean("is_approved").default(true), // Admin approval status
+  adminResponse: text("admin_response"), // Admin response to review
+  adminResponseDate: timestamp("admin_response_date"),
+  helpfulVotes: integer("helpful_votes").default(0), // Number of helpful votes
+  notHelpfulVotes: integer("not_helpful_votes").default(0), // Number of not helpful votes
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Product Statistics table for caching review aggregations
+export const productStats = pgTable("product_stats", {
+  id: serial("id").primaryKey(),
+  productId: integer("product_id").notNull().unique(), // Reference to product
+  totalReviews: integer("total_reviews").default(0), // Total number of reviews
+  averageRating: decimal("average_rating", { precision: 3, scale: 2 }).default("0"), // Average rating (0-5.00)
+  ratingDistribution: json("rating_distribution").$type<{[key: string]: number}>().default({}), // Distribution of ratings {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
+  lastReviewDate: timestamp("last_review_date"), // Date of most recent review
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Review Helpfulness tracking to prevent duplicate voting
+export const reviewHelpfulness = pgTable("review_helpfulness", {
+  id: serial("id").primaryKey(),
+  reviewId: integer("review_id").notNull().references(() => productReviews.id),
+  customerId: integer("customer_id"), // Logged in customer ID
+  customerIp: text("customer_ip"), // IP address for anonymous users
+  isHelpful: boolean("is_helpful").notNull(), // true = helpful, false = not helpful
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Schema exports for Reviews
+export const insertProductReviewSchema = createInsertSchema(productReviews).omit({
+  id: true,
+  helpfulVotes: true,
+  notHelpfulVotes: true,
+  adminResponse: true,
+  adminResponseDate: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertProductReview = z.infer<typeof insertProductReviewSchema>;
+export type ProductReview = typeof productReviews.$inferSelect;
+
+export const insertProductStatsSchema = createInsertSchema(productStats).omit({
+  id: true,
+  updatedAt: true,
+});
+
+export type InsertProductStats = z.infer<typeof insertProductStatsSchema>;
+export type ProductStats = typeof productStats.$inferSelect;
+
+export const insertReviewHelpfulnessSchema = createInsertSchema(reviewHelpfulness).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertReviewHelpfulness = z.infer<typeof insertReviewHelpfulnessSchema>;
+export type ReviewHelpfulness = typeof reviewHelpfulness.$inferSelect;

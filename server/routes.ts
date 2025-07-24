@@ -31347,6 +31347,292 @@ momtazchem.com
 
 
   // =============================================================================
+  // PRODUCT REVIEWS & RATINGS ENDPOINTS
+  // =============================================================================
+
+  // Get product reviews (public endpoint - accessible to all users including guests)
+  app.get("/api/products/:id/reviews", async (req, res) => {
+    try {
+      const productId = parseInt(req.params.id);
+      if (isNaN(productId)) {
+        return res.status(400).json({ success: false, message: "شناسه محصول نامعتبر است" });
+      }
+
+      const { pool } = await import('./db');
+      
+      // Get approved reviews with customer information
+      const reviewsResult = await pool.query(`
+        SELECT 
+          id,
+          product_id,
+          customer_id,
+          customer_name,
+          rating,
+          title,
+          comment,
+          is_verified_purchase,
+          helpful_votes,
+          not_helpful_votes,
+          admin_response,
+          admin_response_date,
+          created_at,
+          updated_at
+        FROM product_reviews 
+        WHERE product_id = $1 AND is_approved = true
+        ORDER BY created_at DESC
+      `, [productId]);
+
+      // Get product statistics
+      const statsResult = await pool.query(`
+        SELECT 
+          total_reviews,
+          average_rating,
+          rating_distribution,
+          last_review_date
+        FROM product_stats 
+        WHERE product_id = $1
+      `, [productId]);
+
+      const reviews = reviewsResult.rows.map(row => ({
+        id: row.id,
+        productId: row.product_id,
+        customerId: row.customer_id,
+        customerName: row.customer_name,
+        rating: row.rating,
+        title: row.title || '',
+        comment: row.comment,
+        isVerifiedPurchase: row.is_verified_purchase,
+        helpfulVotes: row.helpful_votes,
+        notHelpfulVotes: row.not_helpful_votes,
+        adminResponse: row.admin_response,
+        adminResponseDate: row.admin_response_date,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+      }));
+
+      const stats = statsResult.rows[0] || {
+        total_reviews: 0,
+        average_rating: 0,
+        rating_distribution: {},
+        last_review_date: null
+      };
+
+      res.json({
+        success: true,
+        data: {
+          reviews,
+          stats: {
+            totalReviews: parseInt(stats.total_reviews) || 0,
+            averageRating: parseFloat(stats.average_rating) || 0,
+            ratingDistribution: stats.rating_distribution || {},
+            lastReviewDate: stats.last_review_date
+          }
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching product reviews:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت نظرات" });
+    }
+  });
+
+  // Submit or update product review (requires customer authentication)
+  app.post("/api/products/:id/reviews", async (req, res) => {
+    try {
+      const productId = parseInt(req.params.id);
+      if (isNaN(productId)) {
+        return res.status(400).json({ success: false, message: "شناسه محصول نامعتبر است" });
+      }
+
+      // Check customer authentication
+      if (!req.session.customerId) {
+        return res.status(401).json({ success: false, message: "برای ثبت نظر باید وارد حساب کاربری خود شوید" });
+      }
+
+      const customerId = req.session.customerId;
+      const { rating, title, comment } = req.body;
+
+      // Validate input
+      if (!rating || rating < 1 || rating > 5) {
+        return res.status(400).json({ success: false, message: "امتیاز باید بین 1 تا 5 ستاره باشد" });
+      }
+
+      if (!comment || comment.trim().length === 0) {
+        return res.status(400).json({ success: false, message: "متن نظر الزامی است" });
+      }
+
+      const { pool } = await import('./db');
+
+      // Get customer information
+      const customerResult = await pool.query(`
+        SELECT 
+          COALESCE(first_name || ' ' || last_name, company, email) as customer_name,
+          email 
+        FROM crm_customers 
+        WHERE id = $1
+      `, [customerId]);
+
+      if (customerResult.rows.length === 0) {
+        return res.status(404).json({ success: false, message: "اطلاعات مشتری یافت نشد" });
+      }
+
+      const customer = customerResult.rows[0];
+
+      // Check if customer already has a review for this product
+      const existingReview = await pool.query(`
+        SELECT id FROM product_reviews WHERE product_id = $1 AND customer_id = $2
+      `, [productId, customerId]);
+
+      let reviewResult;
+      let isUpdate = false;
+
+      if (existingReview.rows.length > 0) {
+        // Update existing review
+        reviewResult = await pool.query(`
+          UPDATE product_reviews 
+          SET rating = $1, title = $2, comment = $3, updated_at = NOW()
+          WHERE product_id = $4 AND customer_id = $5
+          RETURNING id
+        `, [rating, title || null, comment.trim(), productId, customerId]);
+        isUpdate = true;
+      } else {
+        // Create new review
+        reviewResult = await pool.query(`
+          INSERT INTO product_reviews (
+            product_id, customer_id, customer_name, customer_email, 
+            rating, title, comment, is_verified_purchase
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+          RETURNING id
+        `, [
+          productId, customerId, customer.customer_name, customer.email,
+          rating, title || null, comment.trim(), false // TODO: Check if verified purchase
+        ]);
+      }
+
+      // Update product statistics
+      await updateProductStatistics(productId);
+
+      res.json({ 
+        success: true, 
+        message: isUpdate ? "نظر شما با موفقیت به‌روزرسانی شد" : "نظر شما با موفقیت ثبت شد",
+        reviewId: reviewResult.rows[0].id,
+        isUpdate
+      });
+    } catch (error) {
+      console.error("Error submitting product review:", error);
+      res.status(500).json({ success: false, message: "خطا در ثبت نظر" });
+    }
+  });
+
+  // Mark review as helpful/not helpful
+  app.post("/api/reviews/:id/helpful", async (req, res) => {
+    try {
+      const reviewId = parseInt(req.params.id);
+      const { isHelpful } = req.body;
+      
+      if (isNaN(reviewId)) {
+        return res.status(400).json({ success: false, message: "شناسه نظر نامعتبر است" });
+      }
+      
+      if (typeof isHelpful !== 'boolean') {
+        return res.status(400).json({ success: false, message: "نوع رای نامعتبر است" });
+      }
+
+      const customerId = req.session.customerId || null;
+      const customerIp = req.ip;
+      
+      // Check if user already voted on this review
+      const { pool } = await import('./db');
+      let existingVote;
+      if (customerId) {
+        existingVote = await pool.query(`
+          SELECT id FROM review_helpfulness 
+          WHERE review_id = $1 AND customer_id = $2
+        `, [reviewId, customerId]);
+      } else {
+        existingVote = await pool.query(`
+          SELECT id FROM review_helpfulness 
+          WHERE review_id = $1 AND customer_ip = $2
+        `, [reviewId, customerIp]);
+      }
+      
+      if (existingVote.rows.length > 0) {
+        return res.status(400).json({ success: false, message: "شما قبلاً روی این نظر رای داده‌اید" });
+      }
+
+      // Record the vote
+      await pool.query(`
+        INSERT INTO review_helpfulness (review_id, customer_id, customer_ip, is_helpful)
+        VALUES ($1, $2, $3, $4)
+      `, [reviewId, customerId, customerIp, isHelpful]);
+
+      // Update the review's helpful votes count
+      const updateField = isHelpful ? 'helpful_votes' : 'not_helpful_votes';
+      await pool.query(`
+        UPDATE product_reviews 
+        SET ${updateField} = ${updateField} + 1 
+        WHERE id = $1
+      `, [reviewId]);
+
+      res.json({ success: true, message: "رای شما ثبت شد" });
+    } catch (error) {
+      console.error("Error recording helpful vote:", error);
+      res.status(500).json({ success: false, message: "خطا در ثبت رای" });
+    }
+  });
+
+  // Helper function to update product statistics
+  async function updateProductStatistics(productId: number) {
+    try {
+      const { pool } = await import('./db');
+      
+      // Calculate new statistics from approved reviews
+      const statsQuery = await pool.query(`
+        SELECT 
+          COUNT(*) as total_reviews,
+          AVG(rating) as average_rating,
+          COUNT(CASE WHEN rating = 1 THEN 1 END) as rating_1,
+          COUNT(CASE WHEN rating = 2 THEN 1 END) as rating_2,
+          COUNT(CASE WHEN rating = 3 THEN 1 END) as rating_3,
+          COUNT(CASE WHEN rating = 4 THEN 1 END) as rating_4,
+          COUNT(CASE WHEN rating = 5 THEN 1 END) as rating_5,
+          MAX(created_at) as last_review_date
+        FROM product_reviews 
+        WHERE product_id = $1 AND is_approved = true
+      `, [productId]);
+
+      const stats = statsQuery.rows[0];
+      const ratingDistribution = {
+        "1": parseInt(stats.rating_1),
+        "2": parseInt(stats.rating_2),
+        "3": parseInt(stats.rating_3),
+        "4": parseInt(stats.rating_4),
+        "5": parseInt(stats.rating_5)
+      };
+
+      // Update or insert product stats
+      await pool.query(`
+        INSERT INTO product_stats (
+          product_id, total_reviews, average_rating, rating_distribution, last_review_date, updated_at
+        ) VALUES ($1, $2, $3, $4, $5, NOW())
+        ON CONFLICT (product_id) DO UPDATE SET
+          total_reviews = $2,
+          average_rating = $3,
+          rating_distribution = $4,
+          last_review_date = $5,
+          updated_at = NOW()
+      `, [
+        productId,
+        parseInt(stats.total_reviews),
+        parseFloat(stats.average_rating) || 0,
+        JSON.stringify(ratingDistribution),
+        stats.last_review_date
+      ]);
+    } catch (error) {
+      console.error("Error updating product stats:", error);
+    }
+  }
+
+  // =============================================================================
   // WEIGHT CALCULATION ENDPOINTS
   // =============================================================================
 
