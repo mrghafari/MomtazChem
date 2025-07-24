@@ -194,6 +194,19 @@ export async function generateInvoicePDF(invoiceData: any): Promise<Buffer> {
           return Math.floor(num).toString();
         };
         
+        // Add company logo if available (left side)
+        if (companyLogoBase64) {
+          try {
+            const logoBuffer = Buffer.from(companyLogoBase64, 'base64');
+            doc.image(logoBuffer, 50, 30, { width: 80, height: 60 });
+            console.log('✅ Company logo added to invoice PDF (left side)');
+          } catch (logoError) {
+            console.warn('⚠️ Logo embedding failed:', logoError);
+          }
+        } else {
+          console.log('ℹ️ No company logo available for invoice PDF');
+        }
+        
         // Header layout based on user's Word format
         const isProforma = invoiceData.invoiceType === 'PROFORMA';
         
@@ -516,12 +529,12 @@ export async function generateCustomerProfilePDF(customerData: any): Promise<Buf
         
         doc.font('VazirBold');
         
-        // Add company logo if available
+        // Add company logo if available (left side)
         if (companyLogoBase64) {
           try {
             const logoBuffer = Buffer.from(companyLogoBase64, 'base64');
-            doc.image(logoBuffer, 450, 30, { width: 80, height: 60 });
-            console.log('✅ Company logo added to customer profile PDF');
+            doc.image(logoBuffer, 50, 30, { width: 80, height: 60 });
+            console.log('✅ Company logo added to customer profile PDF (left side)');
           } catch (logoError) {
             console.warn('⚠️ Logo embedding failed:', logoError);
           }
@@ -817,12 +830,12 @@ export async function generateAnalyticsPDF(analyticsData: any, title: string = '
         
         doc.font('VazirBold');
         
-        // Add company logo if available
+        // Add company logo if available (left side)
         if (companyLogoBase64) {
           try {
             const logoBuffer = Buffer.from(companyLogoBase64, 'base64');
-            doc.image(logoBuffer, 450, 30, { width: 80, height: 60 });
-            console.log('✅ Company logo added to analytics PDF');
+            doc.image(logoBuffer, 50, 30, { width: 80, height: 60 });
+            console.log('✅ Company logo added to analytics PDF (left side)');
           } catch (logoError) {
             console.warn('⚠️ Logo embedding failed:', logoError);
           }
@@ -918,12 +931,12 @@ export async function generateAnalyticsPDF(analyticsData: any, title: string = '
         console.warn('⚠️ Font registration failed, using default font:', fontError);
         
         // Fallback to default font
-        // Add company logo if available
+        // Add company logo if available (left side)
         if (companyLogoBase64) {
           try {
             const logoBuffer = Buffer.from(companyLogoBase64, 'base64');
-            doc.image(logoBuffer, 450, 30, { width: 80, height: 60 });
-            console.log('✅ Company logo added to analytics PDF (fallback)');
+            doc.image(logoBuffer, 50, 30, { width: 80, height: 60 });
+            console.log('✅ Company logo added to analytics PDF fallback (left side)');
           } catch (logoError) {
             console.warn('⚠️ Logo embedding failed in fallback:', logoError);
           }

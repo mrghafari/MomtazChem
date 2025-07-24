@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Invoice PDF with Left Logo</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; margin-bottom: 30px; text-align: center; }
+        .test-section { margin-bottom: 25px; padding: 20px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #3498db; }
+        .button { background: #3498db; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; margin: 10px 5px; transition: background 0.3s; }
+        .button:hover { background: #2980b9; }
+        .success { color: #27ae60; font-weight: bold; }
+        .error { color: #e74c3c; font-weight: bold; }
+        .info { color: #34495e; margin: 10px 0; }
+        .result { margin-top: 20px; padding: 15px; background: #ecf0f1; border-radius: 6px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Invoice PDF with Left Logo</h1>
+        
+        <div class="test-section">
+            <h3>📄 Generate Invoice PDF with Logo on Left Side</h3>
+            <p class="info">This test generates a sample invoice PDF with the company logo positioned on the left side of the document.</p>
+            <button class="button" onclick="generateInvoicePDF()">📄 Generate Invoice PDF</button>
+            <div id="invoiceResult" class="result" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>📊 Generate Analytics PDF with Left Logo</h3>
+            <p class="info">This test generates an analytics report PDF with the company logo positioned on the left side.</p>
+            <button class="button" onclick="generateAnalyticsPDF()">📊 Generate Analytics PDF</button>
+            <div id="analyticsResult" class="result" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>👤 Generate Customer Report PDF with Left Logo</h3>
+            <p class="info">This test generates a customer profile PDF with the company logo positioned on the left side.</p>
+            <button class="button" onclick="generateCustomerPDF()">👤 Generate Customer PDF</button>
+            <div id="customerResult" class="result" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        // Admin login first
+        async function ensureAdminLogin() {
+            try {
+                const loginResponse = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: 'admin', password: 'admin123' })
+                });
+                
+                const loginResult = await loginResponse.json();
+                if (!loginResult.success) {
+                    throw new Error('Admin login failed');
+                }
+                console.log('✅ Admin login successful');
+                return true;
+            } catch (error) {
+                console.error('❌ Admin login error:', error);
+                return false;
+            }
+        }
+
+        async function generateInvoicePDF() {
+            const resultDiv = document.getElementById('invoiceResult');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<p class="info">🔄 Logging in as admin and generating invoice PDF...</p>';
+            
+            try {
+                await ensureAdminLogin();
+                
+                // Sample invoice data
+                const invoiceData = {
+                    invoiceNumber: 'INV-TEST-001',
+                    invoiceType: 'INVOICE',
+                    invoiceDate: new Date().toISOString(),
+                    customer: {
+                        name: 'علی احمدی',
+                        phone: '09123456789',
+                        email: 'ali@example.com',
+                        address: 'تهران، خیابان آزادی'
+                    },
+                    items: [
+                        { name: 'Solvant 402', quantity: 2, unitPrice: 150000 },
+                        { name: 'Chemical X', quantity: 1, unitPrice: 300000 }
+                    ],
+                    totalAmount: 600000
+                };
+                
+                const response = await fetch('/api/admin/pdf/generate-invoice', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(invoiceData)
+                });
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'test-invoice-left-logo.pdf';
+                    a.click();
+                    
+                    resultDiv.innerHTML = '<p class="success">✅ Invoice PDF generated successfully with left logo! File downloaded.</p>';
+                } else {
+                    const error = await response.text();
+                    resultDiv.innerHTML = `<p class="error">❌ Error: ${error}</p>`;
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+            }
+        }
+
+        async function generateAnalyticsPDF() {
+            const resultDiv = document.getElementById('analyticsResult');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<p class="info">🔄 Logging in as admin and generating analytics PDF...</p>';
+            
+            try {
+                await ensureAdminLogin();
+                
+                const response = await fetch('/api/crm/analytics/export-pdf');
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'test-analytics-left-logo.pdf';
+                    a.click();
+                    
+                    resultDiv.innerHTML = '<p class="success">✅ Analytics PDF generated successfully with left logo! File downloaded.</p>';
+                } else {
+                    const error = await response.text();
+                    resultDiv.innerHTML = `<p class="error">❌ Error: ${error}</p>`;
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+            }
+        }
+
+        async function generateCustomerPDF() {
+            const resultDiv = document.getElementById('customerResult');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<p class="info">🔄 Logging in as admin and generating customer PDF...</p>';
+            
+            try {
+                await ensureAdminLogin();
+                
+                // Sample customer data
+                const customerData = {
+                    firstName: 'محمد',
+                    lastName: 'کریمی',
+                    email: 'mohammad.karimi@example.com',
+                    phone: '09198765432',
+                    company: 'شرکت تجارت کیمیا'
+                };
+                
+                const response = await fetch('/api/admin/pdf/generate-customer-report', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(customerData)
+                });
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'test-customer-left-logo.pdf';
+                    a.click();
+                    
+                    resultDiv.innerHTML = '<p class="success">✅ Customer PDF generated successfully with left logo! File downloaded.</p>';
+                } else {
+                    const error = await response.text();
+                    resultDiv.innerHTML = `<p class="error">❌ Error: ${error}</p>`;
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
