@@ -44,6 +44,15 @@ export default function BankReceiptUpload() {
     enabled: !!orderId,
   });
 
+  // Fetch company banking information
+  const { data: companyInfo, isLoading: isLoadingCompanyInfo } = useQuery({
+    queryKey: ['/api/admin/company-information'],
+    queryFn: async () => {
+      const response = await apiRequest('/api/admin/company-information');
+      return response;
+    },
+  });
+
   // Upload mutation
   const uploadMutation = useMutation({
     mutationFn: async (formData: FormData) => {
@@ -213,7 +222,7 @@ export default function BankReceiptUpload() {
         </Card>
       )}
 
-      {/* Banking Information */}
+      {/* Banking Information - Dynamic from Company Info */}
       <Card className="mb-6 bg-blue-50 dark:bg-blue-900/20">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -222,33 +231,55 @@ export default function BankReceiptUpload() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3 text-sm">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <span className="font-medium">نام بانک:</span>
-                <p className="text-muted-foreground">بانک ملی ایران</p>
+          {isLoadingCompanyInfo ? (
+            <div className="text-center py-4">
+              <p className="text-muted-foreground">در حال بارگذاری اطلاعات بانکی...</p>
+            </div>
+          ) : (
+            <div className="space-y-3 text-sm">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="font-medium">نام بانک:</span>
+                  <p className="text-muted-foreground">
+                    {companyInfo?.bankName || 'بانک ملی عراق'}
+                  </p>
+                </div>
+                <div>
+                  <span className="font-medium">شماره حساب:</span>
+                  <p className="font-mono">
+                    {companyInfo?.bankAccount || 'در انتظار تکمیل اطلاعات'}
+                  </p>
+                </div>
               </div>
-              <div>
-                <span className="font-medium">شماره حساب:</span>
-                <p className="font-mono">6037-9919-1234-5678</p>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="font-medium">نام صاحب حساب:</span>
+                  <p className="text-muted-foreground">
+                    {companyInfo?.companyNameAr || companyInfo?.companyNameEn || 'شرکت ممتاز شیمی'}
+                  </p>
+                </div>
+                <div>
+                  <span className="font-medium">شماره IBAN:</span>
+                  <p className="font-mono">
+                    {companyInfo?.bankIban || 'در انتظار تکمیل اطلاعات'}
+                  </p>
+                </div>
+              </div>
+              {companyInfo?.bankSwift && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <span className="font-medium">کد SWIFT:</span>
+                    <p className="font-mono">{companyInfo.bankSwift}</p>
+                  </div>
+                </div>
+              )}
+              <div className="mt-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                  ⚠️ لطفاً مبلغ دقیق سفارش را واریز کرده و فیش واریزی را آپلود کنید
+                </p>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <span className="font-medium">نام صاحب حساب:</span>
-                <p className="text-muted-foreground">شرکت ممتاز کیمیا</p>
-              </div>
-              <div>
-                <span className="font-medium">شماره شبا:</span>
-                <p className="font-mono">IR12-0170-0000-0000-6037-9919</p>
-              </div>
-            </div>
-            <div className="mt-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
-              <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                ⚠️ لطفاً مبلغ دقیق سفارش را واریز کرده و فیش واریزی را آپلود کنید
-              </p>
-            </div>
-          </div>
+          )}
         </CardContent>
       </Card>
 

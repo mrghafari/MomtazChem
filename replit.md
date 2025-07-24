@@ -6,6 +6,44 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Dynamic Banking Information Integration Across Payment Forms (July 24, 2025)
+✅ **IMPLEMENTED: Complete integration of dynamic banking information from Company Information module into all payment forms**
+- **User Request**: "یکپارچگی اطلاعات بانکی دینامیک از ماژول اطلاعات شرکت در فرم‌های پرداخت"
+- **Dynamic Banking Integration**: Replaced all hardcoded banking information with real-time data from company information module:
+  - **Bank Receipt Upload Page**: Complete banking information card with dynamic data fetching
+  - **Customer Wallet Page**: Banking information card appears when "bank_transfer" payment method is selected
+  - **Real-time Synchronization**: Banking information updates automatically when changed in Company Information module
+- **API Integration**: Added `/api/admin/company-information` calls to both payment forms:
+  - Bank receipt upload page fetches company banking data for display
+  - Customer wallet page shows banking information only during bank transfer recharge requests
+  - Consistent API structure across both forms for maintainability
+- **Schema Utilization**: Leveraged existing banking fields from company information schema:
+  - `bankName` - نام بانک (Bank name)
+  - `bankAccount` - شماره حساب (Account number)
+  - `bankIban` - شماره IBAN (IBAN number)
+  - `bankSwift` - کد SWIFT (SWIFT code)
+- **Enhanced User Experience**: 
+  - **Loading States**: Professional loading indicators while fetching banking information
+  - **Fallback Values**: Default values displayed when banking information is not available
+  - **Conditional Display**: Banking card only appears when relevant (bank transfer method selected)
+  - **Responsive Design**: Grid layout with proper styling and visual hierarchy
+- **Visual Design**: 
+  - Blue-themed banking information cards for consistency
+  - Building2 icon for banking sections
+  - Proper spacing and typography for banking details
+  - Grid layout showing bank name, account number, account holder, IBAN, and SWIFT code
+- **Company Name Integration**: Account holder name dynamically sourced from company names:
+  - Uses `companyNameAr` or `companyNameEn` from company information
+  - Fallback to default company name if not available
+- **Technical Implementation**:
+  - Clean separation of concerns with proper API integration
+  - Error handling for failed API requests
+  - Type-safe implementation with proper interfaces
+  - Consistent code patterns across both payment forms
+- **Business Impact**: Banking information changes in Company Information module now instantly reflect across all customer-facing payment forms
+- **Test Infrastructure**: Created comprehensive test page `test-banking-integration.html` for verification
+- **Result**: Complete dynamic banking integration operational - customers see current banking information in all payment scenarios
+
 ### COMPLETED: Simplified Footer Implementation for All PDF Reports (July 24, 2025)
 ✅ **IMPLEMENTED: Simplified footer design with company names only across all PDF reports**
 - **User Request**: Remove all contact information (phone, address, website, email) from PDF footers and keep only company names

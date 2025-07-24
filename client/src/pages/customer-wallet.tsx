@@ -14,7 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Wallet, Plus, ArrowUpCircle, ArrowDownCircle, Clock, CheckCircle, XCircle, DollarSign, CreditCard, Banknote, Shield } from "lucide-react";
+import { Wallet, Plus, ArrowUpCircle, ArrowDownCircle, Clock, CheckCircle, XCircle, DollarSign, CreditCard, Banknote, Shield, Building2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 interface WalletSummary {
@@ -119,6 +119,15 @@ export default function CustomerWallet() {
     queryKey: ['/api/customer/wallet/transactions'],
     enabled: isAuthenticated, // Only fetch when authenticated
     refetchInterval: getWalletRefreshInterval()
+  });
+
+  // Fetch company banking information for bank transfer display
+  const { data: companyInfo, isLoading: isLoadingCompanyInfo } = useQuery({
+    queryKey: ['/api/admin/company-information'],
+    queryFn: async () => {
+      const response = await apiRequest('/api/admin/company-information');
+      return response;
+    },
   });
 
   // Create recharge request mutation
@@ -502,6 +511,62 @@ export default function CustomerWallet() {
                       {/* Bank Transfer Fields */}
                       {rechargeForm.paymentMethod === 'bank_transfer' && (
                         <>
+                          {/* Banking Information Card - Dynamic from Company Info */}
+                          <Card className="bg-blue-50 dark:bg-blue-900/20">
+                            <CardHeader>
+                              <CardTitle className="flex items-center gap-2 text-base">
+                                <Building2 className="w-4 h-4 text-blue-600" />
+                                اطلاعات حساب بانکی برای واریز
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              {isLoadingCompanyInfo ? (
+                                <div className="text-center py-2">
+                                  <p className="text-sm text-muted-foreground">در حال بارگذاری اطلاعات بانکی...</p>
+                                </div>
+                              ) : (
+                                <div className="space-y-2 text-sm">
+                                  <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                      <span className="font-medium">نام بانک:</span>
+                                      <p className="text-muted-foreground">
+                                        {companyInfo?.bankName || 'بانک ملی عراق'}
+                                      </p>
+                                    </div>
+                                    <div>
+                                      <span className="font-medium">شماره حساب:</span>
+                                      <p className="font-mono text-sm">
+                                        {companyInfo?.bankAccount || 'در انتظار تکمیل اطلاعات'}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                      <span className="font-medium">نام صاحب حساب:</span>
+                                      <p className="text-muted-foreground">
+                                        {companyInfo?.companyNameAr || companyInfo?.companyNameEn || 'شرکت ممتاز شیمی'}
+                                      </p>
+                                    </div>
+                                    <div>
+                                      <span className="font-medium">شماره IBAN:</span>
+                                      <p className="font-mono text-sm">
+                                        {companyInfo?.bankIban || 'در انتظار تکمیل اطلاعات'}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  {companyInfo?.bankSwift && (
+                                    <div className="grid grid-cols-2 gap-3">
+                                      <div>
+                                        <span className="font-medium">کد SWIFT:</span>
+                                        <p className="font-mono text-sm">{companyInfo.bankSwift}</p>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
+
                           <div>
                             <Label htmlFor="bankReference">{t.bankReference} *</Label>
                             <Input
