@@ -31398,7 +31398,8 @@ momtazchem.com
         customerEmail: (req.session as any)?.customerEmail
       });
       
-      const customerId = (req.session as any)?.customerId;
+      // Use same authentication pattern as other working endpoints
+      const customerId = (req.session as any)?.customerId || (req.session as any)?.crmCustomerId;
       if (!customerId) {
         return res.status(401).json({ 
           success: false, 
