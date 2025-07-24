@@ -488,33 +488,9 @@ const Shop = () => {
       });
       console.log('🔐 [LOGIN] Welcome toast shown');
       
-      // If user had items in cart, show checkout modal immediately
-      if (hasCartItems) {
-        console.log('🔐 [LOGIN] Showing checkout after login');
-        setShowCheckout(true);
-        toast({
-          title: "آماده پرداخت",
-          description: "کالاهای شما در سبد خرید منتظر پرداخت هستند",
-        });
-      } else {
-        // Check if there are items in user cart after migration
-        const userCartData = localStorage.getItem('momtazchem_user_cart');
-        const totalCartItems = userCartData ? Object.keys(JSON.parse(userCartData)).length : 0;
-        console.log('🔐 [LOGIN] User cart data:', userCartData);
-        console.log('🔐 [LOGIN] Total cart items after migration:', totalCartItems);
-        
-        if (totalCartItems > 0) {
-          console.log('🔐 [LOGIN] Showing checkout after migration');
-          setShowCheckout(true);
-          toast({
-            title: "آماده پرداخت",
-            description: "کالاهای شما در سبد خرید منتظر پرداخت هستند",
-          });
-        } else {
-          console.log('🔐 [LOGIN] No items in cart, navigating to profile');
-          navigate("/customer/profile");
-        }
-      }
+      // Always redirect to customer profile after login
+      console.log('🔐 [LOGIN] Redirecting to customer profile');
+      navigate("/customer/profile");
       
       console.log('🔐 [LOGIN] handleLoginSuccess completed successfully');
     } catch (error) {
@@ -544,28 +520,8 @@ const Shop = () => {
       description: `خوش آمدید ${customerData.firstName} ${customerData.lastName}`,
     });
     
-    // If user had items in cart, show checkout modal immediately
-    if (hasCartItems) {
-      setShowCheckout(true);
-      toast({
-        title: "آماده پرداخت",
-        description: "کالاهای انتخابی شما آماده پرداخت است",
-      });
-    } else {
-      // Check if there are items in user cart after migration
-      const userCartData = localStorage.getItem('momtazchem_user_cart');
-      const totalCartItems = userCartData ? Object.keys(JSON.parse(userCartData)).length : 0;
-      
-      if (totalCartItems > 0) {
-        setShowCheckout(true);
-        toast({
-          title: "آماده پرداخت",
-          description: "کالاهای انتخابی شما آماده پرداخت است",
-        });
-      } else {
-        navigate("/customer/profile");
-      }
-    }
+    // Always redirect to customer profile after registration
+    navigate("/customer/profile");
   };
 
   const handleLogout = async () => {
