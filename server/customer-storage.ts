@@ -219,23 +219,46 @@ export class CustomerStorage implements ICustomerStorage {
 
   // Get orders for customer profile display with priority for temporary orders and abandoned cart tracking
   async getOrdersForProfile(customerId: number): Promise<{ 
-    displayOrders: CustomerOrder[], 
+    displayOrders: any[], 
     totalOrders: number, 
     hiddenOrders: number,
-    abandonedOrders: CustomerOrder[],
+    abandonedOrders: any[],
     hasAbandonedOrders: boolean,
     abandonedCarts: any[],
     hasAbandonedCarts: boolean
   }> {
-    // Get all orders for the customer (excluding deleted orders)
-    const allOrders = await customerDb
-      .select()
-      .from(customerOrders)
-      .where(and(
-        eq(customerOrders.customerId, customerId),
-        ne(customerOrders.status, 'deleted') // فیلتر کردن سفارشات حذف شده از نمایش پروفایل
-      ))
-      .orderBy(desc(customerOrders.createdAt));
+    // Get all orders for the customer from the main orders table (excluding deleted orders)
+    const { pool } = await import('./db');
+    const result = await pool.query(`
+      SELECT 
+        id,
+        order_number as "orderNumber",
+        customer_id as "customerId",
+        status,
+        payment_status as "paymentStatus", 
+        payment_method as "paymentMethod",
+        subtotal,
+        tax_amount as "taxAmount",
+        shipping_amount as "shippingAmount",
+        discount_amount as "discountAmount", 
+        total_amount as "totalAmount",
+        currency,
+        notes,
+        billing_address as "billingAddress",
+        shipping_address as "shippingAddress",
+        shipping_method as "shippingMethod",
+        tracking_number as "trackingNumber",
+        order_date as "orderDate",
+        shipped_date as "shippedDate",
+        delivered_date as "deliveredDate", 
+        created_at as "createdAt",
+        updated_at as "updatedAt"
+      FROM orders 
+      WHERE customer_id = $1 AND status != 'deleted'
+      ORDER BY created_at DESC
+    `, [customerId]);
+    
+    const allOrders = result.rows;
 
     const totalOrders = allOrders.length;
 
@@ -243,7 +266,8 @@ export class CustomerStorage implements ICustomerStorage {
     const now = new Date();
     const abandonedOrders = allOrders.filter(order => {
       // Check if this is a grace period order that has expired
-      if (order.paymentMethod === 'bank_transfer_grace' && order.status === 'payment_grace_period') {
+      if ((order.paymentMethod === 'bank_transfer_grace' || order.paymentMethod === 'واریز بانکی با مهلت 3 روزه') && 
+          (order.status === 'payment_grace_period' || order.status === 'pending')) {
         // Calculate if grace period has expired (3 days)
         const orderDate = new Date(order.createdAt);
         const gracePeriodEnd = new Date(orderDate.getTime() + (3 * 24 * 60 * 60 * 1000)); // 3 days
@@ -258,11 +282,12 @@ export class CustomerStorage implements ICustomerStorage {
     );
 
     const temporaryOrders = activeOrders.filter(order => 
-      (order.paymentMethod === 'bank_transfer_grace' && order.status === 'payment_grace_period')
+      (order.paymentMethod === 'bank_transfer_grace' || order.paymentMethod === 'واریز بانکی با مهلت 3 روزه') && 
+      (order.status === 'payment_grace_period' || order.status === 'pending')
     );
     
     const regularOrders = activeOrders.filter(order => 
-      order.paymentMethod !== 'bank_transfer_grace'
+      order.paymentMethod !== 'bank_transfer_grace' && order.paymentMethod !== 'واریز بانکی با مهلت 3 روزه'
     );
 
     let displayOrders: CustomerOrder[] = [];

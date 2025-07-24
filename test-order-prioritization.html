@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Order Prioritization</title>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <h1>Test Order Prioritization for 3-Day Bank Transfer Orders</h1>
+    
+    <h2>Customer Login Test</h2>
+    <button onclick="testLogin()">Test Login</button>
+    <div id="loginResult"></div>
+    
+    <h2>Orders Test</h2>
+    <button onclick="testOrders()">Get Orders</button>
+    <div id="ordersResult"></div>
+    
+    <h2>Manual Database Test</h2>
+    <p>Testing SQL queries directly to verify data</p>
+    <pre id="sqlResults"></pre>
+
+    <script>
+        async function testLogin() {
+            try {
+                // Try multiple customer accounts
+                const accounts = [
+                    { email: 'ahmad1@test.com', password: 'ahmad123' },
+                    { email: 'mr.ghafari@gmail.com', password: 'ghafari123' },
+                    { email: 'sara.chemistry@example.com', password: 'sara123' },
+                    { email: 'oilstar@hotmail.com', password: 'oilstar123' }
+                ];
+                
+                for (let account of accounts) {
+                    const response = await fetch('/api/customers/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify(account)
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        document.getElementById('loginResult').innerHTML = 
+                            `<h3>✅ Login Successful!</h3>
+                             <p>Account: ${account.email}</p>
+                             <pre>${JSON.stringify(result, null, 2)}</pre>`;
+                        return; // Success, stop trying
+                    }
+                }
+                
+                // If no account worked, show error
+                document.getElementById('loginResult').innerHTML = 
+                    `<h3>❌ All login attempts failed</h3>
+                     <p>Please check customer credentials in database</p>`;
+                
+            } catch (error) {
+                document.getElementById('loginResult').innerHTML = 
+                    `<pre>Error: ${error.message}</pre>`;
+            }
+        }
+        
+        async function testOrders() {
+            try {
+                const response = await fetch('/api/customers/orders', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success && result.orders) {
+                    const bankTransferOrders = result.orders.filter(order => 
+                        order.paymentMethod === 'واریز بانکی با مهلت 3 روزه'
+                    );
+                    
+                    document.getElementById('ordersResult').innerHTML = 
+                        `<h3>All Orders (${result.orders.length}):</h3>
+                         <pre>${JSON.stringify(result.orders.slice(0, 5), null, 2)}</pre>
+                         <h3>3-Day Bank Transfer Orders (${bankTransferOrders.length}):</h3>
+                         <pre>${JSON.stringify(bankTransferOrders, null, 2)}</pre>`;
+                } else {
+                    document.getElementById('ordersResult').innerHTML = 
+                        `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+                }
+            } catch (error) {
+                document.getElementById('ordersResult').innerHTML = 
+                    `<pre>Error: ${error.message}</pre>`;
+            }
+        }
+    </script>
+</body>
+</html>
