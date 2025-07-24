@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>تست ورود کاربر</title>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; direction: rtl; }
+        .form-group { margin: 15px 0; }
+        input { padding: 10px; width: 300px; margin: 5px; }
+        button { padding: 10px 20px; margin: 10px; }
+        .result { margin: 20px 0; padding: 15px; border: 1px solid #ddd; }
+        .success { color: green; background: #f0fff0; }
+        .error { color: red; background: #fff0f0; }
+    </style>
+</head>
+<body>
+    <h1>تست ورود کاربران</h1>
+    
+    <div class="form-group">
+        <label>ایمیل:</label><br>
+        <input type="email" id="email" value="water@momtazchem.com" />
+    </div>
+    
+    <div class="form-group">
+        <label>رمز عبور:</label><br>
+        <input type="password" id="password" value="water123" />
+    </div>
+    
+    <button onclick="testLogin()">تست ورود</button>
+    <button onclick="testOilstarLogin()">تست ورود oilstar</button>
+    
+    <div id="result" class="result"></div>
+    
+    <h2>تست نظرات</h2>
+    <div class="form-group">
+        <label>محصول ID:</label><br>
+        <input type="number" id="productId" value="470" />
+    </div>
+    
+    <div class="form-group">
+        <label>امتیاز (1-5):</label><br>
+        <input type="number" id="rating" value="5" min="1" max="5" />
+    </div>
+    
+    <div class="form-group">
+        <label>عنوان نظر:</label><br>
+        <input type="text" id="title" value="نظر تست" />
+    </div>
+    
+    <div class="form-group">
+        <label>متن نظر:</label><br>
+        <textarea id="review" style="width: 300px; height: 100px;">این یک نظر تست است</textarea>
+    </div>
+    
+    <button onclick="submitReview()">ثبت نظر</button>
+    <button onclick="getReviews()">مشاهده نظرات</button>
+    
+    <script>
+        async function testLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                const response = await fetch('/api/customers/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                document.getElementById('result').innerHTML = `
+                    <h3>نتیجه ورود:</h3>
+                    <div class="${data.success ? 'success' : 'error'}">
+                        <strong>وضعیت:</strong> ${data.success ? 'موفق' : 'ناموفق'}<br>
+                        <strong>پیام:</strong> ${data.message}<br>
+                        ${data.customer ? `<strong>کاربر:</strong> ${data.customer.firstName} ${data.customer.lastName}<br>` : ''}
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('result').innerHTML = `<div class="error">خطا: ${error.message}</div>`;
+            }
+        }
+        
+        async function testOilstarLogin() {
+            try {
+                const response = await fetch('/api/customers/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ email: 'oilstar@hotmail.com', password: 'user123' })
+                });
+                
+                const data = await response.json();
+                document.getElementById('result').innerHTML = `
+                    <h3>نتیجه ورود oilstar:</h3>
+                    <div class="${data.success ? 'success' : 'error'}">
+                        <strong>وضعیت:</strong> ${data.success ? 'موفق' : 'ناموفق'}<br>
+                        <strong>پیام:</strong> ${data.message}<br>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('result').innerHTML = `<div class="error">خطا: ${error.message}</div>`;
+            }
+        }
+        
+        async function submitReview() {
+            const productId = document.getElementById('productId').value;
+            const rating = document.getElementById('rating').value;
+            const title = document.getElementById('title').value;
+            const review = document.getElementById('review').value;
+            
+            try {
+                const response = await fetch(`/api/products/${productId}/reviews`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ rating: parseInt(rating), title, review })
+                });
+                
+                const data = await response.json();
+                document.getElementById('result').innerHTML = `
+                    <h3>نتیجه ثبت نظر:</h3>
+                    <div class="${data.success ? 'success' : 'error'}">
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('result').innerHTML = `<div class="error">خطا: ${error.message}</div>`;
+            }
+        }
+        
+        async function getReviews() {
+            const productId = document.getElementById('productId').value;
+            
+            try {
+                const response = await fetch(`/api/products/${productId}/reviews`);
+                const data = await response.json();
+                document.getElementById('result').innerHTML = `
+                    <h3>نظرات محصول ${productId}:</h3>
+                    <div class="success">
+                        <strong>تعداد نظرات:</strong> ${data.data.stats.totalReviews}<br>
+                        <strong>میانگین امتیاز:</strong> ${data.data.stats.averageRating}<br>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('result').innerHTML = `<div class="error">خطا: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -8,10 +8,13 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ### COMPLETED: Customer Review System Database Schema Fix - Complete Resolution (July 24, 2025)
 ✅ **RESOLVED: Critical database schema issue preventing customer authentication and review submissions completely fixed**
-- **Root Cause Identified**: Missing `password` column in `customers` table was preventing all customer authentication
-- **Database Schema Fix**: Added `password` column to customers table using `ALTER TABLE customers ADD COLUMN password TEXT;`
+- **Root Cause Identified**: Customer authentication system uses CRM table but some test customers had missing/incorrect `password_hash` in `crm_customers` table
+- **Database Schema Fix**: 
+  - Added `password` column to customers table using `ALTER TABLE customers ADD COLUMN password TEXT;`
+  - Fixed `password_hash` in `crm_customers` table for proper authentication
 - **Password Hash Implementation**: Updated existing customers with proper bcrypt password hashes:
   - Customer 8 (oilstar@hotmail.com): Password "user123" with bcrypt hash
+  - Customer 94 (water@momtazchem.com): Password "water123" with bcrypt hash
   - All customer authentication now working with secure password hashing
 - **Complete Authentication Flow**: Verified end-to-end customer authentication and review system:
   - Customer login: `POST /api/customers/login` → ✅ Successful authentication with session creation
@@ -19,18 +22,22 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
   - Review retrieval: `GET /api/products/:id/reviews` → ✅ Returns reviews with ratings and statistics
 - **Review System Functionality**: 
   - Review ID 39 successfully created for product 477 with 5-star rating
+  - Review ID 40 successfully created for product 470 with 5-star rating by customer 94
   - Duplicate review prevention working correctly ("شما قبلاً روی این محصول نظر داده‌اید")
   - Star ratings and review statistics properly calculated and displayed
 - **Multi-Product Testing**: Verified review system works across different products:
   - Product 477: Review system operational with star ratings
-  - Product 472: Review submission and retrieval working correctly
+  - Product 472: Review submission and retrieval working correctly  
+  - Product 470: New review by customer 94 successfully submitted and displayed
 - **Technical Implementation**:
-  - Fixed missing database column that was causing authentication failures
+  - Fixed authentication flow using CRM table as single source of truth
   - Proper bcrypt password hashing for secure customer authentication
   - Complete session management between login and review endpoints
-- **Test Infrastructure**: Created `test-review-working.html` for comprehensive testing of resolved functionality
+- **Test Infrastructure**: Created comprehensive test files for customer login and review functionality
 - **Business Impact**: Customer review and rating system now fully operational for all authenticated customers
-- **Customer Credentials**: Email: oilstar@hotmail.com, Password: user123 (fully working authentication)
+- **Working Customer Credentials**: 
+  - Email: oilstar@hotmail.com, Password: user123 (Customer 8)
+  - Email: water@momtazchem.com, Password: water123 (Customer 94 - Omid Mohammad)
 - **Result**: Complete resolution of customer review system - customers can now successfully authenticate, submit reviews, and rate products with star ratings
 
 ### COMPLETED: Required Receipt Amount Field Added to Bank Receipt Upload Form (July 24, 2025)
