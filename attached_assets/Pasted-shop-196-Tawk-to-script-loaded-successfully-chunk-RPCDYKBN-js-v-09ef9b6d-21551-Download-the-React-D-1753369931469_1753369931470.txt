@@ -1,0 +1,554 @@
+shop:196 Tawk.to script loaded successfully
+chunk-RPCDYKBN.js?v=09ef9b6d:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:117574)
+    at t.value (twk-chunk-common.js:2:150658)
+    at p.updateUUID (twk-chunk-common.js:2:202310)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:124589)
+    at twk-chunk-common.js:2:123900
+value @ twk-chunk-common.js:2
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: Array(6)
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: Array(6)
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: Array(6)
+shop:168 Tawk.to Live Chat loaded successfully
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 477
+product-reviews.tsx:42 Reviews Data Full: undefined
+product-reviews.tsx:43 Reviews Array Length: 0
+product-reviews.tsx:44 Reviews Array: []
+product-reviews.tsx:45 Product Stats: {averageRating: 0, totalReviews: 0}
+product-reviews.tsx:46 Product: {id: 477, name: 'تینر فوری 10000', category: 'paint-thinner', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 477
+product-reviews.tsx:42 Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "averageRating": 0,
+      "totalReviews": 0,
+      "ratingDistribution": {}
+    }
+  }
+}
+product-reviews.tsx:43 Reviews Array Length: 0
+product-reviews.tsx:44 Reviews Array: []
+product-reviews.tsx:45 Product Stats: {averageRating: 0, totalReviews: 0, ratingDistribution: {…}}
+product-reviews.tsx:46 Product: {id: 477, name: 'تینر فوری 10000', category: 'paint-thinner', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+product-reviews.tsx:50 ReviewsData type: object
+product-reviews.tsx:51 ReviewsData keys: (2) ['success', 'data']
+product-reviews.tsx:53 ReviewsData.data keys: (2) ['reviews', 'stats']
+product-reviews.tsx:54 ReviewsData.data.reviews: []
+ProductRating.tsx:109 ProductRating Props: {productId: 477, productName: 'تینر فوری 10000', averageRating: 0, totalReviews: 0, reviews: 0}
+ProductRating.tsx:109 ProductRating Props: {productId: 477, productName: 'تینر فوری 10000', averageRating: 0, totalReviews: 0, reviews: 0}
+ProductRating.tsx:109 ProductRating Props: {productId: 477, productName: 'تینر فوری 10000', averageRating: 0, totalReviews: 0, reviews: 0}
+ProductRating.tsx:109 ProductRating Props: {productId: 477, productName: 'تینر فوری 10000', averageRating: 0, totalReviews: 0, reviews: 0}
+ProductRating.tsx:109 ProductRating Props: {productId: 477, productName: 'تینر فوری 10000', averageRating: 0, totalReviews: 0, reviews: 0}
+ProductRating.tsx:109 ProductRating Props: {productId: 477, productName: 'تینر فوری 10000', averageRating: 0, totalReviews: 0, reviews: 0}
+ProductRating.tsx:109 ProductRating Props: {productId: 477, productName: 'تینر فوری 10000', averageRating: 0, totalReviews: 0, reviews: 0}
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 477
+product-reviews.tsx:42 Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "averageRating": 0,
+      "totalReviews": 0,
+      "ratingDistribution": {}
+    }
+  }
+}
+product-reviews.tsx:43 Reviews Array Length: 0
+product-reviews.tsx:44 Reviews Array: []
+product-reviews.tsx:45 Product Stats: {averageRating: 0, totalReviews: 0, ratingDistribution: {…}}
+product-reviews.tsx:46 Product: {id: 477, name: 'تینر فوری 10000', category: 'paint-thinner', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+product-reviews.tsx:50 ReviewsData type: object
+product-reviews.tsx:51 ReviewsData keys: (2) ['success', 'data']
+product-reviews.tsx:53 ReviewsData.data keys: (2) ['reviews', 'stats']
+product-reviews.tsx:54 ReviewsData.data.reviews: []
+ProductRating.tsx:109 ProductRating Props: {productId: 477, productName: 'تینر فوری 10000', averageRating: 0, totalReviews: 0, reviews: 0}
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 477
+product-reviews.tsx:42 Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "averageRating": 0,
+      "totalReviews": 0,
+      "ratingDistribution": {}
+    }
+  }
+}
+product-reviews.tsx:43 Reviews Array Length: 0
+product-reviews.tsx:44 Reviews Array: []
+product-reviews.tsx:45 Product Stats: {averageRating: 0, totalReviews: 0, ratingDistribution: {…}}
+product-reviews.tsx:46 Product: {id: 477, name: 'تینر فوری 10000', category: 'paint-thinner', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+product-reviews.tsx:50 ReviewsData type: object
+product-reviews.tsx:51 ReviewsData keys: (2) ['success', 'data']
+product-reviews.tsx:53 ReviewsData.data keys: (2) ['reviews', 'stats']
+product-reviews.tsx:54 ReviewsData.data.reviews: []
+ProductRating.tsx:109 ProductRating Props: {productId: 477, productName: 'تینر فوری 10000', averageRating: 0, totalReviews: 0, reviews: 0}
+useAuth.ts:30  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 401 (Unauthorized)
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=09ef9b6d:840
+run @ @tanstack_react-query.js?v=09ef9b6d:494
+start @ @tanstack_react-query.js?v=09ef9b6d:536
+fetch @ @tanstack_react-query.js?v=09ef9b6d:926
+executeFetch_fn @ @tanstack_react-query.js?v=09ef9b6d:2211
+fetch @ @tanstack_react-query.js?v=09ef9b6d:2011
+refetch @ @tanstack_react-query.js?v=09ef9b6d:2001
+onFocus @ @tanstack_react-query.js?v=09ef9b6d:749
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:1112
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:1111
+batch @ @tanstack_react-query.js?v=09ef9b6d:583
+onFocus @ @tanstack_react-query.js?v=09ef9b6d:1110
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:313
+onFocus @ @tanstack_react-query.js?v=09ef9b6d:312
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:299
+listener @ @tanstack_react-query.js?v=09ef9b6d:270
+useAuth.ts:30  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 401 (Unauthorized)
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=09ef9b6d:840
+run @ @tanstack_react-query.js?v=09ef9b6d:494
+start @ @tanstack_react-query.js?v=09ef9b6d:536
+fetch @ @tanstack_react-query.js?v=09ef9b6d:926
+executeFetch_fn @ @tanstack_react-query.js?v=09ef9b6d:2211
+fetch @ @tanstack_react-query.js?v=09ef9b6d:2011
+refetch @ @tanstack_react-query.js?v=09ef9b6d:2001
+onFocus @ @tanstack_react-query.js?v=09ef9b6d:749
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:1112
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:1111
+batch @ @tanstack_react-query.js?v=09ef9b6d:583
+onFocus @ @tanstack_react-query.js?v=09ef9b6d:1110
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:313
+onFocus @ @tanstack_react-query.js?v=09ef9b6d:312
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:299
+listener @ @tanstack_react-query.js?v=09ef9b6d:270
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 477
+product-reviews.tsx:42 Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "averageRating": 0,
+      "totalReviews": 0,
+      "ratingDistribution": {}
+    }
+  }
+}
+product-reviews.tsx:43 Reviews Array Length: 0
+product-reviews.tsx:44 Reviews Array: []
+product-reviews.tsx:45 Product Stats: {averageRating: 0, totalReviews: 0, ratingDistribution: {…}}
+product-reviews.tsx:46 Product: {id: 477, name: 'تینر فوری 10000', category: 'paint-thinner', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+product-reviews.tsx:50 ReviewsData type: object
+product-reviews.tsx:51 ReviewsData keys: (2) ['success', 'data']
+product-reviews.tsx:53 ReviewsData.data keys: (2) ['reviews', 'stats']
+product-reviews.tsx:54 ReviewsData.data.reviews: []
+ProductRating.tsx:109 ProductRating Props: {productId: 477, productName: 'تینر فوری 10000', averageRating: 0, totalReviews: 0, reviews: 0}
+queryClient.ts:81  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+(anonymous) @ queryClient.ts:81
+fetchFn @ @tanstack_react-query.js?v=09ef9b6d:840
+run @ @tanstack_react-query.js?v=09ef9b6d:494
+start @ @tanstack_react-query.js?v=09ef9b6d:536
+fetch @ @tanstack_react-query.js?v=09ef9b6d:926
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:1726
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:1725
+batch @ @tanstack_react-query.js?v=09ef9b6d:583
+refetchQueries @ @tanstack_react-query.js?v=09ef9b6d:1724
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:1716
+batch @ @tanstack_react-query.js?v=09ef9b6d:583
+invalidateQueries @ @tanstack_react-query.js?v=09ef9b6d:1705
+onSuccess @ useCustomer.ts:17
+execute @ @tanstack_react-query.js?v=09ef9b6d:1233
+await in execute
+mutate @ @tanstack_react-query.js?v=09ef9b6d:2630
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:3295
+callCallback2 @ chunk-RPCDYKBN.js?v=09ef9b6d:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=09ef9b6d:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=09ef9b6d:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=09ef9b6d:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=09ef9b6d:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=09ef9b6d:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=09ef9b6d:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=09ef9b6d:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=09ef9b6d:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=09ef9b6d:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=09ef9b6d:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=09ef9b6d:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=09ef9b6d:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=09ef9b6d:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=09ef9b6d:5449
+useAuth.ts:30  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 401 (Unauthorized)
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=09ef9b6d:840
+run @ @tanstack_react-query.js?v=09ef9b6d:494
+start @ @tanstack_react-query.js?v=09ef9b6d:536
+fetch @ @tanstack_react-query.js?v=09ef9b6d:926
+executeFetch_fn @ @tanstack_react-query.js?v=09ef9b6d:2211
+setOptions @ @tanstack_react-query.js?v=09ef9b6d:1955
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:3032
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=09ef9b6d:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=09ef9b6d:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=09ef9b6d:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=09ef9b6d:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=09ef9b6d:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=09ef9b6d:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=09ef9b6d:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=09ef9b6d:19416
+commitRoot @ chunk-RPCDYKBN.js?v=09ef9b6d:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=09ef9b6d:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=09ef9b6d:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=09ef9b6d:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=09ef9b6d:555
+flush @ @tanstack_react-query.js?v=09ef9b6d:569
+batch @ @tanstack_react-query.js?v=09ef9b6d:587
+dispatch_fn2 @ @tanstack_react-query.js?v=09ef9b6d:1338
+execute @ @tanstack_react-query.js?v=09ef9b6d:1243
+await in execute
+mutate @ @tanstack_react-query.js?v=09ef9b6d:2630
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:3295
+callCallback2 @ chunk-RPCDYKBN.js?v=09ef9b6d:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=09ef9b6d:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=09ef9b6d:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=09ef9b6d:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=09ef9b6d:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=09ef9b6d:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=09ef9b6d:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=09ef9b6d:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=09ef9b6d:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=09ef9b6d:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=09ef9b6d:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=09ef9b6d:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=09ef9b6d:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=09ef9b6d:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=09ef9b6d:5449
+queryClient.ts:81  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+(anonymous) @ queryClient.ts:81
+fetchFn @ @tanstack_react-query.js?v=09ef9b6d:840
+run @ @tanstack_react-query.js?v=09ef9b6d:494
+start @ @tanstack_react-query.js?v=09ef9b6d:536
+fetch @ @tanstack_react-query.js?v=09ef9b6d:926
+executeFetch_fn @ @tanstack_react-query.js?v=09ef9b6d:2211
+setOptions @ @tanstack_react-query.js?v=09ef9b6d:1955
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:3032
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=09ef9b6d:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=09ef9b6d:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=09ef9b6d:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=09ef9b6d:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=09ef9b6d:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=09ef9b6d:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=09ef9b6d:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=09ef9b6d:19416
+commitRoot @ chunk-RPCDYKBN.js?v=09ef9b6d:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=09ef9b6d:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=09ef9b6d:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=09ef9b6d:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=09ef9b6d:555
+flush @ @tanstack_react-query.js?v=09ef9b6d:569
+batch @ @tanstack_react-query.js?v=09ef9b6d:587
+dispatch_fn2 @ @tanstack_react-query.js?v=09ef9b6d:1338
+execute @ @tanstack_react-query.js?v=09ef9b6d:1243
+await in execute
+mutate @ @tanstack_react-query.js?v=09ef9b6d:2630
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:3295
+callCallback2 @ chunk-RPCDYKBN.js?v=09ef9b6d:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=09ef9b6d:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=09ef9b6d:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=09ef9b6d:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=09ef9b6d:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=09ef9b6d:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=09ef9b6d:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=09ef9b6d:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=09ef9b6d:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=09ef9b6d:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=09ef9b6d:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=09ef9b6d:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=09ef9b6d:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=09ef9b6d:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=09ef9b6d:5449
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+useAuth.ts:30  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 401 (Unauthorized)
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=09ef9b6d:840
+run @ @tanstack_react-query.js?v=09ef9b6d:494
+start @ @tanstack_react-query.js?v=09ef9b6d:536
+fetch @ @tanstack_react-query.js?v=09ef9b6d:926
+executeFetch_fn @ @tanstack_react-query.js?v=09ef9b6d:2211
+onSubscribe @ @tanstack_react-query.js?v=09ef9b6d:1898
+subscribe @ @tanstack_react-query.js?v=09ef9b6d:24
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=09ef9b6d:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=09ef9b6d:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=09ef9b6d:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=09ef9b6d:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=09ef9b6d:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=09ef9b6d:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=09ef9b6d:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=09ef9b6d:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=09ef9b6d:19416
+commitRoot @ chunk-RPCDYKBN.js?v=09ef9b6d:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=09ef9b6d:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=09ef9b6d:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=09ef9b6d:18627
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:369  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+checkCustomerAuth @ shop.tsx:369
+(anonymous) @ shop.tsx:294
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=09ef9b6d:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=09ef9b6d:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=09ef9b6d:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=09ef9b6d:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=09ef9b6d:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=09ef9b6d:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=09ef9b6d:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=09ef9b6d:19416
+commitRoot @ chunk-RPCDYKBN.js?v=09ef9b6d:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=09ef9b6d:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=09ef9b6d:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=09ef9b6d:18627
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: []
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: []
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: []
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: []
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+customer-auth.tsx:180  POST https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/login 401 (Unauthorized)
+onLogin @ customer-auth.tsx:180
+(anonymous) @ chunk-4BFJKWC4.js?v=09ef9b6d:1465
+await in (anonymous)
+callCallback2 @ chunk-RPCDYKBN.js?v=09ef9b6d:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=09ef9b6d:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=09ef9b6d:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=09ef9b6d:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=09ef9b6d:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=09ef9b6d:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=09ef9b6d:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=09ef9b6d:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=09ef9b6d:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=09ef9b6d:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=09ef9b6d:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=09ef9b6d:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=09ef9b6d:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=09ef9b6d:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=09ef9b6d:5449
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:457 🔐 [LOGIN] Starting handleLoginSuccess
+shop.tsx:458 🔐 [LOGIN] Customer data: {id: 94, firstName: 'Omid', lastName: 'Mohammad', email: 'water@momtazchem.com', company: 'Momtazchem Chemical Solutions', …}
+shop.tsx:459 🔐 [LOGIN] Current cart state: {}
+shop.tsx:463 🔐 [LOGIN] Customer state set
+shop.tsx:466 🔐 [LOGIN] Wallet balance fetch initiated
+shop.tsx:470 🔐 [LOGIN] Auth modal closed
+shop.tsx:475 🔐 [LOGIN] Cache invalidated
+shop.tsx:479 🔐 [LOGIN] Has cart items: false
+ 🔐 [LOGIN] Cart contents: {}
+ 🔐 [LOGIN] Cart migration completed
+ 🔐 [LOGIN] Welcome toast shown
+ 🔐 [LOGIN] Staying in shop after successful login
+ 🔐 [LOGIN] handleLoginSuccess completed successfully
+ 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+ 🌟 [RATINGS DEBUG] Products with ratings: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+ 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+ 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+ 🌟 [RATINGS DEBUG] Products with ratings: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+ 🔍 DEBUGGING REVIEWS ISSUE:
+ Product ID: 477
+ Reviews Data Full: undefined
+ Reviews Array Length: 0
+ Reviews Array: []
+ Product Stats: {averageRating: 0, totalReviews: 0}
+ Product: {id: 477, name: 'تینر فوری 10000', category: 'paint-thinner', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+ 🔍 DEBUGGING REVIEWS ISSUE:
+ Product ID: 477
+ Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "averageRating": 0,
+      "totalReviews": 0,
+      "ratingDistribution": {}
+    }
+  }
+}
+ Reviews Array Length: 0
+ Reviews Array: []
+ Product Stats: {averageRating: 0, totalReviews: 0, ratingDistribution: {…}}
+ Product: {id: 477, name: 'تینر فوری 10000', category: 'paint-thinner', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+ ReviewsData type: object
+ ReviewsData keys: (2) ['success', 'data']
+ ReviewsData.data keys: (2) ['reviews', 'stats']
+ ReviewsData.data.reviews: []
+ ProductRating Props: {productId: 477, productName: 'تینر فوری 10000', averageRating: 0, totalReviews: 0, reviews: 0}
+ 🔍 DEBUGGING REVIEWS ISSUE:
+ Product ID: 477
+ Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "averageRating": 0,
+      "totalReviews": 0,
+      "ratingDistribution": {}
+    }
+  }
+}
+ Reviews Array Length: 0
+ Reviews Array: []
+ Product Stats: {averageRating: 0, totalReviews: 0, ratingDistribution: {…}}
+ Product: {id: 477, name: 'تینر فوری 10000', category: 'paint-thinner', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+ ReviewsData type: object
+ ReviewsData keys: (2) ['success', 'data']
+ ReviewsData.data keys: (2) ['reviews', 'stats']
+ ReviewsData.data.reviews: []
+ ProductRating Props: {productId: 477, productName: 'تینر فوری 10000', averageRating: 0, totalReviews: 0, reviews: 0}
+ ProductRating Props: {productId: 477, productName: 'تینر فوری 10000', averageRating: 0, totalReviews: 0, reviews: 0}
+ ProductRating Props: {productId: 477, productName: 'تینر فوری 10000', averageRating: 0, totalReviews: 0, reviews: 0}
+ ProductRating Props: {productId: 477, productName: 'تینر فوری 10000', averageRating: 0, totalReviews: 0, reviews: 0}
+ ProductRating Props: {productId: 477, productName: 'تینر فوری 10000', averageRating: 0, totalReviews: 0, reviews: 0}
+ 🔍 DEBUGGING REVIEWS ISSUE:
+ Product ID: 477
+ Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "averageRating": 0,
+      "totalReviews": 0,
+      "ratingDistribution": {}
+    }
+  }
+}
+ Reviews Array Length: 0
+ Reviews Array: []
+ Product Stats: {averageRating: 0, totalReviews: 0, ratingDistribution: {…}}
+ Product: {id: 477, name: 'تینر فوری 10000', category: 'paint-thinner', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+ ReviewsData type: object
+ ReviewsData keys: (2) ['success', 'data']
+ ReviewsData.data keys: (2) ['reviews', 'stats']
+ ReviewsData.data.reviews: []
+ ProductRating Props: {productId: 477, productName: 'تینر فوری 10000', averageRating: 0, totalReviews: 0, reviews: 0}
+ 🔍 DEBUGGING REVIEWS ISSUE:
+ Product ID: 477
+ Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "averageRating": 0,
+      "totalReviews": 0,
+      "ratingDistribution": {}
+    }
+  }
+}
+ Reviews Array Length: 0
+ Reviews Array: []
+ Product Stats: {averageRating: 0, totalReviews: 0, ratingDistribution: {…}}
+ Product: {id: 477, name: 'تینر فوری 10000', category: 'paint-thinner', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+ ReviewsData type: object
+ ReviewsData keys: (2) ['success', 'data']
+ ReviewsData.data keys: (2) ['reviews', 'stats']
+ ReviewsData.data.reviews: []
+ ProductRating Props: {productId: 477, productName: 'تینر فوری 10000', averageRating: 0, totalReviews: 0, reviews: 0}
+  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 401 (Unauthorized)
+queryFn @ useAuth.ts:26
+fetchFn @ @tanstack_react-query.js:840
+run @ @tanstack_react-query.js:494
+start @ @tanstack_react-query.js:536
+fetch @ @tanstack_react-query.js:926
+executeFetch_fn @ @tanstack_react-query.js:2211
+(anonymous) @ @tanstack_react-query.js:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js:2243
+updateTimers_fn @ @tanstack_react-query.js:2250
+onQueryUpdate @ @tanstack_react-query.js:2206
+(anonymous) @ @tanstack_react-query.js:998
+(anonymous) @ @tanstack_react-query.js:997
+batch @ @tanstack_react-query.js:583
+dispatch_fn @ @tanstack_react-query.js:996
+setData @ @tanstack_react-query.js:696
+onSuccess @ @tanstack_react-query.js:897
+resolve @ @tanstack_react-query.js:456
+Promise.then
+run @ @tanstack_react-query.js:498
+start @ @tanstack_react-query.js:536
+fetch @ @tanstack_react-query.js:926
+executeFetch_fn @ @tanstack_react-query.js:2211
+onSubscribe @ @tanstack_react-query.js:1898
+subscribe @ @tanstack_react-query.js:24
+(anonymous) @ @tanstack_react-query.js:3022
+subscribeToStore @ chunk-RPCDYKBN.js:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js:19447
+commitRootImpl @ chunk-RPCDYKBN.js:19416
+commitRoot @ chunk-RPCDYKBN.js:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js:9119
+(anonymous) @ chunk-RPCDYKBN.js:18627
