@@ -1283,21 +1283,40 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                     />
                   </div>
                   
-                  {/* Remaining Amount for Bank Payment Card */}
+                  {/* Payment Breakdown Table */}
                   {walletAmount > 0 && (
-                    <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h4 className="font-medium text-orange-800">مبلغ باقی‌مانده برای پرداخت بانکی</h4>
-                          <p className="text-sm text-orange-600">
-                            بعد از کسر مبلغ والت ({formatCurrency(walletAmount)})
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <span className="text-2xl font-bold text-orange-900">
-                            {formatCurrency(totalAmount - walletAmount)}
-                          </span>
-                        </div>
+                    <div className="bg-white border border-gray-300 rounded-lg overflow-hidden">
+                      <table className="w-full text-sm">
+                        <tbody>
+                          {/* Final Amount Row */}
+                          <tr className="border-b">
+                            <td className="px-4 py-3 text-right font-medium bg-gray-50">Final Amount</td>
+                            <td className="px-4 py-3 text-center font-bold">{totalAmount.toLocaleString()}</td>
+                            <td className="px-4 py-3 bg-gray-50"></td>
+                            <td className="px-4 py-3 bg-gray-50"></td>
+                          </tr>
+                          
+                          {/* Wallet Payment Row */}
+                          <tr className="border-b">
+                            <td className="px-4 py-3 text-right">مبلغ پرداخت از کیف پول</td>
+                            <td className="px-4 py-3 text-center font-medium">{walletAmount.toLocaleString()}</td>
+                            <td className="px-4 py-3 text-right font-medium bg-blue-50">محدودیت کیف پول</td>
+                            <td className="px-4 py-3 text-center font-medium bg-blue-50 text-blue-700">{walletBalance.toLocaleString()}</td>
+                          </tr>
+                          
+                          {/* Bank Payment Row */}
+                          <tr>
+                            <td className="px-4 py-3 text-right">پرداخت کارت بانکی</td>
+                            <td className="px-4 py-3 text-center font-medium text-orange-600">{(totalAmount - walletAmount).toLocaleString()}</td>
+                            <td className="px-4 py-3 bg-gray-50"></td>
+                            <td className="px-4 py-3 bg-gray-50"></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      
+                      {/* Additional note */}
+                      <div className="px-4 py-2 bg-orange-50 text-sm text-orange-700 border-t">
+                        پرداخت در حواله بانکی یا موقعیت سه روزه
                       </div>
                     </div>
                   )}
