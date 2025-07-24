@@ -82,6 +82,9 @@ const CustomerProfile = () => {
   const [completeHistory, setCompleteHistory] = useState<any[]>([]);
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
   
+  // Main profile filter state
+  const [mainProfileFilter, setMainProfileFilter] = useState<string>("all");
+  
   // Get customer information
   const { data: customerData, isLoading: customerLoading, error: customerError } = useQuery<any>({
     queryKey: ["/api/customers/me"],
@@ -104,7 +107,7 @@ const CustomerProfile = () => {
 
   // Sort orders: 3-day bank transfer orders first, then regular orders
   const rawOrders = orderData?.orders || [];
-  const orders = rawOrders.sort((a: any, b: any) => {
+  const sortedOrders = rawOrders.sort((a: any, b: any) => {
     // Check if order is 3-day bank transfer (both Persian display name and English API name)
     const aIs3DayBank = a.paymentMethod === 'واریز بانکی با مهلت 3 روزه' || a.paymentMethod === 'bank_transfer_grace';
     const bIs3DayBank = b.paymentMethod === 'واریز بانکی با مهلت 3 روزه' || b.paymentMethod === 'bank_transfer_grace';
@@ -116,6 +119,9 @@ const CustomerProfile = () => {
     // If both are same type, sort by creation date (newest first)
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
+
+  // Filter orders based on main profile filter
+  const orders = mainProfileFilter === "all" ? sortedOrders : sortedOrders.filter(order => getOrderCategory(order) === mainProfileFilter);
   
   const totalOrders = orderData?.totalOrders || 0;
   const hiddenOrders = orderData?.hiddenOrders || 0;
@@ -441,7 +447,8 @@ const CustomerProfile = () => {
                   {orders.length > 0 && (
                     <div className="flex items-center gap-3 text-xs">
                       {(() => {
-                        const statusCounts = orders.reduce((acc: any, order: any) => {
+                        // Count all orders (not filtered ones) for accurate status display
+                        const statusCounts = sortedOrders.reduce((acc: any, order: any) => {
                           const category = getOrderCategory(order);
                           acc[category] = (acc[category] || 0) + 1;
                           return acc;
@@ -449,29 +456,80 @@ const CustomerProfile = () => {
                         
                         return (
                           <>
+                            {/* All Orders Filter */}
+                            <button
+                              onClick={() => setMainProfileFilter("all")}
+                              className={`flex items-center gap-1 px-2 py-1 rounded-full border transition-all cursor-pointer ${
+                                mainProfileFilter === "all"
+                                  ? "bg-purple-100 border-purple-300 shadow-md"
+                                  : "bg-gray-50 border-gray-200 hover:bg-gray-100"
+                              }`}
+                            >
+                              <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
+                              <span className={`font-medium ${mainProfileFilter === "all" ? "text-purple-700" : "text-gray-700"}`}>
+                                {sortedOrders.length} همه
+                              </span>
+                            </button>
+
                             {statusCounts.completed > 0 && (
-                              <div className="flex items-center gap-1 px-2 py-1 bg-green-50 rounded-full border border-green-200">
+                              <button
+                                onClick={() => setMainProfileFilter("completed")}
+                                className={`flex items-center gap-1 px-2 py-1 rounded-full border transition-all cursor-pointer ${
+                                  mainProfileFilter === "completed"
+                                    ? "bg-green-100 border-green-300 shadow-md"
+                                    : "bg-green-50 border-green-200 hover:bg-green-100"
+                                }`}
+                              >
                                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                                <span className="text-green-700 font-medium">{statusCounts.completed} تکمیل شده</span>
-                              </div>
+                                <span className={`font-medium ${mainProfileFilter === "completed" ? "text-green-800" : "text-green-700"}`}>
+                                  {statusCounts.completed} تکمیل شده
+                                </span>
+                              </button>
                             )}
                             {statusCounts.pending > 0 && (
-                              <div className="flex items-center gap-1 px-2 py-1 bg-yellow-50 rounded-full border border-yellow-200">
+                              <button
+                                onClick={() => setMainProfileFilter("pending")}
+                                className={`flex items-center gap-1 px-2 py-1 rounded-full border transition-all cursor-pointer ${
+                                  mainProfileFilter === "pending"
+                                    ? "bg-yellow-100 border-yellow-300 shadow-md"
+                                    : "bg-yellow-50 border-yellow-200 hover:bg-yellow-100"
+                                }`}
+                              >
                                 <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                                <span className="text-yellow-700 font-medium">{statusCounts.pending} در انتظار پرداخت</span>
-                              </div>
+                                <span className={`font-medium ${mainProfileFilter === "pending" ? "text-yellow-800" : "text-yellow-700"}`}>
+                                  {statusCounts.pending} در انتظار پرداخت
+                                </span>
+                              </button>
                             )}
                             {statusCounts.processing > 0 && (
-                              <div className="flex items-center gap-1 px-2 py-1 bg-blue-50 rounded-full border border-blue-200">
+                              <button
+                                onClick={() => setMainProfileFilter("processing")}
+                                className={`flex items-center gap-1 px-2 py-1 rounded-full border transition-all cursor-pointer ${
+                                  mainProfileFilter === "processing"
+                                    ? "bg-blue-100 border-blue-300 shadow-md"
+                                    : "bg-blue-50 border-blue-200 hover:bg-blue-100"
+                                }`}
+                              >
                                 <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                                <span className="text-blue-700 font-medium">{statusCounts.processing} در حال پردازش</span>
-                              </div>
+                                <span className={`font-medium ${mainProfileFilter === "processing" ? "text-blue-800" : "text-blue-700"}`}>
+                                  {statusCounts.processing} در حال پردازش
+                                </span>
+                              </button>
                             )}
                             {statusCounts.bank_transfer > 0 && (
-                              <div className="flex items-center gap-1 px-2 py-1 bg-orange-50 rounded-full border border-orange-200">
+                              <button
+                                onClick={() => setMainProfileFilter("bank_transfer")}
+                                className={`flex items-center gap-1 px-2 py-1 rounded-full border transition-all cursor-pointer ${
+                                  mainProfileFilter === "bank_transfer"
+                                    ? "bg-orange-100 border-orange-300 shadow-md"
+                                    : "bg-orange-50 border-orange-200 hover:bg-orange-100"
+                                }`}
+                              >
                                 <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                                <span className="text-orange-700 font-medium">{statusCounts.bank_transfer} حواله بانکی</span>
-                              </div>
+                                <span className={`font-medium ${mainProfileFilter === "bank_transfer" ? "text-orange-800" : "text-orange-700"}`}>
+                                  {statusCounts.bank_transfer} حواله بانکی
+                                </span>
+                              </button>
                             )}
                           </>
                         );

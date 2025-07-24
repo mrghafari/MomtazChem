@@ -54,9 +54,20 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
   - Only displays categories that have orders > 0
 - **Dynamic Counting**: Real-time calculation using getOrderCategory function to categorize and count orders
 - **Status Logic**: Uses same categorization logic as purchase history filtering for consistency
-- **User Experience**: Clear visual overview of order distribution on main profile page
-- **Impact**: Customers can quickly see their order status breakdown without opening purchase history modal
-- **Result**: Main profile page now shows order status counts with colored indicators next to "سفارشات شما"
+- **Clickable Filtering**: Added click functionality to status indicators for instant order filtering:
+  - **All Orders**: Shows all orders (default state)
+  - **Completed**: Filters to show only completed orders
+  - **Pending Payment**: Shows only orders awaiting payment
+  - **Processing**: Displays only orders in processing states
+  - **Bank Transfer**: Shows only 3-day grace period bank transfer orders
+- **Interactive Design**: 
+  - Active filter highlighted with darker background and shadow
+  - Hover effects on all clickable status badges
+  - Visual feedback showing selected filter state
+- **Smart Filtering**: Order list updates instantly when status badges are clicked
+- **User Experience**: Clear visual overview of order distribution with instant filtering capability on main profile page
+- **Impact**: Customers can quickly see their order status breakdown and filter orders without opening purchase history modal
+- **Result**: Main profile page now shows clickable order status counts with colored indicators and filtering functionality next to "سفارشات شما"
 
 ### COMPLETED: Purchase History Header Creation with Order Types Categorization (July 24, 2025)
 ✅ **IMPLEMENTED: Professional header above search field in customer purchase history to categorize different order types**
