@@ -71,6 +71,96 @@ export async function generateAISeoContent(request: SeoGenerationRequest): Promi
   }
 }
 
+export async function generateKeywordsForBusiness(params: {
+  industry: string;
+  businessContext: string;
+  seedKeywords: string;
+  language: string;
+  pageType: string;
+}): Promise<{
+  primary: string[];
+  longTail: string[];
+  semantic: string[];
+  localSeo: string[];
+  recommendations: string[];
+}> {
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error("OpenAI API key not configured");
+  }
+
+  try {
+    const prompt = `You are an expert SEO keyword researcher specializing in chemical industry businesses in the Middle East, particularly Iraq.
+
+Business Information:
+- Industry: ${params.industry}
+- Target Market: ${params.businessContext}
+- Initial Keywords: ${params.seedKeywords}
+- Language: ${params.language}
+- Page Type: ${params.pageType}
+
+Your task is to generate strategic SEO keywords for this chemical business that will help them rank #1 in search engines.
+
+Requirements:
+1. Generate keywords in ${params.language === 'fa' ? 'Persian/Farsi' : params.language === 'ar' ? 'Arabic' : params.language === 'en' ? 'English' : 'Kurdish'} language
+2. Focus on high-intent commercial keywords for chemical industry
+3. Include location-based keywords for Iraq and Middle East region
+4. Consider search volume and competition balance
+5. Include technical chemical terms and industry-specific language
+
+Generate keywords in these categories:
+
+Primary Keywords (5-8 high-volume commercial keywords):
+- Main business keywords with good search volume
+- Direct product/service keywords
+- Industry-defining terms
+
+Long-tail Keywords (8-12 specific phrases):
+- Specific product searches
+- Problem-solving queries
+- Technical specifications searches
+- "Best" and "How to" variations
+
+Semantic Keywords (6-10 related terms):
+- Industry synonyms and variations
+- Related chemical processes
+- Supporting business terms
+- Complementary services
+
+Local SEO Keywords (5-8 location-based):
+- City + service combinations for Iraq
+- Regional market terms
+- Local industry keywords
+- Geographic + chemical terms
+
+Optimization Recommendations (5-7 strategic tips):
+- Specific advice for this business type
+- Content strategy suggestions
+- Technical SEO recommendations
+- Competitive positioning advice
+
+Respond in JSON format with arrays for each category and ensure all keywords are in the requested language.`;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        { 
+          role: "system", 
+          content: "You are a top-tier SEO keyword strategist specializing in chemical industry businesses in the Middle East. Your keyword research helps businesses achieve #1 rankings in Google."
+        },
+        { role: "user", content: prompt }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.3,
+      max_tokens: 2500
+    });
+
+    return JSON.parse(response.choices[0].message.content || "{}");
+  } catch (error) {
+    console.error("Error generating keywords:", error);
+    throw new Error("Failed to generate keywords: " + error.message);
+  }
+}
+
 export async function analyzeSeoPerformance(url: string, targetKeywords: string[]): Promise<{
   titleScore: number;
   descriptionScore: number;

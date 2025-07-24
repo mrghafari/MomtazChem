@@ -18013,6 +18013,26 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     }
   });
 
+  // Business-specific keyword research
+  app.post('/api/ai/seo/keyword-research', requireAuth, async (req, res) => {
+    try {
+      const { generateKeywordsForBusiness } = await import('./ai-seo-generator');
+      const result = await generateKeywordsForBusiness(req.body);
+      
+      res.json({
+        success: true,
+        type: 'keywords',
+        data: result
+      });
+    } catch (error) {
+      console.error('Error generating keyword research:', error);
+      res.status(500).json({
+        success: false,
+        message: error.message || 'Failed to generate keyword research'
+      });
+    }
+  });
+
   // AI Content Optimization
   app.post('/api/ai/seo/optimize', requireAuth, async (req, res) => {
     try {

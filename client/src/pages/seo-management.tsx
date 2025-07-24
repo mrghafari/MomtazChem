@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Plus, Edit2, Trash2, Search, BarChart3, Globe, Link, Settings, Languages, Target, Bot, Wand2, Brain, Lightbulb, Zap, FileText } from "lucide-react";
+import { Plus, Edit2, Trash2, Search, BarChart3, Globe, Link, Settings, Languages, Target, Bot, Wand2, Brain, Lightbulb, Zap, FileText, Loader2, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -505,6 +505,44 @@ export default function SeoManagement() {
     });
   };
 
+  const handleKeywordResearch = async () => {
+    if (!aiIndustry || !aiSeedKeywords) {
+      toast({
+        title: "فیلدهای مورد نیاز ناقص",
+        description: "لطفاً نوع کسب‌وکار و کلیدواژه‌های اولیه را وارد کنید",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsAiLoading(true);
+    
+    try {
+      const response = await apiRequest("/api/ai/seo/keyword-research", "POST", {
+        industry: aiIndustry,
+        businessContext: aiBusinessContext,
+        seedKeywords: aiSeedKeywords,
+        language: aiLanguage || 'fa',
+        pageType: aiPageType || 'homepage'
+      });
+      
+      setAiResults(response);
+      toast({
+        title: "✨ کلیدواژه‌ها تولید شد",
+        description: "کلیدواژه‌های هوشمند با موفقیت تولید شدند",
+      });
+    } catch (error: any) {
+      console.error("Error generating keywords:", error);
+      toast({
+        title: "خطا در تولید کلیدواژه",
+        description: error.message || "تولید کلیدواژه‌ها ناموفق بود",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAiLoading(false);
+    }
+  };
+
   const filteredSettings = Array.isArray(seoSettings) ? 
     seoSettings.filter((setting: SeoSetting) =>
       setting.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -882,6 +920,243 @@ export default function SeoManagement() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="keywords" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Keyword Research & Analysis */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Target className="h-5 w-5 text-blue-600" />
+                  پژوهش کلیدواژه با هوش مصنوعی
+                </CardTitle>
+                <CardDescription className="text-right">
+                  تولید کلیدواژه‌های مؤثر برای بهبود رتبه‌بندی در جستجوگرها
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  <div>
+                    <Label htmlFor="businessType" className="text-right">نوع کسب‌وکار</Label>
+                    <Input
+                      id="businessType"
+                      value={aiIndustry}
+                      onChange={(e) => setAiIndustry(e.target.value)}
+                      placeholder="مثال: فروش مواد شیمیایی، صنایع نفت‌وگاز"
+                      className="text-right"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="targetMarket" className="text-right">بازار هدف</Label>
+                    <Input
+                      id="targetMarket"
+                      value={aiBusinessContext}
+                      onChange={(e) => setAiBusinessContext(e.target.value)}
+                      placeholder="مثال: عراق، خاورمیانه، مشتریان صنعتی"
+                      className="text-right"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="seedKeywords" className="text-right">کلیدواژه‌های اولیه</Label>
+                    <Textarea
+                      id="seedKeywords"
+                      value={aiSeedKeywords}
+                      onChange={(e) => setAiSeedKeywords(e.target.value)}
+                      placeholder="مثال: مواد شیمیایی، حلال، کود، پتروشیمی"
+                      rows={3}
+                      className="text-right"
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <Label htmlFor="language" className="text-right">زبان</Label>
+                      <Select value={aiLanguage} onValueChange={setAiLanguage}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="انتخاب زبان" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="fa">فارسی</SelectItem>
+                          <SelectItem value="ar">عربی</SelectItem>
+                          <SelectItem value="en">انگلیسی</SelectItem>
+                          <SelectItem value="ku">کردی</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="pageType" className="text-right">نوع صفحه</Label>
+                      <Select value={aiPageType} onValueChange={setAiPageType}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="انتخاب نوع صفحه" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="homepage">صفحه اصلی</SelectItem>
+                          <SelectItem value="product">صفحه محصول</SelectItem>
+                          <SelectItem value="category">دسته‌بندی</SelectItem>
+                          <SelectItem value="about">درباره ما</SelectItem>
+                          <SelectItem value="service">خدمات</SelectItem>
+                          <SelectItem value="blog">وبلاگ</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+                
+                <Button
+                  onClick={handleKeywordResearch}
+                  disabled={isAiLoading || !aiIndustry || !aiSeedKeywords}
+                  className="w-full bg-blue-600 hover:bg-blue-700"
+                >
+                  {isAiLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      در حال تولید کلیدواژه...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      تولید کلیدواژه‌های هوشمند
+                    </>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Keyword Performance Tracking */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5 text-green-600" />
+                  عملکرد کلیدواژه‌ها
+                </CardTitle>
+                <CardDescription className="text-right">
+                  رصد و تحلیل عملکرد کلیدواژه‌های فعلی
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {isLoadingKeywordPerformance ? (
+                  <div className="text-center py-8">
+                    <Loader2 className="h-8 w-8 mx-auto mb-4 animate-spin text-blue-600" />
+                    <p className="text-gray-600">در حال بارگذاری آمار کلیدواژه‌ها...</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center p-4 bg-blue-50 rounded-lg">
+                        <div className="text-2xl font-bold text-blue-600">
+                          {keywordPerformance?.totalKeywords || 0}
+                        </div>
+                        <div className="text-sm text-gray-600">کل کلیدواژه‌ها</div>
+                      </div>
+                      <div className="text-center p-4 bg-green-50 rounded-lg">
+                        <div className="text-2xl font-bold text-green-600">
+                          {keywordPerformance?.averagePosition ? 
+                            keywordPerformance.averagePosition.toFixed(1) : 'N/A'}
+                        </div>
+                        <div className="text-sm text-gray-600">میانگین رتبه</div>
+                      </div>
+                    </div>
+                    
+                    {keywordPerformance?.topKeywords && keywordPerformance.topKeywords.length > 0 ? (
+                      <div className="space-y-2">
+                        <h4 className="font-semibold text-right">برترین کلیدواژه‌ها</h4>
+                        {keywordPerformance.topKeywords.map((keyword: any, index: number) => (
+                          <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded">
+                            <div className="flex items-center gap-2">
+                              <Badge variant={keyword.position <= 10 ? "default" : "secondary"}>
+                                رتبه {keyword.position}
+                              </Badge>
+                              <span className="text-sm text-gray-600">
+                                {keyword.clicks} کلیک
+                              </span>
+                            </div>
+                            <span className="font-medium text-right">{keyword.keyword}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-6 text-gray-500">
+                        <Target className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                        <p>هنوز کلیدواژه‌ای ثبت نشده است</p>
+                        <p className="text-sm mt-1">از بخش تولید کلیدواژه استفاده کنید</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* AI Results Display */}
+          {aiResults && aiResults.type === 'keywords' && (
+            <Card className="mt-6">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-purple-600" />
+                  کلیدواژه‌های پیشنهادی
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {aiResults.data.primary && (
+                    <div className="space-y-2">
+                      <h4 className="font-semibold text-purple-600 text-right">کلیدواژه‌های اصلی</h4>
+                      <div className="space-y-1">
+                        {aiResults.data.primary.map((keyword: string, index: number) => (
+                          <Badge key={index} variant="default" className="mr-1 mb-1">
+                            {keyword}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {aiResults.data.longTail && (
+                    <div className="space-y-2">
+                      <h4 className="font-semibold text-blue-600 text-right">کلیدواژه‌های طولانی</h4>
+                      <div className="space-y-1">
+                        {aiResults.data.longTail.map((keyword: string, index: number) => (
+                          <Badge key={index} variant="secondary" className="mr-1 mb-1">
+                            {keyword}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {aiResults.data.semantic && (
+                    <div className="space-y-2">
+                      <h4 className="font-semibold text-green-600 text-right">کلیدواژه‌های مرتبط</h4>
+                      <div className="space-y-1">
+                        {aiResults.data.semantic.map((keyword: string, index: number) => (
+                          <Badge key={index} variant="outline" className="mr-1 mb-1">
+                            {keyword}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                {aiResults.data.recommendations && (
+                  <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <h4 className="font-semibold text-yellow-800 mb-2 text-right">
+                      توصیه‌های بهینه‌سازی
+                    </h4>
+                    <ul className="space-y-1 text-sm text-yellow-700 text-right">
+                      {aiResults.data.recommendations.map((rec: string, index: number) => (
+                        <li key={index}>• {rec}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-6">
