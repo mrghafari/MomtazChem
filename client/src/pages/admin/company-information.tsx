@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -37,7 +37,9 @@ import {
   Search,
   Image,
   Eye,
-  X
+  X,
+  Save,
+  Loader2
 } from 'lucide-react';
 
 interface CompanyInfo {
@@ -199,6 +201,8 @@ export default function CompanyInformation() {
   const [editingItem, setEditingItem] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedImageView, setSelectedImageView] = useState<CompanyImage | null>(null);
+  const [formData, setFormData] = useState<CompanyInfo>({});
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   // Fetch company information from database
   const { data: companyInfo, isLoading: infoLoading } = useQuery<CompanyInfo>({
@@ -232,6 +236,20 @@ export default function CompanyInformation() {
       return result.data || [];
     }
   });
+
+  // Initialize formData when companyInfo loads
+  useEffect(() => {
+    if (companyInfo) {
+      setFormData(companyInfo);
+      setHasUnsavedChanges(false);
+    }
+  }, [companyInfo]);
+
+  // Handle form field changes
+  const handleFieldChange = (field: keyof CompanyInfo, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    setHasUnsavedChanges(true);
+  };
 
   // Fetch incoming correspondence
   const { data: incomingMails } = useQuery<Correspondence[]>({
@@ -300,6 +318,7 @@ export default function CompanyInformation() {
     onSuccess: () => {
       toast({ title: "موفقیت", description: "اطلاعات شرکت با موفقیت در دیتابیس ذخیره شد" });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/company-information'] });
+      setHasUnsavedChanges(false);
     },
     onError: (error) => {
       console.error('Error updating company information:', error);
@@ -310,6 +329,11 @@ export default function CompanyInformation() {
       });
     }
   });
+
+  // Handle save button click
+  const handleSaveCompanyInfo = () => {
+    updateCompanyInfoMutation.mutate(formData);
+  };
 
   // Business Cards mutations
   const addBusinessCardMutation = useMutation({
@@ -610,24 +634,18 @@ export default function CompanyInformation() {
                   <Label>نام شرکت (عربی)</Label>
                   <Input 
                     id="companyNameAr"
-                    value={companyInfo?.companyNameAr || ''} 
+                    value={formData?.companyNameAr || ''} 
                     placeholder="ممتاز شیمی"
-                    onChange={(e) => {
-                      const updatedInfo = { ...companyInfo, companyNameAr: e.target.value };
-                      updateCompanyInfoMutation.mutate(updatedInfo);
-                    }}
+                    onChange={(e) => handleFieldChange('companyNameAr', e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>نام شرکت (انگلیسی)</Label>
                   <Input 
                     id="companyNameEn"
-                    value={companyInfo?.companyNameEn || ''} 
+                    value={formData?.companyNameEn || ''} 
                     placeholder="Momtazchem"
-                    onChange={(e) => {
-                      const updatedInfo = { ...companyInfo, companyNameEn: e.target.value };
-                      updateCompanyInfoMutation.mutate(updatedInfo);
-                    }}
+                    onChange={(e) => handleFieldChange('companyNameEn', e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
@@ -906,6 +924,42 @@ export default function CompanyInformation() {
                   />
                 </div>
               </CardContent>
+            </Card>
+
+            {/* Save Button */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Save className="h-5 w-5" />
+                  ذخیره اطلاعات
+                </CardTitle>
+                <CardDescription>
+                  {hasUnsavedChanges 
+                    ? "تغییرات ذخیره نشده‌ای دارید. برای ذخیره در دیتابیس کلیک کنید." 
+                    : "تمام اطلاعات ذخیره شده است."
+                  }
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button 
+                  onClick={handleSaveCompanyInfo}
+                  disabled={!hasUnsavedChanges || updateCompanyInfoMutation.isPending}
+                  className="w-full"
+                  size="lg"
+                >
+                  {updateCompanyInfoMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      در حال ذخیره...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="ml-2 h-4 w-4" />
+                      ذخیره اطلاعات شرکت
+                    </>
+                  )}
+                </Button>
+              </CardContent>  
             </Card>
 
             {/* Company Description */}
