@@ -242,7 +242,7 @@ export default function CompanyInformation() {
     mutationFn: async (data: CompanyInfo) => {
       const response = await apiRequest('/api/admin/company-information', {
         method: 'PUT',
-        body: JSON.stringify(data),
+        body: data, // Remove JSON.stringify as apiRequest does this automatically
       });
       return response;
     },
@@ -265,7 +265,7 @@ export default function CompanyInformation() {
     mutationFn: async (data: BusinessCard) => {
       const response = await apiRequest('/api/business-cards', {
         method: 'POST',
-        body: JSON.stringify(data),
+        body: data, // Remove JSON.stringify
       });
       return response;
     },
@@ -288,7 +288,7 @@ export default function CompanyInformation() {
     mutationFn: async ({ id, data }: { id: number; data: BusinessCard }) => {
       const response = await apiRequest(`/api/business-cards/${id}`, {
         method: 'PUT',
-        body: JSON.stringify(data),
+        body: data, // Remove JSON.stringify
       });
       return response;
     },

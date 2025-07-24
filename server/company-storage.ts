@@ -22,7 +22,7 @@ export class CompanyStorage {
   // Company Information methods
   async getCompanyInformation(): Promise<CompanyInformation | null> {
     try {
-      const [company] = await db.select().from(companyInformation).where(eq(companyInformation.isActive, true)).limit(1);
+      const [company] = await db.select().from(companyInformation).limit(1);
       return company || null;
     } catch (error) {
       console.error('Error fetching company information:', error);
