@@ -3,116 +3,347 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تست ادغام اطلاعات بانکی دینامیک</title>
+    <title>Banking Information Integration Test</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; direction: rtl; }
-        .container { max-width: 800px; margin: 0 auto; }
-        .test-section { margin-bottom: 30px; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
-        .success { background-color: #d4edda; border-color: #c3e6cb; }
-        .info { background-color: #d1ecf1; border-color: #bee5eb; }
-        .warning { background-color: #fff3cd; border-color: #ffeaa7; }
-        h1 { color: #2c3e50; text-align: center; }
-        h2 { color: #34495e; }
-        p { line-height: 1.6; }
-        .api-path { font-family: monospace; background: #f8f9fa; padding: 4px 8px; border-radius: 4px; }
+        body {
+            font-family: 'Tahoma', sans-serif;
+            direction: rtl;
+            text-align: right;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            background: #f8f9fa;
+        }
+        .test-section.success {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+        .test-section.error {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+        .test-button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            transition: all 0.3s;
+        }
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .banking-info {
+            background: #e8f4fd;
+            border: 1px solid #bee5eb;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .label {
+            font-weight: bold;
+            color: #495057;
+        }
+        .value {
+            color: #212529;
+            background: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+        .endpoint-test {
+            background: #fff3cd;
+            border: 1px solid #ffeeba;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: monospace;
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-weight: bold;
+            display: inline-block;
+            margin: 5px;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .status.loading {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🏦 تست ادغام اطلاعات بانکی دینامیک</h1>
-        <p style="text-align: center; color: #666;">آزمایش عملکرد ادغام اطلاعات بانکی از ماژول Company Information به فرم‌های پرداخت</p>
-
-        <!-- Test Section 1: Bank Receipt Upload Page -->
-        <div class="test-section success">
-            <h2>✅ صفحه آپلود رسید بانکی (Bank Receipt Upload)</h2>
-            <p><strong>مسیر:</strong> <span class="api-path">/bank-receipt-upload</span></p>
-            <p><strong>تغییرات انجام شده:</strong></p>
-            <ul>
-                <li>✅ حذف اطلاعات بانکی هاردکد شده</li>
-                <li>✅ اضافه کردن API call برای دریافت اطلاعات شرکت</li>
-                <li>✅ نمایش دینامیک نام بانک از <code>companyInfo.bankName</code></li>
-                <li>✅ نمایش دینامیک شماره حساب از <code>companyInfo.bankAccount</code></li>
-                <li>✅ نمایش دینامیک IBAN از <code>companyInfo.bankIban</code></li>
-                <li>✅ نمایش دینامیک کد SWIFT از <code>companyInfo.bankSwift</code></li>
-                <li>✅ نمایش نام صاحب حساب از نام شرکت</li>
-                <li>✅ Loading state برای زمان بارگذاری اطلاعات</li>
-                <li>✅ Fallback values برای زمان عدم دسترسی به اطلاعات</li>
-            </ul>
-            <p><strong>API Endpoint:</strong> <span class="api-path">GET /api/admin/company-information</span></p>
+        <div class="header">
+            <h1>🏦 Banking Information Integration Test</h1>
+            <p>Testing public API endpoint for customer payment forms</p>
         </div>
 
-        <!-- Test Section 2: Customer Wallet Page -->
-        <div class="test-section success">
-            <h2>✅ صفحه کیف پول مشتری (Customer Wallet)</h2>
-            <p><strong>مسیر:</strong> <span class="api-path">/customer/wallet</span></p>
-            <p><strong>تغییرات انجام شده:</strong></p>
-            <ul>
-                <li>✅ اضافه کردن import برای <code>Building2</code> icon</li>
-                <li>✅ اضافه کردن API call برای دریافت اطلاعات شرکت</li>
-                <li>✅ ایجاد کارد اطلاعات بانکی در بخش Bank Transfer</li>
-                <li>✅ نمایش دینامیک اطلاعات بانکی فقط زمان انتخاب "bank_transfer"</li>
-                <li>✅ طراحی responsive با grid layout دو ستونه</li>
-                <li>✅ نمایش loading state</li>
-                <li>✅ نمایش fallback values</li>
-                <li>✅ رنگ‌بندی آبی برای کارد اطلاعات بانکی</li>
-            </ul>
-            <p><strong>API Endpoint:</strong> <span class="api-path">GET /api/admin/company-information</span></p>
+        <div class="test-section" id="endpoint-test">
+            <h3>📡 Public API Endpoint Test</h3>
+            <p>Testing: <code>/api/company/banking-info</code></p>
+            <div class="endpoint-test" id="endpoint-result">
+                <div class="status loading">Testing endpoint...</div>
+            </div>
+            <button class="test-button" onclick="testPublicEndpoint()">🔄 Test Public Endpoint</button>
         </div>
 
-        <!-- Test Section 3: Company Information Module -->
-        <div class="test-section info">
-            <h2>ℹ️ ماژول اطلاعات شرکت (Company Information)</h2>
-            <p><strong>مسیر:</strong> <span class="api-path">/admin/company-information</span></p>
-            <p><strong>فیلدهای بانکی موجود:</strong></p>
-            <ul>
-                <li><code>bankName</code> - نام بانک</li>
-                <li><code>bankAccount</code> - شماره حساب</li>
-                <li><code>bankIban</code> - شماره IBAN</li>
-                <li><code>bankSwift</code> - کد SWIFT</li>
-            </ul>
-            <p><strong>تنظیمات:</strong> Manual Save System فعال - تغییرات فقط با کلیک دکمه "ذخیره اطلاعات شرکت" ذخیره می‌شوند</p>
+        <div class="test-section" id="banking-display">
+            <h3>🏛️ Banking Information Display</h3>
+            <div class="banking-info" id="banking-data">
+                <div class="status loading">Loading banking information...</div>
+            </div>
         </div>
 
-        <!-- Test Section 4: Schema Integration -->
-        <div class="test-section info">
-            <h2>🔗 ادغام Schema</h2>
-            <p><strong>فایل Schema:</strong> <span class="api-path">shared/schema.ts</span></p>
-            <p><strong>جدول:</strong> <code>companyInformation</code></p>
-            <p><strong>فیلدهای بانکی:</strong></p>
-            <ul>
-                <li><code>bankName: text('bank_name')</code></li>
-                <li><code>bankAccount: text('bank_account')</code></li>
-                <li><code>bankIban: text('bank_iban')</code></li>
-                <li><code>bankSwift: text('bank_swift')</code></li>
-            </ul>
+        <div class="test-section" id="forms-test">
+            <h3>📝 Payment Forms Integration Test</h3>
+            <p>Testing banking information access in customer payment forms:</p>
+            
+            <div class="status" id="bank-receipt-status">Testing Bank Receipt Upload...</div>
+            <div class="status" id="customer-wallet-status">Testing Customer Wallet...</div>
+            <div class="status" id="payment-gateway-status">Testing Payment Gateway...</div>
+            
+            <button class="test-button" onclick="testPaymentForms()">🧪 Test Payment Forms</button>
         </div>
 
-        <!-- Test Section 5: Next Steps -->
-        <div class="test-section warning">
-            <h2>⚠️ گام‌های بعدی</h2>
-            <p><strong>برای تکمیل تست:</strong></p>
-            <ol>
-                <li>ورود به پنل مدیریت از طریق <span class="api-path">/admin</span></li>
-                <li>رفتن به بخش "اطلاعات شرکت"</li>
-                <li>تکمیل اطلاعات بانکی (نام بانک، شماره حساب، IBAN، SWIFT)</li>
-                <li>ذخیره اطلاعات با کلیک دکمه "ذخیره اطلاعات شرکت"</li>
-                <li>تست صفحه آپلود رسید بانکی</li>
-                <li>تست صفحه کیف پول مشتری با انتخاب گزینه "bank_transfer"</li>
-            </ol>
+        <div class="test-section" id="auth-verification">
+            <h3>🔐 Authentication Verification</h3>
+            <p>Verifying that public endpoint works without admin authentication:</p>
+            <div class="status" id="auth-status">Checking authentication...</div>
+            <button class="test-button" onclick="testAuthenticationBypass()">🔓 Test Public Access</button>
         </div>
 
-        <!-- Test Results -->
-        <div class="test-section">
-            <h2>📊 نتایج تست</h2>
-            <p><strong>وضعیت کلی:</strong> ✅ ادغام کامل شده</p>
-            <p><strong>فایل‌های تغییر یافته:</strong></p>
-            <ul>
-                <li><code>client/src/pages/bank-receipt-upload.tsx</code> - اطلاعات بانکی دینامیک</li>
-                <li><code>client/src/pages/customer-wallet.tsx</code> - کارد اطلاعات بانکی در bank transfer</li>
-            </ul>
-            <p><strong>API Calls:</strong> <span class="api-path">GET /api/admin/company-information</span></p>
-            <p><strong>Fallback Strategy:</strong> نمایش مقادیر پیش‌فرض در صورت عدم دسترسی به اطلاعات</p>
+        <div class="test-section" id="dynamic-test">
+            <h3>🔄 Dynamic Data Integration Test</h3>
+            <p>Testing real-time data from Company Information module:</p>
+            <div class="status" id="dynamic-status">Testing dynamic integration...</div>
+            <button class="test-button" onclick="testDynamicIntegration()">⚡ Test Dynamic Data</button>
         </div>
     </div>
+
+    <script>
+        // Test public banking API endpoint
+        async function testPublicEndpoint() {
+            const resultDiv = document.getElementById('endpoint-result');
+            const testSection = document.getElementById('endpoint-test');
+            
+            try {
+                resultDiv.innerHTML = '<div class="status loading">🔄 Testing public endpoint...</div>';
+                
+                const response = await fetch('/api/company/banking-info');
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="status success">✅ Public endpoint working correctly!</div>
+                        <pre style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0;">
+Response: ${JSON.stringify(data, null, 2)}
+                        </pre>
+                    `;
+                    testSection.classList.remove('error');
+                    testSection.classList.add('success');
+                    
+                    // Display banking information
+                    displayBankingInfo(data.data);
+                } else {
+                    throw new Error(`API Error: ${data.message || 'Unknown error'}`);
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="status error">❌ Endpoint test failed!</div>
+                    <div style="color: red; margin: 10px 0;">Error: ${error.message}</div>
+                `;
+                testSection.classList.remove('success');
+                testSection.classList.add('error');
+            }
+        }
+
+        // Display banking information
+        function displayBankingInfo(bankingData) {
+            const bankingDiv = document.getElementById('banking-data');
+            
+            if (bankingData) {
+                bankingDiv.innerHTML = `
+                    <h4 style="color: #495057; margin-bottom: 15px;">🏦 Banking Information Retrieved</h4>
+                    <div class="info-grid">
+                        <div class="label">نام بانک:</div>
+                        <div class="value">${bankingData.bankName || 'N/A'}</div>
+                        
+                        <div class="label">شماره حساب:</div>
+                        <div class="value">${bankingData.bankAccount || 'N/A'}</div>
+                        
+                        <div class="label">نام صاحب حساب:</div>
+                        <div class="value">${bankingData.bankAccountHolder || bankingData.companyNameAr || 'N/A'}</div>
+                        
+                        <div class="label">شماره IBAN:</div>
+                        <div class="value">${bankingData.bankIban || 'N/A'}</div>
+                        
+                        <div class="label">کد SWIFT:</div>
+                        <div class="value">${bankingData.bankSwift || 'N/A'}</div>
+                        
+                        <div class="label">نام شرکت (عربی):</div>
+                        <div class="value">${bankingData.companyNameAr || 'N/A'}</div>
+                        
+                        <div class="label">نام شرکت (انگلیسی):</div>
+                        <div class="value">${bankingData.companyNameEn || 'N/A'}</div>
+                    </div>
+                `;
+                document.getElementById('banking-display').classList.add('success');
+            } else {
+                bankingDiv.innerHTML = '<div class="status error">❌ No banking data received</div>';
+                document.getElementById('banking-display').classList.add('error');
+            }
+        }
+
+        // Test payment forms integration
+        async function testPaymentForms() {
+            const forms = [
+                { id: 'bank-receipt-status', url: '/bank-receipt-upload?orderId=M2511132', name: 'Bank Receipt Upload' },
+                { id: 'customer-wallet-status', url: '/customer-wallet', name: 'Customer Wallet' },
+                { id: 'payment-gateway-status', url: '/checkout', name: 'Payment Gateway' }
+            ];
+            
+            for (const form of forms) {
+                const statusElement = document.getElementById(form.id);
+                statusElement.className = 'status loading';
+                statusElement.textContent = `🔄 Testing ${form.name}...`;
+                
+                try {
+                    const response = await fetch(form.url);
+                    if (response.ok) {
+                        statusElement.className = 'status success';
+                        statusElement.textContent = `✅ ${form.name} - Accessible`;
+                    } else {
+                        statusElement.className = 'status error';
+                        statusElement.textContent = `❌ ${form.name} - Error ${response.status}`;
+                    }
+                } catch (error) {
+                    statusElement.className = 'status error';
+                    statusElement.textContent = `❌ ${form.name} - Network Error`;
+                }
+                
+                // Small delay between requests
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+        }
+
+        // Test authentication bypass
+        async function testAuthenticationBypass() {
+            const statusElement = document.getElementById('auth-status');
+            
+            try {
+                statusElement.className = 'status loading';
+                statusElement.textContent = '🔄 Testing public access without authentication...';
+                
+                // Test public endpoint
+                const publicResponse = await fetch('/api/company/banking-info');
+                const publicData = await publicResponse.json();
+                
+                // Test admin endpoint (should fail)
+                const adminResponse = await fetch('/api/admin/company-information');
+                const adminData = await adminResponse.json();
+                
+                if (publicResponse.ok && publicData.success && !adminResponse.ok) {
+                    statusElement.className = 'status success';
+                    statusElement.textContent = '✅ Authentication working correctly - Public access OK, Admin access blocked';
+                    document.getElementById('auth-verification').classList.add('success');
+                } else {
+                    throw new Error('Authentication verification failed');
+                }
+            } catch (error) {
+                statusElement.className = 'status error';
+                statusElement.textContent = `❌ Authentication test failed: ${error.message}`;
+                document.getElementById('auth-verification').classList.add('error');
+            }
+        }
+
+        // Test dynamic data integration
+        async function testDynamicIntegration() {
+            const statusElement = document.getElementById('dynamic-status');
+            
+            try {
+                statusElement.className = 'status loading';
+                statusElement.textContent = '🔄 Testing dynamic data integration...';
+                
+                const response = await fetch('/api/company/banking-info');
+                const data = await response.json();
+                
+                if (response.ok && data.success && data.data) {
+                    const bankingInfo = data.data;
+                    const hasValidData = bankingInfo.bankName && bankingInfo.bankAccount;
+                    
+                    if (hasValidData) {
+                        statusElement.className = 'status success';
+                        statusElement.textContent = '✅ Dynamic integration working - Real banking data retrieved from Company Information';
+                        document.getElementById('dynamic-test').classList.add('success');
+                    } else {
+                        statusElement.className = 'status error';
+                        statusElement.textContent = '❌ Dynamic integration incomplete - Some banking fields missing';
+                        document.getElementById('dynamic-test').classList.add('error');
+                    }
+                } else {
+                    throw new Error('Failed to retrieve dynamic data');
+                }
+            } catch (error) {
+                statusElement.className = 'status error';
+                statusElement.textContent = `❌ Dynamic integration test failed: ${error.message}`;
+                document.getElementById('dynamic-test').classList.add('error');
+            }
+        }
+
+        // Auto-run tests on page load
+        window.onload = function() {
+            console.log('🧪 Banking Integration Test Page Loaded');
+            
+            // Auto-test public endpoint
+            setTimeout(testPublicEndpoint, 1000);
+            
+            // Auto-test authentication
+            setTimeout(testAuthenticationBypass, 2000);
+            
+            // Auto-test dynamic integration
+            setTimeout(testDynamicIntegration, 3000);
+        };
+    </script>
 </body>
 </html>

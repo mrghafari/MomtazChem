@@ -6,6 +6,33 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Banking API Authentication Fixed - Public Endpoint Created for Customer Access (July 24, 2025)
+✅ **RESOLVED: Fixed critical authentication issue preventing customers from accessing banking information in payment forms**
+- **Root Cause**: Customer-facing payment forms were using admin-only endpoint `/api/admin/company-information` causing 401 authentication errors
+- **Technical Solution**: Created new public endpoint `/api/company/banking-info` to provide secure banking information access without admin authentication
+- **New Public Endpoint**: 
+  - **Route**: `GET /api/company/banking-info` (no authentication required)
+  - **Returns**: Banking fields only - `bankName`, `bankAccount`, `bankAccountHolder`, `bankIban`, `bankSwift`, plus company names
+  - **Security**: Exposes only necessary banking information for customer payment forms, not sensitive company data
+- **Customer Payment Forms Updated**:
+  - **Bank Receipt Upload**: Updated to use public banking API endpoint instead of admin endpoint
+  - **Customer Wallet**: Modified to fetch banking information from public endpoint for bank transfer recharge requests  
+  - **Payment Gateway**: Updated checkout component to use public banking API for both Iraqi and International transfers
+- **TypeScript Fixes**: Resolved compilation errors in payment gateway component:
+  - Fixed `useQuery` function signature with proper `queryFn` implementation
+  - Corrected `apiRequest` method calls to use object-based parameters
+  - Eliminated all implicit 'any' type errors in payment processing
+- **API Response Verification**: Public endpoint successfully returns complete banking information:
+  - Bank Name: "Trade Bank of Iraq"
+  - Account Number: "12345648" 
+  - IBAN: "IQ123456789"
+  - SWIFT: "BANKIQ22"
+  - Company Names: Arabic and English versions for account holder fallbacks
+- **Dynamic Integration**: Banking information automatically updates in customer forms when changed in Company Information admin module
+- **Business Impact**: Customers can now access bank transfer payment options without authentication errors
+- **Security Maintained**: Public endpoint only exposes banking information necessary for customer transactions
+- **Result**: Complete resolution of customer banking access issues - all payment forms now work properly with dynamic banking information
+
 ### COMPLETED: Wallet Management Module Reorganization Under Financial Section (July 24, 2025)
 ✅ **IMPLEMENTED: Complete reorganization of Wallet Management module under Financial section with enhanced features**
 - **User Request**: "این ماژول Wallet Management را ببر زیر مجموعه مالی بذار با تمام فیچرهاش" (Move Wallet Management module under Financial section with all its features)

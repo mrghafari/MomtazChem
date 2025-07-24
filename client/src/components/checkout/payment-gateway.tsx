@@ -33,9 +33,14 @@ const PaymentGateway = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
-  // Fetch company information for dynamic banking details
+  // Fetch company banking information for dynamic banking details
   const { data: companyInfo, isLoading: isLoadingCompanyInfo } = useQuery({
-    queryKey: ['/api/admin/company-information'],
+    queryKey: ['/api/company/banking-info'],
+    queryFn: async () => {
+      const response = await fetch('/api/company/banking-info');
+      const result = await response.json();
+      return result.data;
+    },
     retry: false,
   });
 
@@ -95,7 +100,10 @@ const PaymentGateway = ({
         });
       }, 200);
 
-      const response = await apiRequest('/api/payment/upload-receipt', 'POST', formData);
+      const response = await apiRequest('/api/payment/upload-receipt', {
+        method: 'POST',
+        body: formData
+      });
       
       clearInterval(progressInterval);
       setUploadProgress(100);

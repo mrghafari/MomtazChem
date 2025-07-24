@@ -44,12 +44,12 @@ export default function BankReceiptUpload() {
     enabled: !!orderId,
   });
 
-  // Fetch company banking information
+  // Fetch company banking information from public endpoint
   const { data: companyInfo, isLoading: isLoadingCompanyInfo } = useQuery({
-    queryKey: ['/api/admin/company-information'],
+    queryKey: ['/api/company/banking-info'],
     queryFn: async () => {
-      const response = await apiRequest('/api/admin/company-information');
-      return response;
+      const response = await apiRequest('/api/company/banking-info');
+      return response.data;
     },
   });
 

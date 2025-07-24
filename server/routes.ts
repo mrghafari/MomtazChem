@@ -1162,6 +1162,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get company banking information - Public endpoint for customers
+  app.get('/api/company/banking-info', async (req, res) => {
+    try {
+      const companyInfo = await companyStorage.getCompanyInformation();
+      
+      // Only expose banking and company name information for customer use
+      const bankingInfo = {
+        bankName: companyInfo?.bankName || null,
+        bankAccount: companyInfo?.bankAccount || null,
+        bankAccountHolder: companyInfo?.bankAccountHolder || null,
+        bankIban: companyInfo?.bankIban || null,
+        bankSwift: companyInfo?.bankSwift || null,
+        companyNameAr: companyInfo?.companyNameAr || null,
+        companyNameEn: companyInfo?.companyNameEn || null,
+        companyNameTr: companyInfo?.companyNameTr || null,
+        companyNameKu: companyInfo?.companyNameKu || null
+      };
+      
+      res.json({ success: true, data: bankingInfo });
+    } catch (error) {
+      console.error('Error fetching banking information:', error);
+      res.status(500).json({ success: false, message: "خطا در دریافت اطلاعات بانکی" });
+    }
+  });
+
   // ============================================================================
   // CORRESPONDENCE MANAGEMENT
   // ============================================================================

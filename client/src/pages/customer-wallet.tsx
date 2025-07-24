@@ -123,10 +123,10 @@ export default function CustomerWallet() {
 
   // Fetch company banking information for bank transfer display
   const { data: companyInfo, isLoading: isLoadingCompanyInfo } = useQuery({
-    queryKey: ['/api/admin/company-information'],
+    queryKey: ['/api/company/banking-info'],
     queryFn: async () => {
-      const response = await apiRequest('/api/admin/company-information');
-      return response;
+      const response = await apiRequest('/api/company/banking-info');
+      return response.data;
     },
   });
 
