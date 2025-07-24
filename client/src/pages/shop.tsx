@@ -205,13 +205,17 @@ const Shop = () => {
     retry: false,
   });
   
+  // Extract the actual data from API response
+  const productStatsData = productStats?.data || {};
+  
   // Debug product stats
-  console.log('🌟 [RATINGS DEBUG] Product stats loaded:', productStats ? Object.keys(productStats).length : 0, 'products with ratings');
+  console.log('🌟 [RATINGS DEBUG] Product stats loaded:', Object.keys(productStatsData).length, 'products with ratings');
+  console.log('🌟 [RATINGS DEBUG] Product stats data:', productStatsData);
   
   // Debug current products with their IDs
   if (filteredProducts && filteredProducts.length > 0) {
     console.log('🌟 [RATINGS DEBUG] Current products:', filteredProducts.map((p: any) => ({ id: p.id, name: p.name })));
-    console.log('🌟 [RATINGS DEBUG] Products with ratings:', filteredProducts.filter((p: any) => productStats && productStats[p.id]).map((p: any) => ({ id: p.id, name: p.name, rating: productStats ? productStats[p.id] : null })));
+    console.log('🌟 [RATINGS DEBUG] Products with ratings:', filteredProducts.filter((p: any) => productStatsData && productStatsData[p.id]).map((p: any) => ({ id: p.id, name: p.name, rating: productStatsData ? productStatsData[p.id] : null })));
   }
 
   // Initialize price range only once when first loaded
@@ -1307,10 +1311,10 @@ const Shop = () => {
                                     <Star 
                                       key={starNum}
                                       className={`w-3 h-3 ${
-                                        productStats && productStats[product.id] && productStats[product.id].totalReviews > 0 
-                                          ? (starNum <= Math.floor(productStats[product.id].averageRating) 
+                                        productStatsData && productStatsData[product.id] && productStatsData[product.id].totalReviews > 0 
+                                          ? (starNum <= Math.floor(productStatsData[product.id].averageRating) 
                                               ? 'fill-yellow-400 text-yellow-400' 
-                                              : starNum <= Math.ceil(productStats[product.id].averageRating)
+                                              : starNum <= Math.ceil(productStatsData[product.id].averageRating)
                                               ? 'fill-yellow-200 text-yellow-200'
                                               : 'fill-gray-200 text-gray-200')
                                           : 'fill-gray-200 text-gray-200 hover:fill-yellow-300'
@@ -1318,9 +1322,9 @@ const Shop = () => {
                                     />
                                   ))}
                                 </div>
-                                {productStats && productStats[product.id] && productStats[product.id].totalReviews > 0 ? (
+                                {productStatsData && productStatsData[product.id] && productStatsData[product.id].totalReviews > 0 ? (
                                   <span className="text-xs font-medium text-gray-700">
-                                    {productStats[product.id].averageRating.toFixed(1)}
+                                    {productStatsData[product.id].averageRating.toFixed(1)}
                                   </span>
                                 ) : (
                                   <span className="text-xs text-gray-500">
@@ -1650,8 +1654,8 @@ const Shop = () => {
                                     <Star 
                                       key={starNum}
                                       className={`w-3 h-3 ${
-                                        productStats && productStats[product.id] && productStats[product.id].totalReviews > 0 
-                                          ? (starNum <= Math.floor(productStats[product.id].averageRating) 
+                                        productStatsData && productStatsData[product.id] && productStatsData[product.id].totalReviews > 0 
+                                          ? (starNum <= Math.floor(productStatsData[product.id].averageRating) 
                                               ? 'fill-yellow-400 text-yellow-400' 
                                               : 'fill-gray-200 text-gray-200')
                                           : 'fill-gray-200 text-gray-200 hover:fill-yellow-300'
@@ -1659,9 +1663,9 @@ const Shop = () => {
                                     />
                                   ))}
                                 </div>
-                                {productStats && productStats[product.id] && productStats[product.id].totalReviews > 0 ? (
+                                {productStatsData && productStatsData[product.id] && productStatsData[product.id].totalReviews > 0 ? (
                                   <span className="text-xs text-gray-600 ml-1">
-                                    {productStats[product.id].averageRating.toFixed(1)}
+                                    {productStatsData[product.id].averageRating.toFixed(1)}
                                   </span>
                                 ) : (
                                   <span className="text-xs text-gray-500">
