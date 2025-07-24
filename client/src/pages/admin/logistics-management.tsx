@@ -561,41 +561,7 @@ const LogisticsManagement = () => {
                       </p>
                     </div>
 
-                    {/* GPS Location Block - For distribution partner coordination */}
-                    {order.hasGpsLocation && (
-                      <div className="bg-red-50 rounded-lg p-3 border border-red-200">
-                        <h5 className="font-medium text-red-800 mb-2 flex items-center">
-                          <MapPin className="w-4 h-4 mr-2" />
-                          موقعیت GPS
-                        </h5>
-                        <div className="space-y-1">
-                          <p className="text-sm font-mono text-red-700">
-                            📍 {parseFloat(order.gpsLatitude?.toString() || '0').toFixed(6)}, {parseFloat(order.gpsLongitude?.toString() || '0').toFixed(6)}
-                          </p>
-                          {order.locationAccuracy && (
-                            <p className="text-xs text-red-600">
-                              دقت: {order.locationAccuracy} متر
-                            </p>
-                          )}
-                          <div className="flex gap-1 mt-2">
-                            <button
-                              onClick={() => {
-                                const lat = parseFloat(order.gpsLatitude?.toString() || '0');
-                                const lng = parseFloat(order.gpsLongitude?.toString() || '0');
-                                const url = `https://www.google.com/maps?q=${lat},${lng}`;
-                                window.open(url, '_blank');
-                              }}
-                              className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
-                            >
-                              🗺️ Google Maps
-                            </button>
-                          </div>
-                        </div>
-                        <p className="text-xs text-red-600 mt-2">
-                          برای هماهنگی با شریک توزیع
-                        </p>
-                      </div>
-                    )}
+
 
                     {/* Order Date Block */}
                     <div className="bg-green-50 rounded-lg p-3 border border-green-200">
@@ -622,52 +588,83 @@ const LogisticsManagement = () => {
                     </div>
                   </div>
 
-                  {/* Action Buttons */}
-                  <div className="flex gap-2 flex-wrap">
-                    <Button 
-                      size="sm" 
-                      onClick={() => handleSendDeliveryCode(order.id, !!order.deliveryCode)}
-                      disabled={resendingCodes[order.id]}
-                      className={`${
-                        resentCodes[order.id] 
-                          ? 'bg-red-600 hover:bg-red-700 text-white' 
-                          : 'bg-blue-600 hover:bg-blue-700 text-white'
-                      }`}
-                    >
-                      {resendingCodes[order.id] ? (
-                        <>
-                          <Send className="w-4 h-4 mr-2 animate-spin" />
-                          در حال ارسال...
-                        </>
-                      ) : resentCodes[order.id] ? (
-                        <>
-                          <Send className="w-4 h-4 mr-2" />
-                          کد ارسال شد ✓
-                        </>
-                      ) : order.deliveryCode ? (
-                        <>
-                          <Send className="w-4 h-4 mr-2" />
-                          ارسال مجدد کد
-                        </>
-                      ) : (
-                        <>
-                          <Send className="w-4 h-4 mr-2" />
-                          ارسال کد به مشتری
-                        </>
-                      )}
-                    </Button>
-                    <Button size="sm" variant="outline" className="border-green-500 text-green-700 hover:bg-green-100">
-                      <Users className="w-4 h-4 mr-2" />
-                      اختصاص راننده
-                    </Button>
-                    <Button size="sm" variant="outline" className="border-green-500 text-green-700 hover:bg-green-100">
-                      <MapPin className="w-4 h-4 mr-2" />
-                      پیگیری مسیر
-                    </Button>
-                    <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white">
-                      <CheckCircle className="w-4 h-4 mr-2" />
-                      تحویل شد
-                    </Button>
+                  {/* Action Buttons and GPS Coordinates */}
+                  <div className="space-y-3">
+                    {/* GPS Coordinates - For distribution partner coordination */}
+                    {order.hasGpsLocation && (
+                      <div className="flex items-center justify-between p-2 bg-red-50 border border-red-200 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <MapPin className="w-4 h-4 text-red-600" />
+                          <span className="text-sm font-mono text-red-700">
+                            📍 {parseFloat(order.gpsLatitude?.toString() || '0').toFixed(6)}, {parseFloat(order.gpsLongitude?.toString() || '0').toFixed(6)}
+                          </span>
+                          {order.locationAccuracy && (
+                            <span className="text-xs text-red-600">
+                              (دقت: {order.locationAccuracy}م)
+                            </span>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => {
+                            const lat = parseFloat(order.gpsLatitude?.toString() || '0');
+                            const lng = parseFloat(order.gpsLongitude?.toString() || '0');
+                            const url = `https://www.google.com/maps?q=${lat},${lng}`;
+                            window.open(url, '_blank');
+                          }}
+                          className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
+                        >
+                          🗺️ Google Maps
+                        </button>
+                      </div>
+                    )}
+                    
+                    {/* Action Buttons */}
+                    <div className="flex gap-2 flex-wrap">
+                      <Button 
+                        size="sm" 
+                        onClick={() => handleSendDeliveryCode(order.id, !!order.deliveryCode)}
+                        disabled={resendingCodes[order.id]}
+                        className={`${
+                          resentCodes[order.id] 
+                            ? 'bg-red-600 hover:bg-red-700 text-white' 
+                            : 'bg-blue-600 hover:bg-blue-700 text-white'
+                        }`}
+                      >
+                        {resendingCodes[order.id] ? (
+                          <>
+                            <Send className="w-4 h-4 mr-2 animate-spin" />
+                            در حال ارسال...
+                          </>
+                        ) : resentCodes[order.id] ? (
+                          <>
+                            <Send className="w-4 h-4 mr-2" />
+                            کد ارسال شد ✓
+                          </>
+                        ) : order.deliveryCode ? (
+                          <>
+                            <Send className="w-4 h-4 mr-2" />
+                            ارسال مجدد کد
+                          </>
+                        ) : (
+                          <>
+                            <Send className="w-4 h-4 mr-2" />
+                            ارسال کد به مشتری
+                          </>
+                        )}
+                      </Button>
+                      <Button size="sm" variant="outline" className="border-green-500 text-green-700 hover:bg-green-100">
+                        <Users className="w-4 h-4 mr-2" />
+                        اختصاص راننده
+                      </Button>
+                      <Button size="sm" variant="outline" className="border-green-500 text-green-700 hover:bg-green-100">
+                        <MapPin className="w-4 h-4 mr-2" />
+                        پیگیری مسیر
+                      </Button>
+                      <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white">
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        تحویل شد
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
