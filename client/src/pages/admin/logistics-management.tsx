@@ -589,7 +589,7 @@ const LogisticsManagement = () => {
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="flex gap-2 flex-wrap">
+                  <div className="flex gap-2 flex-wrap items-center">
                       <Button 
                         size="sm" 
                         onClick={() => handleSendDeliveryCode(order.id, !!order.deliveryCode)}
@@ -635,12 +635,12 @@ const LogisticsManagement = () => {
                         تحویل شد
                       </Button>
                       {order.hasGpsLocation && (
-                        <div className="border border-gray-300 rounded-lg p-2 bg-gray-50 mr-2">
+                        <div className="border border-gray-300 rounded-lg p-1.5 bg-gray-50 h-fit">
                           <div className="flex gap-1">
                             <Button 
                               size="sm" 
                               variant="outline" 
-                              className="border-blue-500 text-blue-700 hover:bg-blue-100 px-3 py-1.5"
+                              className="border-blue-500 text-blue-700 hover:bg-blue-100 px-2 py-1 text-xs h-8"
                               onClick={async () => {
                                 const lat = parseFloat(order.gpsLatitude?.toString() || '0').toFixed(6);
                                 const lng = parseFloat(order.gpsLongitude?.toString() || '0').toFixed(6);
@@ -663,7 +663,7 @@ const LogisticsManagement = () => {
                             <Button 
                               size="sm" 
                               variant="outline" 
-                              className="border-green-500 text-green-700 hover:bg-green-100 px-3 py-1.5"
+                              className="border-green-500 text-green-700 hover:bg-green-100 px-2 py-1 text-xs h-8"
                               onClick={async () => {
                                 const lat = parseFloat(order.gpsLatitude?.toString() || '0').toFixed(6);
                                 const lng = parseFloat(order.gpsLongitude?.toString() || '0').toFixed(6);
@@ -703,7 +703,7 @@ const LogisticsManagement = () => {
                             <Button 
                               size="sm" 
                               variant="outline" 
-                              className="border-red-500 text-red-700 hover:bg-red-100 px-3 py-1.5"
+                              className="border-red-500 text-red-700 hover:bg-red-100 px-2 py-1 text-xs h-8"
                               onClick={() => {
                                 const lat = parseFloat(order.gpsLatitude?.toString() || '0');
                                 const lng = parseFloat(order.gpsLongitude?.toString() || '0');
