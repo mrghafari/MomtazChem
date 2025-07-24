@@ -35070,7 +35070,7 @@ momtazchem.com
   // Get company information
   app.get("/api/admin/company-information", requireAuth, async (req, res) => {
     try {
-      const companyInfo = await companyStorage.getCompanyInfo();
+      const companyInfo = await companyStorage.getCompanyInformation();
       
       res.json({
         success: true,

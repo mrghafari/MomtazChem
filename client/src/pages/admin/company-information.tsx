@@ -65,8 +65,8 @@ interface CompanyInfo {
   city?: string;
   country?: string;
   postalCode?: string;
-  phonePrimary?: string;
-  phoneSecondary?: string;
+  phone?: string;
+  supportPhone?: string;
   fax?: string;
   emailPrimary?: string;
   emailSecondary?: string;
@@ -333,6 +333,9 @@ export default function CompanyInformation() {
 
   // Handle save button click
   const handleSaveCompanyInfo = () => {
+    console.log('Saving company info:', formData);
+    console.log('Phone Primary:', formData?.phone);
+    console.log('Phone Secondary:', formData?.supportPhone);
     updateCompanyInfoMutation.mutate(formData);
   };
 
@@ -831,19 +834,19 @@ export default function CompanyInformation() {
                 <div className="space-y-2">
                   <Label>تلفن اصلی</Label>
                   <Input 
-                    id="phonePrimary"
-                    value={formData?.phonePrimary || ''} 
+                    id="phone"
+                    value={formData?.phone || ''} 
                     placeholder="+964-1-234-5678"
-                    onChange={(e) => handleFieldChange('phonePrimary', e.target.value)}
+                    onChange={(e) => handleFieldChange('phone', e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>تلفن فرعی</Label>
                   <Input 
-                    id="phoneSecondary"
-                    value={formData?.phoneSecondary || ''} 
+                    id="supportPhone"
+                    value={formData?.supportPhone || ''} 
                     placeholder="+964-1-234-5679"
-                    onChange={(e) => handleFieldChange('phoneSecondary', e.target.value)}
+                    onChange={(e) => handleFieldChange('supportPhone', e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">

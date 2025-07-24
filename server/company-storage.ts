@@ -54,6 +54,10 @@ export class CompanyStorage {
     }
   }
 
+  async upsertCompanyInfo(data: Partial<InsertCompanyInformation>): Promise<CompanyInformation | null> {
+    return this.updateCompanyInformation(data);
+  }
+
   // Correspondence methods
   async getCorrespondence(type?: 'incoming' | 'outgoing'): Promise<Correspondence[]> {
     try {
