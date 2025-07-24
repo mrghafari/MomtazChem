@@ -6,34 +6,43 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
-### COMPLETED: Dynamic Company Logo Integration with Left-Side Positioning (July 24, 2025)
-✅ **IMPLEMENTED: Complete dynamic logo system with left-side positioning across all PDF reports**
-- **Database Integration**: Created `getCompanyLogo()` function to fetch current logo from company information module
-- **PDF System Enhancement**: Updated all PDF generation functions to use dynamic logo from database:
-  - **generateInvoicePDF**: Async logo loading with left-side positioning (X:50, Y:30)
-  - **generateCustomerReportPDF**: Dynamic logo integration with left-side placement 
-  - **generateAnalyticsPDF**: Logo fetch from database for both main and fallback PDF generation with left positioning
-- **Left-Side Logo Positioning**: All PDF reports now display company logo on the left side:
-  - Consistent positioning coordinates (50, 30) across all PDF types
+### COMPLETED: Dynamic Company Address Integration with Logo Positioning (July 24, 2025)
+✅ **IMPLEMENTED: Complete dynamic company information system across all PDF reports**
+- **Database Integration**: Created `getCompanyInformation()` function to fetch complete company data including addresses from company information module
+- **PDF System Enhancement**: Updated all PDF generation functions to use dynamic company information from database:
+  - **generateInvoicePDF**: Dynamic Arabic and English addresses in footer with professional two-column layout
+  - **generateCustomerReportPDF**: Company information from database in footer
+  - **generateAnalyticsPDF**: Dynamic company details in footer
+  - **generateCustomerProfilePDF**: Complete company information integration
+- **Dynamic Address System**: All PDF reports now display real-time company addresses:
+  - **Arabic/Persian Address**: From `mainAddress` or `address` field in left column
+  - **English Address**: From `addressEnglish` field in right column
+  - **Contact Information**: Dynamic phone, email, and website from database
+  - **Company Names**: Both Arabic/Persian and English names from database
+- **Left-Side Logo Positioning**: Maintained consistent logo display across all PDFs:
+  - Logo positioning coordinates (50, 30) across all PDF types
   - Professional layout with logo dimensions 80x60 pixels
-  - Enhanced visual balance with left-aligned company branding
-- **Conditional Logic**: Added smart logo display that only renders logo if available:
-  - Checks for `companyLogoBase64` existence before attempting to render
-  - Professional error handling with informative console logging including position
-  - Graceful fallback when no logo is available in database
-- **Real-time Updates**: PDF reports automatically reflect logo changes without system restart:
-  - No static file dependencies - all logos loaded from database
-  - Immediate reflection of logo updates across all report types
-  - Consistent left-side logo display across invoice, customer profile, and analytics PDFs
+  - Dynamic logo loading from database with proper error handling
+- **Two-Column Footer Layout**: Professional footer design with dynamic content:
+  - **Left Column**: Persian/Arabic company name, address, and company slogan
+  - **Right Column**: English company name, contact details (website, emails, phones), and English address
+  - **Fallback Handling**: Graceful fallback to default values when database fields are empty
+- **Real-time Updates**: PDF reports automatically reflect all company information changes:
+  - Address changes in company information instantly appear in all PDF types
+  - Contact information updates reflected immediately
+  - Company name changes update across all documents
+  - No static content - everything sourced from database
 - **Technical Implementation**:
-  - Made all PDF generation functions async to handle database logo loading
-  - Added proper Promise handling in `generateCustomerProfilePDF`
-  - Enhanced error logging for logo embedding success/failure with position indicators
-  - Maintained existing PDF layout and formatting with left-positioned dynamic logo
-- **LSP Error Resolution**: Fixed all TypeScript errors related to logo variable scope
-- **Test Verification**: Successfully generated analytics and customer profile PDFs with left-side logo placement
-- **Impact**: All PDF reports now use current company logo from admin settings with consistent left-side positioning
-- **Result**: Complete dynamic logo integration operational with left-side positioning - logo changes in company information instantly affect all generated PDFs
+  - Enhanced all PDF generation functions with `getCompanyInformation()` calls
+  - Dynamic field mapping with multiple fallback options per field
+  - Maintained existing PDF layout while integrating dynamic content
+  - Proper async/await handling for database information loading
+- **Multi-language Support**: Dynamic content supports both Persian/Arabic and English:
+  - Company names in both languages from database
+  - Addresses in Arabic and English from separate database fields
+  - Contact information with proper language formatting
+- **Impact**: All PDF reports now use current company information from admin settings with dynamic addresses
+- **Result**: Complete dynamic company information integration operational - changes in company module instantly affect all generated PDFs
 
 ### COMPLETED: Phone Field Mapping Fix and Single Save Button Implementation (July 24, 2025)
 ✅ **RESOLVED: Fixed phone number save issue by correcting field mapping between frontend and backend**
