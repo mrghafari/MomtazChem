@@ -1,0 +1,205 @@
+ Tawk.to script loaded successfully
+chunk-RPCDYKBN.js?v=09ef9b6d:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:117574)
+    at t.value (twk-chunk-common.js:2:150658)
+    at p.updateUUID (twk-chunk-common.js:2:202310)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at push.2f62.p.dispatch (twk-vendor.js:2:78106)
+    at push.2f62.p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:124589)
+    at twk-chunk-common.js:2:123900
+value @ twk-chunk-common.js:2
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+VM43737:23 Tawk.to Live Chat loaded successfully
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 2 products with ratings
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 2 products with ratings
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 2 products with ratings
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 2 products with ratings
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 2 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 2 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 2 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 2 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 2 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 2 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 2 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+shop.tsx:457 🔐 [LOGIN] Starting handleLoginSuccess
+shop.tsx:458 🔐 [LOGIN] Customer data: Object
+shop.tsx:459 🔐 [LOGIN] Current cart state: Object
+shop.tsx:463 🔐 [LOGIN] Customer state set
+shop.tsx:466 🔐 [LOGIN] Wallet balance fetch initiated
+shop.tsx:470 🔐 [LOGIN] Auth modal closed
+shop.tsx:475 🔐 [LOGIN] Cache invalidated
+shop.tsx:479 🔐 [LOGIN] Has cart items: false
+shop.tsx:480 🔐 [LOGIN] Cart contents: Object
+shop.tsx:484 🔐 [LOGIN] Cart migration completed
+shop.tsx:490 🔐 [LOGIN] Welcome toast shown
+shop.tsx:493 🔐 [LOGIN] Staying in shop after successful login
+shop.tsx:495 🔐 [LOGIN] handleLoginSuccess completed successfully
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 2 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 2 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+shop.tsx:209 🌟 [RATINGS DEBUG] Product stats loaded: 2 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:214 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 473
+product-reviews.tsx:42 Reviews Data Full: undefined
+product-reviews.tsx:43 Reviews Array Length: 0
+product-reviews.tsx:44 Reviews Array: Array(0)
+product-reviews.tsx:45 Product Stats: Object
+product-reviews.tsx:46 Product: Object
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 473
+product-reviews.tsx:42 Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "totalReviews": 0,
+      "averageRating": 0,
+      "ratingDistribution": {},
+      "lastReviewDate": null
+    }
+  }
+}
+product-reviews.tsx:43 Reviews Array Length: 0
+product-reviews.tsx:44 Reviews Array: Array(0)
+product-reviews.tsx:45 Product Stats: Object
+product-reviews.tsx:46 Product: Object
+product-reviews.tsx:50 ReviewsData type: object
+product-reviews.tsx:51 ReviewsData keys: Array(2)
+product-reviews.tsx:53 ReviewsData.data keys: Array(2)
+product-reviews.tsx:54 ReviewsData.data.reviews: Array(0)
+ProductRating.tsx:54 🔍 CUSTOMER MATCHING DEBUG:
+ProductRating.tsx:55 Current customer: Object
+ProductRating.tsx:56 Customer ID: 8
+ProductRating.tsx:57 Available reviews: Array(0)
+ProductRating.tsx:65 Found existing review: undefined
+ProductRating.tsx:150 ProductRating Props: Object
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 473
+product-reviews.tsx:42 Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "totalReviews": 0,
+      "averageRating": 0,
+      "ratingDistribution": {},
+      "lastReviewDate": null
+    }
+  }
+}
+product-reviews.tsx:43 Reviews Array Length: 0
+product-reviews.tsx:44 Reviews Array: Array(0)
+product-reviews.tsx:45 Product Stats: Object
+product-reviews.tsx:46 Product: Object
+product-reviews.tsx:50 ReviewsData type: object
+product-reviews.tsx:51 ReviewsData keys: Array(2)
+product-reviews.tsx:53 ReviewsData.data keys: Array(2)
+product-reviews.tsx:54 ReviewsData.data.reviews: Array(0)
+ProductRating.tsx:150 ProductRating Props: Object
+ProductRating.tsx:150 ProductRating Props: {productId: 473, productName: 'Paint Thinner PT-300', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+ProductRating.tsx:150 ProductRating Props: {productId: 473, productName: 'Paint Thinner PT-300', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+ProductRating.tsx:150 ProductRating Props: {productId: 473, productName: 'Paint Thinner PT-300', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+ProductRating.tsx:150 ProductRating Props: {productId: 473, productName: 'Paint Thinner PT-300', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+ProductRating.tsx:150 ProductRating Props: {productId: 473, productName: 'Paint Thinner PT-300', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+useAuth.ts:30  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 401 (Unauthorized)
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=09ef9b6d:840
+run @ @tanstack_react-query.js?v=09ef9b6d:494
+start @ @tanstack_react-query.js?v=09ef9b6d:536
+fetch @ @tanstack_react-query.js?v=09ef9b6d:926
+executeFetch_fn @ @tanstack_react-query.js?v=09ef9b6d:2211
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:2245
+ProductRating.tsx:150 ProductRating Props: {productId: 473, productName: 'Paint Thinner PT-300', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 473
+product-reviews.tsx:42 Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "totalReviews": 0,
+      "averageRating": 0,
+      "ratingDistribution": {},
+      "lastReviewDate": null
+    }
+  }
+}
+product-reviews.tsx:43 Reviews Array Length: 0
+product-reviews.tsx:44 Reviews Array: []
+product-reviews.tsx:45 Product Stats: {totalReviews: 0, averageRating: 0, ratingDistribution: {…}, lastReviewDate: null}
+product-reviews.tsx:46 Product: {id: 473, name: 'Paint Thinner PT-300', category: 'paint-thinner', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+product-reviews.tsx:50 ReviewsData type: object
+product-reviews.tsx:51 ReviewsData keys: (2) ['success', 'data']
+product-reviews.tsx:53 ReviewsData.data keys: (2) ['reviews', 'stats']
+product-reviews.tsx:54 ReviewsData.data.reviews: []
+ProductRating.tsx:150 ProductRating Props: {productId: 473, productName: 'Paint Thinner PT-300', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 473
+product-reviews.tsx:42 Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "totalReviews": 0,
+      "averageRating": 0,
+      "ratingDistribution": {},
+      "lastReviewDate": null
+    }
+  }
+}
+product-reviews.tsx:43 Reviews Array Length: 0
+product-reviews.tsx:44 Reviews Array: []
+product-reviews.tsx:45 Product Stats: {totalReviews: 0, averageRating: 0, ratingDistribution: {…}, lastReviewDate: null}
+product-reviews.tsx:46 Product: {id: 473, name: 'Paint Thinner PT-300', category: 'paint-thinner', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+product-reviews.tsx:50 ReviewsData type: object
+product-reviews.tsx:51 ReviewsData keys: (2) ['success', 'data']
+product-reviews.tsx:53 ReviewsData.data keys: (2) ['reviews', 'stats']
+product-reviews.tsx:54 ReviewsData.data.reviews: []
+ProductRating.tsx:150 ProductRating Props: {productId: 473, productName: 'Paint Thinner PT-300', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 473
+product-reviews.tsx:42 Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "totalReviews": 0,
+      "averageRating": 0,
+      "ratingDistribution": {},
+      "lastReviewDate": null
+    }
+  }
+}
+product-reviews.tsx:43 Reviews Array Length: 0
+product-reviews.tsx:44 Reviews Array: []
+product-reviews.tsx:45 Product Stats: {totalReviews: 0, averageRating: 0, ratingDistribution: {…}, lastReviewDate: null}
+product-reviews.tsx:46 Product: {id: 473, name: 'Paint Thinner PT-300', category: 'paint-thinner', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+product-reviews.tsx:50 ReviewsData type: object
+product-reviews.tsx:51 ReviewsData keys: (2) ['success', 'data']
+product-reviews.tsx:53 ReviewsData.data keys: (2) ['reviews', 'stats']
+product-reviews.tsx:54 ReviewsData.data.reviews: []
+ProductRating.tsx:150 ProductRating Props: {productId: 473, productName: 'Paint Thinner PT-300', averageRating: 0, totalReviews: 0, reviews: Array(0)}
