@@ -35,7 +35,7 @@
         </div>
         
         <div class="test-section">
-            <h2>ثبت نظر جدید</h2>
+            <h2>ثبت/ویرایش نظر</h2>
             <div>
                 <label>امتیاز (1-5):</label>
                 <input type="number" id="rating" min="1" max="5" value="5">
@@ -48,7 +48,11 @@
                 <label>متن نظر:</label>
                 <textarea id="comment" rows="4" placeholder="متن نظر خود را بنویسید..."></textarea>
             </div>
-            <button class="btn-success" onclick="submitReview()">ثبت نظر</button>
+            <button class="btn-success" onclick="submitReview()">ثبت/به‌روزرسانی نظر</button>
+            <p style="font-size: 12px; color: #666; margin-top: 10px;">
+                📝 اگر قبلاً نظر داده‌اید، با کلیک روی این دکمه نظر قبلی شما به‌روزرسانی می‌شود.<br>
+                🔹 سیستم تشخیص می‌دهد که آیا نظر جدید ثبت کند یا نظر موجود را ویرایش کند.
+            </p>
         </div>
     </div>
 
