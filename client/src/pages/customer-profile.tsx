@@ -734,6 +734,32 @@ const CustomerProfile = () => {
             <DialogTitle className="text-purple-700">سابقه خرید کامل</DialogTitle>
           </DialogHeader>
           
+          {/* Order Types Header */}
+          <div className="mb-4 p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200">
+            <h3 className="text-lg font-semibold text-purple-800 mb-3 text-center">انواع سفارشات</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+              <div className="flex items-center gap-2 p-2 bg-white rounded-md shadow-sm">
+                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                <span className="text-gray-700">تکمیل شده</span>
+              </div>
+              <div className="flex items-center gap-2 p-2 bg-white rounded-md shadow-sm">
+                <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                <span className="text-gray-700">در انتظار پرداخت</span>
+              </div>
+              <div className="flex items-center gap-2 p-2 bg-white rounded-md shadow-sm">
+                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                <span className="text-gray-700">در حال پردازش</span>
+              </div>
+              <div className="flex items-center gap-2 p-2 bg-white rounded-md shadow-sm">
+                <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+                <span className="text-gray-700">حواله بانکی</span>
+              </div>
+            </div>
+            <div className="mt-3 text-xs text-purple-600 text-center">
+              نکته: سفارشات با حواله بانکی سه‌روزه در اولویت نمایش قرار می‌گیرند
+            </div>
+          </div>
+          
           {/* Search Bar */}
           <div className="relative mb-4">
             <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
