@@ -14,7 +14,7 @@ interface Review {
   id: number;
   customerName: string;
   rating: number;
-  review: string;
+  comment: string;
   createdAt: string;
 }
 
@@ -57,7 +57,7 @@ export default function ProductRating({
   React.useEffect(() => {
     if (isEditing && existingReview) {
       setNewRating(existingReview.rating);
-      setNewComment(existingReview.review);
+      setNewComment(existingReview.comment);
     } else if (!isEditing) {
       setNewRating(0);
       setNewComment('');
@@ -206,7 +206,7 @@ export default function ProductRating({
                   <div className="mb-2">
                     <StarRating rating={existingReview.rating} size="sm" />
                   </div>
-                  <p className="text-gray-700">{existingReview.review}</p>
+                  <p className="text-gray-700">{existingReview.comment}</p>
                   <p className="text-xs text-gray-500 mt-2">
                     ثبت شده در: {formatDate(existingReview.createdAt)}
                   </p>
@@ -320,7 +320,7 @@ export default function ProductRating({
                           )}
                         </div>
                         <StarRating rating={review.rating} size="sm" />
-                        <p className="mt-2 text-gray-700">{review.review}</p>
+                        <p className="mt-2 text-gray-700">{review.comment}</p>
                       </div>
                     </div>
                   </div>

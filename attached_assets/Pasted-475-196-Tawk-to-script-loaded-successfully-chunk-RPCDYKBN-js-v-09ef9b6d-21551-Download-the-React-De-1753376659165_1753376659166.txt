@@ -1,0 +1,220 @@
+475:196 Tawk.to script loaded successfully
+chunk-RPCDYKBN.js?v=09ef9b6d:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 475
+product-reviews.tsx:42 Reviews Data Full: undefined
+product-reviews.tsx:43 Reviews Array Length: 0
+product-reviews.tsx:44 Reviews Array: Array(0)
+product-reviews.tsx:45 Product Stats: Object
+product-reviews.tsx:46 Product: undefined
+/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 475
+product-reviews.tsx:42 Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [
+      {
+        "id": 45,
+        "productId": 475,
+        "customerId": 8,
+        "customerName": "ABAS ABASI",
+        "rating": 4,
+        "title": "تست نظر پس از اصلاح کد",
+        "comment": "این یک تست نظر است برای بررسی اینکه سیستم ثبت نظر درست کار می‌کند",
+        "isVerifiedPurchase": false,
+        "helpfulVotes": 0,
+        "notHelpfulVotes": 0,
+        "adminResponse": null,
+        "adminResponseDate": null,
+        "createdAt": "2025-07-24 16:52:44.90059",
+        "updatedAt": "2025-07-24 16:54:23.719377"
+      }
+    ],
+    "stats": {
+      "totalReviews": 1,
+      "averageRating": 4,
+      "ratingDistribution": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 1,
+        "5": 0
+      },
+      "lastReviewDate": "2025-07-24 16:52:44.90059"
+    }
+  }
+}
+product-reviews.tsx:43 Reviews Array Length: 1
+product-reviews.tsx:44 Reviews Array: Array(1)
+product-reviews.tsx:45 Product Stats: Object
+product-reviews.tsx:46 Product: undefined
+product-reviews.tsx:50 ReviewsData type: object
+product-reviews.tsx:51 ReviewsData keys: Array(2)
+product-reviews.tsx:53 ReviewsData.data keys: Array(2)
+product-reviews.tsx:54 ReviewsData.data.reviews: Array(1)
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 475
+product-reviews.tsx:42 Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [
+      {
+        "id": 45,
+        "productId": 475,
+        "customerId": 8,
+        "customerName": "ABAS ABASI",
+        "rating": 4,
+        "title": "تست نظر پس از اصلاح کد",
+        "comment": "این یک تست نظر است برای بررسی اینکه سیستم ثبت نظر درست کار می‌کند",
+        "isVerifiedPurchase": false,
+        "helpfulVotes": 0,
+        "notHelpfulVotes": 0,
+        "adminResponse": null,
+        "adminResponseDate": null,
+        "createdAt": "2025-07-24 16:52:44.90059",
+        "updatedAt": "2025-07-24 16:54:23.719377"
+      }
+    ],
+    "stats": {
+      "totalReviews": 1,
+      "averageRating": 4,
+      "ratingDistribution": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 1,
+        "5": 0
+      },
+      "lastReviewDate": "2025-07-24 16:52:44.90059"
+    }
+  }
+}
+product-reviews.tsx:43 Reviews Array Length: 1
+product-reviews.tsx:44 Reviews Array: Array(1)
+product-reviews.tsx:45 Product Stats: Object
+product-reviews.tsx:46 Product: Object
+product-reviews.tsx:50 ReviewsData type: object
+product-reviews.tsx:51 ReviewsData keys: Array(2)
+product-reviews.tsx:53 ReviewsData.data keys: Array(2)
+product-reviews.tsx:54 ReviewsData.data.reviews: Array(1)
+ProductRating.tsx:137 ProductRating Props: Object
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:117574)
+    at t.value (twk-chunk-common.js:2:150658)
+    at p.updateUUID (twk-chunk-common.js:2:202310)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at push.2f62.p.dispatch (twk-vendor.js:2:78106)
+    at push.2f62.p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:124589)
+    at twk-chunk-common.js:2:123900
+value @ twk-chunk-common.js:2
+updateUUID @ twk-chunk-common.js:2
+(anonymous) @ twk-vendor.js:2
+push.2f62.p.dispatch @ twk-vendor.js:2
+push.2f62.p.dispatch @ twk-vendor.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+475:168 Tawk.to Live Chat loaded successfully
+/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ProductRating.tsx:137 ProductRating Props: {productId: 475, productName: 'Diesel Fuel Additive DFA-100', averageRating: 4, totalReviews: 1, reviews: 1}
+ProductRating.tsx:137 ProductRating Props: {productId: 475, productName: 'Diesel Fuel Additive DFA-100', averageRating: 4, totalReviews: 1, reviews: 1}
+ProductRating.tsx:137 ProductRating Props: {productId: 475, productName: 'Diesel Fuel Additive DFA-100', averageRating: 4, totalReviews: 1, reviews: 1}
+ProductRating.tsx:137 ProductRating Props: {productId: 475, productName: 'Diesel Fuel Additive DFA-100', averageRating: 4, totalReviews: 1, reviews: 1}
+ProductRating.tsx:137 ProductRating Props: {productId: 475, productName: 'Diesel Fuel Additive DFA-100', averageRating: 4, totalReviews: 1, reviews: 1}
+ProductRating.tsx:137 ProductRating Props: {productId: 475, productName: 'Diesel Fuel Additive DFA-100', averageRating: 4, totalReviews: 1, reviews: 1}
+ProductRating.tsx:137 ProductRating Props: {productId: 475, productName: 'Diesel Fuel Additive DFA-100', averageRating: 4, totalReviews: 1, reviews: 1}
+ProductRating.tsx:137 ProductRating Props: {productId: 475, productName: 'Diesel Fuel Additive DFA-100', averageRating: 4, totalReviews: 1, reviews: 1}
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 475
+product-reviews.tsx:42 Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [
+      {
+        "id": 45,
+        "productId": 475,
+        "customerId": 8,
+        "customerName": "ABAS ABASI",
+        "rating": 4,
+        "title": "تست نظر پس از اصلاح کد",
+        "comment": "این یک تست نظر است برای بررسی اینکه سیستم ثبت نظر درست کار می‌کند",
+        "isVerifiedPurchase": false,
+        "helpfulVotes": 0,
+        "notHelpfulVotes": 0,
+        "adminResponse": null,
+        "adminResponseDate": null,
+        "createdAt": "2025-07-24 16:52:44.90059",
+        "updatedAt": "2025-07-24 16:54:23.719377"
+      }
+    ],
+    "stats": {
+      "totalReviews": 1,
+      "averageRating": 4,
+      "ratingDistribution": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 1,
+        "5": 0
+      },
+      "lastReviewDate": "2025-07-24 16:52:44.90059"
+    }
+  }
+}
+product-reviews.tsx:43 Reviews Array Length: 1
+product-reviews.tsx:44 Reviews Array: [{…}]
+product-reviews.tsx:45 Product Stats: {totalReviews: 1, averageRating: 4, ratingDistribution: {…}, lastReviewDate: '2025-07-24 16:52:44.90059'}
+product-reviews.tsx:46 Product: {id: 475, name: 'Diesel Fuel Additive DFA-100', category: 'fuel-additives', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+product-reviews.tsx:50 ReviewsData type: object
+product-reviews.tsx:51 ReviewsData keys: (2) ['success', 'data']
+product-reviews.tsx:53 ReviewsData.data keys: (2) ['reviews', 'stats']
+product-reviews.tsx:54 ReviewsData.data.reviews: [{…}]
+ProductRating.tsx:137 ProductRating Props: {productId: 475, productName: 'Diesel Fuel Additive DFA-100', averageRating: 4, totalReviews: 1, reviews: 1}
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 475
+product-reviews.tsx:42 Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [
+      {
+        "id": 45,
+        "productId": 475,
+        "customerId": 8,
+        "customerName": "ABAS ABASI",
+        "rating": 4,
+        "title": "تست نظر پس از اصلاح کد",
+        "comment": "این یک تست نظر است برای بررسی اینکه سیستم ثبت نظر درست کار می‌کند",
+        "isVerifiedPurchase": false,
+        "helpfulVotes": 0,
+        "notHelpfulVotes": 0,
+        "adminResponse": null,
+        "adminResponseDate": null,
+        "createdAt": "2025-07-24 16:52:44.90059",
+        "updatedAt": "2025-07-24 16:54:23.719377"
+      }
+    ],
+    "stats": {
+      "totalReviews": 1,
+      "averageRating": 4,
+      "ratingDistribution": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 1,
+        "5": 0
+      },
+      "lastReviewDate": "2025-07-24 16:52:44.90059"
+    }
+  }
+}
+product-reviews.tsx:43 Reviews Array Length: 1
+product-reviews.tsx:44 Reviews Array: [{…}]
+product-reviews.tsx:45 Product Stats: {totalReviews: 1, averageRating: 4, ratingDistribution: {…}, lastReviewDate: '2025-07-24 16:52:44.90059'}
+product-reviews.tsx:46 Product: {id: 475, name: 'Diesel Fuel Additive DFA-100', category: 'fuel-additives', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+product-reviews.tsx:50 ReviewsData type: object
+product-reviews.tsx:51 ReviewsData keys: (2) ['success', 'data']
+product-reviews.tsx:53 ReviewsData.data keys: (2) ['reviews', 'stats']
+product-reviews.tsx:54 ReviewsData.data.reviews: [{…}]
+ProductRating.tsx:137 ProductRating Props: {productId: 475, productName: 'Diesel Fuel Additive DFA-100', averageRating: 4, totalReviews: 1, reviews: 1}
+ProductRating.tsx:137 ProductRating Props: {productId: 475, productName: 'Diesel Fuel Additive DFA-100', averageRating: 4, totalReviews: 1, reviews: 1}
