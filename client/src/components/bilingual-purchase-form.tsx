@@ -1441,23 +1441,23 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                         <p className={`text-sm font-medium ${
                           isPrimaryAddressDisabled ? 'text-gray-600' : 'text-green-800'
                         }`}>
-                          {crmData?.firstName} {crmData?.lastName}
+                          {crmCustomerData?.firstName} {crmCustomerData?.lastName}
                         </p>
                         <p className={`text-sm ${
                           isPrimaryAddressDisabled ? 'text-gray-500' : 'text-green-700'
                         }`}>
-                          {crmData?.address || 'آدرس ثبت نشده'}
+                          {crmCustomerData?.address || 'آدرس ثبت نشده'}
                         </p>
                         <div className="flex items-center gap-4 mt-2">
                           <p className={`text-xs ${
                             isPrimaryAddressDisabled ? 'text-gray-500' : 'text-green-600'
                           }`}>
-                            📞 {crmData?.phone}
+                            📞 {crmCustomerData?.phone}
                           </p>
                           <p className={`text-xs ${
                             isPrimaryAddressDisabled ? 'text-gray-500' : 'text-green-600'
                           }`}>
-                            🏙️ {crmData?.city || 'شهر ثبت نشده'}
+                            🏙️ {crmCustomerData?.city || 'شهر ثبت نشده'}
                           </p>
                         </div>
                       </div>
