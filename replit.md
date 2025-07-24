@@ -6,6 +6,28 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Order Details Invalid Date Error Fix Across All Admin Interfaces (July 24, 2025)
+✅ **RESOLVED: Fixed "Invalid Date" errors displayed in order details across all administrative components**
+- **User Issue**: "Invalid Date" text appearing in order details sections instead of proper formatted dates
+- **Root Cause**: Unsafe date formatting using `new Date().toLocaleDateString()` on null, undefined, or malformed date values
+- **Technical Solution**: 
+  - Created `formatDateSafe()` function with comprehensive error handling and null checking
+  - Function returns Persian fallback text ("تاریخ نامشخص", "تاریخ نامعتبر", "خطا در تاریخ") for invalid dates
+  - Validates date values before formatting using `isNaN(date.getTime())` check
+- **Files Updated**:
+  - **finance-orders.tsx**: Fixed order creation date, update date, and document upload date formatting
+  - **logistics-management.tsx**: Fixed order creation date and actual delivery date formatting
+  - **warehouse-management.tsx**: Updated formatDate function to use safe date formatting
+- **Specific Fixes**:
+  - Order details modal: `orderDetails.createdAt` and `orderDetails.updatedAt` now use `formatDateSafe()`
+  - Document uploads: `doc.uploadedAt` formatting secured against null values
+  - Order cards: All `order.createdAt` and `order.updatedAt` references updated
+  - Logistics dates: Both order creation and delivery dates protected
+- **Error Prevention**: All date formatting now includes try-catch blocks with Persian error messages
+- **User Experience**: Clear, readable Persian text instead of "Invalid Date" errors throughout admin interfaces
+- **Impact**: Complete elimination of Invalid Date errors across financial, logistics, and warehouse management interfaces
+- **Result**: All order detail views now display proper formatted dates or meaningful Persian error messages
+
 ### COMPLETED: Persian Tooltips for Product Icons Implementation with Enhanced Positioning (July 24, 2025)
 ✅ **IMPLEMENTED: Persian hover tooltips added to product interaction icons with proper positioning**
 - **User Request**: Add Persian tooltip text when hovering over technical specifications and comments icons

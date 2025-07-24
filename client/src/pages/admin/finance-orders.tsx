@@ -53,6 +53,25 @@ import { useToast } from "@/hooks/use-toast";
 import { useOrderNotifications } from "@/hooks/useOrderNotifications";
 import { formatCurrency } from "@/lib/utils";
 
+// Safe date formatting function to prevent Invalid Date errors
+const formatDateSafe = (dateString: string | null | undefined, locale = 'en-US', options = {}): string => {
+  if (!dateString) return 'تاریخ نامشخص';
+  
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'تاریخ نامعتبر';
+    
+    return date.toLocaleDateString(locale, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      ...options
+    });
+  } catch (error) {
+    return 'خطا در تاریخ';
+  }
+};
+
 interface OrderManagement {
   id: number;
   customerOrderId: number;
@@ -1202,13 +1221,13 @@ function FinanceOrders() {
                         <div>
                           <Label className="text-sm font-medium text-gray-600">تاریخ سفارش</Label>
                           <p className="font-medium">
-                            {new Date(orderDetails.createdAt).toLocaleDateString('en-US')}
+                            {formatDateSafe(orderDetails.createdAt)}
                           </p>
                         </div>
                         <div>
                           <Label className="text-sm font-medium text-gray-600">آخرین بروزرسانی</Label>
                           <p className="font-medium">
-                            {new Date(orderDetails.updatedAt).toLocaleDateString('en-US')}
+                            {formatDateSafe(orderDetails.updatedAt)}
                           </p>
                         </div>
                       </div>
@@ -1262,7 +1281,7 @@ function FinanceOrders() {
                                     {doc.description || doc.fileName || 'مدرک ارسالی'}
                                   </p>
                                   <p className="text-sm text-gray-500">
-                                    {new Date(doc.uploadedAt).toLocaleDateString('en-US')} 
+                                    {formatDateSafe(doc.uploadedAt)} 
                                     {doc.fileName && ` • ${doc.fileName}`}
                                   </p>
                                 </div>
@@ -1440,11 +1459,7 @@ function OrderCard({ order, onOrderSelect, readOnly = false, fetchOrderDetails }
                 {parseFloat(order.totalAmount).toLocaleString()} {order.currency}
               </p>
               <p className="text-xs text-gray-500">
-                {new Date(order.createdAt).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric'
-                })}
+                {formatDateSafe(order.createdAt)}
               </p>
             </div>
           </div>
@@ -1462,7 +1477,7 @@ function OrderCard({ order, onOrderSelect, readOnly = false, fetchOrderDetails }
           <div className="flex items-center space-x-2 space-x-reverse">
             <Calendar className="h-4 w-4 text-gray-400" />
             <span className="text-sm text-gray-600">
-              {new Date(order.updatedAt).toLocaleDateString('en-US', {
+              {formatDateSafe(order.updatedAt, 'en-US', {
                 month: 'short',
                 day: 'numeric',
                 hour: '2-digit',

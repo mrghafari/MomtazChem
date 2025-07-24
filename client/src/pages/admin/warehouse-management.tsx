@@ -49,6 +49,25 @@ import { apiRequest } from '@/lib/queryClient';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 
+// Safe date formatting function to prevent Invalid Date errors
+const formatDateSafe = (dateString: string | null | undefined, locale = 'en-US', options = {}): string => {
+  if (!dateString) return 'تاریخ نامشخص';
+  
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'تاریخ نامعتبر';
+    
+    return date.toLocaleDateString(locale, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      ...options
+    });
+  } catch (error) {
+    return 'خطا در تاریخ';
+  }
+};
+
 interface Order {
   id: number;
   customerName: string;
@@ -786,7 +805,7 @@ const WarehouseManagement: React.FC = () => {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US');
+    return formatDateSafe(dateString);
   };
 
   return (

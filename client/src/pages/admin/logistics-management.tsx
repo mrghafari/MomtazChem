@@ -28,6 +28,25 @@ import {
 } from 'lucide-react';
 import { useOrderNotifications } from '@/hooks/useOrderNotifications';
 
+// Safe date formatting function to prevent Invalid Date errors
+const formatDateSafe = (dateString: string | null | undefined, locale = 'en-US', options = {}): string => {
+  if (!dateString) return 'تاریخ نامشخص';
+  
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'تاریخ نامعتبر';
+    
+    return date.toLocaleDateString(locale, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      ...options
+    });
+  } catch (error) {
+    return 'خطا در تاریخ';
+  }
+};
+
 interface TransportationCompany {
   id: number;
   name: string;
@@ -523,7 +542,7 @@ const LogisticsManagement = () => {
                         تاریخ سفارش
                       </h5>
                       <p className="text-sm font-medium text-green-700">
-                        {order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-US') : 'نامشخص'}
+                        {formatDateSafe(order.createdAt)}
                       </p>
                       <p className="text-xs text-green-600 mt-1">تاریخ ثبت سفارش</p>
                     </div>
@@ -535,7 +554,7 @@ const LogisticsManagement = () => {
                         تاریخ تحویل
                       </h5>
                       <p className="text-sm font-medium text-yellow-700">
-                        {order.actualDeliveryDate ? new Date(order.actualDeliveryDate).toLocaleDateString('en-US') : 'در انتظار تحویل'}
+                        {order.actualDeliveryDate ? formatDateSafe(order.actualDeliveryDate) : 'در انتظار تحویل'}
                       </p>
                       <p className="text-xs text-yellow-600 mt-1">تاریخ تحویل سفارش</p>
                     </div>
