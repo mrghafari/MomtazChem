@@ -1356,7 +1356,7 @@ const Shop = () => {
                                     <MessageSquare className="w-3 h-3 text-green-600" />
                                   </Button>
                                 </TooltipTrigger>
-                                <TooltipContent>
+                                <TooltipContent side="left" sideOffset={5}>
                                   <p>نظرات و امتیاز محصول</p>
                                 </TooltipContent>
                               </Tooltip>
@@ -1373,7 +1373,7 @@ const Shop = () => {
                                     <Package className="w-3 h-3 text-blue-600" />
                                   </Button>
                                 </TooltipTrigger>
-                                <TooltipContent>
+                                <TooltipContent side="left" sideOffset={5}>
                                   <p>مشخصات فنی محصول</p>
                                 </TooltipContent>
                               </Tooltip>
@@ -1698,7 +1698,7 @@ const Shop = () => {
                                     <MessageSquare className="w-3 h-3 text-green-600" />
                                   </Button>
                                 </TooltipTrigger>
-                                <TooltipContent>
+                                <TooltipContent side="left" sideOffset={5}>
                                   <p>نظرات و امتیاز محصول</p>
                                 </TooltipContent>
                               </Tooltip>
@@ -1715,7 +1715,7 @@ const Shop = () => {
                                     <Package className="w-3 h-3 text-blue-600" />
                                   </Button>
                                 </TooltipTrigger>
-                                <TooltipContent>
+                                <TooltipContent side="left" sideOffset={5}>
                                   <p>مشخصات فنی محصول</p>
                                 </TooltipContent>
                               </Tooltip>

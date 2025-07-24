@@ -6,23 +6,28 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
-### COMPLETED: Persian Tooltips for Product Icons Implementation (July 24, 2025)
-✅ **IMPLEMENTED: Persian hover tooltips added to product interaction icons in shop interface**
+### COMPLETED: Persian Tooltips for Product Icons Implementation with Enhanced Positioning (July 24, 2025)
+✅ **IMPLEMENTED: Persian hover tooltips added to product interaction icons with proper positioning**
 - **User Request**: Add Persian tooltip text when hovering over technical specifications and comments icons
 - **Technical Implementation**: 
   - Added TooltipProvider and Tooltip components from shadcn UI library
   - Updated both grid view and list view product icons with tooltips
   - Imported Tooltip components into shop.tsx component
+  - **Positioning Fix**: Added `side="left" sideOffset={5}` to prevent tooltip text appearing under card borders
 - **Icon Tooltips Added**:
   - **MessageSquare (comments)**: "نظرات و امتیاز محصول" (Product reviews and ratings)
   - **Package (specifications)**: "مشخصات فنی محصول" (Product technical specifications)
+- **Enhanced Positioning**: 
+  - Tooltips now appear to the left of icons with 5px offset
+  - Prevents overlap with product card borders
+  - Consistent positioning across both grid and list views
 - **Coverage**: Tooltips implemented in both display modes:
   - Grid view product cards
   - List view product cards
-- **User Experience**: Clear Persian guidance for customers understanding icon functionality
+- **User Experience**: Clear Persian guidance for customers understanding icon functionality with proper visibility
 - **Accessibility**: Enhanced interface usability with hover explanations for all product interaction elements
-- **Impact**: Improved customer understanding of available product actions with native Persian tooltips
-- **Result**: All product icons now provide clear Persian explanations when hovered
+- **Impact**: Improved customer understanding of available product actions with native Persian tooltips and optimal positioning
+- **Result**: All product icons now provide clear Persian explanations when hovered with proper left-side positioning
 
 ### COMPLETED: Customer Login Redirect Fixed - Now Stays in Shop (July 24, 2025)
 ✅ **RESOLVED: Customer login and registration now keep users in shop environment**
