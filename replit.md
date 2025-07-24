@@ -24,20 +24,20 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Impact**: Improved customer understanding of available product actions with native Persian tooltips
 - **Result**: All product icons now provide clear Persian explanations when hovered
 
-### COMPLETED: Customer Login Redirect to Profile Implementation (July 24, 2025)
-✅ **IMPLEMENTED: Customer login and registration now redirect to profile instead of shop**
-- **User Request**: Customer login should redirect to profile page instead of remaining in shop
-- **Technical Changes**: Modified both `handleLoginSuccess` and `handleRegisterSuccess` functions in shop.tsx
-- **Previous Behavior**: After login, customers remained in shop with potential checkout modal display
-- **New Behavior**: After login or registration, customers are automatically redirected to `/customer/profile`
-- **Code Simplification**: 
-  - Removed complex cart-based checkout logic from login handlers
-  - Eliminated conditional checkout modal displays based on cart contents
-  - Streamlined authentication flow with direct profile navigation
-- **User Experience**: Clean login experience that takes customers directly to their profile dashboard
-- **Cart Functionality**: Cart migration still functions properly but doesn't trigger immediate checkout
-- **Impact**: Improved user experience with clear post-authentication navigation flow
-- **Result**: Both customer login and registration now consistently redirect to customer profile page
+### COMPLETED: Customer Login Redirect Fixed - Now Stays in Shop (July 24, 2025)
+✅ **RESOLVED: Customer login and registration now keep users in shop environment**
+- **User Issue**: Customers were being redirected to profile page after login instead of staying in shop
+- **Technical Fix**: Removed redirect navigation from both `handleLoginSuccess` and `handleRegisterSuccess` functions in shop.tsx
+- **Previous Behavior**: After login/registration, customers were redirected to `/customer/profile`
+- **New Behavior**: After login or registration, customers remain in the shop interface where they started
+- **Code Changes**: 
+  - Replaced `navigate("/customer/profile")` with logging message in login handler
+  - Removed profile redirect from registration handler
+  - Preserved all other functionality: cart migration, toast notifications, cache invalidation
+- **User Experience**: Seamless shopping experience - customers can continue browsing/purchasing without interruption
+- **Cart Functionality**: All cart migration and authentication features work exactly as before
+- **Impact**: Improved shopping flow - customers stay focused on products instead of being taken away to profile
+- **Result**: Both customer login and registration now keep users in the shop environment they started in
 
 ### COMPLETED: Customer Review System Session Persistence Fix (July 24, 2025)
 ✅ **RESOLVED: Critical session management bug preventing review submissions after customer login**

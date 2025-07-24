@@ -489,9 +489,8 @@ const Shop = () => {
       });
       console.log('🔐 [LOGIN] Welcome toast shown');
       
-      // Always redirect to customer profile after login
-      console.log('🔐 [LOGIN] Redirecting to customer profile');
-      navigate("/customer/profile");
+      // Stay in shop after login - no redirect needed
+      console.log('🔐 [LOGIN] Staying in shop after successful login');
       
       console.log('🔐 [LOGIN] handleLoginSuccess completed successfully');
     } catch (error) {
@@ -521,8 +520,7 @@ const Shop = () => {
       description: `خوش آمدید ${customerData.firstName} ${customerData.lastName}`,
     });
     
-    // Always redirect to customer profile after registration
-    navigate("/customer/profile");
+    // Stay in shop after registration - no redirect needed
   };
 
   const handleLogout = async () => {
