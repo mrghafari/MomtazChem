@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>تست سیستم نظرات - کارکرد موفق</title>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; direction: rtl; }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .test-section { border: 1px solid #ddd; padding: 15px; margin: 10px 0; }
+        button { padding: 10px 15px; margin: 5px; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>🎉 تست سیستم نظرات - حل شده!</h1>
+    
+    <div class="test-section">
+        <h2>✅ مشکل حل شد:</h2>
+        <ul>
+            <li><strong>مشکل اصلی:</strong> ستون password در جدول customers وجود نداشت</li>
+            <li><strong>حل:</strong> ستون password اضافه شد و هش درست اضافه شد</li>
+            <li><strong>کاربر تست:</strong> oilstar@hotmail.com با پسورد user123</li>
+            <li><strong>نتیجه:</strong> نظرات موفقیت‌آمیز ثبت می‌شوند</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h2>نتایج تست:</h2>
+        <button onclick="testLogin()">تست ورود کاربر</button>
+        <button onclick="testReview477()">تست نظر محصول 477</button>
+        <button onclick="testReview472()">تست نظر محصول 472</button>
+        <button onclick="getReviews477()">مشاهده نظرات محصول 477</button>
+        <button onclick="getReviews472()">مشاهده نظرات محصول 472</button>
+        
+        <div id="results"></div>
+    </div>
+
+    <script>
+        async function testLogin() {
+            try {
+                const response = await fetch('/api/customers/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'oilstar@hotmail.com',
+                        password: 'user123'
+                    }),
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                document.getElementById('results').innerHTML = `
+                    <h3>نتیجه ورود:</h3>
+                    <pre class="${data.success ? 'success' : 'error'}">${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                document.getElementById('results').innerHTML = `<div class="error">خطا: ${error.message}</div>`;
+            }
+        }
+
+        async function testReview477() {
+            try {
+                const response = await fetch('/api/products/477/reviews', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        rating: 5,
+                        title: 'تست جدید',
+                        review: 'نظر تست برای محصول 477'
+                    }),
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                document.getElementById('results').innerHTML = `
+                    <h3>نتیجه ثبت نظر محصول 477:</h3>
+                    <pre class="${data.success ? 'success' : 'error'}">${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                document.getElementById('results').innerHTML = `<div class="error">خطا: ${error.message}</div>`;
+            }
+        }
+
+        async function testReview472() {
+            try {
+                const response = await fetch('/api/products/472/reviews', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        rating: 4,
+                        title: 'محصول خوب',
+                        review: 'کیفیت خوبی داره'
+                    }),
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                document.getElementById('results').innerHTML = `
+                    <h3>نتیجه ثبت نظر محصول 472:</h3>
+                    <pre class="${data.success ? 'success' : 'error'}">${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                document.getElementById('results').innerHTML = `<div class="error">خطا: ${error.message}</div>`;
+            }
+        }
+
+        async function getReviews477() {
+            try {
+                const response = await fetch('/api/products/477/reviews');
+                const data = await response.json();
+                document.getElementById('results').innerHTML = `
+                    <h3>نظرات محصول 477:</h3>
+                    <pre class="success">${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                document.getElementById('results').innerHTML = `<div class="error">خطا: ${error.message}</div>`;
+            }
+        }
+
+        async function getReviews472() {
+            try {
+                const response = await fetch('/api/products/472/reviews');
+                const data = await response.json();
+                document.getElementById('results').innerHTML = `
+                    <h3>نظرات محصول 472:</h3>
+                    <pre class="success">${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                document.getElementById('results').innerHTML = `<div class="error">خطا: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>
