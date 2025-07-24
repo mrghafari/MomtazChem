@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست نمایش قالب‌های ایمیل</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            direction: rtl;
+            text-align: right;
+        }
+        .admin-login {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .form-field {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background: #007cba;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #005a87;
+        }
+        .templates-list {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .template-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            background: #f9f9f9;
+        }
+        .template-item:last-child {
+            border-bottom: none;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>تست نمایش قالب‌های ایمیل در سیستم مدیریت</h1>
+    
+    <div class="info">
+        <h3>وضعیت قالب #08:</h3>
+        <ul>
+            <li>✅ قالب در دیتابیس: #08 - Customer Inquiry Confirmation (ID: 9)</li>
+            <li>✅ API بازگرداندن: 18 قالب از جمله #08</li>
+            <li>❓ نمایش در رابط مدیریت: بررسی می‌شود</li>
+        </ul>
+    </div>
+    
+    <div class="admin-login">
+        <h2>ورود مدیریت</h2>
+        <div class="form-field">
+            <label for="username">نام کاربری:</label>
+            <input type="text" id="username" value="admin">
+        </div>
+        <div class="form-field">
+            <label for="password">رمز عبور:</label>
+            <input type="password" id="password" value="admin123">
+        </div>
+        <button onclick="adminLogin()">ورود مدیریت</button>
+        <button onclick="loadTemplates()">بارگیری قالب‌ها</button>
+        <button onclick="checkTemplate08()">بررسی قالب #08</button>
+    </div>
+    
+    <div id="result"></div>
+    <div id="templates" class="templates-list" style="display:none;"></div>
+
+    <script>
+        let adminCookies = '';
+        
+        async function adminLogin() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>در حال ورود...</p>';
+            
+            try {
+                const response = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: document.getElementById('username').value,
+                        password: document.getElementById('password').value
+                    }),
+                    credentials: 'include'
+                });
+                
+                const result = await response.json();
+                console.log('Admin login response:', result);
+                
+                if (response.ok && result.success) {
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            <h3>✅ ورود موفق</h3>
+                            <p>مدیر: ${result.user.username} (${result.user.email})</p>
+                            <p>نقش: ${result.user.userType}</p>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="result error">
+                            <h3>❌ خطا در ورود</h3>
+                            <p>${result.message}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h3>❌ خطا در اتصال</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        async function loadTemplates() {
+            const resultDiv = document.getElementById('result');
+            const templatesDiv = document.getElementById('templates');
+            
+            resultDiv.innerHTML = '<p>در حال بارگیری قالب‌ها...</p>';
+            
+            try {
+                const response = await fetch('/api/admin/email/templates', {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: {
+                        'Cache-Control': 'no-cache'
+                    }
+                });
+                
+                const templates = await response.json();
+                console.log('Templates response:', templates);
+                
+                if (response.ok && Array.isArray(templates)) {
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            <h3>✅ قالب‌ها بارگیری شدند</h3>
+                            <p>تعداد کل: ${templates.length} قالب</p>
+                            <p>قالب #08 یافت شد: ${templates.find(t => t.name.includes('#08')) ? '✅ بله' : '❌ خیر'}</p>
+                        </div>
+                    `;
+                    
+                    templatesDiv.innerHTML = templates.map(template => `
+                        <div class="template-item">
+                            <h4>${template.name}</h4>
+                            <p><strong>موضوع:</strong> ${template.subject}</p>
+                            <p><strong>شناسه:</strong> ${template.id}</p>
+                            <p><strong>وضعیت:</strong> ${template.is_active ? 'فعال' : 'غیرفعال'}</p>
+                        </div>
+                    `).join('');
+                    templatesDiv.style.display = 'block';
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="result error">
+                            <h3>❌ خطا در دریافت قالب‌ها</h3>
+                            <p>کد وضعیت: ${response.status}</p>
+                            <p>پیام: ${templates.message || 'خطای نامشخص'}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Templates error:', error);
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h3>❌ خطا در اتصال</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        async function checkTemplate08() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>در حال بررسی قالب #08...</p>';
+            
+            try {
+                const response = await fetch('/api/admin/email/templates', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                
+                const templates = await response.json();
+                
+                if (response.ok && Array.isArray(templates)) {
+                    const template08 = templates.find(t => t.name.includes('#08') || t.name.includes('Customer Inquiry Confirmation'));
+                    
+                    if (template08) {
+                        resultDiv.innerHTML = `
+                            <div class="result success">
+                                <h3>✅ قالب #08 پیدا شد</h3>
+                                <p><strong>نام:</strong> ${template08.name}</p>
+                                <p><strong>شناسه:</strong> ${template08.id}</p>
+                                <p><strong>موضوع:</strong> ${template08.subject}</p>
+                                <p><strong>وضعیت:</strong> ${template08.is_active ? 'فعال' : 'غیرفعال'}</p>
+                                <p><strong>محتوای HTML موجود:</strong> ${template08.html_content ? 'بله' : 'خیر'}</p>
+                                <p><strong>تاریخ ایجاد:</strong> ${template08.created_at}</p>
+                            </div>
+                        `;
+                    } else {
+                        resultDiv.innerHTML = `
+                            <div class="result error">
+                                <h3>❌ قالب #08 پیدا نشد</h3>
+                                <p>در ${templates.length} قالب موجود، قالب #08 یافت نشد</p>
+                                <p>قالب‌های موجود:</p>
+                                <ul>
+                                    ${templates.map(t => `<li>${t.name} (ID: ${t.id})</li>`).join('')}
+                                </ul>
+                            </div>
+                        `;
+                    }
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="result error">
+                            <h3>❌ خطا در بررسی قالب‌ها</h3>
+                            <p>کد وضعیت: ${response.status}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Template check error:', error);
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h3>❌ خطا در بررسی</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

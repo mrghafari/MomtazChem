@@ -9,6 +9,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { Mail, Plus, Edit2, Eye, Copy, Trash2, Save, X, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 
 interface EmailTemplate {
   id: number;
@@ -79,90 +80,12 @@ const EmailTemplatesFixed: React.FC = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
+  const { user } = useAuth();
+  
   // Direct API fetch with React Query
   const { data: templates = [], isLoading, error, refetch } = useQuery({
-    queryKey: ['admin-email-templates'],
-    queryFn: async () => {
-      try {
-        const timestamp = Date.now();
-        const response = await fetch(`/api/admin/email/templates?cache_bust=${timestamp}&t=${Math.random()}`, {
-          method: 'GET',
-          credentials: 'include',
-          headers: {
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Pragma': 'no-cache',
-            'Expires': '0',
-            'Content-Type': 'application/json'
-          }
-        });
-
-        if (!response.ok) {
-          if (response.status === 401) {
-            throw new Error('احراز هویت مورد نیاز است - لطفاً دوباره وارد شوید');
-          }
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        console.log('📧 Raw API Response:', { 
-          dataType: typeof data, 
-          isArray: Array.isArray(data), 
-          length: data?.length, 
-          keys: data && typeof data === 'object' ? Object.keys(data) : null 
-        });
-        
-        if (!Array.isArray(data)) {
-          if (data && data.success === false) {
-            console.error('❌ API Error:', data);
-            throw new Error(data.message || 'خطای API');
-          }
-          console.error('❌ Invalid data format:', data);
-          throw new Error('فرمت داده نامعتبر دریافت شد');
-        }
-
-        return data.map((template: any) => ({
-          id: template.id,
-          name: template.name || template.templateName,
-          templateName: template.templateName || template.name,
-          subject: template.subject,
-          html_content: template.html_content || template.htmlContent,
-          htmlContent: template.htmlContent || template.html_content,
-          text_content: template.text_content || template.textContent,
-          textContent: template.textContent || template.text_content,
-          category: template.category || template.categoryName,
-          categoryName: template.categoryName || template.category,
-          variables: template.variables || [],
-          is_active: template.is_active !== false && template.isActive !== false,
-          isActive: template.isActive !== false && template.is_active !== false,
-          is_default: template.is_default || template.isDefault || false,
-          isDefault: template.isDefault || template.is_default || false,
-          language: template.language || 'fa',
-          created_by: template.created_by || template.createdBy,
-          createdBy: template.createdBy || template.created_by,
-          usage_count: template.usage_count || template.usageCount || 0,
-          usageCount: template.usageCount || template.usage_count || 0,
-          last_used: template.last_used || template.lastUsed,
-          lastUsed: template.lastUsed || template.last_used,
-          created_at: template.created_at || template.createdAt,
-          createdAt: template.createdAt || template.created_at,
-          updated_at: template.updated_at || template.updatedAt,
-          updatedAt: template.updatedAt || template.updated_at
-        }));
-      } catch (error) {
-        console.error('❌ Error fetching templates:', error);
-        throw error;
-      }
-    },
-    staleTime: 0,
-    refetchOnWindowFocus: true,
-    retry: (failureCount, error) => {
-      if (error?.message?.includes('احراز هویت')) {
-        // Redirect to login on auth error
-        window.location.href = '/admin/login';
-        return false;
-      }
-      return failureCount < 2;
-    }
+    queryKey: ['/api/admin/email/templates'],
+    enabled: !!user
   });
 
   // Manual refresh function
