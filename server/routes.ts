@@ -44,6 +44,7 @@ import { generateSmartSKU, validateSKUUniqueness } from "./ai-sku-generator";
 import { deliveryVerificationStorage } from "./delivery-verification-storage";
 import { gpsDeliveryStorage } from "./gps-delivery-storage";
 import { insertGpsDeliveryConfirmationSchema } from "@shared/gps-delivery-schema";
+import { vehicleTemplates, vehicleSelectionHistory, insertVehicleTemplateSchema } from "@shared/logistics-schema";
 import { 
   companyInformation, 
   correspondence, 
@@ -35847,6 +35848,218 @@ momtazchem.com
     } catch (error) {
       console.error('Error exporting orders CSV:', error);
       res.status(500).json({ success: false, message: "خطا در ایجاد فایل CSV" });
+    }
+  });
+
+  // =============================================================================
+  // OPTIMAL VEHICLE SELECTION API ENDPOINTS  
+  // =============================================================================
+
+  // Get all vehicle templates
+  app.get("/api/logistics/vehicle-templates", requireAuth, async (req, res) => {
+    try {
+      const vehicles = await db.select().from(vehicleTemplates).where(eq(vehicleTemplates.isActive, true)).orderBy(vehicleTemplates.priority, vehicleTemplates.name);
+      res.json({ success: true, data: vehicles });
+    } catch (error) {
+      console.error("Error fetching vehicle templates:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت الگوهای خودرو" });
+    }
+  });
+
+  // Create vehicle template
+  app.post("/api/logistics/vehicle-templates", requireAuth, async (req, res) => {
+    try {
+      const vehicleData = insertVehicleTemplateSchema.parse(req.body);
+      const [newVehicle] = await db.insert(vehicleTemplates).values(vehicleData).returning();
+      res.json({ success: true, data: newVehicle });
+    } catch (error) {
+      console.error("Error creating vehicle template:", error);
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ success: false, message: "داده‌های نامعتبر", errors: error.errors });
+      } else {
+        res.status(500).json({ success: false, message: "خطا در ایجاد الگوی خودرو" });
+      }
+    }
+  });
+
+  // Update vehicle template
+  app.patch("/api/logistics/vehicle-templates/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ success: false, message: "شناسه نامعتبر" });
+      }
+
+      const vehicleData = req.body;
+      vehicleData.updatedAt = new Date();
+      
+      const [updatedVehicle] = await db.update(vehicleTemplates)
+        .set(vehicleData)
+        .where(eq(vehicleTemplates.id, id))
+        .returning();
+
+      if (!updatedVehicle) {
+        return res.status(404).json({ success: false, message: "الگوی خودرو پیدا نشد" });
+      }
+
+      res.json({ success: true, data: updatedVehicle });
+    } catch (error) {
+      console.error("Error updating vehicle template:", error);
+      res.status(500).json({ success: false, message: "خطا در بروزرسانی الگوی خودرو" });
+    }
+  });
+
+  // Delete vehicle template
+  app.delete("/api/logistics/vehicle-templates/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ success: false, message: "شناسه نامعتبر" });
+      }
+
+      // Soft delete by setting isActive to false
+      const [deletedVehicle] = await db.update(vehicleTemplates)
+        .set({ isActive: false, updatedAt: new Date() })
+        .where(eq(vehicleTemplates.id, id))
+        .returning();
+
+      if (!deletedVehicle) {
+        return res.status(404).json({ success: false, message: "الگوی خودرو پیدا نشد" });
+      }
+
+      res.json({ success: true, message: "الگوی خودرو با موفقیت حذف شد" });
+    } catch (error) {
+      console.error("Error deleting vehicle template:", error);
+      res.status(500).json({ success: false, message: "خطا در حذف الگوی خودرو" });
+    }
+  });
+
+  // Select optimal vehicle for order
+  app.post("/api/logistics/select-optimal-vehicle", requireAuth, async (req, res) => {
+    try {
+      const { orderNumber, weightKg, volumeM3, routeType, distanceKm, isHazardous, isRefrigerated, isFragile, customerId } = req.body;
+
+      // Input validation
+      if (!orderNumber || !weightKg || !routeType || !distanceKm) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "فیلدهای اجباری: شماره سفارش، وزن، نوع مسیر، و فاصله" 
+        });
+      }
+
+      // Get all active vehicle templates
+      const vehicles = await db.select().from(vehicleTemplates).where(eq(vehicleTemplates.isActive, true));
+
+      // Apply optimal vehicle selection algorithm (based on your Python code)
+      const eligibleVehicles = vehicles.filter(vehicle => {
+        // Check weight capacity
+        if (parseFloat(weightKg) > parseFloat(vehicle.maxWeightKg.toString())) return false;
+        
+        // Check route compatibility
+        if (!vehicle.allowedRoutes.includes(routeType)) return false;
+        
+        // Check hazardous material support
+        if (isHazardous && !vehicle.supportsHazardous) return false;
+        
+        // Check refrigerated support
+        if (isRefrigerated && !vehicle.supportsRefrigerated) return false;
+        
+        // Check fragile support
+        if (isFragile && !vehicle.supportsFragile) return false;
+        
+        return true;
+      });
+
+      if (eligibleVehicles.length === 0) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "هیچ وسیله مناسبی برای این سفارش پیدا نشد" 
+        });
+      }
+
+      // Calculate costs for each eligible vehicle
+      const costOptions = eligibleVehicles.map(vehicle => {
+        const basePrice = parseFloat(vehicle.basePrice.toString());
+        const weightCost = parseFloat(vehicle.pricePerKg.toString()) * parseFloat(weightKg);
+        const distanceCost = parseFloat(vehicle.pricePerKm.toString()) * parseFloat(distanceKm);
+        const totalCost = basePrice + weightCost + distanceCost;
+
+        return {
+          vehicleId: vehicle.id,
+          vehicleName: vehicle.name,
+          vehicleType: vehicle.vehicleType,
+          basePrice,
+          weightCost,
+          distanceCost,
+          totalCost,
+          vehicle
+        };
+      });
+
+      // Find the option with minimum cost
+      const bestOption = costOptions.reduce((min, current) => 
+        current.totalCost < min.totalCost ? current : min
+      );
+
+      // Save selection history
+      const historyData = {
+        orderNumber,
+        customerId: customerId || null,
+        orderWeightKg: weightKg.toString(),
+        orderVolumeM3: volumeM3?.toString() || null,
+        routeType,
+        distanceKm: distanceKm.toString(),
+        isHazardous: isHazardous || false,
+        isRefrigerated: isRefrigerated || false,
+        isFragile: isFragile || false,
+        selectedVehicleTemplateId: bestOption.vehicleId,
+        selectedVehicleName: bestOption.vehicleName,
+        basePrice: bestOption.basePrice.toString(),
+        weightCost: bestOption.weightCost.toString(),
+        distanceCost: bestOption.distanceCost.toString(),
+        totalCost: bestOption.totalCost.toString(),
+        alternativeOptions: costOptions.filter(option => option.vehicleId !== bestOption.vehicleId),
+        selectionCriteria: `انتخاب بر اساس کمترین هزینه: ${bestOption.totalCost.toLocaleString()} دینار عراقی`
+      };
+
+      const [savedHistory] = await db.insert(vehicleSelectionHistory).values(historyData).returning();
+
+      res.json({
+        success: true,
+        data: {
+          selectedVehicle: bestOption,
+          alternativeOptions: costOptions.filter(option => option.vehicleId !== bestOption.vehicleId),
+          selectionHistory: savedHistory,
+          totalEligibleVehicles: eligibleVehicles.length,
+          selectionCriteria: historyData.selectionCriteria
+        }
+      });
+
+    } catch (error) {
+      console.error("Error selecting optimal vehicle:", error);
+      res.status(500).json({ success: false, message: "خطا در انتخاب وسیله بهینه" });
+    }
+  });
+
+  // Get vehicle selection history
+  app.get("/api/logistics/vehicle-selection-history", requireAuth, async (req, res) => {
+    try {
+      const { orderNumber, customerId, limit = 50 } = req.query;
+      
+      let query = db.select().from(vehicleSelectionHistory);
+      
+      if (orderNumber) {
+        query = query.where(eq(vehicleSelectionHistory.orderNumber, orderNumber as string));
+      } else if (customerId) {
+        query = query.where(eq(vehicleSelectionHistory.customerId, parseInt(customerId as string)));
+      }
+      
+      const history = await query.orderBy(desc(vehicleSelectionHistory.createdAt)).limit(parseInt(limit as string));
+      
+      res.json({ success: true, data: history });
+    } catch (error) {
+      console.error("Error fetching vehicle selection history:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت تاریخچه انتخاب وسایل نقلیه" });
     }
   });
 

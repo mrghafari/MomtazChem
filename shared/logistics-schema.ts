@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, decimal, boolean, integer, varchar, index } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, decimal, boolean, integer, varchar, index, json } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -479,3 +479,162 @@ export const VEHICLE_SIZES = {
 export type IraqiRegion = typeof IRAQI_REGIONS[keyof typeof IRAQI_REGIONS];
 export type TransportType = typeof TRANSPORT_TYPES[keyof typeof TRANSPORT_TYPES];
 export type VehicleSize = typeof VEHICLE_SIZES[keyof typeof VEHICLE_SIZES];
+
+// =============================================================================
+// OPTIMAL VEHICLE SELECTION SYSTEM
+// =============================================================================
+
+// Vehicle Templates for optimal selection algorithm 
+export const vehicleTemplates = pgTable("vehicle_templates", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  nameEn: text("name_en"),
+  vehicleType: varchar("vehicle_type", { length: 50 }).notNull(), // motorcycle, van, light_truck, heavy_truck
+  
+  // Capacity limits
+  maxWeightKg: decimal("max_weight_kg", { precision: 8, scale: 2 }).notNull(),
+  maxVolumeM3: decimal("max_volume_m3", { precision: 8, scale: 2 }),
+  
+  // Route restrictions
+  allowedRoutes: text("allowed_routes").array().notNull(), // ['urban', 'interurban', 'highway']
+  
+  // Pricing structure
+  basePrice: decimal("base_price", { precision: 10, scale: 2 }).notNull(),
+  pricePerKm: decimal("price_per_km", { precision: 6, scale: 2 }).notNull(),
+  pricePerKg: decimal("price_per_kg", { precision: 6, scale: 2 }).default("0"),
+  
+  // Special capabilities
+  supportsHazardous: boolean("supports_hazardous").default(false),
+  supportsRefrigerated: boolean("supports_refrigerated").default(false),
+  supportsFragile: boolean("supports_fragile").default(true),
+  
+  // Operational details
+  averageSpeedKmh: decimal("average_speed_kmh", { precision: 5, scale: 2 }).default("50"),
+  fuelConsumptionL100km: decimal("fuel_consumption_l100km", { precision: 5, scale: 2 }),
+  
+  // Status
+  isActive: boolean("is_active").default(true),
+  priority: integer("priority").default(0), // Lower number = higher priority
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => [
+  index("vehicle_templates_type_idx").on(table.vehicleType),
+  index("vehicle_templates_active_idx").on(table.isActive),
+  index("vehicle_templates_weight_idx").on(table.maxWeightKg),
+]);
+
+// Vehicle selection history and results
+export const vehicleSelectionHistory = pgTable("vehicle_selection_history", {
+  id: serial("id").primaryKey(),
+  orderNumber: text("order_number").notNull(),
+  customerId: integer("customer_id"),
+  
+  // Order requirements that were analyzed
+  orderWeightKg: decimal("order_weight_kg", { precision: 8, scale: 2 }).notNull(),
+  orderVolumeM3: decimal("order_volume_m3", { precision: 8, scale: 2 }),
+  routeType: varchar("route_type", { length: 20 }).notNull(), // urban, interurban, highway
+  distanceKm: decimal("distance_km", { precision: 8, scale: 2 }).notNull(),
+  isHazardous: boolean("is_hazardous").default(false),
+  isRefrigerated: boolean("is_refrigerated").default(false),
+  isFragile: boolean("is_fragile").default(false),
+  
+  // Selected vehicle template
+  selectedVehicleTemplateId: integer("selected_vehicle_template_id").references(() => vehicleTemplates.id),
+  selectedVehicleName: text("selected_vehicle_name").notNull(),
+  
+  // Cost calculation results
+  basePrice: decimal("base_price", { precision: 10, scale: 2 }).notNull(),
+  weightCost: decimal("weight_cost", { precision: 10, scale: 2 }).default("0"),
+  distanceCost: decimal("distance_cost", { precision: 10, scale: 2 }).notNull(),
+  totalCost: decimal("total_cost", { precision: 10, scale: 2 }).notNull(),
+  
+  // Alternative options that were considered
+  alternativeOptions: json("alternative_options"), // Array of other vehicle options with costs
+  
+  // Selection metadata
+  selectionAlgorithm: varchar("selection_algorithm", { length: 50 }).default("cost_optimization"),
+  selectionCriteria: text("selection_criteria"), // Human readable explanation
+  adminUserId: integer("admin_user_id"), // Who made the selection (if manual override)
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [
+  index("vehicle_selection_order_idx").on(table.orderNumber),
+  index("vehicle_selection_customer_idx").on(table.customerId),
+  index("vehicle_selection_vehicle_idx").on(table.selectedVehicleTemplateId),
+  index("vehicle_selection_date_idx").on(table.createdAt),
+]);
+
+// Route optimization and distance calculation cache
+export const routeOptimization = pgTable("route_optimization", {
+  id: serial("id").primaryKey(),
+  
+  // Route definition
+  fromProvinceId: integer("from_province_id").references(() => iraqiProvinces.id),
+  fromCityId: integer("from_city_id").references(() => iraqiCities.id),
+  toProvinceId: integer("to_province_id").references(() => iraqiProvinces.id),
+  toCityId: integer("to_city_id").references(() => iraqiCities.id),
+  
+  // Route details
+  routeType: varchar("route_type", { length: 20 }).notNull(), // urban, interurban, highway
+  distanceKm: decimal("distance_km", { precision: 8, scale: 2 }).notNull(),
+  estimatedTimeMinutes: integer("estimated_time_minutes").notNull(),
+  
+  // Route characteristics
+  hasHighway: boolean("has_highway").default(false),
+  hasMountainRoad: boolean("has_mountain_road").default(false),
+  hasUnpavedRoad: boolean("has_unpaved_road").default(false),
+  tollCost: decimal("toll_cost", { precision: 10, scale: 2 }).default("0"),
+  
+  // Traffic and conditions
+  trafficMultiplier: decimal("traffic_multiplier", { precision: 3, scale: 2 }).default("1.0"),
+  weatherRestrictions: text("weather_restrictions").array(), // ['rain', 'snow', 'sandstorm']
+  
+  // Cache metadata
+  lastUpdated: timestamp("last_updated").notNull().defaultNow(),
+  dataSource: varchar("data_source", { length: 50 }).default("manual"), // manual, google_maps, osm
+  isActive: boolean("is_active").default(true),
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [
+  index("route_optimization_from_idx").on(table.fromCityId),
+  index("route_optimization_to_idx").on(table.toCityId),
+  index("route_optimization_type_idx").on(table.routeType),
+  index("route_optimization_distance_idx").on(table.distanceKm),
+]);
+
+// Insert schemas and types for vehicle optimization
+export const insertVehicleTemplateSchema = createInsertSchema(vehicleTemplates);
+export const insertVehicleSelectionHistorySchema = createInsertSchema(vehicleSelectionHistory);
+export const insertRouteOptimizationSchema = createInsertSchema(routeOptimization);
+
+export type VehicleTemplate = typeof vehicleTemplates.$inferSelect;
+export type InsertVehicleTemplate = z.infer<typeof insertVehicleTemplateSchema>;
+export type VehicleSelectionHistory = typeof vehicleSelectionHistory.$inferSelect;
+export type InsertVehicleSelectionHistory = z.infer<typeof insertVehicleSelectionHistorySchema>;
+export type RouteOptimization = typeof routeOptimization.$inferSelect;
+export type InsertRouteOptimization = z.infer<typeof insertRouteOptimizationSchema>;
+
+// Vehicle selection constants
+export const ROUTE_TYPES = {
+  URBAN: 'urban',
+  INTERURBAN: 'interurban', 
+  HIGHWAY: 'highway'
+} as const;
+
+export const OPTIMAL_VEHICLE_TYPES = {
+  MOTORCYCLE: 'motorcycle',
+  VAN: 'van',
+  LIGHT_TRUCK: 'light_truck',
+  HEAVY_TRUCK: 'heavy_truck'
+} as const;
+
+export const SELECTION_ALGORITHMS = {
+  COST_OPTIMIZATION: 'cost_optimization',
+  TIME_OPTIMIZATION: 'time_optimization',
+  MIXED_OPTIMIZATION: 'mixed_optimization'
+} as const;
+
+export type RouteType = typeof ROUTE_TYPES[keyof typeof ROUTE_TYPES];
+export type OptimalVehicleType = typeof OPTIMAL_VEHICLE_TYPES[keyof typeof OPTIMAL_VEHICLE_TYPES];
+export type SelectionAlgorithm = typeof SELECTION_ALGORITHMS[keyof typeof SELECTION_ALGORITHMS];

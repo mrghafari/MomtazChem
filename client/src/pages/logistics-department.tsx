@@ -60,6 +60,13 @@ interface LogisticsOrder {
     email?: string;
     phone?: string;
   };
+  shippingAddress?: {
+    name?: string;
+    phone?: string;
+    address?: string;
+    city?: string;
+    postalCode?: string;
+  };
 }
 
 interface ShippingRate {
@@ -489,6 +496,14 @@ export default function LogisticsDepartment() {
                           >
                             <Edit className="w-4 h-4 mr-2" />
                             مدیریت ارسال
+                          </Button>
+                          
+                          <Button
+                            onClick={() => window.open(`/admin/vehicle-optimization?orderId=${order.id}&weight=${order.totalWeight}&destination=${encodeURIComponent(order.shippingAddress?.city || '')}`, '_blank')}
+                            className="bg-purple-600 hover:bg-purple-700"
+                          >
+                            <Car className="w-4 h-4 mr-2" />
+                            انتخاب وسیله نقلیه
                           </Button>
                           
                           {order.currentStatus !== 'logistics_delivered' && (

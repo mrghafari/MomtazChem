@@ -1,0 +1,81 @@
+from typing import List, Dict
+
+
+# تعریف ساختار وسایل نقلیه
+vehicles = [
+    {
+        "id": 1,
+        "name": "موتور",
+        "max_weight_kg": 20,
+        "allowed_routes": ["urban"],
+        "base_price": 50000,
+        "price_per_km": 4000,
+        "price_per_kg": 0,
+        "supports_hazardous": False
+    },
+    {
+        "id": 2,
+        "name": "وانت",
+        "max_weight_kg": 200,
+        "allowed_routes": ["urban", "interurban"],
+        "base_price": 80000,
+        "price_per_km": 5000,
+        "price_per_kg": 500,
+        "supports_hazardous": True
+    },
+    {
+        "id": 3,
+        "name": "کامیون سبک",
+        "max_weight_kg": 2000,
+        "allowed_routes": ["interurban"],
+        "base_price": 200000,
+        "price_per_km": 7000,
+        "price_per_kg": 300,
+        "supports_hazardous": True
+    }
+]
+
+# تعریف یک سفارش
+order = {
+    "weight_kg": 50,
+    "route_type": "urban",     # یا "interurban"
+    "distance_km": 15,
+    "is_hazardous": False
+}
+
+
+def select_optimal_vehicle(order: Dict, vehicles: List[Dict]) -> Dict:
+    # فیلتر وسایل نقلیه مناسب
+    eligible = [
+        v for v in vehicles
+        if order["weight_kg"] <= v["max_weight_kg"]
+        and order["route_type"] in v["allowed_routes"]
+        and (not order["is_hazardous"] or v["supports_hazardous"])
+    ]
+
+    if not eligible:
+        raise Exception("هیچ وسیله مناسبی برای این سفارش پیدا نشد.")
+
+    # محاسبه هزینه کل برای هر وسیله
+    cost_options = []
+    for v in eligible:
+        weight_cost = v.get("price_per_kg", 0) * order["weight_kg"]
+        distance_cost = v["price_per_km"] * order["distance_km"]
+        total_cost = v["base_price"] + weight_cost + distance_cost
+
+        cost_options.append({
+            "vehicle_id": v["id"],
+            "vehicle_name": v["name"],
+            "total_cost": total_cost
+        })
+
+    # پیدا کردن گزینه با کمترین هزینه
+    best_option = min(cost_options, key=lambda x: x["total_cost"])
+    return best_option
+
+
+# تست الگوریتم
+result = select_optimal_vehicle(order, vehicles)
+
+print("بهترین گزینه حمل:")
+print(result)
