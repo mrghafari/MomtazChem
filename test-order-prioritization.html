@@ -1,68 +1,118 @@
 <!DOCTYPE html>
-<html>
+<html lang="fa" dir="rtl">
 <head>
-    <title>Test Order Prioritization</title>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست اولویت‌بندی سفارشات</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            direction: rtl;
+            text-align: right;
+        }
+        .order-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            background: #f9f9f9;
+        }
+        .grace-period {
+            background: #fff3cd;
+            border-color: #ffeaa7;
+        }
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+    </style>
 </head>
 <body>
-    <h1>Test Order Prioritization for 3-Day Bank Transfer Orders</h1>
+    <h1>تست اولویت‌بندی سفارشات</h1>
     
-    <h2>Customer Login Test</h2>
-    <button onclick="testLogin()">Test Login</button>
-    <div id="loginResult"></div>
-    
-    <h2>Orders Test</h2>
-    <button onclick="testOrders()">Get Orders</button>
-    <div id="ordersResult"></div>
-    
-    <h2>Manual Database Test</h2>
-    <p>Testing SQL queries directly to verify data</p>
-    <pre id="sqlResults"></pre>
+    <div>
+        <h3>ورود به حساب کاربری</h3>
+        <button class="btn" onclick="loginTestCustomer()">ورود با حساب تست (customer 100)</button>
+        <button class="btn" onclick="loginRealCustomer()">ورود با حساب واقعی (customer 8)</button>
+        <button class="btn" onclick="getOrders()">دریافت سفارشات</button>
+    </div>
+
+    <div id="result" class="result" style="display: none;"></div>
 
     <script>
-        async function testLogin() {
+        let sessionCookie = '';
+
+        async function loginTestCustomer() {
             try {
-                // Try multiple customer accounts
-                const accounts = [
-                    { email: 'ahmad1@test.com', password: 'ahmad123' },
-                    { email: 'mr.ghafari@gmail.com', password: 'ghafari123' },
-                    { email: 'sara.chemistry@example.com', password: 'sara123' },
-                    { email: 'oilstar@hotmail.com', password: 'oilstar123' }
-                ];
-                
-                for (let account of accounts) {
-                    const response = await fetch('/api/customers/login', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        credentials: 'include',
-                        body: JSON.stringify(account)
-                    });
-                    
-                    const result = await response.json();
-                    
-                    if (result.success) {
-                        document.getElementById('loginResult').innerHTML = 
-                            `<h3>✅ Login Successful!</h3>
-                             <p>Account: ${account.email}</p>
-                             <pre>${JSON.stringify(result, null, 2)}</pre>`;
-                        return; // Success, stop trying
-                    }
-                }
-                
-                // If no account worked, show error
-                document.getElementById('loginResult').innerHTML = 
-                    `<h3>❌ All login attempts failed</h3>
-                     <p>Please check customer credentials in database</p>`;
-                
+                const response = await fetch('/api/customers/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        email: 'test.prioritization@example.com',
+                        password: '123456'
+                    })
+                });
+
+                const data = await response.json();
+                showResult('success', `ورود موفق برای مشتری ${data.customer?.firstName} ${data.customer?.lastName} (ID: ${data.customer?.id})`);
             } catch (error) {
-                document.getElementById('loginResult').innerHTML = 
-                    `<pre>Error: ${error.message}</pre>`;
+                showResult('error', 'خطا در ورود: ' + error.message);
             }
         }
-        
-        async function testOrders() {
+
+        async function loginRealCustomer() {
+            try {
+                const response = await fetch('/api/customers/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        email: 'oilstar@hotmail.com',
+                        password: 'test123' // یا رمز عبور صحیح
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    showResult('success', `ورود موفق برای مشتری ${data.customer?.firstName} ${data.customer?.lastName} (ID: ${data.customer?.id})`);
+                } else {
+                    showResult('error', 'خطا در ورود: ' + data.message);
+                }
+            } catch (error) {
+                showResult('error', 'خطا در ورود: ' + error.message);
+            }
+        }
+
+        async function getOrders() {
             try {
                 const response = await fetch('/api/customers/orders', {
                     method: 'GET',
@@ -71,27 +121,75 @@
                     },
                     credentials: 'include'
                 });
+
+                const data = await response.json();
                 
-                const result = await response.json();
-                
-                if (result.success && result.orders) {
-                    const bankTransferOrders = result.orders.filter(order => 
-                        order.paymentMethod === 'واریز بانکی با مهلت 3 روزه'
-                    );
-                    
-                    document.getElementById('ordersResult').innerHTML = 
-                        `<h3>All Orders (${result.orders.length}):</h3>
-                         <pre>${JSON.stringify(result.orders.slice(0, 5), null, 2)}</pre>
-                         <h3>3-Day Bank Transfer Orders (${bankTransferOrders.length}):</h3>
-                         <pre>${JSON.stringify(bankTransferOrders, null, 2)}</pre>`;
+                if (data.success) {
+                    let html = `<h3>نتایج تست اولویت‌بندی سفارشات</h3>`;
+                    html += `<p><strong>تعداد کل سفارشات:</strong> ${data.totalOrders}</p>`;
+                    html += `<p><strong>سفارشات نمایش داده شده:</strong> ${data.orders.length}</p>`;
+                    html += `<p><strong>سفارشات مخفی:</strong> ${data.hiddenOrders}</p>`;
+
+                    if (data.orders.length > 0) {
+                        html += `<h4>سفارشات (با اولویت‌بندی):</h4>`;
+                        
+                        data.orders.forEach((order, index) => {
+                            const isGracePeriod = order.paymentMethod === 'واریز بانکی با مهلت 3 روزه';
+                            html += `
+                                <div class="order-card ${isGracePeriod ? 'grace-period' : ''}">
+                                    <strong>اولویت ${index + 1}:</strong> ${order.orderNumber} 
+                                    ${isGracePeriod ? '🔥 (اولویت بالا - مهلت 3 روزه)' : ''}
+                                    <br>
+                                    <strong>روش پرداخت:</strong> ${order.paymentMethod}
+                                    <br>
+                                    <strong>وضعیت:</strong> ${order.status}
+                                    <br>
+                                    <strong>مبلغ:</strong> ${order.totalAmount} ${order.currency}
+                                    <br>
+                                    <strong>تاریخ ایجاد:</strong> ${new Date(order.createdAt).toLocaleDateString('fa-IR')}
+                                </div>
+                            `;
+                        });
+
+                        // Check if grace period orders are prioritized
+                        const gracePeriodOrders = data.orders.filter(o => o.paymentMethod === 'واریز بانکی با مهلت 3 روزه');
+                        const regularOrders = data.orders.filter(o => o.paymentMethod !== 'واریز بانکی با مهلت 3 روزه');
+                        
+                        html += `<div style="margin-top: 20px; padding: 15px; background: #e7f3ff; border-radius: 5px;">`;
+                        html += `<h4>✅ نتیجه تست اولویت‌بندی:</h4>`;
+                        html += `<p><strong>سفارشات مهلت 3 روزه:</strong> ${gracePeriodOrders.length}</p>`;
+                        html += `<p><strong>سفارشات عادی:</strong> ${regularOrders.length}</p>`;
+                        
+                        if (gracePeriodOrders.length > 0 && regularOrders.length > 0) {
+                            const firstOrder = data.orders[0];
+                            const isFirstOrderGracePeriod = firstOrder.paymentMethod === 'واریز بانکی با مهلت 3 روزه';
+                            
+                            if (isFirstOrderGracePeriod) {
+                                html += `<p style="color: green;"><strong>✅ اولویت‌بندی صحیح است!</strong> سفارش مهلت 3 روزه در اول لیست قرار دارد.</p>`;
+                            } else {
+                                html += `<p style="color: red;"><strong>❌ اولویت‌بندی اشتباه است!</strong> سفارش مهلت 3 روزه باید در اول لیست باشد.</p>`;
+                            }
+                        }
+                        html += `</div>`;
+                        
+                    } else {
+                        html += `<p style="color: #666;">این مشتری هیچ سفارشی ندارد.</p>`;
+                    }
+
+                    showResult('success', html);
                 } else {
-                    document.getElementById('ordersResult').innerHTML = 
-                        `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+                    showResult('error', 'خطا در دریافت سفارشات: ' + data.message);
                 }
             } catch (error) {
-                document.getElementById('ordersResult').innerHTML = 
-                    `<pre>Error: ${error.message}</pre>`;
+                showResult('error', 'خطا در دریافت سفارشات: ' + error.message);
             }
+        }
+
+        function showResult(type, message) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.className = `result ${type}`;
+            resultDiv.innerHTML = message;
+            resultDiv.style.display = 'block';
         }
     </script>
 </body>
