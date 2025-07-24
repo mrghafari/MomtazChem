@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست سیستم نظرات - مشتری احراز هویت شده</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #cce7ff; color: #004085; border: 1px solid #b8daff; }
+        button { padding: 8px 16px; margin: 5px; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        input, textarea { width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ddd; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>تست سیستم نظرات - مشتری احراز هویت شده</h1>
+        
+        <div id="status"></div>
+        
+        <div class="test-section">
+            <h2>بررسی وضعیت احراز هویت مشتری</h2>
+            <button class="btn-primary" onclick="checkAuth()">بررسی احراز هویت</button>
+        </div>
+        
+        <div class="test-section">
+            <h2>مشاهده نظرات محصول 475</h2>
+            <button class="btn-primary" onclick="loadReviews()">بارگیری نظرات</button>
+            <div id="reviews-display"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>ثبت نظر جدید</h2>
+            <div>
+                <label>امتیاز (1-5):</label>
+                <input type="number" id="rating" min="1" max="5" value="5">
+            </div>
+            <div>
+                <label>عنوان نظر:</label>
+                <input type="text" id="title" placeholder="عنوان نظر">
+            </div>
+            <div>
+                <label>متن نظر:</label>
+                <textarea id="comment" rows="4" placeholder="متن نظر خود را بنویسید..."></textarea>
+            </div>
+            <button class="btn-success" onclick="submitReview()">ثبت نظر</button>
+        </div>
+    </div>
+
+    <script>
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/customers/me', {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    showStatus(`✅ مشتری وارد شده: ${data.customer.firstName} ${data.customer.lastName} (${data.customer.email})`, 'success');
+                } else {
+                    showStatus(`❌ عدم احراز هویت: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`❌ خطا در بررسی احراز هویت: ${error.message}`, 'error');
+            }
+        }
+
+        async function loadReviews() {
+            try {
+                const response = await fetch('/api/products/475/reviews');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const reviewsHtml = data.data.reviews.map(review => `
+                        <div style="border: 1px solid #ddd; padding: 10px; margin: 10px 0; border-radius: 4px;">
+                            <strong>${review.customerName}</strong> - ⭐ ${review.rating}/5
+                            <br><strong>عنوان:</strong> ${review.title || 'بدون عنوان'}
+                            <br><strong>نظر:</strong> ${review.comment}
+                            <br><small>تاریخ: ${new Date(review.createdAt).toLocaleDateString('fa-IR')}</small>
+                        </div>
+                    `).join('');
+                    
+                    document.getElementById('reviews-display').innerHTML = `
+                        <h3>تعداد نظرات: ${data.data.stats.totalReviews} - میانگین امتیاز: ${data.data.stats.averageRating}</h3>
+                        ${reviewsHtml}
+                    `;
+                    showStatus(`✅ ${data.data.reviews.length} نظر بارگیری شد`, 'success');
+                } else {
+                    showStatus(`❌ خطا در بارگیری نظرات: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`❌ خطا در بارگیری نظرات: ${error.message}`, 'error');
+            }
+        }
+
+        async function submitReview() {
+            const rating = document.getElementById('rating').value;
+            const title = document.getElementById('title').value;
+            const comment = document.getElementById('comment').value;
+            
+            if (!comment.trim()) {
+                showStatus('❌ لطفاً متن نظر را وارد کنید', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/products/475/reviews', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        rating: parseInt(rating),
+                        title: title,
+                        comment: comment
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showStatus(`✅ ${data.message} - Review ID: ${data.reviewId}`, 'success');
+                    // Reload reviews
+                    loadReviews();
+                } else {
+                    showStatus(`❌ خطا در ثبت نظر: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`❌ خطا در ثبت نظر: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-check auth on page load
+        window.onload = function() {
+            checkAuth();
+            loadReviews();
+        };
+    </script>
+</body>
+</html>
