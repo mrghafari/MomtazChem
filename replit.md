@@ -67,6 +67,26 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Impact**: Customer profiles now intelligently prioritize orders requiring urgent attention while maintaining chronological order within categories
 - **Result**: Complete order prioritization system operational - 3-day bank transfer orders consistently appear first in customer profiles
 
+### COMPLETED: Partial Wallet Payment Enhancement in Bilingual Purchase Form (July 24, 2025)
+✅ **IMPLEMENTED: "پرداخت بخشی از والت" functionality enhancement in bilingual-purchase-form.tsx**
+- **User Request**: "این قسمت را اصلاح کن و بنویس پرداخت بخشی از والت و هر مقداری که از والت انتخاب کرد از کل وجه کم کند و در کادری در نزدیکی پرداخت بانکی بگذارد برای پرداخت از طریق بانک"
+- **Text Enhancement**: Changed "پرداخت ترکیبی (والت + آنلاین)" to "پرداخت بخشی از والت" for clearer user understanding
+- **Amount Selection Interface**: Enhanced wallet amount input field with proper validation and limits
+- **Remaining Amount Card**: Added dedicated orange-themed card showing remaining amount for bank payment:
+  - **Visual Design**: Orange background with border for remaining amount display
+  - **Dynamic Calculation**: Real-time calculation of remaining amount after wallet deduction
+  - **Clear Messaging**: "مبلغ باقی‌مانده برای پرداخت بانکی" with wallet amount details
+  - **Large Amount Display**: 2xl font size for remaining amount visibility
+- **Enhanced User Experience**: 
+  - **Interactive Input**: Real-time calculation as user types wallet amount
+  - **Visual Feedback**: Remaining amount card only appears when wallet amount > 0
+  - **Clear Hierarchy**: Wallet amount input followed by remaining amount card
+  - **RTL Design**: Proper right-to-left text alignment for Persian interface
+- **Payment Flow Integration**: Partial wallet payment seamlessly integrated with existing order processing logic
+- **bilingual-purchase-form.tsx Updates**: All changes applied to correct file per user specification
+- **Impact**: Users can now easily see how much they're paying from wallet and exact remaining amount for bank transfer
+- **Result**: Complete partial wallet payment functionality operational with enhanced visual feedback and clear remaining amount display
+
 ### COMPLETED: Dynamic Banking Information Integration Across Payment Forms (July 24, 2025)
 ✅ **IMPLEMENTED: Complete integration of dynamic banking information from Company Information module into all payment forms**
 - **User Request**: "یکپارچگی اطلاعات بانکی دینامیک از ماژول اطلاعات شرکت در فرم‌های پرداخت"

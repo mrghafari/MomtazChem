@@ -1164,7 +1164,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                     <RadioGroupItem value="wallet_partial" id="wallet_partial" />
                     <Label htmlFor="wallet_partial" className="flex items-center gap-2 cursor-pointer">
                       <Wallet className="w-4 h-4 text-orange-600" />
-                      پرداخت ترکیبی (والت + آنلاین)
+                      پرداخت بخشی از والت
                     </Label>
                   </div>
                 )}
@@ -1264,24 +1264,42 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
               {/* Partial Payment Amount Input */}
               {paymentMethod === 'wallet_partial' && (
-                <div className="space-y-2">
-                  <Label htmlFor="walletAmount">مبلغ از والت (حداکثر {formatCurrency(walletBalance)})</Label>
-                  <Input
-                    id="walletAmount"
-                    type="number"
-                    min="0"
-                    max={walletBalance}
-                    value={walletAmount || ''}
-                    onChange={(e) => {
-                      const value = parseFloat(e.target.value) || 0;
-                      setWalletAmount(Math.min(value, walletBalance));
-                    }}
-                    placeholder="مبلغ از والت"
-                    className="text-right"
-                  />
-                  <div className="text-sm text-muted-foreground">
-                    مبلغ باقیمانده (آنلاین): {formatCurrency(totalAmount - walletAmount)}
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="walletAmount">مبلغ از والت (حداکثر {formatCurrency(walletBalance)})</Label>
+                    <Input
+                      id="walletAmount"
+                      type="number"
+                      min="0"
+                      max={walletBalance}
+                      value={walletAmount || ''}
+                      onChange={(e) => {
+                        const value = parseFloat(e.target.value) || 0;
+                        setWalletAmount(Math.min(value, walletBalance));
+                      }}
+                      placeholder="مبلغ از والت"
+                      className="text-right"
+                    />
                   </div>
+                  
+                  {/* Remaining Amount for Bank Payment Card */}
+                  {walletAmount > 0 && (
+                    <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-medium text-orange-800">مبلغ باقی‌مانده برای پرداخت بانکی</h4>
+                          <p className="text-sm text-orange-600">
+                            بعد از کسر مبلغ والت ({formatCurrency(walletAmount)})
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-2xl font-bold text-orange-900">
+                            {formatCurrency(totalAmount - walletAmount)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
