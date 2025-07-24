@@ -462,6 +462,15 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     console.log('=== End BilingualPurchaseForm Debug ===');
   }, [existingCustomer, customerData, crmCustomerData, form, isLoadingCustomer]);
 
+  // State for additional recipient fields - CRM conditional logic (must be declared before use)
+  const [showSecondAddress, setShowSecondAddress] = useState(false);
+  const [showRecipientMobile, setShowRecipientMobile] = useState(false);  
+  const [secondAddress, setSecondAddress] = useState('');
+  const [secondCity, setSecondCity] = useState('');
+  const [secondProvince, setSecondProvince] = useState('');
+  const [secondPostalCode, setSecondPostalCode] = useState('');
+  const [recipientMobile, setRecipientMobile] = useState('');
+
   // Get current translations based on site language
   const t = translations[language] || translations['en']; // fallback to English
   const isRTL = direction === 'rtl';
@@ -470,15 +479,6 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const isPrimaryAddressDisabled = showSecondAddress && secondAddress.trim().length > 0;
   const isPrimaryMobileDisabled = showRecipientMobile && recipientMobile.trim().length > 0;
   const hasCrmData = !!(crmCustomerData || (customerData?.success && customerData.customer));
-
-  // State for additional recipient fields - CRM conditional logic
-  const [showSecondAddress, setShowSecondAddress] = useState(false);
-  const [showRecipientMobile, setShowRecipientMobile] = useState(false);  
-  const [secondAddress, setSecondAddress] = useState('');
-  const [secondCity, setSecondCity] = useState('');
-  const [secondProvince, setSecondProvince] = useState('');
-  const [secondPostalCode, setSecondPostalCode] = useState('');
-  const [recipientMobile, setRecipientMobile] = useState('');
 
 
 

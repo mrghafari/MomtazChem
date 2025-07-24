@@ -10030,7 +10030,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       (req.session as any).crmCustomerId = crmCustomer.id;
       (req.session as any).isAuthenticated = true;
       
-      console.log(`✅ [CUSTOMER LOGIN] Session configured for customer ${crmCustomer.id} (admin session cleared):`, {
+      // Explicitly save session to ensure persistence
+      await new Promise<void>((resolve, reject) => {
+        req.session.save((err) => {
+          if (err) {
+            console.error('Session save error:', err);
+            reject(err);
+          } else {
+            resolve();
+          }
+        });
+      });
+      
+      console.log(`✅ [CUSTOMER LOGIN] Session saved for customer ${crmCustomer.id}:`, {
         customerId: crmCustomer.id,
         customerEmail: crmCustomer.email,
         sessionId: req.sessionID

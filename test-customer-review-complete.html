@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Review System Test - Complete Workflow</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            direction: rtl;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .section {
+            padding: 20px 30px;
+            border-bottom: 1px solid #eee;
+        }
+        .section:last-child {
+            border-bottom: none;
+        }
+        .test-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+            transition: transform 0.2s;
+        }
+        .test-btn:hover {
+            transform: translateY(-2px);
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #e2e3e5;
+            color: #383d41;
+            border: 1px solid #d6d8db;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌟 Customer Review System Test</h1>
+            <p>Complete workflow testing for customer review authentication and submission</p>
+        </div>
+
+        <div class="section">
+            <h3>📝 Step 1: Customer Registration</h3>
+            <p>Register a new test customer for review submission</p>
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" id="registerEmail" value="newreviewtest@example.com">
+            </div>
+            <div class="form-group">
+                <label>Password:</label>
+                <input type="password" id="registerPassword" value="newpassword123">
+            </div>
+            <div class="form-group">
+                <label>Phone:</label>
+                <input type="text" id="registerPhone" value="07709876543">
+            </div>
+            <button class="test-btn" onclick="registerCustomer()">Register New Customer</button>
+            <div id="registerResult" class="result info" style="display:none;"></div>
+        </div>
+
+        <div class="section">
+            <h3>🔐 Step 2: Customer Login</h3>
+            <p>Login with customer credentials</p>
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" id="loginEmail" value="newreviewtest@example.com">
+            </div>
+            <div class="form-group">
+                <label>Password:</label>
+                <input type="password" id="loginPassword" value="newpassword123">
+            </div>
+            <button class="test-btn" onclick="loginCustomer()">Login Customer</button>
+            <div id="loginResult" class="result info" style="display:none;"></div>
+        </div>
+
+        <div class="section">
+            <h3>⭐ Step 3: Submit Product Review</h3>
+            <p>Submit a review for product 475 (Diesel Fuel Additive)</p>
+            <div class="form-group">
+                <label>Product ID:</label>
+                <input type="number" id="productId" value="475">
+            </div>
+            <div class="form-group">
+                <label>Rating (1-5):</label>
+                <input type="number" id="rating" value="5" min="1" max="5">
+            </div>
+            <div class="form-group">
+                <label>Review Title:</label>
+                <input type="text" id="reviewTitle" value="محصول فوق‌العاده">
+            </div>
+            <div class="form-group">
+                <label>Review Comment:</label>
+                <textarea id="reviewComment" rows="3">کیفیت عالی و نتیجه مطلوب. به همه پیشنهاد می‌کنم.</textarea>
+            </div>
+            <button class="test-btn" onclick="submitReview()">Submit Review</button>
+            <div id="reviewResult" class="result info" style="display:none;"></div>
+        </div>
+
+        <div class="section">
+            <h3>📊 Step 4: Verify Product Stats</h3>
+            <p>Check if product rating was updated in product stats</p>
+            <button class="test-btn" onclick="checkProductStats()">Check Product Stats</button>
+            <div id="statsResult" class="result info" style="display:none;"></div>
+        </div>
+
+        <div class="section">
+            <h3>🧪 Complete Workflow Test</h3>
+            <p>Run all steps in sequence</p>
+            <button class="test-btn" onclick="runCompleteTest()">Run Complete Test</button>
+            <div id="completeResult" class="result info" style="display:none;"></div>
+        </div>
+    </div>
+
+    <script>
+        let sessionCookie = '';
+
+        async function registerCustomer() {
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const phone = document.getElementById('registerPhone').value;
+            
+            const resultDiv = document.getElementById('registerResult');
+            resultDiv.style.display = 'block';
+            resultDiv.textContent = 'Registering customer...';
+            resultDiv.className = 'result info';
+
+            try {
+                const response = await fetch('/api/customers/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password,
+                        firstName: 'Test',
+                        lastName: 'Customer',
+                        phone: phone,
+                        country: 'Iraq',
+                        province: 'Baghdad',
+                        city: 'Baghdad',
+                        address: 'Test Address',
+                        postalCode: '12345',
+                        preferredLanguage: 'fa',
+                        communicationPreference: 'Email'
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `✅ Success: ${result.message}\nCustomer ID: ${result.customer.id}`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `❌ Error: ${result.message}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ Network Error: ${error.message}`;
+            }
+        }
+
+        async function loginCustomer() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            const resultDiv = document.getElementById('loginResult');
+            resultDiv.style.display = 'block';
+            resultDiv.textContent = 'Logging in customer...';
+            resultDiv.className = 'result info';
+
+            try {
+                const response = await fetch('/api/customers/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        email: email,
+                        password: password
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `✅ Login Success: ${result.message}\nCustomer: ${result.customer.firstName} ${result.customer.lastName}\nID: ${result.customer.id}`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `❌ Login Failed: ${result.message}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ Network Error: ${error.message}`;
+            }
+        }
+
+        async function submitReview() {
+            const productId = document.getElementById('productId').value;
+            const rating = document.getElementById('rating').value;
+            const title = document.getElementById('reviewTitle').value;
+            const comment = document.getElementById('reviewComment').value;
+            
+            const resultDiv = document.getElementById('reviewResult');
+            resultDiv.style.display = 'block';
+            resultDiv.textContent = 'Submitting review...';
+            resultDiv.className = 'result info';
+
+            try {
+                const response = await fetch(`/api/products/${productId}/reviews`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        rating: parseInt(rating),
+                        title: title,
+                        comment: comment
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `✅ Review Submitted: ${result.message}\nReview ID: ${result.data.id}\nCreated: ${result.data.createdAt}`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `❌ Review Failed: ${result.message}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ Network Error: ${error.message}`;
+            }
+        }
+
+        async function checkProductStats() {
+            const resultDiv = document.getElementById('statsResult');
+            resultDiv.style.display = 'block';
+            resultDiv.textContent = 'Checking product stats...';
+            resultDiv.className = 'result info';
+
+            try {
+                const response = await fetch('/api/shop/product-stats');
+                const stats = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `✅ Product Stats Retrieved:\n${JSON.stringify(stats, null, 2)}`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `❌ Stats Failed: ${stats.message}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textDiv = `❌ Network Error: ${error.message}`;
+            }
+        }
+
+        async function runCompleteTest() {
+            const resultDiv = document.getElementById('completeResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result info';
+            
+            // Generate unique test data
+            const timestamp = Date.now();
+            const testEmail = `reviewtest${timestamp}@example.com`;
+            const testPhone = `0770${Math.floor(Math.random() * 10000000)}`;
+            
+            document.getElementById('registerEmail').value = testEmail;
+            document.getElementById('loginEmail').value = testEmail;
+            document.getElementById('registerPhone').value = testPhone;
+            
+            let testLog = `🧪 Complete Test Started: ${new Date().toLocaleString()}\n\n`;
+            
+            try {
+                // Step 1: Register
+                testLog += '📝 Step 1: Registering customer...\n';
+                resultDiv.textContent = testLog;
+                
+                const registerResponse = await fetch('/api/customers/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: testEmail,
+                        password: 'testpass123',
+                        firstName: 'Complete',
+                        lastName: 'Test',
+                        phone: testPhone,
+                        country: 'Iraq',
+                        province: 'Baghdad',
+                        city: 'Baghdad',
+                        address: 'Test Address',
+                        postalCode: '12345',
+                        preferredLanguage: 'fa',
+                        communicationPreference: 'Email'
+                    })
+                });
+                
+                const registerResult = await registerResponse.json();
+                if (registerResponse.ok) {
+                    testLog += `✅ Registration Success: Customer ID ${registerResult.customer.id}\n\n`;
+                } else {
+                    throw new Error(`Registration failed: ${registerResult.message}`);
+                }
+                
+                // Step 2: Login
+                testLog += '🔐 Step 2: Logging in...\n';
+                resultDiv.textContent = testLog;
+                
+                const loginResponse = await fetch('/api/customers/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        email: testEmail,
+                        password: 'testpass123'
+                    })
+                });
+                
+                const loginResult = await loginResponse.json();
+                if (loginResponse.ok) {
+                    testLog += `✅ Login Success: ${loginResult.customer.firstName} ${loginResult.customer.lastName}\n\n`;
+                } else {
+                    throw new Error(`Login failed: ${loginResult.message}`);
+                }
+                
+                // Step 3: Submit Review
+                testLog += '⭐ Step 3: Submitting review...\n';
+                resultDiv.textContent = testLog;
+                
+                const reviewResponse = await fetch('/api/products/475/reviews', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        rating: 4,
+                        title: 'Complete Test Review',
+                        comment: 'This is a complete workflow test review submission.'
+                    })
+                });
+                
+                const reviewResult = await reviewResponse.json();
+                if (reviewResponse.ok) {
+                    testLog += `✅ Review Success: Review ID ${reviewResult.data.id}\n\n`;
+                } else {
+                    throw new Error(`Review failed: ${reviewResult.message}`);
+                }
+                
+                // Step 4: Check Stats
+                testLog += '📊 Step 4: Checking product stats...\n';
+                resultDiv.textContent = testLog;
+                
+                const statsResponse = await fetch('/api/shop/product-stats');
+                const stats = await statsResponse.json();
+                
+                if (statsResponse.ok) {
+                    const product475Stats = stats['475'];
+                    testLog += `✅ Stats Updated: Product 475 now has ${product475Stats.totalReviews} reviews with ${product475Stats.averageRating} average rating\n\n`;
+                } else {
+                    throw new Error('Stats check failed');
+                }
+                
+                testLog += `🎉 COMPLETE TEST SUCCESSFUL!\n`;
+                testLog += `All steps completed successfully at ${new Date().toLocaleString()}`;
+                
+                resultDiv.className = 'result success';
+                resultDiv.textContent = testLog;
+                
+            } catch (error) {
+                testLog += `❌ TEST FAILED: ${error.message}`;
+                resultDiv.className = 'result error';
+                resultDiv.textContent = testLog;
+            }
+        }
+    </script>
+</body>
+</html>
