@@ -1418,35 +1418,72 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                   )}
                 />
 
-                {/* Delivery Address with conditional graying */}
-                <FormField
-                  control={form.control}
-                  name="address"
-                  render={({ field }) => (
-                    <FormItem className={isPrimaryAddressDisabled ? 'opacity-60' : ''}>
-                      <FormLabel className={isPrimaryAddressDisabled ? 'text-gray-500' : ''}>
-                        {isPrimaryAddressDisabled ? t.crmAddressDisabled : t.deliveryAddress}
-                        {isPrimaryAddressDisabled && hasCrmData && (
+                {/* Primary Address Card from CRM */}
+                {hasCrmData ? (
+                  <div className={`space-y-3 p-4 rounded-lg border ${
+                    isPrimaryAddressDisabled 
+                      ? 'bg-gray-100 border-gray-300 opacity-60' 
+                      : 'bg-green-50 border-green-200'
+                  }`}>
+                    <div className="flex items-center justify-between">
+                      <h4 className={`font-medium ${
+                        isPrimaryAddressDisabled ? 'text-gray-500' : 'text-green-800'
+                      }`}>
+                        📍 {isPrimaryAddressDisabled ? 'آدرس پیش‌فرض (غیرفعال)' : 'آدرس پیش‌فرض تحویل (از CRM)'}
+                        {isPrimaryAddressDisabled && (
                           <span className="text-orange-500 mr-2">⚠️</span>
                         )}
-                      </FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          {...field} 
-                          rows={3}
-                          placeholder={t.addressPlaceholder}
-                          className={`${isRTL ? 'text-right' : 'text-left'} ${
-                            isPrimaryAddressDisabled 
-                              ? 'bg-gray-100 text-gray-500 border-gray-300' 
-                              : ''
-                          }`}
-                          readOnly={isPrimaryAddressDisabled}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                      </h4>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div className="bg-white rounded p-3 border border-green-100">
+                        <p className={`text-sm font-medium ${
+                          isPrimaryAddressDisabled ? 'text-gray-600' : 'text-green-800'
+                        }`}>
+                          {crmData?.firstName} {crmData?.lastName}
+                        </p>
+                        <p className={`text-sm ${
+                          isPrimaryAddressDisabled ? 'text-gray-500' : 'text-green-700'
+                        }`}>
+                          {crmData?.address || 'آدرس ثبت نشده'}
+                        </p>
+                        <div className="flex items-center gap-4 mt-2">
+                          <p className={`text-xs ${
+                            isPrimaryAddressDisabled ? 'text-gray-500' : 'text-green-600'
+                          }`}>
+                            📞 {crmData?.phone}
+                          </p>
+                          <p className={`text-xs ${
+                            isPrimaryAddressDisabled ? 'text-gray-500' : 'text-green-600'
+                          }`}>
+                            🏙️ {crmData?.city || 'شهر ثبت نشده'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  /* Fallback for non-CRM users */
+                  <FormField
+                    control={form.control}
+                    name="address"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t.deliveryAddress}</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            {...field} 
+                            rows={3}
+                            placeholder={t.addressPlaceholder}
+                            className={isRTL ? 'text-right' : 'text-left'}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
 
                 {/* Second Address Option - Only show for CRM customers */}
                 {hasCrmData && (
