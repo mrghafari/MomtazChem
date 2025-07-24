@@ -25295,17 +25295,39 @@ momtazchem.com
       // اعتبارسنجی مبلغ فیش در مقایسه با مبلغ سفارش
       const orderAmount = parseFloat(order.totalAmount);
       let walletCredit = 0;
+      let walletDeduction = 0;
       let amountStatus = '';
 
       if (amount < orderAmount) {
-        return res.status(400).json({ 
-          success: false, 
-          message: `مبلغ فیش (${amount.toLocaleString()} دینار) کمتر از بدهی شما (${orderAmount.toLocaleString()} دینار) است. لطفاً حداقل ${orderAmount.toLocaleString()} دینار واریز کنید.` 
-        });
+        // بررسی موجودی والت مشتری
+        const walletBalance = await customerStorage.getWalletBalance(order.customerId);
+        const deficit = orderAmount - amount;
+        
+        if (walletBalance >= deficit) {
+          // والت پوشش می‌دهد - از والت کم می‌شود
+          walletDeduction = deficit;
+          amountStatus = `مبلغ کمبود ${deficit.toLocaleString()} دینار از والت شما کسر شد. موجودی والت: ${walletBalance.toLocaleString()} دینار`;
+          
+          try {
+            await customerStorage.deductWalletBalance(order.customerId, deficit);
+            console.log(`✅ [WALLET] Deducted ${deficit} from customer ${order.customerId} wallet to cover receipt deficit`);
+          } catch (error) {
+            console.error('Error deducting from wallet:', error);
+            return res.status(500).json({ 
+              success: false, 
+              message: 'خطا در کسر مبلغ از والت' 
+            });
+          }
+        } else {
+          return res.status(400).json({ 
+            success: false, 
+            message: `مبلغ فیش (${amount.toLocaleString()} دینار) کمتر از بدهی شما (${orderAmount.toLocaleString()} دینار) است. کمبود: ${deficit.toLocaleString()} دینار. موجودی والت شما (${walletBalance.toLocaleString()} دینار) کافی نیست.` 
+          });
+        }
       } else if (amount > orderAmount) {
         // مبلغ اضافی به والت اضافه می‌شود
         walletCredit = amount - orderAmount;
-        amountStatus = `مبلغ اضافی ${walletCredit.toLocaleString()} دینار به والت شما اضافه خواهد شد`;
+        amountStatus = `مبلغ اضافی ${walletCredit.toLocaleString()} دینار به والت شما اضافه شد`;
         
         // اضافه کردن مبلغ اضافی به والت مشتری
         try {
@@ -25322,7 +25344,7 @@ momtazchem.com
       const filePath = `/uploads/receipts/${file.filename}`;
 
       // به‌روزرسانی سفارش با مسیر فیش بانکی و مبلغ فیش
-      const uploadNote = `فیش بانکی آپلود شد در ${new Date().toLocaleString('fa-IR')} | مبلغ فیش: ${amount.toLocaleString()} دینار | مبلغ سفارش: ${orderAmount.toLocaleString()} دینار${walletCredit > 0 ? ` | مبلغ اضافی ${walletCredit.toLocaleString()} دینار به والت اضافه شد` : ''}${notes ? ` | توضیحات: ${notes}` : ''}`;
+      const uploadNote = `فیش بانکی آپلود شد در ${new Date().toLocaleString('fa-IR')} | مبلغ فیش: ${amount.toLocaleString()} دینار | مبلغ سفارش: ${orderAmount.toLocaleString()} دینار${walletCredit > 0 ? ` | مبلغ اضافی ${walletCredit.toLocaleString()} دینار به والت اضافه شد` : ''}${walletDeduction > 0 ? ` | کمبود ${walletDeduction.toLocaleString()} دینار از والت کسر شد` : ''}${notes ? ` | توضیحات: ${notes}` : ''}`;
       const updatedNotes = order.notes ? `${order.notes} | ${uploadNote}` : uploadNote;
       
       await customerDb
@@ -25357,7 +25379,7 @@ momtazchem.com
           type: 'receipt_uploaded',
           orderId: order.id,
           amount: order.totalAmount,
-          description: `فیش بانکی آپلود شد - ${file.originalname} | مبلغ فیش: ${amount.toLocaleString()} دینار | مبلغ سفارش: ${orderAmount.toLocaleString()} دینار${walletCredit > 0 ? ` | مبلغ اضافی ${walletCredit.toLocaleString()} دینار به والت اضافه شد` : ''}`,
+          description: `فیش بانکی آپلود شد - ${file.originalname} | مبلغ فیش: ${amount.toLocaleString()} دینار | مبلغ سفارش: ${orderAmount.toLocaleString()} دینار${walletCredit > 0 ? ` | مبلغ اضافی ${walletCredit.toLocaleString()} دینار به والت اضافه شد` : ''}${walletDeduction > 0 ? ` | کمبود ${walletDeduction.toLocaleString()} دینار از والت کسر شد` : ''}`,
           referenceNumber: order.orderNumber,
           status: 'pending_review',
           processingDate: new Date(),
@@ -25369,6 +25391,7 @@ momtazchem.com
             receiptAmount: amount,
             orderAmount: orderAmount,
             walletCredit: walletCredit,
+            walletDeduction: walletDeduction,
             amountStatus: amountStatus
           }
         });
@@ -25395,6 +25418,7 @@ momtazchem.com
           receiptAmount: amount,
           orderAmount: orderAmount,
           walletCredit: walletCredit,
+          walletDeduction: walletDeduction,
           amountStatus: amountStatus
         }
       });

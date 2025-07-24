@@ -54,6 +54,15 @@ export default function BankReceiptUpload() {
     },
   });
 
+  // Fetch customer information including wallet balance
+  const { data: customer } = useQuery({
+    queryKey: ['/api/customers/me'],
+    queryFn: async () => {
+      const response = await apiRequest('/api/customers/me');
+      return response.customer;
+    },
+  });
+
   // Upload mutation
   const uploadMutation = useMutation({
     mutationFn: async (formData: FormData) => {
@@ -393,9 +402,21 @@ export default function BankReceiptUpload() {
                 {order && receiptAmount && (
                   <div>
                     {parseInt(receiptAmount) < parseFloat(order.totalAmount) ? (
-                      <p className="text-sm text-red-600">
-                        ⚠️ مبلغ کمتر از بدهی شما است. کمبود: {(parseFloat(order.totalAmount) - parseInt(receiptAmount)).toLocaleString()} دینار
-                      </p>
+                      <div className="space-y-1">
+                        <p className="text-sm text-orange-600">
+                          ⚠️ مبلغ کمتر از بدهی شما است. کمبود: {(parseFloat(order.totalAmount) - parseInt(receiptAmount)).toLocaleString()} دینار
+                        </p>
+                        {customer?.walletBalance !== undefined && (
+                          <p className="text-xs text-gray-600">
+                            💰 موجودی والت شما: {customer.walletBalance.toLocaleString()} دینار
+                            {customer.walletBalance >= (parseFloat(order.totalAmount) - parseInt(receiptAmount)) ? (
+                              <span className="text-green-600 block">✅ والت شما کمبود را پوشش می‌دهد - کمبود از والت کسر خواهد شد</span>
+                            ) : (
+                              <span className="text-red-600 block">❌ موجودی والت برای پوشش کمبود کافی نیست</span>
+                            )}
+                          </p>
+                        )}
+                      </div>
                     ) : parseInt(receiptAmount) > parseFloat(order.totalAmount) ? (
                       <p className="text-sm text-green-600">
                         ✅ مبلغ اضافی {(parseInt(receiptAmount) - parseFloat(order.totalAmount)).toLocaleString()} دینار به والت شما اضافه خواهد شد

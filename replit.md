@@ -67,6 +67,44 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Impact**: Financial department receives accurate payment validation with automatic wallet management for customer overpayments
 - **Result**: Complete smart receipt validation operational with automatic wallet crediting for overpayments and minimum payment enforcement
 
+### COMPLETED: Enhanced Wallet Deduction for Insufficient Receipt Amounts (July 24, 2025)
+✅ **IMPLEMENTED: Automatic wallet deduction when receipt amount is insufficient but wallet can cover the difference**
+- **User Request**: "باز اگر کمتر بود و والت پوشش میداد از والت کم شود" (If amount is less but wallet covers it, deduct from wallet)
+- **Smart Payment Logic**: Enhanced receipt validation with wallet integration for insufficient payments:
+  - **Wallet Coverage Check**: When receipt amount < order total, system checks customer wallet balance
+  - **Automatic Deduction**: If wallet balance >= deficit amount, automatically deducts difference from wallet
+  - **Payment Completion**: Receipt + wallet deduction = order total for complete payment processing
+  - **Insufficient Funds**: Only rejects payment if both receipt + wallet combined are insufficient
+- **Enhanced Backend Logic**: Updated payment validation with comprehensive wallet integration:
+  - **Wallet Balance Query**: Real-time wallet balance checking using `customerStorage.getWalletBalance()`
+  - **Deficit Calculation**: Precise calculation of amount needed beyond receipt payment
+  - **Wallet Deduction**: Automatic call to `customerStorage.deductWalletBalance()` for covering deficit
+  - **Error Handling**: Proper error handling for wallet deduction failures with rollback capability
+- **Improved Error Messages**: Enhanced user feedback with wallet information:
+  - **Detailed Messages**: Clear explanation of deficit amount and wallet balance status
+  - **Coverage Status**: Specific messaging for wallet coverage capability
+  - **Multi-scenario Handling**: Different messages for wallet coverage vs insufficient total funds
+- **Enhanced Frontend Display**: Real-time wallet balance display and coverage indication:
+  - **Wallet Balance Display**: Live display of customer wallet balance during receipt entry
+  - **Coverage Indicators**: Green/red indicators showing if wallet can cover deficit
+  - **Smart Feedback**: Real-time calculation showing wallet deduction amounts
+  - **Visual Guidance**: Color-coded messages for wallet coverage scenarios
+- **Complete Audit Trail**: Comprehensive tracking of all payment components:
+  - **Transaction Notes**: Detailed notes including receipt amount, order amount, and wallet deductions
+  - **Financial Records**: Enhanced financial transaction metadata with wallet deduction tracking
+  - **Payment Breakdown**: Complete payment source breakdown (receipt + wallet = total)
+- **Advanced Payment Processing**: Three-tier payment validation system:
+  - **Scenario 1**: Receipt >= Order Amount → Process normally (credit excess to wallet)
+  - **Scenario 2**: Receipt < Order Amount + Wallet >= Deficit → Deduct deficit from wallet
+  - **Scenario 3**: Receipt + Wallet < Order Amount → Reject with detailed insufficient funds message
+- **Business Logic Enhancement**: 
+  - **Flexible Payment**: Customers can pay any amount knowing wallet will cover difference if possible
+  - **User Convenience**: No need for exact payment calculations - system handles optimization
+  - **Financial Accuracy**: Precise tracking of payment sources for accounting purposes
+- **Test Infrastructure**: Enhanced validation testing with wallet coverage scenarios
+- **Impact**: Complete payment flexibility with automatic wallet utilization for optimal customer experience
+- **Result**: Advanced receipt validation with automatic wallet deduction operational for insufficient payments with wallet coverage
+
 ### COMPLETED: Banking API Authentication Fixed - Public Endpoint Created for Customer Access (July 24, 2025)
 ✅ **RESOLVED: Fixed critical authentication issue preventing customers from accessing banking information in payment forms**
 - **Root Cause**: Customer-facing payment forms were using admin-only endpoint `/api/admin/company-information` causing 401 authentication errors
