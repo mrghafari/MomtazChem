@@ -10263,6 +10263,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Change customer password endpoint
+  app.post("/api/customers/change-password", async (req, res) => {
+    try {
+      const { oldPassword, newPassword } = req.body;
+      
+      // Check authentication
+      const customerId = (req.session as any).customerId;
+      if (!customerId) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "احراز هویت لازم است" 
+        });
+      }
+
+      // Validate input
+      if (!oldPassword || !newPassword) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "رمز عبور قدیمی و جدید اجباری است" 
+        });
+      }
+
+      if (newPassword.length < 6) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "رمز عبور جدید باید حداقل 6 کاراکتر باشد" 
+        });
+      }
+
+      // Get current customer from CRM
+      const crmCustomer = await crmStorage.getCrmCustomerById(customerId);
+      if (!crmCustomer || !crmCustomer.passwordHash) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "کاربر یافت نشد" 
+        });
+      }
+
+      // Verify old password
+      const isOldPasswordValid = await bcrypt.compare(oldPassword, crmCustomer.passwordHash);
+      if (!isOldPasswordValid) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "رمز عبور قدیمی اشتباه است" 
+        });
+      }
+
+      // Generate new password hash
+      const newPasswordHash = await bcrypt.hash(newPassword, 10);
+
+      // Update password in CRM database
+      await crmStorage.updateCrmCustomer(customerId, {
+        passwordHash: newPasswordHash
+      });
+
+      console.log(`✅ [PASSWORD CHANGE] Password updated for customer ${customerId} (${crmCustomer.email})`);
+
+      // Log password change activity
+      await crmStorage.logCustomerActivity({
+        customerId: customerId,
+        customerName: `${crmCustomer.firstName || ''} ${crmCustomer.lastName || ''}`.trim(),
+        activityType: 'password_change',
+        description: 'مشتری رمز عبور خود را تغییر داد',
+        performedBy: 'customer',
+        activityData: {
+          email: crmCustomer.email,
+          changeDate: new Date().toISOString(),
+          userAgent: req.headers['user-agent'] || 'unknown',
+          source: 'website'
+        }
+      });
+
+      res.json({
+        success: true,
+        message: "رمز عبور با موفقیت تغییر یافت"
+      });
+
+    } catch (error) {
+      console.error("Password change error:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در تغییر رمز عبور" 
+      });
+    }
+  });
+
   // =============================================================================
   // DUAL VERIFICATION SYSTEM (SMS + EMAIL)
   // =============================================================================
