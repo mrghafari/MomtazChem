@@ -31,9 +31,9 @@ export class UniversalEmailService {
             console.log(`📧 Template ${options.templateNumber} found: ${template.templateName}`);
             
             // Process template with variables if provided
-            if (options.variables) {
-              let processedHtml = template.htmlContent;
-              let processedSubject = template.subject;
+            if (options.variables && template.htmlContent && template.subject) {
+              let processedHtml = template.htmlContent || '';
+              let processedSubject = template.subject || '';
               
               for (const [key, value] of Object.entries(options.variables)) {
                 const placeholder = `{{${key}}}`;

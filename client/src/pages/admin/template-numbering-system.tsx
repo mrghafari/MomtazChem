@@ -161,7 +161,7 @@ export default function TemplateNumberingSystem() {
         <Button 
           onClick={() => setShowLockDialog(true)}
           className="bg-red-600 hover:bg-red-700 text-white"
-          disabled={templates.every(t => t.isNumberLocked)}
+          disabled={templates?.every(t => t.isNumberLocked) ?? true}
         >
           <Lock className="w-4 h-4 mr-2" />
           قفل همه شماره‌ها
@@ -185,7 +185,7 @@ export default function TemplateNumberingSystem() {
               <div>
                 <p className="text-green-800 font-medium">شماره‌های قفل شده</p>
                 <p className="text-2xl font-bold text-green-900">
-                  {templates.filter(t => t.isNumberLocked).length}
+                  {templates?.filter(t => t.isNumberLocked).length ?? 0}
                 </p>
               </div>
               <Lock className="w-8 h-8 text-green-600" />
@@ -199,7 +199,7 @@ export default function TemplateNumberingSystem() {
               <div>
                 <p className="text-blue-800 font-medium">شماره‌های قابل تغییر</p>
                 <p className="text-2xl font-bold text-blue-900">
-                  {templates.filter(t => t.templateNumber && !t.isNumberLocked).length}
+                  {templates?.filter(t => t.templateNumber && !t.isNumberLocked).length ?? 0}
                 </p>
               </div>
               <UnlockKeyhole className="w-8 h-8 text-blue-600" />
@@ -213,7 +213,7 @@ export default function TemplateNumberingSystem() {
               <div>
                 <p className="text-gray-800 font-medium">بدون شماره</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {templates.filter(t => !t.templateNumber).length}
+                  {templates?.filter(t => !t.templateNumber).length ?? 0}
                 </p>
               </div>
               <Hash className="w-8 h-8 text-gray-600" />
@@ -224,7 +224,7 @@ export default function TemplateNumberingSystem() {
 
       {/* Templates List */}
       <div className="space-y-4">
-        {templates.map(template => {
+        {templates?.map(template => {
           const predefinedNumber = getPredefinedNumber(template.name);
           const statusColor = getStatusColor(template);
           
