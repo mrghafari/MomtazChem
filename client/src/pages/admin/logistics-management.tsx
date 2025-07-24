@@ -588,38 +588,8 @@ const LogisticsManagement = () => {
                     </div>
                   </div>
 
-                  {/* Action Buttons and GPS Coordinates */}
-                  <div className="space-y-3">
-                    {/* GPS Coordinates - For distribution partner coordination */}
-                    {order.hasGpsLocation && (
-                      <div className="flex items-center justify-between p-2 bg-red-50 border border-red-200 rounded-lg">
-                        <div className="flex items-center gap-2">
-                          <MapPin className="w-4 h-4 text-red-600" />
-                          <span className="text-sm font-mono text-red-700">
-                            📍 {parseFloat(order.gpsLatitude?.toString() || '0').toFixed(6)}, {parseFloat(order.gpsLongitude?.toString() || '0').toFixed(6)}
-                          </span>
-                          {order.locationAccuracy && (
-                            <span className="text-xs text-red-600">
-                              (دقت: {order.locationAccuracy}م)
-                            </span>
-                          )}
-                        </div>
-                        <button
-                          onClick={() => {
-                            const lat = parseFloat(order.gpsLatitude?.toString() || '0');
-                            const lng = parseFloat(order.gpsLongitude?.toString() || '0');
-                            const url = `https://www.google.com/maps?q=${lat},${lng}`;
-                            window.open(url, '_blank');
-                          }}
-                          className="px-1 py-0.5 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors text-[10px]"
-                        >
-                          🗺️
-                        </button>
-                      </div>
-                    )}
-                    
-                    {/* Action Buttons */}
-                    <div className="flex gap-2 flex-wrap">
+                  {/* Action Buttons */}
+                  <div className="flex gap-2 flex-wrap">
                       <Button 
                         size="sm" 
                         onClick={() => handleSendDeliveryCode(order.id, !!order.deliveryCode)}
@@ -664,8 +634,53 @@ const LogisticsManagement = () => {
                         <CheckCircle className="w-4 h-4 mr-2" />
                         تحویل شد
                       </Button>
+                      {order.hasGpsLocation && (
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="border-red-500 text-red-700 hover:bg-red-100 px-2"
+                          onClick={() => {
+                            const lat = parseFloat(order.gpsLatitude?.toString() || '0').toFixed(6);
+                            const lng = parseFloat(order.gpsLongitude?.toString() || '0').toFixed(6);
+                            const gpsText = `GPS: ${lat}, ${lng}`;
+                            const mapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
+                            
+                            // Try to copy to clipboard
+                            if (navigator.clipboard) {
+                              navigator.clipboard.writeText(`${gpsText}\n${mapsUrl}`).then(() => {
+                                // Show success feedback
+                                console.log('GPS coordinates copied to clipboard');
+                              }).catch(() => {
+                                // Fallback: open share dialog or copy manually
+                                if (navigator.share) {
+                                  navigator.share({
+                                    title: 'GPS Location',
+                                    text: gpsText,
+                                    url: mapsUrl
+                                  });
+                                } else {
+                                  // Open Google Maps as fallback
+                                  window.open(mapsUrl, '_blank');
+                                }
+                              });
+                            } else {
+                              // Fallback for older browsers
+                              if (navigator.share) {
+                                navigator.share({
+                                  title: 'GPS Location',
+                                  text: gpsText,
+                                  url: mapsUrl
+                                });
+                              } else {
+                                window.open(mapsUrl, '_blank');
+                              }
+                            }
+                          }}
+                        >
+                          📍
+                        </Button>
+                      )}
                     </div>
-                  </div>
                 </CardContent>
               </Card>
             ))
