@@ -5,7 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -24,7 +25,9 @@ import {
   Shield,
   AlertTriangle,
   FileText,
-  Printer
+  Printer,
+  Calculator,
+  History
 } from 'lucide-react';
 import { useOrderNotifications } from '@/hooks/useOrderNotifications';
 
@@ -189,6 +192,11 @@ const LogisticsManagement = () => {
     enabled: activeTab === 'cities' || activeTab === 'shipping'
   });
 
+  // Vehicle optimization states
+  const [isCreateVehicleDialogOpen, setIsCreateVehicleDialogOpen] = useState(false);
+  const [editingVehicle, setEditingVehicle] = useState<any>(null);
+  const [optimizationRequest, setOptimizationRequest] = useState<any>({});
+
   const { data: citiesResponse, isLoading: loadingCities } = useQuery({
     queryKey: ['/api/logistics/cities'],
     enabled: activeTab === 'cities' || activeTab === 'shipping'
@@ -199,7 +207,57 @@ const LogisticsManagement = () => {
     enabled: activeTab === 'shipping'
   });
 
+  // Vehicle optimization queries
+  const { data: vehiclesData, isLoading: vehiclesLoading } = useQuery({
+    queryKey: ['/api/logistics/vehicle-templates'],
+    enabled: activeTab === 'vehicles'
+  });
+
+  const { data: historyData, isLoading: historyLoading } = useQuery({
+    queryKey: ['/api/logistics/vehicle-selection-history'],
+    enabled: activeTab === 'vehicles'
+  });
+
   const companies = companiesResponse?.data || [];
+  const vehicles = vehiclesData?.data || [];
+  const history = historyData?.data || [];
+
+  // Vehicle optimization mutations
+  const createVehicleMutation = useMutation({
+    mutationFn: (data: any) => 
+      fetch('/api/logistics/vehicle-templates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      }).then(res => res.json()),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/logistics/vehicle-templates'] });
+      setIsCreateVehicleDialogOpen(false);
+      toast({ title: "موفقیت", description: "الگوی خودرو ایجاد شد" });
+    },
+    onError: () => {
+      toast({ title: "خطا", description: "خطا در ایجاد الگوی خودرو", variant: "destructive" });
+    }
+  });
+
+  const optimizeVehicleMutation = useMutation({
+    mutationFn: (data: any) => 
+      fetch('/api/logistics/select-optimal-vehicle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      }).then(res => res.json()),
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/logistics/vehicle-selection-history'] });
+      toast({ 
+        title: "انتخاب بهینه انجام شد", 
+        description: `وسیله انتخاب شده: ${result.data.selectedVehicle.vehicleName} - هزینه: ${parseInt(result.data.selectedVehicle.totalCost).toLocaleString()} دینار`
+      });
+    },
+    onError: () => {
+      toast({ title: "خطا", description: "خطا در انتخاب وسیله بهینه", variant: "destructive" });
+    }
+  });
 
   const getStatusBadge = (status: string) => {
     const statusMap = {
@@ -222,6 +280,286 @@ const LogisticsManagement = () => {
   const handleShowOrderDetails = (order: LogisticsOrder) => {
     setSelectedOrder(order);
     setIsOrderDetailsOpen(true);
+  };
+
+  const VEHICLE_TYPES = {
+    motorcycle: "موتور",
+    van: "وانت", 
+    light_truck: "کامیون سبک",
+    heavy_truck: "کامیون سنگین"
+  };
+
+  const ROUTE_TYPES = {
+    urban: "شهری",
+    interurban: "بین شهری",
+    highway: "آزادراه"
+  };
+
+  const handleCreateVehicle = (formData: FormData) => {
+    const vehicleData = {
+      name: formData.get('name') as string,
+      nameEn: formData.get('nameEn') as string,
+      vehicleType: formData.get('vehicleType') as string,
+      maxWeightKg: formData.get('maxWeightKg') as string,
+      maxVolumeM3: formData.get('maxVolumeM3') as string || null,
+      allowedRoutes: (formData.get('allowedRoutes') as string).split(',').map(r => r.trim()),
+      basePrice: formData.get('basePrice') as string,
+      pricePerKm: formData.get('pricePerKm') as string,
+      pricePerKg: formData.get('pricePerKg') as string || "0",
+      supportsHazardous: formData.get('supportsHazardous') === 'true',
+      supportsRefrigerated: formData.get('supportsRefrigerated') === 'true',
+      supportsFragile: formData.get('supportsFragile') !== 'false',
+      averageSpeedKmh: formData.get('averageSpeedKmh') as string || "50",
+      fuelConsumptionL100km: formData.get('fuelConsumptionL100km') as string || null,
+      priority: parseInt(formData.get('priority') as string) || 0
+    };
+    createVehicleMutation.mutate(vehicleData);
+  };
+
+  const handleOptimizeVehicle = () => {
+    if (!optimizationRequest.orderNumber || !optimizationRequest.weightKg || !optimizationRequest.routeType || !optimizationRequest.distanceKm) {
+      toast({ title: "خطا", description: "لطفاً همه فیلدهای اجباری را پر کنید", variant: "destructive" });
+      return;
+    }
+    optimizeVehicleMutation.mutate(optimizationRequest);
+  };
+
+  const VehicleOptimizationTab = () => {
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-lg font-semibold flex items-center gap-2">
+              <Truck className="h-5 w-5" />
+              سیستم انتخاب بهینه وسیله نقلیه
+            </h2>
+            <p className="text-muted-foreground text-sm">مدیریت الگوهای خودرو و انتخاب بهینه بر اساس الگوریتم هزینه</p>
+          </div>
+        </div>
+
+        <Tabs defaultValue="templates" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="templates">الگوهای خودرو</TabsTrigger>
+            <TabsTrigger value="optimization">انتخاب بهینه</TabsTrigger>
+            <TabsTrigger value="history">تاریخچه انتخاب</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="templates" className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h3 className="text-md font-medium">الگوهای خودرو</h3>
+              <Dialog open={isCreateVehicleDialogOpen} onOpenChange={setIsCreateVehicleDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button size="sm">
+                    <Plus className="h-4 w-4 ml-2" />
+                    افزودن الگوی جدید
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl" dir="rtl">
+                  <DialogHeader>
+                    <DialogTitle>افزودن الگوی خودروی جدید</DialogTitle>
+                    <DialogDescription>اطلاعات الگوی خودرو را برای استفاده در انتخاب بهینه وارد کنید</DialogDescription>
+                  </DialogHeader>
+                  <form onSubmit={(e) => { e.preventDefault(); handleCreateVehicle(new FormData(e.currentTarget)); }}>
+                    <div className="grid grid-cols-2 gap-4 py-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="name">نام فارسی *</Label>
+                        <Input id="name" name="name" required />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="nameEn">نام انگلیسی</Label>
+                        <Input id="nameEn" name="nameEn" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="vehicleType">نوع خودرو *</Label>
+                        <select name="vehicleType" required className="w-full p-2 border rounded">
+                          <option value="">انتخاب نوع خودرو</option>
+                          {Object.entries(VEHICLE_TYPES).map(([key, value]) => (
+                            <option key={key} value={key}>{value}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="maxWeightKg">حداکثر وزن (کیلوگرم) *</Label>
+                        <Input id="maxWeightKg" name="maxWeightKg" type="number" required />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="basePrice">قیمت پایه (دینار) *</Label>
+                        <Input id="basePrice" name="basePrice" type="number" required />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="pricePerKm">قیمت هر کیلومتر (دینار) *</Label>
+                        <Input id="pricePerKm" name="pricePerKm" type="number" required />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="allowedRoutes">مسیرهای مجاز *</Label>
+                        <Input id="allowedRoutes" name="allowedRoutes" placeholder="urban,interurban,highway" required />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="averageSpeedKmh">سرعت متوسط (کیلومتر/ساعت)</Label>
+                        <Input id="averageSpeedKmh" name="averageSpeedKmh" type="number" defaultValue="50" />
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button type="button" variant="outline" onClick={() => setIsCreateVehicleDialogOpen(false)}>انصراف</Button>
+                      <Button type="submit" disabled={createVehicleMutation.isPending}>
+                        {createVehicleMutation.isPending ? "در حال ایجاد..." : "ایجاد الگو"}
+                      </Button>
+                    </DialogFooter>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <Card>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>نام</TableHead>
+                      <TableHead>نوع</TableHead>
+                      <TableHead>حداکثر وزن</TableHead>
+                      <TableHead>قیمت پایه</TableHead>
+                      <TableHead>وضعیت</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {vehiclesLoading ? (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center py-8">در حال بارگذاری...</TableCell>
+                      </TableRow>
+                    ) : vehicles.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center py-8">هیچ الگوی خودرویی یافت نشد</TableCell>
+                      </TableRow>
+                    ) : (
+                      vehicles.map((vehicle: any) => (
+                        <TableRow key={vehicle.id}>
+                          <TableCell>{vehicle.name}</TableCell>
+                          <TableCell>{VEHICLE_TYPES[vehicle.vehicleType] || vehicle.vehicleType}</TableCell>
+                          <TableCell>{vehicle.maxWeightKg} کیلوگرم</TableCell>
+                          <TableCell>{parseInt(vehicle.basePrice).toLocaleString()} دینار</TableCell>
+                          <TableCell>
+                            <Badge variant={vehicle.isActive ? "default" : "secondary"}>
+                              {vehicle.isActive ? "فعال" : "غیرفعال"}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="optimization" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calculator className="h-5 w-5" />
+                  انتخاب بهینه وسیله نقلیه
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>شماره سفارش *</Label>
+                    <Input 
+                      value={optimizationRequest.orderNumber || ''} 
+                      onChange={(e) => setOptimizationRequest({...optimizationRequest, orderNumber: e.target.value})}
+                      placeholder="M2507240001"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>وزن (کیلوگرم) *</Label>
+                    <Input 
+                      type="number"
+                      value={optimizationRequest.weightKg || ''} 
+                      onChange={(e) => setOptimizationRequest({...optimizationRequest, weightKg: parseFloat(e.target.value)})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>نوع مسیر *</Label>
+                    <select 
+                      value={optimizationRequest.routeType || ''} 
+                      onChange={(e) => setOptimizationRequest({...optimizationRequest, routeType: e.target.value})}
+                      className="w-full p-2 border rounded"
+                    >
+                      <option value="">انتخاب نوع مسیر</option>
+                      {Object.entries(ROUTE_TYPES).map(([key, value]) => (
+                        <option key={key} value={key}>{value}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>مسافت (کیلومتر) *</Label>
+                    <Input 
+                      type="number"
+                      value={optimizationRequest.distanceKm || ''} 
+                      onChange={(e) => setOptimizationRequest({...optimizationRequest, distanceKm: parseFloat(e.target.value)})}
+                    />
+                  </div>
+                </div>
+                <Button 
+                  onClick={handleOptimizeVehicle} 
+                  disabled={optimizeVehicleMutation.isPending}
+                  className="w-full mt-4"
+                >
+                  {optimizeVehicleMutation.isPending ? "در حال محاسبه..." : "انتخاب بهینه"}
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="history" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <History className="h-5 w-5" />
+                  تاریخچه انتخاب وسیله
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>شماره سفارش</TableHead>
+                      <TableHead>وزن</TableHead>
+                      <TableHead>مسیر</TableHead>
+                      <TableHead>وسیله انتخابی</TableHead>
+                      <TableHead>هزینه</TableHead>
+                      <TableHead>تاریخ</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {historyLoading ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center py-8">در حال بارگذاری...</TableCell>
+                      </TableRow>
+                    ) : history.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center py-8">هیچ تاریخچه‌ای یافت نشد</TableCell>
+                      </TableRow>
+                    ) : (
+                      history.map((item: any) => (
+                        <TableRow key={item.id}>
+                          <TableCell>{item.orderNumber}</TableCell>
+                          <TableCell>{item.orderWeightKg} کیلوگرم</TableCell>
+                          <TableCell>{ROUTE_TYPES[item.routeType] || item.routeType}</TableCell>
+                          <TableCell>{item.selectedVehicleName}</TableCell>
+                          <TableCell>{parseInt(item.totalCost).toLocaleString()} دینار</TableCell>
+                          <TableCell>{formatDateSafe(item.createdAt)}</TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+    );
   };
 
   // Print order details
@@ -1276,12 +1614,7 @@ const LogisticsManagement = () => {
         </TabsContent>
 
         <TabsContent value="vehicles">
-          <Card>
-            <CardContent className="p-6 text-center">
-              <Truck className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-              <p className="text-gray-500">مدیریت وسایل نقلیه در دست توسعه است</p>
-            </CardContent>
-          </Card>
+          <VehicleOptimizationTab />
         </TabsContent>
       </Tabs>
 
