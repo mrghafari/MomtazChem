@@ -3020,7 +3020,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           variables: {
             inquiry_number: inquiryNumber,
             customer_name: `${contact.firstName} ${contact.lastName}`,
-            expected_response_time: '24 hours'
+            expected_response_time: '24 hours',
+            product_interest: contact.productInterest,
+            company: contact.company || 'Not specified',
+            message: contact.message || 'No message provided'
           }
         });
         
