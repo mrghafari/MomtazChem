@@ -1196,8 +1196,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                       id="bank_transfer_grace_inline"
                       className="w-4 h-4"
                     />
-                    <Label htmlFor="bank_transfer_grace_inline" className="text-xs text-amber-600 cursor-pointer whitespace-nowrap">
-                      مهلت 3 روز
+                    <Label htmlFor="bank_transfer_grace_inline" className="text-xs text-amber-600 cursor-pointer">
+                      مهلت 3 روز - برای ارسال حواله بانکی به پروفایل مراجعه کنید
                     </Label>
                   </div>
                 </div>
