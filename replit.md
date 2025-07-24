@@ -25,13 +25,18 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
   - CSS transitions for smooth zoom animations
   - Absolute positioning for control overlays
   - Semi-transparent background overlays for better visibility
+- **Smart File Type Detection**: Automatic differentiation between images and PDFs:
+  - **Images**: Open in popup modal with zoom functionality (PNG, JPG, etc.)
+  - **PDF Files**: Open in new browser tab for native PDF viewing
+  - **File Type Logic**: Checks file extension and URL patterns to determine handling method
 - **User Experience Improvements**:
   - Professional image viewing experience similar to modern gallery apps
   - Multiple viewing options (modal zoom + external tab)
   - Clear visual indicators for available interactions
   - Smooth animations and responsive feedback
+  - Appropriate handling for different document types
 - **Business Impact**: Enhanced financial review process with better receipt examination capabilities
-- **Result**: Bank receipt viewing now provides professional zoom functionality with multiple viewing options
+- **Result**: Bank receipt viewing now provides professional zoom functionality with multiple viewing options and smart file type handling
 
 ### COMPLETED: Logistics Print Function Enhancement - No More New Window Opening (July 24, 2025)
 ✅ **RESOLVED: Fixed logistics print function to use print preview instead of opening new browser window**

@@ -1294,7 +1294,20 @@ function FinanceOrders() {
                                   <Button 
                                     size="sm" 
                                     variant="outline"
-                                    onClick={() => window.open(doc.receiptUrl, '_blank')}
+                                    onClick={() => {
+                                      // Check if it's a PDF file
+                                      const isPDF = doc.receiptUrl.toLowerCase().includes('.pdf') || 
+                                                   doc.fileName?.toLowerCase().includes('.pdf') ||
+                                                   doc.receiptUrl.toLowerCase().includes('pdf');
+                                      
+                                      if (isPDF) {
+                                        // Open PDF in new tab
+                                        window.open(doc.receiptUrl, '_blank');
+                                      } else {
+                                        // Open image in modal with zoom
+                                        openImageModal(doc.receiptUrl);
+                                      }
+                                    }}
                                     className="h-8 px-3"
                                   >
                                     <Download className="h-3 w-3 mr-1" />

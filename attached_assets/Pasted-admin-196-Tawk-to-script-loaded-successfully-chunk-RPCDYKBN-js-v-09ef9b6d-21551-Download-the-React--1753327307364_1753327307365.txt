@@ -1,0 +1,197 @@
+admin:196 Tawk.to script loaded successfully
+chunk-RPCDYKBN.js?v=09ef9b6d:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+queryClient.ts:81  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+(anonymous) @ queryClient.ts:81
+fetchFn @ @tanstack_react-query.js?v=09ef9b6d:840
+run @ @tanstack_react-query.js?v=09ef9b6d:494
+start @ @tanstack_react-query.js?v=09ef9b6d:536
+fetch @ @tanstack_react-query.js?v=09ef9b6d:926
+executeFetch_fn @ @tanstack_react-query.js?v=09ef9b6d:2211
+onSubscribe @ @tanstack_react-query.js?v=09ef9b6d:1898
+subscribe @ @tanstack_react-query.js?v=09ef9b6d:24
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=09ef9b6d:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=09ef9b6d:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=09ef9b6d:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=09ef9b6d:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=09ef9b6d:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=09ef9b6d:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=09ef9b6d:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=09ef9b6d:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=09ef9b6d:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=09ef9b6d:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=09ef9b6d:19432
+commitRoot @ chunk-RPCDYKBN.js?v=09ef9b6d:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=09ef9b6d:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=09ef9b6d:18718
+workLoop @ chunk-RPCDYKBN.js?v=09ef9b6d:197
+flushWork @ chunk-RPCDYKBN.js?v=09ef9b6d:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=09ef9b6d:384
+useAuth.ts:43 Auth check result: {success: true, user: {…}}
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:117574)
+    at t.value (twk-chunk-common.js:2:150658)
+    at p.updateUUID (twk-chunk-common.js:2:202310)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:124589)
+    at twk-chunk-common.js:2:123900
+value @ twk-chunk-common.js:2
+updateUUID @ twk-chunk-common.js:2
+(anonymous) @ twk-vendor.js:2
+(anonymous) @ twk-vendor.js:2
+(anonymous) @ twk-vendor.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+Promise.then
+value @ twk-chunk-common.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+56d7 @ twk-chunk-common.js:2
+a @ twk-runtime.js:1
+r @ twk-runtime.js:1
+t @ twk-runtime.js:1
+(anonymous) @ twk-runtime.js:1
+(anonymous) @ twk-runtime.js:1
+admin:168 Tawk.to Live Chat loaded successfully
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+site-management-fixed.tsx:71 🔍 [DEBUG] useEffect triggered, userPermissions: undefined
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+site-management-fixed.tsx:71 🔍 [DEBUG] useEffect triggered, userPermissions: {success: true, permissions: Array(31), modules: Array(31), roles: Array(1), roleInfo: {…}}
+site-management-fixed.tsx:74 🔍 [DEBUG] userPermissions modules: (31) ['kpi_dashboard', 'management_dashboard', 'syncing_shop', 'shop_management', 'product_management', 'order_management', 'warehouse_management', 'logistics_management', 'inquiries', 'crm', 'barcode', 'email_settings', 'database_backup', 'seo', 'categories', 'sms', 'factory', 'user_management', 'procedures', 'payment_management', 'accounting_management', 'finance', 'wallet_management', 'geography_analytics', 'ai_settings', 'refresh_control', 'content_management', 'ticketing_system', 'remote_desktop', 'server_config', 'company_information']
+site-management-fixed.tsx:399 🔍 [DEBUG] Full userPermissions response: {success: true, permissions: Array(31), modules: Array(31), roles: Array(1), roleInfo: {…}}
+site-management-fixed.tsx:400 🔍 [DEBUG] userPermissions.modules: (31) ['kpi_dashboard', 'management_dashboard', 'syncing_shop', 'shop_management', 'product_management', 'order_management', 'warehouse_management', 'logistics_management', 'inquiries', 'crm', 'barcode', 'email_settings', 'database_backup', 'seo', 'categories', 'sms', 'factory', 'user_management', 'procedures', 'payment_management', 'accounting_management', 'finance', 'wallet_management', 'geography_analytics', 'ai_settings', 'refresh_control', 'content_management', 'ticketing_system', 'remote_desktop', 'server_config', 'company_information']
+site-management-fixed.tsx:401 🔍 [DEBUG] userPermissions.permissions: (31) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+site-management-fixed.tsx:406 🔍 [DEBUG] Total allButtons count: 31
+site-management-fixed.tsx:407 🔍 [DEBUG] AI Settings exists in allButtons: true
+site-management-fixed.tsx:408 🔍 [DEBUG] Content Management exists in allButtons: true
+site-management-fixed.tsx:410 🔍 [DEBUG] allowedModules: (31) ['kpi_dashboard', 'management_dashboard', 'syncing_shop', 'shop_management', 'product_management', 'order_management', 'warehouse_management', 'logistics_management', 'inquiries', 'crm', 'barcode', 'email_settings', 'database_backup', 'seo', 'categories', 'sms', 'factory', 'user_management', 'procedures', 'payment_management', 'accounting_management', 'finance', 'wallet_management', 'geography_analytics', 'ai_settings', 'refresh_control', 'content_management', 'ticketing_system', 'remote_desktop', 'server_config', 'company_information']
+site-management-fixed.tsx:411 🔍 [DEBUG] kpi_dashboard in allowedModules? true
+site-management-fixed.tsx:412 🔍 [DEBUG] management_dashboard in allowedModules? true
+site-management-fixed.tsx:413 🔍 [DEBUG] finance in allowedModules? true
+site-management-fixed.tsx:414 🔍 [DEBUG] geography_analytics in allowedModules? true
+site-management-fixed.tsx:415 🔍 [DEBUG] ai_settings in allowedModules? true
+site-management-fixed.tsx:416 🔍 [DEBUG] content_management in allowedModules? true
+site-management-fixed.tsx:422 🔍 [CRITICAL] Missing button detection:
+site-management-fixed.tsx:430 🔍 [CRITICAL] Missing buttons count: 0
+site-management-fixed.tsx:432 🔍 [DEBUG] finance button found in allButtons? {id: 'finance', label: 'Finance', icon: {…}, className: 'border-green-300 text-green-600 hover:bg-green-50', onClick: ƒ, …}
+site-management-fixed.tsx:433 🔍 [DEBUG] geography_analytics button found in allButtons? {id: 'geography-analytics', label: 'Geography Analytics', icon: {…}, className: 'border-teal-300 text-teal-600 hover:bg-teal-50', onClick: ƒ, …}
+site-management-fixed.tsx:434 🔍 [DEBUG] ai_settings button found in allButtons? {id: 'ai-settings', label: 'AI Control', icon: {…}, className: 'border-purple-300 text-purple-600 hover:bg-purple-50', onClick: ƒ, …}
+site-management-fixed.tsx:435 🔍 [DEBUG] content_management button found in allButtons? {id: 'content-management', label: 'Content Management', icon: {…}, className: 'border-lime-300 text-lime-600 hover:bg-lime-50', onClick: ƒ, …}
+site-management-fixed.tsx:436 🔍 [DEBUG] finance button in filtered? {id: 'finance', label: 'Finance', icon: {…}, className: 'border-green-300 text-green-600 hover:bg-green-50', onClick: ƒ, …}
+site-management-fixed.tsx:437 🔍 [DEBUG] geography_analytics button in filtered? {id: 'geography-analytics', label: 'Geography Analytics', icon: {…}, className: 'border-teal-300 text-teal-600 hover:bg-teal-50', onClick: ƒ, …}
+site-management-fixed.tsx:438 🔍 [DEBUG] ai_settings button in filtered? {id: 'ai-settings', label: 'AI Control', icon: {…}, className: 'border-purple-300 text-purple-600 hover:bg-purple-50', onClick: ƒ, …}
+site-management-fixed.tsx:439 🔍 [DEBUG] content_management button in filtered? {id: 'content-management', label: 'Content Management', icon: {…}, className: 'border-lime-300 text-lime-600 hover:bg-lime-50', onClick: ƒ, …}
+site-management-fixed.tsx:76 🔍 [DEBUG] filtered buttons count: 31
+site-management-fixed.tsx:77 🔍 [DEBUG] First 5 filtered buttons: (5) [{…}, {…}, {…}, {…}, {…}]
+site-management-fixed.tsx:78 🔍 [DEBUG] AI Control button in filtered: {id: 'ai-settings', label: 'AI Control', icon: {…}, className: 'border-purple-300 text-purple-600 hover:bg-purple-50', onClick: ƒ, …}
+site-management-fixed.tsx:79 🔍 [DEBUG] Content Management button in filtered: {id: 'content-management', label: 'Content Management', icon: {…}, className: 'border-lime-300 text-lime-600 hover:bg-lime-50', onClick: ƒ, …}
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+useOrderNotifications.ts:99 🔔 [FINANCIAL] نوتیفیکیشن: 7 سفارش جدید دریافت شد
+finance-orders.tsx:284 📋 [ORDER DETAILS] Order fetched: M2511208
+finance-orders.tsx:285 📋 [ORDER DETAILS] Items count: 1
+finance-orders.tsx:286 📋 [ORDER DETAILS] Items data: [{…}]
+chunk-C436OVJF.js?v=09ef9b6d:339 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-C436OVJF.js?v=09ef9b6d:339
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=09ef9b6d:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=09ef9b6d:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=09ef9b6d:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=09ef9b6d:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=09ef9b6d:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=09ef9b6d:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=09ef9b6d:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=09ef9b6d:19416
+commitRoot @ chunk-RPCDYKBN.js?v=09ef9b6d:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=09ef9b6d:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=09ef9b6d:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=09ef9b6d:19432
+commitRoot @ chunk-RPCDYKBN.js?v=09ef9b6d:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=09ef9b6d:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=09ef9b6d:18718
+workLoop @ chunk-RPCDYKBN.js?v=09ef9b6d:197
+flushWork @ chunk-RPCDYKBN.js?v=09ef9b6d:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=09ef9b6d:384
+content-all.js:1 Uncaught (in promise) Error: Could not establish connection. Receiving end does not exist.
+    at y (content-all.js:1:49937)
+y @ content-all.js:1
+queryClient.ts:81  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+(anonymous) @ queryClient.ts:81
+fetchFn @ @tanstack_react-query.js?v=09ef9b6d:840
+run @ @tanstack_react-query.js?v=09ef9b6d:494
+start @ @tanstack_react-query.js?v=09ef9b6d:536
+fetch @ @tanstack_react-query.js?v=09ef9b6d:926
+executeFetch_fn @ @tanstack_react-query.js?v=09ef9b6d:2211
+fetch @ @tanstack_react-query.js?v=09ef9b6d:2011
+refetch @ @tanstack_react-query.js?v=09ef9b6d:2001
+onFocus @ @tanstack_react-query.js?v=09ef9b6d:749
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:1112
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:1111
+batch @ @tanstack_react-query.js?v=09ef9b6d:583
+onFocus @ @tanstack_react-query.js?v=09ef9b6d:1110
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:313
+onFocus @ @tanstack_react-query.js?v=09ef9b6d:312
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:299
+listener @ @tanstack_react-query.js?v=09ef9b6d:270
+useAuth.ts:43 Auth check result: {success: true, user: {…}}
+chunk-C436OVJF.js?v=09ef9b6d:339 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-C436OVJF.js?v=09ef9b6d:339
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=09ef9b6d:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=09ef9b6d:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=09ef9b6d:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=09ef9b6d:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=09ef9b6d:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=09ef9b6d:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=09ef9b6d:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=09ef9b6d:19416
+commitRoot @ chunk-RPCDYKBN.js?v=09ef9b6d:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=09ef9b6d:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=09ef9b6d:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=09ef9b6d:18627
+finance-orders.tsx:284 📋 [ORDER DETAILS] Order fetched: M2511208
+finance-orders.tsx:285 📋 [ORDER DETAILS] Items count: 1
+finance-orders.tsx:286 📋 [ORDER DETAILS] Items data: [{…}]
+chunk-C436OVJF.js?v=09ef9b6d:339 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-C436OVJF.js?v=09ef9b6d:339
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=09ef9b6d:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=09ef9b6d:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=09ef9b6d:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=09ef9b6d:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=09ef9b6d:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=09ef9b6d:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=09ef9b6d:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=09ef9b6d:19416
+commitRoot @ chunk-RPCDYKBN.js?v=09ef9b6d:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=09ef9b6d:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=09ef9b6d:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=09ef9b6d:19432
+commitRoot @ chunk-RPCDYKBN.js?v=09ef9b6d:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=09ef9b6d:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=09ef9b6d:18718
+workLoop @ chunk-RPCDYKBN.js?v=09ef9b6d:197
+flushWork @ chunk-RPCDYKBN.js?v=09ef9b6d:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=09ef9b6d:384
+queryClient.ts:81  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+(anonymous) @ queryClient.ts:81
+fetchFn @ @tanstack_react-query.js?v=09ef9b6d:840
+run @ @tanstack_react-query.js?v=09ef9b6d:494
+start @ @tanstack_react-query.js?v=09ef9b6d:536
+fetch @ @tanstack_react-query.js?v=09ef9b6d:926
+executeFetch_fn @ @tanstack_react-query.js?v=09ef9b6d:2211
+fetch @ @tanstack_react-query.js?v=09ef9b6d:2011
+refetch @ @tanstack_react-query.js?v=09ef9b6d:2001
+onFocus @ @tanstack_react-query.js?v=09ef9b6d:749
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:1112
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:1111
+batch @ @tanstack_react-query.js?v=09ef9b6d:583
+onFocus @ @tanstack_react-query.js?v=09ef9b6d:1110
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:313
+onFocus @ @tanstack_react-query.js?v=09ef9b6d:312
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:299
+listener @ @tanstack_react-query.js?v=09ef9b6d:270
+useAuth.ts:43 Auth check result: {success: true, user: {…}}
