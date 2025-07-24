@@ -24,6 +24,7 @@ import ShippingRatesManagement from "@/components/ShippingRatesManagement";
 interface LogisticsOrder {
   id: number;
   customerOrderId: number;
+  orderNumber?: string;
   currentStatus: string;
   totalAmount: string;
   currency: string;
@@ -221,7 +222,7 @@ export default function LogisticsDepartment() {
   // Update delivery info mutation
   const updateDeliveryMutation = useMutation({
     mutationFn: async (data: any) => {
-      return apiRequest(`/api/logistics/orders/${selectedOrder?.id}/delivery-info`, 'PUT', data);
+      return apiRequest(`/api/logistics/orders/${selectedOrder?.id}/delivery-info`, { method: 'PUT', body: data });
     },
     onSuccess: () => {
       toast({ title: "موفق", description: "اطلاعات ارسال به‌روزرسانی شد" });
@@ -238,7 +239,7 @@ export default function LogisticsDepartment() {
   // Complete delivery mutation
   const completeDeliveryMutation = useMutation({
     mutationFn: async (orderId: number) => {
-      return apiRequest(`/api/logistics/orders/${orderId}/complete`, 'POST', {});
+      return apiRequest(`/api/logistics/orders/${orderId}/complete`, { method: 'POST', body: {} });
     },
     onSuccess: () => {
       toast({ title: "موفق", description: "تحویل سفارش تکمیل شد" });
@@ -256,7 +257,7 @@ export default function LogisticsDepartment() {
         ? `/api/logistics/shipping-rates/${editingRate.id}`
         : '/api/logistics/shipping-rates';
       const method = editingRate ? 'PUT' : 'POST';
-      return apiRequest(endpoint, method, data);
+      return apiRequest(endpoint, { method, body: data });
     },
     onSuccess: () => {
       toast({ 
@@ -275,7 +276,7 @@ export default function LogisticsDepartment() {
 
   const deleteShippingRateMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest(`/api/logistics/shipping-rates/${id}`, 'DELETE');
+      return apiRequest(`/api/logistics/shipping-rates/${id}`, { method: 'DELETE' });
     },
     onSuccess: () => {
       toast({ title: "موفق", description: "نرخ ارسال حذف شد" });
@@ -529,48 +530,50 @@ export default function LogisticsDepartment() {
             </div>
           </TabsContent>
 
+
+
           {/* Vehicle Optimization Tab */}
           <TabsContent value="vehicle-optimization">
             <Card>
               <CardHeader>
-                <CardTitle>انتخاب بهینه وسیله نقلیه</CardTitle>
-                <p className="text-sm text-gray-600">
-                  سیستم هوشمند انتخاب بهینه وسیله نقلیه برای سفارشات بر اساس وزن، مقصد و معیارهای لجستیکی
-                </p>
+                <CardTitle className="flex items-center gap-2">
+                  <Car className="w-5 h-5" />
+                  انتخاب وسیله نقلیه بهینه
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {orders.length === 0 ? (
                     <div className="text-center py-8">
-                      <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-600">هیچ سفارشی برای انتخاب وسیله نقلیه وجود ندارد</p>
+                      <Car className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-600">هیچ سفارشی برای بهینه‌سازی وسیله نقلیه وجود ندارد</p>
                     </div>
                   ) : (
                     orders.map((order: LogisticsOrder) => (
                       <Card key={order.id} className="hover:shadow-md transition-shadow bg-purple-50 border-purple-200">
-                        <CardContent className="p-4">
+                        <CardContent className="p-6">
                           <div className="flex items-center justify-between">
                             <div className="flex-1">
-                              <div className="flex items-center gap-4 mb-2">
-                                <h3 className="text-lg font-semibold text-purple-800">سفارش {order.orderNumber}</h3>
+                              <div className="flex items-center gap-4 mb-4">
+                                <h3 className="text-lg font-semibold">سفارش {order.orderNumber}</h3>
                                 {getStatusBadge(order.currentStatus)}
+                                <Badge variant="outline" className="bg-purple-100">{getDeliveryMethodLabel(order.deliveryMethod)}</Badge>
                               </div>
                               
-                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                                 <div>
                                   <span className="font-medium text-purple-700">مشتری:</span>
                                   <p className="text-gray-700">
                                     {order.customer?.firstName && order.customer?.lastName 
                                       ? `${order.customer.firstName} ${order.customer.lastName}`
-                                      : 'نام مشتری ناشناس'
-                                    }
+                                      : 'نامشخص'}
                                   </p>
                                 </div>
                                 
                                 <div>
-                                  <span className="font-medium text-purple-700">وزن کل:</span>
+                                  <span className="font-medium text-purple-700">وزن:</span>
                                   <p className="text-gray-700">
-                                    {order.totalWeight ? `${order.totalWeight} ${order.weightUnit || 'kg'}` : 'محاسبه نشده'}
+                                    {order.totalWeight ? `${order.totalWeight} ${order.weightUnit || 'kg'}` : 'نامشخص'}
                                   </p>
                                 </div>
                                 
