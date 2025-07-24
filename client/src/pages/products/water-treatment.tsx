@@ -1,8 +1,8 @@
-import { CheckCircle, Droplets, Filter, Shield, Zap, Download, Image } from "lucide-react";
+import { CheckCircle, Droplets, Filter, Shield, Zap, Download, Image, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { ProductInquiryForm } from "@/components/ui/product-inquiry-form";
 
@@ -10,10 +10,17 @@ import type { ShowcaseProduct } from "@shared/showcase-schema";
 import waterTreatmentBg from "@assets/download_1749877891276.jpeg";
 
 const WaterTreatment = () => {
+  const [, navigate] = useLocation();
+  
   // Fetch water treatment products from database
   const { data: products, isLoading } = useQuery<ShowcaseProduct[]>({
     queryKey: ["/api/products", "water-treatment"],
     queryFn: () => fetch("/api/products?category=water-treatment").then(res => res.json()),
+  });
+
+  const { data: productStats } = useQuery({
+    queryKey: ['/api/shop/product-stats'],
+    queryFn: () => fetch('/api/shop/product-stats').then(res => res.json()).then(data => data.data),
   });
 
   const benefits = [
@@ -144,7 +151,7 @@ const WaterTreatment = () => {
               {products.map((product) => (
                 <Card key={product.id} className="bg-white hover:shadow-lg transition-shadow duration-300 overflow-hidden">
                   {product.imageUrl && (
-                    <div className="aspect-video w-full overflow-hidden bg-gray-100">
+                    <div className="aspect-video w-full overflow-hidden bg-gray-100 relative">
                       <img 
                         src={product.imageUrl} 
                         alt={product.name}
@@ -153,6 +160,48 @@ const WaterTreatment = () => {
                           e.currentTarget.style.display = 'none';
                         }}
                       />
+                      
+                      {/* Star Rating Display - Bottom Left Corner */}
+                      {productStats && productStats[product.id] && (
+                        <div className="absolute bottom-2 left-2">
+                          <div 
+                            className="bg-white/90 backdrop-blur-sm rounded-md px-2 py-1 shadow-sm border border-yellow-200/50 cursor-pointer hover:bg-yellow-50/80 transition-colors"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              navigate(`/product-reviews/${product.id}`);
+                            }}
+                          >
+                            <div className="flex items-center gap-1">
+                              <div className="flex">
+                                {[1,2,3,4,5].map((starNum) => (
+                                  <Star 
+                                    key={starNum}
+                                    className={`w-3 h-3 ${
+                                      productStats[product.id].totalReviews > 0 
+                                        ? (starNum <= Math.floor(productStats[product.id].averageRating) 
+                                            ? 'fill-yellow-400 text-yellow-400' 
+                                            : starNum <= Math.ceil(productStats[product.id].averageRating)
+                                            ? 'fill-yellow-200 text-yellow-200'
+                                            : 'fill-gray-200 text-gray-200')
+                                        : 'fill-gray-200 text-gray-200 hover:fill-yellow-300'
+                                    }`}
+                                  />
+                                ))}
+                              </div>
+                              {productStats[product.id].totalReviews > 0 ? (
+                                <span className="text-xs font-medium text-gray-700">
+                                  {productStats[product.id].averageRating.toFixed(1)}
+                                </span>
+                              ) : (
+                                <span className="text-xs text-gray-500">
+                                  نظر
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                   <CardContent className="p-8">

@@ -1290,23 +1290,23 @@ const Shop = () => {
                             </div>
                           )}
                           
-                          {/* Star Rating Display - Show for all products */}
+                          {/* Star Rating Display - Bottom Left Corner */}
                           {productStats && productStats[product.id] && (
                             <div className="absolute bottom-2 left-2">
-                              <div className="bg-white/95 backdrop-blur-sm rounded-lg p-2 shadow-lg border border-yellow-200">
-                                <div 
-                                  className="flex items-center gap-1 cursor-pointer hover:bg-yellow-50 rounded p-1 transition-colors"
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    navigate(`/product-reviews/${product.id}`);
-                                  }}
-                                >
+                              <div 
+                                className="bg-white/90 backdrop-blur-sm rounded-md px-2 py-1 shadow-sm border border-yellow-200/50 cursor-pointer hover:bg-yellow-50/80 transition-colors"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  navigate(`/product-reviews/${product.id}`);
+                                }}
+                              >
+                                <div className="flex items-center gap-1">
                                   <div className="flex">
                                     {[1,2,3,4,5].map((starNum) => (
                                       <Star 
                                         key={starNum}
-                                        className={`w-4 h-4 ${
+                                        className={`w-3 h-3 ${
                                           productStats[product.id].totalReviews > 0 
                                             ? (starNum <= Math.floor(productStats[product.id].averageRating) 
                                                 ? 'fill-yellow-400 text-yellow-400' 
@@ -1319,17 +1319,12 @@ const Shop = () => {
                                     ))}
                                   </div>
                                   {productStats[product.id].totalReviews > 0 ? (
-                                    <>
-                                      <span className="text-xs font-medium text-gray-700">
-                                        {productStats[product.id].averageRating.toFixed(1)}
-                                      </span>
-                                      <span className="text-xs text-gray-500">
-                                        ({productStats[product.id].totalReviews})
-                                      </span>
-                                    </>
+                                    <span className="text-xs font-medium text-gray-700">
+                                      {productStats[product.id].averageRating.toFixed(1)}
+                                    </span>
                                   ) : (
                                     <span className="text-xs text-gray-500">
-                                      ثبت نظر
+                                      نظر
                                     </span>
                                   )}
                                 </div>
@@ -1640,13 +1635,11 @@ const Shop = () => {
                             </div>
                           )}
                           
-                          {/* Star Rating - More to the left - List View - Show for all products */}
+                          {/* Star Rating - Bottom Left Corner - List View */}
                           {productStats?.[product.id] && (
-                            <div className="absolute bottom-2 left-8 flex items-center">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="p-1 h-7 w-7 hover:bg-yellow-50/80 bg-transparent"
+                            <div className="absolute bottom-2 left-2">
+                              <div 
+                                className="bg-white/90 backdrop-blur-sm rounded-md px-2 py-1 shadow-sm border border-yellow-200/50 cursor-pointer hover:bg-yellow-50/80 transition-colors"
                                 onClick={(e) => {
                                   e.preventDefault();
                                   e.stopPropagation();
@@ -1658,8 +1651,7 @@ const Shop = () => {
                                     {[1,2,3,4,5].map((starNum) => (
                                       <Star 
                                         key={starNum}
-                                        size={12}
-                                        className={`${
+                                        className={`w-3 h-3 ${
                                           productStats[product.id].totalReviews > 0 
                                             ? (starNum <= Math.floor(productStats[product.id].averageRating) 
                                                 ? 'fill-yellow-400 text-yellow-400' 
@@ -1675,7 +1667,7 @@ const Shop = () => {
                                     </span>
                                   )}
                                 </div>
-                              </Button>
+                              </div>
                             </div>
                           )}
                           

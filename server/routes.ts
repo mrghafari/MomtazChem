@@ -31580,6 +31580,38 @@ momtazchem.com
     }
   });
 
+  // Get product statistics for shop display (public endpoint)
+  app.get("/api/shop/product-stats", async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      
+      // Get all product statistics
+      const statsResult = await pool.query(`
+        SELECT 
+          product_id,
+          total_reviews,
+          average_rating,
+          rating_distribution
+        FROM product_stats 
+        WHERE total_reviews > 0
+      `);
+
+      const stats = {};
+      statsResult.rows.forEach(row => {
+        stats[row.product_id] = {
+          totalReviews: parseInt(row.total_reviews) || 0,
+          averageRating: parseFloat(row.average_rating) || 0,
+          ratingDistribution: row.rating_distribution || {}
+        };
+      });
+
+      res.json({ success: true, data: stats });
+    } catch (error) {
+      console.error("Error fetching product stats:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت آمار محصولات" });
+    }
+  });
+
   // Helper function to update product statistics
   async function updateProductStatistics(productId: number) {
     try {
