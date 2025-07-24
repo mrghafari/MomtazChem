@@ -92,11 +92,7 @@ interface LogisticsOrder {
   recipientAddress?: string;
   deliveryNotes?: string;
   
-  // GPS Location data for logistics coordination
-  gpsLatitude?: number | string | null;
-  gpsLongitude?: number | string | null;
-  locationAccuracy?: number | string | null;
-  hasGpsLocation?: boolean;
+
   
   // Customer information
   customerFirstName?: string;
@@ -174,8 +170,7 @@ const LogisticsManagement = () => {
     },
     // Ensure customerAddress is available for display
     customerAddress: order.customerAddress || 'آدرس ثبت نشده',
-    // Add GPS location availability flag
-    hasGpsLocation: !!(order.gpsLatitude && order.gpsLongitude)
+
   }));
 
   const { data: companiesResponse, isLoading: loadingCompanies } = useQuery({
