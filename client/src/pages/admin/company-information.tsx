@@ -652,36 +652,27 @@ export default function CompanyInformation() {
                   <Label>نام تجاری</Label>
                   <Input 
                     id="tradeName"
-                    value={companyInfo?.tradeName || ''} 
+                    value={formData?.tradeName || ''} 
                     placeholder="Al-Entaj Al-Momtaz Company"
-                    onChange={(e) => {
-                      const updatedInfo = { ...companyInfo, tradeName: e.target.value };
-                      updateCompanyInfoMutation.mutate(updatedInfo);
-                    }}
+                    onChange={(e) => handleFieldChange('tradeName', e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>بخش تجاری</Label>
                   <Input 
                     id="businessSector"
-                    value={companyInfo?.businessSector || ''} 
+                    value={formData?.businessSector || ''} 
                     placeholder="Chemical Products Trading"
-                    onChange={(e) => {
-                      const updatedInfo = { ...companyInfo, businessSector: e.target.value };
-                      updateCompanyInfoMutation.mutate(updatedInfo);
-                    }}
+                    onChange={(e) => handleFieldChange('businessSector', e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>توضیحات کسب‌وکار</Label>
                   <Textarea 
                     id="businessDescription"
-                    value={companyInfo?.businessDescription || ''} 
+                    value={formData?.businessDescription || ''} 
                     placeholder="شرح کامل فعالیت‌های تجاری شرکت"
-                    onChange={(e) => {
-                      const updatedInfo = { ...companyInfo, businessDescription: e.target.value };
-                      updateCompanyInfoMutation.mutate(updatedInfo);
-                    }}
+                    onChange={(e) => handleFieldChange('businessDescription', e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
@@ -689,23 +680,17 @@ export default function CompanyInformation() {
                   <Input 
                     id="establishedDate"
                     type="date"
-                    value={companyInfo?.establishedDate || ''} 
-                    onChange={(e) => {
-                      const updatedInfo = { ...companyInfo, establishedDate: e.target.value };
-                      updateCompanyInfoMutation.mutate(updatedInfo);
-                    }}
+                    value={formData?.establishedDate || ''} 
+                    onChange={(e) => handleFieldChange('establishedDate', e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>سایت وب</Label>
                   <Input 
                     id="websiteUrl"
-                    value={companyInfo?.websiteUrl || ''} 
+                    value={formData?.websiteUrl || ''} 
                     placeholder="https://momtazchem.com"
-                    onChange={(e) => {
-                      const updatedInfo = { ...companyInfo, websiteUrl: e.target.value };
-                      updateCompanyInfoMutation.mutate(updatedInfo);
-                    }}
+                    onChange={(e) => handleFieldChange('websiteUrl', e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
@@ -713,12 +698,9 @@ export default function CompanyInformation() {
                   <div className="flex items-center gap-2">
                     <Input 
                       id="logoUrl"
-                      value={companyInfo?.logoUrl || ''} 
+                      value={formData?.logoUrl || ''} 
                       placeholder="آدرس URL لوگو"
-                      onChange={(e) => {
-                        const updatedInfo = { ...companyInfo, logoUrl: e.target.value };
-                        updateCompanyInfoMutation.mutate(updatedInfo);
-                      }}
+                      onChange={(e) => handleFieldChange('logoUrl', e.target.value)}
                     />
                     <Button size="sm">
                       <Upload className="h-4 w-4" />
@@ -742,24 +724,18 @@ export default function CompanyInformation() {
                   <Label>ایمیل اصلی</Label>
                   <Input 
                     id="emailPrimary"
-                    value={companyInfo?.emailPrimary || ''} 
+                    value={formData?.emailPrimary || ''} 
                     placeholder="info@momtazchem.com"
-                    onChange={(e) => {
-                      const updatedInfo = { ...companyInfo, emailPrimary: e.target.value };
-                      updateCompanyInfoMutation.mutate(updatedInfo);
-                    }}
+                    onChange={(e) => handleFieldChange('emailPrimary', e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>ایمیل فرعی</Label>
                   <Input 
                     id="emailSecondary"
-                    value={companyInfo?.emailSecondary || ''} 
+                    value={formData?.emailSecondary || ''} 
                     placeholder="sales@momtazchem.com"
-                    onChange={(e) => {
-                      const updatedInfo = { ...companyInfo, emailSecondary: e.target.value };
-                      updateCompanyInfoMutation.mutate(updatedInfo);
-                    }}
+                    onChange={(e) => handleFieldChange('emailSecondary', e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
@@ -769,36 +745,27 @@ export default function CompanyInformation() {
                   </div>
                   <Input 
                     id="phonePrimary"
-                    value={companyInfo?.phonePrimary || ''} 
+                    value={formData?.phonePrimary || ''} 
                     placeholder="+964-1-234-5678"
-                    onChange={(e) => {
-                      const updatedInfo = { ...companyInfo, phonePrimary: e.target.value };
-                      updateCompanyInfoMutation.mutate(updatedInfo);
-                    }}
+                    onChange={(e) => handleFieldChange('phonePrimary', e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>تلفن فرعی</Label>
                   <Input 
                     id="phoneSecondary"
-                    value={companyInfo?.phoneSecondary || ''} 
+                    value={formData?.phoneSecondary || ''} 
                     placeholder="+964-1-234-5679"
-                    onChange={(e) => {
-                      const updatedInfo = { ...companyInfo, phoneSecondary: e.target.value };
-                      updateCompanyInfoMutation.mutate(updatedInfo);
-                    }}
+                    onChange={(e) => handleFieldChange('phoneSecondary', e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>فکس</Label>
                   <Input 
                     id="fax"
-                    value={companyInfo?.fax || ''} 
+                    value={formData?.fax || ''} 
                     placeholder="+964 750 123 4569"
-                    onChange={(e) => {
-                      const updatedInfo = { ...companyInfo, fax: e.target.value };
-                      updateCompanyInfoMutation.mutate(updatedInfo);
-                    }}
+                    onChange={(e) => handleFieldChange('fax', e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
@@ -808,23 +775,17 @@ export default function CompanyInformation() {
                   </div>
                   <Textarea 
                     id="mainAddress"
-                    value={companyInfo?.mainAddress || ''} 
+                    value={formData?.mainAddress || ''} 
                     placeholder="آدرس کامل شرکت"
-                    onChange={(e) => {
-                      const updatedInfo = { ...companyInfo, mainAddress: e.target.value };
-                      updateCompanyInfoMutation.mutate(updatedInfo);
-                    }}
+                    onChange={(e) => handleFieldChange('mainAddress', e.target.value)}
                   />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>استان</Label>
                     <Select
-                      value={companyInfo?.province || ''}
-                      onValueChange={(value) => {
-                        const updatedInfo = { ...companyInfo, province: value };
-                        updateCompanyInfoMutation.mutate(updatedInfo);
-                      }}
+                      value={formData?.province || ''}
+                      onValueChange={(value) => handleFieldChange('province', value)}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="انتخاب استان" />
@@ -841,11 +802,8 @@ export default function CompanyInformation() {
                   <div className="space-y-2">
                     <Label>شهر</Label>
                     <Select
-                      value={companyInfo?.city || ''}
-                      onValueChange={(value) => {
-                        const updatedInfo = { ...companyInfo, city: value };
-                        updateCompanyInfoMutation.mutate(updatedInfo);
-                      }}
+                      value={formData?.city || ''}
+                      onValueChange={(value) => handleFieldChange('city', value)}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="انتخاب شهر" />
@@ -878,31 +836,25 @@ export default function CompanyInformation() {
                   <Label>شماره ثبت شرکت</Label>
                   <Input 
                     id="registrationNumber"
-                    value={companyInfo?.registrationNumber || ''} 
+                    value={formData?.registrationNumber || ''} 
                     placeholder="123456789"
-                    onChange={(e) => {
-                      const updatedInfo = { ...companyInfo, registrationNumber: e.target.value };
-                      updateCompanyInfoMutation.mutate(updatedInfo);
-                    }}
+                    onChange={(e) => handleFieldChange('registrationNumber', e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>شماره مالیاتی</Label>
                   <Input 
                     id="taxNumber"
-                    value={companyInfo?.taxNumber || ''} 
+                    value={formData?.taxNumber || ''} 
                     placeholder="987654321"
-                    onChange={(e) => {
-                      const updatedInfo = { ...companyInfo, taxNumber: e.target.value };
-                      updateCompanyInfoMutation.mutate(updatedInfo);
-                    }}
+                    onChange={(e) => handleFieldChange('taxNumber', e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>کشور</Label>
                   <Input 
                     id="country"
-                    value={companyInfo?.country || ''}
+                    value={formData?.country || 'عراق'}
                     disabled 
                     placeholder="عراق"
                     className="bg-gray-50"
@@ -915,12 +867,9 @@ export default function CompanyInformation() {
                   <Label>کد پستی</Label>
                   <Input 
                     id="postalCode"
-                    value={companyInfo?.postalCode || ''} 
+                    value={formData?.postalCode || ''} 
                     placeholder="12345"
-                    onChange={(e) => {
-                      const updatedInfo = { ...companyInfo, postalCode: e.target.value };
-                      updateCompanyInfoMutation.mutate(updatedInfo);
-                    }}
+                    onChange={(e) => handleFieldChange('postalCode', e.target.value)}
                   />
                 </div>
               </CardContent>
@@ -976,13 +925,10 @@ export default function CompanyInformation() {
                   <Label>توضیحات تجاری</Label>
                   <Textarea 
                     id="businessDescription"
-                    value={companyInfo?.businessDescription || ''} 
+                    value={formData?.businessDescription || ''} 
                     placeholder="شرح کامل فعالیت‌های تجاری شرکت"
                     rows={3}
-                    onChange={(e) => {
-                      const updatedInfo = { ...companyInfo, businessDescription: e.target.value };
-                      updateCompanyInfoMutation.mutate(updatedInfo);
-                    }}
+                    onChange={(e) => handleFieldChange('businessDescription', e.target.value)}
                   />
                 </div>
               </CardContent>

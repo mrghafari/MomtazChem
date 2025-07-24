@@ -21,6 +21,32 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Impact**: Logistics interface now provides both essential delivery information AND GPS coordinates for distribution partners
 - **Result**: Complete GPS functionality operational with primary postal code properly displayed in block format as requested
 
+### COMPLETED: Company Information Manual Save System Implementation (July 24, 2025)
+✅ **IMPLEMENTED: Complete conversion from automatic saving to manual save functionality in company information module**
+- **User Request**: Remove automatic database saving behavior ("تغییرات به‌صورت خودکار در دیتابیس ذخیره می‌شوند") and implement manual save functionality
+- **Automatic Save Removal**: Eliminated all immediate `updateCompanyInfoMutation.mutate()` calls on field changes across all form sections:
+  - **Basic Information**: Company names, trade name, business sector, description, established date, website, logo URL
+  - **Contact Information**: Primary/secondary emails, phones, fax, main address, province, city selection
+  - **Legal Information**: Registration number, tax number, postal code (country remains auto-set to Iraq)
+  - **Company Description**: Business description textarea
+- **Manual Save System**: Converted all fields to use `formData` state and `handleFieldChange` pattern:
+  - Form data stored in local state until manual save button is clicked
+  - `hasUnsavedChanges` state tracks modification status
+  - Save button disabled when no changes exist
+  - Clear feedback showing saved vs unsaved state
+- **Save Button Enhancement**: Professional save card with loading states:
+  - "تغییرات ذخیره نشده‌ای دارید. برای ذخیره در دیتابیس کلیک کنید." when changes exist
+  - "تمام اطلاعات ذخیره شده است." when no pending changes
+  - Loading spinner and disabled state during save operation
+- **User Experience**: 
+  - Form fields update immediately in UI but don't trigger database calls
+  - Users have full control over when to commit changes to database
+  - Clear visual indication of unsaved changes status
+  - Single save action commits all form modifications
+- **Data Integrity**: Form initialization properly loads existing company data into `formData` state on component mount
+- **Impact**: Company information module now requires explicit user action to save changes, preventing accidental database updates
+- **Result**: Complete manual save workflow operational - users must click "ذخیره اطلاعات شرکت" button to persist changes to database
+
 ### COMPLETED: Customer Receipt Acknowledgment System - Template #09 Implementation (July 24, 2025)
 ✅ **IMPLEMENTED: Complete customer receipt acknowledgment system with professional design**
 - **Template #09 Created**: New "Contact Receipt Acknowledgment" template with beautiful design:
