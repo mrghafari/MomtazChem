@@ -12,6 +12,7 @@ import { useCustomer } from '@/hooks/useCustomer';
 
 interface Review {
   id: number;
+  customerId: number;
   customerName: string;
   rating: number;
   comment: string;
@@ -52,14 +53,14 @@ export default function ProductRating({
     // Debug logging for customer matching
     console.log('🔍 CUSTOMER MATCHING DEBUG:');
     console.log('Current customer:', customer);
-    console.log('Customer full name:', `${customer.firstName} ${customer.lastName}`);
+    console.log('Customer ID:', customer.id);
     console.log('Available reviews:', reviews);
     reviews.forEach((review, index) => {
-      console.log(`Review ${index}:`, review.customerName, '===', `${customer.firstName} ${customer.lastName}`, '?', review.customerName === `${customer.firstName} ${customer.lastName}`);
+      console.log(`Review ${index}: customerID ${review.customerId} === ${customer.id}?`, review.customerId === customer.id);
     });
     
     const found = reviews.find(review => 
-      review.customerName === `${customer.firstName} ${customer.lastName}`
+      review.customerId === customer.id
     );
     console.log('Found existing review:', found);
     return found;
