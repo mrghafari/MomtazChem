@@ -383,24 +383,24 @@ export default function LogisticsDepartment() {
         </div>
 
         <Tabs defaultValue="orders" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="orders" className="flex items-center gap-2">
+          <TabsList className="w-full flex flex-wrap justify-center gap-2 h-auto p-2">
+            <TabsTrigger value="orders" className="flex items-center gap-2 px-4 py-2">
               <Package className="w-4 h-4" />
               سفارشات
             </TabsTrigger>
-            <TabsTrigger value="vehicle-optimization" className="flex items-center gap-2">
+            <TabsTrigger value="vehicle-optimization" className="flex items-center gap-2 px-4 py-2">
               <Car className="w-4 h-4" />
               انتخاب وسیله نقلیه
             </TabsTrigger>
-            <TabsTrigger value="delivery-methods" className="flex items-center gap-2">
+            <TabsTrigger value="delivery-methods" className="flex items-center gap-2 px-4 py-2">
               <Truck className="w-4 h-4" />
               انواع ارسال
             </TabsTrigger>
-            <TabsTrigger value="shipping-rates" className="flex items-center gap-2">
+            <TabsTrigger value="shipping-rates" className="flex items-center gap-2 px-4 py-2">
               <BarChart3 className="w-4 h-4" />
               تعرفه‌های ارسال
             </TabsTrigger>
-            <TabsTrigger value="reports" className="flex items-center gap-2">
+            <TabsTrigger value="reports" className="flex items-center gap-2 px-4 py-2">
               <BarChart3 className="w-4 h-4" />
               گزارشات
             </TabsTrigger>
