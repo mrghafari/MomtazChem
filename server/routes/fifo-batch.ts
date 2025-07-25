@@ -1,5 +1,6 @@
 import { Router } from "express";
 import FIFOBatchManager from "../fifo-batch-manager";
+import LIFOBatchManager from "../lifo-batch-manager";
 
 const router = Router();
 
@@ -94,6 +95,116 @@ router.post("/api/products/:productName/batches/allocate-simulate", async (req, 
     res.status(500).json({
       success: false,
       message: "خطا در شبیه‌سازی تخصیص موجودی",
+      error: error.message
+    });
+  }
+});
+
+// === LIFO Batch Management Routes ===
+
+/**
+ * Get LIFO batch information for a product (newest first)
+ * GET /api/products/:productName/batches/lifo
+ */
+router.get("/api/products/:productName/batches/lifo", async (req, res) => {
+  try {
+    const { productName } = req.params;
+    const decodedProductName = decodeURIComponent(productName);
+    
+    console.log(`📦 [API] Getting LIFO batches for: ${decodedProductName}`);
+    
+    const batchInfo = await LIFOBatchManager.getBatchInfoLIFO(decodedProductName);
+    
+    if (batchInfo.success) {
+      res.json({
+        success: true,
+        productName: decodedProductName,
+        data: batchInfo.data
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        message: batchInfo.message || "اطلاعات بچ یافت نشد"
+      });
+    }
+    
+  } catch (error: any) {
+    console.error("Error fetching LIFO batch info:", error);
+    res.status(500).json({
+      success: false,
+      message: "خطا در دریافت اطلاعات جدیدترین بچ",
+      error: error.message
+    });
+  }
+});
+
+/**
+ * Get newest batch for display on product cards
+ * GET /api/products/:productName/batches/newest
+ */
+router.get("/api/products/:productName/batches/newest", async (req, res) => {
+  try {
+    const { productName } = req.params;
+    const decodedProductName = decodeURIComponent(productName);
+    
+    console.log(`🆕 [API] Getting newest batch for: ${decodedProductName}`);
+    
+    const newestBatch = await LIFOBatchManager.getNewestBatchForDisplay(decodedProductName);
+    
+    if (newestBatch.success) {
+      res.json({
+        success: true,
+        productName: decodedProductName,
+        batch: newestBatch.batch
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        message: newestBatch.message || "جدیدترین بچ یافت نشد"
+      });
+    }
+    
+  } catch (error: any) {
+    console.error("Error fetching newest batch:", error);
+    res.status(500).json({
+      success: false,
+      message: "خطا در دریافت جدیدترین بچ",
+      error: error.message
+    });
+  }
+});
+
+/**
+ * Get batch statistics for LIFO display
+ * GET /api/products/:productName/batches/stats-lifo
+ */
+router.get("/api/products/:productName/batches/stats-lifo", async (req, res) => {
+  try {
+    const { productName } = req.params;
+    const decodedProductName = decodeURIComponent(productName);
+    
+    console.log(`📊 [API] Getting LIFO batch statistics for: ${decodedProductName}`);
+    
+    const stats = await LIFOBatchManager.getBatchStatisticsLIFO(decodedProductName);
+    
+    if (stats.success) {
+      res.json({
+        success: true,
+        productName: decodedProductName,
+        stats: stats.stats
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        message: stats.message || "آمار بچ‌ها یافت نشد"
+      });
+    }
+    
+  } catch (error: any) {
+    console.error("Error fetching batch statistics:", error);
+    res.status(500).json({
+      success: false,
+      message: "خطا در دریافت آمار بچ‌ها",
       error: error.message
     });
   }
