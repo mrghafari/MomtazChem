@@ -27,9 +27,14 @@ import {
   FileText,
   Printer,
   Calculator,
-  History
+  History,
+  Mail,
+  Flame,
+  Weight,
+  Scale
 } from 'lucide-react';
 import { useOrderNotifications } from '@/hooks/useOrderNotifications';
+import PostalServicesTab from '@/components/PostalServicesTab';
 
 // Safe date formatting function to prevent Invalid Date errors
 const formatDateSafe = (dateString: string | null | undefined, locale = 'en-US', options = {}): string => {
@@ -61,6 +66,25 @@ interface TransportationCompany {
   isActive: boolean;
   rating?: number;
   totalDeliveries: number;
+}
+
+interface PostalService {
+  id: number;
+  name: string;
+  nameEn?: string;
+  contactInfo?: string;
+  phone: string;
+  email?: string;
+  website?: string;
+  maxWeightKg: number;
+  allowsFlammable: boolean;
+  basePrice: number;
+  pricePerKg: number;
+  estimatedDays: number;
+  trackingAvailable: boolean;
+  isActive: boolean;
+  supportedRegions?: string[];
+  specialRequirements?: string;
 }
 
 interface LogisticsOrder {
@@ -132,6 +156,10 @@ const LogisticsManagement = () => {
   const [selectedOrder, setSelectedOrder] = useState<LogisticsOrder | null>(null);
   const [isOrderDetailsOpen, setIsOrderDetailsOpen] = useState(false);
 
+  // States for postal services
+  const [isCreatePostalDialogOpen, setIsCreatePostalDialogOpen] = useState(false);
+  const [selectedPostalService, setSelectedPostalService] = useState<PostalService | null>(null);
+
   const [selectedCity, setSelectedCity] = useState<string>('');
   const [selectedProvince, setSelectedProvince] = useState<string>('');
   const [shippingWeight, setShippingWeight] = useState<number>(1);
@@ -152,7 +180,7 @@ const LogisticsManagement = () => {
     enabled: activeTab === 'orders'
   });
   
-  const logisticsOrders = logisticsOrdersResponse?.orders || [];
+  const logisticsOrders = (logisticsOrdersResponse as any)?.orders || [];
   
   // Debug: Log first order to check orderNumber field
   if (logisticsOrders.length > 0) {
@@ -218,9 +246,9 @@ const LogisticsManagement = () => {
     enabled: activeTab === 'vehicles'
   });
 
-  const companies = companiesResponse?.data || [];
-  const vehicles = vehiclesData?.data || [];
-  const history = historyData?.data || [];
+  const companies = (companiesResponse as any)?.data || [];
+  const vehicles = (vehiclesData as any)?.data || [];
+  const history = (historyData as any)?.data || [];
 
   // Vehicle optimization mutations
   const createVehicleMutation = useMutation({
@@ -272,7 +300,7 @@ const LogisticsManagement = () => {
       'maintenance': { color: 'bg-red-500', text: 'تعمیر' },
       'offline': { color: 'bg-gray-500', text: 'آفلاین' },
     };
-    const config = statusMap[status] || { color: 'bg-gray-500', text: status };
+    const config = (statusMap as any)[status] || { color: 'bg-gray-500', text: status };
     return <Badge className={config.color}>{config.text}</Badge>;
   };
 
@@ -435,7 +463,7 @@ const LogisticsManagement = () => {
                       vehicles.map((vehicle: any) => (
                         <TableRow key={vehicle.id}>
                           <TableCell>{vehicle.name}</TableCell>
-                          <TableCell>{VEHICLE_TYPES[vehicle.vehicleType] || vehicle.vehicleType}</TableCell>
+                          <TableCell>{(VEHICLE_TYPES as any)[vehicle.vehicleType] || vehicle.vehicleType}</TableCell>
                           <TableCell>{vehicle.maxWeightKg} کیلوگرم</TableCell>
                           <TableCell>{parseInt(vehicle.basePrice).toLocaleString()} دینار</TableCell>
                           <TableCell>
@@ -545,7 +573,7 @@ const LogisticsManagement = () => {
                         <TableRow key={item.id}>
                           <TableCell>{item.orderNumber}</TableCell>
                           <TableCell>{item.orderWeightKg} کیلوگرم</TableCell>
-                          <TableCell>{ROUTE_TYPES[item.routeType] || item.routeType}</TableCell>
+                          <TableCell>{(ROUTE_TYPES as any)[item.routeType] || item.routeType}</TableCell>
                           <TableCell>{item.selectedVehicleName}</TableCell>
                           <TableCell>{parseInt(item.totalCost).toLocaleString()} دینار</TableCell>
                           <TableCell>{formatDateSafe(item.createdAt)}</TableCell>
@@ -620,23 +648,23 @@ const LogisticsManagement = () => {
             <div class="info-grid">
               <div class="info-item">
                 <span class="label">گیرنده:</span>
-                <span class="value">${selectedOrder.shippingAddress.name}</span>
+                <span class="value">${(selectedOrder.shippingAddress as any)?.name}</span>
               </div>
               <div class="info-item">
                 <span class="label">تلفن گیرنده:</span>
-                <span class="value" style="font-size: 20px; font-weight: bold; color: #2563eb;">${selectedOrder.shippingAddress.phone}</span>
+                <span class="value" style="font-size: 20px; font-weight: bold; color: #2563eb;">${(selectedOrder.shippingAddress as any)?.phone}</span>
               </div>
               <div class="info-item" style="grid-column: 1 / -1;">
                 <span class="label">آدرس کامل:</span>
-                <span class="value" style="font-size: 18px; font-weight: bold; color: #059669; line-height: 1.5;">${selectedOrder.shippingAddress.address}</span>
+                <span class="value" style="font-size: 18px; font-weight: bold; color: #059669; line-height: 1.5;">${(selectedOrder.shippingAddress as any)?.address}</span>
               </div>
               <div class="info-item">
                 <span class="label">شهر:</span>
-                <span class="value">${selectedOrder.shippingAddress.city}</span>
+                <span class="value">${(selectedOrder.shippingAddress as any)?.city}</span>
               </div>
               <div class="info-item">
                 <span class="label">کد پستی:</span>
-                <span class="value">${selectedOrder.shippingAddress.postalCode}</span>
+                <span class="value">${(selectedOrder.shippingAddress as any)?.postalCode}</span>
               </div>
             </div>
           </div>
@@ -1308,8 +1336,8 @@ const LogisticsManagement = () => {
 
   // Cities and Provinces Tab
   const CitiesTab = () => {
-    const provinces = provincesResponse?.provinces || [];
-    const cities = citiesResponse?.cities || [];
+    const provinces = (provincesResponse as any)?.provinces || [];
+    const cities = (citiesResponse as any)?.cities || [];
 
     return (
       <div className="space-y-6">
@@ -1497,7 +1525,7 @@ const LogisticsManagement = () => {
 
   // Shipping Rates Tab
   const ShippingRatesTab = () => {
-    const shippingRates = shippingRatesResponse?.data || [];
+    const shippingRates = (shippingRatesResponse as any)?.data || [];
 
     return (
       <div className="space-y-6">
@@ -1589,12 +1617,13 @@ const LogisticsManagement = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="orders">سفارشات</TabsTrigger>
           <TabsTrigger value="companies">شرکت‌های حمل</TabsTrigger>
           <TabsTrigger value="cities">شهرهای عراق</TabsTrigger>
           <TabsTrigger value="shipping">نرخ‌های حمل</TabsTrigger>
           <TabsTrigger value="vehicles">وسایل نقلیه</TabsTrigger>
+          <TabsTrigger value="postal">خدمات پست</TabsTrigger>
         </TabsList>
 
         <TabsContent value="orders">
@@ -1615,6 +1644,10 @@ const LogisticsManagement = () => {
 
         <TabsContent value="vehicles">
           <VehicleOptimizationTab />
+        </TabsContent>
+
+        <TabsContent value="postal">
+          <PostalServicesTab />
         </TabsContent>
       </Tabs>
 
@@ -1749,6 +1782,8 @@ const LogisticsManagement = () => {
       </Dialog>
     </div>
   );
+
+
 };
 
 export default LogisticsManagement;
