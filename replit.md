@@ -248,27 +248,32 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
   - Review system fully operational with password change capability
 - **Result**: Design flaw completely resolved - customers can change passwords and submit reviews independently
 
-### RESOLVED: 3-Day Bank Transfer Receipt Upload Issue - Complete System Verification (January 25, 2025)
-✅ **VERIFIED: 3-day grace period bank transfer receipt upload system fully operational**
-- **User Issue**: "واقعا مشکل چیه که مشتری نمیتونه حواله پول خودش را برای خرید 3 روزه آپلود کنه قبلا که مشکلی نبود" 
-- **Root Cause Analysis**: No system malfunction - user authentication and UI display issues were the cause
-- **Complete System Test Results**:
-  - Customer 8 login with email `oilstar@hotmail.com` and password `TestPassword456` → ✅ Successful
-  - Two 3-day grace period orders identified: M2511229 and M2511227 → ✅ Both detected
-  - Receipt upload M2511229: 16,000 IQD → 15,011.33 order amount, 988.67 wallet credit → ✅ Successful
-  - Receipt upload M2511227: 300 IQD → 211.33 order amount, 88.67 wallet credit → ✅ Successful
-  - Order status changes from `pending` to `confirmed` → ✅ Both orders processed
-- **Order Prioritization Verified**: 3-day bank transfer orders properly display first in customer profile
-- **Payment Method Detection**: `paymentMethod: "bank_transfer_grace"` correctly identified and processed
-- **Financial Processing Complete**:
-  - Smart receipt validation against order amounts working correctly
-  - Automatic wallet credit for overpayments functional
-  - Order status updates and transaction logging operational
-- **Session Management**: Authentication maintained throughout upload process
-- **UI Display Confirmation**: Orange-themed 3-day order cards with "آپلود حواله بانکی" buttons visible
-- **Business Impact**: 3-day grace period orders fully functional with proper receipt upload and financial processing
-- **Technical Verification**: All endpoints `/api/payment/upload-receipt` and customer authentication working perfectly
-- **Result**: 3-day bank transfer receipt upload system confirmed 100% operational - no system malfunction detected
+### COMPLETED: Bank Receipt Upload 404 Route Fix and Order Debt Display Implementation (January 25, 2025)
+✅ **RESOLVED: Fixed 404 error for bank receipt upload pages and added order debt amount display**
+- **User Issue**: "customer/bank-receipt-upload/M2511241 404 Page Not Found" and "مبلغ بدهی سفارش موقت 2511241 را در فرم آپلود فیش بانکیبنویس"
+- **Route Fix**: Added missing route `/customer/bank-receipt-upload/:orderId` to App.tsx for order-specific bank receipt uploads
+- **Navigation Resolution**: Users can now directly access bank receipt upload pages with order ID parameters
+- **Order Debt Display Implementation**: Enhanced bank receipt upload form with comprehensive debt information:
+  - **Side-by-Side Layout**: Receipt amount input field alongside order debt display card
+  - **Order M2511241 Details**: 211.33 IQD total amount properly displayed in orange-themed debt card
+  - **Visual Comparison**: Clear layout allowing customers to see exact debt amount while entering receipt amount
+  - **Dynamic Validation**: Min attribute set to order amount for HTML5 validation
+- **Enhanced User Experience**: 
+  - **Debt Amount Card**: Orange-themed card clearly showing "مبلغ بدهی سفارش" with formatted amount
+  - **Loading States**: Proper loading indicators when order data is being fetched
+  - **Error Handling**: Clear messages for missing orders or loading issues
+  - **Payment Guidance**: Blue information card explaining overpayment/underpayment scenarios
+- **Technical Fixes**: 
+  - **LSP Errors**: Fixed apiRequest method calls to include required `method: 'GET'` parameter
+  - **Route Registration**: `/customer/bank-receipt-upload/:orderId` now properly registered in router
+  - **Hot Module Replacement**: Component updates without full page refresh
+- **System Integration**: 
+  - **Order Data**: Successfully retrieves M2511241 order with 211.33 IQD amount from customer orders API
+  - **Authentication**: Maintains customer session throughout upload process
+  - **Receipt Validation**: Amount validation against order debt amount
+- **Business Impact**: Customers can now access bank receipt upload for specific orders and see exact debt amounts for accurate payment
+- **Test Results**: M2511241 order properly displays 211.33 IQD debt amount in bank receipt upload form
+- **Result**: Complete 404 route fix and order debt display implementation operational - customers can navigate directly to order-specific receipt upload pages with debt amount visibility
 
 ### COMPLETED: Customer Review System Customer Matching Logic Fixed (July 24, 2025)
 ✅ **RESOLVED: Customer matching logic in ProductRating component fixed to use customerId instead of customerName**

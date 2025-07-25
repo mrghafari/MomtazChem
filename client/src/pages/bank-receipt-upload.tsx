@@ -47,7 +47,7 @@ export default function BankReceiptUpload() {
     queryKey: [`/api/customers/orders`, orderId],
     queryFn: async () => {
       console.log('🔍 [ORDER DEBUG] Fetching orders for orderId:', orderId);
-      const response = await apiRequest({ url: '/api/customers/orders' });
+      const response = await apiRequest('/api/customers/orders', { method: 'GET' });
       console.log('🔍 [ORDER DEBUG] Orders response:', response);
       const orders = response.orders || [];
       console.log('🔍 [ORDER DEBUG] Available orders:', orders.map((o: any) => ({ id: o.id, orderNumber: o.orderNumber, totalAmount: o.totalAmount })));
@@ -62,7 +62,7 @@ export default function BankReceiptUpload() {
   const { data: companyInfo, isLoading: isLoadingCompanyInfo } = useQuery({
     queryKey: ['/api/company/banking-info'],
     queryFn: async () => {
-      const response = await apiRequest({ url: '/api/company/banking-info' });
+      const response = await apiRequest('/api/company/banking-info', { method: 'GET' });
       return response.data;
     },
   });
@@ -71,7 +71,7 @@ export default function BankReceiptUpload() {
   const { data: customer } = useQuery({
     queryKey: ['/api/customers/me'],
     queryFn: async () => {
-      const response = await apiRequest({ url: '/api/customers/me' });
+      const response = await apiRequest('/api/customers/me', { method: 'GET' });
       return response.customer;
     },
   });
