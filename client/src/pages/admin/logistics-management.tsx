@@ -268,6 +268,37 @@ const LogisticsManagement = () => {
     }
   });
 
+  const updateVehicleMutation = useMutation({
+    mutationFn: ({ id, ...data }: { id: number } & any) => 
+      fetch(`/api/logistics/vehicle-templates/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      }).then(res => res.json()),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/logistics/vehicle-templates'] });
+      setEditingVehicle(null);
+      toast({ title: "موفقیت", description: "الگوی خودرو بروزرسانی شد" });
+    },
+    onError: () => {
+      toast({ title: "خطا", description: "خطا در بروزرسانی الگوی خودرو", variant: "destructive" });
+    }
+  });
+
+  const deleteVehicleMutation = useMutation({
+    mutationFn: (id: number) => 
+      fetch(`/api/logistics/vehicle-templates/${id}`, {
+        method: 'DELETE'
+      }).then(res => res.json()),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/logistics/vehicle-templates'] });
+      toast({ title: "موفقیت", description: "الگوی خودرو حذف شد" });
+    },
+    onError: () => {
+      toast({ title: "خطا", description: "خطا در حذف الگوی خودرو", variant: "destructive" });
+    }
+  });
+
   const optimizeVehicleMutation = useMutation({
     mutationFn: (data: any) => 
       fetch('/api/logistics/select-optimal-vehicle', {
@@ -350,6 +381,30 @@ const LogisticsManagement = () => {
       return;
     }
     optimizeVehicleMutation.mutate(optimizationRequest);
+  };
+
+  const handleDeleteVehicle = (vehicleId: number) => {
+    if (confirm("آیا از حذف این الگوی خودرو مطمئن هستید؟")) {
+      deleteVehicleMutation.mutate(vehicleId);
+    }
+  };
+
+  const handleEditVehicle = (formData: FormData) => {
+    if (!editingVehicle) return;
+    
+    const data = {
+      name: formData.get('name') as string,
+      nameEn: formData.get('nameEn') as string,
+      vehicleType: formData.get('vehicleType') as string,
+      maxWeightKg: parseInt(formData.get('maxWeightKg') as string),
+      basePrice: parseInt(formData.get('basePrice') as string),
+      pricePerKm: parseInt(formData.get('pricePerKm') as string),
+      allowedRoutes: formData.get('allowedRoutes') as string,
+      averageSpeedKmh: parseInt(formData.get('averageSpeedKmh') as string) || 50,
+      isActive: formData.get('isActive') === 'on'
+    };
+
+    updateVehicleMutation.mutate({ id: editingVehicle.id, ...data });
   };
 
   const VehicleOptimizationTab = () => {
@@ -448,16 +503,17 @@ const LogisticsManagement = () => {
                       <TableHead>حداکثر وزن</TableHead>
                       <TableHead>قیمت پایه</TableHead>
                       <TableHead>وضعیت</TableHead>
+                      <TableHead>عملیات</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {vehiclesLoading ? (
                       <TableRow>
-                        <TableCell colSpan={5} className="text-center py-8">در حال بارگذاری...</TableCell>
+                        <TableCell colSpan={6} className="text-center py-8">در حال بارگذاری...</TableCell>
                       </TableRow>
                     ) : vehicles.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={5} className="text-center py-8">هیچ الگوی خودرویی یافت نشد</TableCell>
+                        <TableCell colSpan={6} className="text-center py-8">هیچ الگوی خودرویی یافت نشد</TableCell>
                       </TableRow>
                     ) : (
                       vehicles.map((vehicle: any) => (
@@ -471,6 +527,26 @@ const LogisticsManagement = () => {
                               {vehicle.isActive ? "فعال" : "غیرفعال"}
                             </Badge>
                           </TableCell>
+                          <TableCell>
+                            <div className="flex gap-2">
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => setEditingVehicle(vehicle)}
+                              >
+                                <Edit className="w-4 h-4 mr-2" />
+                                ویرایش
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="destructive"
+                                onClick={() => handleDeleteVehicle(vehicle.id)}
+                              >
+                                <AlertTriangle className="w-4 h-4 mr-2" />
+                                حذف
+                              </Button>
+                            </div>
+                          </TableCell>
                         </TableRow>
                       ))
                     )}
@@ -478,6 +554,122 @@ const LogisticsManagement = () => {
                 </Table>
               </CardContent>
             </Card>
+
+            {/* Edit Vehicle Dialog */}
+            <Dialog open={!!editingVehicle} onOpenChange={(open) => !open && setEditingVehicle(null)}>
+              <DialogContent className="max-w-2xl" dir="rtl">
+                <DialogHeader>
+                  <DialogTitle>ویرایش الگوی خودرو</DialogTitle>
+                  <DialogDescription>اطلاعات الگوی خودرو را ویرایش کنید</DialogDescription>
+                </DialogHeader>
+                {editingVehicle && (
+                  <form onSubmit={(e) => { e.preventDefault(); handleEditVehicle(new FormData(e.currentTarget)); }}>
+                    <div className="grid grid-cols-2 gap-4 py-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-name">نام فارسی *</Label>
+                        <Input 
+                          id="edit-name" 
+                          name="name" 
+                          defaultValue={editingVehicle.name}
+                          required 
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-nameEn">نام انگلیسی</Label>
+                        <Input 
+                          id="edit-nameEn" 
+                          name="nameEn" 
+                          defaultValue={editingVehicle.nameEn || ''}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-vehicleType">نوع خودرو *</Label>
+                        <select 
+                          name="vehicleType" 
+                          defaultValue={editingVehicle.vehicleType}
+                          required 
+                          className="w-full p-2 border rounded"
+                        >
+                          <option value="">انتخاب نوع خودرو</option>
+                          {Object.entries(VEHICLE_TYPES).map(([key, value]) => (
+                            <option key={key} value={key}>{value}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-maxWeightKg">حداکثر وزن (کیلوگرم) *</Label>
+                        <Input 
+                          id="edit-maxWeightKg" 
+                          name="maxWeightKg" 
+                          type="number" 
+                          defaultValue={editingVehicle.maxWeightKg}
+                          required 
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-basePrice">قیمت پایه (دینار) *</Label>
+                        <Input 
+                          id="edit-basePrice" 
+                          name="basePrice" 
+                          type="number" 
+                          defaultValue={editingVehicle.basePrice}
+                          required 
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-pricePerKm">قیمت هر کیلومتر (دینار) *</Label>
+                        <Input 
+                          id="edit-pricePerKm" 
+                          name="pricePerKm" 
+                          type="number" 
+                          defaultValue={editingVehicle.pricePerKm}
+                          required 
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-allowedRoutes">مسیرهای مجاز *</Label>
+                        <Input 
+                          id="edit-allowedRoutes" 
+                          name="allowedRoutes" 
+                          defaultValue={editingVehicle.allowedRoutes}
+                          placeholder="urban,interurban,highway" 
+                          required 
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-averageSpeedKmh">سرعت متوسط (کیلومتر/ساعت)</Label>
+                        <Input 
+                          id="edit-averageSpeedKmh" 
+                          name="averageSpeedKmh" 
+                          type="number" 
+                          defaultValue={editingVehicle.averageSpeedKmh || 50}
+                        />
+                      </div>
+                      <div className="space-y-2 col-span-2">
+                        <div className="flex items-center space-x-2">
+                          <input 
+                            type="checkbox" 
+                            id="edit-isActive" 
+                            name="isActive" 
+                            defaultChecked={editingVehicle.isActive}
+                            className="w-4 h-4"
+                          />
+                          <Label htmlFor="edit-isActive">فعال</Label>
+                        </div>
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button type="button" variant="outline" onClick={() => setEditingVehicle(null)}>
+                        انصراف
+                      </Button>
+                      <Button type="submit" disabled={updateVehicleMutation.isPending}>
+                        {updateVehicleMutation.isPending ? "در حال بروزرسانی..." : "بروزرسانی"}
+                      </Button>
+                    </DialogFooter>
+                  </form>
+                )}
+              </DialogContent>
+            </Dialog>
           </TabsContent>
 
           <TabsContent value="optimization" className="space-y-4">
