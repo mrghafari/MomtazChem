@@ -23,7 +23,7 @@ router.get("/api/products/:productName/batches/fifo", async (req, res) => {
       data: batchInfo
     });
     
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching FIFO batch info:", error);
     res.status(500).json({
       success: false,
@@ -51,7 +51,7 @@ router.get("/api/products/:productName/batches/list", async (req, res) => {
       count: batches.length
     });
     
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching product batches:", error);
     res.status(500).json({
       success: false,
@@ -90,7 +90,7 @@ router.post("/api/products/:productName/batches/allocate-simulate", async (req, 
       simulation: allocation
     });
     
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error simulating FIFO allocation:", error);
     res.status(500).json({
       success: false,

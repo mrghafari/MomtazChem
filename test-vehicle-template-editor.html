@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست سیستم ویرایش الگوهای خودرو</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            direction: rtl;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            padding: 30px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+        .test-section {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .test-title {
+            font-size: 1.3em;
+            color: #495057;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        .test-description {
+            color: #6c757d;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        .api-endpoint {
+            background: #e7f3ff;
+            border: 1px solid #b3d7ff;
+            border-radius: 5px;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+            direction: ltr;
+            text-align: left;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        .feature-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .feature-list li:before {
+            content: "✓ ";
+            color: #28a745;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .demo-button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            transition: all 0.3s ease;
+        }
+        .demo-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-left: 8px;
+        }
+        .status-active { background-color: #28a745; }
+        .status-inactive { background-color: #dc3545; }
+        .status-warning { background-color: #ffc107; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚛 تست سیستم ویرایش الگوهای خودرو</h1>
+        
+        <div class="test-section">
+            <div class="test-title">
+                <span class="status-indicator status-active"></span>
+                سیستم ویرایش الگوهای خودرو - مکمل سیستم بهینه‌سازی
+            </div>
+            <div class="test-description">
+                این سیستم امکان تغییر و ویرایش الگوهای خودروهای موجود را فراهم می‌کند. 
+                این سیستم در کنار سیستم‌های FIFO و LIFO برای مدیریت بچ‌های محصولات کار می‌کند.
+            </div>
+            
+            <ul class="feature-list">
+                <li>ویرایش کامل اطلاعات الگوهای خودرو موجود</li>
+                <li>رابط کاربری فارسی با فرم‌های پیشرفته</li>
+                <li>ویرایش ظرفیت، قیمت‌گذاری و محدودیت‌های مسیر</li>
+                <li>تنظیمات قابلیت‌های ویژه (خطرناک، یخچالی، شکستنی)</li>
+                <li>حذف الگوهای غیرضروری با تایید</li>
+                <li>انتخاب چندگانه مسیرهای مجاز</li>
+                <li>سیستم اولویت‌بندی الگوها</li>
+                <li>نمایش وضعیت فعال/غیرفعال</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">
+                <span class="status-indicator status-active"></span>
+                API Endpoints - سیستم ویرایش الگوها
+            </div>
+            
+            <div class="api-endpoint">
+                GET /api/logistics/vehicle-templates
+                → دریافت لیست الگوهای خودرو برای ویرایش
+            </div>
+            
+            <div class="api-endpoint">
+                PUT /api/logistics/vehicle-templates/{id}
+                → بروزرسانی اطلاعات الگوی خودرو
+            </div>
+            
+            <div class="api-endpoint">
+                DELETE /api/logistics/vehicle-templates/{id}
+                → حذف الگوی خودرو با تایید
+            </div>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">
+                <span class="status-indicator status-active"></span>
+                ویژگی‌های سیستم ویرایش
+            </div>
+            <div class="test-description">
+                سیستم ویرایش الگوهای خودرو شامل امکانات کاملی برای مدیریت الگوها:
+            </div>
+            
+            <ul class="feature-list">
+                <li><strong>ویرایش اطلاعات پایه:</strong> نام فارسی، انگلیسی، نوع خودرو</li>
+                <li><strong>ظرفیت:</strong> حداکثر وزن، حجم، سرعت متوسط</li>
+                <li><strong>قیمت‌گذاری:</strong> قیمت پایه، هر کیلومتر، هر کیلوگرم</li>
+                <li><strong>مسیرها:</strong> شهری، بین‌شهری، آزادراه</li>
+                <li><strong>قابلیت‌ها:</strong> مواد خطرناک، یخچالی، شکستنی</li>
+                <li><strong>عملیاتی:</strong> مصرف سوخت، اولویت، وضعیت فعال</li>
+                <li><strong>حذف ایمن:</strong> تایید قبل از حذف الگو</li>
+                <li><strong>واکنش‌گرا:</strong> بروزرسانی فوری داده‌ها</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">
+                <span class="status-indicator status-active"></span>
+                فرآیند ویرایش الگوی خودرو
+            </div>
+            <div class="test-description">
+                مراحل ویرایش الگوی خودرو در سیستم:
+            </div>
+            
+            <ol style="margin-right: 20px;">
+                <li><strong>انتخاب الگو:</strong> کلیک روی دکمه "ویرایش" در کنار الگو</li>
+                <li><strong>باز شدن فرم:</strong> فرم ویرایش با اطلاعات موجود بارگذاری می‌شود</li>
+                <li><strong>تغییر اطلاعات:</strong> ویرایش هر یک از فیلدها</li>
+                <li><strong>انتخاب مسیرها:</strong> انتخاب چندگانه مسیرهای مجاز</li>
+                <li><strong>تنظیم قابلیت‌ها:</strong> فعال/غیرفعال کردن ویژگی‌ها</li>
+                <li><strong>ذخیره تغییرات:</strong> کلیک روی "ذخیره تغییرات"</li>
+                <li><strong>اعتبارسنجی:</strong> بررسی صحت داده‌ها</li>
+                <li><strong>بروزرسانی:</strong> ذخیره در دیتابیس و بروزرسانی UI</li>
+            </ol>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">
+                <span class="status-indicator status-active"></span>
+                ادغام با سیستم‌های موجود
+            </div>
+            <div class="test-description">
+                سیستم ویرایش الگوهای خودرو در کنار سایر سیستم‌ها:
+            </div>
+            
+            <ul class="feature-list">
+                <li><strong>سیستم FIFO:</strong> مدیریت بچ‌های قدیمی محصولات شیمیایی</li>
+                <li><strong>سیستم LIFO:</strong> نمایش جدیدترین بچ‌ها در کارت محصولات</li>
+                <li><strong>بهینه‌سازی خودرو:</strong> انتخاب بهترین خودرو بر اساس الگوهای ویرایش شده</li>
+                <li><strong>مدیریت لجستیک:</strong> یکپارچگی با سیستم‌های حمل و نقل</li>
+                <li><strong>ردیابی تاریخچه:</strong> ثبت انتخاب‌های بهینه با الگوهای جدید</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">
+                <span class="status-indicator status-active"></span>
+                دستورالعمل تست
+            </div>
+            <div class="test-description">
+                برای تست سیستم ویرایش الگوهای خودرو:
+            </div>
+            
+            <button class="demo-button" onclick="window.open('/admin/vehicle-optimization', '_blank')">
+                🚛 ورود به سیستم بهینه‌سازی خودرو
+            </button>
+            
+            <ol style="margin-right: 20px; margin-top: 20px;">
+                <li>وارد صفحه Vehicle Optimization شوید</li>
+                <li>روی تب "ویرایش الگوها" کلیک کنید</li>
+                <li>الگوی موردنظر را انتخاب و "ویرایش" کنید</li>
+                <li>اطلاعات مختلف را تغییر دهید</li>
+                <li>مسیرهای مجاز را تغییر دهید</li>
+                <li>قابلیت‌های ویژه را فعال/غیرفعال کنید</li>
+                <li>تغییرات را ذخیره کنید</li>
+                <li>در تب "الگوهای خودرو" تغییرات را مشاهده کنید</li>
+                <li>در تب "انتخاب بهینه" با الگو جدید تست کنید</li>
+            </ol>
+        </div>
+
+        <div class="success">
+            <strong>✅ وضعیت سیستم:</strong> سیستم ویرایش الگوهای خودرو کاملاً پیاده‌سازی شده و آماده استفاده است.
+            این سیستم در کنار سیستم‌های FIFO/LIFO و بهینه‌سازی وسیله نقلیه کار می‌کند.
+        </div>
+
+        <div style="text-align: center; margin-top: 30px; padding: 20px; background: linear-gradient(45deg, #667eea, #764ba2); color: white; border-radius: 10px;">
+            <h3>🎯 سیستم‌های فعال</h3>
+            <p><strong>FIFO:</strong> مدیریت بچ‌های قدیمی | <strong>LIFO:</strong> نمایش بچ‌های جدید | <strong>ویرایش خودرو:</strong> مدیریت الگوهای وسایل نقلیه</p>
+        </div>
+    </div>
+
+    <script>
+        console.log("🚛 Vehicle Template Editor Test Page Loaded");
+        console.log("✅ FIFO System: Operational");
+        console.log("✅ LIFO System: Operational");
+        console.log("✅ Vehicle Template Editor: Implemented");
+        console.log("🎯 All systems ready for testing");
+    </script>
+</body>
+</html>

@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import VehicleTemplateEditor from "@/components/admin/VehicleTemplateEditor";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -197,8 +198,9 @@ export default function VehicleOptimization() {
       </div>
 
       <Tabs defaultValue="templates" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="templates">الگوهای خودرو</TabsTrigger>
+          <TabsTrigger value="editor">ویرایش الگوها</TabsTrigger>
           <TabsTrigger value="optimization">انتخاب بهینه</TabsTrigger>
           <TabsTrigger value="history">تاریخچه انتخاب</TabsTrigger>
         </TabsList>
@@ -377,6 +379,10 @@ export default function VehicleOptimization() {
               </Table>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="editor" className="space-y-4">
+          <VehicleTemplateEditor />
         </TabsContent>
 
         <TabsContent value="optimization" className="space-y-4">
