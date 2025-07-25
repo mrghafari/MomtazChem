@@ -385,6 +385,133 @@ export default function VehicleOptimization() {
           <VehicleTemplateEditor />
         </TabsContent>
 
+        {/* Edit Vehicle Dialog */}
+        {editingVehicle && (
+          <Dialog open={!!editingVehicle} onOpenChange={() => setEditingVehicle(null)}>
+            <DialogContent className="max-w-2xl" dir="rtl">
+              <DialogHeader>
+                <DialogTitle>ویرایش الگوی خودرو</DialogTitle>
+                <DialogDescription>تغییرات مورد نظر را اعمال کنید</DialogDescription>
+              </DialogHeader>
+              <form onSubmit={(e) => { 
+                e.preventDefault(); 
+                const formData = new FormData(e.currentTarget);
+                const vehicleData = {
+                  id: editingVehicle.id,
+                  name: formData.get('name') as string,
+                  nameEn: formData.get('nameEn') as string,
+                  vehicleType: formData.get('vehicleType') as string,
+                  maxWeightKg: formData.get('maxWeightKg') as string,
+                  maxVolumeM3: formData.get('maxVolumeM3') as string || null,
+                  allowedRoutes: (formData.get('allowedRoutes') as string).split(',').map(r => r.trim()),
+                  basePrice: formData.get('basePrice') as string,
+                  pricePerKm: formData.get('pricePerKm') as string,
+                  pricePerKg: formData.get('pricePerKg') as string || "0",
+                  supportsHazardous: formData.get('supportsHazardous') === 'true',
+                  supportsRefrigerated: formData.get('supportsRefrigerated') === 'true',
+                  supportsFragile: formData.get('supportsFragile') !== 'false',
+                  averageSpeedKmh: formData.get('averageSpeedKmh') as string || "50",
+                  fuelConsumptionL100km: formData.get('fuelConsumptionL100km') as string || null,
+                  isActive: formData.get('isActive') === 'true',
+                  priority: parseInt(formData.get('priority') as string) || 0
+                };
+                updateVehicleMutation.mutate(vehicleData);
+              }}>
+                <div className="grid grid-cols-2 gap-4 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-name">نام خودرو *</Label>
+                    <Input id="edit-name" name="name" defaultValue={editingVehicle.name} required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-nameEn">نام انگلیسی</Label>
+                    <Input id="edit-nameEn" name="nameEn" defaultValue={editingVehicle.nameEn || ''} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-vehicleType">نوع خودرو *</Label>
+                    <Select name="vehicleType" defaultValue={editingVehicle.vehicleType}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="انتخاب کنید" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="motorcycle">موتورسیکلت</SelectItem>
+                        <SelectItem value="van">وانت</SelectItem>
+                        <SelectItem value="light_truck">کامیون سبک</SelectItem>
+                        <SelectItem value="heavy_truck">کامیون سنگین</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-maxWeightKg">حداکثر وزن (کیلوگرم) *</Label>
+                    <Input id="edit-maxWeightKg" name="maxWeightKg" type="number" defaultValue={editingVehicle.maxWeightKg} required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-maxVolumeM3">حداکثر حجم (متر مکعب)</Label>
+                    <Input id="edit-maxVolumeM3" name="maxVolumeM3" type="number" step="0.01" defaultValue={editingVehicle.maxVolumeM3 || ''} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-allowedRoutes">مسیرهای مجاز *</Label>
+                    <Input id="edit-allowedRoutes" name="allowedRoutes" 
+                           defaultValue={editingVehicle.allowedRoutes.join(', ')} 
+                           placeholder="urban, interurban, highway" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-basePrice">قیمت پایه (دینار عراقی) *</Label>
+                    <Input id="edit-basePrice" name="basePrice" type="number" defaultValue={editingVehicle.basePrice} required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-pricePerKm">قیمت هر کیلومتر (دینار) *</Label>
+                    <Input id="edit-pricePerKm" name="pricePerKm" type="number" step="0.01" defaultValue={editingVehicle.pricePerKm} required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-pricePerKg">قیمت هر کیلوگرم (دینار)</Label>
+                    <Input id="edit-pricePerKg" name="pricePerKg" type="number" step="0.01" defaultValue={editingVehicle.pricePerKg} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-averageSpeedKmh">سرعت متوسط (کیلومتر/ساعت)</Label>
+                    <Input id="edit-averageSpeedKmh" name="averageSpeedKmh" type="number" defaultValue={editingVehicle.averageSpeedKmh} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-fuelConsumptionL100km">مصرف سوخت (لیتر/100کیلومتر)</Label>
+                    <Input id="edit-fuelConsumptionL100km" name="fuelConsumptionL100km" type="number" step="0.1" defaultValue={editingVehicle.fuelConsumptionL100km || ''} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-priority">اولویت</Label>
+                    <Input id="edit-priority" name="priority" type="number" defaultValue={editingVehicle.priority} />
+                  </div>
+                  <div className="col-span-2 space-y-4">
+                    <div className="flex items-center space-x-2">
+                      <input type="hidden" name="isActive" value="false" />
+                      <input type="checkbox" name="isActive" value="true" id="edit-isActive" defaultChecked={editingVehicle.isActive} />
+                      <Label htmlFor="edit-isActive">فعال</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input type="hidden" name="supportsHazardous" value="false" />
+                      <input type="checkbox" name="supportsHazardous" value="true" id="edit-supportsHazardous" defaultChecked={editingVehicle.supportsHazardous} />
+                      <Label htmlFor="edit-supportsHazardous">پشتیبانی از مواد خطرناک</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input type="hidden" name="supportsRefrigerated" value="false" />
+                      <input type="checkbox" name="supportsRefrigerated" value="true" id="edit-supportsRefrigerated" defaultChecked={editingVehicle.supportsRefrigerated} />
+                      <Label htmlFor="edit-supportsRefrigerated">پشتیبانی از محصولات یخچالی</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input type="hidden" name="supportsFragile" value="false" />
+                      <input type="checkbox" name="supportsFragile" value="true" id="edit-supportsFragile" defaultChecked={editingVehicle.supportsFragile} />
+                      <Label htmlFor="edit-supportsFragile">پشتیبانی از اقلام شکستنی</Label>
+                    </div>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button type="button" variant="outline" onClick={() => setEditingVehicle(null)}>انصراف</Button>
+                  <Button type="submit" disabled={updateVehicleMutation.isPending}>
+                    {updateVehicleMutation.isPending ? "در حال بروزرسانی..." : "بروزرسانی الگو"}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+        )}
+
         <TabsContent value="optimization" className="space-y-4">
           <Card>
             <CardHeader>

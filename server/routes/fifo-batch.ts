@@ -149,7 +149,7 @@ router.get("/api/products/:productName/batches/newest", async (req, res) => {
     
     console.log(`🆕 [API] Getting newest batch for: ${decodedProductName}`);
     
-    const newestBatch = await LIFOBatchManager.getNewestBatchForDisplay(decodedProductName);
+    const newestBatch = await FIFODisplayManager.getNewestBatchForDisplay(decodedProductName);
     
     if (newestBatch.success) {
       res.json({
@@ -185,7 +185,7 @@ router.get("/api/products/:productName/batches/stats-lifo", async (req, res) => 
     
     console.log(`📊 [API] Getting LIFO batch statistics for: ${decodedProductName}`);
     
-    const stats = await LIFOBatchManager.getBatchStatisticsLIFO(decodedProductName);
+    const stats = await FIFODisplayManager.getBatchStatisticsFIFO(decodedProductName);
     
     if (stats.success) {
       res.json({

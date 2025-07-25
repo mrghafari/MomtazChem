@@ -352,6 +352,12 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
   - **Editor Tab**: **NEW** - Complete editing interface for existing templates
   - **Optimization Tab**: Algorithm-based vehicle selection system
   - **History Tab**: Selection history and analytics
+- **Table Row Edit Dialog**: **FIXED** - Added complete edit dialog functionality for table row edit buttons:
+  - **Edit Button Integration**: Table edit buttons now properly open edit dialog with pre-populated fields
+  - **Complete Edit Form**: Full form with all vehicle parameters including pricing, capacity, routes, and capabilities
+  - **Form Data Processing**: Proper form data extraction and mutation handling for updates
+  - **Persian Interface**: Complete RTL support with proper Persian field labels and validation messages
+  - **State Management**: Proper editingVehicle state handling with dialog open/close functionality
 - **Advanced Editing Features**: 
   - **Complete Parameter Control**: Edit capacity (weight, volume), pricing (base, per km, per kg), operational settings (speed, fuel consumption)
   - **Route Management**: Multi-select checkboxes for allowed routes (urban, interurban, highway)
@@ -395,7 +401,7 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
   - **TypeScript Resolution**: All compilation errors resolved for clean build
 - **Business Impact**: Vehicle template management now fully editable allowing dynamic optimization parameters
 - **Dual System Success**: Works seamlessly alongside FIFO (chemical batch rotation) and LIFO (newest batch display) systems
-- **Result**: Complete vehicle template editing system operational - users can modify all aspects of vehicle patterns including capacity, pricing, route restrictions, and special capabilities through professional Persian interface
+- **Result**: Complete vehicle template editing system operational - users can modify all aspects of vehicle patterns including capacity, pricing, route restrictions, and special capabilities through professional Persian interface with functional table row edit buttons
 
 ### COMPLETED: Enhanced Wallet Deduction for Insufficient Receipt Amounts (July 24, 2025)
 ✅ **IMPLEMENTED: Automatic wallet deduction when receipt amount is insufficient but wallet can cover the difference**
