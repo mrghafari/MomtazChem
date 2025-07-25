@@ -167,6 +167,11 @@ const WarehouseManagementFixed: React.FC = () => {
     const matchesAmount = amountFilter === '' || parseFloat(order.totalAmount || '0').toString().includes(amountFilter);
     
     return matchesSearch && matchesStatus && matchesOrderId && matchesCustomerName && matchesPhone && matchesEmail && matchesStatusFilter && matchesAmount;
+  })?.sort((a, b) => {
+    // Sort by creation date - older orders first (ascending order)
+    const dateA = new Date(a.createdAt || a.orderDate || '').getTime();
+    const dateB = new Date(b.createdAt || b.orderDate || '').getTime();
+    return dateA - dateB;
   }) || [];
 
   // Helper functions

@@ -6,6 +6,19 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Warehouse Order Sorting Fixed - Older Orders Now Appear at Top (January 25, 2025)
+✅ **IMPLEMENTED: Chronological sorting in warehouse management to display older orders at the top of the list**
+- **User Request Fulfilled**: "در مدیریت انبار سفارشات قدیمی تر بالای لیست قرار میگیرند" (In warehouse management, older orders should appear at the top of the list)
+- **Sorting Algorithm**: Added chronological sorting by creation date in ascending order (oldest first)
+- **Technical Implementation**: Enhanced filteredOrders with `.sort()` method using `createdAt` field comparison
+- **FIFO Workflow Compliance**: Warehouse management now prioritizes older orders for processing, aligning with FIFO inventory management principles
+- **Date Handling**: Robust date comparison using `getTime()` method with fallback to `orderDate` field
+- **Business Impact**: Warehouse staff can now process orders in proper chronological sequence, ensuring older orders are fulfilled first
+- **File Updated**: `client/src/pages/admin/warehouse-management-fixed.tsx` with sorting logic
+- **Sort Logic**: `return dateA - dateB` ensures ascending order (oldest orders at top)
+- **User Experience**: Improved workflow for warehouse staff prioritizing order fulfillment by age
+- **Result**: Complete warehouse order sorting operational - older orders now consistently appear at the top of the warehouse management list
+
 ### COMPLETED: Customer Rejection Reason Visibility Implementation - Complete & Operational (January 25, 2025)
 ✅ **IMPLEMENTED: Customer-facing rejection reason display system for complete transparency in financial order processing**
 - **User Request Fulfilled**: Enhanced customer experience by showing clear rejection reasons when orders are rejected by financial department
