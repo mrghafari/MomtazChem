@@ -263,6 +263,7 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
   - **Loading States**: Proper loading indicators when order data is being fetched
   - **Error Handling**: Clear messages for missing orders or loading issues
   - **Payment Guidance**: Blue information card explaining overpayment/underpayment scenarios
+  - **Financial Process Clarity**: Green information card explaining "مبلغ اضافه واریزی فیش بانکی پس از اینکه فیش توسط واحد مالی تایید شد به والت مشتری اضافه خواهد شد"
 - **Technical Fixes**: 
   - **LSP Errors**: Fixed apiRequest method calls to include required `method: 'GET'` parameter
   - **Route Registration**: `/customer/bank-receipt-upload/:orderId` now properly registered in router

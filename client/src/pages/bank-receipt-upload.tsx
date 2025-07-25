@@ -429,10 +429,17 @@ export default function BankReceiptUpload() {
             
             {/* Additional Information */}
             {order && (
-              <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                <p className="text-xs text-blue-600 dark:text-blue-300">
-                  💡 حداقل مبلغ واریزی باید برابر با بدهی سفارش باشد. در صورت واریز بیشتر، مبلغ اضافی به والت شما اضافه می‌شود. در صورت واریز کمتر و کفایت موجودی والت، کمبود از والت کسر خواهد شد.
-                </p>
+              <div className="mt-2 space-y-2">
+                <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <p className="text-xs text-blue-600 dark:text-blue-300">
+                    💡 حداقل مبلغ واریزی باید برابر با بدهی سفارش باشد. در صورت واریز بیشتر، مبلغ اضافی به والت شما اضافه می‌شود. در صورت واریز کمتر و کفایت موجودی والت، کمبود از والت کسر خواهد شد.
+                  </p>
+                </div>
+                <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                  <p className="text-xs text-green-600 dark:text-green-300">
+                    ⏰ مبلغ اضافه واریزی فیش بانکی پس از اینکه فیش توسط واحد مالی تایید شد به والت مشتری اضافه خواهد شد
+                  </p>
+                </div>
               </div>
             )}
             
