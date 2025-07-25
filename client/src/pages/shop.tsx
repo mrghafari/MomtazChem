@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ShoppingCart, Plus, Minus, Filter, Search, Grid, List, Star, User, LogOut, X, ChevronDown, Eye, Brain, Sparkles, Wallet, FileText, Download, AlertTriangle, Package, MessageSquare, ZoomIn, Shield } from "lucide-react";
+import { ShoppingCart, Plus, Minus, Filter, Search, Grid, List, Star, User, LogOut, X, ChevronDown, Eye, Brain, Sparkles, Wallet, FileText, Download, AlertTriangle, Package, MessageSquare, ZoomIn, Shield, Flame } from "lucide-react";
 import { useLocation } from "wouter";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
@@ -1350,6 +1350,14 @@ const Shop = () => {
                           
 
 
+                          {/* Flammable Product Badge - Top Right */}
+                          {product.isFlammable && (
+                            <Badge variant="outline" className="absolute top-2 right-2 bg-orange-100 text-orange-800 border-orange-300">
+                              <Flame className="w-3 h-3 mr-1" />
+                              آتش‌زا
+                            </Badge>
+                          )}
+
                           {/* Reviews and Specs - Right side */}
                           <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-lg p-1 shadow-lg">
                             <TooltipProvider>
@@ -1704,6 +1712,14 @@ const Shop = () => {
 
                           
 
+
+                          {/* Flammable Product Badge - Top Right - List View */}
+                          {product.isFlammable && (
+                            <Badge variant="outline" className="absolute top-2 right-2 bg-orange-100 text-orange-800 border-orange-300">
+                              <Flame className="w-3 h-3 mr-1" />
+                              آتش‌زا
+                            </Badge>
+                          )}
 
                           {/* Reviews and Specs - Right side - List View */}
                           <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-lg p-1 shadow-lg">

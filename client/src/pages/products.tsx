@@ -19,7 +19,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertShowcaseProductSchema, type ShowcaseProduct, type InsertShowcaseProduct } from "@shared/showcase-schema";
 import { z } from "zod";
-import { Plus, Edit, Trash2, Package, DollarSign, Beaker, Droplet, LogOut, User, Upload, Image, FileText, X, AlertTriangle, CheckCircle, AlertCircle, XCircle, TrendingUp, TrendingDown, BarChart3, QrCode, Mail, Search, Database, Factory, BookOpen, ArrowLeft, Wheat, Eye, EyeOff, HelpCircle, Info, Tag, Lock, RefreshCw, Sparkles } from "lucide-react";
+import { Plus, Edit, Trash2, Package, DollarSign, Beaker, Droplet, LogOut, User, Upload, Image, FileText, X, AlertTriangle, CheckCircle, AlertCircle, XCircle, TrendingUp, TrendingDown, BarChart3, QrCode, Mail, Search, Database, Factory, BookOpen, ArrowLeft, Wheat, Eye, EyeOff, HelpCircle, Info, Tag, Lock, RefreshCw, Sparkles, Flame } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import JsBarcode from "jsbarcode";
 import VisualBarcode from "@/components/ui/visual-barcode";
@@ -66,6 +66,8 @@ const formSchema = insertShowcaseProductSchema.extend({
   showWhenOutOfStock: z.boolean().default(false),
   // Non-chemical product flag
   isNonChemical: z.boolean().default(false),
+  // Flammable product flag
+  isFlammable: z.boolean().default(false),
 });
 import { useToast } from "@/hooks/use-toast";
 import { getPersonalizedWelcome, getDashboardMotivation } from "@/utils/greetings";
@@ -513,6 +515,8 @@ export default function ProductsPage() {
       showWhenOutOfStock: false,
       // Non-chemical product flag
       isNonChemical: false,
+      // Flammable product flag
+      isFlammable: false,
       // Weight fields
       netWeight: 0,
       grossWeight: 0,
@@ -809,6 +813,7 @@ export default function ProductsPage() {
       syncWithShop: product.syncWithShop !== undefined ? product.syncWithShop : true,
       showWhenOutOfStock: product.showWhenOutOfStock ?? false,
       isNonChemical: product.isNonChemical ?? false,
+      isFlammable: product.isFlammable ?? false,
       isActive: product.isActive !== false,
     });
     setDialogOpen(true);
@@ -1540,8 +1545,8 @@ export default function ProductsPage() {
                 console.log('❌ [DEBUG] Form validation failed:', errors);
               })} className="space-y-4">
                 
-                {/* چک‌باکس کالای غیر شیمیایی */}
-                <div className="mb-4">
+                {/* چک‌باکس کالای غیر شیمیایی و آتش‌زا */}
+                <div className="grid grid-cols-2 gap-4 mb-4">
                   <FormField
                     control={form.control}
                     name="isNonChemical"
@@ -1556,6 +1561,29 @@ export default function ProductsPage() {
                             checked={field.value}
                             onCheckedChange={field.onChange}
                             className="border-amber-400"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="isFlammable"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 bg-orange-50 border-orange-200">
+                        <div className="space-y-0.5">
+                          <FormLabel className="text-sm font-medium text-orange-700 flex items-center gap-1">
+                            <Flame className="w-3 h-3" />
+                            محصول آتش‌زا
+                          </FormLabel>
+                          <div className="text-xs text-orange-500">محصول آتش‌زا</div>
+                        </div>
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                            className="border-orange-400"
                           />
                         </FormControl>
                       </FormItem>

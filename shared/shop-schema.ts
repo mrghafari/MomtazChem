@@ -125,6 +125,8 @@ export const shopProducts = pgTable("shop_products", {
   showCatalogToCustomers: boolean("show_catalog_to_customers").default(false), // Checkbox to control visibility
   catalogFileName: text("catalog_file_name"), // Original filename for display
   catalogUploadDate: timestamp("catalog_upload_date"), // When catalog was uploaded
+  // Safety and hazard information
+  isFlammable: boolean("is_flammable").default(false), // آتش‌زا بودن کالا
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
   

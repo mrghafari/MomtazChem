@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Search, Filter, X, ChevronDown, Star, ShoppingCart, Eye } from 'lucide-react';
+import { Search, Filter, X, ChevronDown, Star, ShoppingCart, Eye, Flame } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -28,6 +28,7 @@ interface ShopProduct {
   thumbnailUrl?: string;
   tags?: string[];
   isFeatured: boolean;
+  isFlammable?: boolean;
   specifications?: any;
   features?: any;
   applications?: any;
@@ -426,6 +427,12 @@ export default function ShopSearch() {
                       {!product.inStock && (
                         <Badge variant="destructive" className="absolute top-2 right-2">
                           Out of Stock
+                        </Badge>
+                      )}
+                      {product.isFlammable && (
+                        <Badge variant="outline" className="absolute bottom-2 left-2 bg-orange-100 text-orange-800 border-orange-300">
+                          <Flame className="w-3 h-3 mr-1" />
+                          آتش‌زا
                         </Badge>
                       )}
                     </div>
