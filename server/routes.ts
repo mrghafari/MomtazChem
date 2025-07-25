@@ -4170,6 +4170,100 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // =============================================================================
+  // FIFO BATCH MANAGEMENT ENDPOINTS
+  // =============================================================================
+
+  // Get FIFO batch information for a product
+  app.get("/api/products/:productName/batches/fifo", async (req, res) => {
+    try {
+      const { productName } = req.params;
+      const decodedProductName = decodeURIComponent(productName);
+      
+      console.log(`📦 [API] Getting FIFO batches for: ${decodedProductName}`);
+      
+      const { FIFOBatchManager } = await import('./fifo-batch-manager');
+      const batchInfo = await FIFOBatchManager.getBatchInfoForDisplay(decodedProductName);
+      
+      res.json({
+        success: true,
+        productName: decodedProductName,
+        data: batchInfo
+      });
+      
+    } catch (error: any) {
+      console.error("Error fetching FIFO batch info:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت اطلاعات بچ‌های محصول",
+        error: error?.message || 'خطای نامشخص'
+      });
+    }
+  });
+
+  // Get all batches for a product in FIFO order
+  app.get("/api/products/:productName/batches/list", async (req, res) => {
+    try {
+      const { productName } = req.params;
+      const decodedProductName = decodeURIComponent(productName);
+      
+      const { FIFOBatchManager } = await import('./fifo-batch-manager');
+      const batches = await FIFOBatchManager.getBatchesFIFO(decodedProductName);
+      
+      res.json({
+        success: true,
+        productName: decodedProductName,
+        batches,
+        count: batches.length
+      });
+      
+    } catch (error: any) {
+      console.error("Error fetching product batches:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت لیست بچ‌های محصول",
+        error: error?.message || 'خطای نامشخص'
+      });
+    }
+  });
+
+  // Simulate FIFO allocation for an order (without committing)
+  app.post("/api/products/:productName/batches/allocate-simulate", async (req, res) => {
+    try {
+      const { productName } = req.params;
+      const { quantity, orderId } = req.body;
+      const decodedProductName = decodeURIComponent(productName);
+      
+      if (!quantity || quantity <= 0) {
+        return res.status(400).json({
+          success: false,
+          message: "مقدار نامعتبر است"
+        });
+      }
+      
+      const { FIFOBatchManager } = await import('./fifo-batch-manager');
+      const allocation = await FIFOBatchManager.allocateInventoryFIFO(
+        decodedProductName,
+        quantity,
+        orderId
+      );
+      
+      res.json({
+        success: true,
+        productName: decodedProductName,
+        simulation: allocation
+      });
+      
+    } catch (error: any) {
+      console.error("Error simulating FIFO allocation:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در شبیه‌سازی تخصیص موجودی",
+        error: error?.message || 'خطای نامشخص'
+      });
+    }
+  });
+
+  // =============================================================================
   // BARCODE & INVENTORY MANAGEMENT ENDPOINTS
   // =============================================================================
 

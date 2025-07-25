@@ -23,6 +23,7 @@ import { Plus, Edit, Trash2, Package, DollarSign, Beaker, Droplet, LogOut, User,
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import JsBarcode from "jsbarcode";
 import VisualBarcode from "@/components/ui/visual-barcode";
+import FIFOBatchDisplay from "@/components/ui/fifo-batch-display";
 
 // Custom form schema that handles numeric inputs properly
 const formSchema = insertShowcaseProductSchema.extend({
@@ -1417,15 +1418,12 @@ export default function ProductsPage() {
                         </div>
                       )}
 
-                      {/* Batch Number */}
-                      {product.batchNumber && (
-                        <div className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
-                          <span className="font-medium">شماره بچ:</span>
-                          <span className="font-mono bg-gray-100 px-2 py-1 rounded text-xs">
-                            {product.batchNumber}
-                          </span>
-                        </div>
-                      )}
+                      {/* FIFO Batch Information - Enhanced Display */}
+                      <FIFOBatchDisplay 
+                        productName={product.name}
+                        className="my-2"
+                        showDetails={true}
+                      />
 
                       {/* Product Info */}
                       {product.description && (

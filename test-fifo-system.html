@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>آزمایش سیستم FIFO - فروش بچ‌های قدیمی ابتدا</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Tahoma', sans-serif; 
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container { 
+            max-width: 1000px; 
+            margin: 0 auto; 
+            background: white; 
+            border-radius: 15px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%); 
+            color: white; 
+            padding: 30px; 
+            text-align: center; 
+        }
+        
+        .header h1 { font-size: 24px; margin-bottom: 10px; }
+        .header p { opacity: 0.9; font-size: 14px; }
+        
+        .content { padding: 30px; }
+        
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: #fafafa;
+        }
+        
+        .test-section h3 {
+            color: #2e7d32;
+            margin-bottom: 15px;
+            font-size: 18px;
+            border-bottom: 2px solid #4caf50;
+            padding-bottom: 8px;
+        }
+        
+        .batch-display {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+        
+        .batch-card {
+            background: white;
+            border: 2px solid #e8f5e8;
+            border-radius: 8px;
+            padding: 15px;
+            position: relative;
+        }
+        
+        .batch-card.oldest {
+            border-color: #4caf50;
+            background: linear-gradient(135deg, #e8f5e8 0%, #f1f8e9 100%);
+        }
+        
+        .batch-card.newest {
+            border-color: #ff9800;
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+        }
+        
+        .batch-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .batch-number {
+            font-weight: bold;
+            font-size: 16px;
+            color: #1976d2;
+        }
+        
+        .fifo-order {
+            background: #4caf50;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 15px;
+            font-size: 12px;
+        }
+        
+        .batch-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            font-size: 14px;
+        }
+        
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .info-label {
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .info-value {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .test-button {
+            background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.4);
+        }
+        
+        .result-box {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            white-space: pre-line;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .success { background: #e8f5e8; border-color: #4caf50; color: #2e7d32; }
+        .error { background: #ffebee; border-color: #f44336; color: #c62828; }
+        
+        .total-stock {
+            background: linear-gradient(135deg, #1976d2 0%, #0d47a1 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .note {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .note h4 {
+            color: #e65100;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🗂️ آزمایش سیستم FIFO - فروش بچ‌های قدیمی ابتدا</h1>
+            <p>آزمایش کامل سیستم مدیریت موجودی با روش FIFO برای محصولات شیمیایی</p>
+        </div>
+        
+        <div class="content">
+            <!-- Product Information Section -->
+            <div class="test-section">
+                <h3>📦 اطلاعات محصول: Solvant 402</h3>
+                <button class="test-button" onclick="loadProductBatches()">بارگذاری بچ‌های محصول</button>
+                <button class="test-button" onclick="showBatchDetails()">نمایش جزئیات FIFO</button>
+                
+                <div id="batchDisplay" class="batch-display"></div>
+                <div id="totalStock" class="total-stock" style="display: none;"></div>
+            </div>
+            
+            <!-- FIFO Allocation Test -->
+            <div class="test-section">
+                <h3>🔄 آزمایش تخصیص FIFO</h3>
+                <p>آزمایش تخصیص موجودی با استفاده از سیستم FIFO (قدیمی‌ترین بچ ابتدا)</p>
+                
+                <div style="margin: 15px 0;">
+                    <label>مقدار برای تخصیص:</label>
+                    <input type="number" id="allocationQuantity" value="500" min="1" max="5000" 
+                           style="padding: 8px; margin: 0 10px; border: 1px solid #ddd; border-radius: 5px;">
+                    <button class="test-button" onclick="testFIFOAllocation()">آزمایش تخصیص FIFO</button>
+                </div>
+                
+                <div id="allocationResult" class="result-box" style="display: none;"></div>
+            </div>
+            
+            <!-- Order Processing Test -->
+            <div class="test-section">
+                <h3>🛒 آزمایش پردازش سفارش</h3>
+                <p>شبیه‌سازی پردازش سفارش واقعی با استفاده از سیستم FIFO</p>
+                
+                <div style="margin: 15px 0;">
+                    <label>مقدار سفارش:</label>
+                    <input type="number" id="orderQuantity" value="1000" min="1" max="5000" 
+                           style="padding: 8px; margin: 0 10px; border: 1px solid #ddd; border-radius: 5px;">
+                    <button class="test-button" onclick="simulateOrder()">شبیه‌سازی سفارش</button>
+                </div>
+                
+                <div id="orderResult" class="result-box" style="display: none;"></div>
+            </div>
+            
+            <!-- System Information -->
+            <div class="note">
+                <h4>📌 درباره سیستم FIFO</h4>
+                <p>
+                    <strong>FIFO (First In, First Out)</strong> یعنی "اول وارد، اول خارج". در این سیستم:
+                    <br>• قدیمی‌ترین بچ‌ها ابتدا فروخته می‌شوند
+                    <br>• برای محصولات شیمیایی با تاریخ انقضا مناسب است
+                    <br>• از فساد و ضایعات جلوگیری می‌کند
+                    <br>• بچ‌ها بر اساس تاریخ تولید مرتب می‌شوند
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let batchData = null;
+        
+        // Load product batches from API
+        async function loadProductBatches() {
+            try {
+                showLoading('batchDisplay', 'در حال بارگذاری بچ‌های محصول...');
+                
+                const response = await fetch('/api/products/Solvant%20402/batches/fifo');
+                const data = await response.json();
+                
+                if (data.success) {
+                    batchData = data.data;
+                    displayBatches(batchData);
+                    showTotalStock(batchData.totalStock, batchData.batchCount);
+                } else {
+                    showError('batchDisplay', 'خطا در بارگذاری بچ‌ها: ' + data.message);
+                }
+            } catch (error) {
+                showError('batchDisplay', 'خطا در ارتباط با سرور: ' + error.message);
+            }
+        }
+        
+        // Display batch information
+        function displayBatches(data) {
+            const container = document.getElementById('batchDisplay');
+            
+            if (!data.allBatches || data.allBatches.length === 0) {
+                container.innerHTML = '<p>هیچ بچی یافت نشد</p>';
+                return;
+            }
+            
+            let html = '';
+            data.allBatches.forEach((batch, index) => {
+                const isOldest = batch.isOldest;
+                const isNewest = index === data.allBatches.length - 1;
+                
+                html += `
+                    <div class="batch-card ${isOldest ? 'oldest' : isNewest ? 'newest' : ''}">
+                        <div class="batch-header">
+                            <div class="batch-number">بچ: ${batch.batchNumber || 'بدون شماره'}</div>
+                            <div class="fifo-order">ردیف ${batch.fifoOrder}</div>
+                        </div>
+                        
+                        <div class="batch-info">
+                            <div class="info-item">
+                                <span class="info-label">موجودی:</span>
+                                <span class="info-value">${batch.stockQuantity} واحد</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">قیمت واحد:</span>
+                                <span class="info-value">${batch.unitPrice} ${batch.currency}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">تاریخ تولید:</span>
+                                <span class="info-value">${formatDate(batch.createdAt)}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">وزن:</span>
+                                <span class="info-value">${batch.weight} ${batch.weightUnit}</span>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 10px; padding: 8px; background: ${isOldest ? '#4caf50' : '#ff9800'}; color: white; border-radius: 5px; text-align: center; font-size: 12px;">
+                            ${batch.willSellNext}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        // Show total stock information
+        function showTotalStock(totalStock, batchCount) {
+            const container = document.getElementById('totalStock');
+            container.style.display = 'block';
+            container.innerHTML = `
+                📊 مجموع موجودی: ${totalStock} واحد در ${batchCount} بچ
+            `;
+        }
+        
+        // Show batch details
+        function showBatchDetails() {
+            if (!batchData) {
+                alert('ابتدا بچ‌های محصول را بارگذاری کنید');
+                return;
+            }
+            
+            const details = `
+اطلاعات کامل FIFO:
+===================
+
+قدیمی‌ترین بچ (اولین مورد برای فروش):
+• بچ: ${batchData.oldestBatch.batchNumber}
+• موجودی: ${batchData.oldestBatch.stockQuantity} واحد
+• تاریخ: ${formatDate(batchData.oldestBatch.createdAt)}
+
+جدیدترین بچ (آخرین مورد برای فروش):
+• بچ: ${batchData.newestBatch.batchNumber} 
+• موجودی: ${batchData.newestBatch.stockQuantity} واحد
+• تاریخ: ${formatDate(batchData.newestBatch.createdAt)}
+
+آمار کلی:
+• تعداد بچ‌ها: ${batchData.batchCount}
+• مجموع موجودی: ${batchData.totalStock} واحد
+
+ترتیب فروش FIFO:
+${batchData.allBatches.map((batch, index) => 
+    `${index + 1}. بچ ${batch.batchNumber}: ${batch.stockQuantity} واحد (${formatDate(batch.createdAt)})`
+).join('\n')}
+            `;
+            
+            alert(details);
+        }
+        
+        // Test FIFO allocation
+        async function testFIFOAllocation() {
+            const quantity = parseInt(document.getElementById('allocationQuantity').value);
+            
+            if (!quantity || quantity <= 0) {
+                alert('لطفاً مقدار معتبری وارد کنید');
+                return;
+            }
+            
+            try {
+                showLoading('allocationResult', 'در حال آزمایش تخصیص FIFO...');
+                
+                const response = await fetch(`/api/products/Solvant%20402/batches/allocate-simulate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ quantity, orderId: 'TEST-' + Date.now() })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showSuccess('allocationResult', formatAllocationResult(data.simulation));
+                } else {
+                    showError('allocationResult', 'خطا در تخصیص: ' + data.message);
+                }
+            } catch (error) {
+                showError('allocationResult', 'خطا در ارتباط با سرور: ' + error.message);
+            }
+        }
+        
+        // Simulate order processing
+        async function simulateOrder() {
+            const quantity = parseInt(document.getElementById('orderQuantity').value);
+            
+            if (!quantity || quantity <= 0) {
+                alert('لطفاً مقدار سفارش معتبری وارد کنید');
+                return;
+            }
+            
+            const result = `
+شبیه‌سازی پردازش سفارش:
+========================
+
+محصول: Solvant 402
+مقدار سفارش: ${quantity} واحد
+
+❗ توجه: این تنها شبیه‌سازی است و موجودی واقعی تغییر نمی‌کند
+
+برای پردازش واقعی سفارش، از سیستم فروش اصلی استفاده کنید.
+سیستم FIFO به طور خودکار:
+1. قدیمی‌ترین بچ را انتخاب می‌کند
+2. مقدار مورد نیاز را از آن کم می‌کند  
+3. در صورت نیاز به بچ بعدی می‌رود
+4. تا تکمیل سفارش ادامه می‌دهد
+
+وضعیت کنونی بچ‌ها را با کلیک "بارگذاری بچ‌های محصول" مشاهده کنید.
+            `;
+            
+            showInfo('orderResult', result);
+        }
+        
+        // Format allocation result
+        function formatAllocationResult(simulation) {
+            return `
+نتیجه تخصیص FIFO:
+==================
+
+وضعیت: ${simulation.success ? '✅ موفق' : '❌ ناموفق'}
+مقدار درخواستی: ${simulation.totalAllocated} واحد
+${simulation.remainingNeeded > 0 ? `مقدار کمبود: ${simulation.remainingNeeded} واحد` : '✅ تخصیص کامل'}
+
+بچ‌های استفاده شده:
+${simulation.batchesUsed.map((batch, index) => 
+    `${index + 1}. بچ ${batch.batchNumber}: ${batch.allocatedQuantity} واحد از ${batch.batchNumber}`
+).join('\n')}
+
+${simulation.message}
+            `;
+        }
+        
+        // Utility functions
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('fa-IR');
+        }
+        
+        function showLoading(containerId, message) {
+            const container = document.getElementById(containerId);
+            container.style.display = 'block';
+            container.className = 'result-box';
+            container.innerHTML = '⏳ ' + message;
+        }
+        
+        function showSuccess(containerId, message) {
+            const container = document.getElementById(containerId);
+            container.style.display = 'block';
+            container.className = 'result-box success';
+            container.innerHTML = message;
+        }
+        
+        function showError(containerId, message) {
+            const container = document.getElementById(containerId);
+            container.style.display = 'block';
+            container.className = 'result-box error';
+            container.innerHTML = '❌ ' + message;
+        }
+        
+        function showInfo(containerId, message) {
+            const container = document.getElementById(containerId);
+            container.style.display = 'block';
+            container.className = 'result-box';
+            container.innerHTML = message;
+        }
+        
+        // Auto-load batches on page load
+        window.addEventListener('load', function() {
+            setTimeout(loadProductBatches, 1000);
+        });
+    </script>
+</body>
+</html>
