@@ -1,315 +1,226 @@
 import { db } from "./db";
-import { eq, and, gt, sql, desc, asc } from "drizzle-orm";
-import { showcaseProducts } from "@shared/showcase-schema";
-import { shopProducts } from "@shared/shop-schema";
+import { showcaseProducts } from "@shared/schema";
+import { eq } from "drizzle-orm";
 
 /**
- * FIFO Batch Management System
- * Handles First In, First Out inventory management for products with batches
+ * FIFO (First In, First Out) Batch Manager
+ * Shows oldest batch information first - unified FIFO methodology
+ * Used for displaying batch info on product cards with FIFO ordering
  */
 export class FIFOBatchManager {
   
   /**
-   * Get all batches for a product ordered by FIFO (oldest first)
-   * @param productName - Name of the product to get batches for
-   * @returns Array of batches sorted by creation date (oldest first)
+   * Get FIFO batch information for a product (oldest first)
+   * Used for product card displays showing oldest batch info first
    */
-  static async getBatchesFIFO(productName: string): Promise<any[]> {
-    try {
-      console.log(`📦 [FIFO] Getting batches for product: ${productName}`);
-      
-      // Get batches from showcase_products (کاردکس) ordered by creation date (FIFO)
-      const batches = await db
-        .select({
-          id: showcaseProducts.id,
-          name: showcaseProducts.name,
-          batchNumber: showcaseProducts.batchNumber,
-          stockQuantity: showcaseProducts.stockQuantity,
-          unitPrice: showcaseProducts.unitPrice,
-          currency: showcaseProducts.currency,
-          expiryDate: showcaseProducts.expiryDate,
-          createdAt: showcaseProducts.createdAt,
-          barcode: showcaseProducts.barcode,
-          weight: showcaseProducts.weight,
-          weightUnit: showcaseProducts.weightUnit
-        })
-        .from(showcaseProducts)
-        .where(
-          and(
-            eq(showcaseProducts.name, productName),
-            gt(showcaseProducts.stockQuantity, 0) // Only show batches with stock
-          )
-        )
-        .orderBy(asc(showcaseProducts.createdAt)); // FIFO: oldest first
-      
-      console.log(`📦 [FIFO] Found ${batches.length} batches for ${productName}`);
-      
-      return batches.map((batch, index) => ({
-        ...batch,
-        fifoOrder: index + 1, // Add FIFO position for display
-        isOldest: index === 0, // Mark the oldest batch
-        willSellNext: index === 0 ? "اولین مورد برای فروش" : `ردیف ${index + 1} در نوبت فروش`
-      }));
-      
-    } catch (error) {
-      console.error(`❌ [FIFO] Error getting batches for ${productName}:`, error);
-      return [];
-    }
-  }
-  
-  /**
-   * Get total stock across all batches for a product
-   * @param productName - Name of the product
-   * @returns Total stock quantity across all batches
-   */
-  static async getTotalStock(productName: string): Promise<number> {
-    try {
-      const result = await db
-        .select({
-          totalStock: sql<number>`SUM(${showcaseProducts.stockQuantity})`
-        })
-        .from(showcaseProducts)
-        .where(
-          and(
-            eq(showcaseProducts.name, productName),
-            gt(showcaseProducts.stockQuantity, 0)
-          )
-        );
-      
-      return result[0]?.totalStock || 0;
-    } catch (error) {
-      console.error(`❌ [FIFO] Error getting total stock for ${productName}:`, error);
-      return 0;
-    }
-  }
-  
-  /**
-   * Process order using FIFO batch allocation
-   * @param productName - Name of the product
-   * @param quantityNeeded - Quantity to allocate
-   * @param orderId - Order ID for tracking
-   * @returns Allocation details including which batches were used
-   */
-  static async allocateInventoryFIFO(
-    productName: string, 
-    quantityNeeded: number, 
-    orderId?: string
-  ): Promise<{
+  static async getBatchInfoFIFO(productName: string): Promise<{
     success: boolean;
-    batchesUsed: any[];
-    totalAllocated: number;
-    remainingNeeded: number;
-    message: string;
+    data?: {
+      totalStock: string;
+      batchCount: number;
+      newestBatch: any;
+      oldestBatch: any;
+      nextToShow: any; // For LIFO display - newest batch shown first
+      allBatches: any[];
+    };
+    message?: string;
   }> {
     try {
-      console.log(`🛒 [FIFO-ALLOCATION] Allocating ${quantityNeeded} units of ${productName} using FIFO`);
+      console.log(`📦 [LIFO] Getting LIFO batches for product: ${productName}`);
       
-      // Get batches in FIFO order (oldest first)
-      const availableBatches = await this.getBatchesFIFO(productName);
+      // Get all batches for this product name, ordered by creation date DESC (newest first)
+      const batches = await db
+        .select()
+        .from(showcaseProducts)
+        .where(eq(showcaseProducts.name, productName))
+        .orderBy(showcaseProducts.createdAt); // We'll reverse this for LIFO
       
-      if (availableBatches.length === 0) {
+      if (batches.length === 0) {
+        console.log(`📦 [LIFO] No batches found for ${productName}`);
         return {
           success: false,
-          batchesUsed: [],
-          totalAllocated: 0,
-          remainingNeeded: quantityNeeded,
-          message: `هیچ بچی برای محصول ${productName} موجود نیست`
+          message: `هیچ بچی برای محصول ${productName} یافت نشد`
         };
       }
+
+      // Keep FIFO ordering (oldest first)
+      const fifoBatches = [...batches];
       
-      let remainingNeeded = quantityNeeded;
-      let totalAllocated = 0;
-      const batchesUsed: any[] = [];
+      console.log(`📦 [FIFO] Found ${fifoBatches.length} batches for ${productName}`);
       
-      // Allocate from oldest batches first (FIFO)
-      for (const batch of availableBatches) {
-        if (remainingNeeded <= 0) break;
-        
-        const availableInBatch = batch.stockQuantity;
-        const quantityFromThisBatch = Math.min(remainingNeeded, availableInBatch);
-        
-        if (quantityFromThisBatch > 0) {
-          // Record batch usage
-          batchesUsed.push({
-            batchId: batch.id,
-            batchNumber: batch.batchNumber,
-            quantityUsed: quantityFromThisBatch,
-            remainingInBatch: availableInBatch - quantityFromThisBatch,
-            createdAt: batch.createdAt,
-            expiryDate: batch.expiryDate
-          });
-          
-          // Update remaining quantities
-          remainingNeeded -= quantityFromThisBatch;
-          totalAllocated += quantityFromThisBatch;
-          
-          console.log(`📦 [FIFO] Allocated ${quantityFromThisBatch} from batch ${batch.batchNumber}`);
-        }
-      }
+      // Calculate total stock
+      const totalStock = fifoBatches.reduce((sum, batch) => sum + (batch.stockQuantity || 0), 0);
       
-      const allocationComplete = remainingNeeded === 0;
+      // Get oldest and newest batches
+      const oldestBatch = fifoBatches[0]; // First in FIFO order (oldest)
+      const newestBatch = fifoBatches[fifoBatches.length - 1]; // Last in FIFO order (newest)
       
-      return {
-        success: allocationComplete,
-        batchesUsed,
-        totalAllocated,
-        remainingNeeded,
-        message: allocationComplete 
-          ? `تخصیص کامل: ${totalAllocated} واحد از ${batchesUsed.length} بچ`
-          : `تخصیص ناقص: ${totalAllocated} واحد تخصیص یافت، ${remainingNeeded} واحد کم است`
+      // Add FIFO display information
+      const enrichedBatches = fifoBatches.map((batch, index) => ({
+        ...batch,
+        fifoOrder: index + 1, // 1 = oldest, 2 = second oldest, etc.
+        isOldest: index === 0,
+        isNewest: index === fifoBatches.length - 1,
+        displayText: index === 0 
+          ? "قدیمی‌ترین بچ - اولین مورد برای فروش" 
+          : `ردیف ${index + 1} در نوبت فروش`
+      }));
+      
+      const result = {
+        totalStock: totalStock.toString(),
+        batchCount: fifoBatches.length,
+        oldestBatch: {
+          ...oldestBatch,
+          fifoOrder: 1,
+          isOldest: true,
+          displayText: "اولین مورد برای فروش"
+        },
+        newestBatch: {
+          ...newestBatch,
+          fifoOrder: fifoBatches.length,
+          isNewest: true,
+          displayText: `ردیف ${fifoBatches.length} در نوبت فروش`
+        },
+        nextToSell: {
+          ...oldestBatch,
+          fifoOrder: 1,
+          isOldest: true,
+          displayText: "اولین مورد برای فروش"
+        },
+        allBatches: enrichedBatches
       };
       
-    } catch (error: any) {
-      console.error(`❌ [FIFO-ALLOCATION] Error allocating inventory for ${productName}:`, error);
-      return {
-        success: false,
-        batchesUsed: [],
-        totalAllocated: 0,
-        remainingNeeded: quantityNeeded,
-        message: `خطا در تخصیص موجودی: ${error?.message || 'خطای نامشخص'}`
-      };
-    }
-  }
-  
-  /**
-   * Actually reduce inventory from batches (commit the allocation)
-   * @param allocationResult - Result from allocateInventoryFIFO
-   * @param orderId - Order ID for tracking
-   * @returns Success status and details
-   */
-  static async commitAllocation(
-    allocationResult: any,
-    orderId?: string
-  ): Promise<{ success: boolean; message: string; updatedBatches: any[] }> {
-    if (!allocationResult.success || allocationResult.batchesUsed.length === 0) {
-      return {
-        success: false,
-        message: "هیچ تخصیصی برای اعمال وجود ندارد",
-        updatedBatches: []
-      };
-    }
-    
-    const updatedBatches: any[] = [];
-    
-    try {
-      // Reduce stock from each batch used
-      for (const batchUsage of allocationResult.batchesUsed) {
-        const newStockQuantity = batchUsage.remainingInBatch;
-        
-        await db
-          .update(showcaseProducts)
-          .set({ 
-            stockQuantity: newStockQuantity,
-            lastRestockDate: new Date() // Update last modified
-          })
-          .where(eq(showcaseProducts.id, batchUsage.batchId));
-        
-        updatedBatches.push({
-          batchId: batchUsage.batchId,
-          batchNumber: batchUsage.batchNumber,
-          quantityReduced: batchUsage.quantityUsed,
-          newStockQuantity,
-          orderId
-        });
-        
-        console.log(`✅ [FIFO-COMMIT] Reduced ${batchUsage.quantityUsed} from batch ${batchUsage.batchNumber}, new stock: ${newStockQuantity}`);
-      }
+      console.log(`✅ [FIFO] Successfully processed ${fifoBatches.length} batches for ${productName}`);
+      console.log(`📊 [FIFO] Total stock: ${totalStock}, Oldest: ${oldestBatch.batchNumber}, Newest: ${newestBatch.batchNumber}`);
       
       return {
         success: true,
-        message: `موجودی ${allocationResult.totalAllocated} واحد از ${allocationResult.batchesUsed.length} بچ کاهش یافت`,
-        updatedBatches
+        data: result
       };
       
     } catch (error: any) {
-      console.error(`❌ [FIFO-COMMIT] Error committing allocation:`, error);
+      console.error(`❌ [FIFO] Error getting FIFO batch info for ${productName}:`, error);
       return {
         success: false,
-        message: `خطا در اعمال تغییرات موجودی: ${error?.message || 'خطای نامشخص'}`,
-        updatedBatches: []
+        message: `خطا در دریافت اطلاعات بچ‌های محصول: ${error?.message || 'خطای نامشخص'}`
       };
     }
   }
   
   /**
-   * Complete FIFO inventory reduction in one step
-   * @param productName - Product name
-   * @param quantity - Quantity to reduce
-   * @param orderId - Order ID for tracking
-   * @returns Complete result including allocation and reduction
+   * Get oldest batch information for display purposes
+   * Used specifically for showing first batch to sell on product cards
    */
-  static async reduceInventoryFIFO(
-    productName: string,
-    quantity: number,
-    orderId?: string
-  ): Promise<{
+  static async getOldestBatchForDisplay(productName: string): Promise<{
     success: boolean;
-    message: string;
-    allocation: any;
-    commitment: any;
-  }> {
-    console.log(`🛒 [FIFO-COMPLETE] Starting FIFO inventory reduction for ${productName}, quantity: ${quantity}`);
-    
-    // Step 1: Allocate inventory using FIFO
-    const allocation = await this.allocateInventoryFIFO(productName, quantity, orderId);
-    
-    if (!allocation.success) {
-      return {
-        success: false,
-        message: allocation.message,
-        allocation,
-        commitment: null
-      };
-    }
-    
-    // Step 2: Commit the allocation (actually reduce stock)
-    const commitment = await this.commitAllocation(allocation, orderId);
-    
-    return {
-      success: commitment.success,
-      message: commitment.success 
-        ? `فروش FIFO موفق: ${allocation.totalAllocated} واحد از ${allocation.batchesUsed.length} بچ`
-        : commitment.message,
-      allocation,
-      commitment
-    };
-  }
-  
-  /**
-   * Get batch information for display on product cards
-   * @param productName - Product name
-   * @returns Formatted batch information for UI display
-   */
-  static async getBatchInfoForDisplay(productName: string): Promise<{
-    totalStock: number;
-    batchCount: number;
-    oldestBatch: any;
-    newestBatch: any;
-    nextToSell: any;
-    allBatches: any[];
+    batch?: any;
+    message?: string;
   }> {
     try {
-      const batches = await this.getBatchesFIFO(productName);
-      const totalStock = await this.getTotalStock(productName);
+      console.log(`🆕 [FIFO-DISPLAY] Getting oldest batch for ${productName}`);
       
-      return {
-        totalStock,
-        batchCount: batches.length,
-        oldestBatch: batches[0] || null,
-        newestBatch: batches[batches.length - 1] || null,
-        nextToSell: batches[0] || null, // First batch in FIFO order
-        allBatches: batches
+      // Get oldest batch (earliest creation date)
+      const oldestBatch = await db
+        .select()
+        .from(showcaseProducts)
+        .where(eq(showcaseProducts.name, productName))
+        .orderBy(showcaseProducts.createdAt)
+        .limit(1);
+      
+      if (oldestBatch.length === 0) {
+        return {
+          success: false,
+          message: `هیچ بچی برای ${productName} یافت نشد`
+        };
+      }
+      
+      const batch = oldestBatch[0];
+      
+      // Add display information
+      const enrichedBatch = {
+        ...batch,
+        displayText: "قدیمی‌ترین بچ - اولین مورد برای فروش",
+        fifoOrder: 1,
+        isOldest: true,
+        stockStatus: batch.stockQuantity > 0 ? "موجود" : "ناموجود",
+        batchAge: this.calculateBatchAge(batch.createdAt)
       };
       
-    } catch (error) {
-      console.error(`❌ [FIFO-DISPLAY] Error getting batch info for ${productName}:`, error);
+      console.log(`✅ [FIFO-DISPLAY] Found oldest batch: ${batch.batchNumber} with ${batch.stockQuantity} units`);
+      
       return {
-        totalStock: 0,
-        batchCount: 0,
-        oldestBatch: null,
-        newestBatch: null,
-        nextToSell: null,
-        allBatches: []
+        success: true,
+        batch: enrichedBatch
+      };
+      
+    } catch (error: any) {
+      console.error(`❌ [FIFO-DISPLAY] Error getting oldest batch for ${productName}:`, error);
+      return {
+        success: false,
+        message: `خطا در دریافت قدیمی‌ترین بچ: ${error?.message || 'خطای نامشخص'}`
+      };
+    }
+  }
+  
+  /**
+   * Calculate how many days old a batch is
+   */
+  private static calculateBatchAge(createdAt: Date | string): string {
+    const created = new Date(createdAt);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - created.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) return "امروز";
+    if (diffDays === 1) return "دیروز";
+    if (diffDays < 7) return `${diffDays} روز پیش`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} هفته پیش`;
+    return `${Math.floor(diffDays / 30)} ماه پیش`;
+  }
+  
+  /**
+   * Get batch statistics for FIFO display
+   */
+  static async getBatchStatisticsFIFO(productName: string): Promise<{
+    success: boolean;
+    stats?: {
+      totalBatches: number;
+      totalStock: number;
+      newestBatchAge: string;
+      oldestBatchAge: string;
+      averageStock: number;
+    };
+    message?: string;
+  }> {
+    try {
+      const batchInfo = await this.getBatchInfoFIFO(productName);
+      
+      if (!batchInfo.success || !batchInfo.data) {
+        return {
+          success: false,
+          message: batchInfo.message
+        };
+      }
+      
+      const { data } = batchInfo;
+      const averageStock = Math.round(parseInt(data.totalStock) / data.batchCount);
+      
+      return {
+        success: true,
+        stats: {
+          totalBatches: data.batchCount,
+          totalStock: parseInt(data.totalStock),
+          newestBatchAge: this.calculateBatchAge(data.newestBatch.createdAt),
+          oldestBatchAge: this.calculateBatchAge(data.oldestBatch.createdAt),
+          averageStock
+        }
+      };
+      
+    } catch (error: any) {
+      console.error(`❌ [FIFO-STATS] Error getting batch statistics:`, error);
+      return {
+        success: false,
+        message: `خطا در محاسبه آمار بچ‌ها: ${error?.message || 'خطای نامشخص'}`
       };
     }
   }

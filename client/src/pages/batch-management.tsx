@@ -94,8 +94,8 @@ export default function BatchManagement() {
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">مدیریت بچ‌ها (LIFO)</h1>
-          <p className="text-gray-600 mt-1">مدیریت بچ‌های محصولات با سیستم LIFO</p>
+          <h1 className="text-2xl font-bold text-gray-900">مدیریت بچ‌ها (FIFO)</h1>
+          <p className="text-gray-600 mt-1">مدیریت بچ‌های محصولات با سیستم FIFO</p>
         </div>
         <div className="flex items-center gap-2 text-gray-600">
           <span className="text-sm">{user?.username}</span>

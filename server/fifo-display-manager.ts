@@ -13,7 +13,7 @@ export class FIFODisplayManager {
    * Get FIFO batch information for a product (oldest first)
    * Used for product card displays showing oldest batch info
    */
-  static async getBatchInfoFIFO(productName: string): Promise<{
+  static async getBatchInfoForDisplay(productName: string): Promise<{
     success: boolean;
     data?: {
       totalStock: string;
@@ -215,6 +215,109 @@ export class FIFODisplayManager {
           newestBatchAge: this.calculateBatchAge(data.newestBatch.createdAt),
           averageStock
         }
+      };
+      
+    } catch (error: any) {
+      console.error(`❌ [FIFO-DISPLAY] Error getting batch statistics for ${productName}:`, error);
+      return {
+        success: false,
+        message: `خطا در دریافت آمار بچ‌ها: ${error?.message || 'خطای نامشخص'}`
+      };
+    }
+  }
+
+  /**
+   * Get oldest batch information for display purposes (FIFO first to sell)
+   */
+  static async getOldestBatchForDisplay(productName: string): Promise<{
+    success: boolean;
+    batch?: any;
+    message?: string;
+  }> {
+    try {
+      console.log(`🆕 [FIFO-DISPLAY] Getting oldest batch for ${productName}`);
+      
+      // Get oldest batch (earliest creation date)
+      const oldestBatch = await db
+        .select()
+        .from(showcaseProducts)
+        .where(eq(showcaseProducts.name, productName))
+        .orderBy(showcaseProducts.createdAt)
+        .limit(1);
+      
+      if (oldestBatch.length === 0) {
+        return {
+          success: false,
+          message: `هیچ بچی برای محصول ${productName} یافت نشد`
+        };
+      }
+
+      const batch = oldestBatch[0];
+      
+      return {
+        success: true,
+        batch: {
+          ...batch,
+          fifoOrder: 1,
+          isOldest: true,
+          displayText: "قدیمی‌ترین بچ - اولین مورد برای فروش"
+        }
+      };
+      
+    } catch (error: any) {
+      console.error(`❌ [FIFO-DISPLAY] Error getting oldest batch for ${productName}:`, error);
+      return {
+        success: false,
+        message: `خطا در دریافت قدیمی‌ترین بچ: ${error?.message || 'خطای نامشخص'}`
+      };
+    }
+  }
+
+  /**
+   * Get batch statistics for FIFO display
+   */
+  static async getBatchStatisticsFIFO(productName: string): Promise<{
+    success: boolean;
+    stats?: any;
+    message?: string;
+  }> {
+    try {
+      console.log(`📊 [FIFO-DISPLAY] Getting FIFO batch statistics for ${productName}`);
+      
+      const batches = await db
+        .select()
+        .from(showcaseProducts)
+        .where(eq(showcaseProducts.name, productName))
+        .orderBy(showcaseProducts.createdAt);
+      
+      if (batches.length === 0) {
+        return {
+          success: false,
+          message: `هیچ بچی برای محصول ${productName} یافت نشد`
+        };
+      }
+
+      const totalStock = batches.reduce((sum, batch) => sum + (batch.stockQuantity || 0), 0);
+      const oldestBatch = batches[0];
+      const newestBatch = batches[batches.length - 1];
+      
+      const stats = {
+        batchCount: batches.length,
+        totalStock: totalStock.toString(),
+        oldestBatch: {
+          ...oldestBatch,
+          displayText: "قدیمی‌ترین - اولین مورد برای فروش"
+        },
+        newestBatch: {
+          ...newestBatch,
+          displayText: `جدیدترین - ردیف ${batches.length} در نوبت فروش`
+        },
+        averageStock: Math.round(totalStock / batches.length)
+      };
+      
+      return {
+        success: true,
+        stats
       };
       
     } catch (error: any) {

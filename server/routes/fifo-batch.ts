@@ -1,6 +1,6 @@
 import { Router } from "express";
-import FIFOBatchManager from "../fifo-batch-manager";
 import { FIFODisplayManager } from "../fifo-display-manager";
+import { FIFOBatchManager } from "../fifo-batch-manager";
 
 const router = Router();
 
@@ -139,51 +139,51 @@ router.get("/api/products/:productName/batches/display", async (req, res) => {
 });
 
 /**
- * Get newest batch for display on product cards
- * GET /api/products/:productName/batches/newest
+ * Get oldest batch for display on product cards (FIFO first to sell)
+ * GET /api/products/:productName/batches/oldest
  */
-router.get("/api/products/:productName/batches/newest", async (req, res) => {
+router.get("/api/products/:productName/batches/oldest", async (req, res) => {
   try {
     const { productName } = req.params;
     const decodedProductName = decodeURIComponent(productName);
     
-    console.log(`🆕 [API] Getting newest batch for: ${decodedProductName}`);
+    console.log(`🆕 [API] Getting oldest batch for: ${decodedProductName}`);
     
-    const newestBatch = await FIFODisplayManager.getNewestBatchForDisplay(decodedProductName);
+    const oldestBatch = await FIFODisplayManager.getOldestBatchForDisplay(decodedProductName);
     
-    if (newestBatch.success) {
+    if (oldestBatch.success) {
       res.json({
         success: true,
         productName: decodedProductName,
-        batch: newestBatch.batch
+        batch: oldestBatch.batch
       });
     } else {
       res.status(404).json({
         success: false,
-        message: newestBatch.message || "جدیدترین بچ یافت نشد"
+        message: oldestBatch.message || "قدیمی‌ترین بچ یافت نشد"
       });
     }
     
   } catch (error: any) {
-    console.error("Error fetching newest batch:", error);
+    console.error("Error fetching oldest batch:", error);
     res.status(500).json({
       success: false,
-      message: "خطا در دریافت جدیدترین بچ",
+      message: "خطا در دریافت قدیمی‌ترین بچ",
       error: error.message
     });
   }
 });
 
 /**
- * Get batch statistics for LIFO display
- * GET /api/products/:productName/batches/stats-lifo
+ * Get batch statistics for FIFO display
+ * GET /api/products/:productName/batches/stats-fifo
  */
-router.get("/api/products/:productName/batches/stats-lifo", async (req, res) => {
+router.get("/api/products/:productName/batches/stats-fifo", async (req, res) => {
   try {
     const { productName } = req.params;
     const decodedProductName = decodeURIComponent(productName);
     
-    console.log(`📊 [API] Getting LIFO batch statistics for: ${decodedProductName}`);
+    console.log(`📊 [API] Getting FIFO batch statistics for: ${decodedProductName}`);
     
     const stats = await FIFODisplayManager.getBatchStatisticsFIFO(decodedProductName);
     
