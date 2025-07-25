@@ -9,7 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useForm } from "react-hook-form";
-import { Eye, CheckCircle, XCircle, Clock, DollarSign, FileText, LogOut, User, ZoomIn, X, Calculator } from "lucide-react";
+import { Eye, CheckCircle, XCircle, Clock, DollarSign, FileText, LogOut, User, ZoomIn, X, Calculator, Wallet } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import GlobalRefreshControl from "@/components/GlobalRefreshControl";
@@ -145,14 +145,30 @@ export default function FinancialDepartment() {
         reviewerId: user?.id
       });
     },
-    onSuccess: () => {
+    onSuccess: (response, variables) => {
       queryClient.invalidateQueries({ queryKey: ["/api/financial/orders"] });
       setDialogOpen(false);
       setSelectedOrder(null);
       form.reset();
+      
+      // Enhanced success message based on action and wallet impact
+      let description = "سفارش با موفقیت پردازش شد";
+      
+      if (variables.action === "approve" && selectedOrder?.financialNotes?.includes('مبلغ اضافی')) {
+        const match = selectedOrder.financialNotes.match(/مبلغ اضافی ([\d,]+) دینار/);
+        if (match) {
+          const excessAmount = match[1];
+          description = `سفارش تایید شد و مبلغ اضافی ${excessAmount} دینار به کیف پول مشتری اضافه شد`;
+        }
+      } else if (variables.action === "approve") {
+        description = "سفارش تایید شد و به بخش انبار ارسال شد";
+      } else {
+        description = "سفارش رد شد و مشتری اطلاع‌رسانی شد";
+      }
+      
       toast({
-        title: "موفق",
-        description: "سفارش با موفقیت پردازش شد",
+        title: variables.action === "approve" ? "تایید موفق" : "رد موفق",
+        description: description,
       });
     },
     onError: (error) => {
@@ -459,6 +475,45 @@ export default function FinancialDepartment() {
                           : selectedOrder.totalAmount
                         } {selectedOrder.currency || 'IQD'}
                       </span>
+                    </div>
+                  )}
+                  
+                  {/* Wallet Impact Analysis */}
+                  {selectedOrder.financialNotes && selectedOrder.financialNotes.includes('مبلغ اضافی') && (
+                    <div className="col-span-2 mt-2 p-3 bg-orange-50 rounded-lg border border-orange-200">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Wallet className="w-4 h-4 text-orange-600" />
+                        <span className="text-sm font-medium text-orange-800">تأثیر بر کیف پول مشتری</span>
+                      </div>
+                      <div className="text-xs text-orange-700">
+                        {(() => {
+                          const match = selectedOrder.financialNotes?.match(/مبلغ اضافی ([\d,]+) دینار/);
+                          if (match) {
+                            const excessAmount = match[1];
+                            return (
+                              <div className="space-y-1">
+                                <p>💰 <strong>مبلغ اضافی واریزی:</strong> {excessAmount} دینار</p>
+                                <p>✅ <strong>تأیید سفارش:</strong> مبلغ اضافی به کیف پول مشتری اضافه می‌شود</p>
+                                <p>❌ <strong>رد سفارش:</strong> مبلغ اضافی به کیف پول اضافه نمی‌شود</p>
+                              </div>
+                            );
+                          }
+                          return <p>این سفارش دارای مبلغ اضافی برای اضافه شدن به کیف پول است</p>;
+                        })()}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Regular wallet impact when no excess */}
+                  {(!selectedOrder.financialNotes || !selectedOrder.financialNotes.includes('مبلغ اضافی')) && (
+                    <div className="col-span-2 mt-2 p-3 bg-green-50 rounded-lg border border-green-200">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Wallet className="w-4 h-4 text-green-600" />
+                        <span className="text-sm font-medium text-green-800">تأثیر بر کیف پول مشتری</span>
+                      </div>
+                      <p className="text-xs text-green-700">
+                        ✅ <strong>تأیید سفارش:</strong> هیچ تغییری در کیف پول مشتری اعمال نمی‌شود (پرداخت دقیق)
+                      </p>
                     </div>
                   )}
                   <div>

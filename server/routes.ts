@@ -28731,6 +28731,52 @@ momtazchem.com
         })
         .where(eq(orderManagement.customerOrderId, customerOrderId));
 
+      // Check for excess payment and credit to wallet if order is approved
+      const [orderWithNotes] = await db
+        .select({ financialNotes: orderManagement.financialNotes })
+        .from(orderManagement)
+        .where(eq(orderManagement.customerOrderId, customerOrderId));
+
+      if (orderWithNotes?.financialNotes && orderWithNotes.financialNotes.includes('مبلغ اضافی')) {
+        const match = orderWithNotes.financialNotes.match(/مبلغ اضافی ([\d,]+) دینار/);
+        if (match) {
+          const excessAmountStr = match[1];
+          const excessAmount = parseFloat(excessAmountStr.replace(/,/g, ''));
+          
+          console.log(`💰 [WALLET CREDIT] Processing excess amount: ${excessAmount} IQD for customer order ${customerOrderId}`);
+          
+          // Get customer ID from order
+          const [orderData] = await db
+            .select({ customerId: customerOrders.customerId })
+            .from(customerOrders)
+            .where(eq(customerOrders.id, customerOrderId));
+
+          if (orderData) {
+            try {
+              const { customerStorage } = await import("./customer-storage");
+              
+              // Add excess amount to customer wallet
+              await customerStorage.addWalletBalance(orderData.customerId, excessAmount, 
+                `اضافه مبلغ واریزی سفارش ${customerInfo?.orderNumber || customerOrderId} پس از تایید واحد مالی`);
+              
+              console.log(`✅ [WALLET CREDIT] Successfully added ${excessAmount} IQD to customer ${orderData.customerId} wallet`);
+              
+              // Update financial notes to indicate wallet credit completed
+              const updatedNotes = `${orderWithNotes.financialNotes} - مبلغ اضافی ${excessAmountStr} دینار به کیف پول مشتری اضافه شد`;
+              
+              await db
+                .update(orderManagement)
+                .set({ financialNotes: updatedNotes })
+                .where(eq(orderManagement.customerOrderId, customerOrderId));
+              
+            } catch (walletError) {
+              console.error(`❌ [WALLET CREDIT] Error adding to wallet:`, walletError);
+              // Don't fail the approval, just log the error
+            }
+          }
+        }
+      }
+
       // Add status history
       await db.insert(orderStatusHistory).values({
         orderManagementId: orderMgmt.id, // Use correct order management ID
