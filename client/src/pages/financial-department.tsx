@@ -183,8 +183,18 @@ export default function FinancialDepartment() {
   const handleProcessOrder = (values: { notes: string; action: "approve" | "reject" }) => {
     if (!selectedOrder) return;
     
+    // Validate rejection reason is provided for reject action
+    if (values.action === "reject" && (!values.notes || values.notes.trim() === "")) {
+      toast({
+        title: "خطا",
+        description: "برای رد پرداخت، ذکر دلیل اجباری است",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     processOrderMutation.mutate({
-      orderId: selectedOrder.id,
+      orderId: selectedOrder.customerOrderId,
       action: values.action,
       notes: values.notes
     });
@@ -582,14 +592,29 @@ export default function FinancialDepartment() {
                   name="notes"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>یادداشت (اختیاری)</FormLabel>
+                      <FormLabel>
+                        {form.watch("action") === "reject" 
+                          ? "دلیل رد پرداخت (اجباری - مشتری این متن را خواهد دید)" 
+                          : "یادداشت تایید (اختیاری)"
+                        }
+                      </FormLabel>
                       <FormControl>
                         <Textarea
                           {...field}
-                          placeholder="دلیل تایید یا رد پرداخت را بنویسید..."
+                          placeholder={
+                            form.watch("action") === "reject"
+                              ? "مثال: فیش پرداخت نامشخص است، مبلغ واریزی کمتر از مبلغ سفارش است، اطلاعات بانکی صحیح نیست..."
+                              : "یادداشت اضافی درباره تایید پرداخت..."
+                          }
                           rows={4}
+                          className={form.watch("action") === "reject" ? "border-red-300 focus:border-red-500" : ""}
                         />
                       </FormControl>
+                      {form.watch("action") === "reject" && (
+                        <div className="text-xs text-red-600 mt-1">
+                          ⚠️ این متن به عنوان دلیل رد سفارش به مشتری نمایش داده خواهد شد
+                        </div>
+                      )}
                     </FormItem>
                   )}
                 />

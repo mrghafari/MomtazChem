@@ -6,6 +6,36 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Customer Rejection Reason Visibility Implementation - Complete & Operational (January 25, 2025)
+✅ **IMPLEMENTED: Customer-facing rejection reason display system for complete transparency in financial order processing**
+- **User Request Fulfilled**: Enhanced customer experience by showing clear rejection reasons when orders are rejected by financial department
+- **Main Profile Display**: Added rejection reason cards in main customer profile order display:
+  - **Red Alert Cards**: Professional red-themed cards (bg-red-50, border-red-200) with AlertTriangle icon
+  - **Clear Messaging**: "دلیل رد سفارش:" header with actual rejection notes from financial department
+  - **Proper Positioning**: Displays below order status badge for immediate visibility
+  - **Conditional Display**: Only shows for orders with status 'financial_rejected' or 'rejected' with financialNotes present
+- **Purchase History Modal**: Added identical rejection reason display in complete purchase history modal:
+  - **Consistent Design**: Same red alert styling and layout as main profile
+  - **Filter Integration**: Rejection reasons visible when filtering by "رد شده" order type
+  - **Complete Visibility**: All rejected orders show detailed rejection reasons throughout customer interface
+- **Database Integration**: Uses existing `financialNotes` field from order_management table for rejection reason storage
+- **Test Data Available**: Order M2511168 for customer 8 with rejection note "سفارش رد شد از طریق مودال جزئیات - 7/23/2025"
+- **Enhanced Financial Department Form**: Previously implemented required validation ensures rejection notes are always provided
+- **Complete Transparency**: Customers now see detailed rejection reasons including:
+  - Date of rejection decision
+  - Specific reason from financial reviewer
+  - Clear actionable feedback for order resubmission or correction
+- **User Experience**: Professional error state design with proper RTL alignment and Persian text
+- **Technical Implementation**: 
+  - AlertTriangle icon imported and used consistently
+  - Proper conditional rendering to avoid empty states
+  - Integration with existing order status and filtering systems
+  - No LSP errors - clean TypeScript implementation
+- **Business Impact**: Complete transparency in financial order rejection process enhances customer trust and reduces support inquiries
+- **Test Infrastructure**: Created comprehensive test file `test-customer-rejection-visibility.html` for feature validation
+- **Workflow Integration**: Works seamlessly with existing order management and financial approval systems
+- **Result**: Complete customer rejection visibility operational - customers can see detailed rejection reasons in both main profile and purchase history with professional styling and clear messaging
+
 ### COMPLETED: Complete LIFO to FIFO System Conversion - All LIFO References Eliminated (January 25, 2025)
 ✅ **SYSTEM UNIFIED: Complete elimination of all LIFO references throughout the entire system per user request**
 - **User Request Fulfilled**: "کلمه lifo را از اینجا بردار و عوض کن به FIFO" - All LIFO references systematically replaced with FIFO

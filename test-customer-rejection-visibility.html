@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست نمایش دلیل رد سفارش برای مشتریان</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            direction: rtl;
+            text-align: right;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            border-color: #bee5eb;
+        }
+        .code {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            border: 1px solid #e9ecef;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 تست نمایش دلیل رد سفارش برای مشتریان</h1>
+    <p><strong>تاریخ تست:</strong> 25 ژانویه 2025</p>
+    
+    <div class="test-section success">
+        <h2>✅ اطلاعات تست</h2>
+        <ul>
+            <li><strong>سفارش تست:</strong> M2511168</li>
+            <li><strong>مشتری:</strong> Customer ID 8 (oilstar@hotmail.com)</li>
+            <li><strong>وضعیت:</strong> financial_rejected</li>
+            <li><strong>دلیل رد:</strong> "سفارش رد شد از طریق مودال جزئیات - 7/23/2025"</li>
+        </ul>
+    </div>
+
+    <div class="test-section info">
+        <h2>📋 راهنمای تست</h2>
+        <h3>قدم‌های تست:</h3>
+        <ol>
+            <li>ورود به سیستم با حساب مشتری 8:
+                <div class="code">
+                Email: oilstar@hotmail.com<br>
+                Password: user123
+                </div>
+            </li>
+            <li>رفتن به صفحه پروفایل مشتری (<code>/customer-profile</code>)</li>
+            <li>بررسی نمایش سفارش M2511168 در لیست سفارشات اصلی</li>
+            <li>بررسی نمایش دلیل رد در کادر قرمز زیر Badge وضعیت</li>
+            <li>باز کردن "مشاهده سابقه خرید کامل" و بررسی نمایش دلیل رد در آنجا</li>
+        </ol>
+    </div>
+
+    <div class="test-section info">
+        <h2>🎯 نتایج مورد انتظار</h2>
+        <h3>در صفحه اصلی پروفایل:</h3>
+        <ul>
+            <li>سفارش M2511168 با Badge قرمز "رد شده توسط بخش مالی" نمایش داده شود</li>
+            <li>زیر Badge، کادر قرمز با آیکون ⚠️ و متن "دلیل رد سفارش:" نمایش داده شود</li>
+            <li>متن دلیل رد: "سفارش رد شد از طریق مودال جزئیات - 7/23/2025" نمایش داده شود</li>
+        </ul>
+        
+        <h3>در سابقه خرید کامل:</h3>
+        <ul>
+            <li>همان کادر قرمز دلیل رد در modal نیز نمایش داده شود</li>
+            <li>فیلتر "رد شده" سفارش M2511168 را نمایش دهد</li>
+        </ul>
+    </div>
+
+    <div class="test-section info">
+        <h2>💻 جزئیات فنی Implementation</h2>
+        <h3>تغییرات اعمال شده:</h3>
+        <ul>
+            <li><strong>فایل:</strong> client/src/pages/customer-profile.tsx</li>
+            <li><strong>خط 804-815:</strong> اضافه شدن نمایش دلیل رد در صفحه اصلی</li>
+            <li><strong>خط 1181-1192:</strong> اضافه شدن نمایش دلیل رد در سابقه خرید</li>
+        </ul>
+        
+        <h3>شرایط نمایش:</h3>
+        <div class="code">
+(order.status === 'financial_rejected' || order.status === 'rejected') && order.financialNotes
+        </div>
+        
+        <h3>طراحی کادر رد:</h3>
+        <ul>
+            <li>Background: bg-red-50</li>
+            <li>Border: border-red-200</li>
+            <li>آیکون: AlertTriangle (⚠️) با رنگ قرمز</li>
+            <li>عنوان: "دلیل رد سفارش:" با فونت bold</li>
+            <li>متن دلیل با رنگ text-red-700</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h2>🔍 تست‌های اضافی</h2>
+        <h3>تست‌های مرتبط:</h3>
+        <ul>
+            <li>بررسی عدم نمایش کادر رد برای سفارشات با وضعیت‌های دیگر</li>
+            <li>بررسی عدم نمایش کادر رد برای سفارشات بدون financialNotes</li>
+            <li>تست فیلتر "رد شده" در سابقه خرید</li>
+            <li>تست نمایش در responsive design</li>
+        </ul>
+    </div>
+
+    <div class="test-section success">
+        <h2>✅ نتیجه</h2>
+        <p>پس از تست موفق، مشتریان می‌توانند:</p>
+        <ul>
+            <li>دلیل رد سفارشات خود را در پروفایل ببینند</li>
+            <li>در صورت رد سفارش، دلیل واضح و شفاف ارائه شود</li>
+            <li>شفافیت کامل در فرآیند بررسی مالی داشته باشند</li>
+            <li>بتوانند بر اساس دلیل رد، اقدامات لازم را انجام دهند</li>
+        </ul>
+        
+        <p><strong>✅ Feature completed:</strong> Customer rejection reason visibility implemented successfully</p>
+    </div>
+
+    <div class="test-section">
+        <h2>📞 دسترسی سریع برای تست</h2>
+        <p><strong>لینک ورود مشتری:</strong> <a href="/customer-login">/customer-login</a></p>
+        <p><strong>لینک پروفایل:</strong> <a href="/customer-profile">/customer-profile</a></p>
+        <p><strong>شماره سفارش تست:</strong> M2511168</p>
+    </div>
+
+</body>
+</html>

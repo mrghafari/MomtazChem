@@ -797,6 +797,19 @@ const CustomerProfile = () => {
                             <Badge className={getStatusColor(order.status, order.paymentStatus)}>
                               {getStatusLabel(order.status, order.paymentStatus)}
                             </Badge>
+                            
+                            {/* نمایش دلیل رد سفارش از بخش مالی */}
+                            {(order.status === 'financial_rejected' || order.status === 'rejected') && order.financialNotes && (
+                              <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                                <div className="flex items-start gap-2">
+                                  <AlertTriangle className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" />
+                                  <div>
+                                    <h6 className="text-sm font-medium text-red-800 mb-1">دلیل رد سفارش:</h6>
+                                    <p className="text-sm text-red-700">{order.financialNotes}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </div>
                         
@@ -1161,6 +1174,19 @@ const CustomerProfile = () => {
                       </Badge>
                     </div>
                   </div>
+
+                  {/* نمایش دلیل رد سفارش در سابقه خرید */}
+                  {(order.status === 'financial_rejected' || order.status === 'rejected') && order.financialNotes && (
+                    <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                      <div className="flex items-start gap-2">
+                        <AlertTriangle className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <h6 className="text-sm font-medium text-red-800 mb-1">دلیل رد سفارش:</h6>
+                          <p className="text-sm text-red-700">{order.financialNotes}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Order Items Preview */}
                   {order.items && order.items.length > 0 && (

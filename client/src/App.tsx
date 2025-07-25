@@ -182,6 +182,7 @@ function Router() {
           <Route path="/customer/register" component={CustomerRegister} />
           <Route path="/crm" component={CRMPage} />
           <Route path="/customer/profile" component={CustomerProfile} />
+          <Route path="/customer-profile" component={CustomerProfile} />
           <Route path="/customer/profile/edit" component={CustomerProfileEdit} />
           <Route path="/customer-profile-edit" component={CustomerProfileEdit} />
           <Route path="/customer/wallet" component={CustomerWallet} />
