@@ -264,6 +264,11 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
   - **Error Handling**: Clear messages for missing orders or loading issues
   - **Payment Guidance**: Blue information card explaining overpayment/underpayment scenarios
   - **Financial Process Clarity**: Green information card explaining "مبلغ اضافه واریزی فیش بانکی پس از اینکه فیش توسط واحد مالی تایید شد به والت مشتری اضافه خواهد شد"
+- **Financial Approval Workflow Implementation**: Changed overpayment logic to require financial department approval:
+  - **Backend Algorithm**: Excess amounts NO LONGER automatically credited to wallet upon receipt upload
+  - **Pending Status**: Overpayments marked as "در انتظار تایید واحد مالی" in order notes and system logs
+  - **Frontend Messaging**: Changed from immediate credit notification to "پس از تایید واحد مالی به والت شما اضافه خواهد شد"
+  - **Business Process**: Excess amounts require manual financial department approval before wallet crediting
 - **Technical Fixes**: 
   - **LSP Errors**: Fixed apiRequest method calls to include required `method: 'GET'` parameter
   - **Route Registration**: `/customer/bank-receipt-upload/:orderId` now properly registered in router

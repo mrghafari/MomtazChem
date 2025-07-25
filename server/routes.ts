@@ -25641,17 +25641,12 @@ momtazchem.com
           console.log(`⚠️ [WALLET] Insufficient funds for customer ${order.customerId}: Receipt ${amount}, Order ${orderAmount}, Wallet ${walletBalance}, Deficit ${deficit}`);
         }
       } else if (amount > orderAmount) {
-        // مبلغ اضافی به والت اضافه می‌شود
+        // مبلغ اضافی پس از تایید مالی به والت اضافه خواهد شد
         walletCredit = amount - orderAmount;
-        amountStatus = `مبلغ اضافی ${walletCredit.toLocaleString()} دینار به والت شما اضافه شد`;
+        amountStatus = `مبلغ اضافی ${walletCredit.toLocaleString()} دینار پس از تایید واحد مالی به والت شما اضافه خواهد شد`;
         
-        // اضافه کردن مبلغ اضافی به والت مشتری
-        try {
-          await customerStorage.addWalletBalance(order.customerId, walletCredit);
-          console.log(`✅ [WALLET] Added ${walletCredit} to customer ${order.customerId} wallet from excess receipt amount`);
-        } catch (error) {
-          console.error('Warning: Could not add excess amount to wallet:', error);
-        }
+        // عدم اضافه کردن فوری مبلغ اضافی به والت - باید منتظر تایید مالی باشیم
+        console.log(`📋 [PENDING] Excess amount ${walletCredit} for customer ${order.customerId} pending financial approval`);
       } else {
         amountStatus = 'مبلغ فیش دقیقاً برابر با بدهی شما است';
       }
@@ -25660,7 +25655,7 @@ momtazchem.com
       const filePath = `/uploads/receipts/${file.filename}`;
 
       // به‌روزرسانی سفارش با مسیر فیش بانکی و مبلغ فیش
-      const uploadNote = `فیش بانکی آپلود شد در ${new Date().toLocaleString('fa-IR')} | مبلغ فیش: ${amount.toLocaleString()} دینار | مبلغ سفارش: ${orderAmount.toLocaleString()} دینار${walletCredit > 0 ? ` | مبلغ اضافی ${walletCredit.toLocaleString()} دینار به والت اضافه شد` : ''}${walletDeduction > 0 ? ` | کمبود ${walletDeduction.toLocaleString()} دینار از والت کسر شد` : ''}${notes ? ` | توضیحات: ${notes}` : ''}`;
+      const uploadNote = `فیش بانکی آپلود شد در ${new Date().toLocaleString('fa-IR')} | مبلغ فیش: ${amount.toLocaleString()} دینار | مبلغ سفارش: ${orderAmount.toLocaleString()} دینار${walletCredit > 0 ? ` | مبلغ اضافی ${walletCredit.toLocaleString()} دینار در انتظار تایید واحد مالی` : ''}${walletDeduction > 0 ? ` | کمبود ${walletDeduction.toLocaleString()} دینار از والت کسر شد` : ''}${notes ? ` | توضیحات: ${notes}` : ''}`;
       const updatedNotes = order.notes ? `${order.notes} | ${uploadNote}` : uploadNote;
       
       await customerDb

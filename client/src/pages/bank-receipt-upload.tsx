@@ -467,8 +467,8 @@ export default function BankReceiptUpload() {
                         )}
                       </div>
                     ) : parseInt(receiptAmount) > parseFloat(order.totalAmount) ? (
-                      <p className="text-sm text-green-600">
-                        ✅ مبلغ اضافی {(parseInt(receiptAmount) - parseFloat(order.totalAmount)).toLocaleString()} دینار به والت شما اضافه خواهد شد
+                      <p className="text-sm text-blue-600">
+                        ⏰ مبلغ اضافی {(parseInt(receiptAmount) - parseFloat(order.totalAmount)).toLocaleString()} دینار پس از تایید واحد مالی به والت شما اضافه خواهد شد
                       </p>
                     ) : (
                       <p className="text-sm text-green-600">
