@@ -186,6 +186,7 @@ function Router() {
           <Route path="/customer-profile-edit" component={CustomerProfileEdit} />
           <Route path="/customer/wallet" component={CustomerWallet} />
           <Route path="/customer/bank-receipt-upload" component={BankReceiptUpload} />
+          <Route path="/customer/bank-receipt-upload/:orderId" component={BankReceiptUpload} />
           <Route path="/category-management" component={CategoryManagement} />
           <Route path="/seo-management" component={SeoManagement} />
           <Route path="/admin/sms-management" component={AdminSmsManagement} />
