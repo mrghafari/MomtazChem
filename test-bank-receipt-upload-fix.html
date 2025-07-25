@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست آپلود فیش بانکی - رفع مشکل</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f7fafc;
+            margin: 0;
+            padding: 20px;
+            direction: rtl;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        h1 {
+            color: #2b6cb0;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            border-right: 4px solid #3182ce;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #2d3748;
+        }
+        input[type="text"], input[type="number"], input[type="file"], textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+            direction: rtl;
+        }
+        input[type="file"] {
+            direction: ltr;
+        }
+        button {
+            background: #3182ce;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #2c5aa0;
+        }
+        button:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+        }
+        .result {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+        .success {
+            background: #c6f6d5;
+            color: #276749;
+            border: 1px solid #9ae6b4;
+        }
+        .error {
+            background: #fed7d7;
+            color: #c53030;
+            border: 1px solid #feb2b2;
+        }
+        .info {
+            background: #bee3f8;
+            color: #2a69ac;
+            border: 1px solid #90cdf4;
+        }
+        .customer-info {
+            background: #e6fffa;
+            border: 1px solid #81e6d9;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+        }
+        .progress {
+            width: 100%;
+            height: 20px;
+            background-color: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: #3182ce;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 تست آپلود فیش بانکی - رفع مشکل</h1>
+        <p class="subtitle">تست عملکرد سیستم آپلود فیش بانکی بعد از رفع مشکل</p>
+
+        <div class="customer-info">
+            <h3>📋 اطلاعات کاربر برای تست</h3>
+            <p><strong>شناسه کاربر:</strong> Customer 8 (ABAS ABASI)</p>
+            <p><strong>ایمیل:</strong> oilstar@hotmail.com</p>
+            <p><strong>رمز عبور:</strong> user123</p>
+            <p><strong>موجودی والت:</strong> 469,000 دینار عراقی</p>
+        </div>
+
+        <div class="test-section">
+            <h3>🔧 مرحله 1: بررسی وضعیت سرور</h3>
+            <button onclick="checkServerStatus()">بررسی وضعیت سرور</button>
+            <div id="serverStatus"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔐 مرحله 2: ورود کاربر</h3>
+            <div class="form-group">
+                <label for="loginEmail">ایمیل:</label>
+                <input type="text" id="loginEmail" value="oilstar@hotmail.com">
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">رمز عبور:</label>
+                <input type="text" id="loginPassword" value="user123">
+            </div>
+            <button onclick="loginCustomer()">ورود کاربر</button>
+            <div id="loginResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📦 مرحله 3: انتخاب سفارش</h3>
+            <div class="form-group">
+                <label for="orderSelect">سفارش:</label>
+                <select id="orderSelect">
+                    <option value="">انتخاب سفارش...</option>
+                </select>
+            </div>
+            <button onclick="getCustomerOrders()">دریافت سفارشات</button>
+            <div id="ordersResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📄 مرحله 4: آپلود فیش بانکی</h3>
+            <div class="form-group">
+                <label for="receiptAmount">مبلغ فیش (دینار عراقی):</label>
+                <input type="number" id="receiptAmount" placeholder="مبلغ واریزی">
+            </div>
+            <div class="form-group">
+                <label for="receiptFile">فایل فیش:</label>
+                <input type="file" id="receiptFile" accept=".jpg,.jpeg,.png,.pdf">
+            </div>
+            <div class="form-group">
+                <label for="receiptNotes">توضیحات (اختیاری):</label>
+                <textarea id="receiptNotes" rows="3" placeholder="توضیحات اضافی"></textarea>
+            </div>
+            <div class="progress" id="uploadProgress" style="display: none;">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <button onclick="uploadReceipt()" id="uploadButton">آپلود فیش بانکی</button>
+            <div id="uploadResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 نتایج تست</h3>
+            <div id="allResults"></div>
+            <button onclick="clearResults()">پاک کردن نتایج</button>
+        </div>
+    </div>
+
+    <script>
+        let currentCustomer = null;
+        let selectedOrder = null;
+
+        function addResult(message, type = 'info') {
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `result ${type}`;
+            resultDiv.textContent = message;
+            document.getElementById('allResults').appendChild(resultDiv);
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        async function checkServerStatus() {
+            const statusDiv = document.getElementById('serverStatus');
+            statusDiv.innerHTML = '<div class="result info">در حال بررسی وضعیت سرور...</div>';
+            
+            try {
+                const response = await fetch('/api/customers/me', {
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    statusDiv.innerHTML = '<div class="result success">✅ سرور در حال اجرا است</div>';
+                    addResult('✅ سرور در حال اجرا است', 'success');
+                } else {
+                    statusDiv.innerHTML = `<div class="result error">❌ مشکل در سرور (کد: ${response.status})</div>`;
+                    addResult(`❌ مشکل در سرور (کد: ${response.status})`, 'error');
+                }
+            } catch (error) {
+                statusDiv.innerHTML = '<div class="result error">❌ عدم دسترسی به سرور</div>';
+                addResult(`❌ عدم دسترسی به سرور: ${error.message}`, 'error');
+            }
+        }
+
+        async function loginCustomer() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const resultDiv = document.getElementById('loginResult');
+            
+            if (!email || !password) {
+                resultDiv.innerHTML = '<div class="result error">لطفاً ایمیل و رمز عبور را وارد کنید</div>';
+                return;
+            }
+
+            resultDiv.innerHTML = '<div class="result info">در حال ورود...</div>';
+            
+            try {
+                const response = await fetch('/api/customers/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ email, password })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    currentCustomer = result.customer;
+                    resultDiv.innerHTML = '<div class="result success">✅ ورود موفق</div>';
+                    addResult(`✅ ورود موفق - کاربر: ${currentCustomer?.firstName} ${currentCustomer?.lastName}`, 'success');
+                } else {
+                    resultDiv.innerHTML = `<div class="result error">❌ خطا در ورود: ${result.message}</div>`;
+                    addResult(`❌ خطا در ورود: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="result error">❌ خطا در ارسال درخواست: ${error.message}</div>`;
+                addResult(`❌ خطا در ارسال درخواست: ${error.message}`, 'error');
+            }
+        }
+
+        async function getCustomerOrders() {
+            if (!currentCustomer) {
+                document.getElementById('ordersResult').innerHTML = '<div class="result error">ابتدا وارد شوید</div>';
+                return;
+            }
+
+            const resultDiv = document.getElementById('ordersResult');
+            resultDiv.innerHTML = '<div class="result info">در حال دریافت سفارشات...</div>';
+            
+            try {
+                const response = await fetch('/api/customers/orders', {
+                    credentials: 'include'
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    const orders = result.orders.filter(order => 
+                        order.paymentMethod === 'bank_transfer_grace' || 
+                        order.paymentMethod === 'واریز بانکی با مهلت 3 روزه'
+                    );
+                    
+                    const orderSelect = document.getElementById('orderSelect');
+                    orderSelect.innerHTML = '<option value="">انتخاب سفارش...</option>';
+                    
+                    orders.forEach(order => {
+                        const option = document.createElement('option');
+                        option.value = JSON.stringify(order);
+                        option.textContent = `${order.orderNumber} - ${parseFloat(order.totalAmount).toLocaleString()} دینار`;
+                        orderSelect.appendChild(option);
+                    });
+
+                    orderSelect.addEventListener('change', function() {
+                        if (this.value) {
+                            selectedOrder = JSON.parse(this.value);
+                            document.getElementById('receiptAmount').value = selectedOrder.totalAmount;
+                            addResult(`✅ سفارش انتخاب شد: ${selectedOrder.orderNumber} - مبلغ: ${parseFloat(selectedOrder.totalAmount).toLocaleString()} دینار`, 'info');
+                        }
+                    });
+
+                    resultDiv.innerHTML = `<div class="result success">✅ ${orders.length} سفارش با مهلت 3 روزه یافت شد</div>`;
+                    addResult(`✅ ${orders.length} سفارش با مهلت 3 روزه یافت شد`, 'success');
+                } else {
+                    resultDiv.innerHTML = `<div class="result error">❌ خطا در دریافت سفارشات: ${result.message}</div>`;
+                    addResult(`❌ خطا در دریافت سفارشات: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="result error">❌ خطا در ارسال درخواست: ${error.message}</div>`;
+                addResult(`❌ خطا در ارسال درخواست: ${error.message}`, 'error');
+            }
+        }
+
+        async function uploadReceipt() {
+            if (!selectedOrder) {
+                document.getElementById('uploadResult').innerHTML = '<div class="result error">ابتدا سفارش را انتخاب کنید</div>';
+                return;
+            }
+
+            const receiptAmount = document.getElementById('receiptAmount').value;
+            const receiptFile = document.getElementById('receiptFile').files[0];
+            const receiptNotes = document.getElementById('receiptNotes').value;
+            
+            if (!receiptAmount || !receiptFile) {
+                document.getElementById('uploadResult').innerHTML = '<div class="result error">لطفاً مبلغ فیش و فایل را انتخاب کنید</div>';
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('receipt', receiptFile);
+            formData.append('orderId', selectedOrder.orderNumber);
+            formData.append('receiptAmount', receiptAmount);
+            if (receiptNotes) {
+                formData.append('notes', receiptNotes);
+            }
+
+            const resultDiv = document.getElementById('uploadResult');
+            const progressDiv = document.getElementById('uploadProgress');
+            const progressBar = document.getElementById('progressBar');
+            const uploadButton = document.getElementById('uploadButton');
+            
+            resultDiv.innerHTML = '<div class="result info">در حال آپلود فیش...</div>';
+            progressDiv.style.display = 'block';
+            uploadButton.disabled = true;
+            
+            try {
+                const xhr = new XMLHttpRequest();
+                
+                xhr.upload.addEventListener('progress', (e) => {
+                    if (e.lengthComputable) {
+                        const percentComplete = (e.loaded / e.total) * 100;
+                        progressBar.style.width = percentComplete + '%';
+                    }
+                });
+
+                xhr.addEventListener('load', () => {
+                    progressDiv.style.display = 'none';
+                    uploadButton.disabled = false;
+                    
+                    if (xhr.status === 200) {
+                        const result = JSON.parse(xhr.responseText);
+                        if (result.success) {
+                            resultDiv.innerHTML = `<div class="result success">✅ آپلود موفق: ${result.message}</div>`;
+                            addResult(`✅ آپلود موفق: فیش برای سفارش ${selectedOrder.orderNumber} با مبلغ ${parseFloat(receiptAmount).toLocaleString()} دینار آپلود شد`, 'success');
+                            
+                            if (result.data) {
+                                const details = result.data;
+                                addResult(`📊 جزئیات: مبلغ فیش=${details.receiptAmount?.toLocaleString() || receiptAmount}, اضافی والت=${details.walletCredit || 0}, کسر والت=${details.walletDeduction || 0}`, 'info');
+                            }
+                        } else {
+                            resultDiv.innerHTML = `<div class="result error">❌ خطا: ${result.message}</div>`;
+                            addResult(`❌ خطا در آپلود: ${result.message}`, 'error');
+                        }
+                    } else {
+                        resultDiv.innerHTML = `<div class="result error">❌ خطای سرور (کد: ${xhr.status})</div>`;
+                        addResult(`❌ خطای سرور (کد: ${xhr.status})`, 'error');
+                    }
+                });
+
+                xhr.addEventListener('error', () => {
+                    progressDiv.style.display = 'none';
+                    uploadButton.disabled = false;
+                    resultDiv.innerHTML = '<div class="result error">❌ خطا در آپلود فایل</div>';
+                    addResult('❌ خطا در آپلود فایل', 'error');
+                });
+
+                xhr.open('POST', '/api/payment/upload-receipt');
+                xhr.send(formData);
+                
+            } catch (error) {
+                progressDiv.style.display = 'none';
+                uploadButton.disabled = false;
+                resultDiv.innerHTML = `<div class="result error">❌ خطا: ${error.message}</div>`;
+                addResult(`❌ خطا در آپلود: ${error.message}`, 'error');
+            }
+        }
+
+        function clearResults() {
+            document.getElementById('allResults').innerHTML = '';
+        }
+
+        // بررسی وضعیت سرور هنگام بارگذاری صفحه
+        window.addEventListener('load', checkServerStatus);
+    </script>
+</body>
+</html>
