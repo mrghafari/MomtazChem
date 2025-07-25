@@ -1,20 +1,18 @@
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Calendar, Package2, Clock, ArrowRight, TrendingUp, Layers } from "lucide-react";
-// Import { Skeleton } from "@/components/ui/skeleton";
+import { Calendar, Package2, Clock, ArrowLeft, TrendingUp, Layers, Sparkles } from "lucide-react";
 
 interface FIFOBatchDisplayProps {
   productName: string;
   className?: string;
   showDetails?: boolean;
+  compact?: boolean;
 }
 
 interface BatchInfo {
-  totalStock: number;
+  totalStock: string;
   batchCount: number;
   oldestBatch: any;
   newestBatch: any;
@@ -22,17 +20,21 @@ interface BatchInfo {
   allBatches: any[];
 }
 
-export function FIFOBatchDisplay({ productName, className = "", showDetails = false }: FIFOBatchDisplayProps) {
-  const [showBatchDialog, setShowBatchDialog] = useState(false);
-
-  // Fetch FIFO batch information
+export default function FIFOBatchDisplay({ 
+  productName, 
+  className = "", 
+  showDetails = false,
+  compact = false 
+}: FIFOBatchDisplayProps) {
+  
+  // Fetch FIFO batch data
   const { data: batchData, isLoading, error } = useQuery({
-    queryKey: [`/api/products/${encodeURIComponent(productName)}/batches/fifo`],
+    queryKey: [`/api/products/${encodeURIComponent(productName)}/batches/display`],
     enabled: !!productName
   });
 
   const batchInfo: BatchInfo = (batchData as any)?.data || {
-    totalStock: 0,
+    totalStock: "0",
     batchCount: 0,
     oldestBatch: null,
     newestBatch: null,
@@ -40,9 +42,8 @@ export function FIFOBatchDisplay({ productName, className = "", showDetails = fa
     allBatches: []
   };
 
-  // Format date for display
+  // Format date for Persian display
   const formatDate = (dateString: string) => {
-    if (!dateString) return 'تاریخ نامشخص';
     const date = new Date(dateString);
     return date.toLocaleDateString('fa-IR');
   };
@@ -52,189 +53,187 @@ export function FIFOBatchDisplay({ productName, className = "", showDetails = fa
     return (
       <div className={`space-y-2 ${className}`}>
         <div className="animate-pulse">
-          <div className="h-4 bg-gray-200 rounded w-24 mb-2"></div>
-          <div className="h-3 bg-gray-200 rounded w-32 mb-1"></div>
-          <div className="h-3 bg-gray-200 rounded w-28"></div>
+          <div className="h-4 bg-green-200 rounded w-24 mb-2"></div>
+          <div className="h-3 bg-green-200 rounded w-32 mb-1"></div>
+          <div className="h-3 bg-green-200 rounded w-28"></div>
         </div>
       </div>
     );
   }
 
   // Error state
-  if (error || !batchInfo) {
+  if (error || !batchInfo.oldestBatch) {
     return (
       <div className={`text-sm text-gray-500 ${className}`}>
-        <div className="flex items-center gap-1">
-          <Package2 className="w-4 h-4" />
-          <span>اطلاعات بچ در دسترس نیست</span>
-        </div>
+        <span>اطلاعات بچ در دسترس نیست</span>
       </div>
     );
   }
 
-  // No batches available
-  if (batchInfo.batchCount === 0) {
-    return (
-      <div className={`text-sm text-gray-500 ${className}`}>
-        <div className="flex items-center gap-1">
-          <Package2 className="w-4 h-4" />
-          <span>بدون بچ موجود</span>
-        </div>
-      </div>
-    );
-  }
+  const oldestBatch = batchInfo.nextToSell || batchInfo.oldestBatch;
 
-  return (
-    <div className={`space-y-2 ${className}`}>
-      {/* FIFO Summary */}
-      <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <Layers className="w-4 h-4 text-green-600" />
-            <span className="text-sm font-medium text-green-800">
-              فروش FIFO - {batchInfo.batchCount} بچ
-            </span>
-          </div>
-          <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300">
-            {batchInfo.totalStock} واحد
+  // Compact display
+  if (compact) {
+    return (
+      <div className={`text-sm ${className}`}>
+        <div className="flex items-center gap-2 text-green-700">
+          <Package2 className="h-3 w-3" />
+          <span className="font-medium">{oldestBatch.batchNumber}</span>
+          <Badge variant="outline" className="text-xs text-green-600 border-green-300">
+            {oldestBatch.stockQuantity} واحد
           </Badge>
         </div>
+        <div className="text-xs text-gray-500 mt-1">
+          اولین مورد برای فروش
+        </div>
+      </div>
+    );
+  }
 
-        {/* Next to sell batch */}
-        {batchInfo.nextToSell && (
-          <div className="bg-white rounded p-2 border border-green-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <TrendingUp className="w-3 h-3 text-green-600" />
-                  <span className="text-xs font-medium text-green-700">
-                    اولین مورد برای فروش
-                  </span>
-                </div>
-                <div className="text-sm font-medium text-gray-900">
-                  بچ: {batchInfo.nextToSell.batchNumber || 'بدون شماره'}
-                </div>
-                <div className="text-xs text-gray-600">
-                  موجودی: {batchInfo.nextToSell.stockQuantity} واحد
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="text-xs text-gray-500">
-                  تاریخ تولید
-                </div>
-                <div className="text-xs font-medium text-gray-700">
-                  {formatDate(batchInfo.nextToSell.createdAt)}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+  // Full display
+  return (
+    <div className={`border border-green-200 rounded-lg p-3 bg-green-50 ${className}`}>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <Layers className="h-4 w-4 text-green-600" />
+          <h4 className="font-semibold text-green-800">بچ اولویت فروش</h4>
+        </div>
+        <Badge className="bg-green-600 hover:bg-green-700">
+          FIFO
+        </Badge>
+      </div>
 
-        {/* Show all batches button */}
-        {batchInfo.batchCount > 1 && showDetails && (
-          <Dialog open={showBatchDialog} onOpenChange={setShowBatchDialog}>
+      {/* Oldest Batch Info */}
+      <div className="space-y-2 mb-4">
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-medium text-green-700">شماره بچ:</span>
+          <span className="text-sm font-bold text-green-800">{oldestBatch.batchNumber}</span>
+        </div>
+        
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-medium text-green-700">موجودی:</span>
+          <Badge variant="outline" className="text-green-600 border-green-300">
+            {oldestBatch.stockQuantity} واحد
+          </Badge>
+        </div>
+        
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-medium text-green-700">تاریخ تولید:</span>
+          <span className="text-sm text-green-600 flex items-center gap-1">
+            <Calendar className="h-3 w-3" />
+            {formatDate(oldestBatch.createdAt)}
+          </span>
+        </div>
+        
+        <div className="bg-green-100 p-2 rounded text-center">
+          <span className="text-xs font-medium text-green-700">
+            {oldestBatch.displayText || "اولین مورد برای فروش"}
+          </span>
+        </div>
+      </div>
+
+      {/* Statistics */}
+      <div className="grid grid-cols-2 gap-3 text-xs">
+        <div className="text-center">
+          <div className="font-semibold text-green-800">{batchInfo.batchCount}</div>
+          <div className="text-green-600">کل بچ‌ها</div>
+        </div>
+        <div className="text-center">
+          <div className="font-semibold text-green-800">{batchInfo.totalStock}</div>
+          <div className="text-green-600">کل موجودی</div>
+        </div>
+      </div>
+
+      {/* Details Dialog */}
+      {showDetails && (
+        <div className="mt-3 pt-3 border-t border-green-200">
+          <Dialog>
             <DialogTrigger asChild>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="w-full mt-2 bg-green-50 border-green-300 text-green-700 hover:bg-green-100"
-              >
-                مشاهده تمام بچ‌ها ({batchInfo.batchCount})
-                <ArrowRight className="w-3 h-3 mr-1" />
+              <Button variant="outline" size="sm" className="w-full text-green-700 border-green-300 hover:bg-green-100">
+                <Sparkles className="h-3 w-3 mr-2" />
+                مشاهده جزئیات همه بچ‌ها
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-2xl" dir="rtl">
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
-                  <Layers className="w-5 h-5 text-green-600" />
-                  بچ‌های محصول {productName}
-                  <Badge variant="outline" className="mr-auto">
-                    {batchInfo.batchCount} بچ موجود
-                  </Badge>
+                  <Package2 className="h-5 w-5 text-green-600" />
+                  جزئیات بچ‌های {productName}
                 </DialogTitle>
               </DialogHeader>
               
-              <div className="space-y-3 max-h-96 overflow-y-auto">
-                {batchInfo.allBatches.map((batch, index) => (
-                  <Card key={batch.id} className={`
-                    ${index === 0 ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}
-                  `}>
-                    <CardHeader className="pb-2">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-sm">
-                          بچ: {batch.batchNumber || 'بدون شماره'}
-                        </CardTitle>
+              <div className="space-y-4">
+                {/* Summary Stats */}
+                <div className="grid grid-cols-3 gap-4 p-4 bg-green-50 rounded-lg">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-green-800">{batchInfo.batchCount}</div>
+                    <div className="text-sm text-green-600">تعداد بچ</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-green-800">{batchInfo.totalStock}</div>
+                    <div className="text-sm text-green-600">کل موجودی</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-green-800">FIFO</div>
+                    <div className="text-sm text-green-600">روش فروش</div>
+                  </div>
+                </div>
+
+                {/* All Batches */}
+                <div className="space-y-3 max-h-96 overflow-y-auto">
+                  {batchInfo.allBatches.map((batch: any, index: number) => (
+                    <div 
+                      key={batch.id} 
+                      className={`p-3 rounded-lg border ${
+                        batch.isOldest 
+                          ? 'bg-green-100 border-green-300' 
+                          : 'bg-gray-50 border-gray-200'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
-                          {index === 0 && (
-                            <Badge className="bg-green-100 text-green-800 border-green-300">
-                              اولین مورد
-                            </Badge>
-                          )}
-                          <Badge variant="outline">
-                            ردیف {index + 1}
+                          <Badge 
+                            className={
+                              batch.isOldest 
+                                ? 'bg-green-600 hover:bg-green-700' 
+                                : 'bg-gray-600 hover:bg-gray-700'
+                            }
+                          >
+                            ردیف {batch.fifoOrder}
                           </Badge>
+                          <span className="font-medium">{batch.batchNumber}</span>
                         </div>
+                        {batch.isOldest && (
+                          <Badge variant="outline" className="text-green-600 border-green-300">
+                            <TrendingUp className="h-3 w-3 mr-1" />
+                            اولویت فروش
+                          </Badge>
+                        )}
                       </div>
-                    </CardHeader>
-                    <CardContent className="pt-0">
+                      
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>
-                          <div className="text-gray-600">موجودی</div>
-                          <div className="font-medium">{batch.stockQuantity} واحد</div>
+                          <span className="text-gray-600">موجودی: </span>
+                          <span className="font-medium">{batch.stockQuantity} واحد</span>
                         </div>
                         <div>
-                          <div className="text-gray-600">قیمت واحد</div>
-                          <div className="font-medium">{batch.unitPrice} {batch.currency}</div>
-                        </div>
-                        <div>
-                          <div className="text-gray-600">تاریخ تولید</div>
-                          <div className="font-medium">{formatDate(batch.createdAt)}</div>
-                        </div>
-                        <div>
-                          <div className="text-gray-600">وزن</div>
-                          <div className="font-medium">
-                            {batch.weight || 'نامشخص'} {batch.weightUnit || ''}
-                          </div>
+                          <span className="text-gray-600">تاریخ: </span>
+                          <span className="font-medium">{formatDate(batch.createdAt)}</span>
                         </div>
                       </div>
                       
-                      {batch.expiryDate && (
-                        <div className="mt-2 flex items-center gap-1 text-orange-600">
-                          <Calendar className="w-3 h-3" />
-                          <span className="text-xs">
-                            انقضا: {formatDate(batch.expiryDate)}
-                          </span>
-                        </div>
-                      )}
-                      
-                      {batch.willSellNext && (
-                        <div className="mt-2 text-xs text-green-600 font-medium">
-                          {batch.willSellNext}
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-              
-              {/* FIFO Explanation */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-4">
-                <div className="flex items-center gap-2 mb-1">
-                  <Clock className="w-4 h-4 text-blue-600" />
-                  <span className="text-sm font-medium text-blue-800">
-                    سیستم فروش FIFO (اول وارد، اول خارج)
-                  </span>
+                      <div className="mt-2 text-xs text-gray-600">
+                        {batch.displayText}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <p className="text-xs text-blue-700">
-                  در این سیستم، قدیمی‌ترین بچ‌ها ابتدا فروخته می‌شوند. این روش برای محصولات شیمیایی با تاریخ انقضا مناسب است.
-                </p>
               </div>
             </DialogContent>
           </Dialog>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
-
-export default FIFOBatchDisplay;

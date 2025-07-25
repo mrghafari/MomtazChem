@@ -1,6 +1,6 @@
 import { Router } from "express";
 import FIFOBatchManager from "../fifo-batch-manager";
-import LIFOBatchManager from "../lifo-batch-manager";
+import { FIFODisplayManager } from "../fifo-display-manager";
 
 const router = Router();
 
@@ -100,20 +100,20 @@ router.post("/api/products/:productName/batches/allocate-simulate", async (req, 
   }
 });
 
-// === LIFO Batch Management Routes ===
+// === FIFO Display Management Routes ===
 
 /**
- * Get LIFO batch information for a product (newest first)
- * GET /api/products/:productName/batches/lifo
+ * Get FIFO batch information for display (oldest first)
+ * GET /api/products/:productName/batches/display
  */
-router.get("/api/products/:productName/batches/lifo", async (req, res) => {
+router.get("/api/products/:productName/batches/display", async (req, res) => {
   try {
     const { productName } = req.params;
     const decodedProductName = decodeURIComponent(productName);
     
-    console.log(`📦 [API] Getting LIFO batches for: ${decodedProductName}`);
+    console.log(`📦 [API] Getting FIFO display batches for: ${decodedProductName}`);
     
-    const batchInfo = await LIFOBatchManager.getBatchInfoLIFO(decodedProductName);
+    const batchInfo = await FIFODisplayManager.getBatchInfoForDisplay(decodedProductName);
     
     if (batchInfo.success) {
       res.json({
@@ -129,10 +129,10 @@ router.get("/api/products/:productName/batches/lifo", async (req, res) => {
     }
     
   } catch (error: any) {
-    console.error("Error fetching LIFO batch info:", error);
+    console.error("Error fetching FIFO display batch info:", error);
     res.status(500).json({
       success: false,
-      message: "خطا در دریافت اطلاعات جدیدترین بچ",
+      message: "خطا در دریافت اطلاعات قدیمی‌ترین بچ",
       error: error.message
     });
   }

@@ -36176,6 +36176,10 @@ momtazchem.com
     }
   });
 
+  // Register FIFO batch routes
+  const fifoBatchRouter = await import('./routes/fifo-batch');
+  app.use(fifoBatchRouter.default);
+
   // Global error handler for all API routes
   app.use('/api/*', (err: any, req: Request, res: Response, next: NextFunction) => {
     console.error('API Error:', err);

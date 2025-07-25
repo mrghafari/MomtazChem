@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Calendar, Package2, Clock, ArrowLeft, TrendingUp, Layers, Sparkles } from "lucide-react";
 
-interface LIFOBatchDisplayProps {
+interface FIFOBatchDisplayProps {
   productName: string;
   className?: string;
   showDetails?: boolean;
@@ -19,22 +19,22 @@ interface LIFOBatchDisplayProps {
 interface BatchInfo {
   totalStock: string;
   batchCount: number;
-  newestBatch: any;
   oldestBatch: any;
-  nextToShow: any;
+  newestBatch: any;
+  nextToSell: any;
   allBatches: any[];
 }
 
-export default function LIFOBatchDisplay({ 
+export default function FIFOBatchDisplay({ 
   productName, 
   className = "", 
   showDetails = false,
   compact = false 
-}: LIFOBatchDisplayProps) {
+}: FIFOBatchDisplayProps) {
   
-  // Fetch LIFO batch data
+  // Fetch FIFO batch data
   const { data: batchData, isLoading, error } = useQuery({
-    queryKey: [`/api/products/${encodeURIComponent(productName)}/batches/lifo`],
+    queryKey: [`/api/products/${encodeURIComponent(productName)}/batches/display`],
     enabled: !!productName
   });
 
