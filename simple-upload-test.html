@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>تست ساده آپلود فیش</title>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <h1>تست آپلود فیش بانکی</h1>
+    
+    <div>
+        <h3>1. ابتدا وارد شوید:</h3>
+        <button onclick="login()">ورود با oilstar@hotmail.com</button>
+        <div id="loginResult"></div>
+    </div>
+    
+    <div>
+        <h3>2. آپلود فیش:</h3>
+        <input type="file" id="receiptFile">
+        <input type="text" id="orderId" placeholder="شماره سفارش" value="M2507240103">
+        <input type="number" id="amount" placeholder="مبلغ" value="50000">
+        <button onclick="uploadReceipt()">آپلود فیش</button>
+        <div id="uploadResult"></div>
+    </div>
+
+    <script>
+        async function login() {
+            const result = document.getElementById('loginResult');
+            result.innerHTML = 'در حال ورود...';
+            
+            try {
+                const response = await fetch('/api/customers/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        email: 'oilstar@hotmail.com',
+                        password: 'Oil123'
+                    })
+                });
+                
+                const data = await response.json();
+                result.innerHTML = data.success ? '✅ ورود موفق' : '❌ ' + data.message;
+                console.log('Login result:', data);
+            } catch (error) {
+                result.innerHTML = '❌ خطا: ' + error.message;
+                console.error('Login error:', error);
+            }
+        }
+        
+        async function uploadReceipt() {
+            const result = document.getElementById('uploadResult');
+            const file = document.getElementById('receiptFile').files[0];
+            const orderId = document.getElementById('orderId').value;
+            const amount = document.getElementById('amount').value;
+            
+            if (!file || !orderId || !amount) {
+                result.innerHTML = '❌ لطفاً تمام فیلدها را پر کنید';
+                return;
+            }
+            
+            result.innerHTML = 'در حال آپلود...';
+            
+            const formData = new FormData();
+            formData.append('receipt', file);
+            formData.append('orderId', orderId);
+            formData.append('receiptAmount', amount);
+            
+            try {
+                const response = await fetch('/api/payment/upload-receipt', {
+                    method: 'POST',
+                    credentials: 'include',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                result.innerHTML = data.success ? '✅ آپلود موفق: ' + data.message : '❌ خطا: ' + data.message;
+                console.log('Upload result:', data);
+            } catch (error) {
+                result.innerHTML = '❌ خطا: ' + error.message;
+                console.error('Upload error:', error);
+            }
+        }
+    </script>
+</body>
+</html>

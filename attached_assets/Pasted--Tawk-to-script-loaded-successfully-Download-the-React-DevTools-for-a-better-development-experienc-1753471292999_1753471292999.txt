@@ -1,0 +1,125 @@
+ Tawk.to script loaded successfully
+ Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+content-all.js:1 Uncaught (in promise) Error: Cannot find menu item with id translate-page
+    at y (content-all.js:1:49937)
+y @ content-all.js:1
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:117574)
+    at t.value (twk-chunk-common.js:2:150658)
+    at p.updateUUID (twk-chunk-common.js:2:202310)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:124589)
+    at twk-chunk-common.js:2:123900
+value @ twk-chunk-common.js:2
+updateUUID @ twk-chunk-common.js:2
+(anonymous) @ twk-vendor.js:2
+p.dispatch @ twk-vendor.js:2
+dispatch @ twk-vendor.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+VM6641 M2511237:23 Tawk.to Live Chat loaded successfully
+content-all.js:1 Uncaught (in promise) Error: Cannot find menu item with id save-page
+    at y (content-all.js:1:49937)
+y @ content-all.js:1
+content-all.js:1 Uncaught (in promise) Error: Cannot find menu item with id translate-page
+    at y (content-all.js:1:49937)
+y @ content-all.js:1
+api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: Object
+api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+shop.tsx:461 🔐 [LOGIN] Starting handleLoginSuccess
+shop.tsx:462 🔐 [LOGIN] Customer data: Object
+shop.tsx:463 🔐 [LOGIN] Current cart state: Object
+shop.tsx:467 🔐 [LOGIN] Customer state set
+shop.tsx:470 🔐 [LOGIN] Wallet balance fetch initiated
+shop.tsx:474 🔐 [LOGIN] Auth modal closed
+shop.tsx:479 🔐 [LOGIN] Cache invalidated
+shop.tsx:483 🔐 [LOGIN] Has cart items: false
+shop.tsx:484 🔐 [LOGIN] Cart contents: Object
+shop.tsx:488 🔐 [LOGIN] Cart migration completed
+shop.tsx:494 🔐 [LOGIN] Welcome toast shown
+shop.tsx:497 🔐 [LOGIN] Staying in shop after successful login
+shop.tsx:499 🔐 [LOGIN] handleLoginSuccess completed successfully
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: {475: {…}}
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: [{…}]
+useAuth.ts:30  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 401 (Unauthorized)
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=09ef9b6d:840
+run @ @tanstack_react-query.js?v=09ef9b6d:494
+start @ @tanstack_react-query.js?v=09ef9b6d:536
+fetch @ @tanstack_react-query.js?v=09ef9b6d:926
+executeFetch_fn @ @tanstack_react-query.js?v=09ef9b6d:2211
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:2245
+useAuth.ts:30  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 401 (Unauthorized)
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=09ef9b6d:840
+run @ @tanstack_react-query.js?v=09ef9b6d:494
+start @ @tanstack_react-query.js?v=09ef9b6d:536
+fetch @ @tanstack_react-query.js?v=09ef9b6d:926
+executeFetch_fn @ @tanstack_react-query.js?v=09ef9b6d:2211
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=09ef9b6d:2243
+updateTimers_fn @ @tanstack_react-query.js?v=09ef9b6d:2250
+onQueryUpdate @ @tanstack_react-query.js?v=09ef9b6d:2206
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:998
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:997
+batch @ @tanstack_react-query.js?v=09ef9b6d:583
+dispatch_fn @ @tanstack_react-query.js?v=09ef9b6d:996
+setData @ @tanstack_react-query.js?v=09ef9b6d:696
+onSuccess @ @tanstack_react-query.js?v=09ef9b6d:897
+resolve @ @tanstack_react-query.js?v=09ef9b6d:456
+Promise.then
+run @ @tanstack_react-query.js?v=09ef9b6d:498
+start @ @tanstack_react-query.js?v=09ef9b6d:536
+fetch @ @tanstack_react-query.js?v=09ef9b6d:926
+executeFetch_fn @ @tanstack_react-query.js?v=09ef9b6d:2211
+(anonymous) @ @tanstack_react-query.js?v=09ef9b6d:2245

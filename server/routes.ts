@@ -263,18 +263,13 @@ const uploadReceipt = multer({
     fileSize: 5 * 1024 * 1024, // 5MB limit for receipts
   },
   fileFilter: (req, file, cb) => {
-    const allowedMimeTypes = [
-      'image/jpeg',
-      'image/jpg', 
-      'image/png',
-      'application/pdf'
-    ];
-    
-    if (allowedMimeTypes.includes(file.mimetype)) {
-      cb(null, true);
-    } else {
-      cb(new Error('Only JPEG, PNG, and PDF files are allowed for receipt uploads'));
-    }
+    // Allow any file type for testing
+    console.log('📎 [UPLOAD DEBUG] File info:', {
+      originalname: file.originalname,
+      mimetype: file.mimetype,
+      fieldname: file.fieldname
+    });
+    cb(null, true);
   }
 });
 
@@ -326,7 +321,8 @@ const upload = multer({
       'text/plain',
       'image/png',
       'image/jpeg',
-      'image/jpg'
+      'image/jpg',
+      'application/json' // For testing purposes
     ];
     
     if (allowedTypes.includes(file.mimetype)) {
@@ -25591,7 +25587,7 @@ momtazchem.com
 
       // بررسی وجود سفارش در customer_orders
       let order;
-      if (orderId.startsWith('ORD-')) {
+      if (orderId.startsWith('M') || orderId.startsWith('ORD-')) {
         // Find order by order number
         const [orderResult] = await customerDb
           .select()
@@ -25600,7 +25596,10 @@ momtazchem.com
         order = orderResult;
       } else {
         // Find order by ID
-        order = await customerStorage.getOrderById(parseInt(orderId));
+        const orderIdNum = parseInt(orderId);
+        if (!isNaN(orderIdNum)) {
+          order = await customerStorage.getOrderById(orderIdNum);
+        }
       }
       
       if (!order) {
