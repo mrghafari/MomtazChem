@@ -79,6 +79,7 @@ export const showcaseProducts = pgTable("showcase_products", {
   syncWithShop: boolean("sync_with_shop").default(true), // Whether to include in shop sync process
   showWhenOutOfStock: boolean("show_when_out_of_stock").default(false), // Whether to show product in shop when stock is 0
   isNonChemical: boolean("is_non_chemical").default(false), // Whether this is a non-chemical product
+  isFlammable: boolean("is_flammable").default(false), // Whether this is a flammable product
   // Product Variant Fields
   isVariant: boolean("is_variant").default(false), // Whether this is a variant of another product
   parentProductId: integer("parent_product_id"), // Reference to parent product if this is a variant

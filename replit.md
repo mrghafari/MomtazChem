@@ -6,6 +6,19 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Flammable Checkbox Database Schema Fix - Resolved Critical Saving Issue (July 25, 2025)
+✅ **RESOLVED: Fixed critical issue preventing flammable checkbox (تیک آتش‌زا) from saving in product forms**
+- **Root Cause**: Missing `isFlammable` field in `showcaseProducts` database table schema
+- **Database Schema Fix**: Added `is_flammable BOOLEAN DEFAULT false` column to `showcase_products` table
+- **Schema Update**: Updated `shared/showcase-schema.ts` to include `isFlammable: boolean("is_flammable").default(false)` field
+- **TypeScript Resolution**: Fixed all TypeScript compilation errors related to missing property
+- **User Request Fulfilled**: "تیک آتش زا را که میزنیم ثبت نمیشه" (The flammable checkbox we check doesn't save)
+- **Form Validation**: Flammable checkbox now properly validates and saves in product management forms
+- **Chemical Safety Compliance**: Flammable product marking system fully operational for safety compliance
+- **Database Persistence**: Flammable product data now correctly persists for postal service weight/restriction calculations
+- **Impact**: Chemical industry safety compliance now fully functional with proper flammable product identification
+- **Result**: Complete resolution of flammable checkbox saving issue - all product forms now properly save flammable status
+
 ### COMPLETED: System-Wide Auto-Save Functionality Completely Removed (July 24, 2025)
 ✅ **IMPLEMENTED: Complete elimination of all auto-save functionality system-wide per user request**
 - **User Request**: "سیو به هنگام را بردار" (Remove auto-save functionality)

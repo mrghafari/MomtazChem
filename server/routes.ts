@@ -3409,7 +3409,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         parentProductId: productData.parentProductId || null,
         isVariant: productData.isVariant || false,
         variantType: productData.variantType || null,
-        variantValue: productData.variantValue || null
+        variantValue: productData.variantValue || null,
+        isFlammable: productData.isFlammable || false
       };
       
       const product = await storage.createProduct(showcaseProductData);
