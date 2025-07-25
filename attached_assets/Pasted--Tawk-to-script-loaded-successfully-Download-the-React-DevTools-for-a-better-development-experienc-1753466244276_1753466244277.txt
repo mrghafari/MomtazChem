@@ -1,0 +1,108 @@
+ Tawk.to script loaded successfully
+ Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ Auth check result: Object
+content-all.js:1 Uncaught (in promise) 
+ 
+value @ twk-chunk-common.js:2
+ Tawk.to Live Chat loaded successfully
+content-all.js:1 Uncaught (in promise) 
+content-all.js:1 Uncaught (in promise) 
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+content-all.js:1 Uncaught (in promise) 
+content-all.js:1 Uncaught (in promise) 
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ Auth check result: Object
+content-all.js:1 Uncaught (in promise) 
+content-all.js:1 Uncaught (in promise) 
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+content-all.js:1 Uncaught (in promise) Error: Cannot find menu item with id save-page
+    at y (content-all.js:1:49937)
+content-all.js:1 Uncaught (in promise) Error: Cannot find menu item with id translate-page
+    at y (content-all.js:1:49937)
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+useAuth.ts:43 Auth check result: Object
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+/api/customers/login:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+shop.tsx:461 🔐 [LOGIN] Starting handleLoginSuccess
+shop.tsx:462 🔐 [LOGIN] Customer data: Object
+shop.tsx:463 🔐 [LOGIN] Current cart state: Object
+shop.tsx:467 🔐 [LOGIN] Customer state set
+shop.tsx:470 🔐 [LOGIN] Wallet balance fetch initiated
+shop.tsx:474 🔐 [LOGIN] Auth modal closed
+shop.tsx:479 🔐 [LOGIN] Cache invalidated
+shop.tsx:483 🔐 [LOGIN] Has cart items: false
+shop.tsx:484 🔐 [LOGIN] Cart contents: Object
+shop.tsx:488 🔐 [LOGIN] Cart migration completed
+shop.tsx:494 🔐 [LOGIN] Welcome toast shown
+shop.tsx:497 🔐 [LOGIN] Staying in shop after successful login
+shop.tsx:499 🔐 [LOGIN] handleLoginSuccess completed successfully
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
