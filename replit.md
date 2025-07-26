@@ -39,6 +39,25 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Format Compliance**: Fully compliant with Excel data structure provided - using "شهر/منطقه" terminology and distance from Erbil integration
 - **Result**: Complete Iraqi geographical format implementation operational in customer registration with distance-aware city/region selection and logistics optimization information
 
+### COMPLETED: Shipping Address Notification Added to Customer Order Cards (January 25, 2025)
+✅ **IMPLEMENTED: Informational notification on order cards reminding customers to register/update precise address for accurate shipping cost calculations**
+- **User Request Fulfilled**: "روی کارت سفارش به مشتری اعلام کنید که برای محاسبه دقیق کرایه حمل آدرس دقیق خود را باید ثبت کرده باشد و یا آن را به روز رسانی کند"
+- **Order Card Enhancement**: Added blue-themed informational notification to all customer order cards
+- **Professional Design**: 
+  - Blue background (bg-blue-50, border-blue-200) with location pin icon
+  - Clear title: "💡 نکته مهم برای محاسبه دقیق کرایه حمل"
+  - Detailed explanation about precise address requirement for shipping cost calculations
+- **Interactive Element**: Clickable "پروفایل کاربری" (User Profile) link directing customers to profile edit page
+- **Comprehensive Message**: Explains importance of complete address including province, city/region, and detailed address for shipping cost determination
+- **Strategic Placement**: Positioned after order details section for maximum visibility on every order card
+- **User Experience**: 
+  - Non-intrusive but noticeable blue styling
+  - Clear call-to-action for address registration/updating
+  - Seamless integration with existing order card design
+- **Business Impact**: Customers now clearly understand the importance of accurate address information for precise shipping cost calculations
+- **Arabic Text**: Professional Persian messaging explaining address requirements for logistics optimization
+- **Result**: All customer order cards now display shipping address notification encouraging precise address registration for accurate delivery cost calculations
+
 ### COMPLETED: Iraqi Geographical Database Complete with Distance from Erbil - 187 Cities Loaded (January 25, 2025)
 ✅ **IMPLEMENTED: Complete Iraqi geographical database with all 187 cities including distance calculations from Erbil for logistics optimization**
 - **Database Population Complete**: Successfully populated the entire Iraqi geographical database with 18 provinces and 187 cities/regions matching the Excel data source
