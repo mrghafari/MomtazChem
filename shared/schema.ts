@@ -760,7 +760,7 @@ export const crmCustomers = pgTable("crm_customers", {
   alternatePhone: text("alternate_phone"),
   country: text("country"),
   province: text("province"), // State/Province field
-  city: text("city"),
+  cityRegion: text("city_region"), // شهر/منطقه
   address: text("address"),
   secondaryAddress: text("secondary_address"),
   postalCode: text("postal_code"),

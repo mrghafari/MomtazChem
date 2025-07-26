@@ -128,8 +128,8 @@ function CitySelect({ editingCustomer, setEditingCustomer }: {
         <Input
           id="editCity"
           placeholder="Enter city"
-          value={editingCustomer?.city || ""}
-          onChange={(e) => setEditingCustomer({ ...editingCustomer, city: e.target.value })}
+          value={editingCustomer?.cityRegion || ""}
+          onChange={(e) => setEditingCustomer({ ...editingCustomer, cityRegion: e.target.value })}
         />
       </div>
     );
@@ -137,10 +137,10 @@ function CitySelect({ editingCustomer, setEditingCustomer }: {
 
   return (
     <div>
-      <Label htmlFor="editCity">City/مدينة *</Label>
+      <Label htmlFor="editCityRegion">شهر/منطقه / City/Region *</Label>
       <Select 
-        value={editingCustomer?.city || ""} 
-        onValueChange={(value) => setEditingCustomer({ ...editingCustomer, city: value })}
+        value={editingCustomer?.cityRegion || ""} 
+        onValueChange={(value) => setEditingCustomer({ ...editingCustomer, cityRegion: value })}
       >
         <SelectTrigger>
           <SelectValue placeholder="Select city / اختر المدينة" />
@@ -166,7 +166,7 @@ interface CrmCustomer {
   phone?: string;
   country?: string;
   province?: string;
-  city?: string;
+  cityRegion?: string;
   address?: string;
   secondaryAddress?: string;
   postalCode?: string;
@@ -256,7 +256,7 @@ export default function CRM() {
     company: "",
     phone: "",
     country: "",
-    city: "",
+    cityRegion: "",
     address: "",
     secondaryAddress: "",
     postalCode: "",
@@ -406,7 +406,7 @@ export default function CRM() {
         company: "",
         phone: "",
         country: "",
-        city: "",
+        cityRegion: "",
         address: "",
         secondaryAddress: "",
         postalCode: "",
@@ -1303,13 +1303,13 @@ export default function CRM() {
                 />
               </div>
               <div>
-                <Label htmlFor="city">City *</Label>
+                <Label htmlFor="cityRegion">شهر/منطقه / City/Region *</Label>
                 <Input
-                  id="city"
+                  id="cityRegion"
                   required
-                  placeholder="Customer's city"
-                  value={newCustomer.city}
-                  onChange={(e) => setNewCustomer({ ...newCustomer, city: e.target.value })}
+                  placeholder="Customer's city/region"
+                  value={newCustomer.cityRegion}
+                  onChange={(e) => setNewCustomer({ ...newCustomer, cityRegion: e.target.value })}
                 />
               </div>
             </div>

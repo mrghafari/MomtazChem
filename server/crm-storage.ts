@@ -296,7 +296,7 @@ export class CrmStorage implements ICrmStorage {
         company: customer.company || orderData.company,
         phone: customer.phone || orderData.phone,
         country: customer.country || orderData.country,
-        city: customer.city || orderData.city,
+        cityRegion: customer.cityRegion || orderData.city,
         address: customer.address || orderData.address,
         postalCode: customer.postalCode || orderData.postalCode,
         lastOrderDate: new Date(),
@@ -325,7 +325,7 @@ export class CrmStorage implements ICrmStorage {
         company: orderData.company,
         phone: orderData.phone,
         country: orderData.country,
-        city: orderData.city,
+        cityRegion: orderData.city,
         address: orderData.address,
         postalCode: orderData.postalCode,
         

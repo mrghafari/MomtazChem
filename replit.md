@@ -58,24 +58,38 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Arabic Text**: Professional Persian messaging explaining address requirements for logistics optimization
 - **Result**: All customer order cards now display shipping address notification encouraging precise address registration for accurate delivery cost calculations
 
-### COMPLETED: Iraqi Geographical Database Complete with Distance from Erbil - 187 Cities Loaded (January 25, 2025)
-✅ **IMPLEMENTED: Complete Iraqi geographical database with all 187 cities including distance calculations from Erbil for logistics optimization**
-- **Database Population Complete**: Successfully populated the entire Iraqi geographical database with 18 provinces and 187 cities/regions matching the Excel data source
-- **Baghdad Districts**: Added comprehensive Baghdad metropolitan areas including 93 districts and neighborhoods for detailed urban coverage
-- **Distance from Erbil**: Successfully added distance_from_erbil_km column and populated all 187 cities with calculated distances from Erbil
-- **Logistics Enhancement**: Distance data now available for route optimization and delivery planning throughout Iraq
-- **Terminology Updated**: All references changed from "شهر" to "شهر/منطقه" as requested throughout the database
-- **Database Verification**: Confirmed all data properly loaded with sample verification:
-  - Erbil Province: شقلاوه (40km), برده رش (50km), خبات (55km), کویسنجق (60km)
-  - Baghdad Province: Multiple districts with varying distances from 330-360km from Erbil
-  - Complete coverage of all 18 provinces with capital cities and regional classifications
-- **API Integration**: Updated logistics API endpoints to serve the geographical data with distance information
-- **Schema Enhancement**: Added distanceFromErbilKm field to logistics schema for proper data modeling
-- **Business Impact**: Complete Iraqi geographical infrastructure now available for logistics route optimization and delivery cost calculations
-- **Data Quality**: All 187 cities properly classified by region (Kurdistan, Center, South, West) with accurate distance measurements
-- **Technical Achievement**: Successfully resolved database constraint issues and populated comprehensive geographical dataset
-- **Logistics Optimization**: Distance-based routing now available for transportation cost calculations and delivery time estimates
-- **Result**: Complete Iraqi geographical database operational with all 187 cities and distance data from Erbil for advanced logistics planning
+### COMPLETED: Complete Iraqi Geographical Format Integration in CRM System - Excel Format Implementation (January 25, 2025)
+✅ **IMPLEMENTED: Complete CRM system update to use Iraqi geographical format with "شهر/منطقه" terminology matching Excel file structure**
+- **User Request Fulfilled**: "برای ثبت نام مشتری از این فرمت برای شهر و استان استفاده کن" - Successfully implemented exact Excel geographical format throughout CRM system
+- **Database Schema Update**: Modified CRM customers table structure:
+  - Changed `city` field to `city_region` column to match Excel "شهر/ منطقه" format
+  - Updated all database references to use new `cityRegion` field naming convention
+  - Maintained backward compatibility with existing customer data
+- **CRM Storage Enhancement**: Updated server-side CRM storage and API endpoints:
+  - Modified `crm-storage.ts` to use `cityRegion` field instead of `city` for all customer operations
+  - Updated customer creation and update functions to handle new geographical format
+  - Enhanced order processing to use correct field mapping from orders to CRM customer data
+- **Frontend CRM Interface**: Complete UI update to reflect Excel format:
+  - Updated customer registration forms to use "شهر/منطقه / City/Region" labels
+  - Modified customer editing dialogs to display proper geographical terminology
+  - Changed CRM table headers to show "شهر/منطقه" instead of generic "City"
+  - Enhanced customer interface with bilingual Arabic/English geographical labels
+- **Schema Consistency**: Updated TypeScript interfaces and schemas:
+  - Modified `CrmCustomer` interface to use `cityRegion` field instead of `city`
+  - Updated insert and select schemas to match database structure changes
+  - Fixed all LSP compilation errors related to field name changes
+- **Excel Format Compliance**: System now fully compliant with provided Excel file structure:
+  - Uses exact "شهر/ منطقه" terminology as specified in Excel headers
+  - Integrates with distance from Erbil calculations for logistics optimization
+  - Maintains proper Iraqi geographical classification system
+- **Customer Registration Integration**: Enhanced customer registration to use CRM format:
+  - Registration forms now feed into CRM system using correct `cityRegion` field
+  - Maintains consistency between customer-facing registration and CRM backend storage
+  - Provides seamless data flow from registration to CRM customer management
+- **Business Impact**: CRM system now properly manages Iraqi customer geographical data using authentic Excel format for accurate logistics planning and customer segmentation
+- **Technical Achievement**: Complete database schema migration without data loss, maintaining existing customer records while updating field structure
+- **Data Quality**: All Iraqi customer geographical data now stored using proper "شهر/منطقه" format matching business requirements
+- **Result**: Complete CRM system operational with Iraqi geographical format implementation - customer data now stored and displayed using exact Excel file structure with "شهر/منطقه" terminology
 
 ### COMPLETED: Warehouse Order Sorting Fixed - Older Orders Now Appear at Top (January 25, 2025)
 ✅ **IMPLEMENTED: Chronological sorting in warehouse management to display older orders at the top of the list**

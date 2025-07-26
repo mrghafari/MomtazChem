@@ -18,7 +18,7 @@ export const customers = pgTable("customers", {
   phone: text("phone").notNull(), // Mandatory mobile phone
   country: text("country").notNull(), // Mandatory country
   province: text("province").notNull(), // Mandatory province/state
-  city: text("city").notNull(), // Mandatory city
+  cityRegion: text("city_region").notNull(), // Mandatory city/region (شهر/منطقه)
   address: text("address").notNull(), // Mandatory address
   postalCode: text("postal_code"),
   
