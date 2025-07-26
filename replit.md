@@ -6,6 +6,39 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Customer Registration Form with Iraqi Geographical Format Implementation (January 25, 2025)
+✅ **IMPLEMENTED: Enhanced customer registration form using proper Iraqi geographical format with distance from Erbil integration**
+- **User Request Fulfilled**: "برای ثبت نام مشتری از این فرمت برای شهر و استان استفاده کن" - Implemented specific Iraqi geographical format for customer registration
+- **Excel Format Integration**: Based on provided Excel file structure with headers:
+  - "شهر/ منطقه" (City/Region) 
+  - "استان" (Province)
+  - "فاصله از اربیل(کیلومتر)" (Distance from Erbil in kilometers)
+- **Enhanced Registration Interface**: Created comprehensive Iraqi geographical address section:
+  - **Bilingual Labels**: Arabic/English labels for all geographical fields (🌍 البلد / Country, 🏛️ الاستان / Province, 🏙️ شهر/منطقه / City/Region)
+  - **Flag Icons**: Country selection with flag emojis for visual identification
+  - **Distance Display**: Shows distance from Erbil for each city/region selection for logistics optimization
+  - **Professional Styling**: Blue-themed geographical section with icons and proper RTL/LTR support
+- **API Integration Enhancement**: Fixed schema inconsistencies and ensured `distanceFromErbilKm` field properly returned in API responses
+- **Distance Information Panel**: Added informational section explaining logistics optimization using distance calculations from Erbil
+- **Smart City Selection**: 
+  - Disabled city selection until province is chosen
+  - Shows both Arabic and English names with distance information
+  - Format: "العزیزیه (Al-Aziziyah) • فاصله از اربیل: 390 کیلومتر"
+- **Database Integration**: Connected to complete Iraqi geographical database with all 187 cities and 18 provinces
+- **User Experience**: 
+  - Clear visual hierarchy with geographical section highlighted
+  - Descriptive placeholders in Arabic and English
+  - Real-time province/city filtering
+  - Distance-aware logistics information display
+- **Technical Implementation**:
+  - Fixed province selection to use Arabic names for proper data consistency
+  - Enhanced city dropdown with distance information display
+  - Added logistics information panel for delivery optimization context
+  - Proper form validation and field dependencies
+- **Business Impact**: Customer registration now captures precise Iraqi geographical data for optimized logistics routing and delivery cost calculations
+- **Format Compliance**: Fully compliant with Excel data structure provided - using "شهر/منطقه" terminology and distance from Erbil integration
+- **Result**: Complete Iraqi geographical format implementation operational in customer registration with distance-aware city/region selection and logistics optimization information
+
 ### COMPLETED: Iraqi Geographical Database Complete with Distance from Erbil - 187 Cities Loaded (January 25, 2025)
 ✅ **IMPLEMENTED: Complete Iraqi geographical database with all 187 cities including distance calculations from Erbil for logistics optimization**
 - **Database Population Complete**: Successfully populated the entire Iraqi geographical database with 18 provinces and 187 cities/regions matching the Excel data source

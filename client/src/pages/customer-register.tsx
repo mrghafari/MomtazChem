@@ -213,93 +213,130 @@ const CustomerRegister = () => {
                   )}
                 />
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="country"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Country *</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select country" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="Iraq">Iraq</SelectItem>
-                            <SelectItem value="Iran">Iran</SelectItem>
-                            <SelectItem value="Turkey">Turkey</SelectItem>
-                            <SelectItem value="Syria">Syria</SelectItem>
-                            <SelectItem value="Jordan">Jordan</SelectItem>
-                            <SelectItem value="Lebanon">Lebanon</SelectItem>
-                            <SelectItem value="Kuwait">Kuwait</SelectItem>
-                            <SelectItem value="Saudi Arabia">Saudi Arabia</SelectItem>
-                            <SelectItem value="UAE">UAE</SelectItem>
-                            <SelectItem value="Other">Other</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                {/* Iraqi Geographical Format Section */}
+                <div className="bg-blue-50 p-6 rounded-lg border border-blue-200">
+                  <h3 className="text-lg font-medium text-blue-900 mb-4 flex items-center gap-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    العنوان الجغرافي العراقي (Iraqi Geographical Address)
+                  </h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="country"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2">
+                            🌍 البلد / Country *
+                          </FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="اختر البلد / Select country" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="Iraq">🇮🇶 العراق / Iraq</SelectItem>
+                              <SelectItem value="Iran">🇮🇷 إيران / Iran</SelectItem>
+                              <SelectItem value="Turkey">🇹🇷 تركيا / Turkey</SelectItem>
+                              <SelectItem value="Syria">🇸🇾 سوريا / Syria</SelectItem>
+                              <SelectItem value="Jordan">🇯🇴 الأردن / Jordan</SelectItem>
+                              <SelectItem value="Lebanon">🇱🇧 لبنان / Lebanon</SelectItem>
+                              <SelectItem value="Kuwait">🇰🇼 الكويت / Kuwait</SelectItem>
+                              <SelectItem value="Saudi Arabia">🇸🇦 السعودية / Saudi Arabia</SelectItem>
+                              <SelectItem value="UAE">🇦🇪 الإمارات / UAE</SelectItem>
+                              <SelectItem value="Other">🌐 دولة أخرى / Other</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={form.control}
-                    name="province"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Province/State *</FormLabel>
-                        <Select 
-                          onValueChange={(value) => {
-                            field.onChange(value);
-                            setSelectedProvince(value);
-                            form.setValue("city", ""); // Reset city when province changes
-                          }} 
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select province" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {Array.isArray(provinces) && provinces.map((province: any) => (
-                              <SelectItem key={province.id} value={province.nameEnglish}>
-                                {province.nameEnglish} ({province.nameArabic})
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={form.control}
+                      name="province"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2">
+                            🏛️ الاستان / Province *
+                          </FormLabel>
+                          <Select 
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                              setSelectedProvince(value);
+                              form.setValue("city", ""); // Reset city when province changes
+                            }} 
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="اختر الاستان / Select province" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {Array.isArray(provinces) && provinces.map((province: any) => (
+                                <SelectItem key={province.id} value={province.nameArabic}>
+                                  {province.nameArabic} ({province.nameEnglish})
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={form.control}
-                    name="city"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>City *</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedProvince}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder={selectedProvince ? "Select city" : "Select province first"} />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {Array.isArray(cities) && cities.map((city: any) => (
-                              <SelectItem key={city.id} value={city.nameEnglish}>
-                                {city.nameEnglish} ({city.nameArabic})
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={form.control}
+                      name="city"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2">
+                            🏙️ شهر/منطقه / City/Region *
+                          </FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedProvince}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder={selectedProvince ? "اختر شهر/منطقه" : "اختر الاستان أولاً"} />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {Array.isArray(cities) && cities.map((city: any) => (
+                                <SelectItem key={city.id} value={city.nameArabic}>
+                                  <div className="flex flex-col">
+                                    <span className="font-medium">{city.nameArabic}</span>
+                                    <span className="text-xs text-gray-500">
+                                      {city.nameEnglish} • فاصله از اربیل: {city.distanceFromErbilKm || 0} کیلومتر
+                                    </span>
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {/* Distance Information Display */}
+                  {selectedProvince && cities.length > 0 && (
+                    <div className="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                      <div className="flex items-center gap-2 text-green-800">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span className="text-sm font-medium">معلومات المسافة للخدمات اللوجستية</span>
+                      </div>
+                      <p className="text-xs text-green-700 mt-1">
+                        المسافات محسوبة من أربيل لتحسين التوصيل وحساب تكاليف الشحن
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 <FormField
