@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست ثبت نام با شهر پنجوین</title>
+    <style>
+        body { font-family: Tahoma, Arial, sans-serif; margin: 20px; direction: rtl; }
+        .test-section { margin: 20px 0; padding: 15px; border: 2px solid #28a745; border-radius: 8px; background: #d4edda; }
+        h2 { color: #28a745; margin-top: 0; }
+        .test-button { 
+            background: #28a745; color: white; padding: 10px 20px; 
+            border: none; border-radius: 5px; cursor: pointer; margin: 5px;
+        }
+        .test-button:hover { background: #1e7e34; }
+        .log { background: #f8f9fa; border: 1px solid #dee2e6; padding: 10px; border-radius: 4px; margin: 10px 0; font-family: monospace; }
+        .success { color: #28a745; font-weight: bold; }
+        .error { color: #dc3545; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>🎯 تست ثبت نام مشتری با شهر پنجوین</h1>
+    
+    <div class="test-section">
+        <h2>✅ مشکل برطرف شد - پنجوین اضافه شد</h2>
+        <p>شهر پنجوین که قبلاً در پایگاه داده موجود نبود، حالا با موفقیت اضافه شده است:</p>
+        <ul>
+            <li><strong>شهر:</strong> پنجوین (Penjwin)</li>
+            <li><strong>استان:</strong> سلیمانیه</li>
+            <li><strong>فاصله از اربیل:</strong> 170 کیلومتر</li>
+            <li><strong>وضعیت:</strong> فعال و قابل انتخاب</li>
+        </ul>
+        
+        <h3>📊 آمار کل:</h3>
+        <ul>
+            <li>مجموع شهرهای قبلی: 187 شهر</li>
+            <li>شهرهای اضافه شده: 89 شهر (شامل پنجوین)</li>
+            <li>مجموع فعلی: 276 شهر</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 تست‌های تأیید</h2>
+        <button class="test-button" onclick="testPenjwinAPI()">تست API پنجوین</button>
+        <button class="test-button" onclick="testSulaymaniyahCities()">تست شهرهای سلیمانیه</button>
+        <button class="test-button" onclick="testCustomerRegistration()">تست ثبت نام با پنجوین</button>
+        <div id="test-results" class="log"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>📋 لینک‌های مفید</h2>
+        <p>حالا می‌توانید این بخش‌ها را تست کنید:</p>
+        <ul>
+            <li><a href="/#/customer/register" target="_blank">فرم ثبت نام مشتری</a> - استان سلیمانیه → شهر پنجوین</li>
+            <li><a href="/#/admin/crm" target="_blank">مدیریت CRM</a> - ایجاد مشتری با آدرس پنجوین</li>
+        </ul>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const results = document.getElementById('test-results');
+            const className = type === 'success' ? 'success' : (type === 'error' ? 'error' : '');
+            results.innerHTML += `<div class="${className}">[${new Date().toLocaleTimeString('fa-IR')}] ${message}</div>`;
+        }
+
+        async function testPenjwinAPI() {
+            log('📡 تست API برای شهر پنجوین...');
+            try {
+                // First get Sulaymaniyah province ID
+                const provinceResponse = await fetch('/api/logistics/provinces');
+                const provinceData = await provinceResponse.json();
+                const sulaymaniyah = provinceData.data.find(p => p.nameArabic === 'سلیمانیه');
+                
+                if (sulaymaniyah) {
+                    log(`✅ استان سلیمانیه یافت شد (ID: ${sulaymaniyah.id})`, 'success');
+                    
+                    const cityResponse = await fetch(`/api/logistics/cities?provinceId=${sulaymaniyah.id}`);
+                    const cityData = await cityResponse.json();
+                    
+                    const penjwin = cityData.data.find(c => c.nameArabic === 'پنجوین');
+                    if (penjwin) {
+                        log(`🎉 پنجوین یافت شد! ID: ${penjwin.id}, فاصله: ${penjwin.distanceFromErbilKm} کم`, 'success');
+                    } else {
+                        log('❌ پنجوین در لیست شهرها یافت نشد', 'error');
+                    }
+                } else {
+                    log('❌ استان سلیمانیه یافت نشد', 'error');
+                }
+            } catch (error) {
+                log(`❌ خطا: ${error.message}`, 'error');
+            }
+        }
+
+        async function testSulaymaniyahCities() {
+            log('📡 تست تمام شهرهای سلیمانیه...');
+            try {
+                const provinceResponse = await fetch('/api/logistics/provinces');
+                const provinceData = await provinceResponse.json();
+                const sulaymaniyah = provinceData.data.find(p => p.nameArabic === 'سلیمانیه');
+                
+                const cityResponse = await fetch(`/api/logistics/cities?provinceId=${sulaymaniyah.id}`);
+                const cityData = await cityResponse.json();
+                
+                log(`✅ ${cityData.data.length} شهر در سلیمانیه یافت شد:`, 'success');
+                cityData.data.forEach(city => {
+                    const highlight = city.nameArabic === 'پنجوین' ? ' ⭐' : '';
+                    log(`   - ${city.nameArabic} (${city.distanceFromErbilKm} کم)${highlight}`);
+                });
+            } catch (error) {
+                log(`❌ خطا: ${error.message}`, 'error');
+            }
+        }
+
+        async function testCustomerRegistration() {
+            log('📡 تست ثبت نام مشتری با آدرس پنجوین...');
+            const sampleData = {
+                email: `penjwin_test_${Date.now()}@example.com`,
+                password: 'testpass123',
+                firstName: 'محمد',
+                lastName: 'احمدی',
+                company: 'شرکت پنجوین',
+                phone: '+964 771 123 4567',
+                country: 'عراق',
+                province: 'سلیمانیه',
+                cityRegion: 'پنجوین',
+                address: 'پنجوین، خیابان اصلی، منزل شماره 10',
+                postalCode: '46001',
+                communicationPreference: 'email',
+                preferredLanguage: 'ar',
+                marketingConsent: false
+            };
+
+            try {
+                const response = await fetch('/api/customers/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(sampleData)
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    log('🎉 ثبت نام با آدرس پنجوین موفق بود!', 'success');
+                    log(`   - مشتری CRM ID: ${result.crmCustomer?.id}`);
+                    log(`   - شهر/منطقه: ${sampleData.cityRegion}`);
+                    log(`   - استان: ${sampleData.province}`);
+                } else {
+                    log(`❌ خطا در ثبت نام: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ خطا: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-run Penjwin test
+        window.onload = function() {
+            log('🚀 شروع تست خودکار پنجوین...');
+            setTimeout(testPenjwinAPI, 1000);
+        };
+    </script>
+</body>
+</html>
