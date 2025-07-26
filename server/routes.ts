@@ -9955,7 +9955,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         alternatePhone: alternatePhone || null,
         country,
         province: province || null,
-        city,
+        cityRegion: city, // Support both city and cityRegion for Excel format
         address,
         secondaryAddress: secondaryAddress || null,
         postalCode: postalCode || null,
@@ -9993,7 +9993,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           company: crmCustomerData.company,
           phone: crmCustomerData.phone,
           country: crmCustomerData.country,
-          city: crmCustomerData.city,
+          city: crmCustomerData.cityRegion, // Map cityRegion back to city for portal compatibility
           address: crmCustomerData.address,
           postalCode: crmCustomerData.postalCode,
           isActive: true,

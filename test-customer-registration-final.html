@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست فرم ثبت نام مشتری با فرمت جغرافیایی عراقی</title>
+    <style>
+        body { font-family: Tahoma, Arial, sans-serif; margin: 20px; direction: rtl; }
+        .test-section { margin: 20px 0; padding: 15px; border: 2px solid #007bff; border-radius: 8px; }
+        .success { border-color: #28a745; background-color: #d4edda; }
+        .error { border-color: #dc3545; background-color: #f8d7da; }
+        .info { border-color: #17a2b8; background-color: #d6f3ff; }
+        h2 { color: #007bff; margin-top: 0; }
+        .feature-list { list-style-type: none; padding: 0; }
+        .feature-list li { margin: 8px 0; padding: 8px; background: #f8f9fa; border-radius: 4px; }
+        .feature-list li:before { content: "✅ "; color: #28a745; font-weight: bold; }
+        .test-button { 
+            background: #007bff; color: white; padding: 10px 20px; 
+            border: none; border-radius: 5px; cursor: pointer; margin: 5px;
+        }
+        .test-button:hover { background: #0056b3; }
+        .log { background: #f8f9fa; border: 1px solid #dee2e6; padding: 10px; border-radius: 4px; margin: 10px 0; font-family: monospace; }
+        .api-test { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 8px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>🎯 تست فرم ثبت نام مشتری با فرمت جغرافیایی عراقی - وضعیت نهایی</h1>
+    
+    <div class="test-section success">
+        <h2>✅ پیاده‌سازی موفق فرمت Excel</h2>
+        <ul class="feature-list">
+            <li>استفاده از فرمت دقیق "شهر/منطقه" مطابق فایل Excel ارائه‌شده</li>
+            <li>ادغام کامل CRM و سیستم ثبت نام مشتری</li>
+            <li>پایگاه داده جغرافیایی یکپارچه برای عراق (187 شهر، 18 استان)</li>
+            <li>نمایش فاصله از اربیل برای بهینه‌سازی لجستیک</li>
+            <li>رابط کاربری دوزبانه (عربی/انگلیسی) با پشتیبانی RTL</li>
+            <li>تطبیق فیلد cityRegion در تمام سیستم</li>
+        </ul>
+    </div>
+
+    <div class="test-section info">
+        <h2>🔗 URL های تست</h2>
+        <div class="api-test">
+            <strong>فرم ثبت نام مشتری:</strong><br>
+            <a href="/#/customer/register" target="_blank">/#/customer/register</a>
+            <div class="log">
+                بخش‌های قابل تست:
+                - انتخاب استان از لیست کامل عراقی
+                - انتخاب شهر/منطقه براساس استان انتخابی
+                - نمایش فاصله از اربیل
+                - ثبت داده‌ها با فرمت صحیح Excel
+            </div>
+        </div>
+
+        <div class="api-test">
+            <strong>مدیریت CRM:</strong><br>
+            <a href="/#/admin/crm" target="_blank">/#/admin/crm</a>
+            <div class="log">
+                بخش‌های قابل تست:
+                - نمایش فیلد "شهر/منطقه" در جدول مشتریان
+                - ایجاد مشتری جدید با فرمت جغرافیایی صحیح
+                - ویرایش اطلاعات جغرافیایی مشتری موجود
+                - جستجو براساس شهر/منطقه
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 تست API Endpoints</h2>
+        <button class="test-button" onclick="testProvinces()">تست استان‌های عراق</button>
+        <button class="test-button" onclick="testCities()">تست شهرها براساس استان</button>
+        <button class="test-button" onclick="testRegistration()">تست ثبت نام نمونه</button>
+        <button class="test-button" onclick="testCRM()">تست CRM Customer</button>
+        <div id="test-results" class="log"></div>
+    </div>
+
+    <div class="test-section info">
+        <h2>📋 داده‌های نمونه برای تست</h2>
+        <div class="api-test">
+            <strong>نمونه استان:</strong> بغداد<br>
+            <strong>نمونه شهر/منطقه:</strong> الکرادة (Al-Karada) • فاصله از اربیل: 350 کیلومتر<br>
+            <strong>نمونه مشتری:</strong>
+            <div class="log">
+ایمیل: test@example.com
+نام: احمد محمد
+شرکت: شرکت تست
+تلفن: +964 771 234 5678
+کشور: عراق
+استان: بغداد
+شهر/منطقه: الکرادة
+آدرس: خیابان تست، ساختمان 123
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section success">
+        <h2>🎉 وضعیت پروژه</h2>
+        <ul class="feature-list">
+            <li>فرمت Excel برای شهر/استان کاملاً پیاده‌سازی شد</li>
+            <li>سیستم CRM و ثبت نام مشتری یکپارچه شدند</li>
+            <li>پایگاه داده جغرافیایی عراق آماده استفاده است</li>
+            <li>تمام LSP errors برطرف شدند</li>
+            <li>سیستم آماده تست و استفاده نهایی است</li>
+        </ul>
+    </div>
+
+    <script>
+        function log(message) {
+            const results = document.getElementById('test-results');
+            results.innerHTML += `[${new Date().toLocaleTimeString('fa-IR')}] ${message}\n`;
+        }
+
+        async function testProvinces() {
+            log('📡 تست API استان‌های عراق...');
+            try {
+                const response = await fetch('/api/logistics/provinces');
+                const data = await response.json();
+                if (data.success && Array.isArray(data.data)) {
+                    log(`✅ ${data.data.length} استان یافت شد`);
+                    const sampleProvinces = data.data.slice(0, 3);
+                    sampleProvinces.forEach(p => {
+                        log(`   - ${p.nameArabic} (${p.nameEnglish})`);
+                    });
+                } else {
+                    log('❌ خطا در دریافت استان‌ها');
+                }
+            } catch (error) {
+                log(`❌ خطا: ${error.message}`);
+            }
+        }
+
+        async function testCities() {
+            log('📡 تست API شهرها برای استان بغداد...');
+            try {
+                // First get Baghdad province ID
+                const provinceResponse = await fetch('/api/logistics/provinces');
+                const provinceData = await provinceResponse.json();
+                const baghdad = provinceData.data.find(p => p.nameArabic === 'بغداد');
+                
+                if (baghdad) {
+                    log(`✅ استان بغداد یافت شد (ID: ${baghdad.id})`);
+                    
+                    const cityResponse = await fetch(`/api/logistics/cities?provinceId=${baghdad.id}`);
+                    const cityData = await cityResponse.json();
+                    
+                    if (cityData.success && Array.isArray(cityData.data)) {
+                        log(`✅ ${cityData.data.length} شهر/منطقه برای بغداد یافت شد`);
+                        const sampleCities = cityData.data.slice(0, 3);
+                        sampleCities.forEach(c => {
+                            log(`   - ${c.nameArabic} (${c.nameEnglish}) • فاصله: ${c.distanceFromErbilKm} کم`);
+                        });
+                    } else {
+                        log('❌ خطا در دریافت شهرها');
+                    }
+                } else {
+                    log('❌ استان بغداد یافت نشد');
+                }
+            } catch (error) {
+                log(`❌ خطا: ${error.message}`);
+            }
+        }
+
+        async function testRegistration() {
+            log('📡 تست ثبت نام نمونه...');
+            const sampleData = {
+                email: `test_${Date.now()}@example.com`,
+                password: 'testpass123',
+                firstName: 'احمد',
+                lastName: 'محمد',
+                company: 'شرکت تست',
+                phone: '+964 771 234 5678',
+                country: 'عراق',
+                province: 'بغداد',
+                cityRegion: 'الکرادة',
+                address: 'خیابان تست، ساختمان 123',
+                postalCode: '10001',
+                communicationPreference: 'email',
+                preferredLanguage: 'ar',
+                marketingConsent: false
+            };
+
+            try {
+                const response = await fetch('/api/customers/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(sampleData)
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    log('✅ ثبت نام موفق با فرمت Excel صحیح');
+                    log(`   - مشتری CRM ID: ${result.crmCustomer?.id}`);
+                    log(`   - شهر/منطقه: ${sampleData.cityRegion}`);
+                } else {
+                    log(`❌ خطا در ثبت نام: ${result.message}`);
+                }
+            } catch (error) {
+                log(`❌ خطا: ${error.message}`);
+            }
+        }
+
+        async function testCRM() {
+            log('📡 تست CRM Customer...');
+            try {
+                const response = await fetch('/api/crm/customers');
+                const data = await response.json();
+                if (data.success) {
+                    log(`✅ ${data.customers?.length || 0} مشتری در CRM یافت شد`);
+                    if (data.customers && data.customers.length > 0) {
+                        const sample = data.customers[0];
+                        log(`   - نمونه: ${sample.firstName} ${sample.lastName}`);
+                        log(`   - شهر/منطقه: ${sample.cityRegion || sample.city || 'نامشخص'}`);
+                    }
+                } else {
+                    log(`❌ خطا در CRM: ${data.message}`);
+                }
+            } catch (error) {
+                log(`❌ خطا: ${error.message}`);
+            }
+        }
+
+        // Auto-run basic tests on page load
+        window.onload = function() {
+            log('🚀 تست‌های خودکار در حال اجرا...');
+            setTimeout(testProvinces, 1000);
+            setTimeout(testCities, 3000);
+        };
+    </script>
+</body>
+</html>

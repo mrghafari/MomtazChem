@@ -23,7 +23,7 @@ const customerRegistrationSchema = z.object({
   phone: z.string().min(1, "Phone number is required"),
   country: z.string().min(1, "Country is required"),
   province: z.string().min(1, "Province is required"),
-  city: z.string().min(1, "City is required"),
+  cityRegion: z.string().min(1, "City/Region is required"),
   address: z.string().min(1, "Address is required"),
   postalCode: z.string().optional(),
   communicationPreference: z.string().default("email"),
@@ -71,7 +71,7 @@ const CustomerRegister = () => {
       phone: "",
       country: "",
       province: "",
-      city: "",
+      cityRegion: "",
       address: "",
       postalCode: "",
       password: "",
@@ -87,6 +87,7 @@ const CustomerRegister = () => {
       const { confirmPassword, ...registerData } = data;
       return await apiRequest("/api/customers/register", "POST", {
         ...registerData,
+        city: registerData.cityRegion, // Map cityRegion to city for backend compatibility
         passwordHash: registerData.password,
         customerSource: "website",
         customerType: "retail",
@@ -292,7 +293,7 @@ const CustomerRegister = () => {
 
                     <FormField
                       control={form.control}
-                      name="city"
+                      name="cityRegion"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="flex items-center gap-2">
