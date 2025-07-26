@@ -49,7 +49,7 @@ const CustomerRegister = () => {
   });
 
   // Find selected province ID 
-  const selectedProvinceData = Array.isArray(provinces) ? provinces.find((p: any) => p.nameEnglish === selectedProvince) : null;
+  const selectedProvinceData = Array.isArray(provinces) ? provinces.find((p: any) => p.nameArabic === selectedProvince) : null;
   
   // Fetch cities based on selected province
   const { data: cities = [] } = useQuery({
