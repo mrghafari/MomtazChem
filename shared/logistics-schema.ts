@@ -367,6 +367,7 @@ export const iraqiCities = pgTable("iraqi_cities", {
   region: text("region").default("center"), // north, south, center, kurdistan
   postalCode: text("postal_code"), // Postal code if available
   distanceFromBaghdad: integer("distance_from_baghdad"), // Distance in KM from Baghdad
+  distanceFromErbilKm: integer("distance_from_erbil_km"), // Distance in KM from Erbil for logistics optimization
   distanceFromProvinceCapital: integer("distance_from_province_capital"), // Distance from province capital
   isProvinceCapital: boolean("is_province_capital").default(false), // Is it a province capital
   isActive: boolean("is_active").default(true),

@@ -6,6 +6,25 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Iraqi Geographical Database Complete with Distance from Erbil - 187 Cities Loaded (January 25, 2025)
+✅ **IMPLEMENTED: Complete Iraqi geographical database with all 187 cities including distance calculations from Erbil for logistics optimization**
+- **Database Population Complete**: Successfully populated the entire Iraqi geographical database with 18 provinces and 187 cities/regions matching the Excel data source
+- **Baghdad Districts**: Added comprehensive Baghdad metropolitan areas including 93 districts and neighborhoods for detailed urban coverage
+- **Distance from Erbil**: Successfully added distance_from_erbil_km column and populated all 187 cities with calculated distances from Erbil
+- **Logistics Enhancement**: Distance data now available for route optimization and delivery planning throughout Iraq
+- **Terminology Updated**: All references changed from "شهر" to "شهر/منطقه" as requested throughout the database
+- **Database Verification**: Confirmed all data properly loaded with sample verification:
+  - Erbil Province: شقلاوه (40km), برده رش (50km), خبات (55km), کویسنجق (60km)
+  - Baghdad Province: Multiple districts with varying distances from 330-360km from Erbil
+  - Complete coverage of all 18 provinces with capital cities and regional classifications
+- **API Integration**: Updated logistics API endpoints to serve the geographical data with distance information
+- **Schema Enhancement**: Added distanceFromErbilKm field to logistics schema for proper data modeling
+- **Business Impact**: Complete Iraqi geographical infrastructure now available for logistics route optimization and delivery cost calculations
+- **Data Quality**: All 187 cities properly classified by region (Kurdistan, Center, South, West) with accurate distance measurements
+- **Technical Achievement**: Successfully resolved database constraint issues and populated comprehensive geographical dataset
+- **Logistics Optimization**: Distance-based routing now available for transportation cost calculations and delivery time estimates
+- **Result**: Complete Iraqi geographical database operational with all 187 cities and distance data from Erbil for advanced logistics planning
+
 ### COMPLETED: Warehouse Order Sorting Fixed - Older Orders Now Appear at Top (January 25, 2025)
 ✅ **IMPLEMENTED: Chronological sorting in warehouse management to display older orders at the top of the list**
 - **User Request Fulfilled**: "در مدیریت انبار سفارشات قدیمی تر بالای لیست قرار میگیرند" (In warehouse management, older orders should appear at the top of the list)

@@ -12648,19 +12648,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const cities = await db
-        .select({
-          id: iraqiCities.id,
-          name: iraqiCities.name,
-          nameArabic: iraqiCities.nameArabic,
-          nameEnglish: iraqiCities.nameEnglish,
-          provinceName: iraqiCities.provinceName,
-          region: iraqiCities.region,
-          isProvinceCapital: iraqiCities.isProvinceCapital,
-          isActive: iraqiCities.isActive,
-          population: iraqiCities.population,
-          distanceFromBaghdad: iraqiCities.distanceFromBaghdad,
-          provinceId: iraqiCities.provinceId
-        })
+        .select()
         .from(iraqiCities)
         .where(whereConditions.length > 1 ? and(...whereConditions) : whereConditions[0])
         .orderBy(iraqiCities.nameArabic);
