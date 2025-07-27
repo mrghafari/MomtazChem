@@ -177,10 +177,10 @@ export default function CustomerProfileEdit() {
     }
   });
 
-  // Update form values when customer data is loaded
+  // Update form values when customer data is loaded  
   useEffect(() => {
-    if (customer?.customer) {
-      const customerData = customer.customer;
+    if (customer) {
+      const customerData = customer; // CRITICAL FIX: customer is already the data, not nested
       
       // Debug: Log customer data to check CRM fields
       console.log('🔍 [UI DEBUG] Customer data loaded');
@@ -268,8 +268,8 @@ export default function CustomerProfileEdit() {
 
   // Set selected province ID when provinces data and customer data are loaded
   useEffect(() => {
-    if (customer?.customer?.province && provinces.length > 0) {
-      console.log('🏛️ [PROVINCE DEBUG] Customer province from backend:', customer.customer.province);
+    if (customer?.province && provinces.length > 0) {
+      console.log('🏛️ [PROVINCE DEBUG] Customer province from backend:', customer.province);
       console.log('🏛️ [PROVINCE DEBUG] Available provinces:', provinces.map((p: any) => ({
         id: p.id,
         nameEnglish: p.nameEnglish,
@@ -279,10 +279,10 @@ export default function CustomerProfileEdit() {
       
       // Try to find by English name first, then by Arabic name
       const customerProvince = provinces.find((p: any) => 
-        p.nameEnglish === customer.customer.province || 
-        p.name === customer.customer.province ||
-        p.nameArabic === customer.customer.province ||
-        p.namePersian === customer.customer.province
+        p.nameEnglish === customer.province || 
+        p.name === customer.province ||
+        p.nameArabic === customer.province ||
+        p.namePersian === customer.province
       );
       
       if (customerProvince) {
@@ -292,7 +292,7 @@ export default function CustomerProfileEdit() {
         form.setValue('province', customerProvince.nameEnglish || customerProvince.name);
         console.log('📍 [PROVINCE] Province set to:', customerProvince.nameEnglish);
       } else {
-        console.error('❌ [PROVINCE] Province not found for:', customer.customer.province);
+        console.error('❌ [PROVINCE] Province not found for:', customer.province);
         console.error('❌ [PROVINCE] Available options:', provinces.map((p: any) => `${p.nameArabic} / ${p.nameEnglish}`));
       }
     }
@@ -300,12 +300,13 @@ export default function CustomerProfileEdit() {
 
   // CRITICAL FIX: Separate effect for city setting after cities are loaded
   useEffect(() => {
-    const customerCityValue = customer?.customer?.cityRegion || customer?.customer?.city;
+    const customerCityValue = customer?.cityRegion || customer?.city;
     
     console.log('🚀 [CITY EFFECT] City effect triggered');
-    console.log('🔧 [CITY EFFECT] Raw customer object:', customer?.customer);
-    console.log('🔧 [CITY EFFECT] cityRegion field:', customer?.customer?.cityRegion);
-    console.log('🔧 [CITY EFFECT] city field:', customer?.customer?.city);
+    console.log('🔧 [CITY EFFECT] Full customer object:', customer);
+    console.log('🔧 [CITY EFFECT] Customer object keys:', Object.keys(customer || {}));
+    console.log('🔧 [CITY EFFECT] cityRegion field:', customer?.cityRegion);
+    console.log('🔧 [CITY EFFECT] city field:', customer?.city);
     console.log('🔧 [CITY EFFECT] Customer city value:', customerCityValue);
     console.log('🔧 [CITY EFFECT] Cities loaded:', cities.length);
     console.log('🔧 [CITY EFFECT] Selected province ID:', selectedProvinceId);
