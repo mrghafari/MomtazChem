@@ -1055,12 +1055,22 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                     >
                       <option value="">{t.selectDeliveryMethod}</option>
                       {shippingRatesData.map((rate: any) => {
+                        // Handle smart_vehicle option specially
+                        if (rate.deliveryMethod === 'smart_vehicle' || rate.delivery_method === 'smart_vehicle') {
+                          return (
+                            <option key={rate.id} value={rate.id} style={{backgroundColor: '#d1fae5', color: '#047857'}}>
+                              🚚 انتخاب هوشمند خودرو - محاسبه خودکار بهترین گزینه
+                            </option>
+                          );
+                        }
+                        
+                        // Handle standard shipping rates
                         const freeShippingThreshold = parseFloat(rate.freeShippingThreshold || '0');
                         const qualifiesForFreeShipping = freeShippingThreshold > 0 && subtotalAmount >= freeShippingThreshold;
                         
                         return (
                           <option key={rate.id} value={rate.id}>
-                            {rate.deliveryMethod || rate.name} - {qualifiesForFreeShipping ? t.freeShipping : formatCurrency(parseFloat(rate.basePrice || '0'))}
+                            {rate.deliveryMethod || rate.delivery_method || rate.name} - {qualifiesForFreeShipping ? t.freeShipping : formatCurrency(parseFloat(rate.basePrice || rate.base_price || '0'))}
                             {rate.estimatedDays && ` (${rate.estimatedDays} ${language === 'en' ? 'days' : language === 'ar' ? 'أيام' : 'أيام'})`}
                           </option>
                         );
@@ -1070,23 +1080,46 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                     {/* Show shipping cost details */}
                     {selectedShippingMethod && (
                       <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-200 dark:border-blue-800">
-                        <div className="flex justify-between items-center text-sm">
-                          <span>{t.shippingCost}:</span>
-                          <span className="font-medium">
-                            {shippingCost === 0 ? t.freeShipping : formatCurrency(shippingCost)}
-                          </span>
-                        </div>
                         {(() => {
                           const selectedRate = shippingRatesData.find((rate: any) => rate.id === selectedShippingMethod);
-                          const freeShippingThreshold = parseFloat(selectedRate?.freeShippingThreshold || '0');
-                          if (freeShippingThreshold > 0 && subtotalAmount >= freeShippingThreshold) {
+                          
+                          // Handle smart_vehicle display
+                          if (selectedRate && (selectedRate.deliveryMethod === 'smart_vehicle' || selectedRate.delivery_method === 'smart_vehicle')) {
                             return (
-                              <div className="text-xs text-green-600 dark:text-green-400 mt-1">
-                                ✓ {language === 'en' ? 'Free shipping for orders over' : language === 'ar' ? 'شحن مجاني للطلبات فوق' : 'شحن مجاني للطلبات فوق'} {formatCurrency(freeShippingThreshold)}
+                              <div className="space-y-2">
+                                <div className="flex justify-between items-center text-sm">
+                                  <span className="text-emerald-700 font-medium">🚚 انتخاب هوشمند خودرو:</span>
+                                  <span className="font-bold text-emerald-800">محاسبه خودکار در مرحله بعد</span>
+                                </div>
+                                <div className="text-xs text-emerald-600 bg-emerald-50 p-2 rounded border border-emerald-200">
+                                  ✓ سیستم بهترین خودرو را بر اساس وزن، مقصد و کمترین هزینه انتخاب می‌کند
+                                </div>
                               </div>
                             );
                           }
-                          return null;
+                          
+                          // Handle standard shipping rates
+                          return (
+                            <div>
+                              <div className="flex justify-between items-center text-sm">
+                                <span>{t.shippingCost}:</span>
+                                <span className="font-medium">
+                                  {shippingCost === 0 ? t.freeShipping : formatCurrency(shippingCost)}
+                                </span>
+                              </div>
+                              {(() => {
+                                const freeShippingThreshold = parseFloat(selectedRate?.freeShippingThreshold || '0');
+                                if (freeShippingThreshold > 0 && subtotalAmount >= freeShippingThreshold) {
+                                  return (
+                                    <div className="text-xs text-green-600 dark:text-green-400 mt-1">
+                                      ✓ {language === 'en' ? 'Free shipping for orders over' : language === 'ar' ? 'شحن مجاني للطلبات فوق' : 'شحن مجاني للطلبات فوق'} {formatCurrency(freeShippingThreshold)}
+                                    </div>
+                                  );
+                                }
+                                return null;
+                              })()}
+                            </div>
+                          );
                         })()}
                       </div>
                     )}

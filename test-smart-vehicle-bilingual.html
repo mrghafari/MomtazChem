@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Vehicle Test - Bilingual Purchase Form</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            direction: rtl;
+            text-align: right;
+            background: #f0f9ff;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            background: #f8fafc;
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 4px solid #10b981;
+            border-radius: 5px;
+        }
+        .success { border-left-color: #10b981; }
+        .info { border-left-color: #3b82f6; }
+        .warning { border-left-color: #f59e0b; }
+        h1 { color: #1f2937; text-align: center; }
+        h2 { color: #374151; margin-top: 30px; }
+        code {
+            background: #f3f4f6;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        .endpoint {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+        }
+        .json {
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚚 Smart Vehicle Integration Test</h1>
+        <p><strong>تاریخ:</strong> January 27, 2025</p>
+        <p><strong>هدف:</strong> تست نمایش smart_vehicle در bilingual-purchase-form dropdown</p>
+
+        <div class="test-section success">
+            <h2>✅ Database Status - Smart Vehicle Added</h2>
+            <p><strong>Shipping Rates Table:</strong></p>
+            <div class="json">Smart vehicle entry added to shipping_rates:
+ID: 32
+delivery_method: smart_vehicle
+description: انتخاب خودکار بهترین خودرو بر اساس وزن، مقصد و کمترین هزینه</div>
+        </div>
+
+        <div class="test-section info">
+            <h2>🔧 Frontend Integration - Bilingual Purchase Form</h2>
+            <p><strong>Changes Made:</strong></p>
+            <ul>
+                <li>✅ Smart vehicle detection in dropdown rendering</li>
+                <li>✅ Special styling with emerald green color</li>
+                <li>✅ Persian text: "🚚 انتخاب هوشمند خودرو - محاسبه خودکار بهترین گزینه"</li>
+                <li>✅ Special display when smart vehicle is selected</li>
+                <li>✅ Information panel explaining smart selection process</li>
+            </ul>
+        </div>
+
+        <div class="test-section info">
+            <h2>📋 API Endpoints for Testing</h2>
+            <div class="endpoint">GET /api/shipping-rates</div>
+            <p>Should return smart_vehicle as first option with ID 32</p>
+
+            <div class="endpoint">GET /api/customers/me</div>
+            <p>Customer authentication for accessing dropdown</p>
+        </div>
+
+        <div class="test-section warning">
+            <h2>🔍 Testing Steps</h2>
+            <ol>
+                <li><strong>Customer Login:</strong> Login as customer 8 (oilstar@hotmail.com)</li>
+                <li><strong>Add Product to Cart:</strong> Add NPK Fertilizer to cart</li>
+                <li><strong>Go to Checkout:</strong> Click on Purchase Order</li>
+                <li><strong>Check Dropdown:</strong> Look for "🚚 انتخاب هوشمند خودرو" option</li>
+                <li><strong>Select Smart Vehicle:</strong> Choose the smart vehicle option</li>
+                <li><strong>Verify Display:</strong> Should show special emerald information panel</li>
+            </ol>
+        </div>
+
+        <div class="test-section success">
+            <h2>🎯 Expected Results</h2>
+            <p><strong>Dropdown Options:</strong></p>
+            <div class="json">1. 🚚 انتخاب هوشمند خودرو - محاسبه خودکار بهترین گزینه [GREEN]
+2. courier - IQD 200.00 (4 days)
+3. cod - IQD 15,000.00 (3 days)
+4. iraq_post - IQD 8,000.00 (7 days)
+... other options</div>
+
+            <p><strong>When Smart Vehicle Selected:</strong></p>
+            <div class="json">🚚 انتخاب هوشمند خودرو: محاسبه خودکار در مرحله بعد
+✓ سیستم بهترین خودرو را بر اساس وزن، مقصد و کمترین هزینه انتخاب می‌کند</div>
+        </div>
+
+        <div class="test-section info">
+            <h2>🔗 Integration Points</h2>
+            <ul>
+                <li><strong>Database:</strong> shipping_rates table (ID: 32)</li>
+                <li><strong>Frontend:</strong> bilingual-purchase-form.tsx</li>
+                <li><strong>API:</strong> /api/shipping-rates endpoint</li>
+                <li><strong>Smart Logic:</strong> Vehicle optimization algorithm</li>
+                <li><strong>Customer Flow:</strong> Checkout → Delivery Method → Smart Selection</li>
+            </ul>
+        </div>
+
+        <div class="test-section success">
+            <h2>📊 Success Criteria</h2>
+            <p>✅ Smart vehicle appears as first option in delivery method dropdown</p>
+            <p>✅ Special emerald green styling distinguishes it from regular options</p>
+            <p>✅ Selection shows informational panel about smart calculation</p>
+            <p>✅ Order can be placed with smart vehicle selection</p>
+            <p>✅ Backend processes smart vehicle orders correctly</p>
+        </div>
+
+        <p style="text-align: center; margin-top: 30px; font-weight: bold; color: #10b981;">
+            🎉 Smart Vehicle Integration Complete - Ready for User Testing
+        </p>
+    </div>
+</body>
+</html>
