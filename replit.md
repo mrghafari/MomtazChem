@@ -6,6 +6,27 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Shipping Rates Tab Completely Removed from Logistics Management Interface (January 27, 2025)
+✅ **IMPLEMENTED: Complete removal of "نرخ های حمل" tab from logistics management page**
+- **User Request Fulfilled**: Removed shipping rates tab as system exclusively uses smart vehicle delivery method
+- **Interface Streamlining**: Logistics management now has 5 tabs instead of 6:
+  - **سفارشات** (Orders) - Main logistics order processing
+  - **شرکت‌های حمل** (Transportation Companies) - Company management  
+  - **جغرافیای عراق** (Iraqi Geography) - Cities and provinces with distance calculations
+  - **وسایل نقلیه** (Vehicles) - Vehicle optimization templates
+  - **خدمات پست** (Postal Services) - Postal service management
+- **Code Cleanup**: Completely removed all shipping rates related code:
+  - Deleted `ShippingRatesTab` component (75+ lines of code)
+  - Removed `TabsTrigger` for shipping rates
+  - Eliminated `TabsContent` for shipping tab
+  - Removed `shippingRatesResponse` and `loadingShippingRates` queries
+  - Updated grid layout from `grid-cols-6` to `grid-cols-5`
+  - Cleaned up enabled conditions in province and city queries
+- **Business Alignment**: Interface now fully supports smart vehicle only delivery approach
+- **Technical Implementation**: Clean removal without breaking existing functionality or LSP errors
+- **User Experience**: Simplified logistics interface focusing on core operational functions without redundant shipping rate management
+- **Result**: Logistics management interface streamlined with shipping rates tab completely removed - system fully aligned with smart vehicle delivery method
+
 ### COMPLETED: Critical Distance Data Correction - All City Distances from Erbil Fixed (January 27, 2025)
 ✅ **RESOLVED: Fixed incorrect distance_from_erbil_km values in database using authentic Excel data**
 - **User Issue**: "فاصله ها از اربیل غلط است من قبلا در فایل اکسل تمام فاصله ها را داده بودم" - Distance data in database was incorrect

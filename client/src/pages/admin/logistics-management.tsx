@@ -223,7 +223,7 @@ const LogisticsManagement = () => {
   // Iraqi provinces and cities data
   const { data: provincesResponse, isLoading: loadingProvinces } = useQuery({
     queryKey: ['/api/logistics/provinces'],
-    enabled: activeTab === 'cities' || activeTab === 'shipping' || activeTab === 'geography'
+    enabled: activeTab === 'cities' || activeTab === 'geography'
   });
 
   // Geography data for new geography tab
@@ -244,13 +244,10 @@ const LogisticsManagement = () => {
 
   const { data: citiesResponse, isLoading: loadingCities } = useQuery({
     queryKey: ['/api/logistics/cities'],
-    enabled: activeTab === 'cities' || activeTab === 'shipping' || activeTab === 'geography'
+    enabled: activeTab === 'cities' || activeTab === 'geography'
   });
 
-  const { data: shippingRatesResponse, isLoading: loadingShippingRates } = useQuery({
-    queryKey: ['/api/logistics/shipping-rates'],
-    enabled: activeTab === 'shipping'
-  });
+
 
   // Vehicle optimization queries
   const { data: vehiclesData, isLoading: vehiclesLoading } = useQuery({
@@ -1732,82 +1729,7 @@ const LogisticsManagement = () => {
     );
   };
 
-  // Shipping Rates Tab
-  const ShippingRatesTab = () => {
-    const shippingRates = (shippingRatesResponse as any)?.data || [];
 
-    return (
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h3 className="text-lg font-semibold">نرخ‌های حمل و نقل عراق</h3>
-          <Badge variant="outline">{shippingRates.length} نرخ فعال</Badge>
-        </div>
-
-        <div className="grid gap-4">
-          {loadingShippingRates ? (
-            <div className="text-center py-8">در حال بارگذاری...</div>
-          ) : shippingRates.length === 0 ? (
-            <Card>
-              <CardContent className="text-center py-8">
-                <Package className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                <p className="text-gray-500">هیچ نرخ حملی ثبت نشده است</p>
-              </CardContent>
-            </Card>
-          ) : (
-            shippingRates.map((rate: any) => (
-              <Card key={rate.id} className="border-l-4 border-l-purple-500">
-                <CardContent className="p-4">
-                  <div className="flex justify-between items-start">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <Badge className="bg-purple-500">{rate.delivery_method}</Badge>
-                        {rate.transportation_type && (
-                          <Badge variant="outline">{rate.transportation_type}</Badge>
-                        )}
-                      </div>
-                      <h4 className="font-semibold">{rate.city_name}, {rate.province_name}</h4>
-                      <p className="text-sm text-gray-600">{rate.description}</p>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                        <span>هزینه پایه: {Number(rate.base_price).toLocaleString()} دینار</span>
-                        <span>هزینه هر کیلو: {Number(rate.price_per_kg || 0).toLocaleString()} دینار</span>
-                        <span>زمان تحویل: {rate.estimated_days} روز</span>
-                        <span>حداکثر وزن: {rate.max_weight || 'نامحدود'} کیلو</span>
-                      </div>
-                      <div className="flex items-center gap-4 text-sm">
-                        {rate.tracking_available && (
-                          <Badge variant="outline" className="bg-green-50">
-                            <CheckCircle className="w-3 h-3 mr-1" />
-                            قابلیت ردیابی
-                          </Badge>
-                        )}
-                        {rate.insurance_available && (
-                          <Badge variant="outline" className="bg-blue-50">
-                            <Shield className="w-3 h-3 mr-1" />
-                            بیمه {rate.insurance_rate}%
-                          </Badge>
-                        )}
-                        {rate.sms_verification_enabled && (
-                          <Badge variant="outline" className="bg-yellow-50">
-                            <Phone className="w-3 h-3 mr-1" />
-                            تأیید پیامکی
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                    <div className="text-left">
-                      <Badge className={rate.is_active ? "bg-green-500" : "bg-red-500"}>
-                        {rate.is_active ? 'فعال' : 'غیرفعال'}
-                      </Badge>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
-          )}
-        </div>
-      </div>
-    );
-  };
 
   // New Geography Tab for provinces and cities management with editing capabilities
   const GeographyTab = () => {
@@ -2407,11 +2329,11 @@ const LogisticsManagement = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="orders">سفارشات</TabsTrigger>
           <TabsTrigger value="companies">شرکت‌های حمل</TabsTrigger>
           <TabsTrigger value="geography">جغرافیای عراق</TabsTrigger>
-          <TabsTrigger value="shipping">نرخ‌های حمل</TabsTrigger>
+
           <TabsTrigger value="vehicles">وسایل نقلیه</TabsTrigger>
           <TabsTrigger value="postal">خدمات پست</TabsTrigger>
         </TabsList>
@@ -2430,9 +2352,7 @@ const LogisticsManagement = () => {
 
 
 
-        <TabsContent value="shipping">
-          <ShippingRatesTab />
-        </TabsContent>
+
 
         <TabsContent value="vehicles">
           <VehicleOptimizationTab />
