@@ -118,8 +118,8 @@ export default function CustomerProfileEdit() {
     enabled: true, // Always enabled to get initial data
   });
 
-  const provinces = (provincesData && typeof provincesData === 'object' && 'data' in provincesData) ? provincesData.data : [];
-  let cities = (citiesData && typeof citiesData === 'object' && 'data' in citiesData) ? citiesData.data : [];
+  const provinces = (provincesData && typeof provincesData === 'object' && 'data' in provincesData) ? provincesData.data as any[] : [];
+  let cities = (citiesData && typeof citiesData === 'object' && 'data' in citiesData) ? citiesData.data as any[] : [];
   
   // If a province is selected, filter cities to only that province
   if (selectedProvinceId && cities.length > 0) {
@@ -219,7 +219,7 @@ export default function CustomerProfileEdit() {
         company: customerData.company || "",
         country: customerData.country || "",
         province: customerData.province || "",
-        city: customerData.cityRegion || customerData.city || "",
+        city: customerData.cityRegion || customerData.city || "", // CRITICAL: Use cityRegion from database
         address: customerData.address || "",
         secondaryAddress: customerData.state || customerData.secondaryAddress || "",
         postalCode: customerData.postalCode || "",
@@ -298,72 +298,76 @@ export default function CustomerProfileEdit() {
     }
   }, [customer, provinces, form]);
 
-  // Set selected city when cities data and customer data are loaded
+  // CRITICAL FIX: Separate effect for city setting after cities are loaded
   useEffect(() => {
-    // CRITICAL FIX: Use cityRegion field from database instead of city
     const customerCityValue = customer?.customer?.cityRegion || customer?.customer?.city;
-    console.log('🔧 [CRITICAL FIX] Customer city value from backend:', customerCityValue);
-    console.log('🔧 [CRITICAL FIX] Available cities count:', cities.length);
-    console.log('🔧 [CRITICAL FIX] Current form city value:', form.getValues('city'));
     
-    if (customerCityValue && cities.length > 0) {
-      // Debug: Log all available cities to understand filtering
-      console.log('🔧 [CRITICAL FIX] Available cities:', cities.map((c: any) => ({
+    console.log('🚀 [CITY EFFECT] City effect triggered');
+    console.log('🔧 [CITY EFFECT] Customer city value:', customerCityValue);
+    console.log('🔧 [CITY EFFECT] Cities loaded:', cities.length);
+    console.log('🔧 [CITY EFFECT] Selected province ID:', selectedProvinceId);
+    
+    if (!customerCityValue || cities.length === 0) {
+      console.log('⏸️ [CITY EFFECT] Skipping - missing data');
+      return;
+    }
+
+    // Find matching city with comprehensive search
+    const foundCity = cities.find((c: any) => {
+      const matches = [
+        c.nameEnglish === customerCityValue,
+        c.nameArabic === customerCityValue,
+        c.name === customerCityValue,
+        c.namePersian === customerCityValue
+      ];
+      
+      console.log('🔍 [CITY MATCHING] Testing city:', {
         id: c.id,
         nameEnglish: c.nameEnglish,
         nameArabic: c.nameArabic,
-        name: c.name
-      })));
-      
-      // COMPREHENSIVE MATCHING: Check all possible city name fields
-      const customerCity = cities.find((c: any) => {
-        // Create array of all possible values for this city
-        const cityNames = [
-          c.nameEnglish,
-          c.name,
-          c.nameArabic,
-          c.namePersian
-        ].filter(Boolean); // Remove null/undefined values
-        
-        console.log('🔍 [CITY MATCHING] Checking city:', cityNames, 'against:', customerCityValue);
-        
-        // Check if customer value matches any of the city names
-        return cityNames.includes(customerCityValue);
+        matches: matches,
+        anyMatch: matches.some(Boolean)
       });
       
-      console.log('🔧 [CRITICAL FIX] Found matching city:', customerCity);
+      return matches.some(Boolean);
+    });
+
+    if (foundCity) {
+      const valueToSet = foundCity.nameEnglish;
+      console.log('✅ [CITY SUCCESS] Found city:', foundCity);
+      console.log('✅ [CITY SUCCESS] Setting form value to:', valueToSet);
       
-      if (customerCity) {
-        // CRITICAL FIX: Use the EXACT value used in SelectItem (nameEnglish)
-        const cityValueToSet = customerCity.nameEnglish;
-        console.log('🔧 [CRITICAL FIX] Setting city value to:', cityValueToSet);
-        console.log('🔧 [CRITICAL FIX] Original customer value was:', customerCityValue);
-        
-        // Force form update and trigger re-render
-        form.setValue('city', cityValueToSet, { shouldValidate: true, shouldDirty: true });
-        
-        console.log('✅ [SUCCESS] City successfully set in form');
-        console.log('🔍 [VERIFY] Form value after setting:', form.getValues('city'));
-      } else {
-        console.error('❌ [ERROR] City not found in available cities list');
-        console.error('❌ [ERROR] Searched for:', customerCityValue);
-        console.error('❌ [ERROR] Available cities:', cities.map(c => ({
-          nameEnglish: c.nameEnglish,
-          nameArabic: c.nameArabic,
-          name: c.name
-        })));
-        
-        // As fallback, try to set the original value anyway
-        form.setValue('city', customerCityValue, { shouldValidate: false });
-      }
+      // Set with multiple strategies to ensure it works
+      form.setValue('city', valueToSet, { 
+        shouldValidate: true, 
+        shouldDirty: true,
+        shouldTouch: true
+      });
+      
+      // Double-check by getting the value right after setting
+      setTimeout(() => {
+        const currentValue = form.getValues('city');
+        console.log('🔍 [VERIFICATION] Form value after set:', currentValue);
+        if (currentValue !== valueToSet) {
+          console.error('❌ [ERROR] Form setValue failed! Trying alternative method...');
+          // Force update with react-hook-form's reset method
+          const currentValues = form.getValues();
+          form.reset({
+            ...currentValues,
+            city: valueToSet
+          });
+        }
+      }, 100);
+      
     } else {
-      console.log('🔧 [CRITICAL FIX] Missing data:', { 
-        hasCustomerCityValue: !!customerCityValue, 
-        customerCityValue, 
-        citiesLength: cities.length 
-      });
+      console.error('❌ [CITY ERROR] No matching city found for:', customerCityValue);
+      console.error('❌ [CITY ERROR] Available cities:', cities.map((c: any) => ({
+        id: c.id,
+        nameEnglish: c.nameEnglish,
+        nameArabic: c.nameArabic
+      })));
     }
-  }, [customer, cities, form]);
+  }, [customer?.customer?.cityRegion, customer?.customer?.city, cities, form, selectedProvinceId]);
 
   // Send SMS verification code
   const sendSmsCodeMutation = useMutation({
