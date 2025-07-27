@@ -1,0 +1,124 @@
+ Tawk.to script loaded successfully
+ Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ Auth check result: Object
+ 
+value @ twk-chunk-common.js:2
+ Tawk.to Live Chat loaded successfully
+ 🔍 [DEBUG] Site Management component initialized
+ 🔍 [DEBUG] useEffect triggered, userPermissions: undefined
+ Auth check result: Object
+ 🔍 [DEBUG] Site Management component initialized
+ 🔍 [DEBUG] useEffect triggered, userPermissions: Object
+ 🔍 [DEBUG] userPermissions modules: Array(31)
+ 🔍 [DEBUG] Full userPermissions response: Object
+ 🔍 [DEBUG] userPermissions.modules: Array(31)
+ 🔍 [DEBUG] userPermissions.permissions: Array(31)
+ 🔍 [DEBUG] Total allButtons count: 31
+ 🔍 [DEBUG] AI Settings exists in allButtons: true
+ 🔍 [DEBUG] Content Management exists in allButtons: true
+ 🔍 [DEBUG] allowedModules: Array(31)
+ 🔍 [DEBUG] kpi_dashboard in allowedModules? true
+ 🔍 [DEBUG] management_dashboard in allowedModules? true
+ 🔍 [DEBUG] finance in allowedModules? true
+ 🔍 [DEBUG] geography_analytics in allowedModules? true
+ 🔍 [DEBUG] ai_settings in allowedModules? true
+ 🔍 [DEBUG] content_management in allowedModules? true
+ 🔍 [CRITICAL] Missing button detection:
+ 🔍 [CRITICAL] Missing buttons count: 0
+ 🔍 [DEBUG] finance button found in allButtons? Object
+ 🔍 [DEBUG] geography_analytics button found in allButtons? Object
+ 🔍 [DEBUG] ai_settings button found in allButtons? Object
+site-management-fixed.tsx:435 🔍 [DEBUG] content_management button found in allButtons? Object
+site-management-fixed.tsx:436 🔍 [DEBUG] finance button in filtered? Object
+site-management-fixed.tsx:437 🔍 [DEBUG] geography_analytics button in filtered? Object
+site-management-fixed.tsx:438 🔍 [DEBUG] ai_settings button in filtered? Object
+site-management-fixed.tsx:439 🔍 [DEBUG] content_management button in filtered? Object
+site-management-fixed.tsx:76 🔍 [DEBUG] filtered buttons count: 31
+site-management-fixed.tsx:77 🔍 [DEBUG] First 5 filtered buttons: Array(5)
+site-management-fixed.tsx:78 🔍 [DEBUG] AI Control button in filtered: Object
+site-management-fixed.tsx:79 🔍 [DEBUG] Content Management button in filtered: Object
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+logistics-management.tsx:187 🔍 [LOGISTICS MGMT] First order data: Object
+useOrderNotifications.ts:99 🔔 [LOGISTICS] نوتیفیکیشن: 21 سفارش جدید دریافت شد
+useAuth.ts:43 Auth check result: Object
+logistics-management.tsx:187 🔍 [LOGISTICS MGMT] First order data: Object
+logistics-management.tsx:187 🔍 [LOGISTICS MGMT] First order data: Object
+logistics-management.tsx:187 🔍 [LOGISTICS MGMT] First order data: Object
+useAuth.ts:43 Auth check result: Object
+useAuth.ts:43 Auth check result: Object
+logistics-management.tsx:187 🔍 [LOGISTICS MGMT] First order data: Object
+logistics-management:1 Uncaught (in promise) AbortError: The play() request was interrupted by a call to pause(). https://goo.gl/LdLk22
+logistics-management.tsx:187 🔍 [LOGISTICS MGMT] First order data: Object
+logistics-management.tsx:187 🔍 [LOGISTICS MGMT] First order data: Object
+logistics-management.tsx:187 🔍 [LOGISTICS MGMT] First order data: Object
+logistics-management.tsx:187 🔍 [LOGISTICS MGMT] First order data: Object
+logistics-management.tsx:187 🔍 [LOGISTICS MGMT] First order data: Object
+logistics-management.tsx:187 🔍 [LOGISTICS MGMT] First order data: Object
+useAuth.ts:43 Auth check result: Object
+useAuth.ts:43 Auth check result: Object
+logistics-management.tsx:187 🔍 [LOGISTICS MGMT] First order data: Object
+logistics-management.tsx:187 🔍 [LOGISTICS MGMT] First order data: Object
+useAuth.ts:43 Auth check result: Object
+logistics-management.tsx:187 🔍 [LOGISTICS MGMT] First order data: Object
+useAuth.ts:43 Auth check result: Object
+useAuth.ts:43 Auth check result: Object
+useAuth.ts:43 Auth check result: Object
+logistics-management.tsx:187 🔍 [LOGISTICS MGMT] First order data: Object
+logistics-management.tsx:187 🔍 [LOGISTICS MGMT] First order data: Object
+logistics-management.tsx:187 🔍 [LOGISTICS MGMT] First order data: Object
+logistics-management.tsx:187 🔍 [LOGISTICS MGMT] First order data: Object
+logistics-management.tsx:187 🔍 [LOGISTICS MGMT] First order data: Object
+useAuth.ts:43 Auth check result: Object
+logistics-management.tsx:187 🔍 [LOGISTICS MGMT] First order data: Object
+logistics-management.tsx:187 🔍 [LOGISTICS MGMT] First order data: Object
+logistics-management.tsx:187 🔍 [LOGISTICS MGMT] First order data: Object
+useAuth.ts:43 Auth check result: Object
+logistics-management.tsx:187 🔍 [LOGISTICS MGMT] First order data: Object
+logistics-management.tsx:187 🔍 [LOGISTICS MGMT] First order data: Object
+useAuth.ts:43 Auth check result: Object
+useAuth.ts:43 Auth check result: Object
+logistics-management.tsx:187 🔍 [LOGISTICS MGMT] First order data: Object
+useAuth.ts:43 Auth check result: Object
+useAuth.ts:43 Auth check result: Object
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+useAuth.ts:43 Auth check result: Object
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+useAuth.ts:43 Auth check result: Object
+logistics-management.tsx:187 🔍 [LOGISTICS MGMT] First order data: Object
+/api/logistics/vehicle-templates/1:1  Failed to load resource: the server responded with a status of 404 (Not Found)
+logistics-management.tsx:187 🔍 [LOGISTICS MGMT] First order data: Object
+logistics-management.tsx:187 🔍 [LOGISTICS MGMT] First order data: Object
+logistics-management.tsx:187 🔍 [LOGISTICS MGMT] First order data: Object
+logistics-management.tsx:187 🔍 [LOGISTICS MGMT] First order data: Object
+useAuth.ts:43 Auth check result: Object
+logistics-management.tsx:187 🔍 [LOGISTICS MGMT] First order data: {id: 88, customerOrderId: 254, orderNumber: 'M2511132', hasOrderNumber: true, allFields: Array(54)}
+useAuth.ts:43 Auth check result: {success: true, user: {…}}
+logistics-management.tsx:187 🔍 [LOGISTICS MGMT] First order data: {id: 88, customerOrderId: 254, orderNumber: 'M2511132', hasOrderNumber: true, allFields: Array(54)}
+logistics-management.tsx:273  PUT https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/logistics/vehicle-templates/1 404 (Not Found)
+mutationFn @ logistics-management.tsx:273
+fn @ @tanstack_react-query.js?v=6aa58533:1189
+run @ @tanstack_react-query.js?v=6aa58533:494
+start @ @tanstack_react-query.js?v=6aa58533:536
+execute @ @tanstack_react-query.js?v=6aa58533:1225
+await in execute
+mutate @ @tanstack_react-query.js?v=6aa58533:2630
+(anonymous) @ @tanstack_react-query.js?v=6aa58533:3295
+handleEditVehicle @ logistics-management.tsx:407
+onSubmit @ logistics-management.tsx:566
+callCallback2 @ chunk-RPCDYKBN.js?v=6aa58533:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=6aa58533:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=6aa58533:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=6aa58533:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=6aa58533:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=6aa58533:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=6aa58533:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=6aa58533:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=6aa58533:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=6aa58533:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=6aa58533:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=6aa58533:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=6aa58533:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=6aa58533:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=6aa58533:5449
+logistics-management.tsx:187 🔍 [LOGISTICS MGMT] First order data: {id: 88, customerOrderId: 254, orderNumber: 'M2511132', hasOrderNumber: true, allFields: Array(54)}

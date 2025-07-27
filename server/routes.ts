@@ -34135,8 +34135,35 @@ momtazchem.com
     }
   });
 
-  // Update vehicle template
+  // Update vehicle template (PATCH method)
   app.patch("/api/logistics/vehicle-templates/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ success: false, message: "شناسه نامعتبر" });
+      }
+
+      const vehicleData = req.body;
+      vehicleData.updatedAt = new Date();
+      
+      const [updatedVehicle] = await db.update(vehicleTemplates)
+        .set(vehicleData)
+        .where(eq(vehicleTemplates.id, id))
+        .returning();
+
+      if (!updatedVehicle) {
+        return res.status(404).json({ success: false, message: "الگوی خودرو یافت نشد" });
+      }
+
+      res.json({ success: true, data: updatedVehicle });
+    } catch (error) {
+      console.error("Error updating vehicle template:", error);
+      res.status(500).json({ success: false, message: "خطا در بروزرسانی الگوی خودرو" });
+    }
+  });
+
+  // Update vehicle template (PUT method - for compatibility)
+  app.put("/api/logistics/vehicle-templates/:id", requireAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {

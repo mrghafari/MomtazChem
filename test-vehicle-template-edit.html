@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Vehicle Template Edit</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button { padding: 10px 20px; margin: 10px; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-success { background-color: #28a745; color: white; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; }
+        .test-result { margin-top: 10px; padding: 10px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚛 تست ادیت الگوهای خودرو</h1>
+        <p>این صفحه برای تست عملکرد فرم ادیت الگوهای خودرو طراحی شده است.</p>
+
+        <div class="test-section info">
+            <h3>📊 وضعیت فعلی سیستم</h3>
+            <div id="systemStatus">در حال بررسی...</div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔍 تست 1: دریافت لیست الگوهای خودرو</h3>
+            <button class="btn-primary" onclick="testGetVehicleTemplates()">دریافت الگوها</button>
+            <div id="getTemplatesResult" class="test-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>✏️ تست 2: ادیت الگوی خودرو (PUT Method)</h3>
+            <p>این تست از متد PUT برای ادیت الگوی خودرو استفاده می‌کند.</p>
+            <button class="btn-success" onclick="testEditVehicleTemplate()">تست ادیت با PUT</button>
+            <div id="editTemplateResult" class="test-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔧 تست 3: ادیت الگوی خودرو (PATCH Method)</h3>
+            <p>این تست از متد PATCH برای ادیت الگوی خودرو استفاده می‌کند.</p>
+            <button class="btn-success" onclick="testEditVehicleTemplatePatch()">تست ادیت با PATCH</button>
+            <div id="editTemplatePatchResult" class="test-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🆕 تست 4: ایجاد الگوی جدید</h3>
+            <button class="btn-primary" onclick="testCreateVehicleTemplate()">ایجاد الگوی جدید</button>
+            <div id="createTemplateResult" class="test-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📝 نتایج کلی</h3>
+            <div id="overallResults">هنوز تستی اجرا نشده است.</div>
+        </div>
+    </div>
+
+    <script>
+        let testResults = {
+            getTemplates: false,
+            editPUT: false,
+            editPATCH: false,
+            create: false
+        };
+
+        function updateOverallResults() {
+            const resultsDiv = document.getElementById('overallResults');
+            const total = Object.keys(testResults).length;
+            const passed = Object.values(testResults).filter(r => r).length;
+            
+            resultsDiv.innerHTML = `
+                <h4>نتایج: ${passed}/${total} تست موفق</h4>
+                <ul>
+                    <li>دریافت الگوها: ${testResults.getTemplates ? '✅' : '❌'}</li>
+                    <li>ادیت با PUT: ${testResults.editPUT ? '✅' : '❌'}</li>
+                    <li>ادیت با PATCH: ${testResults.editPATCH ? '✅' : '❌'}</li>
+                    <li>ایجاد الگوی جدید: ${testResults.create ? '✅' : '❌'}</li>
+                </ul>
+            `;
+            
+            if (passed === total) {
+                resultsDiv.className = 'test-result success';
+            } else if (passed > 0) {
+                resultsDiv.className = 'test-result info';
+            } else {
+                resultsDiv.className = 'test-result error';
+            }
+        }
+
+        async function checkSystemStatus() {
+            try {
+                const response = await fetch('/api/logistics/test');
+                const data = await response.json();
+                
+                document.getElementById('systemStatus').innerHTML = `
+                    <div class="success" style="padding: 10px; border-radius: 4px;">
+                        ✅ سیستم آنلاین است: ${data.message}
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('systemStatus').innerHTML = `
+                    <div class="error" style="padding: 10px; border-radius: 4px;">
+                        ❌ خطا در اتصال به سیستم: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        async function testGetVehicleTemplates() {
+            try {
+                const response = await fetch('/api/logistics/vehicle-templates', {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    testResults.getTemplates = true;
+                    document.getElementById('getTemplatesResult').innerHTML = `
+                        <div class="success">
+                            ✅ موفق: ${data.data?.length || 0} الگو دریافت شد
+                            <pre>${JSON.stringify(data.data?.slice(0, 2), null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    throw new Error(data.message || 'خطای نامشخص');
+                }
+            } catch (error) {
+                testResults.getTemplates = false;
+                document.getElementById('getTemplatesResult').innerHTML = `
+                    <div class="error">
+                        ❌ خطا: ${error.message}
+                    </div>
+                `;
+            }
+            updateOverallResults();
+        }
+
+        async function testEditVehicleTemplate() {
+            try {
+                // First get templates to find an ID to edit
+                const getResponse = await fetch('/api/logistics/vehicle-templates', {
+                    credentials: 'include'
+                });
+                const getData = await getResponse.json();
+                
+                if (!getData.success || !getData.data?.length) {
+                    throw new Error('هیچ الگویی برای ادیت یافت نشد');
+                }
+                
+                const templateId = getData.data[0].id;
+                const editData = {
+                    name: "الگوی تست ادیت شده",
+                    nameEn: "Test Edited Template",
+                    maxWeightKg: "1500",
+                    basePrice: "75000"
+                };
+                
+                const response = await fetch(`/api/logistics/vehicle-templates/${templateId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(editData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    testResults.editPUT = true;
+                    document.getElementById('editTemplateResult').innerHTML = `
+                        <div class="success">
+                            ✅ موفق: الگو ${templateId} با موفقیت ادیت شد (PUT)
+                            <pre>${JSON.stringify(data.data, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    throw new Error(data.message || `HTTP ${response.status}`);
+                }
+            } catch (error) {
+                testResults.editPUT = false;
+                document.getElementById('editTemplateResult').innerHTML = `
+                    <div class="error">
+                        ❌ خطا در ادیت با PUT: ${error.message}
+                    </div>
+                `;
+            }
+            updateOverallResults();
+        }
+
+        async function testEditVehicleTemplatePatch() {
+            try {
+                // First get templates to find an ID to edit
+                const getResponse = await fetch('/api/logistics/vehicle-templates', {
+                    credentials: 'include'
+                });
+                const getData = await getResponse.json();
+                
+                if (!getData.success || !getData.data?.length) {
+                    throw new Error('هیچ الگویی برای ادیت یافت نشد');
+                }
+                
+                const templateId = getData.data[0].id;
+                const editData = {
+                    name: "الگوی تست PATCH",
+                    nameEn: "Test PATCH Template",
+                    maxWeightKg: "2000",
+                    basePrice: "85000"
+                };
+                
+                const response = await fetch(`/api/logistics/vehicle-templates/${templateId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(editData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    testResults.editPATCH = true;
+                    document.getElementById('editTemplatePatchResult').innerHTML = `
+                        <div class="success">
+                            ✅ موفق: الگو ${templateId} با موفقیت ادیت شد (PATCH)
+                            <pre>${JSON.stringify(data.data, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    throw new Error(data.message || `HTTP ${response.status}`);
+                }
+            } catch (error) {
+                testResults.editPATCH = false;
+                document.getElementById('editTemplatePatchResult').innerHTML = `
+                    <div class="error">
+                        ❌ خطا در ادیت با PATCH: ${error.message}
+                    </div>
+                `;
+            }
+            updateOverallResults();
+        }
+
+        async function testCreateVehicleTemplate() {
+            try {
+                const newTemplateData = {
+                    name: "الگوی تست جدید",
+                    nameEn: "New Test Template",
+                    vehicleType: "van",
+                    maxWeightKg: "1200",
+                    maxVolumeM3: "8",
+                    allowedRoutes: ["urban", "interurban"],
+                    basePrice: "60000",
+                    pricePerKm: "1200",
+                    pricePerKg: "600",
+                    supportsHazardous: false,
+                    supportsRefrigerated: false,
+                    supportsFragile: true,
+                    averageSpeedKmh: "45",
+                    fuelConsumptionL100km: "10",
+                    isActive: true,
+                    priority: 0
+                };
+                
+                const response = await fetch('/api/logistics/vehicle-templates', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(newTemplateData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    testResults.create = true;
+                    document.getElementById('createTemplateResult').innerHTML = `
+                        <div class="success">
+                            ✅ موفق: الگوی جدید با ID ${data.data?.id} ایجاد شد
+                            <pre>${JSON.stringify(data.data, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    throw new Error(data.message || `HTTP ${response.status}`);
+                }
+            } catch (error) {
+                testResults.create = false;
+                document.getElementById('createTemplateResult').innerHTML = `
+                    <div class="error">
+                        ❌ خطا در ایجاد الگو: ${error.message}
+                    </div>
+                `;
+            }
+            updateOverallResults();
+        }
+
+        // Run system status check on page load
+        checkSystemStatus();
+        updateOverallResults();
+    </script>
+</body>
+</html>
