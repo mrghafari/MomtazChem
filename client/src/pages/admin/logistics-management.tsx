@@ -1522,7 +1522,121 @@ const LogisticsManagement = () => {
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
               </div>
             ) : (
-              <div className="overflow-x-auto">
+              <div className="space-y-6">
+                {/* City Navigation Slider */}
+                <Card className="bg-gradient-to-r from-blue-50 to-green-50 border-blue-200">
+                  <CardContent className="p-6">
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-lg font-semibold flex items-center gap-2">
+                          <MapPin className="h-5 w-5 text-blue-600" />
+                          اسلایدر شهرها ({sortedAndFilteredCities.length} شهر)
+                        </h4>
+                        <div className="text-sm text-gray-600">
+                          شهر {citySliderIndex[0] + 1} از {sortedAndFilteredCities.length}
+                        </div>
+                      </div>
+                      
+                      {/* Slider Control */}
+                      <div className="px-4">
+                        <Slider
+                          value={citySliderIndex}
+                          onValueChange={setCitySliderIndex}
+                          max={Math.max(0, sortedAndFilteredCities.length - 1)}
+                          min={0}
+                          step={1}
+                          className="w-full"
+                          dir="ltr"
+                        />
+                        <div className="flex justify-between text-xs text-gray-500 mt-2">
+                          <span>اولین شهر</span>
+                          <span>آخرین شهر</span>
+                        </div>
+                      </div>
+
+                      {/* Current City Info */}
+                      {sortedAndFilteredCities.length > 0 && (
+                        <div className="bg-white p-4 rounded-lg border-2 border-blue-300">
+                          {(() => {
+                            const currentCity = sortedAndFilteredCities[citySliderIndex[0]] || sortedAndFilteredCities[0];
+                            return (
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                  <div className="bg-blue-600 p-2 rounded-full">
+                                    <MapPin className="h-4 w-4 text-white" />
+                                  </div>
+                                  <div>
+                                    <h3 className="text-lg font-bold text-blue-900">
+                                      {currentCity.name_arabic || currentCity.name}
+                                    </h3>
+                                    <p className="text-sm text-blue-700">
+                                      {currentCity.name_english || currentCity.name} • {currentCity.province_name}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-4">
+                                  <Badge 
+                                    variant="outline" 
+                                    className={selectedOriginCity?.id === currentCity.id ? 
+                                      "bg-yellow-100 border-yellow-500 text-yellow-700" : 
+                                      "bg-green-50 border-green-200 text-green-700"
+                                    }
+                                  >
+                                    {selectedOriginCity?.id === currentCity.id ? 
+                                      'مبدا (0 کیلومتر)' : 
+                                      `${calculateDistance(currentCity)} کیلومتر`
+                                    }
+                                  </Badge>
+                                  <Badge variant={currentCity.is_active ? "default" : "secondary"}>
+                                    {currentCity.is_active ? "فعال" : "غیرفعال"}
+                                  </Badge>
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    onClick={() => {
+                                      setEditingCity(currentCity);
+                                      setIsEditCityDialogOpen(true);
+                                    }}
+                                  >
+                                    <Edit className="w-4 h-4 mr-2" />
+                                    ویرایش
+                                  </Button>
+                                </div>
+                              </div>
+                            );
+                          })()}
+                        </div>
+                      )}
+
+                      {/* Navigation Buttons */}
+                      {sortedAndFilteredCities.length > 1 && (
+                        <div className="flex justify-center gap-4">
+                          <Button
+                            variant="outline"
+                            onClick={() => setCitySliderIndex([Math.max(0, citySliderIndex[0] - 1)])}
+                            disabled={citySliderIndex[0] === 0}
+                            className="flex items-center gap-2"
+                          >
+                            <ChevronUp className="h-4 w-4" />
+                            شهر قبلی
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={() => setCitySliderIndex([Math.min(sortedAndFilteredCities.length - 1, citySliderIndex[0] + 1)])}
+                            disabled={citySliderIndex[0] === sortedAndFilteredCities.length - 1}
+                            className="flex items-center gap-2"
+                          >
+                            شهر بعدی
+                            <ChevronDown className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Table Display */}
+                <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -1650,6 +1764,7 @@ const LogisticsManagement = () => {
                     هیچ شهری با عبارت "{citySearchFilter}" یافت نشد
                   </div>
                 )}
+                </div>
               </div>
             )}
           </CardContent>
