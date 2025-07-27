@@ -48,6 +48,31 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Business Impact**: Customers can now choose free self-pickup option alongside smart vehicle delivery
 - **Result**: Complete self-pickup delivery method operational with zero cost - customers can collect orders directly from company location without any shipping charges
 
+### COMPLETED: Vehicles Tab Implementation - Complete & Operational (January 27, 2025)
+✅ **IMPLEMENTED: Complete vehicles tab added next to Iraqi cities tab with comprehensive vehicle list and management system**
+- **User Request Fulfilled**: "چرا لیست خودرو ها و ظرفیت هاشون و جاهایی که میتونند بروند را نمیبینم" - Added professional vehicles tab displaying all vehicle types
+- **Comprehensive Vehicle Display**: Created VehiclesTab component showing 4 vehicle types with complete specifications:
+  - **وانت کوچک - پیکان**: 25kg capacity, 400 IQD/km, 12-24h delivery for Baghdad, Erbil, Mosul, Kirkuk
+  - **وانت متوسط - نیسان**: 100kg capacity, 500 IQD/km, 24-36h delivery for Baghdad, Basra, Najaf, Karbala
+  - **کامیونت - ایسوزو**: 500kg capacity, 700 IQD/km, 24-48h delivery to all Iraqi cities
+  - **کامیون بزرگ - هیوو**: 1000+ kg capacity, 1000 IQD/km, 48-72h delivery for major cities and international transport
+- **Professional Interface Features**:
+  - **Search Functionality**: Real-time search through vehicle names and types
+  - **Vehicle Cards**: Professional card design showing capacity, destinations, pricing, delivery times, and status
+  - **Destination Badges**: Clear display of accessible destinations for each vehicle type
+  - **Action Buttons**: Edit and details buttons for vehicle management
+  - **Empty State**: Professional empty state when no vehicles match search criteria
+- **Tab Integration**: Successfully added as 5th tab in logistics management with proper grid layout (grid-cols-5)
+- **Technical Implementation**: 
+  - Added TabsTrigger for "وسایل نقلیه" with proper positioning
+  - Created TabsContent with VehiclesTab component
+  - Integrated search state management and filtering logic
+  - Used existing UI components (Card, Badge, Button) for consistency
+- **Business Impact**: Logistics staff can now view and manage all available vehicles with their capacities and operational destinations
+- **Test Infrastructure**: Created comprehensive test file `test-vehicles-tab.html` for feature validation
+- **User Experience**: Professional design matching existing system architecture with Persian language support
+- **Result**: Complete vehicles tab operational next to Iraqi cities - users can now view comprehensive list of 4 vehicle types with capacities, destinations, pricing, and delivery times
+
 ### COMPLETED: Vertical City Navigation Slider Implementation - Complete & Operational (January 27, 2025)
 ✅ **IMPLEMENTED: Advanced vertical slider navigation system positioned next to cities table for seamless navigation through all 188 Iraqi cities**
 - **User Request Fulfilled**: "بابا من اسلایدر کنار ستون شهرها میخوام تا بتونم شهرها را بیارم داخل کادر" - Added proper vertical slider next to cities column
