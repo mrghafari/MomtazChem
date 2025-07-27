@@ -44,7 +44,7 @@ function ProvinceSelect({ editingCustomer, setEditingCustomer }: {
           id="editProvince"
           placeholder="Enter province"
           value={editingCustomer?.province || ""}
-          onChange={(e) => setEditingCustomer({ ...editingCustomer, province: e.target.value })}
+          onChange={(e) => setEditingCustomer({ ...editingCustomer!, province: e.target.value })}
         />
       </div>
     );
@@ -56,9 +56,9 @@ function ProvinceSelect({ editingCustomer, setEditingCustomer }: {
       <Select 
         value={editingCustomer?.province || ""} 
         onValueChange={(value) => {
-          setEditingCustomer({ ...editingCustomer, province: value });
+          setEditingCustomer({ ...editingCustomer!, province: value });
           // Find the selected province to get its ID for city filtering
-          const selectedProvince = provinces.find((p: any) => p.nameEnglish === value || p.name === value);
+          const selectedProvince = (provinces as any[]).find((p: any) => p.nameEnglish === value || p.name === value);
           if (selectedProvince) {
             setSelectedProvinceId(selectedProvince.id);
           }
@@ -68,7 +68,7 @@ function ProvinceSelect({ editingCustomer, setEditingCustomer }: {
           <SelectValue placeholder="Select province / اختر المحافظة" />
         </SelectTrigger>
         <SelectContent>
-          {provinces.map((province: any) => (
+          {(provinces as any[]).map((province: any) => (
             <SelectItem key={province.id} value={province.nameEnglish}>
               {province.nameEnglish} / {province.nameArabic}
             </SelectItem>
@@ -96,8 +96,8 @@ function CitySelect({ editingCustomer, setEditingCustomer }: {
 
   // Update selectedProvinceId when province changes
   useEffect(() => {
-    if (editingCustomer?.province && provinces.length > 0) {
-      const selectedProvince = provinces.find((p: any) => 
+    if (editingCustomer?.province && Array.isArray(provinces) && provinces.length > 0) {
+      const selectedProvince = (provinces as any[]).find((p: any) => 
         p.nameEnglish === editingCustomer.province || p.name === editingCustomer.province
       );
       if (selectedProvince) {
@@ -129,7 +129,7 @@ function CitySelect({ editingCustomer, setEditingCustomer }: {
           id="editCity"
           placeholder="Enter city"
           value={editingCustomer?.cityRegion || ""}
-          onChange={(e) => setEditingCustomer({ ...editingCustomer, cityRegion: e.target.value })}
+          onChange={(e) => setEditingCustomer({ ...editingCustomer!, cityRegion: e.target.value })}
         />
       </div>
     );
@@ -140,7 +140,7 @@ function CitySelect({ editingCustomer, setEditingCustomer }: {
       <Label htmlFor="editCityRegion">شهر/منطقه / City/Region *</Label>
       <Select 
         value={editingCustomer?.cityRegion || ""} 
-        onValueChange={(value) => setEditingCustomer({ ...editingCustomer, cityRegion: value })}
+        onValueChange={(value) => setEditingCustomer({ ...editingCustomer!, cityRegion: value })}
       >
         <SelectTrigger>
           <SelectValue placeholder="Select city / اختر المدينة" />
@@ -531,7 +531,7 @@ export default function CRM() {
       company: editingCustomer.company || null,
       country: editingCustomer.country,
       province: editingCustomer.province || null,
-      city: editingCustomer.city,
+      cityRegion: editingCustomer.cityRegion,
       address: editingCustomer.address,
       secondaryAddress: editingCustomer.secondaryAddress || null,
       postalCode: editingCustomer.postalCode || null,

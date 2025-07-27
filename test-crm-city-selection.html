@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست انتخاب شهر در CRM</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button { padding: 10px 20px; margin: 10px; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-success { background-color: #28a745; color: white; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; max-height: 300px; }
+        .test-result { margin-top: 10px; padding: 10px; border-radius: 4px; }
+        input, select { padding: 8px; margin: 5px; border: 1px solid #ddd; border-radius: 4px; width: 200px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏙️ تست انتخاب شهر در سیستم CRM</h1>
+        <p>این صفحه برای تست عملکرد انتخاب شهر و ثبت آن در سیستم CRM طراحی شده است.</p>
+
+        <div class="test-section info">
+            <h3>📊 وضعیت فعلی سیستم</h3>
+            <div id="systemStatus">در حال بررسی...</div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔍 تست 1: دریافت لیست استان‌ها</h3>
+            <button class="btn-primary" onclick="testGetProvinces()">دریافت استان‌ها</button>
+            <div id="provincesResult" class="test-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🏙️ تست 2: دریافت شهرهای استان</h3>
+            <select id="provinceSelect">
+                <option value="">انتخاب استان</option>
+            </select>
+            <button class="btn-primary" onclick="testGetCities()">دریافت شهرها</button>
+            <div id="citiesResult" class="test-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>👤 تست 3: دریافت مشتری CRM</h3>
+            <input type="number" id="customerIdInput" placeholder="شناسه مشتری" value="8">
+            <button class="btn-primary" onclick="testGetCrmCustomer()">دریافت مشتری</button>
+            <div id="customerResult" class="test-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>✏️ تست 4: بروزرسانی شهر مشتری</h3>
+            <div>
+                <label>شناسه مشتری:</label>
+                <input type="number" id="updateCustomerId" value="8">
+            </div>
+            <div>
+                <label>استان جدید:</label>
+                <select id="updateProvinceSelect">
+                    <option value="">انتخاب استان</option>
+                </select>
+            </div>
+            <div>
+                <label>شهر جدید:</label>
+                <select id="updateCitySelect">
+                    <option value="">انتخاب شهر</option>
+                </select>
+            </div>
+            <button class="btn-success" onclick="testUpdateCustomerCity()">بروزرسانی شهر</button>
+            <div id="updateResult" class="test-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>✅ تست 5: تایید ثبت شهر (ریفرش)</h3>
+            <button class="btn-primary" onclick="testVerifyUpdate()">بررسی ثبت شهر پس از ریفرش</button>
+            <div id="verifyResult" class="test-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📝 نتایج کلی</h3>
+            <div id="overallResults">هنوز تستی اجرا نشده است.</div>
+        </div>
+    </div>
+
+    <script>
+        let testResults = {
+            provinces: false,
+            cities: false,
+            getCustomer: false,
+            updateCity: false,
+            verifyUpdate: false
+        };
+
+        let provinceData = [];
+        let cityData = [];
+
+        function updateOverallResults() {
+            const resultsDiv = document.getElementById('overallResults');
+            const total = Object.keys(testResults).length;
+            const passed = Object.values(testResults).filter(r => r).length;
+            
+            resultsDiv.innerHTML = `
+                <h4>نتایج: ${passed}/${total} تست موفق</h4>
+                <ul>
+                    <li>استان‌ها: ${testResults.provinces ? '✅' : '❌'}</li>
+                    <li>شهرها: ${testResults.cities ? '✅' : '❌'}</li>
+                    <li>دریافت مشتری: ${testResults.getCustomer ? '✅' : '❌'}</li>
+                    <li>بروزرسانی شهر: ${testResults.updateCity ? '✅' : '❌'}</li>
+                    <li>تایید ثبت: ${testResults.verifyUpdate ? '✅' : '❌'}</li>
+                </ul>
+            `;
+            
+            if (passed === total) {
+                resultsDiv.className = 'test-result success';
+            } else if (passed > 0) {
+                resultsDiv.className = 'test-result info';
+            } else {
+                resultsDiv.className = 'test-result error';
+            }
+        }
+
+        async function checkSystemStatus() {
+            try {
+                const response = await fetch('/api/logistics/provinces');
+                const data = await response.json();
+                
+                document.getElementById('systemStatus').innerHTML = `
+                    <div class="success" style="padding: 10px; border-radius: 4px;">
+                        ✅ سیستم آنلاین است: ${data.data?.length || 0} استان یافت شد
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('systemStatus').innerHTML = `
+                    <div class="error" style="padding: 10px; border-radius: 4px;">
+                        ❌ خطا در اتصال به سیستم: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        async function testGetProvinces() {
+            try {
+                const response = await fetch('/api/logistics/provinces');
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    testResults.provinces = true;
+                    provinceData = data.data;
+                    
+                    // Populate select elements
+                    const selects = [document.getElementById('provinceSelect'), document.getElementById('updateProvinceSelect')];
+                    selects.forEach(select => {
+                        select.innerHTML = '<option value="">انتخاب استان</option>';
+                        data.data.forEach(province => {
+                            const option = document.createElement('option');
+                            option.value = province.nameEnglish;
+                            option.setAttribute('data-id', province.id);
+                            option.textContent = `${province.nameEnglish} / ${province.nameArabic}`;
+                            select.appendChild(option);
+                        });
+                    });
+                    
+                    document.getElementById('provincesResult').innerHTML = `
+                        <div class="success">
+                            ✅ موفق: ${data.data.length} استان دریافت شد
+                            <pre>${JSON.stringify(data.data.slice(0, 3), null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    throw new Error(data.message || 'خطای نامشخص');
+                }
+            } catch (error) {
+                testResults.provinces = false;
+                document.getElementById('provincesResult').innerHTML = `
+                    <div class="error">
+                        ❌ خطا: ${error.message}
+                    </div>
+                `;
+            }
+            updateOverallResults();
+        }
+
+        async function testGetCities() {
+            try {
+                const provinceSelect = document.getElementById('provinceSelect');
+                const selectedOption = provinceSelect.options[provinceSelect.selectedIndex];
+                
+                if (!selectedOption.value) {
+                    throw new Error('لطفاً ابتدا استان را انتخاب کنید');
+                }
+                
+                const provinceId = selectedOption.getAttribute('data-id');
+                const response = await fetch(`/api/logistics/cities?provinceId=${provinceId}`);
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    testResults.cities = true;
+                    cityData = data.data;
+                    
+                    document.getElementById('citiesResult').innerHTML = `
+                        <div class="success">
+                            ✅ موفق: ${data.data.length} شهر برای استان ${selectedOption.value} یافت شد
+                            <pre>${JSON.stringify(data.data.slice(0, 5), null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    throw new Error(data.message || 'خطای نامشخص');
+                }
+            } catch (error) {
+                testResults.cities = false;
+                document.getElementById('citiesResult').innerHTML = `
+                    <div class="error">
+                        ❌ خطا: ${error.message}
+                    </div>
+                `;
+            }
+            updateOverallResults();
+        }
+
+        async function testGetCrmCustomer() {
+            try {
+                const customerId = document.getElementById('customerIdInput').value;
+                if (!customerId) {
+                    throw new Error('لطفاً شناسه مشتری را وارد کنید');
+                }
+                
+                const response = await fetch(`/api/crm/customers/${customerId}`, {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    testResults.getCustomer = true;
+                    document.getElementById('customerResult').innerHTML = `
+                        <div class="success">
+                            ✅ موفق: مشتری ${data.data.firstName} ${data.data.lastName} یافت شد
+                            <p><strong>شهر فعلی:</strong> ${data.data.cityRegion || 'تعریف نشده'}</p>
+                            <p><strong>استان فعلی:</strong> ${data.data.province || 'تعریف نشده'}</p>
+                            <pre>${JSON.stringify(data.data, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    throw new Error(data.message || 'مشتری یافت نشد');
+                }
+            } catch (error) {
+                testResults.getCustomer = false;
+                document.getElementById('customerResult').innerHTML = `
+                    <div class="error">
+                        ❌ خطا: ${error.message}
+                    </div>
+                `;
+            }
+            updateOverallResults();
+        }
+
+        async function testUpdateCustomerCity() {
+            try {
+                const customerId = document.getElementById('updateCustomerId').value;
+                const province = document.getElementById('updateProvinceSelect').value;
+                const city = document.getElementById('updateCitySelect').value;
+                
+                if (!customerId || !province || !city) {
+                    throw new Error('لطفاً همه فیلدها را پر کنید');
+                }
+                
+                const updateData = {
+                    province: province,
+                    cityRegion: city
+                };
+                
+                const response = await fetch(`/api/crm/customers/${customerId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(updateData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    testResults.updateCity = true;
+                    document.getElementById('updateResult').innerHTML = `
+                        <div class="success">
+                            ✅ موفق: شهر مشتری ${customerId} بروزرسانی شد
+                            <p><strong>استان جدید:</strong> ${data.data.province}</p>
+                            <p><strong>شهر جدید:</strong> ${data.data.cityRegion}</p>
+                            <pre>${JSON.stringify(data.data, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    throw new Error(data.message || 'خطا در بروزرسانی');
+                }
+            } catch (error) {
+                testResults.updateCity = false;
+                document.getElementById('updateResult').innerHTML = `
+                    <div class="error">
+                        ❌ خطا: ${error.message}
+                    </div>
+                `;
+            }
+            updateOverallResults();
+        }
+
+        async function testVerifyUpdate() {
+            try {
+                const customerId = document.getElementById('updateCustomerId').value;
+                if (!customerId) {
+                    throw new Error('لطفاً شناسه مشتری را وارد کنید');
+                }
+                
+                // Clear cache and force fresh request
+                const response = await fetch(`/api/crm/customers/${customerId}?_=${Date.now()}`, {
+                    credentials: 'include',
+                    cache: 'no-cache'
+                });
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    testResults.verifyUpdate = true;
+                    document.getElementById('verifyResult').innerHTML = `
+                        <div class="success">
+                            ✅ تایید موفق: شهر مشتری پس از ریفرش ثبت شده است
+                            <p><strong>استان ثبت شده:</strong> ${data.data.province || 'تعریف نشده'}</p>
+                            <p><strong>شهر ثبت شده:</strong> ${data.data.cityRegion || 'تعریف نشده'}</p>
+                            <p><strong>تاریخ بروزرسانی:</strong> ${data.data.updatedAt}</p>
+                        </div>
+                    `;
+                } else {
+                    throw new Error(data.message || 'مشتری یافت نشد');
+                }
+            } catch (error) {
+                testResults.verifyUpdate = false;
+                document.getElementById('verifyResult').innerHTML = `
+                    <div class="error">
+                        ❌ خطا: ${error.message}
+                    </div>
+                `;
+            }
+            updateOverallResults();
+        }
+
+        // Auto-populate cities when province changes
+        document.getElementById('updateProvinceSelect').addEventListener('change', async function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const citySelect = document.getElementById('updateCitySelect');
+            
+            if (!selectedOption.value) {
+                citySelect.innerHTML = '<option value="">انتخاب شهر</option>';
+                return;
+            }
+            
+            try {
+                const provinceId = selectedOption.getAttribute('data-id');
+                const response = await fetch(`/api/logistics/cities?provinceId=${provinceId}`);
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    citySelect.innerHTML = '<option value="">انتخاب شهر</option>';
+                    data.data.forEach(city => {
+                        const option = document.createElement('option');
+                        option.value = city.nameEnglish;
+                        option.textContent = `${city.nameEnglish} / ${city.nameArabic}`;
+                        citySelect.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading cities:', error);
+            }
+        });
+
+        // Run system status check on page load
+        checkSystemStatus();
+        updateOverallResults();
+    </script>
+</body>
+</html>
