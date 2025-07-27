@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { CheckCircle, ShoppingCart, CreditCard, Truck, User, MapPin, Weight, Car, Calculator } from "lucide-react";
+import { CheckCircle, ShoppingCart, CreditCard, Truck, User, MapPin, Weight, Car, Calculator, Scale } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
@@ -833,6 +833,24 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Checkout</h1>
           <p className="text-gray-600">Complete your order details below</p>
+        </div>
+
+        {/* وزن ناخالص کالای انتخاب شده */}
+        <div className="flex justify-center mb-6">
+          <Card className="w-auto px-6 py-4 bg-gradient-to-r from-blue-50 to-green-50 border-2 border-blue-200">
+            <div className="flex items-center gap-3">
+              <Scale className="h-6 w-6 text-blue-600" />
+              <div className="text-center">
+                <p className="text-sm text-gray-600 mb-1">وزن ناخالص کالای انتخاب شده</p>
+                <p className="text-2xl font-bold text-blue-800">
+                  {totalWeight.toLocaleString('fa-IR', { 
+                    minimumFractionDigits: 2, 
+                    maximumFractionDigits: 2 
+                  })} کیلوگرم
+                </p>
+              </div>
+            </div>
+          </Card>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
