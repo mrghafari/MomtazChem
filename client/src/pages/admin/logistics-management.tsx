@@ -31,7 +31,9 @@ import {
   Mail,
   Flame,
   Weight,
-  Scale
+  Scale,
+  Search,
+  X
 } from 'lucide-react';
 import { useOrderNotifications } from '@/hooks/useOrderNotifications';
 import PostalServicesTab from '@/components/PostalServicesTab';
@@ -1811,9 +1813,22 @@ const LogisticsManagement = () => {
     const [isEditProvinceDialogOpen, setIsEditProvinceDialogOpen] = useState(false);
     const [isEditCityDialogOpen, setIsEditCityDialogOpen] = useState(false);
     const [selectedOriginCity, setSelectedOriginCity] = useState<any>(null);
+    const [citySearchFilter, setCitySearchFilter] = useState('');
 
     const geographyProvinces = (geographyProvincesResponse as any)?.data || [];
     const geographyCities = (geographyCitiesResponse as any)?.data || [];
+
+    // Filter cities based on search
+    const filteredCities = geographyCities.filter((city: any) => {
+      if (!citySearchFilter.trim()) return true;
+      const searchTerm = citySearchFilter.toLowerCase().trim();
+      return (
+        (city.name_arabic && city.name_arabic.toLowerCase().includes(searchTerm)) ||
+        (city.name_english && city.name_english.toLowerCase().includes(searchTerm)) ||
+        (city.name && city.name.toLowerCase().includes(searchTerm)) ||
+        (city.province_name && city.province_name.toLowerCase().includes(searchTerm))
+      );
+    });
 
     // Calculate dynamic distances based on selected origin city from database
     const calculateDistance = (targetCity: any) => {
@@ -1999,13 +2014,44 @@ const LogisticsManagement = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <MapPin className="h-5 w-5" />
-              شهرهای عراق ({geographyCities.length})
+              شهرهای عراق ({citySearchFilter ? filteredCities.length : geographyCities.length})
             </CardTitle>
             <CardDescription>
               مدیریت 188 شهر عراق با فاصله‌های قابل تنظیم بر اساس مبدا انتخابی
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {/* Cities Search Filter */}
+            <div className="mb-4 flex items-center gap-3">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    placeholder="جستجو در شهرها (نام عربی، انگلیسی، یا استان)..."
+                    value={citySearchFilter}
+                    onChange={(e) => setCitySearchFilter(e.target.value)}
+                    className="pl-10 text-right"
+                    dir="rtl"
+                  />
+                </div>
+              </div>
+              {citySearchFilter && (
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="bg-blue-50">
+                    {filteredCities.length} نتیجه یافت شد
+                  </Badge>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setCitySearchFilter('')}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+            </div>
+
             {loadingGeographyCities ? (
               <div className="flex items-center justify-center p-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
@@ -2027,7 +2073,7 @@ const LogisticsManagement = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {geographyCities.slice(0, 50).map((city: any) => (
+                    {filteredCities.slice(0, 50).map((city: any) => (
                       <TableRow key={city.id}>
                         <TableCell className="font-medium">{city.id}</TableCell>
                         <TableCell>{city.name_arabic || city.name}</TableCell>
@@ -2074,9 +2120,15 @@ const LogisticsManagement = () => {
                     ))}
                   </TableBody>
                 </Table>
-                {geographyCities.length > 50 && (
+                {filteredCities.length > 50 && (
                   <div className="text-center py-4 text-sm text-gray-500">
-                    و {geographyCities.length - 50} شهر دیگر...
+                    و {filteredCities.length - 50} شهر دیگر...
+                  </div>
+                )}
+                {citySearchFilter && filteredCities.length === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    <Search className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                    هیچ شهری با عبارت "{citySearchFilter}" یافت نشد
                   </div>
                 )}
               </div>
