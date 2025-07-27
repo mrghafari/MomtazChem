@@ -17889,6 +17889,7 @@ Leading Chemical Solutions Provider
         website, taxId, registrationNumber, leadSource, assignedSalesRep,
         annualRevenue, priceRange, orderFrequency, creditStatus, smsEnabled, emailEnabled
       });
+      console.log('🔧 [CRITICAL FIX] Mapping city field to cityRegion for database storage:', city);
       
       // Get current customer data first to preserve existing information
       const currentCustomer = await crmStorage.getCrmCustomerById(customerId);
@@ -17909,7 +17910,7 @@ Leading Chemical Solutions Provider
         company: company || currentCustomer.company,
         country: country || currentCustomer.country,
         province: province || currentCustomer.province,
-        city: city || currentCustomer.city,
+        cityRegion: city || currentCustomer.cityRegion, // FIX: Map 'city' to 'cityRegion' for database
         address: address || currentCustomer.address,
         
         // Additional contact info
