@@ -448,10 +448,22 @@ export default function CRM() {
       }
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("🔧 [FRONTEND UPDATE SUCCESS] Response data:", data);
       toast({ title: "Success", description: "Customer information updated successfully" });
+      
+      // Force invalidate all customer-related queries
       queryClient.invalidateQueries({ queryKey: ["/api/crm/customers"] });
       queryClient.invalidateQueries({ queryKey: ["/api/crm/dashboard"] });
+      
+      // Also invalidate with search parameters
+      queryClient.invalidateQueries({ 
+        queryKey: ["/api/crm/customers", { search: searchTerm, sortField, sortDirection }] 
+      });
+      
+      // Force refetch to ensure UI updates
+      queryClient.refetchQueries({ queryKey: ["/api/crm/customers"] });
+      
       setIsEditCustomerDialogOpen(false);
       setEditingCustomer(null);
     },
@@ -566,7 +578,10 @@ export default function CRM() {
       emailEnabled: editingCustomer.emailEnabled ?? true,
     };
 
-    console.log("Frontend updateData being sent:", updateData);
+    console.log("🔧 [FRONTEND UPDATE] Customer ID:", editingCustomer.id);
+    console.log("🔧 [FRONTEND UPDATE] Current cityRegion:", editingCustomer.cityRegion);
+    console.log("🔧 [FRONTEND UPDATE] Current province:", editingCustomer.province);
+    console.log("🔧 [FRONTEND UPDATE] UpdateData being sent:", updateData);
     updateCustomerMutation.mutate({ id: editingCustomer.id, data: updateData });
   };
 

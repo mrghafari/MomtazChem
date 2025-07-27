@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست عملکرد فرانت‌اند CRM</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        .warning { background-color: #fff3cd; border-color: #ffeaa7; }
+        button { padding: 10px 20px; margin: 10px; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-success { background-color: #28a745; color: white; }
+        .btn-warning { background-color: #ffc107; color: black; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; max-height: 300px; }
+        .test-result { margin-top: 10px; padding: 10px; border-radius: 4px; }
+        input, select { padding: 8px; margin: 5px; border: 1px solid #ddd; border-radius: 4px; width: 200px; }
+        .side-by-side { display: flex; gap: 20px; align-items: flex-start; }
+        .flex-column { flex: 1; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 تست عملکرد فرانت‌اند CRM</h1>
+        <p>این صفحه برای بررسی مسیر کامل ارسال و دریافت داده‌ها در سیستم CRM طراحی شده است.</p>
+
+        <div class="test-section info">
+            <h3>🎯 هدف تست</h3>
+            <p>بررسی اینکه آیا مشکل در فرانت‌اند است یا بک‌اند:</p>
+            <ul>
+                <li>✅ <strong>بک‌اند:</strong> از لاگ‌های سرور مشخص است که کاملاً کار می‌کند</li>
+                <li>❓ <strong>فرانت‌اند:</strong> نیاز به بررسی cache و state management دارد</li>
+            </ul>
+        </div>
+
+        <div class="side-by-side">
+            <div class="flex-column">
+                <div class="test-section">
+                    <h3>👤 مرحله 1: احراز هویت ادمین</h3>
+                    <button class="btn-primary" onclick="adminLogin()">ورود به عنوان ادمین</button>
+                    <div id="authResult" class="test-result"></div>
+                </div>
+
+                <div class="test-section">
+                    <h3>🔍 مرحله 2: دریافت وضعیت فعلی</h3>
+                    <button class="btn-primary" onclick="getCurrentCustomer()">دریافت مشتری 8</button>
+                    <div id="currentResult" class="test-result"></div>
+                </div>
+
+                <div class="test-section">
+                    <h3>✏️ مرحله 3: بروزرسانی مستقیم API</h3>
+                    <div>
+                        <label>استان جدید:</label>
+                        <input type="text" id="newProvince" value="Baghdad" placeholder="استان">
+                    </div>
+                    <div>
+                        <label>شهر جدید:</label>
+                        <input type="text" id="newCity" value="Baghdad City" placeholder="شهر">
+                    </div>
+                    <button class="btn-success" onclick="directAPIUpdate()">بروزرسانی مستقیم API</button>
+                    <div id="directResult" class="test-result"></div>
+                </div>
+            </div>
+
+            <div class="flex-column">
+                <div class="test-section">
+                    <h3>🔄 مرحله 4: تست Cache Invalidation</h3>
+                    <button class="btn-warning" onclick="testCacheInvalidation()">تست Cache</button>
+                    <div id="cacheResult" class="test-result"></div>
+                </div>
+
+                <div class="test-section">
+                    <h3>📊 مرحله 5: مقایسه نتایج</h3>
+                    <button class="btn-primary" onclick="compareResults()">مقایسه نتایج</button>
+                    <div id="compareResult" class="test-result"></div>
+                </div>
+
+                <div class="test-section">
+                    <h3>🎭 مرحله 6: شبیه‌سازی رفتار CRM Interface</h3>
+                    <button class="btn-success" onclick="simulateCRMInterface()">شبیه‌سازی CRM</button>
+                    <div id="simulateResult" class="test-result"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section warning">
+            <h3>📋 نتیجه‌گیری و تشخیص</h3>
+            <div id="diagnosticResult">
+                <p>پس از اجرای تست‌ها، نتایج در اینجا نمایش داده می‌شود...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let adminCookies = '';
+        let customerDataBefore = null;
+        let customerDataAfter = null;
+
+        async function adminLogin() {
+            try {
+                const response = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        username: 'admin@momtazchem.com',
+                        password: 'admin123'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    document.getElementById('authResult').innerHTML = `
+                        <div class="success">
+                            ✅ ورود موفق: ${data.user.username}
+                            <p>وضعیت احراز: ${data.user.userType}</p>
+                        </div>
+                    `;
+                    return true;
+                } else {
+                    throw new Error(data.message || 'خطا در ورود');
+                }
+            } catch (error) {
+                document.getElementById('authResult').innerHTML = `
+                    <div class="error">
+                        ❌ خطا در ورود: ${error.message}
+                    </div>
+                `;
+                return false;
+            }
+        }
+
+        async function getCurrentCustomer() {
+            try {
+                const response = await fetch('/api/crm/customers/8', {
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    customerDataBefore = data.data;
+                    
+                    document.getElementById('currentResult').innerHTML = `
+                        <div class="success">
+                            ✅ دریافت موفق مشتری:
+                            <p><strong>نام:</strong> ${data.data.firstName} ${data.data.lastName}</p>
+                            <p><strong>استان فعلی:</strong> ${data.data.province || 'تعریف نشده'}</p>
+                            <p><strong>شهر فعلی:</strong> ${data.data.cityRegion || 'تعریف نشده'}</p>
+                            <p><strong>آخرین بروزرسانی:</strong> ${new Date(data.data.updatedAt).toLocaleString('fa-IR')}</p>
+                            <details>
+                                <summary>نمایش کامل JSON</summary>
+                                <pre>${JSON.stringify(data.data, null, 2)}</pre>
+                            </details>
+                        </div>
+                    `;
+                } else {
+                    throw new Error(data.message || 'خطا در دریافت داده‌ها');
+                }
+            } catch (error) {
+                document.getElementById('currentResult').innerHTML = `
+                    <div class="error">
+                        ❌ خطا: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        async function directAPIUpdate() {
+            try {
+                const province = document.getElementById('newProvince').value;
+                const city = document.getElementById('newCity').value;
+
+                if (!province || !city) {
+                    throw new Error('لطفاً هم استان و هم شهر را وارد کنید');
+                }
+
+                console.log('🔧 [DIRECT API] Sending update:', { province, cityRegion: city });
+
+                const response = await fetch('/api/crm/customers/8', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        province: province,
+                        cityRegion: city
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    customerDataAfter = data.data;
+                    
+                    document.getElementById('directResult').innerHTML = `
+                        <div class="success">
+                            ✅ بروزرسانی مستقیم موفق!
+                            <p><strong>استان جدید:</strong> ${data.data.province}</p>
+                            <p><strong>شهر جدید:</strong> ${data.data.cityRegion}</p>
+                            <p><strong>زمان بروزرسانی:</strong> ${new Date(data.data.updatedAt).toLocaleString('fa-IR')}</p>
+                            <div style="background: #e7f3ff; padding: 10px; margin: 10px 0; border-radius: 4px;">
+                                📊 <strong>اکنون لاگ‌های سرور را بررسی کنید:</strong>
+                                <ul>
+                                    <li>🔧 [CRM UPDATE] Customer ID: 8</li>
+                                    <li>🔧 [CRM UPDATE] cityRegion field: ${city}</li>
+                                    <li>🔧 [CRM UPDATE] Updated customer</li>
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    throw new Error(data.message || 'خطا در بروزرسانی');
+                }
+            } catch (error) {
+                document.getElementById('directResult').innerHTML = `
+                    <div class="error">
+                        ❌ خطا: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        async function testCacheInvalidation() {
+            try {
+                // Get data immediately after update
+                const immediate = await fetch('/api/crm/customers/8', {
+                    credentials: 'include'
+                });
+                const immediateData = await immediate.json();
+
+                // Get data with cache buster
+                const cacheBusted = await fetch(`/api/crm/customers/8?_=${Date.now()}`, {
+                    credentials: 'include',
+                    cache: 'no-cache'
+                });
+                const cacheBustedData = await cacheBusted.json();
+
+                const immediate_province = immediateData.data.province || 'null';
+                const immediate_city = immediateData.data.cityRegion || 'null';
+                const busted_province = cacheBustedData.data.province || 'null';
+                const busted_city = cacheBustedData.data.cityRegion || 'null';
+
+                const cacheWorking = immediate_province === busted_province && immediate_city === busted_city;
+
+                document.getElementById('cacheResult').innerHTML = `
+                    <div class="${cacheWorking ? 'success' : 'error'}">
+                        <h4>نتیجه تست Cache:</h4>
+                        <p><strong>درخواست عادی:</strong> ${immediate_province} / ${immediate_city}</p>
+                        <p><strong>درخواست Cache-Busted:</strong> ${busted_province} / ${busted_city}</p>
+                        <p><strong>وضعیت Cache:</strong> ${cacheWorking ? '✅ سالم' : '❌ مشکوک'}</p>
+                        ${!cacheWorking ? '<p style="color: red;">⚠️ احتمال مشکل در Cache Invalidation</p>' : ''}
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('cacheResult').innerHTML = `
+                    <div class="error">
+                        ❌ خطا در تست Cache: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        async function compareResults() {
+            if (!customerDataBefore || !customerDataAfter) {
+                document.getElementById('compareResult').innerHTML = `
+                    <div class="warning">
+                        ⚠️ لطفاً ابتدا مراحل 2 و 3 را اجرا کنید
+                    </div>
+                `;
+                return;
+            }
+
+            const beforeProvince = customerDataBefore.province || 'null';
+            const beforeCity = customerDataBefore.cityRegion || 'null';
+            const afterProvince = customerDataAfter.province || 'null';
+            const afterCity = customerDataAfter.cityRegion || 'null';
+
+            const provinceChanged = beforeProvince !== afterProvince;
+            const cityChanged = beforeCity !== afterCity;
+
+            document.getElementById('compareResult').innerHTML = `
+                <div class="${provinceChanged && cityChanged ? 'success' : 'error'}">
+                    <h4>مقایسه قبل و بعد از بروزرسانی:</h4>
+                    <p><strong>استان:</strong> ${beforeProvince} → ${afterProvince} ${provinceChanged ? '✅' : '❌'}</p>
+                    <p><strong>شهر:</strong> ${beforeCity} → ${afterCity} ${cityChanged ? '✅' : '❌'}</p>
+                    <p><strong>آخرین بروزرسانی قبل:</strong> ${new Date(customerDataBefore.updatedAt).toLocaleString('fa-IR')}</p>
+                    <p><strong>آخرین بروزرسانی بعد:</strong> ${new Date(customerDataAfter.updatedAt).toLocaleString('fa-IR')}</p>
+                    ${provinceChanged && cityChanged ? 
+                        '<p style="color: green; font-weight: bold;">🎉 بک‌اند کاملاً کار می‌کند!</p>' : 
+                        '<p style="color: red; font-weight: bold;">⚠️ مشکل در بک‌اند!</p>'
+                    }
+                </div>
+            `;
+        }
+
+        async function simulateCRMInterface() {
+            try {
+                // Simulate the exact API call that CRM interface makes
+                const response = await fetch('/api/crm/customers?limit=50', {
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    const customer8 = data.data.find(c => c.id === 8);
+                    
+                    if (customer8) {
+                        const expected_province = document.getElementById('newProvince').value;
+                        const expected_city = document.getElementById('newCity').value;
+                        
+                        const matches_province = customer8.province === expected_province;
+                        const matches_city = customer8.cityRegion === expected_city;
+                        
+                        document.getElementById('simulateResult').innerHTML = `
+                            <div class="${matches_province && matches_city ? 'success' : 'error'}">
+                                <h4>نتیجه شبیه‌سازی CRM Interface:</h4>
+                                <p><strong>مشتری یافت شد:</strong> ✅</p>
+                                <p><strong>استان در لیست:</strong> ${customer8.province} ${matches_province ? '✅' : '❌'} (انتظار: ${expected_province})</p>
+                                <p><strong>شهر در لیست:</strong> ${customer8.cityRegion} ${matches_city ? '✅' : '❌'} (انتظار: ${expected_city})</p>
+                                <p><strong>آخرین بروزرسانی:</strong> ${new Date(customer8.updatedAt).toLocaleString('fa-IR')}</p>
+                                ${matches_province && matches_city ? 
+                                    '<p style="color: green; font-weight: bold;">🎉 CRM Interface داده‌های به‌روز را نشان می‌دهد!</p>' : 
+                                    '<p style="color: red; font-weight: bold;">⚠️ CRM Interface داده‌های قدیمی نشان می‌دهد!</p>'
+                                }
+                            </div>
+                        `;
+                        
+                        // Update diagnostic result
+                        updateDiagnostic(matches_province && matches_city);
+                    } else {
+                        throw new Error('مشتری 8 در لیست یافت نشد');
+                    }
+                } else {
+                    throw new Error(data.message || 'خطا در دریافت لیست مشتریان');
+                }
+            } catch (error) {
+                document.getElementById('simulateResult').innerHTML = `
+                    <div class="error">
+                        ❌ خطا: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        function updateDiagnostic(crmInterfaceWorking) {
+            if (crmInterfaceWorking) {
+                document.getElementById('diagnosticResult').innerHTML = `
+                    <div class="success">
+                        <h4>🎉 تشخیص: سیستم کاملاً سالم است!</h4>
+                        <ul>
+                            <li>✅ بک‌اند: کاملاً کار می‌کند</li>
+                            <li>✅ API: داده‌ها صحیح ذخیره می‌شوند</li>
+                            <li>✅ CRM Interface: داده‌های به‌روز نمایش داده می‌شوند</li>
+                        </ul>
+                        <p><strong>نتیجه:</strong> احتمالاً مشکل از کش مرورگر یا تجربه کاربری خاص بوده است.</p>
+                    </div>
+                `;
+            } else {
+                document.getElementById('diagnosticResult').innerHTML = `
+                    <div class="error">
+                        <h4>⚠️ تشخیص: مشکل در فرانت‌اند</h4>
+                        <ul>
+                            <li>✅ بک‌اند: کاملاً کار می‌کند</li>
+                            <li>✅ API: داده‌ها صحیح ذخیره می‌شوند</li>
+                            <li>❌ CRM Interface: داده‌های قدیمی نمایش داده می‌شوند</li>
+                        </ul>
+                        <p><strong>اقدام لازم:</strong> بررسی Query Cache Invalidation در React Query</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Auto-run when page loads
+        window.onload = function() {
+            console.log('🔧 CRM Frontend Debug Test Page Loaded');
+        };
+    </script>
+</body>
+</html>

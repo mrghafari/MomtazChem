@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست دیباگ بروزرسانی CRM</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button { padding: 10px 20px; margin: 10px; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-success { background-color: #28a745; color: white; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; max-height: 300px; }
+        .test-result { margin-top: 10px; padding: 10px; border-radius: 4px; }
+        input, select { padding: 8px; margin: 5px; border: 1px solid #ddd; border-radius: 4px; width: 200px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 تست دیباگ بروزرسانی CRM</h1>
+        <p>این صفحه برای دیباگ مشکل عدم ثبت شهر در سیستم CRM طراحی شده است.</p>
+
+        <div class="test-section info">
+            <h3>👤 مشتری تست</h3>
+            <p><strong>شناسه مشتری:</strong> 8 (ABAS ABASI)</p>
+            <p><strong>وضعیت احراز هویت:</strong> <span id="authStatus">در حال بررسی...</span></p>
+        </div>
+
+        <div class="test-section">
+            <h3>🔍 مرحله 1: بررسی وضعیت فعلی مشتری</h3>
+            <button class="btn-primary" onclick="checkCurrentCustomer()">بررسی وضعیت فعلی</button>
+            <div id="currentStatus" class="test-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🏛️ مرحله 2: انتخاب استان و شهر جدید</h3>
+            <div>
+                <label>استان:</label>
+                <select id="provinceSelect">
+                    <option value="">انتخاب استان</option>
+                </select>
+            </div>
+            <div>
+                <label>شهر:</label>
+                <select id="citySelect">
+                    <option value="">انتخاب شهر</option>
+                </select>
+            </div>
+            <button class="btn-primary" onclick="loadGeoData()">بارگیری داده‌های جغرافیایی</button>
+            <div id="geoResult" class="test-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>✏️ مرحله 3: تست بروزرسانی با دیباگ کامل</h3>
+            <div>
+                <label>استان جدید:</label>
+                <input type="text" id="testProvince" placeholder="مثال: Kurdistan" value="Kurdistan">
+            </div>
+            <div>
+                <label>شهر جدید:</label>
+                <input type="text" id="testCity" placeholder="مثال: Erbil" value="Erbil">
+            </div>
+            <button class="btn-success" onclick="testUpdateWithDebug()">بروزرسانی با دیباگ</button>
+            <div id="updateResult" class="test-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔄 مرحله 4: تایید نهایی</h3>
+            <button class="btn-primary" onclick="verifyFinalUpdate()">بررسی وضعیت پس از بروزرسانی</button>
+            <div id="verifyResult" class="test-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 لاگ‌های سرور</h3>
+            <p>لاگ‌های مربوط به بروزرسانی CRM را در کنسول سرور بررسی کنید</p>
+            <button class="btn-danger" onclick="showConsoleInstructions()">نمایش راهنمای بررسی لاگ‌ها</button>
+            <div id="consoleInstructions" class="test-result"></div>
+        </div>
+    </div>
+
+    <script>
+        async function checkAuthStatus() {
+            try {
+                const response = await fetch('/api/admin/me', { credentials: 'include' });
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    document.getElementById('authStatus').innerHTML = `✅ احراز هویت موفق - ${data.user.username}`;
+                    return true;
+                } else {
+                    document.getElementById('authStatus').innerHTML = `❌ احراز هویت ناموفق`;
+                    return false;
+                }
+            } catch (error) {
+                document.getElementById('authStatus').innerHTML = `❌ خطا در احراز هویت: ${error.message}`;
+                return false;
+            }
+        }
+
+        async function checkCurrentCustomer() {
+            try {
+                const response = await fetch('/api/crm/customers/8', { credentials: 'include' });
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    document.getElementById('currentStatus').innerHTML = `
+                        <div class="success">
+                            ✅ وضعیت فعلی مشتری:
+                            <p><strong>نام:</strong> ${data.data.firstName} ${data.data.lastName}</p>
+                            <p><strong>استان فعلی:</strong> ${data.data.province || 'تعریف نشده'}</p>
+                            <p><strong>شهر فعلی:</strong> ${data.data.cityRegion || 'تعریف نشده'}</p>
+                            <p><strong>آخرین بروزرسانی:</strong> ${new Date(data.data.updatedAt).toLocaleString('fa-IR')}</p>
+                            <pre>${JSON.stringify(data.data, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    throw new Error(data.message || 'خطا در دریافت اطلاعات مشتری');
+                }
+            } catch (error) {
+                document.getElementById('currentStatus').innerHTML = `
+                    <div class="error">
+                        ❌ خطا: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        async function loadGeoData() {
+            try {
+                // Load provinces
+                const provincesResponse = await fetch('/api/logistics/provinces');
+                const provincesData = await provincesResponse.json();
+                
+                if (provincesResponse.ok && provincesData.success) {
+                    const provinceSelect = document.getElementById('provinceSelect');
+                    provinceSelect.innerHTML = '<option value="">انتخاب استان</option>';
+                    provincesData.data.forEach(province => {
+                        const option = document.createElement('option');
+                        option.value = province.nameEnglish;
+                        option.setAttribute('data-id', province.id);
+                        option.textContent = `${province.nameEnglish} / ${province.nameArabic}`;
+                        provinceSelect.appendChild(option);
+                    });
+                    
+                    document.getElementById('geoResult').innerHTML = `
+                        <div class="success">
+                            ✅ ${provincesData.data.length} استان بارگیری شد
+                        </div>
+                    `;
+                } else {
+                    throw new Error('خطا در بارگیری استان‌ها');
+                }
+            } catch (error) {
+                document.getElementById('geoResult').innerHTML = `
+                    <div class="error">
+                        ❌ خطا: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Auto-load cities when province changes
+        document.getElementById('provinceSelect').addEventListener('change', async function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const citySelect = document.getElementById('citySelect');
+            
+            if (!selectedOption.value) {
+                citySelect.innerHTML = '<option value="">انتخاب شهر</option>';
+                return;
+            }
+            
+            try {
+                const provinceId = selectedOption.getAttribute('data-id');
+                const response = await fetch(`/api/logistics/cities?provinceId=${provinceId}`);
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    citySelect.innerHTML = '<option value="">انتخاب شهر</option>';
+                    data.data.forEach(city => {
+                        const option = document.createElement('option');
+                        option.value = city.nameEnglish;
+                        option.textContent = `${city.nameEnglish} / ${city.nameArabic}`;
+                        citySelect.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading cities:', error);
+            }
+        });
+
+        async function testUpdateWithDebug() {
+            try {
+                const province = document.getElementById('testProvince').value;
+                const city = document.getElementById('testCity').value;
+                
+                if (!province || !city) {
+                    throw new Error('لطفاً هم استان و هم شهر را وارد کنید');
+                }
+                
+                const updateData = {
+                    province: province,
+                    cityRegion: city
+                };
+                
+                console.log('🔧 Frontend sending update data:', updateData);
+                
+                const response = await fetch('/api/crm/customers/8', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(updateData)
+                });
+                
+                const data = await response.json();
+                
+                console.log('🔧 Frontend received response:', data);
+                
+                if (response.ok && data.success) {
+                    document.getElementById('updateResult').innerHTML = `
+                        <div class="success">
+                            ✅ بروزرسانی موفق!
+                            <p><strong>استان بروزرسانی شده:</strong> ${data.data.province}</p>
+                            <p><strong>شهر بروزرسانی شده:</strong> ${data.data.cityRegion}</p>
+                            <p><strong>زمان بروزرسانی:</strong> ${new Date(data.data.updatedAt).toLocaleString('fa-IR')}</p>
+                            <pre>${JSON.stringify(data.data, null, 2)}</pre>
+                            <div style="background: #fff3cd; padding: 10px; margin: 10px 0; border-radius: 4px;">
+                                <strong>📝 حالا لاگ‌های سرور را بررسی کنید:</strong>
+                                <ul>
+                                    <li>🔧 [CRM UPDATE] Customer ID: 8</li>
+                                    <li>🔧 [CRM UPDATE] Update data received</li>
+                                    <li>🔧 [CRM UPDATE] cityRegion field</li>
+                                    <li>🔧 [CRM UPDATE] Updated customer</li>
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    throw new Error(data.message || 'خطا در بروزرسانی');
+                }
+            } catch (error) {
+                document.getElementById('updateResult').innerHTML = `
+                    <div class="error">
+                        ❌ خطا: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        async function verifyFinalUpdate() {
+            try {
+                // Force fresh request
+                const response = await fetch(`/api/crm/customers/8?_=${Date.now()}`, {
+                    credentials: 'include',
+                    cache: 'no-cache'
+                });
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    const testProvince = document.getElementById('testProvince').value;
+                    const testCity = document.getElementById('testCity').value;
+                    
+                    const provinceMatch = data.data.province === testProvince;
+                    const cityMatch = data.data.cityRegion === testCity;
+                    
+                    document.getElementById('verifyResult').innerHTML = `
+                        <div class="${provinceMatch && cityMatch ? 'success' : 'error'}">
+                            <h4>نتیجه تست نهایی:</h4>
+                            <p><strong>استان:</strong> ${data.data.province} ${provinceMatch ? '✅' : '❌'} (انتظار: ${testProvince})</p>
+                            <p><strong>شهر:</strong> ${data.data.cityRegion} ${cityMatch ? '✅' : '❌'} (انتظار: ${testCity})</p>
+                            <p><strong>آخرین بروزرسانی:</strong> ${new Date(data.data.updatedAt).toLocaleString('fa-IR')}</p>
+                            ${provinceMatch && cityMatch ? 
+                                '<p style="color: green; font-weight: bold;">🎉 بروزرسانی کاملاً موفق بوده است!</p>' : 
+                                '<p style="color: red; font-weight: bold;">⚠️ بروزرسانی کامل نبوده است!</p>'
+                            }
+                        </div>
+                    `;
+                } else {
+                    throw new Error(data.message || 'خطا در دریافت اطلاعات');
+                }
+            } catch (error) {
+                document.getElementById('verifyResult').innerHTML = `
+                    <div class="error">
+                        ❌ خطا: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        function showConsoleInstructions() {
+            document.getElementById('consoleInstructions').innerHTML = `
+                <div class="info">
+                    <h4>📋 راهنمای بررسی لاگ‌های سرور:</h4>
+                    <ol>
+                        <li>در کنسول سرور (terminal) به دنبال این پیام‌ها بگردید:</li>
+                        <ul>
+                            <li><code>🔧 [CRM UPDATE] Customer ID: 8</code></li>
+                            <li><code>🔧 [CRM UPDATE] Update data received</code></li>
+                            <li><code>🔧 [CRM UPDATE] cityRegion field</code></li>
+                        </ul>
+                        <li>همچنین در CRM Storage به دنبال این پیام‌ها بگردید:</li>
+                        <ul>
+                            <li><code>CrmStorage updateCrmCustomer called</code></li>
+                            <li><code>[CRM UPDATE] Original update data</code></li>
+                            <li><code>CrmStorage updateCrmCustomer result</code></li>
+                        </ul>
+                        <li>اگر لاگ‌ها نشان می‌دهند که داده‌ها به درستی ارسال شده‌اند اما ثبت نمی‌شوند، احتمالاً مشکل در سطح دیتابیس است.</li>
+                    </ol>
+                </div>
+            `;
+        }
+
+        // Initialize page
+        checkAuthStatus();
+    </script>
+</body>
+</html>

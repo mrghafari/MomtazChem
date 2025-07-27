@@ -17533,7 +17533,16 @@ Leading Chemical Solutions Provider
       const customerId = parseInt(req.params.id);
       const updateData = req.body;
       
+      console.log("🔧 [CRM UPDATE] Customer ID:", customerId);
+      console.log("🔧 [CRM UPDATE] Update data received:", JSON.stringify(updateData, null, 2));
+      console.log("🔧 [CRM UPDATE] cityRegion field:", updateData.cityRegion);
+      console.log("🔧 [CRM UPDATE] province field:", updateData.province);
+      
       const customer = await crmStorage.updateCrmCustomer(customerId, updateData);
+      
+      console.log("🔧 [CRM UPDATE] Updated customer:", JSON.stringify(customer, null, 2));
+      console.log("🔧 [CRM UPDATE] Updated cityRegion:", customer.cityRegion);
+      
       res.json({
         success: true,
         data: customer
