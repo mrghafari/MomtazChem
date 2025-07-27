@@ -102,7 +102,7 @@ export default function CustomerProfileEdit() {
   });
 
   // State for selected province to filter cities
-  const [selectedProvinceId, setSelectedProvinceId] = useState<number | null>(null);
+  const [selectedProvinceId, setSelectedProvinceId] = useState<number | null>(18); // Default to Erbil (ID=18)
 
   // Fetch cities data based on selected province
   const { data: citiesData } = useQuery({
@@ -116,6 +116,8 @@ export default function CustomerProfileEdit() {
     },
     retry: 1,
     enabled: true, // Always enabled to get initial data
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    cacheTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
 
   const provinces = (provincesData && typeof provincesData === 'object' && 'data' in provincesData) ? provincesData.data as any[] : [];
@@ -792,18 +794,11 @@ export default function CustomerProfileEdit() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {cities.map((city: any) => {
-                              console.log('🏙️ [RENDER] Rendering city option:', {
-                                id: city.id,
-                                value: city.nameEnglish,
-                                display: `${city.nameEnglish} / ${city.nameArabic}`
-                              });
-                              return (
-                                <SelectItem key={city.id} value={city.nameEnglish}>
-                                  {city.nameEnglish} / {city.nameArabic}
-                                </SelectItem>
-                              );
-                            })}
+                            {cities.map((city: any) => (
+                              <SelectItem key={city.id} value={city.nameEnglish}>
+                                {city.nameEnglish} / {city.nameArabic}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                         <FormMessage />

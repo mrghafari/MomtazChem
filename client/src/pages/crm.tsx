@@ -29,7 +29,7 @@ function ProvinceSelect({ editingCustomer, setEditingCustomer }: {
   
   // Fetch provinces data only if country is Iraq
   const { data: provincesData } = useQuery({
-    queryKey: ["/api/logistics/provinces"],
+    queryKey: ["/api/iraqi-provinces"],
     enabled: editingCustomer?.country === "Iraq",
     retry: 1,
   });
@@ -87,7 +87,7 @@ function CitySelect({ editingCustomer, setEditingCustomer }: {
   
   // Get province ID when province changes
   const { data: provincesData } = useQuery({
-    queryKey: ["/api/logistics/provinces"],
+    queryKey: ["/api/iraqi-provinces"],
     enabled: editingCustomer?.country === "Iraq",
     retry: 1,
   });
@@ -108,11 +108,11 @@ function CitySelect({ editingCustomer, setEditingCustomer }: {
 
   // Fetch cities data based on selected province
   const { data: citiesData } = useQuery({
-    queryKey: ["/api/logistics/cities", selectedProvinceId],
+    queryKey: ["/api/iraqi-cities", selectedProvinceId],
     queryFn: () => {
       const url = selectedProvinceId 
-        ? `/api/logistics/cities?provinceId=${selectedProvinceId}`
-        : '/api/logistics/cities';
+        ? `/api/iraqi-cities?provinceId=${selectedProvinceId}`
+        : '/api/iraqi-cities';
       return fetch(url).then(res => res.json());
     },
     enabled: editingCustomer?.country === "Iraq" && selectedProvinceId !== null,
