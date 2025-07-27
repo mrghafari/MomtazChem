@@ -111,7 +111,7 @@ export default function CustomerProfileEdit() {
       const url = selectedProvinceId 
         ? `/api/iraqi-cities?provinceId=${selectedProvinceId}`
         : '/api/iraqi-cities';
-      console.log('🌍 [API] Fetching cities from:', url);
+      // console.log('🌍 [API] Fetching cities from:', url);
       return fetch(url).then(res => res.json());
     },
     retry: 1,
@@ -133,12 +133,8 @@ export default function CustomerProfileEdit() {
     arr.findIndex((c: any) => c.nameEnglish === city.nameEnglish) === index
   );
   
-  console.log('🌍 [FILTER] Total cities after deduplication:', cities.length);
-  if (selectedProvinceId) {
-    console.log(`🌍 [FILTER] Filtered cities for province ${selectedProvinceId}:`, cities.length, 'cities');
-  } else {
-    console.log('🌍 [FILTER] No province filter applied. Total cities:', cities.length);
-  }
+  // Debug logging disabled for performance
+  // console.log('🌍 [FILTER] Total cities after deduplication:', cities.length);
 
   const form = useForm<EditProfileForm>({
     resolver: zodResolver(editProfileSchema),
@@ -280,112 +276,42 @@ export default function CustomerProfileEdit() {
   // Set selected province ID when provinces data and customer data are loaded
   useEffect(() => {
     const actualCustomer = customer?.customer || customer;
-    if (actualCustomer?.province && provinces.length > 0) {
-      console.log('🏛️ [PROVINCE DEBUG] Customer province from backend:', actualCustomer.province);
-      console.log('🏛️ [PROVINCE DEBUG] Available provinces:', provinces.map((p: any) => ({
-        id: p.id,
-        nameEnglish: p.nameEnglish,
-        nameArabic: p.nameArabic,
-        name: p.name
-      })));
-      
-      // Try to find by English name first, then by Arabic name
+    if (actualCustomer?.province && provinces.length > 0 && !selectedProvinceId) {
       const customerProvince = provinces.find((p: any) => 
         p.nameEnglish === actualCustomer.province || 
         p.name === actualCustomer.province ||
-        p.nameArabic === actualCustomer.province ||
-        p.namePersian === actualCustomer.province
+        p.nameArabic === actualCustomer.province
       );
       
       if (customerProvince) {
-        console.log('✅ [PROVINCE] Found matching province:', customerProvince);
         setSelectedProvinceId(customerProvince.id);
-        // Set form value to the standardized name to ensure CRM integration
         form.setValue('province', customerProvince.nameEnglish || customerProvince.name);
-        console.log('📍 [PROVINCE] Province set to:', customerProvince.nameEnglish);
-      } else {
-        console.error('❌ [PROVINCE] Province not found for:', actualCustomer.province);
-        console.error('❌ [PROVINCE] Available options:', provinces.map((p: any) => `${p.nameArabic} / ${p.nameEnglish}`));
       }
     }
-  }, [customer, provinces, form]);
+  }, [customer?.customer?.province, provinces.length, selectedProvinceId]);
 
-  // CRITICAL FIX: Separate effect for city setting after cities are loaded
+  // CRITICAL FIX: City setting with stable dependencies
   useEffect(() => {
     const actualCustomer = customer?.customer || customer;
     const customerCityValue = actualCustomer?.cityRegion || actualCustomer?.city;
     
-    console.log('🚀 [CITY EFFECT] City effect triggered');
-    console.log('🔧 [CITY EFFECT] Full customer object:', customer);
-    console.log('🔧 [CITY EFFECT] Actual customer data:', actualCustomer);
-    console.log('🔧 [CITY EFFECT] Customer object keys:', Object.keys(actualCustomer || {}));
-    console.log('🔧 [CITY EFFECT] cityRegion field:', actualCustomer?.cityRegion);
-    console.log('🔧 [CITY EFFECT] city field:', actualCustomer?.city);
-    console.log('🔧 [CITY EFFECT] Customer city value:', customerCityValue);
-    console.log('🔧 [CITY EFFECT] Cities loaded:', cities.length);
-    console.log('🔧 [CITY EFFECT] Selected province ID:', selectedProvinceId);
-    
-    if (!customerCityValue || cities.length === 0) {
-      console.log('⏸️ [CITY EFFECT] Skipping - missing data');
+    // Only run if we have all necessary data and haven't set city yet
+    if (!customerCityValue || cities.length === 0 || form.getValues('city')) {
       return;
     }
 
-    // Find matching city with comprehensive search
-    const foundCity = cities.find((c: any) => {
-      const matches = [
-        c.nameEnglish === customerCityValue,
-        c.nameArabic === customerCityValue,
-        c.name === customerCityValue,
-        c.namePersian === customerCityValue
-      ];
-      
-      console.log('🔍 [CITY MATCHING] Testing city:', {
-        id: c.id,
-        nameEnglish: c.nameEnglish,
-        nameArabic: c.nameArabic,
-        matches: matches,
-        anyMatch: matches.some(Boolean)
-      });
-      
-      return matches.some(Boolean);
-    });
+    // Find matching city
+    const foundCity = cities.find((c: any) => 
+      c.nameEnglish === customerCityValue ||
+      c.nameArabic === customerCityValue ||
+      c.name === customerCityValue ||
+      c.namePersian === customerCityValue
+    );
 
     if (foundCity) {
-      const valueToSet = foundCity.nameEnglish;
-      console.log('✅ [CITY SUCCESS] Found city:', foundCity);
-      console.log('✅ [CITY SUCCESS] Setting form value to:', valueToSet);
-      
-      // Set with multiple strategies to ensure it works
-      form.setValue('city', valueToSet, { 
-        shouldValidate: true, 
-        shouldDirty: true,
-        shouldTouch: true
-      });
-      
-      // Double-check by getting the value right after setting
-      setTimeout(() => {
-        const currentValue = form.getValues('city');
-        console.log('🔍 [VERIFICATION] Form value after set:', currentValue);
-        if (currentValue !== valueToSet) {
-          console.error('❌ [ERROR] Form setValue failed! Trying alternative method...');
-          // Force update with react-hook-form's reset method
-          const currentValues = form.getValues();
-          form.reset({
-            ...currentValues,
-            city: valueToSet
-          });
-        }
-      }, 100);
-      
-    } else {
-      console.error('❌ [CITY ERROR] No matching city found for:', customerCityValue);
-      console.error('❌ [CITY ERROR] Available cities:', cities.map((c: any) => ({
-        id: c.id,
-        nameEnglish: c.nameEnglish,
-        nameArabic: c.nameArabic
-      })));
+      form.setValue('city', foundCity.nameEnglish, { shouldValidate: false });
     }
-  }, [customer, cities, form, selectedProvinceId]);
+  }, [customer?.customer?.cityRegion, cities.length, form.watch('city')]);
 
   // Send SMS verification code
   const sendSmsCodeMutation = useMutation({
