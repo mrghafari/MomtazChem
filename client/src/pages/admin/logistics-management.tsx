@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -1100,17 +1100,17 @@ const LogisticsManagement = () => {
                             return (
                               <>
                                 <p className="text-sm font-medium text-orange-800">
-                                  {shippingData.name}
+                                  {(shippingData as any).name}
                                 </p>
                                 <p className="text-xs text-orange-600 flex items-center">
                                   <Phone className="w-3 h-3 mr-1" />
-                                  {shippingData.phone}
+                                  {(shippingData as any).phone}
                                 </p>
                                 <p className="text-sm text-orange-700">
-                                  {shippingData.address}
+                                  {(shippingData as any).address}
                                 </p>
                                 <p className="text-xs text-orange-600">
-                                  {shippingData.city} - {shippingData.postalCode}
+                                  {(shippingData as any).city} - {(shippingData as any).postalCode}
                                 </p>
                               </>
                             );
@@ -2440,26 +2440,26 @@ const LogisticsManagement = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label className="text-sm text-gray-600">گیرنده</Label>
-                      <p className="font-medium">{selectedOrder.shippingAddress.name}</p>
+                      <p className="font-medium">{(selectedOrder.shippingAddress as any)?.name}</p>
                     </div>
                     <div>
                       <Label className="text-sm text-gray-600">تلفن گیرنده</Label>
                       <p className="font-medium flex items-center">
                         <Phone className="w-4 h-4 mr-2 text-green-600" />
-                        {selectedOrder.shippingAddress.phone}
+                        {(selectedOrder.shippingAddress as any)?.phone}
                       </p>
                     </div>
                     <div className="md:col-span-2">
                       <Label className="text-sm text-gray-600">آدرس کامل</Label>
-                      <p className="font-medium">{selectedOrder.shippingAddress.address}</p>
+                      <p className="font-medium">{(selectedOrder.shippingAddress as any)?.address}</p>
                     </div>
                     <div>
                       <Label className="text-sm text-gray-600">شهر</Label>
-                      <p className="font-medium">{selectedOrder.shippingAddress.city}</p>
+                      <p className="font-medium">{(selectedOrder.shippingAddress as any)?.city}</p>
                     </div>
                     <div>
                       <Label className="text-sm text-gray-600">کد پستی</Label>
-                      <p className="font-medium">{selectedOrder.shippingAddress.postalCode}</p>
+                      <p className="font-medium">{(selectedOrder.shippingAddress as any)?.postalCode}</p>
                     </div>
                   </div>
                 </div>
