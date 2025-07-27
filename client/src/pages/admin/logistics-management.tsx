@@ -33,7 +33,10 @@ import {
   Weight,
   Scale,
   Search,
-  X
+  X,
+  ChevronUp,
+  ChevronDown,
+  ChevronsUpDown
 } from 'lucide-react';
 import { useOrderNotifications } from '@/hooks/useOrderNotifications';
 import PostalServicesTab from '@/components/PostalServicesTab';
@@ -1814,9 +1817,53 @@ const LogisticsManagement = () => {
     const [isEditCityDialogOpen, setIsEditCityDialogOpen] = useState(false);
     const [selectedOriginCity, setSelectedOriginCity] = useState<any>(null);
     const [citySearchFilter, setCitySearchFilter] = useState('');
+    const [citySortConfig, setCitySortConfig] = useState<{key: string, direction: 'asc' | 'desc'} | null>(null);
 
     const geographyProvinces = (geographyProvincesResponse as any)?.data || [];
     const geographyCities = (geographyCitiesResponse as any)?.data || [];
+
+    // Sort cities based on current sort configuration
+    const sortCities = (cities: any[]) => {
+      if (!citySortConfig) return cities;
+      
+      return [...cities].sort((a, b) => {
+        let aValue = a[citySortConfig.key];
+        let bValue = b[citySortConfig.key];
+        
+        // Handle special cases for distance calculation
+        if (citySortConfig.key === 'distance') {
+          aValue = calculateDistance(a);
+          bValue = calculateDistance(b);
+        }
+        
+        // Handle null/undefined values
+        if (aValue == null) aValue = '';
+        if (bValue == null) bValue = '';
+        
+        // Convert to string for comparison
+        aValue = String(aValue).toLowerCase();
+        bValue = String(bValue).toLowerCase();
+        
+        if (citySortConfig.direction === 'asc') {
+          return aValue.localeCompare(bValue, 'ar', { numeric: true });
+        } else {
+          return bValue.localeCompare(aValue, 'ar', { numeric: true });
+        }
+      });
+    };
+
+    // Handle sort click
+    const handleSort = (key: string) => {
+      setCitySortConfig(current => {
+        if (current?.key === key) {
+          // Toggle direction if same key
+          return { key, direction: current.direction === 'asc' ? 'desc' : 'asc' };
+        } else {
+          // New key, start with ascending
+          return { key, direction: 'asc' };
+        }
+      });
+    };
 
     // Filter cities based on search
     const filteredCities = geographyCities.filter((city: any) => {
@@ -1829,6 +1876,19 @@ const LogisticsManagement = () => {
         (city.province_name && city.province_name.toLowerCase().includes(searchTerm))
       );
     });
+
+    // Apply sorting to filtered cities
+    const sortedAndFilteredCities = sortCities(filteredCities);
+
+    // Get sort icon for column header
+    const getSortIcon = (columnKey: string) => {
+      if (citySortConfig?.key !== columnKey) {
+        return <ChevronsUpDown className="w-4 h-4 text-gray-400" />;
+      }
+      return citySortConfig.direction === 'asc' ? 
+        <ChevronUp className="w-4 h-4 text-blue-600" /> : 
+        <ChevronDown className="w-4 h-4 text-blue-600" />;
+    };
 
     // Calculate dynamic distances based on selected origin city from database
     const calculateDistance = (targetCity: any) => {
@@ -2014,7 +2074,7 @@ const LogisticsManagement = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <MapPin className="h-5 w-5" />
-              شهرهای عراق ({citySearchFilter ? filteredCities.length : geographyCities.length})
+              شهرهای عراق ({citySearchFilter ? sortedAndFilteredCities.length : geographyCities.length})
             </CardTitle>
             <CardDescription>
               مدیریت 188 شهر عراق با فاصله‌های قابل تنظیم بر اساس مبدا انتخابی
@@ -2038,7 +2098,7 @@ const LogisticsManagement = () => {
               {citySearchFilter && (
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className="bg-blue-50">
-                    {filteredCities.length} نتیجه یافت شد
+                    {sortedAndFilteredCities.length} نتیجه یافت شد
                   </Badge>
                   <Button
                     size="sm"
@@ -2061,19 +2121,71 @@ const LogisticsManagement = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="text-right">شناسه</TableHead>
-                      <TableHead className="text-right">نام عربی</TableHead>
-                      <TableHead className="text-right">نام انگلیسی</TableHead>
-                      <TableHead className="text-right">استان</TableHead>
                       <TableHead className="text-right">
-                        فاصله از {selectedOriginCity ? (selectedOriginCity.name_arabic || selectedOriginCity.name) : 'اربیل'} (کیلومتر)
+                        <Button
+                          variant="ghost"
+                          className="h-auto p-0 font-semibold hover:bg-transparent"
+                          onClick={() => handleSort('id')}
+                        >
+                          شناسه
+                          {getSortIcon('id')}
+                        </Button>
                       </TableHead>
-                      <TableHead className="text-right">وضعیت</TableHead>
+                      <TableHead className="text-right">
+                        <Button
+                          variant="ghost"
+                          className="h-auto p-0 font-semibold hover:bg-transparent"
+                          onClick={() => handleSort('name_arabic')}
+                        >
+                          نام عربی
+                          {getSortIcon('name_arabic')}
+                        </Button>
+                      </TableHead>
+                      <TableHead className="text-right">
+                        <Button
+                          variant="ghost"
+                          className="h-auto p-0 font-semibold hover:bg-transparent"
+                          onClick={() => handleSort('name_english')}
+                        >
+                          نام انگلیسی
+                          {getSortIcon('name_english')}
+                        </Button>
+                      </TableHead>
+                      <TableHead className="text-right">
+                        <Button
+                          variant="ghost"
+                          className="h-auto p-0 font-semibold hover:bg-transparent"
+                          onClick={() => handleSort('province_name')}
+                        >
+                          استان
+                          {getSortIcon('province_name')}
+                        </Button>
+                      </TableHead>
+                      <TableHead className="text-right">
+                        <Button
+                          variant="ghost"
+                          className="h-auto p-0 font-semibold hover:bg-transparent"
+                          onClick={() => handleSort('distance')}
+                        >
+                          فاصله از {selectedOriginCity ? (selectedOriginCity.name_arabic || selectedOriginCity.name) : 'اربیل'} (کیلومتر)
+                          {getSortIcon('distance')}
+                        </Button>
+                      </TableHead>
+                      <TableHead className="text-right">
+                        <Button
+                          variant="ghost"
+                          className="h-auto p-0 font-semibold hover:bg-transparent"
+                          onClick={() => handleSort('is_active')}
+                        >
+                          وضعیت
+                          {getSortIcon('is_active')}
+                        </Button>
+                      </TableHead>
                       <TableHead className="text-right">عملیات</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredCities.slice(0, 50).map((city: any) => (
+                    {sortedAndFilteredCities.slice(0, 50).map((city: any) => (
                       <TableRow key={city.id}>
                         <TableCell className="font-medium">{city.id}</TableCell>
                         <TableCell>{city.name_arabic || city.name}</TableCell>
@@ -2120,12 +2232,12 @@ const LogisticsManagement = () => {
                     ))}
                   </TableBody>
                 </Table>
-                {filteredCities.length > 50 && (
+                {sortedAndFilteredCities.length > 50 && (
                   <div className="text-center py-4 text-sm text-gray-500">
-                    و {filteredCities.length - 50} شهر دیگر...
+                    و {sortedAndFilteredCities.length - 50} شهر دیگر...
                   </div>
                 )}
-                {citySearchFilter && filteredCities.length === 0 && (
+                {citySearchFilter && sortedAndFilteredCities.length === 0 && (
                   <div className="text-center py-8 text-gray-500">
                     <Search className="w-12 h-12 mx-auto mb-4 text-gray-300" />
                     هیچ شهری با عبارت "{citySearchFilter}" یافت نشد

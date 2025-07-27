@@ -224,6 +224,37 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Workflow Integration**: Works seamlessly with existing order management and financial approval systems
 - **Result**: Complete customer rejection visibility operational - customers can see detailed rejection reasons in both main profile and purchase history with professional styling and clear messaging
 
+### COMPLETED: Table Column Sorting Implementation - Complete & Operational (January 27, 2025)
+✅ **IMPLEMENTED: Comprehensive column sorting functionality for cities table with visual indicators**
+- **User Request Fulfilled**: "سورتینگ برای هدر شهرها و سایر ستونها بذار" - Sorting capability added to all city table columns
+- **Clickable Column Headers**: All table headers now clickable buttons with sorting functionality:
+  - **شناسه (ID)**: Sort by city ID numbers
+  - **نام عربی (Arabic Name)**: Alphabetical sorting for Arabic city names
+  - **نام انگلیسی (English Name)**: Alphabetical sorting for English city names
+  - **استان (Province)**: Sort cities by province names
+  - **فاصله (Distance)**: Numerical sorting by distance from selected origin city
+  - **وضعیت (Status)**: Sort by active/inactive status
+- **Advanced Sorting Logic**: Smart sorting system with multiple features:
+  - **Toggle Direction**: Click same column header to toggle between ascending/descending
+  - **Arabic-aware Comparison**: Uses `localeCompare` with Arabic locale for proper text sorting
+  - **Numeric Sorting**: Proper numerical comparison for IDs and distances
+  - **Distance Calculation**: Dynamic distance sorting based on selected origin city
+  - **Null Handling**: Proper handling of empty/null values in sorting
+- **Visual Sort Indicators**: Professional icons showing current sort state:
+  - **ChevronsUpDown**: Gray double arrows for unsorted columns
+  - **ChevronUp**: Blue up arrow for ascending sort
+  - **ChevronDown**: Blue down arrow for descending sort
+- **Integrated Functionality**: Sorting works seamlessly with existing features:
+  - **Search Integration**: Sorting applies to filtered search results
+  - **Origin Selection**: Distance sorting updates when origin city changes
+  - **Pagination**: Sorted results properly paginated with "و X شهر دیگر..." message
+- **State Management**: Added citySortConfig state tracking current sort column and direction
+- **Performance Optimized**: Client-side sorting for instant results without server requests
+- **Professional UI**: Ghost button headers with hover effects and proper RTL alignment
+- **Business Impact**: Administrators can quickly organize 188 Iraqi cities by any column for enhanced data management
+- **User Experience**: Intuitive sorting with clear visual feedback and professional table design
+- **Result**: Complete column sorting operational - users can sort cities table by ID, Arabic name, English name, province, distance, or status with visual sort indicators
+
 ### COMPLETED: Cities Search Filter Implementation - Complete & Operational (January 27, 2025)
 ✅ **IMPLEMENTED: Search filter functionality added above cities table header for enhanced city management**
 - **User Request Fulfilled**: "فیلتر را بالای هدر شهرها اضافه نکردی" - Search filter now positioned above cities table header
