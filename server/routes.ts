@@ -34504,6 +34504,243 @@ momtazchem.com
     }
   });
 
+  // Smart vehicle selection for checkout (enhanced algorithm)
+  app.post("/api/logistics/select-optimal-vehicle", async (req, res) => {
+    try {
+      const { 
+        orderWeightKg, 
+        destinationCity, 
+        routeType = 'urban',
+        isHazardous = false,
+        isRefrigerated = false,
+        isFragile = false,
+        distanceKm = 0
+      } = req.body;
+
+      console.log('🚚 [SMART VEHICLE] Selection request:', {
+        orderWeightKg,
+        destinationCity,
+        routeType,
+        isHazardous,
+        isRefrigerated,
+        isFragile,
+        distanceKm
+      });
+
+      // Validate required fields
+      if (!orderWeightKg || !destinationCity) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "وزن سفارش و شهر مقصد الزامی است" 
+        });
+      }
+
+      // Get destination city info for distance calculation
+      let distance = distanceKm;
+      if (!distance && destinationCity) {
+        const destCity = await db.select()
+          .from(iraqiCities)
+          .where(
+            or(
+              eq(iraqiCities.nameEnglish, destinationCity),
+              eq(iraqiCities.nameArabic, destinationCity),
+              eq(iraqiCities.name, destinationCity)
+            )
+          )
+          .limit(1);
+        
+        if (destCity.length > 0) {
+          distance = parseFloat(destCity[0].distanceFromErbilKm || '0');
+        }
+      }
+
+      // Get all active vehicle templates
+      const vehicles = await db.select().from(vehicleTemplates)
+        .where(eq(vehicleTemplates.isActive, true))
+        .orderBy(vehicleTemplates.priority);
+
+      if (vehicles.length === 0) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "هیچ الگوی خودروی فعالی یافت نشد" 
+        });
+      }
+
+      console.log('🚚 [SMART VEHICLE] Found vehicles:', vehicles.length);
+
+      // Filter suitable vehicles based on capacity and capabilities
+      const suitableVehicles = vehicles.filter(vehicle => {
+        const weightOk = parseFloat(vehicle.maxWeightKg) >= orderWeightKg;
+        const volumeOk = parseFloat(vehicle.maxVolumeM3 || '999999') >= (orderWeightKg / 100); // Rough estimate
+        
+        // Check special requirements
+        let specialOk = true;
+        if (isHazardous && !vehicle.canTransportHazardous) specialOk = false;
+        if (isRefrigerated && !vehicle.hasRefrigeration) specialOk = false;
+        if (isFragile && !vehicle.canTransportFragile) specialOk = false;
+        
+        // Check route type compatibility
+        let routeOk = true;
+        if (vehicle.allowedRoutes) {
+          const allowedRoutes = Array.isArray(vehicle.allowedRoutes) 
+            ? vehicle.allowedRoutes 
+            : vehicle.allowedRoutes.split(',');
+          routeOk = allowedRoutes.includes(routeType);
+        }
+        
+        return weightOk && volumeOk && specialOk && routeOk;
+      });
+
+      if (suitableVehicles.length === 0) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "هیچ خودروی مناسبی برای این سفارش یافت نشد" 
+        });
+      }
+
+      console.log('🚚 [SMART VEHICLE] Suitable vehicles:', suitableVehicles.length);
+
+      // Calculate cost and score for each suitable vehicle
+      const scoredVehicles = suitableVehicles.map(vehicle => {
+        // Calculate total cost
+        const basePrice = parseFloat(vehicle.basePrice || '0');
+        const distanceCost = distance * parseFloat(vehicle.pricePerKm || '0');
+        const weightCost = orderWeightKg * parseFloat(vehicle.pricePerKg || '0');
+        const totalCost = basePrice + distanceCost + weightCost;
+        
+        // Calculate efficiency score (higher is better)
+        let score = 0;
+        
+        // Weight utilization efficiency (prefer vehicles that use capacity well)
+        const weightUtilization = orderWeightKg / parseFloat(vehicle.maxWeightKg);
+        score += weightUtilization * 40; // 40% weight for capacity utilization
+        
+        // Cost efficiency (lower cost per unit is better)
+        const costPerKg = totalCost / orderWeightKg;
+        score += (1000 / costPerKg) * 30; // 30% weight for cost efficiency
+        
+        // Fuel efficiency bonus
+        const fuelEfficiency = parseFloat(vehicle.fuelConsumptionL100km || '20');
+        score += (30 - fuelEfficiency) * 1; // Bonus for better fuel economy
+        
+        // Priority bonus from template
+        score += parseFloat(vehicle.priority || '0') * 5;
+        
+        // Speed bonus for urgent deliveries
+        const maxSpeed = parseFloat(vehicle.maxSpeedKmh || '80');
+        if (routeType === 'highway') {
+          score += maxSpeed * 0.1;
+        }
+        
+        // Special capability bonus
+        if (isHazardous && vehicle.canTransportHazardous) score += 10;
+        if (isRefrigerated && vehicle.hasRefrigeration) score += 10;
+        if (isFragile && vehicle.canTransportFragile) score += 5;
+
+        return {
+          ...vehicle,
+          totalCost: Math.round(totalCost * 100) / 100,
+          basePrice,
+          distanceCost: Math.round(distanceCost * 100) / 100,
+          weightCost: Math.round(weightCost * 100) / 100,
+          score: Math.round(score * 100) / 100,
+          weightUtilization: Math.round(weightUtilization * 100),
+          costPerKg: Math.round(costPerKg * 100) / 100
+        };
+      });
+
+      // Sort by score (highest first)
+      scoredVehicles.sort((a, b) => b.score - a.score);
+
+      const selectedVehicle = scoredVehicles[0];
+      const alternatives = scoredVehicles.slice(1, 4); // Top 3 alternatives
+
+      console.log('🚚 [SMART VEHICLE] Selected vehicle:', {
+        name: selectedVehicle.name,
+        totalCost: selectedVehicle.totalCost,
+        score: selectedVehicle.score,
+        weightUtilization: selectedVehicle.weightUtilization
+      });
+
+      // Save selection to history (optional - only if user is authenticated)
+      try {
+        const orderNumber = `QUOTE-${Date.now()}`; // Generate a quote number for non-order selections
+        
+        const selectionData = {
+          orderNumber,
+          customerId: null, // Will be null for guest selections
+          orderWeightKg: orderWeightKg.toString(),
+          routeType,
+          distanceKm: distance.toString(),
+          isHazardous,
+          isRefrigerated,
+          isFragile,
+          selectedVehicleTemplateId: selectedVehicle.id,
+          selectedVehicleName: selectedVehicle.name,
+          basePrice: selectedVehicle.basePrice.toString(),
+          weightCost: selectedVehicle.weightCost.toString(),
+          distanceCost: selectedVehicle.distanceCost.toString(),
+          totalCost: selectedVehicle.totalCost.toString(),
+          alternativeOptions: alternatives.map(v => ({ 
+            id: v.id, 
+            name: v.name, 
+            score: v.score, 
+            totalCost: v.totalCost 
+          })),
+          selectionAlgorithm: 'smart_optimization',
+          selectionCriteria: `Weight: ${orderWeightKg}kg, Distance: ${distance}km, Route: ${routeType}`
+        };
+
+        console.log('🚚 [SMART VEHICLE] Attempting to save selection data:', JSON.stringify(selectionData, null, 2));
+        await db.insert(vehicleSelectionHistory).values(selectionData);
+        console.log('🚚 [SMART VEHICLE] Selection saved to history:', orderNumber);
+      } catch (historyError) {
+        console.log('🚚 [SMART VEHICLE] History save failed (non-critical):', historyError.message);
+        console.log('🚚 [SMART VEHICLE] Full error:', historyError);
+      }
+
+      res.json({
+        success: true,
+        selectedVehicle: {
+          id: selectedVehicle.id,
+          vehicleName: selectedVehicle.name,
+          vehicleType: selectedVehicle.type,
+          totalCost: selectedVehicle.totalCost,
+          basePrice: selectedVehicle.basePrice,
+          distanceCost: selectedVehicle.distanceCost,
+          weightCost: selectedVehicle.weightCost,
+          score: selectedVehicle.score,
+          weightUtilization: selectedVehicle.weightUtilization,
+          maxWeightKg: selectedVehicle.maxWeightKg,
+          maxVolumeM3: selectedVehicle.maxVolumeM3,
+          fuelConsumptionL100km: selectedVehicle.fuelConsumptionL100km,
+          maxSpeedKmh: selectedVehicle.maxSpeedKmh
+        },
+        alternatives: alternatives.map(v => ({
+          id: v.id,
+          vehicleName: v.name,
+          vehicleType: v.type,
+          totalCost: v.totalCost,
+          score: v.score,
+          weightUtilization: v.weightUtilization
+        })),
+        selectionCriteria: {
+          orderWeightKg,
+          destinationCity,
+          distanceKm: distance,
+          routeType,
+          isHazardous,
+          isRefrigerated,
+          isFragile
+        }
+      });
+
+    } catch (error) {
+      console.error("🚚 [SMART VEHICLE] Selection error:", error);
+      res.status(500).json({ success: false, message: "خطا در انتخاب وسیله بهینه" });
+    }
+  });
+
   // Get vehicle selection history
   app.get("/api/logistics/vehicle-selection-history", requireAuth, async (req, res) => {
     try {

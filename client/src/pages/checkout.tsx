@@ -303,9 +303,66 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
     return sortedVehicles[0]; // Return most cost-effective vehicle
   }, [vehicleTemplates]);
 
-  // Calculate shipping cost with smart vehicle selection
-  const calculateShippingCost = useCallback((weight: number, destination: string) => {
+  // Calculate shipping cost with smart vehicle selection using backend API
+  const calculateShippingCost = useCallback(async (weight: number, destination: string) => {
     if (!destination || weight === 0) return 0;
+    
+    try {
+      console.log('🚚 [CHECKOUT] Requesting smart vehicle selection:', { weight, destination });
+      
+      const response = await fetch('/api/logistics/select-optimal-vehicle', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          orderWeightKg: weight,
+          destinationCity: destination,
+          routeType: 'urban', // Default to urban routing
+          isHazardous: false, // Could be determined from products later
+          isRefrigerated: false,
+          isFragile: false
+        })
+      });
+
+      if (!response.ok) {
+        console.error('🚚 [CHECKOUT] Vehicle selection failed:', response.status);
+        return 0;
+      }
+
+      const result = await response.json();
+      
+      if (result.success && result.selectedVehicle) {
+        const vehicleInfo = result.selectedVehicle;
+        setSelectedVehicle({
+          ...vehicleInfo,
+          name: vehicleInfo.vehicleName,
+          type: vehicleInfo.vehicleType
+        });
+        
+        console.log('🚚 [CHECKOUT] Smart vehicle selected:', {
+          vehicle: vehicleInfo.vehicleName,
+          totalCost: vehicleInfo.totalCost,
+          score: vehicleInfo.score,
+          utilization: vehicleInfo.weightUtilization
+        });
+        
+        return vehicleInfo.totalCost;
+      } else {
+        console.error('🚚 [CHECKOUT] No suitable vehicle found');
+        return 0;
+      }
+    } catch (error) {
+      console.error('🚚 [CHECKOUT] Vehicle selection error:', error);
+      
+      // Fallback to local calculation if API fails
+      return fallbackLocalCalculation(weight, destination);
+    }
+  }, []);
+
+  // Fallback local calculation method (backup)
+  const fallbackLocalCalculation = useCallback((weight: number, destination: string) => {
+    console.log('🚚 [CHECKOUT] Using fallback calculation');
     
     // Find destination city in Iraqi cities
     const destCity = iraqiCities?.data?.find((city: any) => 
@@ -316,7 +373,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
     
     if (!destCity) return 0;
     
-    // Select optimal vehicle
+    // Select optimal vehicle using local logic
     const vehicle = selectOptimalVehicle(weight, destination);
     if (!vehicle) return 0;
     
@@ -329,7 +386,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
     
     const totalCost = baseCost + distanceCost + weightCost;
     
-    console.log('🚚 Vehicle Selection Debug:', {
+    console.log('🚚 [CHECKOUT] Fallback calculation:', {
       weight,
       destination,
       selectedVehicle: vehicle.name,
@@ -383,21 +440,31 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   // Calculate shipping cost when weight or destination changes
   useEffect(() => {
     if (totalWeight > 0 && destinationCity) {
-      const cost = calculateShippingCost(totalWeight, destinationCity);
-      setCalculatedShippingCost(cost);
+      // Use async function to handle the promise from calculateShippingCost
+      const updateShippingCost = async () => {
+        try {
+          const cost = await calculateShippingCost(totalWeight, destinationCity);
+          setCalculatedShippingCost(cost);
+          
+          // Auto-select smart vehicle option when available
+          if (selectedVehicle && cost > 0) {
+            form.setValue('shippingMethod', 'smart_vehicle');
+          }
+          
+          console.log('💰 Shipping Cost Calculated:', {
+            weight: totalWeight,
+            destination: destinationCity,
+            cost: cost,
+            selectedVehicle: selectedVehicle?.name,
+            autoSelected: true
+          });
+        } catch (error) {
+          console.error('🚚 [CHECKOUT] Error updating shipping cost:', error);
+          setCalculatedShippingCost(0);
+        }
+      };
       
-      // Auto-select smart vehicle option when available
-      if (selectedVehicle && cost > 0) {
-        form.setValue('shippingMethod', 'smart_vehicle');
-      }
-      
-      console.log('💰 Shipping Cost Calculated:', {
-        weight: totalWeight,
-        destination: destinationCity,
-        cost: cost,
-        selectedVehicle: selectedVehicle?.name,
-        autoSelected: true
-      });
+      updateShippingCost();
     } else {
       setCalculatedShippingCost(0);
       setSelectedVehicle(null);

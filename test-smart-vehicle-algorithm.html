@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>آزمایش الگوریتم انتخاب خودرو هوشمند</title>
+    <style>
+        body {
+            font-family: 'Tahoma', Arial, sans-serif;
+            margin: 20px;
+            direction: rtl;
+            background-color: #f8fafc;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+            border: 1px solid #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            background: #f8fafc;
+        }
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #374151;
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .checkbox-group {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        .btn {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+        }
+        .btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .results {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 8px;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+        }
+        .error {
+            background: #fef2f2;
+            border-color: #fecaca;
+            color: #dc2626;
+        }
+        .selected-vehicle {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .alternatives {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .alternative-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        .vehicle-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #6b7280;
+        }
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #d1d5db;
+            border-top: 2px solid #22c55e;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚚 آزمایش الگوریتم انتخاب خودرو هوشمند</h1>
+            <p>سیستم انتخاب بهینه خودرو بر اساس وزن، مقصد و ویژگی‌های خاص محصولات</p>
+        </div>
+
+        <form id="vehicleForm">
+            <div class="form-group">
+                <label for="orderWeight">🏋️ وزن سفارش (کیلوگرم) *</label>
+                <input type="number" id="orderWeight" class="form-control" value="15" min="0.1" step="0.1" required>
+                <small>وزن کل محصولات سفارش</small>
+            </div>
+
+            <div class="form-group">
+                <label for="destinationCity">🏙️ شهر مقصد</label>
+                <select id="destinationCity" class="form-control">
+                    <option value="کربلا">کربلا</option>
+                    <option value="بغداد">بغداد</option>
+                    <option value="اربیل">اربیل</option>
+                    <option value="بصره">بصره</option>
+                    <option value="نجف">نجف</option>
+                    <option value="سلیمانیه">سلیمانیه</option>
+                    <option value="دهوک">دهوک</option>
+                    <option value="موصل">موصل</option>
+                </select>
+                <small>شهر مقصد برای محاسبه فاصله و هزینه حمل</small>
+            </div>
+
+            <div class="form-group">
+                <label for="routeType">🛣️ نوع مسیر *</label>
+                <select id="routeType" class="form-control" required>
+                    <option value="urban">شهری (urban)</option>
+                    <option value="interurban">بین‌شهری (interurban)</option>
+                    <option value="highway">جاده‌ای (highway)</option>
+                </select>
+                <small>نوع مسیر حمل برای انتخاب خودروی مناسب</small>
+            </div>
+
+            <div class="form-group">
+                <label>⚠️ ویژگی‌های خاص محصولات:</label>
+                <div class="checkbox-group">
+                    <label>
+                        <input type="checkbox" id="isHazardous"> 
+                        🔥 مواد خطرناک (Hazardous)
+                    </label>
+                    <label>
+                        <input type="checkbox" id="isRefrigerated"> 
+                        ❄️ نیاز به سردخانه (Refrigerated)
+                    </label>
+                    <label>
+                        <input type="checkbox" id="isFragile"> 
+                        📦 شکستنی (Fragile)
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit" class="btn" id="submitBtn">
+                🔍 انتخاب خودرو بهینه
+            </button>
+        </form>
+
+        <div id="results" style="display: none;"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById('vehicleForm');
+        const resultsDiv = document.getElementById('results');
+        const submitBtn = document.getElementById('submitBtn');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<div class="spinner"></div> در حال انتخاب خودرو...';
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = '<div class="loading"><div class="spinner"></div><br>در حال تحلیل گزینه‌های خودرو...</div>';
+
+            try {
+                const formData = {
+                    orderWeightKg: parseFloat(document.getElementById('orderWeight').value),
+                    destinationCity: document.getElementById('destinationCity').value,
+                    routeType: document.getElementById('routeType').value,
+                    isHazardous: document.getElementById('isHazardous').checked,
+                    isRefrigerated: document.getElementById('isRefrigerated').checked,
+                    isFragile: document.getElementById('isFragile').checked
+                };
+
+                console.log('Sending request:', formData);
+
+                const response = await fetch('/api/logistics/select-optimal-vehicle', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                console.log('Response:', data);
+
+                if (data.success) {
+                    displayResults(data);
+                } else {
+                    displayError(data.message || 'خطا در انتخاب خودرو');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                displayError('خطا در ارتباط با سرور');
+            } finally {
+                // Reset button
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '🔍 انتخاب خودرو بهینه';
+            }
+        });
+
+        function displayResults(data) {
+            const { selectedVehicle, alternatives, selectionCriteria } = data;
+            
+            let html = `
+                <div class="selected-vehicle">
+                    <h2>🏆 خودرو منتخب: ${selectedVehicle.vehicleName}</h2>
+                    <div class="vehicle-info">
+                        <div class="info-item">
+                            <span>💰 هزینه کل:</span>
+                            <strong>${selectedVehicle.totalCost.toLocaleString()} دینار</strong>
+                        </div>
+                        <div class="info-item">
+                            <span>📊 امتیاز:</span>
+                            <strong>${selectedVehicle.score.toFixed(2)}</strong>
+                        </div>
+                        <div class="info-item">
+                            <span>⚖️ استفاده از ظرفیت:</span>
+                            <strong>${selectedVehicle.weightUtilization}%</strong>
+                        </div>
+                        <div class="info-item">
+                            <span>🏋️ حداکثر وزن:</span>
+                            <strong>${selectedVehicle.maxWeightKg} کیلوگرم</strong>
+                        </div>
+                        <div class="info-item">
+                            <span>📦 حداکثر حجم:</span>
+                            <strong>${selectedVehicle.maxVolumeM3} متر مکعب</strong>
+                        </div>
+                        <div class="info-item">
+                            <span>⛽ مصرف سوخت:</span>
+                            <strong>${selectedVehicle.fuelConsumptionL100km} لیتر/100کیلومتر</strong>
+                        </div>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <h3>💹 جزئیات هزینه:</h3>
+                        <div class="vehicle-info">
+                            <div class="info-item">
+                                <span>قیمت پایه:</span>
+                                <span>${selectedVehicle.basePrice.toLocaleString()} دینار</span>
+                            </div>
+                            <div class="info-item">
+                                <span>هزینه وزن:</span>
+                                <span>${selectedVehicle.weightCost.toLocaleString()} دینار</span>
+                            </div>
+                            <div class="info-item">
+                                <span>هزینه مسافت:</span>
+                                <span>${selectedVehicle.distanceCost.toLocaleString()} دینار</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>📋 معیارهای انتخاب:</h3>
+                <div class="vehicle-info">
+                    <div class="info-item">
+                        <span>وزن سفارش:</span>
+                        <span>${selectionCriteria.orderWeightKg} کیلوگرم</span>
+                    </div>
+                    <div class="info-item">
+                        <span>شهر مقصد:</span>
+                        <span>${selectionCriteria.destinationCity}</span>
+                    </div>
+                    <div class="info-item">
+                        <span>فاصله:</span>
+                        <span>${selectionCriteria.distanceKm} کیلومتر</span>
+                    </div>
+                    <div class="info-item">
+                        <span>نوع مسیر:</span>
+                        <span>${selectionCriteria.routeType}</span>
+                    </div>
+                    <div class="info-item">
+                        <span>مواد خطرناک:</span>
+                        <span>${selectionCriteria.isHazardous ? 'بله' : 'خیر'}</span>
+                    </div>
+                    <div class="info-item">
+                        <span>نیاز به سردخانه:</span>
+                        <span>${selectionCriteria.isRefrigerated ? 'بله' : 'خیر'}</span>
+                    </div>
+                    <div class="info-item">
+                        <span>شکستنی:</span>
+                        <span>${selectionCriteria.isFragile ? 'بله' : 'خیر'}</span>
+                    </div>
+                </div>
+            `;
+
+            if (alternatives && alternatives.length > 0) {
+                html += `
+                    <h3>🔄 گزینه‌های جایگزین:</h3>
+                    <div class="alternatives">
+                `;
+                
+                alternatives.forEach((vehicle, index) => {
+                    html += `
+                        <div class="alternative-card">
+                            <h4>رتبه ${index + 2}: ${vehicle.vehicleName}</h4>
+                            <div class="vehicle-info">
+                                <div class="info-item">
+                                    <span>هزینه کل:</span>
+                                    <span>${vehicle.totalCost.toLocaleString()} دینار</span>
+                                </div>
+                                <div class="info-item">
+                                    <span>امتیاز:</span>
+                                    <span>${vehicle.score.toFixed(2)}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span>استفاده از ظرفیت:</span>
+                                    <span>${vehicle.weightUtilization}%</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+            }
+
+            resultsDiv.innerHTML = html;
+            resultsDiv.className = 'results';
+        }
+
+        function displayError(message) {
+            resultsDiv.innerHTML = `
+                <div class="error">
+                    <h3>❌ خطا در انتخاب خودرو</h3>
+                    <p>${message}</p>
+                    <p>لطفاً پارامترهای ورودی را بررسی کنید.</p>
+                </div>
+            `;
+            resultsDiv.className = 'results error';
+        }
+
+        // Load test on page load
+        window.addEventListener('load', () => {
+            console.log('🚚 Smart Vehicle Algorithm Test Page Loaded');
+            console.log('🔧 Available endpoints:');
+            console.log('   POST /api/logistics/select-optimal-vehicle');
+            console.log('📋 Test scenarios ready for execution');
+        });
+    </script>
+</body>
+</html>
