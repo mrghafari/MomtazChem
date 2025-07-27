@@ -32,6 +32,22 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Result**: Complete smart vehicle calculator system operational - customers receive automated intelligent vehicle selection with accurate pricing based on weight and destination
 - **Slider Re-implemented**: Vertical city navigation slider added back to geography management for accessing all 188 Iraqi cities
 
+### COMPLETED: Self-Pickup Delivery Method Added - Zero Cost Option (January 27, 2025)
+✅ **IMPLEMENTED: "حمل با خودم" delivery option with zero cost for customer self-pickup**
+- **User Request Fulfilled**: Added self-pickup option to delivery methods with 0 IQD cost
+- **Database Integration**: Added to both delivery_methods and shipping_rates tables:
+  - **delivery_methods**: ID 8, value: self_pickup, label: "حمل با خودم", cost: 0.00 IQD
+  - **shipping_rates**: ID 33, delivery_method: self_pickup, base_price: 0.00, price_per_kg: 0.00
+- **Features**: 
+  - **Zero Cost**: Both base cost and per-kg cost set to 0.00 IQD
+  - **Immediate Delivery**: 0 days estimated delivery (pickup from company location)
+  - **Full Coverage**: Available for all cities and provinces without restrictions
+  - **Blue Theme**: User icon with blue color scheme for visual identification
+- **API Integration**: Available through both /api/checkout/delivery-methods and /api/shipping-rates endpoints
+- **Description**: "تحویل حضوری از محل شرکت - بدون هزینه حمل"
+- **Business Impact**: Customers can now choose free self-pickup option alongside smart vehicle delivery
+- **Result**: Complete self-pickup delivery method operational with zero cost - customers can collect orders directly from company location without any shipping charges
+
 ### COMPLETED: Shipping Rates Tab Completely Removed from Logistics Management Interface (January 27, 2025)
 ✅ **IMPLEMENTED: Complete removal of "نرخ های حمل" tab from logistics management page**
 - **User Request Fulfilled**: Removed shipping rates tab as system exclusively uses smart vehicle delivery method

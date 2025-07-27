@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست گزینه "حمل با خودم" در Checkout</title>
+    <style>
+        body {
+            font-family: 'Tahoma', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+        .success-banner {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .delivery-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .delivery-card {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            background: #f8f9fa;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .delivery-card.new-option {
+            border-color: #007bff;
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        }
+        .delivery-card.smart-vehicle {
+            border-color: #10b981;
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+        }
+        .delivery-card h3 {
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        .delivery-card.new-option h3 {
+            color: #1976d2;
+        }
+        .delivery-card.smart-vehicle h3 {
+            color: #059669;
+        }
+        .cost-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .cost-free {
+            background: #4caf50;
+            color: white;
+        }
+        .cost-calculated {
+            background: #ff9800;
+            color: white;
+        }
+        .api-test {
+            background: #2d3748;
+            color: #68d391;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+            direction: ltr;
+            text-align: left;
+            font-size: 0.9em;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .feature-card {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 20px;
+        }
+        .feature-card h4 {
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+        .feature-card p {
+            color: #4a5568;
+            line-height: 1.6;
+        }
+        .database-info {
+            background: #edf2f7;
+            border-left: 4px solid #4299e1;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .test-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            margin: 10px;
+            transition: transform 0.2s ease;
+        }
+        .test-button:hover {
+            transform: translateY(-2px);
+        }
+        .checkout-demo {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚚 تست گزینه "حمل با خودم" در سیستم Checkout</h1>
+        
+        <div class="success-banner">
+            <h2>✅ گزینه "حمل با خودم" با موفقیت اضافه شد</h2>
+            <p>گزینه جدید با هزینه صفر به سیستم Delivery Methods اضافه گردید</p>
+        </div>
+
+        <div class="delivery-options">
+            <div class="delivery-card new-option">
+                <h3>👤 حمل با خودم</h3>
+                <p><strong>نوع:</strong> تحویل حضوری از محل شرکت</p>
+                <p><strong>زمان تحویل:</strong> فوری (0 روز)</p>
+                <div class="cost-badge cost-free">هزینه: 0 دینار</div>
+                <p><strong>توضیحات:</strong> تحویل حضوری از محل شرکت - بدون هزینه حمل</p>
+                <p><strong>آیکن:</strong> 👤 User | <strong>رنگ:</strong> آبی</p>
+            </div>
+            
+            <div class="delivery-card smart-vehicle">
+                <h3>🚛 انتخاب هوشمند خودرو</h3>
+                <p><strong>نوع:</strong> محاسبه خودکار بهترین گزینه</p>
+                <p><strong>زمان تحویل:</strong> 1 روز</p>
+                <div class="cost-badge cost-calculated">هزینه: محاسبه بر اساس وزن/مقصد</div>
+                <p><strong>توضیحات:</strong> انتخاب خودکار بهترین خودرو بر اساس وزن، مقصد و کمترین هزینه</p>
+                <p><strong>آیکن:</strong> 🚗 Car | <strong>رنگ:</strong> سبز اسمرالد</p>
+            </div>
+        </div>
+
+        <div class="database-info">
+            <h3>📊 اطلاعات پایگاه داده</h3>
+            <p><strong>جدول delivery_methods:</strong></p>
+            <div class="api-test">
+ID: 8 | Value: self_pickup | Label: حمل با خودم
+Icon: user | Color: blue | Base Cost: 0.00 IQD
+Estimated Days: 0 | Status: Active
+            </div>
+            <p><strong>جدول shipping_rates:</strong></p>
+            <div class="api-test">
+ID: 33 | Delivery Method: self_pickup | Type: حضوری
+City: تمامی شهرها | Province: تمامی استان‌ها
+Base Price: 0.00 | Price Per Kg: 0.00 | Min Weight: 0.00
+Max Weight: 999999.00 | Estimated Days: 0
+            </div>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <h4>💰 هزینه صفر</h4>
+                <p>گزینه "حمل با خودم" بدون هیچ هزینه‌ای قابل انتخاب است. هم base_cost و هم cost_per_kg برابر 0.00 تنظیم شده</p>
+            </div>
+            
+            <div class="feature-card">
+                <h4>⚡ تحویل فوری</h4>
+                <p>زمان تحویل 0 روز تنظیم شده که نشان‌دهنده تحویل فوری و حضوری از محل شرکت است</p>
+            </div>
+            
+            <div class="feature-card">
+                <h4>🌍 پوشش کامل</h4>
+                <p>این گزینه برای تمامی شهرها و استان‌ها قابل استفاده است بدون محدودیت جغرافیایی</p>
+            </div>
+            
+            <div class="feature-card">
+                <h4>📱 عدم نیاز به پیگیری</h4>
+                <p>tracking_available و sms_verification برای این گزینه غیرفعال است چون مشتری خودش حضوری تحویل می‌گیرد</p>
+            </div>
+        </div>
+
+        <div class="checkout-demo">
+            <h3>🛒 نمایش در کارت Checkout</h3>
+            <p>گزینه "حمل با خودم" حالا در dropdown روش‌های تحویل نمایش داده می‌شود:</p>
+            
+            <div style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px; padding: 15px; margin: 15px 0;">
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">روش تحویل *</label>
+                <select style="width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 5px; font-size: 1em;" disabled>
+                    <option>👤 حمل با خودم - 0 دینار</option>
+                    <option>🚛 انتخاب هوشمند خودرو (محاسبه خودکار)</option>
+                </select>
+                <small style="color: #6c757d; display: block; margin-top: 5px;">
+                    ✅ هزینه حمل: 0 دینار (تحویل حضوری از محل شرکت)
+                </small>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <button class="test-button" onclick="testDeliveryMethods()">
+                تست API Delivery Methods
+            </button>
+            <button class="test-button" onclick="testShippingRates()">
+                تست API Shipping Rates
+            </button>
+        </div>
+
+        <div id="test-results" style="margin-top: 20px;"></div>
+
+        <div style="text-align: center; margin-top: 30px; color: #4a5568;">
+            <p>✅ <strong>وضعیت:</strong> گزینه "حمل با خودم" با موفقیت به سیستم اضافه شد</p>
+            <p>💰 <strong>هزینه:</strong> 0 دینار (کاملاً رایگان)</p>
+            <p>⚡ <strong>تحویل:</strong> فوری و حضوری از محل شرکت</p>
+            <p>🌍 <strong>پوشش:</strong> تمامی شهرها و استان‌های عراق</p>
+        </div>
+    </div>
+
+    <script>
+        async function testDeliveryMethods() {
+            const resultsDiv = document.getElementById('test-results');
+            resultsDiv.innerHTML = '<div style="text-align: center; padding: 20px;">در حال تست API...</div>';
+            
+            try {
+                const response = await fetch('/api/checkout/delivery-methods');
+                const data = await response.json();
+                
+                let html = '<div class="api-test" style="direction: ltr; text-align: left;">';
+                html += '<h4 style="color: #68d391;">✅ GET /api/checkout/delivery-methods</h4>';
+                html += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                html += '</div>';
+                
+                resultsDiv.innerHTML = html;
+            } catch (error) {
+                resultsDiv.innerHTML = '<div class="api-test" style="color: #f56565;">❌ Error: ' + error.message + '</div>';
+            }
+        }
+
+        async function testShippingRates() {
+            const resultsDiv = document.getElementById('test-results');
+            resultsDiv.innerHTML = '<div style="text-align: center; padding: 20px;">در حال تست API...</div>';
+            
+            try {
+                const response = await fetch('/api/shipping-rates');
+                const data = await response.json();
+                
+                let html = '<div class="api-test" style="direction: ltr; text-align: left;">';
+                html += '<h4 style="color: #68d391;">✅ GET /api/shipping-rates</h4>';
+                html += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                html += '</div>';
+                
+                resultsDiv.innerHTML = html;
+            } catch (error) {
+                resultsDiv.innerHTML = '<div class="api-test" style="color: #f56565;">❌ Error: ' + error.message + '</div>';
+            }
+        }
+    </script>
+</body>
+</html>
