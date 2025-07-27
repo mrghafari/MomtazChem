@@ -174,6 +174,10 @@ const LogisticsManagement = () => {
   const [orderValue, setOrderValue] = useState<number>(0);
   const [shippingCalculation, setShippingCalculation] = useState<any>(null);
   const [citySliderIndex, setCitySliderIndex] = useState<number[]>([0]);
+  
+  // City navigation state for vertical slider - navigate through all 188 cities
+  const [currentCityStartIndex, setCurrentCityStartIndex] = useState(0);
+  const citiesPerPage = 20; // Number of cities to show at once
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -1658,135 +1662,292 @@ const LogisticsManagement = () => {
                   </CardContent>
                 </Card>
 
-                {/* Table Display */}
-                <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="text-center w-20">
-                        <Button
-                          variant="ghost"
-                          className="h-auto p-0 font-semibold hover:bg-transparent w-full justify-center"
-                          onClick={() => handleSort('id')}
-                        >
-                          شناسه
-                          {getSortIcon('id')}
-                        </Button>
-                      </TableHead>
-                      <TableHead className="text-center w-40">
-                        <Button
-                          variant="ghost"
-                          className="h-auto p-0 font-semibold hover:bg-transparent w-full justify-center"
-                          onClick={() => handleSort('name_arabic')}
-                        >
-                          نام عربی
-                          {getSortIcon('name_arabic')}
-                        </Button>
-                      </TableHead>
-                      <TableHead className="text-center w-40">
-                        <Button
-                          variant="ghost"
-                          className="h-auto p-0 font-semibold hover:bg-transparent w-full justify-center"
-                          onClick={() => handleSort('name_english')}
-                        >
-                          نام انگلیسی
-                          {getSortIcon('name_english')}
-                        </Button>
-                      </TableHead>
-                      <TableHead className="text-center w-32">
-                        <Button
-                          variant="ghost"
-                          className="h-auto p-0 font-semibold hover:bg-transparent w-full justify-center"
-                          onClick={() => handleSort('province_name')}
-                        >
-                          استان
-                          {getSortIcon('province_name')}
-                        </Button>
-                      </TableHead>
-                      <TableHead className="text-center w-48">
-                        <Button
-                          variant="ghost"
-                          className="h-auto p-0 font-semibold hover:bg-transparent w-full justify-center"
-                          onClick={() => handleSort('distance')}
-                        >
-                          فاصله از {selectedOriginCity ? (selectedOriginCity.name_arabic || selectedOriginCity.name) : 'اربیل'} (کیلومتر)
-                          {getSortIcon('distance')}
-                        </Button>
-                      </TableHead>
-                      <TableHead className="text-center w-24">
-                        <Button
-                          variant="ghost"
-                          className="h-auto p-0 font-semibold hover:bg-transparent w-full justify-center"
-                          onClick={() => handleSort('is_active')}
-                        >
-                          وضعیت
-                          {getSortIcon('is_active')}
-                        </Button>
-                      </TableHead>
-                      <TableHead className="text-center w-32">عملیات</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {sortedAndFilteredCities.slice(0, 50).map((city: any) => (
-                      <TableRow key={city.id}>
-                        <TableCell className="font-medium text-center">{city.id}</TableCell>
-                        <TableCell className="text-center">{city.name_arabic || city.name}</TableCell>
-                        <TableCell className="text-center">{city.name_english || city.name}</TableCell>
-                        <TableCell className="text-center">{city.province_name}</TableCell>
-                        <TableCell className="text-center">
-                          <div className="flex flex-col items-center gap-1">
-                            <Badge 
-                              variant="outline" 
-                              className={selectedOriginCity?.id === city.id ? 
-                                "bg-yellow-100 border-yellow-500 text-yellow-700" : 
-                                "bg-green-50 border-green-200 text-green-700"
-                              }
+                {/* Table Display with Vertical Slider */}
+                <div className="flex gap-4">
+                  {/* Cities Table */}
+                  <div className="flex-1 overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="text-center w-20">
+                            <Button
+                              variant="ghost"
+                              className="h-auto p-0 font-semibold hover:bg-transparent w-full justify-center"
+                              onClick={() => handleSort('id')}
                             >
-                              {selectedOriginCity?.id === city.id ? 
-                                'مبدا (0 کیلومتر)' : 
-                                `${calculateDistance(city)} کیلومتر`
-                              }
-                            </Badge>
-                            {!selectedOriginCity && (
-                              <div className="text-xs text-gray-500">
-                                (از اربیل: {city.distance_from_erbil_km || 0} کیلومتر)
+                              شناسه
+                              {getSortIcon('id')}
+                            </Button>
+                          </TableHead>
+                          <TableHead className="text-center w-40">
+                            <Button
+                              variant="ghost"
+                              className="h-auto p-0 font-semibold hover:bg-transparent w-full justify-center"
+                              onClick={() => handleSort('name_arabic')}
+                            >
+                              نام عربی
+                              {getSortIcon('name_arabic')}
+                            </Button>
+                          </TableHead>
+                          <TableHead className="text-center w-40">
+                            <Button
+                              variant="ghost"
+                              className="h-auto p-0 font-semibold hover:bg-transparent w-full justify-center"
+                              onClick={() => handleSort('name_english')}
+                            >
+                              نام انگلیسی
+                              {getSortIcon('name_english')}
+                            </Button>
+                          </TableHead>
+                          <TableHead className="text-center w-32">
+                            <Button
+                              variant="ghost"
+                              className="h-auto p-0 font-semibold hover:bg-transparent w-full justify-center"
+                              onClick={() => handleSort('province_name')}
+                            >
+                              استان
+                              {getSortIcon('province_name')}
+                            </Button>
+                          </TableHead>
+                          <TableHead className="text-center w-48">
+                            <Button
+                              variant="ghost"
+                              className="h-auto p-0 font-semibold hover:bg-transparent w-full justify-center"
+                              onClick={() => handleSort('distance')}
+                            >
+                              فاصله از {selectedOriginCity ? (selectedOriginCity.name_arabic || selectedOriginCity.name) : 'اربیل'} (کیلومتر)
+                              {getSortIcon('distance')}
+                            </Button>
+                          </TableHead>
+                          <TableHead className="text-center w-24">
+                            <Button
+                              variant="ghost"
+                              className="h-auto p-0 font-semibold hover:bg-transparent w-full justify-center"
+                              onClick={() => handleSort('is_active')}
+                            >
+                              وضعیت
+                              {getSortIcon('is_active')}
+                            </Button>
+                          </TableHead>
+                          <TableHead className="text-center w-32">عملیات</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {sortedAndFilteredCities
+                          .slice(currentCityStartIndex, currentCityStartIndex + citiesPerPage)
+                          .map((city: any) => (
+                          <TableRow key={city.id}>
+                            <TableCell className="font-medium text-center">{city.id}</TableCell>
+                            <TableCell className="text-center">{city.name_arabic || city.name}</TableCell>
+                            <TableCell className="text-center">{city.name_english || city.name}</TableCell>
+                            <TableCell className="text-center">{city.province_name}</TableCell>
+                            <TableCell className="text-center">
+                              <div className="flex flex-col items-center gap-1">
+                                <Badge 
+                                  variant="outline" 
+                                  className={selectedOriginCity?.id === city.id ? 
+                                    "bg-yellow-100 border-yellow-500 text-yellow-700" : 
+                                    "bg-green-50 border-green-200 text-green-700"
+                                  }
+                                >
+                                  {selectedOriginCity?.id === city.id ? 
+                                    'مبدا (0 کیلومتر)' : 
+                                    `${calculateDistance(city)} کیلومتر`
+                                  }
+                                </Badge>
+                                {!selectedOriginCity && (
+                                  <div className="text-xs text-gray-500">
+                                    (از اربیل: {city.distance_from_erbil_km || 0} کیلومتر)
+                                  </div>
+                                )}
                               </div>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <Badge variant={city.is_active ? "default" : "secondary"}>
-                            {city.is_active ? "فعال" : "غیرفعال"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={() => {
-                              setEditingCity(city);
-                              setIsEditCityDialogOpen(true);
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <Badge variant={city.is_active ? "default" : "secondary"}>
+                                {city.is_active ? "فعال" : "غیرفعال"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => {
+                                  setEditingCity(city);
+                                  setIsEditCityDialogOpen(true);
+                                }}
+                              >
+                                <Edit className="w-4 h-4 mr-2" />
+                                ویرایش
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                    
+                    {/* Pagination Info */}
+                    <div className="flex justify-between items-center py-4 text-sm text-gray-600">
+                      <div>
+                        نمایش {currentCityStartIndex + 1} تا {Math.min(currentCityStartIndex + citiesPerPage, sortedAndFilteredCities.length)} از {sortedAndFilteredCities.length} شهر
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setCurrentCityStartIndex(Math.max(0, currentCityStartIndex - citiesPerPage))}
+                          disabled={currentCityStartIndex === 0}
+                        >
+                          صفحه قبل
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setCurrentCityStartIndex(Math.min(sortedAndFilteredCities.length - citiesPerPage, currentCityStartIndex + citiesPerPage))}
+                          disabled={currentCityStartIndex + citiesPerPage >= sortedAndFilteredCities.length}
+                        >
+                          صفحه بعد
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    {citySearchFilter && sortedAndFilteredCities.length === 0 && (
+                      <div className="text-center py-8 text-gray-500">
+                        <Search className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                        هیچ شهری با عبارت "{citySearchFilter}" یافت نشد
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Vertical City Navigation Slider */}
+                  <div className="w-64 bg-blue-50 rounded-lg p-4 border-2 border-blue-200">
+                    <div className="text-center mb-4">
+                      <h4 className="font-semibold text-blue-800 mb-2">📍 ناوبری عمودی شهرها</h4>
+                      <p className="text-xs text-blue-600">دسترسی به همه {sortedAndFilteredCities.length} شهر عراق</p>
+                    </div>
+                    
+                    {/* Vertical Slider Control */}
+                    <div className="relative h-96 mb-4">
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="h-full w-6 bg-blue-200 rounded-full relative">
+                          {/* Slider Track */}
+                          <div 
+                            className="absolute w-6 h-8 bg-blue-600 rounded-full cursor-pointer hover:bg-blue-700 transition-colors shadow-lg"
+                            style={{
+                              top: `${(currentCityStartIndex / Math.max(1, sortedAndFilteredCities.length - citiesPerPage)) * (100 - (32/384*100))}%`,
+                              transform: 'translateY(-50%)',
+                            }}
+                            onMouseDown={(e) => {
+                              const startY = e.clientY;
+                              const startIndex = currentCityStartIndex;
+                              const maxIndex = Math.max(0, sortedAndFilteredCities.length - citiesPerPage);
+                              
+                              const handleMouseMove = (e: MouseEvent) => {
+                                const deltaY = e.clientY - startY;
+                                const deltaPercent = (deltaY / 320) * 100; // 320px is roughly the slider height
+                                const newIndex = Math.round(startIndex + (deltaPercent / 100) * maxIndex);
+                                setCurrentCityStartIndex(Math.max(0, Math.min(maxIndex, newIndex)));
+                              };
+                              
+                              const handleMouseUp = () => {
+                                document.removeEventListener('mousemove', handleMouseMove);
+                                document.removeEventListener('mouseup', handleMouseUp);
+                              };
+                              
+                              document.addEventListener('mousemove', handleMouseMove);
+                              document.addEventListener('mouseup', handleMouseUp);
                             }}
                           >
-                            <Edit className="w-4 h-4 mr-2" />
-                            ویرایش
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-                {sortedAndFilteredCities.length > 50 && (
-                  <div className="text-center py-4 text-sm text-gray-500">
-                    و {sortedAndFilteredCities.length - 50} شهر دیگر...
+                            <div className="absolute inset-0 flex items-center justify-center text-white text-xs font-bold">
+                              ⬍
+                            </div>
+                          </div>
+                          
+                          {/* City Markers on Slider */}
+                          {sortedAndFilteredCities.slice(0, Math.min(20, sortedAndFilteredCities.length)).map((city: any, index: number) => {
+                            const position = (index / Math.max(1, Math.min(20, sortedAndFilteredCities.length) - 1)) * 100;
+                            return (
+                              <div
+                                key={city.id}
+                                className="absolute w-2 h-2 bg-blue-400 rounded-full -left-1 cursor-pointer hover:bg-blue-600 transition-colors"
+                                style={{ top: `${position}%` }}
+                                title={city.name_arabic || city.name}
+                                onClick={() => {
+                                  const actualIndex = sortedAndFilteredCities.findIndex((c: any) => c.id === city.id);
+                                  const pageStart = Math.floor(actualIndex / citiesPerPage) * citiesPerPage;
+                                  setCurrentCityStartIndex(pageStart);
+                                }}
+                              />
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Quick Navigation Buttons */}
+                    <div className="space-y-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="w-full text-xs"
+                        onClick={() => setCurrentCityStartIndex(0)}
+                      >
+                        🏁 شروع فهرست
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="w-full text-xs"
+                        onClick={() => setCurrentCityStartIndex(Math.max(0, sortedAndFilteredCities.length - citiesPerPage))}
+                      >
+                        🔚 انتهای فهرست
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="w-full text-xs"
+                        onClick={() => {
+                          const baghdadIndex = sortedAndFilteredCities.findIndex((city: any) => 
+                            (city.name_arabic || city.name || '').includes('بغداد') || 
+                            (city.name_english || '').toLowerCase().includes('baghdad')
+                          );
+                          if (baghdadIndex >= 0) {
+                            const pageStart = Math.floor(baghdadIndex / citiesPerPage) * citiesPerPage;
+                            setCurrentCityStartIndex(pageStart);
+                          }
+                        }}
+                      >
+                        🏛️ رفتن به بغداد
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="w-full text-xs"
+                        onClick={() => {
+                          const basraIndex = sortedAndFilteredCities.findIndex((city: any) => 
+                            (city.name_arabic || city.name || '').includes('بصره') || 
+                            (city.name_english || '').toLowerCase().includes('basra')
+                          );
+                          if (basraIndex >= 0) {
+                            const pageStart = Math.floor(basraIndex / citiesPerPage) * citiesPerPage;
+                            setCurrentCityStartIndex(pageStart);
+                          }
+                        }}
+                      >
+                        🌊 رفتن به بصره
+                      </Button>
+                    </div>
+                    
+                    {/* Current View Info */}
+                    <div className="mt-4 p-2 bg-white rounded border text-center">
+                      <p className="text-xs text-gray-600">نمایش فعلی:</p>
+                      <p className="text-sm font-semibold text-blue-800">
+                        شهر {currentCityStartIndex + 1} تا {Math.min(currentCityStartIndex + citiesPerPage, sortedAndFilteredCities.length)}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        از مجموع {sortedAndFilteredCities.length} شهر
+                      </p>
+                    </div>
                   </div>
-                )}
-                {citySearchFilter && sortedAndFilteredCities.length === 0 && (
-                  <div className="text-center py-8 text-gray-500">
-                    <Search className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                    هیچ شهری با عبارت "{citySearchFilter}" یافت نشد
-                  </div>
-                )}
                 </div>
               </div>
             )}
