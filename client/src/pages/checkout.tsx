@@ -385,16 +385,28 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
     if (totalWeight > 0 && destinationCity) {
       const cost = calculateShippingCost(totalWeight, destinationCity);
       setCalculatedShippingCost(cost);
+      
+      // Auto-select smart vehicle option when available
+      if (selectedVehicle && cost > 0) {
+        form.setValue('shippingMethod', 'smart_vehicle');
+      }
+      
       console.log('💰 Shipping Cost Calculated:', {
         weight: totalWeight,
         destination: destinationCity,
-        cost: cost
+        cost: cost,
+        selectedVehicle: selectedVehicle?.name,
+        autoSelected: true
       });
     } else {
       setCalculatedShippingCost(0);
       setSelectedVehicle(null);
+      // Clear smart vehicle selection if no longer valid
+      if (form.watch('shippingMethod') === 'smart_vehicle') {
+        form.setValue('shippingMethod', '');
+      }
     }
-  }, [totalWeight, destinationCity, calculateShippingCost]);
+  }, [totalWeight, destinationCity, calculateShippingCost, selectedVehicle, form]);
 
   // Use calculated shipping cost or fallback to traditional method
   let shippingCost = calculatedShippingCost;
@@ -1242,13 +1254,48 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                       name="shippingMethod"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>انتخاب روش ارسال *</FormLabel>
+                          <FormLabel>انتخاب روش ارسال * (انتخاب هوشمند)</FormLabel>
                           <FormControl>
                             <Select value={field.value} onValueChange={field.onChange}>
                               <SelectTrigger>
-                                <SelectValue placeholder="روش ارسال را انتخاب کنید" />
+                                <SelectValue 
+                                  placeholder={
+                                    selectedVehicle && destinationCity && totalWeight > 0
+                                      ? `🚚 ${selectedVehicle.name} - ${shippingCost.toLocaleString()} IQD (${destinationCity})`
+                                      : "روش ارسال را انتخاب کنید"
+                                  }
+                                />
                               </SelectTrigger>
                               <SelectContent>
+                                {/* Smart Vehicle Selection Option */}
+                                {selectedVehicle && destinationCity && totalWeight > 0 && (
+                                  <SelectItem value="smart_vehicle" className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                                    <div className="flex flex-col gap-1 w-full">
+                                      <div className="flex items-center justify-between">
+                                        <span className="font-medium text-green-700 dark:text-green-300">
+                                          🚚 انتخاب هوشمند: {selectedVehicle.name}
+                                        </span>
+                                        <span className="text-green-600 dark:text-green-400 font-bold">
+                                          {shippingCost.toLocaleString()} IQD
+                                        </span>
+                                      </div>
+                                      <div className="text-xs text-green-600 dark:text-green-400 space-y-1">
+                                        <div>📍 مقصد: {destinationCity} • وزن: {totalWeight.toFixed(1)} کگ</div>
+                                        <div>
+                                          💰 پایه: {parseFloat(selectedVehicle.basePrice || '0').toLocaleString()} • 
+                                          فاصله: {(parseFloat(iraqiCities?.data?.find((city: any) => 
+                                            city.nameEnglish?.toLowerCase().includes(destinationCity.toLowerCase()) ||
+                                            city.nameArabic?.includes(destinationCity) ||
+                                            city.name?.toLowerCase().includes(destinationCity.toLowerCase())
+                                          )?.distanceFromErbilKm || '0') * parseFloat(selectedVehicle.pricePerKm || '0')).toLocaleString()} • 
+                                          وزن: {(totalWeight * parseFloat(selectedVehicle.pricePerKg || '0')).toLocaleString()} IQD
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </SelectItem>
+                                )}
+                                
+                                {/* Standard Delivery Methods */}
                                 {(deliveryMethods as any[])?.map((method: any) => {
                                   const freeShippingThreshold = parseFloat(method.freeShippingThreshold || '0');
                                   const qualifiesForFreeShipping = freeShippingThreshold > 0 && subtotal >= freeShippingThreshold;
