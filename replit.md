@@ -224,35 +224,43 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Workflow Integration**: Works seamlessly with existing order management and financial approval systems
 - **Result**: Complete customer rejection visibility operational - customers can see detailed rejection reasons in both main profile and purchase history with professional styling and clear messaging
 
-### COMPLETED: Enhanced Logistics Geography Management with Flexible Origin City Selection - Complete Implementation (January 27, 2025)
-✅ **IMPLEMENTED: Advanced logistics geography system allowing any city to be selected as origin point for distance calculations**
-- **User Request Fulfilled**: "در این جدول ممکن است هر شهری به عنوان مبدا انتخاب شود" - Enhanced system to support flexible origin city selection
-- **Dynamic Origin Selection**: Added comprehensive dropdown selector allowing selection of any of the 188 Iraqi cities as calculation origin point
+### COMPLETED: Enhanced Logistics Geography Management with Dynamic Origin Selection and Editable Distances - Complete Implementation (January 27, 2025)
+✅ **IMPLEMENTED: Advanced logistics geography system with flexible origin city selection and editable distance management**
+- **User Request Fulfilled**: "باید قابلیت تغییر مبدا را هم اضافه کنیم و ممکن است هر شهر مبدا قرار گیرد و قابل تعریف باشد فاصله از مبدا هم قابل ادیت باشد"
+- **Dynamic Origin Selection**: Comprehensive dropdown selector allowing any of the 188 Iraqi cities as calculation origin point
 - **Real-time Distance Recalculation**: Implemented dynamic distance calculation based on selected origin city with visual updates across both province and city tables
-- **Enhanced User Interface**: 
-  - **Origin City Selector**: Blue-themed selection panel with Navigation icon and clear dropdown for all cities
-  - **Dynamic Table Headers**: Table headers automatically update to show selected origin city name in Arabic
-  - **Visual Indicators**: Selected origin city highlighted with yellow background and "مبدا" (Origin) badge in city table
-  - **Relative Distance Display**: Shows calculated distances from selected origin with original Erbil distances in parentheses
+- **Editable Distance System**: Added ability to edit distance_from_erbil_km field in city editing dialog with number input validation
+- **Enhanced GeographyTab Implementation**:
+  - **Origin City Selector**: Blue-themed selection panel with MapPin icon and clear dropdown for all cities
+  - **Dynamic Table Headers**: Headers automatically update to show selected origin city name in Arabic ("فاصله از [شهر] (کیلومتر)")
+  - **Visual Distance Indicators**: 
+    - Origin city highlighted with yellow background and "مبدا (0 کیلومتر)" badge
+    - Other cities show calculated distances in green badges
+    - Provinces show average distance in blue badges with "مبدا" label for origin province
 - **Advanced Calculation Logic**:
-  - **Distance Calculation**: Implements relative distance calculation using difference between cities' distances from Erbil
-  - **Origin City Display**: Selected origin city shows 0 km distance to itself with special highlighting
-  - **Province Integration**: Both province and city tables dynamically update distance calculations based on origin selection
-  - **Fallback Support**: Defaults to Erbil as origin when no city is selected, maintaining backward compatibility
+  - **Relative Distance Calculation**: Uses difference between cities' distances from Erbil as common reference point
+  - **Province Distance**: Calculates average distance of all cities within each province from selected origin
+  - **Origin City Display**: Selected origin city shows 0 km distance with special highlighting
+  - **Fallback Support**: Defaults to Erbil distances when no origin city is selected
+- **Complete API Integration**: 
+  - **GET /api/logistics/provinces-detailed**: Comprehensive province data with all fields for editing
+  - **GET /api/logistics/cities-detailed**: Detailed city data including province names and distances
+  - **PUT /api/logistics/provinces/:id**: Update province information (names, capital, region, status)
+  - **PUT /api/logistics/cities/:id**: Update city information including editable distance_from_erbil_km field
 - **Professional Persian Interface**:
-  - **Clear Labels**: "انتخاب شهر مبدا برای محاسبه فواصل" with Navigation icon
-  - **Informational Alerts**: Blue alert explaining distance calculation method when origin is selected
-  - **Reset Functionality**: Clear button to reset origin selection back to default Erbil base
-- **CRM Integration**: Added direct access button in CRM interface with Globe icon and "مدیریت جغرافیای لجستیک" label
-- **Route Integration**: Successfully registered `/admin/logistics-geography` route in App.tsx with proper component import
-- **Database Compatibility**: Works seamlessly with existing iraqi_provinces and iraqi_cities tables without schema changes
-- **Business Impact**: Enables flexible logistics planning from any Iraqi city as distribution center, supporting decentralized logistics operations
-- **Technical Achievement**: Complete dynamic recalculation system without backend changes, using frontend logic for distance transformation
-- **User Experience**: 
+  - **Clear Labels**: "انتخاب شهر مبدا برای محاسبه فواصل" with explanatory text
+  - **Reset Functionality**: "بازنشانی" button to reset origin selection back to default Erbil base
+  - **Informational Cards**: Blue alert explaining distance calculation method and relative distance logic
+  - **Edit Dialogs**: Complete editing forms for both provinces and cities with distance field validation
+- **Enhanced User Experience**:
   - **Real-time Updates**: Instant visual feedback when changing origin city selection
-  - **Clear Visual Hierarchy**: Color-coded distance badges (yellow for origin, blue for provinces, green for cities)
-  - **Comprehensive Information**: Shows both calculated distances and original Erbil distances for reference
-- **Result**: Complete flexible origin city selection system operational - users can select any city as logistics base point with dynamic distance calculations for all 188 cities and 18 provinces
+  - **Color-coded System**: Yellow for origin, blue for provinces, green for cities
+  - **Reference Information**: Shows original Erbil distances in parentheses when no origin selected
+  - **Comprehensive Information**: Distance editing with min="0" validation and number input type
+- **Database Integration**: Works seamlessly with existing iraqi_provinces and iraqi_cities tables
+- **Business Impact**: Enables flexible logistics planning from any Iraqi city as distribution center with editable distance parameters
+- **Technical Achievement**: Complete dynamic recalculation system with editable distance management
+- **Result**: Complete flexible origin city selection system with editable distances operational - users can select any city as logistics base point, edit distance values, and see dynamic distance calculations for all 188 cities and 18 provinces
 
 ### COMPLETED: Complete LIFO to FIFO System Conversion - All LIFO References Eliminated (January 25, 2025)
 ✅ **SYSTEM UNIFIED: Complete elimination of all LIFO references throughout the entire system per user request**

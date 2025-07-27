@@ -1809,9 +1809,32 @@ const LogisticsManagement = () => {
     const [editingCity, setEditingCity] = useState<any>(null);
     const [isEditProvinceDialogOpen, setIsEditProvinceDialogOpen] = useState(false);
     const [isEditCityDialogOpen, setIsEditCityDialogOpen] = useState(false);
+    const [selectedOriginCity, setSelectedOriginCity] = useState<any>(null);
 
     const geographyProvinces = (geographyProvincesResponse as any)?.data || [];
     const geographyCities = (geographyCitiesResponse as any)?.data || [];
+
+    // Calculate dynamic distances based on selected origin city
+    const calculateDistance = (targetCity: any) => {
+      if (!selectedOriginCity) return targetCity.distance_from_erbil_km || 0;
+      
+      const originDistance = selectedOriginCity.distance_from_erbil_km || 0;
+      const targetDistance = targetCity.distance_from_erbil_km || 0;
+      
+      // Calculate relative distance using Erbil as common reference point
+      return Math.abs(targetDistance - originDistance);
+    };
+
+    // Calculate province distance (average of cities in province)
+    const calculateProvinceDistance = (province: any) => {
+      if (!selectedOriginCity) return 0;
+      
+      const provinceCities = geographyCities.filter((city: any) => city.province_id === province.id);
+      if (provinceCities.length === 0) return 0;
+      
+      const totalDistance = provinceCities.reduce((sum: number, city: any) => sum + calculateDistance(city), 0);
+      return Math.round(totalDistance / provinceCities.length);
+    };
 
     // Update province mutation
     const updateProvinceMutation = useMutation({
@@ -1888,7 +1911,7 @@ const LogisticsManagement = () => {
               <MapPin className="h-5 w-5" />
               مدیریت جغرافیای عراق
             </h3>
-            <p className="text-sm text-gray-600 mt-1">مدیریت 18 استان و 188 شهر عراق با فاصله از اربیل (مبدا)</p>
+            <p className="text-sm text-gray-600 mt-1">مدیریت 18 استان و 188 شهر عراق با قابلیت انتخاب مبدا</p>
           </div>
           <div className="flex gap-2">
             <Badge variant="outline" className="bg-blue-50">
@@ -1899,6 +1922,64 @@ const LogisticsManagement = () => {
             </Badge>
           </div>
         </div>
+
+        {/* Origin City Selection */}
+        <Card className="border-2 border-blue-200 bg-blue-50">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="bg-blue-600 p-2 rounded-full">
+                  <MapPin className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-blue-900">انتخاب شهر مبدا برای محاسبه فواصل</h4>
+                  <p className="text-sm text-blue-700">
+                    {selectedOriginCity 
+                      ? `مبدا انتخاب شده: ${selectedOriginCity.name_arabic || selectedOriginCity.name}` 
+                      : 'مبدا پیش‌فرض: اربیل (تمام فاصله‌ها از اربیل محاسبه می‌شوند)'
+                    }
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <select
+                  value={selectedOriginCity?.id || ''}
+                  onChange={(e) => {
+                    const cityId = parseInt(e.target.value);
+                    const city = geographyCities.find((c: any) => c.id === cityId);
+                    setSelectedOriginCity(city || null);
+                  }}
+                  className="p-2 border rounded-md bg-white text-sm min-w-[200px]"
+                >
+                  <option value="">اربیل (پیش‌فرض)</option>
+                  {geographyCities.map((city: any) => (
+                    <option key={city.id} value={city.id}>
+                      {city.name_arabic || city.name} - {city.province_name}
+                    </option>
+                  ))}
+                </select>
+                {selectedOriginCity && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setSelectedOriginCity(null)}
+                    className="text-blue-600 border-blue-600 hover:bg-blue-100"
+                  >
+                    بازنشانی
+                  </Button>
+                )}
+              </div>
+            </div>
+            {selectedOriginCity && (
+              <div className="mt-3 p-3 bg-blue-100 rounded-md">
+                <p className="text-sm text-blue-800">
+                  <strong>نکته:</strong> فاصله‌ها بر اساس تفاوت فاصله شهرها از اربیل محاسبه می‌شوند. 
+                  شهر انتخابی به عنوان مبدا (0 کیلومتر) نمایش داده می‌شود.
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         <Tabs defaultValue="provinces" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
@@ -1936,6 +2017,9 @@ const LogisticsManagement = () => {
                           <TableHead className="text-right">نام انگلیسی</TableHead>
                           <TableHead className="text-right">مرکز استان</TableHead>
                           <TableHead className="text-right">منطقه</TableHead>
+                          <TableHead className="text-right">
+                            فاصله از {selectedOriginCity ? (selectedOriginCity.name_arabic || selectedOriginCity.name) : 'اربیل'} (کیلومتر)
+                          </TableHead>
                           <TableHead className="text-right">وضعیت</TableHead>
                           <TableHead className="text-right">عملیات</TableHead>
                         </TableRow>
@@ -1952,6 +2036,20 @@ const LogisticsManagement = () => {
                                 {province.region === 'north' ? 'شمال' : 
                                  province.region === 'center' ? 'مرکز' : 
                                  province.region === 'south' ? 'جنوب' : province.region}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Badge 
+                                variant="outline" 
+                                className={selectedOriginCity?.province_id === province.id ? 
+                                  "bg-yellow-100 border-yellow-500 text-yellow-700" : 
+                                  "bg-blue-50 border-blue-200 text-blue-700"
+                                }
+                              >
+                                {selectedOriginCity?.province_id === province.id ? 
+                                  'مبدا' : 
+                                  `${calculateProvinceDistance(province)} کیلومتر`
+                                }
                               </Badge>
                             </TableCell>
                             <TableCell>
@@ -1990,7 +2088,7 @@ const LogisticsManagement = () => {
                   شهرهای عراق
                 </CardTitle>
                 <CardDescription>
-                  مدیریت 188 شهر عراق با فاصله از اربیل برای محاسبات لجستیک
+                  مدیریت 188 شهر عراق با فاصله‌های قابل تنظیم بر اساس مبدا انتخابی
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -2007,7 +2105,9 @@ const LogisticsManagement = () => {
                           <TableHead className="text-right">نام عربی</TableHead>
                           <TableHead className="text-right">نام انگلیسی</TableHead>
                           <TableHead className="text-right">استان</TableHead>
-                          <TableHead className="text-right">فاصله از اربیل (کیلومتر)</TableHead>
+                          <TableHead className="text-right">
+                            فاصله از {selectedOriginCity ? (selectedOriginCity.name_arabic || selectedOriginCity.name) : 'اربیل'} (کیلومتر)
+                          </TableHead>
                           <TableHead className="text-right">وضعیت</TableHead>
                           <TableHead className="text-right">عملیات</TableHead>
                         </TableRow>
@@ -2020,9 +2120,23 @@ const LogisticsManagement = () => {
                             <TableCell>{city.name_english || city.name}</TableCell>
                             <TableCell>{city.province_name}</TableCell>
                             <TableCell>
-                              <Badge variant="outline" className="bg-orange-50">
-                                {city.distance_from_erbil_km || 0} کیلومتر
+                              <Badge 
+                                variant="outline" 
+                                className={selectedOriginCity?.id === city.id ? 
+                                  "bg-yellow-100 border-yellow-500 text-yellow-700" : 
+                                  "bg-green-50 border-green-200 text-green-700"
+                                }
+                              >
+                                {selectedOriginCity?.id === city.id ? 
+                                  'مبدا (0 کیلومتر)' : 
+                                  `${calculateDistance(city)} کیلومتر`
+                                }
                               </Badge>
+                              {!selectedOriginCity && (
+                                <div className="text-xs text-gray-500 mt-1">
+                                  (از اربیل: {city.distance_from_erbil_km || 0} کیلومتر)
+                                </div>
+                              )}
                             </TableCell>
                             <TableCell>
                               <Badge variant={city.is_active ? "default" : "secondary"}>
@@ -2163,6 +2277,7 @@ const LogisticsManagement = () => {
                       id="distance_from_erbil_km" 
                       name="distance_from_erbil_km" 
                       type="number"
+                      min="0"
                       defaultValue={editingCity.distance_from_erbil_km || 0}
                       required 
                     />
