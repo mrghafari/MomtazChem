@@ -1522,167 +1522,132 @@ const LogisticsManagement = () => {
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
               </div>
             ) : (
-              <div className="space-y-6">
-                {/* City Navigation Slider */}
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-lg font-semibold flex items-center gap-2">
-                      <MapPin className="h-5 w-5 text-blue-600" />
-                      نمایش شهرها به صورت Slider ({sortedAndFilteredCities.length} شهر)
-                    </h4>
-                    <div className="text-sm text-gray-600">
-                      شهر {citySliderIndex[0] + 1} از {sortedAndFilteredCities.length}
-                    </div>
-                  </div>
-                  
-                  {/* Slider Control */}
-                  <div className="px-4">
-                    <Slider
-                      value={citySliderIndex}
-                      onValueChange={setCitySliderIndex}
-                      max={Math.max(0, sortedAndFilteredCities.length - 1)}
-                      min={0}
-                      step={1}
-                      className="w-full"
-                      dir="ltr"
-                    />
-                    <div className="flex justify-between text-xs text-gray-500 mt-2">
-                      <span>اولین شهر</span>
-                      <span>آخرین شهر</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Current City Display */}
-                {sortedAndFilteredCities.length > 0 && (
-                  <Card className="border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-green-50">
-                    <CardContent className="p-6">
-                      {(() => {
-                        const currentCity = sortedAndFilteredCities[citySliderIndex[0]] || sortedAndFilteredCities[0];
-                        return (
-                          <div className="space-y-4">
-                            {/* City Header */}
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-3">
-                                <div className="bg-blue-600 p-3 rounded-full">
-                                  <MapPin className="h-6 w-6 text-white" />
-                                </div>
-                                <div>
-                                  <h3 className="text-2xl font-bold text-blue-900">
-                                    {currentCity.name_arabic || currentCity.name}
-                                  </h3>
-                                  <p className="text-blue-700">
-                                    {currentCity.name_english || currentCity.name} • {currentCity.province_name}
-                                  </p>
-                                </div>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-center w-20">
+                        <Button
+                          variant="ghost"
+                          className="h-auto p-0 font-semibold hover:bg-transparent w-full justify-center"
+                          onClick={() => handleSort('id')}
+                        >
+                          شناسه
+                          {getSortIcon('id')}
+                        </Button>
+                      </TableHead>
+                      <TableHead className="text-center w-40">
+                        <Button
+                          variant="ghost"
+                          className="h-auto p-0 font-semibold hover:bg-transparent w-full justify-center"
+                          onClick={() => handleSort('name_arabic')}
+                        >
+                          نام عربی
+                          {getSortIcon('name_arabic')}
+                        </Button>
+                      </TableHead>
+                      <TableHead className="text-center w-40">
+                        <Button
+                          variant="ghost"
+                          className="h-auto p-0 font-semibold hover:bg-transparent w-full justify-center"
+                          onClick={() => handleSort('name_english')}
+                        >
+                          نام انگلیسی
+                          {getSortIcon('name_english')}
+                        </Button>
+                      </TableHead>
+                      <TableHead className="text-center w-32">
+                        <Button
+                          variant="ghost"
+                          className="h-auto p-0 font-semibold hover:bg-transparent w-full justify-center"
+                          onClick={() => handleSort('province_name')}
+                        >
+                          استان
+                          {getSortIcon('province_name')}
+                        </Button>
+                      </TableHead>
+                      <TableHead className="text-center w-48">
+                        <Button
+                          variant="ghost"
+                          className="h-auto p-0 font-semibold hover:bg-transparent w-full justify-center"
+                          onClick={() => handleSort('distance')}
+                        >
+                          فاصله از {selectedOriginCity ? (selectedOriginCity.name_arabic || selectedOriginCity.name) : 'اربیل'} (کیلومتر)
+                          {getSortIcon('distance')}
+                        </Button>
+                      </TableHead>
+                      <TableHead className="text-center w-24">
+                        <Button
+                          variant="ghost"
+                          className="h-auto p-0 font-semibold hover:bg-transparent w-full justify-center"
+                          onClick={() => handleSort('is_active')}
+                        >
+                          وضعیت
+                          {getSortIcon('is_active')}
+                        </Button>
+                      </TableHead>
+                      <TableHead className="text-center w-32">عملیات</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {sortedAndFilteredCities.slice(0, 50).map((city: any) => (
+                      <TableRow key={city.id}>
+                        <TableCell className="font-medium text-center">{city.id}</TableCell>
+                        <TableCell className="text-center">{city.name_arabic || city.name}</TableCell>
+                        <TableCell className="text-center">{city.name_english || city.name}</TableCell>
+                        <TableCell className="text-center">{city.province_name}</TableCell>
+                        <TableCell className="text-center">
+                          <div className="flex flex-col items-center gap-1">
+                            <Badge 
+                              variant="outline" 
+                              className={selectedOriginCity?.id === city.id ? 
+                                "bg-yellow-100 border-yellow-500 text-yellow-700" : 
+                                "bg-green-50 border-green-200 text-green-700"
+                              }
+                            >
+                              {selectedOriginCity?.id === city.id ? 
+                                'مبدا (0 کیلومتر)' : 
+                                `${calculateDistance(city)} کیلومتر`
+                              }
+                            </Badge>
+                            {!selectedOriginCity && (
+                              <div className="text-xs text-gray-500">
+                                (از اربیل: {city.distance_from_erbil_km || 0} کیلومتر)
                               </div>
-                              <div className="text-right">
-                                <Badge 
-                                  variant="outline" 
-                                  className="text-lg px-3 py-1 bg-blue-100 border-blue-300 text-blue-800"
-                                >
-                                  شناسه: {currentCity.id}
-                                </Badge>
-                              </div>
-                            </div>
-
-                            {/* City Details Grid */}
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                              {/* Distance Info */}
-                              <div className="bg-white p-4 rounded-lg border border-green-200">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <Scale className="h-5 w-5 text-green-600" />
-                                  <span className="font-semibold text-green-800">فاصله</span>
-                                </div>
-                                <Badge 
-                                  variant="outline" 
-                                  className={selectedOriginCity?.id === currentCity.id ? 
-                                    "bg-yellow-100 border-yellow-500 text-yellow-700 text-lg px-3 py-2" : 
-                                    "bg-green-50 border-green-200 text-green-700 text-lg px-3 py-2"
-                                  }
-                                >
-                                  {selectedOriginCity?.id === currentCity.id ? 
-                                    'مبدا (0 کیلومتر)' : 
-                                    `${calculateDistance(currentCity)} کیلومتر`
-                                  }
-                                </Badge>
-                                {!selectedOriginCity && (
-                                  <div className="text-xs text-gray-500 mt-2">
-                                    (از اربیل: {currentCity.distance_from_erbil_km || 0} کیلومتر)
-                                  </div>
-                                )}
-                              </div>
-
-                              {/* Status Info */}
-                              <div className="bg-white p-4 rounded-lg border border-blue-200">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <CheckCircle className="h-5 w-5 text-blue-600" />
-                                  <span className="font-semibold text-blue-800">وضعیت</span>
-                                </div>
-                                <Badge 
-                                  variant={currentCity.is_active ? "default" : "secondary"}
-                                  className="text-lg px-3 py-2"
-                                >
-                                  {currentCity.is_active ? "فعال" : "غیرفعال"}
-                                </Badge>
-                              </div>
-
-                              {/* Action Buttons */}
-                              <div className="bg-white p-4 rounded-lg border border-orange-200">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <Edit className="h-5 w-5 text-orange-600" />
-                                  <span className="font-semibold text-orange-800">عملیات</span>
-                                </div>
-                                <Button 
-                                  size="sm" 
-                                  variant="outline"
-                                  onClick={() => {
-                                    setEditingCity(currentCity);
-                                    setIsEditCityDialogOpen(true);
-                                  }}
-                                  className="w-full"
-                                >
-                                  <Edit className="w-4 h-4 mr-2" />
-                                  ویرایش شهر
-                                </Button>
-                              </div>
-                            </div>
+                            )}
                           </div>
-                        );
-                      })()}
-                    </CardContent>
-                  </Card>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Badge variant={city.is_active ? "default" : "secondary"}>
+                            {city.is_active ? "فعال" : "غیرفعال"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => {
+                              setEditingCity(city);
+                              setIsEditCityDialogOpen(true);
+                            }}
+                          >
+                            <Edit className="w-4 h-4 mr-2" />
+                            ویرایش
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+                {sortedAndFilteredCities.length > 50 && (
+                  <div className="text-center py-4 text-sm text-gray-500">
+                    و {sortedAndFilteredCities.length - 50} شهر دیگر...
+                  </div>
                 )}
-
-                {/* No Results State */}
                 {citySearchFilter && sortedAndFilteredCities.length === 0 && (
                   <div className="text-center py-8 text-gray-500">
                     <Search className="w-12 h-12 mx-auto mb-4 text-gray-300" />
                     هیچ شهری با عبارت "{citySearchFilter}" یافت نشد
-                  </div>
-                )}
-
-                {/* Navigation Buttons */}
-                {sortedAndFilteredCities.length > 1 && (
-                  <div className="flex justify-center gap-4">
-                    <Button
-                      variant="outline"
-                      onClick={() => setCitySliderIndex([Math.max(0, citySliderIndex[0] - 1)])}
-                      disabled={citySliderIndex[0] === 0}
-                      className="flex items-center gap-2"
-                    >
-                      <ChevronUp className="h-4 w-4" />
-                      شهر قبلی
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => setCitySliderIndex([Math.min(sortedAndFilteredCities.length - 1, citySliderIndex[0] + 1)])}
-                      disabled={citySliderIndex[0] === sortedAndFilteredCities.length - 1}
-                      className="flex items-center gap-2"
-                    >
-                      شهر بعدی
-                      <ChevronDown className="h-4 w-4" />
-                    </Button>
                   </div>
                 )}
               </div>
