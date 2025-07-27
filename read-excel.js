@@ -1,24 +1,21 @@
-const xlsx = require('node-xlsx');
-const fs = require('fs');
+import XLSX from 'node-xlsx';
 
-try {
-  // Read the Excel file
-  const workSheetsFromFile = xlsx.parse('attached_assets/Book1_1753527370713.xlsx');
+// Read the Excel file
+const sheets = XLSX.parse('attached_assets/Book1_1753532888345.xlsx');
+
+console.log('📊 Excel File Analysis:');
+console.log('Number of sheets:', sheets.length);
+
+for (let sheet of sheets) {
+  console.log('\n📋 Sheet Name:', sheet.name);
+  console.log('Total rows:', sheet.data.length);
   
-  console.log('Number of sheets:', workSheetsFromFile.length);
-  
-  // Display first sheet content
-  if (workSheetsFromFile.length > 0) {
-    const firstSheet = workSheetsFromFile[0];
-    console.log('Sheet name:', firstSheet.name);
-    console.log('Number of rows:', firstSheet.data.length);
+  if (sheet.data.length > 0) {
+    console.log('Headers:', sheet.data[0]);
+    console.log('\nFirst 10 rows:');
     
-    // Display first 20 rows to understand the structure
-    console.log('\nFirst 20 rows:');
-    firstSheet.data.slice(0, 20).forEach((row, index) => {
-      console.log(`Row ${index + 1}:`, JSON.stringify(row));
-    });
+    for (let i = 0; i < Math.min(10, sheet.data.length); i++) {
+      console.log(`Row ${i + 1}:`, sheet.data[i]);
+    }
   }
-} catch (error) {
-  console.error('Error reading Excel file:', error);
 }

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Customer Profile Geography</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6">
+        <h1 class="text-2xl font-bold mb-6 text-center">🗺️ Test Customer Profile Geography</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Customer Data -->
+            <div class="bg-blue-50 p-4 rounded-lg">
+                <h2 class="text-lg font-semibold mb-3">📋 Customer Data</h2>
+                <div id="customerData" class="space-y-2 text-sm"></div>
+            </div>
+            
+            <!-- Provinces Data -->
+            <div class="bg-green-50 p-4 rounded-lg">
+                <h2 class="text-lg font-semibold mb-3">🏛️ Provinces Data</h2>
+                <div id="provincesData" class="space-y-2 text-sm"></div>
+            </div>
+            
+            <!-- Cities Data -->
+            <div class="bg-yellow-50 p-4 rounded-lg">
+                <h2 class="text-lg font-semibold mb-3">🏙️ Cities Data</h2>
+                <div id="citiesData" class="space-y-2 text-sm"></div>
+            </div>
+            
+            <!-- Test Results -->
+            <div class="bg-purple-50 p-4 rounded-lg">
+                <h2 class="text-lg font-semibold mb-3">✅ Test Results</h2>
+                <div id="testResults" class="space-y-2 text-sm"></div>
+            </div>
+        </div>
+        
+        <div class="mt-6 flex justify-center">
+            <button onclick="runTests()" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600">
+                🧪 Run Geography Tests
+            </button>
+        </div>
+    </div>
+
+    <script>
+        async function runTests() {
+            const results = [];
+            
+            try {
+                // 1. Test Customer Login
+                console.log('🔐 Testing customer login...');
+                const loginResponse = await fetch('/api/customers/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'oilstar@hotmail.com',
+                        password: 'password'
+                    }),
+                    credentials: 'include'
+                });
+                const loginResult = await loginResponse.json();
+                console.log('Login result:', loginResult);
+                
+                if (!loginResult.success) {
+                    throw new Error('Login failed: ' + loginResult.message);
+                }
+                results.push('✅ Customer login successful');
+                
+                // 2. Test Customer Data Fetch
+                console.log('👤 Testing customer data fetch...');
+                const customerResponse = await fetch('/api/customers/me', {
+                    credentials: 'include'
+                });
+                const customerData = await customerResponse.json();
+                console.log('Customer data:', customerData);
+                
+                document.getElementById('customerData').innerHTML = `
+                    <div><strong>Name:</strong> ${customerData.customer.firstName} ${customerData.customer.lastName}</div>
+                    <div><strong>Province:</strong> ${customerData.customer.province}</div>
+                    <div><strong>City Region:</strong> ${customerData.customer.cityRegion}</div>
+                    <div><strong>City:</strong> ${customerData.customer.city || 'Not Set'}</div>
+                `;
+                results.push('✅ Customer data fetched successfully');
+                
+                // 3. Test Provinces API
+                console.log('🏛️ Testing provinces API...');
+                const provincesResponse = await fetch('/api/iraqi-provinces');
+                const provincesData = await provincesResponse.json();
+                console.log('Provinces data:', provincesData);
+                
+                document.getElementById('provincesData').innerHTML = `
+                    <div><strong>Total Provinces:</strong> ${provincesData.count}</div>
+                    <div><strong>Sample:</strong> ${provincesData.data.slice(0, 3).map(p => `${p.nameArabic} (${p.nameEnglish})`).join(', ')}</div>
+                `;
+                results.push('✅ Provinces API working');
+                
+                // 4. Find Erbil Province
+                const erbilProvince = provincesData.data.find(p => 
+                    p.nameArabic === 'اربیل' || p.nameEnglish === 'Erbil'
+                );
+                
+                if (erbilProvince) {
+                    results.push(`✅ Erbil province found: ID ${erbilProvince.id}`);
+                    
+                    // 5. Test Cities API for Erbil
+                    console.log('🏙️ Testing cities API for Erbil...');
+                    const citiesResponse = await fetch(`/api/iraqi-cities?provinceId=${erbilProvince.id}`);
+                    const citiesData = await citiesResponse.json();
+                    console.log('Erbil cities data:', citiesData);
+                    
+                    document.getElementById('citiesData').innerHTML = `
+                        <div><strong>Erbil Cities:</strong> ${citiesData.count}</div>
+                        <div><strong>Cities:</strong> ${citiesData.data.map(c => `${c.nameArabic} (${c.nameEnglish})`).join(', ')}</div>
+                    `;
+                    results.push('✅ Erbil cities fetched successfully');
+                    
+                    // 6. Test City Matching
+                    const customerCityRegion = customerData.customer.cityRegion;
+                    const matchingCity = citiesData.data.find(c => 
+                        c.nameArabic === customerCityRegion || 
+                        c.nameEnglish === customerCityRegion ||
+                        c.name === customerCityRegion
+                    );
+                    
+                    if (matchingCity) {
+                        results.push(`✅ City matching successful: ${matchingCity.nameArabic} → ${matchingCity.nameEnglish}`);
+                    } else {
+                        results.push(`❌ City matching failed for: ${customerCityRegion}`);
+                    }
+                } else {
+                    results.push('❌ Erbil province not found');
+                }
+                
+            } catch (error) {
+                console.error('Test error:', error);
+                results.push(`❌ Test failed: ${error.message}`);
+            }
+            
+            // Display results
+            document.getElementById('testResults').innerHTML = results.map(r => `<div>${r}</div>`).join('');
+        }
+        
+        // Auto-run tests on page load
+        setTimeout(runTests, 1000);
+    </script>
+</body>
+</html>

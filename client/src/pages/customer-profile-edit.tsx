@@ -97,7 +97,7 @@ export default function CustomerProfileEdit() {
 
   // Fetch provinces data
   const { data: provincesData } = useQuery({
-    queryKey: ["/api/logistics/provinces"],
+    queryKey: ["/api/iraqi-provinces"],
     retry: 1,
   });
 
@@ -106,11 +106,11 @@ export default function CustomerProfileEdit() {
 
   // Fetch cities data based on selected province
   const { data: citiesData } = useQuery({
-    queryKey: ["/api/logistics/cities", selectedProvinceId],
+    queryKey: ["/api/iraqi-cities", selectedProvinceId],
     queryFn: () => {
       const url = selectedProvinceId 
-        ? `/api/logistics/cities?provinceId=${selectedProvinceId}`
-        : '/api/logistics/cities';
+        ? `/api/iraqi-cities?provinceId=${selectedProvinceId}`
+        : '/api/iraqi-cities';
       console.log('🌍 [API] Fetching cities from:', url);
       return fetch(url).then(res => res.json());
     },
