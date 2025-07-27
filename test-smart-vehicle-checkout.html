@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Vehicle Checkout Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .code { background: #f8f9fa; padding: 10px; border-radius: 4px; font-family: monospace; margin: 5px 0; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        .emerald { background: #10b981; }
+        .emerald:hover { background: #059669; }
+    </style>
+</head>
+<body>
+    <h1>🚚 Smart Vehicle Checkout System Test</h1>
+    
+    <div class="test-section">
+        <h2>📋 Test Overview</h2>
+        <p>Testing the new smart vehicle selection system integrated with delivery methods in checkout form.</p>
+        <div class="info">
+            <strong>✅ Implementation Completed:</strong>
+            <ul>
+                <li>Added smart_vehicle (ID: 7) to delivery_methods database table</li>
+                <li>Enhanced checkout form to show smart vehicle option in "Delivery Method *" field</li>
+                <li>Integrated intelligent cost calculation with vehicle templates</li>
+                <li>Added emerald color theme for smart vehicle selection</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔍 1. Check Delivery Methods</h2>
+        <button onclick="checkDeliveryMethods()">Get Delivery Methods</button>
+        <div id="deliveryMethodsResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🚛 2. Test Vehicle Templates</h2>
+        <button onclick="checkVehicleTemplates()">Get Vehicle Templates</button>
+        <div id="vehicleTemplatesResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>💡 3. Test Smart Vehicle Calculation</h2>
+        <p>Testing automatic vehicle selection for sample order:</p>
+        <div class="code">
+            <strong>Test Parameters:</strong><br>
+            • Destination: کربلا (Karbala)<br>
+            • Weight: 25.5 kg<br>
+            • Products: Chemical products requiring special transport
+        </div>
+        <button class="emerald" onclick="testSmartVehicleCalculation()">Calculate Smart Vehicle</button>
+        <div id="smartCalculationResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🏪 4. Frontend Integration Test</h2>
+        <p>Direct link to checkout page to test the smart vehicle option:</p>
+        <div class="info">
+            <strong>Instructions:</strong>
+            <ol>
+                <li>Click the link below to open checkout page</li>
+                <li>Add items to cart if empty</li>
+                <li>Look for "انتخاب هوشمند خودرو (محاسبه خودکار)" in Delivery Method dropdown</li>
+                <li>Select it and verify intelligent calculation appears</li>
+            </ol>
+        </div>
+        <button onclick="openCheckoutPage()">🛒 Open Checkout Page</button>
+    </div>
+
+    <div class="test-section">
+        <h2>📊 Test Results Summary</h2>
+        <div id="testSummary" class="info">
+            <p>Run tests above to see results...</p>
+        </div>
+    </div>
+
+    <script>
+        let testResults = [];
+
+        async function checkDeliveryMethods() {
+            try {
+                const response = await fetch('/api/checkout/delivery-methods');
+                const data = await response.json();
+                
+                const smartVehicleMethod = data.find(method => method.value === 'smart_vehicle');
+                
+                if (smartVehicleMethod) {
+                    document.getElementById('deliveryMethodsResult').innerHTML = `
+                        <div class="success">
+                            <strong>✅ Smart Vehicle Method Found!</strong><br>
+                            <div class="code">
+                                ID: ${smartVehicleMethod.id}<br>
+                                Value: ${smartVehicleMethod.value}<br>
+                                Label: ${smartVehicleMethod.label}<br>
+                                Color: ${smartVehicleMethod.color}<br>
+                                Description: ${smartVehicleMethod.description}
+                            </div>
+                        </div>
+                        <div class="info">
+                            <strong>Total Delivery Methods:</strong> ${data.length}<br>
+                            Smart vehicle is at position: ${data.findIndex(m => m.value === 'smart_vehicle')} (sortOrder: ${smartVehicleMethod.sortOrder})
+                        </div>
+                    `;
+                    testResults.push('✅ Delivery Methods: Smart vehicle found in database');
+                } else {
+                    document.getElementById('deliveryMethodsResult').innerHTML = `
+                        <div class="error">❌ Smart vehicle method not found in delivery methods!</div>
+                    `;
+                    testResults.push('❌ Delivery Methods: Smart vehicle not found');
+                }
+                
+                updateTestSummary();
+            } catch(error) {
+                document.getElementById('deliveryMethodsResult').innerHTML = `
+                    <div class="error">❌ Error: ${error.message}</div>
+                `;
+            }
+        }
+
+        async function checkVehicleTemplates() {
+            try {
+                const response = await fetch('/api/logistics/vehicle-templates');
+                const data = await response.json();
+                
+                if (data.success && data.data.length > 0) {
+                    const template = data.data[0];
+                    document.getElementById('vehicleTemplatesResult').innerHTML = `
+                        <div class="success">
+                            <strong>✅ Vehicle Templates Available!</strong><br>
+                            <div class="code">
+                                Sample Template:<br>
+                                Name: ${template.name}<br>
+                                Max Weight: ${template.maxWeight} kg<br>
+                                Base Price: ${template.basePrice} IQD<br>
+                                Price per KM: ${template.pricePerKm} IQD<br>
+                                Price per KG: ${template.pricePerKg} IQD
+                            </div>
+                        </div>
+                        <div class="info">
+                            <strong>Total Templates:</strong> ${data.data.length}
+                        </div>
+                    `;
+                    testResults.push('✅ Vehicle Templates: Available for calculation');
+                } else {
+                    document.getElementById('vehicleTemplatesResult').innerHTML = `
+                        <div class="error">❌ No vehicle templates available!</div>
+                    `;
+                    testResults.push('❌ Vehicle Templates: No templates found');
+                }
+                
+                updateTestSummary();
+            } catch(error) {
+                document.getElementById('vehicleTemplatesResult').innerHTML = `
+                    <div class="error">❌ Error: ${error.message}</div>
+                `;
+            }
+        }
+
+        async function testSmartVehicleCalculation() {
+            try {
+                // First get Iraqi cities to find Karbala
+                const citiesResponse = await fetch('/api/iraqi-cities');
+                const citiesData = await citiesResponse.json();
+                const karbalaCity = citiesData.data.find(city => 
+                    city.nameArabic === 'کربلا' || 
+                    city.nameEnglish === 'Karbala' ||
+                    city.name.includes('کربلا')
+                );
+                
+                if (!karbalaCity) {
+                    throw new Error('Karbala city not found in database');
+                }
+                
+                // Test vehicle optimization
+                const optimizationResponse = await fetch('/api/logistics/vehicle-optimization/calculate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        destinationCity: karbalaCity.nameArabic || karbalaCity.name,
+                        totalWeight: 25.5,
+                        totalVolume: 0.5,
+                        requiresHazardousMaterials: true,
+                        requiresRefrigeration: false,
+                        requiresFragileHandling: false
+                    })
+                });
+                
+                const optimizationData = await optimizationResponse.json();
+                
+                if (optimizationData.success && optimizationData.selectedVehicle) {
+                    const vehicle = optimizationData.selectedVehicle;
+                    const cost = optimizationData.totalCost;
+                    
+                    document.getElementById('smartCalculationResult').innerHTML = `
+                        <div class="success">
+                            <strong>✅ Smart Vehicle Calculation Successful!</strong><br>
+                            <div class="code">
+                                Selected Vehicle: ${vehicle.name}<br>
+                                Total Cost: ${cost.toLocaleString()} IQD<br>
+                                Distance to Karbala: ${karbalaCity.distanceFromErbilKm} km<br>
+                                Base Cost: ${parseFloat(vehicle.basePrice).toLocaleString()} IQD<br>
+                                Distance Cost: ${(karbalaCity.distanceFromErbilKm * parseFloat(vehicle.pricePerKm)).toLocaleString()} IQD<br>
+                                Weight Cost: ${(25.5 * parseFloat(vehicle.pricePerKg)).toLocaleString()} IQD
+                            </div>
+                        </div>
+                        <div class="info">
+                            <strong>Vehicle Capabilities:</strong><br>
+                            • Max Weight: ${vehicle.maxWeight} kg<br>
+                            • Max Volume: ${vehicle.maxVolume} m³<br>
+                            • Hazardous Materials: ${vehicle.hazardousMaterials ? 'Yes' : 'No'}<br>
+                            • Routes: ${vehicle.allowedRoutes}
+                        </div>
+                    `;
+                    testResults.push('✅ Smart Calculation: Vehicle selection working');
+                } else {
+                    document.getElementById('smartCalculationResult').innerHTML = `
+                        <div class="error">❌ Smart calculation failed: ${optimizationData.message || 'Unknown error'}</div>
+                    `;
+                    testResults.push('❌ Smart Calculation: Failed to select vehicle');
+                }
+                
+                updateTestSummary();
+            } catch(error) {
+                document.getElementById('smartCalculationResult').innerHTML = `
+                    <div class="error">❌ Error: ${error.message}</div>
+                `;
+                testResults.push('❌ Smart Calculation: Error occurred');
+                updateTestSummary();
+            }
+        }
+
+        function openCheckoutPage() {
+            window.open('/checkout', '_blank');
+        }
+
+        function updateTestSummary() {
+            const summary = document.getElementById('testSummary');
+            const successCount = testResults.filter(r => r.startsWith('✅')).length;
+            const failCount = testResults.filter(r => r.startsWith('❌')).length;
+            
+            let html = `<strong>Test Results (${testResults.length} tests run):</strong><br>`;
+            html += `<span style="color: green">✅ Passed: ${successCount}</span> | `;
+            html += `<span style="color: red">❌ Failed: ${failCount}</span><br><br>`;
+            
+            testResults.forEach(result => {
+                html += `${result}<br>`;
+            });
+            
+            if (successCount === testResults.length && testResults.length > 0) {
+                html += `<br><div class="success"><strong>🎉 All tests passed! Smart vehicle system is ready.</strong></div>`;
+            }
+            
+            summary.innerHTML = html;
+        }
+
+        // Auto-run initial test
+        window.onload = function() {
+            setTimeout(checkDeliveryMethods, 500);
+        };
+    </script>
+</body>
+</html>

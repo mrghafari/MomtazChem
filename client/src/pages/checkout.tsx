@@ -1267,36 +1267,63 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                 />
                               </SelectTrigger>
                               <SelectContent>
-                                {/* Smart Vehicle Selection Option */}
-                                {selectedVehicle && destinationCity && totalWeight > 0 && (
-                                  <SelectItem value="smart_vehicle" className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
-                                    <div className="flex flex-col gap-1 w-full">
-                                      <div className="flex items-center justify-between">
-                                        <span className="font-medium text-green-700 dark:text-green-300">
-                                          🚚 انتخاب هوشمند: {selectedVehicle.name}
-                                        </span>
-                                        <span className="text-green-600 dark:text-green-400 font-bold">
-                                          {shippingCost.toLocaleString()} IQD
-                                        </span>
-                                      </div>
-                                      <div className="text-xs text-green-600 dark:text-green-400 space-y-1">
-                                        <div>📍 مقصد: {destinationCity} • وزن: {totalWeight.toFixed(1)} کگ</div>
-                                        <div>
-                                          💰 پایه: {parseFloat(selectedVehicle.basePrice || '0').toLocaleString()} • 
-                                          فاصله: {(parseFloat(iraqiCities?.data?.find((city: any) => 
-                                            city.nameEnglish?.toLowerCase().includes(destinationCity.toLowerCase()) ||
-                                            city.nameArabic?.includes(destinationCity) ||
-                                            city.name?.toLowerCase().includes(destinationCity.toLowerCase())
-                                          )?.distanceFromErbilKm || '0') * parseFloat(selectedVehicle.pricePerKm || '0')).toLocaleString()} • 
-                                          وزن: {(totalWeight * parseFloat(selectedVehicle.pricePerKg || '0')).toLocaleString()} IQD
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </SelectItem>
-                                )}
-                                
-                                {/* Standard Delivery Methods */}
+                                {/* Display all delivery methods including smart_vehicle */}
                                 {(deliveryMethods as any[])?.map((method: any) => {
+                                  // Handle smart_vehicle specially
+                                  if (method.value === 'smart_vehicle') {
+                                    if (selectedVehicle && destinationCity && totalWeight > 0) {
+                                      // Show calculated smart vehicle option
+                                      return (
+                                        <SelectItem key={method.id} value={method.id.toString()} className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800">
+                                          <div className="flex flex-col gap-1 w-full">
+                                            <div className="flex items-center justify-between">
+                                              <span className="font-medium text-emerald-700 dark:text-emerald-300">
+                                                🚚 {selectedVehicle.name} (هوشمند)
+                                              </span>
+                                              <span className="text-emerald-600 dark:text-emerald-400 font-bold">
+                                                {shippingCost.toLocaleString()} IQD
+                                              </span>
+                                            </div>
+                                            <div className="text-xs text-emerald-600 dark:text-emerald-400 space-y-1">
+                                              <div>📍 مقصد: {destinationCity} • وزن: {totalWeight.toFixed(1)} کگ</div>
+                                              <div>
+                                                💰 پایه: {parseFloat(selectedVehicle.basePrice || '0').toLocaleString()} • 
+                                                فاصله: {(parseFloat(iraqiCities?.data?.find((city: any) => 
+                                                  city.nameEnglish?.toLowerCase().includes(destinationCity.toLowerCase()) ||
+                                                  city.nameArabic?.includes(destinationCity) ||
+                                                  city.name?.toLowerCase().includes(destinationCity.toLowerCase())
+                                                )?.distanceFromErbilKm || '0') * parseFloat(selectedVehicle.pricePerKm || '0')).toLocaleString()} • 
+                                                وزن: {(totalWeight * parseFloat(selectedVehicle.pricePerKg || '0')).toLocaleString()} IQD
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </SelectItem>
+                                      );
+                                    } else {
+                                      // Show placeholder smart vehicle option
+                                      return (
+                                        <SelectItem key={method.id} value={method.id.toString()} className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800">
+                                          <div className="flex flex-col gap-1 w-full">
+                                            <div className="flex items-center justify-between">
+                                              <span className="font-medium text-emerald-700 dark:text-emerald-300">
+                                                🚚 {method.label}
+                                              </span>
+                                              <span className="text-emerald-600 dark:text-emerald-400 text-xs">
+                                                محاسبه خودکار
+                                              </span>
+                                            </div>
+                                            <div className="text-xs text-emerald-600 dark:text-emerald-400">
+                                              {!destinationCity ? "📍 لطفاً شهر مقصد را مشخص کنید" :
+                                               totalWeight <= 0 ? "⚖️ محصولات را به سبد خرید اضافه کنید" :
+                                               "🔄 در حال محاسبه بهترین خودرو..."}
+                                            </div>
+                                          </div>
+                                        </SelectItem>
+                                      );
+                                    }
+                                  }
+                                  
+                                  // Handle standard delivery methods
                                   const freeShippingThreshold = parseFloat(method.freeShippingThreshold || '0');
                                   const qualifiesForFreeShipping = freeShippingThreshold > 0 && subtotal >= freeShippingThreshold;
                                   const baseCost = parseFloat(method.baseCost || '0');
@@ -1313,6 +1340,79 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                     </SelectItem>
                                   );
                                 })}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    {/* Show delivery details */}
+                    {selectedMethod && (
+                      <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-200 dark:border-blue-800">
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between items-center">
+                            <span>هزینه ارسال:</span>
+                            <span className="font-medium">
+                              {shippingCost === 0 ? 'رایگان' : `${shippingCost.toLocaleString()} IQD`}
+                            </span>
+                          </div>
+                          {selectedMethod.value === 'smart_vehicle' && selectedVehicle ? (
+                            <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded p-2 border border-emerald-200 dark:border-emerald-800">
+                              <div className="text-xs text-emerald-700 dark:text-emerald-300 space-y-1">
+                                <div className="font-medium">📋 جزئیات انتخاب هوشمند:</div>
+                                <div>🚛 خودرو انتخابی: {selectedVehicle.name}</div>
+                                <div>⚖️ ظرفیت وزنی: {selectedVehicle.maxWeight} کگ</div>
+                                <div>📦 ظرفیت حجمی: {selectedVehicle.maxVolume} متر مکعب</div>
+                                <div>🛣️ مسیرهای مجاز: {selectedVehicle.allowedRoutes}</div>
+                                {selectedVehicle.hazardousMaterials && <div>⚠️ حمل مواد خطرناک</div>}
+                                {selectedVehicle.refrigeratedTransport && <div>❄️ حمل یخچالی</div>}
+                                {selectedVehicle.fragileItems && <div>📱 مناسب اقلام شکستنی</div>}
+                              </div>
+                            </div>
+                          ) : selectedMethod.freeShippingThreshold && parseFloat(selectedMethod.freeShippingThreshold) > 0 ? (
+                            <div className="text-xs text-green-600 dark:text-green-400">
+                              {subtotal >= parseFloat(selectedMethod.freeShippingThreshold) 
+                                ? `✓ ارسال رایگان برای خریدهای بالای ${parseFloat(selectedMethod.freeShippingThreshold).toLocaleString()} IQD`
+                                : `برای ارسال رایگان ${(parseFloat(selectedMethod.freeShippingThreshold) - subtotal).toLocaleString()} IQD بیشتر خرید کنید`
+                              }
+                            </div>
+                          ) : null}
+                          {selectedMethod.description && (
+                            <div className="text-xs text-muted-foreground">
+                              {selectedMethod.description}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Payment Method */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <CreditCard className="w-5 h-5" />
+                      روش پرداخت
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="paymentMethod"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>انتخاب روش پرداخت *</FormLabel>
+                          <FormControl>
+                            <Select value={field.value} onValueChange={field.onChange}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="روش پرداخت را انتخاب کنید" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="bank_receipt">ارسال فیش واریزی بانکی (Bank Receipt Upload)</SelectItem>
+                                <SelectItem value="online_payment">پرداخت آنلاین (Online Payment)</SelectItem>
                               </SelectContent>
                             </Select>
                           </FormControl>
