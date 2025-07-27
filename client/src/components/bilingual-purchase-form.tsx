@@ -1412,7 +1412,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                         <p className={`text-sm ${
                           isPrimaryAddressDisabled ? 'text-gray-500' : 'text-green-700'
                         }`}>
-                          {crmCustomerData?.address || 'آدرس ثبت نشده'}
+                          {crmCustomerData?.address || customerData?.customer?.address || 'آدرس ثبت نشده'}
                         </p>
                         <div className="flex items-center gap-4 mt-2">
                           <p className={`text-xs ${
@@ -1423,7 +1423,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                           <p className={`text-xs ${
                             isPrimaryAddressDisabled ? 'text-gray-500' : 'text-green-600'
                           }`}>
-                            🏙️ {crmCustomerData?.city || 'شهر ثبت نشده'}
+                            🏙️ {crmCustomerData?.city || crmCustomerData?.cityRegion || customerData?.customer?.cityRegion || 'شهر ثبت نشده'}
                           </p>
                         </div>
                       </div>
