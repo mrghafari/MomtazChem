@@ -121,9 +121,18 @@ export default function CustomerProfileEdit() {
   const provinces = (provincesData && typeof provincesData === 'object' && 'data' in provincesData) ? provincesData.data as any[] : [];
   let cities = (citiesData && typeof citiesData === 'object' && 'data' in citiesData) ? citiesData.data as any[] : [];
   
-  // If a province is selected, filter cities to only that province
+  // Remove duplicates based on nameEnglish and filter by province
   if (selectedProvinceId && cities.length > 0) {
     cities = cities.filter((city: any) => city.provinceId === selectedProvinceId);
+  }
+  
+  // Remove duplicates based on nameEnglish field
+  cities = cities.filter((city: any, index: number, arr: any[]) => 
+    arr.findIndex((c: any) => c.nameEnglish === city.nameEnglish) === index
+  );
+  
+  console.log('🌍 [FILTER] Total cities after deduplication:', cities.length);
+  if (selectedProvinceId) {
     console.log(`🌍 [FILTER] Filtered cities for province ${selectedProvinceId}:`, cities.length, 'cities');
   } else {
     console.log('🌍 [FILTER] No province filter applied. Total cities:', cities.length);
@@ -374,7 +383,7 @@ export default function CustomerProfileEdit() {
         nameArabic: c.nameArabic
       })));
     }
-  }, [customer?.customer?.cityRegion, customer?.customer?.city, cities, form, selectedProvinceId]);
+  }, [customer, cities, form, selectedProvinceId]);
 
   // Send SMS verification code
   const sendSmsCodeMutation = useMutation({
@@ -803,7 +812,7 @@ export default function CustomerProfileEdit() {
                           🔍 Debug: Current city value = "{field.value}"<br/>
                           🌍 Selected Province ID = {selectedProvinceId}<br/>
                           📊 Available cities count = {cities.length}<br/>
-                          💾 Backend cityRegion = "{customer?.customer?.cityRegion}"
+                          💾 Backend cityRegion = "{(customer?.customer || customer)?.cityRegion}"
                         </div>
                       </FormItem>
                     )}
