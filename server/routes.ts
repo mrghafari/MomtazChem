@@ -17843,6 +17843,7 @@ Leading Chemical Solutions Provider
         country,
         province,
         city,
+        cityRegion,
         address,
         secondaryAddress,
         postalCode,
@@ -17890,6 +17891,7 @@ Leading Chemical Solutions Provider
         annualRevenue, priceRange, orderFrequency, creditStatus, smsEnabled, emailEnabled
       });
       console.log('🔧 [CRITICAL FIX] Mapping city field to cityRegion for database storage:', city);
+      console.log('🔧 [CRITICAL FIX] cityRegion field from request:', cityRegion);
       
       // Get current customer data first to preserve existing information
       const currentCustomer = await crmStorage.getCrmCustomerById(customerId);
@@ -17910,7 +17912,7 @@ Leading Chemical Solutions Provider
         company: company || currentCustomer.company,
         country: country || currentCustomer.country,
         province: province || currentCustomer.province,
-        cityRegion: city || currentCustomer.cityRegion, // FIX: Map 'city' to 'cityRegion' for database
+        cityRegion: (cityRegion || city) ? (cityRegion || city) : currentCustomer.cityRegion, // FIX: Update city when provided
         address: address || currentCustomer.address,
         
         // Additional contact info
@@ -17955,6 +17957,7 @@ Leading Chemical Solutions Provider
       };
 
       console.log('🔄 [CRM INTEGRATION] Update data prepared with preservation:', Object.keys(updateData));
+      console.log('🔧 [DEBUG] Final updateData.cityRegion value:', updateData.cityRegion);
 
       // Update customer profile in CRM with data preservation
       const updatedCustomer = await crmStorage.updateCrmCustomer(customerId, updateData);

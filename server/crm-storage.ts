@@ -157,6 +157,16 @@ export class CrmStorage implements ICrmStorage {
       const processedUpdate = { ...customerUpdate };
       
       console.log("[CRM UPDATE] Original update data:", customerUpdate);
+      
+      // CRITICAL FIX: Handle city -> cityRegion field mapping for geographical data persistence
+      console.log("[DEBUG] Checking for city field in customerUpdate:", 'city' in customerUpdate, customerUpdate.city);
+      if ('city' in customerUpdate && customerUpdate.city) {
+        processedUpdate.cityRegion = customerUpdate.city;
+        delete processedUpdate.city; // Remove city field as database uses cityRegion
+        console.log("[FIELD MAPPING FIX] city -> cityRegion transformation:", customerUpdate.city, "->", processedUpdate.cityRegion);
+      } else {
+        console.log("[DEBUG] City field not found or empty in customerUpdate");
+      }
       console.log("[CRM UPDATE] resetPasswordExpires type:", typeof customerUpdate.resetPasswordExpires, customerUpdate.resetPasswordExpires);
       
       // Handle updatedAt - always set to current date
