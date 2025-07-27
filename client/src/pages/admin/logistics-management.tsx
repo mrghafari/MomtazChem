@@ -2096,6 +2096,188 @@ const LogisticsManagement = () => {
     );
   };
 
+  // Vehicles Tab Component
+  const VehiclesTab = () => {
+    const [searchVehicle, setSearchVehicle] = useState('');
+
+    // Sample vehicle data with capacities and destinations
+    const vehicleData = [
+      {
+        id: 1,
+        name: 'وانت کوچک - پیکان',
+        type: 'pickup_small',
+        capacity: '25 کیلوگرم',
+        destinations: ['بغداد', 'اربیل', 'موصل', 'کرکوک'],
+        pricePerKm: '400 دینار/کم',
+        estimatedTime: '12-24 ساعت',
+        status: 'فعال',
+        description: 'برای محموله‌های کم وزن تا 25 کیلوگرم'
+      },
+      {
+        id: 2,
+        name: 'وانت متوسط - نیسان',
+        type: 'pickup_medium',
+        capacity: '100 کیلوگرم',
+        destinations: ['بغداد', 'بصره', 'نجف', 'کربلا'],
+        pricePerKm: '500 دینار/کم',
+        estimatedTime: '24-36 ساعت',
+        status: 'فعال',
+        description: 'برای محموله‌های متوسط تا 100 کیلوگرم'
+      },
+      {
+        id: 3,
+        name: 'کامیونت - ایسوزو',
+        type: 'truck_small',
+        capacity: '500 کیلوگرم',
+        destinations: ['تمام شهرهای عراق'],
+        pricePerKm: '700 دینار/کم',
+        estimatedTime: '24-48 ساعت',
+        status: 'فعال',
+        description: 'برای محموله‌های سنگین تا 500 کیلوگرم'
+      },
+      {
+        id: 4,
+        name: 'کامیون بزرگ - هیوو',
+        type: 'truck_large',
+        capacity: '1000+ کیلوگرم',
+        destinations: ['شهرهای اصلی عراق', 'حمل بین‌المللی'],
+        pricePerKm: '1000 دینار/کم',
+        estimatedTime: '48-72 ساعت',
+        status: 'فعال',
+        description: 'برای محموله‌های بسیار سنگین بالای 500 کیلوگرم'
+      }
+    ];
+
+    const filteredVehicles = vehicleData.filter(vehicle =>
+      vehicle.name.toLowerCase().includes(searchVehicle.toLowerCase()) ||
+      vehicle.type.toLowerCase().includes(searchVehicle.toLowerCase())
+    );
+
+    return (
+      <div className="space-y-6">
+        {/* Search and Header */}
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              <Truck className="w-6 h-6 text-blue-600" />
+              مدیریت وسایل نقلیه ({vehicleData.length})
+            </h2>
+            <p className="text-gray-600 mt-1">
+              لیست وسایل نقلیه با ظرفیت و مقاصد قابل دسترس
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                placeholder="جستجو در وسایل نقلیه..."
+                value={searchVehicle}
+                onChange={(e) => setSearchVehicle(e.target.value)}
+                className="pl-10 w-64"
+              />
+            </div>
+            <Button>
+              <Plus className="w-4 h-4 mr-2" />
+              افزودن وسیله نقلیه
+            </Button>
+          </div>
+        </div>
+
+        {/* Vehicles Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredVehicles.map((vehicle) => (
+            <Card key={vehicle.id} className="border-2 hover:border-blue-300 transition-colors">
+              <CardHeader className="pb-3">
+                <div className="flex justify-between items-start">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-blue-100 rounded-lg">
+                      <Truck className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-lg">{vehicle.name}</CardTitle>
+                      <p className="text-sm text-gray-600">{vehicle.description}</p>
+                    </div>
+                  </div>
+                  <Badge className={vehicle.status === 'فعال' ? 'bg-green-500' : 'bg-red-500'}>
+                    {vehicle.status}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Capacity */}
+                <div className="flex items-center gap-2">
+                  <Scale className="w-4 h-4 text-orange-600" />
+                  <span className="font-medium">ظرفیت:</span>
+                  <Badge variant="outline" className="bg-orange-50">
+                    {vehicle.capacity}
+                  </Badge>
+                </div>
+
+                {/* Price */}
+                <div className="flex items-center gap-2">
+                  <Calculator className="w-4 h-4 text-green-600" />
+                  <span className="font-medium">نرخ:</span>
+                  <Badge variant="outline" className="bg-green-50">
+                    {vehicle.pricePerKm}
+                  </Badge>
+                </div>
+
+                {/* Estimated Time */}
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-purple-600" />
+                  <span className="font-medium">زمان تحویل:</span>
+                  <Badge variant="outline" className="bg-purple-50">
+                    {vehicle.estimatedTime}
+                  </Badge>
+                </div>
+
+                {/* Destinations */}
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <MapPin className="w-4 h-4 text-blue-600" />
+                    <span className="font-medium">مقاصد قابل دسترس:</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    {vehicle.destinations.map((destination, index) => (
+                      <Badge key={index} variant="secondary" className="text-xs">
+                        {destination}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-2 pt-3 border-t">
+                  <Button variant="outline" size="sm" className="flex-1">
+                    <Edit className="w-4 h-4 mr-2" />
+                    ویرایش
+                  </Button>
+                  <Button variant="outline" size="sm" className="flex-1">
+                    <Eye className="w-4 h-4 mr-2" />
+                    جزئیات
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Empty State */}
+        {filteredVehicles.length === 0 && (
+          <div className="text-center py-12">
+            <Truck className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              هیچ وسیله نقلیه‌ای یافت نشد
+            </h3>
+            <p className="text-gray-600">
+              با عبارت "{searchVehicle}" هیچ وسیله نقلیه‌ای پیدا نشد
+            </p>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
@@ -2113,12 +2295,11 @@ const LogisticsManagement = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="orders">سفارشات</TabsTrigger>
           <TabsTrigger value="companies">شرکت‌های حمل</TabsTrigger>
           <TabsTrigger value="geography">جغرافیای عراق</TabsTrigger>
-
-
+          <TabsTrigger value="vehicles">وسایل نقلیه</TabsTrigger>
           <TabsTrigger value="postal">خدمات پست</TabsTrigger>
         </TabsList>
 
@@ -2132,6 +2313,10 @@ const LogisticsManagement = () => {
 
         <TabsContent value="geography">
           <GeographyTab />
+        </TabsContent>
+
+        <TabsContent value="vehicles">
+          <VehiclesTab />
         </TabsContent>
 
 
