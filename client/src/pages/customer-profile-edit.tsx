@@ -117,7 +117,6 @@ export default function CustomerProfileEdit() {
     retry: 1,
     enabled: true, // Always enabled to get initial data
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-    cacheTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
 
   const provinces = (provincesData && typeof provincesData === 'object' && 'data' in provincesData) ? provincesData.data as any[] : [];
@@ -276,19 +275,46 @@ export default function CustomerProfileEdit() {
   // Set selected province ID when provinces data and customer data are loaded
   useEffect(() => {
     const actualCustomer = customer?.customer || customer;
-    if (actualCustomer?.province && provinces.length > 0 && !selectedProvinceId) {
+    
+    console.log('🏛️ [PROVINCE DEBUG] Province matching logic:', {
+      customerProvince: actualCustomer?.province,
+      provincesLength: provinces.length,
+      currentSelectedProvinceId: selectedProvinceId,
+      form_province_value: form.getValues('province')
+    });
+    
+    if (actualCustomer?.province && provinces.length > 0) {
       const customerProvince = provinces.find((p: any) => 
         p.nameEnglish === actualCustomer.province || 
         p.name === actualCustomer.province ||
         p.nameArabic === actualCustomer.province
       );
       
+      console.log('🔍 [PROVINCE MATCH] Found province:', customerProvince);
+      
       if (customerProvince) {
+        // Always set the province ID for city filtering
         setSelectedProvinceId(customerProvince.id);
-        form.setValue('province', customerProvince.nameEnglish || customerProvince.name);
+        
+        // Set form value if not already set correctly
+        const currentFormValue = form.getValues('province');
+        const targetProvinceValue = customerProvince.nameEnglish || customerProvince.name;
+        
+        if (currentFormValue !== targetProvinceValue) {
+          form.setValue('province', targetProvinceValue, { 
+            shouldValidate: true, 
+            shouldDirty: true 
+          });
+          
+          console.log('✅ [PROVINCE SET] Province form value updated:', {
+            from: currentFormValue,
+            to: targetProvinceValue,
+            provinceId: customerProvince.id
+          });
+        }
       }
     }
-  }, [customer?.customer?.province, provinces.length, selectedProvinceId]);
+  }, [customer?.customer?.province, provinces.length, form]);
 
   // CRITICAL FIX: City setting with stable dependencies
   useEffect(() => {
