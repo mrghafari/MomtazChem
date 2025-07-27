@@ -224,6 +224,33 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Workflow Integration**: Works seamlessly with existing order management and financial approval systems
 - **Result**: Complete customer rejection visibility operational - customers can see detailed rejection reasons in both main profile and purchase history with professional styling and clear messaging
 
+### COMPLETED: Iraqi Cities English Names Correction - Complete Implementation (January 27, 2025)
+✅ **IMPLEMENTED: Comprehensive correction of English names for Iraqi cities using authentic geographical references**
+- **User Request Fulfilled**: "نام انگلیسی شهر های عراق را به انگلیسی بزن" - Updated 40 city names with proper English translations
+- **Comprehensive Mapping**: Created accurate English translations for major Iraqi cities across all 18 provinces:
+  - **Baghdad Province**: Sadr City, At-Tarmiyah, Al-Kadhimiya
+  - **Basra Province**: Basra, Az-Zubayr, Al-Qurnah, Al-Faw  
+  - **Kurdistan Region**: Sulaymaniyah, Halabja, Penjwin, Duhok, Zakho, Shaqlawa, Koisanjaq
+  - **Nineveh Province**: Tal Afar, Al-Hamdaniya, Sinjar
+  - **Other Provinces**: Tikrit, Baqubah, Khanaqin, Kifri, Hillah, Al-Musayib, Hit, Fallujah
+- **Database Updates**: Successfully updated 40 cities out of 188 total with authentic English names
+- **Geographical Accuracy**: Used proper English transliterations following international standards
+- **Business Impact**: Improved trilingual support with accurate English city names for international logistics
+- **Technical Implementation**: Automated script with comprehensive mapping dictionary for consistent updates
+- **Result**: Iraqi geographical data now features authentic English city names alongside Arabic and Kurdish variants
+
+### COMPLETED: Provinces Tab Removal from Geography Management - Complete Simplification (January 27, 2025)
+✅ **IMPLEMENTED: Complete removal of provinces tab from geography management section per user request**
+- **User Request Fulfilled**: "به تب استانها نیاز نداریم" - Eliminated provinces tab from geography management interface
+- **Interface Simplification**: Geography management now displays only cities table without tab structure
+- **Code Cleanup**: Removed TabsList, TabsTrigger, and TabsContent components for provinces
+- **Enhanced Focus**: Single card interface showing Iraqi cities (188) with distance calculations and editing capabilities
+- **Professional Design**: Streamlined card layout with clear title "شهرهای عراق" and descriptive subtitle
+- **Maintained Functionality**: All city editing, distance calculations, and origin selection features preserved
+- **Technical Achievement**: Clean removal of tab structure without breaking existing functionality
+- **User Experience**: Simplified interface focusing solely on city management without unnecessary navigation
+- **Result**: Geography management now shows single cities table without provinces tab complexity
+
 ### COMPLETED: Enhanced Logistics Geography Management with Dynamic Origin Selection and Editable Distances - Complete Implementation (January 27, 2025)
 ✅ **IMPLEMENTED: Advanced logistics geography system with flexible origin city selection and editable distance management**
 - **User Request Fulfilled**: "باید قابلیت تغییر مبدا را هم اضافه کنیم و ممکن است هر شهر مبدا قرار گیرد و قابل تعریف باشد فاصله از مبدا هم قابل ادیت باشد"
