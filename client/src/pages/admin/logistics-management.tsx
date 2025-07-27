@@ -35,6 +35,7 @@ import {
 } from 'lucide-react';
 import { useOrderNotifications } from '@/hooks/useOrderNotifications';
 import PostalServicesTab from '@/components/PostalServicesTab';
+import IraqiGeographyTable from '@/components/admin/IraqiGeographyTable';
 
 // Safe date formatting function to prevent Invalid Date errors
 const formatDateSafe = (dateString: string | null | undefined, locale = 'en-US', options = {}): string => {
@@ -2354,7 +2355,7 @@ const LogisticsManagement = () => {
         </TabsContent>
 
         <TabsContent value="cities">
-          <CitiesTab />
+          <IraqiGeographyTable />
         </TabsContent>
 
         <TabsContent value="shipping">
