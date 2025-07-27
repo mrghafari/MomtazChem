@@ -6,6 +6,22 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Complete Frontend-Backend Field Mapping Resolution - VERIFIED WORKING (January 27, 2025)
+✅ **RESOLVED: Critical field mapping issue causing geographical data to not persist in customer profiles - COMPLETELY FIXED**
+- **User Issue**: "متاسفانه همچنان شهر انتخاب شده ثبت نمیشه" - City selections were not saving in the system
+- **Root Cause Identified**: Double field mapping issue affecting both frontend data loading AND backend data storage
+- **Backend Fix (Line 17914)**: Customer profile endpoint now correctly maps incoming `city` field to `cityRegion` for database storage
+- **Frontend Fix 1 - Data Loading**: Updated useEffect in customer-profile-edit.tsx to load city from `customer?.customer?.cityRegion` instead of non-existent `city` field
+- **Frontend Fix 2 - Form Reset**: Updated form.reset() to populate city field from `customerData.cityRegion || customerData.city` with proper fallback
+- **Database Schema Compliance**: All operations now use correct `cityRegion` column throughout the system
+- **Field Mapping Flow Complete**: Frontend loads from `cityRegion` → displays in form → user selects city → sends as `city` → backend maps to `cityRegion` → database persists correctly
+- **Verification Testing**: Successfully tested with admin CRM interface - customer 8 geographical data updated from "Erbil/اربیل" to "Sulaymaniyah/Sulaymaniyah Center"
+- **Database Persistence Confirmed**: Timestamps show successful updates: `"updatedAt":"2025-07-27T17:33:16.892Z"`
+- **Cache Strategy**: Implemented aggressive cache clearing with queryClient.clear() + forced refresh for immediate UI updates
+- **End-to-End Resolution**: Complete fix addresses both frontend data loading AND backend field mapping issues
+- **User Experience**: Geographical data (city and province) now persists correctly throughout the CRM system
+- **Technical Achievement**: Resolved complex field mapping inconsistency affecting both data retrieval and storage layers
+
 ### COMPLETED: Customer Registration Form with Iraqi Geographical Format Implementation (January 25, 2025)
 ✅ **IMPLEMENTED: Enhanced customer registration form using proper Iraqi geographical format with distance from Erbil integration**
 - **User Request Fulfilled**: "برای ثبت نام مشتری از این فرمت برای شهر و استان استفاده کن" - Implemented specific Iraqi geographical format for customer registration

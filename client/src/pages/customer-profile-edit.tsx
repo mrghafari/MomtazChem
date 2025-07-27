@@ -209,7 +209,7 @@ export default function CustomerProfileEdit() {
         company: customerData.company || "",
         country: customerData.country || "",
         province: customerData.province || "",
-        city: customerData.city || "",
+        city: customerData.cityRegion || customerData.city || "",
         address: customerData.address || "",
         secondaryAddress: customerData.state || customerData.secondaryAddress || "",
         postalCode: customerData.postalCode || "",
@@ -278,20 +278,23 @@ export default function CustomerProfileEdit() {
 
   // Set selected city when cities data and customer data are loaded
   useEffect(() => {
-    if (customer?.customer?.city && cities.length > 0) {
+    // CRITICAL FIX: Use cityRegion field from database instead of city
+    const customerCityValue = customer?.customer?.cityRegion || customer?.customer?.city;
+    if (customerCityValue && cities.length > 0) {
       const customerCity = cities.find((c: any) => 
-        c.nameEnglish === customer.customer.city || 
-        c.name === customer.customer.city ||
-        c.namePersian === customer.customer.city
+        c.nameEnglish === customerCityValue || 
+        c.name === customerCityValue ||
+        c.namePersian === customerCityValue
       );
       if (customerCity) {
         // Use standardized name for CRM integration
         form.setValue('city', customerCity.nameEnglish || customerCity.name);
-        console.log('🏙️ City found and set:', customerCity);
+        console.log('🏙️ [FIELD MAPPING FIX] City found and set:', customerCity);
+        console.log('🔧 [FIELD MAPPING FIX] Original cityRegion value:', customerCityValue);
       } else {
         // If not found in current city list, preserve original value to prevent data loss
-        console.log('🏙️ City not found for:', customer.customer.city, 'Preserving original value');
-        form.setValue('city', customer.customer.city);
+        console.log('🏙️ City not found for:', customerCityValue, 'Preserving original value');
+        form.setValue('city', customerCityValue);
       }
     }
   }, [customer, cities, form]);
