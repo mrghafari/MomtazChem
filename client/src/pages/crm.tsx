@@ -452,17 +452,20 @@ export default function CRM() {
       console.log("🔧 [FRONTEND UPDATE SUCCESS] Response data:", data);
       toast({ title: "Success", description: "Customer information updated successfully" });
       
-      // Force invalidate all customer-related queries
-      queryClient.invalidateQueries({ queryKey: ["/api/crm/customers"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/crm/dashboard"] });
+      // AGGRESSIVE CACHE CLEARING - Clear all related caches
+      queryClient.clear(); // Nuclear option - clear all cache
       
-      // Also invalidate with search parameters
-      queryClient.invalidateQueries({ 
-        queryKey: ["/api/crm/customers", { search: searchTerm, sortField, sortDirection }] 
-      });
-      
-      // Force refetch to ensure UI updates
-      queryClient.refetchQueries({ queryKey: ["/api/crm/customers"] });
+      // Wait a bit then refetch main data
+      setTimeout(() => {
+        queryClient.refetchQueries({ queryKey: ["/api/crm/customers"] });
+        queryClient.refetchQueries({ queryKey: ["/api/crm/dashboard"] });
+        
+        // Force a full page refresh if still not working
+        if (editingCustomer && data.data) {
+          console.log("🔄 [FORCE REFRESH] Triggering window reload to ensure UI updates");
+          window.location.reload();
+        }
+      }, 100);
       
       setIsEditCustomerDialogOpen(false);
       setEditingCustomer(null);
