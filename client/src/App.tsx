@@ -122,6 +122,7 @@ import ManagementDashboard from "@/pages/management-dashboard";
 import AccountingManagement from "@/pages/admin/accounting-management";
 import CompanyInformation from "@/pages/admin/company-information";
 import VehicleOptimization from "@/pages/admin/vehicle-optimization";
+import LogisticsGeography from "@/pages/admin/logistics-geography";
 
 import NotFound from "@/pages/not-found";
 
@@ -238,6 +239,7 @@ function Router() {
           <Route path="/admin/accounting-management" component={AccountingManagement} />
           <Route path="/admin/company-information" component={CompanyInformation} />
           <Route path="/admin/vehicle-optimization" component={VehicleOptimization} />
+          <Route path="/admin/logistics-geography" component={LogisticsGeography} />
           <Route path="/admin/pdf-test" component={lazy(() => import("@/pages/admin/pdf-test"))} />
 
 

@@ -14,7 +14,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
-import { Search, Plus, Users, TrendingUp, DollarSign, ShoppingCart, Eye, Edit, Activity, Trash2, Download, FileText, UserCog, ArrowUpDown, ArrowUp, ArrowDown, Shield, Settings, MessageCircle, Mail, UserCheck } from "lucide-react";
+import { Search, Plus, Users, TrendingUp, DollarSign, ShoppingCart, Eye, Edit, Activity, Trash2, Download, FileText, UserCog, ArrowUpDown, ArrowUp, ArrowDown, Shield, Settings, MessageCircle, Mail, UserCheck, MapPin, Globe } from "lucide-react";
 import UnifiedCustomerProfile from "@/components/unified-customer-profile";
 import { PasswordManagement } from "@/components/PasswordManagement";
 
@@ -817,6 +817,14 @@ export default function CRM() {
           </div>
         </div>
         <div className="flex gap-2">
+          <Button 
+            variant="outline"
+            onClick={() => setLocation('/admin/logistics-geography')}
+            className="flex items-center gap-2 bg-blue-50 border-blue-200 hover:bg-blue-100"
+          >
+            <Globe className="h-4 w-4" />
+            مدیریت جغرافیای لجستیک
+          </Button>
           <Button 
             variant="outline"
             onClick={() => handleExportAnalytics()}
