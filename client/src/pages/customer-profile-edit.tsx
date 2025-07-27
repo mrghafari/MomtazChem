@@ -280,22 +280,40 @@ export default function CustomerProfileEdit() {
   useEffect(() => {
     // CRITICAL FIX: Use cityRegion field from database instead of city
     const customerCityValue = customer?.customer?.cityRegion || customer?.customer?.city;
+    console.log('🔧 [CITY DEBUG] Customer city value from backend:', customerCityValue);
+    console.log('🔧 [CITY DEBUG] Available cities count:', cities.length);
+    
     if (customerCityValue && cities.length > 0) {
+      // Debug: Log all available cities to understand filtering
+      console.log('🔧 [CITY DEBUG] Available cities:', cities.map((c: any) => ({
+        id: c.id,
+        nameEnglish: c.nameEnglish,
+        nameArabic: c.nameArabic,
+        namePersian: c.namePersian
+      })));
+      
       const customerCity = cities.find((c: any) => 
         c.nameEnglish === customerCityValue || 
         c.name === customerCityValue ||
-        c.namePersian === customerCityValue
+        c.namePersian === customerCityValue ||
+        c.nameArabic === customerCityValue
       );
+      
+      console.log('🔧 [CITY DEBUG] Found matching city:', customerCity);
+      
       if (customerCity) {
         // Use standardized name for CRM integration
-        form.setValue('city', customerCity.nameEnglish || customerCity.name);
-        console.log('🏙️ [FIELD MAPPING FIX] City found and set:', customerCity);
+        const cityValueToSet = customerCity.nameEnglish || customerCity.name;
+        form.setValue('city', cityValueToSet);
+        console.log('🏙️ [FIELD MAPPING FIX] City found and set:', cityValueToSet);
         console.log('🔧 [FIELD MAPPING FIX] Original cityRegion value:', customerCityValue);
       } else {
         // If not found in current city list, preserve original value to prevent data loss
-        console.log('🏙️ City not found for:', customerCityValue, 'Preserving original value');
+        console.log('🏙️ [CITY DEBUG] City not found for:', customerCityValue, 'in available cities. Preserving original value');
         form.setValue('city', customerCityValue);
       }
+    } else {
+      console.log('🔧 [CITY DEBUG] No customer city value or no cities available', { customerCityValue, citiesLength: cities.length });
     }
   }, [customer, cities, form]);
 
