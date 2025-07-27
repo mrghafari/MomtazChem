@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>City Matching Test</title>
+</head>
+<body>
+    <h1>City Matching Debug Test</h1>
+    <div id="results"></div>
+
+    <script>
+        async function testCityMatching() {
+            const results = document.getElementById('results');
+            
+            try {
+                // Test customer data
+                console.log('🧪 [TEST] Starting city matching test...');
+                
+                // Simulate customer data from database
+                const customerCityValue = 'اربیل';
+                console.log('💾 [TEST] Customer city from DB:', customerCityValue);
+                
+                // Fetch cities from API
+                const response = await fetch('/api/logistics/cities?provinceId=1');
+                const citiesData = await response.json();
+                const cities = citiesData.data || [];
+                
+                console.log('🌍 [TEST] Fetched cities:', cities.length);
+                
+                // Test matching logic
+                const customerCity = cities.find((c) => {
+                    const cityNames = [
+                        c.nameEnglish,
+                        c.name,
+                        c.nameArabic,
+                        c.namePersian
+                    ].filter(Boolean);
+                    
+                    console.log('🔍 [TEST] Checking city:', cityNames, 'against:', customerCityValue);
+                    return cityNames.includes(customerCityValue);
+                });
+                
+                console.log('✅ [TEST] Found matching city:', customerCity);
+                
+                if (customerCity) {
+                    const cityValueToSet = customerCity.nameEnglish;
+                    console.log('🎯 [TEST] Value to set in form:', cityValueToSet);
+                    
+                    results.innerHTML = `
+                        <h2>✅ TEST SUCCESS</h2>
+                        <p><strong>Customer DB Value:</strong> ${customerCityValue}</p>
+                        <p><strong>Found City:</strong> ${JSON.stringify(customerCity, null, 2)}</p>
+                        <p><strong>Form Value to Set:</strong> ${cityValueToSet}</p>
+                        <p><strong>Match Method:</strong> Found in city names array</p>
+                    `;
+                } else {
+                    results.innerHTML = `
+                        <h2>❌ TEST FAILED</h2>
+                        <p><strong>Customer DB Value:</strong> ${customerCityValue}</p>
+                        <p><strong>Available Cities:</strong></p>
+                        <pre>${JSON.stringify(cities.map(c => ({
+                            id: c.id,
+                            nameEnglish: c.nameEnglish,
+                            nameArabic: c.nameArabic,
+                            name: c.name
+                        })), null, 2)}</pre>
+                    `;
+                }
+                
+            } catch (error) {
+                console.error('❌ [TEST] Error:', error);
+                results.innerHTML = `<h2>❌ TEST ERROR</h2><p>${error.message}</p>`;
+            }
+        }
+        
+        // Run test when page loads
+        window.onload = testCityMatching;
+    </script>
+</body>
+</html>

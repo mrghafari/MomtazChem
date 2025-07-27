@@ -315,20 +315,29 @@ export default function CustomerProfileEdit() {
         name: c.name
       })));
       
-      // Try multiple field matching strategies
-      const customerCity = cities.find((c: any) => 
-        c.nameEnglish === customerCityValue || 
-        c.name === customerCityValue ||
-        c.nameArabic === customerCityValue ||
-        c.namePersian === customerCityValue
-      );
+      // COMPREHENSIVE MATCHING: Check all possible city name fields
+      const customerCity = cities.find((c: any) => {
+        // Create array of all possible values for this city
+        const cityNames = [
+          c.nameEnglish,
+          c.name,
+          c.nameArabic,
+          c.namePersian
+        ].filter(Boolean); // Remove null/undefined values
+        
+        console.log('🔍 [CITY MATCHING] Checking city:', cityNames, 'against:', customerCityValue);
+        
+        // Check if customer value matches any of the city names
+        return cityNames.includes(customerCityValue);
+      });
       
       console.log('🔧 [CRITICAL FIX] Found matching city:', customerCity);
       
       if (customerCity) {
-        // CRITICAL: Use the EXACT value that matches the SelectItem value
-        const cityValueToSet = customerCity.nameEnglish || customerCity.name;
+        // CRITICAL FIX: Use the EXACT value used in SelectItem (nameEnglish)
+        const cityValueToSet = customerCity.nameEnglish;
         console.log('🔧 [CRITICAL FIX] Setting city value to:', cityValueToSet);
+        console.log('🔧 [CRITICAL FIX] Original customer value was:', customerCityValue);
         
         // Force form update and trigger re-render
         form.setValue('city', cityValueToSet, { shouldValidate: true, shouldDirty: true });
@@ -338,7 +347,11 @@ export default function CustomerProfileEdit() {
       } else {
         console.error('❌ [ERROR] City not found in available cities list');
         console.error('❌ [ERROR] Searched for:', customerCityValue);
-        console.error('❌ [ERROR] Available options:', cities.map(c => c.nameArabic + ' / ' + c.nameEnglish));
+        console.error('❌ [ERROR] Available cities:', cities.map(c => ({
+          nameEnglish: c.nameEnglish,
+          nameArabic: c.nameArabic,
+          name: c.name
+        })));
         
         // As fallback, try to set the original value anyway
         form.setValue('city', customerCityValue, { shouldValidate: false });
@@ -759,17 +772,27 @@ export default function CustomerProfileEdit() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {cities.map((city: any) => (
-                              <SelectItem key={city.id} value={city.nameEnglish}>
-                                {city.nameEnglish} / {city.nameArabic}
-                              </SelectItem>
-                            ))}
+                            {cities.map((city: any) => {
+                              console.log('🏙️ [RENDER] Rendering city option:', {
+                                id: city.id,
+                                value: city.nameEnglish,
+                                display: `${city.nameEnglish} / ${city.nameArabic}`
+                              });
+                              return (
+                                <SelectItem key={city.id} value={city.nameEnglish}>
+                                  {city.nameEnglish} / {city.nameArabic}
+                                </SelectItem>
+                              );
+                            })}
                           </SelectContent>
                         </Select>
                         <FormMessage />
-                        {/* Debug display to see current form value */}
-                        <div className="text-xs text-gray-500">
-                          Debug: Current value = "{field.value}"
+                        {/* Enhanced Debug display */}
+                        <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded mt-1">
+                          🔍 Debug: Current city value = "{field.value}"<br/>
+                          🌍 Selected Province ID = {selectedProvinceId}<br/>
+                          📊 Available cities count = {cities.length}<br/>
+                          💾 Backend cityRegion = "{customer?.customer?.cityRegion}"
                         </div>
                       </FormItem>
                     )}
