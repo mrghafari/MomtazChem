@@ -1982,196 +1982,94 @@ const LogisticsManagement = () => {
           </CardContent>
         </Card>
 
-        <Tabs defaultValue="provinces" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="provinces">
-              استان‌ها ({geographyProvinces.length})
-            </TabsTrigger>
-            <TabsTrigger value="cities">
-              شهرها ({geographyCities.length})
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="provinces">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5" />
-                  استان‌های عراق
-                </CardTitle>
-                <CardDescription>
-                  مدیریت 18 استان عراق با امکان ویرایش نام‌ها و مرکز استان
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {loadingGeographyProvinces ? (
-                  <div className="flex items-center justify-center p-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="text-right">شناسه</TableHead>
-                          <TableHead className="text-right">نام عربی</TableHead>
-                          <TableHead className="text-right">نام انگلیسی</TableHead>
-                          <TableHead className="text-right">مرکز استان</TableHead>
-                          <TableHead className="text-right">منطقه</TableHead>
-                          <TableHead className="text-right">
-                            فاصله از {selectedOriginCity ? (selectedOriginCity.name_arabic || selectedOriginCity.name) : 'اربیل'} (کیلومتر)
-                          </TableHead>
-                          <TableHead className="text-right">وضعیت</TableHead>
-                          <TableHead className="text-right">عملیات</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {geographyProvinces.map((province: any) => (
-                          <TableRow key={province.id}>
-                            <TableCell className="font-medium">{province.id}</TableCell>
-                            <TableCell>{province.name_arabic}</TableCell>
-                            <TableCell>{province.name_english}</TableCell>
-                            <TableCell>{province.capital}</TableCell>
-                            <TableCell>
-                              <Badge variant="outline">
-                                {province.region === 'north' ? 'شمال' : 
-                                 province.region === 'center' ? 'مرکز' : 
-                                 province.region === 'south' ? 'جنوب' : province.region}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <Badge 
-                                variant="outline" 
-                                className={selectedOriginCity?.province_id === province.id ? 
-                                  "bg-yellow-100 border-yellow-500 text-yellow-700" : 
-                                  "bg-blue-50 border-blue-200 text-blue-700"
-                                }
-                              >
-                                {selectedOriginCity?.province_id === province.id ? 
-                                  'مبدا' : 
-                                  `${calculateProvinceDistance(province)} کیلومتر`
-                                }
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant={province.is_active ? "default" : "secondary"}>
-                                {province.is_active ? "فعال" : "غیرفعال"}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                onClick={() => {
-                                  setEditingProvince(province);
-                                  setIsEditProvinceDialogOpen(true);
-                                }}
-                              >
-                                <Edit className="w-4 h-4 mr-2" />
-                                ویرایش
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+        <Card className="w-full">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <MapPin className="h-5 w-5" />
+              شهرهای عراق ({geographyCities.length})
+            </CardTitle>
+            <CardDescription>
+              مدیریت 188 شهر عراق با فاصله‌های قابل تنظیم بر اساس مبدا انتخابی
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {loadingGeographyCities ? (
+              <div className="flex items-center justify-center p-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-right">شناسه</TableHead>
+                      <TableHead className="text-right">نام عربی</TableHead>
+                      <TableHead className="text-right">نام انگلیسی</TableHead>
+                      <TableHead className="text-right">استان</TableHead>
+                      <TableHead className="text-right">
+                        فاصله از {selectedOriginCity ? (selectedOriginCity.name_arabic || selectedOriginCity.name) : 'اربیل'} (کیلومتر)
+                      </TableHead>
+                      <TableHead className="text-right">وضعیت</TableHead>
+                      <TableHead className="text-right">عملیات</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {geographyCities.slice(0, 50).map((city: any) => (
+                      <TableRow key={city.id}>
+                        <TableCell className="font-medium">{city.id}</TableCell>
+                        <TableCell>{city.name_arabic || city.name}</TableCell>
+                        <TableCell>{city.name_english || city.name}</TableCell>
+                        <TableCell>{city.province_name}</TableCell>
+                        <TableCell>
+                          <Badge 
+                            variant="outline" 
+                            className={selectedOriginCity?.id === city.id ? 
+                              "bg-yellow-100 border-yellow-500 text-yellow-700" : 
+                              "bg-green-50 border-green-200 text-green-700"
+                            }
+                          >
+                            {selectedOriginCity?.id === city.id ? 
+                              'مبدا (0 کیلومتر)' : 
+                              `${calculateDistance(city)} کیلومتر`
+                            }
+                          </Badge>
+                          {!selectedOriginCity && (
+                            <div className="text-xs text-gray-500 mt-1">
+                              (از اربیل: {city.distance_from_erbil_km || 0} کیلومتر)
+                            </div>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={city.is_active ? "default" : "secondary"}>
+                            {city.is_active ? "فعال" : "غیرفعال"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => {
+                              setEditingCity(city);
+                              setIsEditCityDialogOpen(true);
+                            }}
+                          >
+                            <Edit className="w-4 h-4 mr-2" />
+                            ویرایش
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+                {geographyCities.length > 50 && (
+                  <div className="text-center py-4 text-sm text-gray-500">
+                    و {geographyCities.length - 50} شهر دیگر...
                   </div>
                 )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="cities">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5" />
-                  شهرهای عراق
-                </CardTitle>
-                <CardDescription>
-                  مدیریت 188 شهر عراق با فاصله‌های قابل تنظیم بر اساس مبدا انتخابی
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {loadingGeographyCities ? (
-                  <div className="flex items-center justify-center p-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="text-right">شناسه</TableHead>
-                          <TableHead className="text-right">نام عربی</TableHead>
-                          <TableHead className="text-right">نام انگلیسی</TableHead>
-                          <TableHead className="text-right">استان</TableHead>
-                          <TableHead className="text-right">
-                            فاصله از {selectedOriginCity ? (selectedOriginCity.name_arabic || selectedOriginCity.name) : 'اربیل'} (کیلومتر)
-                          </TableHead>
-                          <TableHead className="text-right">وضعیت</TableHead>
-                          <TableHead className="text-right">عملیات</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {geographyCities.slice(0, 50).map((city: any) => (
-                          <TableRow key={city.id}>
-                            <TableCell className="font-medium">{city.id}</TableCell>
-                            <TableCell>{city.name_arabic || city.name}</TableCell>
-                            <TableCell>{city.name_english || city.name}</TableCell>
-                            <TableCell>{city.province_name}</TableCell>
-                            <TableCell>
-                              <Badge 
-                                variant="outline" 
-                                className={selectedOriginCity?.id === city.id ? 
-                                  "bg-yellow-100 border-yellow-500 text-yellow-700" : 
-                                  "bg-green-50 border-green-200 text-green-700"
-                                }
-                              >
-                                {selectedOriginCity?.id === city.id ? 
-                                  'مبدا (0 کیلومتر)' : 
-                                  `${calculateDistance(city)} کیلومتر`
-                                }
-                              </Badge>
-                              {!selectedOriginCity && (
-                                <div className="text-xs text-gray-500 mt-1">
-                                  (از اربیل: {city.distance_from_erbil_km || 0} کیلومتر)
-                                </div>
-                              )}
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant={city.is_active ? "default" : "secondary"}>
-                                {city.is_active ? "فعال" : "غیرفعال"}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                onClick={() => {
-                                  setEditingCity(city);
-                                  setIsEditCityDialogOpen(true);
-                                }}
-                              >
-                                <Edit className="w-4 h-4 mr-2" />
-                                ویرایش
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                    {geographyCities.length > 50 && (
-                      <div className="text-center py-4 text-sm text-gray-500">
-                        و {geographyCities.length - 50} شهر دیگر...
-                      </div>
-                    )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Edit Province Dialog */}
         <Dialog open={isEditProvinceDialogOpen} onOpenChange={setIsEditProvinceDialogOpen}>
