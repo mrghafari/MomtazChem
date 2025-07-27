@@ -217,7 +217,18 @@ const LogisticsManagement = () => {
   // Iraqi provinces and cities data
   const { data: provincesResponse, isLoading: loadingProvinces } = useQuery({
     queryKey: ['/api/logistics/provinces'],
-    enabled: activeTab === 'cities' || activeTab === 'shipping'
+    enabled: activeTab === 'cities' || activeTab === 'shipping' || activeTab === 'geography'
+  });
+
+  // Geography data for new geography tab
+  const { data: geographyProvincesResponse, isLoading: loadingGeographyProvinces } = useQuery({
+    queryKey: ['/api/logistics/provinces-detailed'],
+    enabled: activeTab === 'geography'
+  });
+
+  const { data: geographyCitiesResponse, isLoading: loadingGeographyCities } = useQuery({
+    queryKey: ['/api/logistics/cities-detailed'],
+    enabled: activeTab === 'geography'
   });
 
   // Vehicle optimization states
@@ -227,7 +238,7 @@ const LogisticsManagement = () => {
 
   const { data: citiesResponse, isLoading: loadingCities } = useQuery({
     queryKey: ['/api/logistics/cities'],
-    enabled: activeTab === 'cities' || activeTab === 'shipping'
+    enabled: activeTab === 'cities' || activeTab === 'shipping' || activeTab === 'geography'
   });
 
   const { data: shippingRatesResponse, isLoading: loadingShippingRates } = useQuery({
@@ -1792,6 +1803,402 @@ const LogisticsManagement = () => {
     );
   };
 
+  // New Geography Tab for provinces and cities management with editing capabilities
+  const GeographyTab = () => {
+    const [editingProvince, setEditingProvince] = useState<any>(null);
+    const [editingCity, setEditingCity] = useState<any>(null);
+    const [isEditProvinceDialogOpen, setIsEditProvinceDialogOpen] = useState(false);
+    const [isEditCityDialogOpen, setIsEditCityDialogOpen] = useState(false);
+
+    const geographyProvinces = (geographyProvincesResponse as any)?.data || [];
+    const geographyCities = (geographyCitiesResponse as any)?.data || [];
+
+    // Update province mutation
+    const updateProvinceMutation = useMutation({
+      mutationFn: (data: any) => 
+        fetch(`/api/logistics/provinces/${data.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        }).then(res => res.json()),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['/api/logistics/provinces-detailed'] });
+        setIsEditProvinceDialogOpen(false);
+        setEditingProvince(null);
+        toast({ title: "موفقیت", description: "استان با موفقیت به‌روزرسانی شد" });
+      },
+      onError: () => {
+        toast({ title: "خطا", description: "خطا در به‌روزرسانی استان", variant: "destructive" });
+      }
+    });
+
+    // Update city mutation
+    const updateCityMutation = useMutation({
+      mutationFn: (data: any) => 
+        fetch(`/api/logistics/cities/${data.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        }).then(res => res.json()),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['/api/logistics/cities-detailed'] });
+        setIsEditCityDialogOpen(false);
+        setEditingCity(null);
+        toast({ title: "موفقیت", description: "شهر با موفقیت به‌روزرسانی شد" });
+      },
+      onError: () => {
+        toast({ title: "خطا", description: "خطا در به‌روزرسانی شهر", variant: "destructive" });
+      }
+    });
+
+    const handleEditProvince = (formData: FormData) => {
+      if (!editingProvince) return;
+      
+      const data = {
+        id: editingProvince.id,
+        name_arabic: formData.get('name_arabic') as string,
+        name_english: formData.get('name_english') as string,
+        capital: formData.get('capital') as string,
+        region: formData.get('region') as string,
+        is_active: formData.get('is_active') === 'on'
+      };
+
+      updateProvinceMutation.mutate(data);
+    };
+
+    const handleEditCity = (formData: FormData) => {
+      if (!editingCity) return;
+      
+      const data = {
+        id: editingCity.id,
+        name_arabic: formData.get('name_arabic') as string,
+        name_english: formData.get('name_english') as string,
+        distance_from_erbil_km: parseInt(formData.get('distance_from_erbil_km') as string),
+        is_active: formData.get('is_active') === 'on'
+      };
+
+      updateCityMutation.mutate(data);
+    };
+
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <MapPin className="h-5 w-5" />
+              مدیریت جغرافیای عراق
+            </h3>
+            <p className="text-sm text-gray-600 mt-1">مدیریت 18 استان و 188 شهر عراق با فاصله از اربیل (مبدا)</p>
+          </div>
+          <div className="flex gap-2">
+            <Badge variant="outline" className="bg-blue-50">
+              {geographyProvinces.length} استان
+            </Badge>
+            <Badge variant="outline" className="bg-green-50">
+              {geographyCities.length} شهر
+            </Badge>
+          </div>
+        </div>
+
+        <Tabs defaultValue="provinces" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="provinces">
+              استان‌ها ({geographyProvinces.length})
+            </TabsTrigger>
+            <TabsTrigger value="cities">
+              شهرها ({geographyCities.length})
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="provinces">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MapPin className="h-5 w-5" />
+                  استان‌های عراق
+                </CardTitle>
+                <CardDescription>
+                  مدیریت 18 استان عراق با امکان ویرایش نام‌ها و مرکز استان
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {loadingGeographyProvinces ? (
+                  <div className="flex items-center justify-center p-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="text-right">شناسه</TableHead>
+                          <TableHead className="text-right">نام عربی</TableHead>
+                          <TableHead className="text-right">نام انگلیسی</TableHead>
+                          <TableHead className="text-right">مرکز استان</TableHead>
+                          <TableHead className="text-right">منطقه</TableHead>
+                          <TableHead className="text-right">وضعیت</TableHead>
+                          <TableHead className="text-right">عملیات</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {geographyProvinces.map((province: any) => (
+                          <TableRow key={province.id}>
+                            <TableCell className="font-medium">{province.id}</TableCell>
+                            <TableCell>{province.name_arabic}</TableCell>
+                            <TableCell>{province.name_english}</TableCell>
+                            <TableCell>{province.capital}</TableCell>
+                            <TableCell>
+                              <Badge variant="outline">
+                                {province.region === 'north' ? 'شمال' : 
+                                 province.region === 'center' ? 'مرکز' : 
+                                 province.region === 'south' ? 'جنوب' : province.region}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={province.is_active ? "default" : "secondary"}>
+                                {province.is_active ? "فعال" : "غیرفعال"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => {
+                                  setEditingProvince(province);
+                                  setIsEditProvinceDialogOpen(true);
+                                }}
+                              >
+                                <Edit className="w-4 h-4 mr-2" />
+                                ویرایش
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="cities">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MapPin className="h-5 w-5" />
+                  شهرهای عراق
+                </CardTitle>
+                <CardDescription>
+                  مدیریت 188 شهر عراق با فاصله از اربیل برای محاسبات لجستیک
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {loadingGeographyCities ? (
+                  <div className="flex items-center justify-center p-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="text-right">شناسه</TableHead>
+                          <TableHead className="text-right">نام عربی</TableHead>
+                          <TableHead className="text-right">نام انگلیسی</TableHead>
+                          <TableHead className="text-right">استان</TableHead>
+                          <TableHead className="text-right">فاصله از اربیل (کیلومتر)</TableHead>
+                          <TableHead className="text-right">وضعیت</TableHead>
+                          <TableHead className="text-right">عملیات</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {geographyCities.slice(0, 50).map((city: any) => (
+                          <TableRow key={city.id}>
+                            <TableCell className="font-medium">{city.id}</TableCell>
+                            <TableCell>{city.name_arabic || city.name}</TableCell>
+                            <TableCell>{city.name_english || city.name}</TableCell>
+                            <TableCell>{city.province_name}</TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className="bg-orange-50">
+                                {city.distance_from_erbil_km || 0} کیلومتر
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={city.is_active ? "default" : "secondary"}>
+                                {city.is_active ? "فعال" : "غیرفعال"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => {
+                                  setEditingCity(city);
+                                  setIsEditCityDialogOpen(true);
+                                }}
+                              >
+                                <Edit className="w-4 h-4 mr-2" />
+                                ویرایش
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                    {geographyCities.length > 50 && (
+                      <div className="text-center py-4 text-sm text-gray-500">
+                        و {geographyCities.length - 50} شهر دیگر...
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+
+        {/* Edit Province Dialog */}
+        <Dialog open={isEditProvinceDialogOpen} onOpenChange={setIsEditProvinceDialogOpen}>
+          <DialogContent className="max-w-2xl" dir="rtl">
+            <DialogHeader>
+              <DialogTitle>ویرایش استان</DialogTitle>
+              <DialogDescription>ویرایش اطلاعات استان {editingProvince?.name_arabic}</DialogDescription>
+            </DialogHeader>
+            {editingProvince && (
+              <form onSubmit={(e) => { e.preventDefault(); handleEditProvince(new FormData(e.currentTarget)); }}>
+                <div className="grid grid-cols-2 gap-4 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name_arabic">نام عربی *</Label>
+                    <Input 
+                      id="name_arabic" 
+                      name="name_arabic" 
+                      defaultValue={editingProvince.name_arabic}
+                      required 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="name_english">نام انگلیسی *</Label>
+                    <Input 
+                      id="name_english" 
+                      name="name_english" 
+                      defaultValue={editingProvince.name_english}
+                      required 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="capital">مرکز استان *</Label>
+                    <Input 
+                      id="capital" 
+                      name="capital" 
+                      defaultValue={editingProvince.capital}
+                      required 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="region">منطقه</Label>
+                    <select 
+                      name="region" 
+                      defaultValue={editingProvince.region}
+                      className="w-full p-2 border rounded"
+                    >
+                      <option value="north">شمال</option>
+                      <option value="center">مرکز</option>
+                      <option value="south">جنوب</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2 col-span-2">
+                    <div className="flex items-center space-x-2">
+                      <input 
+                        type="checkbox" 
+                        id="is_active" 
+                        name="is_active" 
+                        defaultChecked={editingProvince.is_active}
+                      />
+                      <Label htmlFor="is_active">فعال</Label>
+                    </div>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button type="button" variant="outline" onClick={() => setIsEditProvinceDialogOpen(false)}>انصراف</Button>
+                  <Button type="submit" disabled={updateProvinceMutation.isPending}>
+                    {updateProvinceMutation.isPending ? "در حال به‌روزرسانی..." : "به‌روزرسانی"}
+                  </Button>
+                </DialogFooter>
+              </form>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit City Dialog */}
+        <Dialog open={isEditCityDialogOpen} onOpenChange={setIsEditCityDialogOpen}>
+          <DialogContent className="max-w-2xl" dir="rtl">
+            <DialogHeader>
+              <DialogTitle>ویرایش شهر</DialogTitle>
+              <DialogDescription>ویرایش اطلاعات شهر {editingCity?.name_arabic || editingCity?.name}</DialogDescription>
+            </DialogHeader>
+            {editingCity && (
+              <form onSubmit={(e) => { e.preventDefault(); handleEditCity(new FormData(e.currentTarget)); }}>
+                <div className="grid grid-cols-2 gap-4 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="city_name_arabic">نام عربی *</Label>
+                    <Input 
+                      id="city_name_arabic" 
+                      name="name_arabic" 
+                      defaultValue={editingCity.name_arabic || editingCity.name}
+                      required 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="city_name_english">نام انگلیسی</Label>
+                    <Input 
+                      id="city_name_english" 
+                      name="name_english" 
+                      defaultValue={editingCity.name_english || editingCity.name}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="distance_from_erbil_km">فاصله از اربیل (کیلومتر) *</Label>
+                    <Input 
+                      id="distance_from_erbil_km" 
+                      name="distance_from_erbil_km" 
+                      type="number"
+                      defaultValue={editingCity.distance_from_erbil_km || 0}
+                      required 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>استان</Label>
+                    <p className="text-sm text-gray-600 p-2 bg-gray-50 rounded">
+                      {editingCity.province_name}
+                    </p>
+                  </div>
+                  <div className="space-y-2 col-span-2">
+                    <div className="flex items-center space-x-2">
+                      <input 
+                        type="checkbox" 
+                        id="city_is_active" 
+                        name="is_active" 
+                        defaultChecked={editingCity.is_active}
+                      />
+                      <Label htmlFor="city_is_active">فعال</Label>
+                    </div>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button type="button" variant="outline" onClick={() => setIsEditCityDialogOpen(false)}>انصراف</Button>
+                  <Button type="submit" disabled={updateCityMutation.isPending}>
+                    {updateCityMutation.isPending ? "در حال به‌روزرسانی..." : "به‌روزرسانی"}
+                  </Button>
+                </DialogFooter>
+              </form>
+            )}
+          </DialogContent>
+        </Dialog>
+      </div>
+    );
+  };
+
   return (
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
@@ -1809,9 +2216,10 @@ const LogisticsManagement = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="orders">سفارشات</TabsTrigger>
           <TabsTrigger value="companies">شرکت‌های حمل</TabsTrigger>
+          <TabsTrigger value="geography">جغرافیای عراق</TabsTrigger>
           <TabsTrigger value="cities">شهرهای عراق</TabsTrigger>
           <TabsTrigger value="shipping">نرخ‌های حمل</TabsTrigger>
           <TabsTrigger value="vehicles">وسایل نقلیه</TabsTrigger>
@@ -1824,6 +2232,10 @@ const LogisticsManagement = () => {
 
         <TabsContent value="companies">
           <CompaniesTab />
+        </TabsContent>
+
+        <TabsContent value="geography">
+          <GeographyTab />
         </TabsContent>
 
         <TabsContent value="cities">

@@ -12772,6 +12772,161 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get provinces with detailed information for geography management
+  app.get("/api/logistics/provinces-detailed", async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      
+      const result = await pool.query(`
+        SELECT 
+          id, 
+          name, 
+          name_arabic, 
+          name_english, 
+          name_kurdish,
+          capital, 
+          region, 
+          area, 
+          population, 
+          is_active, 
+          notes,
+          created_at, 
+          updated_at
+        FROM iraqi_provinces 
+        ORDER BY name_arabic ASC
+      `);
+      
+      res.json({
+        success: true,
+        data: result.rows
+      });
+    } catch (error) {
+      console.error("Error fetching detailed provinces:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch detailed provinces" 
+      });
+    }
+  });
+
+  // Get cities with detailed information including province names for geography management
+  app.get("/api/logistics/cities-detailed", async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      
+      const result = await pool.query(`
+        SELECT 
+          c.id, 
+          c.name, 
+          c.name_arabic, 
+          c.name_english, 
+          c.name_kurdish,
+          c.province_id, 
+          c.distance_from_erbil_km, 
+          c.is_active, 
+          c.notes,
+          c.created_at, 
+          c.updated_at,
+          p.name_arabic as province_name
+        FROM iraqi_cities c 
+        LEFT JOIN iraqi_provinces p ON c.province_id = p.id
+        ORDER BY c.name_arabic ASC
+      `);
+      
+      res.json({
+        success: true,
+        data: result.rows
+      });
+    } catch (error) {
+      console.error("Error fetching detailed cities:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch detailed cities" 
+      });
+    }
+  });
+
+  // Update province information
+  app.put("/api/logistics/provinces/:id", requireAuth, async (req, res) => {
+    try {
+      const provinceId = parseInt(req.params.id);
+      if (isNaN(provinceId)) {
+        return res.status(400).json({ success: false, message: "Invalid province ID" });
+      }
+
+      const { name_arabic, name_english, capital, region, is_active } = req.body;
+      const { pool } = await import('./db');
+      
+      const result = await pool.query(`
+        UPDATE iraqi_provinces SET
+          name_arabic = $1,
+          name_english = $2,
+          capital = $3,
+          region = $4,
+          is_active = $5,
+          updated_at = NOW()
+        WHERE id = $6
+        RETURNING id, name_arabic, name_english, capital, region, is_active, updated_at
+      `, [name_arabic, name_english, capital, region, is_active, provinceId]);
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ success: false, message: "Province not found" });
+      }
+      
+      res.json({
+        success: true,
+        message: "Province updated successfully",
+        data: result.rows[0]
+      });
+    } catch (error) {
+      console.error("Error updating province:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to update province" 
+      });
+    }
+  });
+
+  // Update city information
+  app.put("/api/logistics/cities/:id", requireAuth, async (req, res) => {
+    try {
+      const cityId = parseInt(req.params.id);
+      if (isNaN(cityId)) {
+        return res.status(400).json({ success: false, message: "Invalid city ID" });
+      }
+
+      const { name_arabic, name_english, distance_from_erbil_km, is_active } = req.body;
+      const { pool } = await import('./db');
+      
+      const result = await pool.query(`
+        UPDATE iraqi_cities SET
+          name_arabic = $1,
+          name_english = $2,
+          distance_from_erbil_km = $3,
+          is_active = $4,
+          updated_at = NOW()
+        WHERE id = $5
+        RETURNING id, name_arabic, name_english, distance_from_erbil_km, is_active, updated_at
+      `, [name_arabic, name_english, distance_from_erbil_km, is_active, cityId]);
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ success: false, message: "City not found" });
+      }
+      
+      res.json({
+        success: true,
+        message: "City updated successfully",
+        data: result.rows[0]
+      });
+    } catch (error) {
+      console.error("Error updating city:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to update city" 
+      });
+    }
+  });
+
   // =============================================================================
   // SHIPPING RATES MANAGEMENT
   // =============================================================================
