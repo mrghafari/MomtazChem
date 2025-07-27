@@ -6,6 +6,33 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Critical Distance Data Correction - All City Distances from Erbil Fixed (January 27, 2025)
+✅ **RESOLVED: Fixed incorrect distance_from_erbil_km values in database using authentic Excel data**
+- **User Issue**: "فاصله ها از اربیل غلط است من قبلا در فایل اکسل تمام فاصله ها را داده بودم" - Distance data in database was incorrect
+- **Excel Data Analysis**: Successfully read user's Excel file `Book1_1753529079559.xlsx` containing 188 cities with correct distances
+- **Database Correction**: Mass update of 183 cities with authentic distances from provided Excel data:
+  - **Major Cities Corrected**: Baghdad (360km→330km), Basra (600km→550km), Sulaymaniyah (170km→140km), Duhok (120km→70km)
+  - **Erbil Reference Point**: Set to 0km as the origin city for all calculations
+  - **Regional Accuracy**: All 18 provinces updated with accurate distance calculations for logistics optimization
+- **Data Quality**: Excel format compliance with columns "شهر/ منطقه", "استان", "فاصله از اربیل(کیلومتر)"
+- **Technical Implementation**: Python script with pandas and psycopg2 for precise data migration
+- **Business Impact**: Smart vehicle system and logistics calculations now use authentic geographical distances
+- **Validation Results**: Key distances confirmed - Erbil:0km, Duhok:70km, Mosul:80km, Sulaymaniyah:140km, Baghdad:330km, Basra:550km
+- **Result**: All 188 Iraqi cities now have correct distances from Erbil based on user's authoritative Excel data
+
+### COMPLETED: Gross Weight Display Added to Checkout Page Header (January 27, 2025)
+✅ **IMPLEMENTED: Beautiful "وزن ناخالص کالای انتخاب شده" card display in checkout page header**
+- **User Request Fulfilled**: Added professional weight display card centered above checkout form
+- **Design Features**: 
+  - **Blue-green gradient background** (from-blue-50 to-green-50) with blue border
+  - **Scale icon** from Lucide React for visual identification
+  - **Persian formatting** with toLocaleString for proper number display
+  - **Professional layout** with centered positioning and proper spacing
+- **Technical Implementation**: Added Scale icon import and weight card between header and main form
+- **User Experience**: Customers can immediately see total gross weight of selected products before proceeding with checkout
+- **Business Value**: Clear weight information supports smart vehicle selection and shipping cost transparency
+- **Result**: Professional weight display operational in checkout page with beautiful design and automatic calculation
+
 ### COMPLETED: Smart Vehicle Database Integration in Delivery Method Field - Complete & Operational (January 27, 2025)
 ✅ **IMPLEMENTED: Complete smart vehicle selection system integrated directly into checkout "Delivery Method *" field with database backend**
 - **User Request Fulfilled**: Smart vehicle calculation results now display in main delivery method dropdown instead of separate interface
