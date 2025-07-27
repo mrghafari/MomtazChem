@@ -1815,10 +1815,14 @@ const LogisticsManagement = () => {
     const geographyProvinces = (geographyProvincesResponse as any)?.data || [];
     const geographyCities = (geographyCitiesResponse as any)?.data || [];
 
-    // Calculate dynamic distances based on selected origin city
+    // Calculate dynamic distances based on selected origin city from database
     const calculateDistance = (targetCity: any) => {
-      if (!selectedOriginCity) return targetCity.distance_from_erbil_km || 0;
+      if (!selectedOriginCity) {
+        // Return actual distance from Erbil (default) from database
+        return targetCity.distance_from_erbil_km || 0;
+      }
       
+      // Get distances from database
       const originDistance = selectedOriginCity.distance_from_erbil_km || 0;
       const targetDistance = targetCity.distance_from_erbil_km || 0;
       
@@ -1826,10 +1830,19 @@ const LogisticsManagement = () => {
       return Math.abs(targetDistance - originDistance);
     };
 
-    // Calculate province distance (average of cities in province)
+    // Calculate province distance (average of cities in province) from database
     const calculateProvinceDistance = (province: any) => {
-      if (!selectedOriginCity) return 0;
+      if (!selectedOriginCity) {
+        // Return average distance from Erbil for all cities in province
+        const provinceCities = geographyCities.filter((city: any) => city.province_id === province.id);
+        if (provinceCities.length === 0) return 0;
+        
+        const totalDistance = provinceCities.reduce((sum: number, city: any) => 
+          sum + (city.distance_from_erbil_km || 0), 0);
+        return Math.round(totalDistance / provinceCities.length);
+      }
       
+      // Calculate relative distances from selected origin city
       const provinceCities = geographyCities.filter((city: any) => city.province_id === province.id);
       if (provinceCities.length === 0) return 0;
       
