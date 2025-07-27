@@ -303,6 +303,9 @@ export default function CustomerProfileEdit() {
     const customerCityValue = customer?.customer?.cityRegion || customer?.customer?.city;
     
     console.log('🚀 [CITY EFFECT] City effect triggered');
+    console.log('🔧 [CITY EFFECT] Raw customer object:', customer?.customer);
+    console.log('🔧 [CITY EFFECT] cityRegion field:', customer?.customer?.cityRegion);
+    console.log('🔧 [CITY EFFECT] city field:', customer?.customer?.city);
     console.log('🔧 [CITY EFFECT] Customer city value:', customerCityValue);
     console.log('🔧 [CITY EFFECT] Cities loaded:', cities.length);
     console.log('🔧 [CITY EFFECT] Selected province ID:', selectedProvinceId);

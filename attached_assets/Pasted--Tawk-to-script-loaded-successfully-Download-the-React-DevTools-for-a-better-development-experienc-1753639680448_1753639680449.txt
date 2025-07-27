@@ -1,0 +1,145 @@
+ Tawk.to script loaded successfully
+ Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 
+value @ twk-chunk-common.js:2
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+ 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+ Tawk.to Live Chat loaded successfully
+ 🔐 [LOGIN] Starting handleLoginSuccess
+ 🔐 [LOGIN] Customer data: Object
+ 🔐 [LOGIN] Current cart state: Object
+ 🔐 [LOGIN] Customer state set
+ 🔐 [LOGIN] Wallet balance fetch initiated
+ 🔐 [LOGIN] Auth modal closed
+ 🔐 [LOGIN] Cache invalidated
+ 🔐 [LOGIN] Has cart items: false
+ 🔐 [LOGIN] Cart contents: Object
+ 🔐 [LOGIN] Cart migration completed
+ 🔐 [LOGIN] Welcome toast shown
+ 🔐 [LOGIN] Staying in shop after successful login
+shop.tsx:499 🔐 [LOGIN] handleLoginSuccess completed successfully
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+customer-profile-edit.tsx:129 🌍 [FILTER] No province filter applied. Total cities: 0
+customer-profile-edit.tsx:114 🌍 [API] Fetching cities from: /api/logistics/cities
+customer-profile-edit.tsx:186 🔍 [UI DEBUG] Customer data loaded
+customer-profile-edit.tsx:187 🔍 [CRM DEBUG] CRM Fields from API: Object
+customer-profile-edit.tsx:195 🔍 [VALUES] Actual CRM values: annualRevenue=null priceRange=null orderFrequency=null creditStatus=good smsEnabled=false emailEnabled=false
+customer-profile-edit.tsx:205 🏢 [TAX DEBUG] Tax & Registration from API: Object
+customer-profile-edit.tsx:209 🏢 [TAX VALUES] Actual values: taxId=110 registrationNumber=1111
+customer-profile-edit.tsx:253 ✅ [UI DEBUG] Form reset completed with CRM values: annualRevenue= priceRange= orderFrequency= creditStatus=good smsEnabled=false emailEnabled=false
+customer-profile-edit.tsx:262 ✅ [TAX DEBUG] Form reset completed with Tax values: taxId=110 registrationNumber=1111
+customer-profile-edit.tsx:272 🏛️ [PROVINCE DEBUG] Customer province from backend: Erbil
+customer-profile-edit.tsx:273 🏛️ [PROVINCE DEBUG] Available provinces: Array(18)
+customer-profile-edit.tsx:289 ✅ [PROVINCE] Found matching province: Object
+customer-profile-edit.tsx:293 📍 [PROVINCE] Province set to: Erbil
+customer-profile-edit.tsx:305 🚀 [CITY EFFECT] City effect triggered
+customer-profile-edit.tsx:306 🔧 [CITY EFFECT] Customer city value: 
+customer-profile-edit.tsx:307 🔧 [CITY EFFECT] Cities loaded: 0
+customer-profile-edit.tsx:308 🔧 [CITY EFFECT] Selected province ID: null
+customer-profile-edit.tsx:311 ⏸️ [CITY EFFECT] Skipping - missing data
+customer-profile-edit.tsx:129 🌍 [FILTER] No province filter applied. Total cities: 0
+customer-profile-edit.tsx:114 🌍 [API] Fetching cities from: /api/logistics/cities?provinceId=1
+customer-profile-edit.tsx:305 🚀 [CITY EFFECT] City effect triggered
+customer-profile-edit.tsx:306 🔧 [CITY EFFECT] Customer city value: 
+customer-profile-edit.tsx:307 🔧 [CITY EFFECT] Cities loaded: 0
+customer-profile-edit.tsx:308 🔧 [CITY EFFECT] Selected province ID: 1
+customer-profile-edit.tsx:311 ⏸️ [CITY EFFECT] Skipping - missing data
+customer-profile-edit.tsx:127 🌍 [FILTER] Filtered cities for province 1: 5 cities
+customer-profile-edit.tsx:780 🏙️ [RENDER] Rendering city option: Object
+customer-profile-edit.tsx:780 🏙️ [RENDER] Rendering city option: Object
+customer-profile-edit.tsx:780 🏙️ [RENDER] Rendering city option: Object
+customer-profile-edit.tsx:780 🏙️ [RENDER] Rendering city option: Object
+customer-profile-edit.tsx:780 🏙️ [RENDER] Rendering city option: Object
+customer-profile-edit.tsx:305 🚀 [CITY EFFECT] City effect triggered
+customer-profile-edit.tsx:306 🔧 [CITY EFFECT] Customer city value: 
+customer-profile-edit.tsx:307 🔧 [CITY EFFECT] Cities loaded: 5
+customer-profile-edit.tsx:308 🔧 [CITY EFFECT] Selected province ID: 1
+customer-profile-edit.tsx:311 ⏸️ [CITY EFFECT] Skipping - missing data
+customer-profile-edit.tsx:127 🌍 [FILTER] Filtered cities for province 1: 5 cities
+customer-profile-edit.tsx:780 🏙️ [RENDER] Rendering city option: Object
+customer-profile-edit.tsx:780 🏙️ [RENDER] Rendering city option: Object
+customer-profile-edit.tsx:780 🏙️ [RENDER] Rendering city option: Object
+customer-profile-edit.tsx:780 🏙️ [RENDER] Rendering city option: Object
+customer-profile-edit.tsx:780 🏙️ [RENDER] Rendering city option: Object
+customer-profile-edit.tsx:305 🚀 [CITY EFFECT] City effect triggered
+customer-profile-edit.tsx:306 🔧 [CITY EFFECT] Customer city value: 
+customer-profile-edit.tsx:307 🔧 [CITY EFFECT] Cities loaded: 5
+customer-profile-edit.tsx:308 🔧 [CITY EFFECT] Selected province ID: 1
+customer-profile-edit.tsx:311 ⏸️ [CITY EFFECT] Skipping - missing data
+customer-profile-edit.tsx:768 🏙️ [FORM] City changing to: اربیل
+customer-profile-edit.tsx:127 🌍 [FILTER] Filtered cities for province 1: 5 cities
+customer-profile-edit.tsx:780 🏙️ [RENDER] Rendering city option: {id: 276, value: 'اربیل', display: 'اربیل / اربیل'}
+customer-profile-edit.tsx:780 🏙️ [RENDER] Rendering city option: {id: 2, value: 'Bardarash', display: 'Bardarash / برده رش'}
+customer-profile-edit.tsx:780 🏙️ [RENDER] Rendering city option: {id: 3, value: 'Khabat', display: 'Khabat / خبات'}
+customer-profile-edit.tsx:780 🏙️ [RENDER] Rendering city option: {id: 1, value: 'Shaqlawa', display: 'Shaqlawa / شقلاوه'}
+customer-profile-edit.tsx:780 🏙️ [RENDER] Rendering city option: {id: 4, value: 'Koy Sanjaq', display: 'Koy Sanjaq / کویسنجق'}
+customer-profile-edit.tsx:305 🚀 [CITY EFFECT] City effect triggered
+customer-profile-edit.tsx:306 🔧 [CITY EFFECT] Customer city value: 
+customer-profile-edit.tsx:307 🔧 [CITY EFFECT] Cities loaded: 5
+customer-profile-edit.tsx:308 🔧 [CITY EFFECT] Selected province ID: 1
+customer-profile-edit.tsx:311 ⏸️ [CITY EFFECT] Skipping - missing data
+customer-profile-edit.tsx:127 🌍 [FILTER] Filtered cities for province 1: 5 cities
+customer-profile-edit.tsx:780 🏙️ [RENDER] Rendering city option: {id: 276, value: 'اربیل', display: 'اربیل / اربیل'}
+customer-profile-edit.tsx:780 🏙️ [RENDER] Rendering city option: {id: 2, value: 'Bardarash', display: 'Bardarash / برده رش'}
+customer-profile-edit.tsx:780 🏙️ [RENDER] Rendering city option: {id: 3, value: 'Khabat', display: 'Khabat / خبات'}
+customer-profile-edit.tsx:780 🏙️ [RENDER] Rendering city option: {id: 1, value: 'Shaqlawa', display: 'Shaqlawa / شقلاوه'}
+customer-profile-edit.tsx:780 🏙️ [RENDER] Rendering city option: {id: 4, value: 'Koy Sanjaq', display: 'Koy Sanjaq / کویسنجق'}
+customer-profile-edit.tsx:305 🚀 [CITY EFFECT] City effect triggered
+customer-profile-edit.tsx:306 🔧 [CITY EFFECT] Customer city value: 
+customer-profile-edit.tsx:307 🔧 [CITY EFFECT] Cities loaded: 5
+customer-profile-edit.tsx:308 🔧 [CITY EFFECT] Selected province ID: 1
+customer-profile-edit.tsx:311 ⏸️ [CITY EFFECT] Skipping - missing data
+customer-profile-edit.tsx:127 🌍 [FILTER] Filtered cities for province 1: 5 cities
+customer-profile-edit.tsx:780 🏙️ [RENDER] Rendering city option: {id: 276, value: 'اربیل', display: 'اربیل / اربیل'}
+customer-profile-edit.tsx:780 🏙️ [RENDER] Rendering city option: {id: 2, value: 'Bardarash', display: 'Bardarash / برده رش'}
+customer-profile-edit.tsx:780 🏙️ [RENDER] Rendering city option: {id: 3, value: 'Khabat', display: 'Khabat / خبات'}
+customer-profile-edit.tsx:780 🏙️ [RENDER] Rendering city option: {id: 1, value: 'Shaqlawa', display: 'Shaqlawa / شقلاوه'}
+customer-profile-edit.tsx:780 🏙️ [RENDER] Rendering city option: {id: 4, value: 'Koy Sanjaq', display: 'Koy Sanjaq / کویسنجق'}
+customer-profile-edit.tsx:305 🚀 [CITY EFFECT] City effect triggered
+customer-profile-edit.tsx:306 🔧 [CITY EFFECT] Customer city value: 
+customer-profile-edit.tsx:307 🔧 [CITY EFFECT] Cities loaded: 5
+customer-profile-edit.tsx:308 🔧 [CITY EFFECT] Selected province ID: 1
+customer-profile-edit.tsx:311 ⏸️ [CITY EFFECT] Skipping - missing data
+customer-profile-edit.tsx:476 📤 [FRONTEND] Sending profile update data: {firstName: 'ABAS', lastName: 'ABASI', phone: '09124955173', email: 'oilstar@hotmail.com', company: 'پتروشیمی شازند', …}

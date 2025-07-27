@@ -11010,6 +11010,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           country: customer.country || '',
           province: customer.province || '',
           city: customer.city || '',
+          cityRegion: customer.cityRegion || customer.city || '', // CRITICAL FIX: Add cityRegion field
           address: customer.address || '',
           postalCode: customer.postalCode,
           crmId: crmCustomer?.id || customer.id,
