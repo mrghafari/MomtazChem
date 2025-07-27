@@ -35,7 +35,7 @@ import {
 } from 'lucide-react';
 import { useOrderNotifications } from '@/hooks/useOrderNotifications';
 import PostalServicesTab from '@/components/PostalServicesTab';
-import IraqiGeographyTable from '@/components/admin/IraqiGeographyTable';
+
 
 // Safe date formatting function to prevent Invalid Date errors
 const formatDateSafe = (dateString: string | null | undefined, locale = 'en-US', options = {}): string => {
@@ -2332,11 +2332,10 @@ const LogisticsManagement = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="orders">سفارشات</TabsTrigger>
           <TabsTrigger value="companies">شرکت‌های حمل</TabsTrigger>
           <TabsTrigger value="geography">جغرافیای عراق</TabsTrigger>
-          <TabsTrigger value="cities">شهرهای عراق</TabsTrigger>
           <TabsTrigger value="shipping">نرخ‌های حمل</TabsTrigger>
           <TabsTrigger value="vehicles">وسایل نقلیه</TabsTrigger>
           <TabsTrigger value="postal">خدمات پست</TabsTrigger>
@@ -2354,9 +2353,7 @@ const LogisticsManagement = () => {
           <GeographyTab />
         </TabsContent>
 
-        <TabsContent value="cities">
-          <IraqiGeographyTable />
-        </TabsContent>
+
 
         <TabsContent value="shipping">
           <ShippingRatesTab />
