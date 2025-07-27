@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { CheckCircle, ShoppingCart, CreditCard, Truck, User, MapPin } from "lucide-react";
+import { CheckCircle, ShoppingCart, CreditCard, Truck, User, MapPin, Weight, Car, Calculator } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
@@ -89,6 +89,10 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   const [showCartManagement, setShowCartManagement] = useState(true);
   const [showSecondAddress, setShowSecondAddress] = useState(false);
   const [showRecipientMobile, setShowRecipientMobile] = useState(false);
+  const [selectedVehicle, setSelectedVehicle] = useState<any>(null);
+  const [calculatedShippingCost, setCalculatedShippingCost] = useState(0);
+  const [totalWeight, setTotalWeight] = useState(0);
+  const [destinationCity, setDestinationCity] = useState('');
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
@@ -102,6 +106,18 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   // Get available delivery methods
   const { data: deliveryMethods = [] } = useQuery({
     queryKey: ['/api/checkout/delivery-methods']
+  });
+
+  // Get vehicle templates for smart selection
+  const { data: vehicleTemplates = [] } = useQuery({
+    queryKey: ['/api/logistics/vehicle-templates'],
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+  });
+
+  // Get Iraqi cities for distance calculation
+  const { data: iraqiCities = [] } = useQuery({
+    queryKey: ['/api/iraqi-cities'],
+    staleTime: 10 * 60 * 1000, // Cache for 10 minutes
   });
 
   // Determine if user is logged in first
@@ -253,23 +269,152 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   }).filter(Boolean);
 
   const subtotal = cartItems.reduce((sum, item) => sum + item.totalPrice, 0);
+
+  // Calculate total weight of cart items
+  useEffect(() => {
+    const weight = cartItems.reduce((sum, item) => {
+      const itemWeight = parseFloat(item?.weight || '1'); // Default 1kg if not specified
+      return sum + (itemWeight * item.quantity);
+    }, 0);
+    setTotalWeight(weight);
+  }, [cartItems]);
   
-  // Calculate shipping cost based on selected delivery method
-  const selectedMethod = (deliveryMethods as any[])?.find((method: any) => method.id.toString() === form.watch('shippingMethod'));
-  let shippingCost = 0;
-  
-  if (selectedMethod) {
-    const baseCost = parseFloat(selectedMethod.baseCost || '0');
-    const freeShippingThreshold = parseFloat(selectedMethod.freeShippingThreshold || '0');
+  // Smart vehicle selection based on weight and destination
+  const selectOptimalVehicle = useCallback((weight: number, destination: string) => {
+    if (!vehicleTemplates?.data || vehicleTemplates.data.length === 0) return null;
     
-    if (freeShippingThreshold > 0 && subtotal >= freeShippingThreshold) {
-      shippingCost = 0; // Free shipping
+    const vehicles = vehicleTemplates.data;
+    
+    // Filter vehicles that can handle the weight
+    const suitableVehicles = vehicles.filter((vehicle: any) => 
+      vehicle.isActive && 
+      parseFloat(vehicle.maxWeightKg) >= weight
+    );
+    
+    if (suitableVehicles.length === 0) return null;
+    
+    // Sort by cost efficiency (base cost + per km cost)
+    const sortedVehicles = suitableVehicles.sort((a: any, b: any) => {
+      const costA = parseFloat(a.basePrice) + parseFloat(a.pricePerKm);
+      const costB = parseFloat(b.basePrice) + parseFloat(b.pricePerKm);
+      return costA - costB;
+    });
+    
+    return sortedVehicles[0]; // Return most cost-effective vehicle
+  }, [vehicleTemplates]);
+
+  // Calculate shipping cost with smart vehicle selection
+  const calculateShippingCost = useCallback((weight: number, destination: string) => {
+    if (!destination || weight === 0) return 0;
+    
+    // Find destination city in Iraqi cities
+    const destCity = iraqiCities?.data?.find((city: any) => 
+      city.nameEnglish?.toLowerCase().includes(destination.toLowerCase()) ||
+      city.nameArabic?.includes(destination) ||
+      city.name?.toLowerCase().includes(destination.toLowerCase())
+    );
+    
+    if (!destCity) return 0;
+    
+    // Select optimal vehicle
+    const vehicle = selectOptimalVehicle(weight, destination);
+    if (!vehicle) return 0;
+    
+    setSelectedVehicle(vehicle);
+    
+    // Calculate cost: base cost + (distance × cost per km) + (weight × cost per kg)
+    const baseCost = parseFloat(vehicle.basePrice || '0');
+    const distanceCost = parseFloat(destCity.distanceFromErbilKm || '0') * parseFloat(vehicle.pricePerKm || '0');
+    const weightCost = weight * parseFloat(vehicle.pricePerKg || '0');
+    
+    const totalCost = baseCost + distanceCost + weightCost;
+    
+    console.log('🚚 Vehicle Selection Debug:', {
+      weight,
+      destination,
+      selectedVehicle: vehicle.name,
+      baseCost,
+      distance: destCity.distanceFromErbilKm,
+      distanceCost,
+      weightCost,
+      totalCost
+    });
+    
+    return totalCost;
+  }, [iraqiCities, selectOptimalVehicle]);
+
+  // Watch for address changes to update destination
+  useEffect(() => {
+    // Try multiple potential city sources for destination
+    let city = '';
+    
+    // For guests: use form fields
+    if (!isUserLoggedIn) {
+      city = form.watch('billingCity') || form.watch('shippingCity') || '';
     } else {
-      shippingCost = baseCost;
-      // Add weight-based cost if available
-      if (selectedMethod.costPerKg) {
-        const totalWeight = cartItems.reduce((sum, item) => sum + (parseFloat(item.weight || '1') * item.quantity), 0);
-        shippingCost += parseFloat(selectedMethod.costPerKg) * totalWeight;
+      // For logged in users: use CRM data or second address
+      if (form.watch('secondDeliveryCity')) {
+        city = form.watch('secondDeliveryCity');
+      } else if (customerData?.customer?.city) {
+        city = customerData.customer.city;
+      } else if (customerData?.customer?.cityRegion) {
+        city = customerData.customer.cityRegion;
+      } else {
+        // Fallback to form fields
+        city = form.watch('billingCity') || form.watch('shippingCity') || '';
+      }
+    }
+    
+    if (city !== destinationCity) {
+      setDestinationCity(city);
+      console.log('🎯 Destination City Updated:', city);
+    }
+  }, [
+    form.watch('billingCity'), 
+    form.watch('shippingCity'), 
+    form.watch('secondDeliveryCity'),
+    customerData?.customer?.city,
+    customerData?.customer?.cityRegion,
+    destinationCity, 
+    form,
+    isUserLoggedIn
+  ]);
+
+  // Calculate shipping cost when weight or destination changes
+  useEffect(() => {
+    if (totalWeight > 0 && destinationCity) {
+      const cost = calculateShippingCost(totalWeight, destinationCity);
+      setCalculatedShippingCost(cost);
+      console.log('💰 Shipping Cost Calculated:', {
+        weight: totalWeight,
+        destination: destinationCity,
+        cost: cost
+      });
+    } else {
+      setCalculatedShippingCost(0);
+      setSelectedVehicle(null);
+    }
+  }, [totalWeight, destinationCity, calculateShippingCost]);
+
+  // Use calculated shipping cost or fallback to traditional method
+  let shippingCost = calculatedShippingCost;
+  
+  // Fallback to traditional delivery method if smart calculation not available
+  if (shippingCost === 0) {
+    const selectedMethod = (deliveryMethods as any[])?.find((method: any) => method.id.toString() === form.watch('shippingMethod'));
+    
+    if (selectedMethod) {
+      const baseCost = parseFloat(selectedMethod.baseCost || '0');
+      const freeShippingThreshold = parseFloat(selectedMethod.freeShippingThreshold || '0');
+      
+      if (freeShippingThreshold > 0 && subtotal >= freeShippingThreshold) {
+        shippingCost = 0; // Free shipping
+      } else {
+        shippingCost = baseCost;
+        // Add weight-based cost if available
+        if (selectedMethod.costPerKg) {
+          shippingCost += parseFloat(selectedMethod.costPerKg) * totalWeight;
+        }
       }
     }
   }
@@ -1492,7 +1637,10 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                         </div>
                         <div className="flex justify-between">
                           <span>وزن تقریبی:</span>
-                          <span>{cartItems.reduce((sum, item) => sum + (parseFloat(item.weight || '1') * item.quantity), 0).toFixed(2)} کیلوگرم</span>
+                          <span className="font-semibold flex items-center gap-1">
+                            <Weight className="w-3 h-3" />
+                            {totalWeight.toFixed(2)} کیلوگرم
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span>تاریخ سفارش:</span>
@@ -1500,6 +1648,94 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                         </div>
                       </div>
                     </div>
+
+                    {/* Smart Vehicle Selection Display */}
+                    {selectedVehicle && destinationCity && (
+                      <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg border border-green-200 dark:border-green-800">
+                        <div className="text-xs font-medium text-green-800 dark:text-green-300 mb-2 flex items-center gap-1">
+                          <Car className="w-3 h-3" />
+                          خودرو انتخاب شده (هوشمند)
+                        </div>
+                        <div className="space-y-1 text-xs text-green-700 dark:text-green-400">
+                          <div className="flex justify-between">
+                            <span>نوع خودرو:</span>
+                            <span className="font-semibold">{selectedVehicle.name}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>ظرفیت وزن:</span>
+                            <span>{parseFloat(selectedVehicle.maxWeightKg || '0').toLocaleString()} کیلوگرم</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>مقصد:</span>
+                            <span className="font-semibold">{destinationCity}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>هزینه پایه:</span>
+                            <span>{parseFloat(selectedVehicle.basePrice || '0').toLocaleString()} IQD</span>
+                          </div>
+                          {iraqiCities?.data?.find((city: any) => 
+                            city.nameEnglish?.toLowerCase().includes(destinationCity.toLowerCase()) ||
+                            city.nameArabic?.includes(destinationCity) ||
+                            city.name?.toLowerCase().includes(destinationCity.toLowerCase())
+                          ) && (
+                            <div className="flex justify-between">
+                              <span>فاصله از اربیل:</span>
+                              <span>{iraqiCities.data.find((city: any) => 
+                                city.nameEnglish?.toLowerCase().includes(destinationCity.toLowerCase()) ||
+                                city.nameArabic?.includes(destinationCity) ||
+                                city.name?.toLowerCase().includes(destinationCity.toLowerCase())
+                              )?.distanceFromErbilKm} کیلومتر</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="mt-2 pt-2 border-t border-green-200 dark:border-green-700">
+                          <div className="text-xs text-green-600 dark:text-green-400 italic flex items-center gap-1">
+                            <Calculator className="w-3 h-3" />
+                            محاسبه خودکار بر اساس وزن و مقصد
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Shipping Cost Breakdown */}
+                    {calculatedShippingCost > 0 && (
+                      <div className="bg-orange-50 dark:bg-orange-900/20 p-3 rounded-lg border border-orange-200 dark:border-orange-800">
+                        <div className="text-xs font-medium text-orange-800 dark:text-orange-300 mb-2 flex items-center gap-1">
+                          <Truck className="w-3 h-3" />
+                          تفکیک هزینه حمل
+                        </div>
+                        <div className="space-y-1 text-xs text-orange-700 dark:text-orange-400">
+                          {selectedVehicle && (
+                            <>
+                              <div className="flex justify-between">
+                                <span>هزینه پایه:</span>
+                                <span>{parseFloat(selectedVehicle.basePrice || '0').toLocaleString()} IQD</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>هزینه فاصله ({iraqiCities?.data?.find((city: any) => 
+                                  city.nameEnglish?.toLowerCase().includes(destinationCity.toLowerCase()) ||
+                                  city.nameArabic?.includes(destinationCity) ||
+                                  city.name?.toLowerCase().includes(destinationCity.toLowerCase())
+                                )?.distanceFromErbilKm || 0} کم):</span>
+                                <span>{(parseFloat(iraqiCities?.data?.find((city: any) => 
+                                  city.nameEnglish?.toLowerCase().includes(destinationCity.toLowerCase()) ||
+                                  city.nameArabic?.includes(destinationCity) ||
+                                  city.name?.toLowerCase().includes(destinationCity.toLowerCase())
+                                )?.distanceFromErbilKm || '0') * parseFloat(selectedVehicle.pricePerKm || '0')).toLocaleString()} IQD</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>هزینه وزن ({totalWeight.toFixed(2)} کگ):</span>
+                                <span>{(totalWeight * parseFloat(selectedVehicle.pricePerKg || '0')).toLocaleString()} IQD</span>
+                              </div>
+                              <div className="flex justify-between font-semibold border-t border-orange-200 pt-1">
+                                <span>مجموع هزینه حمل:</span>
+                                <span>{calculatedShippingCost.toLocaleString()} IQD</span>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    )}
                     
                     {/* Second Address Option */}
                     <div className="space-y-2">
