@@ -10978,7 +10978,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             taxId: customer.taxId,
             registrationNumber: customer.registrationNumber,
             annualRevenue: customer.annualRevenue,
-            priceRange: customer.priceRange
+            priceRange: customer.priceRange,
+            cityRegion: customer.cityRegion, // DEBUG: Check if cityRegion exists
+            city: customer.city,
+            province: customer.province
           });
         }
       }
@@ -11010,7 +11013,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           country: customer.country || '',
           province: customer.province || '',
           city: customer.city || '',
-          cityRegion: customer.cityRegion || customer.city || '', // CRITICAL FIX: Add cityRegion field
+          cityRegion: customer.cityRegion || customer.city_region || customer.city || '', // CRITICAL FIX: Check both cityRegion and city_region
           address: customer.address || '',
           postalCode: customer.postalCode,
           crmId: crmCustomer?.id || customer.id,
