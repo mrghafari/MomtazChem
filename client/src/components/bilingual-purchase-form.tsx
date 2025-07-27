@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { MapPin, Globe, X, ShoppingCart, Plus, Minus, Trash2, Wallet, CreditCard, Upload, Clock } from "lucide-react";
+import { MapPin, Globe, X, ShoppingCart, Plus, Minus, Trash2, Wallet, CreditCard, Upload, Clock, Scale } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -603,7 +603,21 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     });
   }, [isLoadingShippingRates, shippingRatesError, shippingRatesData]);
 
-  // Calculate VAT and duties amounts (only on product subtotal, not shipping)
+  // Calculate total weight of all products in cart
+  const totalWeight = useMemo(() => {
+    let totalWeight = 0;
+    Object.entries(cart).forEach(([productId, quantity]) => {
+      const product = products.find(p => p.id === parseInt(productId));
+      if (product) {
+        // Use gross weight if available, otherwise use weight, then default to 0
+        const productWeight = parseFloat(product.grossWeight || product.weight || '0');
+        totalWeight += productWeight * quantity;
+      }
+    });
+    return totalWeight;
+  }, [cart, products]);
+
+  // Calculate VAT and duties amounts (only on product subtotal, not shipping)  
   const vatRate = vatData?.vatEnabled ? parseFloat(vatData.vatRate || '0') : 0;
   const dutiesRate = vatData?.dutiesEnabled ? parseFloat(vatData.dutiesRate || '0') : 0;
   
@@ -1035,7 +1049,17 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
               
               {/* Delivery Method Selection */}
               <div className="space-y-3 border-t pt-3">
-                <label className="text-sm font-medium">{t.deliveryMethod} *</label>
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium">{t.deliveryMethod} *</label>
+                  {totalWeight > 0 && (
+                    <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/20 px-3 py-1 rounded-lg border border-blue-200 dark:border-blue-800">
+                      <Scale className="w-4 h-4 text-blue-600" />
+                      <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                        وزن ناخالص: {totalWeight.toLocaleString()} کیلوگرم
+                      </span>
+                    </div>
+                  )}
+                </div>
                 {isLoadingShippingRates ? (
                   <div className="text-sm text-muted-foreground flex items-center gap-2">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
