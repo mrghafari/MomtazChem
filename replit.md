@@ -6,6 +6,31 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Smart Vehicle Calculator System Implementation - Complete & Operational (January 27, 2025)
+✅ **IMPLEMENTED: Complete smart vehicle calculation system with intelligent weight-based vehicle selection and dynamic cost calculation**
+- **User Request Fulfilled**: Smart vehicle calculator system successfully implemented with server/smart-vehicle-calculator.ts module creation
+- **API Endpoint Operational**: POST /api/smart-vehicle/calculate endpoint working with proper validation and error handling
+- **Intelligent Vehicle Selection Algorithm**: 
+  - **25kg ↓**: وانت کوچک - پیکان (400 دینار/کم) - 12-24 ساعت delivery
+  - **100kg ↓**: وانت متوسط - نیسان (500 دینار/کم) - 24-36 ساعت delivery  
+  - **500kg ↓**: کامیونت - ایسوزو (700 دینار/کم) - 24-48 ساعت delivery
+  - **500kg ↑**: کامیون بزرگ - هیوو (1000 دینار/کم) - 48-72 ساعت delivery
+- **Database Integration**: Uses authentic Iraqi cities data from iraqiCities table with real distance calculations from Erbil
+- **Dynamic Cost Calculation**: 
+  - Base cost = distance × price per km
+  - Weight surcharge for orders over 50kg (10 IQD per extra kg)
+  - Real-time calculation using database distances
+- **Test Results Confirmed**: 
+  - 25kg to Baghdad: وانت کوچک - پیکان, 132,000 IQD, 330km, 12-24h
+  - 150kg to Basra: کامیونت - ایسوزو, 386,000 IQD, 550km, 24-48h
+- **Comprehensive Test Interface**: Created test-smart-vehicle-system.html with interactive calculation form
+- **Error Handling**: Complete validation for city lookup, weight limits, and calculation errors
+- **Persian Interface**: Full Persian text support with proper vehicle naming and delivery times
+- **API Structure**: Returns complete vehicle selection data including name, type, capacity, pricing, and delivery estimates
+- **Technical Achievement**: Fixed routing issue by placing endpoint before catch-all handler
+- **Business Impact**: Customers can now get instant intelligent vehicle selection and accurate shipping cost calculations
+- **Result**: Complete smart vehicle calculator system operational - customers receive automated intelligent vehicle selection with accurate pricing based on weight and destination
+
 ### COMPLETED: Shipping Rates Tab Completely Removed from Logistics Management Interface (January 27, 2025)
 ✅ **IMPLEMENTED: Complete removal of "نرخ های حمل" tab from logistics management page**
 - **User Request Fulfilled**: Removed shipping rates tab as system exclusively uses smart vehicle delivery method

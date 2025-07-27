@@ -88,6 +88,7 @@ import {
 } from "@shared/cart-schema";
 
 import { logisticsStorage } from "./logistics-storage";
+import { smartVehicleCalculator } from "./smart-vehicle-calculator";
 import { 
   transportationCompanies,
   deliveryVehicles,
@@ -34760,6 +34761,53 @@ momtazchem.com
     } catch (error) {
       console.error("Error fetching vehicle selection history:", error);
       res.status(500).json({ success: false, message: "خطا در دریافت تاریخچه انتخاب وسایل نقلیه" });
+    }
+  });
+
+  // Smart vehicle calculation using the smart vehicle calculator module
+  app.post("/api/smart-vehicle/calculate", async (req, res) => {
+    try {
+      const { weight, destinationCity, orderData } = req.body;
+
+      console.log('🚚 [SMART VEHICLE CALC] Calculation request:', {
+        weight,
+        destinationCity,
+        orderData: orderData ? 'provided' : 'not provided'
+      });
+
+      // Validate required parameters
+      if (!weight || !destinationCity) {
+        return res.status(400).json({
+          success: false,
+          message: "وزن و شهر مقصد الزامی است"
+        });
+      }
+
+      // Use the smart vehicle calculator
+      const result = await smartVehicleCalculator.calculateShippingCost(
+        weight,
+        destinationCity,
+        orderData
+      );
+
+      console.log('🚚 [SMART VEHICLE CALC] Calculation result:', {
+        success: result.success,
+        selectedVehicle: result.selectedVehicle?.name,
+        totalCost: result.totalCost,
+        distance: result.distance
+      });
+
+      res.json({
+        success: result.success,
+        data: result
+      });
+
+    } catch (error) {
+      console.error('🚚 [SMART VEHICLE CALC] Error:', error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در محاسبه انتخاب خودروی هوشمند"
+      });
     }
   });
 
