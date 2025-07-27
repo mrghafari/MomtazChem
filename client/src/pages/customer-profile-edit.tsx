@@ -111,13 +111,23 @@ export default function CustomerProfileEdit() {
       const url = selectedProvinceId 
         ? `/api/logistics/cities?provinceId=${selectedProvinceId}`
         : '/api/logistics/cities';
+      console.log('🌍 [API] Fetching cities from:', url);
       return fetch(url).then(res => res.json());
     },
     retry: 1,
+    enabled: true, // Always enabled to get initial data
   });
 
   const provinces = (provincesData && typeof provincesData === 'object' && 'data' in provincesData) ? provincesData.data : [];
-  const cities = (citiesData && typeof citiesData === 'object' && 'data' in citiesData) ? citiesData.data : [];
+  let cities = (citiesData && typeof citiesData === 'object' && 'data' in citiesData) ? citiesData.data : [];
+  
+  // If a province is selected, filter cities to only that province
+  if (selectedProvinceId && cities.length > 0) {
+    cities = cities.filter((city: any) => city.provinceId === selectedProvinceId);
+    console.log(`🌍 [FILTER] Filtered cities for province ${selectedProvinceId}:`, cities.length, 'cities');
+  } else {
+    console.log('🌍 [FILTER] No province filter applied. Total cities:', cities.length);
+  }
 
   const form = useForm<EditProfileForm>({
     resolver: zodResolver(editProfileSchema),
@@ -259,19 +269,31 @@ export default function CustomerProfileEdit() {
   // Set selected province ID when provinces data and customer data are loaded
   useEffect(() => {
     if (customer?.customer?.province && provinces.length > 0) {
-      // Try to find by English name first, then by Persian name
+      console.log('🏛️ [PROVINCE DEBUG] Customer province from backend:', customer.customer.province);
+      console.log('🏛️ [PROVINCE DEBUG] Available provinces:', provinces.map((p: any) => ({
+        id: p.id,
+        nameEnglish: p.nameEnglish,
+        nameArabic: p.nameArabic,
+        name: p.name
+      })));
+      
+      // Try to find by English name first, then by Arabic name
       const customerProvince = provinces.find((p: any) => 
         p.nameEnglish === customer.customer.province || 
         p.name === customer.customer.province ||
+        p.nameArabic === customer.customer.province ||
         p.namePersian === customer.customer.province
       );
+      
       if (customerProvince) {
+        console.log('✅ [PROVINCE] Found matching province:', customerProvince);
         setSelectedProvinceId(customerProvince.id);
         // Set form value to the standardized name to ensure CRM integration
         form.setValue('province', customerProvince.nameEnglish || customerProvince.name);
-        console.log('📍 Province found and set:', customerProvince);
+        console.log('📍 [PROVINCE] Province set to:', customerProvince.nameEnglish);
       } else {
-        console.log('📍 Province not found for:', customer.customer.province, 'Available provinces:', provinces.map((p: any) => p.nameEnglish || p.name));
+        console.error('❌ [PROVINCE] Province not found for:', customer.customer.province);
+        console.error('❌ [PROVINCE] Available options:', provinces.map((p: any) => `${p.nameArabic} / ${p.nameEnglish}`));
       }
     }
   }, [customer, provinces, form]);
@@ -280,40 +302,53 @@ export default function CustomerProfileEdit() {
   useEffect(() => {
     // CRITICAL FIX: Use cityRegion field from database instead of city
     const customerCityValue = customer?.customer?.cityRegion || customer?.customer?.city;
-    console.log('🔧 [CITY DEBUG] Customer city value from backend:', customerCityValue);
-    console.log('🔧 [CITY DEBUG] Available cities count:', cities.length);
+    console.log('🔧 [CRITICAL FIX] Customer city value from backend:', customerCityValue);
+    console.log('🔧 [CRITICAL FIX] Available cities count:', cities.length);
+    console.log('🔧 [CRITICAL FIX] Current form city value:', form.getValues('city'));
     
     if (customerCityValue && cities.length > 0) {
       // Debug: Log all available cities to understand filtering
-      console.log('🔧 [CITY DEBUG] Available cities:', cities.map((c: any) => ({
+      console.log('🔧 [CRITICAL FIX] Available cities:', cities.map((c: any) => ({
         id: c.id,
         nameEnglish: c.nameEnglish,
         nameArabic: c.nameArabic,
-        namePersian: c.namePersian
+        name: c.name
       })));
       
+      // Try multiple field matching strategies
       const customerCity = cities.find((c: any) => 
         c.nameEnglish === customerCityValue || 
         c.name === customerCityValue ||
-        c.namePersian === customerCityValue ||
-        c.nameArabic === customerCityValue
+        c.nameArabic === customerCityValue ||
+        c.namePersian === customerCityValue
       );
       
-      console.log('🔧 [CITY DEBUG] Found matching city:', customerCity);
+      console.log('🔧 [CRITICAL FIX] Found matching city:', customerCity);
       
       if (customerCity) {
-        // Use standardized name for CRM integration
+        // CRITICAL: Use the EXACT value that matches the SelectItem value
         const cityValueToSet = customerCity.nameEnglish || customerCity.name;
-        form.setValue('city', cityValueToSet);
-        console.log('🏙️ [FIELD MAPPING FIX] City found and set:', cityValueToSet);
-        console.log('🔧 [FIELD MAPPING FIX] Original cityRegion value:', customerCityValue);
+        console.log('🔧 [CRITICAL FIX] Setting city value to:', cityValueToSet);
+        
+        // Force form update and trigger re-render
+        form.setValue('city', cityValueToSet, { shouldValidate: true, shouldDirty: true });
+        
+        console.log('✅ [SUCCESS] City successfully set in form');
+        console.log('🔍 [VERIFY] Form value after setting:', form.getValues('city'));
       } else {
-        // If not found in current city list, preserve original value to prevent data loss
-        console.log('🏙️ [CITY DEBUG] City not found for:', customerCityValue, 'in available cities. Preserving original value');
-        form.setValue('city', customerCityValue);
+        console.error('❌ [ERROR] City not found in available cities list');
+        console.error('❌ [ERROR] Searched for:', customerCityValue);
+        console.error('❌ [ERROR] Available options:', cities.map(c => c.nameArabic + ' / ' + c.nameEnglish));
+        
+        // As fallback, try to set the original value anyway
+        form.setValue('city', customerCityValue, { shouldValidate: false });
       }
     } else {
-      console.log('🔧 [CITY DEBUG] No customer city value or no cities available', { customerCityValue, citiesLength: cities.length });
+      console.log('🔧 [CRITICAL FIX] Missing data:', { 
+        hasCustomerCityValue: !!customerCityValue, 
+        customerCityValue, 
+        citiesLength: cities.length 
+      });
     }
   }, [customer, cities, form]);
 
@@ -711,7 +746,13 @@ export default function CustomerProfileEdit() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>City / مدينة</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
+                        <Select 
+                          onValueChange={(value) => {
+                            console.log('🏙️ [FORM] City changing to:', value);
+                            field.onChange(value);
+                          }} 
+                          value={field.value}
+                        >
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select city / اختر المدينة" />
@@ -726,6 +767,10 @@ export default function CustomerProfileEdit() {
                           </SelectContent>
                         </Select>
                         <FormMessage />
+                        {/* Debug display to see current form value */}
+                        <div className="text-xs text-gray-500">
+                          Debug: Current value = "{field.value}"
+                        </div>
                       </FormItem>
                     )}
                   />
