@@ -1780,6 +1780,10 @@ const LogisticsManagement = () => {
           aValue = calculateDistance(a);
           bValue = calculateDistance(b);
           break;
+        case 'vehicleId':
+          aValue = a.vehicleId || 0;
+          bValue = b.vehicleId || 0;
+          break;
         default:
           return 0;
       }
@@ -1869,6 +1873,7 @@ const LogisticsManagement = () => {
         name_arabic: formData.get('name_arabic') as string,
         name_english: formData.get('name_english') as string,
         distance_from_erbil_km: parseInt(formData.get('distance_from_erbil_km') as string),
+        vehicle_id: formData.get('vehicle_id') ? parseInt(formData.get('vehicle_id') as string) : null,
         is_active: formData.get('is_active') === 'on'
       };
 
@@ -2008,6 +2013,17 @@ const LogisticsManagement = () => {
                             <ArrowUpDown className="h-3 w-3" />
                           </Button>
                         </TableHead>
+                        <TableHead className="text-right w-24">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => handleCitySort('vehicleId')}
+                            className="flex items-center justify-end gap-1 p-0 h-auto font-medium text-right w-full"
+                          >
+                            شناسه خودرو
+                            <ArrowUpDown className="h-3 w-3" />
+                          </Button>
+                        </TableHead>
                         <TableHead className="text-right w-24">وضعیت</TableHead>
                         <TableHead className="text-right w-32">عملیات</TableHead>
                       </TableRow>
@@ -2045,6 +2061,17 @@ const LogisticsManagement = () => {
                               (از اربیل: {city.distance_from_erbil_km || 0} کیلومتر)
                             </div>
                           )}
+                        </TableCell>
+                        <TableCell className="text-right w-24">
+                          <div className="flex justify-end">
+                            {city.vehicleId ? (
+                              <Badge variant="outline" className="bg-blue-50 border-blue-200 text-blue-700">
+                                {city.vehicleId}
+                              </Badge>
+                            ) : (
+                              <span className="text-gray-400 text-sm">-</span>
+                            )}
+                          </div>
                         </TableCell>
                         <TableCell className="text-right w-24">
                           <div className="flex justify-end">
@@ -2186,6 +2213,17 @@ const LogisticsManagement = () => {
                       min="0"
                       defaultValue={editingCity.distance_from_erbil_km || 0}
                       required 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="vehicle_id">شناسه خودرو</Label>
+                    <Input 
+                      id="vehicle_id" 
+                      name="vehicle_id" 
+                      type="number"
+                      min="1"
+                      defaultValue={editingCity.vehicleId || ''}
+                      placeholder="شناسه خودرو (اختیاری)"
                     />
                   </div>
                   <div className="space-y-2">

@@ -370,6 +370,7 @@ export const iraqiCities = pgTable("iraqi_cities", {
   distanceFromErbilKm: integer("distance_from_erbil_km").default(0), // Distance in KM from Erbil for logistics optimization
   distanceFromProvinceCapital: integer("distance_from_province_capital"), // Distance from province capital
   isProvinceCapital: boolean("is_province_capital").default(false), // Is it a province capital
+  vehicleId: integer("vehicle_id").references(() => deliveryVehicles.id), // Assigned vehicle for this city
   isActive: boolean("is_active").default(true),
   population: integer("population"), // Population estimate
   coordinates: text("coordinates"), // GPS coordinates if available
@@ -385,6 +386,7 @@ export const iraqiCities = pgTable("iraqi_cities", {
   index("iraqi_cities_region_idx").on(table.region),
   index("iraqi_cities_active_idx").on(table.isActive),
   index("iraqi_cities_capital_idx").on(table.isProvinceCapital),
+  index("iraqi_cities_vehicle_idx").on(table.vehicleId),
 ]);
 
 // Shipping rates table for Iraqi cities

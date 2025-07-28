@@ -12823,6 +12823,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           c.name_kurdish,
           c.province_id, 
           c.distance_from_erbil_km, 
+          c.vehicle_id,
           c.is_active, 
           c.notes,
           c.created_at, 
@@ -12895,7 +12896,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ success: false, message: "Invalid city ID" });
       }
 
-      const { name_arabic, name_english, distance_from_erbil_km, is_active } = req.body;
+      const { name_arabic, name_english, distance_from_erbil_km, vehicle_id, is_active } = req.body;
       const { pool } = await import('./db');
       
       const result = await pool.query(`
@@ -12903,11 +12904,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           name_arabic = $1,
           name_english = $2,
           distance_from_erbil_km = $3,
-          is_active = $4,
+          vehicle_id = $4,
+          is_active = $5,
           updated_at = NOW()
-        WHERE id = $5
-        RETURNING id, name_arabic, name_english, distance_from_erbil_km, is_active, updated_at
-      `, [name_arabic, name_english, distance_from_erbil_km, is_active, cityId]);
+        WHERE id = $6
+        RETURNING id, name_arabic, name_english, distance_from_erbil_km, vehicle_id, is_active, updated_at
+      `, [name_arabic, name_english, distance_from_erbil_km, vehicle_id, is_active, cityId]);
       
       if (result.rows.length === 0) {
         return res.status(404).json({ success: false, message: "City not found" });

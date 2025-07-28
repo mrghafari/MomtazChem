@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست شناسه خودرو شهرها</title>
+    <style>
+        body { font-family: 'Tahoma', sans-serif; margin: 20px; direction: rtl; }
+        .test-container { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; }
+        input, select { margin: 5px; padding: 8px; border: 1px solid #ccc; border-radius: 3px; }
+        .form-group { margin: 10px 0; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>تست سیستم شناسه خودرو برای شهرها</h1>
+    
+    <div class="test-container">
+        <h3>1. دریافت شهرهای عراقی</h3>
+        <button onclick="getCities()">دریافت شهرها</button>
+        <div id="citiesResult"></div>
+    </div>
+    
+    <div class="test-container">
+        <h3>2. ویرایش شناسه خودرو شهر</h3>
+        <div class="form-group">
+            <label>انتخاب شهر:</label>
+            <select id="citySelect" onchange="loadCityData()">
+                <option value="">ابتدا شهرها را دریافت کنید</option>
+            </select>
+        </div>
+        
+        <div id="cityEditForm" style="display: none;">
+            <div class="form-group">
+                <label>نام عربی:</label>
+                <input type="text" id="nameArabic" readonly>
+            </div>
+            <div class="form-group">
+                <label>نام انگلیسی:</label>
+                <input type="text" id="nameEnglish">
+            </div>
+            <div class="form-group">
+                <label>فاصله از اربیل (کیلومتر):</label>
+                <input type="number" id="distanceFromErbil" min="0">
+            </div>
+            <div class="form-group">
+                <label>شناسه خودرو:</label>
+                <input type="number" id="vehicleId" min="1" placeholder="شناسه خودرو (اختیاری)">
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="isActive"> فعال
+                </label>
+            </div>
+            <button onclick="updateCity()">به‌روزرسانی شهر</button>
+        </div>
+        <div id="updateResult"></div>
+    </div>
+    
+    <div class="test-container">
+        <h3>3. نتایج کلی</h3>
+        <div id="overallResults">آماده تست...</div>
+    </div>
+
+    <script>
+        let cities = [];
+        let selectedCity = null;
+
+        async function getCities() {
+            try {
+                const response = await fetch('/api/logistics/cities-detailed');
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    cities = data.data;
+                    
+                    // پر کردن dropdown شهرها
+                    const citySelect = document.getElementById('citySelect');
+                    citySelect.innerHTML = '<option value="">شهر را انتخاب کنید</option>';
+                    
+                    cities.forEach(city => {
+                        const option = document.createElement('option');
+                        option.value = city.id;
+                        option.textContent = `${city.name_arabic || city.name} (ID: ${city.id})${city.vehicle_id ? ' - خودرو: ' + city.vehicle_id : ''}`;
+                        citySelect.appendChild(option);
+                    });
+                    
+                    document.getElementById('citiesResult').innerHTML = `
+                        <div class="success">
+                            ✅ موفق: ${cities.length} شهر دریافت شد
+                            <pre>${JSON.stringify(cities.slice(0, 3).map(c => ({
+                                id: c.id,
+                                name: c.name_arabic || c.name,
+                                vehicle_id: c.vehicle_id,
+                                province_name: c.province_name
+                            })), null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    throw new Error(data.message || 'خطای نامشخص');
+                }
+            } catch (error) {
+                document.getElementById('citiesResult').innerHTML = `
+                    <div class="error">
+                        ❌ خطا: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        function loadCityData() {
+            const cityId = document.getElementById('citySelect').value;
+            if (!cityId) {
+                document.getElementById('cityEditForm').style.display = 'none';
+                return;
+            }
+            
+            selectedCity = cities.find(c => c.id == cityId);
+            if (selectedCity) {
+                document.getElementById('nameArabic').value = selectedCity.name_arabic || selectedCity.name || '';
+                document.getElementById('nameEnglish').value = selectedCity.name_english || '';
+                document.getElementById('distanceFromErbil').value = selectedCity.distance_from_erbil_km || 0;
+                document.getElementById('vehicleId').value = selectedCity.vehicle_id || '';
+                document.getElementById('isActive').checked = selectedCity.is_active;
+                document.getElementById('cityEditForm').style.display = 'block';
+            }
+        }
+
+        async function updateCity() {
+            if (!selectedCity) {
+                alert('لطفاً ابتدا شهری را انتخاب کنید');
+                return;
+            }
+            
+            try {
+                const vehicleIdValue = document.getElementById('vehicleId').value;
+                
+                const updateData = {
+                    name_arabic: document.getElementById('nameArabic').value,
+                    name_english: document.getElementById('nameEnglish').value,
+                    distance_from_erbil_km: parseInt(document.getElementById('distanceFromErbil').value),
+                    vehicle_id: vehicleIdValue ? parseInt(vehicleIdValue) : null,
+                    is_active: document.getElementById('isActive').checked
+                };
+                
+                console.log('Update data:', updateData);
+                
+                const response = await fetch(`/api/logistics/cities/${selectedCity.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updateData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    document.getElementById('updateResult').innerHTML = `
+                        <div class="success">
+                            ✅ موفق: شهر به‌روزرسانی شد
+                            <pre>${JSON.stringify(data.data, null, 2)}</pre>
+                        </div>
+                    `;
+                    
+                    // به‌روزرسانی اطلاعات محلی
+                    const cityIndex = cities.findIndex(c => c.id === selectedCity.id);
+                    if (cityIndex >= 0) {
+                        cities[cityIndex] = { ...cities[cityIndex], ...data.data };
+                        selectedCity = cities[cityIndex];
+                    }
+                } else {
+                    throw new Error(data.message || 'خطای نامشخص');
+                }
+            } catch (error) {
+                document.getElementById('updateResult').innerHTML = `
+                    <div class="error">
+                        ❌ خطا: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        function updateOverallResults() {
+            const cityCount = cities.length;
+            const citiesWithVehicles = cities.filter(c => c.vehicle_id).length;
+            
+            document.getElementById('overallResults').innerHTML = `
+                <div class="success">
+                    📊 آمار کلی:
+                    <ul>
+                        <li>تعداد کل شهرها: ${cityCount}</li>
+                        <li>شهرهای دارای شناسه خودرو: ${citiesWithVehicles}</li>
+                        <li>شهرهای بدون شناسه خودرو: ${cityCount - citiesWithVehicles}</li>
+                    </ul>
+                </div>
+            `;
+        }
+
+        // به‌روزرسانی خودکار آمار پس از دریافت شهرها
+        document.addEventListener('DOMContentLoaded', function() {
+            const originalGetCities = getCities;
+            getCities = async function() {
+                await originalGetCities();
+                updateOverallResults();
+            };
+        });
+    </script>
+</body>
+</html>
