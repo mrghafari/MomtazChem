@@ -14,7 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Truck, Plus, Edit, Trash2, Calculator, History, CheckCircle, AlertCircle } from "lucide-react";
+import { Truck, Plus, Edit, Trash2, History, CheckCircle, AlertCircle } from "lucide-react";
 
 interface VehicleTemplate {
   id: number;
@@ -82,7 +82,7 @@ export default function VehicleOptimization() {
   const queryClient = useQueryClient();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingVehicle, setEditingVehicle] = useState<VehicleTemplate | null>(null);
-  const [optimizationRequest, setOptimizationRequest] = useState<Partial<OptimalVehicleRequest>>({});
+
 
   // Fetch vehicle templates
   const { data: vehiclesData, isLoading: vehiclesLoading } = useQuery({
@@ -137,21 +137,7 @@ export default function VehicleOptimization() {
     }
   });
 
-  // Optimize vehicle selection mutation
-  const optimizeVehicleMutation = useMutation({
-    mutationFn: (data: OptimalVehicleRequest) => 
-      apiRequest({ url: '/api/logistics/select-optimal-vehicle', method: 'POST', data }),
-    onSuccess: (result) => {
-      queryClient.invalidateQueries({ queryKey: ['/api/logistics/vehicle-selection-history'] });
-      toast({ 
-        title: "انتخاب بهینه انجام شد", 
-        description: `وسیله انتخاب شده: ${result.data.selectedVehicle.vehicleName} - هزینه: ${parseInt(result.data.selectedVehicle.totalCost).toLocaleString()} دینار`
-      });
-    },
-    onError: () => {
-      toast({ title: "خطا", description: "خطا در انتخاب وسیله بهینه", variant: "destructive" });
-    }
-  });
+
 
   const vehicles: VehicleTemplate[] = vehiclesData?.data || [];
   const history: VehicleSelectionHistory[] = historyData?.data || [];
@@ -177,13 +163,7 @@ export default function VehicleOptimization() {
     createVehicleMutation.mutate(vehicleData);
   };
 
-  const handleOptimizeVehicle = () => {
-    if (!optimizationRequest.orderNumber || !optimizationRequest.weightKg || !optimizationRequest.routeType || !optimizationRequest.distanceKm) {
-      toast({ title: "خطا", description: "لطفاً همه فیلدهای اجباری را پر کنید", variant: "destructive" });
-      return;
-    }
-    optimizeVehicleMutation.mutate(optimizationRequest as OptimalVehicleRequest);
-  };
+
 
   return (
     <div className="space-y-6 p-6" dir="rtl">
@@ -198,10 +178,9 @@ export default function VehicleOptimization() {
       </div>
 
       <Tabs defaultValue="templates" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="templates">الگوهای خودرو</TabsTrigger>
           <TabsTrigger value="editor">ویرایش الگوها</TabsTrigger>
-          <TabsTrigger value="optimization">انتخاب بهینه</TabsTrigger>
           <TabsTrigger value="history">تاریخچه انتخاب</TabsTrigger>
         </TabsList>
 
@@ -512,115 +491,7 @@ export default function VehicleOptimization() {
           </Dialog>
         )}
 
-        <TabsContent value="optimization" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calculator className="h-5 w-5" />
-                انتخاب بهینه وسیله نقلیه
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>شماره سفارش *</Label>
-                  <Input 
-                    value={optimizationRequest.orderNumber || ''} 
-                    onChange={(e) => setOptimizationRequest(prev => ({ ...prev, orderNumber: e.target.value }))}
-                    placeholder="M2507240001"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>وزن سفارش (کیلوگرم) *</Label>
-                  <Input 
-                    type="number"
-                    value={optimizationRequest.weightKg || ''} 
-                    onChange={(e) => setOptimizationRequest(prev => ({ ...prev, weightKg: parseFloat(e.target.value) }))}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>حجم سفارش (متر مکعب)</Label>
-                  <Input 
-                    type="number"
-                    step="0.01"
-                    value={optimizationRequest.volumeM3 || ''} 
-                    onChange={(e) => setOptimizationRequest(prev => ({ ...prev, volumeM3: parseFloat(e.target.value) }))}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>نوع مسیر *</Label>
-                  <Select 
-                    value={optimizationRequest.routeType || ''} 
-                    onValueChange={(value) => setOptimizationRequest(prev => ({ ...prev, routeType: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="انتخاب نوع مسیر" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Object.entries(ROUTE_TYPES).map(([key, value]) => (
-                        <SelectItem key={key} value={key}>{value}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>فاصله (کیلومتر) *</Label>
-                  <Input 
-                    type="number"
-                    value={optimizationRequest.distanceKm || ''} 
-                    onChange={(e) => setOptimizationRequest(prev => ({ ...prev, distanceKm: parseFloat(e.target.value) }))}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>شناسه مشتری</Label>
-                  <Input 
-                    type="number"
-                    value={optimizationRequest.customerId || ''} 
-                    onChange={(e) => setOptimizationRequest(prev => ({ ...prev, customerId: parseInt(e.target.value) }))}
-                  />
-                </div>
-              </div>
-              
-              <div className="flex gap-4">
-                <div className="flex items-center space-x-2">
-                  <input 
-                    type="checkbox" 
-                    id="isHazardous"
-                    checked={optimizationRequest.isHazardous || false}
-                    onChange={(e) => setOptimizationRequest(prev => ({ ...prev, isHazardous: e.target.checked }))}
-                  />
-                  <Label htmlFor="isHazardous">مواد خطرناک</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <input 
-                    type="checkbox" 
-                    id="isRefrigerated"
-                    checked={optimizationRequest.isRefrigerated || false}
-                    onChange={(e) => setOptimizationRequest(prev => ({ ...prev, isRefrigerated: e.target.checked }))}
-                  />
-                  <Label htmlFor="isRefrigerated">نیاز به یخچال</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <input 
-                    type="checkbox" 
-                    id="isFragile"
-                    checked={optimizationRequest.isFragile !== false}
-                    onChange={(e) => setOptimizationRequest(prev => ({ ...prev, isFragile: e.target.checked }))}
-                  />
-                  <Label htmlFor="isFragile">اقلام شکستنی</Label>
-                </div>
-              </div>
 
-              <Button 
-                onClick={handleOptimizeVehicle} 
-                disabled={optimizeVehicleMutation.isPending}
-                className="w-full"
-              >
-                {optimizeVehicleMutation.isPending ? "در حال محاسبه..." : "انتخاب بهینه وسیله نقلیه"}
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
 
         <TabsContent value="history" className="space-y-4">
           <Card>
