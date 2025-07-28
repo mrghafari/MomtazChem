@@ -21,6 +21,10 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **English Names Integration**: Added bilingual display for both cities and provinces - Arabic names shown prominently with English names as smaller gray text below when different
 - **Column Structure Optimization**: Merged Arabic/English name columns into single "نام شهر"/"نام استان" columns with dual-language display for cleaner table layout
 - **Smart Name Display**: English names only show when different from Arabic names to avoid redundancy and maintain clean interface
+- **Scrollable Table Implementation**: Added vertical scrollbar to cities table with max-height: 384px for viewing all cities
+- **Sticky Header Enhancement**: Table header remains visible during scrolling with sticky positioning and white background
+- **Complete City List**: Removed 8-row limitation - now all 188+ cities are viewable through scrolling interface
+- **Professional Scrolling**: Added border and rounded corners to scrollable container for polished appearance
 
 ### COMPLETED: Self-Pickup Delivery Method Added - Customer Self-Collection Option Operational (January 28, 2025)
 ✅ **IMPLEMENTED: Complete "حمل توسط خودم" (self-pickup) delivery method for customers to collect orders without shipping costs**

@@ -1921,21 +1921,22 @@ const LogisticsManagement = () => {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="text-right">شناسه</TableHead>
-                      <TableHead className="text-right">نام شهر</TableHead>
-                      <TableHead className="text-right">استان</TableHead>
-                      <TableHead className="text-right">
-                        فاصله از {selectedOriginCity ? (selectedOriginCity.name_arabic || selectedOriginCity.name) : 'اربیل'} (کیلومتر)
-                      </TableHead>
-                      <TableHead className="text-right">وضعیت</TableHead>
-                      <TableHead className="text-right">عملیات</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {geographyCities.slice(0, 8).map((city: any) => (
+                <div className="max-h-96 overflow-y-auto border border-gray-200 rounded-lg">
+                  <Table>
+                    <TableHeader className="sticky top-0 bg-white z-10">
+                      <TableRow>
+                        <TableHead className="text-right">شناسه</TableHead>
+                        <TableHead className="text-right">نام شهر</TableHead>
+                        <TableHead className="text-right">استان</TableHead>
+                        <TableHead className="text-right">
+                          فاصله از {selectedOriginCity ? (selectedOriginCity.name_arabic || selectedOriginCity.name) : 'اربیل'} (کیلومتر)
+                        </TableHead>
+                        <TableHead className="text-right">وضعیت</TableHead>
+                        <TableHead className="text-right">عملیات</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {geographyCities.map((city: any) => (
                       <TableRow key={city.id}>
                         <TableCell className="font-medium text-right">{city.id}</TableCell>
                         <TableCell className="text-right">
@@ -1992,13 +1993,9 @@ const LogisticsManagement = () => {
                         </TableCell>
                       </TableRow>
                     ))}
-                  </TableBody>
-                </Table>
-                {geographyCities.length > 8 && (
-                  <div className="text-center py-4 text-sm text-gray-500">
-                    و {geographyCities.length - 8} شهر دیگر...
-                  </div>
-                )}
+                    </TableBody>
+                  </Table>
+                </div>
               </div>
             )}
           </CardContent>
