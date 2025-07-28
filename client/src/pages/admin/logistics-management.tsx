@@ -631,32 +631,35 @@ const LogisticsManagement = () => {
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="edit-maxWeightKg">حداکثر وزن (کیلوگرم) *</Label>
-                        <Input 
+                        <input 
                           id="edit-maxWeightKg" 
                           name="maxWeightKg" 
                           type="number" 
-                          defaultValue={parseInt(editingVehicle.maxWeightKg)}
+                          defaultValue={parseInt(editingVehicle.maxWeightKg).toString()}
                           required 
+                          className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="edit-basePrice">قیمت پایه (دینار) *</Label>
-                        <Input 
+                        <input 
                           id="edit-basePrice" 
                           name="basePrice" 
                           type="number" 
-                          defaultValue={parseInt(editingVehicle.basePrice)}
+                          defaultValue={parseInt(editingVehicle.basePrice).toString()}
                           required 
+                          className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="edit-pricePerKm">قیمت هر کیلومتر (دینار) *</Label>
-                        <Input 
+                        <input 
                           id="edit-pricePerKm" 
                           name="pricePerKm" 
                           type="number" 
-                          defaultValue={parseInt(editingVehicle.pricePerKm)}
+                          defaultValue={parseInt(editingVehicle.pricePerKm).toString()}
                           required 
+                          className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
                       <div className="space-y-2">
@@ -671,29 +674,32 @@ const LogisticsManagement = () => {
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="edit-averageSpeedKmh">سرعت متوسط (کیلومتر/ساعت)</Label>
-                        <Input 
+                        <input 
                           id="edit-averageSpeedKmh" 
                           name="averageSpeedKmh" 
                           type="number" 
-                          defaultValue={parseInt(editingVehicle.averageSpeedKmh) || 50}
+                          defaultValue={(parseInt(editingVehicle.averageSpeedKmh) || 50).toString()}
+                          className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="edit-maxVolumeM3">حجم حداکثر (متر مکعب)</Label>
-                        <Input 
+                        <input 
                           id="edit-maxVolumeM3" 
                           name="maxVolumeM3" 
                           type="number" 
-                          defaultValue={parseInt(editingVehicle.maxVolumeM3) || 0}
+                          defaultValue={(parseInt(editingVehicle.maxVolumeM3) || 0).toString()}
+                          className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="edit-fuelConsumptionL100km">مصرف سوخت (لیتر/100کیلومتر)</Label>
-                        <Input 
+                        <input 
                           id="edit-fuelConsumptionL100km" 
                           name="fuelConsumptionL100km" 
                           type="number" 
-                          defaultValue={parseInt(editingVehicle.fuelConsumptionL100km) || 0}
+                          defaultValue={(parseInt(editingVehicle.fuelConsumptionL100km) || 0).toString()}
+                          className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
                       <div className="space-y-2 col-span-2">
