@@ -86,6 +86,10 @@ export default function VehicleTemplateEditor({ className = "" }: VehicleTemplat
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [editingTemplate, setEditingTemplate] = useState<VehicleTemplate | null>(null);
+  
+  // State for add dialog
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [allowedRoutes, setAllowedRoutes] = useState<string[]>(['urban']);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedRoutes, setSelectedRoutes] = useState<string[]>([]);
 
@@ -117,6 +121,33 @@ export default function VehicleTemplateEditor({ className = "" }: VehicleTemplat
       fuelConsumptionL100km: "12",
       isActive: true,
       priority: "0"
+    }
+  });
+
+  // Add vehicle template mutation
+  const addTemplateMutation = useMutation({
+    mutationFn: (data: any) => 
+      apiRequest({ 
+        url: '/api/logistics/vehicle-templates', 
+        method: 'POST', 
+        data 
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/logistics/vehicle-templates'] });
+      setIsAddDialogOpen(false);
+      form.reset();
+      setAllowedRoutes(['urban']);
+      toast({ 
+        title: "موفقیت", 
+        description: "الگوی خودرو جدید با موفقیت اضافه شد" 
+      });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: "خطا", 
+        description: error?.message || "خطا در اضافه کردن الگوی خودرو", 
+        variant: "destructive" 
+      });
     }
   });
 
@@ -168,6 +199,24 @@ export default function VehicleTemplateEditor({ className = "" }: VehicleTemplat
       });
     }
   });
+
+  // Handle add new template
+  const onAdd = (formData: VehicleTemplateForm) => {
+    const submitData = {
+      ...formData,
+      allowedRoutes,
+      maxWeightKg: parseInt(formData.maxWeightKg),
+      maxVolumeM3: parseFloat(formData.maxVolumeM3) || undefined,
+      basePrice: parseInt(formData.basePrice),
+      pricePerKm: parseInt(formData.pricePerKm),
+      pricePerKg: parseInt(formData.pricePerKg) || undefined,
+      averageSpeedKmh: parseInt(formData.averageSpeedKmh),
+      fuelConsumptionL100km: parseFloat(formData.fuelConsumptionL100km) || undefined,
+      priority: parseInt(formData.priority) || 0,
+    };
+
+    addTemplateMutation.mutate(submitData);
+  };
 
   // Open edit dialog
   const handleEdit = (template: VehicleTemplate) => {
@@ -273,6 +322,436 @@ export default function VehicleTemplateEditor({ className = "" }: VehicleTemplat
             تغییر و بروزرسانی الگوهای موجود برای سیستم انتخاب بهینه وسیله نقلیه
           </p>
         </div>
+        
+        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="bg-blue-600 hover:bg-blue-700">
+              <Plus className="h-4 w-4 ml-1" />
+              اضافه کردن الگوی جدید
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto" dir="rtl">
+            <DialogHeader>
+              <DialogTitle className="text-xl flex items-center gap-2">
+                <Plus className="h-5 w-5" />
+                افزودن الگوی خودرو جدید
+              </DialogTitle>
+              <DialogDescription>
+                الگو جدید برای سیستم انتخاب بهینه وسیله نقلیه اضافه کنید
+              </DialogDescription>
+            </DialogHeader>
+            
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onAdd)} className="space-y-6">
+              {/* Basic Information */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold border-b pb-2">اطلاعات پایه</h3>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>نام الگو *</FormLabel>
+                        <FormControl>
+                          <Input placeholder="مثال: ون استاندارد" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="nameEn"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>نام انگلیسی</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Standard Van" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="vehicleType"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>نوع خودرو *</FormLabel>
+                        <div className="space-y-2">
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="انتخاب از لیست موجود یا تایپ کنید" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {Object.entries(VEHICLE_TYPES).map(([key, value]) => (
+                                <SelectItem key={key} value={key}>{value}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormControl>
+                            <Input
+                              placeholder="یا نوع خودرو سفارشی وارد کنید (مثال: truck_10_ton)"
+                              value={field.value}
+                              onChange={field.onChange}
+                              className="text-sm"
+                            />
+                          </FormControl>
+                        </div>
+                        <FormDescription>
+                          نوع خودرو را از لیست انتخاب کنید یا نوع جدید وارد کنید
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="priority"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>اولویت</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            placeholder="0" 
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormDescription>عدد کمتر = اولویت بالاتر</FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              {/* Vehicle Specifications */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold border-b pb-2">مشخصات فنی</h3>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="maxWeightKg"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>حداکثر وزن (کیلوگرم) *</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            placeholder="1000" 
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="maxVolumeM3"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>حداکثر حجم (مترمکعب)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            step="0.1"
+                            placeholder="10" 
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="averageSpeedKmh"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>سرعت متوسط (کیلومتر بر ساعت) *</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            placeholder="50" 
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="fuelConsumptionL100km"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>مصرف سوخت (لیتر در 100 کیلومتر)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            step="0.1"
+                            placeholder="12" 
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              {/* Pricing Structure */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold border-b pb-2">ساختار قیمت‌گذاری</h3>
+                
+                <div className="grid grid-cols-3 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="basePrice"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>قیمت پایه *</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            placeholder="50000" 
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="pricePerKm"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>قیمت هر کیلومتر *</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            placeholder="500" 
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="pricePerKg"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>قیمت هر کیلوگرم</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            placeholder="100" 
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              {/* Route Types */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold border-b pb-2">انواع مسیر مجاز</h3>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="urban"
+                      checked={allowedRoutes.includes('urban')}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setAllowedRoutes([...allowedRoutes, 'urban']);
+                        } else {
+                          setAllowedRoutes(allowedRoutes.filter(r => r !== 'urban'));
+                        }
+                      }}
+                      className="ml-2"
+                    />
+                    <label htmlFor="urban">شهری</label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="interurban"
+                      checked={allowedRoutes.includes('interurban')}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setAllowedRoutes([...allowedRoutes, 'interurban']);
+                        } else {
+                          setAllowedRoutes(allowedRoutes.filter(r => r !== 'interurban'));
+                        }
+                      }}
+                      className="ml-2"
+                    />
+                    <label htmlFor="interurban">بین‌شهری</label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="highway"
+                      checked={allowedRoutes.includes('highway')}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setAllowedRoutes([...allowedRoutes, 'highway']);
+                        } else {
+                          setAllowedRoutes(allowedRoutes.filter(r => r !== 'highway'));
+                        }
+                      }}
+                      className="ml-2"
+                    />
+                    <label htmlFor="highway">آزادراهی</label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Special Capabilities */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold border-b pb-2">قابلیت‌های ویژه</h3>
+                
+                <div className="grid grid-cols-3 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="supportsHazardous"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                        <div className="space-y-0.5">
+                          <FormLabel>مواد خطرناک</FormLabel>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="supportsRefrigerated"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                        <div className="space-y-0.5">
+                          <FormLabel>یخچالی</FormLabel>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="supportsFragile"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                        <div className="space-y-0.5">
+                          <FormLabel>شکستنی</FormLabel>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              {/* Status */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold border-b pb-2">وضعیت</h3>
+                <FormField
+                  control={form.control}
+                  name="isActive"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-base">فعال</FormLabel>
+                        <FormDescription>
+                          الگو در سیستم انتخاب خودرو فعال باشد
+                        </FormDescription>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <Separator />
+
+              {/* Action Buttons */}
+              <div className="flex justify-end gap-3">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setIsAddDialogOpen(false)}
+                  disabled={addTemplateMutation.isPending}
+                >
+                  <X className="h-4 w-4 ml-1" />
+                  انصراف
+                </Button>
+                <Button 
+                  type="submit" 
+                  disabled={addTemplateMutation.isPending}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  {addTemplateMutation.isPending ? (
+                    <>در حال افزودن...</>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4 ml-1" />
+                      افزودن الگو
+                    </>
+                  )}
+                </Button>
+              </div>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Templates List */}
