@@ -201,14 +201,12 @@ const InternationalGeographyTab: React.FC = () => {
   // Mutations
   const createCountryMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await fetch('/api/logistics/international-countries', {
+      const { apiRequest } = await import('@/lib/queryClient');
+      return await apiRequest('/api/logistics/international-countries', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
-      if (!response.ok) throw new Error('Failed to create country');
-      return response.json();
-    },
+      });\n    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/logistics/international-countries'] });
       setIsAddCountryOpen(false);
@@ -224,7 +222,7 @@ const InternationalGeographyTab: React.FC = () => {
         hasCustomsAgreement: false,
         notes: ''
       });
-    },
+      });\n    },
     onError: (error) => {
       toast({ title: "خطا در ایجاد کشور", description: error.message, variant: "destructive" });
     }
@@ -232,19 +230,17 @@ const InternationalGeographyTab: React.FC = () => {
 
   const updateCountryMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: any }) => {
-      const response = await fetch(`/api/logistics/international-countries/${id}`, {
+      const { apiRequest } = await import('@/lib/queryClient');
+      return await apiRequest(`/api/logistics/international-countries/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
-      if (!response.ok) throw new Error('Failed to update country');
-      return response.json();
-    },
+      });\n    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/logistics/international-countries'] });
       setIsEditCountryOpen(false);
       toast({ title: "کشور با موفقیت به‌روزرسانی شد", variant: "default" });
-    },
+      });\n    },
     onError: (error) => {
       toast({ title: "خطا در به‌روزرسانی کشور", description: error.message, variant: "destructive" });
     }
@@ -252,16 +248,15 @@ const InternationalGeographyTab: React.FC = () => {
 
   const deleteCountryMutation = useMutation({
     mutationFn: async (id: number) => {
-      const response = await fetch(`/api/logistics/international-countries/${id}`, {
+      const { apiRequest } = await import('@/lib/queryClient');
+      return await apiRequest(`/api/logistics/international-countries/${id}`, {
         method: 'DELETE'
       });
-      if (!response.ok) throw new Error('Failed to delete country');
-      return response.json();
-    },
+      });\n    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/logistics/international-countries'] });
       toast({ title: "کشور با موفقیت حذف شد", variant: "default" });
-    },
+      });\n    },
     onError: (error) => {
       toast({ title: "خطا در حذف کشور", description: error.message, variant: "destructive" });
     }
@@ -269,14 +264,12 @@ const InternationalGeographyTab: React.FC = () => {
 
   const createCityMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await fetch('/api/logistics/international-cities', {
+      const { apiRequest } = await import('@/lib/queryClient');
+      return await apiRequest('/api/logistics/international-cities', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
-      if (!response.ok) throw new Error('Failed to create city');
-      return response.json();
-    },
+      });\n    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/logistics/international-cities'] });
       setIsAddCityOpen(false);
@@ -295,7 +288,7 @@ const InternationalGeographyTab: React.FC = () => {
         customsInformation: '',
         notes: ''
       });
-    },
+      });\n    },
     onError: (error) => {
       toast({ title: "خطا در ایجاد شهر", description: error.message, variant: "destructive" });
     }
@@ -303,19 +296,16 @@ const InternationalGeographyTab: React.FC = () => {
 
   const updateCityMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: any }) => {
-      const response = await fetch(`/api/logistics/international-cities/${id}`, {
+      const { apiRequest } = await import('@/lib/queryClient');
+      return await apiRequest(`/api/logistics/international-cities/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
-      });
-      if (!response.ok) throw new Error('Failed to update city');
-      return response.json();
-    },
+      });\n    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/logistics/international-cities'] });
       setIsEditCityOpen(false);
       toast({ title: "شهر با موفقیت به‌روزرسانی شد", variant: "default" });
-    },
+      });\n    },
     onError: (error) => {
       toast({ title: "خطا در به‌روزرسانی شهر", description: error.message, variant: "destructive" });
     }
@@ -323,16 +313,14 @@ const InternationalGeographyTab: React.FC = () => {
 
   const deleteCityMutation = useMutation({
     mutationFn: async (id: number) => {
-      const response = await fetch(`/api/logistics/international-cities/${id}`, {
+      const { apiRequest } = await import('@/lib/queryClient');
+      return await apiRequest(`/api/logistics/international-cities/${id}`, {
         method: 'DELETE'
-      });
-      if (!response.ok) throw new Error('Failed to delete city');
-      return response.json();
-    },
+      });\n    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/logistics/international-cities'] });
       toast({ title: "شهر با موفقیت حذف شد", variant: "default" });
-    },
+      });\n    },
     onError: (error) => {
       toast({ title: "خطا در حذف شهر", description: error.message, variant: "destructive" });
     }
@@ -340,14 +328,11 @@ const InternationalGeographyTab: React.FC = () => {
 
   const createRateMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await fetch('/api/logistics/international-shipping-rates', {
+      const { apiRequest } = await import('@/lib/queryClient');
+      return await apiRequest('/api/logistics/international-shipping-rates', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
-      });
-      if (!response.ok) throw new Error('Failed to create shipping rate');
-      return response.json();
-    },
+      });\n    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/logistics/international-shipping-rates'] });
       setIsAddRateOpen(false);
@@ -371,8 +356,7 @@ const InternationalGeographyTab: React.FC = () => {
         requiresCustomsClearance: true,
         isActive: true,
         notes: ''
-      });
-    },
+      });\n    },
     onError: (error) => {
       toast({ title: "خطا در ایجاد نرخ حمل", description: error.message, variant: "destructive" });
     }
@@ -380,19 +364,16 @@ const InternationalGeographyTab: React.FC = () => {
 
   const updateRateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: any }) => {
-      const response = await fetch(`/api/logistics/international-shipping-rates/${id}`, {
+      const { apiRequest } = await import('@/lib/queryClient');
+      return await apiRequest(`/api/logistics/international-shipping-rates/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
-      });
-      if (!response.ok) throw new Error('Failed to update shipping rate');
-      return response.json();
-    },
+      });\n    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/logistics/international-shipping-rates'] });
       setIsEditRateOpen(false);
       toast({ title: "نرخ حمل با موفقیت به‌روزرسانی شد", variant: "default" });
-    },
+      });\n    },
     onError: (error) => {
       toast({ title: "خطا در به‌روزرسانی نرخ حمل", description: error.message, variant: "destructive" });
     }
@@ -400,16 +381,14 @@ const InternationalGeographyTab: React.FC = () => {
 
   const deleteRateMutation = useMutation({
     mutationFn: async (id: number) => {
-      const response = await fetch(`/api/logistics/international-shipping-rates/${id}`, {
+      const { apiRequest } = await import('@/lib/queryClient');
+      return await apiRequest(`/api/logistics/international-shipping-rates/${id}`, {
         method: 'DELETE'
-      });
-      if (!response.ok) throw new Error('Failed to delete shipping rate');
-      return response.json();
-    },
+      });\n    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/logistics/international-shipping-rates'] });
       toast({ title: "نرخ حمل با موفقیت حذف شد", variant: "default" });
-    },
+      });\n    },
     onError: (error) => {
       toast({ title: "خطا در حذف نرخ حمل", description: error.message, variant: "destructive" });
     }
