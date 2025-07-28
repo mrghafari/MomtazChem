@@ -31291,6 +31291,61 @@ momtazchem.com
     }
   });
 
+  // Public API endpoint for frontend visibility controls (no auth required)
+  app.get("/api/frontend-controls", async (req: Request, res: Response) => {
+    try {
+      const { db } = await import("./db");
+      const { contentItems } = await import("../shared/content-schema");
+      const { eq, or } = await import("drizzle-orm");
+
+      // Fetch toggle states for discount banner and AI features
+      const toggleItems = await db.select().from(contentItems)
+        .where(or(
+          eq(contentItems.key, 'discount_banner_enabled'),
+          eq(contentItems.key, 'ai_features_enabled')
+        ));
+
+      // Create response object with default values
+      const controls = {
+        discountBannerEnabled: false,
+        aiFeaturesEnabled: false,
+        discountBannerText: ''
+      };
+
+      // Update controls based on database values
+      toggleItems.forEach(item => {
+        if (item.key === 'discount_banner_enabled') {
+          controls.discountBannerEnabled = item.isActive || false;
+        } else if (item.key === 'ai_features_enabled') {
+          controls.aiFeaturesEnabled = item.isActive || false;
+        }
+      });
+
+      // Fetch discount banner text if enabled
+      if (controls.discountBannerEnabled) {
+        const bannerTextItem = await db.select().from(contentItems)
+          .where(eq(contentItems.key, 'discount_banner_text'))
+          .limit(1);
+        
+        if (bannerTextItem.length > 0) {
+          controls.discountBannerText = bannerTextItem[0].content || '';
+        }
+      }
+
+      res.json({
+        success: true,
+        data: controls
+      });
+    } catch (error) {
+      console.error("Error fetching frontend controls:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch frontend controls",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   // Content Management API endpoints
   app.get("/api/content-management/items", requireAuth, async (req: Request, res: Response) => {
     try {

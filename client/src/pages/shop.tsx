@@ -187,6 +187,20 @@ const Shop = () => {
 
   const highestDiscountPercentage = getHighestDiscount();
 
+  // Fetch frontend visibility controls
+  const { data: frontendControls } = useQuery({
+    queryKey: ["/api/frontend-controls"],
+    queryFn: async () => {
+      const response = await fetch("/api/frontend-controls");
+      if (!response.ok) throw new Error("Failed to fetch frontend controls");
+      return response.json();
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  // Extract control states with fallback to enabled for backwards compatibility
+  const { discountBannerEnabled = true, aiFeaturesEnabled = true, discountBannerText = '' } = frontendControls?.data || {};
+
   // Get data from search results or fallback to regular products
   const currentProducts = searchResults?.data?.products || products;
   
@@ -918,16 +932,17 @@ const Shop = () => {
                 </div>
               )}
               
-              {/* AI Recommendations Button - Left */}
-              <Button 
-                variant="outline" 
-                className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white border-none hover:from-purple-600 hover:to-pink-600 shadow-lg"
-                onClick={() => navigate('/product-recommendations')}
-
-              >
-                <Sparkles className="w-5 h-5" />
-                <span className="hidden sm:inline">AI Recommendations</span>
-              </Button>
+              {/* AI Recommendations Button - Left - Controlled by Content Management */}
+              {aiFeaturesEnabled && (
+                <Button 
+                  variant="outline" 
+                  className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white border-none hover:from-purple-600 hover:to-pink-600 shadow-lg"
+                  onClick={() => navigate('/product-recommendations')}
+                >
+                  <Sparkles className="w-5 h-5" />
+                  <span className="hidden sm:inline">AI Recommendations</span>
+                </Button>
+              )}
             </div>
             
             {/* User & Cart Section */}
@@ -1031,42 +1046,46 @@ const Shop = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Global Volume Discount Incentive Banner */}
-        <div className="mb-6 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 rounded-2xl p-4 shadow-2xl border border-purple-300 overflow-hidden relative">
-          {/* Animated Background Elements */}
-          <div className="absolute inset-0">
-            <div className="absolute -top-8 -right-8 w-24 h-24 bg-yellow-400/20 rounded-full animate-bounce"></div>
-            <div className="absolute -bottom-4 -left-4 w-20 h-20 bg-orange-400/20 rounded-full animate-pulse"></div>
-            <div className="absolute top-1/2 left-1/4 w-16 h-16 bg-pink-400/20 rounded-full animate-ping"></div>
-          </div>
-          
-          {/* Glassmorphism Overlay */}
-          <div className="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
-          
-          <div className="relative z-10 flex items-center justify-between text-white">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-3">
-                <Sparkles className="w-8 h-8 animate-spin text-yellow-300" />
-                <div>
-                  <h3 className="text-2xl font-bold mb-1">💰 {t.shop?.maximizeSavings || 'MAXIMIZE YOUR SAVINGS!'}</h3>
-                  <p className="text-purple-100 text-sm">{t.shop?.bulkDiscountMessage || `Buy more, save more! Up to ${highestDiscountPercentage}% OFF on bulk orders`}</p>
-                </div>
-              </div>
+        {/* Global Volume Discount Incentive Banner - Controlled by Content Management */}
+        {discountBannerEnabled && (
+          <div className="mb-6 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 rounded-2xl p-4 shadow-2xl border border-purple-300 overflow-hidden relative">
+            {/* Animated Background Elements */}
+            <div className="absolute inset-0">
+              <div className="absolute -top-8 -right-8 w-24 h-24 bg-yellow-400/20 rounded-full animate-bounce"></div>
+              <div className="absolute -bottom-4 -left-4 w-20 h-20 bg-orange-400/20 rounded-full animate-pulse"></div>
+              <div className="absolute top-1/2 left-1/4 w-16 h-16 bg-pink-400/20 rounded-full animate-ping"></div>
             </div>
             
-            <div className="flex items-center gap-3">
-              <div className="bg-yellow-400 text-purple-900 px-4 py-2 rounded-full font-bold text-sm animate-pulse shadow-lg">
-                🔥 {t.shop?.volumeDiscountsActive || 'VOLUME DISCOUNTS ACTIVE'}
+            {/* Glassmorphism Overlay */}
+            <div className="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
+            
+            <div className="relative z-10 flex items-center justify-between text-white">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3">
+                  <Sparkles className="w-8 h-8 animate-spin text-yellow-300" />
+                  <div>
+                    <h3 className="text-2xl font-bold mb-1">💰 {t.shop?.maximizeSavings || 'MAXIMIZE YOUR SAVINGS!'}</h3>
+                    <p className="text-purple-100 text-sm">
+                      {discountBannerText || t.shop?.bulkDiscountMessage || `Buy more, save more! Up to ${highestDiscountPercentage}% OFF on bulk orders`}
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div className="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/30">
-                <div className="flex items-center gap-2 text-sm">
-                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                  <span className="font-semibold">{t.shop?.checkProductCards || 'Check product cards below!'}</span>
+              
+              <div className="flex items-center gap-3">
+                <div className="bg-yellow-400 text-purple-900 px-4 py-2 rounded-full font-bold text-sm animate-pulse shadow-lg">
+                  🔥 {t.shop?.volumeDiscountsActive || 'VOLUME DISCOUNTS ACTIVE'}
+                </div>
+                <div className="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/30">
+                  <div className="flex items-center gap-2 text-sm">
+                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                    <span className="font-semibold">{t.shop?.checkProductCards || 'Check product cards below!'}</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
 
         <div className="flex gap-8">
           {/* Sidebar Filters */}
