@@ -1,0 +1,319 @@
+shop:196 Tawk.to script loaded successfully
+chunk-RPCDYKBN.js?v=6aa58533:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: Object
+api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:117574)
+    at t.value (twk-chunk-common.js:2:150658)
+    at p.updateUUID (twk-chunk-common.js:2:202310)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:124589)
+    at twk-chunk-common.js:2:123900
+value @ twk-chunk-common.js:2
+shop:168 Tawk.to Live Chat loaded successfully
+api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+about:blank:1 [Intervention] Slow network is detected. See https://www.chromestatus.com/feature/5636954674692096 for more details. Fallback font will be used while loading: https://embed.tawk.to/_s/v4/assets/fonts/tawk-font-icon-3.woff?55755728=
+api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:117574)
+    at t.value (twk-chunk-common.js:2:150658)
+    at p.updateUUID (twk-chunk-common.js:2:202310)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:124589)
+    at twk-chunk-common.js:2:123900
+value @ twk-chunk-common.js:2
+useAuth.ts:43 Auth check result: Object
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: Array(1)
+shop:168 Tawk.to Live Chat loaded successfully
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 474
+product-reviews.tsx:42 Reviews Data Full: undefined
+product-reviews.tsx:43 Reviews Array Length: 0
+product-reviews.tsx:44 Reviews Array: []
+product-reviews.tsx:45 Product Stats: {averageRating: 0, totalReviews: 0}
+product-reviews.tsx:46 Product: {id: 474, name: 'NPK Fertilizer 20-20-20', category: 'agricultural-fertilizers', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 474
+product-reviews.tsx:42 Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "totalReviews": 0,
+      "averageRating": 0,
+      "ratingDistribution": {},
+      "lastReviewDate": null
+    }
+  }
+}
+product-reviews.tsx:43 Reviews Array Length: 0
+product-reviews.tsx:44 Reviews Array: []
+product-reviews.tsx:45 Product Stats: {totalReviews: 0, averageRating: 0, ratingDistribution: {…}, lastReviewDate: null}
+product-reviews.tsx:46 Product: {id: 474, name: 'NPK Fertilizer 20-20-20', category: 'agricultural-fertilizers', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+product-reviews.tsx:50 ReviewsData type: object
+product-reviews.tsx:51 ReviewsData keys: (2) ['success', 'data']
+product-reviews.tsx:53 ReviewsData.data keys: (2) ['reviews', 'stats']
+product-reviews.tsx:54 ReviewsData.data.reviews: []
+ProductRating.tsx:150 ProductRating Props: {productId: 474, productName: 'NPK Fertilizer 20-20-20', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+queryClient.ts:81  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+(anonymous) @ queryClient.ts:81
+fetchFn @ @tanstack_react-query.js?v=6aa58533:840
+run @ @tanstack_react-query.js?v=6aa58533:494
+start @ @tanstack_react-query.js?v=6aa58533:536
+fetch @ @tanstack_react-query.js?v=6aa58533:926
+executeFetch_fn @ @tanstack_react-query.js?v=6aa58533:2211
+onSubscribe @ @tanstack_react-query.js?v=6aa58533:1898
+subscribe @ @tanstack_react-query.js?v=6aa58533:24
+(anonymous) @ @tanstack_react-query.js?v=6aa58533:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=6aa58533:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=6aa58533:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=6aa58533:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=6aa58533:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=6aa58533:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=6aa58533:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=6aa58533:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=6aa58533:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=6aa58533:19416
+commitRoot @ chunk-RPCDYKBN.js?v=6aa58533:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=6aa58533:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=6aa58533:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=6aa58533:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=6aa58533:555
+flush @ @tanstack_react-query.js?v=6aa58533:569
+batch @ @tanstack_react-query.js?v=6aa58533:587
+dispatch_fn @ @tanstack_react-query.js?v=6aa58533:996
+setData @ @tanstack_react-query.js?v=6aa58533:696
+onSuccess @ @tanstack_react-query.js?v=6aa58533:897
+resolve @ @tanstack_react-query.js?v=6aa58533:456
+Promise.then
+run @ @tanstack_react-query.js?v=6aa58533:498
+start @ @tanstack_react-query.js?v=6aa58533:536
+fetch @ @tanstack_react-query.js?v=6aa58533:926
+executeFetch_fn @ @tanstack_react-query.js?v=6aa58533:2211
+onSubscribe @ @tanstack_react-query.js?v=6aa58533:1898
+subscribe @ @tanstack_react-query.js?v=6aa58533:24
+(anonymous) @ @tanstack_react-query.js?v=6aa58533:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=6aa58533:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=6aa58533:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=6aa58533:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=6aa58533:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=6aa58533:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=6aa58533:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=6aa58533:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=6aa58533:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=6aa58533:19416
+commitRoot @ chunk-RPCDYKBN.js?v=6aa58533:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=6aa58533:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=6aa58533:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=6aa58533:18627
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: {475: {…}}
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: [{…}]
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: {475: {…}}
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: [{…}]
+shop.tsx:373  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+checkCustomerAuth @ shop.tsx:373
+(anonymous) @ shop.tsx:298
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=6aa58533:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=6aa58533:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=6aa58533:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=6aa58533:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=6aa58533:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=6aa58533:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=6aa58533:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=6aa58533:19416
+commitRoot @ chunk-RPCDYKBN.js?v=6aa58533:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=6aa58533:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=6aa58533:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=6aa58533:18627
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: {475: {…}}
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: [{…}]
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: {475: {…}}
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: [{…}]
+useAuth.ts:43 Auth check result: {success: true, user: {…}}
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: {475: {…}}
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: [{…}]
+shop.tsx:461 🔐 [LOGIN] Starting handleLoginSuccess
+shop.tsx:462 🔐 [LOGIN] Customer data: {id: 8, firstName: 'ABAS', lastName: 'ABASI', email: 'oilstar@hotmail.com', company: 'پتروشیمی شازند', …}
+shop.tsx:463 🔐 [LOGIN] Current cart state: {}
+shop.tsx:467 🔐 [LOGIN] Customer state set
+shop.tsx:470 🔐 [LOGIN] Wallet balance fetch initiated
+shop.tsx:474 🔐 [LOGIN] Auth modal closed
+shop.tsx:479 🔐 [LOGIN] Cache invalidated
+shop.tsx:483 🔐 [LOGIN] Has cart items: false
+shop.tsx:484 🔐 [LOGIN] Cart contents: {}
+shop.tsx:488 🔐 [LOGIN] Cart migration completed
+shop.tsx:494 🔐 [LOGIN] Welcome toast shown
+shop.tsx:497 🔐 [LOGIN] Staying in shop after successful login
+shop.tsx:499 🔐 [LOGIN] handleLoginSuccess completed successfully
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: {475: {…}}
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: [{…}]
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: {475: {…}}
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: [{…}]
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 1 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: {475: {…}}
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: [{…}]
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 474
+product-reviews.tsx:42 Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "totalReviews": 0,
+      "averageRating": 0,
+      "ratingDistribution": {},
+      "lastReviewDate": null
+    }
+  }
+}
+product-reviews.tsx:43 Reviews Array Length: 0
+product-reviews.tsx:44 Reviews Array: []
+product-reviews.tsx:45 Product Stats: {totalReviews: 0, averageRating: 0, ratingDistribution: {…}, lastReviewDate: null}
+product-reviews.tsx:46 Product: {id: 474, name: 'NPK Fertilizer 20-20-20', category: 'agricultural-fertilizers', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+product-reviews.tsx:50 ReviewsData type: object
+product-reviews.tsx:51 ReviewsData keys: (2) ['success', 'data']
+product-reviews.tsx:53 ReviewsData.data keys: (2) ['reviews', 'stats']
+product-reviews.tsx:54 ReviewsData.data.reviews: []
+ProductRating.tsx:54 🔍 CUSTOMER MATCHING DEBUG:
+ProductRating.tsx:55 Current customer: {id: 8, firstName: 'ABAS', lastName: 'ABASI', email: 'oilstar@hotmail.com', company: 'پتروشیمی شازند', …}
+ProductRating.tsx:56 Customer ID: 8
+ProductRating.tsx:57 Available reviews: []
+ProductRating.tsx:65 Found existing review: undefined
+ProductRating.tsx:150 ProductRating Props: {productId: 474, productName: 'NPK Fertilizer 20-20-20', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+ProductRating.tsx:150 ProductRating Props: {productId: 474, productName: 'NPK Fertilizer 20-20-20', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+ProductRating.tsx:150 ProductRating Props: {productId: 474, productName: 'NPK Fertilizer 20-20-20', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 474
+product-reviews.tsx:42 Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "totalReviews": 0,
+      "averageRating": 0,
+      "ratingDistribution": {},
+      "lastReviewDate": null
+    }
+  }
+}
+product-reviews.tsx:43 Reviews Array Length: 0
+product-reviews.tsx:44 Reviews Array: []
+product-reviews.tsx:45 Product Stats: {totalReviews: 0, averageRating: 0, ratingDistribution: {…}, lastReviewDate: null}
+product-reviews.tsx:46 Product: {id: 474, name: 'NPK Fertilizer 20-20-20', category: 'agricultural-fertilizers', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+product-reviews.tsx:50 ReviewsData type: object
+product-reviews.tsx:51 ReviewsData keys: (2) ['success', 'data']
+product-reviews.tsx:53 ReviewsData.data keys: (2) ['reviews', 'stats']
+product-reviews.tsx:54 ReviewsData.data.reviews: []
+ProductRating.tsx:150 ProductRating Props: {productId: 474, productName: 'NPK Fertilizer 20-20-20', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+ProductRating.tsx:150 ProductRating Props: {productId: 474, productName: 'NPK Fertilizer 20-20-20', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+ProductRating.tsx:150 ProductRating Props: {productId: 474, productName: 'NPK Fertilizer 20-20-20', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+ProductRating.tsx:150 ProductRating Props: {productId: 474, productName: 'NPK Fertilizer 20-20-20', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 474
+product-reviews.tsx:42 Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "totalReviews": 0,
+      "averageRating": 0,
+      "ratingDistribution": {},
+      "lastReviewDate": null
+    }
+  }
+}
+product-reviews.tsx:43 Reviews Array Length: 0
+product-reviews.tsx:44 Reviews Array: []
+product-reviews.tsx:45 Product Stats: {totalReviews: 0, averageRating: 0, ratingDistribution: {…}, lastReviewDate: null}
+product-reviews.tsx:46 Product: {id: 474, name: 'NPK Fertilizer 20-20-20', category: 'agricultural-fertilizers', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+product-reviews.tsx:50 ReviewsData type: object
+product-reviews.tsx:51 ReviewsData keys: (2) ['success', 'data']
+product-reviews.tsx:53 ReviewsData.data keys: (2) ['reviews', 'stats']
+product-reviews.tsx:54 ReviewsData.data.reviews: []
+ProductRating.tsx:150 ProductRating Props: {productId: 474, productName: 'NPK Fertilizer 20-20-20', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 474
+product-reviews.tsx:42 Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "totalReviews": 0,
+      "averageRating": 0,
+      "ratingDistribution": {},
+      "lastReviewDate": null
+    }
+  }
+}
+product-reviews.tsx:43 Reviews Array Length: 0
+product-reviews.tsx:44 Reviews Array: []
+product-reviews.tsx:45 Product Stats: {totalReviews: 0, averageRating: 0, ratingDistribution: {…}, lastReviewDate: null}
+product-reviews.tsx:46 Product: {id: 474, name: 'NPK Fertilizer 20-20-20', category: 'agricultural-fertilizers', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+product-reviews.tsx:50 ReviewsData type: object
+product-reviews.tsx:51 ReviewsData keys: (2) ['success', 'data']
+product-reviews.tsx:53 ReviewsData.data keys: (2) ['reviews', 'stats']
+product-reviews.tsx:54 ReviewsData.data.reviews: []
+ProductRating.tsx:150 ProductRating Props: {productId: 474, productName: 'NPK Fertilizer 20-20-20', averageRating: 0, totalReviews: 0, reviews: Array(0)}

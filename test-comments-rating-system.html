@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست سیستم کامنت و ستاره‌گذاری</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .section {
+            background: white;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .response {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        input, textarea {
+            margin: 5px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 200px;
+        }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .info { color: #17a2b8; }
+        .header {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="header">🌟 تست سیستم کامنت و ستاره‌گذاری محصولات</h1>
+
+    <!-- Step 1: Customer Login -->
+    <div class="section">
+        <h2>1️⃣ ورود مشتری (اجباری برای ثبت نظر)</h2>
+        <input type="email" id="loginEmail" placeholder="ایمیل مشتری" value="oilstar@hotmail.com">
+        <input type="password" id="loginPassword" placeholder="کلمه عبور" value="oilstar123">
+        <button onclick="loginCustomer()">ورود مشتری</button>
+        <div id="loginResponse" class="response"></div>
+    </div>
+
+    <!-- Step 2: Check Product Stats API -->
+    <div class="section">
+        <h2>2️⃣ بررسی API آمار محصولات (برای نمایش ستاره‌ها در فروشگاه)</h2>
+        <button onclick="checkProductStats()">دریافت آمار محصولات</button>
+        <div id="statsResponse" class="response"></div>
+    </div>
+
+    <!-- Step 3: Check Individual Product Reviews -->
+    <div class="section">
+        <h2>3️⃣ بررسی نظرات محصول خاص</h2>
+        <input type="number" id="checkProductId" placeholder="شناسه محصول" value="475" min="1">
+        <button onclick="checkProductReviews()">دریافت نظرات محصول</button>
+        <div id="reviewsResponse" class="response"></div>
+    </div>
+
+    <!-- Step 4: Submit New Review -->
+    <div class="section">
+        <h2>4️⃣ ثبت نظر جدید (نیازمند ورود مشتری)</h2>
+        <input type="number" id="submitProductId" placeholder="شناسه محصول" value="474" min="1">
+        <input type="number" id="rating" placeholder="امتیاز (1-5)" value="5" min="1" max="5">
+        <input type="text" id="reviewTitle" placeholder="عنوان نظر" value="محصول ممتاز">
+        <textarea id="reviewComment" placeholder="متن نظر" rows="3">این محصول واقعاً فوق‌العاده است. کیفیت بسیار بالا و قیمت مناسب دارد.</textarea>
+        <button onclick="submitReview()">ثبت نظر</button>
+        <div id="submitResponse" class="response"></div>
+    </div>
+
+    <!-- Step 5: Test All Products with Reviews -->
+    <div class="section">
+        <h2>5️⃣ تست همه محصولات دارای نظر</h2>
+        <button onclick="testAllProductsWithReviews()">تست همه محصولات</button>
+        <div id="allProductsResponse" class="response"></div>
+    </div>
+
+    <script>
+        const BASE_URL = window.location.origin;
+
+        async function loginCustomer() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            try {
+                const response = await fetch(`${BASE_URL}/api/auth/customer/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                document.getElementById('loginResponse').textContent = JSON.stringify(data, null, 2);
+                document.getElementById('loginResponse').className = `response ${data.success ? 'success' : 'error'}`;
+            } catch (error) {
+                document.getElementById('loginResponse').textContent = `خطا: ${error.message}`;
+                document.getElementById('loginResponse').className = 'response error';
+            }
+        }
+
+        async function checkProductStats() {
+            try {
+                const response = await fetch(`${BASE_URL}/api/shop/product-stats`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                document.getElementById('statsResponse').textContent = JSON.stringify(data, null, 2);
+                document.getElementById('statsResponse').className = `response ${data.success ? 'success' : 'error'}`;
+            } catch (error) {
+                document.getElementById('statsResponse').textContent = `خطا: ${error.message}`;
+                document.getElementById('statsResponse').className = 'response error';
+            }
+        }
+
+        async function checkProductReviews() {
+            const productId = document.getElementById('checkProductId').value;
+            
+            try {
+                const response = await fetch(`${BASE_URL}/api/products/${productId}/reviews`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                document.getElementById('reviewsResponse').textContent = JSON.stringify(data, null, 2);
+                document.getElementById('reviewsResponse').className = `response ${data.success ? 'success' : 'error'}`;
+            } catch (error) {
+                document.getElementById('reviewsResponse').textContent = `خطا: ${error.message}`;
+                document.getElementById('reviewsResponse').className = 'response error';
+            }
+        }
+
+        async function submitReview() {
+            const productId = document.getElementById('submitProductId').value;
+            const rating = parseInt(document.getElementById('rating').value);
+            const title = document.getElementById('reviewTitle').value;
+            const comment = document.getElementById('reviewComment').value;
+            
+            try {
+                const response = await fetch(`${BASE_URL}/api/products/${productId}/reviews`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ rating, title, comment })
+                });
+                
+                const data = await response.json();
+                document.getElementById('submitResponse').textContent = JSON.stringify(data, null, 2);
+                document.getElementById('submitResponse').className = `response ${data.success ? 'success' : 'error'}`;
+            } catch (error) {
+                document.getElementById('submitResponse').textContent = `خطا: ${error.message}`;
+                document.getElementById('submitResponse').className = 'response error';
+            }
+        }
+
+        async function testAllProductsWithReviews() {
+            try {
+                // First get product stats to see which products have reviews
+                const statsResponse = await fetch(`${BASE_URL}/api/shop/product-stats`, {
+                    credentials: 'include'
+                });
+                const statsData = await statsResponse.json();
+                
+                let results = "📊 آمار کلی محصولات:\n";
+                results += JSON.stringify(statsData, null, 2) + "\n\n";
+                
+                if (statsData.success && statsData.data) {
+                    const productIds = Object.keys(statsData.data);
+                    results += `🎯 تست ${productIds.length} محصول دارای نظر:\n\n`;
+                    
+                    for (const productId of productIds) {
+                        results += `--- محصول ${productId} ---\n`;
+                        try {
+                            const reviewResponse = await fetch(`${BASE_URL}/api/products/${productId}/reviews`, {
+                                credentials: 'include'
+                            });
+                            const reviewData = await reviewResponse.json();
+                            
+                            if (reviewData.success) {
+                                results += `✅ تعداد نظرات: ${reviewData.data.stats.totalReviews}\n`;
+                                results += `⭐ میانگین امتیاز: ${reviewData.data.stats.averageRating}\n`;
+                                results += `📝 نظرات: ${reviewData.data.reviews.length} نظر\n`;
+                            } else {
+                                results += `❌ خطا: ${reviewData.message}\n`;
+                            }
+                        } catch (error) {
+                            results += `❌ خطای شبکه: ${error.message}\n`;
+                        }
+                        results += "\n";
+                    }
+                } else {
+                    results += "❌ خطا در دریافت آمار محصولات\n";
+                }
+                
+                document.getElementById('allProductsResponse').textContent = results;
+                document.getElementById('allProductsResponse').className = 'response info';
+            } catch (error) {
+                document.getElementById('allProductsResponse').textContent = `خطا: ${error.message}`;
+                document.getElementById('allProductsResponse').className = 'response error';
+            }
+        }
+
+        // Auto-run tests on page load
+        window.onload = function() {
+            checkProductStats();
+        };
+    </script>
+</body>
+</html>

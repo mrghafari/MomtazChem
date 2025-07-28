@@ -15212,6 +15212,45 @@ Momtaz Chemical Technical Team`,
     }
   });
 
+  // Get product stats for all products (for star ratings display in shop)
+  app.get("/api/shop/product-stats", async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      
+      // Get all product stats
+      const statsResult = await pool.query(`
+        SELECT 
+          product_id,
+          total_reviews,
+          average_rating,
+          rating_distribution,
+          last_review_date
+        FROM product_stats 
+        WHERE total_reviews > 0
+        ORDER BY product_id
+      `);
+
+      // Convert to object with product_id as key
+      const statsData = {};
+      statsResult.rows.forEach(row => {
+        statsData[row.product_id] = {
+          totalReviews: parseInt(row.total_reviews) || 0,
+          averageRating: parseFloat(row.average_rating) || 0,
+          ratingDistribution: row.rating_distribution || {},
+          lastReviewDate: row.last_review_date
+        };
+      });
+
+      res.json({
+        success: true,
+        data: statsData
+      });
+    } catch (error) {
+      console.error("Error fetching product stats:", error);
+      res.status(500).json({ success: false, message: "خطا در دریافت آمار محصولات" });
+    }
+  });
+
   // Shop categories management
   app.post("/api/shop/categories", requireAuth, async (req, res) => {
     try {
