@@ -198,8 +198,12 @@ const Shop = () => {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  // Extract control states with fallback to enabled for backwards compatibility
-  const { discountBannerEnabled = true, aiFeaturesEnabled = true, discountBannerText = '' } = frontendControls?.data || {};
+  // Extract control states - only show if explicitly enabled (no fallback to true)
+  const { discountBannerEnabled = false, aiFeaturesEnabled = false, discountBannerText = '' } = frontendControls?.data || {};
+  
+  // Debug frontend controls
+  console.log('🎛️ [FRONTEND CONTROLS] Loaded:', frontendControls);
+  console.log('🎛️ [VISIBILITY] Discount Banner:', discountBannerEnabled, 'AI Features:', aiFeaturesEnabled);
 
   // Get data from search results or fallback to regular products
   const currentProducts = searchResults?.data?.products || products;
