@@ -6,6 +6,37 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: International Shipping Rates Edit Functionality Implementation (January 28, 2025)
+✅ **IMPLEMENTED: Complete editing functionality for international shipping rates with comprehensive form fields**
+- **User Request Fulfilled**: "نرخهای حمل بین المللی را ادیت ایبل کن" - Enabled full editing capabilities for international shipping rates
+- **Edit Dialog Implementation**: Comprehensive edit form with all shipping rate fields including:
+  - **Country and City Selection**: Dropdown selectors for country and optional city specification
+  - **Shipping Method**: Complete selection from air_freight, sea_freight, road_transport, rail_transport, express_courier
+  - **Pricing Structure**: Base price, per-kg rates, per-km rates, minimum charges with currency support
+  - **Weight and Time Limits**: Maximum weight capacity and estimated delivery time ranges
+  - **Service Capabilities**: Hazardous materials, flammable goods, refrigerated transport support flags
+  - **Operational Settings**: Customs clearance requirements and active status toggles
+- **Professional UI**: Persian/Arabic interface with proper form validation and responsive grid layout
+- **Backend Integration**: Full API integration with PUT endpoint for shipping rate updates using existing mutation system
+- **Business Impact**: Complete CRUD operations for international shipping rate management with professional logistics interface
+- **Technical Achievement**: Seamless integration with existing rate management system maintaining data consistency
+- **Result**: Complete international shipping rates editing operational - users can modify all aspects of shipping rates including pricing, capabilities, and operational parameters
+
+### COMPLETED: International Cities Edit Functionality Implementation (January 28, 2025)
+✅ **IMPLEMENTED: Complete editing functionality for international cities with comprehensive form validation**
+- **User Request Fulfilled**: "ادیت شهرهای بین المللی را فعال کن" - Enabled comprehensive city editing capabilities
+- **Edit Dialog Enhancement**: Professional edit form with all city management fields including:
+  - **Multilingual Names**: Arabic/Persian, English, and local name editing capabilities
+  - **Geographic Classification**: Country selection, province/state, city type (port, airport, border, major_city, commercial_hub)
+  - **Distance Management**: Editable distance from Erbil in kilometers for logistics calculations
+  - **Operational Controls**: Active status, shipping routes availability, priority destination settings
+  - **Customs Integration**: Customs information field for international shipping compliance
+- **Form Validation**: Complete input validation with required field marking and data type enforcement
+- **Backend Integration**: Full API integration with existing updateCityMutation for seamless data persistence
+- **Professional Interface**: Persian/Arabic labels with proper RTL support and responsive design
+- **Business Impact**: Complete city management capabilities for international logistics planning
+- **Result**: Complete international cities editing operational - users can modify all city details including names, classification, distance, and operational parameters
+
 ### COMPLETED: International Geography Management System - Full Functionality Implementation (January 28, 2025)
 ✅ **IMPLEMENTED: Complete international geography management system with full city and shipping rate creation capabilities**
 - **User Request Fulfilled**: "Enable full functionality for managing international geography in a logistics system, specifically allowing users to add cities and shipping rates for countries outside Iraq"

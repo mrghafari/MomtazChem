@@ -1618,6 +1618,291 @@ const InternationalGeographyTab: React.FC = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Edit Shipping Rate Dialog */}
+      <Dialog open={isEditRateOpen} onOpenChange={setIsEditRateOpen}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <DollarSign className="w-5 h-5" />
+              ویرایش نرخ حمل بین‌المللی
+            </DialogTitle>
+            <DialogDescription>
+              اطلاعات نرخ حمل را برای مقصد مورد نظر به‌روزرسانی کنید
+            </DialogDescription>
+          </DialogHeader>
+          
+          {editingRate && (
+            <>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="editRateCountryId">کشور *</Label>
+                  <Select defaultValue={editingRate.countryId.toString()}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="انتخاب کشور" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {countries.map((country: InternationalCountry) => (
+                        <SelectItem key={country.id} value={country.id.toString()}>
+                          {country.name} ({country.nameEn})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="editRateCityId">شهر (اختیاری)</Label>
+                  <Select defaultValue={editingRate.cityId?.toString() || "all"}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="همه شهرها" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">همه شهرها</SelectItem>
+                      {cities.filter((city: InternationalCity) => 
+                        city.countryId === editingRate.countryId
+                      ).map((city: InternationalCity) => (
+                        <SelectItem key={city.id} value={city.id.toString()}>
+                          {city.name} ({city.nameEn})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="editShippingMethod">روش حمل *</Label>
+                  <Select defaultValue={editingRate.shippingMethod}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(SHIPPING_METHODS).map(([key, value]) => (
+                        <SelectItem key={key} value={key}>{value}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="editTransportProvider">شرکت حمل *</Label>
+                  <Input
+                    id="editTransportProvider"
+                    defaultValue={editingRate.transportProvider}
+                    placeholder="مثال: Turkish Airlines Cargo"
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="editBasePrice">قیمت پایه *</Label>
+                  <Input
+                    id="editBasePrice"
+                    type="number"
+                    defaultValue={editingRate.basePrice}
+                    placeholder="مثال: 50000"
+                    min="0"
+                    step="0.01"
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="editPricePerKg">قیمت هر کیلوگرم *</Label>
+                  <Input
+                    id="editPricePerKg"
+                    type="number"
+                    defaultValue={editingRate.pricePerKg}
+                    placeholder="مثال: 500"
+                    min="0"
+                    step="0.01"
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="editPricePerKm">قیمت هر کیلومتر</Label>
+                  <Input
+                    id="editPricePerKm"
+                    type="number"
+                    defaultValue={editingRate.pricePerKm || 0}
+                    placeholder="مثال: 100"
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="editMinimumCharge">حداقل هزینه *</Label>
+                  <Input
+                    id="editMinimumCharge"
+                    type="number"
+                    defaultValue={editingRate.minimumCharge}
+                    placeholder="مثال: 10000"
+                    min="0"
+                    step="0.01"
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="editMaximumWeight">حداکثر وزن (کیلوگرم) *</Label>
+                  <Input
+                    id="editMaximumWeight"
+                    type="number"
+                    defaultValue={editingRate.maximumWeight}
+                    placeholder="مثال: 1000"
+                    min="1"
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="editEstimatedDaysMin">حداقل زمان تحویل (روز) *</Label>
+                  <Input
+                    id="editEstimatedDaysMin"
+                    type="number"
+                    defaultValue={editingRate.estimatedDaysMin}
+                    placeholder="مثال: 1"
+                    min="1"
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="editEstimatedDaysMax">حداکثر زمان تحویل (روز) *</Label>
+                  <Input
+                    id="editEstimatedDaysMax"
+                    type="number"
+                    defaultValue={editingRate.estimatedDaysMax}
+                    placeholder="مثال: 7"
+                    min="1"
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="editCurrency">ارز *</Label>
+                  <Input
+                    id="editCurrency"
+                    defaultValue={editingRate.currency}
+                    placeholder="مثال: TRY"
+                    maxLength={3}
+                    required
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="editSupportsHazardous"
+                    defaultChecked={editingRate.supportsHazardous}
+                  />
+                  <Label htmlFor="editSupportsHazardous">پشتیبانی از مواد خطرناک</Label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="editSupportsFlammable"
+                    defaultChecked={editingRate.supportsFlammable}
+                  />
+                  <Label htmlFor="editSupportsFlammable">پشتیبانی از مواد آتش‌زا</Label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="editSupportsRefrigerated"
+                    defaultChecked={editingRate.supportsRefrigerated}
+                  />
+                  <Label htmlFor="editSupportsRefrigerated">پشتیبانی از حمل یخچالی</Label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="editRequiresCustomsClearance"
+                    defaultChecked={editingRate.requiresCustomsClearance}
+                  />
+                  <Label htmlFor="editRequiresCustomsClearance">نیاز به ترخیص گمرکی</Label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="editRateIsActive"
+                    defaultChecked={editingRate.isActive}
+                  />
+                  <Label htmlFor="editRateIsActive">فعال</Label>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="editRateNotes">یادداشت‌ها</Label>
+                <Textarea
+                  id="editRateNotes"
+                  defaultValue={editingRate.notes}
+                  placeholder="یادداشت‌های اضافی..."
+                  rows={3}
+                />
+              </div>
+              
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsEditRateOpen(false)}>
+                  انصراف
+                </Button>
+                <Button 
+                  onClick={() => {
+                    const countrySelect = document.querySelector('#editRateCountryId') as HTMLSelectElement;
+                    const citySelect = document.querySelector('#editRateCityId') as HTMLSelectElement;
+                    const methodSelect = document.querySelector('#editShippingMethod') as HTMLSelectElement;
+                    const provider = document.querySelector('#editTransportProvider') as HTMLInputElement;
+                    const basePrice = document.querySelector('#editBasePrice') as HTMLInputElement;
+                    const pricePerKg = document.querySelector('#editPricePerKg') as HTMLInputElement;
+                    const pricePerKm = document.querySelector('#editPricePerKm') as HTMLInputElement;
+                    const minCharge = document.querySelector('#editMinimumCharge') as HTMLInputElement;
+                    const maxWeight = document.querySelector('#editMaximumWeight') as HTMLInputElement;
+                    const minDays = document.querySelector('#editEstimatedDaysMin') as HTMLInputElement;
+                    const maxDays = document.querySelector('#editEstimatedDaysMax') as HTMLInputElement;
+                    const currency = document.querySelector('#editCurrency') as HTMLInputElement;
+                    const supportsHazardous = document.querySelector('#editSupportsHazardous') as HTMLInputElement;
+                    const supportsFlammable = document.querySelector('#editSupportsFlammable') as HTMLInputElement;
+                    const supportsRefrigerated = document.querySelector('#editSupportsRefrigerated') as HTMLInputElement;
+                    const requiresCustoms = document.querySelector('#editRequiresCustomsClearance') as HTMLInputElement;
+                    const isActive = document.querySelector('#editRateIsActive') as HTMLInputElement;
+                    const notes = document.querySelector('#editRateNotes') as HTMLTextAreaElement;
+                    
+                    updateRateMutation.mutate({
+                      id: editingRate.id,
+                      data: {
+                        countryId: parseInt(countrySelect.value),
+                        cityId: citySelect.value === "all" ? null : parseInt(citySelect.value),
+                        shippingMethod: methodSelect.value,
+                        transportProvider: provider.value,
+                        basePrice: parseFloat(basePrice.value),
+                        pricePerKg: parseFloat(pricePerKg.value),
+                        pricePerKm: parseFloat(pricePerKm.value) || 0,
+                        minimumCharge: parseFloat(minCharge.value),
+                        maximumWeight: parseFloat(maxWeight.value),
+                        estimatedDaysMin: parseInt(minDays.value),
+                        estimatedDaysMax: parseInt(maxDays.value),
+                        currency: currency.value.toUpperCase(),
+                        supportsHazardous: supportsHazardous.checked,
+                        supportsFlammable: supportsFlammable.checked,
+                        supportsRefrigerated: supportsRefrigerated.checked,
+                        requiresCustomsClearance: requiresCustoms.checked,
+                        isActive: isActive.checked,
+                        notes: notes.value
+                      }
+                    });
+                  }}
+                  disabled={updateRateMutation.isPending}
+                >
+                  {updateRateMutation.isPending ? 'در حال ذخیره...' : 'ذخیره تغییرات'}
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
