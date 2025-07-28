@@ -6,6 +6,17 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Function Hoisting Error Fixed in Logistics Management - Critical Runtime Issue Resolved (January 28, 2025)
+✅ **RESOLVED: "Cannot access 'calculateDistance' before initialization" error in logistics-management.tsx**
+- **Root Cause**: JavaScript hoisting issue where `calculateDistance` function was being called in sorting logic before its definition
+- **Error Location**: Line 1769 in GeographyTab component during cities table sorting by distance
+- **Technical Fix**: Moved `calculateDistance` function definition before its usage in `sortedCities` array creation
+- **Code Structure**: Reordered function definitions to respect JavaScript temporal dead zone requirements
+- **Impact**: Geography tab sorting by distance column now works without runtime errors
+- **User Experience**: Cities table sorting functionality fully operational across all columns (name, province, distance)
+- **System Stability**: Eliminated critical runtime error preventing logistics management interface from functioning
+- **Result**: Complete resolution of function initialization error - logistics geography management now fully operational with proper sorting capabilities
+
 ### COMPLETED: Logistics City List Display Limited to 8 Rows - UI Streamlining (January 28, 2025)
 ✅ **IMPLEMENTED: City list display in logistics management limited to 8 rows for better interface organization**
 - **User Request Fulfilled**: "از لیست شهرها 8 ردیف دیده شود در بخش لجستیک" - Changed city display from 50 to 8 rows

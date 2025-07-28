@@ -1740,6 +1740,17 @@ const LogisticsManagement = () => {
     const geographyProvinces = (geographyProvincesResponse as any)?.data || [];
     const geographyCities = (geographyCitiesResponse as any)?.data || [];
 
+    // Calculate dynamic distances based on selected origin city
+    const calculateDistance = (targetCity: any) => {
+      if (!selectedOriginCity) return targetCity.distance_from_erbil_km || 0;
+      
+      const originDistance = selectedOriginCity.distance_from_erbil_km || 0;
+      const targetDistance = targetCity.distance_from_erbil_km || 0;
+      
+      // Calculate relative distance using Erbil as common reference point
+      return Math.abs(targetDistance - originDistance);
+    };
+
     // Handle sorting for cities table
     const handleCitySort = (field: string) => {
       if (citySortField === field) {
@@ -1785,17 +1796,6 @@ const LogisticsManagement = () => {
       
       return 0;
     });
-
-    // Calculate dynamic distances based on selected origin city
-    const calculateDistance = (targetCity: any) => {
-      if (!selectedOriginCity) return targetCity.distance_from_erbil_km || 0;
-      
-      const originDistance = selectedOriginCity.distance_from_erbil_km || 0;
-      const targetDistance = targetCity.distance_from_erbil_km || 0;
-      
-      // Calculate relative distance using Erbil as common reference point
-      return Math.abs(targetDistance - originDistance);
-    };
 
     // Calculate province distance (average of cities in province)
     const calculateProvinceDistance = (province: any) => {
