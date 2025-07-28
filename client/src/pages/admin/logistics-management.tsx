@@ -36,6 +36,7 @@ import {
 } from 'lucide-react';
 import { useOrderNotifications } from '@/hooks/useOrderNotifications';
 import PostalServicesTab from '@/components/PostalServicesTab';
+import VehicleTemplateEditor from '@/components/admin/VehicleTemplateEditor';
 
 
 // Safe date formatting function to prevent Invalid Date errors
@@ -444,8 +445,9 @@ const LogisticsManagement = () => {
         </div>
 
         <Tabs defaultValue="templates" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="templates">الگوهای خودرو</TabsTrigger>
+            <TabsTrigger value="editor">ویرایش قالب‌ها</TabsTrigger>
             <TabsTrigger value="optimization">انتخاب بهینه</TabsTrigger>
             <TabsTrigger value="history">تاریخچه انتخاب</TabsTrigger>
           </TabsList>
@@ -731,6 +733,10 @@ const LogisticsManagement = () => {
                 )}
               </DialogContent>
             </Dialog>
+          </TabsContent>
+
+          <TabsContent value="editor" className="space-y-4">
+            <VehicleTemplateEditor />
           </TabsContent>
 
           <TabsContent value="optimization" className="space-y-4">
