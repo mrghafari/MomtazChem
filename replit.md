@@ -6,6 +6,26 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Vehicle Assignment Button Terminology Update - Professional Arabic Interface Enhancement (January 28, 2025)
+✅ **IMPLEMENTED: Updated vehicle assignment button terminology throughout logistics management interface**
+- **User Request Fulfilled**: "به جای کلمه اختصاص خودرو از اختصاص وسیله ارسال محموله استفاده کن" - Changed all vehicle assignment terminology
+- **Professional Arabic Terminology**: Updated button text from "اختصاص خودرو" to "اختصاص وسیله ارسال محموله" for more professional Arabic terminology
+- **System-wide Updates**: Modified all references including:
+  - **Button Labels**: Changed main action button text in orders list
+  - **Dialog Titles**: Updated modal header text for vehicle assignment
+  - **Error Messages**: Updated toast notification text for consistency
+  - **User Interface**: Maintained same functionality with improved professional terminology
+- **Enhanced User Experience**: 
+  - More formal and professional Arabic terminology
+  - Consistent language throughout logistics management interface
+  - Better alignment with business terminology preferences
+- **Technical Implementation**: 
+  - Updated button onClick handlers and styling maintained
+  - All existing functionality preserved with terminology improvements
+  - Proper Persian RTL support maintained
+- **Business Impact**: Professional interface terminology enhances user experience for Arabic-speaking logistics staff
+- **Result**: Complete terminology update operational - vehicle assignment system now uses "اختصاص وسیله ارسال محموله" throughout interface
+
 ### COMPLETED: Enhanced Financial System with Manual Receipt Amount Verification - Intelligent Wallet Management (January 28, 2025)
 ✅ **IMPLEMENTED: Complete manual receipt amount verification system with intelligent automatic wallet reconciliation**
 - **User Request Fulfilled**: Added manual receipt amount input field for financial department to verify exact payment amounts against bank receipts

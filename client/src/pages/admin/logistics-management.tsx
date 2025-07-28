@@ -389,7 +389,7 @@ const LogisticsManagement = () => {
       console.error('Error loading vehicle assignment data:', error);
       toast({
         title: "خطا",
-        description: "خطا در بارگذاری اطلاعات اختصاص خودرو",
+        description: "خطا در بارگذاری اطلاعات اختصاص وسیله ارسال محموله",
         variant: "destructive"
       });
     }
@@ -430,7 +430,7 @@ const LogisticsManagement = () => {
       console.error('Error assigning vehicle:', error);
       toast({
         title: "خطا",
-        description: "خطا در اختصاص خودرو",
+        description: "خطا در اختصاص وسیله ارسال محموله",
         variant: "destructive"
       });
     }
@@ -1327,6 +1327,7 @@ const LogisticsManagement = () => {
                           </>
                         )}
                       </Button>
+
                       <Button 
                         size="sm" 
                         variant="outline" 
@@ -1334,11 +1335,7 @@ const LogisticsManagement = () => {
                         onClick={() => handleVehicleAssignment(order)}
                       >
                         <Truck className="w-4 h-4 mr-2" />
-                        اختصاص خودرو
-                      </Button>
-                      <Button size="sm" variant="outline" className="border-green-500 text-green-700 hover:bg-green-100">
-                        <Users className="w-4 h-4 mr-2" />
-                        اختصاص راننده
+                        اختصاص وسیله ارسال محموله
                       </Button>
                       <Button size="sm" variant="outline" className="border-green-500 text-green-700 hover:bg-green-100">
                         <MapPin className="w-4 h-4 mr-2" />
@@ -2532,7 +2529,7 @@ const LogisticsManagement = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Truck className="w-6 h-6 text-orange-600" />
-              اختصاص خودرو به سفارش {selectedOrderForVehicle?.orderNumber}
+              اختصاص وسیله ارسال محموله به سفارش {selectedOrderForVehicle?.orderNumber}
             </DialogTitle>
             <DialogDescription>
               انتخاب خودروی مناسب از ناوگان شرکت بر اساس نوع خودروی انتخابی مشتری
