@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Sticky Header - جدول شهرهای عراق</title>
+    <style>
+        body {
+            font-family: Tahoma, Arial, sans-serif;
+            direction: rtl;
+            text-align: right;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .table-container {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            position: relative;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            position: relative;
+        }
+        thead {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        th {
+            background: white;
+            padding: 12px 8px;
+            border-bottom: 2px solid #ddd;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            text-align: right;
+        }
+        td {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            text-align: right;
+        }
+        .btn-sort {
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            width: 100%;
+            justify-content: flex-end;
+            padding: 4px;
+            border-radius: 4px;
+        }
+        .btn-sort:hover {
+            background: #f0f0f0;
+        }
+        .arrow-icon {
+            width: 12px;
+            height: 12px;
+        }
+        .badge {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            color: white;
+        }
+        .badge-green { background: #10b981; }
+        .badge-blue { background: #3b82f6; }
+        .badge-yellow { background: #f59e0b; }
+        .badge-gray { background: #6b7280; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🧪 تست Sticky Header - جدول شهرهای عراق</h2>
+        <p>این جدول برای تست sticky header طراحی شده است. هنگام scroll کردن، header باید ثابت بماند.</p>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 80px;">
+                            <button class="btn-sort">
+                                ردیف
+                                <span class="arrow-icon">↕</span>
+                            </button>
+                        </th>
+                        <th style="width: 200px;">
+                            <button class="btn-sort">
+                                نام شهر
+                                <span class="arrow-icon">↕</span>
+                            </button>
+                        </th>
+                        <th style="width: 120px;">
+                            <button class="btn-sort">
+                                استان
+                                <span class="arrow-icon">↕</span>
+                            </button>
+                        </th>
+                        <th style="width: 200px;">
+                            <button class="btn-sort">
+                                فاصله از اربیل (کیلومتر)
+                                <span class="arrow-icon">↕</span>
+                            </button>
+                        </th>
+                        <th style="width: 100px;">
+                            <button class="btn-sort">
+                                شناسه خودرو
+                                <span class="arrow-icon">↕</span>
+                            </button>
+                        </th>
+                        <th style="width: 80px;">وضعیت</th>
+                        <th style="width: 100px;">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody id="cities-table">
+                    <!-- Cities will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div style="margin-top: 20px; padding: 15px; background: #e6f3ff; border-radius: 8px;">
+            <h4>📝 نتیجه تست:</h4>
+            <p><strong>✅ Sticky Header:</strong> هنگام scroll کردن، header جدول باید در بالای صفحه ثابت بماند</p>
+            <p><strong>✅ Z-Index:</strong> Header باید روی محتوای جدول قرار گیرد (z-index: 50)</p>
+            <p><strong>✅ Background:</strong> Header باید background سفید داشته باشد</p>
+            <p><strong>✅ Shadow:</strong> Header باید سایه داشته باشد برای جدایی بصری</p>
+        </div>
+    </div>
+
+    <script>
+        // Sample data for Iraqi cities
+        const cities = [
+            {id: 1, name: "بغداد", nameEn: "Baghdad", province: "بغداد", distance: 320, vehicleId: null, status: "فعال"},
+            {id: 2, name: "اربیل", nameEn: "Erbil", province: "اربیل", distance: 0, vehicleId: null, status: "فعال"},
+            {id: 3, name: "بصره", nameEn: "Basra", province: "بصره", distance: 750, vehicleId: null, status: "فعال"},
+            {id: 4, name: "موصل", nameEn: "Mosul", province: "نینوا", distance: 250, vehicleId: null, status: "فعال"},
+            {id: 5, name: "کرکوک", nameEn: "Kirkuk", province: "کرکوک", distance: 150, vehicleId: null, status: "فعال"},
+            {id: 6, name: "نجف", nameEn: "Najaf", province: "نجف", distance: 460, vehicleId: null, status: "فعال"},
+            {id: 7, name: "کربلا", nameEn: "Karbala", province: "کربلا", distance: 420, vehicleId: null, status: "فعال"},
+            {id: 8, name: "دهوک", nameEn: "Duhok", province: "دهوک", distance: 120, vehicleId: null, status: "فعال"},
+            {id: 9, name: "سلیمانیه", nameEn: "Sulaymaniyah", province: "سلیمانیه", distance: 140, vehicleId: null, status: "فعال"},
+            {id: 10, name: "رمادی", nameEn: "Ramadi", province: "انبار", distance: 380, vehicleId: null, status: "فعال"},
+            {id: 11, name: "فلوجه", nameEn: "Fallujah", province: "انبار", distance: 350, vehicleId: null, status: "فعال"},
+            {id: 12, name: "تکریت", nameEn: "Tikrit", province: "صلاح الدین", distance: 280, vehicleId: null, status: "فعال"},
+            {id: 13, name: "سامرا", nameEn: "Samarra", province: "صلاح الدین", distance: 290, vehicleId: null, status: "فعال"},
+            {id: 14, name: "هیت", nameEn: "Hit", province: "انبار", distance: 420, vehicleId: null, status: "فعال"},
+            {id: 15, name: "عماره", nameEn: "Amarah", province: "میسان", distance: 520, vehicleId: null, status: "فعال"},
+            {id: 16, name: "کوت", nameEn: "Kut", province: "واسط", distance: 380, vehicleId: null, status: "فعال"},
+            {id: 17, name: "دیوانیه", nameEn: "Diwaniyah", province: "قادسیه", distance: 480, vehicleId: null, status: "فعال"},
+            {id: 18, name: "حله", nameEn: "Hillah", province: "بابل", distance: 350, vehicleId: null, status: "فعال"},
+            {id: 19, name: "ناصریه", nameEn: "Nasiriyah", province: "ذی‌قار", distance: 580, vehicleId: null, status: "فعال"},
+            {id: 20, name: "مثنی", nameEn: "Muthanna", province: "مثنی", distance: 620, vehicleId: null, status: "فعال"},
+            // Adding more cities to test scroll
+            {id: 21, name: "زاخو", nameEn: "Zakho", province: "دهوک", distance: 90, vehicleId: null, status: "فعال"},
+            {id: 22, name: "سپی", nameEn: "Sepi", province: "دهوک", distance: 95, vehicleId: null, status: "فعال"},
+            {id: 23, name: "شیخان", nameEn: "Shekhan", province: "دهوک", distance: 85, vehicleId: null, status: "فعال"},
+            {id: 24, name: "قره‌قوش", nameEn: "Qaraqosh", province: "نینوا", distance: 270, vehicleId: null, status: "فعال"},
+            {id: 25, name: "حمدانیه", nameEn: "Hamdaniya", province: "نینوا", distance: 280, vehicleId: null, status: "فعال"},
+            {id: 26, name: "شنگال", nameEn: "Sinjar", province: "نینوا", distance: 300, vehicleId: null, status: "فعال"},
+            {id: 27, name: "تلعفر", nameEn: "Tal Afar", province: "نینوا", distance: 320, vehicleId: null, status: "فعال"},
+            {id: 28, name: "مخمور", nameEn: "Makhmur", province: "اربیل", distance: 70, vehicleId: null, status: "فعال"},
+            {id: 29, name: "کویسنجق", nameEn: "Koisanjaq", province: "اربیل", distance: 60, vehicleId: null, status: "فعال"},
+            {id: 30, name: "شقلاوه", nameEn: "Shaqlawa", province: "اربیل", distance: 45, vehicleId: null, status: "فعال"}
+        ];
+
+        function renderCities() {
+            const tbody = document.getElementById('cities-table');
+            tbody.innerHTML = '';
+            
+            cities.forEach(city => {
+                const row = document.createElement('tr');
+                
+                const distanceBadge = city.distance === 0 
+                    ? '<span class="badge badge-yellow">مبدا (0 کیلومتر)</span>'
+                    : `<span class="badge badge-green">${city.distance} کیلومتر</span>`;
+                
+                const vehicleBadge = city.vehicleId 
+                    ? `<span class="badge badge-blue">${city.vehicleId}</span>`
+                    : '<span class="badge badge-gray">-</span>';
+                
+                const statusBadge = city.status === 'فعال' 
+                    ? '<span class="badge badge-green">فعال</span>'
+                    : '<span class="badge badge-gray">غیرفعال</span>';
+                
+                row.innerHTML = `
+                    <td>${city.id}</td>
+                    <td>
+                        <div>${city.name}</div>
+                        <div style="font-size: 11px; color: #666;">${city.nameEn}</div>
+                    </td>
+                    <td>${city.province}</td>
+                    <td>${distanceBadge}</td>
+                    <td>${vehicleBadge}</td>
+                    <td>${statusBadge}</td>
+                    <td>
+                        <button style="padding: 4px 8px; border: 1px solid #ddd; background: white; border-radius: 4px; cursor: pointer;">
+                            ویرایش
+                        </button>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        // Initialize table
+        renderCities();
+        
+        // Add sort functionality to test header interaction
+        document.querySelectorAll('.btn-sort').forEach(btn => {
+            btn.addEventListener('click', function() {
+                console.log('Sort button clicked:', this.textContent.trim());
+                alert('Sort button clicked: ' + this.textContent.trim());
+            });
+        });
+    </script>
+</body>
+</html>
