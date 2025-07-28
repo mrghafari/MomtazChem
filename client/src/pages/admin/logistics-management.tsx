@@ -31,7 +31,8 @@ import {
   Mail,
   Flame,
   Weight,
-  Scale
+  Scale,
+  ArrowUpDown
 } from 'lucide-react';
 import { useOrderNotifications } from '@/hooks/useOrderNotifications';
 import PostalServicesTab from '@/components/PostalServicesTab';
@@ -1733,9 +1734,57 @@ const LogisticsManagement = () => {
     const [isEditProvinceDialogOpen, setIsEditProvinceDialogOpen] = useState(false);
     const [isEditCityDialogOpen, setIsEditCityDialogOpen] = useState(false);
     const [selectedOriginCity, setSelectedOriginCity] = useState<any>(null);
+    const [citySortField, setCitySortField] = useState<string | null>(null);
+    const [citySortDirection, setCitySortDirection] = useState<'asc' | 'desc'>('asc');
 
     const geographyProvinces = (geographyProvincesResponse as any)?.data || [];
     const geographyCities = (geographyCitiesResponse as any)?.data || [];
+
+    // Handle sorting for cities table
+    const handleCitySort = (field: string) => {
+      if (citySortField === field) {
+        setCitySortDirection(citySortDirection === 'asc' ? 'desc' : 'asc');
+      } else {
+        setCitySortField(field);
+        setCitySortDirection('asc');
+      }
+    };
+
+    // Sort cities based on current sort field and direction
+    const sortedCities = [...geographyCities].sort((a: any, b: any) => {
+      if (!citySortField) return 0;
+      
+      let aValue, bValue;
+      
+      switch (citySortField) {
+        case 'name':
+          aValue = a.name_arabic || a.name || '';
+          bValue = b.name_arabic || b.name || '';
+          break;
+        case 'province':
+          aValue = a.province_name || '';
+          bValue = b.province_name || '';
+          break;
+        case 'distance':
+          aValue = calculateDistance(a);
+          bValue = calculateDistance(b);
+          break;
+        default:
+          return 0;
+      }
+      
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        const result = aValue.localeCompare(bValue, 'ar');
+        return citySortDirection === 'asc' ? result : -result;
+      }
+      
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        const result = aValue - bValue;
+        return citySortDirection === 'asc' ? result : -result;
+      }
+      
+      return 0;
+    });
 
     // Calculate dynamic distances based on selected origin city
     const calculateDistance = (targetCity: any) => {
@@ -1926,17 +1975,45 @@ const LogisticsManagement = () => {
                     <TableHeader className="sticky top-0 bg-white z-10">
                       <TableRow>
                         <TableHead className="text-right">شناسه</TableHead>
-                        <TableHead className="text-right">نام شهر</TableHead>
-                        <TableHead className="text-right">استان</TableHead>
                         <TableHead className="text-right">
-                          فاصله از {selectedOriginCity ? (selectedOriginCity.name_arabic || selectedOriginCity.name) : 'اربیل'} (کیلومتر)
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => handleCitySort('name')}
+                            className="flex items-center justify-end gap-1 p-0 h-auto font-medium text-right"
+                          >
+                            نام شهر
+                            <ArrowUpDown className="h-3 w-3" />
+                          </Button>
+                        </TableHead>
+                        <TableHead className="text-right">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => handleCitySort('province')}
+                            className="flex items-center justify-end gap-1 p-0 h-auto font-medium text-right"
+                          >
+                            استان
+                            <ArrowUpDown className="h-3 w-3" />
+                          </Button>
+                        </TableHead>
+                        <TableHead className="text-right">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => handleCitySort('distance')}
+                            className="flex items-center justify-end gap-1 p-0 h-auto font-medium text-right"
+                          >
+                            فاصله از {selectedOriginCity ? (selectedOriginCity.name_arabic || selectedOriginCity.name) : 'اربیل'} (کیلومتر)
+                            <ArrowUpDown className="h-3 w-3" />
+                          </Button>
                         </TableHead>
                         <TableHead className="text-right">وضعیت</TableHead>
                         <TableHead className="text-right">عملیات</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {geographyCities.map((city: any) => (
+                      {sortedCities.map((city: any) => (
                       <TableRow key={city.id}>
                         <TableCell className="font-medium text-right">{city.id}</TableCell>
                         <TableCell className="text-right">
