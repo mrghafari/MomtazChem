@@ -621,6 +621,27 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const dutiesAmount = vatData?.dutiesEnabled ? subtotalAmount * dutiesRate : 0;
   const totalTaxAmount = vatAmount + dutiesAmount;
   
+  // Smart delivery cost calculation state
+  const [smartDeliveryCost, setSmartDeliveryCost] = useState<number>(0);
+  const [smartDeliveryLoading, setSmartDeliveryLoading] = useState<boolean>(false);
+  const [smartDeliveryError, setSmartDeliveryError] = useState<string>('');
+  const [optimalVehicle, setOptimalVehicle] = useState<any>(null);
+  const [alternativeVehicles, setAlternativeVehicles] = useState<any[]>([]);
+
+  // Auto-select smart vehicle when shipping methods load
+  useEffect(() => {
+    if (shippingRatesData && shippingRatesData.length > 0 && !selectedShippingMethod) {
+      const smartVehicleMethod = shippingRatesData.find((rate: any) => 
+        rate.deliveryMethod === 'smart_vehicle' || rate.delivery_method === 'smart_vehicle'
+      );
+      
+      if (smartVehicleMethod) {
+        console.log('🚚 [AUTO SELECT] Auto-selecting smart vehicle method:', smartVehicleMethod.id);
+        setSelectedShippingMethod(smartVehicleMethod.id);
+      }
+    }
+  }, [shippingRatesData, selectedShippingMethod]);
+
   console.log('💰 [PURCHASE FORM] Tax calculation:', {
     vatData,
     vatRate,
@@ -642,8 +663,9 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     return sum;
   }, 0);
 
-  // Calculate total amount (subtotal + VAT + duties + shipping)
-  const totalAmount = subtotalAmount + totalTaxAmount + shippingCost;
+  // Calculate total amount (subtotal + VAT + duties + smart delivery cost)
+  const smartDeliveryFinalCost = optimalVehicle ? optimalVehicle.totalCost : smartDeliveryCost;
+  const totalAmount = subtotalAmount + totalTaxAmount + smartDeliveryFinalCost;
 
   // Calculate wallet payment amounts
   const walletBalance = (walletData as any)?.data?.wallet ? parseFloat((walletData as any).data.wallet.balance) : 
@@ -704,6 +726,88 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       setIsGettingLocation(false);
     }
   };
+
+  // Calculate smart delivery cost
+  const calculateSmartDeliveryCost = async (destinationCity: string, destinationProvince: string) => {
+    if (!destinationCity || totalWeight <= 0) {
+      console.log('🚚 [SMART DELIVERY] Skipping calculation - missing city or zero weight');
+      return;
+    }
+
+    setSmartDeliveryLoading(true);
+    setSmartDeliveryError('');
+    
+    try {
+      console.log('🚚 [SMART DELIVERY] Calculating cost for:', {
+        weight: totalWeight,
+        city: destinationCity,
+        province: destinationProvince,
+        cartItems: Object.keys(cart).length
+      });
+
+      const response = await fetch('/api/calculate-delivery-cost', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          weight: totalWeight,
+          destinationCity: destinationCity,
+          destinationProvince: destinationProvince,
+          cart: cart,
+          useSecondaryAddress: showSecondAddress && secondAddress.trim().length > 0,
+          secondaryAddress: showSecondAddress ? {
+            address: secondAddress,
+            city: secondCity,
+            province: secondProvince,
+            postalCode: secondPostalCode
+          } : null
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.success && data.data) {
+        const { optimalVehicle, alternatives } = data.data;
+        
+        setOptimalVehicle(optimalVehicle);
+        setAlternativeVehicles(alternatives || []);
+        setSmartDeliveryCost(optimalVehicle.totalCost);
+        
+        console.log('✅ [SMART DELIVERY] Cost calculated:', {
+          vehicle: optimalVehicle.vehicleName,
+          cost: optimalVehicle.totalCost,
+          estimatedTime: optimalVehicle.estimatedTime
+        });
+      } else {
+        throw new Error(data.message || 'محاسبه هزینه ارسال ناموفق بود');
+      }
+    } catch (error) {
+      console.error('❌ [SMART DELIVERY] Calculation error:', error);
+      setSmartDeliveryError(error.message || 'خطا در محاسبه هزینه ارسال');
+      setSmartDeliveryCost(0);
+      setOptimalVehicle(null);
+      setAlternativeVehicles([]);
+    } finally {
+      setSmartDeliveryLoading(false);
+    }
+  };
+
+  // Watch for changes in destination to recalculate delivery cost
+  useEffect(() => {
+    const finalDestinationCity = showSecondAddress && secondCity.trim() ? secondCity : form.watch('city');
+    const finalDestinationProvince = showSecondAddress && secondProvince.trim() ? secondProvince : 
+      (crmCustomerData?.province || customerData?.customer?.province);
+
+    if (finalDestinationCity && finalDestinationProvince && totalWeight > 0) {
+      const debounceTimer = setTimeout(() => {
+        calculateSmartDeliveryCost(finalDestinationCity, finalDestinationProvince);
+      }, 1000); // 1 second debounce
+      
+      return () => clearTimeout(debounceTimer);
+    }
+  }, [showSecondAddress, secondCity, secondProvince, form.watch('city'), totalWeight, cart]);
 
 
 
@@ -1189,17 +1293,48 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                 )}
               </div>
               
-              {/* Delivery Method & Shipping Cost */}
+              {/* Smart Delivery Cost Display */}
               {selectedShippingMethod && (
                 <div className="flex justify-between text-sm">
                   <span>
                     {(() => {
                       const selectedRate = shippingRatesData?.find((rate: any) => rate.id === selectedShippingMethod);
+                      
+                      // Handle smart vehicle display
+                      if (selectedRate && (selectedRate.deliveryMethod === 'smart_vehicle' || selectedRate.delivery_method === 'smart_vehicle')) {
+                        return '🚚 هزینه ارسال هوشمند';
+                      }
+                      
+                      // Handle self pickup display  
+                      if (selectedRate && (selectedRate.deliveryMethod === 'self_pickup' || selectedRate.delivery_method === 'self_pickup')) {
+                        return '🚶‍♂️ حمل توسط خودم';
+                      }
+                      
                       return selectedRate?.name || t.deliveryMethod;
                     })()}
                   </span>
                   <span>
-                    {shippingCost === 0 ? t.freeShipping : formatCurrency(shippingCost)}
+                    {(() => {
+                      const selectedRate = shippingRatesData?.find((rate: any) => rate.id === selectedShippingMethod);
+                      
+                      // Handle smart vehicle cost
+                      if (selectedRate && (selectedRate.deliveryMethod === 'smart_vehicle' || selectedRate.delivery_method === 'smart_vehicle')) {
+                        if (smartDeliveryLoading) {
+                          return <span className="text-emerald-600">در حال محاسبه...</span>;
+                        }
+                        if (smartDeliveryFinalCost > 0) {
+                          return <span className="text-emerald-600 font-bold">{formatCurrency(smartDeliveryFinalCost)}</span>;
+                        }
+                        return <span className="text-gray-500">در انتظار آدرس</span>;
+                      }
+                      
+                      // Handle self pickup cost
+                      if (selectedRate && (selectedRate.deliveryMethod === 'self_pickup' || selectedRate.delivery_method === 'self_pickup')) {
+                        return <span className="text-blue-600 font-bold">رایگان</span>;
+                      }
+                      
+                      return shippingCost === 0 ? t.freeShipping : formatCurrency(shippingCost);
+                    })()}
                   </span>
                 </div>
               )}
@@ -1606,6 +1741,126 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
 
 
+
+                {/* Smart Delivery Cost Section */}
+                <div className="space-y-4 p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg border border-emerald-200 dark:border-emerald-800">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                      <Label className="text-emerald-800 dark:text-emerald-200 font-medium">
+                        🚚 وزن محموله: {totalWeight.toFixed(2)} کیلوگرم
+                      </Label>
+                    </div>
+                    <Badge variant="secondary" className="bg-emerald-100 text-emerald-800 border-emerald-300">
+                      محاسبه هوشمند
+                    </Badge>
+                  </div>
+
+                  {/* Smart Delivery Cost Display */}
+                  {smartDeliveryLoading && (
+                    <div className="flex items-center gap-2 text-emerald-700">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-emerald-600"></div>
+                      <span className="text-sm">در حال محاسبه بهترین گزینه ارسال...</span>
+                    </div>
+                  )}
+
+                  {smartDeliveryError && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                      <p className="text-red-700 text-sm">❌ {smartDeliveryError}</p>
+                    </div>
+                  )}
+
+                  {optimalVehicle && !smartDeliveryLoading && (
+                    <div className="space-y-3">
+                      {/* Optimal Vehicle Card */}
+                      <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-emerald-300">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-medium text-emerald-800 dark:text-emerald-200">
+                            🎯 گزینه بهینه: {optimalVehicle.vehicleName}
+                          </h4>
+                          <div className="text-right">
+                            <p className="text-lg font-bold text-emerald-600">
+                              {new Intl.NumberFormat('fa-IR').format(optimalVehicle.totalCost)} IQD
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              زمان تحویل: {optimalVehicle.estimatedTime} دقیقه
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-3 gap-2 text-xs text-gray-600">
+                          <div>
+                            <span className="font-medium">نوع مسیر:</span>
+                            <p className="text-emerald-600">{
+                              optimalVehicle.routeType === 'highway' ? 'بزرگراهی' :
+                              optimalVehicle.routeType === 'interurban' ? 'شهری' : 'محلی'
+                            }</p>
+                          </div>
+                          <div>
+                            <span className="font-medium">ظرفیت:</span>
+                            <p className="text-emerald-600">{optimalVehicle.maxWeight} کیلوگرم</p>
+                          </div>
+                          <div>
+                            <span className="font-medium">نوع خودرو:</span>
+                            <p className="text-emerald-600">{optimalVehicle.vehicleType}</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Alternative Options */}
+                      {alternativeVehicles.length > 0 && (
+                        <details className="group">
+                          <summary className="cursor-pointer text-sm text-emerald-700 hover:text-emerald-800 flex items-center gap-1">
+                            <span>گزینه‌های جایگزین ({alternativeVehicles.length})</span>
+                            <span className="group-open:rotate-180 transition-transform">▼</span>
+                          </summary>
+                          <div className="mt-2 space-y-2">
+                            {alternativeVehicles.map((vehicle, index) => (
+                              <div key={index} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 border">
+                                <div className="flex items-center justify-between">
+                                  <span className="font-medium text-gray-700 dark:text-gray-300">
+                                    {vehicle.vehicleName}
+                                  </span>
+                                  <div className="text-right">
+                                    <p className="font-bold text-gray-600">
+                                      {new Intl.NumberFormat('fa-IR').format(vehicle.totalCost)} IQD
+                                    </p>
+                                    <p className="text-xs text-gray-500">
+                                      {vehicle.estimatedTime} دقیقه
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </details>
+                      )}
+
+                      {/* Cost Breakdown */}
+                      <div className="bg-emerald-100 dark:bg-emerald-900/30 rounded-lg p-3 border border-emerald-200">
+                        <h5 className="font-medium text-emerald-800 dark:text-emerald-200 mb-2">📊 جزئیات محاسبه هزینه</h5>
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                          <div className="flex justify-between">
+                            <span>قیمت پایه:</span>
+                            <span>{new Intl.NumberFormat('fa-IR').format(optimalVehicle.basePrice)} IQD</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>هزینه مسافت:</span>
+                            <span>{new Intl.NumberFormat('fa-IR').format(optimalVehicle.distanceCost)} IQD</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>هزینه وزن:</span>
+                            <span>{new Intl.NumberFormat('fa-IR').format(optimalVehicle.weightCost)} IQD</span>
+                          </div>
+                          <div className="flex justify-between font-bold border-t pt-1">
+                            <span>مجموع:</span>
+                            <span className="text-emerald-600">{new Intl.NumberFormat('fa-IR').format(optimalVehicle.totalCost)} IQD</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
 
                 {/* Order Notes */}
                 <FormField

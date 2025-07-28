@@ -21123,6 +21123,153 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     }
   });
 
+  // =============================================
+  // SMART DELIVERY COST CALCULATION API
+  // =============================================
+
+  // Calculate optimal delivery cost based on weight and destination
+  app.post("/api/calculate-delivery-cost", async (req, res) => {
+    try {
+      console.log('🚚 [DELIVERY COST] Request received:', req.body);
+      
+      const { weight, destinationCity, destinationProvince, cart, useSecondaryAddress, secondaryAddress } = req.body;
+      
+      if (!weight || !destinationCity) {
+        return res.status(400).json({
+          success: false,
+          message: "وزن محموله و شهر مقصد اجباری است"
+        });
+      }
+
+      // Get vehicle templates
+      const { db } = await import('./db');
+      const { eq } = await import('drizzle-orm');
+      const { vehicleTemplates: vehicleTemplatesTable } = await import('@shared/logistics-schema');
+      const { iraqiCities } = await import('@shared/logistics-schema');
+      
+      const vehicleTemplates = await db.select().from(vehicleTemplatesTable).where(eq(vehicleTemplatesTable.isActive, true));
+      
+      if (!vehicleTemplates.length) {
+        return res.status(500).json({
+          success: false,
+          message: "هیچ الگوی خودرویی در دسترس نیست"
+        });
+      }
+
+      // Get destination city data for distance calculation
+      const destinationCityData = await db.select()
+        .from(iraqiCities)
+        .where(eq(iraqiCities.nameArabic, destinationCity))
+        .limit(1);
+
+      if (!destinationCityData.length) {
+        return res.status(400).json({
+          success: false,
+          message: "شهر مقصد در پایگاه داده یافت نشد"
+        });
+      }
+
+      const distance = parseFloat(destinationCityData[0].distanceFromErbilKm || '0');
+      const weightKg = parseFloat(weight);
+
+      console.log('🎯 [DELIVERY COST] Calculation parameters:', {
+        weight: weightKg,
+        destination: destinationCity,
+        distance: distance,
+        vehicleTemplateCount: vehicleTemplates.length
+      });
+
+      // Calculate costs for each vehicle template
+      const vehicleOptions = vehicleTemplates.map(template => {
+        const maxWeight = parseFloat(template.maxWeightKg);
+        const basePrice = parseFloat(template.basePrice);
+        const pricePerKm = parseFloat(template.pricePerKm);
+        const pricePerKg = parseFloat(template.pricePerKg || '0');
+
+        // Check if vehicle can handle the weight
+        if (weightKg > maxWeight) {
+          return null; // Vehicle cannot handle this weight
+        }
+
+        // Calculate total cost
+        const distanceCost = distance * pricePerKm;
+        const weightCost = weightKg * pricePerKg;
+        const totalCost = basePrice + distanceCost + weightCost;
+
+        // Calculate route type based on distance
+        let routeType = 'urban';
+        if (distance > 100) routeType = 'highway';
+        else if (distance > 30) routeType = 'interurban';
+
+        // Check if vehicle supports this route type
+        if (!template.allowedRoutes.includes(routeType)) {
+          return null; // Vehicle doesn't support this route type
+        }
+
+        return {
+          vehicleId: template.id,
+          vehicleName: template.name,
+          vehicleNameEn: template.nameEn,
+          vehicleType: template.vehicleType,
+          maxWeight: maxWeight,
+          routeType: routeType,
+          basePrice: basePrice,
+          distanceCost: distanceCost,
+          weightCost: weightCost,
+          totalCost: totalCost,
+          estimatedTime: Math.round(distance / parseFloat(template.averageSpeedKmh || '50') * 60), // minutes
+          fuelConsumption: parseFloat(template.fuelConsumptionL100km || '0'),
+          priority: template.priority || 0
+        };
+      }).filter(option => option !== null);
+
+      if (!vehicleOptions.length) {
+        return res.status(400).json({
+          success: false,
+          message: "هیچ خودرویی برای این وزن و مقصد مناسب نیست"
+        });
+      }
+
+      // Sort by total cost (ascending) and priority
+      vehicleOptions.sort((a, b) => {
+        if (a.priority !== b.priority) {
+          return a.priority - b.priority; // Lower priority number = higher priority
+        }
+        return a.totalCost - b.totalCost;
+      });
+
+      const optimalVehicle = vehicleOptions[0];
+      const alternatives = vehicleOptions.slice(1, 3); // Top 2 alternatives
+
+      console.log('✅ [DELIVERY COST] Calculation completed:', {
+        optimal: optimalVehicle.vehicleName,
+        cost: optimalVehicle.totalCost,
+        alternativeCount: alternatives.length
+      });
+
+      res.json({
+        success: true,
+        data: {
+          optimalVehicle,
+          alternatives,
+          calculationDetails: {
+            weight: weightKg,
+            destination: destinationCity,
+            distance: distance,
+            routeType: optimalVehicle.routeType
+          }
+        }
+      });
+
+    } catch (error) {
+      console.error('❌ [DELIVERY COST] Calculation error:', error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در محاسبه هزینه ارسال"
+      });
+    }
+  });
+
   // Generate delivery code for order (logistics department)
   app.post('/api/order-management/:orderManagementId/generate-delivery-code', requireAuth, async (req, res) => {
     try {
