@@ -21230,11 +21230,36 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         });
       }
 
-      // Sort by total cost (ascending) and priority
+      // Optimized algorithm: Always prioritize cost efficiency with smart vehicle sizing
       vehicleOptions.sort((a, b) => {
-        if (a.priority !== b.priority) {
-          return a.priority - b.priority; // Lower priority number = higher priority
+        // Calculate weight utilization percentage
+        const utilizationA = (weightKg / a.maxWeight) * 100;
+        const utilizationB = (weightKg / b.maxWeight) * 100;
+        
+        // Heavy penalty for oversized vehicles (utilization < 10%)
+        let adjustedCostA = a.totalCost;
+        let adjustedCostB = b.totalCost;
+        
+        if (utilizationA < 10) adjustedCostA *= 3; // 3x penalty for oversized vehicles
+        if (utilizationB < 10) adjustedCostB *= 3;
+        
+        // Additional penalty for extreme underutilization (< 2%)
+        if (utilizationA < 2) adjustedCostA *= 2; // 6x total penalty
+        if (utilizationB < 2) adjustedCostB *= 2;
+        
+        // Primary sort: adjusted cost (includes size penalties)
+        const costDiff = adjustedCostA - adjustedCostB;
+        if (Math.abs(costDiff) > 1000) { // Significant cost difference
+          return costDiff;
         }
+        
+        // Secondary sort: prefer better utilization
+        const utilizationDiff = Math.abs(utilizationB - 30) - Math.abs(utilizationA - 30); // Target 30% utilization
+        if (Math.abs(utilizationDiff) > 5) {
+          return utilizationDiff;
+        }
+        
+        // Tertiary sort: original cost without penalties
         return a.totalCost - b.totalCost;
       });
 
