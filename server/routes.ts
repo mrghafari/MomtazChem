@@ -37799,6 +37799,9 @@ momtazchem.com
         return res.status(404).json({ success: false, message: "مشتری یافت نشد" });
       }
       
+      // Get CRM customer data for detailed address information
+      const crmCustomer = await crmStorage.getCrmCustomerById(customerId);
+      
       // Get all orders for customer
       const allOrders = await customerStorage.getOrdersForProfile(customerId);
       
@@ -37853,6 +37856,45 @@ momtazchem.com
         'یادداشت مشتری'
       ];
       
+      // Build comprehensive delivery address from customer information
+      const buildDeliveryAddress = () => {
+        const addressParts = [];
+        
+        if (crmCustomer) {
+          // Use CRM customer data if available (most detailed)
+          if (crmCustomer.address) {
+            addressParts.push(crmCustomer.address);
+          }
+          if (crmCustomer.cityRegion || crmCustomer.city) {
+            addressParts.push(crmCustomer.cityRegion || crmCustomer.city);
+          }
+          if (crmCustomer.province) {
+            addressParts.push(crmCustomer.province);
+          }
+          if (crmCustomer.country) {
+            addressParts.push(crmCustomer.country);
+          }
+          if (crmCustomer.postalCode) {
+            addressParts.push(`کد پستی: ${crmCustomer.postalCode}`);
+          }
+        } else if (customer) {
+          // Fallback to basic customer data
+          if (customer.address) {
+            addressParts.push(customer.address);
+          }
+          if (customer.city) {
+            addressParts.push(customer.city);
+          }
+          if (customer.country) {
+            addressParts.push(customer.country);
+          }
+        }
+        
+        return addressParts.length > 0 ? addressParts.join(' - ') : 'آدرس ثبت نشده';
+      };
+
+      const deliveryAddress = buildDeliveryAddress();
+
       const csvRows = filteredOrders.map(order => [
         order.orderNumber || `M${order.id}`,
         new Date(order.createdAt).toLocaleDateString('fa-IR'),
@@ -37869,7 +37911,7 @@ momtazchem.com
         order.paymentMethod === 'bank_transfer_grace' ? 'حواله بانکی' :
         order.paymentMethod === 'cash_on_delivery' ? 'پرداخت در محل' : order.paymentMethod || 'نامشخص',
         order.items?.length || 0,
-        order.deliveryAddress || 'آدرس ثبت نشده',
+        order.deliveryAddress || deliveryAddress, // Use order's delivery address if available, otherwise use customer address
         order.customerNotes || 'بدون یادداشت'
       ]);
       

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست خروجی CSV سفارشات با آدرس کامل</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+            direction: rtl;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #fafafa;
+        }
+        .test-button {
+            background: #007cba;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #005a8a;
+        }
+        .loading {
+            color: #666;
+            font-style: italic;
+        }
+        .success {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .error {
+            color: #f44336;
+            font-weight: bold;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            background: #f0f0f0;
+            border-left: 4px solid #007cba;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .address-info {
+            background: #e8f4f8;
+            border: 1px solid #b3d9e6;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 تست خروجی CSV سفارشات با آدرس کامل</h1>
+        <p>این صفحه برای تست عملکرد endpoint خروجی CSV سفارشات مشتری با اطلاعات آدرس کامل از CRM استفاده می‌شود.</p>
+
+        <div class="address-info">
+            <h3>💡 ویژگی‌های اضافه شده:</h3>
+            <ul>
+                <li>✅ دریافت اطلاعات CRM مشتری برای آدرس کامل</li>
+                <li>✅ ترکیب آدرس، شهر/منطقه، استان، کشور و کد پستی</li>
+                <li>✅ fallback به اطلاعات مشتری پایه در صورت عدم وجود CRM</li>
+                <li>✅ نمایش "آدرس ثبت نشده" در صورت عدم وجود آدرس</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h3>🎯 تست 1: خروجی CSV بدون فیلتر تاریخ</h3>
+            <p>خروجی همه سفارشات تکمیل شده مشتری</p>
+            <button class="test-button" onclick="testCsvExport()">🔄 دانلود CSV تمام سفارشات</button>
+            <div id="test1-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🗓️ تست 2: خروجی CSV با فیلتر تاریخ</h3>
+            <p>خروجی سفارشات در بازه زمانی مشخص</p>
+            <label>از تاریخ: <input type="date" id="startDate" value="2025-01-01"></label>
+            <label>تا تاریخ: <input type="date" id="endDate" value="2025-01-31"></label>
+            <br><br>
+            <button class="test-button" onclick="testCsvExportWithDates()">🔄 دانلود CSV با فیلتر تاریخ</button>
+            <div id="test2-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📋 تست 3: بررسی محتوای CSV</h3>
+            <p>نمایش محتوای CSV به جای دانلود برای بررسی آدرس</p>
+            <button class="test-button" onclick="testCsvContent()">📋 نمایش محتوای CSV</button>
+            <div id="test3-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔧 تست 4: بررسی اطلاعات مشتری</h3>
+            <p>بررسی اطلاعات مشتری و CRM برای تایید آدرس</p>
+            <button class="test-button" onclick="testCustomerInfo()">👤 نمایش اطلاعات مشتری</button>
+            <div id="test4-result"></div>
+        </div>
+    </div>
+
+    <script>
+        // تست 1: دانلود CSV بدون فیلتر
+        async function testCsvExport() {
+            const resultDiv = document.getElementById('test1-result');
+            resultDiv.innerHTML = '<div class="loading">⏳ در حال درخواست خروجی CSV...</div>';
+            
+            try {
+                const response = await fetch('/api/customers/export-orders-csv', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `test-export-${new Date().toISOString().split('T')[0]}.csv`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    window.URL.revokeObjectURL(url);
+                    
+                    resultDiv.innerHTML = '<div class="success">✅ فایل CSV با موفقیت دانلود شد</div>';
+                } else {
+                    const errorData = await response.json();
+                    resultDiv.innerHTML = `<div class="error">❌ خطا: ${errorData.message}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ خطای شبکه: ${error.message}</div>`;
+            }
+        }
+
+        // تست 2: دانلود CSV با فیلتر تاریخ
+        async function testCsvExportWithDates() {
+            const resultDiv = document.getElementById('test2-result');
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            resultDiv.innerHTML = '<div class="loading">⏳ در حال درخواست خروجی CSV با فیلتر تاریخ...</div>';
+            
+            try {
+                const params = new URLSearchParams();
+                if (startDate) params.append('startDate', startDate);
+                if (endDate) params.append('endDate', endDate);
+
+                const response = await fetch(`/api/customers/export-orders-csv?${params}`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `test-export-${startDate}-to-${endDate}.csv`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    window.URL.revokeObjectURL(url);
+                    
+                    resultDiv.innerHTML = `<div class="success">✅ فایل CSV بازه ${startDate} تا ${endDate} با موفقیت دانلود شد</div>`;
+                } else {
+                    const errorData = await response.json();
+                    resultDiv.innerHTML = `<div class="error">❌ خطا: ${errorData.message}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ خطای شبکه: ${error.message}</div>`;
+            }
+        }
+
+        // تست 3: نمایش محتوای CSV
+        async function testCsvContent() {
+            const resultDiv = document.getElementById('test3-result');
+            resultDiv.innerHTML = '<div class="loading">⏳ در حال دریافت محتوای CSV...</div>';
+            
+            try {
+                const response = await fetch('/api/customers/export-orders-csv', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                if (response.ok) {
+                    const csvText = await response.text();
+                    const lines = csvText.split('\n');
+                    const preview = lines.slice(0, 10).join('\n'); // نمایش 10 خط اول
+                    
+                    resultDiv.innerHTML = `
+                        <div class="success">✅ محتوای CSV دریافت شد (${lines.length} خط):</div>
+                        <div class="result">${preview}${lines.length > 10 ? '\n... و سایر خطوط' : ''}</div>
+                    `;
+                } else {
+                    const errorData = await response.json();
+                    resultDiv.innerHTML = `<div class="error">❌ خطا: ${errorData.message}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ خطای شبکه: ${error.message}</div>`;
+            }
+        }
+
+        // تست 4: بررسی اطلاعات مشتری
+        async function testCustomerInfo() {
+            const resultDiv = document.getElementById('test4-result');
+            resultDiv.innerHTML = '<div class="loading">⏳ در حال دریافت اطلاعات مشتری...</div>';
+            
+            try {
+                const response = await fetch('/api/customers/me', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                if (response.ok) {
+                    const customerData = await response.json();
+                    const customer = customerData.customer;
+                    
+                    resultDiv.innerHTML = `
+                        <div class="success">✅ اطلاعات مشتری:</div>
+                        <div class="result">نام: ${customer?.firstName} ${customer?.lastName}
+آدرس: ${customer?.address || 'ثبت نشده'}
+شهر: ${customer?.city || 'ثبت نشده'}
+کشور: ${customer?.country || 'ثبت نشده'}
+                        </div>
+                    `;
+                } else {
+                    const errorData = await response.json();
+                    resultDiv.innerHTML = `<div class="error">❌ خطا: ${errorData.message}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ خطای شبکه: ${error.message}</div>`;
+            }
+        }
+
+        // آماده‌سازی اولیه
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔍 صفحه تست خروجی CSV با آدرس کامل آماده شد');
+        });
+    </script>
+</body>
+</html>
