@@ -194,7 +194,7 @@ const createPurchaseSchema = (lang: Language) => z.object({
   customerName: z.string().min(2, translations[lang].nameRequired),
   phone: z.string().min(10, translations[lang].phoneRequired),
   address: z.string().min(10, translations[lang].addressRequired),
-  city: z.string().min(2, translations[lang].cityRequired),
+  city: z.string().optional(), // Make city optional to prevent validation failures
   country: z.string().default('Iraq'), // Add country field with default
   postalCode: z.string().optional(),
   notes: z.string().optional(),
@@ -466,7 +466,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         customerName: fullName || customerToUse.name || "",
         phone: customerToUse.phone || "",
         address: customerToUse.address || customerToUse.secondaryAddress || "",
-        city: customerToUse.city || "",
+        city: customerToUse.city || customerToUse.cityRegion || customerToUse.province || "Iraq",
         country: customerToUse.country || "Iraq",
         postalCode: customerToUse.postalCode || "",
         notes: "",
@@ -1631,8 +1631,23 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                       console.log('🚀 [SUBMIT DEBUG] Form state:', form.formState);
                       console.log('🚀 [SUBMIT DEBUG] Form errors:', form.formState.errors);
                       console.log('🚀 [SUBMIT DEBUG] Form isValid:', form.formState.isValid);
+                      console.log('🚀 [SUBMIT DEBUG] Form values:', form.getValues());
                       console.log('🚀 [SUBMIT DEBUG] Payment method:', paymentMethod);
                       console.log('🚀 [SUBMIT DEBUG] Selected shipping method:', selectedShippingMethod);
+                      
+                      // Force validation trigger to see what's failing
+                      form.trigger().then((isValid) => {
+                        console.log('🚀 [SUBMIT DEBUG] Manual validation result:', isValid);
+                        if (!isValid) {
+                          console.log('🚀 [SUBMIT DEBUG] Validation failed, errors:', form.formState.errors);
+                          // Show specific field errors
+                          Object.entries(form.formState.errors).forEach(([field, error]) => {
+                            console.log(`🚀 [SUBMIT DEBUG] Field '${field}' error:`, error);
+                          });
+                        } else {
+                          console.log('🚀 [SUBMIT DEBUG] Form validation PASSED - proceeding with submission');
+                        }
+                      });
                     }}
                   >
                     {submitOrderMutation.isPending ? t.loading : t.submitOrder}
