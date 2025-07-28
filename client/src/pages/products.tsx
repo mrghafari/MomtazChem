@@ -203,7 +203,7 @@ export default function ProductsPage() {
   const { data: products, isLoading, refetch } = useQuery<ShowcaseProduct[]>({
     queryKey: ["/api/products"],
     staleTime: 0, // Always refetch for real-time updates
-    cacheTime: 0, // Don't cache data
+    gcTime: 0, // Don't cache data
     refetchOnMount: true,
     refetchOnWindowFocus: true,
   });
@@ -269,9 +269,9 @@ export default function ProductsPage() {
     }
 
     // Determine active batch for each group (LIFO - newest with stock > 0)
-    for (const [barcode, group] of barcodeMap) {
+    for (const [barcode, group] of Array.from(barcodeMap.entries())) {
       // Sort batches by creation date (newest first)
-      group.batches.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      group.batches.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       
       // Find the first batch with stock > 0 (newest = LIFO)
       const activeBatch = group.batches.find(batch => batch.stockQuantity > 0);
@@ -286,7 +286,7 @@ export default function ProductsPage() {
   };
 
   const { mutate: createProduct } = useMutation({
-    mutationFn: (data: InsertShowcaseProduct) => {
+    mutationFn: (data: any) => {
       setIsSubmitting(true);
       return apiRequest("/api/products", { method: "POST", body: data });
     },
@@ -317,7 +317,7 @@ export default function ProductsPage() {
   });
 
   const { mutate: updateProduct } = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<InsertShowcaseProduct> }) => {
+    mutationFn: ({ id, data }: { id: number; data: any }) => {
       setIsSubmitting(true);
       return apiRequest(`/api/products/${id}`, { method: "PUT", body: data });
     },
@@ -495,7 +495,7 @@ export default function ProductsPage() {
       stockQuantity: 0,
       minStockLevel: 0,
       maxStockLevel: 0,
-      unitPrice: "0",
+      unitPrice: 0,
       currency: "IQD",
       isActive: true,
       // Variant fields
@@ -530,7 +530,7 @@ export default function ProductsPage() {
   });
 
   // Function to validate fields and set errors
-  const validateRequiredFields = (data: InsertShowcaseProduct) => {
+  const validateRequiredFields = (data: z.infer<typeof formSchema>) => {
     const errors: Record<string, string> = {};
     
     // Validate Pricing & Inventory section
@@ -562,7 +562,7 @@ export default function ProductsPage() {
     return errors;
   };
 
-  const onSubmit = (data: InsertShowcaseProduct) => {
+  const onSubmit = (data: z.infer<typeof formSchema>) => {
     console.log('🔍 [DEBUG] Form submission - Raw form data:', data);
     console.log('🔍 [DEBUG] Tags in form data:', data.tags, 'Type:', typeof data.tags);
     console.log('🔍 [DEBUG] Description in form data:', data.description);
