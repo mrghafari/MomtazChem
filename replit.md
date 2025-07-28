@@ -6,6 +6,36 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Flammable Materials Safety Compliance System - Complete Implementation (January 28, 2025)
+✅ **IMPLEMENTED: Complete safety compliance system for flammable materials transport with vehicle authorization controls**
+- **User Request Fulfilled**: "مثلا اتوبوس مسافر بری مجاز به حمل کالای آتش زا نیست" - Implemented vehicle restrictions for flammable materials
+- **Vehicle Template Enhancement**: Added `supportsFlammable` field to vehicle template forms:
+  - **Create Dialog**: Added "مواد آتش‌زا" switch with proper grid layout (grid-cols-4)
+  - **Edit Dialog**: Added "حمل مواد آتش‌زا" field with descriptive text and orange badge display
+  - **Visual Indicators**: Orange warning badges for flammable-authorized vehicles in templates list
+- **Smart Vehicle Selection Logic**: Enhanced delivery cost calculation API with flammable materials safety:
+  - **Cart Analysis**: Automatic detection of flammable products in shopping cart (`isFlammable: true`)
+  - **Vehicle Filtering**: Only vehicles with `supportsFlammable: true` are eligible for flammable materials
+  - **Safety Logging**: Console logging for flammable material transport restrictions
+  - **Multi-Vehicle Support**: Safety restrictions apply to both single and multi-vehicle solutions
+- **Enhanced Error Handling**: Specialized error messages for flammable materials restrictions:
+  - **Specific Message**: "⚠️ سفارش شما شامل مواد آتش‌زا است. متاسفانه هیچ خودرویی با مجوز حمل مواد آتش‌زا در دسترس نیست. لطفاً با مدیریت لجستیک تماس بگیرید."
+  - **API Response**: Enhanced JSON response with `containsFlammableProducts` flag for frontend handling
+- **Database Schema Integration**: Complete integration with existing `vehicle_templates.supports_flammable` column
+- **Safety Compliance Examples**:
+  - **Passenger Bus**: Cannot transport flammable materials (default `supportsFlammable: false`)
+  - **Specialized Trucks**: Can be authorized for flammable transport (`supportsFlammable: true`)
+  - **Mixed Carts**: If any product is flammable, all vehicles must be flammable-authorized
+- **Test Infrastructure**: Created comprehensive test file `test-flammable-safety-system.html` with 5 test scenarios:
+  - Regular products (all vehicles available)
+  - Flammable products (only authorized vehicles)
+  - Mixed products (flammable restrictions apply)
+  - Vehicle template verification
+  - Error handling demonstration
+- **Business Impact**: Complete chemical industry safety compliance ensuring only authorized vehicles transport flammable materials
+- **Technical Achievement**: Seamless integration with existing smart vehicle selection algorithm without disrupting normal operations
+- **Result**: Complete flammable materials safety system operational - vehicle selection now enforces proper authorization for hazardous chemical transport with appropriate safety restrictions and clear error messaging
+
 ### COMPLETED: Flexible Vehicle Type System Implementation - Custom Vehicle Types Support Added (January 28, 2025)
 ✅ **IMPLEMENTED: Complete flexible vehicle type system allowing unlimited custom vehicle type creation**
 - **User Request Fulfilled**: "انتخاب نوع خودرو الان محدود است این را اصلاح کن تا بتوانیم انواع دیگر خودرو را اضافه کنیم" - Removed all vehicle type restrictions

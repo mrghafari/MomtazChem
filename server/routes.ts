@@ -21172,11 +21172,23 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       const distance = parseFloat(destinationCityData[0].distanceFromErbilKm || '0');
       const weightKg = parseFloat(weight);
 
+      // Check if cart contains flammable products
+      let containsFlammableProducts = false;
+      if (cart && Array.isArray(cart)) {
+        for (const item of cart) {
+          if (item.isFlammable === true) {
+            containsFlammableProducts = true;
+            break;
+          }
+        }
+      }
+
       console.log('🎯 [DELIVERY COST] Calculation parameters:', {
         weight: weightKg,
         destination: destinationCity,
         distance: distance,
-        vehicleTemplateCount: vehicleTemplates.length
+        vehicleTemplateCount: vehicleTemplates.length,
+        containsFlammableProducts: containsFlammableProducts
       });
 
       // Calculate route type based on distance
@@ -21194,6 +21206,12 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         // Check if vehicle supports this route type
         if (!template.allowedRoutes.includes(routeType)) {
           return null; // Vehicle doesn't support this route type
+        }
+
+        // Check flammable products compatibility
+        if (containsFlammableProducts && !template.supportsFlammable) {
+          console.log(`🔥 [FLAMMABLE CHECK] Vehicle ${template.name} cannot transport flammable materials`);
+          return null; // Vehicle cannot transport flammable materials
         }
 
         // Calculate total cost
@@ -21249,6 +21267,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           // Sort templates by efficiency (cost per kg capacity)
           const sortedTemplates = [...vehicleTemplates]
             .filter(t => t.allowedRoutes.includes(routeType))
+            .filter(t => !containsFlammableProducts || t.supportsFlammable) // Filter out vehicles that can't handle flammable materials
             .sort((a, b) => {
               const efficiencyA = parseFloat(a.basePrice) / parseFloat(a.maxWeightKg);
               const efficiencyB = parseFloat(b.basePrice) / parseFloat(b.maxWeightKg);
@@ -21354,9 +21373,16 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       const allSolutions = calculateMultiVehicleSolution();
 
       if (!allSolutions.length) {
+        let errorMessage = "هیچ خودرویی برای این وزن و مقصد مناسب نیست";
+        
+        if (containsFlammableProducts) {
+          errorMessage = "⚠️ سفارش شما شامل مواد آتش‌زا است. متاسفانه هیچ خودرویی با مجوز حمل مواد آتش‌زا در دسترس نیست. لطفاً با مدیریت لجستیک تماس بگیرید.";
+        }
+        
         return res.status(400).json({
           success: false,
-          message: "هیچ خودرویی برای این وزن و مقصد مناسب نیست"
+          message: errorMessage,
+          containsFlammableProducts: containsFlammableProducts
         });
       }
 
