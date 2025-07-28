@@ -427,6 +427,12 @@ export default function ContentManagement() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {(updateContentMutation.isPending || createContentMutation.isPending) && (
+                    <div className="flex items-center gap-2 text-sm text-blue-600 bg-blue-50 p-2 rounded-md">
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      در حال ذخیره تغییرات...
+                    </div>
+                  )}
                   <div className="flex items-center justify-between">
                     <div>
                       <h4 className="font-medium text-gray-900">وضعیت بنر تخفیف</h4>
@@ -434,15 +440,19 @@ export default function ContentManagement() {
                     </div>
                     <Switch
                       checked={contentItems?.find((item: ContentItem) => item.key === 'discount_banner_enabled')?.isActive || false}
+                      disabled={updateContentMutation.isPending || createContentMutation.isPending}
                       onCheckedChange={(checked) => {
+                        console.log('🎛️ [TOGGLE] Discount banner toggle clicked:', checked);
                         const existingItem = contentItems?.find((item: ContentItem) => item.key === 'discount_banner_enabled');
                         if (existingItem) {
+                          console.log('🎛️ [TOGGLE] Updating existing discount banner item:', existingItem.id);
                           updateContentMutation.mutate({
                             id: existingItem.id,
-                            content: existingItem.content,
+                            content: checked ? 'true' : 'false',
                             isActive: checked
                           });
                         } else {
+                          console.log('🎛️ [TOGGLE] Creating new discount banner item');
                           createContentMutation.mutate({
                             key: 'discount_banner_enabled',
                             content: checked ? 'true' : 'false',
@@ -461,21 +471,26 @@ export default function ContentManagement() {
                     <Textarea
                       placeholder="متن بنر تخفیف را وارد کنید..."
                       value={contentItems?.find((item: ContentItem) => item.key === 'discount_banner_text')?.content || ''}
+                      disabled={updateContentMutation.isPending || createContentMutation.isPending}
                       onChange={(e) => {
+                        console.log('🎛️ [TEXT] Discount banner text changed:', e.target.value);
                         const existingItem = contentItems?.find((item: ContentItem) => item.key === 'discount_banner_text');
                         if (existingItem) {
+                          console.log('🎛️ [TEXT] Updating existing discount banner text item:', existingItem.id);
                           updateContentMutation.mutate({
                             id: existingItem.id,
                             content: e.target.value,
                             isActive: existingItem.isActive
                           });
                         } else {
+                          console.log('🎛️ [TEXT] Creating new discount banner text item');
                           createContentMutation.mutate({
                             key: 'discount_banner_text',
                             content: e.target.value,
                             contentType: 'text',
                             language: selectedLanguage,
-                            section: 'discount_banner'
+                            section: 'discount_banner',
+                            isActive: true
                           });
                         }
                       }}
@@ -497,6 +512,12 @@ export default function ContentManagement() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {(updateContentMutation.isPending || createContentMutation.isPending) && (
+                    <div className="flex items-center gap-2 text-sm text-blue-600 bg-blue-50 p-2 rounded-md">
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      در حال ذخیره تغییرات...
+                    </div>
+                  )}
                   <div className="flex items-center justify-between">
                     <div>
                       <h4 className="font-medium text-gray-900">وضعیت AI</h4>
@@ -504,15 +525,19 @@ export default function ContentManagement() {
                     </div>
                     <Switch
                       checked={contentItems?.find((item: ContentItem) => item.key === 'ai_enabled')?.isActive || false}
+                      disabled={updateContentMutation.isPending || createContentMutation.isPending}
                       onCheckedChange={(checked) => {
+                        console.log('🎛️ [TOGGLE] AI toggle clicked:', checked);
                         const existingItem = contentItems?.find((item: ContentItem) => item.key === 'ai_enabled');
                         if (existingItem) {
+                          console.log('🎛️ [TOGGLE] Updating existing AI item:', existingItem.id);
                           updateContentMutation.mutate({
                             id: existingItem.id,
-                            content: existingItem.content,
+                            content: checked ? 'true' : 'false',
                             isActive: checked
                           });
                         } else {
+                          console.log('🎛️ [TOGGLE] Creating new AI item');
                           createContentMutation.mutate({
                             key: 'ai_enabled',
                             content: checked ? 'true' : 'false',
@@ -531,21 +556,26 @@ export default function ContentManagement() {
                     <Textarea
                       placeholder="پیام یا توضیح AI را وارد کنید..."
                       value={contentItems?.find((item: ContentItem) => item.key === 'ai_message')?.content || ''}
+                      disabled={updateContentMutation.isPending || createContentMutation.isPending}
                       onChange={(e) => {
+                        console.log('🎛️ [TEXT] AI message changed:', e.target.value);
                         const existingItem = contentItems?.find((item: ContentItem) => item.key === 'ai_message');
                         if (existingItem) {
+                          console.log('🎛️ [TEXT] Updating existing AI message item:', existingItem.id);
                           updateContentMutation.mutate({
                             id: existingItem.id,
                             content: e.target.value,
                             isActive: existingItem.isActive
                           });
                         } else {
+                          console.log('🎛️ [TEXT] Creating new AI message item');
                           createContentMutation.mutate({
                             key: 'ai_message',
                             content: e.target.value,
                             contentType: 'text',
                             language: selectedLanguage,
-                            section: 'ai_settings'
+                            section: 'ai_settings',
+                            isActive: true
                           });
                         }
                       }}
@@ -559,21 +589,26 @@ export default function ContentManagement() {
                       type="password"
                       placeholder="OpenAI API Key..."
                       value={contentItems?.find((item: ContentItem) => item.key === 'openai_api_key')?.content || ''}
+                      disabled={updateContentMutation.isPending || createContentMutation.isPending}
                       onChange={(e) => {
+                        console.log('🎛️ [TEXT] OpenAI API Key changed');
                         const existingItem = contentItems?.find((item: ContentItem) => item.key === 'openai_api_key');
                         if (existingItem) {
+                          console.log('🎛️ [TEXT] Updating existing OpenAI API Key item:', existingItem.id);
                           updateContentMutation.mutate({
                             id: existingItem.id,
                             content: e.target.value,
                             isActive: existingItem.isActive
                           });
                         } else {
+                          console.log('🎛️ [TEXT] Creating new OpenAI API Key item');
                           createContentMutation.mutate({
                             key: 'openai_api_key',
                             content: e.target.value,
                             contentType: 'text',
                             language: selectedLanguage,
-                            section: 'ai_settings'
+                            section: 'ai_settings',
+                            isActive: true
                           });
                         }
                       }}

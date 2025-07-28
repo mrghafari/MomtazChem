@@ -1,0 +1,136 @@
+VM10 admin:51 Tawk.to script loaded successfully
+chunk-RPCDYKBN.js?v=6aa58533:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+useAuth.ts:43 Auth check result: Object
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:117574)
+    at t.value (twk-chunk-common.js:2:150658)
+    at p.updateUUID (twk-chunk-common.js:2:202310)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:124589)
+    at twk-chunk-common.js:2:123900
+value @ twk-chunk-common.js:2
+VM10 admin:23 Tawk.to Live Chat loaded successfully
+api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+useAuth.ts:43 Auth check result: Object
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+site-management-fixed.tsx:71 🔍 [DEBUG] useEffect triggered, userPermissions: undefined
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+site-management-fixed.tsx:71 🔍 [DEBUG] useEffect triggered, userPermissions: Object
+site-management-fixed.tsx:74 🔍 [DEBUG] userPermissions modules: Array(31)
+site-management-fixed.tsx:399 🔍 [DEBUG] Full userPermissions response: Object
+site-management-fixed.tsx:400 🔍 [DEBUG] userPermissions.modules: Array(31)
+site-management-fixed.tsx:401 🔍 [DEBUG] userPermissions.permissions: Array(31)
+site-management-fixed.tsx:406 🔍 [DEBUG] Total allButtons count: 31
+site-management-fixed.tsx:407 🔍 [DEBUG] AI Settings exists in allButtons: true
+site-management-fixed.tsx:408 🔍 [DEBUG] Content Management exists in allButtons: true
+site-management-fixed.tsx:410 🔍 [DEBUG] allowedModules: Array(31)
+site-management-fixed.tsx:411 🔍 [DEBUG] kpi_dashboard in allowedModules? true
+site-management-fixed.tsx:412 🔍 [DEBUG] management_dashboard in allowedModules? true
+site-management-fixed.tsx:413 🔍 [DEBUG] finance in allowedModules? true
+site-management-fixed.tsx:414 🔍 [DEBUG] geography_analytics in allowedModules? true
+site-management-fixed.tsx:415 🔍 [DEBUG] ai_settings in allowedModules? true
+site-management-fixed.tsx:416 🔍 [DEBUG] content_management in allowedModules? true
+site-management-fixed.tsx:422 🔍 [CRITICAL] Missing button detection:
+site-management-fixed.tsx:430 🔍 [CRITICAL] Missing buttons count: 0
+site-management-fixed.tsx:432 🔍 [DEBUG] finance button found in allButtons? Object
+site-management-fixed.tsx:433 🔍 [DEBUG] geography_analytics button found in allButtons? Object
+site-management-fixed.tsx:434 🔍 [DEBUG] ai_settings button found in allButtons? Object
+site-management-fixed.tsx:435 🔍 [DEBUG] content_management button found in allButtons? Object
+site-management-fixed.tsx:436 🔍 [DEBUG] finance button in filtered? Object
+site-management-fixed.tsx:437 🔍 [DEBUG] geography_analytics button in filtered? Object
+site-management-fixed.tsx:438 🔍 [DEBUG] ai_settings button in filtered? Object
+site-management-fixed.tsx:439 🔍 [DEBUG] content_management button in filtered? Object
+site-management-fixed.tsx:76 🔍 [DEBUG] filtered buttons count: 31
+site-management-fixed.tsx:77 🔍 [DEBUG] First 5 filtered buttons: Array(5)
+site-management-fixed.tsx:78 🔍 [DEBUG] AI Control button in filtered: Object
+site-management-fixed.tsx:79 🔍 [DEBUG] Content Management button in filtered: Object
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+chunk-RPCDYKBN.js?v=6aa58533:521 Warning: validateDOMNesting(...): <button> cannot appear as a descendant of <button>.
+    at button
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-AXMZZQ2X.js?v=6aa58533:42:13
+    at Provider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=6aa58533:38:15)
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-switch.js?v=6aa58533:43:7
+    at _c (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ui/switch.tsx:21:11)
+    at button
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-AXMZZQ2X.js?v=6aa58533:42:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=6aa58533:79:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=6aa58533:56:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-AXMZZQ2X.js?v=6aa58533:42:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=6aa58533:79:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=6aa58533:56:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-TPYHSINA.js?v=6aa58533:51:15
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-NPVY7C26.js?v=6aa58533:147:7
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tabs.js?v=6aa58533:123:13
+    at _c3 (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ui/tabs.tsx:47:12)
+    at div
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-AXMZZQ2X.js?v=6aa58533:42:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=6aa58533:79:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=6aa58533:56:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-AXMZZQ2X.js?v=6aa58533:42:13
+    at Provider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=6aa58533:38:15)
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-NPVY7C26.js?v=6aa58533:56:5
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=6aa58533:79:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=6aa58533:56:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-TPYHSINA.js?v=6aa58533:39:15
+    at Provider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=6aa58533:38:15)
+    at CollectionProvider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-TPYHSINA.js?v=6aa58533:29:13)
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-NPVY7C26.js?v=6aa58533:50:76
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tabs.js?v=6aa58533:95:13
+    at _c (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ui/tabs.tsx:22:11)
+    at div
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-AXMZZQ2X.js?v=6aa58533:42:13
+    at Provider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=6aa58533:38:15)
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tabs.js?v=6aa58533:53:7
+    at div
+    at div
+    at ContentManagement (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/content-management.tsx:36:27)
+    at Route (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=6aa58533:265:16)
+    at Switch (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=6aa58533:321:17)
+    at main
+    at div
+    at Router
+    at Provider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=6aa58533:38:15)
+    at TooltipProvider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=6aa58533:65:5)
+    at LanguageProvider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/contexts/LanguageContext.tsx:21:36)
+    at QueryClientProvider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=6aa58533:2805:3)
+    at App
+printWarning @ chunk-RPCDYKBN.js?v=6aa58533:521
+api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+useAuth.ts:43 Auth check result: Object
+api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+useAuth.ts:43 Auth check result: Object
+useAuth.ts:43 Auth check result: Object
+useAuth.ts:43 Auth check result: {success: true, user: {…}}
+content-management.tsx?t=1753730938093:683 🎛️ [TOGGLE] Discount banner toggle clicked: true
+content-management.tsx?t=1753730938093:693 🎛️ [TOGGLE] Creating new discount banner item
+queryClient.ts:81  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+(anonymous) @ queryClient.ts:81
+fetchFn @ @tanstack_react-query.js?v=6aa58533:840
+run @ @tanstack_react-query.js?v=6aa58533:494
+start @ @tanstack_react-query.js?v=6aa58533:536
+fetch @ @tanstack_react-query.js?v=6aa58533:926
+executeFetch_fn @ @tanstack_react-query.js?v=6aa58533:2211
+fetch @ @tanstack_react-query.js?v=6aa58533:2011
+refetch @ @tanstack_react-query.js?v=6aa58533:2001
+onFocus @ @tanstack_react-query.js?v=6aa58533:749
+(anonymous) @ @tanstack_react-query.js?v=6aa58533:1112
+(anonymous) @ @tanstack_react-query.js?v=6aa58533:1111
+batch @ @tanstack_react-query.js?v=6aa58533:583
+onFocus @ @tanstack_react-query.js?v=6aa58533:1110
+(anonymous) @ @tanstack_react-query.js?v=6aa58533:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=6aa58533:313
+onFocus @ @tanstack_react-query.js?v=6aa58533:312
+(anonymous) @ @tanstack_react-query.js?v=6aa58533:299
+listener @ @tanstack_react-query.js?v=6aa58533:270
+useAuth.ts:43 Auth check result: {success: true, user: {…}}
+content-management.tsx?t=1753730952538:831 🎛️ [TOGGLE] AI toggle clicked: true
+content-management.tsx?t=1753730952538:841 🎛️ [TOGGLE] Creating new AI item
+content-management.tsx?t=1753730959238:683 🎛️ [TOGGLE] Discount banner toggle clicked: true
+content-management.tsx?t=1753730959238:693 🎛️ [TOGGLE] Creating new discount banner item
+useAuth.ts:43 Auth check result: {success: true, user: {…}}
+content-management.tsx:439 🎛️ [TOGGLE] Discount banner toggle clicked: true
+content-management.tsx:449 🎛️ [TOGGLE] Creating new discount banner item
