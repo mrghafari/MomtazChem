@@ -24,7 +24,7 @@ export default function ProductReviews() {
   });
 
   // Find the specific product
-  const product = products?.find((p: any) => p.id === parseInt(id || '0'));
+  const product = Array.isArray(products) ? products.find((p: any) => p.id === parseInt(id || '0')) : null;
 
   // Get product reviews data - using proper shop products endpoint
   const { data: reviewsData, isLoading: isLoadingReviews } = useQuery({
@@ -33,8 +33,11 @@ export default function ProductReviews() {
   });
 
   // Extract reviews and stats from the response data
-  const reviews = reviewsData?.data?.reviews || [];
-  const productStats = reviewsData?.data?.stats || { averageRating: 0, totalReviews: 0 };
+  const reviews = (reviewsData as any)?.data?.reviews || [];
+  const productStats = (reviewsData as any)?.data?.stats || { averageRating: 0, totalReviews: 0 };
+  
+  // Check if we have valid data to display
+  const hasValidData = (reviewsData as any)?.success && (reviewsData as any)?.data;
 
   // Debug logging
   console.log('🔍 DEBUGGING REVIEWS ISSUE:');
@@ -48,10 +51,10 @@ export default function ProductReviews() {
   // Check if reviewsData structure is correct
   if (reviewsData) {
     console.log('ReviewsData type:', typeof reviewsData);
-    console.log('ReviewsData keys:', Object.keys(reviewsData));
-    if (reviewsData.data) {
-      console.log('ReviewsData.data keys:', Object.keys(reviewsData.data));
-      console.log('ReviewsData.data.reviews:', reviewsData.data.reviews);
+    console.log('ReviewsData keys:', Object.keys(reviewsData as any));
+    if ((reviewsData as any).data) {
+      console.log('ReviewsData.data keys:', Object.keys((reviewsData as any).data));
+      console.log('ReviewsData.data.reviews:', (reviewsData as any).data.reviews);
     }
   }
 
@@ -60,25 +63,32 @@ export default function ProductReviews() {
     mutationFn: async (reviewData: { rating: number; comment: string }) => {
       const payload = {
         rating: reviewData.rating,
-        comment: reviewData.comment, // Use comment field to match API
-        title: '', // Optional field
-        pros: [], // Optional field
-        cons: [] // Optional field
+        comment: reviewData.comment.trim(),
+        title: `نظر مشتری در مورد ${product?.name || 'محصول'}`, // Generate meaningful title
       };
-      return await apiRequest(`/api/products/${id}/reviews`, 'POST', payload);
+      console.log('🔥 [REVIEW SUBMIT] Sending payload:', payload);
+      const response = await fetch(`/api/products/${id}/reviews`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(payload)
+      });
+      return await response.json();
     },
     onSuccess: () => {
       // Invalidate and refetch product reviews (which includes stats)
       queryClient.invalidateQueries({ queryKey: [`/api/products/${id}/reviews`] });
       toast({
-        title: t.reviewSubmitted,
-        description: t.reviewSubmittedDesc,
+        title: "نظر ثبت شد",
+        description: "نظر شما با موفقیت ثبت شد",
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      console.error('🔥 [REVIEW SUBMIT ERROR]', error);
+      const errorMessage = error?.message || error?.toString() || "خطای نامشخص";
       toast({
-        title: t.reviewError,
-        description: t.reviewErrorDesc,
+        title: "خطا در ثبت نظر",
+        description: `خطا: ${errorMessage}`,
         variant: 'destructive',
       });
     },
@@ -97,6 +107,17 @@ export default function ProductReviews() {
             <div className="h-64 bg-gray-200 rounded mb-4"></div>
             <div className="h-32 bg-gray-200 rounded"></div>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading message if still waiting for valid data
+  if (!hasValidData && !isLoadingReviews) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto text-center">
+          <p className="text-gray-600">در حال بارگذاری نظرات...</p>
         </div>
       </div>
     );

@@ -1,0 +1,879 @@
+474:196 Tawk.to script loaded successfully
+chunk-RPCDYKBN.js?v=6aa58533:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 474
+product-reviews.tsx:42 Reviews Data Full: undefined
+product-reviews.tsx:43 Reviews Array Length: 0
+product-reviews.tsx:44 Reviews Array: []
+product-reviews.tsx:45 Product Stats: {averageRating: 0, totalReviews: 0}
+product-reviews.tsx:46 Product: undefined
+queryClient.ts:81  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+(anonymous) @ queryClient.ts:81
+fetchFn @ @tanstack_react-query.js?v=6aa58533:840
+run @ @tanstack_react-query.js?v=6aa58533:494
+start @ @tanstack_react-query.js?v=6aa58533:536
+fetch @ @tanstack_react-query.js?v=6aa58533:926
+executeFetch_fn @ @tanstack_react-query.js?v=6aa58533:2211
+onSubscribe @ @tanstack_react-query.js?v=6aa58533:1898
+subscribe @ @tanstack_react-query.js?v=6aa58533:24
+(anonymous) @ @tanstack_react-query.js?v=6aa58533:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=6aa58533:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=6aa58533:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=6aa58533:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=6aa58533:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=6aa58533:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=6aa58533:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=6aa58533:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=6aa58533:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=6aa58533:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=6aa58533:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=6aa58533:19432
+commitRoot @ chunk-RPCDYKBN.js?v=6aa58533:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=6aa58533:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=6aa58533:18718
+workLoop @ chunk-RPCDYKBN.js?v=6aa58533:197
+flushWork @ chunk-RPCDYKBN.js?v=6aa58533:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=6aa58533:384
+useAuth.ts:30  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 401 (Unauthorized)
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=6aa58533:840
+run @ @tanstack_react-query.js?v=6aa58533:494
+start @ @tanstack_react-query.js?v=6aa58533:536
+fetch @ @tanstack_react-query.js?v=6aa58533:926
+executeFetch_fn @ @tanstack_react-query.js?v=6aa58533:2211
+onSubscribe @ @tanstack_react-query.js?v=6aa58533:1898
+subscribe @ @tanstack_react-query.js?v=6aa58533:24
+(anonymous) @ @tanstack_react-query.js?v=6aa58533:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=6aa58533:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=6aa58533:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=6aa58533:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=6aa58533:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=6aa58533:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=6aa58533:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=6aa58533:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=6aa58533:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=6aa58533:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=6aa58533:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=6aa58533:19432
+commitRoot @ chunk-RPCDYKBN.js?v=6aa58533:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=6aa58533:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=6aa58533:18718
+workLoop @ chunk-RPCDYKBN.js?v=6aa58533:197
+flushWork @ chunk-RPCDYKBN.js?v=6aa58533:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=6aa58533:384
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 474
+product-reviews.tsx:42 Reviews Data Full: undefined
+product-reviews.tsx:43 Reviews Array Length: 0
+product-reviews.tsx:44 Reviews Array: []
+product-reviews.tsx:45 Product Stats: {averageRating: 0, totalReviews: 0}
+product-reviews.tsx:46 Product: {id: 474, name: 'NPK Fertilizer 20-20-20', category: 'agricultural-fertilizers', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 474
+product-reviews.tsx:42 Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [
+      {
+        "id": 46,
+        "productId": 474,
+        "customerId": 8,
+        "customerName": "ABAS ABASI",
+        "rating": 5,
+        "title": "محصول عالی",
+        "comment": "کود NPK کیفیت بسیار بالایی دارد و نتایج فوق‌العاده‌ای در کشاورزی داشته",
+        "isVerifiedPurchase": true,
+        "helpfulVotes": 0,
+        "notHelpfulVotes": 0,
+        "adminResponse": null,
+        "adminResponseDate": null,
+        "createdAt": "2025-07-28 19:09:34.462694",
+        "updatedAt": "2025-07-28 19:09:34.462694"
+      }
+    ],
+    "stats": {
+      "totalReviews": 1,
+      "averageRating": 5,
+      "ratingDistribution": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 1
+      },
+      "lastReviewDate": "2025-07-28 19:09:44.87269"
+    }
+  }
+}
+product-reviews.tsx:43 Reviews Array Length: 1
+product-reviews.tsx:44 Reviews Array: [{…}]
+product-reviews.tsx:45 Product Stats: {totalReviews: 1, averageRating: 5, ratingDistribution: {…}, lastReviewDate: '2025-07-28 19:09:44.87269'}
+product-reviews.tsx:46 Product: {id: 474, name: 'NPK Fertilizer 20-20-20', category: 'agricultural-fertilizers', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+product-reviews.tsx:50 ReviewsData type: object
+product-reviews.tsx:51 ReviewsData keys: (2) ['success', 'data']
+product-reviews.tsx:53 ReviewsData.data keys: (2) ['reviews', 'stats']
+product-reviews.tsx:54 ReviewsData.data.reviews: [{…}]
+ProductRating.tsx:150 ProductRating Props: {productId: 474, productName: 'NPK Fertilizer 20-20-20', averageRating: 5, totalReviews: 1, reviews: Array(1)}
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:117574)
+    at t.value (twk-chunk-common.js:2:150658)
+    at p.updateUUID (twk-chunk-common.js:2:202310)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:124589)
+    at twk-chunk-common.js:2:123900
+value @ twk-chunk-common.js:2
+updateUUID @ twk-chunk-common.js:2
+(anonymous) @ twk-vendor.js:2
+p.dispatch @ twk-vendor.js:2
+dispatch @ twk-vendor.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+Promise.then
+value @ twk-chunk-common.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+56d7 @ twk-chunk-common.js:2
+a @ twk-runtime.js:1
+r @ twk-runtime.js:1
+t @ twk-runtime.js:1
+(anonymous) @ twk-runtime.js:1
+(anonymous) @ twk-runtime.js:1
+474:168 Tawk.to Live Chat loaded successfully
+queryClient.ts:81  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+(anonymous) @ queryClient.ts:81
+fetchFn @ @tanstack_react-query.js?v=6aa58533:840
+run @ @tanstack_react-query.js?v=6aa58533:494
+start @ @tanstack_react-query.js?v=6aa58533:536
+fetch @ @tanstack_react-query.js?v=6aa58533:926
+executeFetch_fn @ @tanstack_react-query.js?v=6aa58533:2211
+fetch @ @tanstack_react-query.js?v=6aa58533:2011
+refetch @ @tanstack_react-query.js?v=6aa58533:2001
+onFocus @ @tanstack_react-query.js?v=6aa58533:749
+(anonymous) @ @tanstack_react-query.js?v=6aa58533:1112
+(anonymous) @ @tanstack_react-query.js?v=6aa58533:1111
+batch @ @tanstack_react-query.js?v=6aa58533:583
+onFocus @ @tanstack_react-query.js?v=6aa58533:1110
+(anonymous) @ @tanstack_react-query.js?v=6aa58533:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=6aa58533:313
+onFocus @ @tanstack_react-query.js?v=6aa58533:312
+(anonymous) @ @tanstack_react-query.js?v=6aa58533:299
+listener @ @tanstack_react-query.js?v=6aa58533:270
+useAuth.ts:30  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 401 (Unauthorized)
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=6aa58533:840
+run @ @tanstack_react-query.js?v=6aa58533:494
+start @ @tanstack_react-query.js?v=6aa58533:536
+fetch @ @tanstack_react-query.js?v=6aa58533:926
+executeFetch_fn @ @tanstack_react-query.js?v=6aa58533:2211
+fetch @ @tanstack_react-query.js?v=6aa58533:2011
+refetch @ @tanstack_react-query.js?v=6aa58533:2001
+onFocus @ @tanstack_react-query.js?v=6aa58533:749
+(anonymous) @ @tanstack_react-query.js?v=6aa58533:1112
+(anonymous) @ @tanstack_react-query.js?v=6aa58533:1111
+batch @ @tanstack_react-query.js?v=6aa58533:583
+onFocus @ @tanstack_react-query.js?v=6aa58533:1110
+(anonymous) @ @tanstack_react-query.js?v=6aa58533:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=6aa58533:313
+onFocus @ @tanstack_react-query.js?v=6aa58533:312
+(anonymous) @ @tanstack_react-query.js?v=6aa58533:299
+listener @ @tanstack_react-query.js?v=6aa58533:270
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: {}
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: []
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: {}
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: []
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: {}
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: []
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 4 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 474: {…}, 475: {…}}
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]
+shop.tsx:373  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+checkCustomerAuth @ shop.tsx:373
+(anonymous) @ shop.tsx:298
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=6aa58533:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=6aa58533:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=6aa58533:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=6aa58533:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=6aa58533:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=6aa58533:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=6aa58533:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=6aa58533:19416
+commitRoot @ chunk-RPCDYKBN.js?v=6aa58533:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=6aa58533:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=6aa58533:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=6aa58533:18627
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 4 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 474: {…}, 475: {…}}
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 4 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 474: {…}, 475: {…}}
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 4 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 474: {…}, 475: {…}}
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 4 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 474: {…}, 475: {…}}
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 4 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 474: {…}, 475: {…}}
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 472
+product-reviews.tsx:42 Reviews Data Full: undefined
+product-reviews.tsx:43 Reviews Array Length: 0
+product-reviews.tsx:44 Reviews Array: []
+product-reviews.tsx:45 Product Stats: {averageRating: 0, totalReviews: 0}
+product-reviews.tsx:46 Product: {id: 472, name: 'NPK Fertilizer Complex', category: 'Agricultural Fertilizers', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 472
+product-reviews.tsx:42 Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "totalReviews": 0,
+      "averageRating": 0,
+      "ratingDistribution": {},
+      "lastReviewDate": null
+    }
+  }
+}
+product-reviews.tsx:43 Reviews Array Length: 0
+product-reviews.tsx:44 Reviews Array: []
+product-reviews.tsx:45 Product Stats: {totalReviews: 0, averageRating: 0, ratingDistribution: {…}, lastReviewDate: null}
+product-reviews.tsx:46 Product: {id: 472, name: 'NPK Fertilizer Complex', category: 'Agricultural Fertilizers', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+product-reviews.tsx:50 ReviewsData type: object
+product-reviews.tsx:51 ReviewsData keys: (2) ['success', 'data']
+product-reviews.tsx:53 ReviewsData.data keys: (2) ['reviews', 'stats']
+product-reviews.tsx:54 ReviewsData.data.reviews: []
+ProductRating.tsx:150 ProductRating Props: {productId: 472, productName: 'NPK Fertilizer Complex', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+queryClient.ts:81  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+(anonymous) @ queryClient.ts:81
+fetchFn @ @tanstack_react-query.js?v=6aa58533:840
+run @ @tanstack_react-query.js?v=6aa58533:494
+start @ @tanstack_react-query.js?v=6aa58533:536
+fetch @ @tanstack_react-query.js?v=6aa58533:926
+executeFetch_fn @ @tanstack_react-query.js?v=6aa58533:2211
+onSubscribe @ @tanstack_react-query.js?v=6aa58533:1898
+subscribe @ @tanstack_react-query.js?v=6aa58533:24
+(anonymous) @ @tanstack_react-query.js?v=6aa58533:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=6aa58533:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=6aa58533:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=6aa58533:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=6aa58533:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=6aa58533:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=6aa58533:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=6aa58533:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=6aa58533:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=6aa58533:19416
+commitRoot @ chunk-RPCDYKBN.js?v=6aa58533:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=6aa58533:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=6aa58533:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=6aa58533:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=6aa58533:555
+flush @ @tanstack_react-query.js?v=6aa58533:569
+batch @ @tanstack_react-query.js?v=6aa58533:587
+dispatch_fn @ @tanstack_react-query.js?v=6aa58533:996
+setData @ @tanstack_react-query.js?v=6aa58533:696
+onSuccess @ @tanstack_react-query.js?v=6aa58533:897
+resolve @ @tanstack_react-query.js?v=6aa58533:456
+Promise.then
+run @ @tanstack_react-query.js?v=6aa58533:498
+start @ @tanstack_react-query.js?v=6aa58533:536
+fetch @ @tanstack_react-query.js?v=6aa58533:926
+executeFetch_fn @ @tanstack_react-query.js?v=6aa58533:2211
+onSubscribe @ @tanstack_react-query.js?v=6aa58533:1898
+subscribe @ @tanstack_react-query.js?v=6aa58533:24
+(anonymous) @ @tanstack_react-query.js?v=6aa58533:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=6aa58533:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=6aa58533:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=6aa58533:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=6aa58533:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=6aa58533:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=6aa58533:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=6aa58533:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=6aa58533:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=6aa58533:19416
+commitRoot @ chunk-RPCDYKBN.js?v=6aa58533:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=6aa58533:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=6aa58533:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=6aa58533:18627
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 4 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 474: {…}, 475: {…}}
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 4 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 474: {…}, 475: {…}}
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]
+useAuth.ts:30  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 401 (Unauthorized)
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=6aa58533:840
+run @ @tanstack_react-query.js?v=6aa58533:494
+start @ @tanstack_react-query.js?v=6aa58533:536
+fetch @ @tanstack_react-query.js?v=6aa58533:926
+executeFetch_fn @ @tanstack_react-query.js?v=6aa58533:2211
+onSubscribe @ @tanstack_react-query.js?v=6aa58533:1898
+subscribe @ @tanstack_react-query.js?v=6aa58533:24
+(anonymous) @ @tanstack_react-query.js?v=6aa58533:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=6aa58533:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=6aa58533:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=6aa58533:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=6aa58533:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=6aa58533:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=6aa58533:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=6aa58533:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=6aa58533:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=6aa58533:19416
+commitRoot @ chunk-RPCDYKBN.js?v=6aa58533:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=6aa58533:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=6aa58533:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=6aa58533:18627
+shop.tsx:373  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+checkCustomerAuth @ shop.tsx:373
+(anonymous) @ shop.tsx:298
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=6aa58533:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=6aa58533:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=6aa58533:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=6aa58533:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=6aa58533:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=6aa58533:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=6aa58533:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=6aa58533:19416
+commitRoot @ chunk-RPCDYKBN.js?v=6aa58533:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=6aa58533:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=6aa58533:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=6aa58533:18627
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 4 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 474: {…}, 475: {…}}
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 4 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 474: {…}, 475: {…}}
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 4 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 474: {…}, 475: {…}}
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 4 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 474: {…}, 475: {…}}
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]
+shop.tsx:461 🔐 [LOGIN] Starting handleLoginSuccess
+shop.tsx:462 🔐 [LOGIN] Customer data: {id: 8, firstName: 'ABAS', lastName: 'ABASI', email: 'oilstar@hotmail.com', company: 'پتروشیمی شازند', …}
+shop.tsx:463 🔐 [LOGIN] Current cart state: {}
+shop.tsx:467 🔐 [LOGIN] Customer state set
+shop.tsx:470 🔐 [LOGIN] Wallet balance fetch initiated
+shop.tsx:474 🔐 [LOGIN] Auth modal closed
+shop.tsx:479 🔐 [LOGIN] Cache invalidated
+shop.tsx:483 🔐 [LOGIN] Has cart items: false
+shop.tsx:484 🔐 [LOGIN] Cart contents: {}
+shop.tsx:488 🔐 [LOGIN] Cart migration completed
+shop.tsx:494 🔐 [LOGIN] Welcome toast shown
+shop.tsx:497 🔐 [LOGIN] Staying in shop after successful login
+shop.tsx:499 🔐 [LOGIN] handleLoginSuccess completed successfully
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 4 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 474: {…}, 475: {…}}
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 4 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 474: {…}, 475: {…}}
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 4 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 474: {…}, 475: {…}}
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 472
+product-reviews.tsx:42 Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "totalReviews": 0,
+      "averageRating": 0,
+      "ratingDistribution": {},
+      "lastReviewDate": null
+    }
+  }
+}
+product-reviews.tsx:43 Reviews Array Length: 0
+product-reviews.tsx:44 Reviews Array: []
+product-reviews.tsx:45 Product Stats: {totalReviews: 0, averageRating: 0, ratingDistribution: {…}, lastReviewDate: null}
+product-reviews.tsx:46 Product: {id: 472, name: 'NPK Fertilizer Complex', category: 'Agricultural Fertilizers', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+product-reviews.tsx:50 ReviewsData type: object
+product-reviews.tsx:51 ReviewsData keys: (2) ['success', 'data']
+product-reviews.tsx:53 ReviewsData.data keys: (2) ['reviews', 'stats']
+product-reviews.tsx:54 ReviewsData.data.reviews: []
+ProductRating.tsx:54 🔍 CUSTOMER MATCHING DEBUG:
+ProductRating.tsx:55 Current customer: {id: 8, firstName: 'ABAS', lastName: 'ABASI', email: 'oilstar@hotmail.com', company: 'پتروشیمی شازند', …}
+ProductRating.tsx:56 Customer ID: 8
+ProductRating.tsx:57 Available reviews: []
+ProductRating.tsx:65 Found existing review: undefined
+ProductRating.tsx:150 ProductRating Props: {productId: 472, productName: 'NPK Fertilizer Complex', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+ProductRating.tsx:150 ProductRating Props: {productId: 472, productName: 'NPK Fertilizer Complex', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+ProductRating.tsx:150 ProductRating Props: {productId: 472, productName: 'NPK Fertilizer Complex', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 472
+product-reviews.tsx:42 Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "totalReviews": 0,
+      "averageRating": 0,
+      "ratingDistribution": {},
+      "lastReviewDate": null
+    }
+  }
+}
+product-reviews.tsx:43 Reviews Array Length: 0
+product-reviews.tsx:44 Reviews Array: []
+product-reviews.tsx:45 Product Stats: {totalReviews: 0, averageRating: 0, ratingDistribution: {…}, lastReviewDate: null}
+product-reviews.tsx:46 Product: {id: 472, name: 'NPK Fertilizer Complex', category: 'Agricultural Fertilizers', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+product-reviews.tsx:50 ReviewsData type: object
+product-reviews.tsx:51 ReviewsData keys: (2) ['success', 'data']
+product-reviews.tsx:53 ReviewsData.data keys: (2) ['reviews', 'stats']
+product-reviews.tsx:54 ReviewsData.data.reviews: []
+ProductRating.tsx:150 ProductRating Props: {productId: 472, productName: 'NPK Fertilizer Complex', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+ProductRating.tsx:150 ProductRating Props: {productId: 472, productName: 'NPK Fertilizer Complex', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+ProductRating.tsx:150 ProductRating Props: {productId: 472, productName: 'NPK Fertilizer Complex', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+ProductRating.tsx:150 ProductRating Props: {productId: 472, productName: 'NPK Fertilizer Complex', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+ProductRating.tsx:150 ProductRating Props: {productId: 472, productName: 'NPK Fertilizer Complex', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+ProductRating.tsx:150 ProductRating Props: {productId: 472, productName: 'NPK Fertilizer Complex', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 472
+product-reviews.tsx:42 Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "totalReviews": 0,
+      "averageRating": 0,
+      "ratingDistribution": {},
+      "lastReviewDate": null
+    }
+  }
+}
+product-reviews.tsx:43 Reviews Array Length: 0
+product-reviews.tsx:44 Reviews Array: []
+product-reviews.tsx:45 Product Stats: {totalReviews: 0, averageRating: 0, ratingDistribution: {…}, lastReviewDate: null}
+product-reviews.tsx:46 Product: {id: 472, name: 'NPK Fertilizer Complex', category: 'Agricultural Fertilizers', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+product-reviews.tsx:50 ReviewsData type: object
+product-reviews.tsx:51 ReviewsData keys: (2) ['success', 'data']
+product-reviews.tsx:53 ReviewsData.data keys: (2) ['reviews', 'stats']
+product-reviews.tsx:54 ReviewsData.data.reviews: []
+ProductRating.tsx:150 ProductRating Props: {productId: 472, productName: 'NPK Fertilizer Complex', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 472
+product-reviews.tsx:42 Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "totalReviews": 0,
+      "averageRating": 0,
+      "ratingDistribution": {},
+      "lastReviewDate": null
+    }
+  }
+}
+product-reviews.tsx:43 Reviews Array Length: 0
+product-reviews.tsx:44 Reviews Array: []
+product-reviews.tsx:45 Product Stats: {totalReviews: 0, averageRating: 0, ratingDistribution: {…}, lastReviewDate: null}
+product-reviews.tsx:46 Product: {id: 472, name: 'NPK Fertilizer Complex', category: 'Agricultural Fertilizers', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+product-reviews.tsx:50 ReviewsData type: object
+product-reviews.tsx:51 ReviewsData keys: (2) ['success', 'data']
+product-reviews.tsx:53 ReviewsData.data keys: (2) ['reviews', 'stats']
+product-reviews.tsx:54 ReviewsData.data.reviews: []
+ProductRating.tsx:150 ProductRating Props: {productId: 472, productName: 'NPK Fertilizer Complex', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 472
+product-reviews.tsx:42 Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "totalReviews": 0,
+      "averageRating": 0,
+      "ratingDistribution": {},
+      "lastReviewDate": null
+    }
+  }
+}
+product-reviews.tsx:43 Reviews Array Length: 0
+product-reviews.tsx:44 Reviews Array: []
+product-reviews.tsx:45 Product Stats: {totalReviews: 0, averageRating: 0, ratingDistribution: {…}, lastReviewDate: null}
+product-reviews.tsx:46 Product: {id: 472, name: 'NPK Fertilizer Complex', category: 'Agricultural Fertilizers', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+product-reviews.tsx:50 ReviewsData type: object
+product-reviews.tsx:51 ReviewsData keys: (2) ['success', 'data']
+product-reviews.tsx:53 ReviewsData.data keys: (2) ['reviews', 'stats']
+product-reviews.tsx:54 ReviewsData.data.reviews: []
+ProductRating.tsx:150 ProductRating Props: {productId: 472, productName: 'NPK Fertilizer Complex', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 4 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 474: {…}, 475: {…}}
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 4 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 474: {…}, 475: {…}}
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 4 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 474: {…}, 475: {…}}
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]
+useAuth.ts:30  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 401 (Unauthorized)
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=6aa58533:840
+run @ @tanstack_react-query.js?v=6aa58533:494
+start @ @tanstack_react-query.js?v=6aa58533:536
+fetch @ @tanstack_react-query.js?v=6aa58533:926
+executeFetch_fn @ @tanstack_react-query.js?v=6aa58533:2211
+onSubscribe @ @tanstack_react-query.js?v=6aa58533:1898
+subscribe @ @tanstack_react-query.js?v=6aa58533:24
+(anonymous) @ @tanstack_react-query.js?v=6aa58533:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=6aa58533:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=6aa58533:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=6aa58533:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=6aa58533:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=6aa58533:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=6aa58533:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=6aa58533:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=6aa58533:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=6aa58533:19416
+commitRoot @ chunk-RPCDYKBN.js?v=6aa58533:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=6aa58533:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=6aa58533:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=6aa58533:18627
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 4 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 474: {…}, 475: {…}}
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 4 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 474: {…}, 475: {…}}
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 4 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 474: {…}, 475: {…}}
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 472
+product-reviews.tsx:42 Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "totalReviews": 0,
+      "averageRating": 0,
+      "ratingDistribution": {},
+      "lastReviewDate": null
+    }
+  }
+}
+product-reviews.tsx:43 Reviews Array Length: 0
+product-reviews.tsx:44 Reviews Array: []
+product-reviews.tsx:45 Product Stats: {totalReviews: 0, averageRating: 0, ratingDistribution: {…}, lastReviewDate: null}
+product-reviews.tsx:46 Product: {id: 472, name: 'NPK Fertilizer Complex', category: 'Agricultural Fertilizers', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+product-reviews.tsx:50 ReviewsData type: object
+product-reviews.tsx:51 ReviewsData keys: (2) ['success', 'data']
+product-reviews.tsx:53 ReviewsData.data keys: (2) ['reviews', 'stats']
+product-reviews.tsx:54 ReviewsData.data.reviews: []
+ProductRating.tsx:54 🔍 CUSTOMER MATCHING DEBUG:
+ProductRating.tsx:55 Current customer: {id: 8, firstName: 'ABAS', lastName: 'ABASI', email: 'oilstar@hotmail.com', company: 'پتروشیمی شازند', …}
+ProductRating.tsx:56 Customer ID: 8
+ProductRating.tsx:57 Available reviews: []
+ProductRating.tsx:65 Found existing review: undefined
+ProductRating.tsx:150 ProductRating Props: {productId: 472, productName: 'NPK Fertilizer Complex', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+ProductRating.tsx:150 ProductRating Props: {productId: 472, productName: 'NPK Fertilizer Complex', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+ProductRating.tsx:150 ProductRating Props: {productId: 472, productName: 'NPK Fertilizer Complex', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+ProductRating.tsx:150 ProductRating Props: {productId: 472, productName: 'NPK Fertilizer Complex', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+ProductRating.tsx:150 ProductRating Props: {productId: 472, productName: 'NPK Fertilizer Complex', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+ProductRating.tsx:150 ProductRating Props: {productId: 472, productName: 'NPK Fertilizer Complex', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+ProductRating.tsx:150 ProductRating Props: {productId: 472, productName: 'NPK Fertilizer Complex', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+ProductRating.tsx:150 ProductRating Props: {productId: 472, productName: 'NPK Fertilizer Complex', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+ProductRating.tsx:150 ProductRating Props: {productId: 472, productName: 'NPK Fertilizer Complex', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+ProductRating.tsx:150 ProductRating Props: {productId: 472, productName: 'NPK Fertilizer Complex', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 472
+product-reviews.tsx:42 Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "totalReviews": 0,
+      "averageRating": 0,
+      "ratingDistribution": {},
+      "lastReviewDate": null
+    }
+  }
+}
+product-reviews.tsx:43 Reviews Array Length: 0
+product-reviews.tsx:44 Reviews Array: []
+product-reviews.tsx:45 Product Stats: {totalReviews: 0, averageRating: 0, ratingDistribution: {…}, lastReviewDate: null}
+product-reviews.tsx:46 Product: {id: 472, name: 'NPK Fertilizer Complex', category: 'Agricultural Fertilizers', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+product-reviews.tsx:50 ReviewsData type: object
+product-reviews.tsx:51 ReviewsData keys: (2) ['success', 'data']
+product-reviews.tsx:53 ReviewsData.data keys: (2) ['reviews', 'stats']
+product-reviews.tsx:54 ReviewsData.data.reviews: []
+ProductRating.tsx:150 ProductRating Props: {productId: 472, productName: 'NPK Fertilizer Complex', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 472
+product-reviews.tsx:42 Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "totalReviews": 0,
+      "averageRating": 0,
+      "ratingDistribution": {},
+      "lastReviewDate": null
+    }
+  }
+}
+product-reviews.tsx:43 Reviews Array Length: 0
+product-reviews.tsx:44 Reviews Array: []
+product-reviews.tsx:45 Product Stats: {totalReviews: 0, averageRating: 0, ratingDistribution: {…}, lastReviewDate: null}
+product-reviews.tsx:46 Product: {id: 472, name: 'NPK Fertilizer Complex', category: 'Agricultural Fertilizers', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+product-reviews.tsx:50 ReviewsData type: object
+product-reviews.tsx:51 ReviewsData keys: (2) ['success', 'data']
+product-reviews.tsx:53 ReviewsData.data keys: (2) ['reviews', 'stats']
+product-reviews.tsx:54 ReviewsData.data.reviews: []
+ProductRating.tsx:150 ProductRating Props: {productId: 472, productName: 'NPK Fertilizer Complex', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+product-reviews.tsx:40 🔍 DEBUGGING REVIEWS ISSUE:
+product-reviews.tsx:41 Product ID: 472
+product-reviews.tsx:42 Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "totalReviews": 0,
+      "averageRating": 0,
+      "ratingDistribution": {},
+      "lastReviewDate": null
+    }
+  }
+}
+product-reviews.tsx:43 Reviews Array Length: 0
+product-reviews.tsx:44 Reviews Array: []
+product-reviews.tsx:45 Product Stats: {totalReviews: 0, averageRating: 0, ratingDistribution: {…}, lastReviewDate: null}
+product-reviews.tsx:46 Product: {id: 472, name: 'NPK Fertilizer Complex', category: 'Agricultural Fertilizers', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+product-reviews.tsx:50 ReviewsData type: object
+product-reviews.tsx:51 ReviewsData keys: (2) ['success', 'data']
+product-reviews.tsx:53 ReviewsData.data keys: (2) ['reviews', 'stats']
+product-reviews.tsx:54 ReviewsData.data.reviews: []
+ProductRating.tsx:150 ProductRating Props: {productId: 472, productName: 'NPK Fertilizer Complex', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 4 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 474: {…}, 475: {…}}
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 4 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 474: {…}, 475: {…}}
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]
+useAuth.ts:30  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 401 (Unauthorized)
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=6aa58533:840
+run @ @tanstack_react-query.js?v=6aa58533:494
+start @ @tanstack_react-query.js?v=6aa58533:536
+fetch @ @tanstack_react-query.js?v=6aa58533:926
+executeFetch_fn @ @tanstack_react-query.js?v=6aa58533:2211
+onSubscribe @ @tanstack_react-query.js?v=6aa58533:1898
+subscribe @ @tanstack_react-query.js?v=6aa58533:24
+(anonymous) @ @tanstack_react-query.js?v=6aa58533:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=6aa58533:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=6aa58533:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=6aa58533:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=6aa58533:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=6aa58533:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=6aa58533:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=6aa58533:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=6aa58533:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=6aa58533:19416
+commitRoot @ chunk-RPCDYKBN.js?v=6aa58533:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=6aa58533:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=6aa58533:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=6aa58533:18627
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 4 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 474: {…}, 475: {…}}
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 4 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 474: {…}, 475: {…}}
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 4 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 474: {…}, 475: {…}}
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 4 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 474: {…}, 475: {…}}
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 4 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 474: {…}, 475: {…}}
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 4 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 474: {…}, 475: {…}}
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 4 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 474: {…}, 475: {…}}
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]
+shop.tsx:212 🌟 [RATINGS DEBUG] Product stats loaded: 4 products with ratings
+shop.tsx:213 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 474: {…}, 475: {…}}
+shop.tsx:217 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:218 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]
+shop.tsx:461 🔐 [LOGIN] Starting handleLoginSuccess
+shop.tsx:462 🔐 [LOGIN] Customer data: {id: 8, firstName: 'ABAS', lastName: 'ABASI', email: 'oilstar@hotmail.com', company: 'پتروشیمی شازند', …}
+shop.tsx:463 🔐 [LOGIN] Current cart state: {}
+shop.tsx:467 🔐 [LOGIN] Customer state set
+shop.tsx:470 🔐 [LOGIN] Wallet balance fetch initiated
+shop.tsx:474 🔐 [LOGIN] Auth modal closed
+shop.tsx:479 🔐 [LOGIN] Cache invalidated
+shop.tsx:483 🔐 [LOGIN] Has cart items: false
+shop.tsx:484 🔐 [LOGIN] Cart contents: {}
+shop.tsx:488 🔐 [LOGIN] Cart migration completed
+shop.tsx:494 🔐 [LOGIN] Welcome toast shown
+ 🔐 [LOGIN] Staying in shop after successful login
+ 🔐 [LOGIN] handleLoginSuccess completed successfully
+ 🌟 [RATINGS DEBUG] Product stats loaded: 4 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 474: {…}, 475: {…}}
+ 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+ 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]
+ 🌟 [RATINGS DEBUG] Product stats loaded: 4 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 474: {…}, 475: {…}}
+ 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+ 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]
+ 🌟 [RATINGS DEBUG] Product stats loaded: 4 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 474: {…}, 475: {…}}
+ 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+ 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]
+ 🌟 [RATINGS DEBUG] Product stats loaded: 4 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 474: {…}, 475: {…}}
+ 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+ 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]
+ 🔍 DEBUGGING REVIEWS ISSUE:
+ Product ID: 472
+ Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "totalReviews": 0,
+      "averageRating": 0,
+      "ratingDistribution": {},
+      "lastReviewDate": null
+    }
+  }
+}
+ Reviews Array Length: 0
+ Reviews Array: []
+ Product Stats: {totalReviews: 0, averageRating: 0, ratingDistribution: {…}, lastReviewDate: null}
+ Product: {id: 472, name: 'NPK Fertilizer Complex', category: 'Agricultural Fertilizers', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+ ReviewsData type: object
+ ReviewsData keys: (2) ['success', 'data']
+ ReviewsData.data keys: (2) ['reviews', 'stats']
+ ReviewsData.data.reviews: []
+ 🔍 CUSTOMER MATCHING DEBUG:
+ Current customer: {id: 8, firstName: 'ABAS', lastName: 'ABASI', email: 'oilstar@hotmail.com', company: 'پتروشیمی شازند', …}
+ Customer ID: 8
+ Available reviews: []
+ Found existing review: undefined
+ ProductRating Props: {productId: 472, productName: 'NPK Fertilizer Complex', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+ 🔍 DEBUGGING REVIEWS ISSUE:
+ Product ID: 472
+ Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "totalReviews": 0,
+      "averageRating": 0,
+      "ratingDistribution": {},
+      "lastReviewDate": null
+    }
+  }
+}
+ Reviews Array Length: 0
+ Reviews Array: []
+ Product Stats: {totalReviews: 0, averageRating: 0, ratingDistribution: {…}, lastReviewDate: null}
+ Product: {id: 472, name: 'NPK Fertilizer Complex', category: 'Agricultural Fertilizers', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+ ReviewsData type: object
+ ReviewsData keys: (2) ['success', 'data']
+ ReviewsData.data keys: (2) ['reviews', 'stats']
+ ReviewsData.data.reviews: []
+ ProductRating Props: {productId: 472, productName: 'NPK Fertilizer Complex', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+ ProductRating Props: {productId: 472, productName: 'NPK Fertilizer Complex', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+ ProductRating Props: {productId: 472, productName: 'NPK Fertilizer Complex', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+ ProductRating Props: {productId: 472, productName: 'NPK Fertilizer Complex', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+ ProductRating Props: {productId: 472, productName: 'NPK Fertilizer Complex', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+ ProductRating Props: {productId: 472, productName: 'NPK Fertilizer Complex', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+ ProductRating Props: {productId: 472, productName: 'NPK Fertilizer Complex', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+ 🔍 DEBUGGING REVIEWS ISSUE:
+ Product ID: 472
+ Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "totalReviews": 0,
+      "averageRating": 0,
+      "ratingDistribution": {},
+      "lastReviewDate": null
+    }
+  }
+}
+ Reviews Array Length: 0
+ Reviews Array: []
+ Product Stats: {totalReviews: 0, averageRating: 0, ratingDistribution: {…}, lastReviewDate: null}
+ Product: {id: 472, name: 'NPK Fertilizer Complex', category: 'Agricultural Fertilizers', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+ ReviewsData type: object
+ ReviewsData keys: (2) ['success', 'data']
+ ReviewsData.data keys: (2) ['reviews', 'stats']
+ ReviewsData.data.reviews: []
+ ProductRating Props: {productId: 472, productName: 'NPK Fertilizer Complex', averageRating: 0, totalReviews: 0, reviews: Array(0)}
+ 🔍 DEBUGGING REVIEWS ISSUE:
+ Product ID: 472
+ Reviews Data Full: {
+  "success": true,
+  "data": {
+    "reviews": [],
+    "stats": {
+      "totalReviews": 0,
+      "averageRating": 0,
+      "ratingDistribution": {},
+      "lastReviewDate": null
+    }
+  }
+}
+ Reviews Array Length: 0
+ Reviews Array: []
+ Product Stats: {totalReviews: 0, averageRating: 0, ratingDistribution: {…}, lastReviewDate: null}
+ Product: {id: 472, name: 'NPK Fertilizer Complex', category: 'Agricultural Fertilizers', description: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', shortDescription: 'این یک محصول شیمیایی تولید شرکت ممتاز شیمی است', …}
+ ReviewsData type: object
+ ReviewsData keys: (2) ['success', 'data']
+ ReviewsData.data keys: (2) ['reviews', 'stats']
+ ReviewsData.data.reviews: []
+ ProductRating Props: {productId: 472, productName: 'NPK Fertilizer Complex', averageRating: 0, totalReviews: 0, reviews: Array(0)}
