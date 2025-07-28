@@ -387,8 +387,14 @@ export default function SiteManagement() {
       className: "border-blue-300 text-blue-600 hover:bg-blue-50",
       moduleId: "server_config"
     },
-
-
+    {
+      id: "user-guide",
+      label: "راهنمای سایت",
+      icon: BookOpen,
+      onClick: () => trackButtonClick("user-guide", () => setLocation("/user-guide")),
+      className: "border-teal-300 text-teal-600 hover:bg-teal-50",
+      moduleId: "user_guide"
+    }
 
   ];
 

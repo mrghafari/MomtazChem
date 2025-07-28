@@ -5706,7 +5706,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { pool } = await import('./db');
       
-      // Define the main system modules - these are the 30 Site Management modules
+      // Define the main system modules - these are the 31 Site Management modules
       const mainModules = [
         'syncing_shop',
         'inquiries', 
@@ -5737,7 +5737,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'remote_desktop',
         'server_config',
         'kpi_dashboard',
-        'management_dashboard'
+        'management_dashboard',
+        'user_guide'
       ];
 
       // Get super admin role (admin@momtazchem.com has user ID 7)
@@ -24225,7 +24226,8 @@ ${message ? `Additional Requirements:\n${message}` : ''}
             'مدیریت دسته‌بندی‌ها': 'categories',
             'دستیار SEO هوشمند': 'seo_management',
             'تنظیمات سرور': 'server_config',
-            'اطلاعات شرکت': 'company_information'
+            'اطلاعات شرکت': 'company_information',
+            'راهنمای سایت': 'user_guide'
           };
 
           // Convert Persian names to technical IDs
@@ -24322,7 +24324,8 @@ ${message ? `Additional Requirements:\n${message}` : ''}
             'مدیریت دسته‌بندی‌ها': 'categories',
             'دستیار SEO هوشمند': 'seo_management',
             'تنظیمات سرور': 'server_config',
-            'اطلاعات شرکت': 'company_information'
+            'اطلاعات شرکت': 'company_information',
+            'راهنمای سایت': 'user_guide'
           };
 
           // Convert Persian names to technical IDs
