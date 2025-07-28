@@ -512,10 +512,10 @@ export const vehicleTemplates = pgTable("vehicle_templates", {
   supportsFlammable: boolean("supports_flammable").default(false),
   supportsRefrigerated: boolean("supports_refrigerated").default(false),
   supportsFragile: boolean("supports_fragile").default(true),
+  notAllowedFlammable: boolean("not_allowed_flammable").default(false),
   
   // Operational details
   averageSpeedKmh: decimal("average_speed_kmh", { precision: 5, scale: 2 }).default("50"),
-  fuelConsumptionL100km: decimal("fuel_consumption_l100km", { precision: 5, scale: 2 }),
   
   // Status
   isActive: boolean("is_active").default(true),

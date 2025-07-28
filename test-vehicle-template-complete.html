@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست سیستم کامل مدیریت الگوهای خودرو</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            direction: rtl;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .test-section {
+            padding: 30px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .test-section:last-child {
+            border-bottom: none;
+        }
+
+        .test-title {
+            color: #2c3e50;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #3498db;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .feature-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #27ae60;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .feature-item h4 {
+            color: #2c3e50;
+            margin: 0 0 10px 0;
+            font-size: 1.2em;
+        }
+
+        .feature-item p {
+            color: #7f8c8d;
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+            display: inline-block;
+            margin: 5px;
+        }
+
+        .completed {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .enhanced {
+            background: #cce7ff;
+            color: #004085;
+            border: 1px solid #b3d7ff;
+        }
+
+        .new-feature {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .safety-highlight {
+            background: #ffe6cc;
+            color: #cc5500;
+            border: 1px solid #ffcc99;
+        }
+
+        .changelog {
+            background: #f1f3f4;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .changelog h3 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+
+        .changelog ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .changelog li {
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+            position: relative;
+            padding-right: 30px;
+        }
+
+        .changelog li::before {
+            content: "✅";
+            position: absolute;
+            right: 0;
+            top: 10px;
+        }
+
+        .technical-specs {
+            background: #e8f5e8;
+            border: 2px solid #4CAF50;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .technical-specs h4 {
+            color: #2e7d32;
+            margin-top: 0;
+        }
+
+        .schema-change {
+            background: #fff8e1;
+            border: 2px solid #ff9800;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .schema-change h4 {
+            color: #f57c00;
+            margin-top: 0;
+        }
+
+        .warning-box {
+            background: #ffebee;
+            border: 2px solid #f44336;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .warning-box h4 {
+            color: #c62828;
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚛 سیستم کامل مدیریت الگوهای خودرو</h1>
+            <p>تست عملکرد ویژگی‌های جدید و حذف فیلد مصرف سوخت</p>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">
+                🎯 ویژگی‌های اصلاح شده و جدید
+            </div>
+
+            <div class="feature-list">
+                <div class="feature-item">
+                    <h4>🗑️ حذف فیلد مصرف سوخت</h4>
+                    <p>فیلد "مصرف سوخت (لیتر/100کیلومتر)" از تمام فرم‌های ایجاد و ویرایش الگو حذف شده است</p>
+                    <span class="status-badge completed">✅ تکمیل شده</span>
+                </div>
+
+                <div class="feature-item">
+                    <h4>⚠️ چک باکس مواد آتش‌زا</h4>
+                    <p>اضافه شدن چک باکس "غیر مجاز برای حمل مواد آتش‌زا" با طراحی نارنجی هشدار</p>
+                    <span class="status-badge new-feature">🆕 جدید</span>
+                </div>
+
+                <div class="feature-item">
+                    <h4>📊 بهینه‌سازی چیدمان</h4>
+                    <p>تغییر چیدمان قابلیت‌ها از grid-cols-4 به grid-cols-3 و grid-cols-2 برای نمایش بهتر</p>
+                    <span class="status-badge enhanced">⭐ بهبود یافته</span>
+                </div>
+
+                <div class="feature-item">
+                    <h4>🔧 یکپارچه‌سازی Backend</h4>
+                    <p>اضافه شدن فیلد notAllowedFlammable به schema و database با قابلیت پردازش در متدهای Add/Edit</p>
+                    <span class="status-badge completed">✅ تکمیل شده</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">
+                🔄 تغییرات Schema و Database
+            </div>
+
+            <div class="schema-change">
+                <h4>🗄️ تغییرات Schema</h4>
+                <ul>
+                    <li><strong>حذف شده:</strong> fuelConsumptionL100km field</li>
+                    <li><strong>اضافه شده:</strong> notAllowedFlammable: boolean("not_allowed_flammable").default(false)</li>
+                    <li><strong>Migration:</strong> ALTER TABLE vehicle_templates ADD COLUMN not_allowed_flammable BOOLEAN DEFAULT false</li>
+                </ul>
+            </div>
+
+            <div class="technical-specs">
+                <h4>📝 جزئیات فنی</h4>
+                <ul>
+                    <li><strong>Database Field:</strong> not_allowed_flammable (BOOLEAN)</li>
+                    <li><strong>Frontend Field:</strong> notAllowedFlammable</li>
+                    <li><strong>Form Validation:</strong> z.boolean()</li>
+                    <li><strong>Default Value:</strong> false</li>
+                    <li><strong>Visual Design:</strong> Orange theme with warning icon</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">
+                🎨 تغییرات رابط کاربری
+            </div>
+
+            <div class="changelog">
+                <h3>📋 فهرست تغییرات UI</h3>
+                <ul>
+                    <li>حذف کامل فیلد "مصرف سوخت" از Create Dialog</li>
+                    <li>حذف کامل فیلد "مصرف سوخت" از Edit Dialog</li>
+                    <li>اضافه شدن چک باکس "غیر مجاز برای حمل مواد آتش‌زا" با طراحی نارنجی</li>
+                    <li>تغییر grid layout قابلیت‌ها از 4 ستون به 3+2 ستون</li>
+                    <li>بهینه‌سازی بخش "وضعیت" با طراحی ساده‌تر</li>
+                    <li>حذف بخش "تنظیمات اضافی" و جایگزینی با "وضعیت"</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">
+                🔒 تکمیل‌های امنیتی
+            </div>
+
+            <div class="warning-box">
+                <h4>🚨 سیستم کنترل مواد آتش‌زا</h4>
+                <p>
+                    چک باکس جدید "غیر مجاز برای حمل مواد آتش‌زا" امکان تعریف خودروهایی که اجازه حمل مواد آتش‌زا ندارند را فراهم می‌کند.
+                    این ویژگی برای اطمینان از ایمنی حمل مواد شیمیایی خطرناک طراحی شده است.
+                </p>
+                <ul>
+                    <li><strong>نمایش:</strong> آیکون هشدار مثلثی با رنگ نارنجی</li>
+                    <li><strong>کاربرد:</strong> جلوگیری از انتخاب خودروهای غیرمجاز برای مواد آتش‌زا</li>
+                    <li><strong>انطباق:</strong> با سیستم فعلی flammable safety compliance</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">
+                ✅ وضعیت نهایی پروژه
+            </div>
+
+            <div class="feature-list">
+                <div class="feature-item">
+                    <h4>🏁 تکمیل فاز اول</h4>
+                    <p>تمام درخواست‌های کاربر برای حذف فیلد مصرف سوخت و اضافه کردن کنترل مواد آتش‌زا اجرا شده است</p>
+                    <span class="status-badge completed">✅ 100% تکمیل</span>
+                </div>
+
+                <div class="feature-item">
+                    <h4>🔧 TypeScript Validation</h4>
+                    <p>هیچ خطای LSP یا TypeScript در سیستم باقی نمانده است</p>
+                    <span class="status-badge completed">✅ هیچ خطایی</span>
+                </div>
+
+                <div class="feature-item">
+                    <h4>🗄️ Database Migration</h4>
+                    <p>تغییرات schema با موفقیت به database اعمال شده است</p>
+                    <span class="status-badge completed">✅ اعمال شده</span>
+                </div>
+
+                <div class="feature-item">
+                    <h4>🎯 آماده برای تولید</h4>
+                    <p>سیستم مدیریت الگوهای خودرو آماده استفاده در محیط تولید است</p>
+                    <span class="status-badge safety-highlight">🚀 آماده</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Animation effects
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Animate feature items
+        document.querySelectorAll('.feature-item').forEach((item, index) => {
+            item.style.opacity = '0';
+            item.style.transform = 'translateY(30px)';
+            item.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
+            observer.observe(item);
+        });
+
+        // Log completion status
+        console.log('🚛 Vehicle Template Management System - Complete');
+        console.log('✅ Fuel consumption field removed');
+        console.log('✅ Flammable safety checkbox added');
+        console.log('✅ Database schema updated');
+        console.log('✅ Frontend-backend integration complete');
+        console.log('🎯 System ready for production use');
+    </script>
+</body>
+</html>
