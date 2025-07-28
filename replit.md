@@ -6,6 +6,26 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: User Guide Module Permissions Integration with English Module Name (January 28, 2025)
+✅ **IMPLEMENTED: Complete User Guide module integration with Site Management permissions system using English naming**
+- **User Request Fulfilled**: "اسم ماژول را انگلیسی کن" - Changed module name from Persian to English
+- **Database Permissions Update**: Modified custom_roles table permissions array to include "User Guide" instead of "راهنمای سایت"
+- **Backend Mapping Enhancement**: Updated all permission mapping functions:
+  - **Persian to Technical Mapping**: 'User Guide': 'user_guide' in both custom user sections
+  - **Technical to Persian Mapping**: 'user_guide': 'User Guide' in convertTechnicalToPersianModule function
+  - **Consistent Naming**: All backend functions now use English "User Guide" terminology
+- **Frontend Integration**: Site Management interface already configured with English "User Guide" label
+- **Module Verification**: User Guide appears as 32nd module in permissions response with full technical ID conversion
+- **Professional Consistency**: English module naming aligns with international business standards
+- **Technical Implementation**:
+  - Database: Updated permissions JSON array in custom_roles table
+  - Backend: Modified server/routes.ts mapping functions (lines 24236, 24335, 5677)
+  - Frontend: Maintained existing English label in site-management.tsx
+- **Business Impact**: Professional English module naming for international compatibility
+- **System Integration**: Complete permissions flow operational from database → backend → frontend
+- **User Experience**: User Guide button now displays correctly in Site Management Quick Actions
+- **Result**: Complete User Guide module integration operational with English naming - accessible exclusively through Site Management interface with proper permissions validation
+
 ### COMPLETED: User Guide Tab Removal from Main Navigation - Site Management Integration (January 28, 2025)
 ✅ **IMPLEMENTED: Complete removal of user-guide tab from main website navigation header**
 - **User Request Fulfilled**: "تب user-guide را از منوی بالای سایت اصلی حذف کن" - Removed user guide from main navigation
