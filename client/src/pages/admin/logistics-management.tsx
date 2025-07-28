@@ -407,10 +407,12 @@ const LogisticsManagement = () => {
       nameEn: formData.get('nameEn') as string,
       vehicleType: formData.get('vehicleType') as string,
       maxWeightKg: parseInt(formData.get('maxWeightKg') as string),
+      maxVolumeM3: parseInt(formData.get('maxVolumeM3') as string) || 0,
       basePrice: parseInt(formData.get('basePrice') as string),
       pricePerKm: parseInt(formData.get('pricePerKm') as string),
       allowedRoutes: formData.get('allowedRoutes') as string,
       averageSpeedKmh: parseInt(formData.get('averageSpeedKmh') as string) || 50,
+      fuelConsumptionL100km: parseInt(formData.get('fuelConsumptionL100km') as string) || 0,
       isActive: formData.get('isActive') === 'on'
     };
 
@@ -518,7 +520,9 @@ const LogisticsManagement = () => {
                       <TableHead>نام</TableHead>
                       <TableHead>نوع</TableHead>
                       <TableHead>حداکثر وزن</TableHead>
+                      <TableHead>حجم</TableHead>
                       <TableHead>قیمت پایه</TableHead>
+                      <TableHead>مصرف سوخت</TableHead>
                       <TableHead>وضعیت</TableHead>
                       <TableHead>عملیات</TableHead>
                     </TableRow>
@@ -526,11 +530,11 @@ const LogisticsManagement = () => {
                   <TableBody>
                     {vehiclesLoading ? (
                       <TableRow>
-                        <TableCell colSpan={6} className="text-center py-8">در حال بارگذاری...</TableCell>
+                        <TableCell colSpan={8} className="text-center py-8">در حال بارگذاری...</TableCell>
                       </TableRow>
                     ) : vehicles.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={6} className="text-center py-8">هیچ الگوی خودرویی یافت نشد</TableCell>
+                        <TableCell colSpan={8} className="text-center py-8">هیچ الگوی خودرویی یافت نشد</TableCell>
                       </TableRow>
                     ) : (
                       vehicles.map((vehicle: any) => (
@@ -538,7 +542,9 @@ const LogisticsManagement = () => {
                           <TableCell>{vehicle.name}</TableCell>
                           <TableCell>{(VEHICLE_TYPES as any)[vehicle.vehicleType] || vehicle.vehicleType}</TableCell>
                           <TableCell>{parseInt(vehicle.maxWeightKg)} کیلوگرم</TableCell>
+                          <TableCell>{parseInt(vehicle.maxVolumeM3) || 0} متر مکعب</TableCell>
                           <TableCell>{parseInt(vehicle.basePrice)} دینار</TableCell>
+                          <TableCell>{parseInt(vehicle.fuelConsumptionL100km) || 0} لیتر/100کم</TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
                               <Badge variant={vehicle.isActive ? "default" : "secondary"}>
@@ -670,6 +676,24 @@ const LogisticsManagement = () => {
                           name="averageSpeedKmh" 
                           type="number" 
                           defaultValue={parseInt(editingVehicle.averageSpeedKmh) || 50}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-maxVolumeM3">حجم حداکثر (متر مکعب)</Label>
+                        <Input 
+                          id="edit-maxVolumeM3" 
+                          name="maxVolumeM3" 
+                          type="number" 
+                          defaultValue={parseInt(editingVehicle.maxVolumeM3) || 0}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-fuelConsumptionL100km">مصرف سوخت (لیتر/100کیلومتر)</Label>
+                        <Input 
+                          id="edit-fuelConsumptionL100km" 
+                          name="fuelConsumptionL100km" 
+                          type="number" 
+                          defaultValue={parseInt(editingVehicle.fuelConsumptionL100km) || 0}
                         />
                       </div>
                       <div className="space-y-2 col-span-2">
