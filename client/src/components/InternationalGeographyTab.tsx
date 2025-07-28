@@ -849,7 +849,586 @@ const InternationalGeographyTab: React.FC = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Similar dialogs for cities and rates would follow the same pattern */}
+      {/* Add City Dialog */}
+      <Dialog open={isAddCityOpen} onOpenChange={setIsAddCityOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MapPin className="w-5 h-5" />
+              افزودن شهر جدید
+            </DialogTitle>
+            <DialogDescription>
+              اطلاعات شهر جدید را برای حمل بین‌المللی وارد کنید
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="cityName">نام شهر (فارسی/عربی) *</Label>
+              <Input
+                id="cityName"
+                value={cityForm.name}
+                onChange={(e) => setCityForm({...cityForm, name: e.target.value})}
+                placeholder="مثال: استانبول"
+                required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="cityNameEn">نام شهر (انگلیسی) *</Label>
+              <Input
+                id="cityNameEn"
+                value={cityForm.nameEn}
+                onChange={(e) => setCityForm({...cityForm, nameEn: e.target.value})}
+                placeholder="مثال: Istanbul"
+                required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="cityNameLocal">نام محلی</Label>
+              <Input
+                id="cityNameLocal"
+                value={cityForm.nameLocal}
+                onChange={(e) => setCityForm({...cityForm, nameLocal: e.target.value})}
+                placeholder="مثال: İstanbul"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="countryId">کشور *</Label>
+              <Select
+                value={cityForm.countryId.toString()}
+                onValueChange={(value) => setCityForm({...cityForm, countryId: parseInt(value)})}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="انتخاب کشور" />
+                </SelectTrigger>
+                <SelectContent>
+                  {countries.map((country: InternationalCountry) => (
+                    <SelectItem key={country.id} value={country.id.toString()}>
+                      {country.name} ({country.nameEn})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="provinceState">استان/ایالت</Label>
+              <Input
+                id="provinceState"
+                value={cityForm.provinceState}
+                onChange={(e) => setCityForm({...cityForm, provinceState: e.target.value})}
+                placeholder="مثال: مرمره"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="cityType">نوع شهر *</Label>
+              <Select
+                value={cityForm.cityType}
+                onValueChange={(value) => setCityForm({...cityForm, cityType: value as any})}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(CITY_TYPES).map(([key, value]) => (
+                    <SelectItem key={key} value={key}>{value}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="distanceFromErbilKm">فاصله از اربیل (کیلومتر) *</Label>
+              <Input
+                id="distanceFromErbilKm"
+                type="number"
+                min="0"
+                value={cityForm.distanceFromErbilKm}
+                onChange={(e) => setCityForm({...cityForm, distanceFromErbilKm: parseInt(e.target.value) || 0})}
+                placeholder="0"
+                required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="customsInformation">اطلاعات گمرکی</Label>
+              <Input
+                id="customsInformation"
+                value={cityForm.customsInformation}
+                onChange={(e) => setCityForm({...cityForm, customsInformation: e.target.value})}
+                placeholder="اطلاعات گمرک و ترخیص"
+              />
+            </div>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="cityIsActive"
+                checked={cityForm.isActive}
+                onCheckedChange={(checked) => setCityForm({...cityForm, isActive: checked})}
+              />
+              <Label htmlFor="cityIsActive">فعال</Label>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="hasShippingRoutes"
+                checked={cityForm.hasShippingRoutes}
+                onCheckedChange={(checked) => setCityForm({...cityForm, hasShippingRoutes: checked})}
+              />
+              <Label htmlFor="hasShippingRoutes">دارای مسیر حمل</Label>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="isPriorityDestination"
+                checked={cityForm.isPriorityDestination}
+                onCheckedChange={(checked) => setCityForm({...cityForm, isPriorityDestination: checked})}
+              />
+              <Label htmlFor="isPriorityDestination">مقصد اولویت‌دار</Label>
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="cityNotes">یادداشت‌ها</Label>
+            <Textarea
+              id="cityNotes"
+              value={cityForm.notes}
+              onChange={(e) => setCityForm({...cityForm, notes: e.target.value})}
+              placeholder="یادداشت‌های اضافی..."
+              rows={3}
+            />
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddCityOpen(false)}>
+              انصراف
+            </Button>
+            <Button 
+              onClick={() => createCityMutation.mutate(cityForm)}
+              disabled={createCityMutation.isPending}
+            >
+              {createCityMutation.isPending ? 'در حال ذخیره...' : 'ذخیره شهر'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Shipping Rate Dialog */}
+      <Dialog open={isAddRateOpen} onOpenChange={setIsAddRateOpen}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <DollarSign className="w-5 h-5" />
+              افزودن نرخ حمل جدید
+            </DialogTitle>
+            <DialogDescription>
+              نرخ حمل جدید برای کشور و شهر مشخص وارد کنید
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="rateCountryId">کشور *</Label>
+              <Select
+                value={rateForm.countryId.toString()}
+                onValueChange={(value) => setRateForm({...rateForm, countryId: parseInt(value)})}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="انتخاب کشور" />
+                </SelectTrigger>
+                <SelectContent>
+                  {countries.map((country: InternationalCountry) => (
+                    <SelectItem key={country.id} value={country.id.toString()}>
+                      {country.name} ({country.nameEn})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="rateCityId">شهر (اختیاری)</Label>
+              <Select
+                value={rateForm.cityId?.toString() || ""}
+                onValueChange={(value) => setRateForm({...rateForm, cityId: value ? parseInt(value) : null as any})}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="انتخاب شهر" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">همه شهرها</SelectItem>
+                  {cities
+                    .filter((city: InternationalCity) => city.countryId === rateForm.countryId)
+                    .map((city: InternationalCity) => (
+                      <SelectItem key={city.id} value={city.id.toString()}>
+                        {city.name} ({city.nameEn})
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="shippingMethod">روش حمل *</Label>
+              <Select
+                value={rateForm.shippingMethod}
+                onValueChange={(value) => setRateForm({...rateForm, shippingMethod: value as any})}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(SHIPPING_METHODS).map(([key, value]) => (
+                    <SelectItem key={key} value={key}>{value}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="transportProvider">شرکت حمل *</Label>
+              <Input
+                id="transportProvider"
+                value={rateForm.transportProvider}
+                onChange={(e) => setRateForm({...rateForm, transportProvider: e.target.value})}
+                placeholder="مثال: Turkish Cargo"
+                required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="basePrice">قیمت پایه *</Label>
+              <Input
+                id="basePrice"
+                type="number"
+                min="0"
+                step="0.01"
+                value={rateForm.basePrice}
+                onChange={(e) => setRateForm({...rateForm, basePrice: parseFloat(e.target.value) || 0})}
+                placeholder="0.00"
+                required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="pricePerKg">قیمت هر کیلوگرم *</Label>
+              <Input
+                id="pricePerKg"
+                type="number"
+                min="0"
+                step="0.01"
+                value={rateForm.pricePerKg}
+                onChange={(e) => setRateForm({...rateForm, pricePerKg: parseFloat(e.target.value) || 0})}
+                placeholder="0.00"
+                required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="pricePerKm">قیمت هر کیلومتر (اختیاری)</Label>
+              <Input
+                id="pricePerKm"
+                type="number"
+                min="0"
+                step="0.01"
+                value={rateForm.pricePerKm}
+                onChange={(e) => setRateForm({...rateForm, pricePerKm: parseFloat(e.target.value) || 0})}
+                placeholder="0.00"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="minimumCharge">حداقل هزینه *</Label>
+              <Input
+                id="minimumCharge"
+                type="number"
+                min="0"
+                step="0.01"
+                value={rateForm.minimumCharge}
+                onChange={(e) => setRateForm({...rateForm, minimumCharge: parseFloat(e.target.value) || 0})}
+                placeholder="0.00"
+                required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="maximumWeight">حداکثر وزن (کیلوگرم) *</Label>
+              <Input
+                id="maximumWeight"
+                type="number"
+                min="1"
+                value={rateForm.maximumWeight}
+                onChange={(e) => setRateForm({...rateForm, maximumWeight: parseFloat(e.target.value) || 1000})}
+                placeholder="1000"
+                required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="currency">ارز *</Label>
+              <Input
+                id="currency"
+                value={rateForm.currency}
+                onChange={(e) => setRateForm({...rateForm, currency: e.target.value.toUpperCase()})}
+                placeholder="USD"
+                maxLength={3}
+                required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="estimatedDaysMin">حداقل زمان تحویل (روز) *</Label>
+              <Input
+                id="estimatedDaysMin"
+                type="number"
+                min="1"
+                value={rateForm.estimatedDaysMin}
+                onChange={(e) => setRateForm({...rateForm, estimatedDaysMin: parseInt(e.target.value) || 1})}
+                placeholder="7"
+                required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="estimatedDaysMax">حداکثر زمان تحویل (روز) *</Label>
+              <Input
+                id="estimatedDaysMax"
+                type="number"
+                min="1"
+                value={rateForm.estimatedDaysMax}
+                onChange={(e) => setRateForm({...rateForm, estimatedDaysMax: parseInt(e.target.value) || 14})}
+                placeholder="14"
+                required
+              />
+            </div>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="rateIsActive"
+                checked={rateForm.isActive}
+                onCheckedChange={(checked) => setRateForm({...rateForm, isActive: checked})}
+              />
+              <Label htmlFor="rateIsActive">فعال</Label>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="supportsHazardous"
+                checked={rateForm.supportsHazardous}
+                onCheckedChange={(checked) => setRateForm({...rateForm, supportsHazardous: checked})}
+              />
+              <Label htmlFor="supportsHazardous">پشتیبانی از مواد خطرناک</Label>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="supportsFlammable"
+                checked={rateForm.supportsFlammable}
+                onCheckedChange={(checked) => setRateForm({...rateForm, supportsFlammable: checked})}
+              />
+              <Label htmlFor="supportsFlammable">پشتیبانی از مواد آتش‌زا</Label>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="supportsRefrigerated"
+                checked={rateForm.supportsRefrigerated}
+                onCheckedChange={(checked) => setRateForm({...rateForm, supportsRefrigerated: checked})}
+              />
+              <Label htmlFor="supportsRefrigerated">پشتیبانی از محصولات یخچالی</Label>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="requiresCustomsClearance"
+                checked={rateForm.requiresCustomsClearance}
+                onCheckedChange={(checked) => setRateForm({...rateForm, requiresCustomsClearance: checked})}
+              />
+              <Label htmlFor="requiresCustomsClearance">نیاز به ترخیص گمرکی</Label>
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="rateNotes">یادداشت‌ها</Label>
+            <Textarea
+              id="rateNotes"
+              value={rateForm.notes}
+              onChange={(e) => setRateForm({...rateForm, notes: e.target.value})}
+              placeholder="یادداشت‌های اضافی..."
+              rows={3}
+            />
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddRateOpen(false)}>
+              انصراف
+            </Button>
+            <Button 
+              onClick={() => createRateMutation.mutate(rateForm)}
+              disabled={createRateMutation.isPending}
+            >
+              {createRateMutation.isPending ? 'در حال ذخیره...' : 'ذخیره نرخ'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Country Dialog */}
+      <Dialog open={isEditCountryOpen} onOpenChange={setIsEditCountryOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Globe className="w-5 h-5" />
+              ویرایش کشور
+            </DialogTitle>
+            <DialogDescription>
+              اطلاعات کشور را ویرایش کنید
+            </DialogDescription>
+          </DialogHeader>
+          
+          {editingCountry && (
+            <>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="editName">نام کشور (فارسی/عربی) *</Label>
+                  <Input
+                    id="editName"
+                    defaultValue={editingCountry.name}
+                    placeholder="مثال: ترکیه"
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="editNameEn">نام کشور (انگلیسی) *</Label>
+                  <Input
+                    id="editNameEn"
+                    defaultValue={editingCountry.nameEn}
+                    placeholder="مثال: Turkey"
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="editCountryCode">کد کشور *</Label>
+                  <Input
+                    id="editCountryCode"
+                    defaultValue={editingCountry.countryCode}
+                    placeholder="مثال: TR"
+                    maxLength={3}
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="editRegion">منطقه *</Label>
+                  <Select defaultValue={editingCountry.region}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(REGIONS).map(([key, value]) => (
+                        <SelectItem key={key} value={key}>{value}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="editCurrency">ارز *</Label>
+                  <Input
+                    id="editCurrency"
+                    defaultValue={editingCountry.currency}
+                    placeholder="مثال: TRY"
+                    maxLength={3}
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="editNameLocal">نام محلی</Label>
+                  <Input
+                    id="editNameLocal"
+                    defaultValue={editingCountry.nameLocal}
+                    placeholder="مثال: Türkiye"
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="editIsActive"
+                    defaultChecked={editingCountry.isActive}
+                  />
+                  <Label htmlFor="editIsActive">فعال</Label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="editHasCustomsAgreement"
+                    defaultChecked={editingCountry.hasCustomsAgreement}
+                  />
+                  <Label htmlFor="editHasCustomsAgreement">دارای توافق گمرکی</Label>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="editNotes">یادداشت‌ها</Label>
+                <Textarea
+                  id="editNotes"
+                  defaultValue={editingCountry.notes}
+                  placeholder="یادداشت‌های اضافی..."
+                  rows={3}
+                />
+              </div>
+              
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsEditCountryOpen(false)}>
+                  انصراف
+                </Button>
+                <Button 
+                  onClick={() => {
+                    const form = document.querySelector('#editName') as HTMLInputElement;
+                    const nameEn = document.querySelector('#editNameEn') as HTMLInputElement;
+                    const countryCode = document.querySelector('#editCountryCode') as HTMLInputElement;
+                    const currency = document.querySelector('#editCurrency') as HTMLInputElement;
+                    const nameLocal = document.querySelector('#editNameLocal') as HTMLInputElement;
+                    const notes = document.querySelector('#editNotes') as HTMLTextAreaElement;
+                    const isActive = document.querySelector('#editIsActive') as HTMLInputElement;
+                    const hasCustomsAgreement = document.querySelector('#editHasCustomsAgreement') as HTMLInputElement;
+                    
+                    updateCountryMutation.mutate({
+                      id: editingCountry.id,
+                      data: {
+                        name: form.value,
+                        nameEn: nameEn.value,
+                        countryCode: countryCode.value.toUpperCase(),
+                        currency: currency.value.toUpperCase(),
+                        nameLocal: nameLocal.value,
+                        notes: notes.value,
+                        isActive: isActive.checked,
+                        hasCustomsAgreement: hasCustomsAgreement.checked
+                      }
+                    });
+                  }}
+                  disabled={updateCountryMutation.isPending}
+                >
+                  {updateCountryMutation.isPending ? 'در حال ذخیره...' : 'ذخیره تغییرات'}
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
