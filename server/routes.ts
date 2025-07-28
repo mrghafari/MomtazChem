@@ -34292,7 +34292,7 @@ momtazchem.com
   // Get all vehicle templates
   app.get("/api/logistics/vehicle-templates", requireAuth, async (req, res) => {
     try {
-      const vehicles = await db.select().from(vehicleTemplates).where(eq(vehicleTemplates.isActive, true)).orderBy(vehicleTemplates.priority, vehicleTemplates.name);
+      const vehicles = await db.select().from(vehicleTemplates).orderBy(vehicleTemplates.priority, vehicleTemplates.name);
       res.json({ success: true, data: vehicles });
     } catch (error) {
       console.error("Error fetching vehicle templates:", error);

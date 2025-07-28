@@ -320,7 +320,7 @@ const LogisticsManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['/api/logistics/vehicle-selection-history'] });
       toast({ 
         title: "انتخاب بهینه انجام شد", 
-        description: `وسیله انتخاب شده: ${result.data.selectedVehicle.vehicleName} - هزینه: ${parseInt(result.data.selectedVehicle.totalCost).toLocaleString()} دینار`
+        description: `وسیله انتخاب شده: ${result.data.selectedVehicle.vehicleName} - هزینه: ${parseInt(result.data.selectedVehicle.totalCost)} دینار`
       });
     },
     onError: () => {
@@ -415,6 +415,13 @@ const LogisticsManagement = () => {
     };
 
     updateVehicleMutation.mutate({ id: editingVehicle.id, ...data });
+  };
+
+  const handleToggleVehicleStatus = (vehicleId: number, newStatus: boolean) => {
+    updateVehicleMutation.mutate({ 
+      id: vehicleId, 
+      isActive: newStatus 
+    });
   };
 
   const VehicleOptimizationTab = () => {
@@ -531,11 +538,21 @@ const LogisticsManagement = () => {
                           <TableCell>{vehicle.name}</TableCell>
                           <TableCell>{(VEHICLE_TYPES as any)[vehicle.vehicleType] || vehicle.vehicleType}</TableCell>
                           <TableCell>{vehicle.maxWeightKg} کیلوگرم</TableCell>
-                          <TableCell>{parseInt(vehicle.basePrice).toLocaleString()} دینار</TableCell>
+                          <TableCell>{parseInt(vehicle.basePrice)} دینار</TableCell>
                           <TableCell>
-                            <Badge variant={vehicle.isActive ? "default" : "secondary"}>
-                              {vehicle.isActive ? "فعال" : "غیرفعال"}
-                            </Badge>
+                            <div className="flex items-center gap-2">
+                              <Badge variant={vehicle.isActive ? "default" : "secondary"}>
+                                {vehicle.isActive ? "فعال" : "غیرفعال"}
+                              </Badge>
+                              <Button
+                                size="sm"
+                                variant={vehicle.isActive ? "destructive" : "default"}
+                                onClick={() => handleToggleVehicleStatus(vehicle.id, !vehicle.isActive)}
+                                disabled={updateVehicleMutation.isPending}
+                              >
+                                {vehicle.isActive ? "غیرفعال" : "فعال"}
+                              </Button>
+                            </div>
                           </TableCell>
                           <TableCell>
                             <div className="flex gap-2">
