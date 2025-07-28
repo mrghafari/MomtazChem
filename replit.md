@@ -6,6 +6,29 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Vehicle ID Column Removed from Iraqi Cities Table - Interface Cleanup (January 28, 2025)
+✅ **IMPLEMENTED: Complete removal of vehicle ID column from 188 Iraqi cities management table**
+- **User Request**: "شناسه خودرو را از شهرهای عراق (188) بردار" - Remove vehicle ID from Iraqi cities table
+- **Table Header Cleanup**: Removed "شناسه خودرو" column header with sorting functionality from cities table
+- **Data Cell Removal**: Eliminated vehicle_id display cells showing badges with vehicle numbers
+- **Sorting Logic Cleanup**: Removed 'vehicleId' case from switch statement in city sorting functionality
+- **Edit Dialog Update**: Removed vehicle ID input field from city editing dialog interface
+- **Form Handler Cleanup**: Removed vehicle_id field processing from handleEditCity function
+- **Enhanced Table Layout**: 
+  - Cleaner table structure focusing on essential city information
+  - Maintained sticky header functionality with z-index 50
+  - Preserved all other columns: ID, City Name, Province, Distance, Status, Operations
+- **User Experience**: 
+  - Streamlined interface removing unnecessary vehicle assignment complexity
+  - Focus on core geographical data management without vehicle tracking
+  - Simplified city editing process with fewer form fields
+- **Technical Implementation**:
+  - Complete code cleanup removing all vehicle_id references from cities table
+  - Maintained existing distance calculation and origin city selection features
+  - Preserved province and city editing functionality
+- **Business Impact**: Simplified logistics management interface focusing on geographical data without vehicle assignment overhead
+- **Result**: Complete vehicle ID column removal operational - Iraqi cities table now displays without vehicle assignment column for cleaner data presentation
+
 ### COMPLETED: Shipment Weight Display Added to Purchase Form - Enhanced User Experience (January 28, 2025)
 ✅ **IMPLEMENTED: Total shipment weight display next to "Delivery Method *" in purchase cart**
 - **User Request**: "روبروی Delivery Method * در کارت خرید وزن محموله های خریداری شده را بگذار" - Add shipment weight display next to delivery method

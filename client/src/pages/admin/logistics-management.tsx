@@ -1784,10 +1784,7 @@ const LogisticsManagement = () => {
           aValue = calculateDistance(a);
           bValue = calculateDistance(b);
           break;
-        case 'vehicleId':
-          aValue = a.vehicle_id || 0;
-          bValue = b.vehicle_id || 0;
-          break;
+
         default:
           return 0;
       }
@@ -1877,7 +1874,6 @@ const LogisticsManagement = () => {
         name_arabic: formData.get('name_arabic') as string,
         name_english: formData.get('name_english') as string,
         distance_from_erbil_km: parseInt(formData.get('distance_from_erbil_km') as string),
-        vehicle_id: formData.get('vehicle_id') ? parseInt(formData.get('vehicle_id') as string) : null,
         is_active: formData.get('is_active') === 'on'
       };
 
@@ -2035,17 +2031,7 @@ const LogisticsManagement = () => {
                             <ArrowUpDown className="h-3 w-3" />
                           </Button>
                         </TableHead>
-                        <TableHead className="text-right w-24 bg-white sticky top-0 z-50 border-b" style={{ position: 'sticky', top: 0, backgroundColor: 'white', zIndex: 50 }}>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => handleCitySort('vehicleId')}
-                            className="flex items-center justify-end gap-1 p-0 h-auto font-medium text-right w-full"
-                          >
-                            شناسه خودرو
-                            <ArrowUpDown className="h-3 w-3" />
-                          </Button>
-                        </TableHead>
+
                         <TableHead className="text-right w-24 bg-white sticky top-0 z-50 border-b" style={{ position: 'sticky', top: 0, backgroundColor: 'white', zIndex: 50 }}>وضعیت</TableHead>
                         <TableHead className="text-right w-32 bg-white sticky top-0 z-50 border-b" style={{ position: 'sticky', top: 0, backgroundColor: 'white', zIndex: 50 }}>عملیات</TableHead>
                       </TableRow>
@@ -2084,17 +2070,7 @@ const LogisticsManagement = () => {
                             </div>
                           )}
                         </TableCell>
-                        <TableCell className="text-right w-24">
-                          <div className="flex justify-end">
-                            {city.vehicle_id ? (
-                              <Badge variant="outline" className="bg-blue-50 border-blue-200 text-blue-700">
-                                {city.vehicle_id}
-                              </Badge>
-                            ) : (
-                              <span className="text-gray-400 text-sm">-</span>
-                            )}
-                          </div>
-                        </TableCell>
+
                         <TableCell className="text-right w-24">
                           <div className="flex justify-end">
                             <Badge variant={city.is_active ? "default" : "secondary"}>
@@ -2237,17 +2213,7 @@ const LogisticsManagement = () => {
                       required 
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="vehicle_id">شناسه خودرو</Label>
-                    <Input 
-                      id="vehicle_id" 
-                      name="vehicle_id" 
-                      type="number"
-                      min="1"
-                      defaultValue={editingCity.vehicleId || ''}
-                      placeholder="شناسه خودرو (اختیاری)"
-                    />
-                  </div>
+
                   <div className="space-y-2">
                     <Label>استان</Label>
                     <p className="text-sm text-gray-600 p-2 bg-gray-50 rounded">
