@@ -6,6 +6,33 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Authentication Guard Implementation - Enhanced User Experience for Automatic Logouts (January 28, 2025)
+✅ **IMPLEMENTED: Comprehensive AuthGuard component for proper authentication handling when users are automatically logged out**
+- **User Request Fulfilled**: "وقتی اتوماتیک از سیستم خارج میشویم بجای نشان دادن بخشهایی از سایت به صورت ناقص از کاربر بخواهید دوباره وارد شود" - Enhanced logout experience with proper login prompts
+- **AuthGuard Component Created**: Professional authentication wrapper in `client/src/components/AuthGuard.tsx` with comprehensive UI
+- **Enhanced User Experience**: 
+  - **Professional Login Prompt**: Shows proper login dialog instead of incomplete website sections
+  - **Clear Messaging**: Persian text explaining session expiration with security context
+  - **Retry Functionality**: Users can retry authentication or navigate directly to login
+  - **Loading States**: Professional loading indicators during authentication checks
+- **Design Features**:
+  - **Red Lock Icon**: Clear visual indication of authentication requirement
+  - **Professional Card Layout**: Centered dialog with proper RTL support
+  - **Multiple Action Options**: Login redirect and retry buttons with loading states
+  - **Security Explanation**: Educational text about session timeouts for security
+- **Integration**: Updated main admin pages to use AuthGuard wrapper:
+  - **Admin Dashboard**: Wrapped with AuthGuard for centralized authentication handling
+  - **Component Architecture**: Separated authentication logic from business logic
+  - **Flexible Configuration**: Configurable redirect paths and authentication requirements
+- **Technical Implementation**:
+  - **Real-time Authentication Monitoring**: Integrates with existing useAuth hook
+  - **Graceful Error Handling**: Handles authentication failures with user-friendly messages
+  - **State Management**: Proper loading and error state handling with retry counters
+  - **Accessibility**: RTL support and proper focus management for Persian users
+- **Business Impact**: Users now receive professional authentication prompts instead of seeing broken/incomplete interface sections when automatically logged out
+- **Enhanced Security UX**: Clear communication about session timeouts builds user trust in security measures
+- **Result**: Complete authentication enhancement operational - users see professional login prompts with clear messaging instead of incomplete website sections during automatic logout scenarios
+
 ### COMPLETED: Delivery Code Removal from Print Output - Order Details Print Enhancement (January 28, 2025)
 ✅ **IMPLEMENTED: Complete removal of delivery code (کد تحویل) from order details print functionality**
 - **User Request Fulfilled**: "کد تحویل نباید در جزئیات سفارش که برای پرینت آماده میکنیم دیده شود" - Removed delivery code from print output

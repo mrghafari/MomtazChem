@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { LogOut, User, Package } from "lucide-react";
 import { getPersonalizedWelcome, getDashboardMotivation } from "@/utils/greetings";
+import AuthGuard from "@/components/AuthGuard";
 
 // Function to get the actual Site Management modules count
 const getSiteManagementModulesCount = () => {
@@ -21,7 +22,7 @@ const getSiteManagementModulesCount = () => {
 
 export default function AdminPage() {
   const [, setLocation] = useLocation();
-  const { user, isLoading: authLoading, isAuthenticated, logout } = useAuth();
+  const { user, logout } = useAuth();
   
   // Get the actual module count dynamically
   const moduleCount = getSiteManagementModulesCount();
@@ -32,7 +33,6 @@ export default function AdminPage() {
     queryFn: () => fetch('/api/content-management/items?section=admin_dashboard')
       .then(res => res.json())
       .then(data => data.success ? data.data : []),
-    enabled: isAuthenticated
   });
 
   // Helper function to get content by key
@@ -42,21 +42,21 @@ export default function AdminPage() {
     return content ? content.content : defaultValue;
   };
 
-  // Redirect if not authenticated
-  useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      setLocation("/admin/login");
-    }
-  }, [authLoading, isAuthenticated, setLocation]);
+  return (
+    <AuthGuard requireAuth={true} redirectTo="/admin/login">
+      <AdminDashboardContent 
+        user={user}
+        logout={logout}
+        setLocation={setLocation}
+        moduleCount={moduleCount}
+        getContent={getContent}
+        contentLoading={contentLoading}
+      />
+    </AuthGuard>
+  );
+}
 
-  if (authLoading) {
-    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
-  }
-
-  if (!isAuthenticated) {
-    return null;
-  }
-
+function AdminDashboardContent({ user, logout, setLocation, moduleCount, getContent, contentLoading }: any) {
   return (
     <div className="container mx-auto p-6 space-y-8 bg-white dark:bg-gray-900 min-h-screen">
       <div className="bg-white dark:bg-gray-900 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
