@@ -387,11 +387,20 @@ const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
 // Customer authentication middleware with improved error handling  
 const requireCustomerAuth = (req: Request, res: Response, next: NextFunction) => {
   try {
+    console.log('📊 [CSV EXPORT] Called with query:', req.query);
+    console.log('🔐 [CSV AUTH] Session check:', {
+      sessionExists: !!req.session,
+      customerId: req.session?.customerId,
+      adminId: req.session?.adminId,
+      isAuthenticated: req.session?.isAuthenticated
+    });
+    
     if (req.session && req.session.customerId) {
+      console.log('✅ [CSV AUTH] Customer authentication successful for customer:', req.session.customerId);
       next();
     } else {
-      console.log('Customer authentication failed for:', req.originalUrl);
-      res.status(401).json({ success: false, message: "احراز هویت نشده" });
+      console.log('❌ [CSV EXPORT] Unauthorized access attempt');
+      res.status(401).json({ success: false, message: "احراز هویت مشتری مورد نیاز است" });
     }
   } catch (error) {
     console.error('Customer authentication middleware error:', error);
@@ -37788,10 +37797,29 @@ momtazchem.com
     }
   });
 
-  // Export completed orders as CSV with date range filter
-  app.get("/api/customers/export-orders-csv", requireCustomerAuth, async (req, res) => {
+  // Export completed orders as CSV with date range filter - Updated for dual session support
+  app.get("/api/customers/export-orders-csv", async (req, res) => {
     try {
-      const customerId = req.session.customerId;
+      console.log('📊 [CSV EXPORT] Session details:', {
+        customerId: req.session?.customerId,
+        adminId: req.session?.adminId,
+        isAuthenticated: req.session?.isAuthenticated,
+        sessionId: req.sessionID
+      });
+      
+      // Get customer ID - support for dual session mode where customer may be logged in 
+      const customerId = req.session?.customerId;
+      
+      // Check authentication
+      if (!customerId) {
+        console.log('❌ [CSV EXPORT] No customer ID in session');
+        return res.status(401).json({ 
+          success: false, 
+          message: "احراز هویت مشتری مورد نیاز است. لطفاً ابتدا وارد حساب کاربری خود شوید." 
+        });
+      }
+      
+      console.log('✅ [CSV EXPORT] Processing CSV export for customer:', customerId);
       const { startDate, endDate } = req.query;
       
       const customer = await customerStorage.getCustomer(customerId);
@@ -37944,6 +37972,205 @@ momtazchem.com
       
     } catch (error) {
       console.error('Error exporting orders CSV:', error);
+      res.status(500).json({ success: false, message: "خطا در ایجاد فایل CSV" });
+    }
+  });
+
+  // Admin endpoint for exporting customer CSV orders
+  app.get("/api/admin/customers/:customerId/export-orders-csv", requireAuth, async (req, res) => {
+    try {
+      const customerId = parseInt(req.params.customerId);
+      const { startDate, endDate } = req.query;
+      
+      console.log('📊 [ADMIN CSV EXPORT] Processing request for customer:', customerId);
+      
+      const customer = await customerStorage.getCustomer(customerId);
+      if (!customer) {
+        return res.status(404).json({ success: false, message: "مشتری یافت نشد" });
+      }
+      
+      // Get CRM customer data for detailed address information
+      let crmCustomer;
+      try {
+        crmCustomer = await crmStorage.getCrmCustomerById(customerId);
+        console.log('✅ [ADMIN CSV] CRM data loaded for customer:', customerId);
+      } catch (error) {
+        console.log('⚠️ [ADMIN CSV] CRM data not available, using fallback');
+        crmCustomer = null;
+      }
+      
+      // Get all orders for customer
+      const allOrders = await customerStorage.getOrdersForProfile(customerId);
+      
+      // Filter for completed orders only (confirmed, delivered, or paid status)
+      const completedOrders = allOrders.filter(order => 
+        order.status === 'confirmed' || 
+        order.status === 'delivered' || 
+        order.paymentStatus === 'paid'
+      );
+      
+      // Apply date range filter if provided
+      let filteredOrders = completedOrders;
+      if (startDate || endDate) {
+        filteredOrders = completedOrders.filter(order => {
+          const orderDate = new Date(order.createdAt);
+          const start = startDate ? new Date(startDate as string) : null;
+          const end = endDate ? new Date(endDate as string) : null;
+          
+          if (end) {
+            end.setHours(23, 59, 59, 999);
+          }
+          
+          if (start && end) {
+            return orderDate >= start && orderDate <= end;
+          } else if (start) {
+            return orderDate >= start;
+          } else if (end) {
+            return orderDate <= end;
+          }
+          return true;
+        });
+      }
+      
+      if (filteredOrders.length === 0) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "هیچ سفارش تکمیل شده‌ای در بازه زمانی انتخابی یافت نشد" 
+        });
+      }
+      
+      // Build delivery address from CRM customer data if available
+      const buildDeliveryAddress = (customer, crmCustomer) => {
+        if (crmCustomer && (crmCustomer.address || crmCustomer.cityRegion || crmCustomer.province)) {
+          const addressParts = [];
+          
+          if (crmCustomer.address && crmCustomer.address.trim()) {
+            addressParts.push(crmCustomer.address.trim());
+          }
+          
+          if (crmCustomer.cityRegion && crmCustomer.cityRegion.trim()) {
+            addressParts.push(crmCustomer.cityRegion.trim());
+          }
+          
+          if (crmCustomer.province && crmCustomer.province.trim() && 
+              crmCustomer.province !== crmCustomer.cityRegion) {
+            addressParts.push(crmCustomer.province.trim());
+          }
+          
+          if (crmCustomer.country && crmCustomer.country.trim()) {
+            addressParts.push(crmCustomer.country.trim());
+          }
+          
+          if (crmCustomer.postalCode && crmCustomer.postalCode.toString().trim()) {
+            addressParts.push(`کد پستی: ${crmCustomer.postalCode}`);
+          }
+          
+          const fullAddress = addressParts.length > 0 ? addressParts.join(', ') : 'آدرس ثبت نشده';
+          console.log('✅ [ADMIN CSV ADDRESS] Built from CRM:', fullAddress);
+          return fullAddress;
+        } else if (customer && (customer.address || customer.city)) {
+          const addressParts = [];
+          if (customer.address && customer.address.trim()) addressParts.push(customer.address.trim());
+          if (customer.city && customer.city.trim()) addressParts.push(customer.city.trim());
+          if (customer.country && customer.country.trim()) addressParts.push(customer.country.trim());
+          
+          const basicAddress = addressParts.length > 0 ? addressParts.join(', ') : 'آدرس ثبت نشده';
+          console.log('⚠️ [ADMIN CSV ADDRESS] Fallback from customer:', basicAddress);
+          return basicAddress;
+        }
+        
+        console.log('❌ [ADMIN CSV ADDRESS] No address data available');
+        return 'آدرس ثبت نشده';
+      };
+      
+      const deliveryAddress = buildDeliveryAddress(customer, crmCustomer);
+      console.log('🏠 [ADMIN CSV] Final delivery address:', deliveryAddress);
+      
+      // CSV Headers
+      const csvHeaders = [
+        'شماره سفارش',
+        'تاریخ سفارش', 
+        'نام محصول',
+        'تعداد',
+        'قیمت واحد',
+        'مجموع',
+        'وضعیت سفارش',
+        'وضعیت پرداخت',
+        'آدرس تحویل',
+        'تاریخ تحویل'
+      ];
+      
+      // Build CSV rows
+      const csvRows = [];
+      
+      for (const order of filteredOrders) {
+        const orderDate = new Date(order.createdAt).toLocaleDateString('fa-IR');
+        const deliveryDate = order.deliveredAt 
+          ? new Date(order.deliveredAt).toLocaleDateString('fa-IR') 
+          : 'تحویل نشده';
+        
+        if (order.items && order.items.length > 0) {
+          for (const item of order.items) {
+            csvRows.push([
+              order.orderNumber || order.id,
+              orderDate,
+              item.productName || 'نامشخص',
+              item.quantity || 0,
+              item.unitPrice || 0,
+              item.totalPrice || (item.quantity * item.unitPrice) || 0,
+              order.status || 'نامشخص',
+              order.paymentStatus || 'نامشخص',
+              deliveryAddress,
+              deliveryDate
+            ]);
+          }
+        } else {
+          csvRows.push([
+            order.orderNumber || order.id,
+            orderDate,
+            'محصول نامشخص',
+            1,
+            order.totalAmount || 0,
+            order.totalAmount || 0,
+            order.status || 'نامشخص',
+            order.paymentStatus || 'نامشخص',
+            deliveryAddress,
+            deliveryDate
+          ]);
+        }
+      }
+      
+      // Convert to CSV format
+      const csvContent = [
+        csvHeaders.join(','),
+        ...csvRows.map(row => row.map(cell => `"${cell}"`).join(','))
+      ].join('\n');
+      
+      // Generate filename
+      const dateRange = startDate && endDate 
+        ? `${startDate}_to_${endDate}`
+        : startDate 
+        ? `from_${startDate}`
+        : endDate 
+        ? `until_${endDate}`
+        : 'all_time';
+      
+      const fileName = `admin-export-customer-${customerId}-orders-${dateRange}-${new Date().toISOString().split('T')[0]}.csv`;
+      
+      // Set response headers for CSV download
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+      res.setHeader('Cache-Control', 'no-cache');
+      
+      // Add BOM for UTF-8 support in Excel
+      res.write('\uFEFF');
+      res.write(csvContent);
+      res.end();
+      
+      console.log('✅ [ADMIN CSV] Export completed for customer:', customerId);
+      
+    } catch (error) {
+      console.error('Error in admin CSV export:', error);
       res.status(500).json({ success: false, message: "خطا در ایجاد فایل CSV" });
     }
   });
