@@ -6,8 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useQuery, useMutation, queryClient } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient';
+import { useQuery } from '@tanstack/react-query';
 import { 
   MapPin, 
   Search, 
@@ -21,10 +20,7 @@ import {
   Mountain,
   RefreshCw,
   Download,
-  Eye,
-  Edit,
-  Save,
-  X
+  Eye
 } from 'lucide-react';
 
 interface IraqiCity {
@@ -74,11 +70,6 @@ const IraqiGeographyTable: React.FC = () => {
   const [sortField, setSortField] = useState<SortField>('nameArabic');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const [currentView, setCurrentView] = useState<'cities' | 'provinces'>('cities');
-  
-  // Editing states
-  const [editingCityId, setEditingCityId] = useState<number | null>(null);
-  const [editingProvinceId, setEditingProvinceId] = useState<number | null>(null);
-  const [editValues, setEditValues] = useState<Partial<IraqiCity & IraqiProvince>>({});
 
   // Fetch cities data
   const { data: citiesData, isLoading: citiesLoading, error: citiesError } = useQuery({
@@ -92,35 +83,6 @@ const IraqiGeographyTable: React.FC = () => {
 
   const cities: IraqiCity[] = citiesData?.data || [];
   const provinces: IraqiProvince[] = provincesData?.data || [];
-
-  // Mutations for updating cities and provinces
-  const updateCityMutation = useMutation({
-    mutationFn: async (data: { id: number; updates: Partial<IraqiCity> }) => {
-      return apiRequest(`/api/admin/iraqi-cities/${data.id}`, {
-        method: 'PUT',
-        body: JSON.stringify(data.updates),
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/iraqi-cities'] });
-      setEditingCityId(null);
-      setEditValues({});
-    },
-  });
-
-  const updateProvinceMutation = useMutation({
-    mutationFn: async (data: { id: number; updates: Partial<IraqiProvince> }) => {
-      return apiRequest(`/api/admin/iraqi-provinces/${data.id}`, {
-        method: 'PUT', 
-        body: JSON.stringify(data.updates),
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/iraqi-provinces'] });
-      setEditingProvinceId(null);
-      setEditValues({});
-    },
-  });
 
   // Get unique regions for filter
   const uniqueRegions = useMemo(() => {
@@ -231,41 +193,6 @@ const IraqiGeographyTable: React.FC = () => {
     setIsCapitalFilter('all');
     setSortField('nameArabic');
     setSortDirection('asc');
-  };
-
-  // Edit functions
-  const startEditingCity = (city: IraqiCity) => {
-    setEditingCityId(city.id);
-    setEditValues(city);
-  };
-
-  const startEditingProvince = (province: IraqiProvince) => {
-    setEditingProvinceId(province.id);
-    setEditValues(province);
-  };
-
-  const cancelEditing = () => {
-    setEditingCityId(null);
-    setEditingProvinceId(null);
-    setEditValues({});
-  };
-
-  const saveChanges = () => {
-    if (editingCityId && currentView === 'cities') {
-      updateCityMutation.mutate({
-        id: editingCityId,
-        updates: editValues as Partial<IraqiCity>
-      });
-    } else if (editingProvinceId && currentView === 'provinces') {
-      updateProvinceMutation.mutate({
-        id: editingProvinceId,
-        updates: editValues as Partial<IraqiProvince>
-      });
-    }
-  };
-
-  const updateEditValue = (field: string, value: any) => {
-    setEditValues(prev => ({ ...prev, [field]: value }));
   };
 
   // Export data
@@ -497,52 +424,21 @@ const IraqiGeographyTable: React.FC = () => {
                       </Button>
                     </TableHead>
                     <TableHead className="text-right">کد پستی</TableHead>
-                    <TableHead className="text-right">عملیات</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredAndSortedCities.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={11} className="text-center py-8 text-gray-500">
+                      <TableCell colSpan={10} className="text-center py-8 text-gray-500">
                         هیچ شهری با این فیلترها یافت نشد
                       </TableCell>
                     </TableRow>
                   ) : (
                     filteredAndSortedCities.map((city) => (
                       <TableRow key={city.id}>
-                        <TableCell className="font-medium">
-                          {editingCityId === city.id ? (
-                            <Input
-                              value={editValues.nameArabic || ''}
-                              onChange={(e) => updateEditValue('nameArabic', e.target.value)}
-                              className="h-8"
-                            />
-                          ) : (
-                            city.nameArabic || '-'
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {editingCityId === city.id ? (
-                            <Input
-                              value={editValues.nameEnglish || ''}
-                              onChange={(e) => updateEditValue('nameEnglish', e.target.value)}
-                              className="h-8"
-                            />
-                          ) : (
-                            city.nameEnglish || '-'
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {editingCityId === city.id ? (
-                            <Input
-                              value={editValues.nameKurdish || ''}
-                              onChange={(e) => updateEditValue('nameKurdish', e.target.value)}
-                              className="h-8"
-                            />
-                          ) : (
-                            city.nameKurdish || '-'
-                          )}
-                        </TableCell>
+                        <TableCell className="font-medium">{city.nameArabic || '-'}</TableCell>
+                        <TableCell>{city.nameEnglish || '-'}</TableCell>
+                        <TableCell>{city.nameKurdish || '-'}</TableCell>
                         <TableCell>{city.provinceName}</TableCell>
                         <TableCell>
                           <Badge variant={
@@ -565,94 +461,18 @@ const IraqiGeographyTable: React.FC = () => {
                           )}
                         </TableCell>
                         <TableCell>
-                          {editingCityId === city.id ? (
-                            <Input
-                              type="number"
-                              value={editValues.population || ''}
-                              onChange={(e) => updateEditValue('population', parseInt(e.target.value) || 0)}
-                              className="h-8"
-                              placeholder="جمعیت"
-                            />
-                          ) : (
-                            city.population ? city.population.toLocaleString() : '-'
-                          )}
+                          {city.population ? city.population.toLocaleString() : '-'}
                         </TableCell>
                         <TableCell>
-                          {editingCityId === city.id ? (
-                            <Input
-                              type="number"
-                              value={editValues.distanceFromErbilKm || ''}
-                              onChange={(e) => updateEditValue('distanceFromErbilKm', parseInt(e.target.value) || 0)}
-                              className="h-8"
-                              placeholder="کیلومتر"
-                            />
-                          ) : (
-                            city.distanceFromErbilKm ? `${city.distanceFromErbilKm} کیلومتر` : '-'
-                          )}
+                          {city.distanceFromErbilKm ? `${city.distanceFromErbilKm} کیلومتر` : '-'}
                         </TableCell>
                         <TableCell>
-                          {editingCityId === city.id ? (
-                            <Input
-                              type="number"
-                              value={editValues.elevation || ''}
-                              onChange={(e) => updateEditValue('elevation', parseInt(e.target.value) || 0)}
-                              className="h-8"
-                              placeholder="متر"
-                            />
-                          ) : (
-                            <div className="flex items-center gap-1">
-                              {city.elevation && <Mountain className="h-3 w-3 text-gray-500" />}
-                              {city.elevation || '-'}
-                            </div>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {editingCityId === city.id ? (
-                            <Input
-                              value={editValues.postalCode || ''}
-                              onChange={(e) => updateEditValue('postalCode', e.target.value)}
-                              className="h-8"
-                              placeholder="کد پستی"
-                            />
-                          ) : (
-                            city.postalCode || '-'
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            {editingCityId === city.id ? (
-                              <>
-                                <Button
-                                  size="sm"
-                                  variant="default"
-                                  onClick={saveChanges}
-                                  disabled={updateCityMutation.isPending}
-                                  className="bg-blue-600 hover:bg-blue-700 text-white"
-                                >
-                                  <Save className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={cancelEditing}
-                                  disabled={updateCityMutation.isPending}
-                                >
-                                  <X className="h-4 w-4" />
-                                </Button>
-                              </>
-                            ) : (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => startEditingCity(city)}
-                                className="bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700"
-                              >
-                                <Edit className="h-4 w-4 ml-1" />
-                                ویرایش
-                              </Button>
-                            )}
+                          <div className="flex items-center gap-1">
+                            {city.elevation && <Mountain className="h-3 w-3 text-gray-500" />}
+                            {city.elevation || '-'}
                           </div>
                         </TableCell>
+                        <TableCell>{city.postalCode || '-'}</TableCell>
                       </TableRow>
                     ))
                   )}
@@ -688,63 +508,22 @@ const IraqiGeographyTable: React.FC = () => {
                     <TableHead className="text-right">مساحت (کیلومتر مربع)</TableHead>
                     <TableHead className="text-right">جمعیت</TableHead>
                     <TableHead className="text-right">وضعیت</TableHead>
-                    <TableHead className="text-right">عملیات</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredAndSortedProvinces.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={9} className="text-center py-8 text-gray-500">
+                      <TableCell colSpan={8} className="text-center py-8 text-gray-500">
                         هیچ استانی با این فیلترها یافت نشد
                       </TableCell>
                     </TableRow>
                   ) : (
                     filteredAndSortedProvinces.map((province) => (
                       <TableRow key={province.id}>
-                        <TableCell className="font-medium">
-                          {editingProvinceId === province.id ? (
-                            <Input
-                              value={editValues.nameArabic || ''}
-                              onChange={(e) => updateEditValue('nameArabic', e.target.value)}
-                              className="h-8"
-                            />
-                          ) : (
-                            province.nameArabic || '-'
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {editingProvinceId === province.id ? (
-                            <Input
-                              value={editValues.nameEnglish || ''}
-                              onChange={(e) => updateEditValue('nameEnglish', e.target.value)}
-                              className="h-8"
-                            />
-                          ) : (
-                            province.nameEnglish || '-'
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {editingProvinceId === province.id ? (
-                            <Input
-                              value={editValues.nameKurdish || ''}
-                              onChange={(e) => updateEditValue('nameKurdish', e.target.value)}
-                              className="h-8"
-                            />
-                          ) : (
-                            province.nameKurdish || '-'
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {editingProvinceId === province.id ? (
-                            <Input
-                              value={editValues.capital || ''}
-                              onChange={(e) => updateEditValue('capital', e.target.value)}
-                              className="h-8"
-                            />
-                          ) : (
-                            province.capital || '-'
-                          )}
-                        </TableCell>
+                        <TableCell className="font-medium">{province.nameArabic || '-'}</TableCell>
+                        <TableCell>{province.nameEnglish || '-'}</TableCell>
+                        <TableCell>{province.nameKurdish || '-'}</TableCell>
+                        <TableCell>{province.capital || '-'}</TableCell>
                         <TableCell>
                           <Badge variant={
                             province.region === 'north' ? 'default' :
@@ -759,73 +538,18 @@ const IraqiGeographyTable: React.FC = () => {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          {editingProvinceId === province.id ? (
-                            <Input
-                              type="number"
-                              value={editValues.area || ''}
-                              onChange={(e) => updateEditValue('area', parseInt(e.target.value) || 0)}
-                              className="h-8"
-                              placeholder="کیلومتر مربع"
-                            />
-                          ) : (
-                            province.area ? province.area.toLocaleString() : '-'
-                          )}
+                          {province.area ? province.area.toLocaleString() : '-'}
                         </TableCell>
                         <TableCell>
-                          {editingProvinceId === province.id ? (
-                            <Input
-                              type="number"
-                              value={editValues.population || ''}
-                              onChange={(e) => updateEditValue('population', parseInt(e.target.value) || 0)}
-                              className="h-8"
-                              placeholder="جمعیت"
-                            />
-                          ) : (
-                            <div className="flex items-center gap-1">
-                              <Users className="h-3 w-3 text-gray-500" />
-                              {province.population ? province.population.toLocaleString() : '-'}
-                            </div>
-                          )}
+                          <div className="flex items-center gap-1">
+                            <Users className="h-3 w-3 text-gray-500" />
+                            {province.population ? province.population.toLocaleString() : '-'}
+                          </div>
                         </TableCell>
                         <TableCell>
                           <Badge variant={province.isActive ? 'default' : 'destructive'}>
                             {province.isActive ? 'فعال' : 'غیرفعال'}
                           </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            {editingProvinceId === province.id ? (
-                              <>
-                                <Button
-                                  size="sm"
-                                  variant="default"
-                                  onClick={saveChanges}
-                                  disabled={updateProvinceMutation.isPending}
-                                  className="bg-blue-600 hover:bg-blue-700 text-white"
-                                >
-                                  <Save className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={cancelEditing}
-                                  disabled={updateProvinceMutation.isPending}
-                                >
-                                  <X className="h-4 w-4" />
-                                </Button>
-                              </>
-                            ) : (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => startEditingProvince(province)}
-                                className="bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700"
-                              >
-                                <Edit className="h-4 w-4 ml-1" />
-                                ویرایش
-                              </Button>
-                            )}
-                          </div>
                         </TableCell>
                       </TableRow>
                     ))
