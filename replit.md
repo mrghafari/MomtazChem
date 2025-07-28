@@ -6,6 +6,22 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Vehicle Template Form Number Formatting Enhancement - All Decimal Places Removed (January 28, 2025)
+✅ **IMPLEMENTED: Complete decimal place removal from all vehicle template form numbers for cleaner display**
+- **User Request Fulfilled**: "تمام اعشاری که در این فرم هست را پاک کن" - Removed all decimal places from vehicle template form display
+- **Form Field Enhancements**: Applied `parseInt()` to all numeric fields in vehicle template editing form:
+  - **Maximum Weight**: `parseInt(editingVehicle.maxWeightKg)` displays clean whole numbers (e.g., 20 instead of 20.00)
+  - **Base Price**: `parseInt(editingVehicle.basePrice)` shows currency without decimals (e.g., 50000 instead of 50000.00)
+  - **Price Per KM**: `parseInt(editingVehicle.pricePerKm)` displays clean pricing (e.g., 4000 instead of 4000.00)
+  - **Average Speed**: `parseInt(editingVehicle.averageSpeedKmh)` shows speed without decimals (e.g., 50 instead of 50.00)
+- **Table Display Enhancement**: Vehicle listing table now shows clean numbers without decimal places for weight and pricing
+- **Professional Interface**: All vehicle template numbers now display as whole integers for improved readability
+- **Business Impact**: Cleaner number presentation improves user experience and reduces visual clutter in forms
+- **Technical Implementation**: Applied parseInt() conversion to both form defaultValue and table display cells
+- **User Experience**: Professional number formatting matching business preference for whole number display
+- **Test Infrastructure**: All vehicle template editing and display interfaces now show clean integer values
+- **Result**: Complete decimal removal operational - all vehicle template form numbers display as clean whole integers without decimal places
+
 ### COMPLETED: Enhanced City Editing System in Logistics Management - Complete Interface Implementation (January 28, 2025)
 ✅ **IMPLEMENTED: Complete city editing functionality with enhanced distance modification capabilities**
 - **User Request Fulfilled**: "امکان ادیت جزئیات شهرها در بخش لجستیک را بذار بخصصوص تغییر کیلومتر" - Added comprehensive city editing with focus on distance modification

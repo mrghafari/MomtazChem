@@ -537,7 +537,7 @@ const LogisticsManagement = () => {
                         <TableRow key={vehicle.id}>
                           <TableCell>{vehicle.name}</TableCell>
                           <TableCell>{(VEHICLE_TYPES as any)[vehicle.vehicleType] || vehicle.vehicleType}</TableCell>
-                          <TableCell>{vehicle.maxWeightKg} کیلوگرم</TableCell>
+                          <TableCell>{parseInt(vehicle.maxWeightKg)} کیلوگرم</TableCell>
                           <TableCell>{parseInt(vehicle.basePrice)} دینار</TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
@@ -629,7 +629,7 @@ const LogisticsManagement = () => {
                           id="edit-maxWeightKg" 
                           name="maxWeightKg" 
                           type="number" 
-                          defaultValue={editingVehicle.maxWeightKg}
+                          defaultValue={parseInt(editingVehicle.maxWeightKg)}
                           required 
                         />
                       </div>
@@ -639,7 +639,7 @@ const LogisticsManagement = () => {
                           id="edit-basePrice" 
                           name="basePrice" 
                           type="number" 
-                          defaultValue={editingVehicle.basePrice}
+                          defaultValue={parseInt(editingVehicle.basePrice)}
                           required 
                         />
                       </div>
@@ -649,7 +649,7 @@ const LogisticsManagement = () => {
                           id="edit-pricePerKm" 
                           name="pricePerKm" 
                           type="number" 
-                          defaultValue={editingVehicle.pricePerKm}
+                          defaultValue={parseInt(editingVehicle.pricePerKm)}
                           required 
                         />
                       </div>
@@ -669,7 +669,7 @@ const LogisticsManagement = () => {
                           id="edit-averageSpeedKmh" 
                           name="averageSpeedKmh" 
                           type="number" 
-                          defaultValue={editingVehicle.averageSpeedKmh || 50}
+                          defaultValue={parseInt(editingVehicle.averageSpeedKmh) || 50}
                         />
                       </div>
                       <div className="space-y-2 col-span-2">
