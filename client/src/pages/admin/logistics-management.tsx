@@ -1781,8 +1781,8 @@ const LogisticsManagement = () => {
           bValue = calculateDistance(b);
           break;
         case 'vehicleId':
-          aValue = a.vehicleId || 0;
-          bValue = b.vehicleId || 0;
+          aValue = a.vehicle_id || 0;
+          bValue = b.vehicle_id || 0;
           break;
         default:
           return 0;
@@ -2064,9 +2064,9 @@ const LogisticsManagement = () => {
                         </TableCell>
                         <TableCell className="text-right w-24">
                           <div className="flex justify-end">
-                            {city.vehicleId ? (
+                            {city.vehicle_id ? (
                               <Badge variant="outline" className="bg-blue-50 border-blue-200 text-blue-700">
-                                {city.vehicleId}
+                                {city.vehicle_id}
                               </Badge>
                             ) : (
                               <span className="text-gray-400 text-sm">-</span>

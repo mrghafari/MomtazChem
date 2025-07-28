@@ -6,6 +6,18 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Vehicle ID Sorting Fix - Field Name Mapping Issue Resolved (January 28, 2025)
+✅ **RESOLVED: Critical issue where vehicle ID sorting was not working due to field name inconsistency**
+- **User Issue**: "مرتب سازی شناسه خودرو بر اساس شناسه انجام نشد" - Vehicle ID sorting not working properly
+- **Root Cause**: Frontend code was using `vehicleId` (camelCase) but database returns `vehicle_id` (snake_case)
+- **Sorting Logic Fix**: Updated switch case in line 1787-1789 to use `a.vehicle_id` and `b.vehicle_id` instead of `a.vehicleId` and `b.vehicleId`
+- **Display Fix**: Updated TableCell display logic in line 2070-2073 to check `city.vehicle_id` instead of `city.vehicleId`
+- **Complete Resolution**: Vehicle ID column now sorts correctly in both ascending and descending order
+- **Technical Achievement**: Fixed frontend-backend field mapping consistency for proper vehicle ID functionality
+- **User Experience**: Logistics staff can now properly sort cities by assigned vehicle IDs for optimized route planning
+- **Database Integration**: Maintains compatibility with existing vehicle_id column structure in iraqi_cities table
+- **Result**: Complete vehicle ID sorting operational - cities table now sorts correctly by vehicle ID when column header is clicked
+
 ### COMPLETED: Cities Table Column Alignment Enhancement - Professional UI Layout (January 28, 2025)
 ✅ **IMPLEMENTED: Fixed column alignment between headers and data cells in cities table within logistics management**
 - **User Request Fulfilled**: "اليپن ستونهای شهرها را با هدرشان درست کن" - Enhanced table column alignment and spacing
