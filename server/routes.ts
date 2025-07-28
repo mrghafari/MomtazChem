@@ -5671,7 +5671,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       'remote_desktop': 'دسکتاپ ریموت',
       'server_config': 'تنظیمات سرور',
       'company_information': 'اطلاعات شرکت',
-      'user_guide': 'راهنمای سایت',
+      'user_guide': 'User Guide',
       'site_management': 'مدیریت سایت'
     };
 
@@ -24230,7 +24230,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
             'دستیار SEO هوشمند': 'seo_management',
             'تنظیمات سرور': 'server_config',
             'اطلاعات شرکت': 'company_information',
-            'راهنمای سایت': 'user_guide',
+            'User Guide': 'user_guide',
             'مدیریت سایت': 'site_management'
           };
 
@@ -24329,7 +24329,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
             'دستیار SEO هوشمند': 'seo_management',
             'تنظیمات سرور': 'server_config',
             'اطلاعات شرکت': 'company_information',
-            'راهنمای سایت': 'user_guide',
+            'User Guide': 'user_guide',
             'مدیریت سایت': 'site_management'
           };
 
