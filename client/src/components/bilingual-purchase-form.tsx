@@ -200,6 +200,7 @@ const createPurchaseSchema = (lang: Language) => z.object({
   notes: z.string().optional(),
   gpsLatitude: z.number().optional(),
   gpsLongitude: z.number().optional(),
+  deliveryMethod: z.string().optional(), // Add delivery method field
 });
 
 interface PurchaseFormProps {
@@ -409,7 +410,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
   // Dynamic form based on current language
   const form = useForm({
-    resolver: zodResolver(createPurchaseSchema(language)),
+    resolver: zodResolver(createPurchaseSchema(language as Language)),
     defaultValues: {
       customerName: "",
       phone: "",
@@ -420,6 +421,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       notes: "",
       gpsLatitude: undefined,
       gpsLongitude: undefined,
+      deliveryMethod: "", // Add delivery method default
     },
   });
 
@@ -491,7 +493,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const [recipientMobile, setRecipientMobile] = useState('');
 
   // Get current translations based on site language
-  const t = translations[language] || translations['en']; // fallback to English
+  const t = translations[language as keyof typeof translations] || translations.en;
   const isRTL = direction === 'rtl';
   
   // Conditional graying out logic for CRM fields

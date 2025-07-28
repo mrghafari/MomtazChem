@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Checkout Submit Issue</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .step { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        code { background-color: #f8f9fa; padding: 2px 4px; border-radius: 3px; }
+        .debug-logs { background-color: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0; max-height: 300px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <h1>Test Checkout Submit Functionality</h1>
+    
+    <div class="step info">
+        <h3>🎯 Test Objective</h3>
+        <p>Debug why checkout submit button is not working even with free self-pickup delivery method selected.</p>
+        <p><strong>Customer Credentials:</strong> oilstar@hotmail.com / user123</p>
+    </div>
+
+    <div class="step">
+        <h3>📋 Test Steps</h3>
+        <ol>
+            <li>Navigate to the shop page</li>
+            <li>Add a product to cart</li>
+            <li>Click checkout button</li>
+            <li>Fill in customer information</li>
+            <li>Select "حمل توسط خودم" (self-pickup) delivery method</li>
+            <li>Click submit button</li>
+            <li>Check console for debug logs</li>
+        </ol>
+    </div>
+
+    <div class="step">
+        <h3>🔍 Debug Information</h3>
+        <p><strong>Form Schema Fields:</strong></p>
+        <ul>
+            <li>✅ customerName: required (min 2 chars)</li>
+            <li>✅ phone: required (min 10 chars)</li>
+            <li>✅ address: required (min 10 chars)</li>
+            <li>✅ city: required (min 2 chars)</li>
+            <li>✅ country: default "Iraq"</li>
+            <li>✅ deliveryMethod: optional (newly added)</li>
+            <li>postalCode: optional</li>
+            <li>notes: optional</li>
+            <li>gpsLatitude: optional</li>
+            <li>gpsLongitude: optional</li>
+        </ul>
+    </div>
+
+    <div class="step">
+        <h3>🚀 Expected Debug Logs</h3>
+        <p>When submit button is clicked, you should see these console messages:</p>
+        <div class="debug-logs">
+            <code>🚀 [SUBMIT DEBUG] Submit button clicked</code><br>
+            <code>🚀 [SUBMIT DEBUG] Event: [object]</code><br>
+            <code>🚀 [SUBMIT DEBUG] Form state: [object]</code><br>
+            <code>🚀 [SUBMIT DEBUG] Form errors: [object]</code><br>
+            <code>🚀 [SUBMIT DEBUG] Form isValid: true/false</code><br>
+            <code>🚀 [SUBMIT DEBUG] Payment method: [value]</code><br>
+            <code>🚀 [SUBMIT DEBUG] Selected shipping method: [value]</code><br>
+            <br>
+            <code>🚀 [SUBMIT DEBUG] onSubmit function called</code><br>
+            <code>🚀 [SUBMIT DEBUG] Form data received: [object]</code><br>
+            <code>🚀 [SUBMIT DEBUG] Selected shipping method: [value]</code><br>
+            <code>🚀 [SUBMIT DEBUG] Payment method: [value]</code><br>
+            <code>🚀 [SUBMIT DEBUG] Form validation state: [object]</code><br>
+            <code>🚀 [SUBMIT DEBUG] Form errors: [object]</code><br>
+        </div>
+    </div>
+
+    <div class="step">
+        <h3>🔧 Known Issues Fixed</h3>
+        <ul>
+            <li>✅ Added <code>deliveryMethod</code> field to validation schema</li>
+            <li>✅ Added <code>deliveryMethod</code> to form default values</li>
+            <li>✅ Fixed TypeScript compilation errors</li>
+            <li>✅ Form structure verified: <code>&lt;form onSubmit={form.handleSubmit(onSubmit)}&gt;</code></li>
+            <li>✅ Customer authentication working</li>
+        </ul>
+    </div>
+
+    <div class="step error">
+        <h3>⚠️ Current Issues</h3>
+        <ul>
+            <li>Submit button click not triggering debug logs</li>
+            <li>onSubmit function not being called</li>
+            <li>Form validation may be blocking submission</li>
+            <li>Self-pickup delivery method selection may not be properly registered</li>
+        </ul>
+    </div>
+
+    <div class="step">
+        <h3>🔍 Manual Test Instructions</h3>
+        <ol>
+            <li>Open browser console (F12)</li>
+            <li>Navigate to <a href="http://localhost:5000/shop" target="_blank">Shop Page</a></li>
+            <li>Login as customer: oilstar@hotmail.com / user123</li>
+            <li>Add product "Diesel Fuel Additive" to cart</li>
+            <li>Click checkout</li>
+            <li>Select "حمل توسط خودم - رایگان" delivery method</li>
+            <li>Fill required fields if not auto-populated</li>
+            <li>Click "Submit Order" button</li>
+            <li>Check console for debug messages</li>
+        </ol>
+    </div>
+
+    <div class="step info">
+        <h3>💡 Troubleshooting Tips</h3>
+        <ul>
+            <li>Ensure all required fields are filled</li>
+            <li>Check if delivery method is properly selected</li>
+            <li>Verify form validation state in console</li>
+            <li>Look for any JavaScript errors in console</li>
+            <li>Check if payment method is selected</li>
+        </ul>
+    </div>
+
+    <script>
+        console.log('🧪 [TEST PAGE] Checkout submit test page loaded');
+        console.log('🧪 [TEST PAGE] Customer should be logged in with: oilstar@hotmail.com');
+        console.log('🧪 [TEST PAGE] Ready to test checkout submit functionality');
+        
+        // Monitor for any console errors
+        window.addEventListener('error', function(e) {
+            console.error('🧪 [TEST PAGE] JavaScript Error:', e.error);
+        });
+    </script>
+</body>
+</html>
