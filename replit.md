@@ -43,10 +43,30 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Technical Achievement**: Resolved complex SQL query issues and field mapping for seamless database integration
 - **Result**: Complete automatic intercity bus selection system operational - intelligent transport method selection based on route availability, weight limits, and cost optimization with proper fallback to smart vehicle algorithm
 
+### COMPLETED: Product Form Boolean Fields Update Bug Fixed - Critical Backend Issue Resolved (January 28, 2025)
+✅ **RESOLVED: Critical bug where boolean fields (isFlammable, isNonChemical) in product kardex form were not updating in database**
+- **User Issue Identified**: Product form could not update flammable status, breaking safety system functionality
+- **Root Cause**: Backend updateProduct function lacked explicit handling for boolean fields, causing form updates to fail
+- **Backend Fix Implemented**: Added explicit Boolean() processing for all boolean fields in server/storage.ts:
+  - **isFlammable Processing**: Added debug logging and explicit Boolean conversion for flammable status
+  - **isNonChemical Processing**: Added debug logging and explicit Boolean conversion for chemical classification
+  - **All Boolean Fields**: Added processing for isActive, syncWithShop, showWhenOutOfStock, showMsdsToCustomers, showCatalogToCustomers, isVariant
+- **Debug Logging Added**: Comprehensive logging to track boolean field processing with original values and types
+- **Test Verification**: Successfully tested with Solvant 402 product:
+  - Form update: `"isFlammable": true` correctly saved to database
+  - API recognition: `🔥 [FLAMMABLE CHECK] { containsFlammableProducts: true, cartItems: 1 }`
+  - Safety filtering: System correctly filtered out non-authorized vehicles
+  - Final selection: Only flammable-authorized vehicle selected (618,400 IQD vs blocked buses at 31,500 IQD)
+- **Safety System Integration**: Boolean field fix ensures flammable materials safety system operates correctly
+- **Technical Achievement**: Explicit Boolean() conversion prevents type coercion issues in PostgreSQL boolean columns
+- **Business Impact**: Product safety classifications now update properly, ensuring transport safety compliance
+- **Result**: Complete boolean field processing operational - product kardex form now properly updates all boolean fields including critical isFlammable status for safety system functionality
+
 ### COMPLETED: Flammable Materials Safety Compliance System - Complete Implementation (January 28, 2025)
 ✅ **IMPLEMENTED: Complete safety compliance system for flammable materials transport with vehicle authorization controls**
 - **User Request Fulfilled**: "مثلا اتوبوس مسافر بری مجاز به حمل کالای آتش زا نیست" - Implemented vehicle restrictions for flammable materials
 - **VERIFIED: Single Flammable Item Logic**: "حتی اگر یکی از کالاها از میان چندین کالا آتشزا باشه نباید سرویسی که حمل مواد آتشزا برایش ممنوع است انتخاب شود" - System correctly blocks intercity buses even when only one item among many is flammable
+- **CONFIRMED WORKING**: User validated 20x cost difference between specialized transport (620,000 IQD) vs intercity buses (31,500 IQD) for flammable goods
 - **Vehicle Template Enhancement**: Added `supportsFlammable` field to vehicle template forms:
   - **Create Dialog**: Added "مواد آتش‌زا" switch with proper grid layout (grid-cols-4)
   - **Edit Dialog**: Added "حمل مواد آتش‌زا" field with descriptive text and orange badge display
