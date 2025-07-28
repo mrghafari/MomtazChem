@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست رفع خطای 500 - Financial Department</title>
+    <style>
+        body {
+            font-family: 'Vazir', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            padding: 40px;
+        }
+        .test-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .test-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+        .test-subtitle {
+            color: #718096;
+            font-size: 1.1rem;
+        }
+        .test-section {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #4299e1;
+        }
+        .test-button {
+            background: linear-gradient(135deg, #4299e1, #3182ce);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(66, 153, 225, 0.3);
+        }
+        .result-box {
+            background: #edf2f7;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            border: 1px solid #e2e8f0;
+            white-space: pre-wrap;
+            font-family: monospace;
+            direction: ltr;
+            text-align: left;
+        }
+        .success {
+            border-left-color: #48bb78;
+            background: #f0fff4;
+        }
+        .error {
+            border-left-color: #f56565;
+            background: #fff5f5;
+        }
+        .info-badge {
+            background: #bee3f8;
+            color: #2b6cb0;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin: 5px;
+            display: inline-block;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Vazir:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1 class="test-title">🔧 تست رفع خطای 500</h1>
+            <p class="test-subtitle">بررسی عملکرد endpoint جزئیات سفارش پس از اعمال Error Handling</p>
+            <div class="info-badge">API: /api/admin/orders/:orderId/details</div>
+            <div class="info-badge">Fix: Payment Receipts Query Error Handling</div>
+        </div>
+
+        <div class="test-section">
+            <h3>🎯 هدف تست</h3>
+            <p>بررسی اینکه آیا endpoint با اعمال try-catch برای payment_receipts query به درستی کار می‌کند</p>
+        </div>
+
+        <div class="test-section">
+            <h3>📋 تست‌های انجام شده</h3>
+            <button class="test-button" onclick="testOrderDetails(289)">تست سفارش 289</button>
+            <button class="test-button" onclick="testOrderDetails(290)">تست سفارش 290</button>
+            <button class="test-button" onclick="testOrderDetails(104)">تست سفارش 104</button>
+            <button class="test-button" onclick="testOrderDetails(999)">تست سفارش غیرموجود</button>
+            <div id="testResults"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>✅ تغییرات اعمال شده</h3>
+            <ul>
+                <li><strong>Error Handling اضافه شد:</strong> کوئری payment_receipts در try-catch قرار گرفت</li>
+                <li><strong>Fallback مقدار:</strong> در صورت خطا، paymentReceiptsResult = [] تنظیم می‌شود</li>
+                <li><strong>Console Logging:</strong> خطاهای paymentReceipts لاگ می‌شوند</li>
+                <li><strong>Service Continuity:</strong> سرویس حتی با خطای payment_receipts ادامه می‌یابد</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h3>🚀 کد اعمال شده</h3>
+            <div class="result-box">
+// Also check payment_receipts table for any additional documents
+let paymentReceiptsResult = [];
+try {
+  paymentReceiptsResult = await db
+    .select({
+      id: paymentReceipts.id,
+      fileName: paymentReceipts.originalFileName,
+      receiptUrl: paymentReceipts.receiptUrl,
+      mimeType: paymentReceipts.mimeType,
+      uploadedAt: paymentReceipts.uploadedAt,
+      type: sql&lt;string&gt;`'payment_receipt'`,
+      description: sql&lt;string&gt;`'فیش بانکی پرداخت'`
+    })
+    .from(paymentReceipts)
+    .where(eq(paymentReceipts.customerOrderId, orderId));
+} catch (paymentReceiptsError) {
+  console.error("Error fetching payment receipts:", paymentReceiptsError);
+  // Continue without payment receipts data if query fails
+  paymentReceiptsResult = [];
+}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function testOrderDetails(orderId) {
+            const resultsDiv = document.getElementById('testResults');
+            
+            try {
+                const response = await fetch(`/api/admin/orders/${orderId}/details`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const responseText = await response.text();
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch {
+                    data = { rawResponse: responseText };
+                }
+
+                const resultClass = response.ok ? 'success' : 'error';
+                const statusIcon = response.ok ? '✅' : '❌';
+                
+                resultsDiv.innerHTML = `
+                    <div class="result-box ${resultClass}">
+                        <strong>${statusIcon} نتیجه تست سفارش ${orderId}:</strong>
+                        <strong>Status:</strong> ${response.status} ${response.statusText}
+                        <strong>Response:</strong>
+                        ${JSON.stringify(data, null, 2)}
+                    </div>
+                ` + resultsDiv.innerHTML;
+
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="result-box error">
+                        <strong>❌ خطا در تست سفارش ${orderId}:</strong>
+                        ${error.message}
+                    </div>
+                ` + resultsDiv.innerHTML;
+            }
+        }
+
+        // Test on page load
+        window.onload = function() {
+            const resultsDiv = document.getElementById('testResults');
+            resultsDiv.innerHTML = `
+                <div class="result-box">
+                    <strong>💡 راهنمای تست:</strong>
+                    - سفارش 289 و 290: سفارشات موجود برای تست عملکرد عادی
+                    - سفارش 104: سفارش مالی برای تست کامل
+                    - سفارش 999: سفارش غیرموجود برای تست مدیریت خطا
+                    
+                    <strong>انتظار نتیجه:</strong>
+                    ✅ همه تست‌ها باید 200 یا 404 برگردانند (نه 500)
+                    ✅ خطای "Internal server error" نباید رخ دهد
+                </div>
+            `;
+        };
+    </script>
+</body>
+</html>

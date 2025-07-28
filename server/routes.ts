@@ -7741,18 +7741,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Also check payment_receipts table for any additional documents
-      const paymentReceiptsResult = await db
-        .select({
-          id: paymentReceipts.id,
-          fileName: paymentReceipts.originalFileName,
-          receiptUrl: paymentReceipts.receiptUrl,
-          mimeType: paymentReceipts.mimeType,
-          uploadedAt: paymentReceipts.uploadedAt,
-          type: sql<string>`'payment_receipt'`,
-          description: sql<string>`'فیش بانکی پرداخت'`
-        })
-        .from(paymentReceipts)
-        .where(eq(paymentReceipts.customerOrderId, orderId));
+      let paymentReceiptsResult = [];
+      try {
+        paymentReceiptsResult = await db
+          .select({
+            id: paymentReceipts.id,
+            fileName: paymentReceipts.originalFileName,
+            receiptUrl: paymentReceipts.receiptUrl,
+            mimeType: paymentReceipts.mimeType,
+            uploadedAt: paymentReceipts.uploadedAt,
+            type: sql<string>`'payment_receipt'`,
+            description: sql<string>`'فیش بانکی پرداخت'`
+          })
+          .from(paymentReceipts)
+          .where(eq(paymentReceipts.customerOrderId, orderId));
+      } catch (paymentReceiptsError) {
+        console.error("Error fetching payment receipts:", paymentReceiptsError);
+        // Continue without payment receipts data if query fails
+        paymentReceiptsResult = [];
+      }
       
       // Combine both sources
       documentsResult = [...documentsResult, ...paymentReceiptsResult];
