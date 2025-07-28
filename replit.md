@@ -6,6 +6,16 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Logistics City List Display Limited to 8 Rows - UI Streamlining (January 28, 2025)
+✅ **IMPLEMENTED: City list display in logistics management limited to 8 rows for better interface organization**
+- **User Request Fulfilled**: "از لیست شهرها 8 ردیف دیده شود در بخش لجستیک" - Changed city display from 50 to 8 rows
+- **File Updated**: Modified `client/src/pages/admin/logistics-management.tsx` GeographyTab component
+- **Display Logic**: Changed `geographyCities.slice(0, 50)` to `geographyCities.slice(0, 8)` for compact view
+- **Summary Counter**: Updated counter to show "و X شهر دیگر..." based on 8-row limit instead of 50
+- **User Interface**: Cleaner logistics interface focusing on essential city data with streamlined table view
+- **Business Impact**: Improved user experience with focused city list display while maintaining full functionality
+- **Result**: Logistics management now shows only 8 cities in Geography tab for better interface organization
+
 ### COMPLETED: Self-Pickup Delivery Method Added - Customer Self-Collection Option Operational (January 28, 2025)
 ✅ **IMPLEMENTED: Complete "حمل توسط خودم" (self-pickup) delivery method for customers to collect orders without shipping costs**
 - **User Request Fulfilled**: Added zero-cost delivery option for customers who prefer to collect orders directly from company location

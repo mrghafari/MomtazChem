@@ -1936,7 +1936,7 @@ const LogisticsManagement = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {geographyCities.slice(0, 50).map((city: any) => (
+                    {geographyCities.slice(0, 8).map((city: any) => (
                       <TableRow key={city.id}>
                         <TableCell className="font-medium">{city.id}</TableCell>
                         <TableCell>{city.name_arabic || city.name}</TableCell>
@@ -1983,9 +1983,9 @@ const LogisticsManagement = () => {
                     ))}
                   </TableBody>
                 </Table>
-                {geographyCities.length > 50 && (
+                {geographyCities.length > 8 && (
                   <div className="text-center py-4 text-sm text-gray-500">
-                    و {geographyCities.length - 50} شهر دیگر...
+                    و {geographyCities.length - 8} شهر دیگر...
                   </div>
                 )}
               </div>
