@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست ویرایش شهرها - سیستم لجستیک</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+            margin: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        .header h1 {
+            color: #667eea;
+            margin: 0;
+            font-size: 2.5em;
+        }
+        
+        .test-section {
+            margin: 30px 0;
+            padding: 25px;
+            background: #f8f9ff;
+            border-radius: 12px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .test-section h2 {
+            color: #667eea;
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .city-card {
+            background: white;
+            border: 2px solid #e1e8ff;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .city-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+        
+        .city-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .info-item {
+            background: #f0f4ff;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 0.9em;
+        }
+        
+        .info-value {
+            margin-top: 5px;
+            color: #333;
+        }
+        
+        .distance-highlight {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-block;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .edit-button {
+            background: linear-gradient(45deg, #28a745, #20c997);
+        }
+        
+        .test-button {
+            background: linear-gradient(45deg, #ffc107, #fd7e14);
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .loading {
+            background: #e2e3e5;
+            border: 1px solid #d6d8db;
+            color: #383d41;
+        }
+        
+        .edit-form {
+            background: #fff;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            display: none;
+        }
+        
+        .form-group {
+            margin: 15px 0;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e1e8ff;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .form-group input:focus {
+            border-color: #667eea;
+            outline: none;
+        }
+        
+        .distance-input {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏙️ تست سیستم ویرایش شهرها</h1>
+            <p>تست عملکرد ویرایش جزئیات شهرها بخصوص تغییر کیلومتر فاصله</p>
+        </div>
+
+        <div class="test-section">
+            <h2>🔍 دریافت لیست شهرها</h2>
+            <button onclick="loadCities()" class="test-button">بارگذاری شهرها</button>
+            <div id="citiesResult" class="result loading" style="display: none;">در حال بارگذاری...</div>
+            <div id="citiesList"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>✏️ ویرایش شهر انتخابی</h2>
+            <div id="editSection"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>📊 آمار تست</h2>
+            <div id="statistics">
+                <div class="info-item">
+                    <div class="info-label">تعداد شهرهای بارگذاری شده</div>
+                    <div class="info-value" id="totalCities">0</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">تعداد ویرایش‌های موفق</div>
+                    <div class="info-value" id="successfulEdits">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let cities = [];
+        let successfulEdits = 0;
+
+        async function loadCities() {
+            const resultDiv = document.getElementById('citiesResult');
+            const citiesListDiv = document.getElementById('citiesList');
+            
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result loading';
+            resultDiv.textContent = 'در حال دریافت لیست شهرها...';
+            
+            try {
+                const response = await fetch('/api/logistics/cities-detailed');
+                const data = await response.json();
+                
+                if (data.success) {
+                    cities = data.data;
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `✅ ${cities.length} شهر با موفقیت بارگذاری شد`;
+                    
+                    document.getElementById('totalCities').textContent = cities.length;
+                    
+                    // نمایش شهرها
+                    displayCities(cities.slice(0, 10)); // نمایش 10 شهر اول برای تست
+                } else {
+                    throw new Error(data.message || 'خطا در دریافت داده‌ها');
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ خطا: ${error.message}`;
+            }
+        }
+
+        function displayCities(citiesToShow) {
+            const citiesListDiv = document.getElementById('citiesList');
+            citiesListDiv.innerHTML = '';
+            
+            citiesToShow.forEach(city => {
+                const cityCard = document.createElement('div');
+                cityCard.className = 'city-card';
+                cityCard.innerHTML = `
+                    <div class="city-info">
+                        <div class="info-item">
+                            <div class="info-label">شناسه</div>
+                            <div class="info-value">${city.id}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">نام عربی</div>
+                            <div class="info-value">${city.name_arabic || city.name}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">نام انگلیسی</div>
+                            <div class="info-value">${city.name_english || 'ندارد'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">استان</div>
+                            <div class="info-value">${city.province_name}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">فاصله از اربیل</div>
+                            <div class="info-value">
+                                <span class="distance-highlight">${city.distance_from_erbil_km || 0} کیلومتر</span>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">وضعیت</div>
+                            <div class="info-value">${city.is_active ? '✅ فعال' : '❌ غیرفعال'}</div>
+                        </div>
+                    </div>
+                    <button onclick="openEditForm(${city.id})" class="edit-button">
+                        📍 ویرایش فاصله و جزئیات
+                    </button>
+                `;
+                citiesListDiv.appendChild(cityCard);
+            });
+        }
+
+        function openEditForm(cityId) {
+            const city = cities.find(c => c.id === cityId);
+            if (!city) return;
+            
+            const editSection = document.getElementById('editSection');
+            editSection.innerHTML = `
+                <div class="edit-form" style="display: block;">
+                    <h3>ویرایش شهر: ${city.name_arabic || city.name}</h3>
+                    <div class="form-group">
+                        <label for="nameArabic">نام عربی *</label>
+                        <input type="text" id="nameArabic" value="${city.name_arabic || city.name}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="nameEnglish">نام انگلیسی</label>
+                        <input type="text" id="nameEnglish" value="${city.name_english || ''}">
+                    </div>
+                    <div class="form-group">
+                        <label for="distanceFromErbil">📍 فاصله از اربیل (کیلومتر) *</label>
+                        <input type="number" id="distanceFromErbil" class="distance-input" 
+                               value="${city.distance_from_erbil_km || 0}" min="0" max="1000" required>
+                        <small style="color: #666; display: block; margin-top: 5px;">
+                            💡 این فاصله برای محاسبه هزینه حمل استفاده می‌شود
+                        </small>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="isActive" ${city.is_active ? 'checked' : ''}>
+                            فعال
+                        </label>
+                    </div>
+                    <button onclick="updateCity(${cityId})" class="edit-button">
+                        💾 ذخیره تغییرات
+                    </button>
+                    <button onclick="cancelEdit()" class="test-button">
+                        ❌ انصراف
+                    </button>
+                    <div id="editResult" class="result" style="display: none;"></div>
+                </div>
+            `;
+        }
+
+        async function updateCity(cityId) {
+            const resultDiv = document.getElementById('editResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result loading';
+            resultDiv.textContent = 'در حال ذخیره تغییرات...';
+            
+            try {
+                const updateData = {
+                    name_arabic: document.getElementById('nameArabic').value,
+                    name_english: document.getElementById('nameEnglish').value,
+                    distance_from_erbil_km: parseInt(document.getElementById('distanceFromErbil').value),
+                    is_active: document.getElementById('isActive').checked
+                };
+                
+                console.log('داده‌های ارسالی:', updateData);
+                
+                const response = await fetch(`/api/logistics/cities/${cityId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updateData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    successfulEdits++;
+                    document.getElementById('successfulEdits').textContent = successfulEdits;
+                    
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `✅ شهر با موفقیت به‌روزرسانی شد!\n\nجزئیات به‌روزرسانی:\n${JSON.stringify(data.data, null, 2)}`;
+                    
+                    // به‌روزرسانی داده‌های محلی
+                    const cityIndex = cities.findIndex(c => c.id === cityId);
+                    if (cityIndex !== -1) {
+                        cities[cityIndex] = { ...cities[cityIndex], ...data.data };
+                    }
+                    
+                    // به‌روزرسانی نمایش
+                    loadCities();
+                } else {
+                    throw new Error(data.message || 'خطا در به‌روزرسانی');
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ خطا در به‌روزرسانی: ${error.message}`;
+            }
+        }
+
+        function cancelEdit() {
+            document.getElementById('editSection').innerHTML = '<p>برای ویرایش، روی دکمه "ویرایش فاصله و جزئیات" کلیک کنید.</p>';
+        }
+
+        // بارگذاری خودکار هنگام باز شدن صفحه
+        window.onload = function() {
+            console.log('🚀 تست سیستم ویرایش شهرها آماده است');
+            loadCities();
+        };
+    </script>
+</body>
+</html>

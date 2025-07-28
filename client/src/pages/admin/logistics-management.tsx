@@ -2050,7 +2050,7 @@ const LogisticsManagement = () => {
                         </TableCell>
                         <TableCell className="text-right w-32">{city.province_name}</TableCell>
                         <TableCell className="text-right w-64">
-                          <div className="flex justify-end">
+                          <div className="flex justify-end items-center gap-2">
                             <Badge 
                               variant="outline" 
                               className={selectedOriginCity?.id === city.id ? 
@@ -2063,6 +2063,18 @@ const LogisticsManagement = () => {
                                 `${calculateDistance(city)} کیلومتر`
                               }
                             </Badge>
+                            {!selectedOriginCity && (
+                              <button
+                                onClick={() => {
+                                  setEditingCity(city);
+                                  setIsEditCityDialogOpen(true);
+                                }}
+                                className="text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-1 py-0.5 rounded transition-colors"
+                                title="ویرایش سریع فاصله"
+                              >
+                                📍
+                              </button>
+                            )}
                           </div>
                           {!selectedOriginCity && (
                             <div className="text-xs text-gray-500 mt-1 text-right">
@@ -2179,8 +2191,19 @@ const LogisticsManagement = () => {
         <Dialog open={isEditCityDialogOpen} onOpenChange={setIsEditCityDialogOpen}>
           <DialogContent className="max-w-2xl" dir="rtl">
             <DialogHeader>
-              <DialogTitle>ویرایش شهر</DialogTitle>
-              <DialogDescription>ویرایش اطلاعات شهر {editingCity?.name_arabic || editingCity?.name}</DialogDescription>
+              <DialogTitle className="flex items-center gap-2">
+                <Edit className="w-5 h-5 text-blue-600" />
+                ویرایش شهر
+              </DialogTitle>
+              <DialogDescription className="bg-blue-50 p-3 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <span className="text-blue-700">🏙️</span>
+                  <span>ویرایش اطلاعات شهر <strong>{editingCity?.name_arabic || editingCity?.name}</strong></span>
+                </div>
+                <div className="text-xs text-blue-600 mt-1">
+                  استان: {editingCity?.province_name}
+                </div>
+              </DialogDescription>
             </DialogHeader>
             {editingCity && (
               <form onSubmit={(e) => { e.preventDefault(); handleEditCity(new FormData(e.currentTarget)); }}>
@@ -2203,15 +2226,29 @@ const LogisticsManagement = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="distance_from_erbil_km">فاصله از اربیل (کیلومتر) *</Label>
-                    <Input 
-                      id="distance_from_erbil_km" 
-                      name="distance_from_erbil_km" 
-                      type="number"
-                      min="0"
-                      defaultValue={editingCity.distance_from_erbil_km || 0}
-                      required 
-                    />
+                    <Label htmlFor="distance_from_erbil_km" className="text-blue-700 font-medium">
+                      📍 فاصله از اربیل (کیلومتر) *
+                    </Label>
+                    <div className="relative">
+                      <Input 
+                        id="distance_from_erbil_km" 
+                        name="distance_from_erbil_km" 
+                        type="number"
+                        min="0"
+                        max="1000"
+                        step="1"
+                        defaultValue={editingCity.distance_from_erbil_km || 0}
+                        required 
+                        className="pr-12 text-center font-medium text-lg"
+                        placeholder="0"
+                      />
+                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">
+                        کیلومتر
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-600 bg-blue-50 p-2 rounded">
+                      💡 این فاصله برای محاسبه هزینه حمل و انتخاب خودرو استفاده می‌شود
+                    </p>
                   </div>
 
                   <div className="space-y-2">
