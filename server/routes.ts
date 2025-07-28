@@ -21199,6 +21199,22 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       const distance = parseFloat(destinationCity_data.distanceFromErbilKm || '0');
       const weightKg = parseFloat(weight);
 
+      // Check if cart contains flammable products FIRST (before checking bus lines)
+      let containsFlammableProducts = false;
+      if (cart && Array.isArray(cart)) {
+        for (const item of cart) {
+          if (item.isFlammable === true) {
+            containsFlammableProducts = true;
+            break;
+          }
+        }
+      }
+
+      console.log('🔥 [FLAMMABLE CHECK]', {
+        containsFlammableProducts: containsFlammableProducts,
+        cartItems: cart?.length || 0
+      });
+
       // Check if both origin and destination cities have intercity bus lines
       const hasIntercityBusOption = originCity_data.hasIntercityBusLine && destinationCity_data.hasIntercityBusLine;
       
@@ -21208,11 +21224,12 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         originHasBusLine: originCity_data.hasIntercityBusLine,
         destinationHasBusLine: destinationCity_data.hasIntercityBusLine,
         hasIntercityBusOption: hasIntercityBusOption,
-        weight: weightKg
+        weight: weightKg,
+        containsFlammableProducts: containsFlammableProducts
       });
 
-      // If both cities have bus lines, automatically use intercity bus transport
-      if (hasIntercityBusOption) {
+      // If both cities have bus lines AND no flammable products AND weight limit OK, use intercity bus transport
+      if (hasIntercityBusOption && !containsFlammableProducts && weightKg <= 50) {
         console.log('🚌 [INTERCITY BUS] Automatic selection for route:', originCity, '→', destinationCity);
         
         // Calculate bus transport cost (typically cheaper than vehicle transport)
@@ -21254,17 +21271,6 @@ ${message ? `Additional Requirements:\n${message}` : ''}
             }
           }
         });
-      }
-
-      // Check if cart contains flammable products
-      let containsFlammableProducts = false;
-      if (cart && Array.isArray(cart)) {
-        for (const item of cart) {
-          if (item.isFlammable === true) {
-            containsFlammableProducts = true;
-            break;
-          }
-        }
       }
 
       console.log('🎯 [DELIVERY COST] Calculation parameters:', {
