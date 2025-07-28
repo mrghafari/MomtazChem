@@ -38,6 +38,7 @@ import {
 import { useOrderNotifications } from '@/hooks/useOrderNotifications';
 import PostalServicesTab from '@/components/PostalServicesTab';
 import VehicleTemplateEditor from '@/components/admin/VehicleTemplateEditor';
+import InternationalGeographyTab from '@/components/InternationalGeographyTab';
 
 
 // Safe date formatting function to prevent Invalid Date errors
@@ -2400,10 +2401,11 @@ const LogisticsManagement = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="orders">سفارشات</TabsTrigger>
           <TabsTrigger value="companies">شرکت‌های حمل</TabsTrigger>
           <TabsTrigger value="geography">جغرافیای عراق</TabsTrigger>
+          <TabsTrigger value="international">جغرافیای خارج از عراق</TabsTrigger>
           <TabsTrigger value="vehicles">وسایل نقلیه</TabsTrigger>
           <TabsTrigger value="postal">خدمات پست</TabsTrigger>
         </TabsList>
@@ -2426,6 +2428,10 @@ const LogisticsManagement = () => {
 
         <TabsContent value="vehicles">
           <VehicleOptimizationTab />
+        </TabsContent>
+
+        <TabsContent value="international">
+          <InternationalGeographyTab />
         </TabsContent>
 
         <TabsContent value="postal">

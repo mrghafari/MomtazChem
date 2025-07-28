@@ -457,6 +457,8 @@ export type InsertShippingRate = z.infer<typeof insertShippingRateSchema>;
 export type FreightRate = typeof freightRates.$inferSelect;
 export type InsertFreightRate = z.infer<typeof insertFreightRateSchema>;
 
+
+
 // Iraqi regions constants
 export const IRAQI_REGIONS = {
   BAGHDAD: 'baghdad',
@@ -483,6 +485,91 @@ export const VEHICLE_SIZES = {
 export type IraqiRegion = typeof IRAQI_REGIONS[keyof typeof IRAQI_REGIONS];
 export type TransportType = typeof TRANSPORT_TYPES[keyof typeof TRANSPORT_TYPES];
 export type VehicleSize = typeof VEHICLE_SIZES[keyof typeof VEHICLE_SIZES];
+
+// =============================================================================
+// INTERNATIONAL GEOGRAPHY SYSTEM - Countries and Foreign Cities
+// =============================================================================
+
+// International Countries Table
+export const internationalCountries = pgTable("international_countries", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(), // Country name in Arabic
+  nameEn: text("name_en").notNull(), // Country name in English
+  nameLocal: text("name_local"), // Country name in local language
+  countryCode: varchar("country_code", { length: 3 }).notNull().unique(), // ISO 3-letter code (TUR, IRN, SYR, etc.)
+  region: text("region").notNull(), // Middle East, Asia, Europe, etc.
+  currency: text("currency").notNull(), // TRY, IRR, USD, EUR, etc.
+  isActive: boolean("is_active").default(true),
+  hasShippingRoutes: boolean("has_shipping_routes").default(false),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => [
+  index("international_countries_code_idx").on(table.countryCode),
+  index("international_countries_region_idx").on(table.region),
+  index("international_countries_active_idx").on(table.isActive),
+]);
+
+// International Cities Table
+export const internationalCities = pgTable("international_cities", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(), // City name in Arabic
+  nameEn: text("name_en").notNull(), // City name in English
+  nameLocal: text("name_local"), // City name in local language
+  countryId: integer("country_id").references(() => internationalCountries.id).notNull(),
+  provinceState: text("province_state"), // Province/State within the country
+  cityType: varchar("city_type", { length: 20 }).default("city"), // city, port, airport, border_crossing
+  distanceFromErbilKm: decimal("distance_from_erbil_km", { precision: 8, scale: 2 }), // Distance from Erbil in kilometers
+  isActive: boolean("is_active").default(true),
+  hasShippingRoutes: boolean("has_shipping_routes").default(false),
+  isPriorityDestination: boolean("is_priority_destination").default(false),
+  customsInformation: text("customs_information"), // Customs and import/export notes
+  notes: text("notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => [
+  index("international_cities_country_idx").on(table.countryId),
+  index("international_cities_type_idx").on(table.cityType),
+  index("international_cities_active_idx").on(table.isActive),
+  index("international_cities_distance_idx").on(table.distanceFromErbilKm),
+]);
+
+// International Shipping Rates Table
+export const internationalShippingRates = pgTable("international_shipping_rates", {
+  id: serial("id").primaryKey(),
+  countryId: integer("country_id").references(() => internationalCountries.id),
+  cityId: integer("city_id").references(() => internationalCities.id),
+  shippingMethod: varchar("shipping_method", { length: 50 }).notNull(), // sea_freight, air_freight, land_transport
+  transportProvider: text("transport_provider"), // Company providing the service
+  
+  // Pricing structure
+  basePrice: decimal("base_price", { precision: 12, scale: 2 }).notNull(),
+  pricePerKg: decimal("price_per_kg", { precision: 8, scale: 2 }),
+  pricePerKm: decimal("price_per_km", { precision: 8, scale: 2 }),
+  minimumCharge: decimal("minimum_charge", { precision: 12, scale: 2 }),
+  maximumWeight: decimal("maximum_weight", { precision: 10, scale: 2 }),
+  
+  // Time and conditions
+  estimatedDaysMin: integer("estimated_days_min").default(7), // Minimum delivery time
+  estimatedDaysMax: integer("estimated_days_max").default(14), // Maximum delivery time
+  currency: text("currency").default("USD"), // Pricing currency
+  
+  // Restrictions and capabilities
+  supportsHazardous: boolean("supports_hazardous").default(false),
+  supportsFlammable: boolean("supports_flammable").default(false),
+  supportsRefrigerated: boolean("supports_refrigerated").default(false),
+  requiresCustomsClearance: boolean("requires_customs_clearance").default(true),
+  
+  isActive: boolean("is_active").default(true),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => [
+  index("international_shipping_country_idx").on(table.countryId),
+  index("international_shipping_city_idx").on(table.cityId),
+  index("international_shipping_method_idx").on(table.shippingMethod),
+  index("international_shipping_active_idx").on(table.isActive),
+]);
 
 // =============================================================================
 // OPTIMAL VEHICLE SELECTION SYSTEM
@@ -644,3 +731,32 @@ export const SELECTION_ALGORITHMS = {
 export type RouteType = typeof ROUTE_TYPES[keyof typeof ROUTE_TYPES];
 export type OptimalVehicleType = typeof OPTIMAL_VEHICLE_TYPES[keyof typeof OPTIMAL_VEHICLE_TYPES];
 export type SelectionAlgorithm = typeof SELECTION_ALGORITHMS[keyof typeof SELECTION_ALGORITHMS];
+
+// International geography schemas and types
+export const insertInternationalCountrySchema = createInsertSchema(internationalCountries);
+export const insertInternationalCitySchema = createInsertSchema(internationalCities);
+export const insertInternationalShippingRateSchema = createInsertSchema(internationalShippingRates);
+
+export type InternationalCountry = typeof internationalCountries.$inferSelect;
+export type InsertInternationalCountry = z.infer<typeof insertInternationalCountrySchema>;
+export type InternationalCity = typeof internationalCities.$inferSelect;
+export type InsertInternationalCity = z.infer<typeof insertInternationalCitySchema>;
+export type InternationalShippingRate = typeof internationalShippingRates.$inferSelect;
+export type InsertInternationalShippingRate = z.infer<typeof insertInternationalShippingRateSchema>;
+
+// International geography constants
+export const INTERNATIONAL_CITY_TYPES = {
+  CITY: 'city',
+  PORT: 'port', 
+  AIRPORT: 'airport',
+  BORDER_CROSSING: 'border_crossing'
+} as const;
+
+export const INTERNATIONAL_SHIPPING_METHODS = {
+  SEA_FREIGHT: 'sea_freight',
+  AIR_FREIGHT: 'air_freight', 
+  LAND_TRANSPORT: 'land_transport'
+} as const;
+
+export type InternationalCityType = typeof INTERNATIONAL_CITY_TYPES[keyof typeof INTERNATIONAL_CITY_TYPES];
+export type InternationalShippingMethod = typeof INTERNATIONAL_SHIPPING_METHODS[keyof typeof INTERNATIONAL_SHIPPING_METHODS];

@@ -44,7 +44,7 @@ import { generateSmartSKU, validateSKUUniqueness } from "./ai-sku-generator";
 import { deliveryVerificationStorage } from "./delivery-verification-storage";
 import { gpsDeliveryStorage } from "./gps-delivery-storage";
 import { insertGpsDeliveryConfirmationSchema } from "@shared/gps-delivery-schema";
-import { vehicleTemplates, vehicleSelectionHistory, insertVehicleTemplateSchema, insertVehicleSelectionHistorySchema } from "@shared/logistics-schema";
+import { vehicleTemplates, vehicleSelectionHistory, insertVehicleTemplateSchema, insertVehicleSelectionHistorySchema, internationalCountries, internationalCities, internationalShippingRates, insertInternationalCountrySchema, insertInternationalCitySchema, insertInternationalShippingRateSchema } from "@shared/logistics-schema";
 import { 
   companyInformation, 
   correspondence, 
@@ -37091,6 +37091,245 @@ momtazchem.com
   // Register FIFO batch routes
   const fifoBatchRouter = await import('./routes/fifo-batch');
   app.use(fifoBatchRouter.default);
+
+  // =============================================================================
+  // INTERNATIONAL GEOGRAPHY API ENDPOINTS
+  // =============================================================================
+
+  // International Countries
+  app.get('/api/logistics/international-countries', requireAuth, async (req, res) => {
+    try {
+      const { isActive, region } = req.query;
+      let query = db.select().from(internationalCountries);
+      
+      if (isActive !== undefined) {
+        query = query.where(eq(internationalCountries.isActive, isActive === 'true'));
+      }
+      
+      if (region) {
+        query = query.where(eq(internationalCountries.region, region as string));
+      }
+      
+      const countries = await query.orderBy(internationalCountries.name);
+      res.json({ success: true, data: countries });
+    } catch (error) {
+      console.error('Error fetching international countries:', error);
+      res.status(500).json({ success: false, message: 'خطا در دریافت کشورهای بین‌المللی' });
+    }
+  });
+
+  app.get('/api/logistics/international-countries/:id', requireAuth, async (req, res) => {
+    try {
+      const country = await db.select()
+        .from(internationalCountries)
+        .where(eq(internationalCountries.id, parseInt(req.params.id)))
+        .limit(1);
+      
+      if (country.length === 0) {
+        return res.status(404).json({ success: false, message: 'کشور یافت نشد' });
+      }
+      
+      res.json({ success: true, data: country[0] });
+    } catch (error) {
+      console.error('Error fetching international country:', error);
+      res.status(500).json({ success: false, message: 'خطا در دریافت اطلاعات کشور' });
+    }
+  });
+
+  app.post('/api/logistics/international-countries', requireAuth, async (req, res) => {
+    try {
+      const validatedData = insertInternationalCountrySchema.parse(req.body);
+      const country = await db.insert(internationalCountries)
+        .values(validatedData)
+        .returning();
+      
+      res.status(201).json({ success: true, data: country[0] });
+    } catch (error) {
+      console.error('Error creating international country:', error);
+      res.status(500).json({ success: false, message: 'خطا در ایجاد کشور بین‌المللی' });
+    }
+  });
+
+  app.put('/api/logistics/international-countries/:id', requireAuth, async (req, res) => {
+    try {
+      const country = await db.update(internationalCountries)
+        .set({ ...req.body, updatedAt: new Date() })
+        .where(eq(internationalCountries.id, parseInt(req.params.id)))
+        .returning();
+      
+      if (country.length === 0) {
+        return res.status(404).json({ success: false, message: 'کشور یافت نشد' });
+      }
+      
+      res.json({ success: true, data: country[0] });
+    } catch (error) {
+      console.error('Error updating international country:', error);
+      res.status(500).json({ success: false, message: 'خطا در به‌روزرسانی کشور' });
+    }
+  });
+
+  // International Cities
+  app.get('/api/logistics/international-cities', requireAuth, async (req, res) => {
+    try {
+      const { countryId, cityType, isActive } = req.query;
+      let query = db.select({
+        id: internationalCities.id,
+        name: internationalCities.name,
+        nameEn: internationalCities.nameEn,
+        nameLocal: internationalCities.nameLocal,
+        countryId: internationalCities.countryId,
+        provinceState: internationalCities.provinceState,
+        cityType: internationalCities.cityType,
+        distanceFromErbilKm: internationalCities.distanceFromErbilKm,
+        isActive: internationalCities.isActive,
+        hasShippingRoutes: internationalCities.hasShippingRoutes,
+        isPriorityDestination: internationalCities.isPriorityDestination,
+        customsInformation: internationalCities.customsInformation,
+        notes: internationalCities.notes,
+        countryName: internationalCountries.name,
+        countryCode: internationalCountries.countryCode
+      })
+      .from(internationalCities)
+      .leftJoin(internationalCountries, eq(internationalCities.countryId, internationalCountries.id));
+      
+      if (countryId) {
+        query = query.where(eq(internationalCities.countryId, parseInt(countryId as string)));
+      }
+      
+      if (cityType) {
+        query = query.where(eq(internationalCities.cityType, cityType as string));
+      }
+      
+      if (isActive !== undefined) {
+        query = query.where(eq(internationalCities.isActive, isActive === 'true'));
+      }
+      
+      const cities = await query.orderBy(internationalCities.name);
+      res.json({ success: true, data: cities });
+    } catch (error) {
+      console.error('Error fetching international cities:', error);
+      res.status(500).json({ success: false, message: 'خطا در دریافت شهرهای بین‌المللی' });
+    }
+  });
+
+  app.post('/api/logistics/international-cities', requireAuth, async (req, res) => {
+    try {
+      const validatedData = insertInternationalCitySchema.parse(req.body);
+      const city = await db.insert(internationalCities)
+        .values(validatedData)
+        .returning();
+      
+      res.status(201).json({ success: true, data: city[0] });
+    } catch (error) {
+      console.error('Error creating international city:', error);
+      res.status(500).json({ success: false, message: 'خطا در ایجاد شهر بین‌المللی' });
+    }
+  });
+
+  app.put('/api/logistics/international-cities/:id', requireAuth, async (req, res) => {
+    try {
+      const city = await db.update(internationalCities)
+        .set({ ...req.body, updatedAt: new Date() })
+        .where(eq(internationalCities.id, parseInt(req.params.id)))
+        .returning();
+      
+      if (city.length === 0) {
+        return res.status(404).json({ success: false, message: 'شهر یافت نشد' });
+      }
+      
+      res.json({ success: true, data: city[0] });
+    } catch (error) {
+      console.error('Error updating international city:', error);
+      res.status(500).json({ success: false, message: 'خطا در به‌روزرسانی شهر' });
+    }
+  });
+
+  // International Shipping Rates
+  app.get('/api/logistics/international-shipping-rates', requireAuth, async (req, res) => {
+    try {
+      const { countryId, cityId, shippingMethod, isActive } = req.query;
+      let query = db.select({
+        id: internationalShippingRates.id,
+        countryId: internationalShippingRates.countryId,
+        cityId: internationalShippingRates.cityId,
+        shippingMethod: internationalShippingRates.shippingMethod,
+        transportProvider: internationalShippingRates.transportProvider,
+        basePrice: internationalShippingRates.basePrice,
+        pricePerKg: internationalShippingRates.pricePerKg,
+        pricePerKm: internationalShippingRates.pricePerKm,
+        minimumCharge: internationalShippingRates.minimumCharge,
+        maximumWeight: internationalShippingRates.maximumWeight,
+        estimatedDaysMin: internationalShippingRates.estimatedDaysMin,
+        estimatedDaysMax: internationalShippingRates.estimatedDaysMax,
+        currency: internationalShippingRates.currency,
+        supportsHazardous: internationalShippingRates.supportsHazardous,
+        supportsFlammable: internationalShippingRates.supportsFlammable,
+        supportsRefrigerated: internationalShippingRates.supportsRefrigerated,
+        requiresCustomsClearance: internationalShippingRates.requiresCustomsClearance,
+        isActive: internationalShippingRates.isActive,
+        notes: internationalShippingRates.notes,
+        countryName: internationalCountries.name,
+        cityName: internationalCities.name
+      })
+      .from(internationalShippingRates)
+      .leftJoin(internationalCountries, eq(internationalShippingRates.countryId, internationalCountries.id))
+      .leftJoin(internationalCities, eq(internationalShippingRates.cityId, internationalCities.id));
+      
+      if (countryId) {
+        query = query.where(eq(internationalShippingRates.countryId, parseInt(countryId as string)));
+      }
+      
+      if (cityId) {
+        query = query.where(eq(internationalShippingRates.cityId, parseInt(cityId as string)));
+      }
+      
+      if (shippingMethod) {
+        query = query.where(eq(internationalShippingRates.shippingMethod, shippingMethod as string));
+      }
+      
+      if (isActive !== undefined) {
+        query = query.where(eq(internationalShippingRates.isActive, isActive === 'true'));
+      }
+      
+      const rates = await query.orderBy(internationalShippingRates.basePrice);
+      res.json({ success: true, data: rates });
+    } catch (error) {
+      console.error('Error fetching international shipping rates:', error);
+      res.status(500).json({ success: false, message: 'خطا در دریافت نرخ‌های حمل بین‌المللی' });
+    }
+  });
+
+  app.post('/api/logistics/international-shipping-rates', requireAuth, async (req, res) => {
+    try {
+      const validatedData = insertInternationalShippingRateSchema.parse(req.body);
+      const rate = await db.insert(internationalShippingRates)
+        .values(validatedData)
+        .returning();
+      
+      res.status(201).json({ success: true, data: rate[0] });
+    } catch (error) {
+      console.error('Error creating international shipping rate:', error);
+      res.status(500).json({ success: false, message: 'خطا در ایجاد نرخ حمل بین‌المللی' });
+    }
+  });
+
+  app.put('/api/logistics/international-shipping-rates/:id', requireAuth, async (req, res) => {
+    try {
+      const rate = await db.update(internationalShippingRates)
+        .set({ ...req.body, updatedAt: new Date() })
+        .where(eq(internationalShippingRates.id, parseInt(req.params.id)))
+        .returning();
+      
+      if (rate.length === 0) {
+        return res.status(404).json({ success: false, message: 'نرخ حمل یافت نشد' });
+      }
+      
+      res.json({ success: true, data: rate[0] });
+    } catch (error) {
+      console.error('Error updating international shipping rate:', error);
+      res.status(500).json({ success: false, message: 'خطا در به‌روزرسانی نرخ حمل' });
+    }
+  });
 
   // Global error handler for all API routes
   app.use('/api/*', (err: any, req: Request, res: Response, next: NextFunction) => {
