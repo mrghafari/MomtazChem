@@ -6,6 +6,35 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Self-Pickup Delivery Method Added - Customer Self-Collection Option Operational (January 28, 2025)
+✅ **IMPLEMENTED: Complete "حمل توسط خودم" (self-pickup) delivery method for customers to collect orders without shipping costs**
+- **User Request Fulfilled**: Added zero-cost delivery option for customers who prefer to collect orders directly from company location
+- **Database Integration Complete**: Added self_pickup to both delivery_methods and shipping_rates tables:
+  - **delivery_methods table**: Entry ID: 8 with blue color theme and walking person icon
+  - **shipping_rates table**: Entry ID: 33 for comprehensive billing system compatibility
+- **Frontend Enhancement**: Updated bilingual-purchase-form.tsx with complete self_pickup support:
+  - **Blue-themed Option**: "🚶‍♂️ حمل توسط خودم - رایگان" with distinctive blue styling (backgroundColor: '#dbeafe', color: '#1d4ed8')
+  - **Special Information Display**: When selected, shows blue-themed information panel explaining self-collection process
+  - **Zero Cost Calculation**: Enhanced shipping cost calculation to handle special delivery methods with automatic zero cost
+  - **Professional Messaging**: "✓ شما خودتان کالا را از محل شرکت تحویل خواهید گرفت - بدون هزینه حمل"
+- **API Endpoints Enhanced**: Both delivery methods and shipping rates APIs now serve self_pickup option alongside smart_vehicle
+- **Complete Delivery Portfolio**: System now supports TWO delivery methods:
+  - **Smart Vehicle**: Emerald-themed intelligent algorithm-based vehicle selection
+  - **Self-Pickup**: Blue-themed zero-cost customer collection from company premises
+- **Business Benefits**: 
+  - **Cost Savings**: Eliminates shipping costs for local customers
+  - **Customer Choice**: Provides flexibility between delivery and self-collection
+  - **Logistics Efficiency**: Reduces delivery workload for nearby customers
+  - **Speed Advantage**: Immediate availability for customer pickup
+- **Technical Implementation**: 
+  - **Database Schema**: Proper configuration with estimatedDays: 0, basePrice: 0.00, isActive: true
+  - **Form Integration**: Seamless integration with existing checkout form validation and submission
+  - **Special Case Handling**: Enhanced shipping cost calculation with dedicated logic for special delivery methods
+  - **Visual Distinction**: Blue color scheme differentiates self_pickup from emerald smart_vehicle option
+- **Test Infrastructure**: Created comprehensive test files for validation and demonstration
+- **User Experience**: Professional dual-option delivery system with clear visual distinction and cost transparency
+- **Result**: Complete self-pickup delivery system operational - customers can now choose between intelligent vehicle delivery and zero-cost self-collection with professional blue-themed interface
+
 ### COMPLETED: Shipping Rates Tab Removal from Logistics Management - UI Streamlining Complete (January 28, 2025)
 ✅ **IMPLEMENTED: Complete removal of "نرخ‌های حمل" (Shipping Rates) tab from logistics management interface**
 - **User Request Fulfilled**: Successfully removed redundant "نرخ‌های حمل" tab as part of ongoing UI streamlining campaign

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست Checkout با گزینه "حمل توسط خودم"</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            direction: rtl;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        .success { background-color: #f0f9ff; border-color: #2563eb; }
+        .info { background-color: #f8fafc; border-color: #64748b; }
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        button:hover { background: #1d4ed8; }
+        h1 { color: #1e40af; margin-bottom: 30px; }
+        h2 { color: #374151; margin-top: 25px; }
+        .feature-item {
+            margin: 10px 0;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            border-right: 4px solid #2563eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛒 تست سیستم Checkout با گزینه "حمل توسط خودم"</h1>
+        
+        <div class="test-section info">
+            <h2>📋 تغییرات پیاده‌سازی شده</h2>
+            <div class="feature-item">✅ اضافه کردن گزینه "🚶‍♂️ حمل توسط خودم - رایگان" در dropdown</div>
+            <div class="feature-item">✅ رنگ‌بندی آبی ویژه برای self_pickup (backgroundColor: '#dbeafe', color: '#1d4ed8')</div>
+            <div class="feature-item">✅ نمایش اطلاعات توضیحی آبی هنگام انتخاب self_pickup</div>
+            <div class="feature-item">✅ محاسبه shipping cost = 0 برای special delivery methods</div>
+            <div class="feature-item">✅ پیام "شما خودتان کالا را از محل شرکت تحویل خواهید گرفت"</div>
+        </div>
+
+        <div class="test-section success">
+            <h2>🎯 مراحل تست Manual</h2>
+            <p><strong>برای تست کامل checkout form:</strong></p>
+            <ol>
+                <li>به صفحه shop بروید: <button onclick="window.open('/shop', '_blank')">باز کردن Shop</button></li>
+                <li>محصولی را انتخاب کنید و به سبد خرید اضافه کنید</li>
+                <li>روی آیکون سبد خرید کلیک کنید</li>
+                <li>در modal خرید، بخش "روش تحویل" را بررسی کنید</li>
+                <li>باید 2 گزینه ببینید:
+                    <ul>
+                        <li>🚚 انتخاب هوشمند خودرو (سبز)</li>
+                        <li>🚶‍♂️ حمل توسط خودم - رایگان (آبی)</li>
+                    </ul>
+                </li>
+                <li>گزینه "حمل توسط خودم" را انتخاب کنید</li>
+                <li>باید پیام آبی رنگ "شما خودتان کالا را از محل شرکت تحویل خواهید گرفت" ببینید</li>
+                <li>هزینه حمل باید 0 نشان دهد</li>
+            </ol>
+        </div>
+
+        <div class="test-section info">
+            <h2>🔍 API Tests</h2>
+            <button onclick="testAPIs()">تست همه APIs</button>
+            <div id="api-results"></div>
+        </div>
+
+        <div class="test-section success">
+            <h2>💡 انتظارات نهایی</h2>
+            <ul>
+                <li><strong>Dropdown Appearance:</strong> گزینه آبی رنگ "🚶‍♂️ حمل توسط خودم - رایگان"</li>
+                <li><strong>Selection Info:</strong> پیام آبی "✓ شما خودتان کالا را از محل شرکت تحویل خواهید گرفت - بدون هزینه حمل"</li>
+                <li><strong>Shipping Cost:</strong> 0 (رایگان)</li>
+                <li><strong>Form Submission:</strong> قابلیت ثبت سفارش با روش self_pickup</li>
+                <li><strong>Database Storage:</strong> ذخیره شدن deliveryMethod: "self_pickup" در order</li>
+            </ul>
+        </div>
+
+        <div class="test-section info">
+            <h2>🏢 Business Context</h2>
+            <p>این ویژگی برای شرکت Momtazchem (مواد شیمیایی) پیاده‌سازی شده که:</p>
+            <ul>
+                <li>مشتریان محلی می‌توانند بدون هزینه حمل کالا را تحویل بگیرند</li>
+                <li>کاهش هزینه‌های logistics برای شرکت</li>
+                <li>افزایش سرعت تحویل برای مشتریان نزدیک</li>
+                <li>گزینه دوم در کنار smart vehicle selection algorithm</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        async function testAPIs() {
+            const resultsDiv = document.getElementById('api-results');
+            resultsDiv.innerHTML = '<h3>🔄 در حال تست...</h3>';
+            
+            try {
+                // Test delivery methods API
+                const deliveryResponse = await fetch('/api/checkout/delivery-methods');
+                const deliveryData = await deliveryResponse.json();
+                
+                // Test shipping rates API  
+                const shippingResponse = await fetch('/api/shipping-rates');
+                const shippingData = await shippingResponse.json();
+                
+                // Check for self_pickup in both
+                const hasSelfPickupDelivery = deliveryData.some(d => d.value === 'self_pickup');
+                const hasSelfPickupShipping = shippingData.success && shippingData.data.some(s => s.deliveryMethod === 'self_pickup');
+                
+                resultsDiv.innerHTML = `
+                    <h3>📊 نتایج تست API</h3>
+                    <p><strong>Delivery Methods API:</strong> ${hasSelfPickupDelivery ? '✅ شامل self_pickup' : '❌ فاقد self_pickup'}</p>
+                    <p><strong>Shipping Rates API:</strong> ${hasSelfPickupShipping ? '✅ شامل self_pickup' : '❌ فاقد self_pickup'}</p>
+                    <p><strong>تعداد روش‌های حمل:</strong> ${deliveryData.length}</p>
+                    <p><strong>تعداد نرخ‌های حمل:</strong> ${shippingData.success ? shippingData.data.length : 0}</p>
+                    
+                    <details style="margin-top: 15px;">
+                        <summary>📦 جزئیات Delivery Methods</summary>
+                        <pre style="background: #f5f5f5; padding: 10px; border-radius: 4px; font-size: 11px; direction: ltr; text-align: left;">${JSON.stringify(deliveryData, null, 2)}</pre>
+                    </details>
+                    
+                    <details style="margin-top: 10px;">
+                        <summary>🚚 جزئیات Shipping Rates</summary>
+                        <pre style="background: #f5f5f5; padding: 10px; border-radius: 4px; font-size: 11px; direction: ltr; text-align: left;">${JSON.stringify(shippingData, null, 2)}</pre>
+                    </details>
+                `;
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `<h3>❌ خطا در تست: ${error.message}</h3>`;
+            }
+        }
+        
+        // Auto-test on page load
+        window.addEventListener('load', () => {
+            setTimeout(testAPIs, 1000);
+        });
+    </script>
+</body>
+</html>

@@ -565,7 +565,15 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       console.log('📦 Selected shipping rate:', selectedRate);
       
       if (selectedRate) {
-        // Parse threshold carefully
+        // Handle special delivery methods with zero cost
+        if (selectedRate.deliveryMethod === 'smart_vehicle' || selectedRate.delivery_method === 'smart_vehicle' ||
+            selectedRate.deliveryMethod === 'self_pickup' || selectedRate.delivery_method === 'self_pickup') {
+          console.log('✅ SPECIAL DELIVERY METHOD: Zero cost for', selectedRate.deliveryMethod || selectedRate.delivery_method);
+          setShippingCost(0);
+          return;
+        }
+        
+        // Parse threshold carefully for regular shipping methods
         const freeShippingThreshold = parseFloat(selectedRate.freeShippingThreshold || '0');
         const basePrice = parseFloat(selectedRate.basePrice || '0');
         
@@ -1064,6 +1072,15 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                           );
                         }
                         
+                        // Handle self_pickup option specially
+                        if (rate.deliveryMethod === 'self_pickup' || rate.delivery_method === 'self_pickup') {
+                          return (
+                            <option key={rate.id} value={rate.id} style={{backgroundColor: '#dbeafe', color: '#1d4ed8'}}>
+                              🚶‍♂️ حمل توسط خودم - رایگان
+                            </option>
+                          );
+                        }
+                        
                         // Handle standard shipping rates
                         const freeShippingThreshold = parseFloat(rate.freeShippingThreshold || '0');
                         const qualifiesForFreeShipping = freeShippingThreshold > 0 && subtotalAmount >= freeShippingThreshold;
@@ -1093,6 +1110,21 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                                 </div>
                                 <div className="text-xs text-emerald-600 bg-emerald-50 p-2 rounded border border-emerald-200">
                                   ✓ سیستم بهترین خودرو را بر اساس وزن، مقصد و کمترین هزینه انتخاب می‌کند
+                                </div>
+                              </div>
+                            );
+                          }
+                          
+                          // Handle self_pickup display
+                          if (selectedRate && (selectedRate.deliveryMethod === 'self_pickup' || selectedRate.delivery_method === 'self_pickup')) {
+                            return (
+                              <div className="space-y-2">
+                                <div className="flex justify-between items-center text-sm">
+                                  <span className="text-blue-700 font-medium">🚶‍♂️ حمل توسط خودم:</span>
+                                  <span className="font-bold text-blue-800">رایگان</span>
+                                </div>
+                                <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded border border-blue-200">
+                                  ✓ شما خودتان کالا را از محل شرکت تحویل خواهید گرفت - بدون هزینه حمل
                                 </div>
                               </div>
                             );
