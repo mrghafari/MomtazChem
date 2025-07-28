@@ -1904,6 +1904,94 @@ const LogisticsManagement = () => {
           </CardContent>
         </Card>
 
+        {/* Provinces Table */}
+        <Card className="w-full">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <MapPin className="h-5 w-5" />
+              استان‌های عراق ({geographyProvinces.length})
+            </CardTitle>
+            <CardDescription>
+              مدیریت 18 استان عراق با فاصله‌های میانگین شهرهای هر استان
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {loadingGeographyProvinces ? (
+              <div className="flex items-center justify-center p-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-right">شناسه</TableHead>
+                      <TableHead className="text-right">نام عربی</TableHead>
+                      <TableHead className="text-right">نام انگلیسی</TableHead>
+                      <TableHead className="text-right">مرکز استان</TableHead>
+                      <TableHead className="text-right">
+                        فاصله میانگین از {selectedOriginCity ? (selectedOriginCity.name_arabic || selectedOriginCity.name) : 'اربیل'} (کیلومتر)
+                      </TableHead>
+                      <TableHead className="text-right">وضعیت</TableHead>
+                      <TableHead className="text-right">عملیات</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {geographyProvinces.map((province: any) => (
+                      <TableRow key={province.id}>
+                        <TableCell className="font-medium text-right">{province.id}</TableCell>
+                        <TableCell className="text-right">{province.name_arabic}</TableCell>
+                        <TableCell className="text-right">{province.name_english}</TableCell>
+                        <TableCell className="text-right">{province.capital}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end">
+                            <Badge 
+                              variant="outline" 
+                              className={selectedOriginCity && 
+                                geographyCities.some((city: any) => city.province_id === province.id && city.id === selectedOriginCity.id) ? 
+                                "bg-yellow-100 border-yellow-500 text-yellow-700" : 
+                                "bg-blue-50 border-blue-200 text-blue-700"
+                              }
+                            >
+                              {selectedOriginCity && 
+                                geographyCities.some((city: any) => city.province_id === province.id && city.id === selectedOriginCity.id) ? 
+                                'مبدا' : 
+                                `${calculateProvinceDistance(province)} کیلومتر`
+                              }
+                            </Badge>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end">
+                            <Badge variant={province.is_active ? "default" : "secondary"}>
+                              {province.is_active ? "فعال" : "غیرفعال"}
+                            </Badge>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => {
+                                setEditingProvince(province);
+                                setIsEditProvinceDialogOpen(true);
+                              }}
+                            >
+                              <Edit className="w-4 h-4 mr-2" />
+                              ویرایش
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         <Card className="w-full">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -1938,46 +2026,52 @@ const LogisticsManagement = () => {
                   <TableBody>
                     {geographyCities.slice(0, 8).map((city: any) => (
                       <TableRow key={city.id}>
-                        <TableCell className="font-medium">{city.id}</TableCell>
-                        <TableCell>{city.name_arabic || city.name}</TableCell>
-                        <TableCell>{city.name_english || city.name}</TableCell>
-                        <TableCell>{city.province_name}</TableCell>
-                        <TableCell>
-                          <Badge 
-                            variant="outline" 
-                            className={selectedOriginCity?.id === city.id ? 
-                              "bg-yellow-100 border-yellow-500 text-yellow-700" : 
-                              "bg-green-50 border-green-200 text-green-700"
-                            }
-                          >
-                            {selectedOriginCity?.id === city.id ? 
-                              'مبدا (0 کیلومتر)' : 
-                              `${calculateDistance(city)} کیلومتر`
-                            }
-                          </Badge>
+                        <TableCell className="font-medium text-right">{city.id}</TableCell>
+                        <TableCell className="text-right">{city.name_arabic || city.name}</TableCell>
+                        <TableCell className="text-right">{city.name_english || city.name}</TableCell>
+                        <TableCell className="text-right">{city.province_name}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end">
+                            <Badge 
+                              variant="outline" 
+                              className={selectedOriginCity?.id === city.id ? 
+                                "bg-yellow-100 border-yellow-500 text-yellow-700" : 
+                                "bg-green-50 border-green-200 text-green-700"
+                              }
+                            >
+                              {selectedOriginCity?.id === city.id ? 
+                                'مبدا (0 کیلومتر)' : 
+                                `${calculateDistance(city)} کیلومتر`
+                              }
+                            </Badge>
+                          </div>
                           {!selectedOriginCity && (
-                            <div className="text-xs text-gray-500 mt-1">
+                            <div className="text-xs text-gray-500 mt-1 text-right">
                               (از اربیل: {city.distance_from_erbil_km || 0} کیلومتر)
                             </div>
                           )}
                         </TableCell>
-                        <TableCell>
-                          <Badge variant={city.is_active ? "default" : "secondary"}>
-                            {city.is_active ? "فعال" : "غیرفعال"}
-                          </Badge>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end">
+                            <Badge variant={city.is_active ? "default" : "secondary"}>
+                              {city.is_active ? "فعال" : "غیرفعال"}
+                            </Badge>
+                          </div>
                         </TableCell>
-                        <TableCell>
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={() => {
-                              setEditingCity(city);
-                              setIsEditCityDialogOpen(true);
-                            }}
-                          >
-                            <Edit className="w-4 h-4 mr-2" />
-                            ویرایش
-                          </Button>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => {
+                                setEditingCity(city);
+                                setIsEditCityDialogOpen(true);
+                              }}
+                            >
+                              <Edit className="w-4 h-4 mr-2" />
+                              ویرایش
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
