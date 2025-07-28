@@ -46,6 +46,7 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 ### COMPLETED: Flammable Materials Safety Compliance System - Complete Implementation (January 28, 2025)
 ✅ **IMPLEMENTED: Complete safety compliance system for flammable materials transport with vehicle authorization controls**
 - **User Request Fulfilled**: "مثلا اتوبوس مسافر بری مجاز به حمل کالای آتش زا نیست" - Implemented vehicle restrictions for flammable materials
+- **VERIFIED: Single Flammable Item Logic**: "حتی اگر یکی از کالاها از میان چندین کالا آتشزا باشه نباید سرویسی که حمل مواد آتشزا برایش ممنوع است انتخاب شود" - System correctly blocks intercity buses even when only one item among many is flammable
 - **Vehicle Template Enhancement**: Added `supportsFlammable` field to vehicle template forms:
   - **Create Dialog**: Added "مواد آتش‌زا" switch with proper grid layout (grid-cols-4)
   - **Edit Dialog**: Added "حمل مواد آتش‌زا" field with descriptive text and orange badge display
