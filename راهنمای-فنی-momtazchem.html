@@ -1,0 +1,390 @@
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>راهنمای معماری فنی پلتفرم</title>
+    <style>
+        body {
+            font-family: 'Tahoma', 'Arial', 'Segoe UI', sans-serif;
+            line-height: 1.6;
+            margin: 40px;
+            direction: rtl;
+            text-align: right;
+            background: white;
+        }
+        
+        h1 {
+            color: #2563eb;
+            border-bottom: 3px solid #2563eb;
+            padding-bottom: 10px;
+            font-size: 28px;
+            text-align: center;
+        }
+        
+        h2 {
+            color: #1e40af;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 22px;
+            border-right: 4px solid #3b82f6;
+            padding-right: 15px;
+        }
+        
+        h3 {
+            color: #1d4ed8;
+            margin-top: 25px;
+            margin-bottom: 12px;
+            font-size: 18px;
+        }
+        
+        h4 {
+            color: #2563eb;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        p {
+            margin-bottom: 12px;
+            text-align: justify;
+            line-height: 1.8;
+        }
+        
+        ul, ol {
+            margin-bottom: 15px;
+            padding-right: 20px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+        
+        code {
+            background-color: #f3f4f6;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        
+        pre {
+            background-color: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            overflow-x: auto;
+            direction: ltr;
+            text-align: left;
+        }
+        
+        blockquote {
+            border-right: 4px solid #fbbf24;
+            background-color: #fffbeb;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+        
+        th, td {
+            border: 1px solid #d1d5db;
+            padding: 12px;
+            text-align: center;
+        }
+        
+        th {
+            background-color: #f3f4f6;
+            font-weight: bold;
+            color: #374151;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            border-radius: 10px;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            border-top: 2px solid #e5e7eb;
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            page-break-inside: avoid;
+        }
+        
+        .highlight {
+            background-color: #fef3c7;
+            padding: 15px;
+            border-radius: 8px;
+            border-right: 4px solid #f59e0b;
+            margin: 15px 0;
+        }
+        
+        .english {
+            direction: ltr;
+            text-align: left;
+            font-style: italic;
+            color: #6b7280;
+        }
+        
+        @media print {
+            body {
+                margin: 20px;
+            }
+            .section {
+                page-break-inside: avoid;
+            }
+        }
+        
+        /* پشتیبانی از فونت‌های فارسی */
+        @font-face {
+            font-family: 'Persian';
+            src: local('Tahoma'), local('Arial Unicode MS');
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>راهنمای معماری فنی پلتفرم</h1>
+        <p><strong>Momtazchem Chemical Solutions Platform</strong></p>
+        <p>تاریخ: ژانویه 2025 | Date: January 2025</p>
+    </div>
+    
+    <div class="content">
+        <h1>راهنمای معماری فنی پلتفرم</h1>
+<p>Technical Architecture Guide</p>
+<h2>معماری کلی سیستم</h2>
+<h3>نمای کلی Architecture Stack</h3>
+<p>Frontend Layer
+React.js + TypeScript + Tailwind CSS + Shadcn/UI
+├── Routing: Wouter
+├── State: TanStack Query + React Hook Form
+├── Authentication: Session-based
+└── Internationalization: 4 Languages</p>
+<p>API Gateway Layer
+Express.js REST API
+├── Authentication Middleware
+├── Rate Limiting
+├── CORS Configuration
+└── Request Validation</p>
+<p>Business Logic Layer
+Node.js + TypeScript
+├── Order Processing Engine
+├── Logistics Optimization Algorithm
+├── CRM Analytics Engine
+├── Safety Compliance System
+└── Email/Notification Services</p>
+<p>Data Access Layer
+Drizzle ORM + PostgreSQL
+├── Customer Data Management
+├── Product &amp; Inventory
+├── Order &amp; Transaction Processing
+├── Geographic &amp; Logistics Data
+└── Content &amp; Configuration</p>
+<p>Infrastructure Layer
+Neon Cloud PostgreSQL Database
+├── Automated Backups
+├── Connection Pooling
+├── Performance Monitoring
+└── Security &amp; Encryption</p>
+<h2>جزئیات فنی Frontend</h2>
+<h3>Component Architecture</h3>
+<p>src/
+├── components/
+│   ├── ui/               // Shadcn/UI Base Components
+│   │   ├── button.tsx
+│   │   ├── form.tsx
+│   │   ├── dialog.tsx
+│   │   └── table.tsx
+│   ├── layout/           // Layout Components
+│   │   ├── header.tsx
+│   │   ├── footer.tsx
+│   │   └── sidebar.tsx
+│   ├── forms/            // Business Forms
+│   │   ├── customer-registration.tsx
+│   │   ├── product-form.tsx
+│   │   └── order-form.tsx
+│   └── business/         // Business Logic Components
+│       ├── product-catalog.tsx
+│       ├── shopping-cart.tsx
+│       └── order-tracking.tsx</p>
+<h3>State Management Strategy</h3>
+<p>• Server State: TanStack Query برای cache و synchronization
+• Client State: React useState و useReducer
+• Form State: React Hook Form با Zod validation
+• Global State: Context API برای authentication و theme
+• Persistent State: localStorage برای cart و preferences</p>
+<h2>جزئیات فنی Backend</h2>
+<h3>API Architecture</h3>
+<p>server/
+├── routes/
+│   ├── auth.ts           // Authentication Routes
+│   ├── products.ts       // Product Management
+│   ├── orders.ts         // Order Processing
+│   ├── customers.ts      // Customer Management
+│   ├── logistics.ts      // Logistics &amp; Shipping
+│   ├── crm.ts           // CRM Functionality
+│   ├── admin.ts         // Admin Operations
+│   └── webhooks.ts      // External Integrations</p>
+<h3>Advanced Features Implementation</h3>
+<h4>1. Smart Vehicle Selection Algorithm</h4>
+<p>interface VehicleOptimization {
+  calculateOptimalVehicle(
+    weight: number,
+    destination: string,
+    isFlammable: boolean
+  ): Promise&lt;{
+    selectedVehicle: Vehicle;
+    totalCost: number;
+    estimatedTime: string;
+    route: string[];
+  }&gt;;
+}</p>
+<p>الگوریتم بهینه‌سازی شامل:
+• محاسبه ظرفیت وزن
+• محاسبه مسافت و هزینه سوخت
+• اعمال قوانین ایمنی
+• انتخاب ارزان‌ترین گزینه</p>
+<h4>2. Safety Compliance System</h4>
+<p>interface SafetyCompliance {
+  validateFlammableMaterials(products: Product[]): boolean;
+  getAuthorizedVehicles(materialType: MaterialType): Vehicle[];
+  generateSafetyReport(order: Order): SafetyReport;
+}</p>
+<p>سیستم safety شامل:
+• تشخیص مواد آتش‌زا
+• فیلتر خودروهای مجاز
+• گزارش‌گیری ایمنی</p>
+<h2>ساختار پایگاه داده</h2>
+<h3>Core Tables Schema</h3>
+<h4>1. User Management</h4>
+<p>-- کاربران سیستم
+CREATE TABLE users (
+  id SERIAL PRIMARY KEY,
+  username VARCHAR(255) UNIQUE NOT NULL,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  role_id INTEGER REFERENCES roles(id),
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);</p>
+<h4>2. Product Management</h4>
+<p>-- محصولات
+CREATE TABLE products (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  technical_name VARCHAR(255),
+  category_id INTEGER REFERENCES categories(id),
+  description TEXT,
+  price DECIMAL(10,2) NOT NULL,
+  stock_quantity INTEGER DEFAULT 0,
+  weight_kg DECIMAL(8,3),
+  is_flammable BOOLEAN DEFAULT false,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);</p>
+<h4>3. Order Management</h4>
+<p>-- سفارشات مشتریان
+CREATE TABLE customer_orders (
+  id SERIAL PRIMARY KEY,
+  order_number VARCHAR(50) UNIQUE NOT NULL,
+  customer_id INTEGER REFERENCES customers(id),
+  total_amount DECIMAL(12,2) NOT NULL,
+  shipping_cost DECIMAL(10,2) DEFAULT 0,
+  tax_amount DECIMAL(10,2) DEFAULT 0,
+  status order_status_enum DEFAULT &#39;pending&#39;,
+  payment_status payment_status_enum DEFAULT &#39;pending&#39;,
+  shipping_address TEXT,
+  delivery_method VARCHAR(100),
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);</p>
+<h2>API Documentation</h2>
+<h3>Authentication APIs</h3>
+<h4>Login</h4>
+<p>POST /api/auth/login
+Content-Type: application/json</p>
+<p>{
+  &quot;username&quot;: &quot;string&quot;,
+  &quot;password&quot;: &quot;string&quot;
+}</p>
+<p>Response:
+{
+  &quot;success&quot;: true,
+  &quot;token&quot;: &quot;string&quot;,
+  &quot;user&quot;: {
+    &quot;id&quot;: number,
+    &quot;username&quot;: &quot;string&quot;,
+    &quot;role&quot;: &quot;string&quot;
+  }
+}</p>
+<h3>Product APIs</h3>
+<h4>Get Products</h4>
+<p>GET /api/products?category=1&amp;search=chemical
+Authorization: Bearer {token}</p>
+<p>Response:
+{
+  &quot;success&quot;: true,
+  &quot;data&quot;: [
+    {
+      &quot;id&quot;: 1,
+      &quot;name&quot;: &quot;Chemical Product&quot;,
+      &quot;price&quot;: 100.00,
+      &quot;stock&quot;: 50,
+      &quot;isFlammable&quot;: false
+    }
+  ],
+  &quot;pagination&quot;: {
+    &quot;page&quot;: 1,
+    &quot;limit&quot;: 20,
+    &quot;total&quot;: 100
+  }
+}</p>
+<h2>Performance &amp; Security</h2>
+<h3>Performance Optimizations</h3>
+<p>• Database Performance: Indexes روی کلیدهای اصلی
+• Query Optimization: استفاده از prepared statements
+• Connection Pooling: مدیریت اتصالات database
+• Caching Layer: Redis برای cache داده‌های پرتکرار</p>
+<h3>Security Measures</h3>
+<p>• Authentication &amp; Authorization: JWT Tokens، RBAC system
+• Data Security: Input validation، SQL injection prevention
+• Infrastructure Security: HTTPS enforcement، Rate limiting</p>
+<h2>نتیجه‌گیری</h2>
+<p>این راهنمای فنی نمای کاملی از معماری و پیاده‌سازی پلتفرم ارائه می‌دهد. سیستم با استفاده از تکنولوژی‌های مدرن و بهترین practices صنعت، راه‌حلی قابل اعتماد و مقیاس‌پذیر برای کسب‌وکارهای شیمیایی فراهم می‌کند.</p>
+<hr>
+<p>نسخه: 1.0
+تاریخ آخرین به‌روزرسانی: ژانویه 2025</p>
+
+    </div>
+    
+    <div class="footer">
+        <hr>
+        <p><strong>Momtazchem Chemical Solutions</strong></p>
+        <p>www.momtazchem.com | info@momtazchem.com</p>
+        <p>این سند محرمانه بوده و مخصوص استفاده داخلی شرکت می‌باشد</p>
+        <p class="english">This document is confidential and for internal company use only</p>
+    </div>
+</body>
+</html>
+  

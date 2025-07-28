@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست سیستم تأیید مبلغ فیش هوشمند</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8 text-center">🧠 تست سیستم مدیریت هوشمند کیف پول</h1>
+        
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">📋 سناریوهای تست</h2>
+            
+            <!-- Test Scenario 1: Exact Payment -->
+            <div class="border rounded-lg p-4 mb-4">
+                <h3 class="font-bold text-lg mb-2">1️⃣ پرداخت دقیق (بدون تغییر کیف پول)</h3>
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">مبلغ سفارش:</label>
+                        <input type="number" id="exact-order-amount" value="50000" class="w-full px-3 py-2 border rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">مبلغ فیش:</label>
+                        <input type="number" id="exact-receipt-amount" value="50000" class="w-full px-3 py-2 border rounded-md">
+                    </div>
+                </div>
+                <button onclick="testExactPayment()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                    تست پرداخت دقیق
+                </button>
+                <div id="exact-result" class="test-result info">
+                    انتظار: هیچ تراکنش کیف پولی انجام نشود - پرداخت دقیق
+                </div>
+            </div>
+
+            <!-- Test Scenario 2: Overpayment -->
+            <div class="border rounded-lg p-4 mb-4">
+                <h3 class="font-bold text-lg mb-2">2️⃣ پرداخت اضافی (اعتبار به کیف پول)</h3>
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">مبلغ سفارش:</label>
+                        <input type="number" id="over-order-amount" value="75000" class="w-full px-3 py-2 border rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">مبلغ فیش:</label>
+                        <input type="number" id="over-receipt-amount" value="100000" class="w-full px-3 py-2 border rounded-md">
+                    </div>
+                </div>
+                <button onclick="testOverpayment()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                    تست پرداخت اضافی
+                </button>
+                <div id="over-result" class="test-result info">
+                    انتظار: 25,000 دینار اضافی به کیف پول مشتری اضافه شود
+                </div>
+            </div>
+
+            <!-- Test Scenario 3: Underpayment with Sufficient Wallet -->
+            <div class="border rounded-lg p-4 mb-4">
+                <h3 class="font-bold text-lg mb-2">3️⃣ کم‌پرداخت + کیف پول کافی</h3>
+                <div class="grid grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">مبلغ سفارش:</label>
+                        <input type="number" id="under-order-amount" value="120000" class="w-full px-3 py-2 border rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">مبلغ فیش:</label>
+                        <input type="number" id="under-receipt-amount" value="80000" class="w-full px-3 py-2 border rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">موجودی کیف پول:</label>
+                        <input type="number" id="wallet-balance" value="50000" class="w-full px-3 py-2 border rounded-md">
+                    </div>
+                </div>
+                <button onclick="testUnderpaymentSufficient()" class="bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700">
+                    تست کم‌پرداخت با کیف پول کافی
+                </button>
+                <div id="under-sufficient-result" class="test-result info">
+                    انتظار: 40,000 دینار از کیف پول کسر شود (80K + 40K = 120K)
+                </div>
+            </div>
+
+            <!-- Test Scenario 4: Underpayment with Insufficient Wallet -->
+            <div class="border rounded-lg p-4 mb-4">
+                <h3 class="font-bold text-lg mb-2">4️⃣ کم‌پرداخت + کیف پول ناکافی</h3>
+                <div class="grid grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">مبلغ سفارش:</label>
+                        <input type="number" id="insufficient-order-amount" value="200000" class="w-full px-3 py-2 border rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">مبلغ فیش:</label>
+                        <input type="number" id="insufficient-receipt-amount" value="150000" class="w-full px-3 py-2 border rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">موجودی کیف پول:</label>
+                        <input type="number" id="insufficient-wallet-balance" value="30000" class="w-full px-3 py-2 border rounded-md">
+                    </div>
+                </div>
+                <button onclick="testUnderpaymentInsufficient()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+                    تست کم‌پرداخت با کیف پول ناکافی
+                </button>
+                <div id="insufficient-result" class="test-result info">
+                    انتظار: خطا - موجودی کیف پول برای تکمیل پرداخت کافی نیست (نیاز 50K، موجود 30K)
+                </div>
+            </div>
+        </div>
+
+        <!-- API Test Section -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-xl font-semibold mb-4">🔌 تست API واقعی</h2>
+            
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">شناسه سفارش:</label>
+                    <input type="number" id="api-order-id" value="1" class="w-full px-3 py-2 border rounded-md">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">مبلغ فیش:</label>
+                    <input type="number" id="api-receipt-amount" placeholder="مبلغ واقعی فیش" class="w-full px-3 py-2 border rounded-md">
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium mb-1">یادداشت:</label>
+                <textarea id="api-notes" placeholder="یادداشت تأیید مالی" class="w-full px-3 py-2 border rounded-md" rows="2"></textarea>
+            </div>
+            
+            <button onclick="testRealAPI()" class="bg-purple-600 text-white px-6 py-2 rounded hover:bg-purple-700">
+                تست API واقعی تأیید مالی
+            </button>
+            
+            <div id="api-result" class="mt-4"></div>
+        </div>
+    </div>
+
+    <script>
+        // Scenario calculation functions
+        function testExactPayment() {
+            const orderAmount = parseInt(document.getElementById('exact-order-amount').value);
+            const receiptAmount = parseInt(document.getElementById('exact-receipt-amount').value);
+            
+            const result = document.getElementById('exact-result');
+            
+            if (orderAmount === receiptAmount) {
+                result.className = 'test-result success';
+                result.innerHTML = `✅ پرداخت دقیق: ${orderAmount.toLocaleString()} دینار - هیچ تراکنش کیف پولی انجام نمی‌شود`;
+            } else {
+                result.className = 'test-result error';
+                result.innerHTML = `❌ مبالغ برابر نیستند! سفارش: ${orderAmount.toLocaleString()}, فیش: ${receiptAmount.toLocaleString()}`;
+            }
+        }
+
+        function testOverpayment() {
+            const orderAmount = parseInt(document.getElementById('over-order-amount').value);
+            const receiptAmount = parseInt(document.getElementById('over-receipt-amount').value);
+            const excess = receiptAmount - orderAmount;
+            
+            const result = document.getElementById('over-result');
+            
+            if (excess > 0) {
+                result.className = 'test-result success';
+                result.innerHTML = `✅ پرداخت اضافی: ${excess.toLocaleString()} دینار به کیف پول اضافه می‌شود<br>محاسبه: ${receiptAmount.toLocaleString()} - ${orderAmount.toLocaleString()} = ${excess.toLocaleString()}`;
+            } else {
+                result.className = 'test-result error';
+                result.innerHTML = `❌ این سناریو پرداخت اضافی نیست!`;
+            }
+        }
+
+        function testUnderpaymentSufficient() {
+            const orderAmount = parseInt(document.getElementById('under-order-amount').value);
+            const receiptAmount = parseInt(document.getElementById('under-receipt-amount').value);
+            const walletBalance = parseInt(document.getElementById('wallet-balance').value);
+            const deficit = orderAmount - receiptAmount;
+            
+            const result = document.getElementById('under-sufficient-result');
+            
+            if (deficit > 0 && walletBalance >= deficit) {
+                result.className = 'test-result success';
+                result.innerHTML = `✅ کم‌پرداخت قابل جبران: ${deficit.toLocaleString()} دینار از کیف پول کسر می‌شود<br>محاسبه: ${orderAmount.toLocaleString()} - ${receiptAmount.toLocaleString()} = ${deficit.toLocaleString()}<br>کیف پول پس از کسر: ${(walletBalance - deficit).toLocaleString()} دینار`;
+            } else if (deficit > 0 && walletBalance < deficit) {
+                result.className = 'test-result error';
+                result.innerHTML = `❌ کیف پول ناکافی! نیاز: ${deficit.toLocaleString()}, موجود: ${walletBalance.toLocaleString()}`;
+            } else {
+                result.className = 'test-result error';
+                result.innerHTML = `❌ این سناریو کم‌پرداخت نیست!`;
+            }
+        }
+
+        function testUnderpaymentInsufficient() {
+            const orderAmount = parseInt(document.getElementById('insufficient-order-amount').value);
+            const receiptAmount = parseInt(document.getElementById('insufficient-receipt-amount').value);
+            const walletBalance = parseInt(document.getElementById('insufficient-wallet-balance').value);
+            const deficit = orderAmount - receiptAmount;
+            
+            const result = document.getElementById('insufficient-result');
+            
+            if (deficit > 0 && walletBalance < deficit) {
+                result.className = 'test-result error';
+                result.innerHTML = `❌ خطای کیف پول ناکافی تأیید شد!<br>کسری: ${deficit.toLocaleString()} دینار<br>موجودی: ${walletBalance.toLocaleString()} دینار<br>کمبود: ${(deficit - walletBalance).toLocaleString()} دینار`;
+            } else {
+                result.className = 'test-result success';
+                result.innerHTML = `✅ کیف پول کافی است یا سناریو تغییر کرده`;
+            }
+        }
+
+        // Real API test function
+        async function testRealAPI() {
+            const orderId = document.getElementById('api-order-id').value;
+            const receiptAmount = document.getElementById('api-receipt-amount').value;
+            const notes = document.getElementById('api-notes').value;
+            
+            const resultDiv = document.getElementById('api-result');
+            resultDiv.innerHTML = '<div class="test-result info">🔄 در حال ارسال درخواست به API...</div>';
+            
+            try {
+                const response = await fetch(`/api/finance/orders/${orderId}/approve`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        notes: notes || 'تست مبلغ فیش دستی',
+                        receiptAmount: receiptAmount
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <div class="test-result success">
+                            <h4 class="font-bold">✅ تأیید موفق!</h4>
+                            <p><strong>پیام:</strong> ${result.message}</p>
+                            ${result.walletTransaction ? '<p><strong>تراکنش کیف پول:</strong> بله</p>' : '<p><strong>تراکنش کیف پول:</strong> خیر</p>'}
+                            <pre class="mt-2 text-xs bg-gray-100 p-2 rounded">${JSON.stringify(result, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="test-result error">
+                            <h4 class="font-bold">❌ خطا در API</h4>
+                            <p><strong>کد خطا:</strong> ${response.status}</p>
+                            <p><strong>پیام:</strong> ${result.message}</p>
+                            <pre class="mt-2 text-xs bg-gray-100 p-2 rounded">${JSON.stringify(result, null, 2)}</pre>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="test-result error">
+                        <h4 class="font-bold">❌ خطای شبکه</h4>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize with default values for testing
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🧪 صفحه تست سیستم مدیریت هوشمند کیف پول بارگذاری شد');
+        });
+    </script>
+</body>
+</html>

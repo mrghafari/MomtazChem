@@ -20681,20 +20681,20 @@ ${message ? `Additional Requirements:\n${message}` : ''}
 
 
 
-  // Approve financial order (public access for financial department)
+  // Approve financial order with smart wallet management (public access for financial department)
   app.post('/api/finance/orders/:id/approve', async (req: Request, res: Response) => {
     try {
       const orderId = parseInt(req.params.id);
-      const { notes } = req.body;
+      const { notes, receiptAmount } = req.body; // receiptAmount: مبلغ واریزی در فیش
       const adminId = 1; // Default financial admin ID
 
-      console.log(`✅ [FINANCE] Approving order ${orderId} - converting to regular order and moving to warehouse`);
+      console.log(`✅ [FINANCE] Processing payment approval for order ${orderId} with smart wallet management`);
 
       const { pool } = await import('./db');
       
       // First try to find by order management ID
       let orderManagementResult = await pool.query(`
-        SELECT om.*, co.payment_method, co.status
+        SELECT om.*, co.payment_method, co.status, co.total_amount, co.currency, co.customer_id
         FROM order_management om
         JOIN customer_orders co ON om.customer_order_id = co.id
         WHERE om.id = $1
@@ -20704,7 +20704,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       if (orderManagementResult.rows.length === 0) {
         console.log(`🔍 [FINANCE] Order management ID ${orderId} not found, searching by customer_order_id`);
         orderManagementResult = await pool.query(`
-          SELECT om.*, co.payment_method, co.status
+          SELECT om.*, co.payment_method, co.status, co.total_amount, co.currency, co.customer_id
           FROM order_management om
           JOIN customer_orders co ON om.customer_order_id = co.id
           WHERE om.customer_order_id = $1
@@ -20719,8 +20719,59 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       const orderData = orderManagementResult.rows[0];
       const isTemporaryOrder = orderData.payment_grace_period_start !== null;
       const orderManagementId = orderData.id; // Use correct order management ID
+      const customerId = orderData.customer_id;
+      const orderTotalAmount = parseFloat(orderData.total_amount);
+      const paidAmount = receiptAmount ? parseFloat(receiptAmount) : orderTotalAmount;
 
-      console.log(`📊 [FINANCE] Order details - Management ID: ${orderManagementId}, Customer Order ID: ${orderData.customer_order_id}, Is Temporary: ${isTemporaryOrder}`);
+      console.log(`📊 [FINANCE] Order details - Management ID: ${orderManagementId}, Customer: ${customerId}, Total: ${orderTotalAmount}, Paid: ${paidAmount}`);
+
+      // Smart wallet management logic
+      let walletTransactionMessage = '';
+      if (receiptAmount && paidAmount !== orderTotalAmount) {
+        const difference = paidAmount - orderTotalAmount;
+        
+        if (difference > 0) {
+          // Customer paid more than required - credit excess to wallet
+          console.log(`💰 [WALLET] Customer overpaid by ${difference} IQD, crediting to wallet`);
+          await walletStorage.creditWallet(
+            customerId,
+            difference,
+            `اضافه پرداخت سفارش ${orderData.order_number || orderData.customer_order_id} - اعتبار به کیف پول`,
+            'overpayment',
+            orderData.customer_order_id,
+            adminId
+          );
+          walletTransactionMessage = ` - مبلغ اضافی ${difference.toLocaleString()} دینار به کیف پول اضافه شد`;
+        } else {
+          // Customer paid less - check wallet for deficit
+          const deficit = Math.abs(difference);
+          console.log(`💸 [WALLET] Customer underpaid by ${deficit} IQD, checking wallet balance`);
+          
+          const walletBalance = await walletStorage.getWalletBalance(customerId);
+          console.log(`🏦 [WALLET] Customer wallet balance: ${walletBalance} IQD`);
+          
+          if (walletBalance >= deficit) {
+            // Sufficient wallet balance - debit the deficit
+            console.log(`✅ [WALLET] Deducting ${deficit} IQD from wallet to complete payment`);
+            await walletStorage.debitWallet(
+              customerId,
+              deficit,
+              `تکمیل پرداخت سفارش ${orderData.order_number || orderData.customer_order_id} - کسر از کیف پول`,
+              'payment_completion',
+              orderData.customer_order_id,
+              adminId
+            );
+            walletTransactionMessage = ` - مبلغ ${deficit.toLocaleString()} دینار از کیف پول کسر شد`;
+          } else {
+            // Insufficient wallet balance
+            console.log(`❌ [WALLET] Insufficient wallet balance. Required: ${deficit}, Available: ${walletBalance}`);
+            return res.status(400).json({ 
+              success: false, 
+              message: `موجودی کیف پول برای تکمیل پرداخت کافی نیست. مطلوب: ${deficit.toLocaleString()} - موجود: ${walletBalance.toLocaleString()} دینار` 
+            });
+          }
+        }
+      }
 
       // When financial approves, move to warehouse_pending for warehouse approval
       const { orderStatuses } = await import('../shared/order-management-schema');
@@ -20729,7 +20780,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         orderStatuses.WAREHOUSE_PENDING, // Use constant from schema
         adminId, 
         'financial', 
-        notes || 'Payment approved by financial department - moving to warehouse'
+        (notes || 'Payment approved by financial department - moving to warehouse') + walletTransactionMessage
       );
 
       // If this was a temporary order (grace period), convert it to regular order
@@ -20754,14 +20805,24 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         `, [orderData.customer_order_id]);
 
         console.log(`✅ [FINANCE] Order ${orderManagementId} (Customer Order ${orderData.customer_order_id}) converted from temporary to regular order and moved to warehouse`);
-        res.json({ success: true, order: updatedOrder, message: 'سفارش موقت تایید شد و به سفارش معمولی تبدیل شد' });
+        res.json({ 
+          success: true, 
+          order: updatedOrder, 
+          message: 'سفارش موقت تایید شد و به سفارش معمولی تبدیل شد' + walletTransactionMessage,
+          walletTransaction: walletTransactionMessage.length > 0
+        });
       } else {
         console.log(`✅ [FINANCE] Regular order ${orderManagementId} (Customer Order ${orderData.customer_order_id}) approved and moved to warehouse department`);
-        res.json({ success: true, order: updatedOrder, message: 'پرداخت تایید شد و به انبار ارسال گردید' });
+        res.json({ 
+          success: true, 
+          order: updatedOrder, 
+          message: 'پرداخت تایید شد و به انبار ارسال گردید' + walletTransactionMessage,
+          walletTransaction: walletTransactionMessage.length > 0
+        });
       }
     } catch (error) {
       console.error('Error approving financial order:', error);
-      res.status(500).json({ success: false, message: 'خطا در تایید پرداخت' });
+      res.status(500).json({ success: false, message: 'خطا در تایید پرداخت: ' + error.message });
     }
   });
 

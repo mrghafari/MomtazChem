@@ -1,0 +1,243 @@
+
+# راهنمای معماری فنی پلتفرم
+Technical Architecture Guide
+
+## معماری کلی سیستم
+
+### نمای کلی Architecture Stack
+
+Frontend Layer
+React.js + TypeScript + Tailwind CSS + Shadcn/UI
+├── Routing: Wouter
+├── State: TanStack Query + React Hook Form
+├── Authentication: Session-based
+└── Internationalization: 4 Languages
+
+API Gateway Layer
+Express.js REST API
+├── Authentication Middleware
+├── Rate Limiting
+├── CORS Configuration
+└── Request Validation
+
+Business Logic Layer
+Node.js + TypeScript
+├── Order Processing Engine
+├── Logistics Optimization Algorithm
+├── CRM Analytics Engine
+├── Safety Compliance System
+└── Email/Notification Services
+
+Data Access Layer
+Drizzle ORM + PostgreSQL
+├── Customer Data Management
+├── Product & Inventory
+├── Order & Transaction Processing
+├── Geographic & Logistics Data
+└── Content & Configuration
+
+Infrastructure Layer
+Neon Cloud PostgreSQL Database
+├── Automated Backups
+├── Connection Pooling
+├── Performance Monitoring
+└── Security & Encryption
+
+## جزئیات فنی Frontend
+
+### Component Architecture
+src/
+├── components/
+│   ├── ui/               // Shadcn/UI Base Components
+│   │   ├── button.tsx
+│   │   ├── form.tsx
+│   │   ├── dialog.tsx
+│   │   └── table.tsx
+│   ├── layout/           // Layout Components
+│   │   ├── header.tsx
+│   │   ├── footer.tsx
+│   │   └── sidebar.tsx
+│   ├── forms/            // Business Forms
+│   │   ├── customer-registration.tsx
+│   │   ├── product-form.tsx
+│   │   └── order-form.tsx
+│   └── business/         // Business Logic Components
+│       ├── product-catalog.tsx
+│       ├── shopping-cart.tsx
+│       └── order-tracking.tsx
+
+### State Management Strategy
+• Server State: TanStack Query برای cache و synchronization
+• Client State: React useState و useReducer
+• Form State: React Hook Form با Zod validation
+• Global State: Context API برای authentication و theme
+• Persistent State: localStorage برای cart و preferences
+
+## جزئیات فنی Backend
+
+### API Architecture
+server/
+├── routes/
+│   ├── auth.ts           // Authentication Routes
+│   ├── products.ts       // Product Management
+│   ├── orders.ts         // Order Processing
+│   ├── customers.ts      // Customer Management
+│   ├── logistics.ts      // Logistics & Shipping
+│   ├── crm.ts           // CRM Functionality
+│   ├── admin.ts         // Admin Operations
+│   └── webhooks.ts      // External Integrations
+
+### Advanced Features Implementation
+
+#### 1. Smart Vehicle Selection Algorithm
+interface VehicleOptimization {
+  calculateOptimalVehicle(
+    weight: number,
+    destination: string,
+    isFlammable: boolean
+  ): Promise<{
+    selectedVehicle: Vehicle;
+    totalCost: number;
+    estimatedTime: string;
+    route: string[];
+  }>;
+}
+
+الگوریتم بهینه‌سازی شامل:
+• محاسبه ظرفیت وزن
+• محاسبه مسافت و هزینه سوخت
+• اعمال قوانین ایمنی
+• انتخاب ارزان‌ترین گزینه
+
+#### 2. Safety Compliance System
+interface SafetyCompliance {
+  validateFlammableMaterials(products: Product[]): boolean;
+  getAuthorizedVehicles(materialType: MaterialType): Vehicle[];
+  generateSafetyReport(order: Order): SafetyReport;
+}
+
+سیستم safety شامل:
+• تشخیص مواد آتش‌زا
+• فیلتر خودروهای مجاز
+• گزارش‌گیری ایمنی
+
+## ساختار پایگاه داده
+
+### Core Tables Schema
+
+#### 1. User Management
+-- کاربران سیستم
+CREATE TABLE users (
+  id SERIAL PRIMARY KEY,
+  username VARCHAR(255) UNIQUE NOT NULL,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  role_id INTEGER REFERENCES roles(id),
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+#### 2. Product Management
+-- محصولات
+CREATE TABLE products (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  technical_name VARCHAR(255),
+  category_id INTEGER REFERENCES categories(id),
+  description TEXT,
+  price DECIMAL(10,2) NOT NULL,
+  stock_quantity INTEGER DEFAULT 0,
+  weight_kg DECIMAL(8,3),
+  is_flammable BOOLEAN DEFAULT false,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+#### 3. Order Management
+-- سفارشات مشتریان
+CREATE TABLE customer_orders (
+  id SERIAL PRIMARY KEY,
+  order_number VARCHAR(50) UNIQUE NOT NULL,
+  customer_id INTEGER REFERENCES customers(id),
+  total_amount DECIMAL(12,2) NOT NULL,
+  shipping_cost DECIMAL(10,2) DEFAULT 0,
+  tax_amount DECIMAL(10,2) DEFAULT 0,
+  status order_status_enum DEFAULT 'pending',
+  payment_status payment_status_enum DEFAULT 'pending',
+  shipping_address TEXT,
+  delivery_method VARCHAR(100),
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+## API Documentation
+
+### Authentication APIs
+
+#### Login
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "username": "string",
+  "password": "string"
+}
+
+Response:
+{
+  "success": true,
+  "token": "string",
+  "user": {
+    "id": number,
+    "username": "string",
+    "role": "string"
+  }
+}
+
+### Product APIs
+
+#### Get Products
+GET /api/products?category=1&search=chemical
+Authorization: Bearer {token}
+
+Response:
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "name": "Chemical Product",
+      "price": 100.00,
+      "stock": 50,
+      "isFlammable": false
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 100
+  }
+}
+
+## Performance & Security
+
+### Performance Optimizations
+• Database Performance: Indexes روی کلیدهای اصلی
+• Query Optimization: استفاده از prepared statements
+• Connection Pooling: مدیریت اتصالات database
+• Caching Layer: Redis برای cache داده‌های پرتکرار
+
+### Security Measures
+• Authentication & Authorization: JWT Tokens، RBAC system
+• Data Security: Input validation، SQL injection prevention
+• Infrastructure Security: HTTPS enforcement، Rate limiting
+
+## نتیجه‌گیری
+
+این راهنمای فنی نمای کاملی از معماری و پیاده‌سازی پلتفرم ارائه می‌دهد. سیستم با استفاده از تکنولوژی‌های مدرن و بهترین practices صنعت، راه‌حلی قابل اعتماد و مقیاس‌پذیر برای کسب‌وکارهای شیمیایی فراهم می‌کند.
+
+---
+نسخه: 1.0
+تاریخ آخرین به‌روزرسانی: ژانویه 2025

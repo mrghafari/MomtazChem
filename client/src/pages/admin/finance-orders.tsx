@@ -129,6 +129,7 @@ function FinanceOrders() {
   const [selectedOrder, setSelectedOrder] = useState<OrderManagement | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [reviewNotes, setReviewNotes] = useState("");
+  const [receiptAmount, setReceiptAmount] = useState("");
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [selectedImageUrl, setSelectedImageUrl] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -338,11 +339,11 @@ function FinanceOrders() {
 
   // Mutations for approve/reject
   const approveMutation = useMutation({
-    mutationFn: async ({ orderId, notes }: { orderId: number; notes: string }) => {
-      console.log(`🔄 [FINANCE] Sending approve request for order ${orderId}`);
+    mutationFn: async ({ orderId, notes, receiptAmount }: { orderId: number; notes: string; receiptAmount?: string }) => {
+      console.log(`🔄 [FINANCE] Sending approve request for order ${orderId} with receipt amount: ${receiptAmount}`);
       return apiRequest(`/api/finance/orders/${orderId}/approve`, {
         method: 'POST',
-        body: { notes }
+        body: { notes, receiptAmount }
       });
     },
     onSuccess: (response) => {
@@ -509,7 +510,8 @@ function FinanceOrders() {
     if (!selectedOrder) return;
     approveMutation.mutate({ 
       orderId: selectedOrder.customerOrderId, 
-      notes: reviewNotes 
+      notes: reviewNotes,
+      receiptAmount: receiptAmount 
     });
   };
 
@@ -558,7 +560,8 @@ function FinanceOrders() {
     console.log('🔄 [FINANCE] Accepting order from modal - Management ID:', correspondingOrder.id, 'Customer Order ID:', correspondingOrder.customerOrderId);
     approveMutation.mutate({ 
       orderId: correspondingOrder.customerOrderId, // USE CUSTOMER ORDER ID FOR API
-      notes: `سفارش تأیید شد از طریق مودال جزئیات - ${new Date().toLocaleDateString('en-US')}` 
+      notes: `سفارش تأیید شد از طریق مودال جزئیات - ${new Date().toLocaleDateString('en-US')}`,
+      receiptAmount: receiptAmount 
     });
     // Don't close modal here - let the mutation success handler close it
   };
@@ -1029,6 +1032,21 @@ function FinanceOrders() {
                 )}
 
                 <div>
+                  <Label htmlFor="receiptAmount" className="text-sm font-medium">مبلغ فیش واقعی (دینار عراقی)</Label>
+                  <Input
+                    id="receiptAmount"
+                    type="number"
+                    value={receiptAmount}
+                    onChange={(e) => setReceiptAmount(e.target.value)}
+                    placeholder="مبلغ دقیق روی فیش بانکی را وارد کنید"
+                    className="mt-1"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    💡 مبلغ دقیق روی فیش بانکی را وارد کنید - اختلاف مبلغ از کیف پول مشتری تسویه می‌شود
+                  </p>
+                </div>
+
+                <div>
                   <Label htmlFor="reviewNotes" className="text-sm font-medium">یادداشت بررسی</Label>
                   <Textarea
                     id="reviewNotes"
@@ -1354,7 +1372,7 @@ function FinanceOrders() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="flex gap-4 justify-center">
+                    <div className="space-y-4">
                       {orderDetails.currentStatus === 'auto_approved' ? (
                         <div className="col-span-2 flex items-center justify-center p-6 bg-emerald-50 border border-emerald-200 rounded-lg">
                           <CheckCircle className="h-8 w-8 text-emerald-600 mr-3" />
@@ -1365,23 +1383,40 @@ function FinanceOrders() {
                         </div>
                       ) : (
                         <>
-                          <Button 
-                            onClick={handleAcceptOrder}
-                            className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 text-lg"
-                            disabled={orderDetails.currentStatus === 'financial_approved' || orderDetails.currentStatus === 'warehouse_pending'}
-                          >
-                            <CheckCircle2 className="h-5 w-5 mr-2" />
-                            قبول سفارش
-                          </Button>
-                          <Button 
-                            onClick={handleRejectOrder}
-                            variant="destructive"
-                            className="px-8 py-3 text-lg"
-                            disabled={orderDetails.currentStatus === 'financial_rejected'}
-                          >
-                            <XCircle className="h-5 w-5 mr-2" />
-                            رد سفارش
-                          </Button>
+                          <div>
+                            <Label htmlFor="modalReceiptAmount" className="text-sm font-medium">مبلغ فیش واقعی (دینار عراقی)</Label>
+                            <Input
+                              id="modalReceiptAmount"
+                              type="number"
+                              value={receiptAmount}
+                              onChange={(e) => setReceiptAmount(e.target.value)}
+                              placeholder="مبلغ دقیق روی فیش بانکی را وارد کنید"
+                              className="mt-1"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">
+                              💡 مبلغ دقیق روی فیش بانکی را وارد کنید - اختلاف مبلغ از کیف پول مشتری تسویه می‌شود
+                            </p>
+                          </div>
+
+                          <div className="flex gap-4 justify-center">
+                            <Button 
+                              onClick={handleAcceptOrder}
+                              className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 text-lg"
+                              disabled={orderDetails.currentStatus === 'financial_approved' || orderDetails.currentStatus === 'warehouse_pending'}
+                            >
+                              <CheckCircle2 className="h-5 w-5 mr-2" />
+                              قبول سفارش
+                            </Button>
+                            <Button 
+                              onClick={handleRejectOrder}
+                              variant="destructive"
+                              className="px-8 py-3 text-lg"
+                              disabled={orderDetails.currentStatus === 'financial_rejected'}
+                            >
+                              <XCircle className="h-5 w-5 mr-2" />
+                              رد سفارش
+                            </Button>
+                          </div>
                         </>
                       )}
                     </div>
