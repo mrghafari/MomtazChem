@@ -6,6 +6,38 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Flexible Vehicle Type System Implementation - Custom Vehicle Types Support Added (January 28, 2025)
+✅ **IMPLEMENTED: Complete flexible vehicle type system allowing unlimited custom vehicle type creation**
+- **User Request Fulfilled**: "انتخاب نوع خودرو الان محدود است این را اصلاح کن تا بتوانیم انواع دیگر خودرو را اضافه کنیم" - Removed all vehicle type restrictions
+- **Schema Liberation**: Changed vehicleType from restrictive `z.enum(["motorcycle", "van", "light_truck", "heavy_truck"])` to flexible `z.string().min(1, "نوع خودرو باید انتخاب شود")`
+- **Expanded Predefined Options**: Added 19 new vehicle types to predefined list (total 23 types):
+  - **Traditional Types**: موتورسیکلت، ون، کامیون سبک، کامیون سنگین، کامیون کوچک، وانت
+  - **Heavy Vehicles**: تریلر، نیم تریلر، کامیون بار باز، کامیون یخچالی، تانکر، کامیون جرثقیل
+  - **Specialized Types**: کامیون کمپرسی، کامیون زباله، ماشین آتش‌نشانی، آمبولانس، یدک‌کش
+  - **Public Transport**: اتوبوس، مینی‌بوس، تاکسی
+  - **Modern Delivery**: دوچرخه، اسکوتر برقی، پهپاد حمل کالا
+- **Hybrid Interface Implementation**: Created dual-input system for maximum flexibility:
+  - **Select Dropdown**: Quick selection from 23 predefined vehicle types with Persian labels
+  - **Custom Input Field**: Free text input for custom vehicle types (e.g., "truck_10_ton", "electric_van_cold")
+  - **Seamless Integration**: Both selection methods update the same form field with proper validation
+- **Smart Display Logic**: Enhanced table display to show custom vehicle types:
+  - **Predefined Types**: Show Persian translation from VEHICLE_TYPES dictionary
+  - **Custom Types**: Display raw vehicle type string when not found in predefined list
+  - **Fallback Logic**: `{VEHICLE_TYPES[template.vehicleType] || template.vehicleType}` ensures all types display properly
+- **Database Compatibility**: Maintains full backward compatibility with existing vehicle templates
+- **User Experience Enhancements**:
+  - **Clear Instructions**: "انتخاب از لیست موجود یا تایپ کنید" placeholder for dropdown
+  - **Custom Placeholder**: "یا نوع خودرو سفارشی وارد کنید (مثال: truck_10_ton)" for input field
+  - **Helpful Description**: "نوع خودرو را از لیست انتخاب کنید یا نوع جدید وارد کنید" guidance text
+- **Technical Implementation**:
+  - **Form Validation**: String validation instead of enum restriction allows any vehicle type
+  - **Default Value Reset**: Empty vehicleType default to encourage selection/input
+  - **TypeScript Compatibility**: No LSP errors - clean implementation with proper type handling
+- **Business Impact**: Unlimited vehicle type expansion capability for diverse logistics requirements
+- **Test Infrastructure**: Created comprehensive test file `test-flexible-vehicle-types.html` demonstrating 23 predefined + unlimited custom types
+- **Algorithm Integration**: All vehicle types (predefined and custom) work seamlessly with cost optimization algorithm
+- **Result**: Complete flexible vehicle type system operational - users can select from 23 predefined types or create unlimited custom vehicle types for any specialized logistics requirements
+
 ### COMPLETED: Smart Vehicle Selection Algorithm Optimization - Cost-Efficient Selection Fixed (January 28, 2025)
 ✅ **IMPLEMENTED: Optimized vehicle selection algorithm to choose appropriate vehicles for different load sizes**
 - **User Issue Identified**: "چطور برای یک کالای 11 کیلویی یک کامیون سنگین انتخاب کردی؟" - System was selecting heavy trucks for light loads

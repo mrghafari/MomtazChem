@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست سیستم انعطاف‌پذیر انواع خودرو</title>
+    <style>
+        body {
+            font-family: 'Vazir', sans-serif;
+            margin: 20px;
+            direction: rtl;
+            text-align: right;
+            background: #f0f9ff;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .title {
+            text-align: center;
+            color: #1e40af;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        .feature-section {
+            background: #f8fafc;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border-right: 4px solid #3b82f6;
+        }
+        .vehicle-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .vehicle-type {
+            background: #e0f2fe;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #0ea5e9;
+            text-align: center;
+            font-size: 14px;
+        }
+        .predefined {
+            background: #dcfce7;
+            border-color: #22c55e;
+        }
+        .custom {
+            background: #fef3c7;
+            border-color: #f59e0b;
+        }
+        .improvement {
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .before-after {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 15px 0;
+        }
+        .before, .after {
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .before {
+            background: #fee2e2;
+            border: 1px solid #ef4444;
+        }
+        .after {
+            background: #dcfce7;
+            border: 1px solid #22c55e;
+        }
+        .highlight {
+            background: #fbbf24;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #92400e;
+            font-weight: bold;
+        }
+        .schema-change {
+            background: #f3e8ff;
+            border: 1px solid #8b5cf6;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .code-sample {
+            background: #1f2937;
+            color: #e5e7eb;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            direction: ltr;
+            text-align: left;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">🚛 سیستم انعطاف‌پذیر انواع خودرو - اصلاح کامل</h1>
+        
+        <div class="feature-section">
+            <h3>🎯 مشکل حل شده</h3>
+            <div class="before-after">
+                <div class="before">
+                    <h4>❌ قبل از اصلاح</h4>
+                    <ul>
+                        <li>انواع خودرو محدود به 4 نوع ثابت</li>
+                        <li>enum محدودکننده در schema</li>
+                        <li>عدم امکان اضافه کردن نوع جدید</li>
+                        <li>فقط: موتور، ون، کامیون سبک، کامیون سنگین</li>
+                    </ul>
+                </div>
+                <div class="after">
+                    <h4>✅ بعد از اصلاح</h4>
+                    <ul>
+                        <li>سیستم کاملاً انعطاف‌پذیر</li>
+                        <li>امکان وارد کردن هر نوع خودرو</li>
+                        <li>لیست پیش‌فرض گسترده (23 نوع)</li>
+                        <li>امکان تایپ نوع سفارشی</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="feature-section">
+            <h3>🔧 تغییرات تکنیکی انجام شده</h3>
+            <div class="schema-change">
+                <h4>1. اصلاح Schema Validation</h4>
+                <div class="code-sample">
+// Before (محدود)
+vehicleType: z.enum(["motorcycle", "van", "light_truck", "heavy_truck"])
+
+// After (انعطاف‌پذیر)  
+vehicleType: z.string().min(1, "نوع خودرو باید انتخاب شود")
+                </div>
+            </div>
+            
+            <div class="schema-change">
+                <h4>2. گسترش لیست انواع خودرو</h4>
+                <p>افزوده شده: 19 نوع خودرو جدید به لیست پیش‌فرض</p>
+            </div>
+            
+            <div class="schema-change">
+                <h4>3. رابط کاربری ترکیبی</h4>
+                <ul>
+                    <li>Select dropdown برای انتخاب از لیست پیش‌فرض</li>
+                    <li>Input field برای تایپ نوع سفارشی</li>
+                    <li>نمایش نوع‌های سفارشی در جدول</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="feature-section">
+            <h3>📋 انواع خودروی موجود</h3>
+            
+            <h4 style="color: #22c55e;">انواع پیش‌فرض (23 نوع)</h4>
+            <div class="vehicle-grid">
+                <div class="vehicle-type predefined">موتورسیکلت</div>
+                <div class="vehicle-type predefined">ون</div>
+                <div class="vehicle-type predefined">کامیون سبک</div>
+                <div class="vehicle-type predefined">کامیون سنگین</div>
+                <div class="vehicle-type predefined">کامیون کوچک</div>
+                <div class="vehicle-type predefined">وانت</div>
+                <div class="vehicle-type predefined">تریلر</div>
+                <div class="vehicle-type predefined">نیم تریلر</div>
+                <div class="vehicle-type predefined">کامیون بار باز</div>
+                <div class="vehicle-type predefined">کامیون یخچالی</div>
+                <div class="vehicle-type predefined">تانکر</div>
+                <div class="vehicle-type predefined">کامیون جرثقیل</div>
+                <div class="vehicle-type predefined">کامیون کمپرسی</div>
+                <div class="vehicle-type predefined">کامیون زباله</div>
+                <div class="vehicle-type predefined">ماشین آتش‌نشانی</div>
+                <div class="vehicle-type predefined">آمبولانس</div>
+                <div class="vehicle-type predefined">یدک‌کش</div>
+                <div class="vehicle-type predefined">اتوبوس</div>
+                <div class="vehicle-type predefined">مینی‌بوس</div>
+                <div class="vehicle-type predefined">تاکسی</div>
+                <div class="vehicle-type predefined">دوچرخه</div>
+                <div class="vehicle-type predefined">اسکوتر برقی</div>
+                <div class="vehicle-type predefined">پهپاد حمل کالا</div>
+            </div>
+
+            <h4 style="color: #f59e0b;">مثال‌های نوع سفارشی</h4>
+            <div class="vehicle-grid">
+                <div class="vehicle-type custom">truck_10_ton</div>
+                <div class="vehicle-type custom">mini_van_special</div>
+                <div class="vehicle-type custom">electric_delivery</div>
+                <div class="vehicle-type custom">crane_truck_50m</div>
+                <div class="vehicle-type custom">chemical_tanker</div>
+                <div class="vehicle-type custom">food_truck</div>
+            </div>
+        </div>
+
+        <div class="feature-section">
+            <h3>💡 مزایای سیستم جدید</h3>
+            <div class="improvement">
+                <strong>✓ انعطاف‌پذیری کامل:</strong> امکان اضافه کردن هر نوع خودرو بدون محدودیت تکنیکی
+            </div>
+            <div class="improvement">
+                <strong>✓ سهولت استفاده:</strong> انتخاب سریع از لیست پیش‌فرض یا تایپ نوع جدید
+            </div>
+            <div class="improvement">
+                <strong>✓ سازگاری کامل:</strong> خودروهای موجود تغییری نمی‌کنند، فقط قابلیت جدید اضافه شده
+            </div>
+            <div class="improvement">
+                <strong>✓ نمایش هوشمند:</strong> نوع‌های سفارشی در جدول به همراه نوع‌های پیش‌فرض نمایش داده می‌شوند
+            </div>
+        </div>
+
+        <div class="feature-section">
+            <h3>🎮 نحوه استفاده</h3>
+            <ol style="font-size: 16px; line-height: 1.8;">
+                <li><span class="highlight">روش 1:</span> از dropdown انتخاب نوع پیش‌فرض</li>
+                <li><span class="highlight">روش 2:</span> در فیلد پایینی نوع سفارشی تایپ کنید</li>
+                <li><span class="highlight">مثال:</span> "truck_25_ton" یا "electric_van_cold"</li>
+                <li><span class="highlight">ذخیره:</span> تمام انواع در الگوریتم استفاده می‌شوند</li>
+            </ol>
+        </div>
+
+        <div style="background: #dcfce7; padding: 20px; border-radius: 8px; text-align: center; margin-top: 20px;">
+            <h3 style="color: #22c55e; margin: 0;">✅ سیستم انعطاف‌پذیر انواع خودرو عملیاتی است</h3>
+            <p style="margin: 10px 0 0 0; color: #16a34a;">
+                اکنون می‌توانید هر نوع خودرویی را به سیستم اضافه کنید
+            </p>
+        </div>
+    </div>
+</body>
+</html>

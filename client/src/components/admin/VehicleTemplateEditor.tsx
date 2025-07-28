@@ -28,7 +28,7 @@ import { apiRequest } from "@/lib/queryClient";
 const vehicleTemplateSchema = z.object({
   name: z.string().min(2, "نام باید حداقل 2 کاراکتر باشد"),
   nameEn: z.string().optional(),
-  vehicleType: z.enum(["motorcycle", "van", "light_truck", "heavy_truck"]),
+  vehicleType: z.string().min(1, "نوع خودرو باید انتخاب شود"),
   maxWeightKg: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, "وزن باید عدد مثبت باشد"),
   maxVolumeM3: z.string().optional(),
   allowedRoutes: z.array(z.string()).min(1, "حداقل یک نوع مسیر را انتخاب کنید"),
@@ -50,7 +50,26 @@ const VEHICLE_TYPES = {
   motorcycle: "موتورسیکلت",
   van: "ون",
   light_truck: "کامیون سبک", 
-  heavy_truck: "کامیون سنگین"
+  heavy_truck: "کامیون سنگین",
+  mini_truck: "کامیون کوچک",
+  pickup: "وانت",
+  trailer: "تریلر",
+  semi_trailer: "نیم تریلر",
+  flatbed: "کامیون بار باز",
+  refrigerated_truck: "کامیون یخچالی",
+  tanker: "تانکر",
+  crane_truck: "کامیون جرثقیل",
+  dump_truck: "کامیون کمپرسی",
+  garbage_truck: "کامیون زباله",
+  fire_truck: "ماشین آتش‌نشانی",
+  ambulance: "آمبولانس",
+  tow_truck: "یدک‌کش",
+  bus: "اتوبوس",
+  minibus: "مینی‌بوس",
+  taxi: "تاکسی",
+  bicycle: "دوچرخه",
+  electric_scooter: "اسکوتر برقی",
+  drone: "پهپاد حمل کالا"
 };
 
 const ROUTE_TYPES = {
@@ -84,7 +103,7 @@ export default function VehicleTemplateEditor({ className = "" }: VehicleTemplat
     defaultValues: {
       name: "",
       nameEn: "",
-      vehicleType: "van",
+      vehicleType: "",
       maxWeightKg: "1000",
       maxVolumeM3: "10",
       allowedRoutes: ["urban"],
@@ -283,7 +302,7 @@ export default function VehicleTemplateEditor({ className = "" }: VehicleTemplat
                         {template.isActive ? "فعال" : "غیرفعال"}
                       </Badge>
                       <Badge variant="outline">
-                        {VEHICLE_TYPES[template.vehicleType as keyof typeof VEHICLE_TYPES]}
+                        {VEHICLE_TYPES[template.vehicleType as keyof typeof VEHICLE_TYPES] || template.vehicleType}
                       </Badge>
                       <Badge variant="outline">
                         اولویت: {template.priority || 0}
@@ -420,18 +439,31 @@ export default function VehicleTemplateEditor({ className = "" }: VehicleTemplat
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>نوع خودرو *</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
+                        <div className="space-y-2">
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="انتخاب از لیست موجود یا تایپ کنید" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {Object.entries(VEHICLE_TYPES).map(([key, value]) => (
+                                <SelectItem key={key} value={key}>{value}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                           <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="انتخاب نوع خودرو" />
-                            </SelectTrigger>
+                            <Input
+                              placeholder="یا نوع خودرو سفارشی وارد کنید (مثال: truck_10_ton)"
+                              value={field.value}
+                              onChange={field.onChange}
+                              className="text-sm"
+                            />
                           </FormControl>
-                          <SelectContent>
-                            {Object.entries(VEHICLE_TYPES).map(([key, value]) => (
-                              <SelectItem key={key} value={key}>{value}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        </div>
+                        <FormDescription>
+                          نوع خودرو را از لیست انتخاب کنید یا نوع جدید وارد کنید
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
