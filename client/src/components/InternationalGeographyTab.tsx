@@ -1055,14 +1055,14 @@ const InternationalGeographyTab: React.FC = () => {
             <div className="space-y-2">
               <Label htmlFor="rateCityId">شهر (اختیاری)</Label>
               <Select
-                value={rateForm.cityId?.toString() || ""}
-                onValueChange={(value) => setRateForm({...rateForm, cityId: value ? parseInt(value) : null as any})}
+                value={rateForm.cityId?.toString() || "all"}
+                onValueChange={(value) => setRateForm({...rateForm, cityId: value === "all" ? null : parseInt(value) as any})}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="انتخاب شهر" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">همه شهرها</SelectItem>
+                  <SelectItem value="all">همه شهرها</SelectItem>
                   {cities
                     .filter((city: InternationalCity) => city.countryId === rateForm.countryId)
                     .map((city: InternationalCity) => (
