@@ -6,6 +6,25 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Shipping Rates Tab Removal from Logistics Management - UI Streamlining Complete (January 28, 2025)
+✅ **IMPLEMENTED: Complete removal of "نرخ‌های حمل" (Shipping Rates) tab from logistics management interface**
+- **User Request Fulfilled**: Successfully removed redundant "نرخ‌های حمل" tab as part of ongoing UI streamlining campaign
+- **Complete Code Cleanup**: 
+  - **TabsList Updated**: Reduced grid from `grid-cols-6` to `grid-cols-5` removing shipping rates tab trigger
+  - **Component Removal**: Completely removed `ShippingRatesTab` component and its 75+ lines of code
+  - **Query Cleanup**: Removed unused `shippingRatesResponse` and `loadingShippingRates` useQuery hooks
+  - **Conditional Logic**: Updated all `enabled` queries removing `activeTab === 'shipping'` references
+- **Streamlined Interface**: Logistics management now contains only essential operational tabs:
+  - **Orders Tab**: Order processing and management
+  - **Companies Tab**: Transportation company management  
+  - **Geography Tab**: Iraqi cities and provinces with distance calculations
+  - **Vehicles Tab**: Vehicle optimization and templates
+  - **Postal Tab**: Postal services configuration
+- **System Integration**: Smart vehicle system remains fully operational as exclusive delivery method
+- **UI Philosophy**: Continues user's preference for simplified interfaces without redundant functionality
+- **Business Impact**: Cleaner logistics interface focused on core operational functions
+- **Result**: Complete removal of shipping rates tab operational - logistics management interface now streamlined to 5 essential tabs
+
 ### COMPLETED: Smart Vehicle Database Integration in Delivery Method Field - Complete & Operational (January 27, 2025)
 ✅ **IMPLEMENTED: Complete smart vehicle selection system integrated directly into checkout "Delivery Method *" field with database backend**
 - **User Request Fulfilled**: Smart vehicle calculation results now display in main delivery method dropdown instead of separate interface
