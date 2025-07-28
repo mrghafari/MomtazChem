@@ -402,20 +402,24 @@ const LogisticsManagement = () => {
   const handleEditVehicle = (formData: FormData) => {
     if (!editingVehicle) return;
     
+    const allowedRoutesString = formData.get('allowedRoutes') as string;
+    const allowedRoutesArray = allowedRoutesString ? allowedRoutesString.split(',').map(r => r.trim()) : ['urban'];
+    
     const data = {
       name: formData.get('name') as string,
       nameEn: formData.get('nameEn') as string,
       vehicleType: formData.get('vehicleType') as string,
-      maxWeightKg: parseInt(formData.get('maxWeightKg') as string),
-      maxVolumeM3: parseInt(formData.get('maxVolumeM3') as string) || 0,
-      basePrice: parseInt(formData.get('basePrice') as string),
-      pricePerKm: parseInt(formData.get('pricePerKm') as string),
-      allowedRoutes: formData.get('allowedRoutes') as string,
-      averageSpeedKmh: parseInt(formData.get('averageSpeedKmh') as string) || 50,
-      fuelConsumptionL100km: parseInt(formData.get('fuelConsumptionL100km') as string) || 0,
+      maxWeightKg: parseFloat(formData.get('maxWeightKg') as string),
+      maxVolumeM3: parseFloat(formData.get('maxVolumeM3') as string) || 0,
+      basePrice: parseFloat(formData.get('basePrice') as string),
+      pricePerKm: parseFloat(formData.get('pricePerKm') as string),
+      allowedRoutes: allowedRoutesArray,
+      averageSpeedKmh: parseFloat(formData.get('averageSpeedKmh') as string) || 50,
+      fuelConsumptionL100km: parseFloat(formData.get('fuelConsumptionL100km') as string) || 0,
       isActive: formData.get('isActive') === 'on'
     };
 
+    console.log('🚛 [VEHICLE EDIT] Sending data:', data);
     updateVehicleMutation.mutate({ id: editingVehicle.id, ...data });
   };
 

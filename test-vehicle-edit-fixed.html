@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست اصلاح ثبت تغییرات الگوی خودرو</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background-color: #f8f9fa;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #ffffff;
+        }
+        .test-result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .btn-primary, .btn-success, .btn-warning {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            color: white;
+        }
+        .btn-primary { background-color: #007bff; }
+        .btn-success { background-color: #28a745; }
+        .btn-warning { background-color: #ffc107; color: #212529; }
+        .btn-primary:hover { background-color: #0056b3; }
+        .btn-success:hover { background-color: #218838; }
+        .code {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 3px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-left: 8px;
+        }
+        .status-success { background-color: #28a745; }
+        .status-error { background-color: #dc3545; }
+        .status-pending { background-color: #ffc107; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚛 تست اصلاح مشکل ثبت تغییرات الگوی خودرو</h1>
+        <p>این صفحه برای تست رفع خطای 500 در ثبت تغییرات الگوهای خودرو طراحی شده است.</p>
+
+        <div class="test-section info">
+            <h3>📊 تغییرات اعمال شده</h3>
+            <ul>
+                <li>✅ allowedRoutes حالا به صورت array فرستاده می‌شود</li>
+                <li>✅ پردازش داده‌های عددی با parseFloat</li>
+                <li>✅ اضافه شدن console.log برای debug</li>
+                <li>✅ validation بهتر برای فیلدهای اجباری</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h3>🔐 تست 1: احراز هویت ادمین</h3>
+            <button class="btn-primary" onclick="testAdminLogin()">ورود ادمین</button>
+            <div id="loginResult" class="test-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🚛 تست 2: دریافت الگوهای خودرو</h3>
+            <button class="btn-primary" onclick="testGetVehicleTemplates()">دریافت الگوها</button>
+            <div id="getTemplatesResult" class="test-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>✏️ تست 3: ادیت الگوی خودرو (روش جدید)</h3>
+            <p>تست ادیت با داده‌های جدید و validation بهبود یافته</p>
+            <button class="btn-success" onclick="testEditVehicleFixed()">تست ادیت اصلاح شده</button>
+            <div id="editFixedResult" class="test-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📋 نتایج کلی تست</h3>
+            <div id="overallResults" class="test-result info">در انتظار تست...</div>
+        </div>
+    </div>
+
+    <script>
+        let testResults = {
+            login: false,
+            getTemplates: false,
+            editFixed: false
+        };
+
+        async function testAdminLogin() {
+            try {
+                document.getElementById('loginResult').innerHTML = `
+                    <div class="info">⏳ در حال ورود ادمین...</div>
+                `;
+
+                const response = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: 'admin',
+                        password: 'admin123'
+                    }),
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    testResults.login = true;
+                    document.getElementById('loginResult').innerHTML = `
+                        <div class="success">
+                            ✅ ورود ادمین موفق
+                            <div class="code">Admin: ${data.user?.username || 'admin'}</div>
+                        </div>
+                    `;
+                } else {
+                    throw new Error(data.message || `HTTP ${response.status}`);
+                }
+            } catch (error) {
+                testResults.login = false;
+                document.getElementById('loginResult').innerHTML = `
+                    <div class="error">
+                        ❌ خطا در ورود ادمین: ${error.message}
+                    </div>
+                `;
+            }
+            updateOverallResults();
+        }
+
+        async function testGetVehicleTemplates() {
+            try {
+                document.getElementById('getTemplatesResult').innerHTML = `
+                    <div class="info">⏳ در حال دریافت الگوهای خودرو...</div>
+                `;
+
+                const response = await fetch('/api/logistics/vehicle-templates', {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                
+                if (response.ok && data.success && data.data?.length) {
+                    testResults.getTemplates = true;
+                    const template = data.data[0];
+                    document.getElementById('getTemplatesResult').innerHTML = `
+                        <div class="success">
+                            ✅ دریافت الگوها موفق - ${data.data.length} الگو
+                            <div class="code">
+الگوی نمونه:
+- نام: ${template.name}
+- نوع: ${template.vehicleType}
+- حداکثر وزن: ${template.maxWeightKg} کیلوگرم
+- قیمت پایه: ${template.basePrice} دینار
+- مسیرهای مجاز: ${Array.isArray(template.allowedRoutes) ? template.allowedRoutes.join(', ') : template.allowedRoutes}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    throw new Error(data.message || 'هیچ الگویی یافت نشد');
+                }
+            } catch (error) {
+                testResults.getTemplates = false;
+                document.getElementById('getTemplatesResult').innerHTML = `
+                    <div class="error">
+                        ❌ خطا در دریافت الگوها: ${error.message}
+                    </div>
+                `;
+            }
+            updateOverallResults();
+        }
+
+        async function testEditVehicleFixed() {
+            try {
+                // ابتدا الگوها را دریافت کنیم
+                const getResponse = await fetch('/api/logistics/vehicle-templates', {
+                    credentials: 'include'
+                });
+                const getData = await getResponse.json();
+                
+                if (!getData.success || !getData.data?.length) {
+                    throw new Error('هیچ الگویی برای ادیت یافت نشد');
+                }
+                
+                const templateId = getData.data[0].id;
+                document.getElementById('editFixedResult').innerHTML = `
+                    <div class="info">⏳ در حال ادیت الگو ${templateId} با داده‌های اصلاح شده...</div>
+                `;
+
+                // داده‌های جدید با format صحیح
+                const editData = {
+                    name: "الگوی تست اصلاح شده",
+                    nameEn: "Fixed Test Template",
+                    vehicleType: "van",
+                    maxWeightKg: 1500.50,
+                    maxVolumeM3: 8.75,
+                    basePrice: 50000.00,
+                    pricePerKm: 1250.25,
+                    allowedRoutes: ["urban", "interurban"], // حالا array است
+                    averageSpeedKmh: 60.00,
+                    fuelConsumptionL100km: 8.50,
+                    isActive: true
+                };
+
+                console.log('🚛 [TEST] Sending fixed data:', editData);
+
+                const response = await fetch(`/api/logistics/vehicle-templates/${templateId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(editData),
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    testResults.editFixed = true;
+                    document.getElementById('editFixedResult').innerHTML = `
+                        <div class="success">
+                            ✅ ادیت موفق! الگو ${templateId} با داده‌های جدید ذخیره شد
+                            <div class="code">
+نتیجه:
+- نام: ${data.data.name}
+- حداکثر وزن: ${data.data.maxWeightKg} کیلوگرم
+- حداکثر حجم: ${data.data.maxVolumeM3} متر مکعب
+- قیمت پایه: ${data.data.basePrice} دینار
+- مسیرهای مجاز: ${data.data.allowedRoutes?.join(', ')}
+- مصرف سوخت: ${data.data.fuelConsumptionL100km} لیتر/100کیلومتر
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    throw new Error(data.message || `HTTP ${response.status}`);
+                }
+            } catch (error) {
+                testResults.editFixed = false;
+                document.getElementById('editFixedResult').innerHTML = `
+                    <div class="error">
+                        ❌ خطا در ادیت اصلاح شده: ${error.message}
+                        <div class="code">پاسخ سرور: ${error.response || 'نامشخص'}</div>
+                    </div>
+                `;
+            }
+            updateOverallResults();
+        }
+
+        function updateOverallResults() {
+            const totalTests = Object.keys(testResults).length;
+            const passedTests = Object.values(testResults).filter(result => result === true).length;
+            
+            let statusText = '';
+            let statusClass = '';
+            
+            if (passedTests === totalTests) {
+                statusText = `✅ همه تست‌ها موفق (${passedTests}/${totalTests})`;
+                statusClass = 'success';
+            } else if (passedTests > 0) {
+                statusText = `⚠️ برخی تست‌ها موفق (${passedTests}/${totalTests})`;
+                statusClass = 'info';
+            } else {
+                statusText = `❌ هیچ تستی موفق نبود (${passedTests}/${totalTests})`;
+                statusClass = 'error';
+            }
+            
+            document.getElementById('overallResults').innerHTML = `
+                <div class="${statusClass}">
+                    <strong>${statusText}</strong><br>
+                    <div style="margin-top: 10px;">
+                        <span class="status-indicator ${testResults.login ? 'status-success' : 'status-error'}"></span> ورود ادمین<br>
+                        <span class="status-indicator ${testResults.getTemplates ? 'status-success' : 'status-error'}"></span> دریافت الگوها<br>
+                        <span class="status-indicator ${testResults.editFixed ? 'status-success' : 'status-error'}"></span> ادیت اصلاح شده
+                    </div>
+                </div>
+            `;
+        }
+
+        // شروع خودکار تست‌ها
+        window.onload = function() {
+            setTimeout(() => {
+                testAdminLogin();
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
