@@ -806,8 +806,16 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   });
 
   const onSubmit = (data: any) => {
+    console.log('🚀 [SUBMIT DEBUG] onSubmit function called');
+    console.log('🚀 [SUBMIT DEBUG] Form data received:', data);
+    console.log('🚀 [SUBMIT DEBUG] Selected shipping method:', selectedShippingMethod);
+    console.log('🚀 [SUBMIT DEBUG] Payment method:', paymentMethod);
+    console.log('🚀 [SUBMIT DEBUG] Form validation state:', form.formState);
+    console.log('🚀 [SUBMIT DEBUG] Form errors:', form.formState.errors);
+    
     // Validate shipping method selection
     if (!selectedShippingMethod) {
+      console.log('🚀 [SUBMIT DEBUG] Shipping method validation failed');
       toast({
         title: language === 'ar' ? "روش ارسال اجباری است" : "Shipping method is required",
         description: language === 'ar' ? "لطفاً روش ارسال را انتخاب کنید" : "Please select a shipping method",
@@ -1615,6 +1623,15 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                     type="submit"
                     disabled={submitOrderMutation.isPending}
                     className="flex-1"
+                    onClick={(e) => {
+                      console.log('🚀 [SUBMIT DEBUG] Submit button clicked');
+                      console.log('🚀 [SUBMIT DEBUG] Event:', e);
+                      console.log('🚀 [SUBMIT DEBUG] Form state:', form.formState);
+                      console.log('🚀 [SUBMIT DEBUG] Form errors:', form.formState.errors);
+                      console.log('🚀 [SUBMIT DEBUG] Form isValid:', form.formState.isValid);
+                      console.log('🚀 [SUBMIT DEBUG] Payment method:', paymentMethod);
+                      console.log('🚀 [SUBMIT DEBUG] Selected shipping method:', selectedShippingMethod);
+                    }}
                   >
                     {submitOrderMutation.isPending ? t.loading : t.submitOrder}
                   </Button>
