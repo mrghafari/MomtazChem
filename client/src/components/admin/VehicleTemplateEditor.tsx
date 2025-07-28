@@ -36,6 +36,7 @@ const vehicleTemplateSchema = z.object({
   pricePerKm: z.string().refine((val) => !isNaN(Number(val)) && Number(val) >= 0, "قیمت هر کیلومتر باید عدد مثبت باشد"),
   pricePerKg: z.string().refine((val) => !isNaN(Number(val)) && Number(val) >= 0, "قیمت هر کیلوگرم باید عدد مثبت باشد"),
   supportsHazardous: z.boolean(),
+  supportsFlammable: z.boolean(),
   supportsRefrigerated: z.boolean(),
   supportsFragile: z.boolean(),
   averageSpeedKmh: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, "سرعت متوسط باید عدد مثبت باشد"),
@@ -115,6 +116,7 @@ export default function VehicleTemplateEditor({ className = "" }: VehicleTemplat
       pricePerKm: "1000",
       pricePerKg: "500",
       supportsHazardous: false,
+      supportsFlammable: false,
       supportsRefrigerated: false,
       supportsFragile: true,
       averageSpeedKmh: "50",
@@ -235,6 +237,7 @@ export default function VehicleTemplateEditor({ className = "" }: VehicleTemplat
       pricePerKm: template.pricePerKm.toString(),
       pricePerKg: template.pricePerKg?.toString() || "0",
       supportsHazardous: template.supportsHazardous || false,
+      supportsFlammable: template.supportsFlammable || false,
       supportsRefrigerated: template.supportsRefrigerated || false,
       supportsFragile: template.supportsFragile !== false,
       averageSpeedKmh: template.averageSpeedKmh?.toString() || "50",
@@ -638,7 +641,7 @@ export default function VehicleTemplateEditor({ className = "" }: VehicleTemplat
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold border-b pb-2">قابلیت‌های ویژه</h3>
                 
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-4 gap-4">
                   <FormField
                     control={form.control}
                     name="supportsHazardous"
@@ -646,6 +649,24 @@ export default function VehicleTemplateEditor({ className = "" }: VehicleTemplat
                       <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
                         <div className="space-y-0.5">
                           <FormLabel>مواد خطرناک</FormLabel>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="supportsFlammable"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                        <div className="space-y-0.5">
+                          <FormLabel>مواد آتش‌زا</FormLabel>
                         </div>
                         <FormControl>
                           <Switch
@@ -847,6 +868,9 @@ export default function VehicleTemplateEditor({ className = "" }: VehicleTemplat
                   <div className="flex gap-3 text-xs">
                     {template.supportsHazardous && (
                       <Badge variant="destructive" className="text-xs">خطرناک</Badge>
+                    )}
+                    {template.supportsFlammable && (
+                      <Badge variant="destructive" className="text-xs bg-orange-500">آتش‌زا</Badge>
                     )}
                     {template.supportsRefrigerated && (
                       <Badge variant="secondary" className="text-xs">یخچالی</Badge>
@@ -1093,7 +1117,7 @@ export default function VehicleTemplateEditor({ className = "" }: VehicleTemplat
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold border-b pb-2">قابلیت‌های ویژه</h3>
                 
-                <div className="grid grid-cols-3 gap-6">
+                <div className="grid grid-cols-4 gap-6">
                   <FormField
                     control={form.control}
                     name="supportsHazardous"
@@ -1103,6 +1127,27 @@ export default function VehicleTemplateEditor({ className = "" }: VehicleTemplat
                           <FormLabel>حمل مواد خطرناک</FormLabel>
                           <FormDescription className="text-xs">
                             قابلیت حمل مواد شیمیایی خطرناک
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="supportsFlammable"
+                    render={({ field }) => (
+                      <FormItem className="flex items-center justify-between rounded-lg border p-3">
+                        <div className="space-y-0.5">
+                          <FormLabel>حمل مواد آتش‌زا</FormLabel>
+                          <FormDescription className="text-xs">
+                            قابلیت حمل محصولات آتش‌زا و قابل اشتعال
                           </FormDescription>
                         </div>
                         <FormControl>

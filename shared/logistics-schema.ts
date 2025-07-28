@@ -508,6 +508,7 @@ export const vehicleTemplates = pgTable("vehicle_templates", {
   
   // Special capabilities
   supportsHazardous: boolean("supports_hazardous").default(false),
+  supportsFlammable: boolean("supports_flammable").default(false),
   supportsRefrigerated: boolean("supports_refrigerated").default(false),
   supportsFragile: boolean("supports_fragile").default(true),
   
@@ -539,6 +540,7 @@ export const vehicleSelectionHistory = pgTable("vehicle_selection_history", {
   routeType: varchar("route_type", { length: 20 }).notNull(), // urban, interurban, highway
   distanceKm: decimal("distance_km", { precision: 8, scale: 2 }).notNull(),
   isHazardous: boolean("is_hazardous").default(false),
+  isFlammable: boolean("is_flammable").default(false),
   isRefrigerated: boolean("is_refrigerated").default(false),
   isFragile: boolean("is_fragile").default(false),
   
