@@ -1926,8 +1926,7 @@ const LogisticsManagement = () => {
                   <TableHeader>
                     <TableRow>
                       <TableHead className="text-right">شناسه</TableHead>
-                      <TableHead className="text-right">نام عربی</TableHead>
-                      <TableHead className="text-right">نام انگلیسی</TableHead>
+                      <TableHead className="text-right">نام استان</TableHead>
                       <TableHead className="text-right">مرکز استان</TableHead>
                       <TableHead className="text-right">
                         فاصله میانگین از {selectedOriginCity ? (selectedOriginCity.name_arabic || selectedOriginCity.name) : 'اربیل'} (کیلومتر)
@@ -1940,8 +1939,14 @@ const LogisticsManagement = () => {
                     {geographyProvinces.map((province: any) => (
                       <TableRow key={province.id}>
                         <TableCell className="font-medium text-right">{province.id}</TableCell>
-                        <TableCell className="text-right">{province.name_arabic}</TableCell>
-                        <TableCell className="text-right">{province.name_english}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex flex-col text-right">
+                            <span className="font-medium">{province.name_arabic}</span>
+                            {province.name_english && province.name_english !== province.name_arabic && (
+                              <span className="text-sm text-gray-500">{province.name_english}</span>
+                            )}
+                          </div>
+                        </TableCell>
                         <TableCell className="text-right">{province.capital}</TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end">
@@ -2013,8 +2018,7 @@ const LogisticsManagement = () => {
                   <TableHeader>
                     <TableRow>
                       <TableHead className="text-right">شناسه</TableHead>
-                      <TableHead className="text-right">نام عربی</TableHead>
-                      <TableHead className="text-right">نام انگلیسی</TableHead>
+                      <TableHead className="text-right">نام شهر</TableHead>
                       <TableHead className="text-right">استان</TableHead>
                       <TableHead className="text-right">
                         فاصله از {selectedOriginCity ? (selectedOriginCity.name_arabic || selectedOriginCity.name) : 'اربیل'} (کیلومتر)
@@ -2027,8 +2031,14 @@ const LogisticsManagement = () => {
                     {geographyCities.slice(0, 8).map((city: any) => (
                       <TableRow key={city.id}>
                         <TableCell className="font-medium text-right">{city.id}</TableCell>
-                        <TableCell className="text-right">{city.name_arabic || city.name}</TableCell>
-                        <TableCell className="text-right">{city.name_english || city.name}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex flex-col text-right">
+                            <span className="font-medium">{city.name_arabic || city.name}</span>
+                            {city.name_english && city.name_english !== city.name_arabic && (
+                              <span className="text-sm text-gray-500">{city.name_english}</span>
+                            )}
+                          </div>
+                        </TableCell>
                         <TableCell className="text-right">{city.province_name}</TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end">

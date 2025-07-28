@@ -18,6 +18,9 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Column Alignment Enhancement**: Added `text-right` class to all TableCell elements and wrapped Badge/Button components in `div className="flex justify-end"` for proper right-aligned table formatting
 - **Complete Table Structure**: Added provinces table with identical column alignment structure for consistent interface design
 - **UI Consistency**: Both provinces and cities tables now have proper RTL column alignment matching headers for professional appearance
+- **English Names Integration**: Added bilingual display for both cities and provinces - Arabic names shown prominently with English names as smaller gray text below when different
+- **Column Structure Optimization**: Merged Arabic/English name columns into single "نام شهر"/"نام استان" columns with dual-language display for cleaner table layout
+- **Smart Name Display**: English names only show when different from Arabic names to avoid redundancy and maintain clean interface
 
 ### COMPLETED: Self-Pickup Delivery Method Added - Customer Self-Collection Option Operational (January 28, 2025)
 ✅ **IMPLEMENTED: Complete "حمل توسط خودم" (self-pickup) delivery method for customers to collect orders without shipping costs**
