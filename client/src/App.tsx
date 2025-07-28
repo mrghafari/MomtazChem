@@ -123,6 +123,7 @@ import AccountingManagement from "@/pages/admin/accounting-management";
 import CompanyInformation from "@/pages/admin/company-information";
 import VehicleOptimization from "@/pages/admin/vehicle-optimization";
 import LogisticsGeography from "@/pages/admin/logistics-geography";
+import UserGuide from "@/pages/user-guide";
 
 import NotFound from "@/pages/not-found";
 
@@ -136,6 +137,8 @@ function Router() {
           <Route path="/about" component={About} />
           <Route path="/services" component={Services} />
           <Route path="/contact" component={Contact} />
+          <Route path="/user-guide" component={UserGuide} />
+          <Route path="/help" component={UserGuide} />
           <Route path="/shop" component={Shop} />
           <Route path="/product-recommendations" component={ProductRecommendations} />
           <Route path="/checkout" component={() => <Checkout cart={[]} products={[]} onOrderComplete={() => {}} />} />

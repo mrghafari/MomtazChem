@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Menu, X, ChevronDown, Beaker, Droplet, Package, Wheat, Wallet, User, LogOut, ShoppingBag, Shield } from 'lucide-react';
+import { Menu, X, ChevronDown, Beaker, Droplet, Package, Wheat, Wallet, User, LogOut, ShoppingBag, Shield, BookOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
@@ -89,6 +89,7 @@ export default function Header() {
     { href: '/about', label: t.about },
     { href: '/services', label: t.services },
     { href: '/contact', label: t.contact },
+    { href: '/user-guide', label: direction === 'rtl' ? 'راهنمای استفاده' : 'User Guide', icon: <BookOpen className="h-4 w-4" /> },
     { href: '/shop', label: t.shop.title },
   ];
 
@@ -229,7 +230,7 @@ export default function Header() {
               <Link key={item.href} href={item.href}>
                 <motion.span
                   className={cn(
-                    "relative px-3 py-2 text-sm font-medium transition-colors",
+                    "relative px-3 py-2 text-sm font-medium transition-colors flex items-center gap-2",
                     isActive(item.href)
                       ? "text-blue-600 dark:text-blue-400"
                       : "text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
@@ -237,6 +238,7 @@ export default function Header() {
                   whileHover={{ y: -1 }}
                   whileTap={{ y: 0 }}
                 >
+                  {item.icon && item.icon}
                   {item.label}
                   {isActive(item.href) && (
                     <motion.div
@@ -430,7 +432,7 @@ export default function Header() {
                     <Link href={item.href}>
                       <motion.span
                         className={cn(
-                          "block px-4 py-2 text-sm font-medium rounded-md transition-colors",
+                          "flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors",
                           isActive(item.href)
                             ? "bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400"
                             : "text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
@@ -438,6 +440,7 @@ export default function Header() {
                         whileTap={{ scale: 0.98 }}
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
+                        {item.icon && item.icon}
                         {item.label}
                       </motion.span>
                     </Link>
