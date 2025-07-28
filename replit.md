@@ -6,6 +6,31 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Financial Department 500 Error Resolution - Critical Database Query Fix (January 28, 2025)
+✅ **RESOLVED: Critical 500 Internal Server Error in financial department order details endpoint - COMPLETELY FIXED**
+- **User Issue**: "/api/admin/orders/:orderId/details endpoint returning 500 error preventing financial staff from viewing order details"
+- **Root Cause**: Drizzle ORM TypeError due to complex database joins with undefined table references in orderSelectedFields function
+- **Technical Fix**: Completely rewritten database queries using direct SQL instead of problematic Drizzle ORM joins:
+  - **Order Data**: Direct PostgreSQL query: `SELECT * FROM customer_orders WHERE id = $1`
+  - **Customer Info**: Separate query: `SELECT * FROM crm_customers WHERE id = $1` with proper field mapping
+  - **Order Items**: Direct SQL: `SELECT id, product_name, quantity, unit_price FROM order_items WHERE order_id = $1`
+  - **Payment Receipts**: Direct query: `SELECT * FROM payment_receipts WHERE customer_order_id = $1`
+- **Database Field Mapping**: Fixed snake_case to camelCase conversion for all database fields:
+  - `order.order_number` → `orderNumber`
+  - `order.total_amount` → `totalAmount`
+  - `customerData.first_name` → `firstName`
+  - `customerData.city_region` → `city` (with fallback support)
+- **Enhanced Error Handling**: Comprehensive try-catch blocks around each database query with proper fallbacks
+- **Test Results**: Successfully tested with order M2511249 returning complete data:
+  - Customer: ABAS ABASI with full contact information
+  - Items: NPK Fertilizer 20-20-20 with pricing details
+  - Documents: Payment receipt file properly loaded
+- **Business Impact**: Financial department can now view order details without 500 errors disrupting workflow
+- **Technical Achievement**: Eliminated complex Drizzle ORM joins with simpler, more reliable direct SQL queries
+- **Result**: Complete 500 error resolution operational - financial department order details viewing restored with proper error handling and complete data retrieval
+
+## Recent Changes
+
 ### COMPLETED: Authentication Guard Implementation - Enhanced User Experience for Automatic Logouts (January 28, 2025)
 ✅ **IMPLEMENTED: Comprehensive AuthGuard component for proper authentication handling when users are automatically logged out**
 - **User Request Fulfilled**: "وقتی اتوماتیک از سیستم خارج میشویم بجای نشان دادن بخشهایی از سایت به صورت ناقص از کاربر بخواهید دوباره وارد شود" - Enhanced logout experience with proper login prompts

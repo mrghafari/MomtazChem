@@ -7881,38 +7881,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`🔍 [ADMIN] Fetching order details for ID: ${orderId}`);
 
-      // Get order data with customer info in one query
-      const orderResult = await db
-        .select({
-          id: customerOrders.id,
-          orderNumber: customerOrders.orderNumber,
-          totalAmount: customerOrders.totalAmount,
-          shippingCost: customerOrders.shippingCost,
-          currency: customerOrders.currency,
-          paymentMethod: customerOrders.paymentMethod,
-          status: customerOrders.status,
-          createdAt: customerOrders.createdAt,
-          vatAmount: customerOrders.vatAmount,
-          surchargeAmount: customerOrders.surchargeAmount,
-          customerId: customerOrders.customerId,
-          receiptPath: customerOrders.receiptPath, // ADD RECEIPT PATH
-          // Customer info
-          firstName: crmCustomers.firstName,
-          lastName: crmCustomers.lastName,
-          email: crmCustomers.email,
-          phone: crmCustomers.phone,
-          address: crmCustomers.address,
-          country: crmCustomers.country,
-          province: crmCustomers.province,
-          city: crmCustomers.city,
-          postalCode: crmCustomers.postalCode
-        })
-        .from(customerOrders)
-        .leftJoin(crmCustomers, eq(customerOrders.customerId, crmCustomers.id))
-        .where(eq(customerOrders.id, orderId))
-        .limit(1);
+      // Get order data first using direct SQL query to avoid Drizzle schema issues
+      const { pool } = await import('./db');
+      const orderQuery = `
+        SELECT * FROM customer_orders 
+        WHERE id = $1 
+        LIMIT 1
+      `;
+      const orderResult = await pool.query(orderQuery, [orderId]);
 
-      if (!orderResult.length) {
+      if (!orderResult.rows.length) {
         console.log(`❌ [ADMIN] Order not found: ${orderId}`);
         return res.status(404).json({ 
           success: false, 
@@ -7920,64 +7898,117 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const order = orderResult[0];
+      const order = orderResult.rows[0];
       
-      // Extract customer info from the joined result
-      const customer = {
-        firstName: order.firstName,
-        lastName: order.lastName,
-        email: order.email,
-        phone: order.phone,
-        address: order.address,
-        country: order.country,
-        province: order.province,
-        city: order.city,
-        postalCode: order.postalCode
+      // Get customer info separately using direct SQL
+      let customer = {
+        firstName: 'نامشخص',
+        lastName: '',
+        email: 'نامشخص',
+        phone: 'نامشخص',
+        address: 'نامشخص',
+        country: 'عراق',
+        province: 'نامشخص',
+        city: 'نامشخص',
+        postalCode: ''
       };
 
-      // Get order items
-      const itemsResult = await db
-        .select({
-          id: orderItems.id,
-          productName: orderItems.productName,
-          quantity: orderItems.quantity,
-          unitPrice: orderItems.unitPrice,
-          totalPrice: sql<string>`${orderItems.quantity} * ${orderItems.unitPrice}`,
-        })
-        .from(orderItems)
-        .where(eq(orderItems.orderId, orderId));
+      if (order.customer_id) {
+        try {
+          const customerQuery = `
+            SELECT * FROM crm_customers 
+            WHERE id = $1 
+            LIMIT 1
+          `;
+          const customerResult = await pool.query(customerQuery, [order.customer_id]);
+          
+          if (customerResult.rows.length > 0) {
+            const customerData = customerResult.rows[0];
+            customer = {
+              firstName: customerData.first_name || 'نامشخص',
+              lastName: customerData.last_name || '',
+              email: customerData.email || 'نامشخص',
+              phone: customerData.phone || 'نامشخص',
+              address: customerData.address || 'نامشخص',
+              country: customerData.country || 'عراق',
+              province: customerData.province || 'نامشخص',
+              city: customerData.city || customerData.city_region || 'نامشخص',
+              postalCode: customerData.postal_code || ''
+            };
+          }
+        } catch (customerError) {
+          console.error("Error fetching customer data:", customerError);
+          // Continue with default customer data
+        }
+      }
+
+      // Get order items using direct SQL
+      let itemsResult = [];
+      try {
+        const itemsQuery = `
+          SELECT 
+            id, 
+            product_name, 
+            quantity, 
+            unit_price, 
+            (quantity * unit_price) as total_price
+          FROM order_items 
+          WHERE order_id = $1
+        `;
+        const itemsQueryResult = await pool.query(itemsQuery, [orderId]);
+        itemsResult = itemsQueryResult.rows.map(item => ({
+          id: item.id,
+          productName: item.product_name,
+          quantity: item.quantity,
+          unitPrice: item.unit_price,
+          totalPrice: item.total_price
+        }));
+      } catch (itemsError) {
+        console.error("Error fetching order items:", itemsError);
+        itemsResult = [];
+      }
 
       // Get customer documents and payment receipts - CHECK RECEIPT FROM customer_orders.receipt_path
       let documentsResult = [];
       
       // If order has receipt_path, create document entry for it
-      if (order.receiptPath) {
+      if (order.receipt_path) {
         documentsResult.push({
           id: `receipt_${orderId}`,
-          fileName: order.receiptPath.split('/').pop() || 'فیش بانکی',
-          receiptUrl: order.receiptPath,
+          fileName: order.receipt_path.split('/').pop() || 'فیش بانکی',
+          receiptUrl: order.receipt_path,
           mimeType: 'image/*',
-          uploadedAt: order.createdAt,
+          uploadedAt: order.created_at,
           type: 'payment_receipt',
           description: 'فیش بانکی پرداخت'
         });
       }
       
-      // Also check payment_receipts table for any additional documents
+      // Also check payment_receipts table for any additional documents using direct SQL
       let paymentReceiptsResult = [];
       try {
-        paymentReceiptsResult = await db
-          .select({
-            id: paymentReceipts.id,
-            fileName: paymentReceipts.originalFileName,
-            receiptUrl: paymentReceipts.receiptUrl,
-            mimeType: paymentReceipts.mimeType,
-            uploadedAt: paymentReceipts.uploadedAt,
-            type: sql<string>`'payment_receipt'`,
-            description: sql<string>`'فیش بانکی پرداخت'`
-          })
-          .from(paymentReceipts)
-          .where(eq(paymentReceipts.customerOrderId, orderId));
+        const paymentReceiptsQuery = `
+          SELECT 
+            id, 
+            original_file_name as file_name, 
+            receipt_url, 
+            mime_type, 
+            uploaded_at, 
+            'payment_receipt' as type, 
+            'فیش بانکی پرداخت' as description
+          FROM payment_receipts 
+          WHERE customer_order_id = $1
+        `;
+        const paymentReceiptsQueryResult = await pool.query(paymentReceiptsQuery, [orderId]);
+        paymentReceiptsResult = paymentReceiptsQueryResult.rows.map(receipt => ({
+          id: receipt.id,
+          fileName: receipt.file_name,
+          receiptUrl: receipt.receipt_url,
+          mimeType: receipt.mime_type,
+          uploadedAt: receipt.uploaded_at,
+          type: receipt.type,
+          description: receipt.description
+        }));
       } catch (paymentReceiptsError) {
         console.error("Error fetching payment receipts:", paymentReceiptsError);
         // Continue without payment receipts data if query fails
@@ -7987,23 +8018,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Combine both sources
       documentsResult = [...documentsResult, ...paymentReceiptsResult];
 
-      console.log(`✅ [ADMIN] Order details retrieved: ${order.orderNumber} with ${itemsResult.length} items and ${documentsResult.length} documents`);
+      console.log(`✅ [ADMIN] Order details retrieved: ${order.order_number} with ${itemsResult.length} items and ${documentsResult.length} documents`);
 
       res.json({ 
         success: true, 
         order: {
           id: order.id,
           customerOrderId: order.id, // USE SAME ID FOR COMPATIBILITY WITH FRONTEND
-          orderNumber: order.orderNumber,
-          totalAmount: order.totalAmount,
-          shippingCost: order.shippingCost,
+          orderNumber: order.order_number,
+          totalAmount: order.total_amount,
+          shippingCost: order.shipping_cost,
           currency: order.currency,
-          paymentMethod: order.paymentMethod,
+          paymentMethod: order.payment_method,
           status: order.status,
           currentStatus: order.status, // ADD CURRENT STATUS FOR MODAL
-          createdAt: order.createdAt,
-          vatAmount: order.vatAmount,
-          surchargeAmount: order.surchargeAmount,
+          createdAt: order.created_at,
+          vatAmount: order.vat_amount,
+          surchargeAmount: order.surcharge_amount,
           customer,
           items: itemsResult
         },
