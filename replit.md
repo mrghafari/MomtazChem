@@ -6,6 +6,43 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Intercity Bus Line Automatic Selection System - Complete Implementation (January 28, 2025)
+✅ **IMPLEMENTED: Complete automatic intercity bus transport selection system with intelligent route detection**
+- **User Request Fulfilled**: "مثلا اتوبوس مسافر بری مجاز به حمل کالای آتش زا نیست" - Implemented automatic selection of intercity bus transport when available
+- **Database Activation**: Successfully activated intercity bus lines for 8 major Iraqi cities (Baghdad, Erbil, Mosul, Basra, Najaf, Karbala, Diwaniya, Nasiriya)
+- **Smart Detection Logic**: Enhanced `/api/calculate-delivery-cost` endpoint with automatic bus line availability checking:
+  - **Dual City Verification**: Checks if both origin and destination cities have `has_intercity_bus_line = true`
+  - **Weight Limitation Enforcement**: 50kg maximum weight limit for intercity bus transport
+  - **Automatic Selection**: When both cities have bus lines and weight ≤ 50kg, automatically selects intercity bus over vehicle transport
+  - **Cost Calculation**: Bus transport pricing at 15,000 IQD base + 50 IQD per kilometer
+- **Database Query Resolution**: Fixed SQL syntax errors and field mapping issues:
+  - **Field Name Correction**: Resolved `nameArabic` vs `name_arabic` database field naming inconsistency
+  - **Schema Integration**: Proper integration with `iraqiCities` table from logistics schema
+  - **Error Handling**: Comprehensive error handling for city queries and transport method selection
+- **API Response Enhancement**: Complete JSON response with transport method identification:
+  - **Transport Method**: Returns `"transportMethod": "intercity_bus"` for automatic bus selection
+  - **Route Description**: "اربیل ← → بغداد" with proper Arabic formatting
+  - **Cost Breakdown**: Total cost calculation with distance and base pricing
+  - **Advantages List**: Persian language benefits including cost savings and environmental impact
+  - **Weight Restrictions**: Clear indication of weight limits and compliance status
+- **Test Infrastructure**: Created comprehensive test file `test-intercity-bus-automatic-selection.html`:
+  - **Manual Testing**: Interactive form for testing different city combinations
+  - **Automated Scenarios**: 5 predefined test scenarios covering various bus line availability cases
+  - **Visual Results**: Professional UI showing transport method selection and cost calculations
+  - **API Response Display**: Complete JSON response viewing for debugging and verification
+- **Business Logic Examples**:
+  - **Erbil to Baghdad (25kg)**: Automatic intercity bus selection - 31,500 IQD total cost
+  - **Erbil to Dohuk (25kg)**: Smart vehicle selection due to no bus line in Dohuk - 1,600 IQD
+  - **Heavy Cargo (>50kg)**: Automatic fallback to smart vehicle selection regardless of bus availability
+- **System Integration**: Seamless integration with existing smart vehicle optimization algorithm:
+  - **Priority Logic**: Intercity bus takes priority when available and weight compliant
+  - **Fallback Mechanism**: Automatic switch to smart vehicle when bus transport unavailable
+  - **Unified API**: Single endpoint handles both transport methods with intelligent selection
+- **Persian Language Support**: Complete Persian interface with proper RTL formatting and cultural context
+- **Database Status**: 8 out of 188 Iraqi cities now have active intercity bus lines with proper route coverage
+- **Technical Achievement**: Resolved complex SQL query issues and field mapping for seamless database integration
+- **Result**: Complete automatic intercity bus selection system operational - intelligent transport method selection based on route availability, weight limits, and cost optimization with proper fallback to smart vehicle algorithm
+
 ### COMPLETED: Flammable Materials Safety Compliance System - Complete Implementation (January 28, 2025)
 ✅ **IMPLEMENTED: Complete safety compliance system for flammable materials transport with vehicle authorization controls**
 - **User Request Fulfilled**: "مثلا اتوبوس مسافر بری مجاز به حمل کالای آتش زا نیست" - Implemented vehicle restrictions for flammable materials

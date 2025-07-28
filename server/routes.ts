@@ -21134,7 +21134,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     try {
       console.log('🚚 [DELIVERY COST] Request received:', req.body);
       
-      const { weight, destinationCity, destinationProvince, cart, useSecondaryAddress, secondaryAddress } = req.body;
+      const { weight, destinationCity, destinationProvince, cart, useSecondaryAddress, secondaryAddress, originCity = 'اربیل' } = req.body;
       
       if (!weight || !destinationCity) {
         return res.status(400).json({
@@ -21143,11 +21143,8 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         });
       }
 
-      // Get vehicle templates
-      const { db } = await import('./db');
-      const { eq } = await import('drizzle-orm');
-      const { vehicleTemplates: vehicleTemplatesTable } = await import('@shared/logistics-schema');
-      const { iraqiCities } = await import('@shared/logistics-schema');
+      // Get vehicle templates  
+      const { vehicleTemplates: vehicleTemplatesTable, iraqiCities } = await import('@shared/logistics-schema');
       
       const vehicleTemplates = await db.select().from(vehicleTemplatesTable).where(eq(vehicleTemplatesTable.isActive, true));
       
@@ -21158,21 +21155,106 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         });
       }
 
-      // Get destination city data for distance calculation
-      const destinationCityData = await db.select()
-        .from(iraqiCities)
-        .where(eq(iraqiCities.nameArabic, destinationCity))
-        .limit(1);
+      // Get origin and destination city data for distance calculation and bus line check
+      console.log('🔍 [DEBUG] Starting city queries for:', { originCity, destinationCity });
+      
+      let originCityData, destinationCityData;
+      try {
+        console.log('🔍 [DEBUG] Schema available:', { hasIraqiCities: !!iraqiCities, hasDb: !!db, hasEq: !!eq });
+        
+        originCityData = await db.select().from(iraqiCities).where(eq(iraqiCities.nameArabic, originCity)).limit(1);
+        destinationCityData = await db.select().from(iraqiCities).where(eq(iraqiCities.nameArabic, destinationCity)).limit(1);
+        
+        console.log('🔍 [QUERY DEBUG]', {
+          originQuery: originCity,
+          destinationQuery: destinationCity,
+          originResult: originCityData.length,
+          destinationResult: destinationCityData.length
+        });
+      } catch (error) {
+        console.error('❌ [CITY QUERY ERROR]', error);
+        return res.status(500).json({
+          success: false,
+          message: "خطا در دریافت اطلاعات شهرها"
+        });
+      }
 
-      if (!destinationCityData.length) {
+      if (!destinationCityData || destinationCityData.length === 0) {
         return res.status(400).json({
           success: false,
           message: "شهر مقصد در پایگاه داده یافت نشد"
         });
       }
 
-      const distance = parseFloat(destinationCityData[0].distanceFromErbilKm || '0');
+      if (!originCityData || originCityData.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: "شهر مبدا در پایگاه داده یافت نشد"
+        });
+      }
+
+      const originCity_data = originCityData[0];
+      const destinationCity_data = destinationCityData[0];
+      
+      const distance = parseFloat(destinationCity_data.distanceFromErbilKm || '0');
       const weightKg = parseFloat(weight);
+
+      // Check if both origin and destination cities have intercity bus lines
+      const hasIntercityBusOption = originCity_data.hasIntercityBusLine && destinationCity_data.hasIntercityBusLine;
+      
+      console.log('🚌 [BUS LINE CHECK]', {
+        origin: originCity,
+        destination: destinationCity,
+        originHasBusLine: originCity_data.hasIntercityBusLine,
+        destinationHasBusLine: destinationCity_data.hasIntercityBusLine,
+        hasIntercityBusOption: hasIntercityBusOption,
+        weight: weightKg
+      });
+
+      // If both cities have bus lines, automatically use intercity bus transport
+      if (hasIntercityBusOption) {
+        console.log('🚌 [INTERCITY BUS] Automatic selection for route:', originCity, '→', destinationCity);
+        
+        // Calculate bus transport cost (typically cheaper than vehicle transport)
+        const busCostPerKm = 50; // IQD per km for bus transport
+        const busBasePrice = 15000; // Base price for bus service in IQD
+        const busTotalCost = busBasePrice + (distance * busCostPerKm);
+        
+        return res.json({
+          success: true,
+          data: {
+            transportMethod: 'intercity_bus',
+            message: `🚌 انتخاب خودکار خط مسافربری بین شهری برای مسیر ${originCity} به ${destinationCity}`,
+            selectedOption: {
+              transportType: 'intercity_bus',
+              transportName: 'خط مسافربری بین شهری',
+              transportNameEn: 'Intercity Bus Line',
+              routeDescription: `${originCity} ← → ${destinationCity}`,
+              distance: distance,
+              totalCost: busTotalCost,
+              estimatedTime: Math.round(distance / 60 * 60), // Assuming 60 km/h average speed
+              advantages: [
+                'هزینه کمتر نسبت به حمل بار خصوصی',
+                'خدمات منظم و قابل اعتماد',
+                'مناسب برای محموله‌های سبک تا متوسط',
+                'کاهش ترافیک و آلودگی محیط زیست'
+              ],
+              restrictions: {
+                maxWeight: 50, // kg - typical bus cargo limit
+                weightExceeded: weightKg > 50,
+                message: weightKg > 50 ? `محموله شما ${weightKg} کیلوگرم است و از حد مجاز خط مسافربری (50 کیلوگرم) تجاوز می‌کند` : null
+              }
+            },
+            hasIntercityBusOption: true,
+            routeInfo: {
+              origin: originCity,
+              destination: destinationCity,
+              distance: distance,
+              estimatedDuration: `${Math.round(distance / 60)} ساعت`
+            }
+          }
+        });
+      }
 
       // Check if cart contains flammable products
       let containsFlammableProducts = false;
