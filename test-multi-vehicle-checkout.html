@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست سیستم چندخودرویی در چک‌اوت</title>
+    <style>
+        body {
+            font-family: Tahoma, Arial, sans-serif;
+            direction: rtl;
+            text-align: right;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .test-section {
+            background: white;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        .result {
+            background: #e8f5e8;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #4CAF50;
+        }
+        .loading {
+            text-align: center;
+            color: #666;
+        }
+        .spinner {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3498db;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-left: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .heavy-load {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .multi-vehicle {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 3px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .link-button {
+            background: #28a745;
+            text-decoration: none;
+            display: inline-block;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin: 10px 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚛 تست سیستم چندخودرویی در چک‌اوت</h1>
+        
+        <div class="test-section">
+            <h2>مراحل تست:</h2>
+            <ol>
+                <li>ورود به عنوان مشتری</li>
+                <li>اضافه کردن محصولات سنگین به سبد خرید</li>
+                <li>انتقال به صفحه چک‌اوت</li>
+                <li>انتخاب آدرس مقصد (مثلاً کربلا)</li>
+                <li>مشاهده نتیجه سیستم چندخودرویی</li>
+            </ol>
+        </div>
+
+        <div class="test-section">
+            <h3>ورود به سیستم:</h3>
+            <p><strong>ایمیل:</strong> oilstar@hotmail.com</p>
+            <p><strong>رمز عبور:</strong> user123</p>
+            <a href="/login" class="link-button">🔑 ورود به عنوان مشتری</a>
+        </div>
+
+        <div class="test-section">
+            <h3>محصولات پیشنهادی برای تست بار سنگین:</h3>
+            <div class="heavy-load">
+                <h4>🧪 محصولات شیمیایی سنگین:</h4>
+                <p>• <strong>Diesel Fuel Additive:</strong> 4699 عدد (حدود 23 تن)</p>
+                <p>• <strong>Premium Engine Oil:</strong> 98 عدد (حدود 4.9 تن)</p>
+                <p>• <strong>محصولات اضافی:</strong> برای رسیدن به بیش از 25 تن</p>
+            </div>
+            <a href="/shop" class="link-button">🛒 فروشگاه</a>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 تست مستقیم API سیستم چندخودرویی:</h3>
+            <button onclick="testMultiVehicleAPI()">تست API با بار 25 تن</button>
+            <button onclick="testHeavyLoadAPI()">تست API با بار 52 تن</button>
+            <div id="apiResults"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>نتایج مورد انتظار:</h3>
+            <div class="multi-vehicle">
+                <h4>✅ برای بار 25 تن:</h4>
+                <p>• راه‌حل: 2 × کامیون سنگین</p>
+                <p>• هزینه: حدود 1,522,000 IQD</p>
+                <p>• نمایش: "2 خودرو" در فرم</p>
+            </div>
+            <div class="multi-vehicle">
+                <h4>✅ برای بار 52 تن:</h4>
+                <p>• راه‌حل: 3 × کامیون سنگین</p>
+                <p>• هزینه: حدود 2,436,000 IQD</p>
+                <p>• نمایش: "3 خودرو" در فرم</p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>لینک‌های مفید:</h3>
+            <a href="/checkout" class="link-button">💳 چک‌اوت</a>
+            <a href="/admin/vehicle-optimization" class="link-button">🔧 بهینه‌سازی خودرو (ادمین)</a>
+            <a href="/admin/logistics-management" class="link-button">📋 مدیریت لجستیک (ادمین)</a>
+        </div>
+    </div>
+
+    <script>
+        async function testMultiVehicleAPI() {
+            const resultsDiv = document.getElementById('apiResults');
+            resultsDiv.innerHTML = '<div class="loading"><div class="spinner"></div>در حال تست بار 25 تن...</div>';
+            
+            try {
+                const response = await fetch('/api/calculate-delivery-cost', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        weight: 25000, // 25 تن
+                        destinationCity: 'کربلا',
+                        destinationProvince: 'کربلا',
+                        cart: { '475': 5000 } // محصول تستی
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    const { optimalVehicle, alternatives } = data.data;
+                    resultsDiv.innerHTML = `
+                        <div class="result">
+                            <h4>✅ نتیجه تست بار 25 تن:</h4>
+                            <p><strong>راه‌حل بهینه:</strong> ${optimalVehicle.vehicleName}</p>
+                            <p><strong>نوع:</strong> ${optimalVehicle.vehicleType}</p>
+                            <p><strong>هزینه کل:</strong> ${new Intl.NumberFormat('fa-IR').format(optimalVehicle.totalCost)} IQD</p>
+                            <p><strong>تعداد خودرو:</strong> ${optimalVehicle.totalVehicles || 1}</p>
+                            ${optimalVehicle.vehicles ? `
+                                <h5>جزئیات خودروها:</h5>
+                                ${optimalVehicle.vehicles.map((v, i) => `
+                                    <p>خودرو ${i+1}: ${v.vehicleName} - ${v.weight} کیلو</p>
+                                `).join('')}
+                            ` : ''}
+                        </div>
+                    `;
+                } else {
+                    resultsDiv.innerHTML = `<div class="result" style="background: #f8d7da; border-color: #dc3545;">❌ خطا: ${data.message}</div>`;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="result" style="background: #f8d7da; border-color: #dc3545;">❌ خطا در ارتباط: ${error.message}</div>`;
+            }
+        }
+
+        async function testHeavyLoadAPI() {
+            const resultsDiv = document.getElementById('apiResults');
+            resultsDiv.innerHTML = '<div class="loading"><div class="spinner"></div>در حال تست بار 52 تن...</div>';
+            
+            try {
+                const response = await fetch('/api/calculate-delivery-cost', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        weight: 52000, // 52 تن
+                        destinationCity: 'کربلا',
+                        destinationProvince: 'کربلا',
+                        cart: { '470': 4699, '473': 98, '475': 6 }
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    const { optimalVehicle, alternatives } = data.data;
+                    resultsDiv.innerHTML = `
+                        <div class="result">
+                            <h4>✅ نتیجه تست بار 52 تن:</h4>
+                            <p><strong>راه‌حل بهینه:</strong> ${optimalVehicle.vehicleName}</p>
+                            <p><strong>نوع:</strong> ${optimalVehicle.vehicleType}</p>
+                            <p><strong>هزینه کل:</strong> ${new Intl.NumberFormat('fa-IR').format(optimalVehicle.totalCost)} IQD</p>
+                            <p><strong>تعداد خودرو:</strong> ${optimalVehicle.totalVehicles || 1}</p>
+                            ${optimalVehicle.vehicles ? `
+                                <h5>جزئیات خودروها:</h5>
+                                ${optimalVehicle.vehicles.map((v, i) => `
+                                    <p>خودرو ${i+1}: ${v.vehicleName} - ${v.weight} کیلو</p>
+                                `).join('')}
+                            ` : ''}
+                            ${alternatives && alternatives.length > 0 ? `
+                                <h5>گزینه‌های جایگزین:</h5>
+                                ${alternatives.slice(0, 2).map(alt => `
+                                    <p>• ${alt.vehicleName} - ${new Intl.NumberFormat('fa-IR').format(alt.totalCost)} IQD</p>
+                                `).join('')}
+                            ` : ''}
+                        </div>
+                    `;
+                } else {
+                    resultsDiv.innerHTML = `<div class="result" style="background: #f8d7da; border-color: #dc3545;">❌ خطا: ${data.message}</div>`;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="result" style="background: #f8d7da; border-color: #dc3545;">❌ خطا در ارتباط: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>

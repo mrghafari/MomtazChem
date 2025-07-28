@@ -1239,7 +1239,11 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                                   <div className="text-right">
                                     {optimalVehicle ? (
                                       <div>
-                                        <div className="font-bold text-emerald-800">{optimalVehicle.vehicleName}</div>
+                                        <div className="font-bold text-emerald-800">
+                                          {optimalVehicle.vehicleType === 'multiple' 
+                                            ? `${optimalVehicle.totalVehicles} خودرو` 
+                                            : optimalVehicle.vehicleName}
+                                        </div>
                                         <div className="text-xs text-emerald-600">{formatCurrency(optimalVehicle.totalCost)}</div>
                                       </div>
                                     ) : smartDeliveryLoading ? (
@@ -1253,7 +1257,21 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                                   ✓ سیستم بهترین خودرو را بر اساس وزن، مقصد و کمترین هزینه انتخاب می‌کند
                                   {optimalVehicle && (
                                     <div className="mt-1 font-medium">
-                                      خودرو انتخابی: {optimalVehicle.vehicleName} - {optimalVehicle.vehicleType}
+                                      {optimalVehicle.vehicleType === 'multiple' ? (
+                                        <div>
+                                          راه‌حل انتخابی: {optimalVehicle.vehicleName}
+                                          <div className="text-xs mt-1 space-y-1">
+                                            {optimalVehicle.vehicles?.map((vehicle, index) => (
+                                              <div key={index} className="flex justify-between">
+                                                <span>خودرو {index + 1}: {vehicle.vehicleName}</span>
+                                                <span>{vehicle.weight} کیلو</span>
+                                              </div>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      ) : (
+                                        <span>خودرو انتخابی: {optimalVehicle.vehicleName} - {optimalVehicle.vehicleType}</span>
+                                      )}
                                     </div>
                                   )}
                                 </div>

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست سیستم چندخودرویی هوشمند</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .header {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 15px;
+        }
+        .test-form {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 2px solid #e9ecef;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #495057;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .result {
+            background: #e8f5e8;
+            border: 2px solid #28a745;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+        }
+        .error {
+            background: #ffe6e6;
+            border: 2px solid #dc3545;
+            color: #721c24;
+        }
+        .vehicle-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .vehicle-header {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        .vehicle-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .detail-item {
+            background: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 5px;
+            border-right: 4px solid #667eea;
+        }
+        .detail-label {
+            font-weight: bold;
+            color: #495057;
+            font-size: 12px;
+        }
+        .detail-value {
+            color: #2c3e50;
+            font-size: 14px;
+        }
+        .multi-vehicle-section {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .vehicle-list {
+            display: grid;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .vehicle-item {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .vehicle-number {
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚛 تست سیستم چندخودرویی هوشمند</h1>
+            <p>تست قابلیت انتخاب چندین خودرو برای بارهای سنگین</p>
+        </div>
+
+        <div class="test-form">
+            <h3>🎯 مشخصات محموله</h3>
+            <div class="form-group">
+                <label for="weight">وزن محموله (کیلوگرم):</label>
+                <input type="number" id="weight" value="15000" min="1" step="0.1">
+                <small style="color: #666;">وزن سنگین برای تست سیستم چندخودرویی</small>
+            </div>
+            <div class="form-group">
+                <label for="city">شهر مقصد:</label>
+                <select id="city">
+                    <option value="کربلا">کربلا</option>
+                    <option value="بصره">بصره</option>
+                    <option value="نجف">نجف</option>
+                    <option value="موصل">موصل</option>
+                    <option value="دهوک">دهوک</option>
+                    <option value="السلیمانیة">سلیمانیه</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="province">استان:</label>
+                <select id="province">
+                    <option value="کربلا">کربلا</option>
+                    <option value="البصرة">بصره</option>
+                    <option value="النجف">نجف</option>
+                    <option value="نینوا">نینوا</option>
+                    <option value="دهوک">دهوک</option>
+                    <option value="السلیمانیة">سلیمانیه</option>
+                </select>
+            </div>
+            
+            <button onclick="testHeavyLoad()">🚛 تست بار سنگین (15 تن)</button>
+            <button onclick="testUltraHeavyLoad()">🚚🚚 تست بار فوق سنگین (25 تن)</button>
+            <button onclick="testMediumLoad()">🚐 تست بار متوسط (5 تن)</button>
+            <button onclick="testLightLoad()">🛵 تست بار سبک (500 کیلو)</button>
+            <button onclick="testCustomLoad()">⚖️ تست بار سفارشی</button>
+        </div>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function calculateDeliveryCost(weight, city, province) {
+            try {
+                const response = await fetch('/api/calculate-delivery-cost', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        weight: weight,
+                        destinationCity: city,
+                        destinationProvince: province
+                    })
+                });
+
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('خطا در محاسبه:', error);
+                return { success: false, message: error.message };
+            }
+        }
+
+        function formatVehicleDetails(vehicle) {
+            if (vehicle.vehicleType === 'multiple') {
+                return `
+                    <div class="multi-vehicle-section">
+                        <div class="vehicle-header">
+                            🚛 ${vehicle.vehicleName}
+                        </div>
+                        <div class="vehicle-details">
+                            <div class="detail-item">
+                                <div class="detail-label">تعداد خودرو:</div>
+                                <div class="detail-value">${vehicle.totalVehicles} دستگاه</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">هزینه کل:</div>
+                                <div class="detail-value">${vehicle.totalCost.toLocaleString()} دینار</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">درصد استفاده ظرفیت:</div>
+                                <div class="detail-value">${vehicle.weightUtilization.toFixed(1)}%</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">زمان تحویل:</div>
+                                <div class="detail-value">${vehicle.estimatedTime} دقیقه</div>
+                            </div>
+                        </div>
+                        <div class="vehicle-list">
+                            ${vehicle.vehicles.map((v, index) => `
+                                <div class="vehicle-item">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <div class="vehicle-number">${index + 1}</div>
+                                        <div>
+                                            <strong>${v.vehicleName}</strong><br>
+                                            <small>وزن: ${v.weight} کیلو | ظرفیت: ${v.maxWeight} کیلو</small>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <strong>${v.totalCost.toLocaleString()} دینار</strong>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            } else {
+                return `
+                    <div class="vehicle-card">
+                        <div class="vehicle-header">
+                            🚚 ${vehicle.vehicleName}
+                        </div>
+                        <div class="vehicle-details">
+                            <div class="detail-item">
+                                <div class="detail-label">نوع خودرو:</div>
+                                <div class="detail-value">${vehicle.vehicleType}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">هزینه کل:</div>
+                                <div class="detail-value">${vehicle.totalCost.toLocaleString()} دینار</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">حداکثر وزن:</div>
+                                <div class="detail-value">${vehicle.maxWeight} کیلو</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">زمان تحویل:</div>
+                                <div class="detail-value">${vehicle.estimatedTime} دقیقه</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">درصد استفاده:</div>
+                                <div class="detail-value">${vehicle.weightUtilization ? vehicle.weightUtilization.toFixed(1) + '%' : 'محاسبه نشده'}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">امتیاز بهینه‌سازی:</div>
+                                <div class="detail-value">${vehicle.score ? vehicle.score.toFixed(2) : 'محاسبه نشده'}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function displayResult(data) {
+            const resultDiv = document.getElementById('result');
+            
+            if (data.success) {
+                const { optimalVehicle, alternatives, calculationDetails } = data.data;
+                
+                let resultHTML = `
+                    <div class="result">
+                        <h3>✅ نتیجه محاسبه هوشمند</h3>
+                        
+                        <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                            <h4>📊 جزئیات محاسبه:</h4>
+                            <p><strong>وزن:</strong> ${calculationDetails.weight} کیلوگرم</p>
+                            <p><strong>مقصد:</strong> ${calculationDetails.destination}</p>
+                            <p><strong>فاصله:</strong> ${calculationDetails.distance} کیلومتر</p>
+                            <p><strong>نوع مسیر:</strong> ${calculationDetails.routeType}</p>
+                        </div>
+
+                        <h4>🏆 بهترین گزینه:</h4>
+                        ${formatVehicleDetails(optimalVehicle)}
+                `;
+
+                if (alternatives && alternatives.length > 0) {
+                    resultHTML += `
+                        <h4>🔄 گزینه‌های جایگزین:</h4>
+                        ${alternatives.map(alt => formatVehicleDetails(alt)).join('')}
+                    `;
+                }
+
+                resultHTML += `</div>`;
+                resultDiv.innerHTML = resultHTML;
+            } else {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <h3>❌ خطا در محاسبه</h3>
+                        <p>${data.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function testHeavyLoad() {
+            document.getElementById('weight').value = 15000;
+            const weight = 15000;
+            const city = document.getElementById('city').value;
+            const province = document.getElementById('province').value;
+            
+            const result = await calculateDeliveryCost(weight, city, province);
+            displayResult(result);
+        }
+
+        async function testMediumLoad() {
+            document.getElementById('weight').value = 5000;
+            const weight = 5000;
+            const city = document.getElementById('city').value;
+            const province = document.getElementById('province').value;
+            
+            const result = await calculateDeliveryCost(weight, city, province);
+            displayResult(result);
+        }
+
+        async function testLightLoad() {
+            document.getElementById('weight').value = 500;
+            const weight = 500;
+            const city = document.getElementById('city').value;
+            const province = document.getElementById('province').value;
+            
+            const result = await calculateDeliveryCost(weight, city, province);
+            displayResult(result);
+        }
+
+        async function testUltraHeavyLoad() {
+            document.getElementById('weight').value = 25000;
+            const weight = 25000;
+            const city = document.getElementById('city').value;
+            const province = document.getElementById('province').value;
+            
+            const result = await calculateDeliveryCost(weight, city, province);
+            displayResult(result);
+        }
+
+        async function testCustomLoad() {
+            const weight = parseFloat(document.getElementById('weight').value);
+            const city = document.getElementById('city').value;
+            const province = document.getElementById('province').value;
+            
+            if (!weight || weight <= 0) {
+                alert('لطفاً وزن معتبری وارد کنید');
+                return;
+            }
+            
+            const result = await calculateDeliveryCost(weight, city, province);
+            displayResult(result);
+        }
+
+        // تست خودکار در ابتدا
+        window.onload = function() {
+            testHeavyLoad();
+        };
+    </script>
+</body>
+</html>

@@ -21179,32 +21179,27 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         vehicleTemplateCount: vehicleTemplates.length
       });
 
-      // Calculate costs for each vehicle template
-      const vehicleOptions = vehicleTemplates.map(template => {
+      // Calculate route type based on distance
+      let routeType = 'urban';
+      if (distance > 100) routeType = 'highway';
+      else if (distance > 30) routeType = 'interurban';
+
+      // Function to calculate single vehicle option
+      const calculateVehicleOption = (template: any, weight: number) => {
         const maxWeight = parseFloat(template.maxWeightKg);
         const basePrice = parseFloat(template.basePrice);
         const pricePerKm = parseFloat(template.pricePerKm);
         const pricePerKg = parseFloat(template.pricePerKg || '0');
 
-        // Check if vehicle can handle the weight
-        if (weightKg > maxWeight) {
-          return null; // Vehicle cannot handle this weight
-        }
-
-        // Calculate total cost
-        const distanceCost = distance * pricePerKm;
-        const weightCost = weightKg * pricePerKg;
-        const totalCost = basePrice + distanceCost + weightCost;
-
-        // Calculate route type based on distance
-        let routeType = 'urban';
-        if (distance > 100) routeType = 'highway';
-        else if (distance > 30) routeType = 'interurban';
-
         // Check if vehicle supports this route type
         if (!template.allowedRoutes.includes(routeType)) {
           return null; // Vehicle doesn't support this route type
         }
+
+        // Calculate total cost
+        const distanceCost = distance * pricePerKm;
+        const weightCost = weight * pricePerKg;
+        const totalCost = basePrice + distanceCost + weightCost;
 
         return {
           vehicleId: template.id,
@@ -21219,52 +21214,208 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           totalCost: totalCost,
           estimatedTime: Math.round(distance / parseFloat(template.averageSpeedKmh || '50') * 60), // minutes
           fuelConsumption: parseFloat(template.fuelConsumptionL100km || '0'),
-          priority: template.priority || 0
+          priority: template.priority || 0,
+          weight: weight
         };
-      }).filter(option => option !== null);
+      };
 
-      if (!vehicleOptions.length) {
+      // Multi-vehicle algorithm: Calculate best combination for heavy loads
+      const calculateMultiVehicleSolution = () => {
+        console.log('🚛 [MULTI-VEHICLE] Starting calculation for weight:', weightKg, 'kg');
+        const solutions = [];
+
+        // Try single vehicle solutions first
+        for (const template of vehicleTemplates) {
+          const maxWeight = parseFloat(template.maxWeightKg);
+          
+          // If single vehicle can handle the weight
+          if (weightKg <= maxWeight) {
+            const option = calculateVehicleOption(template, weightKg);
+            if (option) {
+              solutions.push({
+                vehicles: [option],
+                totalCost: option.totalCost,
+                totalVehicles: 1,
+                description: `${option.vehicleName} - یک خودرو`
+              });
+            }
+          }
+        }
+
+        // If no single vehicle can handle the weight, try multiple vehicles
+        if (solutions.length === 0 || weightKg > Math.max(...vehicleTemplates.map(t => parseFloat(t.maxWeightKg)))) {
+          console.log('🚛 [MULTI-VEHICLE] Heavy load detected, calculating multi-vehicle solutions');
+
+          // Sort templates by efficiency (cost per kg capacity)
+          const sortedTemplates = [...vehicleTemplates]
+            .filter(t => t.allowedRoutes.includes(routeType))
+            .sort((a, b) => {
+              const efficiencyA = parseFloat(a.basePrice) / parseFloat(a.maxWeightKg);
+              const efficiencyB = parseFloat(b.basePrice) / parseFloat(b.maxWeightKg);
+              return efficiencyA - efficiencyB;
+            });
+
+          // Try combinations of vehicles
+          for (let i = 0; i < sortedTemplates.length; i++) {
+            const template = sortedTemplates[i];
+            const maxWeight = parseFloat(template.maxWeightKg);
+            
+            // Calculate how many vehicles needed
+            const vehiclesNeeded = Math.ceil(weightKg / maxWeight);
+            if (vehiclesNeeded > 5) continue; // Limit to 5 vehicles max
+
+            const vehicles = [];
+            let remainingWeight = weightKg;
+            let totalCost = 0;
+
+            for (let j = 0; j < vehiclesNeeded; j++) {
+              const vehicleWeight = Math.min(remainingWeight, maxWeight);
+              const vehicleOption = calculateVehicleOption(template, vehicleWeight);
+              
+              if (vehicleOption) {
+                vehicles.push({
+                  ...vehicleOption,
+                  vehicleNumber: j + 1,
+                  weight: vehicleWeight
+                });
+                totalCost += vehicleOption.totalCost;
+                remainingWeight -= vehicleWeight;
+              }
+            }
+
+            if (remainingWeight <= 0) {
+              solutions.push({
+                vehicles: vehicles,
+                totalCost: totalCost,
+                totalVehicles: vehiclesNeeded,
+                description: `${vehiclesNeeded} × ${template.name} - چندین خودرو`
+              });
+            }
+          }
+
+          // Try mixed vehicle combinations (largest + smaller vehicles)
+          const largestTemplate = sortedTemplates[sortedTemplates.length - 1];
+          if (largestTemplate) {
+            const largestMaxWeight = parseFloat(largestTemplate.maxWeightKg);
+            let remainingWeight = weightKg;
+            const mixedVehicles = [];
+            let mixedTotalCost = 0;
+
+            // Use largest vehicle(s) first
+            while (remainingWeight > largestMaxWeight) {
+              const vehicleOption = calculateVehicleOption(largestTemplate, largestMaxWeight);
+              if (vehicleOption) {
+                mixedVehicles.push({
+                  ...vehicleOption,
+                  vehicleNumber: mixedVehicles.length + 1,
+                  weight: largestMaxWeight
+                });
+                mixedTotalCost += vehicleOption.totalCost;
+                remainingWeight -= largestMaxWeight;
+              } else {
+                break;
+              }
+            }
+
+            // Find best vehicle for remaining weight
+            if (remainingWeight > 0) {
+              for (const template of sortedTemplates) {
+                const maxWeight = parseFloat(template.maxWeightKg);
+                if (remainingWeight <= maxWeight) {
+                  const vehicleOption = calculateVehicleOption(template, remainingWeight);
+                  if (vehicleOption) {
+                    mixedVehicles.push({
+                      ...vehicleOption,
+                      vehicleNumber: mixedVehicles.length + 1,
+                      weight: remainingWeight
+                    });
+                    mixedTotalCost += vehicleOption.totalCost;
+                    remainingWeight = 0;
+                    break;
+                  }
+                }
+              }
+            }
+
+            if (remainingWeight <= 0 && mixedVehicles.length > 0) {
+              solutions.push({
+                vehicles: mixedVehicles,
+                totalCost: mixedTotalCost,
+                totalVehicles: mixedVehicles.length,
+                description: `راه‌حل ترکیبی - ${mixedVehicles.length} خودرو`
+              });
+            }
+          }
+        }
+
+        return solutions;
+      };
+
+      const allSolutions = calculateMultiVehicleSolution();
+
+      if (!allSolutions.length) {
         return res.status(400).json({
           success: false,
           message: "هیچ خودرویی برای این وزن و مقصد مناسب نیست"
         });
       }
 
-      // Optimized algorithm: Always prioritize cost efficiency with smart vehicle sizing
-      vehicleOptions.sort((a, b) => {
-        // Calculate weight utilization percentage
-        const utilizationA = (weightKg / a.maxWeight) * 100;
-        const utilizationB = (weightKg / b.maxWeight) * 100;
+      // Sort solutions by cost efficiency
+      allSolutions.sort((a, b) => {
+        // Prefer single vehicle solutions when possible
+        if (a.totalVehicles === 1 && b.totalVehicles > 1) return -1;
+        if (b.totalVehicles === 1 && a.totalVehicles > 1) return 1;
         
-        // Heavy penalty for oversized vehicles (utilization < 10%)
-        let adjustedCostA = a.totalCost;
-        let adjustedCostB = b.totalCost;
-        
-        if (utilizationA < 10) adjustedCostA *= 3; // 3x penalty for oversized vehicles
-        if (utilizationB < 10) adjustedCostB *= 3;
-        
-        // Additional penalty for extreme underutilization (< 2%)
-        if (utilizationA < 2) adjustedCostA *= 2; // 6x total penalty
-        if (utilizationB < 2) adjustedCostB *= 2;
-        
-        // Primary sort: adjusted cost (includes size penalties)
-        const costDiff = adjustedCostA - adjustedCostB;
-        if (Math.abs(costDiff) > 1000) { // Significant cost difference
-          return costDiff;
-        }
-        
-        // Secondary sort: prefer better utilization
-        const utilizationDiff = Math.abs(utilizationB - 30) - Math.abs(utilizationA - 30); // Target 30% utilization
-        if (Math.abs(utilizationDiff) > 5) {
-          return utilizationDiff;
-        }
-        
-        // Tertiary sort: original cost without penalties
+        // Then by total cost
         return a.totalCost - b.totalCost;
       });
 
-      const optimalVehicle = vehicleOptions[0];
-      const alternatives = vehicleOptions.slice(1, 3); // Top 2 alternatives
+      const optimalSolution = allSolutions[0];
+      
+      // Format response for single or multiple vehicles
+      let optimalVehicle;
+      if (optimalSolution.totalVehicles === 1) {
+        optimalVehicle = optimalSolution.vehicles[0];
+      } else {
+        // For multiple vehicles, create a summary
+        optimalVehicle = {
+          vehicleId: 'multi',
+          vehicleName: optimalSolution.description,
+          vehicleNameEn: `Multi-vehicle solution (${optimalSolution.totalVehicles} vehicles)`,
+          vehicleType: 'multiple',
+          totalCost: optimalSolution.totalCost,
+          totalVehicles: optimalSolution.totalVehicles,
+          vehicles: optimalSolution.vehicles,
+          routeType: routeType,
+          estimatedTime: Math.max(...optimalSolution.vehicles.map(v => v.estimatedTime)),
+          weightUtilization: (weightKg / optimalSolution.vehicles.reduce((sum, v) => sum + v.maxWeight, 0)) * 100,
+          score: optimalSolution.totalCost / weightKg // Cost per kg
+        };
+      }
+
+      const alternatives = allSolutions.slice(1, 4).map(solution => {
+        if (solution.totalVehicles === 1) {
+          return {
+            ...solution.vehicles[0],
+            weightUtilization: (weightKg / solution.vehicles[0].maxWeight) * 100,
+            score: solution.totalCost / weightKg
+          };
+        } else {
+          return {
+            vehicleId: 'multi',
+            vehicleName: solution.description,
+            vehicleNameEn: `Multi-vehicle solution (${solution.totalVehicles} vehicles)`,
+            vehicleType: 'multiple',
+            totalCost: solution.totalCost,
+            totalVehicles: solution.totalVehicles,
+            vehicles: solution.vehicles,
+            routeType: routeType,
+            estimatedTime: Math.max(...solution.vehicles.map(v => v.estimatedTime)),
+            weightUtilization: (weightKg / solution.vehicles.reduce((sum, v) => sum + v.maxWeight, 0)) * 100,
+            score: solution.totalCost / weightKg
+          };
+        }
+      });
 
       console.log('✅ [DELIVERY COST] Calculation completed:', {
         optimal: optimalVehicle.vehicleName,
