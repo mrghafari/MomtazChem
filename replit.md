@@ -6,6 +6,35 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Enhanced Vehicle Name Display in Smart Delivery System - User-Friendly Enhancement (January 28, 2025)
+✅ **IMPLEMENTED: Complete vehicle name display in purchase form showing which vehicle the intelligent system selected**
+- **User Request Fulfilled**: "در فرم خرید بگویید که سیستم هوشمند چه خودرویی را انتخاب کرده است" - Show in purchase form which vehicle the smart system selected
+- **Enhanced Purchase Form Display**: Added comprehensive vehicle name display throughout bilingual-purchase-form.tsx:
+  - **Header Section Enhancement**: Added "انتخاب شده: [نام خودرو]" display next to "محاسبه هوشمند" badge showing selected vehicle name
+  - **Delivery Method Details**: Enhanced smart vehicle section to show both vehicle name and cost with conditional loading states
+  - **Information Panel**: Added "خودرو انتخابی: [نام خودرو] - [نوع خودرو]" in explanation section for complete transparency
+- **Real-time Vehicle Information**: System now displays actual selected vehicle data from API:
+  - **Vehicle Name**: Shows Persian name (e.g., "کامیون سنگین" - Heavy Truck)
+  - **Cost Display**: Shows calculated delivery cost alongside vehicle name
+  - **Loading States**: Professional loading indicators during calculation phase
+- **API Integration**: Fully integrated with `/api/calculate-delivery-cost` endpoint:
+  - **Tested Successfully**: Endpoint returns proper vehicle selection data for destination کربلا
+  - **Response Data**: Returns "کامیون سنگین" with cost 3,712,200 IQD for 11kg shipment to Karbala
+  - **Complete Vehicle Info**: Includes vehicleName, vehicleType, totalCost, and all technical specifications
+- **User Experience Enhancement**:
+  - **Transparency**: Customers now see exactly which vehicle the intelligent system chose
+  - **Professional Display**: Clean integration with existing form design using emerald color theme
+  - **Loading Feedback**: Shows "در حال محاسبه..." during API calls for better UX
+  - **Complete Information**: Vehicle name appears in multiple locations for comprehensive visibility
+- **Technical Implementation**:
+  - Enhanced conditional rendering with `optimalVehicle && (...)` checks
+  - Added proper loading state handling with `smartDeliveryLoading` variable
+  - Integrated vehicle name display with existing cost calculation workflow
+  - Maintained backward compatibility with existing delivery method selection
+- **Test Infrastructure**: Created comprehensive test file `test-smart-vehicle-name-display.html` demonstrating complete functionality
+- **Business Impact**: Customers now have complete transparency about intelligent vehicle selection process, enhancing trust in the smart delivery system
+- **Result**: Complete vehicle name display operational - customers can see which vehicle (e.g., "کامیون سنگین") the intelligent system selected for their delivery with proper cost information and professional styling
+
 ### COMPLETED: Enhanced Vehicle Template Form with All Editable Numeric Fields - Complete Implementation (January 28, 2025)
 ✅ **IMPLEMENTED: Complete vehicle template editing form with all numeric fields editable and decimal-free display**
 - **User Request Fulfilled**: "تمام اعداد این فرم که جزئیات خودرو است باید قابل تغییر باشه" - Made all vehicle details form numbers editable

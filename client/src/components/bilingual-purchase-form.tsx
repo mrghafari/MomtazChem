@@ -1236,10 +1236,26 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                               <div className="space-y-2">
                                 <div className="flex justify-between items-center text-sm">
                                   <span className="text-emerald-700 font-medium">🚚 انتخاب هوشمند خودرو:</span>
-                                  <span className="font-bold text-emerald-800">محاسبه خودکار در مرحله بعد</span>
+                                  <div className="text-right">
+                                    {optimalVehicle ? (
+                                      <div>
+                                        <div className="font-bold text-emerald-800">{optimalVehicle.vehicleName}</div>
+                                        <div className="text-xs text-emerald-600">{formatCurrency(optimalVehicle.totalCost)}</div>
+                                      </div>
+                                    ) : smartDeliveryLoading ? (
+                                      <span className="font-bold text-emerald-800">در حال محاسبه...</span>
+                                    ) : (
+                                      <span className="font-bold text-emerald-800">محاسبه خودکار در مرحله بعد</span>
+                                    )}
+                                  </div>
                                 </div>
                                 <div className="text-xs text-emerald-600 bg-emerald-50 p-2 rounded border border-emerald-200">
                                   ✓ سیستم بهترین خودرو را بر اساس وزن، مقصد و کمترین هزینه انتخاب می‌کند
+                                  {optimalVehicle && (
+                                    <div className="mt-1 font-medium">
+                                      خودرو انتخابی: {optimalVehicle.vehicleName} - {optimalVehicle.vehicleType}
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                             );
@@ -1751,9 +1767,16 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                         🚚 وزن محموله: {totalWeight.toFixed(2)} کیلوگرم
                       </Label>
                     </div>
-                    <Badge variant="secondary" className="bg-emerald-100 text-emerald-800 border-emerald-300">
-                      محاسبه هوشمند
-                    </Badge>
+                    <div className="flex flex-col items-end gap-1">
+                      <Badge variant="secondary" className="bg-emerald-100 text-emerald-800 border-emerald-300">
+                        محاسبه هوشمند
+                      </Badge>
+                      {optimalVehicle && (
+                        <div className="text-xs text-emerald-700 font-medium">
+                          انتخاب شده: {optimalVehicle.vehicleName}
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {/* Smart Delivery Cost Display */}
