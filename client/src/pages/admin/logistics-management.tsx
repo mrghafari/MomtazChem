@@ -1974,49 +1974,49 @@ const LogisticsManagement = () => {
                   <Table>
                     <TableHeader className="sticky top-0 bg-white z-10">
                       <TableRow>
-                        <TableHead className="text-right">شناسه</TableHead>
-                        <TableHead className="text-right">
+                        <TableHead className="text-right w-20">شناسه</TableHead>
+                        <TableHead className="text-right w-48">
                           <Button 
                             variant="ghost" 
                             size="sm" 
                             onClick={() => handleCitySort('name')}
-                            className="flex items-center justify-end gap-1 p-0 h-auto font-medium text-right"
+                            className="flex items-center justify-end gap-1 p-0 h-auto font-medium text-right w-full"
                           >
                             نام شهر
                             <ArrowUpDown className="h-3 w-3" />
                           </Button>
                         </TableHead>
-                        <TableHead className="text-right">
+                        <TableHead className="text-right w-32">
                           <Button 
                             variant="ghost" 
                             size="sm" 
                             onClick={() => handleCitySort('province')}
-                            className="flex items-center justify-end gap-1 p-0 h-auto font-medium text-right"
+                            className="flex items-center justify-end gap-1 p-0 h-auto font-medium text-right w-full"
                           >
                             استان
                             <ArrowUpDown className="h-3 w-3" />
                           </Button>
                         </TableHead>
-                        <TableHead className="text-right">
+                        <TableHead className="text-right w-64">
                           <Button 
                             variant="ghost" 
                             size="sm" 
                             onClick={() => handleCitySort('distance')}
-                            className="flex items-center justify-end gap-1 p-0 h-auto font-medium text-right"
+                            className="flex items-center justify-end gap-1 p-0 h-auto font-medium text-right w-full"
                           >
                             فاصله از {selectedOriginCity ? (selectedOriginCity.name_arabic || selectedOriginCity.name) : 'اربیل'} (کیلومتر)
                             <ArrowUpDown className="h-3 w-3" />
                           </Button>
                         </TableHead>
-                        <TableHead className="text-right">وضعیت</TableHead>
-                        <TableHead className="text-right">عملیات</TableHead>
+                        <TableHead className="text-right w-24">وضعیت</TableHead>
+                        <TableHead className="text-right w-32">عملیات</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {sortedCities.map((city: any) => (
                       <TableRow key={city.id}>
-                        <TableCell className="font-medium text-right">{city.id}</TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="font-medium text-right w-20">{city.id}</TableCell>
+                        <TableCell className="text-right w-48">
                           <div className="flex flex-col text-right">
                             <span className="font-medium">{city.name_arabic || city.name}</span>
                             {city.name_english && city.name_english !== city.name_arabic && (
@@ -2024,8 +2024,8 @@ const LogisticsManagement = () => {
                             )}
                           </div>
                         </TableCell>
-                        <TableCell className="text-right">{city.province_name}</TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-right w-32">{city.province_name}</TableCell>
+                        <TableCell className="text-right w-64">
                           <div className="flex justify-end">
                             <Badge 
                               variant="outline" 
@@ -2046,14 +2046,14 @@ const LogisticsManagement = () => {
                             </div>
                           )}
                         </TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-right w-24">
                           <div className="flex justify-end">
                             <Badge variant={city.is_active ? "default" : "secondary"}>
                               {city.is_active ? "فعال" : "غیرفعال"}
                             </Badge>
                           </div>
                         </TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-right w-32">
                           <div className="flex justify-end">
                             <Button 
                               size="sm" 
