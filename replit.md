@@ -16,7 +16,7 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 - **Business Impact**: Improved user experience with focused city list display while maintaining full functionality
 - **Result**: Logistics management now shows only 8 cities in Geography tab for better interface organization
 - **Column Alignment Enhancement**: Added `text-right` class to all TableCell elements and wrapped Badge/Button components in `div className="flex justify-end"` for proper right-aligned table formatting
-- **Complete Table Structure**: Added provinces table with identical column alignment structure for consistent interface design
+- **Table Structure Focused**: Removed provinces table per user preference - only cities table displayed with streamlined interface
 - **UI Consistency**: Both provinces and cities tables now have proper RTL column alignment matching headers for professional appearance
 - **English Names Integration**: Added bilingual display for both cities and provinces - Arabic names shown prominently with English names as smaller gray text below when different
 - **Column Structure Optimization**: Merged Arabic/English name columns into single "نام شهر"/"نام استان" columns with dual-language display for cleaner table layout
