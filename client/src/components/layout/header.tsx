@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Menu, X, ChevronDown, Beaker, Droplet, Package, Wheat, Wallet, User, LogOut, ShoppingBag, Shield, BookOpen } from 'lucide-react';
+import { Menu, X, ChevronDown, Beaker, Droplet, Package, Wheat, Wallet, User, LogOut, ShoppingBag, Shield } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
@@ -89,7 +89,6 @@ export default function Header() {
     { href: '/about', label: t.about },
     { href: '/services', label: t.services },
     { href: '/contact', label: t.contact },
-    { href: '/user-guide', label: direction === 'rtl' ? 'راهنمای استفاده' : 'User Guide', icon: <BookOpen className="h-4 w-4" /> },
     { href: '/shop', label: t.shop.title },
   ];
 

@@ -6,6 +6,22 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: User Guide Tab Removal from Main Navigation - Site Management Integration (January 28, 2025)
+✅ **IMPLEMENTED: Complete removal of user-guide tab from main website navigation header**
+- **User Request Fulfilled**: "تب user-guide را از منوی بالای سایت اصلی حذف کن" - Removed user guide from main navigation
+- **Navigation Cleanup**: Updated navigation array in header.tsx removing user-guide entry with Persian/English labels
+- **Import Optimization**: Removed unused BookOpen icon import from lucide-react dependencies
+- **Streamlined Interface**: Main navigation now contains only essential public pages (Home, About, Services, Contact, Shop)
+- **Site Management Access**: User guide functionality remains accessible exclusively through Site Management interface
+- **Professional Design**: Cleaner navigation bar focusing on core business functions
+- **Technical Implementation**: 
+  - Removed navigation entry from header component navigation array
+  - Cleaned up unused icon imports
+  - Maintained all other header functionality and styling
+- **Business Impact**: Simplified public navigation while preserving administrative access through proper channels
+- **User Experience**: Cleaner main navigation focusing on customer-facing content
+- **Result**: Complete user guide removal from main navigation operational - functionality exclusively available through Site Management administrative interface
+
 ### COMPLETED: Vehicle Assignment Button Terminology Update - Professional Arabic Interface Enhancement (January 28, 2025)
 ✅ **IMPLEMENTED: Updated vehicle assignment button terminology throughout logistics management interface**
 - **User Request Fulfilled**: "به جای کلمه اختصاص خودرو از اختصاص وسیله ارسال محموله استفاده کن" - Changed all vehicle assignment terminology
