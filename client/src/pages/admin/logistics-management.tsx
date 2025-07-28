@@ -160,6 +160,12 @@ const LogisticsManagement = () => {
   // States for order details modal
   const [selectedOrder, setSelectedOrder] = useState<LogisticsOrder | null>(null);
   const [isOrderDetailsOpen, setIsOrderDetailsOpen] = useState(false);
+  
+  // States for vehicle assignment
+  const [isVehicleAssignmentOpen, setIsVehicleAssignmentOpen] = useState(false);
+  const [selectedOrderForVehicle, setSelectedOrderForVehicle] = useState<LogisticsOrder | null>(null);
+  const [selectedVehicleDetails, setSelectedVehicleDetails] = useState<any>(null);
+  const [availableFleetVehicles, setAvailableFleetVehicles] = useState<any[]>([]);
 
   // States for postal services
   const [isCreatePostalDialogOpen, setIsCreatePostalDialogOpen] = useState(false);
@@ -352,6 +358,82 @@ const LogisticsManagement = () => {
   const handleShowOrderDetails = (order: LogisticsOrder) => {
     setSelectedOrder(order);
     setIsOrderDetailsOpen(true);
+  };
+
+  // Handle vehicle assignment workflow
+  const handleVehicleAssignment = async (order: LogisticsOrder) => {
+    try {
+      // First, get customer's selected vehicle details from shopping cart
+      const vehicleDetailsResponse = await fetch(`/api/orders/${order.customerOrderId}/vehicle-details`, {
+        credentials: 'include'
+      });
+      
+      if (vehicleDetailsResponse.ok) {
+        const vehicleDetails = await vehicleDetailsResponse.json();
+        setSelectedVehicleDetails(vehicleDetails);
+        
+        // Then get available fleet vehicles of the same type
+        const fleetResponse = await fetch(`/api/logistics/available-vehicles?vehicleType=${vehicleDetails.vehicleType}&weight=${order.calculatedWeight || order.totalWeight}`, {
+          credentials: 'include'
+        });
+        
+        if (fleetResponse.ok) {
+          const fleetVehicles = await fleetResponse.json();
+          setAvailableFleetVehicles(fleetVehicles.vehicles || []);
+        }
+      }
+      
+      setSelectedOrderForVehicle(order);
+      setIsVehicleAssignmentOpen(true);
+    } catch (error) {
+      console.error('Error loading vehicle assignment data:', error);
+      toast({
+        title: "خطا",
+        description: "خطا در بارگذاری اطلاعات اختصاص خودرو",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Assign vehicle to order
+  const assignVehicleToOrder = async (vehicleId: number, truckNumber: string, driverName: string, driverPhone: string) => {
+    try {
+      const response = await fetch(`/api/logistics/assign-vehicle`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          orderId: selectedOrderForVehicle?.customerOrderId,
+          orderManagementId: selectedOrderForVehicle?.id,
+          vehicleId,
+          truckNumber,
+          driverName,
+          driverPhone
+        })
+      });
+
+      if (response.ok) {
+        toast({
+          title: "موفقیت",
+          description: "خودرو با موفقیت به سفارش اختصاص یافت"
+        });
+        
+        // Refresh the orders list
+        queryClient.invalidateQueries({ queryKey: ['/api/order-management/logistics'] });
+        setIsVehicleAssignmentOpen(false);
+      } else {
+        throw new Error('Assignment failed');
+      }
+    } catch (error) {
+      console.error('Error assigning vehicle:', error);
+      toast({
+        title: "خطا",
+        description: "خطا در اختصاص خودرو",
+        variant: "destructive"
+      });
+    }
   };
 
   const VEHICLE_TYPES = {
@@ -1244,6 +1326,15 @@ const LogisticsManagement = () => {
                             ارسال کد به مشتری
                           </>
                         )}
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="border-orange-500 text-orange-700 hover:bg-orange-100"
+                        onClick={() => handleVehicleAssignment(order)}
+                      >
+                        <Truck className="w-4 h-4 mr-2" />
+                        اختصاص خودرو
                       </Button>
                       <Button size="sm" variant="outline" className="border-green-500 text-green-700 hover:bg-green-100">
                         <Users className="w-4 h-4 mr-2" />
@@ -2434,6 +2525,141 @@ const LogisticsManagement = () => {
           <PostalServicesTab />
         </TabsContent>
       </Tabs>
+
+      {/* Vehicle Assignment Dialog */}
+      <Dialog open={isVehicleAssignmentOpen} onOpenChange={setIsVehicleAssignmentOpen}>
+        <DialogContent className="max-w-4xl" dir="rtl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Truck className="w-6 h-6 text-orange-600" />
+              اختصاص خودرو به سفارش {selectedOrderForVehicle?.orderNumber}
+            </DialogTitle>
+            <DialogDescription>
+              انتخاب خودروی مناسب از ناوگان شرکت بر اساس نوع خودروی انتخابی مشتری
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedOrderForVehicle && (
+            <div className="space-y-6">
+              {/* Order Summary */}
+              <div className="bg-blue-50 rounded-lg p-4">
+                <h3 className="text-lg font-semibold text-blue-800 mb-3 flex items-center">
+                  <Package className="w-5 h-5 mr-2" />
+                  اطلاعات سفارش
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label className="text-sm text-gray-600">مشتری</Label>
+                    <p className="font-medium">
+                      {selectedOrderForVehicle.customer?.firstName} {selectedOrderForVehicle.customer?.lastName}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-sm text-gray-600">وزن محموله</Label>
+                    <p className="font-medium">
+                      {selectedOrderForVehicle.calculatedWeight || selectedOrderForVehicle.totalWeight} کیلوگرم
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-sm text-gray-600">مقصد</Label>
+                    <p className="font-medium">
+                      {(selectedOrderForVehicle.shippingAddress as any)?.city || 'نامشخص'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Customer's Selected Vehicle Details */}
+              {selectedVehicleDetails && (
+                <div className="bg-green-50 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold text-green-800 mb-3 flex items-center">
+                    <CheckCircle className="w-5 h-5 mr-2" />
+                    خودروی انتخابی مشتری از سیستم هوشمند
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                      <Label className="text-sm text-gray-600">نوع خودرو</Label>
+                      <p className="font-medium">{selectedVehicleDetails.vehicleType}</p>
+                    </div>
+                    <div>
+                      <Label className="text-sm text-gray-600">نام خودرو</Label>
+                      <p className="font-medium">{selectedVehicleDetails.vehicleName}</p>
+                    </div>
+                    <div>
+                      <Label className="text-sm text-gray-600">هزینه محاسبه شده</Label>
+                      <p className="font-medium text-green-700">
+                        {parseInt(selectedVehicleDetails.totalCost || 0).toLocaleString()} دینار
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-sm text-gray-600">ظرفیت حمل</Label>
+                      <p className="font-medium">{selectedVehicleDetails.maxWeight} کیلوگرم</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Available Fleet Vehicles */}
+              <div className="bg-orange-50 rounded-lg p-4">
+                <h3 className="text-lg font-semibold text-orange-800 mb-3 flex items-center">
+                  <Truck className="w-5 h-5 mr-2" />
+                  خودروهای آماده از ناوگان شرکت
+                </h3>
+                
+                {availableFleetVehicles.length === 0 ? (
+                  <div className="text-center py-8">
+                    <AlertTriangle className="w-12 h-12 mx-auto mb-4 text-orange-400" />
+                    <p className="text-orange-600">هیچ خودروی مناسبی از این نوع در دسترس نیست</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {availableFleetVehicles.map((vehicle) => (
+                      <div key={vehicle.id} className="bg-white rounded-lg p-4 border border-orange-200">
+                        <div className="flex items-center justify-between mb-3">
+                          <h4 className="font-semibold text-gray-800">{vehicle.vehicleName}</h4>
+                          <Badge className="bg-green-500 text-white">آماده</Badge>
+                        </div>
+                        
+                        <div className="space-y-2 mb-4">
+                          <div className="flex justify-between">
+                            <span className="text-sm text-gray-600">شماره پلاک:</span>
+                            <span className="font-medium">{vehicle.plateNumber}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-sm text-gray-600">راننده:</span>
+                            <span className="font-medium">{vehicle.driverName}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-sm text-gray-600">تلفن راننده:</span>
+                            <span className="font-medium">{vehicle.driverPhone}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-sm text-gray-600">ظرفیت:</span>
+                            <span className="font-medium">{vehicle.maxWeight} کیلوگرم</span>
+                          </div>
+                        </div>
+                        
+                        <Button 
+                          className="w-full bg-orange-600 hover:bg-orange-700 text-white"
+                          onClick={() => assignVehicleToOrder(
+                            vehicle.id, 
+                            vehicle.plateNumber, 
+                            vehicle.driverName, 
+                            vehicle.driverPhone
+                          )}
+                        >
+                          <CheckCircle className="w-4 h-4 mr-2" />
+                          اختصاص این خودرو
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Order Details Modal */}
       <Dialog open={isOrderDetailsOpen} onOpenChange={setIsOrderDetailsOpen}>

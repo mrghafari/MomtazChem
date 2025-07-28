@@ -38479,6 +38479,183 @@ momtazchem.com
     }
   });
 
+  // Vehicle assignment API endpoints for logistics management
+  
+  // Get customer's selected vehicle details from their order
+  app.get("/api/orders/:orderId/vehicle-details", requireAuth, async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      if (isNaN(orderId)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid order ID" 
+        });
+      }
+
+      // First, get the vehicle selection history for this order
+      const selectionHistory = await db
+        .select()
+        .from(vehicleSelectionHistory)
+        .where(eq(vehicleSelectionHistory.customerOrderId, orderId))
+        .orderBy(desc(vehicleSelectionHistory.selectedAt))
+        .limit(1);
+
+      if (selectionHistory.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "No vehicle selection found for this order"
+        });
+      }
+
+      const vehicleSelection = selectionHistory[0];
+      
+      // Get the vehicle template details
+      const vehicleTemplate = await db
+        .select()
+        .from(vehicleTemplates)
+        .where(eq(vehicleTemplates.id, vehicleSelection.vehicleTemplateId))
+        .limit(1);
+
+      if (vehicleTemplate.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "Vehicle template not found"
+        });
+      }
+
+      const template = vehicleTemplate[0];
+
+      res.json({
+        success: true,
+        vehicleType: template.vehicleType,
+        vehicleName: template.name,
+        maxWeight: template.maxWeightKg,
+        totalCost: vehicleSelection.totalCost,
+        distanceKm: vehicleSelection.distanceKm,
+        selectedAt: vehicleSelection.selectedAt
+      });
+
+    } catch (error) {
+      console.error("Error fetching vehicle details:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  // Get available fleet vehicles of specific type
+  app.get("/api/logistics/available-vehicles", requireAuth, async (req, res) => {
+    try {
+      const { vehicleType, weight } = req.query;
+      
+      if (!vehicleType) {
+        return res.status(400).json({
+          success: false,
+          message: "Vehicle type is required"
+        });
+      }
+
+      // Mock fleet vehicles data for now - in real implementation this would come from fleet management database
+      const mockFleetVehicles = [
+        {
+          id: 1,
+          vehicleName: "کامیون سبک 1",
+          plateNumber: "۱۲۳ ع ۴۵",
+          driverName: "احمد محمدی",
+          driverPhone: "07501234567",
+          vehicleType: vehicleType,
+          maxWeight: 1000,
+          status: "available"
+        },
+        {
+          id: 2,
+          vehicleName: "کامیون سبک 2",
+          plateNumber: "۶۷۸ ب ۹۰",
+          driverName: "علی حسینی",
+          driverPhone: "07509876543",
+          vehicleType: vehicleType,
+          maxWeight: 1200,
+          status: "available"
+        },
+        {
+          id: 3,
+          vehicleName: "کامیون سنگین 1",
+          plateNumber: "۱۱۱ د ۲۲",
+          driverName: "حسن علوی",
+          driverPhone: "07501122334",
+          vehicleType: "heavy_truck",
+          maxWeight: 5000,
+          status: "available"
+        }
+      ];
+
+      // Filter vehicles by type and weight capacity
+      const weightNum = weight ? parseFloat(weight as string) : 0;
+      const availableVehicles = mockFleetVehicles.filter(vehicle => 
+        vehicle.vehicleType === vehicleType && 
+        vehicle.maxWeight >= weightNum &&
+        vehicle.status === "available"
+      );
+
+      res.json({
+        success: true,
+        vehicles: availableVehicles
+      });
+
+    } catch (error) {
+      console.error("Error fetching available vehicles:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
+  // Assign vehicle to order
+  app.post("/api/logistics/assign-vehicle", requireAuth, async (req, res) => {
+    try {
+      const { orderId, orderManagementId, vehicleId, truckNumber, driverName, driverPhone } = req.body;
+      
+      if (!orderId || !orderManagementId || !vehicleId || !truckNumber || !driverName || !driverPhone) {
+        return res.status(400).json({
+          success: false,
+          message: "Missing required fields"
+        });
+      }
+
+      // Update the order management record with vehicle assignment details
+      const updateResult = await db
+        .update(orderManagement)
+        .set({
+          vehiclePlate: truckNumber,
+          driverName: driverName,
+          driverPhone: driverPhone,
+          currentStatus: 'logistics_assigned',
+          updatedAt: new Date()
+        })
+        .where(eq(orderManagement.id, orderManagementId));
+
+      res.json({
+        success: true,
+        message: "Vehicle assigned successfully",
+        assignedVehicle: {
+          vehicleId,
+          truckNumber,
+          driverName,
+          driverPhone
+        }
+      });
+
+    } catch (error) {
+      console.error("Error assigning vehicle:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
   // Global error handler for all API routes
   app.use('/api/*', (err: any, req: Request, res: Response, next: NextFunction) => {
     console.error('API Error:', err);
