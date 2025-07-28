@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Shipment Weight Display - تست نمایش وزن محموله</title>
+    <style>
+        body {
+            font-family: Tahoma, Arial, sans-serif;
+            direction: rtl;
+            text-align: right;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .form-section {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            background: #fafafa;
+        }
+        .delivery-method-section {
+            border-top: 2px solid #ddd;
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+        .delivery-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .weight-display {
+            font-size: 14px;
+            color: #666;
+            background: #f0f0f0;
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+        }
+        .weight-display .weight-value {
+            font-weight: bold;
+            color: #333;
+        }
+        .cart-item {
+            border: 1px solid #eee;
+            border-radius: 6px;
+            padding: 10px;
+            margin: 8px 0;
+            background: white;
+        }
+        .cart-summary {
+            background: #f8f9ff;
+            border: 1px solid #d0d7ff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        .weight-calculation {
+            background: #e6f3ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 6px;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 12px;
+        }
+        select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            font-size: 14px;
+        }
+        .product-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .product-row:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 تست نمایش وزن محموله در کارت خرید</h1>
+        <p>این صفحه برای تست نمایش وزن محموله در کنار Delivery Method طراحی شده است.</p>
+        
+        <!-- Cart Items Simulation -->
+        <div class="form-section">
+            <h3>🛒 محصولات در سبد خرید</h3>
+            <div id="cart-items">
+                <!-- Cart items will be populated by JavaScript -->
+            </div>
+        </div>
+        
+        <!-- Weight Calculation Details -->
+        <div class="weight-calculation">
+            <h4>📊 جزئیات محاسبه وزن:</h4>
+            <div id="weight-breakdown">
+                <!-- Weight breakdown will be populated by JavaScript -->
+            </div>
+        </div>
+        
+        <!-- Cart Summary with Delivery Method -->
+        <div class="cart-summary">
+            <h3>💰 خلاصه سفارش</h3>
+            
+            <!-- Total without shipping -->
+            <div class="product-row" style="font-weight: bold; border-top: 2px solid #ccc; margin-top: 10px; padding-top: 10px;">
+                <span>مجموع (بدون هزینه حمل)</span>
+                <span id="subtotal">0 IQD</span>
+            </div>
+            
+            <!-- Delivery Method Selection with Weight Display -->
+            <div class="delivery-method-section">
+                <div class="delivery-header">
+                    <label style="font-weight: bold; font-size: 14px;">Delivery Method *</label>
+                    <div class="weight-display">
+                        ⚖️ وزن محموله: <span class="weight-value" id="total-weight">0.00 کیلوگرم</span>
+                    </div>
+                </div>
+                
+                <select id="delivery-method">
+                    <option value="">انتخاب روش ارسال</option>
+                    <option value="smart_vehicle" style="background-color: #d1fae5; color: #047857;">🚚 انتخاب هوشمند خودرو - محاسبه خودکار بهترین گزینه</option>
+                    <option value="self_pickup" style="background-color: #dbeafe; color: #1d4ed8;">🚶‍♂️ حمل توسط خودم - رایگان</option>
+                    <option value="standard">🚛 ارسال عادی - 5000 IQD</option>
+                </select>
+                
+                <!-- Delivery Method Information -->
+                <div id="delivery-info" style="margin-top: 10px; padding: 10px; background: #f0f8ff; border: 1px solid #b3d9ff; border-radius: 6px; display: none;">
+                    <!-- Delivery info will be populated by JavaScript -->
+                </div>
+            </div>
+            
+            <!-- Final Total -->
+            <div class="product-row" style="font-weight: bold; font-size: 16px; border-top: 2px solid #333; margin-top: 15px; padding-top: 10px;">
+                <span>مجموع نهایی</span>
+                <span id="final-total">0 IQD</span>
+            </div>
+        </div>
+        
+        <!-- Test Results -->
+        <div style="margin-top: 20px; padding: 15px; background: #e6f3ff; border-radius: 8px;">
+            <h4>📝 نتایج تست:</h4>
+            <p><strong>✅ وزن محموله:</strong> باید در کنار "Delivery Method *" نمایش داده شود</p>
+            <p><strong>✅ محاسبه دینامیک:</strong> وزن باید با تغییر محصولات به‌روزرسانی شود</p>
+            <p><strong>✅ طراحی بصری:</strong> وزن در یک badge خاکستری با متن bold نمایش یابد</p>
+            <p><strong>✅ واحد اندازه‌گیری:</strong> وزن به کیلوگرم نمایش داده شود</p>
+        </div>
+    </div>
+
+    <script>
+        // Sample cart data with weights
+        const cartItems = [
+            {
+                id: 470,
+                name: "Solvant 402",
+                nameAr: "حلال 402",
+                price: 25.50,
+                quantity: 2,
+                weight: 11.0 // kg
+            },
+            {
+                id: 471,
+                name: "Paint Thinner PT-300",
+                nameAr: "تینر رنگ PT-300",
+                price: 18.75,
+                quantity: 1,
+                weight: 11.01 // kg
+            },
+            {
+                id: 472,
+                name: "NPK Fertilizer Complex",
+                nameAr: "کود NPK مرکب",
+                price: 32.00,
+                quantity: 3,
+                weight: 11.0 // kg
+            }
+        ];
+
+        function calculateTotalWeight() {
+            return cartItems.reduce((total, item) => {
+                return total + (item.weight * item.quantity);
+            }, 0);
+        }
+
+        function calculateSubtotal() {
+            return cartItems.reduce((total, item) => {
+                return total + (item.price * item.quantity);
+            }, 0);
+        }
+
+        function renderCartItems() {
+            const container = document.getElementById('cart-items');
+            container.innerHTML = '';
+            
+            cartItems.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'cart-item';
+                itemDiv.innerHTML = `
+                    <div class="product-row">
+                        <div>
+                            <strong>${item.nameAr}</strong><br>
+                            <small>${item.name}</small>
+                        </div>
+                        <div style="text-align: left;">
+                            <div>تعداد: ${item.quantity}</div>
+                            <div>وزن هر واحد: ${item.weight} کیلوگرم</div>
+                            <div><strong>وزن کل: ${(item.weight * item.quantity).toFixed(2)} کیلوگرم</strong></div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(itemDiv);
+            });
+        }
+
+        function renderWeightBreakdown() {
+            const container = document.getElementById('weight-breakdown');
+            let breakdown = '';
+            let totalWeight = 0;
+            
+            cartItems.forEach(item => {
+                const itemWeight = item.weight * item.quantity;
+                totalWeight += itemWeight;
+                breakdown += `<div>${item.nameAr}: ${item.weight} کیلوگرم × ${item.quantity} = ${itemWeight.toFixed(2)} کیلوگرم</div>`;
+            });
+            
+            breakdown += `<div style="border-top: 1px solid #ccc; margin-top: 8px; padding-top: 8px; font-weight: bold;">مجموع وزن: ${totalWeight.toFixed(2)} کیلوگرم</div>`;
+            container.innerHTML = breakdown;
+        }
+
+        function updateTotalWeight() {
+            const totalWeight = calculateTotalWeight();
+            document.getElementById('total-weight').textContent = `${totalWeight.toFixed(2)} کیلوگرم`;
+        }
+
+        function updateSubtotal() {
+            const subtotal = calculateSubtotal();
+            document.getElementById('subtotal').textContent = `${subtotal.toFixed(2)} IQD`;
+            document.getElementById('final-total').textContent = `${subtotal.toFixed(2)} IQD`;
+        }
+
+        // Handle delivery method selection
+        document.getElementById('delivery-method').addEventListener('change', function() {
+            const deliveryInfo = document.getElementById('delivery-info');
+            const selectedValue = this.value;
+            
+            if (selectedValue === 'smart_vehicle') {
+                deliveryInfo.style.display = 'block';
+                deliveryInfo.style.backgroundColor = '#d1fae5';
+                deliveryInfo.style.borderColor = '#10b981';
+                deliveryInfo.innerHTML = `
+                    <div style="color: #047857; font-weight: bold;">🚚 انتخاب هوشمند خودرو: محاسبه خودکار در مرحله بعد</div>
+                    <div style="font-size: 12px; color: #065f46; margin-top: 5px;">
+                        ✓ سیستم بهترین خودرو را بر اساس وزن محموله (${calculateTotalWeight().toFixed(2)} کیلوگرم)، مقصد و کمترین هزینه انتخاب می‌کند
+                    </div>
+                `;
+            } else if (selectedValue === 'self_pickup') {
+                deliveryInfo.style.display = 'block';
+                deliveryInfo.style.backgroundColor = '#dbeafe';
+                deliveryInfo.style.borderColor = '#3b82f6';
+                deliveryInfo.innerHTML = `
+                    <div style="color: #1d4ed8; font-weight: bold;">🚶‍♂️ حمل توسط خودم - رایگان</div>
+                    <div style="font-size: 12px; color: #1e40af; margin-top: 5px;">
+                        ✓ شما خودتان کالا را از محل شرکت تحویل خواهید گرفت - بدون هزینه حمل
+                        <br>وزن محموله: ${calculateTotalWeight().toFixed(2)} کیلوگرم
+                    </div>
+                `;
+            } else if (selectedValue === 'standard') {
+                deliveryInfo.style.display = 'block';
+                deliveryInfo.style.backgroundColor = '#f0f8ff';
+                deliveryInfo.style.borderColor = '#b3d9ff';
+                deliveryInfo.innerHTML = `
+                    <div style="color: #1e40af; font-weight: bold;">🚛 ارسال عادی</div>
+                    <div style="font-size: 12px; color: #1e40af; margin-top: 5px;">
+                        هزینه ارسال: 5000 IQD | وزن محموله: ${calculateTotalWeight().toFixed(2)} کیلوگرم
+                    </div>
+                `;
+            } else {
+                deliveryInfo.style.display = 'none';
+            }
+        });
+
+        // Initialize the page
+        renderCartItems();
+        renderWeightBreakdown();
+        updateTotalWeight();
+        updateSubtotal();
+        
+        console.log('Test results:');
+        console.log('Total weight:', calculateTotalWeight().toFixed(2), 'kg');
+        console.log('Subtotal:', calculateSubtotal().toFixed(2), 'IQD');
+        console.log('Cart items:', cartItems);
+    </script>
+</body>
+</html>

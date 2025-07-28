@@ -6,6 +6,34 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Shipment Weight Display Added to Purchase Form - Enhanced User Experience (January 28, 2025)
+✅ **IMPLEMENTED: Total shipment weight display next to "Delivery Method *" in purchase cart**
+- **User Request**: "روبروی Delivery Method * در کارت خرید وزن محموله های خریداری شده را بگذار" - Add shipment weight display next to delivery method
+- **Weight Calculation Implementation**: Added comprehensive weight calculation system:
+  - Calculates total weight from all products in cart using `product.weight || product.weightKg || product.weight_kg` fallbacks
+  - Real-time weight updates when cart items change (quantity increase/decrease)
+  - Supports multiple weight field formats for product compatibility
+- **Enhanced UI Layout**: Redesigned delivery method section with weight badge:
+  - Flexbox layout with `justify-between` positioning Delivery Method label and weight display
+  - Professional gray badge with scale icon: "⚖️ وزن محموله: X.XX کیلوگرم"
+  - Dark mode support with `bg-gray-100 dark:bg-gray-800` styling
+  - Rounded corners and border for polished appearance
+- **Dynamic Weight Display**: 
+  - Shows exact weight with 2 decimal precision (`totalWeight.toFixed(2)`)
+  - Updates automatically when products added/removed from cart
+  - Integrates with existing cart management system
+- **Technical Implementation**:
+  - Added weight calculation before totalAmount calculation for proper rendering order
+  - Reduces cart entries to sum individual product weights multiplied by quantities
+  - Handles edge cases with fallback weight values (defaults to 0 if no weight found)
+- **User Experience Enhancement**:
+  - Customers can see exact shipment weight before selecting delivery method
+  - Helps with delivery method decision-making (especially for smart vehicle selection)
+  - Professional presentation matching overall purchase form design
+- **Business Impact**: Customers now have complete shipment information for informed delivery choices, supporting smart vehicle optimization
+- **Test Infrastructure**: Created comprehensive test file `test-shipment-weight.html` for weight calculation validation
+- **Result**: Complete shipment weight display operational - customers see total weight next to Delivery Method with professional styling and real-time updates
+
 ### COMPLETED: Column Header Update - "شناسه" Changed to "ردیف" with Sorting (January 28, 2025)
 ✅ **IMPLEMENTED: Column header text changed from "شناسه" (ID) to "ردیف" (Row) with sorting functionality**
 - **User Request**: "کنار نام شهر را از شناسه به ردیف عوض کن و سورتینگ بذار" - Change ID column to Row with sorting

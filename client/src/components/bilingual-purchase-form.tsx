@@ -631,6 +631,17 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     totalTaxAmount
   });
   
+  // Calculate total weight of all products in cart
+  const totalWeight = Object.entries(cart).reduce((sum, [productId, quantity]) => {
+    const product = products.find(p => p.id === parseInt(productId));
+    if (product) {
+      // Get weight from product data (use different weight fields as fallback)
+      const productWeight = parseFloat(product.weight || product.weightKg || product.weight_kg || '0');
+      return sum + (productWeight * quantity);
+    }
+    return sum;
+  }, 0);
+
   // Calculate total amount (subtotal + VAT + duties + shipping)
   const totalAmount = subtotalAmount + totalTaxAmount + shippingCost;
 
@@ -1053,7 +1064,12 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
               
               {/* Delivery Method Selection */}
               <div className="space-y-3 border-t pt-3">
-                <label className="text-sm font-medium">{t.deliveryMethod} *</label>
+                <div className="flex justify-between items-center">
+                  <label className="text-sm font-medium">{t.deliveryMethod} *</label>
+                  <div className="text-sm text-muted-foreground bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-md border">
+                    ⚖️ وزن محموله: <span className="font-semibold text-gray-700 dark:text-gray-300">{totalWeight.toFixed(2)} کیلوگرم</span>
+                  </div>
+                </div>
                 {isLoadingShippingRates ? (
                   <div className="text-sm text-muted-foreground flex items-center gap-2">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
