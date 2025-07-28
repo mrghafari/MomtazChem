@@ -188,34 +188,7 @@ export default function CustomerProfileEdit() {
     if (customer) {
       const customerData = customer.customer || customer; // CRITICAL FIX: Handle both nested and flat structure
       
-      // Debug: Log customer data to check CRM fields
-      console.log('🔍 [UI DEBUG] Customer data loaded');
-      console.log('🔍 [CRM DEBUG] CRM Fields from API:', {
-        annualRevenue: customerData.annualRevenue,
-        priceRange: customerData.priceRange,
-        orderFrequency: customerData.orderFrequency,
-        creditStatus: customerData.creditStatus,
-        smsEnabled: customerData.smsEnabled,
-        emailEnabled: customerData.emailEnabled
-      });
-      console.log('🔍 [VALUES] Actual CRM values:', 
-        'annualRevenue=' + customerData.annualRevenue,
-        'priceRange=' + customerData.priceRange,
-        'orderFrequency=' + customerData.orderFrequency,
-        'creditStatus=' + customerData.creditStatus,
-        'smsEnabled=' + customerData.smsEnabled,
-        'emailEnabled=' + customerData.emailEnabled
-      );
-      
-      // Debug: Tax ID and Registration Number specifically
-      console.log('🏢 [TAX DEBUG] Tax & Registration from API:', {
-        taxId: customerData.taxId,
-        registrationNumber: customerData.registrationNumber
-      });
-      console.log('🏢 [TAX VALUES] Actual values:', 
-        'taxId=' + customerData.taxId,
-        'registrationNumber=' + customerData.registrationNumber
-      );
+
       
       form.reset({
         firstName: customerData.firstName || "",
@@ -256,19 +229,7 @@ export default function CustomerProfileEdit() {
         emailEnabled: customerData.emailEnabled || false,
       });
       
-      console.log('✅ [UI DEBUG] Form reset completed with CRM values:', 
-        'annualRevenue=' + (customerData.annualRevenue || ""),
-        'priceRange=' + (customerData.priceRange || ""),
-        'orderFrequency=' + (customerData.orderFrequency || ""),
-        'creditStatus=' + (customerData.creditStatus || ""),
-        'smsEnabled=' + (customerData.smsEnabled || false),
-        'emailEnabled=' + (customerData.emailEnabled || false)
-      );
-      
-      console.log('✅ [TAX DEBUG] Form reset completed with Tax values:', 
-        'taxId=' + (customerData.taxId || ""),
-        'registrationNumber=' + (customerData.registrationNumber || "")
-      );
+
     }
   }, [customer, form]);
 
@@ -276,21 +237,12 @@ export default function CustomerProfileEdit() {
   useEffect(() => {
     const actualCustomer = customer?.customer || customer;
     
-    console.log('🏛️ [PROVINCE DEBUG] Province matching logic:', {
-      customerProvince: actualCustomer?.province,
-      provincesLength: provinces.length,
-      currentSelectedProvinceId: selectedProvinceId,
-      form_province_value: form.getValues('province')
-    });
-    
     if (actualCustomer?.province && provinces.length > 0) {
       const customerProvince = provinces.find((p: any) => 
         p.nameEnglish === actualCustomer.province || 
         p.name === actualCustomer.province ||
         p.nameArabic === actualCustomer.province
       );
-      
-      console.log('🔍 [PROVINCE MATCH] Found province:', customerProvince);
       
       if (customerProvince) {
         // Always set the province ID for city filtering
@@ -304,12 +256,6 @@ export default function CustomerProfileEdit() {
           form.setValue('province', targetProvinceValue, { 
             shouldValidate: true, 
             shouldDirty: true 
-          });
-          
-          console.log('✅ [PROVINCE SET] Province form value updated:', {
-            from: currentFormValue,
-            to: targetProvinceValue,
-            provinceId: customerProvince.id
           });
         }
       }
@@ -734,10 +680,7 @@ export default function CustomerProfileEdit() {
                       <FormItem>
                         <FormLabel>City / مدينة</FormLabel>
                         <Select 
-                          onValueChange={(value) => {
-                            console.log('🏙️ [FORM] City changing to:', value);
-                            field.onChange(value);
-                          }} 
+                          onValueChange={field.onChange} 
                           value={field.value}
                         >
                           <FormControl>
@@ -754,13 +697,6 @@ export default function CustomerProfileEdit() {
                           </SelectContent>
                         </Select>
                         <FormMessage />
-                        {/* Enhanced Debug display */}
-                        <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded mt-1">
-                          🔍 Debug: Current city value = "{field.value}"<br/>
-                          🌍 Selected Province ID = {selectedProvinceId}<br/>
-                          📊 Available cities count = {cities.length}<br/>
-                          💾 Backend cityRegion = "{(customer?.customer || customer)?.cityRegion}"
-                        </div>
                       </FormItem>
                     )}
                   />
