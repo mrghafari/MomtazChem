@@ -896,10 +896,6 @@ const LogisticsManagement = () => {
                 <span class="label">ایمیل:</span>
                 <span class="value">${selectedOrder.customer?.email || selectedOrder.customerEmail || 'ثبت نشده'}</span>
               </div>
-              <div class="info-item">
-                <span class="label">کد تحویل:</span>
-                <span class="value" style="font-size: 18px; font-weight: bold; color: #7c3aed;">${selectedOrder.deliveryCode || 'کد ندارد'}</span>
-              </div>
             </div>
           </div>
 

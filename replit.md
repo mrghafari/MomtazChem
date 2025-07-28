@@ -6,6 +6,21 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Delivery Code Removal from Print Output - Order Details Print Enhancement (January 28, 2025)
+✅ **IMPLEMENTED: Complete removal of delivery code (کد تحویل) from order details print functionality**
+- **User Request Fulfilled**: "کد تحویل نباید در جزئیات سفارش که برای پرینت آماده میکنیم دیده شود" - Removed delivery code from print output
+- **Print Functionality Enhanced**: Modified `handlePrintOrderDetails` function in logistics management to exclude delivery code from printed documents
+- **Interface Behavior**: Delivery code remains fully visible in regular order details interface for logistics staff reference
+- **Print Security**: Print output now shows only essential customer information (name, phone, email, address) without sensitive delivery codes
+- **Code Location**: Updated lines 899-902 in `client/src/pages/admin/logistics-management.tsx` removing delivery code section from print HTML content
+- **Professional Formatting**: Maintained clean print layout with customer information, shipping address, and order details
+- **Dual Functionality**: 
+  - **Regular View**: Shows delivery code for logistics operations and SMS sending
+  - **Print View**: Excludes delivery code for document security and customer privacy
+- **Business Impact**: Print documents are now suitable for customer distribution without exposing internal delivery verification codes
+- **Technical Implementation**: Clean removal from print content while preserving all other order information formatting
+- **Result**: Complete delivery code removal from print output operational - printed order details exclude کد تحویل while maintaining full functionality in digital interface
+
 ### COMPLETED: Content Management Toggle Button Enable/Disable Functionality Implementation - Complete & Operational (January 28, 2025)
 ✅ **IMPLEMENTED: Complete toggle button enable/disable functionality for Content Management settings control**
 - **User Request Fulfilled**: "امکان فعال و غیر فعال کردن دکمه ها الان نیست اون را عملیاتی کن" - Enabled complete toggle functionality for settings control
