@@ -5669,7 +5669,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       'logistics_management': 'مدیریت لجستیک',
       'ticketing_system': 'سیستم تیکتینگ',
       'remote_desktop': 'دسکتاپ ریموت',
-      'server_config': 'تنظیمات سرور'
+      'server_config': 'تنظیمات سرور',
+      'company_information': 'اطلاعات شرکت',
+      'user_guide': 'راهنمای سایت',
+      'site_management': 'مدیریت سایت'
     };
 
     return technicalToPersianMap[moduleId] || moduleId;
@@ -24227,7 +24230,8 @@ ${message ? `Additional Requirements:\n${message}` : ''}
             'دستیار SEO هوشمند': 'seo_management',
             'تنظیمات سرور': 'server_config',
             'اطلاعات شرکت': 'company_information',
-            'راهنمای سایت': 'user_guide'
+            'راهنمای سایت': 'user_guide',
+            'مدیریت سایت': 'site_management'
           };
 
           // Convert Persian names to technical IDs
@@ -24325,7 +24329,8 @@ ${message ? `Additional Requirements:\n${message}` : ''}
             'دستیار SEO هوشمند': 'seo_management',
             'تنظیمات سرور': 'server_config',
             'اطلاعات شرکت': 'company_information',
-            'راهنمای سایت': 'user_guide'
+            'راهنمای سایت': 'user_guide',
+            'مدیریت سایت': 'site_management'
           };
 
           // Convert Persian names to technical IDs
@@ -24369,7 +24374,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           "payment_management", "finance", "wallet_management", "geography_analytics", "ai_settings",
           "refresh_control", "content_management",
           "warehouse_management", "logistics_management", "ticketing_system", "remote_desktop",
-          "server_config"
+          "server_config", "company_information", "user_guide", "site_management"
         ];
         
         console.log('🔍 [DEBUG] allModules array contains:', allModules.length, 'modules');
