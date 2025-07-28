@@ -36107,6 +36107,123 @@ momtazchem.com
     }
   });
 
+  // Documentation download endpoints
+  app.get('/api/download/:filename', (req, res) => {
+    try {
+      const filename = req.params.filename;
+      const allowedFiles = [
+        'PROJECT_PROPOSAL_GUIDE',
+        'TECHNICAL_ARCHITECTURE_GUIDE', 
+        'BUSINESS_PROPOSAL_EXECUTIVE'
+      ];
+      
+      if (!allowedFiles.includes(filename)) {
+        return res.status(404).json({ success: false, message: 'File not found' });
+      }
+      
+      const filePath = path.join(process.cwd(), `${filename}.md`);
+      
+      // Check if file exists
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ success: false, message: 'File not found' });
+      }
+      
+      // Set headers for download
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}.md"`);
+      res.setHeader('Content-Type', 'text/markdown');
+      
+      // Send file
+      res.sendFile(filePath);
+      
+    } catch (error) {
+      console.error('Download error:', error);
+      res.status(500).json({ success: false, message: 'Server error' });
+    }
+  });
+
+  // Documentation view endpoints
+  app.get('/api/view/:filename', (req, res) => {
+    try {
+      const filename = req.params.filename;
+      const allowedFiles = [
+        'PROJECT_PROPOSAL_GUIDE',
+        'TECHNICAL_ARCHITECTURE_GUIDE', 
+        'BUSINESS_PROPOSAL_EXECUTIVE'
+      ];
+      
+      if (!allowedFiles.includes(filename)) {
+        return res.status(404).send('<h1>File not found</h1>');
+      }
+      
+      const filePath = path.join(process.cwd(), `${filename}.md`);
+      
+      // Check if file exists
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).send('<h1>File not found</h1>');
+      }
+      
+      // Read file content
+      const content = fs.readFileSync(filePath, 'utf8');
+      
+      // Convert markdown to HTML with proper Persian support
+      const html = `
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${filename}</title>
+    <style>
+        body {
+            font-family: 'Vazir', 'Tahoma', Arial, sans-serif;
+            line-height: 1.8;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f9f9f9;
+            color: #333;
+            direction: rtl;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #2563eb; border-bottom: 3px solid #2563eb; padding-bottom: 10px; }
+        h2 { color: #059669; border-bottom: 2px solid #059669; padding-bottom: 8px; }
+        h3 { color: #dc2626; }
+        h4 { color: #7c3aed; }
+        .persian { text-align: right; }
+        .english { text-align: left; direction: ltr; }
+        pre { background: #f3f4f6; padding: 15px; border-radius: 5px; overflow-x: auto; }
+        code { background: #e5e7eb; padding: 2px 5px; border-radius: 3px; }
+        blockquote { border-right: 4px solid #3b82f6; padding-right: 15px; margin: 20px 0; background: #eff6ff; }
+        ul, ol { padding-right: 20px; }
+        li { margin: 8px 0; }
+        .highlight { background: #fef3c7; padding: 15px; border-radius: 5px; border-right: 4px solid #f59e0b; }
+        @media print {
+            body { background: white; }
+            .container { box-shadow: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <pre>${content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
+    </div>
+</body>
+</html>`;
+      
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      res.send(html);
+      
+    } catch (error) {
+      console.error('View error:', error);
+      res.status(500).send('<h1>Server error</h1>');
+    }
+  });
+
   // Catch-all for unmatched API routes - return JSON 404
   app.all('/api/*', (req, res) => {
     console.log(`❌ 404 - Unmatched API route: ${req.method} ${req.originalUrl}`);

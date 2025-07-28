@@ -363,7 +363,7 @@ const UserGuide: React.FC = () => {
       {/* Navigation */}
       <div className="max-w-7xl mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="users" className="flex items-center gap-2">
               <User className="h-4 w-4" />
               کاربران عادی
@@ -375,6 +375,10 @@ const UserGuide: React.FC = () => {
             <TabsTrigger value="superadmin" className="flex items-center gap-2">
               <Settings className="h-4 w-4" />
               مدیران ارشد
+            </TabsTrigger>
+            <TabsTrigger value="downloads" className="flex items-center gap-2">
+              <Download className="h-4 w-4" />
+              دانلود مستندات
             </TabsTrigger>
           </TabsList>
 
@@ -451,6 +455,133 @@ const UserGuide: React.FC = () => {
               <ScrollArea className="h-[600px]">
                 {superAdminGuides.map(renderGuideSection)}
               </ScrollArea>
+            </div>
+          </TabsContent>
+
+          {/* Downloads Section */}
+          <TabsContent value="downloads">
+            <div className="space-y-4">
+              <Card className="bg-amber-50 border-amber-200">
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Download className="h-6 w-6 text-amber-600" />
+                    <h2 className="text-xl font-semibold">دانلود مستندات پروژه</h2>
+                  </div>
+                  <p className="text-gray-700">
+                    فایل‌های مستندات کامل پروژه شامل راهنماهای فنی، پروپوزال کسب‌وکار و اسناد معماری سیستم
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Word Documents */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="h-5 w-5 text-blue-600" />
+                    فایل‌های Word (.docx) - راهنمای جامع
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <Button 
+                      variant="outline" 
+                      className="h-auto p-4 flex flex-col items-start gap-2"
+                      onClick={() => window.open('/api/download/PROJECT_PROPOSAL_GUIDE', '_blank')}
+                    >
+                      <div className="flex items-center gap-2 w-full">
+                        <Download className="h-4 w-4" />
+                        <span className="font-medium">پروپوزال-اصلی</span>
+                      </div>
+                      <span className="text-sm text-gray-600 text-right">راهنمای جامع پروژه</span>
+                    </Button>
+
+                    <Button 
+                      variant="outline" 
+                      className="h-auto p-4 flex flex-col items-start gap-2"
+                      onClick={() => window.open('/api/download/TECHNICAL_ARCHITECTURE_GUIDE', '_blank')}
+                    >
+                      <div className="flex items-center gap-2 w-full">
+                        <Download className="h-4 w-4" />
+                        <span className="font-medium">پروپوزال-تکنیکال</span>
+                      </div>
+                      <span className="text-sm text-gray-600 text-right">کمپوتری ROI تخلیل</span>
+                    </Button>
+
+                    <Button 
+                      variant="outline" 
+                      className="h-auto p-4 flex flex-col items-start gap-2"
+                      onClick={() => window.open('/api/download/BUSINESS_PROPOSAL_EXECUTIVE', '_blank')}
+                    >
+                      <div className="flex items-center gap-2 w-full">
+                        <Download className="h-4 w-4" />
+                        <span className="font-medium">راهنمای-فنی</span>
+                      </div>
+                      <span className="text-sm text-gray-600 text-right">معرفی فنی</span>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* HTML Documents */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Eye className="h-5 w-5 text-green-600" />
+                    فایل‌های HTML (مشاهده آنلاین) - PDF تبدیلی
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <Button 
+                      variant="outline" 
+                      className="h-auto p-4 flex flex-col items-start gap-2"
+                      onClick={() => window.open('/api/view/PROJECT_PROPOSAL_GUIDE', '_blank')}
+                    >
+                      <div className="flex items-center gap-2 w-full">
+                        <Eye className="h-4 w-4" />
+                        <span className="font-medium">پروپوزال-اصلی</span>
+                      </div>
+                      <span className="text-sm text-gray-600 text-right">مشاهده آنلاین</span>
+                    </Button>
+
+                    <Button 
+                      variant="outline" 
+                      className="h-auto p-4 flex flex-col items-start gap-2"
+                      onClick={() => window.open('/api/view/TECHNICAL_ARCHITECTURE_GUIDE', '_blank')}
+                    >
+                      <div className="flex items-center gap-2 w-full">
+                        <Eye className="h-4 w-4" />
+                        <span className="font-medium">پروپوزال-تکنیکال</span>
+                      </div>
+                      <span className="text-sm text-gray-600 text-right">مشاهده آنلاین</span>
+                    </Button>
+
+                    <Button 
+                      variant="outline" 
+                      className="h-auto p-4 flex flex-col items-start gap-2"
+                      onClick={() => window.open('/api/view/BUSINESS_PROPOSAL_EXECUTIVE', '_blank')}
+                    >
+                      <div className="flex items-center gap-2 w-full">
+                        <Eye className="h-4 w-4" />
+                        <span className="font-medium">راهنمای-فنی</span>
+                      </div>
+                      <span className="text-sm text-gray-600 text-right">مشاهده آنلاین</span>
+                    </Button>
+                  </div>
+
+                  <div className="mt-4 p-4 bg-green-50 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <CheckCircle className="h-5 w-5 text-green-600" />
+                      <span className="font-medium text-green-800">نحوه استفاده:</span>
+                    </div>
+                    <ul className="text-sm text-green-700 space-y-1">
+                      <li>• دکمه‌های Download برای دانلود فایل‌های Word اصلی</li>
+                      <li>• دکمه‌های مشاهده برای باز کردن نسخه HTML در مرورگر</li>
+                      <li>• امکان تبدیل HTML به PDF از طریق گزینه Print مرورگر</li>
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
         </Tabs>
