@@ -257,6 +257,45 @@ export class DatabaseStorage implements IStorage {
       console.log(`🏷️ [DEBUG] Final tags value for database:`, updateData.tags);
     }
 
+    // Handle boolean fields explicitly
+    if (productUpdate.isFlammable !== undefined) {
+      console.log(`🔥 [DEBUG] Processing isFlammable update:`, {
+        originalValue: productUpdate.isFlammable,
+        type: typeof productUpdate.isFlammable
+      });
+      updateData.isFlammable = Boolean(productUpdate.isFlammable);
+      console.log(`🔥 [DEBUG] Final isFlammable value for database:`, updateData.isFlammable);
+    }
+
+    if (productUpdate.isNonChemical !== undefined) {
+      console.log(`⚗️ [DEBUG] Processing isNonChemical update:`, {
+        originalValue: productUpdate.isNonChemical,
+        type: typeof productUpdate.isNonChemical
+      });
+      updateData.isNonChemical = Boolean(productUpdate.isNonChemical);
+      console.log(`⚗️ [DEBUG] Final isNonChemical value for database:`, updateData.isNonChemical);
+    }
+
+    // Handle other boolean fields
+    if (productUpdate.isActive !== undefined) {
+      updateData.isActive = Boolean(productUpdate.isActive);
+    }
+    if (productUpdate.syncWithShop !== undefined) {
+      updateData.syncWithShop = Boolean(productUpdate.syncWithShop);
+    }
+    if (productUpdate.showWhenOutOfStock !== undefined) {
+      updateData.showWhenOutOfStock = Boolean(productUpdate.showWhenOutOfStock);
+    }
+    if (productUpdate.showMsdsToCustomers !== undefined) {
+      updateData.showMsdsToCustomers = Boolean(productUpdate.showMsdsToCustomers);
+    }
+    if (productUpdate.showCatalogToCustomers !== undefined) {
+      updateData.showCatalogToCustomers = Boolean(productUpdate.showCatalogToCustomers);
+    }
+    if (productUpdate.isVariant !== undefined) {
+      updateData.isVariant = Boolean(productUpdate.isVariant);
+    }
+
     const [product] = await showcaseDb
       .update(showcaseProducts)
       .set(updateData)
