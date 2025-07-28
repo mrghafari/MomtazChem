@@ -1976,12 +1976,12 @@ const LogisticsManagement = () => {
             ) : (
               <div className="overflow-x-auto">
                 <div className="max-h-96 overflow-y-auto border border-gray-200 rounded-lg">
-                  <Table>
-                    <TableHeader className="sticky top-0 bg-white z-10 shadow-sm border-b"
-                      style={{ position: 'sticky', top: 0, backgroundColor: 'white', zIndex: 10 }}>
-                      <TableRow className="bg-white">
-                        <TableHead className="text-right w-20 bg-white sticky top-0 z-10">شناسه</TableHead>
-                        <TableHead className="text-right w-48 bg-white sticky top-0 z-10">
+                  <Table className="relative">
+                    <TableHeader className="sticky top-0 bg-white z-20 shadow-sm border-b"
+                      style={{ position: 'sticky', top: 0, backgroundColor: 'white', zIndex: 20 }}>
+                      <TableRow className="bg-white" style={{ backgroundColor: 'white' }}>
+                        <TableHead className="text-right w-20 bg-white sticky top-0 z-20 border-b" style={{ position: 'sticky', top: 0, backgroundColor: 'white', zIndex: 20 }}>شناسه</TableHead>
+                        <TableHead className="text-right w-48 bg-white sticky top-0 z-20 border-b" style={{ position: 'sticky', top: 0, backgroundColor: 'white', zIndex: 20 }}>
                           <Button 
                             variant="ghost" 
                             size="sm" 
@@ -1992,7 +1992,7 @@ const LogisticsManagement = () => {
                             <ArrowUpDown className="h-3 w-3" />
                           </Button>
                         </TableHead>
-                        <TableHead className="text-right w-32 bg-white sticky top-0 z-10">
+                        <TableHead className="text-right w-32 bg-white sticky top-0 z-20 border-b" style={{ position: 'sticky', top: 0, backgroundColor: 'white', zIndex: 20 }}>
                           <Button 
                             variant="ghost" 
                             size="sm" 
@@ -2003,7 +2003,7 @@ const LogisticsManagement = () => {
                             <ArrowUpDown className="h-3 w-3" />
                           </Button>
                         </TableHead>
-                        <TableHead className="text-right w-64 bg-white sticky top-0 z-10">
+                        <TableHead className="text-right w-64 bg-white sticky top-0 z-20 border-b" style={{ position: 'sticky', top: 0, backgroundColor: 'white', zIndex: 20 }}>
                           <Button 
                             variant="ghost" 
                             size="sm" 
@@ -2014,7 +2014,7 @@ const LogisticsManagement = () => {
                             <ArrowUpDown className="h-3 w-3" />
                           </Button>
                         </TableHead>
-                        <TableHead className="text-right w-24 bg-white sticky top-0 z-10">
+                        <TableHead className="text-right w-24 bg-white sticky top-0 z-20 border-b" style={{ position: 'sticky', top: 0, backgroundColor: 'white', zIndex: 20 }}>
                           <Button 
                             variant="ghost" 
                             size="sm" 
@@ -2025,8 +2025,8 @@ const LogisticsManagement = () => {
                             <ArrowUpDown className="h-3 w-3" />
                           </Button>
                         </TableHead>
-                        <TableHead className="text-right w-24 bg-white sticky top-0 z-10">وضعیت</TableHead>
-                        <TableHead className="text-right w-32 bg-white sticky top-0 z-10">عملیات</TableHead>
+                        <TableHead className="text-right w-24 bg-white sticky top-0 z-20 border-b" style={{ position: 'sticky', top: 0, backgroundColor: 'white', zIndex: 20 }}>وضعیت</TableHead>
+                        <TableHead className="text-right w-32 bg-white sticky top-0 z-20 border-b" style={{ position: 'sticky', top: 0, backgroundColor: 'white', zIndex: 20 }}>عملیات</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
