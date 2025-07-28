@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>آزمایش سیستم خطوط مسافربری بین شهری</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            direction: rtl;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2d3748;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            background: #f8fafc;
+        }
+        .test-title {
+            font-weight: bold;
+            color: #2b6cb0;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+        .api-endpoint {
+            background: #1a365d;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            font-family: monospace;
+            margin: 10px 0;
+            direction: ltr;
+            text-align: left;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            background: #e6fffa;
+            border-left: 4px solid #38b2ac;
+        }
+        .success {
+            background: #f0fff4;
+            border-left-color: #48bb78;
+        }
+        .error {
+            background: #fed7d7;
+            border-left-color: #f56565;
+        }
+        .bus-icon {
+            color: #3182ce;
+            font-size: 1.2em;
+        }
+        .feature-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .feature-list li {
+            margin: 8px 0;
+            padding: 8px;
+            background: white;
+            border-radius: 6px;
+            border-right: 3px solid #4299e1;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        .has-bus {
+            background: #bee3f8;
+            color: #2c5282;
+        }
+        .no-bus {
+            background: #fed7d7;
+            color: #c53030;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚌 آزمایش سیستم خطوط مسافربری بین شهری</h1>
+        
+        <div class="test-section">
+            <div class="test-title">📋 ویژگی‌های پیاده‌سازی شده</div>
+            <ul class="feature-list">
+                <li>✅ اضافه شدن فیلد has_intercity_bus_line به جدول شهرها</li>
+                <li>✅ نمایش ستون خط مسافربری در جدول شهرها با آیکون اتوبوس</li>
+                <li>✅ چک‌باکس خط مسافربری در فرم ویرایش شهر</li>
+                <li>✅ به‌روزرسانی API endpoint برای پشتیبانی از فیلد جدید</li>
+                <li>✅ نمایش وضعیت با badge های رنگی (آبی برای دارد، خاکستری برای ندارد)</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">🔗 آزمایش API Endpoints</div>
+            
+            <h4>1. دریافت اطلاعات تفصیلی شهرها (شامل خط مسافربری)</h4>
+            <div class="api-endpoint">GET /api/logistics/cities-detailed</div>
+            <button onclick="testCitiesAPI()">آزمایش API</button>
+            <div id="cities-result" class="result" style="display: none;"></div>
+
+            <h4>2. به‌روزرسانی اطلاعات شهر (شامل خط مسافربری)</h4>
+            <div class="api-endpoint">PUT /api/logistics/cities/{id}</div>
+            <p>این endpoint برای ویرایش اطلاعات شهر استفاده می‌شود و شامل فیلد has_intercity_bus_line است.</p>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">🏛️ نمونه شهرهای دارای خط مسافربری</div>
+            <div id="bus-cities" class="result">
+                <p>در حال بارگذاری شهرهای دارای خط مسافربری...</p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">📊 آمار کلی خطوط مسافربری</div>
+            <div id="bus-stats" class="result">
+                <p>در حال محاسبه آمار...</p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">🎯 اهداف تجاری</div>
+            <ul class="feature-list">
+                <li>📍 شناسایی شهرهای دارای خدمات اتوبوس بین شهری</li>
+                <li>🚚 بهینه‌سازی برنامه‌ریزی لجستیک بر اساس وسایل حمل‌ونقل عمومی</li>
+                <li>💰 کاهش هزینه‌های حمل برای مشتریان در شهرهای دارای خط مسافربری</li>
+                <li>📈 بهبود تجربه کاربری با ارائه گزینه‌های حمل‌ونقل متنوع</li>
+                <li>🗺️ برنامه‌ریزی مسیرهای توزیع بر اساس دسترسی به حمل‌ونقل عمومی</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        async function testCitiesAPI() {
+            const resultDiv = document.getElementById('cities-result');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = 'در حال آزمایش API...';
+            
+            try {
+                const response = await fetch('/api/logistics/cities-detailed');
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.className = 'result success';
+                    
+                    // Filter cities that have intercity bus lines
+                    const busCities = data.data.filter(city => city.has_intercity_bus_line);
+                    const totalCities = data.data.length;
+                    
+                    resultDiv.innerHTML = `
+                        <h4>✅ API Response موفق</h4>
+                        <p><strong>تعداد کل شهرها:</strong> ${totalCities}</p>
+                        <p><strong>شهرهای دارای خط مسافربری:</strong> ${busCities.length}</p>
+                        <p><strong>درصد پوشش:</strong> ${((busCities.length / totalCities) * 100).toFixed(1)}%</p>
+                        
+                        <h5>نمونه شهرهای دارای خط مسافربری:</h5>
+                        <ul>
+                            ${busCities.slice(0, 5).map(city => `
+                                <li>
+                                    <span class="bus-icon">🚌</span>
+                                    <strong>${city.name_arabic || city.name}</strong>
+                                    ${city.name_english ? `(${city.name_english})` : ''}
+                                    - استان: ${city.province_name}
+                                    <span class="status-badge has-bus">دارای خط مسافربری</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                        
+                        ${busCities.length > 5 ? `<p>... و ${busCities.length - 5} شهر دیگر</p>` : ''}
+                    `;
+                    
+                    // Update other sections
+                    updateBusCitiesList(busCities);
+                    updateBusStats(totalCities, busCities.length);
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `❌ خطا در API: ${data.message}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ خطا در اتصال: ${error.message}`;
+            }
+        }
+        
+        function updateBusCitiesList(busCities) {
+            const busCitiesDiv = document.getElementById('bus-cities');
+            
+            if (busCities.length === 0) {
+                busCitiesDiv.innerHTML = `
+                    <p>هیچ شهری با خط مسافربری فعال پیدا نشد.</p>
+                    <p><em>برای آزمایش، می‌توانید از طریق پنل مدیریت لجستیک، خط مسافربری را برای چند شهر فعال کنید.</em></p>
+                `;
+                return;
+            }
+            
+            busCitiesDiv.innerHTML = `
+                <h4>🚌 شهرهای دارای خط مسافربری بین شهری</h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; margin-top: 15px;">
+                    ${busCities.map(city => `
+                        <div style="background: white; padding: 15px; border-radius: 8px; border-right: 4px solid #3182ce;">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                <span class="bus-icon">🚌</span>
+                                <strong style="color: #2d3748;">${city.name_arabic || city.name}</strong>
+                            </div>
+                            ${city.name_english ? `<p style="color: #718096; font-size: 0.9em;">انگلیسی: ${city.name_english}</p>` : ''}
+                            <p style="color: #4a5568; font-size: 0.9em;">استان: ${city.province_name}</p>
+                            <p style="color: #4a5568; font-size: 0.9em;">فاصله از اربیل: ${city.distance_from_erbil_km || 0} کیلومتر</p>
+                            <span class="status-badge has-bus">خط مسافربری فعال</span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+        
+        function updateBusStats(totalCities, buseCitiesCount) {
+            const statsDiv = document.getElementById('bus-stats');
+            const coveragePercentage = totalCities > 0 ? ((buseCitiesCount / totalCities) * 100).toFixed(1) : 0;
+            
+            statsDiv.innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                    <div style="text-align: center; background: white; padding: 20px; border-radius: 10px;">
+                        <div style="font-size: 2.5em; color: #3182ce; margin-bottom: 10px;">🏙️</div>
+                        <div style="font-size: 2em; font-weight: bold; color: #2d3748;">${totalCities}</div>
+                        <div style="color: #718096;">کل شهرها</div>
+                    </div>
+                    <div style="text-align: center; background: white; padding: 20px; border-radius: 10px;">
+                        <div style="font-size: 2.5em; color: #38a169; margin-bottom: 10px;">🚌</div>
+                        <div style="font-size: 2em; font-weight: bold; color: #2d3748;">${buseCitiesCount}</div>
+                        <div style="color: #718096;">دارای خط مسافربری</div>
+                    </div>
+                    <div style="text-align: center; background: white; padding: 20px; border-radius: 10px;">
+                        <div style="font-size: 2.5em; color: #805ad5; margin-bottom: 10px;">📊</div>
+                        <div style="font-size: 2em; font-weight: bold; color: #2d3748;">${coveragePercentage}%</div>
+                        <div style="color: #718096;">درصد پوشش</div>
+                    </div>
+                    <div style="text-align: center; background: white; padding: 20px; border-radius: 10px;">
+                        <div style="font-size: 2.5em; color: #e53e3e; margin-bottom: 10px;">🚫</div>
+                        <div style="font-size: 2em; font-weight: bold; color: #2d3748;">${totalCities - buseCitiesCount}</div>
+                        <div style="color: #718096;">بدون خط مسافربری</div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Auto-run test on page load
+        window.onload = function() {
+            testCitiesAPI();
+        };
+    </script>
+</body>
+</html>

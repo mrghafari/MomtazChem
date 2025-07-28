@@ -371,6 +371,7 @@ export const iraqiCities = pgTable("iraqi_cities", {
   distanceFromProvinceCapital: integer("distance_from_province_capital"), // Distance from province capital
   isProvinceCapital: boolean("is_province_capital").default(false), // Is it a province capital
   vehicleId: integer("vehicle_id").references(() => deliveryVehicles.id), // Assigned vehicle for this city
+  hasIntercityBusLine: boolean("has_intercity_bus_line").default(false), // خط مسافربری بین شهری موجود است
   isActive: boolean("is_active").default(true),
   population: integer("population"), // Population estimate
   coordinates: text("coordinates"), // GPS coordinates if available

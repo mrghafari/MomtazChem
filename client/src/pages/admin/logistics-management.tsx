@@ -32,7 +32,8 @@ import {
   Flame,
   Weight,
   Scale,
-  ArrowUpDown
+  ArrowUpDown,
+  Bus
 } from 'lucide-react';
 import { useOrderNotifications } from '@/hooks/useOrderNotifications';
 import PostalServicesTab from '@/components/PostalServicesTab';
@@ -1931,7 +1932,8 @@ const LogisticsManagement = () => {
         name_arabic: formData.get('name_arabic') as string,
         name_english: formData.get('name_english') as string,
         distance_from_erbil_km: parseInt(formData.get('distance_from_erbil_km') as string),
-        is_active: formData.get('is_active') === 'on'
+        is_active: formData.get('is_active') === 'on',
+        has_intercity_bus_line: formData.get('has_intercity_bus_line') === 'on'
       };
 
       updateCityMutation.mutate(data);
@@ -2089,6 +2091,12 @@ const LogisticsManagement = () => {
                           </Button>
                         </TableHead>
 
+                        <TableHead className="text-right w-32 bg-white sticky top-0 z-50 border-b" style={{ position: 'sticky', top: 0, backgroundColor: 'white', zIndex: 50 }}>
+                          <div className="flex items-center justify-end gap-1">
+                            <Bus className="h-4 w-4 text-blue-600" />
+                            <span>خط مسافربری</span>
+                          </div>
+                        </TableHead>
                         <TableHead className="text-right w-24 bg-white sticky top-0 z-50 border-b" style={{ position: 'sticky', top: 0, backgroundColor: 'white', zIndex: 50 }}>وضعیت</TableHead>
                         <TableHead className="text-right w-32 bg-white sticky top-0 z-50 border-b" style={{ position: 'sticky', top: 0, backgroundColor: 'white', zIndex: 50 }}>عملیات</TableHead>
                       </TableRow>
@@ -2143,6 +2151,20 @@ const LogisticsManagement = () => {
                           )}
                         </TableCell>
 
+                        <TableCell className="text-right w-32">
+                          <div className="flex justify-end">
+                            {city.has_intercity_bus_line ? (
+                              <Badge className="bg-blue-100 text-blue-800 border-blue-300">
+                                <Bus className="h-3 w-3 mr-1" />
+                                دارد
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="bg-gray-50 text-gray-600 border-gray-300">
+                                ندارد
+                              </Badge>
+                            )}
+                          </div>
+                        </TableCell>
                         <TableCell className="text-right w-24">
                           <div className="flex justify-end">
                             <Badge variant={city.is_active ? "default" : "secondary"}>
@@ -2317,7 +2339,7 @@ const LogisticsManagement = () => {
                       {editingCity.province_name}
                     </p>
                   </div>
-                  <div className="space-y-2 col-span-2">
+                  <div className="space-y-2">
                     <div className="flex items-center space-x-2">
                       <input 
                         type="checkbox" 
@@ -2327,6 +2349,24 @@ const LogisticsManagement = () => {
                       />
                       <Label htmlFor="city_is_active">فعال</Label>
                     </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2 bg-blue-50 p-3 rounded-lg border-2 border-blue-200">
+                      <input 
+                        type="checkbox" 
+                        id="city_has_intercity_bus_line" 
+                        name="has_intercity_bus_line" 
+                        defaultChecked={editingCity.has_intercity_bus_line}
+                        className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      />
+                      <Bus className="h-4 w-4 text-blue-600" />
+                      <Label htmlFor="city_has_intercity_bus_line" className="text-blue-800 font-medium">
+                        خط مسافربری بین شهری موجود است
+                      </Label>
+                    </div>
+                    <p className="text-xs text-blue-600 px-3">
+                      💡 این گزینه نشان می‌دهد که آیا در این شهر خدمات اتوبوس بین شهری ارائه می‌شود یا خیر
+                    </p>
                   </div>
                 </div>
                 <DialogFooter>

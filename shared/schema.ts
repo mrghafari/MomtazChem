@@ -1193,6 +1193,7 @@ export const iraqiCities = pgTable("iraqi_cities", {
   distanceFromBaghdad: integer("distance_from_baghdad"), // in kilometers
   distanceFromProvinceCapital: integer("distance_from_province_capital"),
   isProvinceCapital: boolean("is_province_capital").default(false),
+  hasIntercityBusLine: boolean("has_intercity_bus_line").default(false), // خط مسافربری بین شهری موجود است
   notes: text("notes"),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").notNull().defaultNow(),
