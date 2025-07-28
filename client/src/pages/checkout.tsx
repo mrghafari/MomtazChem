@@ -123,6 +123,10 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   // Determine if user is logged in first
   const isUserLoggedIn = (customerData?.success && customerData.customer) || isLoggedIn;
   
+  // Get selected delivery method details
+  const selectedMethodId = form.watch('shippingMethod');
+  const selectedMethod = deliveryMethods?.find((method: any) => method.id?.toString() === selectedMethodId);
+  
   const form = useForm<CheckoutFormData>({
     resolver: zodResolver(createCheckoutFormSchema(!!isUserLoggedIn)),
     defaultValues: {
@@ -281,9 +285,9 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   
   // Smart vehicle selection based on weight and destination
   const selectOptimalVehicle = useCallback((weight: number, destination: string) => {
-    if (!vehicleTemplates?.data || vehicleTemplates.data.length === 0) return null;
+    if (!vehicleTemplates || vehicleTemplates.length === 0) return null;
     
-    const vehicles = vehicleTemplates.data;
+    const vehicles = vehicleTemplates;
     
     // Filter vehicles that can handle the weight
     const suitableVehicles = vehicles.filter((vehicle: any) => 
@@ -365,7 +369,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
     console.log('🚚 [CHECKOUT] Using fallback calculation');
     
     // Find destination city in Iraqi cities
-    const destCity = iraqiCities?.data?.find((city: any) => 
+    const destCity = iraqiCities?.find((city: any) => 
       city.nameEnglish?.toLowerCase().includes(destination.toLowerCase()) ||
       city.nameArabic?.includes(destination) ||
       city.name?.toLowerCase().includes(destination.toLowerCase())
@@ -1355,7 +1359,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                               <div>📍 مقصد: {destinationCity} • وزن: {totalWeight.toFixed(1)} کگ</div>
                                               <div>
                                                 💰 پایه: {parseFloat(selectedVehicle.basePrice || '0').toLocaleString()} • 
-                                                فاصله: {(parseFloat(iraqiCities?.data?.find((city: any) => 
+                                                فاصله: {(parseFloat(iraqiCities?.find((city: any) => 
                                                   city.nameEnglish?.toLowerCase().includes(destinationCity.toLowerCase()) ||
                                                   city.nameArabic?.includes(destinationCity) ||
                                                   city.name?.toLowerCase().includes(destinationCity.toLowerCase())
@@ -1887,14 +1891,14 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                             <span>هزینه پایه:</span>
                             <span>{parseFloat(selectedVehicle.basePrice || '0').toLocaleString()} IQD</span>
                           </div>
-                          {iraqiCities?.data?.find((city: any) => 
+                          {iraqiCities?.find((city: any) => 
                             city.nameEnglish?.toLowerCase().includes(destinationCity.toLowerCase()) ||
                             city.nameArabic?.includes(destinationCity) ||
                             city.name?.toLowerCase().includes(destinationCity.toLowerCase())
                           ) && (
                             <div className="flex justify-between">
                               <span>فاصله از اربیل:</span>
-                              <span>{iraqiCities.data.find((city: any) => 
+                              <span>{iraqiCities.find((city: any) => 
                                 city.nameEnglish?.toLowerCase().includes(destinationCity.toLowerCase()) ||
                                 city.nameArabic?.includes(destinationCity) ||
                                 city.name?.toLowerCase().includes(destinationCity.toLowerCase())
@@ -1926,12 +1930,12 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                 <span>{parseFloat(selectedVehicle.basePrice || '0').toLocaleString()} IQD</span>
                               </div>
                               <div className="flex justify-between">
-                                <span>هزینه فاصله ({iraqiCities?.data?.find((city: any) => 
+                                <span>هزینه فاصله ({iraqiCities?.find((city: any) => 
                                   city.nameEnglish?.toLowerCase().includes(destinationCity.toLowerCase()) ||
                                   city.nameArabic?.includes(destinationCity) ||
                                   city.name?.toLowerCase().includes(destinationCity.toLowerCase())
                                 )?.distanceFromErbilKm || 0} کم):</span>
-                                <span>{(parseFloat(iraqiCities?.data?.find((city: any) => 
+                                <span>{(parseFloat(iraqiCities?.find((city: any) => 
                                   city.nameEnglish?.toLowerCase().includes(destinationCity.toLowerCase()) ||
                                   city.nameArabic?.includes(destinationCity) ||
                                   city.name?.toLowerCase().includes(destinationCity.toLowerCase())
