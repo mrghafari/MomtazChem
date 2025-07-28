@@ -2041,10 +2041,13 @@ const LogisticsManagement = () => {
                       <TableRow key={city.id}>
                         <TableCell className="font-medium text-right w-20">{city.id}</TableCell>
                         <TableCell className="text-right w-48">
-                          <div className="flex flex-col text-right">
-                            <span className="font-medium">{city.name_arabic || city.name}</span>
+                          <div className="flex flex-col text-right space-y-1">
+                            <span className="font-medium text-base">{city.name_arabic || city.name}</span>
                             {city.name_english && city.name_english !== city.name_arabic && (
-                              <span className="text-sm text-gray-500">{city.name_english}</span>
+                              <span className="text-sm text-gray-500 leading-tight">{city.name_english}</span>
+                            )}
+                            {city.name_kurdish && city.name_kurdish !== city.name_arabic && city.name_kurdish !== city.name_english && (
+                              <span className="text-xs text-gray-400 leading-tight">{city.name_kurdish}</span>
                             )}
                           </div>
                         </TableCell>
@@ -2239,10 +2242,10 @@ const LogisticsManagement = () => {
                         step="1"
                         defaultValue={editingCity.distance_from_erbil_km || 0}
                         required 
-                        className="pr-12 text-center font-medium text-lg"
+                        className="pl-20 text-center font-medium text-lg"
                         placeholder="0"
                       />
-                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">
+                      <span className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm pointer-events-none">
                         کیلومتر
                       </span>
                     </div>
