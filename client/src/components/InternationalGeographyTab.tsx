@@ -198,6 +198,223 @@ const InternationalGeographyTab: React.FC = () => {
   });
   const rates = (ratesResponse as any)?.data || [];
 
+  // Mutations
+  const createCountryMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await fetch('/api/logistics/international-countries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (!response.ok) throw new Error('Failed to create country');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/logistics/international-countries'] });
+      setIsAddCountryOpen(false);
+      toast({ title: "کشور با موفقیت اضافه شد", variant: "default" });
+      setCountryForm({
+        name: '',
+        nameEn: '',
+        nameLocal: '',
+        countryCode: '',
+        region: 'middle_east',
+        currency: 'USD',
+        isActive: true,
+        hasCustomsAgreement: false,
+        notes: ''
+      });
+    },
+    onError: (error) => {
+      toast({ title: "خطا در ایجاد کشور", description: error.message, variant: "destructive" });
+    }
+  });
+
+  const updateCountryMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: any }) => {
+      const response = await fetch(`/api/logistics/international-countries/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (!response.ok) throw new Error('Failed to update country');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/logistics/international-countries'] });
+      setIsEditCountryOpen(false);
+      toast({ title: "کشور با موفقیت به‌روزرسانی شد", variant: "default" });
+    },
+    onError: (error) => {
+      toast({ title: "خطا در به‌روزرسانی کشور", description: error.message, variant: "destructive" });
+    }
+  });
+
+  const deleteCountryMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await fetch(`/api/logistics/international-countries/${id}`, {
+        method: 'DELETE'
+      });
+      if (!response.ok) throw new Error('Failed to delete country');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/logistics/international-countries'] });
+      toast({ title: "کشور با موفقیت حذف شد", variant: "default" });
+    },
+    onError: (error) => {
+      toast({ title: "خطا در حذف کشور", description: error.message, variant: "destructive" });
+    }
+  });
+
+  const createCityMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await fetch('/api/logistics/international-cities', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (!response.ok) throw new Error('Failed to create city');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/logistics/international-cities'] });
+      setIsAddCityOpen(false);
+      toast({ title: "شهر با موفقیت اضافه شد", variant: "default" });
+      setCityForm({
+        name: '',
+        nameEn: '',
+        nameLocal: '',
+        countryId: 0,
+        provinceState: '',
+        cityType: 'major_city' as const,
+        distanceFromErbilKm: 0,
+        isActive: true,
+        hasShippingRoutes: false,
+        isPriorityDestination: false,
+        customsInformation: '',
+        notes: ''
+      });
+    },
+    onError: (error) => {
+      toast({ title: "خطا در ایجاد شهر", description: error.message, variant: "destructive" });
+    }
+  });
+
+  const updateCityMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: any }) => {
+      const response = await fetch(`/api/logistics/international-cities/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (!response.ok) throw new Error('Failed to update city');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/logistics/international-cities'] });
+      setIsEditCityOpen(false);
+      toast({ title: "شهر با موفقیت به‌روزرسانی شد", variant: "default" });
+    },
+    onError: (error) => {
+      toast({ title: "خطا در به‌روزرسانی شهر", description: error.message, variant: "destructive" });
+    }
+  });
+
+  const deleteCityMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await fetch(`/api/logistics/international-cities/${id}`, {
+        method: 'DELETE'
+      });
+      if (!response.ok) throw new Error('Failed to delete city');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/logistics/international-cities'] });
+      toast({ title: "شهر با موفقیت حذف شد", variant: "default" });
+    },
+    onError: (error) => {
+      toast({ title: "خطا در حذف شهر", description: error.message, variant: "destructive" });
+    }
+  });
+
+  const createRateMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await fetch('/api/logistics/international-shipping-rates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (!response.ok) throw new Error('Failed to create shipping rate');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/logistics/international-shipping-rates'] });
+      setIsAddRateOpen(false);
+      toast({ title: "نرخ حمل با موفقیت اضافه شد", variant: "default" });
+      setRateForm({
+        countryId: 0,
+        cityId: 0,
+        shippingMethod: 'air_freight' as const,
+        transportProvider: '',
+        basePrice: 0,
+        pricePerKg: 0,
+        pricePerKm: 0,
+        minimumCharge: 0,
+        maximumWeight: 1000,
+        estimatedDaysMin: 1,
+        estimatedDaysMax: 7,
+        currency: 'USD',
+        supportsHazardous: false,
+        supportsFlammable: false,
+        supportsRefrigerated: false,
+        requiresCustomsClearance: true,
+        isActive: true,
+        notes: ''
+      });
+    },
+    onError: (error) => {
+      toast({ title: "خطا در ایجاد نرخ حمل", description: error.message, variant: "destructive" });
+    }
+  });
+
+  const updateRateMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: any }) => {
+      const response = await fetch(`/api/logistics/international-shipping-rates/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (!response.ok) throw new Error('Failed to update shipping rate');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/logistics/international-shipping-rates'] });
+      setIsEditRateOpen(false);
+      toast({ title: "نرخ حمل با موفقیت به‌روزرسانی شد", variant: "default" });
+    },
+    onError: (error) => {
+      toast({ title: "خطا در به‌روزرسانی نرخ حمل", description: error.message, variant: "destructive" });
+    }
+  });
+
+  const deleteRateMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await fetch(`/api/logistics/international-shipping-rates/${id}`, {
+        method: 'DELETE'
+      });
+      if (!response.ok) throw new Error('Failed to delete shipping rate');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/logistics/international-shipping-rates'] });
+      toast({ title: "نرخ حمل با موفقیت حذف شد", variant: "default" });
+    },
+    onError: (error) => {
+      toast({ title: "خطا در حذف نرخ حمل", description: error.message, variant: "destructive" });
+    }
+  });
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -637,8 +854,11 @@ const InternationalGeographyTab: React.FC = () => {
             <Button variant="outline" onClick={() => setIsAddCountryOpen(false)}>
               انصراف
             </Button>
-            <Button>
-              ذخیره کشور
+            <Button 
+              onClick={() => createCountryMutation.mutate(countryForm)}
+              disabled={createCountryMutation.isPending}
+            >
+              {createCountryMutation.isPending ? 'در حال ذخیره...' : 'ذخیره کشور'}
             </Button>
           </DialogFooter>
         </DialogContent>

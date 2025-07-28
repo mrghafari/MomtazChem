@@ -1679,6 +1679,229 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // =============================================================================
+  // INTERNATIONAL GEOGRAPHY API
+  // =============================================================================
+  
+  // Get all international countries
+  app.get('/api/logistics/international-countries', requireAuth, async (req, res) => {
+    try {
+      const countries = await db.select().from(internationalCountries);
+      res.json({ success: true, data: countries });
+    } catch (error) {
+      console.error('Error fetching international countries:', error);
+      res.status(500).json({ success: false, message: "خطا در دریافت کشورها" });
+    }
+  });
+
+  // Create new international country
+  app.post('/api/logistics/international-countries', requireAuth, async (req, res) => {
+    try {
+      const validatedData = insertInternationalCountrySchema.parse(req.body);
+      const [newCountry] = await db
+        .insert(internationalCountries)
+        .values(validatedData)
+        .returning();
+      res.json({ success: true, data: newCountry });
+    } catch (error) {
+      console.error('Error creating international country:', error);
+      res.status(500).json({ success: false, message: "خطا در ایجاد کشور" });
+    }
+  });
+
+  // Update international country
+  app.put('/api/logistics/international-countries/:id', requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertInternationalCountrySchema.parse(req.body);
+      const [updatedCountry] = await db
+        .update(internationalCountries)
+        .set(validatedData)
+        .where(eq(internationalCountries.id, id))
+        .returning();
+      res.json({ success: true, data: updatedCountry });
+    } catch (error) {
+      console.error('Error updating international country:', error);
+      res.status(500).json({ success: false, message: "خطا در به‌روزرسانی کشور" });
+    }
+  });
+
+  // Delete international country
+  app.delete('/api/logistics/international-countries/:id', requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await db
+        .delete(internationalCountries)
+        .where(eq(internationalCountries.id, id));
+      res.json({ success: true, message: "کشور با موفقیت حذف شد" });
+    } catch (error) {
+      console.error('Error deleting international country:', error);
+      res.status(500).json({ success: false, message: "خطا در حذف کشور" });
+    }
+  });
+
+  // Get all international cities with country names
+  app.get('/api/logistics/international-cities', requireAuth, async (req, res) => {
+    try {
+      const cities = await db
+        .select({
+          id: internationalCities.id,
+          name: internationalCities.name,
+          nameEn: internationalCities.nameEn,
+          nameLocal: internationalCities.nameLocal,
+          countryId: internationalCities.countryId,
+          countryName: internationalCountries.name,
+          provinceState: internationalCities.provinceState,
+          cityType: internationalCities.cityType,
+          distanceFromErbilKm: internationalCities.distanceFromErbilKm,
+          isActive: internationalCities.isActive,
+          hasShippingRoutes: internationalCities.hasShippingRoutes,
+          isPriorityDestination: internationalCities.isPriorityDestination,
+          customsInformation: internationalCities.customsInformation,
+          notes: internationalCities.notes,
+          createdAt: internationalCities.createdAt,
+          updatedAt: internationalCities.updatedAt
+        })
+        .from(internationalCities)
+        .leftJoin(internationalCountries, eq(internationalCities.countryId, internationalCountries.id));
+      res.json({ success: true, data: cities });
+    } catch (error) {
+      console.error('Error fetching international cities:', error);
+      res.status(500).json({ success: false, message: "خطا در دریافت شهرها" });
+    }
+  });
+
+  // Create new international city
+  app.post('/api/logistics/international-cities', requireAuth, async (req, res) => {
+    try {
+      const validatedData = insertInternationalCitySchema.parse(req.body);
+      const [newCity] = await db
+        .insert(internationalCities)
+        .values(validatedData)
+        .returning();
+      res.json({ success: true, data: newCity });
+    } catch (error) {
+      console.error('Error creating international city:', error);
+      res.status(500).json({ success: false, message: "خطا در ایجاد شهر" });
+    }
+  });
+
+  // Update international city
+  app.put('/api/logistics/international-cities/:id', requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertInternationalCitySchema.parse(req.body);
+      const [updatedCity] = await db
+        .update(internationalCities)
+        .set(validatedData)
+        .where(eq(internationalCities.id, id))
+        .returning();
+      res.json({ success: true, data: updatedCity });
+    } catch (error) {
+      console.error('Error updating international city:', error);
+      res.status(500).json({ success: false, message: "خطا در به‌روزرسانی شهر" });
+    }
+  });
+
+  // Delete international city
+  app.delete('/api/logistics/international-cities/:id', requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await db
+        .delete(internationalCities)
+        .where(eq(internationalCities.id, id));
+      res.json({ success: true, message: "شهر با موفقیت حذف شد" });
+    } catch (error) {
+      console.error('Error deleting international city:', error);
+      res.status(500).json({ success: false, message: "خطا در حذف شهر" });
+    }
+  });
+
+  // Get all international shipping rates with country and city names
+  app.get('/api/logistics/international-shipping-rates', requireAuth, async (req, res) => {
+    try {
+      const rates = await db
+        .select({
+          id: internationalShippingRates.id,
+          countryId: internationalShippingRates.countryId,
+          cityId: internationalShippingRates.cityId,
+          countryName: internationalCountries.name,
+          cityName: internationalCities.name,
+          shippingMethod: internationalShippingRates.shippingMethod,
+          transportProvider: internationalShippingRates.transportProvider,
+          basePrice: internationalShippingRates.basePrice,
+          pricePerKg: internationalShippingRates.pricePerKg,
+          pricePerKm: internationalShippingRates.pricePerKm,
+          minimumCharge: internationalShippingRates.minimumCharge,
+          maximumWeight: internationalShippingRates.maximumWeight,
+          estimatedDaysMin: internationalShippingRates.estimatedDaysMin,
+          estimatedDaysMax: internationalShippingRates.estimatedDaysMax,
+          currency: internationalShippingRates.currency,
+          supportsHazardous: internationalShippingRates.supportsHazardous,
+          supportsFlammable: internationalShippingRates.supportsFlammable,
+          supportsRefrigerated: internationalShippingRates.supportsRefrigerated,
+          requiresCustomsClearance: internationalShippingRates.requiresCustomsClearance,
+          isActive: internationalShippingRates.isActive,
+          notes: internationalShippingRates.notes,
+          createdAt: internationalShippingRates.createdAt,
+          updatedAt: internationalShippingRates.updatedAt
+        })
+        .from(internationalShippingRates)
+        .leftJoin(internationalCountries, eq(internationalShippingRates.countryId, internationalCountries.id))
+        .leftJoin(internationalCities, eq(internationalShippingRates.cityId, internationalCities.id));
+      res.json({ success: true, data: rates });
+    } catch (error) {
+      console.error('Error fetching international shipping rates:', error);
+      res.status(500).json({ success: false, message: "خطا در دریافت نرخ‌های حمل" });
+    }
+  });
+
+  // Create new international shipping rate
+  app.post('/api/logistics/international-shipping-rates', requireAuth, async (req, res) => {
+    try {
+      const validatedData = insertInternationalShippingRateSchema.parse(req.body);
+      const [newRate] = await db
+        .insert(internationalShippingRates)
+        .values(validatedData)
+        .returning();
+      res.json({ success: true, data: newRate });
+    } catch (error) {
+      console.error('Error creating international shipping rate:', error);
+      res.status(500).json({ success: false, message: "خطا در ایجاد نرخ حمل" });
+    }
+  });
+
+  // Update international shipping rate
+  app.put('/api/logistics/international-shipping-rates/:id', requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertInternationalShippingRateSchema.parse(req.body);
+      const [updatedRate] = await db
+        .update(internationalShippingRates)
+        .set(validatedData)
+        .where(eq(internationalShippingRates.id, id))
+        .returning();
+      res.json({ success: true, data: updatedRate });
+    } catch (error) {
+      console.error('Error updating international shipping rate:', error);
+      res.status(500).json({ success: false, message: "خطا در به‌روزرسانی نرخ حمل" });
+    }
+  });
+
+  // Delete international shipping rate
+  app.delete('/api/logistics/international-shipping-rates/:id', requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await db
+        .delete(internationalShippingRates)
+        .where(eq(internationalShippingRates.id, id));
+      res.json({ success: true, message: "نرخ حمل با موفقیت حذف شد" });
+    } catch (error) {
+      console.error('Error deleting international shipping rate:', error);
+      res.status(500).json({ success: false, message: "خطا در حذف نرخ حمل" });
+    }
+  });
+
+  // =============================================================================
   // AI SETTINGS API
   // =============================================================================
   
@@ -13238,6 +13461,476 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         success: false, 
         message: "Failed to calculate shipping cost" 
+      });
+    }
+  });
+
+  // =============================================================================
+  // INTERNATIONAL GEOGRAPHY API ENDPOINTS
+  // =============================================================================
+
+  // Get all international countries
+  app.get("/api/logistics/international-countries", async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        SELECT * FROM international_countries 
+        WHERE is_active = true
+        ORDER BY name ASC
+      `);
+      
+      res.json({
+        success: true,
+        data: result.rows
+      });
+    } catch (error) {
+      console.error("Error fetching international countries:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch international countries" 
+      });
+    }
+  });
+
+  // Create new international country
+  app.post("/api/logistics/international-countries", requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      const countryData = insertInternationalCountrySchema.parse(req.body);
+      
+      const result = await pool.query(`
+        INSERT INTO international_countries (
+          name, name_en, name_local, country_code, region, currency,
+          is_active, has_customs_agreement, notes, created_at, updated_at
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW())
+        RETURNING *
+      `, [
+        countryData.name,
+        countryData.nameEn,
+        countryData.nameLocal,
+        countryData.countryCode,
+        countryData.region,
+        countryData.currency,
+        countryData.isActive,
+        countryData.hasCustomsAgreement,
+        countryData.notes
+      ]);
+      
+      res.json({
+        success: true,
+        message: "Country created successfully",
+        data: result.rows[0]
+      });
+    } catch (error) {
+      console.error("Error creating international country:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to create international country" 
+      });
+    }
+  });
+
+  // Update international country
+  app.put("/api/logistics/international-countries/:id", requireAuth, async (req, res) => {
+    try {
+      const countryId = parseInt(req.params.id);
+      if (isNaN(countryId)) {
+        return res.status(400).json({ success: false, message: "Invalid country ID" });
+      }
+
+      const { pool } = await import('./db');
+      const countryData = req.body;
+      
+      const result = await pool.query(`
+        UPDATE international_countries 
+        SET name = $1, name_en = $2, name_local = $3, country_code = $4, 
+            region = $5, currency = $6, is_active = $7, has_customs_agreement = $8, 
+            notes = $9, updated_at = NOW()
+        WHERE id = $10
+        RETURNING *
+      `, [
+        countryData.name,
+        countryData.nameEn,
+        countryData.nameLocal,
+        countryData.countryCode,
+        countryData.region,
+        countryData.currency,
+        countryData.isActive,
+        countryData.hasCustomsAgreement,
+        countryData.notes,
+        countryId
+      ]);
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ success: false, message: "Country not found" });
+      }
+      
+      res.json({
+        success: true,
+        message: "Country updated successfully",
+        data: result.rows[0]
+      });
+    } catch (error) {
+      console.error("Error updating international country:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to update international country" 
+      });
+    }
+  });
+
+  // Delete international country (soft delete)
+  app.delete("/api/logistics/international-countries/:id", requireAuth, async (req, res) => {
+    try {
+      const countryId = parseInt(req.params.id);
+      if (isNaN(countryId)) {
+        return res.status(400).json({ success: false, message: "Invalid country ID" });
+      }
+
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        UPDATE international_countries 
+        SET is_active = false, updated_at = NOW()
+        WHERE id = $1
+        RETURNING *
+      `, [countryId]);
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ success: false, message: "Country not found" });
+      }
+      
+      res.json({
+        success: true,
+        message: "Country deleted successfully"
+      });
+    } catch (error) {
+      console.error("Error deleting international country:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to delete international country" 
+      });
+    }
+  });
+
+  // Get all international cities
+  app.get("/api/logistics/international-cities", async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        SELECT c.*, co.name as country_name, co.country_code
+        FROM international_cities c
+        LEFT JOIN international_countries co ON c.country_id = co.id
+        WHERE c.is_active = true
+        ORDER BY co.name, c.name ASC
+      `);
+      
+      res.json({
+        success: true,
+        data: result.rows
+      });
+    } catch (error) {
+      console.error("Error fetching international cities:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch international cities" 
+      });
+    }
+  });
+
+  // Create new international city
+  app.post("/api/logistics/international-cities", requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      const cityData = insertInternationalCitySchema.parse(req.body);
+      
+      const result = await pool.query(`
+        INSERT INTO international_cities (
+          name, name_en, name_local, country_id, province_state, city_type,
+          distance_from_erbil_km, is_active, has_shipping_routes, is_priority_destination,
+          customs_information, notes, created_at, updated_at
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW(), NOW())
+        RETURNING *
+      `, [
+        cityData.name,
+        cityData.nameEn,
+        cityData.nameLocal,
+        cityData.countryId,
+        cityData.provinceState,
+        cityData.cityType,
+        cityData.distanceFromErbilKm,
+        cityData.isActive,
+        cityData.hasShippingRoutes,
+        cityData.isPriorityDestination,
+        cityData.customsInformation,
+        cityData.notes
+      ]);
+      
+      res.json({
+        success: true,
+        message: "City created successfully",
+        data: result.rows[0]
+      });
+    } catch (error) {
+      console.error("Error creating international city:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to create international city" 
+      });
+    }
+  });
+
+  // Update international city
+  app.put("/api/logistics/international-cities/:id", requireAuth, async (req, res) => {
+    try {
+      const cityId = parseInt(req.params.id);
+      if (isNaN(cityId)) {
+        return res.status(400).json({ success: false, message: "Invalid city ID" });
+      }
+
+      const { pool } = await import('./db');
+      const cityData = req.body;
+      
+      const result = await pool.query(`
+        UPDATE international_cities 
+        SET name = $1, name_en = $2, name_local = $3, country_id = $4, 
+            province_state = $5, city_type = $6, distance_from_erbil_km = $7, 
+            is_active = $8, has_shipping_routes = $9, is_priority_destination = $10,
+            customs_information = $11, notes = $12, updated_at = NOW()
+        WHERE id = $13
+        RETURNING *
+      `, [
+        cityData.name,
+        cityData.nameEn,
+        cityData.nameLocal,
+        cityData.countryId,
+        cityData.provinceState,
+        cityData.cityType,
+        cityData.distanceFromErbilKm,
+        cityData.isActive,
+        cityData.hasShippingRoutes,
+        cityData.isPriorityDestination,
+        cityData.customsInformation,
+        cityData.notes,
+        cityId
+      ]);
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ success: false, message: "City not found" });
+      }
+      
+      res.json({
+        success: true,
+        message: "City updated successfully",
+        data: result.rows[0]
+      });
+    } catch (error) {
+      console.error("Error updating international city:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to update international city" 
+      });
+    }
+  });
+
+  // Delete international city (soft delete)
+  app.delete("/api/logistics/international-cities/:id", requireAuth, async (req, res) => {
+    try {
+      const cityId = parseInt(req.params.id);
+      if (isNaN(cityId)) {
+        return res.status(400).json({ success: false, message: "Invalid city ID" });
+      }
+
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        UPDATE international_cities 
+        SET is_active = false, updated_at = NOW()
+        WHERE id = $1
+        RETURNING *
+      `, [cityId]);
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ success: false, message: "City not found" });
+      }
+      
+      res.json({
+        success: true,
+        message: "City deleted successfully"
+      });
+    } catch (error) {
+      console.error("Error deleting international city:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to delete international city" 
+      });
+    }
+  });
+
+  // Get all international shipping rates
+  app.get("/api/logistics/international-shipping-rates", async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        SELECT sr.*, co.name as country_name, ci.name as city_name
+        FROM international_shipping_rates sr
+        LEFT JOIN international_countries co ON sr.country_id = co.id
+        LEFT JOIN international_cities ci ON sr.city_id = ci.id
+        WHERE sr.is_active = true
+        ORDER BY co.name, ci.name, sr.shipping_method ASC
+      `);
+      
+      res.json({
+        success: true,
+        data: result.rows
+      });
+    } catch (error) {
+      console.error("Error fetching international shipping rates:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch international shipping rates" 
+      });
+    }
+  });
+
+  // Create new international shipping rate
+  app.post("/api/logistics/international-shipping-rates", requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      const rateData = insertInternationalShippingRateSchema.parse(req.body);
+      
+      const result = await pool.query(`
+        INSERT INTO international_shipping_rates (
+          country_id, city_id, shipping_method, transport_provider, base_price,
+          price_per_kg, price_per_km, minimum_charge, maximum_weight, estimated_days_min,
+          estimated_days_max, currency, supports_hazardous, supports_flammable,
+          supports_refrigerated, requires_customs_clearance, is_active, notes,
+          created_at, updated_at
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, NOW(), NOW())
+        RETURNING *
+      `, [
+        rateData.countryId,
+        rateData.cityId,
+        rateData.shippingMethod,
+        rateData.transportProvider,
+        rateData.basePrice,
+        rateData.pricePerKg,
+        rateData.pricePerKm,
+        rateData.minimumCharge,
+        rateData.maximumWeight,
+        rateData.estimatedDaysMin,
+        rateData.estimatedDaysMax,
+        rateData.currency,
+        rateData.supportsHazardous,
+        rateData.supportsFlammable,
+        rateData.supportsRefrigerated,
+        rateData.requiresCustomsClearance,
+        rateData.isActive,
+        rateData.notes
+      ]);
+      
+      res.json({
+        success: true,
+        message: "Shipping rate created successfully",
+        data: result.rows[0]
+      });
+    } catch (error) {
+      console.error("Error creating international shipping rate:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to create international shipping rate" 
+      });
+    }
+  });
+
+  // Update international shipping rate
+  app.put("/api/logistics/international-shipping-rates/:id", requireAuth, async (req, res) => {
+    try {
+      const rateId = parseInt(req.params.id);
+      if (isNaN(rateId)) {
+        return res.status(400).json({ success: false, message: "Invalid rate ID" });
+      }
+
+      const { pool } = await import('./db');
+      const rateData = req.body;
+      
+      const result = await pool.query(`
+        UPDATE international_shipping_rates 
+        SET country_id = $1, city_id = $2, shipping_method = $3, transport_provider = $4,
+            base_price = $5, price_per_kg = $6, price_per_km = $7, minimum_charge = $8,
+            maximum_weight = $9, estimated_days_min = $10, estimated_days_max = $11,
+            currency = $12, supports_hazardous = $13, supports_flammable = $14,
+            supports_refrigerated = $15, requires_customs_clearance = $16, 
+            is_active = $17, notes = $18, updated_at = NOW()
+        WHERE id = $19
+        RETURNING *
+      `, [
+        rateData.countryId,
+        rateData.cityId,
+        rateData.shippingMethod,
+        rateData.transportProvider,
+        rateData.basePrice,
+        rateData.pricePerKg,
+        rateData.pricePerKm,
+        rateData.minimumCharge,
+        rateData.maximumWeight,
+        rateData.estimatedDaysMin,
+        rateData.estimatedDaysMax,
+        rateData.currency,
+        rateData.supportsHazardous,
+        rateData.supportsFlammable,
+        rateData.supportsRefrigerated,
+        rateData.requiresCustomsClearance,
+        rateData.isActive,
+        rateData.notes,
+        rateId
+      ]);
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ success: false, message: "Shipping rate not found" });
+      }
+      
+      res.json({
+        success: true,
+        message: "Shipping rate updated successfully",
+        data: result.rows[0]
+      });
+    } catch (error) {
+      console.error("Error updating international shipping rate:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to update international shipping rate" 
+      });
+    }
+  });
+
+  // Delete international shipping rate (soft delete)
+  app.delete("/api/logistics/international-shipping-rates/:id", requireAuth, async (req, res) => {
+    try {
+      const rateId = parseInt(req.params.id);
+      if (isNaN(rateId)) {
+        return res.status(400).json({ success: false, message: "Invalid rate ID" });
+      }
+
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        UPDATE international_shipping_rates 
+        SET is_active = false, updated_at = NOW()
+        WHERE id = $1
+        RETURNING *
+      `, [rateId]);
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ success: false, message: "Shipping rate not found" });
+      }
+      
+      res.json({
+        success: true,
+        message: "Shipping rate deleted successfully"
+      });
+    } catch (error) {
+      console.error("Error deleting international shipping rate:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to delete international shipping rate" 
       });
     }
   });
