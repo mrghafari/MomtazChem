@@ -4,11 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Slider } from '@/components/ui/slider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-
+import { Slider } from '@/components/ui/slider';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -38,8 +37,7 @@ import {
   X,
   ChevronUp,
   ChevronDown,
-  ChevronsUpDown,
-  Clock
+  ChevronsUpDown
 } from 'lucide-react';
 import { useOrderNotifications } from '@/hooks/useOrderNotifications';
 import PostalServicesTab from '@/components/PostalServicesTab';
@@ -174,11 +172,6 @@ const LogisticsManagement = () => {
   const [shippingWeight, setShippingWeight] = useState<number>(1);
   const [orderValue, setOrderValue] = useState<number>(0);
   const [shippingCalculation, setShippingCalculation] = useState<any>(null);
-  const [citySliderIndex, setCitySliderIndex] = useState<number[]>([0]);
-  
-  // City navigation state for vertical slider - navigate through all 188 cities
-  const [currentCityStartIndex, setCurrentCityStartIndex] = useState(0);
-  const citiesPerPage = 20; // Number of cities to show at once
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -1229,7 +1222,7 @@ const LogisticsManagement = () => {
     const [selectedOriginCity, setSelectedOriginCity] = useState<any>(null);
     const [citySearchFilter, setCitySearchFilter] = useState('');
     const [citySortConfig, setCitySortConfig] = useState<{key: string, direction: 'asc' | 'desc'} | null>(null);
-
+    const [citySliderIndex, setCitySliderIndex] = useState<number[]>([0]);
 
     const geographyProvinces = (geographyProvincesResponse as any)?.data || [];
     const geographyCities = (geographyCitiesResponse as any)?.data || [];
@@ -1529,427 +1522,134 @@ const LogisticsManagement = () => {
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
               </div>
             ) : (
-              <div className="space-y-6">
-                {/* City Navigation Slider - Vertical Layout */}
-                <Card className="bg-gradient-to-r from-blue-50 to-green-50 border-blue-200">
-                  <CardContent className="p-6">
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                      {/* Slider Control - Left Side */}
-                      <div className="space-y-4">
-                        <h4 className="text-lg font-semibold flex items-center gap-2">
-                          <MapPin className="h-5 w-5 text-blue-600" />
-                          اسلایدر شهرها
-                        </h4>
-                        <div className="text-sm text-gray-600 mb-4">
-                          شهر {citySliderIndex[0] + 1} از {sortedAndFilteredCities.length}
-                        </div>
-                        
-                        {/* Vertical Slider */}
-                        <div className="flex flex-col items-center h-80">
-                          <div className="text-xs text-gray-500 mb-2">آخرین شهر</div>
-                          <div className="flex-1 flex items-center justify-center px-4">
-                            <Slider
-                              value={citySliderIndex}
-                              onValueChange={setCitySliderIndex}
-                              max={Math.max(0, sortedAndFilteredCities.length - 1)}
-                              min={0}
-                              step={1}
-                              orientation="vertical"
-                              className="h-64"
-                              dir="ltr"
-                            />
-                          </div>
-                          <div className="text-xs text-gray-500 mt-2">اولین شهر</div>
-                        </div>
-
-                        {/* Navigation Buttons */}
-                        {sortedAndFilteredCities.length > 1 && (
-                          <div className="flex flex-col gap-2">
-                            <Button
-                              variant="outline"
-                              onClick={() => setCitySliderIndex([Math.min(sortedAndFilteredCities.length - 1, citySliderIndex[0] + 1)])}
-                              disabled={citySliderIndex[0] === sortedAndFilteredCities.length - 1}
-                              className="flex items-center justify-center gap-2"
-                            >
-                              <ChevronUp className="h-4 w-4" />
-                              شهر بعدی
-                            </Button>
-                            <Button
-                              variant="outline"
-                              onClick={() => setCitySliderIndex([Math.max(0, citySliderIndex[0] - 1)])}
-                              disabled={citySliderIndex[0] === 0}
-                              className="flex items-center justify-center gap-2"
-                            >
-                              <ChevronDown className="h-4 w-4" />
-                              شهر قبلی
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Current City Info - Right Side */}
-                      {sortedAndFilteredCities.length > 0 && (
-                        <div className="lg:col-span-2">
-                          {(() => {
-                            const currentCity = sortedAndFilteredCities[citySliderIndex[0]] || sortedAndFilteredCities[0];
-                            return (
-                              <div className="bg-white p-6 rounded-lg border-2 border-blue-300 h-full">
-                                <div className="space-y-4">
-                                  <div className="flex items-center gap-3">
-                                    <div className="bg-blue-600 p-3 rounded-full">
-                                      <MapPin className="h-6 w-6 text-white" />
-                                    </div>
-                                    <div className="flex-1">
-                                      <h3 className="text-2xl font-bold text-blue-900 mb-1">
-                                        {currentCity.name_arabic || currentCity.name}
-                                      </h3>
-                                      <p className="text-lg text-blue-700">
-                                        {currentCity.name_english || currentCity.name}
-                                      </p>
-                                      <p className="text-sm text-gray-600">
-                                        استان: {currentCity.province_name}
-                                      </p>
-                                    </div>
-                                  </div>
-                                  
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                      <div className="text-sm font-medium text-gray-700">فاصله:</div>
-                                      <Badge 
-                                        variant="outline" 
-                                        className={selectedOriginCity?.id === currentCity.id ? 
-                                          "bg-yellow-100 border-yellow-500 text-yellow-700 text-lg px-4 py-2" : 
-                                          "bg-green-50 border-green-200 text-green-700 text-lg px-4 py-2"
-                                        }
-                                      >
-                                        {selectedOriginCity?.id === currentCity.id ? 
-                                          'مبدا (0 کیلومتر)' : 
-                                          `${calculateDistance(currentCity)} کیلومتر`
-                                        }
-                                      </Badge>
-                                    </div>
-                                    
-                                    <div className="space-y-2">
-                                      <div className="text-sm font-medium text-gray-700">وضعیت:</div>
-                                      <Badge 
-                                        variant={currentCity.is_active ? "default" : "secondary"}
-                                        className="text-lg px-4 py-2"
-                                      >
-                                        {currentCity.is_active ? "فعال" : "غیرفعال"}
-                                      </Badge>
-                                    </div>
-                                  </div>
-                                  
-                                  <div className="pt-4">
-                                    <Button 
-                                      variant="outline"
-                                      className="w-full"
-                                      onClick={() => {
-                                        setEditingCity(currentCity);
-                                        setIsEditCityDialogOpen(true);
-                                      }}
-                                    >
-                                      <Edit className="w-4 h-4 mr-2" />
-                                      ویرایش اطلاعات شهر
-                                    </Button>
-                                  </div>
-                                </div>
-                              </div>
-                            );
-                          })()}
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Table Display with Vertical Slider */}
-                <div className="flex gap-4">
-                  {/* Cities Table */}
-                  <div className="flex-1 overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="text-center w-20">
-                            <Button
-                              variant="ghost"
-                              className="h-auto p-0 font-semibold hover:bg-transparent w-full justify-center"
-                              onClick={() => handleSort('id')}
-                            >
-                              شناسه
-                              {getSortIcon('id')}
-                            </Button>
-                          </TableHead>
-                          <TableHead className="text-center w-40">
-                            <Button
-                              variant="ghost"
-                              className="h-auto p-0 font-semibold hover:bg-transparent w-full justify-center"
-                              onClick={() => handleSort('name_arabic')}
-                            >
-                              نام عربی
-                              {getSortIcon('name_arabic')}
-                            </Button>
-                          </TableHead>
-                          <TableHead className="text-center w-40">
-                            <Button
-                              variant="ghost"
-                              className="h-auto p-0 font-semibold hover:bg-transparent w-full justify-center"
-                              onClick={() => handleSort('name_english')}
-                            >
-                              نام انگلیسی
-                              {getSortIcon('name_english')}
-                            </Button>
-                          </TableHead>
-                          <TableHead className="text-center w-32">
-                            <Button
-                              variant="ghost"
-                              className="h-auto p-0 font-semibold hover:bg-transparent w-full justify-center"
-                              onClick={() => handleSort('province_name')}
-                            >
-                              استان
-                              {getSortIcon('province_name')}
-                            </Button>
-                          </TableHead>
-                          <TableHead className="text-center w-48">
-                            <Button
-                              variant="ghost"
-                              className="h-auto p-0 font-semibold hover:bg-transparent w-full justify-center"
-                              onClick={() => handleSort('distance')}
-                            >
-                              فاصله از {selectedOriginCity ? (selectedOriginCity.name_arabic || selectedOriginCity.name) : 'اربیل'} (کیلومتر)
-                              {getSortIcon('distance')}
-                            </Button>
-                          </TableHead>
-                          <TableHead className="text-center w-24">
-                            <Button
-                              variant="ghost"
-                              className="h-auto p-0 font-semibold hover:bg-transparent w-full justify-center"
-                              onClick={() => handleSort('is_active')}
-                            >
-                              وضعیت
-                              {getSortIcon('is_active')}
-                            </Button>
-                          </TableHead>
-                          <TableHead className="text-center w-32">عملیات</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {sortedAndFilteredCities
-                          .slice(currentCityStartIndex, currentCityStartIndex + citiesPerPage)
-                          .map((city: any) => (
-                          <TableRow key={city.id}>
-                            <TableCell className="font-medium text-center">{city.id}</TableCell>
-                            <TableCell className="text-center">{city.name_arabic || city.name}</TableCell>
-                            <TableCell className="text-center">{city.name_english || city.name}</TableCell>
-                            <TableCell className="text-center">{city.province_name}</TableCell>
-                            <TableCell className="text-center">
-                              <div className="flex flex-col items-center gap-1">
-                                <Badge 
-                                  variant="outline" 
-                                  className={selectedOriginCity?.id === city.id ? 
-                                    "bg-yellow-100 border-yellow-500 text-yellow-700" : 
-                                    "bg-green-50 border-green-200 text-green-700"
-                                  }
-                                >
-                                  {selectedOriginCity?.id === city.id ? 
-                                    'مبدا (0 کیلومتر)' : 
-                                    `${calculateDistance(city)} کیلومتر`
-                                  }
-                                </Badge>
-                                {!selectedOriginCity && (
-                                  <div className="text-xs text-gray-500">
-                                    (از اربیل: {city.distance_from_erbil_km || 0} کیلومتر)
-                                  </div>
-                                )}
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-center">
-                              <Badge variant={city.is_active ? "default" : "secondary"}>
-                                {city.is_active ? "فعال" : "غیرفعال"}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-center">
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                onClick={() => {
-                                  setEditingCity(city);
-                                  setIsEditCityDialogOpen(true);
-                                }}
-                              >
-                                <Edit className="w-4 h-4 mr-2" />
-                                ویرایش
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                    
-                    {/* Pagination Info */}
-                    <div className="flex justify-between items-center py-4 text-sm text-gray-600">
-                      <div>
-                        نمایش {currentCityStartIndex + 1} تا {Math.min(currentCityStartIndex + citiesPerPage, sortedAndFilteredCities.length)} از {sortedAndFilteredCities.length} شهر
-                      </div>
-                      <div className="flex gap-2">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-center w-20">
                         <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => setCurrentCityStartIndex(Math.max(0, currentCityStartIndex - citiesPerPage))}
-                          disabled={currentCityStartIndex === 0}
+                          variant="ghost"
+                          className="h-auto p-0 font-semibold hover:bg-transparent w-full justify-center"
+                          onClick={() => handleSort('id')}
                         >
-                          صفحه قبل
+                          شناسه
+                          {getSortIcon('id')}
                         </Button>
+                      </TableHead>
+                      <TableHead className="text-center w-40">
                         <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => setCurrentCityStartIndex(Math.min(sortedAndFilteredCities.length - citiesPerPage, currentCityStartIndex + citiesPerPage))}
-                          disabled={currentCityStartIndex + citiesPerPage >= sortedAndFilteredCities.length}
+                          variant="ghost"
+                          className="h-auto p-0 font-semibold hover:bg-transparent w-full justify-center"
+                          onClick={() => handleSort('name_arabic')}
                         >
-                          صفحه بعد
+                          نام عربی
+                          {getSortIcon('name_arabic')}
                         </Button>
-                      </div>
-                    </div>
-                    
-                    {citySearchFilter && sortedAndFilteredCities.length === 0 && (
-                      <div className="text-center py-8 text-gray-500">
-                        <Search className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                        هیچ شهری با عبارت "{citySearchFilter}" یافت نشد
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Vertical City Navigation Slider */}
-                  <div className="w-64 bg-blue-50 rounded-lg p-4 border-2 border-blue-200">
-                    <div className="text-center mb-4">
-                      <h4 className="font-semibold text-blue-800 mb-2">📍 ناوبری عمودی شهرها</h4>
-                      <p className="text-xs text-blue-600">دسترسی به همه {sortedAndFilteredCities.length} شهر عراق</p>
-                    </div>
-                    
-                    {/* Vertical Slider Control */}
-                    <div className="relative h-96 mb-4">
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="h-full w-6 bg-blue-200 rounded-full relative">
-                          {/* Slider Track */}
-                          <div 
-                            className="absolute w-6 h-8 bg-blue-600 rounded-full cursor-pointer hover:bg-blue-700 transition-colors shadow-lg"
-                            style={{
-                              top: `${(currentCityStartIndex / Math.max(1, sortedAndFilteredCities.length - citiesPerPage)) * (100 - (32/384*100))}%`,
-                              transform: 'translateY(-50%)',
-                            }}
-                            onMouseDown={(e) => {
-                              const startY = e.clientY;
-                              const startIndex = currentCityStartIndex;
-                              const maxIndex = Math.max(0, sortedAndFilteredCities.length - citiesPerPage);
-                              
-                              const handleMouseMove = (e: MouseEvent) => {
-                                const deltaY = e.clientY - startY;
-                                const deltaPercent = (deltaY / 320) * 100; // 320px is roughly the slider height
-                                const newIndex = Math.round(startIndex + (deltaPercent / 100) * maxIndex);
-                                setCurrentCityStartIndex(Math.max(0, Math.min(maxIndex, newIndex)));
-                              };
-                              
-                              const handleMouseUp = () => {
-                                document.removeEventListener('mousemove', handleMouseMove);
-                                document.removeEventListener('mouseup', handleMouseUp);
-                              };
-                              
-                              document.addEventListener('mousemove', handleMouseMove);
-                              document.addEventListener('mouseup', handleMouseUp);
+                      </TableHead>
+                      <TableHead className="text-center w-40">
+                        <Button
+                          variant="ghost"
+                          className="h-auto p-0 font-semibold hover:bg-transparent w-full justify-center"
+                          onClick={() => handleSort('name_english')}
+                        >
+                          نام انگلیسی
+                          {getSortIcon('name_english')}
+                        </Button>
+                      </TableHead>
+                      <TableHead className="text-center w-32">
+                        <Button
+                          variant="ghost"
+                          className="h-auto p-0 font-semibold hover:bg-transparent w-full justify-center"
+                          onClick={() => handleSort('province_name')}
+                        >
+                          استان
+                          {getSortIcon('province_name')}
+                        </Button>
+                      </TableHead>
+                      <TableHead className="text-center w-48">
+                        <Button
+                          variant="ghost"
+                          className="h-auto p-0 font-semibold hover:bg-transparent w-full justify-center"
+                          onClick={() => handleSort('distance')}
+                        >
+                          فاصله از {selectedOriginCity ? (selectedOriginCity.name_arabic || selectedOriginCity.name) : 'اربیل'} (کیلومتر)
+                          {getSortIcon('distance')}
+                        </Button>
+                      </TableHead>
+                      <TableHead className="text-center w-24">
+                        <Button
+                          variant="ghost"
+                          className="h-auto p-0 font-semibold hover:bg-transparent w-full justify-center"
+                          onClick={() => handleSort('is_active')}
+                        >
+                          وضعیت
+                          {getSortIcon('is_active')}
+                        </Button>
+                      </TableHead>
+                      <TableHead className="text-center w-32">عملیات</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {sortedAndFilteredCities.slice(0, 50).map((city: any) => (
+                      <TableRow key={city.id}>
+                        <TableCell className="font-medium text-center">{city.id}</TableCell>
+                        <TableCell className="text-center">{city.name_arabic || city.name}</TableCell>
+                        <TableCell className="text-center">{city.name_english || city.name}</TableCell>
+                        <TableCell className="text-center">{city.province_name}</TableCell>
+                        <TableCell className="text-center">
+                          <div className="flex flex-col items-center gap-1">
+                            <Badge 
+                              variant="outline" 
+                              className={selectedOriginCity?.id === city.id ? 
+                                "bg-yellow-100 border-yellow-500 text-yellow-700" : 
+                                "bg-green-50 border-green-200 text-green-700"
+                              }
+                            >
+                              {selectedOriginCity?.id === city.id ? 
+                                'مبدا (0 کیلومتر)' : 
+                                `${calculateDistance(city)} کیلومتر`
+                              }
+                            </Badge>
+                            {!selectedOriginCity && (
+                              <div className="text-xs text-gray-500">
+                                (از اربیل: {city.distance_from_erbil_km || 0} کیلومتر)
+                              </div>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Badge variant={city.is_active ? "default" : "secondary"}>
+                            {city.is_active ? "فعال" : "غیرفعال"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => {
+                              setEditingCity(city);
+                              setIsEditCityDialogOpen(true);
                             }}
                           >
-                            <div className="absolute inset-0 flex items-center justify-center text-white text-xs font-bold">
-                              ⬍
-                            </div>
-                          </div>
-                          
-                          {/* City Markers on Slider */}
-                          {sortedAndFilteredCities.slice(0, Math.min(20, sortedAndFilteredCities.length)).map((city: any, index: number) => {
-                            const position = (index / Math.max(1, Math.min(20, sortedAndFilteredCities.length) - 1)) * 100;
-                            return (
-                              <div
-                                key={city.id}
-                                className="absolute w-2 h-2 bg-blue-400 rounded-full -left-1 cursor-pointer hover:bg-blue-600 transition-colors"
-                                style={{ top: `${position}%` }}
-                                title={city.name_arabic || city.name}
-                                onClick={() => {
-                                  const actualIndex = sortedAndFilteredCities.findIndex((c: any) => c.id === city.id);
-                                  const pageStart = Math.floor(actualIndex / citiesPerPage) * citiesPerPage;
-                                  setCurrentCityStartIndex(pageStart);
-                                }}
-                              />
-                            );
-                          })}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {/* Quick Navigation Buttons */}
-                    <div className="space-y-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="w-full text-xs"
-                        onClick={() => setCurrentCityStartIndex(0)}
-                      >
-                        🏁 شروع فهرست
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="w-full text-xs"
-                        onClick={() => setCurrentCityStartIndex(Math.max(0, sortedAndFilteredCities.length - citiesPerPage))}
-                      >
-                        🔚 انتهای فهرست
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="w-full text-xs"
-                        onClick={() => {
-                          const baghdadIndex = sortedAndFilteredCities.findIndex((city: any) => 
-                            (city.name_arabic || city.name || '').includes('بغداد') || 
-                            (city.name_english || '').toLowerCase().includes('baghdad')
-                          );
-                          if (baghdadIndex >= 0) {
-                            const pageStart = Math.floor(baghdadIndex / citiesPerPage) * citiesPerPage;
-                            setCurrentCityStartIndex(pageStart);
-                          }
-                        }}
-                      >
-                        🏛️ رفتن به بغداد
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="w-full text-xs"
-                        onClick={() => {
-                          const basraIndex = sortedAndFilteredCities.findIndex((city: any) => 
-                            (city.name_arabic || city.name || '').includes('بصره') || 
-                            (city.name_english || '').toLowerCase().includes('basra')
-                          );
-                          if (basraIndex >= 0) {
-                            const pageStart = Math.floor(basraIndex / citiesPerPage) * citiesPerPage;
-                            setCurrentCityStartIndex(pageStart);
-                          }
-                        }}
-                      >
-                        🌊 رفتن به بصره
-                      </Button>
-                    </div>
-                    
-                    {/* Current View Info */}
-                    <div className="mt-4 p-2 bg-white rounded border text-center">
-                      <p className="text-xs text-gray-600">نمایش فعلی:</p>
-                      <p className="text-sm font-semibold text-blue-800">
-                        شهر {currentCityStartIndex + 1} تا {Math.min(currentCityStartIndex + citiesPerPage, sortedAndFilteredCities.length)}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        از مجموع {sortedAndFilteredCities.length} شهر
-                      </p>
-                    </div>
+                            <Edit className="w-4 h-4 mr-2" />
+                            ویرایش
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+                {sortedAndFilteredCities.length > 50 && (
+                  <div className="text-center py-4 text-sm text-gray-500">
+                    و {sortedAndFilteredCities.length - 50} شهر دیگر...
                   </div>
-                </div>
+                )}
+                {citySearchFilter && sortedAndFilteredCities.length === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    <Search className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                    هیچ شهری با عبارت "{citySearchFilter}" یافت نشد
+                  </div>
+                )}
               </div>
             )}
           </CardContent>
@@ -2097,188 +1797,6 @@ const LogisticsManagement = () => {
     );
   };
 
-  // Vehicles Tab Component
-  const VehiclesTab = () => {
-    const [searchVehicle, setSearchVehicle] = useState('');
-
-    // Sample vehicle data with capacities and destinations
-    const vehicleData = [
-      {
-        id: 1,
-        name: 'وانت کوچک - پیکان',
-        type: 'pickup_small',
-        capacity: '25 کیلوگرم',
-        destinations: ['بغداد', 'اربیل', 'موصل', 'کرکوک'],
-        pricePerKm: '400 دینار/کم',
-        estimatedTime: '12-24 ساعت',
-        status: 'فعال',
-        description: 'برای محموله‌های کم وزن تا 25 کیلوگرم'
-      },
-      {
-        id: 2,
-        name: 'وانت متوسط - نیسان',
-        type: 'pickup_medium',
-        capacity: '100 کیلوگرم',
-        destinations: ['بغداد', 'بصره', 'نجف', 'کربلا'],
-        pricePerKm: '500 دینار/کم',
-        estimatedTime: '24-36 ساعت',
-        status: 'فعال',
-        description: 'برای محموله‌های متوسط تا 100 کیلوگرم'
-      },
-      {
-        id: 3,
-        name: 'کامیونت - ایسوزو',
-        type: 'truck_small',
-        capacity: '500 کیلوگرم',
-        destinations: ['تمام شهرهای عراق'],
-        pricePerKm: '700 دینار/کم',
-        estimatedTime: '24-48 ساعت',
-        status: 'فعال',
-        description: 'برای محموله‌های سنگین تا 500 کیلوگرم'
-      },
-      {
-        id: 4,
-        name: 'کامیون بزرگ - هیوو',
-        type: 'truck_large',
-        capacity: '1000+ کیلوگرم',
-        destinations: ['شهرهای اصلی عراق', 'حمل بین‌المللی'],
-        pricePerKm: '1000 دینار/کم',
-        estimatedTime: '48-72 ساعت',
-        status: 'فعال',
-        description: 'برای محموله‌های بسیار سنگین بالای 500 کیلوگرم'
-      }
-    ];
-
-    const filteredVehicles = vehicleData.filter(vehicle =>
-      vehicle.name.toLowerCase().includes(searchVehicle.toLowerCase()) ||
-      vehicle.type.toLowerCase().includes(searchVehicle.toLowerCase())
-    );
-
-    return (
-      <div className="space-y-6">
-        {/* Search and Header */}
-        <div className="flex justify-between items-center">
-          <div>
-            <h2 className="text-xl font-bold flex items-center gap-2">
-              <Truck className="w-6 h-6 text-blue-600" />
-              مدیریت وسایل نقلیه ({vehicleData.length})
-            </h2>
-            <p className="text-gray-600 mt-1">
-              لیست وسایل نقلیه با ظرفیت و مقاصد قابل دسترس
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                placeholder="جستجو در وسایل نقلیه..."
-                value={searchVehicle}
-                onChange={(e) => setSearchVehicle(e.target.value)}
-                className="pl-10 w-64"
-              />
-            </div>
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              افزودن وسیله نقلیه
-            </Button>
-          </div>
-        </div>
-
-        {/* Vehicles Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredVehicles.map((vehicle) => (
-            <Card key={vehicle.id} className="border-2 hover:border-blue-300 transition-colors">
-              <CardHeader className="pb-3">
-                <div className="flex justify-between items-start">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-blue-100 rounded-lg">
-                      <Truck className="w-6 h-6 text-blue-600" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-lg">{vehicle.name}</CardTitle>
-                      <p className="text-sm text-gray-600">{vehicle.description}</p>
-                    </div>
-                  </div>
-                  <Badge className={vehicle.status === 'فعال' ? 'bg-green-500' : 'bg-red-500'}>
-                    {vehicle.status}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Capacity */}
-                <div className="flex items-center gap-2">
-                  <Scale className="w-4 h-4 text-orange-600" />
-                  <span className="font-medium">ظرفیت:</span>
-                  <Badge variant="outline" className="bg-orange-50">
-                    {vehicle.capacity}
-                  </Badge>
-                </div>
-
-                {/* Price */}
-                <div className="flex items-center gap-2">
-                  <Calculator className="w-4 h-4 text-green-600" />
-                  <span className="font-medium">نرخ:</span>
-                  <Badge variant="outline" className="bg-green-50">
-                    {vehicle.pricePerKm}
-                  </Badge>
-                </div>
-
-                {/* Estimated Time */}
-                <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-purple-600" />
-                  <span className="font-medium">زمان تحویل:</span>
-                  <Badge variant="outline" className="bg-purple-50">
-                    {vehicle.estimatedTime}
-                  </Badge>
-                </div>
-
-                {/* Destinations */}
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <MapPin className="w-4 h-4 text-blue-600" />
-                    <span className="font-medium">مقاصد قابل دسترس:</span>
-                  </div>
-                  <div className="flex flex-wrap gap-1">
-                    {vehicle.destinations.map((destination, index) => (
-                      <Badge key={index} variant="secondary" className="text-xs">
-                        {destination}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2 pt-3 border-t">
-                  <Button variant="outline" size="sm" className="flex-1">
-                    <Edit className="w-4 h-4 mr-2" />
-                    ویرایش
-                  </Button>
-                  <Button variant="outline" size="sm" className="flex-1">
-                    <Eye className="w-4 h-4 mr-2" />
-                    جزئیات
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Empty State */}
-        {filteredVehicles.length === 0 && (
-          <div className="text-center py-12">
-            <Truck className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              هیچ وسیله نقلیه‌ای یافت نشد
-            </h3>
-            <p className="text-gray-600">
-              با عبارت "{searchVehicle}" هیچ وسیله نقلیه‌ای پیدا نشد
-            </p>
-          </div>
-        )}
-      </div>
-    );
-  };
-
   return (
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
@@ -2296,11 +1814,12 @@ const LogisticsManagement = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="orders">سفارشات</TabsTrigger>
           <TabsTrigger value="companies">شرکت‌های حمل</TabsTrigger>
           <TabsTrigger value="geography">جغرافیای عراق</TabsTrigger>
-          <TabsTrigger value="vehicles">وسایل نقلیه</TabsTrigger>
+
+
           <TabsTrigger value="postal">خدمات پست</TabsTrigger>
         </TabsList>
 
@@ -2314,10 +1833,6 @@ const LogisticsManagement = () => {
 
         <TabsContent value="geography">
           <GeographyTab />
-        </TabsContent>
-
-        <TabsContent value="vehicles">
-          <VehiclesTab />
         </TabsContent>
 
 

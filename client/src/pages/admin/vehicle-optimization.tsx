@@ -87,31 +87,19 @@ export default function VehicleOptimization() {
   // Fetch vehicle templates
   const { data: vehiclesData, isLoading: vehiclesLoading } = useQuery({
     queryKey: ['/api/logistics/vehicle-templates'],
-    queryFn: async () => {
-      const response = await apiRequest('/api/logistics/vehicle-templates');
-      return response;
-    }
+    queryFn: () => apiRequest({ url: '/api/logistics/vehicle-templates' })
   });
 
   // Fetch selection history
   const { data: historyData, isLoading: historyLoading } = useQuery({
     queryKey: ['/api/logistics/vehicle-selection-history'],
-    queryFn: async () => {
-      const response = await apiRequest('/api/logistics/vehicle-selection-history');
-      return response;
-    }
+    queryFn: () => apiRequest({ url: '/api/logistics/vehicle-selection-history' })
   });
 
   // Create vehicle template mutation
   const createVehicleMutation = useMutation({
-    mutationFn: async (data: Partial<VehicleTemplate>) => {
-      const response = await apiRequest('/api/logistics/vehicle-templates', {
-        method: 'POST',
-        body: JSON.stringify(data),
-        headers: { 'Content-Type': 'application/json' }
-      });
-      return response;
-    },
+    mutationFn: (data: Partial<VehicleTemplate>) => 
+      apiRequest({ url: '/api/logistics/vehicle-templates', method: 'POST', data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/logistics/vehicle-templates'] });
       setIsCreateDialogOpen(false);
@@ -124,14 +112,8 @@ export default function VehicleOptimization() {
 
   // Update vehicle template mutation
   const updateVehicleMutation = useMutation({
-    mutationFn: async ({ id, ...data }: Partial<VehicleTemplate> & { id: number }) => {
-      const response = await apiRequest(`/api/logistics/vehicle-templates/${id}`, {
-        method: 'PATCH',
-        body: JSON.stringify(data),
-        headers: { 'Content-Type': 'application/json' }
-      });
-      return response;
-    },
+    mutationFn: ({ id, ...data }: Partial<VehicleTemplate> & { id: number }) => 
+      apiRequest({ url: `/api/logistics/vehicle-templates/${id}`, method: 'PATCH', data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/logistics/vehicle-templates'] });
       setEditingVehicle(null);
@@ -144,12 +126,8 @@ export default function VehicleOptimization() {
 
   // Delete vehicle template mutation
   const deleteVehicleMutation = useMutation({
-    mutationFn: async (id: number) => {
-      const response = await apiRequest(`/api/logistics/vehicle-templates/${id}`, {
-        method: 'DELETE'
-      });
-      return response;
-    },
+    mutationFn: (id: number) => 
+      apiRequest({ url: `/api/logistics/vehicle-templates/${id}`, method: 'DELETE' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/logistics/vehicle-templates'] });
       toast({ title: "موفقیت", description: "الگوی خودرو حذف شد" });
@@ -161,14 +139,8 @@ export default function VehicleOptimization() {
 
   // Optimize vehicle selection mutation
   const optimizeVehicleMutation = useMutation({
-    mutationFn: async (data: OptimalVehicleRequest) => {
-      const response = await apiRequest('/api/logistics/select-optimal-vehicle', {
-        method: 'POST',
-        body: JSON.stringify(data),
-        headers: { 'Content-Type': 'application/json' }
-      });
-      return response;
-    },
+    mutationFn: (data: OptimalVehicleRequest) => 
+      apiRequest({ url: '/api/logistics/select-optimal-vehicle', method: 'POST', data }),
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['/api/logistics/vehicle-selection-history'] });
       toast({ 
