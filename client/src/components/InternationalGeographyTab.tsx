@@ -1429,6 +1429,195 @@ const InternationalGeographyTab: React.FC = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Edit City Dialog */}
+      <Dialog open={isEditCityOpen} onOpenChange={setIsEditCityOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MapPin className="w-5 h-5" />
+              ویرایش شهر بین‌المللی
+            </DialogTitle>
+            <DialogDescription>
+              اطلاعات شهر را برای حمل بین‌المللی به‌روزرسانی کنید
+            </DialogDescription>
+          </DialogHeader>
+          
+          {editingCity && (
+            <>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="editCityName">نام شهر (فارسی/عربی) *</Label>
+                  <Input
+                    id="editCityName"
+                    defaultValue={editingCity.name}
+                    placeholder="مثال: استانبول"
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="editCityNameEn">نام شهر (انگلیسی) *</Label>
+                  <Input
+                    id="editCityNameEn"
+                    defaultValue={editingCity.nameEn}
+                    placeholder="مثال: Istanbul"
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="editCityNameLocal">نام محلی</Label>
+                  <Input
+                    id="editCityNameLocal"
+                    defaultValue={editingCity.nameLocal}
+                    placeholder="مثال: İstanbul"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="editCountryId">کشور *</Label>
+                  <Select defaultValue={editingCity.countryId.toString()}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="انتخاب کشور" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {countries.map((country: InternationalCountry) => (
+                        <SelectItem key={country.id} value={country.id.toString()}>
+                          {country.name} ({country.nameEn})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="editProvinceState">استان/ایالت</Label>
+                  <Input
+                    id="editProvinceState"
+                    defaultValue={editingCity.provinceState}
+                    placeholder="مثال: مرمره"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="editCityType">نوع شهر *</Label>
+                  <Select defaultValue={editingCity.cityType}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(CITY_TYPES).map(([key, value]) => (
+                        <SelectItem key={key} value={key}>{value}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="editDistanceFromErbilKm">فاصله از اربیل (کیلومتر) *</Label>
+                  <Input
+                    id="editDistanceFromErbilKm"
+                    type="number"
+                    defaultValue={editingCity.distanceFromErbilKm}
+                    placeholder="مثال: 1200"
+                    min="0"
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="editCustomsInformation">اطلاعات گمرکی</Label>
+                  <Input
+                    id="editCustomsInformation"
+                    defaultValue={editingCity.customsInformation}
+                    placeholder="مثال: دفتر گمرک اصلی"
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="editCityIsActive"
+                    defaultChecked={editingCity.isActive}
+                  />
+                  <Label htmlFor="editCityIsActive">فعال</Label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="editHasShippingRoutes"
+                    defaultChecked={editingCity.hasShippingRoutes}
+                  />
+                  <Label htmlFor="editHasShippingRoutes">دارای مسیر حمل</Label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="editIsPriorityDestination"
+                    defaultChecked={editingCity.isPriorityDestination}
+                  />
+                  <Label htmlFor="editIsPriorityDestination">مقصد اولویت‌دار</Label>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="editCityNotes">یادداشت‌ها</Label>
+                <Textarea
+                  id="editCityNotes"
+                  defaultValue={editingCity.notes}
+                  placeholder="یادداشت‌های اضافی..."
+                  rows={3}
+                />
+              </div>
+              
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsEditCityOpen(false)}>
+                  انصراف
+                </Button>
+                <Button 
+                  onClick={() => {
+                    const name = document.querySelector('#editCityName') as HTMLInputElement;
+                    const nameEn = document.querySelector('#editCityNameEn') as HTMLInputElement;
+                    const nameLocal = document.querySelector('#editCityNameLocal') as HTMLInputElement;
+                    const countrySelect = document.querySelector('#editCountryId') as HTMLSelectElement;
+                    const provinceState = document.querySelector('#editProvinceState') as HTMLInputElement;
+                    const cityTypeSelect = document.querySelector('#editCityType') as HTMLSelectElement;
+                    const distance = document.querySelector('#editDistanceFromErbilKm') as HTMLInputElement;
+                    const customsInfo = document.querySelector('#editCustomsInformation') as HTMLInputElement;
+                    const isActive = document.querySelector('#editCityIsActive') as HTMLInputElement;
+                    const hasShippingRoutes = document.querySelector('#editHasShippingRoutes') as HTMLInputElement;
+                    const isPriority = document.querySelector('#editIsPriorityDestination') as HTMLInputElement;
+                    const notes = document.querySelector('#editCityNotes') as HTMLTextAreaElement;
+                    
+                    updateCityMutation.mutate({
+                      id: editingCity.id,
+                      data: {
+                        name: name.value,
+                        nameEn: nameEn.value,
+                        nameLocal: nameLocal.value,
+                        countryId: parseInt(countrySelect.value),
+                        provinceState: provinceState.value,
+                        cityType: cityTypeSelect.value,
+                        distanceFromErbilKm: parseFloat(distance.value),
+                        customsInformation: customsInfo.value,
+                        isActive: isActive.checked,
+                        hasShippingRoutes: hasShippingRoutes.checked,
+                        isPriorityDestination: isPriority.checked,
+                        notes: notes.value
+                      }
+                    });
+                  }}
+                  disabled={updateCityMutation.isPending}
+                >
+                  {updateCityMutation.isPending ? 'در حال ذخیره...' : 'ذخیره تغییرات'}
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
