@@ -1768,6 +1768,10 @@ const LogisticsManagement = () => {
       let aValue, bValue;
       
       switch (citySortField) {
+        case 'id':
+          aValue = a.id || 0;
+          bValue = b.id || 0;
+          break;
         case 'name':
           aValue = a.name_arabic || a.name || '';
           bValue = b.name_arabic || b.name || '';
@@ -1980,7 +1984,17 @@ const LogisticsManagement = () => {
                     <TableHeader className="sticky top-0 bg-white z-20 shadow-sm border-b"
                       style={{ position: 'sticky', top: 0, backgroundColor: 'white', zIndex: 20 }}>
                       <TableRow className="bg-white" style={{ backgroundColor: 'white' }}>
-                        <TableHead className="text-right w-20 bg-white sticky top-0 z-20 border-b" style={{ position: 'sticky', top: 0, backgroundColor: 'white', zIndex: 20 }}>شناسه</TableHead>
+                        <TableHead className="text-right w-20 bg-white sticky top-0 z-20 border-b" style={{ position: 'sticky', top: 0, backgroundColor: 'white', zIndex: 20 }}>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => handleCitySort('id')}
+                            className="flex items-center justify-end gap-1 p-0 h-auto font-medium text-right w-full"
+                          >
+                            ردیف
+                            <ArrowUpDown className="h-3 w-3" />
+                          </Button>
+                        </TableHead>
                         <TableHead className="text-right w-48 bg-white sticky top-0 z-20 border-b" style={{ position: 'sticky', top: 0, backgroundColor: 'white', zIndex: 20 }}>
                           <Button 
                             variant="ghost" 

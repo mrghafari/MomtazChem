@@ -6,19 +6,38 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
+### COMPLETED: Column Header Update - "شناسه" Changed to "ردیف" with Sorting (January 28, 2025)
+✅ **IMPLEMENTED: Column header text changed from "شناسه" (ID) to "ردیف" (Row) with sorting functionality**
+- **User Request**: "کنار نام شهر را از شناسه به ردیف عوض کن و سورتینگ بذار" - Change ID column to Row with sorting
+- **Header Text Update**: Changed first column header from "شناسه" to "ردیف" for better UX terminology
+- **Sorting Implementation**: Added complete sorting functionality for row numbers (ID field):
+  - Added Button wrapper with ArrowUpDown icon for visual sorting indication
+  - Implemented `onClick={() => handleCitySort('id')}` event handler
+  - Added 'id' case in switch statement for proper numerical sorting by city ID
+- **Consistent Interface**: Row column now has same interactive sorting behavior as other columns
+- **Technical Implementation**: 
+  - Enhanced switch case with `case 'id': aValue = a.id || 0; bValue = b.id || 0;` for proper ID sorting
+  - Maintains numerical sorting logic for ascending/descending row order
+  - Integrated with existing sorting state management system
+- **User Experience**: 
+  - Users can now sort cities by row number (database ID) in ascending/descending order
+  - Consistent sorting visual feedback with arrow icon
+  - Better terminology using "ردیف" instead of technical "شناسه"
+- **Business Impact**: Improved table navigation allowing staff to sort cities by row numbers for systematic data management
+- **Result**: Complete row sorting implementation operational - first column displays "ردیف" with full sorting capability
+
 ### COMPLETED: Sticky Table Header Implementation - Enhanced Cities Table Navigation (January 28, 2025)
 ✅ **IMPLEMENTED: Sticky/frozen header for cities table to improve navigation during scrolling**
 - **User Request**: "هدر شهرها را فریز کن که در اسلاید کردن بالا و پایین نرود" - Freeze cities header during scroll
-- **Sticky Header Enhancement**: Applied `sticky top-0 bg-white z-10` with additional inline styles for maximum browser compatibility
+- **Advanced Sticky Implementation**: Applied `z-index: 20` with comprehensive inline styles for maximum browser compatibility
 - **TableHeader Improvements**: Added `shadow-sm border-b` for visual separation and `position: sticky` style for reliability
-- **Individual TableHead Stickiness**: Each column header now has `bg-white sticky top-0 z-10` classes for consistent freezing
-- **TableRow Background**: Added `bg-white` class to TableRow to ensure consistent header background during scroll
+- **Individual TableHead Stickiness**: Each column header now has enhanced sticky positioning with `bg-white sticky top-0 z-20 border-b`
 - **Professional Layout**: Header remains visible and functional while scrolling through 188+ Iraqi cities
 - **Enhanced User Experience**: 
   - Sort buttons remain accessible during scroll through large city list
   - Column headers stay visible for reference while browsing data
   - Improved productivity for logistics staff managing geographical data
-- **Technical Implementation**: Combined CSS classes and inline styles for cross-browser sticky header support
+- **Technical Implementation**: Combined CSS classes and inline styles with higher z-index for cross-browser sticky header support
 - **Business Impact**: Logistics staff can efficiently navigate and sort large city datasets without losing header context
 - **Result**: Complete sticky header implementation operational - cities table header remains frozen at top during vertical scrolling
 
