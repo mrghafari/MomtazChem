@@ -206,7 +206,7 @@ const InternationalGeographyTab: React.FC = () => {
         method: 'POST',
         body: JSON.stringify(data)
       });
-      });\n    },
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/logistics/international-countries'] });
       setIsAddCountryOpen(false);
@@ -222,7 +222,7 @@ const InternationalGeographyTab: React.FC = () => {
         hasCustomsAgreement: false,
         notes: ''
       });
-      });\n    },
+    },
     onError: (error) => {
       toast({ title: "خطا در ایجاد کشور", description: error.message, variant: "destructive" });
     }
@@ -235,12 +235,12 @@ const InternationalGeographyTab: React.FC = () => {
         method: 'PUT',
         body: JSON.stringify(data)
       });
-      });\n    },
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/logistics/international-countries'] });
       setIsEditCountryOpen(false);
       toast({ title: "کشور با موفقیت به‌روزرسانی شد", variant: "default" });
-      });\n    },
+    },
     onError: (error) => {
       toast({ title: "خطا در به‌روزرسانی کشور", description: error.message, variant: "destructive" });
     }
@@ -252,11 +252,11 @@ const InternationalGeographyTab: React.FC = () => {
       return await apiRequest(`/api/logistics/international-countries/${id}`, {
         method: 'DELETE'
       });
-      });\n    },
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/logistics/international-countries'] });
       toast({ title: "کشور با موفقیت حذف شد", variant: "default" });
-      });\n    },
+    },
     onError: (error) => {
       toast({ title: "خطا در حذف کشور", description: error.message, variant: "destructive" });
     }
@@ -269,7 +269,7 @@ const InternationalGeographyTab: React.FC = () => {
         method: 'POST',
         body: JSON.stringify(data)
       });
-      });\n    },
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/logistics/international-cities'] });
       setIsAddCityOpen(false);
@@ -288,7 +288,7 @@ const InternationalGeographyTab: React.FC = () => {
         customsInformation: '',
         notes: ''
       });
-      });\n    },
+    },
     onError: (error) => {
       toast({ title: "خطا در ایجاد شهر", description: error.message, variant: "destructive" });
     }
@@ -300,12 +300,13 @@ const InternationalGeographyTab: React.FC = () => {
       return await apiRequest(`/api/logistics/international-cities/${id}`, {
         method: 'PUT',
         body: JSON.stringify(data)
-      });\n    },
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/logistics/international-cities'] });
       setIsEditCityOpen(false);
       toast({ title: "شهر با موفقیت به‌روزرسانی شد", variant: "default" });
-      });\n    },
+    },
     onError: (error) => {
       toast({ title: "خطا در به‌روزرسانی شهر", description: error.message, variant: "destructive" });
     }
@@ -316,11 +317,12 @@ const InternationalGeographyTab: React.FC = () => {
       const { apiRequest } = await import('@/lib/queryClient');
       return await apiRequest(`/api/logistics/international-cities/${id}`, {
         method: 'DELETE'
-      });\n    },
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/logistics/international-cities'] });
       toast({ title: "شهر با موفقیت حذف شد", variant: "default" });
-      });\n    },
+    },
     onError: (error) => {
       toast({ title: "خطا در حذف شهر", description: error.message, variant: "destructive" });
     }
@@ -332,7 +334,8 @@ const InternationalGeographyTab: React.FC = () => {
       return await apiRequest('/api/logistics/international-shipping-rates', {
         method: 'POST',
         body: JSON.stringify(data)
-      });\n    },
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/logistics/international-shipping-rates'] });
       setIsAddRateOpen(false);
@@ -356,7 +359,8 @@ const InternationalGeographyTab: React.FC = () => {
         requiresCustomsClearance: true,
         isActive: true,
         notes: ''
-      });\n    },
+      });
+    },
     onError: (error) => {
       toast({ title: "خطا در ایجاد نرخ حمل", description: error.message, variant: "destructive" });
     }
@@ -368,12 +372,13 @@ const InternationalGeographyTab: React.FC = () => {
       return await apiRequest(`/api/logistics/international-shipping-rates/${id}`, {
         method: 'PUT',
         body: JSON.stringify(data)
-      });\n    },
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/logistics/international-shipping-rates'] });
       setIsEditRateOpen(false);
       toast({ title: "نرخ حمل با موفقیت به‌روزرسانی شد", variant: "default" });
-      });\n    },
+    },
     onError: (error) => {
       toast({ title: "خطا در به‌روزرسانی نرخ حمل", description: error.message, variant: "destructive" });
     }
@@ -384,11 +389,12 @@ const InternationalGeographyTab: React.FC = () => {
       const { apiRequest } = await import('@/lib/queryClient');
       return await apiRequest(`/api/logistics/international-shipping-rates/${id}`, {
         method: 'DELETE'
-      });\n    },
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/logistics/international-shipping-rates'] });
       toast({ title: "نرخ حمل با موفقیت حذف شد", variant: "default" });
-      });\n    },
+    },
     onError: (error) => {
       toast({ title: "خطا در حذف نرخ حمل", description: error.message, variant: "destructive" });
     }
