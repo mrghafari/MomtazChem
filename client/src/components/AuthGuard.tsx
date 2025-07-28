@@ -56,7 +56,7 @@ export function AuthGuard({
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="flex flex-col items-center space-y-4">
           <RefreshCw className="h-8 w-8 animate-spin text-blue-600" />
-          <p className="text-gray-600">در حال بارگذاری...</p>
+          <p className="text-gray-600">Loading...</p>
         </div>
       </div>
     );
@@ -65,25 +65,25 @@ export function AuthGuard({
   // Show authentication required prompt
   if (requireAuth && (!isAuthenticated || showLoginPrompt)) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4" dir="rtl">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center space-y-4">
             <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
               <Lock className="h-8 w-8 text-red-600" />
             </div>
             <CardTitle className="text-xl text-gray-900">
-              احراز هویت مورد نیاز
+              Authentication Required
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6 text-center">
             <div className="space-y-2">
               <p className="text-gray-600">
-                جلسه کاری شما منقضی شده است. برای ادامه کار لطفاً دوباره وارد سیستم شوید.
+                Your session has expired. Please log in again to continue working.
               </p>
               {retryCount > 0 && (
                 <div className="flex items-center justify-center gap-2 text-amber-600 text-sm">
                   <AlertTriangle className="h-4 w-4" />
-                  <span>تلاش شماره {retryCount + 1}</span>
+                  <span>Attempt #{retryCount + 1}</span>
                 </div>
               )}
             </div>
@@ -94,7 +94,7 @@ export function AuthGuard({
                 className="w-full bg-blue-600 hover:bg-blue-700"
               >
                 <Lock className="h-4 w-4 mr-2" />
-                ورود به سیستم
+                Go to Login
               </Button>
               
               <Button 
@@ -106,19 +106,19 @@ export function AuthGuard({
                 {isLoading ? (
                   <>
                     <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                    در حال بررسی...
+                    Checking...
                   </>
                 ) : (
                   <>
                     <RefreshCw className="h-4 w-4 mr-2" />
-                    تلاش مجدد
+                    Try Again
                   </>
                 )}
               </Button>
             </div>
 
             <div className="text-xs text-gray-500 border-t pt-4">
-              <p>برای حفظ امنیت، جلسات کاری بعد از مدت زمان معینی منقضی می‌شوند.</p>
+              <p>For security purposes, work sessions expire after a certain period of time.</p>
             </div>
           </CardContent>
         </Card>
