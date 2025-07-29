@@ -320,6 +320,7 @@ const EmailTemplatesCentral: React.FC = () => {
   };
 
   const handleRefresh = async () => {
+    console.log('🔄 [EMAIL TEMPLATES] Manual refresh triggered');
     try {
       await refetch();
       toast({
@@ -327,9 +328,12 @@ const EmailTemplatesCentral: React.FC = () => {
         description: `${Array.isArray(templates) ? templates.length : 0} قالب از دیتابیس بارگذاری شد`,
       });
     } catch (error) {
+      console.error('❌ [EMAIL TEMPLATES] Refresh failed:', error);
       toast({
         title: "❌ خطا در بروزرسانی",
-        description: "لطفاً دوباره تلاش کنید",
+        description: error.message?.includes('Authentication') 
+          ? "لطفاً ابتدا وارد حساب مدیریت شوید" 
+          : "لطفاً دوباره تلاش کنید",
         variant: "destructive",
       });
     }
@@ -615,11 +619,34 @@ const EmailTemplatesCentral: React.FC = () => {
         </div>
 
         {/* Empty State */}
-        {filteredTemplates.length === 0 && (
+        {filteredTemplates.length === 0 && !isLoading && (
           <div className="text-center py-12">
             <Mail className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">قالبی در این دسته‌بندی یافت نشد</h3>
-            <p className="text-gray-600">دسته‌بندی دیگری را انتخاب کنید</p>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              {error ? 'خطا در بارگذاری قالب‌ها' : 'قالبی در این دسته‌بندی یافت نشد'}
+            </h3>
+            <p className="text-gray-600 mb-4">
+              {error 
+                ? (error.message?.includes('Authentication') 
+                   ? 'لطفاً ابتدا وارد حساب مدیریت شوید' 
+                   : `خطا: ${error.message}`)
+                : 'دسته‌بندی دیگری را انتخاب کنید یا روی بروزرسانی کلیک کنید'
+              }
+            </p>
+            <div className="flex gap-3 justify-center">
+              {error?.message?.includes('Authentication') ? (
+                <Button 
+                  onClick={() => setLocation('/admin/login')} 
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  ورود به حساب مدیریت
+                </Button>
+              ) : null}
+              <Button onClick={refetch} variant="outline">
+                <RefreshCw className="w-4 h-4 mr-2" />
+                تلاش مجدد
+              </Button>
+            </div>
           </div>
         )}
 
