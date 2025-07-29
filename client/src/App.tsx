@@ -40,6 +40,7 @@ import Template05View from '@/pages/admin/template05-view';
 import Template05StaticView from '@/pages/admin/template05-static-view';
 import EmailRoutingStats from "@/pages/admin/email-routing-stats";
 import AutomatedEmailLogs from "@/pages/admin/automated-email-logs";
+import InquiryResponses from '@/pages/admin/inquiry-responses';
 import ServerConfig from "@/components/admin/server-config";
 import ForgotPassword from "@/pages/forgot-password";
 import ResetPassword from "@/pages/reset-password";
@@ -231,6 +232,7 @@ function Router() {
           <Route path="/admin/email-templates-central" component={EmailTemplatesCentral} />
           <Route path="/admin/template05-view" component={Template05View} />
           <Route path="/admin/template05-static" component={Template05StaticView} />
+          <Route path="/admin/inquiry-responses" component={InquiryResponses} />
           <Route path="/admin/security-management" component={SecurityManagement} />
           <Route path="/admin/ticketing-system" component={TicketingSystemFixed} />
           <Route path="/admin/ai-seo-assistant" component={AiSeoAssistant} />

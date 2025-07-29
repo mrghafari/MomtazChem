@@ -3423,6 +3423,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Send follow-up response to inquiry using Template #05
+  app.post("/api/contacts/:contactId/respond", requireAdmin, async (req, res) => {
+    try {
+      const { contactId } = req.params;
+      const { responseMessage, customerName } = req.body;
+      
+      // Get contact details
+      const contacts = await storage.getContacts();
+      const contact = contacts.find(c => c.id === parseInt(contactId));
+      
+      if (!contact) {
+        return res.status(404).json({
+          success: false,
+          message: "Contact not found"
+        });
+      }
+      
+      // Send follow-up response using Template #05
+      const { UniversalEmailService } = await import('./universal-email-service');
+      
+      // Generate inquiry number for reference
+      const inquiryNumber = `INQ-${Date.now()}-${contact.id}`;
+      const currentDate = new Date().toLocaleDateString('fa-IR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      
+      await UniversalEmailService.sendEmail({
+        templateNumber: '#05',
+        categoryKey: 'admin',
+        to: [contact.email],
+        subject: 'پاسخ استعلام شما', // Will be replaced by template
+        html: '', // Will be replaced by template
+        variables: {
+          customer_name: customerName || `${contact.firstName} ${contact.lastName}`,
+          inquiry_number: inquiryNumber,
+          inquiry_subject: `${contact.productInterest} Inquiry`,
+          inquiry_category: contact.productInterest,
+          customer_message: contact.message || 'پیامی ارسال نشده',
+          response_text: responseMessage || `سلام ${customerName || contact.firstName},
+
+از تماس شما با شرکت ممتاز شیمی سپاسگزاریم. تیم فنی ما درخواست شما را بررسی کرده و آماده ارائه اطلاعات کامل در مورد ${contact.productInterest} می‌باشیم.
+
+ما تا 24 ساعت آینده قیمت دقیق، مشخصات فنی و موجودی محصول را برای شما ارسال خواهیم کرد.
+
+در صورت نیاز به اطلاعات فوری، لطفاً با ما تماس بگیرید.
+
+با احترام،
+تیم فنی شرکت ممتاز شیمی`,
+          contact_phone: '+964 770 999 6771',
+          contact_email: 'info@momtazchem.com',
+          received_date: currentDate
+        }
+      });
+      
+      console.log(`Follow-up response sent to ${contact.email} using Template #05`);
+      
+      res.json({
+        success: true,
+        message: "Follow-up response sent successfully using Template #05"
+      });
+      
+    } catch (error) {
+      console.error("Error sending follow-up response:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to send follow-up response"
+      });
+    }
+  });
+
   // Get all contacts (for admin purposes)
   app.get("/api/contacts", async (req, res) => {
     try {
