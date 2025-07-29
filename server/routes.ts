@@ -7842,50 +7842,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // =============================================================================
-  // ORDER TRACKING MANAGEMENT ENDPOINTS
+  // ORDER TRACKING MANAGEMENT ENDPOINTS - REMOVED DUPLICATE
   // =============================================================================
-
-  // Get all orders for tracking (read-only)
-  app.get("/api/orders/tracking/all", requireAuth, async (req, res) => {
-    try {
-      const orders = await orderManagementStorage.getAllOrdersWithDetails();
-      
-      const formattedOrders = orders.map(order => ({
-        id: order.id,
-        customerOrderId: order.customerOrderId || order.id,
-        customerName: order.customerName,
-        customerEmail: order.customerEmail,
-        customerPhone: order.customerPhone,
-        totalAmount: order.totalAmount,
-        currency: order.currency || 'IQD',
-        status: order.status,
-        paymentMethod: order.paymentMethod,
-        paymentReceiptUrl: order.paymentReceiptUrl,
-        trackingNumber: order.trackingNumber,
-        deliveryCode: order.deliveryCode,
-        estimatedDeliveryDate: order.estimatedDeliveryDate,
-        actualDeliveryDate: order.actualDeliveryDate,
-        deliveryPersonName: order.deliveryPersonName,
-        deliveryPersonPhone: order.deliveryPersonPhone,
-        financialNotes: order.financialNotes,
-        warehouseNotes: order.warehouseNotes,
-        logisticsNotes: order.logisticsNotes,
-        createdAt: order.createdAt,
-        updatedAt: order.updatedAt
-      }));
-
-      res.json({ 
-        success: true, 
-        orders: formattedOrders 
-      });
-    } catch (error) {
-      console.error("Error fetching tracking orders:", error);
-      res.status(500).json({ 
-        success: false, 
-        message: "Internal server error" 
-      });
-    }
-  });
+  
+  // REMOVED: Duplicate endpoint that was serving old cached data from orderManagementStorage
 
   // Get order statistics for tracking dashboard
   app.get("/api/order-management/statistics", requireAuth, async (req, res) => {
@@ -21140,59 +21100,11 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     }
   });
 
+  // =============================================================================  
+  // ORDER TRACKING MANAGEMENT API ROUTES - REMOVED DUPLICATE
   // =============================================================================
-  // ORDER TRACKING MANAGEMENT API ROUTES (Read-Only System)
-  // =============================================================================
-
-  // Get all orders for tracking (read-only overview)
-  app.get('/api/orders/tracking/all', async (req, res) => {
-    try {
-      if (!req.session?.adminId) {
-        return res.status(401).json({ success: false, message: 'احراز هویت مورد نیاز است' });
-      }
-
-      const { pool } = await import('./db');
-      
-      // Get all orders with complete information for tracking
-      const query = `
-        SELECT DISTINCT
-          o.id,
-          o.order_number as customerOrderId,
-          crm.first_name || ' ' || crm.last_name as customerName,
-          crm.email as customerEmail,
-          crm.phone as customerPhone,
-          o.total_amount as totalAmount,
-          o.currency,
-          o.status,
-          o.payment_method as paymentMethod,
-          o.payment_receipt_url as paymentReceiptUrl,
-          o.tracking_number as trackingNumber,
-          o.delivery_code as deliveryCode,
-          o.estimated_delivery_date as estimatedDeliveryDate,
-          o.actual_delivery_date as actualDeliveryDate,
-          o.delivery_person_name as deliveryPersonName,
-          o.delivery_person_phone as deliveryPersonPhone,
-          om.financial_notes as financialNotes,
-          om.warehouse_notes as warehouseNotes,
-          om.logistics_notes as logisticsNotes,
-          o.created_at as createdAt,
-          o.updated_at as updatedAt
-        FROM customer_orders o
-        LEFT JOIN crm_customers crm ON o.customer_id = crm.id
-        LEFT JOIN order_management om ON o.id = om.customer_order_id
-        ORDER BY o.created_at DESC
-        LIMIT 1000
-      `;
-      
-      const result = await pool.query(query);
-      console.log('📋 [ORDER TRACKING] Retrieved', result.rows.length, 'orders for tracking');
-      
-      res.json({ success: true, orders: result.rows });
-    } catch (error) {
-      console.error('❌ [ORDER TRACKING] Error fetching tracking orders:', error);
-      res.status(500).json({ success: false, message: 'خطا در بارگیری سفارشات پیگیری' });
-    }
-  });
+  
+  // REMOVED: Second duplicate endpoint that used wrong data structure
 
   // Get order statistics for dashboard
   app.get('/api/orders/statistics', async (req, res) => {
@@ -36651,6 +36563,159 @@ momtazchem.com
     }
   });
 
+  // ============================================================================
+  // ORDER TRACKING API ENDPOINTS - View Only System (MOVED BEFORE CATCH-ALL)
+  // ============================================================================
+  console.log('🚀 [ROUTE DEBUG] Registering order tracking endpoints BEFORE catch-all...');
+
+  // DEBUG TEST ENDPOINT - Simple response to check route registration  
+  app.get('/api/test/simple', (req, res) => {
+    console.log('🔍 [TEST] Simple endpoint called');
+    res.json({ success: true, message: 'Test endpoint working', timestamp: new Date().toISOString() });
+  });
+  console.log('✅ [ROUTE DEBUG] Test endpoint registered BEFORE catch-all');
+
+  // Get all orders for tracking - CORRECTED DATA SOURCE FROM customer_orders TABLE
+  app.get('/api/orders/tracking/all', requireAuth, async (req, res) => {
+    try {
+      const startTime = Date.now();
+      console.log('🔍 [FIXED] Starting corrected order tracking request...');
+
+      // Query database directly using customer_orders table 
+      const result = await customerPool.query(`
+        SELECT 
+          co.id,
+          co.order_number,
+          co.total_amount, 
+          co.status,
+          cc.first_name,
+          cc.last_name,
+          cc.company,
+          cc.phone,
+          cc.email
+        FROM customer_orders co
+        LEFT JOIN crm_customers cc ON co.customer_id = cc.id
+        ORDER BY co.created_at DESC
+      `);
+      
+      console.log('🔍 [FIXED] Found', result.rows.length, 'orders in', Date.now() - startTime, 'ms');
+      
+      const orders = result.rows.map((row: any) => ({
+        id: row.id,
+        orderNumber: row.order_number,
+        customerName: `${row.first_name || ''} ${row.last_name || ''}`.trim() || row.company || 'نامشخص',
+        totalAmount: parseFloat(row.total_amount) || 0,
+        status: row.status || 'pending',
+        customerEmail: row.email || 'نامشخص',
+        customerPhone: row.phone || 'نامشخص'
+      }));
+      
+      console.log('🔍 [FIXED] Returning processed orders:', orders.slice(0, 2));
+      
+      res.json({
+        success: true,
+        message: 'Fixed tracking API working!',
+        orders
+      });
+      
+    } catch (error) {
+      console.error('🔍 [FIXED] API ERROR:', error);
+      res.status(500).json({ success: false, message: 'Database error in fixed tracking API' });
+    }
+  });
+
+  // NEW FRESH API ENDPOINT FOR DEBUGGING - REMOVE CACHE ISSUES
+  app.get('/api/orders/tracking/fresh', requireAuth, async (req, res) => {
+    try {
+      console.log('🆕 [FRESH API] Starting fresh orders query...');
+      
+      const result = await customerPool.query(`
+        SELECT 
+          co.id,
+          co.order_number,
+          co.total_amount, 
+          co.status,
+          cc.first_name,
+          cc.last_name,
+          cc.company,
+          cc.phone,
+          cc.email
+        FROM customer_orders co
+        LEFT JOIN crm_customers cc ON co.customer_id = cc.id
+        ORDER BY co.created_at DESC
+        LIMIT 10
+      `);
+      
+      console.log('🆕 [FRESH API] Found', result.rows.length, 'orders');
+      
+      const orders = result.rows.map((row: any) => ({
+        id: row.id,
+        orderNumber: row.order_number,
+        customerName: `${row.first_name || ''} ${row.last_name || ''}`.trim() || row.company || 'نامشخص',
+        totalAmount: parseFloat(row.total_amount) || 0,
+        status: row.status || 'pending',
+        customerEmail: row.email || 'نامشخص',
+        customerPhone: row.phone || 'نامشخص'
+      }));
+      
+      console.log('🆕 [FRESH API] Returning processed orders:', orders.slice(0, 2));
+      
+      res.json({
+        success: true,
+        message: 'Fresh API working!',
+        orders
+      });
+      
+    } catch (error) {
+      console.error('🆕 [FRESH API ERROR]:', error);
+      res.status(500).json({ success: false, message: 'Fresh API error' });
+    }
+  });
+
+  // Get order statistics for tracking dashboard
+  app.get('/api/order-management/statistics', requireAuth, async (req, res) => {
+    try {
+      const statsResult = await customerPool.query(`
+        SELECT 
+          COUNT(*) as total_orders,
+          COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending_orders,
+          COUNT(CASE WHEN status = 'financial_approved' THEN 1 END) as approved_orders,
+          COUNT(CASE WHEN status = 'logistics_approved' THEN 1 END) as in_delivery,
+          COUNT(CASE WHEN status = 'delivered' THEN 1 END) as delivered_orders,
+          COUNT(CASE WHEN status = 'cancelled' THEN 1 END) as cancelled_orders,
+          SUM(CASE WHEN status = 'delivered' THEN total_amount ELSE 0 END) as total_revenue,
+          AVG(total_amount) as average_order_value
+        FROM customer_orders
+        WHERE created_at >= CURRENT_DATE - INTERVAL '30 days'
+      `);
+
+      const stats = statsResult.rows[0];
+
+      res.json({
+        success: true,
+        statistics: {
+          totalOrders: parseInt(stats.total_orders) || 0,
+          pendingOrders: parseInt(stats.pending_orders) || 0,
+          approvedOrders: parseInt(stats.approved_orders) || 0,
+          inDelivery: parseInt(stats.in_delivery) || 0,
+          deliveredOrders: parseInt(stats.delivered_orders) || 0,
+          cancelledOrders: parseInt(stats.cancelled_orders) || 0,
+          totalRevenue: parseFloat(stats.total_revenue) || 0,
+          averageOrderValue: parseFloat(stats.average_order_value) || 0
+        }
+      });
+
+    } catch (error) {
+      console.error('Error fetching order statistics:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در دریافت آمار سفارشات" 
+      });
+    }
+  });
+
+  console.log('✅ [ROUTE DEBUG] All order tracking endpoints registered BEFORE catch-all');
+
   // Catch-all for unmatched API routes - return JSON 404
   app.all('/api/*', (req, res) => {
     console.log(`❌ 404 - Unmatched API route: ${req.method} ${req.originalUrl}`);
@@ -39658,80 +39723,73 @@ momtazchem.com
   });
 
   // ============================================================================
-  // ORDER TRACKING API ENDPOINTS - View Only System
+  // ORDER TRACKING API ENDPOINTS - View Only System  
   // ============================================================================
+  console.log('🚀 [ROUTE DEBUG] Registering order tracking endpoints...');
 
-  // Get all orders for tracking (view-only) - COMPLETELY REBUILT API 
+  // DEBUG TEST ENDPOINT - Simple response to check route registration  
+  app.get('/api/test/simple', (req, res) => {
+    console.log('🔍 [TEST] Simple endpoint called');
+    res.json({ success: true, message: 'Test endpoint working', timestamp: new Date().toISOString() });
+  });
+  console.log('✅ [ROUTE DEBUG] Test endpoint registered');
+
+  // Get all orders for tracking - CORRECTED DATA SOURCE FROM customer_orders TABLE
   app.get('/api/orders/tracking/all', requireAuth, async (req, res) => {
     try {
-      console.log('🔍 [DEBUG] [NEW VERSION] Fetching orders for tracking...');
+      const startTime = Date.now();
+      console.log('🔍 [FIXED] Starting corrected order tracking request...');
       
-      // Optimized query with index hints and reduced data transfer
-      const ordersResult = await customerPool.query(`
-        SELECT 
-          co.id,
+      // SINGLE OPTIMIZED QUERY - Join everything at once for better performance
+      const result = await customerPool.query(`
+        SELECT DISTINCT
+          co.id as order_id,
           co.order_number,
-          co.status,
+          co.status as order_status,
           co.total_amount,
           co.currency,
           co.created_at,
-          co.customer_id,
           cc.first_name,
           cc.last_name,
           cc.company,  
           cc.phone,
-          cc.email
+          cc.email,
+          om.current_status,
+          om.delivery_code,
+          om.tracking_number
         FROM customer_orders co
         LEFT JOIN crm_customers cc ON co.customer_id = cc.id
+        LEFT JOIN order_management om ON co.id = om.customer_order_id
         ORDER BY co.created_at DESC
-        LIMIT 30
+        LIMIT 25
       `);
       
-      console.log('⚡ [OPTIMIZED] Query returned', ordersResult.rows.length, 'orders');
+      const queryTime = Date.now() - startTime;
+      console.log(`⚡ [FIXED] Single query: ${queryTime}ms, returned ${result.rows.length} orders`);
+      console.log(`🔍 [DATA CHECK] First order: ID=${result.rows[0]?.order_id}, OrderNum=${result.rows[0]?.order_number}`);
       
-      // Get only essential management data for listed orders
-      const orderIds = ordersResult.rows.map((row: any) => row.id);
-      if (orderIds.length === 0) {
-        return res.json({ success: true, orders: [] });
-      }
-      
-      const managementResult = await customerPool.query(`
-        SELECT 
-          customer_order_id,
-          current_status,
-          delivery_code,
-          tracking_number
-        FROM order_management
-        WHERE customer_order_id = ANY($1)
-      `, [orderIds]);
-      
-      // Create a map of order management data
-      const managementMap = new Map();
-      managementResult.rows.forEach((row: any) => {
-        managementMap.set(row.customer_order_id, row);
-      });
-
-      const orders = ordersResult.rows.map((row: any) => {
-        const mgmt = managementMap.get(row.id) || {};
+      // Simple, direct mapping with correct field references
+      const orders = result.rows.map((row: any) => {
         const customerName = `${row.first_name || ''} ${row.last_name || ''}`.trim() || row.company || 'مشتری نامشخص';
         
         return {
-          id: row.id,
-          customerOrderId: row.order_number,
+          id: row.order_id,  // FIXED: Use order_id not id
+          customerOrderId: row.order_number,  // FIXED: This should be order_number  
           orderNumber: row.order_number,
-          status: mgmt.current_status || row.status || 'pending',
+          status: row.current_status || row.order_status || 'pending',
           totalAmount: parseFloat(row.total_amount) || 0,
           currency: row.currency || 'IQD',
           createdAt: row.created_at,
-          trackingNumber: mgmt.tracking_number,
-          deliveryCode: mgmt.delivery_code,
+          trackingNumber: row.tracking_number,
+          deliveryCode: row.delivery_code,
           customerName,
           customerEmail: row.email || '',
           customerPhone: row.phone || ''
         };
       });
 
-      console.log('🔍 [DEBUG] [NEW VERSION] Returning', orders.length, 'processed orders');
+      const totalTime = Date.now() - startTime;
+      console.log(`⚡ [FIXED] Total processing: ${totalTime}ms, returning ${orders.length} correct orders`);
       
       res.json({
         success: true,
@@ -39739,7 +39797,7 @@ momtazchem.com
       });
 
     } catch (error) {
-      console.error('❌ [ERROR] [NEW VERSION] Error fetching tracking orders:', error);
+      console.error('❌ [ERROR] [FIXED] Error fetching tracking orders:', error);
       res.status(500).json({ 
         success: false, 
         message: "خطا در دریافت اطلاعات سفارشات" 
