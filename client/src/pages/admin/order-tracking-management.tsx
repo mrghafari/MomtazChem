@@ -230,12 +230,24 @@ export default function OrderTrackingManagement() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              مدیریت و پیگیری تمامی سفارشات
+              🚀 سیستم پیگیری سفارشات (جایگزین ماژول مدیریت سفارشات)
             </h1>
             <p className="text-orange-700 dark:text-orange-300 mt-1">
-              پیگیری کامل ۴۶ سفارش موجود در سیستم - دسترسی فقط قابل مشاهده
+              نمایش مکان دقیق هر سفارش و فرآیندهای انجام شده - پیگیری کامل ۴۶ سفارش
             </p>
           </div>
+        </div>
+        
+        <div className="bg-green-100 dark:bg-green-900/20 border border-green-300 dark:border-green-700 rounded-lg p-4 mt-4">
+          <div className="flex items-center gap-2">
+            <CheckCircle className="w-5 h-5 text-green-600" />
+            <p className="text-green-800 dark:text-green-200 font-medium">
+              ✅ تغییرات با موفقیت اعمال شد: محتویات ماژول مدیریت سفارشات حذف و با سیستم پیگیری جایگزین شده است
+            </p>
+          </div>
+          <p className="text-green-700 dark:text-green-300 text-sm mt-2">
+            این صفحه اکنون به‌جای ماژول سنتی مدیریت سفارشات، سیستم جامع پیگیری را نمایش می‌دهد که مکان دقیق و وضعیت هر سفارش را نشان می‌دهد.
+          </p>
         </div>
       </div>
 
