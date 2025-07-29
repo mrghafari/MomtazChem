@@ -277,12 +277,28 @@ const EmailTemplatesCentral: React.FC = () => {
 
   // Debug logging
   React.useEffect(() => {
-    console.log('🔍 Templates data:', templates);
-    console.log('🔍 Selected category:', selectedCategory);
-    console.log('🔍 Filtered templates:', filteredTemplates);
-    console.log('🔍 Filtered length:', filteredTemplates.length);
-    console.log('🔍 Is loading:', isLoading);
-    console.log('🔍 Error:', error);
+    console.log('🔍 [EMAIL TEMPLATES] Templates data:', templates);
+    console.log('🔍 [EMAIL TEMPLATES] Templates array:', Array.isArray(templates), templates?.length);
+    console.log('🔍 [EMAIL TEMPLATES] Selected category:', selectedCategory);
+    console.log('🔍 [EMAIL TEMPLATES] Filtered templates:', filteredTemplates);
+    console.log('🔍 [EMAIL TEMPLATES] Filtered length:', filteredTemplates.length);
+    console.log('🔍 [EMAIL TEMPLATES] Is loading:', isLoading);
+    console.log('🔍 [EMAIL TEMPLATES] Error:', error);
+    
+    // Debug template filtering
+    if (Array.isArray(templates) && templates.length > 0) {
+      console.log('🔍 [EMAIL TEMPLATES] Sample template structure:', templates[0]);
+      templates.forEach((template, index) => {
+        const templateNumber = getTemplateNumber(template.name);
+        const templateInfo = getTemplateInfo(template.name);
+        console.log(`🔍 [EMAIL TEMPLATES] Template ${index + 1}:`, {
+          name: template.name,
+          templateNumber,
+          category: templateInfo.category,
+          inRegistry: !!TEMPLATE_REGISTRY[templateNumber]
+        });
+      });
+    }
   }, [templates, selectedCategory, filteredTemplates, isLoading, error]);
 
   // Get category stats
