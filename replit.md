@@ -167,6 +167,28 @@
 
 ## Recent Changes
 
+### COMPLETED: Enhanced Status System with Department Visibility & Deleted Order Highlighting (January 29, 2025)
+✅ **IMPLEMENTED: Complete status enhancement system showing exactly which department each order is waiting for**
+- **User Request Fulfilled**: "مشخص کن در انتظار کجاست مثلا مالی ، انبار یا لجستیک" - Enhanced status display with department information
+- **Intelligent Status Logic**: Smart determination of responsible department based on order status and payment receipt presence:
+  - **pending + no receipt**: "در انتظار پرداخت" → مشتری (customer needs to pay)
+  - **pending + with receipt**: "در انتظار بررسی مالی" → مالی (finance needs to review)
+  - **confirmed**: "در انتظار آماده‌سازی" → انبار (warehouse needs to prepare)
+  - **warehouse_ready**: "در انتظار تحویل" → لجستیک (logistics needs to pick up)
+  - **delivered**: "تحویل شده" → تکمیل (process completed)
+- **Visual Enhancements**: 
+  - **Dual Display**: Status label + department name for each order
+  - **Color Coding**: Red (customer), Yellow (finance), Blue (warehouse), Purple (logistics), Green (completed)
+  - **Column Header Update**: Changed from "وضعیت" to "وضعیت / بخش" for clarity
+  - **Enhanced Order Details**: Improved modal display with status and department information
+- **Deleted Order Highlighting**: "اردرهای حذف شده را هایلایت نارنجی خیلی کم رنگ کن" - Added orange background highlighting:
+  - **Light Orange Background**: bg-orange-50/50 for deleted orders with hover effect bg-orange-100/50
+  - **Visual Distinction**: Deleted orders now easily identifiable in order list
+- **Business Impact**: Staff can instantly identify which department is responsible for each pending order
+- **Technical Implementation**: Created getStatusDisplay() function with comprehensive logic for status determination
+- **User Experience**: Clear visual hierarchy showing order progression and current responsibility
+- **Result**: Complete order status enhancement operational - every order clearly shows current status and responsible department, with deleted orders highlighted in light orange
+
 ### COMPLETED: Order Management Module Replaced with Order Tracking System - Process Flow Clarity (January 29, 2025)
 ✅ **IMPLEMENTED: Complete replacement of order management module content with order tracking functionality**
 - **User Request Fulfilled**: "این ماژول باید محتویاتش حذف شود و order tracking به جای محتویات آن بیاید" - Replaced order management content with order tracking

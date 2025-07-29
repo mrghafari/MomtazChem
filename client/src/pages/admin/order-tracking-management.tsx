@@ -479,7 +479,9 @@ export default function OrderTrackingManagement() {
               </thead>
               <tbody>
                 {filteredOrders.map((order) => (
-                  <tr key={order.id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-800">
+                  <tr key={order.id} className={`border-b hover:bg-gray-50 dark:hover:bg-gray-800 ${
+                    order.status === 'deleted' ? 'bg-orange-50/50 hover:bg-orange-100/50' : ''
+                  }`}>
                     <td className="p-4 w-[140px] min-w-[140px]">
                       <div className="font-medium text-blue-600">#{order.orderNumber || order.customerOrderId}</div>
                     </td>

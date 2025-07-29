@@ -66,6 +66,10 @@
             padding: 12px;
             margin: 8px 0;
         }
+        .deleted-order {
+            background: rgba(254, 243, 199, 0.3) !important;
+            border-color: #f59e0b;
+        }
     </style>
 </head>
 <body>
@@ -153,7 +157,7 @@
 
             <div class="status-card">
                 <h3>سناریو 6: سفارش حذف شده</h3>
-                <div class="order-example">
+                <div class="order-example deleted-order">
                     <strong>سفارش #M2511245</strong><br>
                     Status: deleted
                     <div style="margin-top: 10px;">
@@ -162,7 +166,7 @@
                     </div>
                 </div>
                 <p style="font-size: 12px; color: #666;">
-                    سفارش لغو یا حذف شده از سیستم
+                    سفارش لغو یا حذف شده از سیستم - <strong>پس‌زمینه نارنجی کم‌رنگ</strong>
                 </p>
             </div>
         </div>
@@ -175,6 +179,7 @@
                 <li><strong>رنگ‌بندی:</strong> هر بخش رنگ مخصوص خود را دارد</li>
                 <li><strong>عنوان ستون:</strong> از "وضعیت" به "وضعیت / بخش" تغییر یافت</li>
                 <li><strong>جزئیات سفارش:</strong> نمایش بهبود یافته در modal جزئیات</li>
+                <li><strong>هایلایت حذف شده:</strong> سفارشات با وضعیت deleted پس‌زمینه نارنجی کم‌رنگ دارند</li>
             </ul>
         </div>
 
