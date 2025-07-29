@@ -80,7 +80,7 @@ import CategoryManagement from "@/pages/category-management";
 import SeoManagement from "@/pages/seo-management";
 import AdminSmsManagement from "@/pages/admin-sms-management";
 import WidgetRecommendations from "@/pages/widget-recommendations";
-import AdminOrderManagement from "@/pages/admin-order-management";
+// Removed AdminOrderManagement - replaced with OrderTrackingManagement for order-management module
 import AbandonedCartManagement from "@/pages/abandoned-cart-management";
 import FinancialDepartment from "@/pages/financial-department";
 import WarehouseDepartment from "@/pages/warehouse-department";
