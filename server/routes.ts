@@ -14699,6 +14699,12 @@ ${procedure.content}
           
           if (followUpTemplate) {
             console.log(`📧 Using Template #05 - ${followUpTemplate.templateName}`);
+            console.log(`📧 Template #05 debug:`, {
+              hasHtmlContent: !!followUpTemplate.htmlContent,
+              hasSubject: !!followUpTemplate.subject,
+              htmlLength: followUpTemplate.htmlContent?.length || 0,
+              subjectText: followUpTemplate.subject
+            });
             
             const templateVariables = {
               customer_name: inquiryData.contactEmail.split('@')[0] || 'Valued Customer',
@@ -14720,14 +14726,33 @@ Momtaz Chemical Technical Team`,
               contact_email: 'info@momtazchem.com'
             };
 
-            // Process template content with variables
-            let processedHtml = followUpTemplate.htmlContent;
-            let processedSubject = followUpTemplate.subject;
+            // Process template content with variables - with null safety
+            let processedHtml = followUpTemplate.htmlContent || '';
+            let processedSubject = followUpTemplate.subject || `Inquiry Confirmation - ${inquiry.inquiryNumber}`;
             
-            for (const [key, value] of Object.entries(templateVariables)) {
-              const placeholder = `{{${key}}}`;
-              processedHtml = processedHtml.replace(new RegExp(placeholder, 'g'), value);
-              processedSubject = processedSubject.replace(new RegExp(placeholder, 'g'), value);
+            // Only process variables if we have content
+            if (processedHtml && processedSubject) {
+              for (const [key, value] of Object.entries(templateVariables)) {
+                const placeholder = `{{${key}}}`;
+                processedHtml = processedHtml.replace(new RegExp(placeholder, 'g'), String(value || ''));
+                processedSubject = processedSubject.replace(new RegExp(placeholder, 'g'), String(value || ''));
+              }
+            } else {
+              console.warn(`⚠️ Template #05 missing content, using fallback`);
+              // Use fallback template
+              processedSubject = `Inquiry Confirmation - ${inquiry.inquiryNumber}`;
+              processedHtml = `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                  <h2>Thank you for your inquiry!</h2>
+                  <p>Dear ${templateVariables.customer_name},</p>
+                  <p>We have received your inquiry about <strong>${inquiryData.category}</strong> and will respond within 24 hours.</p>
+                  <p><strong>Inquiry Number:</strong> ${inquiry.inquiryNumber}</p>
+                  <p><strong>Your Message:</strong><br>${inquiryData.message}</p>
+                  <hr>
+                  <p>Best regards,<br>Momtaz Chemical Team</p>
+                  <p>Email: info@momtazchem.com<br>Phone: +964 770 999 6771</p>
+                </div>
+              `;
             }
 
             await UniversalEmailService.sendEmail({

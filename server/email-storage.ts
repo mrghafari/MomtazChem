@@ -542,20 +542,20 @@ export class EmailStorage implements IEmailStorage {
       const result = await emailDb.execute(sql`
         SELECT 
           id, 
-          name as templateName, 
+          name, 
           category,
           subject, 
-          html_content as htmlContent, 
-          text_content as textContent, 
+          html_content, 
+          text_content, 
           variables, 
-          is_active as isActive, 
-          is_default as isDefault, 
+          is_active, 
+          is_default, 
           language, 
-          created_by as createdBy, 
-          usage_count as usageCount, 
-          last_used as lastUsed, 
-          created_at as createdAt, 
-          updated_at as updatedAt
+          created_by, 
+          usage_count, 
+          last_used, 
+          created_at, 
+          updated_at
         FROM email_templates 
         WHERE name LIKE '%' || ${templateNumber} || '%' 
         AND is_active = true
@@ -568,7 +568,33 @@ export class EmailStorage implements IEmailStorage {
         return undefined;
       }
       
-      const template = result.rows[0] as any;
+      const row = result.rows[0] as any;
+      // Map database fields to interface fields with explicit null checking
+      const template = {
+        id: row.id,
+        templateName: row.name || 'Unnamed Template',
+        category: row.category || 'general',
+        subject: row.subject || 'No Subject',
+        htmlContent: row.html_content || '',
+        textContent: row.text_content || '',
+        variables: row.variables || [],
+        isActive: Boolean(row.is_active),
+        isDefault: Boolean(row.is_default),
+        language: row.language || 'en',
+        createdBy: row.created_by || null,
+        usageCount: row.usage_count || 0,
+        lastUsed: row.last_used || null,
+        createdAt: row.created_at || new Date(),
+        updatedAt: row.updated_at || new Date()
+      };
+      
+      console.log(`✅ Template #05 field debug:`, {
+        templateName: template.templateName,
+        hasHtmlContent: !!template.htmlContent,
+        htmlContentLength: template.htmlContent?.length || 0,
+        hasSubject: !!template.subject,
+        rawHtmlContent: row.html_content ? 'EXISTS' : 'NULL'
+      });
       console.log(`✅ Found template ${templateNumber}: ${template.templateName}`);
       return template;
     } catch (error) {
