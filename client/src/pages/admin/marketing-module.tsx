@@ -33,7 +33,12 @@ import {
   Gift,
   Award,
   Star,
-  Trophy
+  Trophy,
+  Mail,
+  Send,
+  Users2,
+  FileText,
+  BarChart4
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -107,6 +112,7 @@ const MarketingModule: React.FC = () => {
   const [loyaltyRulesDialog, setLoyaltyRulesDialog] = useState(false);
   const [tierManagementDialog, setTierManagementDialog] = useState(false);
   const [generateDiscountDialog, setGenerateDiscountDialog] = useState(false);
+  const [emailCampaignDialog, setEmailCampaignDialog] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -173,6 +179,22 @@ const MarketingModule: React.FC = () => {
     onSuccess: () => {
       toast({ title: 'موفقیت', description: 'کد تخفیف با موفقیت تولید شد' });
       queryClient.invalidateQueries({ queryKey: ['/api/loyalty/customers'] });
+    }
+  });
+
+  const createEmailCampaignMutation = useMutation({
+    mutationFn: async (campaignData: any) => {
+      const response = await fetch('/api/marketing/email-campaigns', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(campaignData)
+      });
+      if (!response.ok) throw new Error('Failed to create email campaign');
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: 'موفقیت', description: 'کمپین ایمیل مارکتینگ با موفقیت ایجاد شد' });
+      queryClient.invalidateQueries({ queryKey: ['/api/marketing/email-campaigns'] });
     }
   });
 
@@ -335,7 +357,7 @@ const MarketingModule: React.FC = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-5 mb-6">
+        <TabsList className="grid w-full grid-cols-6 mb-6">
           <TabsTrigger value="international-markets" className="flex items-center gap-2">
             <Globe className="w-4 h-4" />
             بازارهای بین‌المللی
@@ -355,6 +377,10 @@ const MarketingModule: React.FC = () => {
           <TabsTrigger value="loyalty-system" className="flex items-center gap-2">
             <Gift className="w-4 h-4" />
             سیستم وفاداری
+          </TabsTrigger>
+          <TabsTrigger value="email-marketing" className="flex items-center gap-2">
+            <Mail className="w-4 h-4" />
+            ایمیل مارکتینگ
           </TabsTrigger>
         </TabsList>
 
@@ -845,6 +871,295 @@ const MarketingModule: React.FC = () => {
             </Card>
           </div>
         </TabsContent>
+
+        <TabsContent value="email-marketing" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center">
+                  <Send className="w-8 h-8 text-green-600 mr-3" />
+                  <div>
+                    <p className="text-2xl font-bold">47</p>
+                    <p className="text-gray-600">کمپین‌های فعال</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center">
+                  <Users2 className="w-8 h-8 text-blue-600 mr-3" />
+                  <div>
+                    <p className="text-2xl font-bold">12,847</p>
+                    <p className="text-gray-600">مشترکین فعال</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center">
+                  <BarChart4 className="w-8 h-8 text-purple-600 mr-3" />
+                  <div>
+                    <p className="text-2xl font-bold">68.5%</p>
+                    <p className="text-gray-600">نرخ باز کردن</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center">
+                  <Activity className="w-8 h-8 text-orange-600 mr-3" />
+                  <div>
+                    <p className="text-2xl font-bold">24.2%</p>
+                    <p className="text-gray-600">نرخ کلیک</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-6">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Mail className="w-5 h-5 text-green-600" />
+                    کمپین‌های اخیر
+                  </CardTitle>
+                  <Button 
+                    className="bg-green-600 hover:bg-green-700"
+                    onClick={() => setEmailCampaignDialog(true)}
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    کمپین جدید
+                  </Button>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="border border-green-200 rounded-lg p-4 bg-green-50">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <h4 className="font-semibold text-green-800">پیشنهاد ویژه محصولات شیمیایی</h4>
+                          <p className="text-sm text-green-600">حملات تبلیغاتی • مشتریان طلایی</p>
+                        </div>
+                        <Badge className="bg-green-100 text-green-800">فعال</Badge>
+                      </div>
+                      <div className="grid grid-cols-3 gap-4 text-sm">
+                        <div>
+                          <span className="text-gray-600">ارسال شده:</span>
+                          <span className="block font-medium">3,245</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-600">باز شده:</span>
+                          <span className="block font-medium">2,187 (67%)</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-600">کلیک شده:</span>
+                          <span className="block font-medium">742 (23%)</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="border border-blue-200 rounded-lg p-4 bg-blue-50">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <h4 className="font-semibold text-blue-800">خبرنامه هفتگی شرکت</h4>
+                          <p className="text-sm text-blue-600">خبرنامه • همه مشتریان</p>
+                        </div>
+                        <Badge className="bg-blue-100 text-blue-800">ارسال شده</Badge>
+                      </div>
+                      <div className="grid grid-cols-3 gap-4 text-sm">
+                        <div>
+                          <span className="text-gray-600">ارسال شده:</span>
+                          <span className="block font-medium">12,847</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-600">باز شده:</span>
+                          <span className="block font-medium">8,965 (70%)</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-600">کلیک شده:</span>
+                          <span className="block font-medium">3,205 (25%)</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="border border-yellow-200 rounded-lg p-4 bg-yellow-50">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <h4 className="font-semibold text-yellow-800">پیگیری سفارشات معلق</h4>
+                          <p className="text-sm text-yellow-600">پیگیری • مشتریان غیرفعال</p>
+                        </div>
+                        <Badge className="bg-yellow-100 text-yellow-800">در انتظار</Badge>
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        زمان‌بندی: فردا ساعت 10:00 • مخاطبین: 1,456 مشتری
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-purple-600" />
+                    قالب‌های ایمیل
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="border rounded-lg p-3 hover:bg-gray-50 cursor-pointer">
+                      <h5 className="font-medium mb-1">خوش‌آمدگویی</h5>
+                      <p className="text-sm text-gray-600">برای مشتریان جدید</p>
+                    </div>
+                    <div className="border rounded-lg p-3 hover:bg-gray-50 cursor-pointer">
+                      <h5 className="font-medium mb-1">تأیید سفارش</h5>
+                      <p className="text-sm text-gray-600">پس از ثبت سفارش</p>
+                    </div>
+                    <div className="border rounded-lg p-3 hover:bg-gray-50 cursor-pointer">
+                      <h5 className="font-medium mb-1">کد تخفیف</h5>
+                      <p className="text-sm text-gray-600">پیشنهادات ویژه</p>
+                    </div>
+                    <div className="border rounded-lg p-3 hover:bg-gray-50 cursor-pointer">
+                      <h5 className="font-medium mb-1">یادآوری</h5>
+                      <p className="text-sm text-gray-600">سبد خرید رهاشده</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart4 className="w-5 h-5 text-blue-600" />
+                    آمار عملکرد
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>نرخ تحویل</span>
+                        <span className="font-medium">94.2%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="bg-green-600 h-2 rounded-full" style={{width: '94.2%'}}></div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>نرخ باز کردن</span>
+                        <span className="font-medium">68.5%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="bg-blue-600 h-2 rounded-full" style={{width: '68.5%'}}></div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>نرخ کلیک</span>
+                        <span className="font-medium">24.2%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="bg-purple-600 h-2 rounded-full" style={{width: '24.2%'}}></div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>نرخ لغو اشتراک</span>
+                        <span className="font-medium">1.8%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="bg-red-600 h-2 rounded-full" style={{width: '1.8%'}}></div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users2 className="w-5 h-5 text-green-600" />
+                    گروه‌های مخاطبین
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                        <span className="text-sm">مشتریان طلایی</span>
+                      </div>
+                      <span className="font-bold">1,247</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-slate-400"></div>
+                        <span className="text-sm">مشتریان نقره‌ای</span>
+                      </div>
+                      <span className="font-bold">3,456</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-amber-500"></div>
+                        <span className="text-sm">مشتریان برنزی</span>
+                      </div>
+                      <span className="font-bold">8,144</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                        <span className="text-sm">غیرفعال</span>
+                      </div>
+                      <span className="font-bold">2,156</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">عملیات سریع</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <Button 
+                      className="w-full bg-green-600 hover:bg-green-700"
+                      onClick={() => setEmailCampaignDialog(true)}
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      کمپین جدید
+                    </Button>
+                    <Button variant="outline" className="w-full">
+                      <FileText className="w-4 h-4 mr-2" />
+                      مدیریت قالب‌ها
+                    </Button>
+                    <Button variant="outline" className="w-full">
+                      <Users2 className="w-4 h-4 mr-2" />
+                      گروه‌بندی مشتریان
+                    </Button>
+                    <Button variant="outline" className="w-full">
+                      <BarChart4 className="w-4 h-4 mr-2" />
+                      گزارش تفصیلی
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </TabsContent>
       </Tabs>
 
       {/* Add New Market Dialog */}
@@ -1068,6 +1383,139 @@ const MarketingModule: React.FC = () => {
               </Button>
               <Button className="bg-yellow-600 hover:bg-yellow-700">
                 ذخیره تنظیمات سطوح
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Email Marketing Campaign Dialog */}
+      <Dialog open={emailCampaignDialog} onOpenChange={setEmailCampaignDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Send className="w-5 h-5 text-green-600" />
+              ایجاد کمپین ایمیل مارکتینگ جدید
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <Label>نام کمپین</Label>
+                <Input placeholder="نام کمپین خود را وارد کنید..." />
+              </div>
+              <div>
+                <Label>نوع کمپین</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="انتخاب نوع کمپین..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="product_promotion">تبلیغات محصول</SelectItem>
+                    <SelectItem value="seasonal_offer">پیشنهاد فصلی</SelectItem>
+                    <SelectItem value="loyalty_rewards">جوایز وفاداری</SelectItem>
+                    <SelectItem value="newsletter">خبرنامه</SelectItem>
+                    <SelectItem value="welcome_series">سری خوش‌آمدگویی</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <Label>گروه هدف</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="انتخاب مخاطبین..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all_customers">همه مشتریان</SelectItem>
+                    <SelectItem value="gold_tier">مشتریان طلایی</SelectItem>
+                    <SelectItem value="silver_tier">مشتریان نقره‌ای</SelectItem>
+                    <SelectItem value="bronze_tier">مشتریان برنزی</SelectItem>
+                    <SelectItem value="inactive">مشتریان غیرفعال</SelectItem>
+                    <SelectItem value="recent_buyers">خریداران اخیر</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>زمان ارسال</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="زمان ارسال..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="immediate">فوری</SelectItem>
+                    <SelectItem value="scheduled">زمان‌بندی شده</SelectItem>
+                    <SelectItem value="best_time">بهترین زمان</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>اولویت</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="سطح اولویت..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">پایین</SelectItem>
+                    <SelectItem value="medium">متوسط</SelectItem>
+                    <SelectItem value="high">بالا</SelectItem>
+                    <SelectItem value="urgent">فوری</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div>
+              <Label>موضوع ایمیل</Label>
+              <Input placeholder="موضوع جذاب و توصیفی برای ایمیل..." />
+              <p className="text-sm text-gray-600 mt-1">پیشنهاد: از متغیرهای شخصی‌سازی استفاده کنید</p>
+            </div>
+
+            <div>
+              <Label>محتوای ایمیل</Label>
+              <Textarea 
+                rows={8}
+                placeholder="محتوای HTML یا متنی ایمیل خود را وارد کنید..."
+                className="font-mono text-sm"
+              />
+            </div>
+
+            <Card className="bg-blue-50 border-blue-200">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-blue-800 text-lg">متغیرهای قابل استفاده</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                  <code className="bg-blue-100 px-2 py-1 rounded">{'{{customerName}}'}</code>
+                  <code className="bg-blue-100 px-2 py-1 rounded">{'{{email}}'}</code>
+                  <code className="bg-blue-100 px-2 py-1 rounded">{'{{loyaltyPoints}}'}</code>
+                  <code className="bg-blue-100 px-2 py-1 rounded">{'{{tierLevel}}'}</code>
+                  <code className="bg-blue-100 px-2 py-1 rounded">{'{{lastPurchase}}'}</code>
+                  <code className="bg-blue-100 px-2 py-1 rounded">{'{{totalSpent}}'}</code>
+                  <code className="bg-blue-100 px-2 py-1 rounded">{'{{discountCode}}'}</code>
+                  <code className="bg-blue-100 px-2 py-1 rounded">{'{{unsubscribeLink}}'}</code>
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="flex justify-end space-x-2 space-x-reverse">
+              <Button variant="outline" onClick={() => setEmailCampaignDialog(false)}>
+                انصراف
+              </Button>
+              <Button variant="outline">
+                پیش‌نمایش
+              </Button>
+              <Button 
+                className="bg-green-600 hover:bg-green-700"
+                onClick={() => {
+                  createEmailCampaignMutation.mutate({});
+                  setEmailCampaignDialog(false);
+                }}
+                disabled={createEmailCampaignMutation.isPending}
+              >
+                {createEmailCampaignMutation.isPending ? 'در حال ایجاد...' : 'ایجاد کمپین'}
               </Button>
             </div>
           </div>
