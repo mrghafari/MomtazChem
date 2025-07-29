@@ -120,20 +120,46 @@ export default function OrderTrackingManagement() {
     return 600000; // Default 10 minutes if no settings found
   };
 
-  // Fetch all orders for tracking - REBUILT to match actual database
+  // Fetch all orders for tracking - COMPLETELY FIXED WITH DEBUG
   const { data: orders, isLoading } = useQuery({
-    queryKey: ['tracking-orders'],
+    queryKey: ['tracking-orders-fixed', Date.now()], // Force cache bust
     queryFn: async () => {
+      console.log('🔍 [FRONTEND DEBUG] Fetching orders...');
       const response = await fetch('/api/orders/tracking/all', {
-        credentials: 'include'
+        credentials: 'include',
+        cache: 'no-cache', // Disable browser cache
+        headers: {
+          'Cache-Control': 'no-cache'
+        }
       });
+      
       if (!response.ok) {
+        console.error('🔍 [FRONTEND DEBUG] Response not OK:', response.status);
         throw new Error('Failed to fetch tracking orders');
       }
+      
       const data = await response.json();
+      console.log('🔍 [FRONTEND DEBUG] Raw API response:', {
+        success: data.success,
+        ordersCount: data.orders?.length || 0,
+        firstOrder: data.orders?.[0] || null
+      });
+      
+      if (data.orders && data.orders.length > 0) {
+        console.log('🔍 [FRONTEND DEBUG] First order fields:', Object.keys(data.orders[0]));
+        console.log('🔍 [FRONTEND DEBUG] First order sample:', {
+          id: data.orders[0].id,
+          customerName: data.orders[0].customerName,
+          totalAmount: data.orders[0].totalAmount,
+          orderNumber: data.orders[0].orderNumber
+        });
+      }
+      
       return data.orders as Order[];
     },
-    refetchInterval: getOrderTrackingRefreshInterval()
+    refetchInterval: 5000, // Frequent refresh for debugging
+    staleTime: 0, // Always fetch fresh
+    cacheTime: 0 // Don't cache
   });
 
   // Fetch order statistics - REBUILT to match actual API

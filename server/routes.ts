@@ -39661,13 +39661,15 @@ momtazchem.com
   // ORDER TRACKING API ENDPOINTS - View Only System
   // ============================================================================
 
-  // Get all orders for tracking (view-only)
+  // Get all orders for tracking (view-only) - COMPLETELY REBUILT API 
   app.get('/api/orders/tracking/all', requireAuth, async (req, res) => {
     try {
-      // Get orders from customer_orders table with enhanced data and order_management status
+      console.log('🔍 [DEBUG] [NEW VERSION] Fetching orders for tracking...');
+      
+      // Direct query to get actual data - no complex joins that might fail
       const ordersResult = await customerPool.query(`
         SELECT 
-          co.id as order_id,
+          co.id,
           co.order_number,
           co.status,
           co.total_amount,
@@ -39676,73 +39678,149 @@ momtazchem.com
           co.updated_at,
           co.payment_method,
           co.payment_status,
-          -- Order management data for tracking
-          om.current_status as tracking_status,
-          om.delivery_code,
-          om.tracking_number,
-          om.estimated_delivery_date,
-          om.delivery_person_name,
-          om.delivery_person_phone,
-          om.financial_notes,
-          om.warehouse_notes,
-          om.logistics_notes,
-          -- Customer information from CRM
+          co.customer_id,
           cc.first_name,
           cc.last_name,
-          cc.company,
+          cc.company,  
           cc.phone,
           cc.email,
-          cc.city_region as city,
+          cc.city_region,
           cc.address
         FROM customer_orders co
-        LEFT JOIN order_management om ON co.id = om.customer_order_id
         LEFT JOIN crm_customers cc ON co.customer_id = cc.id
         ORDER BY co.created_at DESC
-        LIMIT 100
+        LIMIT 50
       `);
+      
+      console.log('🔍 [DEBUG] [NEW VERSION] Query returned', ordersResult.rows.length, 'orders');
+      
+      // Get order management data separately to avoid complex joins
+      const managementResult = await customerPool.query(`
+        SELECT 
+          customer_order_id,
+          current_status,
+          delivery_code,
+          tracking_number,
+          estimated_delivery_date,
+          delivery_person_name,
+          delivery_person_phone,
+          financial_notes,
+          warehouse_notes,
+          logistics_notes
+        FROM order_management
+      `);
+      
+      // Create a map of order management data
+      const managementMap = new Map();
+      managementResult.rows.forEach((row: any) => {
+        managementMap.set(row.customer_order_id, row);
+      });
 
-      const orders = ordersResult.rows.map((row: any) => ({
-        id: row.order_id,
-        customerOrderId: row.order_number, // Use new order number format (M2511xxx)
-        orderNumber: row.order_number,
-        status: row.tracking_status || row.status || 'pending', // Use tracking status if available, fallback to order status
-        totalAmount: parseFloat(row.total_amount) || 0,
-        currency: row.currency || 'IQD',
-        createdAt: row.created_at,
-        updatedAt: row.updated_at,
-        paymentMethod: row.payment_method || 'نقدی',
-        paymentStatus: row.payment_status || 'در انتظار',
-        trackingNumber: row.tracking_number,
-        estimatedDeliveryDate: row.estimated_delivery_date,
-        deliveryPersonName: row.delivery_person_name,
-        deliveryPersonPhone: row.delivery_person_phone,
-        deliveryCode: row.delivery_code,
-        notes: row.financial_notes || row.warehouse_notes || row.logistics_notes || '',
-        customerName: `${row.first_name || ''} ${row.last_name || ''}`.trim() || row.company || 'مشتری نامشخص',
-        customerEmail: row.email || 'ایمیل نامشخص',
-        customerPhone: row.phone || 'تلفن نامشخص',
-        customerInfo: {
-          firstName: row.first_name || 'نام نامشخص',
-          lastName: row.last_name || 'نام خانوادگی نامشخص',
-          companyName: row.company || 'شرکت نامشخص',
-          phone: row.phone || 'تلفن نامشخص',
-          email: row.email || 'ایمیل نامشخص',
-          city: row.city || 'شهر نامشخص',
-          address: row.address || 'آدرس نامشخص'
-        }
-      }));
+      const orders = ordersResult.rows.map((row: any) => {
+        const mgmt = managementMap.get(row.id) || {};
+        const customerName = `${row.first_name || ''} ${row.last_name || ''}`.trim() || row.company || 'مشتری نامشخص';
+        
+        console.log('🔍 [DEBUG] [NEW VERSION] Processing order:', {
+          id: row.id,
+          order_number: row.order_number,
+          total_amount: row.total_amount,
+          customerName,
+          status: row.status
+        });
+        
+        return {
+          id: row.id,
+          customerOrderId: row.order_number,
+          orderNumber: row.order_number,
+          status: mgmt.current_status || row.status || 'pending',
+          totalAmount: parseFloat(row.total_amount) || 0,
+          currency: row.currency || 'IQD',
+          createdAt: row.created_at,
+          updatedAt: row.updated_at,
+          paymentMethod: row.payment_method || 'نقدی',
+          paymentStatus: row.payment_status || 'در انتظار',
+          trackingNumber: mgmt.tracking_number,
+          estimatedDeliveryDate: mgmt.estimated_delivery_date,
+          deliveryPersonName: mgmt.delivery_person_name,
+          deliveryPersonPhone: mgmt.delivery_person_phone,
+          deliveryCode: mgmt.delivery_code,
+          notes: mgmt.financial_notes || mgmt.warehouse_notes || mgmt.logistics_notes || '',
+          customerName,
+          customerEmail: row.email || 'ایمیل نامشخص',
+          customerPhone: row.phone || 'تلفن نامشخص',
+          customerInfo: {
+            firstName: row.first_name || 'نام نامشخص',
+            lastName: row.last_name || 'نام خانوادگی نامشخص',
+            companyName: row.company || 'شرکت نامشخص',
+            phone: row.phone || 'تلفن نامشخص',
+            email: row.email || 'ایمیل نامشخص',
+            city: row.city_region || 'شهر نامشخص',
+            address: row.address || 'آدرس نامشخص'
+          }
+        };
+      });
 
+      console.log('🔍 [DEBUG] [NEW VERSION] Returning', orders.length, 'processed orders');
+      
       res.json({
         success: true,
         orders
       });
 
     } catch (error) {
-      console.error('Error fetching tracking orders:', error);
+      console.error('❌ [ERROR] [NEW VERSION] Error fetching tracking orders:', error);
       res.status(500).json({ 
         success: false, 
         message: "خطا در دریافت اطلاعات سفارشات" 
       });
+    }
+  });
+  
+  // NEW FRESH API ENDPOINT FOR DEBUGGING - REMOVE CACHE ISSUES
+  app.get('/api/orders/tracking/fresh', requireAuth, async (req, res) => {
+    try {
+      console.log('🆕 [FRESH API] Starting fresh orders query...');
+      
+      const result = await customerPool.query(`
+        SELECT 
+          co.id,
+          co.order_number,
+          co.total_amount, 
+          co.status,
+          cc.first_name,
+          cc.last_name,
+          cc.company,
+          cc.phone,
+          cc.email
+        FROM customer_orders co
+        LEFT JOIN crm_customers cc ON co.customer_id = cc.id
+        ORDER BY co.created_at DESC
+        LIMIT 10
+      `);
+      
+      console.log('🆕 [FRESH API] Found', result.rows.length, 'orders');
+      
+      const orders = result.rows.map((row: any) => ({
+        id: row.id,
+        orderNumber: row.order_number,
+        customerName: `${row.first_name || ''} ${row.last_name || ''}`.trim() || row.company || 'نامشخص',
+        totalAmount: parseFloat(row.total_amount) || 0,
+        status: row.status || 'pending',
+        customerEmail: row.email || 'نامشخص',
+        customerPhone: row.phone || 'نامشخص'
+      }));
+      
+      console.log('🆕 [FRESH API] Returning processed orders:', orders.slice(0, 2));
+      
+      res.json({
+        success: true,
+        message: 'Fresh API working!',
+        orders
+      });
+      
+    } catch (error) {
+      console.error('🆕 [FRESH API ERROR]:', error);
+      res.status(500).json({ success: false, message: 'Fresh API error' });
     }
   });
 
