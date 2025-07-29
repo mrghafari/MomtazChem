@@ -36588,6 +36588,7 @@ momtazchem.com
           co.order_number,
           co.total_amount, 
           co.status,
+          co.created_at,
           cc.first_name,
           cc.last_name,
           cc.company,
@@ -36607,7 +36608,8 @@ momtazchem.com
         totalAmount: parseFloat(row.total_amount) || 0,
         status: row.status || 'pending',
         customerEmail: row.email || 'نامشخص',
-        customerPhone: row.phone || 'نامشخص'
+        customerPhone: row.phone || 'نامشخص',
+        createdAt: row.created_at
       }));
       
       console.log('🔍 [FIXED] Returning processed orders:', orders.slice(0, 2));

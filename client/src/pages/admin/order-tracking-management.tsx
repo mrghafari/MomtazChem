@@ -716,7 +716,7 @@ export default function OrderTrackingManagement() {
                     </td>
                     <td className="p-4 text-right" style={{ width: '140px' }}>
                       <div className="text-sm">
-                        {formatDate(order.createdAt)}
+                        {order.createdAt ? formatDate(order.createdAt) : 'در حال بارگیری...'}
                       </div>
                     </td>
                     <td className="p-4 text-center" style={{ width: '100px' }}>
