@@ -1,8 +1,169 @@
-# Chemical Solutions Platform - Replit Project Guide
+# Momtazchem Chemical Solutions Platform - راهنمای جامع پروژه
 
-## Overview
+## Overview - نمای کلی پروژه
 
-This is a comprehensive multilingual chemical solutions e-commerce and management platform for Momtazchem, a leading chemical products company in Iraq and the Middle East. The system combines a public-facing showcase website, advanced e-commerce functionality, and robust administrative tools including CRM, inventory management, email automation, content management, and SEO optimization. The platform supports 4 languages (English, Arabic, Kurdish, Turkish) with complete RTL/LTR text direction handling and features 30 integrated administrative functions centralized in a unified Site Management interface with drag-and-drop Quick Actions layout.
+**Momtazchem Chemical Solutions Platform** یک پلتفرم جامع چندزبانه حلول شیمیایی برای شرکت ممتازکم، یکی از شرکت‌های پیشرو در زمینه محصولات شیمیایی در عراق و خاورمیانه است. این سیستم ترکیبی از وب‌سایت نمایشی عمومی، عملکرد تجارت الکترونیک پیشرفته، و ابزارهای مدیریتی قوی شامل CRM، مدیریت موجودی، اتوماسیون ایمیل، مدیریت محتوا، و بهینه‌سازی SEO را ارائه می‌دهد.
+
+### Key Features - ویژگی‌های کلیدی:
+- **Multilingual Support**: پشتیبانی کامل از 4 زبان (انگلیسی، عربی، کردی، ترکی) با مدیریت RTL/LTR
+- **Unified Site Management**: 34+ ماژول مدیریتی یکپارچه با رابط کاربری drag-and-drop
+- **Advanced E-commerce**: سیستم فروشگاه پیشرفته با مدیریت سفارش و پرداخت
+- **GPS Tracking System**: سیستم ردیابی GPS در 11 شهر عراق
+- **CRM Integration**: مدیریت جامع مشتریان با سیستم امتیازدهی و وفاداری
+- **Real-time Analytics**: تحلیل‌های لحظه‌ای و گزارش‌های جغرافیایی
+- **Email Automation**: سیستم اتوماسیون ایمیل با 18+ قالب
+- **Inventory Management**: مدیریت انبار با سیستم بارکد و kardex sync
+- **Financial Management**: سیستم مالی با مدیریت کیف پول و تراکنش‌ها
+
+## System Architecture - معماری سیستم
+
+### Frontend Technology Stack - پشته فناوری فرانت‌اند
+- **React 18** with TypeScript for type-safe development
+- **Tailwind CSS** for responsive and modern UI design
+- **Wouter** for lightweight client-side routing
+- **TanStack Query (React Query)** for server state management
+- **React Hook Form** with Zod validation for form handling
+- **Shadcn/ui** components for consistent design system
+- **Lucide React** icons for professional iconography
+- **Framer Motion** for smooth animations and transitions
+
+### Backend Technology Stack - پشته فناوری بک‌اند
+- **Node.js** with Express.js framework
+- **TypeScript** for type-safe backend development
+- **PostgreSQL (Neon Cloud)** as primary database
+- **Drizzle ORM** for database queries and migrations
+- **Express Sessions** with MemoryStore for authentication
+- **Bcrypt** for password hashing and security
+- **Multer** for file upload handling
+- **Nodemailer** for email automation
+- **SMS integration** for customer notifications
+
+### Database Schema - طرح پایگاه داده
+- **Customer Management**: crm_customers, customer_loyalty_points, customer_activities
+- **Order Processing**: customer_orders, order_items, order_management, payment_receipts
+- **Product Catalog**: showcase_products, product_reviews, product_stats, categories
+- **Inventory**: warehouse_inventory, inventory_alerts, batch_tracking
+- **Logistics**: iraqi_cities, iraqi_provinces, vehicle_templates, gps_delivery_confirmations
+- **Content Management**: content_items, email_templates, seo_pages
+- **User Management**: users, custom_users, custom_roles, user_sessions
+
+### Security Features - امکانات امنیتی
+- **Multi-level Authentication**: Admin, Custom Users, Customer authentication
+- **Session Management**: Secure session handling with dual-mode support
+- **Password Security**: Bcrypt hashing with salt rounds
+- **Permission System**: Role-based access control (RBAC) with 34+ modules
+- **Input Validation**: Zod schema validation on all endpoints
+- **SQL Injection Prevention**: Parameterized queries with Drizzle ORM
+
+## Administrative Modules - ماژول‌های مدیریتی
+
+### Core Management Modules (1-10)
+1. **KPI Dashboard** - داشبورد شاخص‌های عملکرد
+2. **Management Dashboard** - داشبورد مدیریتی
+3. **Shop Synchronization** - همگام‌سازی فروشگاه
+4. **Shop Management** - مدیریت فروشگاه
+5. **Product Management** - مدیریت محصولات
+6. **Order Management & Tracking** - مدیریت و پیگیری سفارشات (Consolidated)
+7. **Warehouse Management** - مدیریت انبار
+8. **Logistics Management** - مدیریت لجستیک
+9. **Inquiry Management** - مدیریت استعلامات
+10. **CRM Management** - مدیریت CRM
+
+### Business Operations Modules (11-20)
+11. **Barcode Management** - مدیریت بارکد
+12. **Email Settings** - تنظیمات ایمیل
+13. **Database Backup** - پشتیبان‌گیری پایگاه داده
+14. **SEO Management** - مدیریت SEO
+15. **Categories Management** - مدیریت دسته‌بندی‌ها
+16. **SMS Management** - مدیریت پیامک
+17. **Factory Management** - مدیریت کارخانه
+18. **User Management** - مدیریت کاربران
+19. **Procedures Management** - مدیریت روش‌ها
+20. **Payment Management** - مدیریت پرداخت
+
+### Financial & Analytics Modules (21-30)
+21. **Accounting Management** - مدیریت حسابداری
+22. **Financial Management** - مدیریت مالی
+23. **Wallet Management** - مدیریت کیف پول
+24. **Geographic Analytics** - آمار جغرافیایی
+25. **AI Settings** - تنظیمات هوش مصنوعی
+26. **Refresh Control** - کنترل تازه‌سازی
+27. **Content Management** - مدیریت محتوا
+28. **Ticketing System** - سیستم تیکتینگ
+29. **Remote Desktop** - دسکتاپ راه دور
+30. **Server Configuration** - تنظیمات سرور
+
+### Strategic & Documentation Modules (31-34+)
+31. **Company Information** - اطلاعات شرکت
+32. **User Guide** - راهنمای کاربری
+33. **Marketing Module** - ماژول مارکتینگ (with Email Marketing & Customer Loyalty)
+34. **Site Management** - مدیریت سایت (Meta-module for accessing all others)
+
+## Technical Implementation - پیاده‌سازی فنی
+
+### API Endpoints Structure
+- **Authentication**: `/api/admin/login`, `/api/customers/login`, `/api/admin/me`
+- **Product Management**: `/api/products`, `/api/products/:id`, `/api/categories`
+- **Order Processing**: `/api/orders`, `/api/order-management/*`, `/api/calculate-delivery-cost`
+- **CRM Operations**: `/api/crm/*`, `/api/customers/*`, `/api/loyalty/*`
+- **Logistics**: `/api/logistics/*`, `/api/iraqi-cities`, `/api/gps-delivery/*`
+- **Content**: `/api/content/*`, `/api/email-templates/*`, `/api/seo/*`
+- **Analytics**: `/api/analytics/*`, `/api/geography-analytics/*`
+
+### Real-time Features
+- **GPS Tracking**: Live delivery tracking in 11 Iraqi cities
+- **Auto-refresh Systems**: Configurable refresh intervals per department
+- **Inventory Alerts**: Real-time stock level monitoring
+- **Order Status Updates**: Live order progression tracking
+- **Customer Notifications**: Email and SMS automation
+
+### Multilingual Support
+- **RTL/LTR Handling**: Automatic text direction based on language
+- **Language Files**: Centralized translation management
+- **UI Adaptation**: Dynamic layout changes for Arabic/Kurdish
+- **Content Localization**: Multi-language content management
+
+## Deployment & Configuration - استقرار و پیکربندی
+
+### Environment Setup
+- **Database**: PostgreSQL connection via DATABASE_URL environment variable
+- **Session Storage**: MemoryStore for development, production-ready session management
+- **File Storage**: Local uploads directory with organized structure
+- **Email Configuration**: SMTP settings for automated email delivery
+- **SMS Integration**: Provider credentials for customer notifications
+
+### Performance Optimization
+- **Database Indexing**: Optimized queries with proper indexing strategies
+- **Caching Strategy**: React Query caching with smart invalidation
+- **Image Optimization**: Compressed assets and lazy loading
+- **Code Splitting**: Dynamic imports for reduced bundle size
+- **API Rate Limiting**: Protection against abuse and overuse
+
+### Monitoring & Analytics
+- **Error Tracking**: Comprehensive error logging and reporting
+- **Performance Metrics**: Response time and query optimization monitoring
+- **User Analytics**: Customer behavior and conversion tracking
+- **System Health**: Database performance and server resource monitoring
+
+## Business Intelligence Features - امکانات هوش تجاری
+
+### Customer Loyalty System
+- **Points Accumulation**: 1 point per 1,000 IQD spent
+- **Tier Classification**: Bronze (0-999K), Silver (1M-4.9M), Gold (5M+)
+- **Discount Conversion**: 100 points = 5% discount
+- **Activity Tracking**: Complete customer interaction history
+
+### Marketing Automation
+- **Email Campaigns**: 18+ professional templates with personalization
+- **Audience Segmentation**: Customer tier-based targeting
+- **Performance Analytics**: Open rates, click-through rates, conversion tracking
+- **A/B Testing**: Campaign optimization and effectiveness measurement
+
+### Geographic Intelligence
+- **Delivery Optimization**: Smart vehicle selection based on load and distance
+- **Route Planning**: Cost-efficient logistics with 188 Iraqi cities integration
+- **GPS Tracking**: Real-time delivery monitoring in 11 major cities
+- **Performance Analytics**: Delivery success rates and timing analysis
 
 ## Recent Changes
 
