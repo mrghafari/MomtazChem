@@ -39689,10 +39689,10 @@ momtazchem.com
           -- Customer information from CRM
           cc.first_name,
           cc.last_name,
-          cc.company_name,
+          cc.company,
           cc.phone,
           cc.email,
-          cc.city,
+          cc.city_region as city,
           cc.address
         FROM customer_orders co
         LEFT JOIN order_management om ON co.id = om.customer_order_id
@@ -39705,30 +39705,30 @@ momtazchem.com
         id: row.order_id,
         customerOrderId: row.order_number, // Use new order number format (M2511xxx)
         orderNumber: row.order_number,
-        status: row.tracking_status || row.status, // Use tracking status if available, fallback to order status
+        status: row.tracking_status || row.status || 'pending', // Use tracking status if available, fallback to order status
         totalAmount: parseFloat(row.total_amount) || 0,
         currency: row.currency || 'IQD',
         createdAt: row.created_at,
         updatedAt: row.updated_at,
-        paymentMethod: row.payment_method,
-        paymentStatus: row.payment_status,
+        paymentMethod: row.payment_method || 'نقدی',
+        paymentStatus: row.payment_status || 'در انتظار',
         trackingNumber: row.tracking_number,
         estimatedDeliveryDate: row.estimated_delivery_date,
         deliveryPersonName: row.delivery_person_name,
         deliveryPersonPhone: row.delivery_person_phone,
         deliveryCode: row.delivery_code,
-        notes: row.financial_notes || row.warehouse_notes || row.logistics_notes,
-        customerName: `${row.first_name || ''} ${row.last_name || ''}`.trim() || row.company_name || 'نامشخص',
-        customerEmail: row.email,
-        customerPhone: row.phone,
+        notes: row.financial_notes || row.warehouse_notes || row.logistics_notes || '',
+        customerName: `${row.first_name || ''} ${row.last_name || ''}`.trim() || row.company || 'مشتری نامشخص',
+        customerEmail: row.email || 'ایمیل نامشخص',
+        customerPhone: row.phone || 'تلفن نامشخص',
         customerInfo: {
-          firstName: row.first_name,
-          lastName: row.last_name,
-          companyName: row.company_name,
-          phone: row.phone,
-          email: row.email,
-          city: row.city,
-          address: row.address
+          firstName: row.first_name || 'نام نامشخص',
+          lastName: row.last_name || 'نام خانوادگی نامشخص',
+          companyName: row.company || 'شرکت نامشخص',
+          phone: row.phone || 'تلفن نامشخص',
+          email: row.email || 'ایمیل نامشخص',
+          city: row.city || 'شهر نامشخص',
+          address: row.address || 'آدرس نامشخص'
         }
       }));
 
