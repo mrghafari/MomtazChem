@@ -12305,15 +12305,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Check for hybrid payment first (wallet_partial with remaining amount)
       if (orderData.paymentMethod === 'wallet_partial' && remainingAmount > 0) {
-        console.log(`🔄 [HYBRID PAYMENT] Wallet partial payment detected - wallet: ${actualWalletUsed}, remaining: ${remainingAmount}`);
+        console.log(`🔄 [HYBRID PAYMENT] Wallet partial payment detected - wallet: ${walletAmountUsed}, remaining: ${remainingAmount}`);
         return res.json({
           success: true,
           message: 'سفارش ثبت شد - هدایت به درگاه پرداخت',
           orderId: orderNumber,
           orderNumber: orderNumber,
           totalAmount: totalAmount,
-          walletAmountUsed: actualWalletUsed,
-          walletAmountDeducted: actualWalletUsed,
+          walletAmountUsed: walletAmountUsed,
+          walletAmountDeducted: walletAmountUsed,
           remainingAmount: remainingAmount,
           requiresBankPayment: true,
           redirectUrl: `/payment/${orderNumber}`
@@ -12327,17 +12327,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`✅ Order ${orderNumber} created - redirecting to payment gateway for ${remainingAmount > 0 ? remainingAmount : totalAmount} IQD`);
         
         // For hybrid payment (wallet + bank gateway), return special response
-        if (remainingAmount > 0 && actualWalletUsed > 0) {
+        if (remainingAmount > 0 && walletAmountUsed > 0) {
           return res.json({
             success: true,
             message: 'سفارش ثبت شد - هدایت به درگاه پرداخت',
             orderId: orderNumber,
             orderNumber: orderNumber,
             totalAmount: totalAmount,
-            walletAmountUsed: actualWalletUsed,
+            walletAmountUsed: walletAmountUsed,
             remainingAmount: remainingAmount,
             requiresBankPayment: true,
-            redirectToPayment: `/payment/${orderNumber}?amount=${remainingAmount}&wallet=${actualWalletUsed}`
+            redirectToPayment: `/payment/${orderNumber}?amount=${remainingAmount}&wallet=${walletAmountUsed}`
           });
         }
       }
