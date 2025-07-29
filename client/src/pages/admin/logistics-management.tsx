@@ -85,6 +85,8 @@ interface ReadyVehicle {
   isAvailable: boolean;
   currentLocation?: string;
   notes?: string;
+  supportsFlammable?: boolean;
+  notAllowedFlammable?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -191,6 +193,121 @@ const LogisticsManagement = () => {
   const [isCreateReadyVehicleDialogOpen, setIsCreateReadyVehicleDialogOpen] = useState(false);
   const [selectedReadyVehicle, setSelectedReadyVehicle] = useState<ReadyVehicle | null>(null);
   const [isEditReadyVehicleDialogOpen, setIsEditReadyVehicleDialogOpen] = useState(false);
+
+  // Ready vehicles API integration
+  const { data: readyVehiclesData, isLoading: loadingReadyVehicles } = useQuery({
+    queryKey: ['/api/logistics/ready-vehicles'],
+    enabled: activeTab === 'ready-vehicles'
+  });
+
+  const readyVehicles = readyVehiclesData?.data || [];
+
+  // Create ready vehicle mutation
+  const createReadyVehicleMutation = useMutation({
+    mutationFn: (data: any) => apiRequest({
+      url: '/api/logistics/ready-vehicles',
+      method: 'POST',
+      data
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/logistics/ready-vehicles'] });
+      setIsCreateReadyVehicleDialogOpen(false);
+      toast({ title: "موفقیت", description: "خودرو آماده کار با موفقیت ایجاد شد" });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: "خطا", 
+        description: error?.response?.data?.message || "خطا در ایجاد خودرو آماده کار", 
+        variant: "destructive" 
+      });
+    }
+  });
+
+  // Update ready vehicle mutation
+  const updateReadyVehicleMutation = useMutation({
+    mutationFn: ({ id, ...data }: any) => apiRequest({
+      url: `/api/logistics/ready-vehicles/${id}`,
+      method: 'PUT',
+      data
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/logistics/ready-vehicles'] });
+      setIsEditReadyVehicleDialogOpen(false);
+      setSelectedReadyVehicle(null);
+      toast({ title: "موفقیت", description: "خودرو آماده کار با موفقیت بروزرسانی شد" });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: "خطا", 
+        description: error?.response?.data?.message || "خطا در بروزرسانی خودرو آماده کار", 
+        variant: "destructive" 
+      });
+    }
+  });
+
+  // Delete ready vehicle mutation
+  const deleteReadyVehicleMutation = useMutation({
+    mutationFn: (id: number) => apiRequest({
+      url: `/api/logistics/ready-vehicles/${id}`,
+      method: 'DELETE'
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/logistics/ready-vehicles'] });
+      toast({ title: "موفقیت", description: "خودرو آماده کار با موفقیت حذف شد" });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: "خطا", 
+        description: error?.response?.data?.message || "خطا در حذف خودرو آماده کار", 
+        variant: "destructive" 
+      });
+    }
+  });
+
+  // Handle create ready vehicle form submission
+  const handleCreateReadyVehicle = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    
+    const vehicleData = {
+      vehicleType: formData.get('vehicleType') as string,
+      licensePlate: formData.get('licensePlate') as string,
+      driverName: formData.get('driverName') as string,
+      driverMobile: formData.get('driverMobile') as string,
+      loadCapacity: parseFloat(formData.get('loadCapacity') as string),
+      currentLocation: formData.get('currentLocation') as string,
+      notes: formData.get('notes') as string,
+      isAvailable: formData.get('isAvailable') === 'true',
+      supportsFlammable: formData.get('supportsFlammable') === 'true',
+      notAllowedFlammable: formData.get('notAllowedFlammable') === 'true'
+    };
+
+    createReadyVehicleMutation.mutate(vehicleData);
+  };
+
+  // Handle edit ready vehicle form submission
+  const handleEditReadyVehicle = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!selectedReadyVehicle) return;
+
+    const formData = new FormData(e.currentTarget);
+    
+    const vehicleData = {
+      id: selectedReadyVehicle.id,
+      vehicleType: formData.get('vehicleType') as string,
+      licensePlate: formData.get('licensePlate') as string,
+      driverName: formData.get('driverName') as string,
+      driverMobile: formData.get('driverMobile') as string,
+      loadCapacity: parseFloat(formData.get('loadCapacity') as string),
+      currentLocation: formData.get('currentLocation') as string,
+      notes: formData.get('notes') as string,
+      isAvailable: formData.get('isAvailable') === 'true',
+      supportsFlammable: formData.get('supportsFlammable') === 'true',
+      notAllowedFlammable: formData.get('notAllowedFlammable') === 'true'
+    };
+
+    updateReadyVehicleMutation.mutate(vehicleData);
+  };
 
   const [selectedCity, setSelectedCity] = useState<string>('');
   const [selectedProvince, setSelectedProvince] = useState<string>('');
@@ -2566,7 +2683,9 @@ const LogisticsManagement = () => {
         loadCapacity: parseInt(formData.get('loadCapacity') as string),
         currentLocation: formData.get('currentLocation') as string,
         notes: formData.get('notes') as string,
-        isAvailable: formData.get('isAvailable') === 'true'
+        isAvailable: formData.get('isAvailable') === 'true',
+        supportsFlammable: formData.get('supportsFlammable') === 'true',
+        notAllowedFlammable: formData.get('notAllowedFlammable') === 'true'
       });
     };
 
@@ -2585,7 +2704,9 @@ const LogisticsManagement = () => {
         loadCapacity: parseInt(formData.get('loadCapacity') as string),
         currentLocation: formData.get('currentLocation') as string,
         notes: formData.get('notes') as string,
-        isAvailable: formData.get('isAvailable') === 'true'
+        isAvailable: formData.get('isAvailable') === 'true',
+        supportsFlammable: formData.get('supportsFlammable') === 'true',
+        notAllowedFlammable: formData.get('notAllowedFlammable') === 'true'
       });
     };
 
@@ -2940,6 +3061,42 @@ const LogisticsManagement = () => {
                         defaultChecked={selectedReadyVehicle.isAvailable}
                       />
                       <Label htmlFor="edit-isAvailable">آماده به کار</Label>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-orange-700 flex items-center gap-2">
+                      <Flame className="h-4 w-4" />
+                      قابلیت حمل مواد آتش‌زا
+                    </Label>
+                    <div className="flex flex-col space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <input type="hidden" name="supportsFlammable" value="false" />
+                        <input 
+                          type="checkbox" 
+                          id="edit-supportsFlammable" 
+                          name="supportsFlammable" 
+                          value="true"
+                          defaultChecked={selectedReadyVehicle.supportsFlammable}
+                        />
+                        <Label htmlFor="edit-supportsFlammable" className="text-green-700">
+                          <CheckCircle className="h-3 w-3 mr-1 inline" />
+                          مجهز برای حمل مواد آتش‌زا
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input type="hidden" name="notAllowedFlammable" value="false" />
+                        <input 
+                          type="checkbox" 
+                          id="edit-notAllowedFlammable" 
+                          name="notAllowedFlammable" 
+                          value="true"
+                          defaultChecked={selectedReadyVehicle.notAllowedFlammable}
+                        />
+                        <Label htmlFor="edit-notAllowedFlammable" className="text-red-700">
+                          <X className="h-3 w-3 mr-1 inline" />
+                          غیرمجاز برای مواد آتش‌زا
+                        </Label>
+                      </div>
                     </div>
                   </div>
                 </div>

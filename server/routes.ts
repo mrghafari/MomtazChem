@@ -27616,6 +27616,193 @@ momtazchem.com
     }
   });
 
+  // =============================================================================
+  // READY VEHICLES API ENDPOINTS
+  // =============================================================================
+
+  // Get all ready vehicles
+  app.get('/api/logistics/ready-vehicles', requireAuth, async (req, res) => {
+    try {
+      const { readyVehicles } = await import('../shared/logistics-schema');
+      
+      const vehicles = await db
+        .select()
+        .from(readyVehicles)
+        .orderBy(readyVehicles.createdAt);
+
+      // Map database fields to frontend expected format
+      const mappedVehicles = vehicles.map(vehicle => ({
+        id: vehicle.id,
+        vehicleType: vehicle.vehicleType,
+        licensePlate: vehicle.licensePlate,
+        driverName: vehicle.driverName,
+        driverMobile: vehicle.driverMobile,
+        loadCapacity: parseFloat(vehicle.loadCapacity || '0'),
+        isAvailable: vehicle.isAvailable,
+        currentLocation: vehicle.currentLocation,
+        notes: vehicle.notes,
+        supportsFlammable: vehicle.supportsFlammable,
+        notAllowedFlammable: vehicle.notAllowedFlammable,
+        createdAt: vehicle.createdAt.toISOString(),
+        updatedAt: vehicle.updatedAt.toISOString()
+      }));
+
+      res.json({ success: true, data: mappedVehicles });
+    } catch (error) {
+      console.error('Error fetching ready vehicles:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch ready vehicles' });
+    }
+  });
+
+  // Create new ready vehicle
+  app.post('/api/logistics/ready-vehicles', requireAuth, async (req, res) => {
+    try {
+      const { readyVehicles } = await import('../shared/logistics-schema');
+      
+      const vehicleData = {
+        vehicleType: req.body.vehicleType,
+        licensePlate: req.body.licensePlate,
+        driverName: req.body.driverName,
+        driverMobile: req.body.driverMobile,
+        loadCapacity: req.body.loadCapacity.toString(),
+        isAvailable: req.body.isAvailable !== false,
+        currentLocation: req.body.currentLocation || null,
+        notes: req.body.notes || null,
+        supportsFlammable: req.body.supportsFlammable || false,
+        notAllowedFlammable: req.body.notAllowedFlammable || false,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+
+      const [newVehicle] = await db
+        .insert(readyVehicles)
+        .values(vehicleData)
+        .returning();
+
+      // Map response to frontend format
+      const mappedVehicle = {
+        id: newVehicle.id,
+        vehicleType: newVehicle.vehicleType,
+        licensePlate: newVehicle.licensePlate,
+        driverName: newVehicle.driverName,
+        driverMobile: newVehicle.driverMobile,
+        loadCapacity: parseFloat(newVehicle.loadCapacity || '0'),
+        isAvailable: newVehicle.isAvailable,
+        currentLocation: newVehicle.currentLocation,
+        notes: newVehicle.notes,
+        supportsFlammable: newVehicle.supportsFlammable,
+        notAllowedFlammable: newVehicle.notAllowedFlammable,
+        createdAt: newVehicle.createdAt.toISOString(),
+        updatedAt: newVehicle.updatedAt.toISOString()
+      };
+
+      res.status(201).json({ success: true, data: mappedVehicle });
+    } catch (error) {
+      console.error('Error creating ready vehicle:', error);
+      
+      if (error.code === '23505') { // Unique constraint violation
+        return res.status(400).json({ 
+          success: false, 
+          message: 'شماره پلاک قبلاً ثبت شده است' 
+        });
+      }
+      
+      res.status(500).json({ success: false, message: 'Failed to create ready vehicle' });
+    }
+  });
+
+  // Update ready vehicle
+  app.put('/api/logistics/ready-vehicles/:id', requireAuth, async (req, res) => {
+    try {
+      const { readyVehicles } = await import('../shared/logistics-schema');
+      const vehicleId = parseInt(req.params.id);
+      
+      if (isNaN(vehicleId)) {
+        return res.status(400).json({ success: false, message: 'Invalid vehicle ID' });
+      }
+
+      const updateData = {
+        vehicleType: req.body.vehicleType,
+        licensePlate: req.body.licensePlate,
+        driverName: req.body.driverName,
+        driverMobile: req.body.driverMobile,
+        loadCapacity: req.body.loadCapacity.toString(),
+        isAvailable: req.body.isAvailable,
+        currentLocation: req.body.currentLocation || null,
+        notes: req.body.notes || null,
+        supportsFlammable: req.body.supportsFlammable || false,
+        notAllowedFlammable: req.body.notAllowedFlammable || false,
+        updatedAt: new Date()
+      };
+
+      const [updatedVehicle] = await db
+        .update(readyVehicles)
+        .set(updateData)
+        .where(eq(readyVehicles.id, vehicleId))
+        .returning();
+
+      if (!updatedVehicle) {
+        return res.status(404).json({ success: false, message: 'Vehicle not found' });
+      }
+
+      // Map response to frontend format
+      const mappedVehicle = {
+        id: updatedVehicle.id,
+        vehicleType: updatedVehicle.vehicleType,
+        licensePlate: updatedVehicle.licensePlate,
+        driverName: updatedVehicle.driverName,
+        driverMobile: updatedVehicle.driverMobile,
+        loadCapacity: parseFloat(updatedVehicle.loadCapacity || '0'),
+        isAvailable: updatedVehicle.isAvailable,
+        currentLocation: updatedVehicle.currentLocation,
+        notes: updatedVehicle.notes,
+        supportsFlammable: updatedVehicle.supportsFlammable,
+        notAllowedFlammable: updatedVehicle.notAllowedFlammable,
+        createdAt: updatedVehicle.createdAt.toISOString(),
+        updatedAt: updatedVehicle.updatedAt.toISOString()
+      };
+
+      res.json({ success: true, data: mappedVehicle });
+    } catch (error) {
+      console.error('Error updating ready vehicle:', error);
+      
+      if (error.code === '23505') { // Unique constraint violation
+        return res.status(400).json({ 
+          success: false, 
+          message: 'شماره پلاک قبلاً ثبت شده است' 
+        });
+      }
+      
+      res.status(500).json({ success: false, message: 'Failed to update ready vehicle' });
+    }
+  });
+
+  // Delete ready vehicle
+  app.delete('/api/logistics/ready-vehicles/:id', requireAuth, async (req, res) => {
+    try {
+      const { readyVehicles } = await import('../shared/logistics-schema');
+      const vehicleId = parseInt(req.params.id);
+      
+      if (isNaN(vehicleId)) {
+        return res.status(400).json({ success: false, message: 'Invalid vehicle ID' });
+      }
+
+      const [deletedVehicle] = await db
+        .delete(readyVehicles)
+        .where(eq(readyVehicles.id, vehicleId))
+        .returning();
+
+      if (!deletedVehicle) {
+        return res.status(404).json({ success: false, message: 'Vehicle not found' });
+      }
+
+      res.json({ success: true, message: 'Vehicle deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting ready vehicle:', error);
+      res.status(500).json({ success: false, message: 'Failed to delete ready vehicle' });
+    }
+  });
+
   // Get pending payments for admin review
   app.get('/api/admin/pending-payments', requireAuth, async (req, res) => {
     try {
