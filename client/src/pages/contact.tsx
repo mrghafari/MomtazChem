@@ -307,7 +307,7 @@ const Contact = () => {
                       <div>
                         <h3 className="font-semibold text-gray-900 mb-1">{info.title}</h3>
                         {info.content.map((line, lineIndex) => (
-                          <p key={lineIndex} className="text-gray-600">
+                          <div key={lineIndex} className="text-gray-600">
                             {info.title === "Phone & WhatsApp" ? (
                               line.includes("+9647709996771") ? (
                                 <div className="flex items-center gap-2">
@@ -356,7 +356,7 @@ const Contact = () => {
                             ) : (
                               line
                             )}
-                          </p>
+                          </div>
                         ))}
                       </div>
                     </div>
