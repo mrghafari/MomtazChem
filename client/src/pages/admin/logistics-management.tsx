@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
+import { apiRequest, queryClient } from '@/lib/queryClient';
 import { 
   Package, 
   Users, 
@@ -197,6 +198,9 @@ const LogisticsManagement = () => {
   const [editCustomVehicleType, setEditCustomVehicleType] = useState('');
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [editShowCustomInput, setEditShowCustomInput] = useState(false);
+  
+  // State for vehicle editing (moved here before useEffect)
+  const [editingVehicle, setEditingVehicle] = useState<any>(null);
 
   // Effect to handle custom vehicle type for editing
   React.useEffect(() => {
@@ -408,7 +412,6 @@ const LogisticsManagement = () => {
 
   // Vehicle optimization states
   const [isCreateVehicleDialogOpen, setIsCreateVehicleDialogOpen] = useState(false);
-  const [editingVehicle, setEditingVehicle] = useState<any>(null);
   const [optimizationRequest, setOptimizationRequest] = useState<any>({});
 
   const { data: citiesResponse, isLoading: loadingCities } = useQuery({
