@@ -43,7 +43,7 @@ import { generateEAN13Barcode, validateEAN13, parseEAN13Barcode, isMomtazchemBar
 import { generateSmartSKU, validateSKUUniqueness } from "./ai-sku-generator";
 import { deliveryVerificationStorage } from "./delivery-verification-storage";
 import { gpsDeliveryStorage } from "./gps-delivery-storage";
-import { insertGpsDeliveryConfirmationSchema } from "@shared/gps-delivery-schema";
+
 import { vehicleTemplates, vehicleSelectionHistory, insertVehicleTemplateSchema, insertVehicleSelectionHistorySchema, internationalCountries, internationalCities, internationalShippingRates, insertInternationalCountrySchema, insertInternationalCitySchema, insertInternationalShippingRateSchema } from "@shared/logistics-schema";
 import { 
   companyInformation, 
@@ -124,6 +124,13 @@ declare module "express-session" {
   interface SessionData {
     adminId?: number;
     customerId?: number;
+    customUserId?: number;
+    customUserEmail?: string;
+    customUserName?: string;
+    customUserRole?: string;
+    customUserPermissions?: any;
+    customerEmail?: string;
+    crmCustomerId?: number;
     isAuthenticated?: boolean;
     departmentUser?: {
       id: number;
@@ -340,7 +347,7 @@ const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
     exists: !!req.session,
     isAuthenticated: req.session?.isAuthenticated,
     adminId: req.session?.adminId,
-    customUserId: req.session?.customUserId,
+    customerId: req.session?.customerId,
     sessionID: req.sessionID
   });
 
@@ -350,8 +357,8 @@ const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
       console.log(`✅ Admin authentication successful for admin ${req.session.adminId}`);
       console.log(`🔄 Dual session mode: Admin=${req.session.adminId}, Customer=${req.session.customerId || 'none'}`);
       next();
-    } else if (req.session.customUserId) {
-      console.log(`✅ Custom user authentication successful for user ${req.session.customUserId}`);
+    } else if (req.session.customerId) {
+      console.log(`✅ Custom user authentication successful for user ${req.session.customerId}`);
       next();
     } else {
       console.log('❌ Authentication failed - no valid user ID in session');
@@ -365,12 +372,11 @@ const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
     console.log('❌ Session details:', {
       isAuthenticated: req.session?.isAuthenticated,
       adminId: req.session?.adminId,
-      customUserId: req.session?.customUserId,
       customerId: req.session?.customerId
     });
     
     // If only customer session exists, show specific error
-    if (req.session?.customerId && !req.session?.adminId && !req.session?.customUserId) {
+    if (req.session?.customerId && !req.session?.adminId) {
       return res.status(403).json({ 
         success: false, 
         message: "دسترسی به بخش مدیریت نیاز به ورود مدیر دارد" 
@@ -1412,7 +1418,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/business-cards/:id/approve', requireAuth, async (req, res) => {
     try {
       const { id } = req.params;
-      const approvedBy = req.session.adminId || req.session.customUserId || 1;
+      const approvedBy = req.session.adminId || req.session.customerId || 1;
       const approvedBusinessCard = await companyStorage.approveBusinessCard(parseInt(id), approvedBy);
       
       if (!approvedBusinessCard) {
@@ -2329,10 +2335,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Set up session with appropriate user type
       if (isCustomUser) {
-        req.session.customUserId = user.id;
+        req.session.customerId = user.id;
         req.session.isAuthenticated = true;
         console.log(`✅ [LOGIN] Session configured for custom user ${user.id} (customer session cleared):`, {
-          customUserId: req.session.customUserId,
+          customerId: req.session.customerId,
           isAuthenticated: req.session.isAuthenticated,
           sessionId: req.sessionID
         });
@@ -2384,7 +2390,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/admin/logout", (req, res) => {
     // Clear all session data (single session mode)
     req.session.adminId = undefined;
-    req.session.customUserId = undefined;
     req.session.customerId = undefined;
     req.session.customerEmail = undefined;
     req.session.crmCustomerId = undefined;
@@ -2457,7 +2462,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Standard admin user
         user = await storage.getUserById(req.session.adminId);
         userType = 'admin';
-      } else if (req.session.customUserId) {
+      } else if (req.session.customerId) {
         // Custom user from custom_users table
         const { pool } = await import('./db');
         const result = await pool.query(`
@@ -2466,7 +2471,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           FROM custom_users cu
           LEFT JOIN custom_roles cr ON cu.role_id = cr.id
           WHERE cu.id = $1 AND cu.is_active = true
-        `, [req.session.customUserId]);
+        `, [req.session.customerId]);
         
         if (result.rows.length > 0) {
           const customUser = result.rows[0];
