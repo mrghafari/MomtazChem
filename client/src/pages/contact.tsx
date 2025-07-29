@@ -37,7 +37,7 @@ const Contact = () => {
   };
 
   // Fetch content from Content Management
-  const { data: contentItems = [], isLoading } = useQuery<ContentItem[]>({
+  const { data: contentResponse, isLoading } = useQuery<{success: boolean, data: ContentItem[]}>({
     queryKey: ['/api/content-management/items'],
     queryFn: async () => {
       const response = await fetch('/api/content-management/items');
@@ -45,6 +45,8 @@ const Contact = () => {
       return response.json();
     }
   });
+
+  const contentItems = contentResponse?.data || [];
 
   // Filter content for contact section
   const contactContent = contentItems.filter(item => 
