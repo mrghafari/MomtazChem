@@ -123,10 +123,6 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   // Determine if user is logged in first
   const isUserLoggedIn = (customerData?.success && customerData.customer) || isLoggedIn;
   
-  // Get selected delivery method details
-  const selectedMethodId = form.watch('shippingMethod');
-  const selectedMethod = deliveryMethods?.find((method: any) => method.id?.toString() === selectedMethodId);
-  
   const form = useForm<CheckoutFormData>({
     resolver: zodResolver(createCheckoutFormSchema(!!isUserLoggedIn)),
     defaultValues: {
@@ -147,6 +143,10 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
       notes: "",
     },
   });
+
+  // Get selected delivery method details  
+  const selectedMethodId = form.watch('shippingMethod');
+  const selectedMethod = deliveryMethods?.find((method: any) => method.id?.toString() === selectedMethodId);
 
   // Watch for changes in second address and mobile fields to gray out primary fields
   const watchSecondAddress = form.watch('secondDeliveryAddress');

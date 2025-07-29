@@ -11735,18 +11735,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let actualWalletUsed = 0;
       let finalPaymentMethod = paymentMethod || "bank_transfer";
       
-      if (paymentMethod === 'wallet_full' || paymentMethod === 'wallet_partial') {
-        const walletUsage = parseFloat(walletAmountUsed || 0);
-        const remaining = parseFloat(remainingAmount || totalAmount);
-        
-        console.log('💰 [WALLET DEBUG] Processing wallet payment:', {
-          walletUsage,
-          remaining,
-          finalCrmCustomerId,
-          customerId
-        });
-        
-        if (walletUsage > 0 && (finalCrmCustomerId || customerId)) {
+      // Process wallet payment if walletAmountUsed is provided (for all payment methods including hybrid)
+      const walletUsage = parseFloat(walletAmountUsed || 0);
+      const remaining = parseFloat(remainingAmount || totalAmount);
+      
+      console.log('💰 [WALLET DEBUG] Processing wallet payment:', {
+        paymentMethod,
+        walletUsage,
+        remaining,
+        finalCrmCustomerId,
+        customerId
+      });
+      
+      if (walletUsage > 0 && (finalCrmCustomerId || customerId)) {
           try {
             // Use the customer ID that exists (prioritize CRM customer)
             const customerIdToUse = finalCrmCustomerId || customerId;
@@ -11777,7 +11778,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
             });
           }
         }
-      }
 
       // Create order in customer orders table
       const orderData = {
@@ -11868,19 +11868,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await crmStorage.updateCustomerMetrics(finalCrmCustomerId);
       }
 
-      res.json({
-        success: true,
-        message: "سفارش با موفقیت ثبت شد",
-        order: {
-          id: order.id,
-          totalAmount: order.totalAmount,
-          status: order.status,
-          paymentStatus: finalPaymentStatus,
-          paymentMethod: finalPaymentMethod,
-          walletAmountUsed: actualWalletUsed,
-          crmCustomerId: finalCrmCustomerId,
-        }
-      });
+      // Check if hybrid payment is required (wallet partially used + remaining amount)
+      const remainingAmountToPay = parseFloat(remainingAmount || totalAmount) - actualWalletUsed;
+      const requiresBankPayment = actualWalletUsed > 0 && remainingAmountToPay > 0;
+      
+      if (requiresBankPayment) {
+        // Hybrid payment response - redirect to bank gateway
+        res.json({
+          success: true,
+          message: "پرداخت با کیف پول انجام شد، لطفاً مابقی مبلغ را از طریق درگاه بانکی پرداخت کنید",
+          requiresBankPayment: true,
+          walletAmountDeducted: actualWalletUsed,
+          remainingAmount: remainingAmountToPay,
+          redirectUrl: `/payment/${order.orderNumber}`,
+          order: {
+            id: order.id,
+            orderNumber: order.orderNumber,
+            totalAmount: order.totalAmount,
+            status: order.status,
+            paymentStatus: finalPaymentStatus,
+            paymentMethod: finalPaymentMethod,
+            walletAmountUsed: actualWalletUsed,
+            crmCustomerId: finalCrmCustomerId,
+          }
+        });
+      } else {
+        // Standard payment response
+        res.json({
+          success: true,
+          message: "سفارش با موفقیت ثبت شد",
+          order: {
+            id: order.id,
+            totalAmount: order.totalAmount,
+            status: order.status,
+            paymentStatus: finalPaymentStatus,
+            paymentMethod: finalPaymentMethod,
+            walletAmountUsed: actualWalletUsed,
+            crmCustomerId: finalCrmCustomerId,
+          }
+        });
+      }
 
     } catch (error) {
       console.error("Error creating shop order:", error);
