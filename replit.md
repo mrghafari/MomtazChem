@@ -167,6 +167,23 @@
 
 ## Recent Changes
 
+### COMPLETED: Volume Discount Currency Conversion to Iraqi Dinar (January 29, 2025)
+✅ **IMPLEMENTED: Currency unit conversion in volume discount displays from USD to Iraqi Dinar (IQD)**
+- **User Request Fulfilled**: "واحد پولی را در مقدار تخفیف واحد پولی عراق بزن IQD" - Changed discount amount display currency
+- **Frontend Updates**: Modified shop.tsx volume deals display system:
+  - **Line 1550**: Grid view discount display changed from `$` to `IQD OFF`
+  - **Line 1899**: List view discount display changed from `$` to `IQD OFF`
+  - **Math.floor Integration**: Used Math.floor() for proper Iraqi Dinar integer display (no decimals)
+- **Visual Consistency**: Volume discount amounts now show consistent Iraqi Dinar formatting:
+  - **Before**: `$6.1 OFF` (USD format with decimals)
+  - **After**: `6 IQD OFF` (Iraqi Dinar format as whole numbers)
+- **Professional Display**: Maintains professional appearance while using proper local currency format
+- **Persian RTL Integration**: Currency display works seamlessly with existing right-to-left interface
+- **Business Impact**: Local customers now see discount amounts in familiar Iraqi Dinar currency
+- **Technical Achievement**: Consistent currency formatting across all discount display areas
+- **User Experience**: Clear, localized currency display enhances shopping experience for Iraqi customers
+- **Result**: Complete volume discount currency conversion operational - all discount amounts display in Iraqi Dinar (IQD) format with proper integer values
+
 ### COMPLETED: Enhanced Vehicle Type Selection System with Comprehensive Dropdown Options (January 29, 2025)
 ✅ **IMPLEMENTED: Professional dropdown vehicle type selection system replacing text inputs with standardized options**
 - **User Request Fulfilled**: "یک فرمی برای افزودن نوع خودرو در این فرم ایجاد کن یا بگذار همینجا انواع دیگری اضافه کنیم مثلا اتوبوس مسافربری" - Added comprehensive vehicle type dropdown

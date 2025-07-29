@@ -1544,7 +1544,7 @@ const Shop = () => {
                                                   <span className="font-semibold text-green-700">{(currentDiscount.discount * 100).toFixed(0)}% ACTIVE</span>
                                                 </div>
                                                 <span className="font-semibold text-green-700">
-                                                  ${(parseFloat(product.price || "0") * currentDiscount.discount * currentQty).toFixed(1)} OFF
+                                                  {Math.floor(parseFloat(product.price || "0") * currentDiscount.discount * currentQty)} IQD OFF
                                                 </span>
                                               </div>
                                             </div>
@@ -1893,7 +1893,7 @@ const Shop = () => {
                                                       <span className="font-semibold text-green-700">{(currentDiscount.discount * 100).toFixed(0)}% ACTIVE</span>
                                                     </div>
                                                     <span className="font-semibold text-green-700">
-                                                      ${(parseFloat(product.price || "0") * currentDiscount.discount * currentQty).toFixed(1)} OFF
+                                                      {Math.floor(parseFloat(product.price || "0") * currentDiscount.discount * currentQty)} IQD OFF
                                                     </span>
                                                   </div>
                                                 </div>
