@@ -611,7 +611,7 @@ export default function OrderTrackingManagement() {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="border-b-2 bg-gray-50 dark:bg-gray-800">
-                  <th className="text-right p-4 font-semibold w-[140px] min-w-[140px]">
+                  <th className="text-right p-4 font-semibold" style={{ width: '140px' }}>
                     <button 
                       onClick={() => handleSort('orderNumber')}
                       className="flex items-center justify-end w-full hover:text-blue-600 transition-colors"
@@ -624,7 +624,7 @@ export default function OrderTrackingManagement() {
                       )}
                     </button>
                   </th>
-                  <th className="text-right p-4 font-semibold w-[200px] min-w-[200px]">
+                  <th className="text-right p-4 font-semibold" style={{ width: '200px' }}>
                     <button 
                       onClick={() => handleSort('customerName')}
                       className="flex items-center justify-end w-full hover:text-blue-600 transition-colors"
@@ -637,7 +637,7 @@ export default function OrderTrackingManagement() {
                       )}
                     </button>
                   </th>
-                  <th className="text-right p-4 font-semibold w-[120px] min-w-[120px]">
+                  <th className="text-right p-4 font-semibold" style={{ width: '120px' }}>
                     <button 
                       onClick={() => handleSort('totalAmount')}
                       className="flex items-center justify-end w-full hover:text-blue-600 transition-colors"
@@ -650,7 +650,7 @@ export default function OrderTrackingManagement() {
                       )}
                     </button>
                   </th>
-                  <th className="text-right p-4 font-semibold w-[100px] min-w-[100px]">
+                  <th className="text-right p-4 font-semibold" style={{ width: '100px' }}>
                     <button 
                       onClick={() => handleSort('status')}
                       className="flex items-center justify-end w-full hover:text-blue-600 transition-colors"
@@ -663,7 +663,7 @@ export default function OrderTrackingManagement() {
                       )}
                     </button>
                   </th>
-                  <th className="text-right p-4 font-semibold w-[140px] min-w-[140px]">
+                  <th className="text-right p-4 font-semibold" style={{ width: '140px' }}>
                     <button 
                       onClick={() => handleSort('createdAt')}
                       className="flex items-center justify-end w-full hover:text-blue-600 transition-colors"
@@ -676,7 +676,7 @@ export default function OrderTrackingManagement() {
                       )}
                     </button>
                   </th>
-                  <th className="text-center p-4 font-semibold w-[100px] min-w-[100px]">عملیات</th>
+                  <th className="text-center p-4 font-semibold" style={{ width: '100px' }}>عملیات</th>
                 </tr>
               </thead>
               <tbody>
@@ -684,22 +684,22 @@ export default function OrderTrackingManagement() {
                   <tr key={order.id} className={`border-b hover:bg-gray-50 dark:hover:bg-gray-800 ${
                     order.status === 'deleted' ? 'bg-orange-50/50 hover:bg-orange-100/50' : ''
                   }`}>
-                    <td className="p-4 w-[140px] min-w-[140px]">
+                    <td className="p-4 text-right" style={{ width: '140px' }}>
                       <div className="font-medium text-blue-600">#{order.orderNumber || order.customerOrderId}</div>
                     </td>
-                    <td className="p-4 w-[200px] min-w-[200px]">
+                    <td className="p-4 text-right" style={{ width: '200px' }}>
                       <div className="space-y-1">
                         <div className="font-medium">{order.customerName || 'نامشخص'}</div>
                         <div className="text-xs text-gray-600">{order.customerEmail}</div>
                         <div className="text-xs text-gray-600">{order.customerPhone}</div>
                       </div>
                     </td>
-                    <td className="p-4 w-[120px] min-w-[120px]">
+                    <td className="p-4 text-right" style={{ width: '120px' }}>
                       <div className="font-medium text-sm">
                         {formatAmount(order.totalAmount, order.currency || 'IQD')}
                       </div>
                     </td>
-                    <td className="p-4 w-[100px] min-w-[100px]">
+                    <td className="p-4 text-right" style={{ width: '100px' }}>
                       {(() => {
                         const statusInfo = getStatusDisplay(order);
                         return (
@@ -714,12 +714,12 @@ export default function OrderTrackingManagement() {
                         );
                       })()}
                     </td>
-                    <td className="p-4 w-[140px] min-w-[140px]">
+                    <td className="p-4 text-right" style={{ width: '140px' }}>
                       <div className="text-sm">
                         {formatDate(order.createdAt)}
                       </div>
                     </td>
-                    <td className="p-4 w-[100px] min-w-[100px] text-center">
+                    <td className="p-4 text-center" style={{ width: '100px' }}>
                       <Dialog>
                         <DialogTrigger asChild>
                           <button
