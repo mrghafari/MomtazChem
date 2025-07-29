@@ -717,7 +717,12 @@ const PaymentSettings = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {gateways.map((gateway) => (
+              {isLoading ? (
+                <div className="col-span-full flex justify-center py-8">
+                  <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
+                </div>
+              ) : gateways && gateways.length > 0 ? (
+                gateways.map((gateway) => (
                 <Card key={gateway.id} className="relative">
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
@@ -780,35 +785,36 @@ const PaymentSettings = () => {
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+                ))
+              ) : (
+                <div className="col-span-full">
+                  <Card className="text-center py-12">
+                    <CardContent>
+                      <Settings className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold text-gray-700 mb-2">No Payment Gateways</h3>
+                      <p className="text-gray-500 mb-6">Get started by adding your first payment gateway</p>
+                      <Button
+                        onClick={() => {
+                          setSelectedGateway({
+                            id: 0,
+                            name: '',
+                            type: 'iraqi_bank',
+                            enabled: true,
+                            config: {},
+                            createdAt: '',
+                            updatedAt: ''
+                          });
+                          setIsEditDialogOpen(true);
+                        }}
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add First Gateway
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
             </div>
-
-            {gateways.length === 0 && (
-              <Card className="text-center py-12">
-                <CardContent>
-                  <Settings className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-700 mb-2">No Payment Gateways</h3>
-                  <p className="text-gray-500 mb-6">Get started by adding your first payment gateway</p>
-                  <Button
-                    onClick={() => {
-                      setSelectedGateway({
-                        id: 0,
-                        name: '',
-                        type: 'iraqi_bank',
-                        enabled: true,
-                        config: {},
-                        createdAt: '',
-                        updatedAt: ''
-                      });
-                      setIsEditDialogOpen(true);
-                    }}
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Your First Gateway
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
           </TabsContent>
 
           <TabsContent value="general" className="space-y-6">
