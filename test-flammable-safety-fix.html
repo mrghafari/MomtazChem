@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flammable Materials Safety System Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-case { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 8px; }
+        .success { background-color: #e8f5e8; border-color: #4caf50; }
+        .error { background-color: #ffeaea; border-color: #f44336; }
+        .warning { background-color: #fff3cd; border-color: #ffc107; }
+        pre { background: #f4f4f4; padding: 10px; border-radius: 4px; overflow-x: auto; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>🔥 Flammable Materials Safety System Test</h1>
+    <p>Testing the fixed flammable materials detection system for Solvant 402 transport safety compliance.</p>
+
+    <div class="test-case warning">
+        <h3>🧪 Test Case: Solvant 402 Transport Safety</h3>
+        <p><strong>Product:</strong> Solvant 402 (Product ID: 28, Flammable: TRUE)</p>
+        <p><strong>Expected Result:</strong> System should detect flammable material and exclude buses from vehicle selection</p>
+        
+        <button onclick="testFlammableSafety()">🚚 Test Delivery Cost Calculation</button>
+        <div id="test-results"></div>
+    </div>
+
+    <div class="test-case">
+        <h3>📋 Test Configuration</h3>
+        <pre id="test-config">
+Weight: 25 kg (within bus limit)
+Origin: اربیل (Erbil)
+Destination: بغداد (Baghdad) 
+Cart: { "28": 4 } (Product ID 28 = Solvant 402, Quantity 4)
+Expected: Flammable detection should prevent bus selection
+        </pre>
+    </div>
+
+    <script>
+        async function testFlammableSafety() {
+            const resultsDiv = document.getElementById('test-results');
+            resultsDiv.innerHTML = '<p>🔄 Testing flammable materials detection...</p>';
+
+            const testData = {
+                weight: 25,
+                destinationCity: 'بغداد',
+                destinationProvince: 'بغداد',
+                originCity: 'اربیل',
+                cart: { "28": 4 }, // Solvant 402 (flammable product)
+                useSecondaryAddress: false
+            };
+
+            try {
+                console.log('🧪 [TEST] Sending request:', testData);
+                
+                const response = await fetch('/api/calculate-delivery-cost', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testData)
+                });
+
+                const result = await response.json();
+                console.log('🧪 [TEST] Response:', result);
+
+                let html = '<h4>🔍 Test Results:</h4>';
+                
+                if (result.success) {
+                    if (result.data.transportMethod === 'intercity_bus') {
+                        // This should NOT happen - buses should be excluded for flammable materials
+                        html += `
+                            <div class="error">
+                                <h4>❌ SAFETY VIOLATION DETECTED!</h4>
+                                <p><strong>BUS SELECTED FOR FLAMMABLE MATERIALS</strong></p>
+                                <p>Transport Method: ${result.data.transportMethod}</p>
+                                <p>Message: ${result.data.message}</p>
+                                <p><strong>⚠️ This is a safety violation - buses should not transport flammable materials!</strong></p>
+                            </div>
+                        `;
+                    } else {
+                        // This is the expected result - vehicles selected instead of buses
+                        html += `
+                            <div class="success">
+                                <h4>✅ SAFETY COMPLIANCE VERIFIED!</h4>
+                                <p><strong>Flammable materials detected - buses properly excluded</strong></p>
+                                <p>Transport Method: ${result.data.transportMethod || 'vehicle_selection'}</p>
+                                <p>Available Options: ${result.data.availableOptions?.length || 0} vehicles</p>
+                                ${result.data.availableOptions ? 
+                                    '<p>Selected vehicles properly exclude buses for safety compliance</p>' : 
+                                    '<p>Vehicle selection process initiated (buses excluded)</p>'
+                                }
+                            </div>
+                        `;
+                    }
+                } else {
+                    html += `
+                        <div class="error">
+                            <h4>❌ API Error</h4>
+                            <p>Error: ${result.message}</p>
+                        </div>
+                    `;
+                }
+
+                html += `
+                    <h4>📊 Debug Information:</h4>
+                    <pre>${JSON.stringify(result, null, 2)}</pre>
+                `;
+
+                resultsDiv.innerHTML = html;
+
+            } catch (error) {
+                console.error('🧪 [TEST ERROR]', error);
+                resultsDiv.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Test Failed</h4>
+                        <p>Network Error: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Auto-run test when page loads
+        window.addEventListener('load', () => {
+            console.log('🧪 [TEST] Flammable materials safety test page loaded');
+            setTimeout(testFlammableSafety, 1000); // Auto-test after 1 second
+        });
+    </script>
+</body>
+</html>

@@ -22268,8 +22268,11 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           
           // Query database to check if any products are flammable
           const { showcaseProducts } = await import('@shared/showcase-schema');
+          
+          // Use OR conditions for each product ID to avoid array issues
+          const orConditions = productIds.map(id => eq(showcaseProducts.id, id));
           const products = await db.select().from(showcaseProducts).where(
-            sql`${showcaseProducts.id} = ANY(${productIds})`
+            orConditions.length === 1 ? orConditions[0] : or(...orConditions)
           );
           
           console.log('🔍 [FLAMMABLE] Products found:', products.map(p => ({ id: p.id, name: p.name, isFlammable: p.isFlammable })));

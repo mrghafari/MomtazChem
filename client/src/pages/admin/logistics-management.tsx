@@ -918,9 +918,9 @@ const LogisticsManagement = () => {
                           className="w-full p-2 border rounded"
                           onChange={(e) => {
                             const value = e.target.value;
-                            setEditShowCustomInput(value === 'سایر');
+                            setShowCustomEditInput(value === 'سایر');
                             if (value !== 'سایر') {
-                              setEditCustomVehicleType('');
+                              setCustomEditVehicleType('');
                             }
                           }}
                         >
@@ -930,14 +930,14 @@ const LogisticsManagement = () => {
                           ))}
                           <option value="سایر">سایر (وارد کردن نوع دلخواه)</option>
                         </select>
-                        {editShowCustomInput && (
+                        {showCustomEditInput && (
                           <div className="mt-2">
                             <Input 
                               name="customVehicleType"
-                              value={editCustomVehicleType}
-                              onChange={(e) => setEditCustomVehicleType(e.target.value)}
+                              value={customEditVehicleType}
+                              onChange={(e) => setCustomEditVehicleType(e.target.value)}
                               placeholder="نوع خودروی مورد نظر را وارد کنید"
-                              required={editShowCustomInput}
+                              required={showCustomEditInput}
                               className="w-full"
                             />
                           </div>
