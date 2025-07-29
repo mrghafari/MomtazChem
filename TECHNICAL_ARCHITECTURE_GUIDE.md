@@ -49,11 +49,12 @@
 ┌─────────────────────────────────────────────────────────────┐
 │                  Business Logic Layer                      │
 │               Node.js + TypeScript                         │
-│  ├── Order Processing Engine                               │
+│  ├── Order Processing Engine (46+ سفارش پردازش شده)        │
 │  ├── Logistics Optimization Algorithm                      │
 │  ├── CRM Analytics Engine                                  │
-│  ├── Safety Compliance System                              │
-│  └── Email/Notification Services                           │
+│  ├── Safety Compliance System (مواد آتش‌زا)                │
+│  ├── Marketing Module (ماژول 33 - وفاداری مشتری)           │
+│  └── Email/Notification Services (18+ قالب)                │
 └─────────────────────────────────────────────────────────────┘
                                  │
                                  ▼
@@ -76,6 +77,61 @@
 │  ├── Performance Monitoring                                │
 │  └── Security & Encryption                                 │
 └─────────────────────────────────────────────────────────────┘
+```
+
+## آخرین تغییرات فنی سیستم
+
+### 🔄 بازسازی کامل سیستم پیگیری سفارشات
+```typescript
+// قبل: مشکل عدم تطابق با پایگاه داده
+// بعد: طراحی مجدد کامل رابط کاربری
+
+interface OrderTrackingData {
+  orderId: number;
+  customerName: string;
+  totalAmount: number;
+  status: OrderStatus;
+  items: OrderItem[];
+  paymentReceipts: PaymentReceipt[];
+}
+
+// API Endpoint جدید با پردازش 46+ سفارش
+GET /api/orders/tracking/all
+// Response: تمام سفارشات با جزئیات کامل مشتری
+```
+
+### 🚀 پیاده‌سازی ماژول مارکتینگ (Module 33)
+```typescript
+// سیستم وفاداری مشتری
+interface CustomerLoyalty {
+  points: number;           // 1 نقطه = 1,000 IQD
+  tier: 'Bronze' | 'Silver' | 'Gold';
+  discountEligible: number; // 100 نقطه = 5% تخفیف
+}
+
+// ایمیل مارکتینگ
+interface EmailCampaign {
+  templates: 18;           // قالب‌های حرفه‌ای
+  segmentation: CustomerTier[];
+  automation: boolean;
+  analytics: CampaignMetrics;
+}
+```
+
+### ⚡ سیستم امنیت مواد آتش‌زا
+```typescript
+// الگوریتم کنترل ایمنی
+function checkFlammableSafety(products: Product[]): SafetyResult {
+  const hasFlammable = products.some(p => p.isFlammable);
+  
+  if (hasFlammable) {
+    return {
+      allowedVehicles: vehicles.filter(v => v.supportsFlammable),
+      transportMethod: 'specialized_transport',
+      costMultiplier: 2.0 // هزینه بالاتر برای ایمنی
+    };
+  }
+}
 ```
 
 ## جزئیات فنی Frontend
