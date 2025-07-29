@@ -194,9 +194,23 @@ const LogisticsManagement = () => {
   const [selectedReadyVehicle, setSelectedReadyVehicle] = useState<ReadyVehicle | null>(null);
   const [isEditReadyVehicleDialogOpen, setIsEditReadyVehicleDialogOpen] = useState(false);
   const [customVehicleType, setCustomVehicleType] = useState('');
-  const [showCustomInput, setShowCustomInput] = useState(false);
   const [editCustomVehicleType, setEditCustomVehicleType] = useState('');
+  const [showCustomInput, setShowCustomInput] = useState(false);
   const [editShowCustomInput, setEditShowCustomInput] = useState(false);
+
+  // Effect to handle custom vehicle type for editing
+  React.useEffect(() => {
+    if (editingVehicle) {
+      const isCustomType = !Object.keys(VEHICLE_TYPES).includes(editingVehicle.vehicleType);
+      if (isCustomType) {
+        setEditShowCustomInput(true);
+        setEditCustomVehicleType(editingVehicle.vehicleType);
+      } else {
+        setEditShowCustomInput(false);
+        setEditCustomVehicleType('');
+      }
+    }
+  }, [editingVehicle]);
 
   // Ready vehicles API integration
   const { data: readyVehiclesData, isLoading: loadingReadyVehicles } = useQuery({
@@ -641,10 +655,13 @@ const LogisticsManagement = () => {
     const allowedRoutesString = formData.get('allowedRoutes') as string;
     const allowedRoutesArray = allowedRoutesString ? allowedRoutesString.split(',').map(r => r.trim()) : ['urban'];
     
+    const selectedVehicleType = formData.get('vehicleType') as string;
+    const finalVehicleType = selectedVehicleType === 'سایر' ? editCustomVehicleType : selectedVehicleType;
+    
     const data = {
       name: formData.get('name') as string,
       nameEn: formData.get('nameEn') as string,
-      vehicleType: formData.get('vehicleType') as string,
+      vehicleType: finalVehicleType,
       maxWeightKg: parseFloat(formData.get('maxWeightKg') as string),
       maxVolumeM3: parseFloat(formData.get('maxVolumeM3') as string) || 0,
       basePrice: parseFloat(formData.get('basePrice') as string),
@@ -842,7 +859,13 @@ const LogisticsManagement = () => {
             </Card>
 
             {/* Edit Vehicle Dialog */}
-            <Dialog open={!!editingVehicle} onOpenChange={(open) => !open && setEditingVehicle(null)}>
+            <Dialog open={!!editingVehicle} onOpenChange={(open) => {
+              if (!open) {
+                setEditingVehicle(null);
+                setEditShowCustomInput(false);
+                setEditCustomVehicleType('');
+              }
+            }}>
               <DialogContent className="max-w-2xl" dir="rtl">
                 <DialogHeader>
                   <DialogTitle>ویرایش الگوی خودرو</DialogTitle>
@@ -872,15 +895,35 @@ const LogisticsManagement = () => {
                         <Label htmlFor="edit-vehicleType">نوع خودرو *</Label>
                         <select 
                           name="vehicleType" 
-                          defaultValue={editingVehicle.vehicleType}
+                          defaultValue={Object.keys(VEHICLE_TYPES).includes(editingVehicle.vehicleType) ? editingVehicle.vehicleType : 'سایر'}
                           required 
                           className="w-full p-2 border rounded"
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            setEditShowCustomInput(value === 'سایر');
+                            if (value !== 'سایر') {
+                              setEditCustomVehicleType('');
+                            }
+                          }}
                         >
                           <option value="">انتخاب نوع خودرو</option>
                           {Object.entries(VEHICLE_TYPES).map(([key, value]) => (
                             <option key={key} value={key}>{value}</option>
                           ))}
+                          <option value="سایر">سایر (وارد کردن نوع دلخواه)</option>
                         </select>
+                        {editShowCustomInput && (
+                          <div className="mt-2">
+                            <Input 
+                              name="customVehicleType"
+                              value={editCustomVehicleType}
+                              onChange={(e) => setEditCustomVehicleType(e.target.value)}
+                              placeholder="نوع خودروی مورد نظر را وارد کنید"
+                              required={editShowCustomInput}
+                              className="w-full"
+                            />
+                          </div>
+                        )}
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="edit-maxWeightKg">حداکثر وزن (کیلوگرم) *</Label>
