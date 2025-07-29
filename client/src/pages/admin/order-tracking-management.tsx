@@ -120,46 +120,34 @@ export default function OrderTrackingManagement() {
     return 600000; // Default 10 minutes if no settings found
   };
 
-  // Fetch all orders for tracking - COMPLETELY FIXED WITH DEBUG
-  const { data: orders, isLoading } = useQuery({
-    queryKey: ['tracking-orders-fixed', Date.now()], // Force cache bust
+  // Fetch all orders for tracking - OPTIMIZED FOR PERFORMANCE
+  const { data: orders, isLoading, error } = useQuery({
+    queryKey: ['tracking-orders-optimized'],
     queryFn: async () => {
-      console.log('🔍 [FRONTEND DEBUG] Fetching orders...');
       const response = await fetch('/api/orders/tracking/all', {
-        credentials: 'include',
-        cache: 'no-cache', // Disable browser cache
-        headers: {
-          'Cache-Control': 'no-cache'
-        }
+        credentials: 'include'
       });
       
       if (!response.ok) {
-        console.error('🔍 [FRONTEND DEBUG] Response not OK:', response.status);
+        // If authentication fails, redirect to login
+        if (response.status === 401) {
+          window.location.href = '/admin/login';
+          return [];
+        }
         throw new Error('Failed to fetch tracking orders');
       }
       
       const data = await response.json();
-      console.log('🔍 [FRONTEND DEBUG] Raw API response:', {
-        success: data.success,
-        ordersCount: data.orders?.length || 0,
-        firstOrder: data.orders?.[0] || null
-      });
-      
-      if (data.orders && data.orders.length > 0) {
-        console.log('🔍 [FRONTEND DEBUG] First order fields:', Object.keys(data.orders[0]));
-        console.log('🔍 [FRONTEND DEBUG] First order sample:', {
-          id: data.orders[0].id,
-          customerName: data.orders[0].customerName,
-          totalAmount: data.orders[0].totalAmount,
-          orderNumber: data.orders[0].orderNumber
-        });
-      }
-      
       return data.orders as Order[];
     },
-    refetchInterval: 5000, // Frequent refresh for debugging
-    staleTime: 0, // Always fetch fresh
-    gcTime: 0 // Don't cache (v5 API)
+    refetchInterval: getOrderTrackingRefreshInterval(), // Use configured interval
+    staleTime: 30000, // Cache for 30 seconds
+    gcTime: 300000, // Keep cache for 5 minutes
+    retry: (failureCount, error) => {
+      // Don't retry auth failures
+      if (error.message.includes('401')) return false;
+      return failureCount < 2;
+    }
   });
 
   // Fetch order statistics - REBUILT to match actual API
@@ -243,14 +231,34 @@ export default function OrderTrackingManagement() {
     hasOrders: !!orders,
   });
 
+  // Show login prompt if authentication error
+  if (error && error.message.includes('401')) {
+    return (
+      <div className="space-y-6 p-6" dir="rtl">
+        <div className="text-center py-12">
+          <AlertTriangle className="h-16 w-16 text-red-500 mx-auto" />
+          <h2 className="mt-4 text-xl font-bold text-gray-800">جلسه منقضی شده</h2>
+          <p className="mt-2 text-gray-600">برای مشاهده سفارشات، لطفاً دوباره وارد شوید</p>
+          <button 
+            onClick={() => window.location.href = '/admin/login'}
+            className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            ورود مجدد
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (isLoading || isLoadingStats) {
     return (
       <div className="space-y-6 p-6" dir="rtl">
         <div className="text-center py-12">
-          <div className="animate-spin inline-block w-8 h-8 border-4 border-current border-t-transparent text-blue-600 rounded-full" role="status" aria-label="loading">
+          <div className="animate-spin inline-block w-12 h-12 border-4 border-current border-t-transparent text-blue-600 rounded-full" role="status" aria-label="loading">
             <span className="sr-only">در حال بارگیری...</span>
           </div>
-          <p className="mt-4 text-gray-600">در حال بارگیری اطلاعات سفارشات...</p>
+          <p className="mt-4 text-gray-700 font-medium">بارگیری سفارشات...</p>
+          <p className="mt-2 text-sm text-gray-500">در حال دریافت آخرین وضعیت سفارشات</p>
         </div>
       </div>
     );

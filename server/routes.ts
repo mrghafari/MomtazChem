@@ -39666,7 +39666,7 @@ momtazchem.com
     try {
       console.log('🔍 [DEBUG] [NEW VERSION] Fetching orders for tracking...');
       
-      // Direct query to get actual data - no complex joins that might fail
+      // Optimized query with index hints and reduced data transfer
       const ordersResult = await customerPool.query(`
         SELECT 
           co.id,
@@ -39675,40 +39675,35 @@ momtazchem.com
           co.total_amount,
           co.currency,
           co.created_at,
-          co.updated_at,
-          co.payment_method,
-          co.payment_status,
           co.customer_id,
           cc.first_name,
           cc.last_name,
           cc.company,  
           cc.phone,
-          cc.email,
-          cc.city_region,
-          cc.address
+          cc.email
         FROM customer_orders co
         LEFT JOIN crm_customers cc ON co.customer_id = cc.id
         ORDER BY co.created_at DESC
-        LIMIT 50
+        LIMIT 30
       `);
       
-      console.log('🔍 [DEBUG] [NEW VERSION] Query returned', ordersResult.rows.length, 'orders');
+      console.log('⚡ [OPTIMIZED] Query returned', ordersResult.rows.length, 'orders');
       
-      // Get order management data separately to avoid complex joins
+      // Get only essential management data for listed orders
+      const orderIds = ordersResult.rows.map((row: any) => row.id);
+      if (orderIds.length === 0) {
+        return res.json({ success: true, orders: [] });
+      }
+      
       const managementResult = await customerPool.query(`
         SELECT 
           customer_order_id,
           current_status,
           delivery_code,
-          tracking_number,
-          estimated_delivery_date,
-          delivery_person_name,
-          delivery_person_phone,
-          financial_notes,
-          warehouse_notes,
-          logistics_notes
+          tracking_number
         FROM order_management
-      `);
+        WHERE customer_order_id = ANY($1)
+      `, [orderIds]);
       
       // Create a map of order management data
       const managementMap = new Map();
@@ -39720,14 +39715,6 @@ momtazchem.com
         const mgmt = managementMap.get(row.id) || {};
         const customerName = `${row.first_name || ''} ${row.last_name || ''}`.trim() || row.company || 'مشتری نامشخص';
         
-        console.log('🔍 [DEBUG] [NEW VERSION] Processing order:', {
-          id: row.id,
-          order_number: row.order_number,
-          total_amount: row.total_amount,
-          customerName,
-          status: row.status
-        });
-        
         return {
           id: row.id,
           customerOrderId: row.order_number,
@@ -39736,27 +39723,11 @@ momtazchem.com
           totalAmount: parseFloat(row.total_amount) || 0,
           currency: row.currency || 'IQD',
           createdAt: row.created_at,
-          updatedAt: row.updated_at,
-          paymentMethod: row.payment_method || 'نقدی',
-          paymentStatus: row.payment_status || 'در انتظار',
           trackingNumber: mgmt.tracking_number,
-          estimatedDeliveryDate: mgmt.estimated_delivery_date,
-          deliveryPersonName: mgmt.delivery_person_name,
-          deliveryPersonPhone: mgmt.delivery_person_phone,
           deliveryCode: mgmt.delivery_code,
-          notes: mgmt.financial_notes || mgmt.warehouse_notes || mgmt.logistics_notes || '',
           customerName,
-          customerEmail: row.email || 'ایمیل نامشخص',
-          customerPhone: row.phone || 'تلفن نامشخص',
-          customerInfo: {
-            firstName: row.first_name || 'نام نامشخص',
-            lastName: row.last_name || 'نام خانوادگی نامشخص',
-            companyName: row.company || 'شرکت نامشخص',
-            phone: row.phone || 'تلفن نامشخص',
-            email: row.email || 'ایمیل نامشخص',
-            city: row.city_region || 'شهر نامشخص',
-            address: row.address || 'آدرس نامشخص'
-          }
+          customerEmail: row.email || '',
+          customerPhone: row.phone || ''
         };
       });
 
