@@ -542,16 +542,23 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                              "";
       
       // Enhanced city mapping - check multiple city fields  
-      const customerCity = customerToUse.city || 
-                          customerToUse.cityRegion || 
+      const customerCity = customerToUse.cityRegion || 
+                          customerToUse.city || 
                           customerToUse.cityName ||
                           customerToUse.province || 
                           "";
+      
+      // Enhanced province mapping - for separate province field if needed
+      const customerProvince = customerToUse.province || 
+                              customerToUse.cityRegion || 
+                              customerToUse.city ||
+                              "";
 
-      console.log('🏠 [ADDRESS DEBUG] Address mapping result:', {
+      console.log('🏠 [ADDRESS DEBUG] Enhanced address mapping result:', {
         originalCustomer: customerToUse,
         mappedAddress: customerAddress,
         mappedCity: customerCity,
+        mappedProvince: customerProvince,
         addressSources: {
           address: customerToUse.address,
           secondaryAddress: customerToUse.secondaryAddress,
@@ -561,10 +568,16 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
           streetAddress: customerToUse.streetAddress
         },
         citySources: {
-          city: customerToUse.city,
           cityRegion: customerToUse.cityRegion,
+          city: customerToUse.city,
           cityName: customerToUse.cityName,
           province: customerToUse.province
+        },
+        priorityMapping: {
+          selectedCity: customerCity,
+          selectedProvince: customerProvince,
+          hasCityData: !!customerCity,
+          hasProvinceData: !!customerProvince
         }
       });
 
@@ -573,11 +586,13 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         phone: customerToUse.phone || "",
         address: customerAddress,
         city: customerCity || "Iraq",
-        country: customerToUse.country || "Iraq",
+        country: customerToUse.country || "Iraq", 
         postalCode: customerToUse.postalCode || "",
         notes: "",
         gpsLatitude: undefined,
         gpsLongitude: undefined,
+        // Add province data for internal use even though form may not have separate field
+        province: customerProvince || customerCity || "",
       };
       
       console.log('Form data to reset:', formData);
@@ -1749,8 +1764,15 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                           <p className={`text-xs ${
                             isPrimaryAddressDisabled ? 'text-gray-500' : 'text-green-600'
                           }`}>
-                            🏙️ {crmCustomerData?.city || 'شهر ثبت نشده'}
+                            🏙️ {crmCustomerData?.cityRegion || crmCustomerData?.city || crmCustomerData?.province || 'شهر ثبت نشده'}
                           </p>
+                          {crmCustomerData?.province && crmCustomerData?.province !== crmCustomerData?.cityRegion && (
+                            <p className={`text-xs ${
+                              isPrimaryAddressDisabled ? 'text-gray-500' : 'text-green-600'
+                            }`}>
+                              🏛️ استان: {crmCustomerData.province}
+                            </p>
+                          )}
                         </div>
                       </div>
                       
