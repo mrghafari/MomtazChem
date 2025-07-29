@@ -202,7 +202,7 @@ export default function OrderTrackingManagement() {
     }
   };
 
-  // Format date for display
+  // Format date for display - Show exact checkout submission time
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('fa-IR', {
@@ -210,7 +210,8 @@ export default function OrderTrackingManagement() {
       month: '2-digit',
       day: '2-digit',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
+      second: '2-digit'
     });
   };
 
@@ -416,7 +417,7 @@ export default function OrderTrackingManagement() {
                   <th className="text-right p-4 font-semibold w-[120px] min-w-[120px]">مبلغ</th>
                   <th className="text-right p-4 font-semibold w-[100px] min-w-[100px]">وضعیت</th>
                   <th className="text-right p-4 font-semibold w-[100px] min-w-[100px]">کد تحویل</th>
-                  <th className="text-right p-4 font-semibold w-[140px] min-w-[140px]">تاریخ ایجاد</th>
+                  <th className="text-right p-4 font-semibold w-[140px] min-w-[140px]">زمان ثبت سفارش</th>
                   <th className="text-right p-4 font-semibold w-[100px] min-w-[100px]">عملیات</th>
                 </tr>
               </thead>
@@ -581,12 +582,31 @@ export default function OrderTrackingManagement() {
                                 <CardHeader>
                                   <CardTitle className="text-lg flex items-center gap-2">
                                     <Clock className="w-5 h-5" />
-                                    تاریخ‌ها
+                                    زمان‌های ثبت و بروزرسانی
                                   </CardTitle>
                                 </CardHeader>
-                                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                  <div><strong>تاریخ ایجاد:</strong> {formatDate(selectedOrder.createdAt)}</div>
-                                  <div><strong>آخرین بروزرسانی:</strong> {formatDate(selectedOrder.updatedAt)}</div>
+                                <CardContent className="space-y-3">
+                                  <div className="p-3 bg-green-50 rounded-lg">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <CheckCircle className="w-4 h-4 text-green-600" />
+                                      <strong className="text-green-800">زمان ثبت سفارش توسط مشتری:</strong>
+                                    </div>
+                                    <div className="text-green-700 text-sm">
+                                      {formatDate(selectedOrder.createdAt)}
+                                    </div>
+                                    <div className="text-xs text-green-600 mt-1">
+                                      (زمان دقیق submit کردن سفارش در صفحه checkout)
+                                    </div>
+                                  </div>
+                                  <div className="p-3 bg-blue-50 rounded-lg">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <Activity className="w-4 h-4 text-blue-600" />
+                                      <strong className="text-blue-800">آخرین بروزرسانی وضعیت:</strong>
+                                    </div>
+                                    <div className="text-blue-700 text-sm">
+                                      {formatDate(selectedOrder.updatedAt)}
+                                    </div>
+                                  </div>
                                 </CardContent>
                               </Card>
                             </div>
