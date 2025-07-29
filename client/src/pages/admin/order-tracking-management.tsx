@@ -152,6 +152,22 @@ const departmentLabels: { [key: string]: string } = {
   'logistics': 'لجستیک'
 };
 
+// Format date function for Persian display
+const formatDate = (dateString: string) => {
+  if (!dateString) return 'نامشخص';
+  try {
+    return new Date(dateString).toLocaleDateString('fa-IR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  } catch {
+    return 'تاریخ نامعتبر';
+  }
+};
+
 export default function OrderTrackingManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('all');
