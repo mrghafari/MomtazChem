@@ -153,7 +153,7 @@ const departmentLabels: { [key: string]: string } = {
   'logistics': 'لجستیک'
 };
 
-// Format date function - Same as financial department
+// Format date function - Exactly same as financial department
 const formatDate = (dateString: string) => {
   if (!dateString) return 'نامشخص';  
   try {
