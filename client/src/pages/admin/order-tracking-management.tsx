@@ -560,19 +560,7 @@ export default function OrderTrackingManagement() {
                       )}
                     </button>
                   </th>
-                  <th className="text-right p-4 font-semibold w-[140px] min-w-[140px]">
-                    <button 
-                      onClick={() => handleSort('createdAt')}
-                      className="flex items-center justify-end w-full hover:text-blue-600 transition-colors"
-                    >
-                      زمان ثبت سفارش
-                      {sortField === 'createdAt' && (
-                        <span className="mr-1">
-                          {sortDirection === 'asc' ? '↑' : '↓'}
-                        </span>
-                      )}
-                    </button>
-                  </th>
+
                   <th className="text-center p-4 font-semibold w-[100px] min-w-[100px]">عملیات</th>
                 </tr>
               </thead>
@@ -620,11 +608,7 @@ export default function OrderTrackingManagement() {
                         <span className="text-gray-400">-</span>
                       )}
                     </td>
-                    <td className="p-4 w-[140px] min-w-[140px]">
-                      <div className="text-sm">
-                        {formatDate(order.createdAt)}
-                      </div>
-                    </td>
+
                     <td className="p-4 w-[100px] min-w-[100px] text-center">
                       <Dialog>
                         <DialogTrigger asChild>
