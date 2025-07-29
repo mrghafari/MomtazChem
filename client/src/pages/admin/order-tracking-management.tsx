@@ -152,16 +152,17 @@ const departmentLabels: { [key: string]: string } = {
   'logistics': 'لجستیک'
 };
 
-// Format date function for Persian display
+// Format date function for Gregorian calendar display
 const formatDate = (dateString: string) => {
   if (!dateString) return 'نامشخص';
   try {
-    return new Date(dateString).toLocaleDateString('fa-IR', {
+    return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
+      hour12: false
     });
   } catch {
     return 'تاریخ نامعتبر';
@@ -224,20 +225,32 @@ export default function OrderTrackingManagement() {
     }
   });
 
-  // Fetch order statistics - REBUILT to match actual API
-  const { data: stats, isLoading: isLoadingStats } = useQuery({
-    queryKey: ['order-stats'],
+  // Fetch order statistics - UPDATED to automatically refresh
+  const { data: stats, isLoading: isLoadingStats, refetch: refetchStats } = useQuery({
+    queryKey: ['order-management-statistics-updated'],
     queryFn: async () => {
       const response = await fetch('/api/order-management/statistics', {
-        credentials: 'include'
+        credentials: 'include',
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
       });
       if (!response.ok) {
+        if (response.status === 401) {
+          window.location.href = '/admin/login';
+          return {};
+        }
         throw new Error('Failed to fetch order statistics');
       }
       const data = await response.json();
+      console.log('📊 [STATS UPDATED] Fresh statistics loaded:', data);
       return data as OrderStats;
     },
-    refetchInterval: getOrderTrackingRefreshInterval()
+    refetchInterval: 30000, // Refresh every 30 seconds for real-time stats
+    staleTime: 10000, // Consider data stale after 10 seconds
+    gcTime: 60000, // Keep cache for 1 minute
+    retry: 2
   });
 
   // Handle sorting
@@ -301,16 +314,17 @@ export default function OrderTrackingManagement() {
     }
   };
 
-  // Format date for display - Show exact checkout submission time
-  const formatDate = (dateString: string) => {
+  // Format date for display - Show exact checkout submission time in Gregorian
+  const formatDateDetailed = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('fa-IR', {
+    return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
       hour: '2-digit',
       minute: '2-digit',
-      second: '2-digit'
+      second: '2-digit',
+      hour12: false
     });
   };
 
@@ -394,79 +408,166 @@ export default function OrderTrackingManagement() {
         </div>
       </div>
 
-      {/* Statistics Cards */}
+      {/* UPDATED Statistics Cards with Real-time Data */}
       <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
-        <Card>
+        <Card className="relative">
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
               <Package className="w-5 h-5 text-blue-500" />
               <div>
                 <p className="text-sm text-gray-600">کل سفارشات</p>
-                <p className="text-2xl font-bold">{stats?.totalOrders || 0}</p>
+                <p className="text-2xl font-bold text-blue-700">
+                  {isLoadingStats ? (
+                    <span className="animate-pulse">...</span>
+                  ) : (
+                    stats?.totalOrders || 0
+                  )}
+                </p>
               </div>
             </div>
+            {!isLoadingStats && (
+              <div className="absolute top-2 left-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="relative">
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
               <Clock className="w-5 h-5 text-yellow-500" />
               <div>
                 <p className="text-sm text-gray-600">در انتظار</p>
-                <p className="text-2xl font-bold">{stats?.pendingOrders || 0}</p>
+                <p className="text-2xl font-bold text-yellow-700">
+                  {isLoadingStats ? (
+                    <span className="animate-pulse">...</span>
+                  ) : (
+                    stats?.pendingOrders || 0
+                  )}
+                </p>
               </div>
             </div>
+            {!isLoadingStats && (
+              <div className="absolute top-2 left-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="relative">
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
               <CheckCircle className="w-5 h-5 text-green-500" />
               <div>
                 <p className="text-sm text-gray-600">تکمیل شده</p>
-                <p className="text-2xl font-bold">{stats?.completedOrders || 0}</p>
+                <p className="text-2xl font-bold text-green-700">
+                  {isLoadingStats ? (
+                    <span className="animate-pulse">...</span>
+                  ) : (
+                    stats?.completedOrders || 0
+                  )}
+                </p>
               </div>
             </div>
+            {!isLoadingStats && (
+              <div className="absolute top-2 left-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="relative">
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
               <DollarSign className="w-5 h-5 text-green-600" />
               <div>
-                <p className="text-sm text-gray-600">درآمد کل</p>
-                <p className="text-lg font-bold">{stats?.totalRevenue?.toLocaleString() || 0} IQD</p>
+                <p className="text-sm text-gray-600">درآمد کل (30 روز)</p>
+                <p className="text-lg font-bold text-green-700">
+                  {isLoadingStats ? (
+                    <span className="animate-pulse">...</span>
+                  ) : (
+                    `${(stats?.totalRevenue || 0).toLocaleString()} IQD`
+                  )}
+                </p>
               </div>
             </div>
+            {!isLoadingStats && (
+              <div className="absolute top-2 left-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="relative">
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-purple-500" />
               <div>
                 <p className="text-sm text-gray-600">میانگین سفارش</p>
-                <p className="text-lg font-bold">{stats?.averageOrderValue?.toLocaleString() || 0} IQD</p>
+                <p className="text-lg font-bold text-purple-700">
+                  {isLoadingStats ? (
+                    <span className="animate-pulse">...</span>
+                  ) : (
+                    `${(stats?.averageOrderValue || 0).toLocaleString()} IQD`
+                  )}
+                </p>
               </div>
             </div>
+            {!isLoadingStats && (
+              <div className="absolute top-2 left-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="relative">
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
               <Calendar className="w-5 h-5 text-orange-500" />
               <div>
-                <p className="text-sm text-gray-600">امروز</p>
-                <p className="text-2xl font-bold">{stats?.todaysOrders || 0}</p>
+                <p className="text-sm text-gray-600">سفارشات امروز</p>
+                <p className="text-2xl font-bold text-orange-700">
+                  {isLoadingStats ? (
+                    <span className="animate-pulse">...</span>
+                  ) : (
+                    stats?.todaysOrders || 0
+                  )}
+                </p>
               </div>
             </div>
+            {!isLoadingStats && (
+              <div className="absolute top-2 left-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              </div>
+            )}
           </CardContent>
         </Card>
+      </div>
+
+      {/* Real-time Update Indicator */}
+      <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg p-3">
+        <div className="flex items-center gap-2">
+          <Activity className="w-4 h-4 text-blue-600" />
+          <span className="text-sm text-blue-800 font-medium">
+            آمارها به‌روزرسانی خودکار هر 30 ثانیه
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={() => refetchStats()}
+            className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors"
+          >
+            به‌روزرسانی فوری
+          </button>
+          {isLoadingStats && (
+            <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent"></div>
+          )}
+        </div>
       </div>
 
       {/* Search and Filter */}
