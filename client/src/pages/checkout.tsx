@@ -422,9 +422,14 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
     }
   }, [containsFlammableProducts, cart, cartItems]);
 
-  // Fallback local calculation method (backup)
+  // Fallback local calculation method (backup) - SAFETY COMPLIANT
   const fallbackLocalCalculation = useCallback((weight: number, destination: string) => {
-    console.log('🚚 [CHECKOUT] Using fallback calculation');
+    console.log('🚚 [CHECKOUT] Using FLAMMABLE-SAFE fallback calculation', {
+      weight,
+      destination,
+      containsFlammableProducts,
+      cartItemsWithFlammable: cartItems.filter(item => item?.isFlammable === true).map(item => item.name)
+    });
     
     // Find destination city in Iraqi cities
     const destCity = iraqiCities?.find((city: any) => 
@@ -433,9 +438,66 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
       city.name?.toLowerCase().includes(destination.toLowerCase())
     );
     
-    if (!destCity) return 0;
+    if (!destCity) {
+      console.log('🚚 [FALLBACK] Destination city not found:', destination);
+      return 0;
+    }
     
-    // Select optimal vehicle using local logic (with flammable materials filter)
+    // CRITICAL: If cart contains flammable materials, ONLY allow heavy trucks with flammable authorization
+    if (containsFlammableProducts) {
+      console.log('🔥 [FALLBACK SAFETY] Flammable materials detected - applying safety restrictions');
+      
+      // Find heavy truck vehicles that support flammable materials
+      const flammableAuthorizedVehicles = vehicleTemplates?.filter((vehicle: any) => {
+        const canHandleWeight = vehicle.isActive && parseFloat(vehicle.maxWeightKg) >= weight;
+        const supportsFlammable = vehicle.supportsFlammable === true;
+        const isHeavyTruck = vehicle.name?.includes('سنگین') || vehicle.vehicleType === 'heavy_truck';
+        
+        console.log('🚛 [FALLBACK FLAMMABLE CHECK] Vehicle:', {
+          name: vehicle.name,
+          canHandleWeight,
+          supportsFlammable,
+          isHeavyTruck,
+          qualified: canHandleWeight && supportsFlammable && isHeavyTruck
+        });
+        
+        return canHandleWeight && supportsFlammable && isHeavyTruck;
+      }) || [];
+      
+      if (flammableAuthorizedVehicles.length === 0) {
+        console.error('🔥 [FALLBACK SAFETY] No flammable-authorized vehicles found for heavy materials');
+        return 617000; // Return heavy truck estimated cost as safety fallback
+      }
+      
+      // Select the most suitable heavy truck for flammable materials
+      const selectedVehicle = flammableAuthorizedVehicles[0];
+      setSelectedVehicle({
+        ...selectedVehicle,
+        name: selectedVehicle.name + ' (مواد آتش‌زا)',
+        type: 'heavy_truck_flammable'
+      });
+      
+      // Calculate cost for heavy truck
+      const baseCost = parseFloat(selectedVehicle.basePrice || '350000');
+      const distanceCost = parseFloat(destCity.distanceFromErbilKm || '0') * parseFloat(selectedVehicle.pricePerKm || '800');
+      const weightCost = weight * parseFloat(selectedVehicle.pricePerKg || '200');
+      
+      const totalCost = baseCost + distanceCost + weightCost;
+      
+      console.log('🔥 [FALLBACK FLAMMABLE] Heavy truck selected for safety:', {
+        vehicle: selectedVehicle.name,
+        baseCost,
+        distance: destCity.distanceFromErbilKm,
+        distanceCost,
+        weightCost,
+        totalCost,
+        safetyCompliant: true
+      });
+      
+      return totalCost;
+    }
+    
+    // For non-flammable materials, use normal vehicle selection
     const vehicle = selectOptimalVehicle(weight, destination);
     if (!vehicle) {
       console.log('🚚 [FALLBACK] No suitable vehicle found', { 
@@ -456,7 +518,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
     
     const totalCost = baseCost + distanceCost + weightCost;
     
-    console.log('🚚 [CHECKOUT] Fallback calculation:', {
+    console.log('🚚 [FALLBACK] Standard calculation:', {
       weight,
       destination,
       selectedVehicle: vehicle.name,
@@ -464,11 +526,12 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
       distance: destCity.distanceFromErbilKm,
       distanceCost,
       weightCost,
-      totalCost
+      totalCost,
+      containsFlammableProducts
     });
     
     return totalCost;
-  }, [iraqiCities, selectOptimalVehicle]);
+  }, [iraqiCities, selectOptimalVehicle, containsFlammableProducts, cartItems, vehicleTemplates]);
 
   // Watch for address changes to update destination
   useEffect(() => {

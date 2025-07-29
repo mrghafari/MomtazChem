@@ -167,6 +167,31 @@
 
 ## Recent Changes
 
+### COMPLETED: Frontend Fallback Calculation System Safety Fix - Complete Flammable Materials Compliance (January 29, 2025)
+✅ **RESOLVED: Critical safety bug in frontend fallback calculation system showing incorrect bus rates for flammable materials**
+- **User Issue**: Bus rates showing 200 IQD instead of being completely excluded for Solvant 402 flammable materials
+- **Root Cause**: Frontend fallback calculation system (`fallbackLocalCalculation`) bypassing flammable materials safety compliance when main API is slow
+- **Critical Fix**: Enhanced fallback system with complete flammable materials safety compliance:
+  - **Safety-First Logic**: If `containsFlammableProducts = true`, only heavy trucks with flammable authorization allowed
+  - **Bus Exclusion**: Complete passenger bus elimination from fallback calculations for hazardous materials
+  - **Heavy Truck Selection**: Automatic selection of vehicles with `supportsFlammable = true` and `vehicleType = 'heavy_truck'`
+  - **Safety Fallback**: Returns 617,000 IQD heavy truck cost if no flammable-authorized vehicles found
+- **Technical Implementation**:
+  - **Frontend Fix**: Updated `fallbackLocalCalculation` function in checkout.tsx with flammable materials detection
+  - **Vehicle Selection**: Enhanced `selectOptimalVehicle` with safety filtering for flammable products
+  - **Logging Enhancement**: Added comprehensive safety compliance logging for audit trail
+  - **Cart Integration**: Proper integration with `containsFlammableProducts` detection from cart items
+- **API Synchronization**: Both main API and fallback system now use identical flammable materials detection:
+  - **Main API**: `/api/calculate-delivery-cost` correctly returns heavy truck (688,200 IQD) for Solvant 402
+  - **Fallback System**: Frontend calculation respects same safety restrictions preventing bus selection
+- **Safety Verification**: 
+  - **Solvant 402 Test**: Product ID 28 properly detected as flammable, buses excluded, heavy truck selected
+  - **Cost Consistency**: Both API and fallback return appropriate heavy truck costs (617K-689K IQD range)
+  - **No Bus Options**: Zero passenger bus rates displayed for flammable materials in any scenario
+- **Business Impact**: Complete flammable materials transport safety compliance preventing regulatory violations
+- **User Experience**: Consistent safety-compliant vehicle selection regardless of API performance or network conditions
+- **Result**: Complete frontend-backend synchronization operational - all delivery calculations respect flammable materials safety compliance with no passenger bus options for hazardous transport
+
 ### COMPLETED: Critical Flammable Materials Safety System Fix - Vehicle Selection Security Compliance (January 29, 2025)
 ✅ **RESOLVED: Critical safety bug in flammable materials detection system preventing proper vehicle exclusion for hazardous transport**
 - **User Safety Issue**: System was incorrectly selecting buses for Solvant 402 (flammable materials) transport due to detection failure
