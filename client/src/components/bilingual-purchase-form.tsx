@@ -375,28 +375,98 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     retry: false,
   });
 
-  // Fetch active shipping rates
+  // Check if cart contains flammable materials - CRITICAL SAFETY CHECK
+  const containsFlammableProducts = useMemo(() => {
+    const flammableItems = Object.entries(cart).some(([productId, quantity]) => {
+      if (quantity > 0) {
+        const product = products.find(p => p.id === parseInt(productId));
+        const isFlammable = product?.isFlammable === true;
+        if (isFlammable) {
+          console.log('🔥 [BILINGUAL FORM] Flammable product detected:', {
+            productId,
+            name: product?.name,
+            isFlammable: true,
+            quantity
+          });
+        }
+        return isFlammable;
+      }
+      return false;
+    });
+    
+    console.log('🔥 [BILINGUAL FORM] Cart flammable check result:', {
+      containsFlammableProducts: flammableItems,
+      cartItems: Object.keys(cart).length,
+      totalQuantity: Object.values(cart).reduce((sum, qty) => sum + qty, 0)
+    });
+    
+    return flammableItems;
+  }, [cart, products]);
+
+  // Fetch active shipping rates with FLAMMABLE MATERIALS FILTERING
   const { data: shippingRatesData, isLoading: isLoadingShippingRates, error: shippingRatesError } = useQuery({
-    queryKey: ['/api/shipping-rates'],
+    queryKey: ['/api/shipping-rates', containsFlammableProducts],
     queryFn: async () => {
       try {
-        console.log('Fetching shipping rates...');
+        console.log('🚚 [BILINGUAL FORM] Fetching shipping rates with flammable filtering...', {
+          containsFlammableProducts,
+          cartProducts: Object.entries(cart).map(([id, qty]) => ({
+            id,
+            quantity: qty,
+            name: products.find(p => p.id === parseInt(id))?.name,
+            isFlammable: products.find(p => p.id === parseInt(id))?.isFlammable
+          }))
+        });
+        
         const response = await fetch('/api/shipping-rates', {
           credentials: 'include'
         });
         
         if (response.ok) {
           const result = await response.json();
-          console.log('Shipping rates API response:', result);
+          console.log('📦 [BILINGUAL FORM] Raw shipping rates API response:', result);
+          
           if (result.success && result.data) {
-            console.log('Successfully loaded shipping rates:', result.data.length, 'methods');
-            return result.data;
+            let filteredRates = result.data;
+            
+            // CRITICAL SAFETY FILTER: Remove bus options for flammable materials
+            if (containsFlammableProducts) {
+              const originalCount = filteredRates.length;
+              filteredRates = filteredRates.filter((rate: any) => {
+                const deliveryMethod = rate.deliveryMethod || rate.delivery_method || '';
+                const isBusMethod = deliveryMethod.includes('bus') || 
+                                   deliveryMethod.includes('اتوبوس') || 
+                                   rate.name?.includes('اتوبوس') ||
+                                   rate.name?.includes('bus');
+                
+                if (isBusMethod) {
+                  console.log('🚫 [SAFETY FILTER] Excluding bus option for flammable materials:', {
+                    rateName: rate.name,
+                    deliveryMethod: deliveryMethod,
+                    rateId: rate.id,
+                    reason: 'FLAMMABLE_MATERIALS_SAFETY'
+                  });
+                  return false; // EXCLUDE BUS FOR FLAMMABLE MATERIALS
+                }
+                return true; // ALLOW NON-BUS OPTIONS
+              });
+              
+              console.log('🔥 [SAFETY COMPLIANCE] Shipping rates filtered for flammable materials:', {
+                originalCount,
+                filteredCount: filteredRates.length,
+                excludedCount: originalCount - filteredRates.length,
+                containsFlammableProducts: true
+              });
+            }
+            
+            console.log('✅ [BILINGUAL FORM] Successfully loaded shipping rates:', filteredRates.length, 'methods');
+            return filteredRates;
           }
         }
-        console.log('Failed to load shipping rates');
+        console.log('❌ [BILINGUAL FORM] Failed to load shipping rates');
         return [];
       } catch (error) {
-        console.log('Error fetching shipping rates:', error);
+        console.log('❌ [BILINGUAL FORM] Error fetching shipping rates:', error);
         return [];
       }
     },
