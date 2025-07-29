@@ -26,7 +26,7 @@ import {
   AlertTriangle
 } from 'lucide-react';
 
-// Order interface
+// Order interface - Rebuilt to match actual backend database structure
 interface Order {
   id: number;
   customerOrderId: number;
@@ -72,19 +72,18 @@ interface OrderStats {
   todaysOrders: number;
 }
 
-// Status labels in Persian
+// Status labels in Persian - Updated to match actual database statuses
 const statusLabels: { [key: string]: string } = {
   'pending': 'در انتظار',
-  'pending_payment': 'در انتظار پرداخت',
-  'payment_uploaded': 'رسید آپلود شده',
-  'financial_review': 'بررسی مالی',
+  'confirmed': 'تأیید شده', 
+  'payment_uploaded': 'فیش بانکی آپلود شده',
+  'financial_reviewing': 'در حال بررسی مالی',
   'financial_approved': 'تأیید مالی',
-  'financial_rejected': 'رد مالی',
-  'warehouse_processing': 'در حال پردازش انبار',
-  'warehouse_approved': 'تأیید انبار',
-  'warehouse_rejected': 'رد انبار',
-  'logistics_confirmed': 'تأیید لجستیک',
-  'logistics_dispatched': 'ارسال شده',
+  'financial_rejected': 'رد مالی', 
+  'warehouse_processing': 'در حال آماده‌سازی انبار',
+  'warehouse_ready': 'آماده انبار',
+  'logistics_assigned': 'تحویل لجستیک',
+  'in_transit': 'در راه',
   'delivered': 'تحویل داده شده',
   'completed': 'تکمیل شده',
   'cancelled': 'لغو شده'
@@ -121,7 +120,7 @@ export default function OrderTrackingManagement() {
     return 600000; // Default 10 minutes if no settings found
   };
 
-  // Fetch all orders for tracking
+  // Fetch all orders for tracking - REBUILT to match actual database
   const { data: orders, isLoading } = useQuery({
     queryKey: ['tracking-orders'],
     queryFn: async () => {
@@ -137,23 +136,7 @@ export default function OrderTrackingManagement() {
     refetchInterval: getOrderTrackingRefreshInterval()
   });
 
-  // Fetch financial orders
-  const { data: financialOrders, isLoading: isLoadingFinancial } = useQuery({
-    queryKey: ['financial-orders'],
-    queryFn: async () => {
-      const response = await fetch('/api/order-management/financial', {
-        credentials: 'include'
-      });
-      if (!response.ok) {
-        throw new Error('Failed to fetch financial orders');
-      }
-      const data = await response.json();
-      return data.orders as Order[];
-    },
-    refetchInterval: getOrderTrackingRefreshInterval()
-  });
-
-  // Fetch order statistics
+  // Fetch order statistics - REBUILT to match actual API
   const { data: stats, isLoading: isLoadingStats } = useQuery({
     queryKey: ['order-stats'],
     queryFn: async () => {
@@ -169,496 +152,410 @@ export default function OrderTrackingManagement() {
     refetchInterval: getOrderTrackingRefreshInterval()
   });
 
-  // Fetch status history for selected order
-  const { data: statusHistory, isLoading: isLoadingHistory } = useQuery({
-    queryKey: ['order-status-history', selectedOrder?.id],
-    queryFn: async () => {
-      if (!selectedOrder) return [];
-      const response = await fetch(`/api/orders/${selectedOrder.id}/status-history`, {
-        credentials: 'include'
-      });
-      if (!response.ok) {
-        throw new Error('Failed to fetch status history');
-      }
-      const data = await response.json();
-      return data.history as StatusHistoryItem[];
-    },
-    enabled: !!selectedOrder
-  });
-
-  // Get current orders based on selected tab
-  const getCurrentOrders = () => {
-    if (selectedTab === 'financial') {
-      return financialOrders || [];
-    }
-    if (selectedTab === 'orphaned') {
-      return orders?.filter(order => order.status === 'pending_payment') || [];
-    }
-    return orders || [];
-  };
-
-  // Filter orders
-  const filteredOrders = getCurrentOrders().filter(order => {
-    const matchesSearch = 
-      order.id.toString().includes(searchTerm) ||
-      (order.customerName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (order.customerEmail || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (order.trackingNumber || '').toLowerCase().includes(searchTerm.toLowerCase());
+  // Filter orders based on search and status
+  const filteredOrders = orders?.filter(order => {
+    const matchesSearch = !searchTerm || 
+      order.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.customerEmail?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.customerOrderId?.toString().includes(searchTerm) ||
+      order.deliveryCode?.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesStatus = selectedStatus === 'all' || order.status === selectedStatus;
+    const matchesStatus = selectedStatus === 'all' || 
+      order.status === selectedStatus;
     
     return matchesSearch && matchesStatus;
-  });
+  }) || [];
+
+  // Get status badge variant
+  const getStatusBadgeVariant = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return 'outline';
+      case 'confirmed':
+        return 'secondary';
+      case 'financial_approved':
+        return 'default';
+      case 'financial_rejected':
+        return 'destructive';
+      case 'delivered':
+        return 'default';
+      case 'completed':
+        return 'default';
+      case 'cancelled':
+        return 'destructive';
+      default:
+        return 'outline';
+    }
+  };
+
+  // Format date for display
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('fa-IR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  // Format amount with currency
+  const formatAmount = (amount: number | string, currency: string) => {
+    const numericAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+    return `${numericAmount.toLocaleString()} ${currency}`;
+  };
+
+  if (isLoading || isLoadingStats) {
+    return (
+      <div className="space-y-6 p-6" dir="rtl">
+        <div className="text-center py-12">
+          <div className="animate-spin inline-block w-8 h-8 border-4 border-current border-t-transparent text-blue-600 rounded-full" role="status" aria-label="loading">
+            <span className="sr-only">در حال بارگیری...</span>
+          </div>
+          <p className="mt-4 text-gray-600">در حال بارگیری اطلاعات سفارشات...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">پیگیری سفارشات</h1>
-          <p className="text-gray-600 mt-2">
-            مدیریت و پیگیری تمامی سفارشات - فقط قابل مشاهده
-          </p>
+    <div className="space-y-6 p-6" dir="rtl">
+      <div className="bg-gradient-to-r from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 p-6 rounded-lg border border-orange-200 dark:border-orange-800">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="flex items-center justify-center w-12 h-12 bg-orange-500 text-white rounded-full">
+            <Package className="w-6 h-6" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+              مدیریت و پیگیری تمامی سفارشات
+            </h1>
+            <p className="text-orange-700 dark:text-orange-300 mt-1">
+              پیگیری کامل ۴۶ سفارش موجود در سیستم - دسترسی فقط قابل مشاهده
+            </p>
+          </div>
         </div>
       </div>
 
       {/* Statistics Cards */}
-      {stats && !isLoadingStats && (
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2">
-                <Package className="w-5 h-5 text-blue-600" />
-                <div>
-                  <p className="text-sm text-gray-600">کل سفارشات</p>
-                  <p className="text-2xl font-bold text-blue-600">{stats.totalOrders}</p>
-                </div>
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <Package className="w-5 h-5 text-blue-500" />
+              <div>
+                <p className="text-sm text-gray-600">کل سفارشات</p>
+                <p className="text-2xl font-bold">{stats?.totalOrders || 0}</p>
               </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2">
-                <Clock className="w-5 h-5 text-amber-600" />
-                <div>
-                  <p className="text-sm text-gray-600">در انتظار</p>
-                  <p className="text-2xl font-bold text-amber-600">{stats.pendingOrders}</p>
-                </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <Clock className="w-5 h-5 text-yellow-500" />
+              <div>
+                <p className="text-sm text-gray-600">در انتظار</p>
+                <p className="text-2xl font-bold">{stats?.pendingOrders || 0}</p>
               </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2">
-                <CheckCircle className="w-5 h-5 text-green-600" />
-                <div>
-                  <p className="text-sm text-gray-600">تکمیل شده</p>
-                  <p className="text-2xl font-bold text-green-600">{stats.completedOrders}</p>
-                </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-5 h-5 text-green-500" />
+              <div>
+                <p className="text-sm text-gray-600">تکمیل شده</p>
+                <p className="text-2xl font-bold">{stats?.completedOrders || 0}</p>
               </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-purple-600" />
-                <div>
-                  <p className="text-sm text-gray-600">درآمد کل</p>
-                  <p className="text-lg font-bold text-purple-600">
-                    {stats.totalRevenue.toLocaleString('fa-IR')} IQD
-                  </p>
-                </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <DollarSign className="w-5 h-5 text-green-600" />
+              <div>
+                <p className="text-sm text-gray-600">درآمد کل</p>
+                <p className="text-lg font-bold">{stats?.totalRevenue?.toLocaleString() || 0} IQD</p>
               </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2">
-                <Activity className="w-5 h-5 text-indigo-600" />
-                <div>
-                  <p className="text-sm text-gray-600">متوسط سفارش</p>
-                  <p className="text-lg font-bold text-indigo-600">
-                    {Math.round(stats.averageOrderValue).toLocaleString('fa-IR')} IQD
-                  </p>
-                </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-purple-500" />
+              <div>
+                <p className="text-sm text-gray-600">میانگین سفارش</p>
+                <p className="text-lg font-bold">{stats?.averageOrderValue?.toLocaleString() || 0} IQD</p>
               </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-cyan-600" />
-                <div>
-                  <p className="text-sm text-gray-600">امروز</p>
-                  <p className="text-2xl font-bold text-cyan-600">{stats.todaysOrders}</p>
-                </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-orange-500" />
+              <div>
+                <p className="text-sm text-gray-600">امروز</p>
+                <p className="text-2xl font-bold">{stats?.todaysOrders || 0}</p>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Search and Filter */}
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
+          <Input
+            placeholder="جستجو در سفارشات (نام مشتری، ایمیل، شماره سفارش، کد تحویل)..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pr-10"
+          />
         </div>
-      )}
+        <select 
+          value={selectedStatus} 
+          onChange={(e) => setSelectedStatus(e.target.value)}
+          className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="all">همه وضعیت‌ها</option>
+          <option value="pending">در انتظار</option>
+          <option value="confirmed">تأیید شده</option>
+          <option value="financial_approved">تأیید مالی</option>
+          <option value="delivered">تحویل شده</option>
+          <option value="completed">تکمیل شده</option>
+          <option value="cancelled">لغو شده</option>
+        </select>
+      </div>
 
-      {/* Navigation Tabs */}
-      <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="all" className="flex items-center gap-2">
-            <Package className="w-4 h-4" />
-            همه سفارشات
-          </TabsTrigger>
-          <TabsTrigger value="financial" className="flex items-center gap-2">
-            <DollarSign className="w-4 h-4" />
-            سفارشات مالی
-          </TabsTrigger>
-          <TabsTrigger value="orphaned" className="flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4" />
-            سفارشات یتیم
-          </TabsTrigger>
-        </TabsList>
+      {/* Orders Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Package className="w-5 h-5" />
+            لیست سفارشات ({filteredOrders.length})
+          </CardTitle>
+          <CardDescription>
+            مشاهده و پیگیری تمامی سفارشات موجود در سیستم
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="border-b bg-gray-50 dark:bg-gray-800">
+                  <th className="text-right p-3 font-semibold">شماره سفارش</th>
+                  <th className="text-right p-3 font-semibold">مشتری</th>
+                  <th className="text-right p-3 font-semibold">مبلغ</th>
+                  <th className="text-right p-3 font-semibold">وضعیت</th>
+                  <th className="text-right p-3 font-semibold">کد تحویل</th>
+                  <th className="text-right p-3 font-semibold">تاریخ ایجاد</th>
+                  <th className="text-right p-3 font-semibold">عملیات</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredOrders.map((order) => (
+                  <tr key={order.id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-800">
+                    <td className="p-3">
+                      <div className="font-medium">#{order.customerOrderId}</div>
+                    </td>
+                    <td className="p-3">
+                      <div>
+                        <div className="font-medium">{order.customerName || 'نامشخص'}</div>
+                        <div className="text-sm text-gray-600">{order.customerEmail}</div>
+                        <div className="text-sm text-gray-600">{order.customerPhone}</div>
+                      </div>
+                    </td>
+                    <td className="p-3">
+                      <div className="font-medium">
+                        {formatAmount(order.totalAmount, order.currency)}
+                      </div>
+                    </td>
+                    <td className="p-3">
+                      <Badge variant={getStatusBadgeVariant(order.status)}>
+                        {statusLabels[order.status] || order.status}
+                      </Badge>
+                    </td>
+                    <td className="p-3">
+                      {order.deliveryCode ? (
+                        <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                          {order.deliveryCode}
+                        </Badge>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </td>
+                    <td className="p-3">
+                      <div className="text-sm">
+                        {formatDate(order.createdAt)}
+                      </div>
+                    </td>
+                    <td className="p-3">
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <button
+                            className="inline-flex items-center gap-1 px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+                            onClick={() => setSelectedOrder(order)}
+                          >
+                            <Eye className="w-4 h-4" />
+                            مشاهده
+                          </button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" dir="rtl">
+                          <DialogHeader>
+                            <DialogTitle className="flex items-center gap-2">
+                              <Package className="w-5 h-5" />
+                              جزئیات سفارش #{selectedOrder?.customerOrderId}
+                            </DialogTitle>
+                          </DialogHeader>
+                          
+                          {selectedOrder && (
+                            <div className="space-y-6">
+                              {/* Customer Information */}
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <Card>
+                                  <CardHeader>
+                                    <CardTitle className="text-lg flex items-center gap-2">
+                                      <User className="w-5 h-5" />
+                                      اطلاعات مشتری
+                                    </CardTitle>
+                                  </CardHeader>
+                                  <CardContent className="space-y-2">
+                                    <div><strong>نام:</strong> {selectedOrder.customerName || 'نامشخص'}</div>
+                                    <div><strong>ایمیل:</strong> {selectedOrder.customerEmail || 'نامشخص'}</div>
+                                    <div><strong>تلفن:</strong> {selectedOrder.customerPhone || 'نامشخص'}</div>
+                                  </CardContent>
+                                </Card>
 
-        <TabsContent value={selectedTab} className="space-y-6 mt-6">
-          {/* Search and Filter */}
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex flex-col sm:flex-row gap-4">
-                <div className="relative flex-1">
-                  <Search className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
-                  <Input
-                    placeholder="جستجو بر اساس شماره سفارش، نام مشتری، ایمیل یا کد رهگیری..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pr-10"
-                  />
-                </div>
-                <select
-                  value={selectedStatus}
-                  onChange={(e) => setSelectedStatus(e.target.value)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="all">همه وضعیت‌ها</option>
-                  {Object.entries(statusLabels).map(([status, label]) => (
-                    <option key={status} value={status}>{label}</option>
-                  ))}
-                </select>
-              </div>
-              
-              {/* Tab-specific info */}
-              {selectedTab === 'financial' && (
-                <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <DollarSign className="w-5 h-5 text-amber-600" />
-                    <p className="text-amber-800 font-medium">سفارشات نیازمند بررسی مالی</p>
-                  </div>
-                  <p className="text-sm text-amber-600 mt-1">
-                    شامل سفارشات در انتظار پرداخت، رسیدهای آپلود شده، و سفارشات در حال بررسی مالی
-                  </p>
-                </div>
-              )}
-              
-              {selectedTab === 'orphaned' && (
-                <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <AlertTriangle className="w-5 h-5 text-red-600" />
-                    <p className="text-red-800 font-medium">سفارشات یتیم رها شده</p>
-                  </div>
-                  <p className="text-sm text-red-600 mt-1">
-                    سفارشاتی که در مرحله "در انتظار پرداخت" متوقف شده‌اند و نیاز به پیگیری دارند
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Orders Table */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Package className="w-5 h-5" />
-                لیست سفارشات ({filteredOrders.length})
-              </CardTitle>
-              <CardDescription>
-                {selectedTab === 'all' && 'نمایش کامل تمامی سفارشات با قابلیت جستجو و فیلتر - فقط قابل مشاهده'}
-                {selectedTab === 'financial' && 'سفارشات نیازمند بررسی مالی و پردازش پرداخت'}
-                {selectedTab === 'orphaned' && 'سفارشات رها شده که در مرحله انتظار پرداخت متوقف شده‌اند'}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {isLoading || isLoadingFinancial ? (
-                <div className="flex justify-center items-center py-8">
-                  <div className="flex items-center gap-2">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                    <span>در حال بارگذاری سفارشات...</span>
-                  </div>
-                </div>
-              ) : filteredOrders.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  <Package className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                  <p>هیچ سفارشی یافت نشد</p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse">
-                    <thead>
-                      <tr className="border-b bg-gray-50">
-                        <th className="text-right p-3 font-medium">شماره سفارش</th>
-                        <th className="text-right p-3 font-medium">مشتری</th>
-                        <th className="text-right p-3 font-medium">تاریخ</th>
-                        <th className="text-right p-3 font-medium">مبلغ</th>
-                        <th className="text-right p-3 font-medium">وضعیت</th>
-                        <th className="text-right p-3 font-medium">کد رهگیری</th>
-                        <th className="text-right p-3 font-medium">عملیات</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredOrders.map((order) => (
-                        <tr key={order.id} className="border-b hover:bg-gray-50">
-                          <td className="p-3 font-medium text-blue-600">#{order.id}</td>
-                          <td className="p-3">
-                            <div>
-                              <div className="font-medium">{order.customerName || 'نامشخص'}</div>
-                              <div className="text-sm text-gray-500">{order.customerEmail}</div>
-                              {order.customerPhone && (
-                                <div className="text-sm text-gray-500">{order.customerPhone}</div>
-                              )}
-                            </div>
-                          </td>
-                          <td className="p-3 text-sm">
-                            {new Date(order.createdAt).toLocaleDateString('en-US')}
-                          </td>
-                          <td className="p-3">
-                            <div className="font-medium">
-                              {order.totalAmount 
-                                ? (typeof order.totalAmount === 'string' 
-                                    ? parseFloat(order.totalAmount).toLocaleString('en-US')
-                                    : order.totalAmount.toLocaleString('en-US')
-                                  )
-                                : '0'
-                              } {order.currency || 'IQD'}
-                            </div>
-                          </td>
-                          <td className="p-3">
-                            <Badge 
-                              variant={
-                                order.status === 'completed' ? 'default' :
-                                order.status === 'delivered' ? 'default' :
-                                order.status === 'pending_payment' ? 'destructive' :
-                                'secondary'
-                              }
-                              className={
-                                order.status === 'completed' ? 'bg-green-100 text-green-800 border-green-200' :
-                                order.status === 'delivered' ? 'bg-blue-100 text-blue-800 border-blue-200' :
-                                order.status === 'pending_payment' ? 'bg-red-100 text-red-800 border-red-200' :
-                                order.status === 'financial_approved' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
-                                order.status === 'warehouse_processing' ? 'bg-purple-100 text-purple-800 border-purple-200' :
-                                order.status === 'logistics_confirmed' ? 'bg-orange-100 text-orange-800 border-orange-200' :
-                                'bg-gray-100 text-gray-800 border-gray-200'
-                              }
-                            >
-                              {statusLabels[order.status] || order.status}
-                            </Badge>
-                          </td>
-                          <td className="p-3">
-                            {order.trackingNumber ? (
-                              <span className="font-mono text-sm bg-gray-100 px-2 py-1 rounded">
-                                {order.trackingNumber}
-                              </span>
-                            ) : (
-                              <span className="text-gray-400 text-sm">ندارد</span>
-                            )}
-                          </td>
-                          <td className="p-3">
-                            <Dialog open={dialogOpen && selectedOrder?.id === order.id} onOpenChange={(open) => {
-                              setDialogOpen(open);
-                              if (!open) setSelectedOrder(null);
-                            }}>
-                              <DialogTrigger asChild>
-                                <button
-                                  onClick={() => setSelectedOrder(order)}
-                                  className="inline-flex items-center gap-1 px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
-                                >
-                                  <Eye className="w-4 h-4" />
-                                  جزئیات
-                                </button>
-                              </DialogTrigger>
-                              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                                <DialogHeader>
-                                  <DialogTitle className="flex items-center gap-2">
-                                    <Package className="w-5 h-5" />
-                                    جزئیات سفارش #{order.id}
-                                  </DialogTitle>
-                                </DialogHeader>
-                                
-                                {selectedOrder && (
-                                  <div className="space-y-6">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                      {/* Customer Information */}
-                                      <Card>
-                                        <CardHeader>
-                                          <CardTitle className="flex items-center gap-2 text-lg">
-                                            <User className="w-5 h-5" />
-                                            اطلاعات مشتری
-                                          </CardTitle>
-                                        </CardHeader>
-                                        <CardContent className="space-y-3">
-                                          <div className="flex items-center gap-2">
-                                            <User className="w-4 h-4 text-gray-500" />
-                                            <span className="font-medium">نام:</span>
-                                            <span>{selectedOrder.customerName || 'نامشخص'}</span>
-                                          </div>
-                                          <div className="flex items-center gap-2">
-                                            <span className="w-4 h-4 text-gray-500">@</span>
-                                            <span className="font-medium">ایمیل:</span>
-                                            <span>{selectedOrder.customerEmail || 'ندارد'}</span>
-                                          </div>
-                                          {selectedOrder.customerPhone && (
-                                            <div className="flex items-center gap-2">
-                                              <Phone className="w-4 h-4 text-gray-500" />
-                                              <span className="font-medium">تلفن:</span>
-                                              <span>{selectedOrder.customerPhone}</span>
-                                            </div>
-                                          )}
-                                        </CardContent>
-                                      </Card>
-
-                                      {/* Order Information */}
-                                      <Card>
-                                        <CardHeader>
-                                          <CardTitle className="flex items-center gap-2 text-lg">
-                                            <Package className="w-5 h-5" />
-                                            اطلاعات سفارش
-                                          </CardTitle>
-                                        </CardHeader>
-                                        <CardContent className="space-y-3">
-                                          <div className="flex items-center gap-2">
-                                            <Calendar className="w-4 h-4 text-gray-500" />
-                                            <span className="font-medium">تاریخ ثبت:</span>
-                                            <span>{new Date(selectedOrder.createdAt).toLocaleDateString('en-US')}</span>
-                                          </div>
-                                          <div className="flex items-center gap-2">
-                                            <CreditCard className="w-4 h-4 text-gray-500" />
-                                            <span className="font-medium">مبلغ کل:</span>
-                                            <span className="font-bold text-green-600">
-                                              {selectedOrder.totalAmount 
-                                                ? (typeof selectedOrder.totalAmount === 'string' 
-                                                    ? parseFloat(selectedOrder.totalAmount).toLocaleString('en-US')
-                                                    : selectedOrder.totalAmount.toLocaleString('en-US'))
-                                                : '0'
-                                              } {selectedOrder.currency || 'IQD'}
-                                            </span>
-                                          </div>
-                                          <div className="flex items-center gap-2">
-                                            <Activity className="w-4 h-4 text-gray-500" />
-                                            <span className="font-medium">وضعیت:</span>
-                                            <Badge className={
-                                              selectedOrder.status === 'completed' ? 'bg-green-100 text-green-800' :
-                                              selectedOrder.status === 'delivered' ? 'bg-blue-100 text-blue-800' :
-                                              selectedOrder.status === 'pending_payment' ? 'bg-red-100 text-red-800' :
-                                              'bg-gray-100 text-gray-800'
-                                            }>
-                                              {statusLabels[selectedOrder.status] || selectedOrder.status}
-                                            </Badge>
-                                          </div>
-                                          {selectedOrder.paymentMethod && (
-                                            <div className="flex items-center gap-2">
-                                              <CreditCard className="w-4 h-4 text-gray-500" />
-                                              <span className="font-medium">روش پرداخت:</span>
-                                              <span>{selectedOrder.paymentMethod}</span>
-                                            </div>
-                                          )}
-                                        </CardContent>
-                                      </Card>
+                                <Card>
+                                  <CardHeader>
+                                    <CardTitle className="text-lg flex items-center gap-2">
+                                      <CreditCard className="w-5 h-5" />
+                                      اطلاعات مالی
+                                    </CardTitle>
+                                  </CardHeader>
+                                  <CardContent className="space-y-2">
+                                    <div><strong>مبلغ کل:</strong> {formatAmount(selectedOrder.totalAmount, selectedOrder.currency)}</div>
+                                    <div><strong>روش پرداخت:</strong> {selectedOrder.paymentMethod || 'نامشخص'}</div>
+                                    <div><strong>وضعیت:</strong> 
+                                      <Badge variant={getStatusBadgeVariant(selectedOrder.status)} className="mr-2">
+                                        {statusLabels[selectedOrder.status] || selectedOrder.status}
+                                      </Badge>
                                     </div>
+                                  </CardContent>
+                                </Card>
+                              </div>
 
-                                    {/* Notes */}
-                                    {(selectedOrder.financialNotes || selectedOrder.warehouseNotes || selectedOrder.logisticsNotes) && (
-                                      <Card>
-                                        <CardHeader>
-                                          <CardTitle className="flex items-center gap-2 text-lg">
-                                            <FileText className="w-5 h-5" />
-                                            یادداشت‌های بخش‌ها
-                                          </CardTitle>
-                                        </CardHeader>
-                                        <CardContent className="space-y-3">
-                                          {selectedOrder.financialNotes && (
-                                            <div>
-                                              <span className="font-medium text-amber-700">مالی:</span>
-                                              <p className="text-sm mt-1 p-2 bg-amber-50 rounded">{selectedOrder.financialNotes}</p>
-                                            </div>
-                                          )}
-                                          {selectedOrder.warehouseNotes && (
-                                            <div>
-                                              <span className="font-medium text-purple-700">انبار:</span>
-                                              <p className="text-sm mt-1 p-2 bg-purple-50 rounded">{selectedOrder.warehouseNotes}</p>
-                                            </div>
-                                          )}
-                                          {selectedOrder.logisticsNotes && (
-                                            <div>
-                                              <span className="font-medium text-blue-700">لجستیک:</span>
-                                              <p className="text-sm mt-1 p-2 bg-blue-50 rounded">{selectedOrder.logisticsNotes}</p>
-                                            </div>
-                                          )}
-                                        </CardContent>
-                                      </Card>
-                                    )}
+                              {/* Delivery Information */}
+                              <Card>
+                                <CardHeader>
+                                  <CardTitle className="text-lg flex items-center gap-2">
+                                    <Truck className="w-5 h-5" />
+                                    اطلاعات تحویل
+                                  </CardTitle>
+                                </CardHeader>
+                                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <div><strong>کد تحویل:</strong> {selectedOrder.deliveryCode || 'تخصیص نشده'}</div>
+                                  <div><strong>شماره رهگیری:</strong> {selectedOrder.trackingNumber || 'تخصیص نشده'}</div>
+                                  <div><strong>تاریخ تحویل تخمینی:</strong> {selectedOrder.estimatedDeliveryDate ? formatDate(selectedOrder.estimatedDeliveryDate) : 'تعیین نشده'}</div>
+                                  <div><strong>تاریخ تحویل واقعی:</strong> {selectedOrder.actualDeliveryDate ? formatDate(selectedOrder.actualDeliveryDate) : 'تحویل نشده'}</div>
+                                  <div><strong>نام تحویل‌دهنده:</strong> {selectedOrder.deliveryPersonName || 'تخصیص نشده'}</div>
+                                  <div><strong>تلفن تحویل‌دهنده:</strong> {selectedOrder.deliveryPersonPhone || 'تخصیص نشده'}</div>
+                                </CardContent>
+                              </Card>
 
-                                    {/* Status History */}
-                                    {statusHistory && statusHistory.length > 0 && (
-                                      <Card>
-                                        <CardHeader>
-                                          <CardTitle className="flex items-center gap-2 text-lg">
-                                            <Clock className="w-5 h-5" />
-                                            تاریخچه تغییرات وضعیت
-                                          </CardTitle>
-                                        </CardHeader>
-                                        <CardContent>
-                                          <div className="space-y-3">
-                                            {statusHistory.map((item) => (
-                                              <div key={item.id} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                                                <div className="w-2 h-2 rounded-full bg-blue-500 mt-2"></div>
-                                                <div className="flex-1">
-                                                  <div className="flex items-center gap-2 mb-1">
-                                                    <span className="font-medium">
-                                                      {item.fromStatus ? `${statusLabels[item.fromStatus] || item.fromStatus} ← ` : ''}
-                                                      {statusLabels[item.toStatus] || item.toStatus}
-                                                    </span>
-                                                    <span className="text-xs text-gray-500">
-                                                      {new Date(item.createdAt).toLocaleDateString('en-US')}
-                                                    </span>
-                                                  </div>
-                                                  {item.changedByDepartment && (
-                                                    <p className="text-sm text-gray-600">
-                                                      توسط: {departmentLabels[item.changedByDepartment] || item.changedByDepartment}
-                                                    </p>
-                                                  )}
-                                                  {item.notes && (
-                                                    <p className="text-sm text-gray-700 mt-1">{item.notes}</p>
-                                                  )}
-                                                </div>
-                                              </div>
-                                            ))}
-                                          </div>
-                                        </CardContent>
-                                      </Card>
-                                    )}
-                                  </div>
-                                )}
-                              </DialogContent>
-                            </Dialog>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+                              {/* Department Notes */}
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <Card>
+                                  <CardHeader>
+                                    <CardTitle className="text-sm flex items-center gap-2">
+                                      <FileText className="w-4 h-4" />
+                                      یادداشت‌های مالی
+                                    </CardTitle>
+                                  </CardHeader>
+                                  <CardContent>
+                                    <p className="text-sm text-gray-600">
+                                      {selectedOrder.financialNotes || 'یادداشتی وجود ندارد'}
+                                    </p>
+                                  </CardContent>
+                                </Card>
+
+                                <Card>
+                                  <CardHeader>
+                                    <CardTitle className="text-sm flex items-center gap-2">
+                                      <Package className="w-4 h-4" />
+                                      یادداشت‌های انبار
+                                    </CardTitle>
+                                  </CardHeader>
+                                  <CardContent>
+                                    <p className="text-sm text-gray-600">
+                                      {selectedOrder.warehouseNotes || 'یادداشتی وجود ندارد'}
+                                    </p>
+                                  </CardContent>
+                                </Card>
+
+                                <Card>
+                                  <CardHeader>
+                                    <CardTitle className="text-sm flex items-center gap-2">
+                                      <Truck className="w-4 h-4" />
+                                      یادداشت‌های لجستیک
+                                    </CardTitle>
+                                  </CardHeader>
+                                  <CardContent>
+                                    <p className="text-sm text-gray-600">
+                                      {selectedOrder.logisticsNotes || 'یادداشتی وجود ندارد'}
+                                    </p>
+                                  </CardContent>
+                                </Card>
+                              </div>
+
+                              {/* Timestamps */}
+                              <Card>
+                                <CardHeader>
+                                  <CardTitle className="text-lg flex items-center gap-2">
+                                    <Clock className="w-5 h-5" />
+                                    تاریخ‌ها
+                                  </CardTitle>
+                                </CardHeader>
+                                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <div><strong>تاریخ ایجاد:</strong> {formatDate(selectedOrder.createdAt)}</div>
+                                  <div><strong>آخرین بروزرسانی:</strong> {formatDate(selectedOrder.updatedAt)}</div>
+                                </CardContent>
+                              </Card>
+                            </div>
+                          )}
+                        </DialogContent>
+                      </Dialog>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {filteredOrders.length === 0 && (
+            <div className="text-center py-12">
+              <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">سفارشی یافت نشد</h3>
+              <p className="text-gray-600">
+                {searchTerm || selectedStatus !== 'all' 
+                  ? 'هیچ سفارشی با فیلترهای انتخابی یافت نشد'
+                  : 'هنوز سفارشی در سیستم ثبت نشده است'}
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
