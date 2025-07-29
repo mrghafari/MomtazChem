@@ -611,10 +611,11 @@ const LogisticsManagement = () => {
       pricePerKm: formData.get('pricePerKm') as string,
       pricePerKg: formData.get('pricePerKg') as string || "0",
       supportsHazardous: formData.get('supportsHazardous') === 'true',
+      supportsFlammable: formData.get('supportsFlammable') === 'true',
       supportsRefrigerated: formData.get('supportsRefrigerated') === 'true',
       supportsFragile: formData.get('supportsFragile') !== 'false',
       averageSpeedKmh: formData.get('averageSpeedKmh') as string || "50",
-      fuelConsumptionL100km: formData.get('fuelConsumptionL100km') as string || null,
+
       priority: parseInt(formData.get('priority') as string) || 0
     };
     createVehicleMutation.mutate(vehicleData);
@@ -650,7 +651,8 @@ const LogisticsManagement = () => {
       pricePerKm: parseFloat(formData.get('pricePerKm') as string),
       allowedRoutes: allowedRoutesArray,
       averageSpeedKmh: parseFloat(formData.get('averageSpeedKmh') as string) || 50,
-      fuelConsumptionL100km: parseFloat(formData.get('fuelConsumptionL100km') as string) || 0,
+      supportsFlammable: formData.get('supportsFlammable') === 'true',
+
       isActive: formData.get('isActive') === 'on'
     };
 
@@ -740,6 +742,13 @@ const LogisticsManagement = () => {
                         <Label htmlFor="averageSpeedKmh">سرعت متوسط (کیلومتر/ساعت)</Label>
                         <Input id="averageSpeedKmh" name="averageSpeedKmh" type="number" defaultValue="50" />
                       </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="supportsFlammable">مجاز برای حمل مواد آتش زا</Label>
+                        <select name="supportsFlammable" className="w-full p-2 border rounded">
+                          <option value="false">❌ غیرمجاز</option>
+                          <option value="true">✅ مجاز</option>
+                        </select>
+                      </div>
                     </div>
                     <DialogFooter>
                       <Button type="button" variant="outline" onClick={() => setIsCreateVehicleDialogOpen(false)}>انصراف</Button>
@@ -762,7 +771,7 @@ const LogisticsManagement = () => {
                       <TableHead>حداکثر وزن</TableHead>
                       <TableHead>حجم</TableHead>
                       <TableHead>قیمت پایه</TableHead>
-                      <TableHead>مصرف سوخت</TableHead>
+                      <TableHead>مجاز برای حمل مواد آتش زا</TableHead>
                       <TableHead>وضعیت</TableHead>
                       <TableHead>عملیات</TableHead>
                     </TableRow>
@@ -784,7 +793,11 @@ const LogisticsManagement = () => {
                           <TableCell>{parseInt(vehicle.maxWeightKg)} کیلوگرم</TableCell>
                           <TableCell>{parseInt(vehicle.maxVolumeM3) || 0} متر مکعب</TableCell>
                           <TableCell>{parseInt(vehicle.basePrice)} دینار</TableCell>
-                          <TableCell>{parseInt(vehicle.fuelConsumptionL100km) || 0} لیتر/100کم</TableCell>
+                          <TableCell>
+                            <Badge variant={vehicle.supportsFlammable ? "default" : "destructive"} className="text-xs">
+                              {vehicle.supportsFlammable ? "✅ مجاز" : "❌ غیرمجاز"}
+                            </Badge>
+                          </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
                               <Badge variant={vehicle.isActive ? "default" : "secondary"}>
@@ -933,15 +946,17 @@ const LogisticsManagement = () => {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="edit-fuelConsumptionL100km">مصرف سوخت (لیتر/100کیلومتر)</Label>
-                        <input 
-                          id="edit-fuelConsumptionL100km" 
-                          name="fuelConsumptionL100km" 
-                          type="number" 
-                          defaultValue={(parseInt(editingVehicle.fuelConsumptionL100km) || 0).toString()}
-                          className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
+                        <Label htmlFor="edit-supportsFlammable">مجاز برای حمل مواد آتش زا</Label>
+                        <select 
+                          name="supportsFlammable" 
+                          defaultValue={editingVehicle.supportsFlammable ? "true" : "false"}
+                          className="w-full p-2 border rounded"
+                        >
+                          <option value="false">❌ غیرمجاز</option>
+                          <option value="true">✅ مجاز</option>
+                        </select>
                       </div>
+
                       <div className="space-y-2 col-span-2">
                         <div className="flex items-center space-x-2">
                           <input 
