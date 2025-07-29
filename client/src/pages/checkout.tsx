@@ -338,57 +338,89 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
     if (!destination || weight === 0) return 0;
     
     try {
-      console.log('🚚 [CHECKOUT] Requesting smart vehicle selection:', { weight, destination });
+      console.log('🚚 [CHECKOUT] Using FLAMMABLE-AWARE delivery cost API:', { 
+        weight, 
+        destination,
+        containsFlammableProducts,
+        cartProducts: cartItems.map(item => ({ id: item.id, name: item.name, isFlammable: item.isFlammable }))
+      });
       
-      const response = await fetch('/api/logistics/select-optimal-vehicle', {
+      // Use the flammable-aware calculate-delivery-cost API instead of old vehicle selection
+      const response = await fetch('/api/calculate-delivery-cost', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          orderWeightKg: weight,
+          weight: weight,
           destinationCity: destination,
-          routeType: 'urban', // Default to urban routing
-          isHazardous: containsFlammableProducts, // Determined from cart products
-          isRefrigerated: false,
-          isFragile: false
+          destinationProvince: destination,
+          originCity: 'اربیل',
+          cart: Object.fromEntries(Object.entries(cart).map(([id, qty]) => [id, qty])),
+          useSecondaryAddress: false
         })
       });
 
       if (!response.ok) {
-        console.error('🚚 [CHECKOUT] Vehicle selection failed:', response.status);
-        return 0;
+        console.error('🚚 [CHECKOUT] Delivery cost calculation failed:', response.status);
+        return fallbackLocalCalculation(weight, destination);
       }
 
       const result = await response.json();
+      console.log('🚚 [CHECKOUT] API Response:', result);
       
-      if (result.success && result.selectedVehicle) {
-        const vehicleInfo = result.selectedVehicle;
-        setSelectedVehicle({
-          ...vehicleInfo,
-          name: vehicleInfo.vehicleName,
-          type: vehicleInfo.vehicleType
-        });
+      if (result.success && result.data) {
+        // Handle intercity bus response
+        if (result.data.transportMethod === 'intercity_bus' && result.data.selectedOption) {
+          const busOption = result.data.selectedOption;
+          setSelectedVehicle({
+            name: busOption.transportName,
+            type: 'intercity_bus',
+            cost: busOption.totalCost,
+            restrictions: busOption.restrictions
+          });
+          
+          console.log('🚌 [CHECKOUT] Intercity bus selected:', {
+            option: busOption.transportName,
+            cost: busOption.totalCost,
+            restrictions: busOption.restrictions
+          });
+          
+          return busOption.totalCost;
+        }
         
-        console.log('🚚 [CHECKOUT] Smart vehicle selected:', {
-          vehicle: vehicleInfo.vehicleName,
-          totalCost: vehicleInfo.totalCost,
-          score: vehicleInfo.score,
-          utilization: vehicleInfo.weightUtilization
-        });
-        
-        return vehicleInfo.totalCost;
-      } else {
-        console.error('🚚 [CHECKOUT] No suitable vehicle found');
-        return 0;
+        // Handle optimal vehicle response
+        if (result.data.optimalVehicle) {
+          const vehicleInfo = result.data.optimalVehicle;
+          setSelectedVehicle({
+            name: vehicleInfo.vehicleName,
+            type: vehicleInfo.vehicleType,
+            cost: vehicleInfo.totalCost,
+            maxWeight: vehicleInfo.maxWeight,
+            estimatedTime: vehicleInfo.estimatedTime
+          });
+          
+          console.log('🚚 [CHECKOUT] Heavy vehicle selected for flammable materials:', {
+            vehicle: vehicleInfo.vehicleName,
+            totalCost: vehicleInfo.totalCost,
+            vehicleType: vehicleInfo.vehicleType,
+            safetyCompliant: true
+          });
+          
+          return vehicleInfo.totalCost;
+        }
       }
+      
+      console.error('🚚 [CHECKOUT] No suitable delivery option found in API response');
+      return fallbackLocalCalculation(weight, destination);
+      
     } catch (error) {
-      console.error('🚚 [CHECKOUT] Vehicle selection error:', error);
+      console.error('🚚 [CHECKOUT] Delivery cost calculation error:', error);
       
       // Fallback to local calculation if API fails
       return fallbackLocalCalculation(weight, destination);
     }
-  }, [containsFlammableProducts]);
+  }, [containsFlammableProducts, cart, cartItems]);
 
   // Fallback local calculation method (backup)
   const fallbackLocalCalculation = useCallback((weight: number, destination: string) => {
@@ -481,24 +513,45 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
       // Use async function to handle the promise from calculateShippingCost
       const updateShippingCost = async () => {
         try {
+          console.log('🔄 [SHIPPING UPDATE] Starting calculation:', {
+            weight: totalWeight,
+            destination: destinationCity,
+            containsFlammableProducts,
+            cartItemsCount: cartItems.length
+          });
+          
+          // Clear any previous vehicle selection before new calculation
+          setSelectedVehicle(null);
+          setCalculatedShippingCost(0);
+          
           const cost = await calculateShippingCost(totalWeight, destinationCity);
           setCalculatedShippingCost(cost);
           
-          // Auto-select smart vehicle option when available
+          // Auto-select smart vehicle option when available and cost calculated
           if (selectedVehicle && cost > 0) {
-            form.setValue('shippingMethod', 'smart_vehicle');
+            form.setValue('shippingMethod', '7'); // Smart vehicle method ID
+            
+            console.log('✅ [AUTO-SELECT] Smart vehicle option selected:', {
+              vehicleName: selectedVehicle.name,
+              vehicleType: selectedVehicle.type,
+              cost: cost,
+              methodId: '7'
+            });
           }
           
-          console.log('💰 Shipping Cost Calculated:', {
+          console.log('💰 [SHIPPING FINAL] Cost calculation completed:', {
             weight: totalWeight,
             destination: destinationCity,
             cost: cost,
             selectedVehicle: selectedVehicle?.name,
-            autoSelected: true
+            vehicleType: selectedVehicle?.type,
+            autoSelected: true,
+            containsFlammableProducts
           });
         } catch (error) {
           console.error('🚚 [CHECKOUT] Error updating shipping cost:', error);
           setCalculatedShippingCost(0);
+          setSelectedVehicle(null);
         }
       };
       
@@ -507,11 +560,11 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
       setCalculatedShippingCost(0);
       setSelectedVehicle(null);
       // Clear smart vehicle selection if no longer valid
-      if (form.watch('shippingMethod') === 'smart_vehicle') {
+      if (form.watch('shippingMethod') === '7') {
         form.setValue('shippingMethod', '');
       }
     }
-  }, [totalWeight, destinationCity, calculateShippingCost, selectedVehicle, form]);
+  }, [totalWeight, destinationCity, calculateShippingCost, selectedVehicle, form, containsFlammableProducts, cartItems]);
 
   // Use calculated shipping cost or fallback to traditional method
   let shippingCost = calculatedShippingCost;
