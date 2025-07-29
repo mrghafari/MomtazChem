@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPS Delivery Tracking Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 30px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            border-radius: 10px;
+        }
+        .gps-card {
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px 0;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            transition: all 0.3s ease;
+        }
+        .gps-card:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+            transform: translateY(-2px);
+        }
+        .city-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1e40af;
+            margin-bottom: 10px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+        .stat-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #3b82f6;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1f2937;
+            margin-top: 5px;
+        }
+        .coordinates {
+            background: #eff6ff;
+            border: 2px dashed #3b82f6;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .coordinates:hover {
+            background: #dbeafe;
+            border-color: #1d4ed8;
+        }
+        .coord-label {
+            font-size: 14px;
+            color: #3b82f6;
+            font-weight: bold;
+        }
+        .coord-value {
+            font-size: 16px;
+            color: #1e40af;
+            font-family: 'Courier New', monospace;
+        }
+        .maps-hint {
+            text-align: center;
+            color: #6b7280;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+        .success-rate {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .success-high { background: #dcfce7; color: #166534; }
+        .success-medium { background: #fef3c7; color: #92400e; }
+        .success-low { background: #fecaca; color: #991b1b; }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+        .region-badge {
+            background: #e0e7ff;
+            color: #3730a3;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🗺️ GPS Delivery Tracking System Test</h1>
+            <p>اختبار نظام تتبع تسليم GPS مع إحداثيات خرائط جوجل الحقيقية</p>
+            <p>Click on coordinates to view location on Google Maps</p>
+        </div>
+
+        <div id="gps-data">
+            <div class="loading">⏳ جاري تحميل بيانات GPS...</div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            loadGPSData();
+        });
+
+        async function loadGPSData() {
+            try {
+                const response = await fetch('/api/gps-delivery/analytics?country=Iraq', {
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                console.log('🗺️ GPS Data loaded:', result);
+                
+                if (result.success && result.data && result.data.length > 0) {
+                    displayGPSData(result.data);
+                } else {
+                    document.getElementById('gps-data').innerHTML = `
+                        <div class="loading">❌ No GPS delivery data available</div>
+                    `;
+                }
+            } catch (error) {
+                console.error('❌ Error loading GPS data:', error);
+                document.getElementById('gps-data').innerHTML = `
+                    <div class="loading">❌ Error: ${error.message}</div>
+                `;
+            }
+        }
+
+        function displayGPSData(gpsData) {
+            const container = document.getElementById('gps-data');
+            
+            let html = `<h2 style="text-align: center; margin-bottom: 30px; color: #1e40af;">
+                📊 GPS Delivery Data - ${gpsData.length} مدينة عراقية
+            </h2>`;
+            
+            gpsData.forEach(city => {
+                const successRate = parseFloat(city.deliverySuccessRate);
+                const successClass = successRate >= 80 ? 'success-high' : 
+                                   successRate >= 50 ? 'success-medium' : 'success-low';
+                
+                html += `
+                    <div class="gps-card">
+                        <div class="city-name">
+                            📍 ${city.city}
+                            <span class="region-badge">${city.region}</span>
+                        </div>
+                        
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-label">Total Deliveries</div>
+                                <div class="stat-value">${city.totalDeliveries}</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Successful</div>
+                                <div class="stat-value">${city.successfulDeliveries}</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Success Rate</div>
+                                <div class="stat-value">
+                                    <span class="success-rate ${successClass}">${city.deliverySuccessRate}%</span>
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Average Accuracy</div>
+                                <div class="stat-value">±${city.averageAccuracy}m</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Delivery Persons</div>
+                                <div class="stat-value">${city.uniqueDeliveryPersons}</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Coverage Area</div>
+                                <div class="stat-value">${city.coverageAreaKm2} km²</div>
+                            </div>
+                        </div>
+                        
+                        <div class="coordinates" onclick="openGoogleMaps(${city.northeastLat}, ${city.northeastLng}, '${city.city}')">
+                            <div class="coord-label">📍 GPS Coordinates (Click to view on Google Maps)</div>
+                            <div class="coord-value">
+                                Lat: ${parseFloat(city.northeastLat).toFixed(6)}<br>
+                                Lng: ${parseFloat(city.northeastLng).toFixed(6)}
+                            </div>
+                            <div class="maps-hint">🗺️ اضغط هنا لعرض الموقع في خرائط جوجل</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function openGoogleMaps(lat, lng, cityName) {
+            const url = `https://www.google.com/maps?q=${lat},${lng}&z=15&t=m`;
+            console.log(`🗺️ Opening Google Maps for ${cityName}: ${url}`);
+            window.open(url, '_blank');
+        }
+    </script>
+</body>
+</html>
