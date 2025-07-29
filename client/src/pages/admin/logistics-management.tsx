@@ -2848,12 +2848,24 @@ const LogisticsManagement = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="vehicleType">نوع خودرو *</Label>
-                  <Input 
+                  <select 
                     id="vehicleType" 
                     name="vehicleType" 
                     required 
-                    placeholder="مثال: کامیون سبک، ون، موتورسیکلت"
-                  />
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">انتخاب نوع خودرو</option>
+                    <option value="اتوبوس مسافربری">اتوبوس مسافربری</option>
+                    <option value="اتوبوس شهری">اتوبوس شهری</option>
+                    <option value="کامیون سنگین">کامیون سنگین</option>
+                    <option value="کامیون متوسط">کامیون متوسط</option>
+                    <option value="وانت سبک">وانت سبک</option>
+                    <option value="ون سبک">ون سبک</option>
+                    <option value="موتورسیکلت">موتورسیکلت</option>
+                    <option value="خودرو سواری">خودرو سواری</option>
+                    <option value="تریلر">تریلر</option>
+                    <option value="کشنده">کشنده</option>
+                  </select>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="licensePlate">شماره خودرو *</Label>
@@ -2988,12 +3000,25 @@ const LogisticsManagement = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="edit-vehicleType">نوع خودرو *</Label>
-                    <Input 
+                    <select 
                       id="edit-vehicleType" 
                       name="vehicleType" 
                       required 
                       defaultValue={selectedReadyVehicle.vehicleType}
-                    />
+                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="">انتخاب نوع خودرو</option>
+                      <option value="اتوبوس مسافربری">اتوبوس مسافربری</option>
+                      <option value="اتوبوس شهری">اتوبوس شهری</option>
+                      <option value="کامیون سنگین">کامیون سنگین</option>
+                      <option value="کامیون متوسط">کامیون متوسط</option>
+                      <option value="وانت سبک">وانت سبک</option>
+                      <option value="ون سبک">ون سبک</option>
+                      <option value="موتورسیکلت">موتورسیکلت</option>
+                      <option value="خودرو سواری">خودرو سواری</option>
+                      <option value="تریلر">تریلر</option>
+                      <option value="کشنده">کشنده</option>
+                    </select>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="edit-licensePlate">شماره خودرو *</Label>

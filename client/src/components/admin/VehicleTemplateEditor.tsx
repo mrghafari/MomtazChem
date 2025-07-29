@@ -48,13 +48,20 @@ const vehicleTemplateSchema = z.object({
 type VehicleTemplateForm = z.infer<typeof vehicleTemplateSchema>;
 
 const VEHICLE_TYPES = {
+  passenger_bus: "اتوبوس مسافربری",
+  city_bus: "اتوبوس شهری",
+  heavy_truck: "کامیون سنگین",
+  medium_truck: "کامیون متوسط",
+  light_pickup: "وانت سبک",
+  light_van: "ون سبک",
   motorcycle: "موتورسیکلت",
+  passenger_car: "خودرو سواری",
+  trailer: "تریلر",
+  tractor: "کشنده",
   van: "ون",
   light_truck: "کامیون سبک", 
-  heavy_truck: "کامیون سنگین",
   mini_truck: "کامیون کوچک",
   pickup: "وانت",
-  trailer: "تریلر",
   semi_trailer: "نیم تریلر",
   flatbed: "کامیون بار باز",
   refrigerated_truck: "کامیون یخچالی",
