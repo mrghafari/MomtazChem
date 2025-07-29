@@ -30,6 +30,7 @@ import {
 interface Order {
   id: number;
   customerOrderId: number;
+  orderNumber?: string;
   customerName?: string;
   customerEmail?: string;
   customerPhone?: string;
@@ -152,18 +153,11 @@ const departmentLabels: { [key: string]: string } = {
   'logistics': 'لجستیک'
 };
 
-// Format date function for Gregorian calendar display
+// Format date function - Same as financial department
 const formatDate = (dateString: string) => {
-  if (!dateString) return 'نامشخص';
+  if (!dateString) return 'نامشخص';  
   try {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false
-    });
+    return new Date(dateString).toLocaleDateString('en-US');
   } catch {
     return 'تاریخ نامعتبر';
   }
@@ -280,6 +274,11 @@ export default function OrderTrackingManagement() {
     
     let aValue = a[sortField];
     let bValue = b[sortField];
+    
+    // Handle undefined values
+    if (aValue === undefined && bValue === undefined) return 0;
+    if (aValue === undefined) return 1;
+    if (bValue === undefined) return -1;
     
     // Handle different data types
     if (typeof aValue === 'string' && typeof bValue === 'string') {
@@ -664,19 +663,6 @@ export default function OrderTrackingManagement() {
                       )}
                     </button>
                   </th>
-                  <th className="text-right p-4 font-semibold w-[100px] min-w-[100px]">
-                    <button 
-                      onClick={() => handleSort('deliveryCode')}
-                      className="flex items-center justify-end w-full hover:text-blue-600 transition-colors"
-                    >
-                      کد تحویل
-                      {sortField === 'deliveryCode' && (
-                        <span className="mr-1">
-                          {sortDirection === 'asc' ? '↑' : '↓'}
-                        </span>
-                      )}
-                    </button>
-                  </th>
                   <th className="text-right p-4 font-semibold w-[140px] min-w-[140px]">
                     <button 
                       onClick={() => handleSort('createdAt')}
@@ -727,15 +713,6 @@ export default function OrderTrackingManagement() {
                           </div>
                         );
                       })()}
-                    </td>
-                    <td className="p-4 w-[100px] min-w-[100px] text-center">
-                      {order.deliveryCode ? (
-                        <Badge variant="outline" className="bg-blue-50 text-blue-700 text-xs">
-                          {order.deliveryCode}
-                        </Badge>
-                      ) : (
-                        <span className="text-gray-400">-</span>
-                      )}
                     </td>
                     <td className="p-4 w-[140px] min-w-[140px]">
                       <div className="text-sm">
