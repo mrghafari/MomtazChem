@@ -567,7 +567,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
     },
     onSuccess: (data: any) => {
       // Handle hybrid payment response
-      if (data.requiresBankPayment && data.redirectToPayment) {
+      if (data.requiresBankPayment && data.redirectUrl) {
         console.log('🔄 Hybrid payment - redirecting to bank gateway:', data);
         
         // Invalidate wallet balance cache
@@ -577,11 +577,11 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
         
         toast({
           title: "پرداخت ترکیبی",
-          description: `${data.walletAmountUsed.toLocaleString()} IQD از کیف پول کسر شد. هدایت به درگاه بانکی...`,
+          description: `${data.walletAmountDeducted?.toLocaleString() || data.walletAmountUsed?.toLocaleString()} IQD از کیف پول کسر شد. هدایت به درگاه بانکی...`,
         });
         
         // Redirect to hybrid payment page
-        setLocation(data.redirectToPayment);
+        setLocation(data.redirectUrl);
         return;
       }
       

@@ -551,29 +551,35 @@
 ### COMPLETED: Hybrid Payment System Enhancement - Wallet & Bank Gateway Integration Complete (January 29, 2025)
 ✅ **IMPLEMENTED: Complete hybrid payment system with wallet balance integration and bank gateway support**
 - **User Request Fulfilled**: Fixed TypeScript errors and implemented full hybrid payment functionality allowing customers to combine wallet balance with bank payment
-- **TypeScript Error Resolution**: Resolved all checkout.tsx compilation errors including form variable declaration issues (line 127)
-- **Database Schema Enhancement**: Created missing wallet_balances and wallet_transactions tables with proper structure:
-  - **wallet_balances**: customer_id, balance, total_earned, total_spent with unique constraints
+- **Critical Frontend Fix**: Resolved checkout.tsx response handling mismatch - changed `data.redirectToPayment` to `data.redirectUrl` to match backend response
+- **Database Schema Enhancement**: Used correct `customer_wallets` table instead of incorrect `wallet_balances`:
+  - **customer_wallets**: customer_id, balance, currency, status with proper foreign key constraints
   - **wallet_transactions**: Complete transaction logging with credit/debit tracking
-  - **Sample Data**: Added wallet balances for customers (8: 30,000 IQD, 4: 25,000 IQD, 95: 20,000 IQD)
+  - **Test Data**: Added wallet balances for customers (106: 30,000 IQD, 105: 30,000 IQD, 107: 30,000 IQD, 108: 20,000 IQD, 109: 15,000 IQD)
 - **Backend Logic Enhancement**: Modified `/api/shop/orders` endpoint to support hybrid payments:
   - **Wallet Processing**: Removed payment method restriction - wallet logic now works with all payment types including 'online_payment'
-  - **Hybrid Detection**: Smart detection when `walletAmountUsed > 0 && remainingAmount > 0`
+  - **Hybrid Detection**: Smart detection when `actualWalletUsed > 0 && remainingAmountToPay > 0`
   - **requiresBankPayment Response**: Returns special hybrid response with wallet deduction amount and bank redirect URL
-  - **Automatic Wallet Deduction**: Immediate wallet balance reduction when order created
-- **Frontend Integration**: Enhanced checkout.tsx with proper form variable scoping and error handling
-- **Professional Error Handling**: Comprehensive wallet error messages and transaction logging
+  - **Automatic Wallet Deduction**: Immediate wallet balance reduction when order created with proper transaction logging
+- **Frontend Integration**: Enhanced checkout.tsx with proper response field handling:
+  - **Response Field Fix**: Changed from `data.redirectToPayment` to `data.redirectUrl` matching backend response
+  - **Toast Message Enhancement**: Uses `data.walletAmountDeducted` or fallback to `data.walletAmountUsed` for display
+  - **Proper Cache Invalidation**: Wallet balance cache properly invalidated after partial payment
 - **Payment Flow Logic**: 
-  - **Full Wallet Payment**: `walletAmountUsed == totalAmount` → Standard completion
-  - **Partial Wallet Payment**: `walletAmountUsed < totalAmount` → Hybrid response with `requiresBankPayment: true`
+  - **Full Wallet Payment**: `actualWalletUsed == totalAmount` → Standard completion response
+  - **Partial Wallet Payment**: `actualWalletUsed < totalAmount` → Hybrid response with `requiresBankPayment: true`
   - **Bank Gateway Redirect**: Response includes `redirectUrl: /payment/{orderNumber}` for completion
+- **Testing Results**: Successfully tested hybrid payment with order M2511296:
+  - Customer 109 with 15,000 IQD wallet balance
+  - Order total 60,000 IQD → 15,000 IQD deducted from wallet, 45,000 IQD remaining for bank payment
+  - Backend correctly returns `requiresBankPayment: true` and `redirectUrl: "/payment/M2511296"`
 - **Business Impact**: Customers can now utilize partial wallet balance and complete payment through bank gateway
 - **Technical Achievement**: 
-  - Clean LSP diagnostics with zero compilation errors
+  - Complete frontend-backend response field alignment
   - Proper wallet-bank integration without breaking existing functionality
   - Professional transaction logging and error recovery
 - **Security Enhancement**: Proper session handling and customer ID validation throughout payment process
-- **Result**: Complete hybrid payment system operational - customers can combine wallet balance with bank payment, achieving seamless payment experience with proper error handling and transaction integrity
+- **Result**: Complete hybrid payment system operational - customers can combine wallet balance with bank payment, with proper frontend redirection to bank gateway when partial wallet payment occurs
 
 ### COMPLETED: Enhanced Financial System with Manual Receipt Amount Verification - Intelligent Wallet Management (January 28, 2025)
 ✅ **IMPLEMENTED: Complete manual receipt amount verification system with intelligent automatic wallet reconciliation**
