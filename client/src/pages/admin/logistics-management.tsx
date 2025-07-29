@@ -73,6 +73,20 @@ interface TransportationCompany {
   totalDeliveries: number;
 }
 
+interface ReadyVehicle {
+  id: number;
+  vehicleType: string;
+  licensePlate: string;
+  driverName: string;
+  driverMobile: string;
+  loadCapacity: number;
+  isAvailable: boolean;
+  currentLocation?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 interface PostalService {
   id: number;
   name: string;
@@ -170,6 +184,11 @@ const LogisticsManagement = () => {
   // States for postal services
   const [isCreatePostalDialogOpen, setIsCreatePostalDialogOpen] = useState(false);
   const [selectedPostalService, setSelectedPostalService] = useState<PostalService | null>(null);
+  
+  // States for ready vehicles directory
+  const [isCreateReadyVehicleDialogOpen, setIsCreateReadyVehicleDialogOpen] = useState(false);
+  const [selectedReadyVehicle, setSelectedReadyVehicle] = useState<ReadyVehicle | null>(null);
+  const [isEditReadyVehicleDialogOpen, setIsEditReadyVehicleDialogOpen] = useState(false);
 
   const [selectedCity, setSelectedCity] = useState<string>('');
   const [selectedProvince, setSelectedProvince] = useState<string>('');
@@ -2468,6 +2487,428 @@ const LogisticsManagement = () => {
     );
   };
 
+  // Ready Vehicles Tab Component
+  const ReadyVehiclesTab = () => {
+    // Query for ready vehicles
+    const { data: readyVehiclesData, isLoading: readyVehiclesLoading } = useQuery({
+      queryKey: ['/api/logistics/ready-vehicles'],
+      queryFn: () => fetch('/api/logistics/ready-vehicles', { credentials: 'include' }).then(res => res.json())
+    });
+
+    const readyVehicles = readyVehiclesData?.data || [];
+
+    // Create ready vehicle mutation
+    const createReadyVehicleMutation = useMutation({
+      mutationFn: (data: Partial<ReadyVehicle>) => 
+        fetch('/api/logistics/ready-vehicles', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(data)
+        }).then(res => res.json()),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['/api/logistics/ready-vehicles'] });
+        setIsCreateReadyVehicleDialogOpen(false);
+        toast({ title: "موفقیت", description: "خودرو آماده ثبت شد" });
+      },
+      onError: () => {
+        toast({ title: "خطا", description: "خطا در ثبت خودرو آماده", variant: "destructive" });
+      }
+    });
+
+    // Update ready vehicle mutation
+    const updateReadyVehicleMutation = useMutation({
+      mutationFn: ({ id, ...data }: { id: number } & Partial<ReadyVehicle>) => 
+        fetch(`/api/logistics/ready-vehicles/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(data)
+        }).then(res => res.json()),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['/api/logistics/ready-vehicles'] });
+        setIsEditReadyVehicleDialogOpen(false);
+        setSelectedReadyVehicle(null);
+        toast({ title: "موفقیت", description: "خودرو آماده بروزرسانی شد" });
+      },
+      onError: () => {
+        toast({ title: "خطا", description: "خطا در بروزرسانی خودرو آماده", variant: "destructive" });
+      }
+    });
+
+    // Delete ready vehicle mutation
+    const deleteReadyVehicleMutation = useMutation({
+      mutationFn: (id: number) => 
+        fetch(`/api/logistics/ready-vehicles/${id}`, {
+          method: 'DELETE',
+          credentials: 'include'
+        }).then(res => res.json()),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['/api/logistics/ready-vehicles'] });
+        toast({ title: "موفقیت", description: "خودرو آماده حذف شد" });
+      },
+      onError: () => {
+        toast({ title: "خطا", description: "خطا در حذف خودرو آماده", variant: "destructive" });
+      }
+    });
+
+    // Handle form submission for creating ready vehicle
+    const handleCreateReadyVehicle = (e: React.FormEvent) => {
+      e.preventDefault();
+      const formData = new FormData(e.target as HTMLFormElement);
+      createReadyVehicleMutation.mutate({
+        vehicleType: formData.get('vehicleType') as string,
+        licensePlate: formData.get('licensePlate') as string,
+        driverName: formData.get('driverName') as string,
+        driverMobile: formData.get('driverMobile') as string,
+        loadCapacity: parseInt(formData.get('loadCapacity') as string),
+        currentLocation: formData.get('currentLocation') as string,
+        notes: formData.get('notes') as string,
+        isAvailable: formData.get('isAvailable') === 'true'
+      });
+    };
+
+    // Handle form submission for updating ready vehicle
+    const handleUpdateReadyVehicle = (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!selectedReadyVehicle) return;
+      
+      const formData = new FormData(e.target as HTMLFormElement);
+      updateReadyVehicleMutation.mutate({
+        id: selectedReadyVehicle.id,
+        vehicleType: formData.get('vehicleType') as string,
+        licensePlate: formData.get('licensePlate') as string,
+        driverName: formData.get('driverName') as string,
+        driverMobile: formData.get('driverMobile') as string,
+        loadCapacity: parseInt(formData.get('loadCapacity') as string),
+        currentLocation: formData.get('currentLocation') as string,
+        notes: formData.get('notes') as string,
+        isAvailable: formData.get('isAvailable') === 'true'
+      });
+    };
+
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h3 className="text-lg font-semibold flex items-center gap-2">
+            <Truck className="h-5 w-5 text-green-600" />
+            دایرکتوری خودروهای آماده به کار
+          </h3>
+          <Button 
+            onClick={() => setIsCreateReadyVehicleDialogOpen(true)}
+            className="bg-green-600 hover:bg-green-700"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            افزودن خودرو آماده
+          </Button>
+        </div>
+
+        <Card>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>نوع خودرو</TableHead>
+                  <TableHead>شماره خودرو</TableHead>
+                  <TableHead>نام راننده</TableHead>
+                  <TableHead>موبایل راننده</TableHead>
+                  <TableHead>ظرفیت حمل (کیلوگرم)</TableHead>
+                  <TableHead>موقعیت فعلی</TableHead>
+                  <TableHead>وضعیت</TableHead>
+                  <TableHead>عملیات</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {readyVehiclesLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-8">در حال بارگذاری...</TableCell>
+                  </TableRow>
+                ) : readyVehicles.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-8">
+                      <div className="flex flex-col items-center gap-2">
+                        <Truck className="h-12 w-12 text-gray-400" />
+                        <p className="text-gray-600">هیچ خودرو آماده‌ای ثبت نشده</p>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  readyVehicles.map((vehicle: ReadyVehicle) => (
+                    <TableRow key={vehicle.id}>
+                      <TableCell>{vehicle.vehicleType}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="font-mono">
+                          {vehicle.licensePlate}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="font-medium">{vehicle.driverName}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <Phone className="h-3 w-3 text-blue-600" />
+                          <span className="font-mono text-blue-600">{vehicle.driverMobile}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <Weight className="h-3 w-3 text-orange-600" />
+                          <span>{vehicle.loadCapacity.toLocaleString()} کیلوگرم</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className="text-xs">
+                          {vehicle.currentLocation || 'نامشخص'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={vehicle.isAvailable ? "default" : "destructive"}>
+                          {vehicle.isAvailable ? "آماده" : "مشغول"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            onClick={() => {
+                              setSelectedReadyVehicle(vehicle);
+                              setIsEditReadyVehicleDialogOpen(true);
+                            }}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            onClick={() => deleteReadyVehicleMutation.mutate(vehicle.id)}
+                            disabled={deleteReadyVehicleMutation.isPending}
+                          >
+                            <AlertTriangle className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+
+        {/* Create Ready Vehicle Dialog */}
+        <Dialog open={isCreateReadyVehicleDialogOpen} onOpenChange={setIsCreateReadyVehicleDialogOpen}>
+          <DialogContent className="max-w-2xl" dir="rtl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Truck className="h-5 w-5 text-green-600" />
+                افزودن خودرو آماده به کار
+              </DialogTitle>
+              <DialogDescription>
+                اطلاعات خودرو و راننده را برای ثبت در دایرکتوری وارد کنید
+              </DialogDescription>
+            </DialogHeader>
+            
+            <form onSubmit={handleCreateReadyVehicle} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="vehicleType">نوع خودرو *</Label>
+                  <Input 
+                    id="vehicleType" 
+                    name="vehicleType" 
+                    required 
+                    placeholder="مثال: کامیون سبک، ون، موتورسیکلت"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="licensePlate">شماره خودرو *</Label>
+                  <Input 
+                    id="licensePlate" 
+                    name="licensePlate" 
+                    required 
+                    placeholder="مثال: 12ج345678"
+                    className="font-mono"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="driverName">نام راننده *</Label>
+                  <Input 
+                    id="driverName" 
+                    name="driverName" 
+                    required 
+                    placeholder="نام و نام خانوادگی راننده"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="driverMobile">موبایل راننده *</Label>
+                  <Input 
+                    id="driverMobile" 
+                    name="driverMobile" 
+                    required 
+                    placeholder="مثال: 07501234567"
+                    className="font-mono"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="loadCapacity">ظرفیت حمل (کیلوگرم) *</Label>
+                  <Input 
+                    id="loadCapacity" 
+                    name="loadCapacity" 
+                    type="number" 
+                    required 
+                    placeholder="مثال: 1000"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="currentLocation">موقعیت فعلی</Label>
+                  <Input 
+                    id="currentLocation" 
+                    name="currentLocation" 
+                    placeholder="مثال: اربیل، بغداد"
+                  />
+                </div>
+                <div className="space-y-2 col-span-2">
+                  <Label htmlFor="notes">یادداشت‌ها</Label>
+                  <Input 
+                    id="notes" 
+                    name="notes" 
+                    placeholder="اطلاعات اضافی در مورد خودرو یا راننده"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <input type="hidden" name="isAvailable" value="false" />
+                    <input 
+                      type="checkbox" 
+                      id="isAvailable" 
+                      name="isAvailable" 
+                      value="true" 
+                      defaultChecked
+                    />
+                    <Label htmlFor="isAvailable">آماده به کار</Label>
+                  </div>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setIsCreateReadyVehicleDialogOpen(false)}>
+                  انصراف
+                </Button>
+                <Button type="submit" disabled={createReadyVehicleMutation.isPending}>
+                  {createReadyVehicleMutation.isPending ? "در حال ثبت..." : "ثبت خودرو"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Ready Vehicle Dialog */}
+        <Dialog open={isEditReadyVehicleDialogOpen} onOpenChange={setIsEditReadyVehicleDialogOpen}>
+          <DialogContent className="max-w-2xl" dir="rtl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Edit className="h-5 w-5 text-blue-600" />
+                ویرایش خودرو آماده
+              </DialogTitle>
+              <DialogDescription>
+                ویرایش اطلاعات خودرو {selectedReadyVehicle?.licensePlate}
+              </DialogDescription>
+            </DialogHeader>
+            
+            {selectedReadyVehicle && (
+              <form onSubmit={handleUpdateReadyVehicle} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-vehicleType">نوع خودرو *</Label>
+                    <Input 
+                      id="edit-vehicleType" 
+                      name="vehicleType" 
+                      required 
+                      defaultValue={selectedReadyVehicle.vehicleType}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-licensePlate">شماره خودرو *</Label>
+                    <Input 
+                      id="edit-licensePlate" 
+                      name="licensePlate" 
+                      required 
+                      defaultValue={selectedReadyVehicle.licensePlate}
+                      className="font-mono"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-driverName">نام راننده *</Label>
+                    <Input 
+                      id="edit-driverName" 
+                      name="driverName" 
+                      required 
+                      defaultValue={selectedReadyVehicle.driverName}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-driverMobile">موبایل راننده *</Label>
+                    <Input 
+                      id="edit-driverMobile" 
+                      name="driverMobile" 
+                      required 
+                      defaultValue={selectedReadyVehicle.driverMobile}
+                      className="font-mono"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-loadCapacity">ظرفیت حمل (کیلوگرم) *</Label>
+                    <Input 
+                      id="edit-loadCapacity" 
+                      name="loadCapacity" 
+                      type="number" 
+                      required 
+                      defaultValue={selectedReadyVehicle.loadCapacity}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-currentLocation">موقعیت فعلی</Label>
+                    <Input 
+                      id="edit-currentLocation" 
+                      name="currentLocation" 
+                      defaultValue={selectedReadyVehicle.currentLocation || ''}
+                    />
+                  </div>
+                  <div className="space-y-2 col-span-2">
+                    <Label htmlFor="edit-notes">یادداشت‌ها</Label>
+                    <Input 
+                      id="edit-notes" 
+                      name="notes" 
+                      defaultValue={selectedReadyVehicle.notes || ''}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <input type="hidden" name="isAvailable" value="false" />
+                      <input 
+                        type="checkbox" 
+                        id="edit-isAvailable" 
+                        name="isAvailable" 
+                        value="true" 
+                        defaultChecked={selectedReadyVehicle.isAvailable}
+                      />
+                      <Label htmlFor="edit-isAvailable">آماده به کار</Label>
+                    </div>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button type="button" variant="outline" onClick={() => setIsEditReadyVehicleDialogOpen(false)}>
+                    انصراف
+                  </Button>
+                  <Button type="submit" disabled={updateReadyVehicleMutation.isPending}>
+                    {updateReadyVehicleMutation.isPending ? "در حال بروزرسانی..." : "بروزرسانی"}
+                  </Button>
+                </DialogFooter>
+                </form>
+            )}
+          </DialogContent>
+        </Dialog>
+      </div>
+    );
+  };
+
   return (
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
@@ -2485,12 +2926,13 @@ const LogisticsManagement = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="orders">سفارشات</TabsTrigger>
           <TabsTrigger value="companies">شرکت‌های حمل</TabsTrigger>
           <TabsTrigger value="geography">جغرافیای عراق</TabsTrigger>
           <TabsTrigger value="international">جغرافیای خارج از عراق</TabsTrigger>
           <TabsTrigger value="vehicles">وسایل نقلیه</TabsTrigger>
+          <TabsTrigger value="ready-vehicles">خودروهای آماده</TabsTrigger>
           <TabsTrigger value="postal">خدمات پست</TabsTrigger>
         </TabsList>
 
@@ -2512,6 +2954,10 @@ const LogisticsManagement = () => {
 
         <TabsContent value="vehicles">
           <VehicleOptimizationTab />
+        </TabsContent>
+
+        <TabsContent value="ready-vehicles">
+          <ReadyVehiclesTab />
         </TabsContent>
 
         <TabsContent value="international">

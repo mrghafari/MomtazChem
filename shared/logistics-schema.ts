@@ -442,11 +442,43 @@ export const freightRates = pgTable("freight_rates", {
   index("freight_rates_active_idx").on(table.isActive),
 ]);
 
+// Ready Vehicles Directory - Track available vehicles and drivers
+export const readyVehicles = pgTable("ready_vehicles", {
+  id: serial("id").primaryKey(),
+  
+  // Vehicle information
+  vehicleType: text("vehicle_type").notNull(), // Type of vehicle (truck, van, motorcycle, etc.)
+  licensePlate: varchar("license_plate", { length: 20 }).notNull().unique(), // Vehicle license plate
+  
+  // Driver information
+  driverName: text("driver_name").notNull(), // Driver's full name
+  driverMobile: varchar("driver_mobile", { length: 20 }).notNull(), // Driver's mobile number
+  
+  // Capacity and specifications
+  loadCapacity: decimal("load_capacity", { precision: 8, scale: 2 }).notNull(), // Load capacity in kg
+  
+  // Current status and location
+  isAvailable: boolean("is_available").default(true), // Is the vehicle available for work
+  currentLocation: text("current_location"), // Current location of the vehicle
+  
+  // Additional information
+  notes: text("notes"), // Additional notes about the vehicle or driver
+  
+  // Timestamps
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => [
+  index("ready_vehicles_available_idx").on(table.isAvailable),
+  index("ready_vehicles_type_idx").on(table.vehicleType),
+  index("ready_vehicles_plate_idx").on(table.licensePlate),
+]);
+
 // Add new schemas and types for Iraqi cities
 export const insertIraqiProvinceSchema = createInsertSchema(iraqiProvinces);
 export const insertIraqiCitySchema = createInsertSchema(iraqiCities);
 export const insertShippingRateSchema = createInsertSchema(shippingRates);
 export const insertFreightRateSchema = createInsertSchema(freightRates);
+export const insertReadyVehicleSchema = createInsertSchema(readyVehicles);
 
 export type IraqiProvince = typeof iraqiProvinces.$inferSelect;
 export type InsertIraqiProvince = z.infer<typeof insertIraqiProvinceSchema>;
@@ -456,6 +488,8 @@ export type ShippingRate = typeof shippingRates.$inferSelect;
 export type InsertShippingRate = z.infer<typeof insertShippingRateSchema>;
 export type FreightRate = typeof freightRates.$inferSelect;
 export type InsertFreightRate = z.infer<typeof insertFreightRateSchema>;
+export type ReadyVehicle = typeof readyVehicles.$inferSelect;
+export type InsertReadyVehicle = z.infer<typeof insertReadyVehicleSchema>;
 
 
 
