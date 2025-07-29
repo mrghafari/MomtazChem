@@ -137,10 +137,10 @@ export default function SiteManagement() {
   const getInitialButtons = (): QuickActionButton[] => [
     {
       id: "kpi-dashboard",
-      label: "KPI Dashboard",
+      label: "KPI Dashboard", 
       icon: BarChart3,
       onClick: () => trackButtonClick("kpi-dashboard", () => setLocation("/admin/kpi-dashboard")),
-      className: "border-purple-300 text-purple-600 hover:bg-purple-50",
+      className: "border-blue-300 text-blue-600 hover:bg-blue-50",
       moduleId: "kpi_dashboard"
     },
     {
@@ -389,7 +389,7 @@ export default function SiteManagement() {
     },
     {
       id: "user-guide",
-      label: "راهنمای سایت",
+      label: "User Guide",
       icon: BookOpen,
       onClick: () => trackButtonClick("user-guide", () => setLocation("/user-guide")),
       className: "border-teal-300 text-teal-600 hover:bg-teal-50",
@@ -397,7 +397,7 @@ export default function SiteManagement() {
     },
     {
       id: "marketing-module",
-      label: "ماژول مارکتینگ",
+      label: "Marketing Module",
       icon: BarChart3,
       onClick: () => trackButtonClick("marketing-module", () => setLocation("/admin/marketing-module")),
       className: "border-purple-300 text-purple-600 hover:bg-purple-50",
