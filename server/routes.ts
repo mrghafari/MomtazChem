@@ -529,6 +529,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+
+  // Update email template endpoint
+  app.put('/api/email/templates/:id', requireAuth, async (req, res) => {
+    try {
+      const templateId = parseInt(req.params.id);
+      const { name, subject, html_content, text_content, category, language, is_active } = req.body;
+
+      console.log('📧 [UPDATE TEMPLATE] Updating template:', templateId, { name, category, is_active });
+
+      // Update template in database
+      const result = await db.execute(sql`
+        UPDATE email_templates 
+        SET 
+          name = ${name},
+          subject = ${subject},
+          html_content = ${html_content},
+          text_content = ${text_content || ''},
+          category = ${category},
+          language = ${language || 'fa'},
+          is_active = ${is_active},
+          updated_at = NOW()
+        WHERE id = ${templateId}
+        RETURNING *
+      `);
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'قالب یافت نشد'
+        });
+      }
+
+      console.log('✅ [UPDATE TEMPLATE] Template updated successfully:', templateId);
+      
+      res.json({
+        success: true,
+        message: 'قالب با موفقیت بروزرسانی شد',
+        template: result.rows[0]
+      });
+    } catch (error) {
+      console.error('❌ [UPDATE TEMPLATE] Error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در بروزرسانی قالب',
+        error: error.message
+      });
+    }
+  });
   
   // Serve test files
   app.get('/test-proforma', (req, res) => {

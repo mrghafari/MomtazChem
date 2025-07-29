@@ -3,8 +3,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useQuery } from '@tanstack/react-query';
-import { Mail, Eye, RefreshCw, Star, Zap, Shield, CreditCard, Package, Bell, Settings, Hash, MessageSquare, ShoppingCart, Monitor, Key } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Mail, Eye, RefreshCw, Star, Zap, Shield, CreditCard, Package, Bell, Settings, Hash, MessageSquare, ShoppingCart, Monitor, Key, Edit } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'wouter';
 
@@ -233,9 +239,47 @@ const TEMPLATE_REGISTRY = {
 
 const EmailTemplatesCentral: React.FC = () => {
   const [previewTemplate, setPreviewTemplate] = useState<EmailTemplate | null>(null);
+  const [editingTemplate, setEditingTemplate] = useState<EmailTemplate | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const queryClient = useQueryClient();
+
+  // Update template mutation
+  const updateTemplateMutation = useMutation({
+    mutationFn: async (templateData: Partial<EmailTemplate> & { id: number }) => {
+      const response = await fetch(`/api/email/templates/${templateData.id}`, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(templateData)
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'خطا در بروزرسانی قالب');
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['email-templates-database'] });
+      toast({
+        title: "✅ بروزرسانی موفق",
+        description: "قالب ایمیل با موفقیت بروزرسانی شد",
+      });
+      setEditingTemplate(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "❌ خطا در بروزرسانی",
+        description: error.message || "لطفاً دوباره تلاش کنید",
+        variant: "destructive"
+      });
+    }
+  });
 
   // Fetch templates directly from database without authentication
   const { data: templates = [], isLoading, error, refetch } = useQuery({
@@ -605,14 +649,24 @@ const EmailTemplatesCentral: React.FC = () => {
                         )}
                       </div>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setPreviewTemplate(template)}
-                      className={isSpecial ? 'hover:bg-green-100' : ''}
-                    >
-                      <Eye className="w-4 h-4" />
-                    </Button>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setPreviewTemplate(template)}
+                        className={isSpecial ? 'hover:bg-green-100' : ''}
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setEditingTemplate(template)}
+                        className={isSpecial ? 'hover:bg-green-100' : ''}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -672,6 +726,147 @@ const EmailTemplatesCentral: React.FC = () => {
               </Button>
             </div>
           </div>
+        )}
+
+        {/* Edit Modal */}
+        {editingTemplate && (
+          <Dialog open={!!editingTemplate} onOpenChange={() => setEditingTemplate(null)}>
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle className="text-lg font-bold text-right">
+                  ویرایش قالب ایمیل
+                </DialogTitle>
+              </DialogHeader>
+              
+              <form 
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const formData = new FormData(e.target as HTMLFormElement);
+                  const data = {
+                    id: editingTemplate.id,
+                    name: formData.get('name') as string,
+                    subject: formData.get('subject') as string,
+                    html_content: formData.get('html_content') as string,
+                    text_content: formData.get('text_content') as string,
+                    category: formData.get('category') as string,
+                    language: formData.get('language') as string,
+                    is_active: formData.get('is_active') === 'on'
+                  };
+                  updateTemplateMutation.mutate(data);
+                }}
+                className="space-y-6"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="name">نام قالب</Label>
+                    <Input
+                      id="name"
+                      name="name"
+                      defaultValue={editingTemplate.name}
+                      className="mt-1"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="category">دسته‌بندی</Label>
+                    <Select name="category" defaultValue={editingTemplate.category}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(TEMPLATE_CATEGORIES).map(([key, cat]) => (
+                          <SelectItem key={key} value={key}>
+                            {cat.name}
+                          </SelectItem>
+                        ))}
+                        <SelectItem value="inventory_alerts">هشدار موجودی</SelectItem>
+                        <SelectItem value="payment_notifications">اطلاعیه‌های پرداخت</SelectItem>
+                        <SelectItem value="system_notifications">اطلاعیه‌های سیستم</SelectItem>
+                        <SelectItem value="security_alerts">هشدارهای امنیتی</SelectItem>
+                        <SelectItem value="password-reset">بازنشانی رمز عبور</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="language">زبان</Label>
+                    <Select name="language" defaultValue={editingTemplate.language || 'fa'}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="fa">فارسی</SelectItem>
+                        <SelectItem value="en">انگلیسی</SelectItem>
+                        <SelectItem value="ar">عربی</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2 mt-6">
+                    <Switch
+                      id="is_active"
+                      name="is_active"
+                      defaultChecked={editingTemplate.is_active}
+                    />
+                    <Label htmlFor="is_active" className="text-sm font-medium">
+                      فعال
+                    </Label>
+                  </div>
+                </div>
+                
+                <div>
+                  <Label htmlFor="subject">موضوع ایمیل</Label>
+                  <Input
+                    id="subject"
+                    name="subject"
+                    defaultValue={editingTemplate.subject}
+                    className="mt-1"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="html_content">محتوای HTML</Label>
+                  <Textarea
+                    id="html_content"
+                    name="html_content"
+                    defaultValue={editingTemplate.html_content}
+                    className="mt-1 min-h-[300px] font-mono text-sm"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="text_content">محتوای متنی (اختیاری)</Label>
+                  <Textarea
+                    id="text_content"
+                    name="text_content"
+                    defaultValue={editingTemplate.text_content || ''}
+                    className="mt-1 min-h-[100px]"
+                  />
+                </div>
+                
+                <div className="flex justify-end gap-3 pt-4 border-t">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setEditingTemplate(null)}
+                    disabled={updateTemplateMutation.isPending}
+                  >
+                    انصراف
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={updateTemplateMutation.isPending}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    {updateTemplateMutation.isPending ? 'در حال ذخیره...' : 'ذخیره تغییرات'}
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
         )}
 
         {/* Preview Modal */}
