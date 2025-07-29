@@ -193,6 +193,10 @@ const LogisticsManagement = () => {
   const [isCreateReadyVehicleDialogOpen, setIsCreateReadyVehicleDialogOpen] = useState(false);
   const [selectedReadyVehicle, setSelectedReadyVehicle] = useState<ReadyVehicle | null>(null);
   const [isEditReadyVehicleDialogOpen, setIsEditReadyVehicleDialogOpen] = useState(false);
+  const [customVehicleType, setCustomVehicleType] = useState('');
+  const [showCustomInput, setShowCustomInput] = useState(false);
+  const [editCustomVehicleType, setEditCustomVehicleType] = useState('');
+  const [editShowCustomInput, setEditShowCustomInput] = useState(false);
 
   // Ready vehicles API integration
   const { data: readyVehiclesData, isLoading: loadingReadyVehicles } = useQuery({
@@ -269,8 +273,12 @@ const LogisticsManagement = () => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     
+    // Determine vehicle type based on selection
+    const selectedVehicleType = formData.get('vehicleType') as string;
+    const finalVehicleType = selectedVehicleType === 'سایر' ? customVehicleType : selectedVehicleType;
+    
     const vehicleData = {
-      vehicleType: formData.get('vehicleType') as string,
+      vehicleType: finalVehicleType,
       licensePlate: formData.get('licensePlate') as string,
       driverName: formData.get('driverName') as string,
       driverMobile: formData.get('driverMobile') as string,
@@ -283,6 +291,10 @@ const LogisticsManagement = () => {
     };
 
     createReadyVehicleMutation.mutate(vehicleData);
+    
+    // Reset custom input state
+    setShowCustomInput(false);
+    setCustomVehicleType('');
   };
 
   // Handle edit ready vehicle form submission
@@ -2675,8 +2687,13 @@ const LogisticsManagement = () => {
     const handleCreateReadyVehicle = (e: React.FormEvent) => {
       e.preventDefault();
       const formData = new FormData(e.target as HTMLFormElement);
+      
+      // Determine vehicle type based on selection
+      const selectedVehicleType = formData.get('vehicleType') as string;
+      const finalVehicleType = selectedVehicleType === 'سایر' ? customVehicleType : selectedVehicleType;
+      
       createReadyVehicleMutation.mutate({
-        vehicleType: formData.get('vehicleType') as string,
+        vehicleType: finalVehicleType,
         licensePlate: formData.get('licensePlate') as string,
         driverName: formData.get('driverName') as string,
         driverMobile: formData.get('driverMobile') as string,
@@ -2687,6 +2704,10 @@ const LogisticsManagement = () => {
         supportsFlammable: formData.get('supportsFlammable') === 'true',
         notAllowedFlammable: formData.get('notAllowedFlammable') === 'true'
       });
+      
+      // Reset custom input state
+      setShowCustomInput(false);
+      setCustomVehicleType('');
     };
 
     // Handle form submission for updating ready vehicle
@@ -2695,9 +2716,14 @@ const LogisticsManagement = () => {
       if (!selectedReadyVehicle) return;
       
       const formData = new FormData(e.target as HTMLFormElement);
+      
+      // Determine vehicle type based on selection
+      const selectedVehicleType = formData.get('vehicleType') as string;
+      const finalVehicleType = selectedVehicleType === 'سایر' ? editCustomVehicleType : selectedVehicleType;
+      
       updateReadyVehicleMutation.mutate({
         id: selectedReadyVehicle.id,
-        vehicleType: formData.get('vehicleType') as string,
+        vehicleType: finalVehicleType,
         licensePlate: formData.get('licensePlate') as string,
         driverName: formData.get('driverName') as string,
         driverMobile: formData.get('driverMobile') as string,
@@ -2708,6 +2734,10 @@ const LogisticsManagement = () => {
         supportsFlammable: formData.get('supportsFlammable') === 'true',
         notAllowedFlammable: formData.get('notAllowedFlammable') === 'true'
       });
+      
+      // Reset custom input state
+      setEditShowCustomInput(false);
+      setEditCustomVehicleType('');
     };
 
     return (
@@ -2852,20 +2882,62 @@ const LogisticsManagement = () => {
                     id="vehicleType" 
                     name="vehicleType" 
                     required 
+                    value={showCustomInput ? 'سایر' : ''}
+                    onChange={(e) => {
+                      if (e.target.value === 'سایر') {
+                        setShowCustomInput(true);
+                        setCustomVehicleType('');
+                      } else {
+                        setShowCustomInput(false);
+                        setCustomVehicleType('');
+                      }
+                    }}
                     className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="">انتخاب نوع خودرو</option>
                     <option value="اتوبوس مسافربری">اتوبوس مسافربری</option>
                     <option value="اتوبوس شهری">اتوبوس شهری</option>
+                    <option value="مینی‌بوس">مینی‌بوس</option>
                     <option value="کامیون سنگین">کامیون سنگین</option>
                     <option value="کامیون متوسط">کامیون متوسط</option>
+                    <option value="کامیون سبک">کامیون سبک</option>
                     <option value="وانت سبک">وانت سبک</option>
+                    <option value="وانت متوسط">وانت متوسط</option>
                     <option value="ون سبک">ون سبک</option>
+                    <option value="ون متوسط">ون متوسط</option>
                     <option value="موتورسیکلت">موتورسیکلت</option>
                     <option value="خودرو سواری">خودرو سواری</option>
                     <option value="تریلر">تریلر</option>
+                    <option value="نیم‌تریلر">نیم‌تریلر</option>
                     <option value="کشنده">کشنده</option>
+                    <option value="کامیون کمپرسی">کامیون کمپرسی</option>
+                    <option value="کامیون یخچالی">کامیون یخچالی</option>
+                    <option value="تانکر">تانکر</option>
+                    <option value="کامیون جرثقیل">کامیون جرثقیل</option>
+                    <option value="یدک‌کش">یدک‌کش</option>
+                    <option value="آمبولانس">آمبولانس</option>
+                    <option value="ماشین آتش‌نشانی">ماشین آتش‌نشانی</option>
+                    <option value="تاکسی">تاکسی</option>
+                    <option value="دوچرخه">دوچرخه</option>
+                    <option value="اسکوتر">اسکوتر</option>
+                    <option value="سایر">➕ سایر (نوع دلخواه)</option>
                   </select>
+                  
+                  {/* Custom vehicle type input */}
+                  {showCustomInput && (
+                    <div className="mt-2">
+                      <input
+                        type="text"
+                        name="customVehicleType"
+                        value={customVehicleType}
+                        onChange={(e) => setCustomVehicleType(e.target.value)}
+                        placeholder="نوع خودرو جدید را وارد کنید..."
+                        required
+                        className="w-full p-2 border border-blue-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-blue-50"
+                      />
+                      <p className="text-xs text-blue-600 mt-1">💡 مثال: کامیون اسکانیا، اتوبوس مدرسه، ون سوخت‌رسانی</p>
+                    </div>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="licensePlate">شماره خودرو *</Label>
@@ -3004,21 +3076,62 @@ const LogisticsManagement = () => {
                       id="edit-vehicleType" 
                       name="vehicleType" 
                       required 
-                      defaultValue={selectedReadyVehicle.vehicleType}
+                      value={editShowCustomInput ? 'سایر' : selectedReadyVehicle.vehicleType}
+                      onChange={(e) => {
+                        if (e.target.value === 'سایر') {
+                          setEditShowCustomInput(true);
+                          setEditCustomVehicleType(selectedReadyVehicle.vehicleType);
+                        } else {
+                          setEditShowCustomInput(false);
+                          setEditCustomVehicleType('');
+                        }
+                      }}
                       className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
                       <option value="">انتخاب نوع خودرو</option>
                       <option value="اتوبوس مسافربری">اتوبوس مسافربری</option>
                       <option value="اتوبوس شهری">اتوبوس شهری</option>
+                      <option value="مینی‌بوس">مینی‌بوس</option>
                       <option value="کامیون سنگین">کامیون سنگین</option>
                       <option value="کامیون متوسط">کامیون متوسط</option>
+                      <option value="کامیون سبک">کامیون سبک</option>
                       <option value="وانت سبک">وانت سبک</option>
+                      <option value="وانت متوسط">وانت متوسط</option>
                       <option value="ون سبک">ون سبک</option>
+                      <option value="ون متوسط">ون متوسط</option>
                       <option value="موتورسیکلت">موتورسیکلت</option>
                       <option value="خودرو سواری">خودرو سواری</option>
                       <option value="تریلر">تریلر</option>
+                      <option value="نیم‌تریلر">نیم‌تریلر</option>
                       <option value="کشنده">کشنده</option>
+                      <option value="کامیون کمپرسی">کامیون کمپرسی</option>
+                      <option value="کامیون یخچالی">کامیون یخچالی</option>
+                      <option value="تانکر">تانکر</option>
+                      <option value="کامیون جرثقیل">کامیون جرثقیل</option>
+                      <option value="یدک‌کش">یدک‌کش</option>
+                      <option value="آمبولانس">آمبولانس</option>
+                      <option value="ماشین آتش‌نشانی">ماشین آتش‌نشانی</option>
+                      <option value="تاکسی">تاکسی</option>
+                      <option value="دوچرخه">دوچرخه</option>
+                      <option value="اسکوتر">اسکوتر</option>
+                      <option value="سایر">➕ سایر (نوع دلخواه)</option>
                     </select>
+                    
+                    {/* Custom vehicle type input for edit */}
+                    {editShowCustomInput && (
+                      <div className="mt-2">
+                        <input
+                          type="text"
+                          name="editCustomVehicleType"
+                          value={editCustomVehicleType}
+                          onChange={(e) => setEditCustomVehicleType(e.target.value)}
+                          placeholder="نوع خودرو را ویرایش کنید..."
+                          required
+                          className="w-full p-2 border border-blue-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-blue-50"
+                        />
+                        <p className="text-xs text-blue-600 mt-1">💡 نوع خودرو را تغییر دهید یا نام جدید وارد کنید</p>
+                      </div>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="edit-licensePlate">شماره خودرو *</Label>

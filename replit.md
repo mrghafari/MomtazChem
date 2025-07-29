@@ -167,6 +167,47 @@
 
 ## Recent Changes
 
+### COMPLETED: Enhanced Vehicle Type Selection System with Comprehensive Dropdown Options (January 29, 2025)
+✅ **IMPLEMENTED: Professional dropdown vehicle type selection system replacing text inputs with standardized options**
+- **User Request Fulfilled**: "یک فرمی برای افزودن نوع خودرو در این فرم ایجاد کن یا بگذار همینجا انواع دیگری اضافه کنیم مثلا اتوبوس مسافربری" - Added comprehensive vehicle type dropdown
+- **Ready Vehicles System Enhancement**: Converted manual text input to professional dropdown selection:
+  - **Create Form Dropdown**: Complete vehicle type selection in ready vehicles creation dialog
+  - **Edit Form Dropdown**: Professional editing interface with pre-selected vehicle types
+  - **Comprehensive Options**: 25+ vehicle types including passenger buses, trucks, motorcycles, specialized vehicles
+- **Vehicle Type Categories**: Organized comprehensive list including:
+  - **Passenger Transport**: اتوبوس مسافربری، اتوبوس شهری، مینی‌بوس، تاکسی
+  - **Cargo Vehicles**: کامیون سنگین، کامیون متوسط، کامیون سبک، وانت سبک، وانت متوسط
+  - **Specialized Trucks**: کامیون کمپرسی، کامیون یخچالی، تانکر، کامیون جرثقیل
+  - **Heavy Transport**: تریلر، نیم‌تریلر، کشنده
+  - **Emergency Services**: آمبولانس، ماشین آتش‌نشانی، یدک‌کش
+  - **Light Vehicles**: ون سبک، ون متوسط، موتورسیکلت، خودرو سواری، دوچرخه، اسکوتر
+- **VehicleTemplateEditor Integration**: Updated VEHICLE_TYPES constant with expanded options:
+  - **New Vehicle Types**: Added passenger_bus, city_bus, medium_truck, light_pickup, passenger_car, tractor
+  - **Consistent Mapping**: Professional English-to-Persian vehicle type mapping
+  - **Template Compatibility**: Maintained backward compatibility with existing vehicle templates
+- **User Experience Enhancement**:
+  - **Professional Dropdown**: Clean selection interface with proper focus and validation styling
+  - **Consistent Data Entry**: Eliminates typos and ensures standardized vehicle type naming
+  - **Safety Integration**: Works seamlessly with flammable materials safety compliance system
+  - **Persian RTL Support**: Proper right-to-left dropdown display with Persian vehicle names
+- **Sample Data Enhancement**: Added diverse vehicle types to demonstrate system capabilities:
+  - **اتوبوس مسافربری**: Passenger bus properly marked as not allowed for flammable materials
+  - **اتوبوس شهری**: City bus with safety restrictions for urban transport
+  - **کامیون سنگین**: Heavy truck equipped for flammable materials transport
+  - **موتورسیکلت**: Motorcycle for small package delivery with safety restrictions
+- **Technical Implementation**:
+  - **HTML Select Elements**: Professional dropdown with proper validation and styling
+  - **CSS Integration**: Focus states and proper border styling for form consistency
+  - **Default Value Support**: Edit forms pre-populate with existing vehicle type selection
+  - **Required Validation**: Proper form validation preventing submission without vehicle type selection
+- **Business Impact**: Standardized vehicle type management enabling:
+  - **Data Consistency**: Uniform vehicle type naming across all fleet management operations
+  - **Improved Analytics**: Better reporting and filtering capabilities with standardized types
+  - **Professional Interface**: Enhanced user experience with guided vehicle type selection
+  - **Safety Compliance**: Clear vehicle type identification for safety regulation adherence
+- **Integration**: Seamlessly integrated with existing ready vehicles and vehicle template systems
+- **Result**: Complete vehicle type selection enhancement operational - professional dropdown system with 25+ standardized vehicle types replacing manual text input for improved data consistency and user experience
+
 ### COMPLETED: Ready Vehicles Directory System Implementation - Complete Fleet Management with Flammable Materials Safety (January 29, 2025)
 ✅ **IMPLEMENTED: Complete ready vehicles directory system with comprehensive fleet management and safety compliance**
 - **User Request Fulfilled**: Implemented full-stack ready vehicles system for logistics fleet management with safety compliance for flammable materials transport
@@ -189,11 +230,12 @@
   - **Real-time Updates**: Automatic cache invalidation after CRUD operations
   - **Error Handling**: Professional toast notifications with Persian error messages
   - **Loading States**: Professional loading indicators during API operations
-- **Sample Data**: Populated with 4 ready vehicles including diverse vehicle types and safety capabilities:
-  - کامیون متوسط (Medium Truck) - Baghdad, supports flammable materials
-  - وانت سبک (Light Van) - Erbil, prohibited for flammable materials
+- **Sample Data**: Populated with 9 ready vehicles including diverse vehicle types and safety capabilities:
+  - اتوبوس مسافربری (Passenger Bus) - Baghdad, prohibited for flammable materials
+  - اتوبوس شهری (City Bus) - Erbil, prohibited for flammable materials  
   - کامیون سنگین (Heavy Truck) - Basra, supports flammable materials with safety systems
-  - موتورسیکلت (Motorcycle) - Najaf, for small packages only
+  - ون سبک (Light Van) - Karbala, general cargo transport
+  - موتورسیکلت (Motorcycle) - Najaf, prohibited for flammable materials
 - **Business Impact**: Complete fleet management enabling:
   - **Real-time Vehicle Tracking**: Available vehicles with current location and driver contact
   - **Safety Compliance**: Smart filtering for flammable materials based on vehicle capabilities
