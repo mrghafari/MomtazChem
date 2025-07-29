@@ -229,15 +229,11 @@ const LogisticsManagement = () => {
     enabled: activeTab === 'ready-vehicles'
   });
 
-  const readyVehicles = readyVehiclesData?.data || [];
+  const readyVehicles = readyVehiclesData || [];
 
   // Create ready vehicle mutation
   const createReadyVehicleMutation = useMutation({
-    mutationFn: (data: any) => apiRequest({
-      url: '/api/logistics/ready-vehicles',
-      method: 'POST',
-      data
-    }),
+    mutationFn: (data: any) => apiRequest('/api/logistics/ready-vehicles', { method: 'POST', body: data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/logistics/ready-vehicles'] });
       setIsCreateReadyVehicleDialogOpen(false);
@@ -254,11 +250,7 @@ const LogisticsManagement = () => {
 
   // Update ready vehicle mutation
   const updateReadyVehicleMutation = useMutation({
-    mutationFn: ({ id, ...data }: any) => apiRequest({
-      url: `/api/logistics/ready-vehicles/${id}`,
-      method: 'PUT',
-      data
-    }),
+    mutationFn: ({ id, ...data }: any) => apiRequest(`/api/logistics/ready-vehicles/${id}`, { method: 'PUT', body: data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/logistics/ready-vehicles'] });
       setIsEditReadyVehicleDialogOpen(false);
@@ -276,10 +268,7 @@ const LogisticsManagement = () => {
 
   // Delete ready vehicle mutation
   const deleteReadyVehicleMutation = useMutation({
-    mutationFn: (id: number) => apiRequest({
-      url: `/api/logistics/ready-vehicles/${id}`,
-      method: 'DELETE'
-    }),
+    mutationFn: (id: number) => apiRequest(`/api/logistics/ready-vehicles/${id}`, { method: 'DELETE' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/logistics/ready-vehicles'] });
       toast({ title: "موفقیت", description: "خودرو آماده کار با موفقیت حذف شد" });
@@ -674,7 +663,7 @@ const LogisticsManagement = () => {
     const allowedRoutesArray = allowedRoutesString ? allowedRoutesString.split(',').map(r => r.trim()) : ['urban'];
     
     const selectedVehicleType = formData.get('vehicleType') as string;
-    const finalVehicleType = selectedVehicleType === 'سایر' ? editCustomVehicleType : selectedVehicleType;
+    const finalVehicleType = selectedVehicleType === 'سایر' ? customEditVehicleType : selectedVehicleType;
     
     const data = {
       name: formData.get('name') as string,
@@ -2795,7 +2784,7 @@ const LogisticsManagement = () => {
       
       // Determine vehicle type based on selection
       const selectedVehicleType = formData.get('vehicleType') as string;
-      const finalVehicleType = selectedVehicleType === 'سایر' ? editCustomVehicleType : selectedVehicleType;
+      const finalVehicleType = selectedVehicleType === 'سایر' ? customEditVehicleType : selectedVehicleType;
       
       updateReadyVehicleMutation.mutate({
         id: selectedReadyVehicle.id,
@@ -2812,8 +2801,8 @@ const LogisticsManagement = () => {
       });
       
       // Reset custom input state
-      setEditShowCustomInput(false);
-      setEditCustomVehicleType('');
+      setShowCustomEditInput(false);
+      setCustomEditVehicleType('');
     };
 
     return (
@@ -3152,14 +3141,14 @@ const LogisticsManagement = () => {
                       id="edit-vehicleType" 
                       name="vehicleType" 
                       required 
-                      value={editShowCustomInput ? 'سایر' : selectedReadyVehicle.vehicleType}
+                      value={showCustomEditInput ? 'سایر' : selectedReadyVehicle.vehicleType}
                       onChange={(e) => {
                         if (e.target.value === 'سایر') {
-                          setEditShowCustomInput(true);
-                          setEditCustomVehicleType(selectedReadyVehicle.vehicleType);
+                          setShowCustomEditInput(true);
+                          setCustomEditVehicleType(selectedReadyVehicle.vehicleType);
                         } else {
-                          setEditShowCustomInput(false);
-                          setEditCustomVehicleType('');
+                          setShowCustomEditInput(false);
+                          setCustomEditVehicleType('');
                         }
                       }}
                       className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -3194,13 +3183,13 @@ const LogisticsManagement = () => {
                     </select>
                     
                     {/* Custom vehicle type input for edit */}
-                    {editShowCustomInput && (
+                    {showCustomEditInput && (
                       <div className="mt-2">
                         <input
                           type="text"
-                          name="editCustomVehicleType"
-                          value={editCustomVehicleType}
-                          onChange={(e) => setEditCustomVehicleType(e.target.value)}
+                          name="customEditVehicleType"
+                          value={customEditVehicleType}
+                          onChange={(e) => setCustomEditVehicleType(e.target.value)}
                           placeholder="نوع خودرو را ویرایش کنید..."
                           required
                           className="w-full p-2 border border-blue-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-blue-50"
