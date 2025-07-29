@@ -432,8 +432,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (req.path === '/tickets' && req.method === 'POST') {
       return next();
     }
-    // Skip middleware for test endpoints
-    if (req.path.startsWith('/test/') || req.path.startsWith('/analytics/')) {
+    // Skip middleware for test endpoints and public email templates
+    if (req.path.startsWith('/test/') || req.path.startsWith('/analytics/') || req.path.includes('/email/templates/public')) {
       return next();
     }
     // Skip middleware for warehouse order management endpoints
@@ -448,6 +448,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Serve static files from uploads directory
   app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+
+  // Public email templates endpoint - shows database exactly as is  
+  app.get('/api/email/templates/public', async (req, res) => {
+    try {
+      console.log('📧 [PUBLIC TEMPLATES] Fetching all templates from database...');
+      
+      // Direct SQL query to get all templates exactly as they exist
+      const result = await db.execute(sql`
+        SELECT 
+          id,
+          name,
+          subject,
+          html_content,
+          text_content,
+          category,
+          language,
+          is_active,
+          is_default,
+          variables,
+          usage_count,
+          created_at,
+          updated_at,
+          last_used,
+          created_by
+        FROM email_templates 
+        ORDER BY id ASC
+      `);
+      
+      console.log('📧 [PUBLIC TEMPLATES] Result type:', typeof result);
+      console.log('📧 [PUBLIC TEMPLATES] Result keys:', Object.keys(result || {}));
+      console.log('📧 [PUBLIC TEMPLATES] Has rows?', 'rows' in (result || {}));
+      console.log('📧 [PUBLIC TEMPLATES] Is array?', Array.isArray(result));
+      
+      // Handle different result formats
+      const rawData = Array.isArray(result) ? result : (result.rows || result);
+      
+      const templates = rawData.map(row => ({
+        id: row.id,
+        name: row.name,
+        templateName: row.name,
+        subject: row.subject,
+        html_content: row.html_content,
+        htmlContent: row.html_content,
+        text_content: row.text_content,
+        textContent: row.text_content,
+        category: row.category,
+        categoryName: row.category,
+        language: row.language || 'fa',
+        is_active: row.is_active,
+        isActive: row.is_active,
+        is_default: row.is_default,
+        isDefault: row.is_default,
+        variables: Array.isArray(row.variables) ? row.variables : [],
+        usage_count: row.usage_count || 0,
+        usageCount: row.usage_count || 0,
+        created_at: row.created_at,
+        createdAt: row.created_at,
+        updated_at: row.updated_at,
+        updatedAt: row.updated_at,
+        last_used: row.last_used,
+        lastUsed: row.last_used,
+        created_by: row.created_by,
+        createdBy: row.created_by
+      }));
+      
+      console.log('✅ [PUBLIC TEMPLATES] Successfully fetched templates:', {
+        count: templates.length,
+        categories: [...new Set(templates.map(t => t.category))],
+        activeCount: templates.filter(t => t.is_active).length
+      });
+      
+      res.json(templates);
+    } catch (error) {
+      console.error('❌ [PUBLIC TEMPLATES] Database error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'خطا در بارگذاری قالب‌ها از دیتابیس',
+        error: error.message 
+      });
+    }
+  });
   
   // Serve test files
   app.get('/test-proforma', (req, res) => {

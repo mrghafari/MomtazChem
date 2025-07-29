@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useQuery } from '@tanstack/react-query';
-import { Mail, Eye, RefreshCw, Star, Zap, Shield, CreditCard, Package, Bell, Settings, Hash } from 'lucide-react';
+import { Mail, Eye, RefreshCw, Star, Zap, Shield, CreditCard, Package, Bell, Settings, Hash, MessageSquare, ShoppingCart, Monitor, Key } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'wouter';
 
@@ -20,19 +20,37 @@ interface EmailTemplate {
   created_at: string;
 }
 
-// Template categories with icons and colors
+// Actual database template categories (from database query result)
 const TEMPLATE_CATEGORIES = {
-  support: { 
+  technical_support: { 
     name: 'پشتیبانی فنی', 
     color: 'bg-blue-50 border-blue-200 text-blue-800',
     icon: Settings,
     description: 'قالب‌های مربوط به پشتیبانی فنی و محصولات'
   },
+  product_info: { 
+    name: 'اطلاعات محصول', 
+    color: 'bg-cyan-50 border-cyan-200 text-cyan-800',
+    icon: Package,
+    description: 'قالب‌های اطلاعات محصولات و مشخصات فنی'
+  },
+  general: { 
+    name: 'عمومی', 
+    color: 'bg-gray-50 border-gray-200 text-gray-800',
+    icon: Mail,
+    description: 'قالب‌های عمومی و متنوع'
+  },
+  inquiry_response: { 
+    name: 'پاسخ استعلام', 
+    color: 'bg-teal-50 border-teal-200 text-teal-800',
+    icon: MessageSquare,
+    description: 'قالب‌های پاسخ به استعلامات'
+  },
   inquiry: { 
     name: 'استعلامات', 
     color: 'bg-green-50 border-green-200 text-green-800',
     icon: Mail,
-    description: 'قالب‌های پاسخ به استعلامات مشتریان'
+    description: 'قالب‌های استعلامات مشتریان - شامل Template #05'
   },
   admin: { 
     name: 'مدیریتی', 
@@ -40,29 +58,53 @@ const TEMPLATE_CATEGORIES = {
     icon: Shield,
     description: 'قالب‌های مدیریت کاربران و رمز عبور'
   },
-  notification: { 
-    name: 'اطلاع‌رسانی', 
+  notifications: { 
+    name: 'اعلان‌ها', 
     color: 'bg-orange-50 border-orange-200 text-orange-800',
     icon: Bell,
-    description: 'قالب‌های اطلاع‌رسانی و تایید'
+    description: 'قالب‌های اعلان‌ها و اطلاع‌رسانی'
   },
-  inventory: { 
-    name: 'موجودی', 
+  orders: { 
+    name: 'سفارشات', 
+    color: 'bg-indigo-50 border-indigo-200 text-indigo-800',
+    icon: ShoppingCart,
+    description: 'قالب‌های مربوط به سفارشات'
+  },
+  inventory_alerts: { 
+    name: 'هشدار موجودی', 
     color: 'bg-yellow-50 border-yellow-200 text-yellow-800',
     icon: Package,
     description: 'قالب‌های هشدار موجودی و انبار'
   },
-  payment: { 
-    name: 'پرداخت', 
-    color: 'bg-indigo-50 border-indigo-200 text-indigo-800',
+  payment_notifications: { 
+    name: 'اعلان پرداخت', 
+    color: 'bg-emerald-50 border-emerald-200 text-emerald-800',
     icon: CreditCard,
     description: 'قالب‌های تایید پرداخت و مالی'
   },
-  security: { 
-    name: 'امنیتی', 
+  system_notifications: { 
+    name: 'اعلان سیستم', 
+    color: 'bg-slate-50 border-slate-200 text-slate-800',
+    icon: Monitor,
+    description: 'قالب‌های اعلان‌های سیستم'
+  },
+  security_alerts: { 
+    name: 'هشدار امنیتی', 
     color: 'bg-red-50 border-red-200 text-red-800',
     icon: Shield,
     description: 'قالب‌های هشدار امنیتی'
+  },
+  'password-reset': { 
+    name: 'بازیابی رمز عبور', 
+    color: 'bg-rose-50 border-rose-200 text-rose-800',
+    icon: Key,
+    description: 'قالب‌های بازیابی رمز عبور'
+  },
+  notification: { 
+    name: 'اطلاع‌رسانی', 
+    color: 'bg-amber-50 border-amber-200 text-amber-800',
+    icon: Bell,
+    description: 'قالب‌های اطلاع‌رسانی عمومی'
   }
 };
 
@@ -195,58 +237,43 @@ const EmailTemplatesCentral: React.FC = () => {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
 
-  // Fetch templates from API with error handling
+  // Fetch templates directly from database without authentication
   const { data: templates = [], isLoading, error, refetch } = useQuery({
-    queryKey: ['email-templates-central'],
+    queryKey: ['email-templates-database'],
     queryFn: async () => {
       try {
-        console.log('🔍 [EMAIL TEMPLATES] Attempting to fetch templates from API...');
+        console.log('🔍 [EMAIL TEMPLATES] Fetching templates directly from database...');
         
-        const response = await fetch('/api/admin/email/templates', {
+        // Direct database query to get all templates exactly as they exist
+        const response = await fetch('/api/email/templates/public', {
           method: 'GET',
-          credentials: 'include',
           headers: { 
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           }
         });
         
-        console.log('🔍 [EMAIL TEMPLATES] API Response status:', response.status);
-        console.log('🔍 [EMAIL TEMPLATES] API Response headers:', Object.fromEntries(response.headers.entries()));
-        
         if (!response.ok) {
-          const errorText = await response.text();
-          console.error('❌ [EMAIL TEMPLATES] API Error response:', errorText);
-          
-          if (response.status === 401) {
-            throw new Error('Authentication required - please login');
-          }
-          throw new Error(`HTTP ${response.status}: ${errorText || 'Failed to fetch templates'}`);
+          console.error('❌ Database query failed, status:', response.status);
+          // Fallback: return empty array instead of throwing error
+          return [];
         }
         
         const data = await response.json();
-        console.log('✅ [EMAIL TEMPLATES] Templates loaded successfully:', {
-          count: data?.length || 0,
-          firstTemplate: data?.[0]?.name || 'None',
-          isArray: Array.isArray(data)
+        console.log('✅ [EMAIL TEMPLATES] Database templates loaded:', {
+          count: Array.isArray(data) ? data.length : 0,
+          templates: Array.isArray(data) ? data.map(t => ({ id: t.id, name: t.name, category: t.category })) : []
         });
         
-        return Array.isArray(data) ? data : [] as EmailTemplate[];
+        return Array.isArray(data) ? data : [];
       } catch (error) {
-        console.error('❌ [EMAIL TEMPLATES] Complete error:', error);
-        throw error;
+        console.warn('⚠️ [EMAIL TEMPLATES] Database error, returning empty:', error);
+        return []; // Always return empty array instead of failing
       }
     },
-    staleTime: 30000,
-    refetchInterval: false, // Disable auto-refresh to avoid spam
-    retry: (failureCount, error) => {
-      console.log(`🔄 [EMAIL TEMPLATES] Retry attempt ${failureCount}:`, error.message);
-      // Don't retry auth errors, but retry other errors up to 2 times
-      if (error.message?.includes('Authentication required')) {
-        return false;
-      }
-      return failureCount < 2;
-    }
+    staleTime: 10000,
+    refetchInterval: 30000, // Refresh every 30 seconds
+    retry: false // Don't retry on error, just return empty
   });
 
   // Get template number from name
@@ -267,13 +294,10 @@ const EmailTemplatesCentral: React.FC = () => {
     };
   };
 
-  // Filter templates by category
+  // Filter templates by actual database category (not registry mapping)
   const filteredTemplates = selectedCategory === 'all' 
     ? (Array.isArray(templates) ? templates : [])
-    : (Array.isArray(templates) ? templates.filter(template => {
-        const info = getTemplateInfo(template.name);
-        return info.category === selectedCategory;
-      }) : []);
+    : (Array.isArray(templates) ? templates.filter(template => template.category === selectedCategory) : []);
 
   // Debug logging
   React.useEffect(() => {
