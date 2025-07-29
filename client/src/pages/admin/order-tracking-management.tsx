@@ -365,56 +365,65 @@ export default function OrderTrackingManagement() {
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
+            <table className="w-full border-collapse table-fixed">
+              <colgroup>
+                <col className="w-32" />
+                <col className="w-48" />
+                <col className="w-32" />
+                <col className="w-28" />
+                <col className="w-24" />
+                <col className="w-32" />
+                <col className="w-24" />
+              </colgroup>
               <thead>
                 <tr className="border-b bg-gray-50 dark:bg-gray-800">
-                  <th className="text-right p-3 font-semibold">شماره سفارش</th>
-                  <th className="text-right p-3 font-semibold">مشتری</th>
-                  <th className="text-right p-3 font-semibold">مبلغ</th>
-                  <th className="text-right p-3 font-semibold">وضعیت</th>
-                  <th className="text-right p-3 font-semibold">کد تحویل</th>
-                  <th className="text-right p-3 font-semibold">تاریخ ایجاد</th>
-                  <th className="text-right p-3 font-semibold">عملیات</th>
+                  <th className="text-right p-3 font-semibold align-top">شماره سفارش</th>
+                  <th className="text-right p-3 font-semibold align-top">مشتری</th>
+                  <th className="text-right p-3 font-semibold align-top">مبلغ</th>
+                  <th className="text-right p-3 font-semibold align-top">وضعیت</th>
+                  <th className="text-right p-3 font-semibold align-top">کد تحویل</th>
+                  <th className="text-right p-3 font-semibold align-top">تاریخ ایجاد</th>
+                  <th className="text-right p-3 font-semibold align-top">عملیات</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredOrders.map((order) => (
                   <tr key={order.id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-800">
-                    <td className="p-3">
-                      <div className="font-medium">#{order.customerOrderId}</div>
+                    <td className="p-3 align-top">
+                      <div className="font-medium truncate">#{order.customerOrderId}</div>
                     </td>
-                    <td className="p-3">
-                      <div>
-                        <div className="font-medium">{order.customerName || 'نامشخص'}</div>
-                        <div className="text-sm text-gray-600">{order.customerEmail}</div>
-                        <div className="text-sm text-gray-600">{order.customerPhone}</div>
+                    <td className="p-3 align-top">
+                      <div className="space-y-1">
+                        <div className="font-medium truncate">{order.customerName || 'نامشخص'}</div>
+                        <div className="text-sm text-gray-600 truncate">{order.customerEmail}</div>
+                        <div className="text-sm text-gray-600 truncate">{order.customerPhone}</div>
                       </div>
                     </td>
-                    <td className="p-3">
-                      <div className="font-medium">
+                    <td className="p-3 align-top">
+                      <div className="font-medium text-sm">
                         {formatAmount(order.totalAmount, order.currency)}
                       </div>
                     </td>
-                    <td className="p-3">
-                      <Badge variant={getStatusBadgeVariant(order.status)}>
+                    <td className="p-3 align-top">
+                      <Badge variant={getStatusBadgeVariant(order.status)} className="text-xs">
                         {statusLabels[order.status] || order.status}
                       </Badge>
                     </td>
-                    <td className="p-3">
+                    <td className="p-3 align-top text-center">
                       {order.deliveryCode ? (
-                        <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                        <Badge variant="outline" className="bg-blue-50 text-blue-700 text-xs">
                           {order.deliveryCode}
                         </Badge>
                       ) : (
                         <span className="text-gray-400">-</span>
                       )}
                     </td>
-                    <td className="p-3">
+                    <td className="p-3 align-top">
                       <div className="text-sm">
                         {formatDate(order.createdAt)}
                       </div>
                     </td>
-                    <td className="p-3">
+                    <td className="p-3 align-top text-center">
                       <Dialog>
                         <DialogTrigger asChild>
                           <button
