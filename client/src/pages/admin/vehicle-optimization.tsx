@@ -156,6 +156,7 @@ export default function VehicleOptimization() {
       supportsHazardous: formData.get('supportsHazardous') === 'true',
       supportsRefrigerated: formData.get('supportsRefrigerated') === 'true',
       supportsFragile: formData.get('supportsFragile') !== 'false',
+      supportsFlammable: formData.get('supportsFlammable') === 'true',
       averageSpeedKmh: formData.get('averageSpeedKmh') as string || "50",
       fuelConsumptionL100km: formData.get('fuelConsumptionL100km') as string || null,
       priority: parseInt(formData.get('priority') as string) || 0
@@ -274,6 +275,14 @@ export default function VehicleOptimization() {
                         <input type="checkbox" name="supportsFragile" value="true" id="supportsFragile" defaultChecked />
                         <Label htmlFor="supportsFragile">پشتیبانی از اقلام شکستنی</Label>
                       </div>
+                      <div className="flex items-center space-x-2 bg-orange-50 border border-orange-200 rounded-lg p-3">
+                        <input type="hidden" name="supportsFlammable" value="false" />
+                        <input type="checkbox" name="supportsFlammable" value="true" id="supportsFlammable" />
+                        <Label htmlFor="supportsFlammable" className="text-orange-800 font-medium">
+                          🔥 مجوز حمل مواد آتش‌زا
+                        </Label>
+                        <span className="text-xs text-orange-600 mr-2">(ضروری برای ایمنی)</span>
+                      </div>
                     </div>
                   </div>
                   <DialogFooter>
@@ -297,6 +306,7 @@ export default function VehicleOptimization() {
                     <TableHead>حداکثر وزن</TableHead>
                     <TableHead>مسیرهای مجاز</TableHead>
                     <TableHead>قیمت پایه</TableHead>
+                    <TableHead>مواد آتش‌زا</TableHead>
                     <TableHead>وضعیت</TableHead>
                     <TableHead>عملیات</TableHead>
                   </TableRow>
@@ -304,11 +314,11 @@ export default function VehicleOptimization() {
                 <TableBody>
                   {vehiclesLoading ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center">در حال بارگذاری...</TableCell>
+                      <TableCell colSpan={8} className="text-center">در حال بارگذاری...</TableCell>
                     </TableRow>
                   ) : vehicles.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center">هیچ الگوی خودرویی یافت نشد</TableCell>
+                      <TableCell colSpan={8} className="text-center">هیچ الگوی خودرویی یافت نشد</TableCell>
                     </TableRow>
                   ) : (
                     vehicles.map((vehicle) => (
@@ -331,6 +341,11 @@ export default function VehicleOptimization() {
                           </div>
                         </TableCell>
                         <TableCell>{parseFloat(vehicle.basePrice).toLocaleString()} IQD</TableCell>
+                        <TableCell>
+                          <Badge variant={vehicle.supportsFlammable ? "destructive" : "secondary"} className="text-xs">
+                            {vehicle.supportsFlammable ? "🔥 مجاز" : "❌ غیرمجاز"}
+                          </Badge>
+                        </TableCell>
                         <TableCell>
                           <Badge variant={vehicle.isActive ? "default" : "secondary"}>
                             {vehicle.isActive ? "فعال" : "غیرفعال"}
@@ -389,6 +404,7 @@ export default function VehicleOptimization() {
                   supportsHazardous: formData.get('supportsHazardous') === 'true',
                   supportsRefrigerated: formData.get('supportsRefrigerated') === 'true',
                   supportsFragile: formData.get('supportsFragile') !== 'false',
+                  supportsFlammable: formData.get('supportsFlammable') === 'true',
                   averageSpeedKmh: formData.get('averageSpeedKmh') as string || "50",
                   fuelConsumptionL100km: formData.get('fuelConsumptionL100km') as string || null,
                   isActive: formData.get('isActive') === 'true',
@@ -477,6 +493,14 @@ export default function VehicleOptimization() {
                       <input type="hidden" name="supportsFragile" value="false" />
                       <input type="checkbox" name="supportsFragile" value="true" id="edit-supportsFragile" defaultChecked={editingVehicle.supportsFragile} />
                       <Label htmlFor="edit-supportsFragile">پشتیبانی از اقلام شکستنی</Label>
+                    </div>
+                    <div className="flex items-center space-x-2 bg-orange-50 border border-orange-200 rounded-lg p-3">
+                      <input type="hidden" name="supportsFlammable" value="false" />
+                      <input type="checkbox" name="supportsFlammable" value="true" id="edit-supportsFlammable" defaultChecked={editingVehicle.supportsFlammable} />
+                      <Label htmlFor="edit-supportsFlammable" className="text-orange-800 font-medium">
+                        🔥 مجوز حمل مواد آتش‌زا
+                      </Label>
+                      <span className="text-xs text-orange-600 mr-2">(ضروری برای ایمنی)</span>
                     </div>
                   </div>
                 </div>
