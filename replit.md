@@ -167,6 +167,46 @@
 
 ## Recent Changes
 
+### COMPLETED: Ready Vehicles Directory System Implementation - Complete Fleet Management with Flammable Materials Safety (January 29, 2025)
+✅ **IMPLEMENTED: Complete ready vehicles directory system with comprehensive fleet management and safety compliance**
+- **User Request Fulfilled**: Implemented full-stack ready vehicles system for logistics fleet management with safety compliance for flammable materials transport
+- **Backend API Implementation**: Complete CRUD operations at `/api/logistics/ready-vehicles` with authentication:
+  - **GET**: Fetch all ready vehicles with flammable materials capabilities and availability status
+  - **POST**: Create new vehicles with driver information, load capacity, and safety specifications
+  - **PUT**: Update vehicle details including safety certifications and current location
+  - **DELETE**: Remove vehicles from fleet directory with proper validation
+- **Database Schema**: Created ready_vehicles table with comprehensive fields:
+  - **Vehicle Information**: vehicle_type, license_plate (unique), load_capacity with proper constraints
+  - **Driver Details**: driver_name, driver_mobile for contact and assignment purposes
+  - **Safety Compliance**: supports_flammable and not_allowed_flammable flags for hazardous materials transport
+  - **Operational Data**: is_available status, current_location, notes, created_at, updated_at timestamps
+- **Frontend Integration**: Professional Persian RTL interface with React Query integration:
+  - **ReadyVehiclesTab Component**: Complete vehicle management interface within logistics management
+  - **Create/Edit Dialogs**: Comprehensive forms with validation for all vehicle and driver information
+  - **Table Display**: Professional vehicle listing with safety indicators, availability status, and actions
+  - **Flammable Materials Indicators**: Color-coded badges showing vehicle safety capabilities (green=authorized, red=prohibited, gray=unspecified)
+- **API Integration**: Seamless React Query hooks with automatic cache management:
+  - **Real-time Updates**: Automatic cache invalidation after CRUD operations
+  - **Error Handling**: Professional toast notifications with Persian error messages
+  - **Loading States**: Professional loading indicators during API operations
+- **Sample Data**: Populated with 4 ready vehicles including diverse vehicle types and safety capabilities:
+  - کامیون متوسط (Medium Truck) - Baghdad, supports flammable materials
+  - وانت سبک (Light Van) - Erbil, prohibited for flammable materials
+  - کامیون سنگین (Heavy Truck) - Basra, supports flammable materials with safety systems
+  - موتورسیکلت (Motorcycle) - Najaf, for small packages only
+- **Business Impact**: Complete fleet management enabling:
+  - **Real-time Vehicle Tracking**: Available vehicles with current location and driver contact
+  - **Safety Compliance**: Smart filtering for flammable materials based on vehicle capabilities
+  - **Load Planning**: Weight-based vehicle selection with capacity management
+  - **Driver Management**: Complete contact information and availability tracking
+- **Technical Achievement**: 
+  - **Type Safety**: Complete TypeScript integration with ReadyVehicle and InsertReadyVehicle types
+  - **Form Validation**: Required field validation with proper Persian error messages
+  - **Persian RTL Support**: Complete right-to-left interface with proper font and spacing
+  - **Professional UI**: Clean table layout with action buttons, status indicators, and safety badges
+- **Integration**: Seamlessly integrated with existing logistics management system maintaining design consistency
+- **Result**: Complete ready vehicles directory operational - comprehensive fleet management system with CRUD operations, safety compliance tracking, and professional Persian interface for managing available vehicles and driver information
+
 ### COMPLETED: Enhanced Status System with Department Visibility & Deleted Order Highlighting (January 29, 2025)
 ✅ **IMPLEMENTED: Complete status enhancement system showing exactly which department each order is waiting for**
 - **User Request Fulfilled**: "مشخص کن در انتظار کجاست مثلا مالی ، انبار یا لجستیک" - Enhanced status display with department information
