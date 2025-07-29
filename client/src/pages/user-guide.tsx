@@ -33,7 +33,8 @@ import {
   ChevronDown,
   ChevronRight,
   Home,
-  HelpCircle
+  HelpCircle,
+  Clock
 } from 'lucide-react';
 
 interface GuideSection {
@@ -376,9 +377,9 @@ const UserGuide: React.FC = () => {
               <Settings className="h-4 w-4" />
               مدیران ارشد
             </TabsTrigger>
-            <TabsTrigger value="downloads" className="flex items-center gap-2">
-              <Download className="h-4 w-4" />
-              دانلود مستندات
+            <TabsTrigger value="project" className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              راهنمای جامع پروژه
             </TabsTrigger>
           </TabsList>
 
@@ -455,6 +456,243 @@ const UserGuide: React.FC = () => {
               <ScrollArea className="h-[600px]">
                 {superAdminGuides.map(renderGuideSection)}
               </ScrollArea>
+            </div>
+          </TabsContent>
+
+          {/* Project Documentation Section */}
+          <TabsContent value="project">
+            <div className="space-y-6">
+              <Card className="bg-gradient-to-r from-purple-50 to-purple-100 border-purple-200">
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <FileText className="h-6 w-6 text-purple-600" />
+                    <h2 className="text-xl font-semibold">راهنمای جامع پروژه - به روزرسانی شده</h2>
+                  </div>
+                  <p className="text-gray-700">
+                    مستندات کامل و جامع پلتفرم Momtazchem شامل معماری سیستم، ویژگی‌های کلیدی، 
+                    ۳۴+ ماژول مدیریتی، سیستم چندزبانه، و تمامی امکانات تجاری و فنی.
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* System Overview */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Settings className="h-5 w-5 text-blue-600" />
+                    نمای کلی سیستم
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <h4 className="font-semibold mb-2 text-green-600">ویژگی‌های کلیدی:</h4>
+                      <ul className="space-y-1 text-sm">
+                        <li>• پشتیبانی کامل از 4 زبان (انگلیسی، عربی، کردی، ترکی)</li>
+                        <li>• ۳۴+ ماژول مدیریتی یکپارچه</li>
+                        <li>• سیستم تجارت الکترونیک پیشرفته</li>
+                        <li>• ردیابی GPS در ۱۱ شهر عراق</li>
+                        <li>• سیستم CRM جامع</li>
+                        <li>• تحلیل‌های لحظه‌ای</li>
+                        <li>• اتوماسیون ایمیل با ۱۸+ قالب</li>
+                        <li>• مدیریت موجودی با سیستم بارکد</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold mb-2 text-blue-600">فناوری‌های استفاده شده:</h4>
+                      <ul className="space-y-1 text-sm">
+                        <li>• React 18 with TypeScript</li>
+                        <li>• Tailwind CSS</li>
+                        <li>• PostgreSQL (Neon Cloud)</li>
+                        <li>• Drizzle ORM</li>
+                        <li>• Express.js</li>
+                        <li>• TanStack Query</li>
+                        <li>• Shadcn/ui Components</li>
+                        <li>• Framer Motion</li>
+                      </ul>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Administrative Modules */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Shield className="h-5 w-5 text-orange-600" />
+                    ماژول‌های مدیریتی (۳۴+ ماژول)
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                      <h4 className="font-semibold mb-2 text-green-600">ماژول‌های اصلی (۱-۱۰):</h4>
+                      <ul className="space-y-1 text-sm">
+                        <li>• KPI Dashboard</li>
+                        <li>• Management Dashboard</li>
+                        <li>• Shop Synchronization</li>
+                        <li>• Product Management</li>
+                        <li>• Order Management & Tracking</li>
+                        <li>• Warehouse Management</li>
+                        <li>• Logistics Management</li>
+                        <li>• Inquiry Management</li>
+                        <li>• CRM Management</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold mb-2 text-blue-600">عملیات تجاری (۱۱-۲۰):</h4>
+                      <ul className="space-y-1 text-sm">
+                        <li>• Barcode Management</li>
+                        <li>• Email Settings</li>
+                        <li>• Database Backup</li>
+                        <li>• SEO Management</li>
+                        <li>• Categories Management</li>
+                        <li>• SMS Management</li>
+                        <li>• Factory Management</li>
+                        <li>• User Management</li>
+                        <li>• Payment Management</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold mb-2 text-purple-600">مالی و تحلیلی (۲۱-۳۴+):</h4>
+                      <ul className="space-y-1 text-sm">
+                        <li>• Financial Management</li>
+                        <li>• Wallet Management</li>
+                        <li>• Geographic Analytics</li>
+                        <li>• AI Settings</li>
+                        <li>• Content Management</li>
+                        <li>• Marketing Module</li>
+                        <li>• Site Management</li>
+                        <li>• Remote Desktop</li>
+                        <li>• Server Configuration</li>
+                      </ul>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Recent Updates */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Clock className="h-5 w-5 text-green-600" />
+                    آخرین به‌روزرسانی‌ها
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="p-4 bg-green-50 rounded-lg border-l-4 border-green-500">
+                      <h4 className="font-semibold text-green-800 mb-2">
+                        ✅ بازسازی کامل سیستم پیگیری سفارشات (۲۹ ژانویه ۲۰۲۵)
+                      </h4>
+                      <ul className="text-sm text-green-700 space-y-1">
+                        <li>• رابط کاربری مطابق با ساختار واقعی پایگاه داده ساخته شد</li>
+                        <li>• نمایش ۴۶ سفارش موجود در سیستم با جزئیات کامل</li>
+                        <li>• جستجو و فیلتر براساس وضعیت و اطلاعات مشتری</li>
+                        <li>• مشاهده جزئیات کامل هر سفارش در مودال</li>
+                      </ul>
+                    </div>
+                    <div className="p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+                      <h4 className="font-semibold text-blue-800 mb-2">
+                        ✅ پیاده‌سازی کامل ماژول مارکتینگ (ماژول ۳۳)
+                      </h4>
+                      <ul className="text-sm text-blue-700 space-y-1">
+                        <li>• سیستم وفاداری مشتری با امتیازدهی</li>
+                        <li>• ایمیل مارکتینگ با ۱۸+ قالب</li>
+                        <li>• تحلیل بازارهای بین‌المللی</li>
+                        <li>• بخش‌بندی بازار و تحلیل رقبا</li>
+                      </ul>
+                    </div>
+                    <div className="p-4 bg-orange-50 rounded-lg border-l-4 border-orange-500">
+                      <h4 className="font-semibold text-orange-800 mb-2">
+                        ✅ سیستم امنیت مواد آتش‌زا و انتخاب هوشمند خودرو
+                      </h4>
+                      <ul className="text-sm text-orange-700 space-y-1">
+                        <li>• کنترل ایمنی حمل مواد آتش‌زا</li>
+                        <li>• انتخاب خودکار اتوبوس بین‌شهری</li>
+                        <li>• الگوریتم بهینه‌سازی هزینه حمل</li>
+                        <li>• سیستم مدیریت جغرافیای بین‌المللی</li>
+                      </ul>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Downloads Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Download className="h-5 w-5 text-indigo-600" />
+                    دانلود مستندات کامل
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <Button 
+                      variant="outline" 
+                      className="h-auto p-4 flex flex-col items-start gap-2"
+                      onClick={() => window.open('/api/download/PROJECT_PROPOSAL_GUIDE', '_blank')}
+                    >
+                      <div className="flex items-center gap-2 w-full">
+                        <Download className="h-4 w-4" />
+                        <span className="font-medium">پروپوزال جامع</span>
+                      </div>
+                      <span className="text-sm text-gray-600 text-right">راهنمای کامل پروژه دوزبانه</span>
+                    </Button>
+
+                    <Button 
+                      variant="outline" 
+                      className="h-auto p-4 flex flex-col items-start gap-2"
+                      onClick={() => window.open('/api/download/TECHNICAL_ARCHITECTURE_GUIDE', '_blank')}
+                    >
+                      <div className="flex items-center gap-2 w-full">
+                        <Download className="h-4 w-4" />
+                        <span className="font-medium">معماری فنی</span>
+                      </div>
+                      <span className="text-sm text-gray-600 text-right">مستندات تکنیکال کامل</span>
+                    </Button>
+
+                    <Button 
+                      variant="outline" 
+                      className="h-auto p-4 flex flex-col items-start gap-2"
+                      onClick={() => window.open('/api/download/BUSINESS_PROPOSAL_EXECUTIVE', '_blank')}
+                    >
+                      <div className="flex items-center gap-2 w-full">
+                        <Download className="h-4 w-4" />
+                        <span className="font-medium">پروپوزال تجاری</span>
+                      </div>
+                      <span className="text-sm text-gray-600 text-right">تحلیل ROI و ارزش تجاری</span>
+                    </Button>
+                  </div>
+
+                  <div className="mt-6 p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg">
+                    <div className="flex items-center gap-2 mb-3">
+                      <CheckCircle className="h-5 w-5 text-green-600" />
+                      <span className="font-medium text-gray-800">معماری سیستم:</span>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <h5 className="font-semibold mb-2">Frontend:</h5>
+                        <ul className="space-y-1 text-gray-700">
+                          <li>• React 18 با TypeScript</li>
+                          <li>• Tailwind CSS برای طراحی واکنش‌گرا</li>
+                          <li>• Wouter برای routing سبک</li>
+                          <li>• TanStack Query برای مدیریت state</li>
+                        </ul>
+                      </div>
+                      <div>
+                        <h5 className="font-semibold mb-2">Backend:</h5>
+                        <ul className="space-y-1 text-gray-700">
+                          <li>• Node.js با Express.js</li>
+                          <li>• PostgreSQL (Neon Cloud)</li>
+                          <li>• Drizzle ORM</li>
+                          <li>• Express Sessions با MemoryStore</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
 
