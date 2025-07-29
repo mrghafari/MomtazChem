@@ -880,8 +880,8 @@ const LogisticsManagement = () => {
             <Dialog open={!!editingVehicle} onOpenChange={(open) => {
               if (!open) {
                 setEditingVehicle(null);
-                setEditShowCustomInput(false);
-                setEditCustomVehicleType('');
+                setShowCustomEditInput(false);
+                setCustomEditVehicleType('');
               }
             }}>
               <DialogContent className="max-w-2xl" dir="rtl">

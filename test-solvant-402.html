@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست سیستم ایمنی Solvant 402</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+        .test-card { border: 2px solid #ddd; margin: 15px 0; padding: 20px; border-radius: 10px; }
+        .safe { border-color: #28a745; background-color: #d4edda; }
+        .dangerous { border-color: #dc3545; background-color: #f8d7da; }
+        .flammable { border-color: #fd7e14; background-color: #fff3cd; }
+        h1 { color: #333; text-align: center; }
+        button { padding: 12px 25px; margin: 8px; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; }
+        .test-btn { background-color: #007bff; color: white; }
+        .result { margin: 15px 0; padding: 15px; border-radius: 5px; background-color: #f8f9fa; }
+        .success { background-color: #d4edda; color: #155724; }
+        .danger { background-color: #f8d7da; color: #721c24; }
+        .warning { background-color: #fff3cd; color: #856404; }
+        .code { font-family: monospace; background: #e9ecef; padding: 2px 4px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <h1>🧪 تست سیستم ایمنی Solvant 402</h1>
+    
+    <div class="test-card safe">
+        <h3>✅ محصول 25 - Solvant 402 (غیر آتش‌زا)</h3>
+        <p><strong>وضعیت:</strong> ایمن برای حمل با اتوبوس</p>
+        <p><strong>انتظار:</strong> اتوبوس باید انتخاب شود</p>
+        <button class="test-btn" onclick="testProduct(25)">تست محصول 25</button>
+        <div id="result-25" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="test-card safe">
+        <h3>✅ محصول 27 - Solvant 402 (غیر آتش‌زا)</h3>
+        <p><strong>وضعیت:</strong> ایمن برای حمل با اتوبوس</p>
+        <p><strong>انتظار:</strong> اتوبوس باید انتخاب شود</p>
+        <button class="test-btn" onclick="testProduct(27)">تست محصول 27</button>
+        <div id="result-27" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="test-card dangerous">
+        <h3>🔥 محصول 28 - Solvant 402 (آتش‌زا)</h3>
+        <p><strong>وضعیت:</strong> خطرناک - نیاز به وسیله مخصوص</p>
+        <p><strong>انتظار:</strong> اتوبوس ممنوع → کامیون مجاز آتش‌زا</p>
+        <button class="test-btn" onclick="testProduct(28)" style="background-color: #dc3545;">⚠️ تست محصول 28 (آتش‌زا)</button>
+        <div id="result-28" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="test-card flammable">
+        <h3>❌ محصول 470 (وجود ندارد)</h3>
+        <p><strong>وضعیت:</strong> این شناسه در پایگاه داده وجود ندارد</p>
+        <p><strong>نتیجه:</strong> سیستم هیچ محصولی پیدا نمی‌کند → اتوبوس انتخاب می‌شود</p>
+        <button class="test-btn" onclick="testProduct(470)" style="background-color: #ffc107; color: #000;">تست محصول 470 (غیرموجود)</button>
+        <div id="result-470" class="result" style="display:none;"></div>
+    </div>
+
+    <div style="background-color: #e7f3ff; padding: 20px; margin: 20px 0; border-radius: 8px; border: 2px solid #007bff;">
+        <h3>📊 خلاصه نتایج:</h3>
+        <ul>
+            <li><strong>محصول 25:</strong> غیر آتش‌زا → اتوبوس مجاز ✅</li>
+            <li><strong>محصول 27:</strong> غیر آتش‌زا → اتوبوس مجاز ✅</li>
+            <li><strong>محصول 28:</strong> آتش‌زا → کامیون مجاز آتش‌زا ✅</li>
+            <li><strong>محصول 470:</strong> وجود ندارد → اتوبوس (طبیعی) ✅</li>
+        </ul>
+        <p><strong style="color: #dc3545;">⚠️ برای تست سیستم ایمنی از محصول 28 استفاده کنید!</strong></p>
+    </div>
+
+    <script>
+        async function testProduct(productId) {
+            const resultDiv = document.getElementById('result-' + productId);
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '🔄 در حال تست...';
+
+            try {
+                const response = await fetch('/api/calculate-delivery-cost', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        weight: 11,
+                        destinationCity: 'کربلا',
+                        destinationProvince: 'کربلا',
+                        originCity: 'اربیل',
+                        cart: { [productId]: 1 },
+                        useSecondaryAddress: false
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    const vehicle = data.data.optimalVehicle;
+                    const isFlammableAuthorized = vehicle.vehicleName.includes('مجاز برای مواد آتش‌زا');
+                    const isBus = vehicle.vehicleName.includes('اتوبوس');
+                    
+                    let statusClass = 'success';
+                    let statusText = '';
+                    
+                    if (productId === 28) {
+                        // محصول آتش‌زا - باید کامیون مجاز انتخاب شود
+                        if (isFlammableAuthorized) {
+                            statusText = '✅ درست: کامیون مجاز آتش‌زا انتخاب شد';
+                            statusClass = 'success';
+                        } else {
+                            statusText = '❌ خطا: وسیله غیرمجاز انتخاب شد!';
+                            statusClass = 'danger';
+                        }
+                    } else {
+                        // محصولات غیر آتش‌زا - اتوبوس مجاز است
+                        if (isBus || !isFlammableAuthorized) {
+                            statusText = '✅ درست: وسیله مناسب انتخاب شد';
+                            statusClass = 'success';
+                        } else {
+                            statusText = '⚠️ اخطار: وسیله سنگین‌تر انتخاب شد';
+                            statusClass = 'warning';
+                        }
+                    }
+                    
+                    resultDiv.className = `result ${statusClass}`;
+                    resultDiv.innerHTML = `
+                        <h4>نتیجه تست محصول ${productId}:</h4>
+                        <p><strong>وسیله انتخابی:</strong> <span class="code">${vehicle.vehicleName}</span></p>
+                        <p><strong>هزینه:</strong> ${vehicle.totalCost.toLocaleString()} دینار</p>
+                        <p><strong>وضعیت:</strong> ${statusText}</p>
+                    `;
+                } else {
+                    resultDiv.className = 'result danger';
+                    resultDiv.innerHTML = `<p>❌ خطا: ${data.message}</p>`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result danger';
+                resultDiv.innerHTML = `<p>❌ خطا در اتصال: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
