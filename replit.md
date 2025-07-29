@@ -6,32 +6,29 @@ This is a comprehensive multilingual chemical solutions e-commerce and managemen
 
 ## Recent Changes
 
-### COMPLETED: Order Tracking View-Only System Implementation - Complete Module 34 Integration (January 29, 2025)
-✅ **IMPLEMENTED: Complete "مدیریت و پیگیری سفارشات - فقط قابل مشاهده" (Order Management and Tracking - View Only) system with real data integration**
-- **User Request Fulfilled**: "Make Order Management and Tracking system fully operational with real data" - Complete view-only order tracking system implemented
-- **Database Permissions Success**: Successfully added "مدیریت و پیگیری سفارشات" to Super Admin role permissions using safe array concatenation method
-- **Backend API Implementation**: Created comprehensive order tracking API endpoints:
+### COMPLETED: Order Tracking System Consolidation - Integrated into Main Order Management (January 29, 2025)
+✅ **IMPLEMENTED: Complete order tracking system consolidation into main order management module**
+- **User Request Fulfilled**: "نیاز به ماژول order-tracking-view به صورت جداگانه نیست" - Successfully removed separate tracking module and integrated all functionality
+- **System Consolidation**: Removed redundant order-tracking-view.tsx component and integrated all tracking functionality into existing order-tracking-management.tsx
+- **Permission System Update**: Updated permission mappings in server/routes.ts to point 'مدیریت و پیگیری سفارشات' to 'order_management' instead of separate tracking module
+- **Backend Integration**: All tracking API endpoints maintained and working within unified order management system:
   - **GET /api/orders/tracking/all**: Returns all orders with customer information, status, and tracking details
   - **GET /api/order-management/statistics**: Provides 30-day dashboard statistics including order counts, revenue, and average order value
   - **GET /api/orders/tracking/:orderId/details**: Returns detailed order information with customer data and order items
   - **GET /api/order-management/financial**: Returns financial orders for department-specific views
-- **Permission Mapping Integration**: Updated all permission mapping functions in server/routes.ts:
-  - **Technical to Persian**: Added 'order_tracking': 'مدیریت و پیگیری سفارشات' mapping
-  - **Persian to Technical**: Added reverse mapping in both custom user permission sections
-  - **Consistent Integration**: Seamlessly integrated with existing 33 modules for complete Site Management compatibility
-- **Frontend Component**: order-tracking-view.tsx component ready for Site Management integration:
-  - **Professional Interface**: Arabic/Persian RTL support with comprehensive order display
-  - **Real-time Data**: Integration with actual order_management and crm_customers tables
-  - **View-Only Design**: Read-only interface preventing data modification while providing complete visibility
-  - **Statistical Dashboard**: Order status breakdown, revenue tracking, and performance metrics
-- **Technical Achievement**: 
-  - **Database Safety**: Used PostgreSQL array concatenation to avoid JSON parsing errors
-  - **API Security**: All endpoints require admin authentication with proper error handling
-  - **Module Integration**: Fully integrated as Module 34 in Site Management permissions system
-- **Business Impact**: Complete order tracking visibility for management without data modification risks
-- **System Integration**: Seamlessly works with existing customer data, order management, and department workflows
-- **Route Configuration**: Added /admin/order-tracking-view route to App.tsx for direct access
-- **Result**: Complete Order Management and Tracking system operational - Module 34 fully functional with real database integration, comprehensive API endpoints, and professional view-only interface accessible through Site Management permissions
+- **Technical Cleanup**: 
+  - Deleted separate order-tracking-view.tsx file to eliminate code duplication
+  - Updated permission mapping functions to consolidate tracking functionality
+  - Maintained all GPS tracking capabilities within unified system
+  - Preserved real-time data from 11 Iraqi cities integration
+- **System Benefits**:
+  - **Reduced Complexity**: Single unified interface for all order management and tracking operations
+  - **Better Maintainability**: No duplicate code or separate modules to maintain
+  - **Consistent User Experience**: All order operations accessible through one comprehensive interface
+  - **Permission Simplification**: 'مدیریت و پیگیری سفارشات' permission now points to unified order management system
+- **GPS Tracking Preserved**: All real-time delivery tracking from 11 Iraqi cities maintained within consolidated system
+- **Business Impact**: Streamlined order management with all tracking functionality accessible through single comprehensive interface
+- **Result**: Complete system consolidation operational - order tracking functionality fully integrated into main order management system with no separate module required
 
 ### COMPLETED: Email Marketing Tab Implementation - Complete Marketing Module Enhancement (January 29, 2025)
 ✅ **IMPLEMENTED: Complete Email Marketing tab as 6th tab in Marketing Module #33 with comprehensive campaign management interface**

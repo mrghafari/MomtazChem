@@ -5897,7 +5897,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       'user_guide': 'User Guide',
       'site_management': 'مدیریت سایت',
       'marketing_module': 'ماژول مارکتینگ',
-      'order_tracking': 'مدیریت و پیگیری سفارشات'
+      'order_management': 'مدیریت و پیگیری سفارشات'
     };
 
     return technicalToPersianMap[moduleId] || moduleId;
@@ -24483,7 +24483,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
             'User Guide': 'user_guide',
             'مدیریت سایت': 'site_management',
             'ماژول مارکتینگ': 'marketing_module',
-            'مدیریت و پیگیری سفارشات': 'order_tracking'
+            'مدیریت و پیگیری سفارشات': 'order_management'
           };
 
           // Convert Persian names to technical IDs
@@ -24584,7 +24584,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
             'User Guide': 'user_guide',
             'مدیریت سایت': 'site_management',
             'ماژول مارکتینگ': 'marketing_module',
-            'مدیریت و پیگیری سفارشات': 'order_tracking'
+            'مدیریت و پیگیری سفارشات': 'order_management'
           };
 
           // Convert Persian names to technical IDs
