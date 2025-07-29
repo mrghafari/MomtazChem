@@ -39664,26 +39664,28 @@ momtazchem.com
   // Get all orders for tracking (view-only)
   app.get('/api/orders/tracking/all', requireAuth, async (req, res) => {
     try {
-      // Get orders from order_management table with enhanced data
+      // Get orders from customer_orders table with enhanced data and order_management status
       const ordersResult = await customerPool.query(`
         SELECT 
-          om.id as order_id,
-          om.customer_order_id,
-          om.order_number,
-          om.status,
-          om.total_amount,
-          om.created_at,
-          om.updated_at,
-          om.shipping_method,
-          om.payment_method,
+          co.id as order_id,
+          co.order_number,
+          co.status,
+          co.total_amount,
+          co.currency,
+          co.created_at,
+          co.updated_at,
+          co.payment_method,
+          co.payment_status,
+          -- Order management data for tracking
+          om.current_status as tracking_status,
+          om.delivery_code,
           om.tracking_number,
           om.estimated_delivery_date,
           om.delivery_person_name,
           om.delivery_person_phone,
-          om.notes,
-          om.reviewer_id,
-          om.reviewed_by_department,
-          om.processed_at,
+          om.financial_notes,
+          om.warehouse_notes,
+          om.logistics_notes,
           -- Customer information from CRM
           cc.first_name,
           cc.last_name,
@@ -39692,30 +39694,33 @@ momtazchem.com
           cc.email,
           cc.city,
           cc.address
-        FROM order_management om
-        LEFT JOIN crm_customers cc ON om.customer_id = cc.id
-        ORDER BY om.created_at DESC
+        FROM customer_orders co
+        LEFT JOIN order_management om ON co.id = om.customer_order_id
+        LEFT JOIN crm_customers cc ON co.customer_id = cc.id
+        ORDER BY co.created_at DESC
         LIMIT 100
       `);
 
       const orders = ordersResult.rows.map((row: any) => ({
         id: row.order_id,
-        customerOrderId: row.customer_order_id,
+        customerOrderId: row.order_number, // Use new order number format (M2511xxx)
         orderNumber: row.order_number,
-        status: row.status,
+        status: row.tracking_status || row.status, // Use tracking status if available, fallback to order status
         totalAmount: parseFloat(row.total_amount) || 0,
+        currency: row.currency || 'IQD',
         createdAt: row.created_at,
         updatedAt: row.updated_at,
-        shippingMethod: row.shipping_method,
         paymentMethod: row.payment_method,
+        paymentStatus: row.payment_status,
         trackingNumber: row.tracking_number,
         estimatedDeliveryDate: row.estimated_delivery_date,
         deliveryPersonName: row.delivery_person_name,
         deliveryPersonPhone: row.delivery_person_phone,
-        notes: row.notes,
-        reviewerId: row.reviewer_id,
-        reviewedByDepartment: row.reviewed_by_department,
-        processedAt: row.processed_at,
+        deliveryCode: row.delivery_code,
+        notes: row.financial_notes || row.warehouse_notes || row.logistics_notes,
+        customerName: `${row.first_name || ''} ${row.last_name || ''}`.trim() || row.company_name || 'نامشخص',
+        customerEmail: row.email,
+        customerPhone: row.phone,
         customerInfo: {
           firstName: row.first_name,
           lastName: row.last_name,
