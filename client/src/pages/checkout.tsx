@@ -274,6 +274,18 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
 
   const subtotal = cartItems.reduce((sum, item) => sum + item.totalPrice, 0);
 
+  // Check if cart contains flammable materials
+  const containsFlammableProducts = cartItems.some(item => item?.isFlammable === true);
+  
+  // Debug log for flammable materials detection
+  useEffect(() => {
+    console.log('🔥 [FLAMMABLE CHECK]', {
+      containsFlammableProducts,
+      cartItems: cartItems.length,
+      flammableItems: cartItems.filter(item => item?.isFlammable === true).map(item => ({ name: item.name, isFlammable: item.isFlammable }))
+    });
+  }, [containsFlammableProducts, cartItems]);
+
   // Calculate total weight of cart items
   useEffect(() => {
     const weight = cartItems.reduce((sum, item) => {
@@ -289,11 +301,25 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
     
     const vehicles = vehicleTemplates;
     
-    // Filter vehicles that can handle the weight
-    const suitableVehicles = vehicles.filter((vehicle: any) => 
-      vehicle.isActive && 
-      parseFloat(vehicle.maxWeightKg) >= weight
-    );
+    // Filter vehicles that can handle the weight and flammable materials safety
+    const suitableVehicles = vehicles.filter((vehicle: any) => {
+      const canHandleWeight = vehicle.isActive && parseFloat(vehicle.maxWeightKg) >= weight;
+      
+      // If cart contains flammable materials, only allow vehicles that support flammable transport
+      if (containsFlammableProducts) {
+        const supportsFlammable = vehicle.supportsFlammable === true;
+        console.log('🚚 [VEHICLE FILTER] Flammable materials detected - filtering vehicle:', {
+          vehicleName: vehicle.name,
+          supportsFlammable,
+          canHandleWeight,
+          isSelected: canHandleWeight && supportsFlammable
+        });
+        return canHandleWeight && supportsFlammable;
+      }
+      
+      // For non-flammable materials, any active vehicle that can handle weight is suitable
+      return canHandleWeight;
+    });
     
     if (suitableVehicles.length === 0) return null;
     
@@ -305,7 +331,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
     });
     
     return sortedVehicles[0]; // Return most cost-effective vehicle
-  }, [vehicleTemplates]);
+  }, [vehicleTemplates, containsFlammableProducts]);
 
   // Calculate shipping cost with smart vehicle selection using backend API
   const calculateShippingCost = useCallback(async (weight: number, destination: string) => {
@@ -323,7 +349,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
           orderWeightKg: weight,
           destinationCity: destination,
           routeType: 'urban', // Default to urban routing
-          isHazardous: false, // Could be determined from products later
+          isHazardous: containsFlammableProducts, // Determined from cart products
           isRefrigerated: false,
           isFragile: false
         })
@@ -362,7 +388,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
       // Fallback to local calculation if API fails
       return fallbackLocalCalculation(weight, destination);
     }
-  }, []);
+  }, [containsFlammableProducts]);
 
   // Fallback local calculation method (backup)
   const fallbackLocalCalculation = useCallback((weight: number, destination: string) => {
@@ -377,9 +403,17 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
     
     if (!destCity) return 0;
     
-    // Select optimal vehicle using local logic
+    // Select optimal vehicle using local logic (with flammable materials filter)
     const vehicle = selectOptimalVehicle(weight, destination);
-    if (!vehicle) return 0;
+    if (!vehicle) {
+      console.log('🚚 [FALLBACK] No suitable vehicle found', { 
+        weight, 
+        destination, 
+        containsFlammableProducts,
+        totalVehicles: vehicleTemplates?.length || 0
+      });
+      return 0;
+    }
     
     setSelectedVehicle(vehicle);
     

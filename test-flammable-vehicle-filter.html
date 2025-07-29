@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>آزمایش فیلتر خودروی مواد آتش‌زا - ممتازکم</title>
+    <style>
+        body {
+            font-family: 'Tahoma', 'Arial', sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .test-section.safe {
+            border-color: #4CAF50;
+            background-color: #f8fff8;
+        }
+        .test-section.dangerous {
+            border-color: #f44336;
+            background-color: #fff8f8;
+        }
+        .test-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        .product-list {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .product-card {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            min-width: 200px;
+        }
+        .product-card.flammable {
+            border-color: #ff5722;
+            background-color: #fff3e0;
+        }
+        .product-card.safe {
+            border-color: #4caf50;
+            background-color: #f1f8e9;
+        }
+        .vehicle-results {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .vehicle-card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            background: #fff;
+        }
+        .vehicle-card.selected {
+            border-color: #2196F3;
+            background-color: #e3f2fd;
+        }
+        .vehicle-card.filtered-out {
+            border-color: #f44336;
+            background-color: #ffebee;
+            opacity: 0.6;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status.allowed {
+            background-color: #4caf50;
+            color: white;
+        }
+        .status.blocked {
+            background-color: #f44336;
+            color: white;
+        }
+        .test-button {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .test-button:hover {
+            background: #1976D2;
+        }
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        .log-output {
+            background: #000;
+            color: #0f0;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚚 آزمایش فیلتر خودروی مواد آتش‌زا</h1>
+            <p>تست سیستم فیلتر خودروها بر اساس مواد آتش‌زا در سبد خرید</p>
+        </div>
+
+        <!-- Test Case 1: Safe Products -->
+        <div class="test-section safe">
+            <div class="test-title">🟢 تست ۱: محصولات ایمن (غیر آتش‌زا)</div>
+            <div class="product-list">
+                <div class="product-card safe">
+                    <strong>NPK Fertilizer 20-20-20</strong><br>
+                    <span class="status allowed">ایمن</span><br>
+                    وزن: 2kg
+                </div>
+                <div class="product-card safe">
+                    <strong>کود اوره</strong><br>
+                    <span class="status allowed">ایمن</span><br>
+                    وزن: 3kg
+                </div>
+            </div>
+            <button class="test-button" onclick="testSafeProducts()">آزمایش محصولات ایمن</button>
+            <div class="results" id="safeResults" style="display: none;">
+                <strong>نتیجه انتظاری:</strong> همه خودروهای فعال باید نمایش داده شوند<br>
+                <div class="log-output" id="safeLog"></div>
+            </div>
+        </div>
+
+        <!-- Test Case 2: Flammable Products -->
+        <div class="test-section dangerous">
+            <div class="test-title">🔴 تست ۲: محصولات آتش‌زا</div>
+            <div class="product-list">
+                <div class="product-card flammable">
+                    <strong>Solvant 402</strong><br>
+                    <span class="status blocked">آتش‌زا</span><br>
+                    وزن: 1kg
+                </div>
+                <div class="product-card flammable">
+                    <strong>Paint Thinner PT-300</strong><br>
+                    <span class="status blocked">آتش‌زا</span><br>
+                    وزن: 2kg
+                </div>
+            </div>
+            <button class="test-button" onclick="testFlammableProducts()">آزمایش محصولات آتش‌زا</button>
+            <div class="results" id="flammableResults" style="display: none;">
+                <strong>نتیجه انتظاری:</strong> فقط خودروهای مجاز برای حمل مواد آتش‌زا نمایش داده شوند<br>
+                <div class="log-output" id="flammableLog"></div>
+            </div>
+        </div>
+
+        <!-- Test Case 3: Mixed Products -->
+        <div class="test-section" style="border-color: #ff9800; background-color: #fff8e1;">
+            <div class="test-title">🟡 تست ۳: محصولات ترکیبی (ایمن + آتش‌زا)</div>
+            <div class="product-list">
+                <div class="product-card safe">
+                    <strong>NPK Fertilizer</strong><br>
+                    <span class="status allowed">ایمن</span><br>
+                    وزن: 2kg
+                </div>
+                <div class="product-card flammable">
+                    <strong>Solvant 402</strong><br>
+                    <span class="status blocked">آتش‌زا</span><br>
+                    وزن: 1kg
+                </div>
+            </div>
+            <button class="test-button" onclick="testMixedProducts()">آزمایش محصولات ترکیبی</button>
+            <div class="results" id="mixedResults" style="display: none;">
+                <strong>نتیجه انتظاری:</strong> فقط خودروهای مجاز برای حمل مواد آتش‌زا (به دلیل وجود محصول آتش‌زا)<br>
+                <div class="log-output" id="mixedLog"></div>
+            </div>
+        </div>
+
+        <!-- Vehicle Templates Display -->
+        <div class="test-section">
+            <div class="test-title">🚛 الگوهای خودروی موجود</div>
+            <div class="vehicle-results" id="vehicleTemplates"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000';
+        let vehicleTemplates = [];
+
+        // Load vehicle templates
+        async function loadVehicleTemplates() {
+            try {
+                const response = await fetch(`${API_BASE}/api/logistics/vehicle-templates`);
+                const result = await response.json();
+                vehicleTemplates = result.success ? result.data : [];
+                displayVehicleTemplates();
+            } catch (error) {
+                console.error('Error loading vehicle templates:', error);
+            }
+        }
+
+        function displayVehicleTemplates() {
+            const container = document.getElementById('vehicleTemplates');
+            container.innerHTML = vehicleTemplates.map(vehicle => `
+                <div class="vehicle-card">
+                    <strong>${vehicle.name}</strong><br>
+                    نوع: ${vehicle.vehicleType}<br>
+                    حداکثر وزن: ${vehicle.maxWeightKg} کیلوگرم<br>
+                    <span class="status ${vehicle.supportsFlammable ? 'allowed' : 'blocked'}">
+                        ${vehicle.supportsFlammable ? 'مجاز برای مواد آتش‌زا' : 'غیر مجاز برای مواد آتش‌زا'}
+                    </span><br>
+                    قیمت پایه: ${vehicle.basePrice} دینار<br>
+                    وضعیت: ${vehicle.isActive ? 'فعال' : 'غیرفعال'}
+                </div>
+            `).join('');
+        }
+
+        // Test functions
+        async function testSafeProducts() {
+            const cart = {
+                1: { id: 1, name: 'NPK Fertilizer 20-20-20', isFlammable: false, weight: 2, quantity: 1 },
+                2: { id: 2, name: 'کود اوره', isFlammable: false, weight: 3, quantity: 1 }
+            };
+            await runVehicleSelectionTest(cart, 'safeResults', 'safeLog');
+        }
+
+        async function testFlammableProducts() {
+            const cart = {
+                28: { id: 28, name: 'Solvant 402', isFlammable: true, weight: 1, quantity: 1 },
+                3: { id: 3, name: 'Paint Thinner PT-300', isFlammable: true, weight: 2, quantity: 1 }
+            };
+            await runVehicleSelectionTest(cart, 'flammableResults', 'flammableLog');
+        }
+
+        async function testMixedProducts() {
+            const cart = {
+                1: { id: 1, name: 'NPK Fertilizer', isFlammable: false, weight: 2, quantity: 1 },
+                28: { id: 28, name: 'Solvant 402', isFlammable: true, weight: 1, quantity: 1 }
+            };
+            await runVehicleSelectionTest(cart, 'mixedResults', 'mixedLog');
+        }
+
+        async function runVehicleSelectionTest(cart, resultsId, logId) {
+            const resultsDiv = document.getElementById(resultsId);
+            const logDiv = document.getElementById(logId);
+            
+            resultsDiv.style.display = 'block';
+            
+            // Simulate cart analysis
+            const cartItems = Object.values(cart);
+            const containsFlammableProducts = cartItems.some(item => item.isFlammable === true);
+            const totalWeight = cartItems.reduce((sum, item) => sum + (item.weight * item.quantity), 0);
+            
+            logDiv.innerHTML = `
+🔥 [FLAMMABLE CHECK] {
+  containsFlammableProducts: ${containsFlammableProducts},
+  cartItems: ${cartItems.length},
+  totalWeight: ${totalWeight}kg,
+  flammableItems: [${cartItems.filter(item => item.isFlammable).map(item => item.name).join(', ')}]
+}
+
+🚚 [VEHICLE FILTER] Filtering vehicles...
+            `;
+
+            // Filter vehicles based on flammable materials
+            const suitableVehicles = vehicleTemplates.filter(vehicle => {
+                const canHandleWeight = vehicle.isActive && parseFloat(vehicle.maxWeightKg) >= totalWeight;
+                
+                if (containsFlammableProducts) {
+                    const supportsFlammable = vehicle.supportsFlammable === true;
+                    logDiv.innerHTML += `
+🚚 [VEHICLE FILTER] ${vehicle.name}:
+  - canHandleWeight: ${canHandleWeight}
+  - supportsFlammable: ${supportsFlammable}
+  - isSelected: ${canHandleWeight && supportsFlammable}
+                    `;
+                    return canHandleWeight && supportsFlammable;
+                }
+                
+                return canHandleWeight;
+            });
+
+            // Display results
+            logDiv.innerHTML += `
+🎯 [RESULT] Suitable vehicles found: ${suitableVehicles.length}
+Selected vehicles: [${suitableVehicles.map(v => v.name).join(', ')}]
+            `;
+
+            // Update vehicle display
+            updateVehicleDisplay(suitableVehicles, containsFlammableProducts);
+        }
+
+        function updateVehicleDisplay(suitableVehicles, containsFlammable) {
+            const container = document.getElementById('vehicleTemplates');
+            const suitableIds = suitableVehicles.map(v => v.id);
+            
+            container.innerHTML = vehicleTemplates.map(vehicle => {
+                const isSelected = suitableIds.includes(vehicle.id);
+                let cardClass = 'vehicle-card';
+                
+                if (containsFlammable) {
+                    cardClass += isSelected ? ' selected' : ' filtered-out';
+                }
+                
+                return `
+                    <div class="${cardClass}">
+                        <strong>${vehicle.name}</strong><br>
+                        نوع: ${vehicle.vehicleType}<br>
+                        حداکثر وزن: ${vehicle.maxWeightKg} کیلوگرم<br>
+                        <span class="status ${vehicle.supportsFlammable ? 'allowed' : 'blocked'}">
+                            ${vehicle.supportsFlammable ? 'مجاز برای مواد آتش‌زا' : 'غیر مجاز برای مواد آتش‌زا'}
+                        </span><br>
+                        قیمت پایه: ${vehicle.basePrice} دینار<br>
+                        وضعیت: ${vehicle.isActive ? 'فعال' : 'غیرفعال'}<br>
+                        ${containsFlammable ? (isSelected ? '✅ انتخاب شده' : '❌ فیلتر شده') : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadVehicleTemplates();
+        });
+    </script>
+</body>
+</html>
