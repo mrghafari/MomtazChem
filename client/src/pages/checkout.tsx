@@ -569,6 +569,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
       // Handle hybrid payment response
       if (data.requiresBankPayment && data.redirectUrl) {
         console.log('🔄 Hybrid payment - redirecting to bank gateway:', data);
+        console.log('🔄 Redirect URL:', data.redirectUrl);
         
         // Invalidate wallet balance cache
         queryClient.invalidateQueries({ queryKey: ['/api/customers/wallet/balance'] });
@@ -580,8 +581,9 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
           description: `${data.walletAmountDeducted?.toLocaleString() || data.walletAmountUsed?.toLocaleString()} IQD از کیف پول کسر شد. هدایت به درگاه بانکی...`,
         });
         
-        // Redirect to hybrid payment page
-        setLocation(data.redirectUrl);
+        // Force immediate redirect to hybrid payment page
+        console.log('🔄 About to redirect to:', data.redirectUrl);
+        window.location.href = data.redirectUrl;
         return;
       }
       
