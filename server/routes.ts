@@ -39205,6 +39205,295 @@ momtazchem.com
     }
   });
 
+  // ============= LOYALTY SYSTEM ENDPOINTS =============
+  
+  // Get loyalty system statistics
+  app.get("/api/loyalty/stats", requireAuth, async (req, res) => {
+    try {
+      // Mock data for now - replace with actual database queries
+      const stats = {
+        totalActiveCustomers: 1247,
+        totalPointsAwarded: 45820,
+        totalDiscountsUsed: 156,
+        tierDistribution: {
+          bronze: 847,
+          silver: 312,
+          gold: 88
+        },
+        monthlyGrowth: {
+          customers: 12.5,
+          points: 18.3,
+          discounts: 25.7
+        }
+      };
+      
+      res.json({
+        success: true,
+        data: stats
+      });
+    } catch (error) {
+      console.error("Error fetching loyalty stats:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch loyalty statistics" });
+    }
+  });
+
+  // Get loyalty customers with their data
+  app.get("/api/loyalty/customers", requireAuth, async (req, res) => {
+    try {
+      // Mock data for now - replace with actual database queries
+      const customers = [
+        {
+          id: 1,
+          name: "احمد علی محمدی",
+          email: "ahmad@example.com",
+          totalPoints: 2450,
+          usedPoints: 200,
+          availablePoints: 2250,
+          tierLevel: "gold",
+          totalSpent: 12500000,
+          joinDate: "2024-01-15",
+          lastActivity: "2025-01-25"
+        },
+        {
+          id: 2,
+          name: "فاطمه احمدی",
+          email: "fateme@example.com",
+          totalPoints: 1230,
+          usedPoints: 100,
+          availablePoints: 1130,
+          tierLevel: "silver",
+          totalSpent: 3500000,
+          joinDate: "2024-03-20",
+          lastActivity: "2025-01-20"
+        },
+        {
+          id: 3,
+          name: "محمد رضایی",
+          email: "mohammad@example.com",
+          totalPoints: 890,
+          usedPoints: 0,
+          availablePoints: 890,
+          tierLevel: "bronze",
+          totalSpent: 890000,
+          joinDate: "2024-06-10",
+          lastActivity: "2025-01-18"
+        }
+      ];
+      
+      res.json({
+        success: true,
+        data: customers
+      });
+    } catch (error) {
+      console.error("Error fetching loyalty customers:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch loyalty customers" });
+    }
+  });
+
+  // Get loyalty rules configuration
+  app.get("/api/loyalty/rules", requireAuth, async (req, res) => {
+    try {
+      // Mock data for now - replace with actual database queries
+      const rules = [
+        {
+          id: 1,
+          ruleName: "Points per IQD",
+          ruleType: "points_per_purchase",
+          ruleValue: 0.001,
+          currency: "IQD",
+          isActive: true
+        },
+        {
+          id: 2,
+          ruleName: "Discount conversion rate",
+          ruleType: "discount_rate",
+          ruleValue: 20, // 20 points = 1% discount
+          currency: "IQD",
+          isActive: true
+        },
+        {
+          id: 3,
+          ruleName: "Bronze tier threshold",
+          ruleType: "tier_threshold",
+          ruleValue: 0,
+          currency: "IQD",
+          isActive: true
+        },
+        {
+          id: 4,
+          ruleName: "Silver tier threshold",
+          ruleType: "tier_threshold",
+          ruleValue: 1000000,
+          currency: "IQD",
+          isActive: true
+        },
+        {
+          id: 5,
+          ruleName: "Gold tier threshold",
+          ruleType: "tier_threshold",
+          ruleValue: 5000000,
+          currency: "IQD",
+          isActive: true
+        }
+      ];
+      
+      res.json({
+        success: true,
+        data: rules
+      });
+    } catch (error) {
+      console.error("Error fetching loyalty rules:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch loyalty rules" });
+    }
+  });
+
+  // Get recent loyalty transactions
+  app.get("/api/loyalty/transactions/recent", requireAuth, async (req, res) => {
+    try {
+      // Mock data for now - replace with actual database queries
+      const transactions = [
+        {
+          id: 1,
+          customerId: 1,
+          customerName: "احمد علی محمدی",
+          transactionType: "earned",
+          pointsAmount: 50,
+          description: "امتیاز خرید سفارش #M2511249",
+          createdAt: "2025-01-29T10:30:00Z"
+        },
+        {
+          id: 2,
+          customerId: 2,
+          customerName: "فاطمه احمدی",
+          transactionType: "redeemed",
+          pointsAmount: -200,
+          description: "استفاده از کد تخفیف LOYALTY-2024-ABC123",
+          createdAt: "2025-01-28T15:20:00Z"
+        },
+        {
+          id: 3,
+          customerId: 3,
+          customerName: "محمد رضایی",
+          transactionType: "earned",
+          pointsAmount: 25,
+          description: "امتیاز خرید محصول NPK Fertilizer",
+          createdAt: "2025-01-27T09:45:00Z"
+        }
+      ];
+      
+      res.json({
+        success: true,
+        data: transactions
+      });
+    } catch (error) {
+      console.error("Error fetching recent transactions:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch recent transactions" });
+    }
+  });
+
+  // Activate loyalty system
+  app.post("/api/loyalty/activate", requireAuth, async (req, res) => {
+    try {
+      // Mock activation logic - replace with actual system activation
+      console.log("🎯 [LOYALTY] System activation requested by admin:", req.session.adminId);
+      
+      // Here you would:
+      // 1. Create necessary database tables if they don't exist
+      // 2. Initialize default loyalty rules
+      // 3. Set system as active in configuration
+      // 4. Send activation notification emails
+      
+      res.json({
+        success: true,
+        message: "سیستم وفاداری با موفقیت فعال شد",
+        data: {
+          activatedAt: new Date().toISOString(),
+          status: "active",
+          initialRules: {
+            pointsPerIQD: 0.001,
+            discountRate: 20,
+            tierThresholds: {
+              bronze: 0,
+              silver: 1000000,
+              gold: 5000000
+            }
+          }
+        }
+      });
+    } catch (error) {
+      console.error("Error activating loyalty system:", error);
+      res.status(500).json({ success: false, message: "Failed to activate loyalty system" });
+    }
+  });
+
+  // Update loyalty rules
+  app.post("/api/loyalty/rules", requireAuth, async (req, res) => {
+    try {
+      console.log("🎯 [LOYALTY] Loyalty rules update requested:", req.body);
+      
+      // Mock rule update logic - replace with actual database updates
+      const updatedRules = {
+        pointsPerIQD: req.body.pointsPerIQD || 0.001,
+        discountRate: req.body.discountRate || 20,
+        maxDiscountPercent: req.body.maxDiscountPercent || 25,
+        pointsExpiryDays: req.body.pointsExpiryDays || 365,
+        minPointsForConversion: req.body.minPointsForConversion || 50
+      };
+      
+      res.json({
+        success: true,
+        message: "قوانین وفاداری با موفقیت به‌روزرسانی شد",
+        data: updatedRules
+      });
+    } catch (error) {
+      console.error("Error updating loyalty rules:", error);
+      res.status(500).json({ success: false, message: "Failed to update loyalty rules" });
+    }
+  });
+
+  // Generate discount code from points
+  app.post("/api/loyalty/generate-discount", requireAuth, async (req, res) => {
+    try {
+      const { customerId, points } = req.body;
+      
+      if (!customerId || !points || points < 50) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid request: customerId and points (minimum 50) are required" 
+        });
+      }
+      
+      console.log("🎯 [LOYALTY] Discount generation requested for customer:", customerId, "points:", points);
+      
+      // Calculate discount percentage (20 points = 1%)
+      const discountPercentage = Math.min(points / 20, 25); // Max 25%
+      
+      // Generate unique discount code
+      const discountCode = `LOYALTY-${new Date().getFullYear()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+      
+      // Mock discount generation - replace with actual database insertion
+      const discount = {
+        id: Date.now(),
+        customerId,
+        discountCode,
+        pointsUsed: points,
+        discountPercentage,
+        isUsed: false,
+        createdAt: new Date().toISOString(),
+        expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 days
+      };
+      
+      res.json({
+        success: true,
+        message: "کد تخفیف با موفقیت تولید شد",
+        data: discount
+      });
+    } catch (error) {
+      console.error("Error generating discount:", error);
+      res.status(500).json({ success: false, message: "Failed to generate discount code" });
+    }
+  });
+
   // Global error handler for all API routes
   app.use('/api/*', (err: any, req: Request, res: Response, next: NextFunction) => {
     console.error('API Error:', err);

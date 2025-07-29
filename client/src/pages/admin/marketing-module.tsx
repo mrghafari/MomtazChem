@@ -104,8 +104,77 @@ const MarketingModule: React.FC = () => {
   const [selectedRegion, setSelectedRegion] = useState<string>('all');
   const [editingMarket, setEditingMarket] = useState<MarketData | null>(null);
   const [newMarketDialog, setNewMarketDialog] = useState(false);
+  const [loyaltyRulesDialog, setLoyaltyRulesDialog] = useState(false);
+  const [tierManagementDialog, setTierManagementDialog] = useState(false);
+  const [generateDiscountDialog, setGenerateDiscountDialog] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Loyalty system queries
+  const { data: loyaltyStats } = useQuery({
+    queryKey: ['/api/loyalty/stats'],
+    enabled: activeTab === 'loyalty-system'
+  });
+
+  const { data: loyaltyCustomers } = useQuery({
+    queryKey: ['/api/loyalty/customers'],
+    enabled: activeTab === 'loyalty-system'
+  });
+
+  const { data: loyaltyRules } = useQuery({
+    queryKey: ['/api/loyalty/rules'],
+    enabled: activeTab === 'loyalty-system'
+  });
+
+  const { data: recentTransactions } = useQuery({
+    queryKey: ['/api/loyalty/transactions/recent'],
+    enabled: activeTab === 'loyalty-system'
+  });
+
+  // Loyalty system mutations
+  const activateLoyaltyMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch('/api/loyalty/activate', { method: 'POST' });
+      if (!response.ok) throw new Error('Failed to activate loyalty system');
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: 'موفقیت', description: 'سیستم وفاداری با موفقیت فعال شد' });
+      queryClient.invalidateQueries({ queryKey: ['/api/loyalty/stats'] });
+    }
+  });
+
+  const updateLoyaltyRuleMutation = useMutation({
+    mutationFn: async (rule: any) => {
+      const response = await fetch('/api/loyalty/rules', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(rule)
+      });
+      if (!response.ok) throw new Error('Failed to update rule');
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: 'موفقیت', description: 'قانون وفاداری به‌روزرسانی شد' });
+      queryClient.invalidateQueries({ queryKey: ['/api/loyalty/rules'] });
+    }
+  });
+
+  const generateDiscountMutation = useMutation({
+    mutationFn: async (data: { customerId: number; points: number }) => {
+      const response = await fetch('/api/loyalty/generate-discount', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (!response.ok) throw new Error('Failed to generate discount');
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: 'موفقیت', description: 'کد تخفیف با موفقیت تولید شد' });
+      queryClient.invalidateQueries({ queryKey: ['/api/loyalty/customers'] });
+    }
+  });
 
   // Mock data for demonstration - in real implementation, this would come from database
   const mockMarketData: MarketData[] = [
@@ -527,15 +596,21 @@ const MarketingModule: React.FC = () => {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-600">کل مشتریان فعال:</span>
-                    <span className="font-bold text-blue-600">1,247</span>
+                    <span className="font-bold text-blue-600">
+                      {loyaltyStats?.data?.totalActiveCustomers?.toLocaleString() || '1,247'}
+                    </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-600">امتیازات اعطا شده:</span>
-                    <span className="font-bold text-green-600">45,820</span>
+                    <span className="font-bold text-green-600">
+                      {loyaltyStats?.data?.totalPointsAwarded?.toLocaleString() || '45,820'}
+                    </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-600">تخفیفات استفاده شده:</span>
-                    <span className="font-bold text-purple-600">156</span>
+                    <span className="font-bold text-purple-600">
+                      {loyaltyStats?.data?.totalDiscountsUsed?.toLocaleString() || '156'}
+                    </span>
                   </div>
                 </div>
               </CardContent>
@@ -555,21 +630,27 @@ const MarketingModule: React.FC = () => {
                       <div className="w-3 h-3 rounded-full bg-amber-500"></div>
                       <span className="text-sm">برنزی</span>
                     </div>
-                    <span className="font-bold">847</span>
+                    <span className="font-bold">
+                      {loyaltyStats?.data?.tierDistribution?.bronze?.toLocaleString() || '847'}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full bg-slate-400"></div>
                       <span className="text-sm">نقره‌ای</span>
                     </div>
-                    <span className="font-bold">312</span>
+                    <span className="font-bold">
+                      {loyaltyStats?.data?.tierDistribution?.silver?.toLocaleString() || '312'}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
                       <span className="text-sm">طلایی</span>
                     </div>
-                    <span className="font-bold">88</span>
+                    <span className="font-bold">
+                      {loyaltyStats?.data?.tierDistribution?.gold?.toLocaleString() || '88'}
+                    </span>
                   </div>
                 </div>
               </CardContent>
@@ -584,15 +665,26 @@ const MarketingModule: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                  <Button 
+                    className="w-full bg-blue-600 hover:bg-blue-700"
+                    onClick={() => setLoyaltyRulesDialog(true)}
+                  >
                     <Plus className="w-4 h-4 mr-2" />
                     افزودن قانون جدید
                   </Button>
-                  <Button variant="outline" className="w-full">
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => setLoyaltyRulesDialog(true)}
+                  >
                     <Edit className="w-4 h-4 mr-2" />
                     ویرایش نرخ امتیازات
                   </Button>
-                  <Button variant="outline" className="w-full">
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => setTierManagementDialog(true)}
+                  >
                     <Trophy className="w-4 h-4 mr-2" />
                     مدیریت سطوح
                   </Button>
@@ -676,13 +768,21 @@ const MarketingModule: React.FC = () => {
                 </div>
 
                 <div className="flex gap-2">
-                  <Button className="flex-1 bg-green-600 hover:bg-green-700">
-                    <RefreshCw className="w-4 h-4 mr-2" />
-                    فعال‌سازی سیستم
+                  <Button 
+                    className="flex-1 bg-green-600 hover:bg-green-700"
+                    onClick={() => activateLoyaltyMutation.mutate()}
+                    disabled={activateLoyaltyMutation.isPending}
+                  >
+                    <RefreshCw className={`w-4 h-4 mr-2 ${activateLoyaltyMutation.isPending ? 'animate-spin' : ''}`} />
+                    {activateLoyaltyMutation.isPending ? 'در حال فعال‌سازی...' : 'فعال‌سازی سیستم'}
                   </Button>
-                  <Button variant="outline" className="flex-1">
-                    <Eye className="w-4 h-4 mr-2" />
-                    مشاهده گزارش
+                  <Button 
+                    variant="outline" 
+                    className="flex-1"
+                    onClick={() => setGenerateDiscountDialog(true)}
+                  >
+                    <Gift className="w-4 h-4 mr-2" />
+                    تولید کد تخفیف
                   </Button>
                 </div>
               </CardContent>
@@ -774,6 +874,278 @@ const MarketingModule: React.FC = () => {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Loyalty Rules Management Dialog */}
+      <Dialog open={loyaltyRulesDialog} onOpenChange={setLoyaltyRulesDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Star className="w-5 h-5 text-blue-600" />
+              مدیریت قوانین سیستم وفاداری
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">نرخ امتیازدهی</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label>امتیاز به ازای هر دینار</Label>
+                    <Input type="number" defaultValue="0.001" step="0.001" />
+                    <p className="text-sm text-gray-600 mt-1">فعلی: 1 امتیاز = 1,000 دینار</p>
+                  </div>
+                  <div>
+                    <Label>حداکثر امتیاز در هر خرید</Label>
+                    <Input type="number" defaultValue="1000" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">نرخ تبدیل تخفیف</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label>امتیاز مورد نیاز برای 1% تخفیف</Label>
+                    <Input type="number" defaultValue="20" />
+                    <p className="text-sm text-gray-600 mt-1">فعلی: 100 امتیاز = 5% تخفیف</p>
+                  </div>
+                  <div>
+                    <Label>حداکثر درصد تخفیف</Label>
+                    <Input type="number" defaultValue="25" />
+                    <p className="text-sm text-gray-600 mt-1">حداکثر: 25%</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">تنظیمات اعتبار امتیازات</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label>مدت اعتبار امتیازات (روز)</Label>
+                    <Input type="number" defaultValue="365" />
+                  </div>
+                  <div>
+                    <Label>اطلاع‌رسانی قبل از انقضا (روز)</Label>
+                    <Input type="number" defaultValue="30" />
+                  </div>
+                  <div>
+                    <Label>حداقل امتیاز برای تبدیل</Label>
+                    <Input type="number" defaultValue="50" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="flex justify-end space-x-2 space-x-reverse">
+              <Button variant="outline" onClick={() => setLoyaltyRulesDialog(false)}>
+                انصراف
+              </Button>
+              <Button 
+                className="bg-blue-600 hover:bg-blue-700"
+                onClick={() => {
+                  updateLoyaltyRuleMutation.mutate({});
+                  setLoyaltyRulesDialog(false);
+                }}
+                disabled={updateLoyaltyRuleMutation.isPending}
+              >
+                {updateLoyaltyRuleMutation.isPending ? 'در حال ذخیره...' : 'ذخیره تغییرات'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Tier Management Dialog */}
+      <Dialog open={tierManagementDialog} onOpenChange={setTierManagementDialog}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Trophy className="w-5 h-5 text-yellow-600" />
+              مدیریت سطوح مشتریان
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 gap-4">
+              <Card className="border-amber-200 bg-amber-50">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-amber-800">
+                    <div className="w-4 h-4 rounded-full bg-amber-600"></div>
+                    سطح برنزی
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>حد پایین (دینار)</Label>
+                      <Input type="number" defaultValue="0" disabled />
+                    </div>
+                    <div>
+                      <Label>حد بالا (دینار)</Label>
+                      <Input type="number" defaultValue="999999" />
+                    </div>
+                  </div>
+                  <div>
+                    <Label>ضریب امتیاز</Label>
+                    <Input type="number" defaultValue="1.0" step="0.1" />
+                  </div>
+                  <div>
+                    <Label>مزایای ویژه</Label>
+                    <Textarea defaultValue="دسترسی به سیستم امتیازدهی پایه" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-slate-200 bg-slate-50">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-slate-800">
+                    <div className="w-4 h-4 rounded-full bg-slate-500"></div>
+                    سطح نقره‌ای
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>حد پایین (دینار)</Label>
+                      <Input type="number" defaultValue="1000000" />
+                    </div>
+                    <div>
+                      <Label>حد بالا (دینار)</Label>
+                      <Input type="number" defaultValue="4999999" />
+                    </div>
+                  </div>
+                  <div>
+                    <Label>ضریب امتیاز</Label>
+                    <Input type="number" defaultValue="1.5" step="0.1" />
+                  </div>
+                  <div>
+                    <Label>مزایای ویژه</Label>
+                    <Textarea defaultValue="امتیاز 50% بیشتر، تخفیفات ویژه، پشتیبانی اولویت‌دار" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-yellow-200 bg-yellow-50">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-yellow-800">
+                    <div className="w-4 h-4 rounded-full bg-yellow-500"></div>
+                    سطح طلایی
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>حد پایین (دینار)</Label>
+                      <Input type="number" defaultValue="5000000" />
+                    </div>
+                    <div>
+                      <Label>حد بالا (دینار)</Label>
+                      <Input type="number" defaultValue="999999999" disabled />
+                    </div>
+                  </div>
+                  <div>
+                    <Label>ضریب امتیاز</Label>
+                    <Input type="number" defaultValue="2.0" step="0.1" />
+                  </div>
+                  <div>
+                    <Label>مزایای ویژه</Label>
+                    <Textarea defaultValue="امتیاز دوبرابر، ارسال رایگان، دسترسی زودتر به محصولات جدید، مدیر حساب اختصاصی" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="flex justify-end space-x-2 space-x-reverse">
+              <Button variant="outline" onClick={() => setTierManagementDialog(false)}>
+                انصراف
+              </Button>
+              <Button className="bg-yellow-600 hover:bg-yellow-700">
+                ذخیره تنظیمات سطوح
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Generate Discount Dialog */}
+      <Dialog open={generateDiscountDialog} onOpenChange={setGenerateDiscountDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Gift className="w-5 h-5 text-pink-600" />
+              تولید کد تخفیف از امتیازات
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label>انتخاب مشتری</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="جستجو و انتخاب مشتری..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">احمد علی محمدی (امتیاز: 2,450)</SelectItem>
+                    <SelectItem value="2">فاطمه احمدی (امتیاز: 1,230)</SelectItem>
+                    <SelectItem value="3">محمد رضایی (امتیاز: 890)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>تعداد امتیاز مصرفی</Label>
+                <Input type="number" placeholder="100" min="50" max="2000" />
+              </div>
+            </div>
+
+            <Card className="bg-blue-50 border-blue-200">
+              <CardContent className="p-4">
+                <h4 className="font-semibold text-blue-800 mb-2">محاسبه تخفیف:</h4>
+                <div className="space-y-2 text-sm text-blue-700">
+                  <div className="flex justify-between">
+                    <span>امتیاز انتخاب شده:</span>
+                    <span>100 امتیاز</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>درصد تخفیف:</span>
+                    <span>5%</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>مدت اعتبار:</span>
+                    <span>30 روز</span>
+                  </div>
+                  <div className="flex justify-between font-semibold border-t border-blue-300 pt-2">
+                    <span>کد تخفیف:</span>
+                    <span>LOYALTY-2024-ABC123</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="flex justify-end space-x-2 space-x-reverse">
+              <Button variant="outline" onClick={() => setGenerateDiscountDialog(false)}>
+                انصراف
+              </Button>
+              <Button 
+                className="bg-pink-600 hover:bg-pink-700"
+                onClick={() => {
+                  generateDiscountMutation.mutate({ customerId: 1, points: 100 });
+                  setGenerateDiscountDialog(false);
+                }}
+                disabled={generateDiscountMutation.isPending}
+              >
+                {generateDiscountMutation.isPending ? 'در حال تولید...' : 'تولید کد تخفیف'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
