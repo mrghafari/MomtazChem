@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بررسی محصولات آتش‌زا موجود</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+        .product { border: 2px solid #ddd; margin: 10px 0; padding: 15px; border-radius: 8px; }
+        .flammable { border-color: #ff4444; background-color: #ffe6e6; }
+        .non-flammable { border-color: #44ff44; background-color: #e6ffe6; }
+        .not-found { border-color: #ffaa00; background-color: #fff3cd; }
+        h1 { color: #333; text-align: center; }
+        button { padding: 10px 20px; margin: 5px; border: none; border-radius: 5px; cursor: pointer; }
+        .test-btn { background-color: #007bff; color: white; }
+        .result { margin: 10px 0; padding: 10px; border-radius: 5px; background-color: #f8f9fa; }
+    </style>
+</head>
+<body>
+    <h1>🔍 بررسی محصولات آتش‌زا در سیستم</h1>
+    
+    <div class="product not-found">
+        <h3>❌ محصول 470 (غیر موجود)</h3>
+        <p><strong>وضعیت:</strong> این محصول در پایگاه داده وجود ندارد</p>
+        <p><strong>نتیجه:</strong> سیستم هیچ محصولی پیدا نمی‌کند → اتوبوس انتخاب می‌شود</p>
+        <button class="test-btn" onclick="testProduct(470)">تست محصول 470</button>
+        <div id="result-470" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="product non-flammable">
+        <h3>✅ محصول 25 - Solvant 402 (غیر آتش‌زا)</h3>
+        <p><strong>وضعیت:</strong> موجود در پایگاه داده، غیر قابل اشتعال</p>
+        <p><strong>نتیجه:</strong> اتوبوس مجاز برای حمل</p>
+        <button class="test-btn" onclick="testProduct(25)">تست محصول 25</button>
+        <div id="result-25" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="product non-flammable">
+        <h3>✅ محصول 27 - Solvant 402 (غیر آتش‌زا)</h3>
+        <p><strong>وضعیت:</strong> موجود در پایگاه داده، غیر قابل اشتعال</p>
+        <p><strong>نتیجه:</strong> اتوبوس مجاز برای حمل</p>
+        <button class="test-btn" onclick="testProduct(27)">تست محصول 27</button>
+        <div id="result-27" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="product flammable">
+        <h3>🔥 محصول 28 - Solvant 402 (آتش‌زا)</h3>
+        <p><strong>وضعیت:</strong> موجود در پایگاه داده، قابل اشتعال</p>
+        <p><strong>نتیجه:</strong> اتوبوس ممنوع → کامیون سنگین انتخاب می‌شود</p>
+        <button class="test-btn" onclick="testProduct(28)">تست محصول 28 (آتش‌زا)</button>
+        <div id="result-28" class="result" style="display:none;"></div>
+    </div>
+
+    <div style="background-color: #e7f3ff; padding: 15px; margin: 20px 0; border-radius: 8px;">
+        <h3>📋 خلاصه:</h3>
+        <ul>
+            <li><strong>محصول 470:</strong> وجود ندارد → سیستم درست کار می‌کند (اتوبوس OK)</li>
+            <li><strong>محصولات 25, 27:</strong> غیر آتش‌زا → اتوبوس مجاز</li>
+            <li><strong>محصول 28:</strong> آتش‌زا → اتوبوس ممنوع ✅</li>
+        </ul>
+        <p><strong>برای تست سیستم ایمنی، محصول 28 را استفاده کنید!</strong></p>
+    </div>
+
+    <script>
+        async function testProduct(productId) {
+            const resultDiv = document.getElementById('result-' + productId);
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '🔄 در حال تست...';
+
+            try {
+                const response = await fetch('/api/calculate-delivery-cost', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        weight: 11,
+                        destinationCity: 'کربلا',
+                        destinationProvince: 'کربلا',
+                        originCity: 'اربیل',
+                        cart: { [productId]: 1 },
+                        useSecondaryAddress: false
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    const vehicle = data.data.optimalVehicle;
+                    const isFlammable = vehicle.vehicleName.includes('آتش‌زا');
+                    const isBus = vehicle.vehicleName.includes('اتوبوس');
+                    
+                    let status = '';
+                    if (isFlammable) {
+                        status = '🔥 کامیون مجاز آتش‌زا انتخاب شد - ایمن';
+                    } else if (isBus) {
+                        status = '🚌 اتوبوس انتخاب شد';
+                    } else {
+                        status = '🚛 وسیله دیگر انتخاب شد';
+                    }
+                    
+                    resultDiv.innerHTML = `
+                        <h4>نتیجه تست:</h4>
+                        <p><strong>وسیله انتخابی:</strong> ${vehicle.vehicleName}</p>
+                        <p><strong>هزینه:</strong> ${vehicle.totalCost.toLocaleString()} دینار</p>
+                        <p><strong>وضعیت ایمنی:</strong> ${status}</p>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<p style="color: red;">خطا: ${data.message}</p>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p style="color: red;">خطا در اتصال: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
