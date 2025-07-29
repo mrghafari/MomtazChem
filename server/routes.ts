@@ -12303,6 +12303,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         walletAmountUsed: walletAmountUsed,
       };
 
+      // Check for hybrid payment first (wallet_partial with remaining amount)
+      if (orderData.paymentMethod === 'wallet_partial' && remainingAmount > 0) {
+        console.log(`🔄 [HYBRID PAYMENT] Wallet partial payment detected - wallet: ${actualWalletUsed}, remaining: ${remainingAmount}`);
+        return res.json({
+          success: true,
+          message: 'سفارش ثبت شد - هدایت به درگاه پرداخت',
+          orderId: orderNumber,
+          orderNumber: orderNumber,
+          totalAmount: totalAmount,
+          walletAmountUsed: actualWalletUsed,
+          walletAmountDeducted: actualWalletUsed,
+          remainingAmount: remainingAmount,
+          requiresBankPayment: true,
+          redirectUrl: `/payment/${orderNumber}`
+        });
+      }
+      
       // Add redirect URL for online payment
       if (finalPaymentMethod === 'online_payment') {
         responseData.redirectToPayment = true;

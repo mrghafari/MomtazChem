@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Hybrid Payment System</title>
+    <script>
+        async function testHybridPayment() {
+            const orderData = {
+                cart: {"1": 1},
+                paymentMethod: "wallet_partial", 
+                totalAmount: 60000,
+                walletAmountUsed: 20000,
+                remainingAmount: 40000,
+                customerName: "ABAS ABASI",
+                phone: "09371234567",
+                address: "Test Hybrid Payment Address",
+                city: "کربلا",
+                country: "Iraq"
+            };
+
+            try {
+                const response = await fetch('/api/customers/orders', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(orderData)
+                });
+
+                const result = await response.json();
+                
+                document.getElementById('result').innerHTML = `
+                    <h3>API Response:</h3>
+                    <pre>${JSON.stringify(result, null, 2)}</pre>
+                    
+                    <h3>Expected Fields Check:</h3>
+                    <p>requiresBankPayment: ${result.requiresBankPayment}</p>
+                    <p>redirectUrl: ${result.redirectUrl}</p>
+                    <p>walletAmountDeducted: ${result.walletAmountDeducted}</p>
+                    <p>remainingAmount: ${result.remainingAmount}</p>
+                `;
+
+            } catch (error) {
+                document.getElementById('result').innerHTML = `
+                    <h3>Error:</h3>
+                    <p>${error.message}</p>
+                `;
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Hybrid Payment System Test</h1>
+    <button onclick="testHybridPayment()">Test Hybrid Payment</button>
+    <div id="result"></div>
+</body>
+</html>
