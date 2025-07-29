@@ -50,6 +50,11 @@ export default function DatabaseManagement() {
   const [, setLocation] = useLocation();
   const [isCreatingBackup, setIsCreatingBackup] = useState(false);
 
+  // Fetch current user data
+  const { data: user } = useQuery({
+    queryKey: ["/api/admin/me"],
+  });
+
   // Fetch database statistics
   const { data: dbStats, isLoading: statsLoading } = useQuery<DatabaseStats>({
     queryKey: ["/api/admin/database/stats"],
@@ -62,7 +67,7 @@ export default function DatabaseManagement() {
 
   // Create backup mutation
   const createBackupMutation = useMutation({
-    mutationFn: () => apiRequest("/api/admin/backup/create", "POST"),
+    mutationFn: () => apiRequest("/api/admin/backup/create", { method: "POST" }),
     onSuccess: () => {
       toast({
         title: "بک‌آپ ایجاد شد",
@@ -83,7 +88,7 @@ export default function DatabaseManagement() {
 
   // Delete backup mutation
   const deleteBackupMutation = useMutation({
-    mutationFn: (filename: string) => apiRequest(`/api/admin/backup/delete/${filename}`, "DELETE"),
+    mutationFn: (filename: string) => apiRequest(`/api/admin/backup/delete/${filename}`, { method: "DELETE" }),
     onSuccess: (_, filename) => {
       toast({
         title: "بک‌آپ حذف شد",
@@ -140,7 +145,7 @@ export default function DatabaseManagement() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        {user?.id === 1 && (
+        {user?.user && (
           <Button
             variant="outline"
             size="sm"
