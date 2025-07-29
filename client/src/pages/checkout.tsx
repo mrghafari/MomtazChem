@@ -566,8 +566,27 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
       return apiRequest("/api/shop/orders", { method: "POST", body: orderData });
     },
     onSuccess: (data: any) => {
-      const orderId = data.order.id;
-      const paymentMethod = data.order.paymentMethod;
+      // Handle hybrid payment response
+      if (data.requiresBankPayment && data.redirectToPayment) {
+        console.log('🔄 Hybrid payment - redirecting to bank gateway:', data);
+        
+        // Invalidate wallet balance cache
+        queryClient.invalidateQueries({ queryKey: ['/api/customers/wallet/balance'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/customer/wallet'] });
+        fetchWalletBalance();
+        
+        toast({
+          title: "پرداخت ترکیبی",
+          description: `${data.walletAmountUsed.toLocaleString()} IQD از کیف پول کسر شد. هدایت به درگاه بانکی...`,
+        });
+        
+        // Redirect to hybrid payment page
+        setLocation(data.redirectToPayment);
+        return;
+      }
+      
+      const orderId = data.order?.id || data.orderId;
+      const paymentMethod = data.order?.paymentMethod;
       
       // Invalidate wallet balance cache if wallet payment was used
       if (actualWalletUsage > 0) {

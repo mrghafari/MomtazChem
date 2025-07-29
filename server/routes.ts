@@ -12281,6 +12281,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         responseData.redirectToPayment = true;
         responseData.paymentGatewayUrl = `/payment?orderId=${order.id}&amount=${remainingAmount > 0 ? remainingAmount : totalAmount}`;
         console.log(`✅ Order ${orderNumber} created - redirecting to payment gateway for ${remainingAmount > 0 ? remainingAmount : totalAmount} IQD`);
+        
+        // For hybrid payment (wallet + bank gateway), return special response
+        if (remainingAmount > 0 && actualWalletUsed > 0) {
+          return res.json({
+            success: true,
+            message: 'سفارش ثبت شد - هدایت به درگاه پرداخت',
+            orderId: orderNumber,
+            orderNumber: orderNumber,
+            totalAmount: totalAmount,
+            walletAmountUsed: actualWalletUsed,
+            remainingAmount: remainingAmount,
+            requiresBankPayment: true,
+            redirectToPayment: `/payment/${orderNumber}?amount=${remainingAmount}&wallet=${actualWalletUsed}`
+          });
+        }
       }
 
       res.json(responseData);

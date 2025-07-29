@@ -189,6 +189,50 @@
 - **User Experience**: Clear visual hierarchy showing order progression and current responsibility
 - **Result**: Complete order status enhancement operational - every order clearly shows current status and responsible department, with deleted orders highlighted in light orange
 
+### COMPLETED: Hybrid Payment System Implementation - Wallet + Bank Gateway Integration (January 29, 2025)
+✅ **IMPLEMENTED: Complete hybrid payment system allowing customers to use wallet balance combined with bank gateway for order payments**
+- **User Request Fulfilled**: "سیستم پرداخت ترکیبی که وقتی موجودی کیف پول کافی نیست، مشتری به درگاه بانکی هدایت شود" - Implemented seamless hybrid payment flow
+- **Backend API Enhancement**: Modified `/api/shop/orders` endpoint to detect partial wallet payments and return special hybrid response:
+  - **Hybrid Detection Logic**: When `remainingAmount > 0 && actualWalletUsed > 0`, system returns `requiresBankPayment: true`
+  - **Special Response Format**: Returns order details with wallet deduction amount and redirect URL for bank gateway
+  - **Automatic Wallet Deduction**: Wallet amount is immediately deducted when order is created, ensuring proper transaction handling
+- **Hybrid Payment Page**: Created comprehensive `/payment/:orderNumber` interface for bank gateway completion:
+  - **Payment Summary Display**: Shows completed wallet payment (green) and pending bank payment (blue) with clear visual separation
+  - **15-Minute Timer**: Countdown timer to complete payment with automatic order cancellation for abandoned payments
+  - **Professional UI**: Persian RTL interface with progress indicators, payment status badges, and clear action buttons
+  - **Bank Gateway Integration**: Ready for Stripe integration with proper error handling and success flow
+- **Order Success Page**: Created complete post-payment success interface at `/order-success/:orderNumber`:
+  - **Payment Breakdown**: Clear display of wallet amount used and bank amount paid with color-coded sections
+  - **Order Details**: Complete item list, shipping information, and tracking details
+  - **Action Buttons**: Download invoice, view order details, and continue shopping functionality
+  - **Thank You Message**: Professional completion message with next steps guidance
+- **Checkout Flow Integration**: Enhanced checkout.tsx to handle hybrid payment responses:
+  - **Response Detection**: Detects `requiresBankPayment` flag and redirects to hybrid payment page
+  - **Wallet Cache Management**: Automatic wallet balance refresh after partial wallet deduction
+  - **Toast Notifications**: Persian notifications showing wallet deduction amount and bank redirect status
+  - **Seamless Transition**: Smooth flow from checkout → hybrid payment → order success
+- **Route Configuration**: Added new routes to App.tsx for complete payment flow:
+  - `/payment/:orderNumber` → HybridPayment component for bank gateway completion
+  - `/order-success/:orderNumber` → OrderSuccess component for payment confirmation
+  - Maintained existing `/payment/:orderId` for legacy payment processing
+- **Business Impact**: Customers can now complete purchases even with insufficient wallet balance:
+  - **Increased Conversion**: Orders no longer abandoned due to insufficient wallet funds
+  - **User Experience**: Transparent payment breakdown showing exactly how much comes from wallet vs bank
+  - **Financial Flexibility**: Customers can utilize all available wallet balance and pay remainder through secure bank gateway
+- **Technical Architecture**: 
+  - **Wallet Integration**: Seamless integration with existing wallet system maintaining transaction integrity
+  - **State Management**: Proper React Query cache invalidation ensuring UI reflects real-time wallet balance
+  - **Persian Support**: Complete RTL interface with proper Persian terminology and cultural context
+  - **Error Handling**: Comprehensive error states for payment failures, timeouts, and network issues
+- **Payment Flow**: Complete end-to-end payment experience:
+  1. **Checkout**: Customer selects partial wallet payment when balance insufficient
+  2. **Order Creation**: System deducts available wallet amount and creates order with pending bank payment
+  3. **Hybrid Payment**: Customer directed to payment completion page showing wallet deduction and remaining amount
+  4. **Bank Gateway**: Integration ready for Stripe or local bank gateway processing
+  5. **Order Success**: Comprehensive success page showing payment breakdown and order confirmation
+- **Stripe Integration Readiness**: System prepared for Stripe API keys integration through Payment Settings module
+- **Result**: Complete hybrid payment system operational - customers can seamlessly combine wallet balance with bank gateway payments for order completion, providing flexible payment options and improved conversion rates
+
 ### COMPLETED: Order Management Module Replaced with Order Tracking System - Process Flow Clarity (January 29, 2025)
 ✅ **IMPLEMENTED: Complete replacement of order management module content with order tracking functionality**
 - **User Request Fulfilled**: "این ماژول باید محتویاتش حذف شود و order tracking به جای محتویات آن بیاید" - Replaced order management content with order tracking

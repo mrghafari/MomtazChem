@@ -127,6 +127,8 @@ import CompanyInformation from "@/pages/admin/company-information";
 import VehicleOptimization from "@/pages/admin/vehicle-optimization";
 import LogisticsGeography from "@/pages/admin/logistics-geography";
 import UserGuide from "@/pages/user-guide";
+import HybridPayment from "@/pages/hybrid-payment";
+import OrderSuccess from "@/pages/order-success";
 
 import NotFound from "@/pages/not-found";
 
@@ -146,7 +148,9 @@ function Router() {
           <Route path="/product-recommendations" component={ProductRecommendations} />
           <Route path="/checkout" component={() => <Checkout cart={[]} products={[]} onOrderComplete={() => {}} />} />
           <Route path="/payment/:orderId" component={Payment} />
+          <Route path="/payment/:orderNumber" component={HybridPayment} />
           <Route path="/checkout/success/:orderId" component={CheckoutSuccess} />
+          <Route path="/order-success/:orderNumber" component={OrderSuccess} />
           <Route path="/bank-receipt-upload/:orderId" component={BankReceiptUpload} />
           <Route path="/shop-search" component={ShopSearch} />
           <Route path="/shop-admin" component={ShopAdmin} />
