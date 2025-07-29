@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست هدرهای قابل مرتب‌سازی جدول سفارشات</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+            direction: rtl;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .demo-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            overflow-x: auto;
+            display: block;
+            white-space: nowrap;
+        }
+        .demo-table thead {
+            background: #f9fafb;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        .demo-table th {
+            padding: 16px;
+            font-weight: 600;
+            text-align: right;
+            border-right: 1px solid #e5e7eb;
+        }
+        .demo-table th:first-child {
+            border-right: none;
+        }
+        .sortable-header {
+            background: none;
+            border: none;
+            width: 100%;
+            text-align: right;
+            padding: 0;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            color: #374151;
+            transition: color 0.2s;
+        }
+        .sortable-header:hover {
+            color: #2563eb;
+        }
+        .sort-arrow {
+            margin-right: 4px;
+            font-size: 12px;
+            color: #2563eb;
+        }
+        .demo-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #e5e7eb;
+            border-right: 1px solid #e5e7eb;
+        }
+        .demo-table td:first-child {
+            border-right: none;
+        }
+        .demo-table tbody tr:hover {
+            background: #f9fafb;
+        }
+        .status-pending { background: #fef3c7; color: #d97706; padding: 4px 8px; border-radius: 12px; font-size: 12px; }
+        .status-confirmed { background: #dbeafe; color: #2563eb; padding: 4px 8px; border-radius: 12px; font-size: 12px; }
+        .department { background: #e5e7eb; color: #374151; padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-top: 4px; }
+        .feature-demo {
+            background: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .implementation-details {
+            background: #ecfdf5;
+            border: 1px solid #10b981;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 هدرهای قابل مرتب‌سازی جدول سفارشات</h1>
+        <p style="text-align: center; color: #666; margin-bottom: 30px;">
+            حالا تمامی ستون‌های جدول قابل مرتب‌سازی هستند و کاملاً تراز شده‌اند
+        </p>
+
+        <table class="demo-table">
+            <thead>
+                <tr>
+                    <th style="width: 140px; min-width: 140px;">
+                        <button class="sortable-header">
+                            شماره سفارش
+                            <span class="sort-arrow">↓</span>
+                        </button>
+                    </th>
+                    <th style="width: 200px; min-width: 200px;">
+                        <button class="sortable-header">
+                            مشتری
+                        </button>
+                    </th>
+                    <th style="width: 120px; min-width: 120px;">
+                        <button class="sortable-header">
+                            مبلغ
+                        </button>
+                    </th>
+                    <th style="width: 100px; min-width: 100px;">
+                        <button class="sortable-header">
+                            وضعیت / بخش
+                            <span class="sort-arrow">↑</span>
+                        </button>
+                    </th>
+                    <th style="width: 100px; min-width: 100px;">
+                        <button class="sortable-header">
+                            کد تحویل
+                        </button>
+                    </th>
+                    <th style="width: 140px; min-w-140px;">
+                        <button class="sortable-header">
+                            زمان ثبت سفارش
+                        </button>
+                    </th>
+                    <th style="width: 100px; min-width: 100px; text-align: center;">
+                        عملیات
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="color: #2563eb; font-weight: 500;">#M2511255</td>
+                    <td>
+                        <div style="font-weight: 500;">ABAS ABASI</div>
+                        <div style="font-size: 12px; color: #6b7280;">oilstar@hotmail.com</div>
+                        <div style="font-size: 12px; color: #6b7280;">09124955173</div>
+                    </td>
+                    <td style="font-weight: 500;">33.99 IQD</td>
+                    <td>
+                        <div class="status-pending">در انتظار بررسی مالی</div>
+                        <div class="department">مالی</div>
+                    </td>
+                    <td style="text-align: center;">-</td>
+                    <td>2025/01/25 - 10:30</td>
+                    <td style="text-align: center;">
+                        <button style="background: #3b82f6; color: white; padding: 4px 8px; border: none; border-radius: 4px; font-size: 12px;">جزئیات</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="color: #2563eb; font-weight: 500;">#M2511253</td>
+                    <td>
+                        <div style="font-weight: 500;">ABAS ABASI</div>
+                        <div style="font-size: 12px; color: #6b7280;">oilstar@hotmail.com</div>
+                        <div style="font-size: 12px; color: #6b7280;">09124955173</div>
+                    </td>
+                    <td style="font-weight: 500;">101.97 IQD</td>
+                    <td>
+                        <div class="status-confirmed">در انتظار آماده‌سازی</div>
+                        <div class="department">انبار</div>
+                    </td>
+                    <td style="text-align: center;">DC-7892</td>
+                    <td>2025/01/24 - 14:15</td>
+                    <td style="text-align: center;">
+                        <button style="background: #3b82f6; color: white; padding: 4px 8px; border: none; border-radius: 4px; font-size: 12px;">جزئیات</button>
+                    </td>
+                </tr>
+                <tr style="background: rgba(254, 243, 199, 0.3);">
+                    <td style="color: #2563eb; font-weight: 500;">#M2511240</td>
+                    <td>
+                        <div style="font-weight: 500;">OMAR HASSAN</div>
+                        <div style="font-size: 12px; color: #6b7280;">omar@example.com</div>
+                        <div style="font-size: 12px; color: #6b7280;">07701234567</div>
+                    </td>
+                    <td style="font-weight: 500;">45.50 IQD</td>
+                    <td>
+                        <div style="background: #f3f4f6; color: #6b7280; padding: 4px 8px; border-radius: 12px; font-size: 12px;">لغو شده</div>
+                        <div class="department">حذف</div>
+                    </td>
+                    <td style="text-align: center;">-</td>
+                    <td>2025/01/20 - 09:45</td>
+                    <td style="text-align: center;">
+                        <button style="background: #3b82f6; color: white; padding: 4px 8px; border: none; border-radius: 4px; font-size: 12px;">جزئیات</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="feature-demo">
+            <h3 style="color: #0369a1; margin-top: 0;">✅ ویژگی‌های جدید هدرهای قابل مرتب‌سازی:</h3>
+            <ul style="color: #0f172a;">
+                <li><strong>کلیک روی هدر:</strong> هر ستون قابل مرتب‌سازی با کلیک روی عنوان</li>
+                <li><strong>فلش جهت:</strong> نمایش فلش ↑ (صعودی) یا ↓ (نزولی) برای ستون فعال</li>
+                <li><strong>هاور افکت:</strong> تغییر رنگ به آبی هنگام نگه داشتن موس روی هدر</li>
+                <li><strong>تراز کامل:</strong> تمامی هدرها و محتوا کاملاً تراز شده (راست‌چین)</li>
+                <li><strong>عرض ثابت:</strong> عرض ثابت برای هر ستون جهت تراز بهتر</li>
+                <li><strong>مرتب‌سازی هوشمند:</strong> پشتیبانی از انواع داده (متن، عدد، تاریخ)</li>
+            </ul>
+        </div>
+
+        <div class="implementation-details">
+            <h3 style="color: #059669; margin-top: 0;">🛠️ جزئیات پیاده‌سازی:</h3>
+            <ul style="color: #0f172a;">
+                <li><strong>State Management:</strong> sortField (ستون فعال) و sortDirection (جهت مرتب‌سازی)</li>
+                <li><strong>onClick Handler:</strong> handleSort() برای تغییر ستون و جهت مرتب‌سازی</li>
+                <li><strong>Sorting Logic:</strong> مرتب‌سازی در filteredOrders با پشتیبانی از انواع داده</li>
+                <li><strong>Visual Feedback:</strong> نمایش فلش و تغییر رنگ برای ستون فعال</li>
+                <li><strong>Persian RTL:</strong> تمامی المان‌ها برای راست‌به‌چپ بهینه شده</li>
+                <li><strong>Responsive:</strong> عرض ثابت با حداقل عرض برای تمامی ستون‌ها</li>
+            </ul>
+        </div>
+
+        <div style="background: #fefce8; border: 1px solid #eab308; border-radius: 8px; padding: 20px;">
+            <h3 style="color: #a16207; margin-top: 0;">📋 ستون‌های قابل مرتب‌سازی:</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; color: #0f172a;">
+                <div>1. <strong>شماره سفارش</strong> (orderNumber)</div>
+                <div>2. <strong>مشتری</strong> (customerName)</div>
+                <div>3. <strong>مبلغ</strong> (totalAmount)</div>
+                <div>4. <strong>وضعیت / بخش</strong> (status)</div>
+                <div>5. <strong>کد تحویل</strong> (deliveryCode)</div>
+                <div>6. <strong>زمان ثبت سفارش</strong> (createdAt)</div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px; padding: 20px; background: #f8fafc; border-radius: 8px;">
+            <p style="color: #1f2937; font-size: 16px; margin: 0;">
+                <strong>🎯 هدرهای جدول حالا کاملاً قابل مرتب‌سازی و تراز شده هستند!</strong>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

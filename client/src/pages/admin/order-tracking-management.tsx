@@ -158,6 +158,8 @@ export default function OrderTrackingManagement() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState('all'); // all, financial, orphaned
+  const [sortField, setSortField] = useState<keyof Order | null>(null);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
   // Get refresh interval from global settings
   const getOrderTrackingRefreshInterval = () => {
@@ -222,7 +224,17 @@ export default function OrderTrackingManagement() {
     refetchInterval: getOrderTrackingRefreshInterval()
   });
 
-  // Filter orders based on search and status
+  // Handle sorting
+  const handleSort = (field: keyof Order) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('desc');
+    }
+  };
+
+  // Filter and sort orders
   const filteredOrders = orders?.filter(order => {
     const matchesSearch = !searchTerm || 
       order.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -234,6 +246,21 @@ export default function OrderTrackingManagement() {
       order.status === selectedStatus;
     
     return matchesSearch && matchesStatus;
+  }).sort((a, b) => {
+    if (!sortField) return 0;
+    
+    let aValue = a[sortField];
+    let bValue = b[sortField];
+    
+    // Handle different data types
+    if (typeof aValue === 'string' && typeof bValue === 'string') {
+      aValue = aValue.toLowerCase();
+      bValue = bValue.toLowerCase();
+    }
+    
+    if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+    if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+    return 0;
   }) || [];
 
   // Get status badge variant
@@ -468,13 +495,85 @@ export default function OrderTrackingManagement() {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="border-b-2 bg-gray-50 dark:bg-gray-800">
-                  <th className="text-right p-4 font-semibold w-[140px] min-w-[140px]">شماره سفارش</th>
-                  <th className="text-right p-4 font-semibold w-[200px] min-w-[200px]">مشتری</th>
-                  <th className="text-right p-4 font-semibold w-[120px] min-w-[120px]">مبلغ</th>
-                  <th className="text-right p-4 font-semibold w-[100px] min-w-[100px]">وضعیت / بخش</th>
-                  <th className="text-right p-4 font-semibold w-[100px] min-w-[100px]">کد تحویل</th>
-                  <th className="text-right p-4 font-semibold w-[140px] min-w-[140px]">زمان ثبت سفارش</th>
-                  <th className="text-right p-4 font-semibold w-[100px] min-w-[100px]">عملیات</th>
+                  <th className="text-right p-4 font-semibold w-[140px] min-w-[140px]">
+                    <button 
+                      onClick={() => handleSort('orderNumber')}
+                      className="flex items-center justify-end w-full hover:text-blue-600 transition-colors"
+                    >
+                      شماره سفارش
+                      {sortField === 'orderNumber' && (
+                        <span className="mr-1">
+                          {sortDirection === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </button>
+                  </th>
+                  <th className="text-right p-4 font-semibold w-[200px] min-w-[200px]">
+                    <button 
+                      onClick={() => handleSort('customerName')}
+                      className="flex items-center justify-end w-full hover:text-blue-600 transition-colors"
+                    >
+                      مشتری
+                      {sortField === 'customerName' && (
+                        <span className="mr-1">
+                          {sortDirection === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </button>
+                  </th>
+                  <th className="text-right p-4 font-semibold w-[120px] min-w-[120px]">
+                    <button 
+                      onClick={() => handleSort('totalAmount')}
+                      className="flex items-center justify-end w-full hover:text-blue-600 transition-colors"
+                    >
+                      مبلغ
+                      {sortField === 'totalAmount' && (
+                        <span className="mr-1">
+                          {sortDirection === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </button>
+                  </th>
+                  <th className="text-right p-4 font-semibold w-[100px] min-w-[100px]">
+                    <button 
+                      onClick={() => handleSort('status')}
+                      className="flex items-center justify-end w-full hover:text-blue-600 transition-colors"
+                    >
+                      وضعیت / بخش
+                      {sortField === 'status' && (
+                        <span className="mr-1">
+                          {sortDirection === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </button>
+                  </th>
+                  <th className="text-right p-4 font-semibold w-[100px] min-w-[100px]">
+                    <button 
+                      onClick={() => handleSort('deliveryCode')}
+                      className="flex items-center justify-end w-full hover:text-blue-600 transition-colors"
+                    >
+                      کد تحویل
+                      {sortField === 'deliveryCode' && (
+                        <span className="mr-1">
+                          {sortDirection === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </button>
+                  </th>
+                  <th className="text-right p-4 font-semibold w-[140px] min-w-[140px]">
+                    <button 
+                      onClick={() => handleSort('createdAt')}
+                      className="flex items-center justify-end w-full hover:text-blue-600 transition-colors"
+                    >
+                      زمان ثبت سفارش
+                      {sortField === 'createdAt' && (
+                        <span className="mr-1">
+                          {sortDirection === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </button>
+                  </th>
+                  <th className="text-center p-4 font-semibold w-[100px] min-w-[100px]">عملیات</th>
                 </tr>
               </thead>
               <tbody>
