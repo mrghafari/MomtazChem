@@ -201,8 +201,10 @@ export default function OrderTrackingManagement() {
   };
 
   // Format amount with currency
-  const formatAmount = (amount: number | string, currency: string) => {
+  const formatAmount = (amount: number | string | null | undefined, currency: string) => {
+    if (amount === null || amount === undefined) return `0 ${currency}`;
     const numericAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+    if (isNaN(numericAmount)) return `0 ${currency}`;
     return `${numericAmount.toLocaleString()} ${currency}`;
   };
 
