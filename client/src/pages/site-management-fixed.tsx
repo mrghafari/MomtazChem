@@ -402,6 +402,14 @@ export default function SiteManagement() {
       onClick: () => trackButtonClick("marketing-module", () => setLocation("/admin/marketing-module")),
       className: "border-purple-300 text-purple-600 hover:bg-purple-50",
       moduleId: "marketing_module"
+    },
+    {
+      id: "order-tracking-view",
+      label: "Order Management & Tracking - View Only",
+      icon: Monitor,
+      onClick: () => trackButtonClick("order-tracking-view", () => setLocation("/admin/order-tracking-view")),
+      className: "border-indigo-300 text-indigo-600 hover:bg-indigo-50",
+      moduleId: "order_tracking"
     }
 
   ];

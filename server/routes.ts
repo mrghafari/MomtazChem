@@ -5896,7 +5896,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       'company_information': 'اطلاعات شرکت',
       'user_guide': 'User Guide',
       'site_management': 'مدیریت سایت',
-      'marketing_module': 'ماژول مارکتینگ'
+      'marketing_module': 'ماژول مارکتینگ',
+      'order_tracking': 'مدیریت و پیگیری سفارشات'
     };
 
     return technicalToPersianMap[moduleId] || moduleId;
@@ -24481,7 +24482,8 @@ ${message ? `Additional Requirements:\n${message}` : ''}
             'اطلاعات شرکت': 'company_information',
             'User Guide': 'user_guide',
             'مدیریت سایت': 'site_management',
-            'ماژول مارکتینگ': 'marketing_module'
+            'ماژول مارکتینگ': 'marketing_module',
+            'مدیریت و پیگیری سفارشات': 'order_tracking'
           };
 
           // Convert Persian names to technical IDs
@@ -24581,7 +24583,8 @@ ${message ? `Additional Requirements:\n${message}` : ''}
             'اطلاعات شرکت': 'company_information',
             'User Guide': 'user_guide',
             'مدیریت سایت': 'site_management',
-            'ماژول مارکتینگ': 'marketing_module'
+            'ماژول مارکتینگ': 'marketing_module',
+            'مدیریت و پیگیری سفارشات': 'order_tracking'
           };
 
           // Convert Persian names to technical IDs
@@ -39491,6 +39494,287 @@ momtazchem.com
     } catch (error) {
       console.error("Error generating discount:", error);
       res.status(500).json({ success: false, message: "Failed to generate discount code" });
+    }
+  });
+
+  // ============================================================================
+  // ORDER TRACKING API ENDPOINTS - View Only System
+  // ============================================================================
+
+  // Get all orders for tracking (view-only)
+  app.get('/api/orders/tracking/all', requireAuth, async (req, res) => {
+    try {
+      // Get orders from order_management table with enhanced data
+      const ordersResult = await customerPool.query(`
+        SELECT 
+          om.id as order_id,
+          om.customer_order_id,
+          om.order_number,
+          om.status,
+          om.total_amount,
+          om.created_at,
+          om.updated_at,
+          om.shipping_method,
+          om.payment_method,
+          om.tracking_number,
+          om.estimated_delivery_date,
+          om.delivery_person_name,
+          om.delivery_person_phone,
+          om.notes,
+          om.reviewer_id,
+          om.reviewed_by_department,
+          om.processed_at,
+          -- Customer information from CRM
+          cc.first_name,
+          cc.last_name,
+          cc.company_name,
+          cc.phone,
+          cc.email,
+          cc.city,
+          cc.address
+        FROM order_management om
+        LEFT JOIN crm_customers cc ON om.customer_id = cc.id
+        ORDER BY om.created_at DESC
+        LIMIT 100
+      `);
+
+      const orders = ordersResult.rows.map((row: any) => ({
+        id: row.order_id,
+        customerOrderId: row.customer_order_id,
+        orderNumber: row.order_number,
+        status: row.status,
+        totalAmount: parseFloat(row.total_amount) || 0,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+        shippingMethod: row.shipping_method,
+        paymentMethod: row.payment_method,
+        trackingNumber: row.tracking_number,
+        estimatedDeliveryDate: row.estimated_delivery_date,
+        deliveryPersonName: row.delivery_person_name,
+        deliveryPersonPhone: row.delivery_person_phone,
+        notes: row.notes,
+        reviewerId: row.reviewer_id,
+        reviewedByDepartment: row.reviewed_by_department,
+        processedAt: row.processed_at,
+        customerInfo: {
+          firstName: row.first_name,
+          lastName: row.last_name,
+          companyName: row.company_name,
+          phone: row.phone,
+          email: row.email,
+          city: row.city,
+          address: row.address
+        }
+      }));
+
+      res.json({
+        success: true,
+        orders
+      });
+
+    } catch (error) {
+      console.error('Error fetching tracking orders:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در دریافت اطلاعات سفارشات" 
+      });
+    }
+  });
+
+  // Get order statistics for tracking dashboard
+  app.get('/api/order-management/statistics', requireAuth, async (req, res) => {
+    try {
+      const statsResult = await customerPool.query(`
+        SELECT 
+          COUNT(*) as total_orders,
+          COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending_orders,
+          COUNT(CASE WHEN status = 'financial_approved' THEN 1 END) as approved_orders,
+          COUNT(CASE WHEN status = 'logistics_approved' THEN 1 END) as in_delivery,
+          COUNT(CASE WHEN status = 'delivered' THEN 1 END) as delivered_orders,
+          COUNT(CASE WHEN status = 'cancelled' THEN 1 END) as cancelled_orders,
+          SUM(CASE WHEN status = 'delivered' THEN total_amount ELSE 0 END) as total_revenue,
+          AVG(total_amount) as average_order_value
+        FROM order_management
+        WHERE created_at >= CURRENT_DATE - INTERVAL '30 days'
+      `);
+
+      const stats = statsResult.rows[0];
+
+      res.json({
+        success: true,
+        statistics: {
+          totalOrders: parseInt(stats.total_orders) || 0,
+          pendingOrders: parseInt(stats.pending_orders) || 0,
+          approvedOrders: parseInt(stats.approved_orders) || 0,
+          inDelivery: parseInt(stats.in_delivery) || 0,
+          deliveredOrders: parseInt(stats.delivered_orders) || 0,
+          cancelledOrders: parseInt(stats.cancelled_orders) || 0,
+          totalRevenue: parseFloat(stats.total_revenue) || 0,
+          averageOrderValue: parseFloat(stats.average_order_value) || 0
+        }
+      });
+
+    } catch (error) {
+      console.error('Error fetching order statistics:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در دریافت آمار سفارشات" 
+      });
+    }
+  });
+
+  // Get order details by ID (view-only)
+  app.get('/api/orders/tracking/:orderId/details', requireAuth, async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      
+      if (!orderId) {
+        return res.status(400).json({
+          success: false,
+          message: "شناسه سفارش نامعتبر است"
+        });
+      }
+
+      // Get comprehensive order details
+      const orderResult = await customerPool.query(`
+        SELECT 
+          om.*,
+          cc.first_name,
+          cc.last_name,
+          cc.company_name,
+          cc.phone,
+          cc.email,
+          cc.city,
+          cc.address,
+          cc.postal_code
+        FROM order_management om
+        LEFT JOIN crm_customers cc ON om.customer_id = cc.id
+        WHERE om.id = $1
+      `, [orderId]);
+
+      if (orderResult.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "سفارش یافت نشد"
+        });
+      }
+
+      const order = orderResult.rows[0];
+
+      // Get order items
+      const itemsResult = await customerPool.query(`
+        SELECT 
+          oi.id,
+          oi.product_name,
+          oi.quantity,
+          oi.unit_price,
+          oi.total_price
+        FROM order_items oi
+        WHERE oi.customer_order_id = $1
+      `, [order.customer_order_id]);
+
+      const orderDetails = {
+        id: order.id,
+        customerOrderId: order.customer_order_id,
+        orderNumber: order.order_number,
+        status: order.status,
+        totalAmount: parseFloat(order.total_amount) || 0,
+        createdAt: order.created_at,
+        updatedAt: order.updated_at,
+        shippingMethod: order.shipping_method,
+        paymentMethod: order.payment_method,
+        trackingNumber: order.tracking_number,
+        estimatedDeliveryDate: order.estimated_delivery_date,
+        deliveryPersonName: order.delivery_person_name,
+        deliveryPersonPhone: order.delivery_person_phone,
+        notes: order.notes,
+        customerInfo: {
+          firstName: order.first_name,
+          lastName: order.last_name,
+          companyName: order.company_name,
+          phone: order.phone,
+          email: order.email,
+          city: order.city,
+          address: order.address,
+          postalCode: order.postal_code
+        },
+        items: itemsResult.rows.map((item: any) => ({
+          id: item.id,
+          productName: item.product_name,
+          quantity: item.quantity,
+          unitPrice: parseFloat(item.unit_price) || 0,
+          totalPrice: parseFloat(item.total_price) || 0
+        }))
+      };
+
+      res.json({
+        success: true,
+        order: orderDetails
+      });
+
+    } catch (error) {
+      console.error('Error fetching order details:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در دریافت جزئیات سفارش" 
+      });
+    }
+  });
+
+  // Get financial orders (view-only)
+  app.get('/api/order-management/financial', requireAuth, async (req, res) => {
+    try {
+      const financialOrdersResult = await customerPool.query(`
+        SELECT 
+          om.id as order_id,
+          om.customer_order_id,
+          om.order_number,
+          om.status,
+          om.total_amount,
+          om.created_at,
+          om.payment_method,
+          om.notes,
+          cc.first_name,
+          cc.last_name,
+          cc.company_name,
+          cc.phone,
+          cc.email
+        FROM order_management om
+        LEFT JOIN crm_customers cc ON om.customer_id = cc.id
+        WHERE om.status IN ('pending', 'financial_approved', 'financial_rejected')
+        ORDER BY om.created_at DESC
+        LIMIT 50
+      `);
+
+      const financialOrders = financialOrdersResult.rows.map((row: any) => ({
+        id: row.order_id,
+        customerOrderId: row.customer_order_id,
+        orderNumber: row.order_number,
+        status: row.status,
+        totalAmount: parseFloat(row.total_amount) || 0,
+        createdAt: row.created_at,
+        paymentMethod: row.payment_method,
+        notes: row.notes,
+        customerInfo: {
+          firstName: row.first_name,
+          lastName: row.last_name,
+          companyName: row.company_name,
+          phone: row.phone,
+          email: row.email
+        }
+      }));
+
+      res.json({
+        success: true,
+        orders: financialOrders
+      });
+
+    } catch (error) {
+      console.error('Error fetching financial orders:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در دریافت سفارشات مالی" 
+      });
     }
   });
 
