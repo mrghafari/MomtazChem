@@ -497,7 +497,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
   // Pre-populate form with customer data when available
   useEffect(() => {
-    console.log('=== BilingualPurchaseForm Debug ===');
+    console.log('=== BilingualPurchaseForm Address Debug ===');
     console.log('existingCustomer from parent:', existingCustomer);
     console.log('customerData from API:', customerData);
     console.log('crmCustomerData from API:', crmCustomerData);
@@ -532,11 +532,47 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       const fullName = `${customerToUse.firstName || ''} ${customerToUse.lastName || ''}`.trim();
       console.log('Full name constructed:', fullName);
       
+      // Enhanced address mapping for CRM customers - check multiple address fields
+      const customerAddress = customerToUse.address || 
+                             customerToUse.secondaryAddress || 
+                             customerToUse.primaryAddress ||
+                             customerToUse.deliveryAddress ||
+                             customerToUse.fullAddress ||
+                             customerToUse.streetAddress ||
+                             "";
+      
+      // Enhanced city mapping - check multiple city fields  
+      const customerCity = customerToUse.city || 
+                          customerToUse.cityRegion || 
+                          customerToUse.cityName ||
+                          customerToUse.province || 
+                          "";
+
+      console.log('🏠 [ADDRESS DEBUG] Address mapping result:', {
+        originalCustomer: customerToUse,
+        mappedAddress: customerAddress,
+        mappedCity: customerCity,
+        addressSources: {
+          address: customerToUse.address,
+          secondaryAddress: customerToUse.secondaryAddress,
+          primaryAddress: customerToUse.primaryAddress,
+          deliveryAddress: customerToUse.deliveryAddress,
+          fullAddress: customerToUse.fullAddress,
+          streetAddress: customerToUse.streetAddress
+        },
+        citySources: {
+          city: customerToUse.city,
+          cityRegion: customerToUse.cityRegion,
+          cityName: customerToUse.cityName,
+          province: customerToUse.province
+        }
+      });
+
       const formData = {
         customerName: fullName || customerToUse.name || "",
         phone: customerToUse.phone || "",
-        address: customerToUse.address || customerToUse.secondaryAddress || "",
-        city: customerToUse.city || customerToUse.cityRegion || customerToUse.province || "Iraq",
+        address: customerAddress,
+        city: customerCity || "Iraq",
         country: customerToUse.country || "Iraq",
         postalCode: customerToUse.postalCode || "",
         notes: "",
