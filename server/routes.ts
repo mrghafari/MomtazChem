@@ -22259,18 +22259,35 @@ ${message ? `Additional Requirements:\n${message}` : ''}
 
       // Check if cart contains flammable products FIRST (before checking bus lines)
       let containsFlammableProducts = false;
-      if (cart && Array.isArray(cart)) {
-        for (const item of cart) {
-          if (item.isFlammable === true) {
-            containsFlammableProducts = true;
-            break;
+      if (cart && typeof cart === 'object') {
+        // Get product IDs from cart (cart is in format { productId: quantity })
+        const productIds = Object.keys(cart).map(id => parseInt(id));
+        
+        if (productIds.length > 0) {
+          console.log('🔍 [FLAMMABLE] Checking products:', productIds);
+          
+          // Query database to check if any products are flammable
+          const { showcaseProducts } = await import('@shared/showcase-schema');
+          const products = await db.select().from(showcaseProducts).where(
+            sql`${showcaseProducts.id} = ANY(${productIds})`
+          );
+          
+          console.log('🔍 [FLAMMABLE] Products found:', products.map(p => ({ id: p.id, name: p.name, isFlammable: p.isFlammable })));
+          
+          // Check if any product is flammable
+          for (const product of products) {
+            if (product.isFlammable === true) {
+              containsFlammableProducts = true;
+              console.log(`🔥 [FLAMMABLE] Found flammable product: ${product.name} (ID: ${product.id})`);
+              break;
+            }
           }
         }
       }
 
       console.log('🔥 [FLAMMABLE CHECK]', {
         containsFlammableProducts: containsFlammableProducts,
-        cartItems: cart?.length || 0
+        cartItems: Object.keys(cart || {}).length
       });
 
       // Check if both origin and destination cities have intercity bus lines
