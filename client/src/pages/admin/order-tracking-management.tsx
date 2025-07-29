@@ -72,7 +72,62 @@ interface OrderStats {
   todaysOrders: number;
 }
 
-// Status labels in Persian - Updated to match actual database statuses
+// Enhanced status display with department information
+const getStatusDisplay = (order: Order) => {
+  const status = order.status;
+  const paymentReceiptUrl = order.paymentReceiptUrl;
+  
+  switch (status) {
+    case 'pending':
+      // Check if payment receipt is uploaded to determine which department
+      if (!paymentReceiptUrl) {
+        return {
+          label: 'در انتظار پرداخت',
+          department: 'مشتری',
+          color: 'bg-red-100 text-red-800 border-red-200'
+        };
+      } else {
+        return {
+          label: 'در انتظار بررسی مالی',
+          department: 'مالی',
+          color: 'bg-yellow-100 text-yellow-800 border-yellow-200'
+        };
+      }
+    case 'confirmed':
+      return {
+        label: 'در انتظار آماده‌سازی',
+        department: 'انبار', 
+        color: 'bg-blue-100 text-blue-800 border-blue-200'
+      };
+    case 'warehouse_ready':
+      return {
+        label: 'در انتظار تحویل',
+        department: 'لجستیک',
+        color: 'bg-purple-100 text-purple-800 border-purple-200'
+      };
+    case 'delivered':
+      return {
+        label: 'تحویل شده',
+        department: 'تکمیل',
+        color: 'bg-green-100 text-green-800 border-green-200'
+      };
+    case 'deleted':
+    case 'cancelled':
+      return {
+        label: 'لغو شده',
+        department: 'حذف',
+        color: 'bg-gray-100 text-gray-800 border-gray-200'
+      };
+    default:
+      return {
+        label: status,
+        department: 'نامشخص',
+        color: 'bg-gray-100 text-gray-800 border-gray-200'
+      };
+  }
+};
+
+// Simple status labels for backward compatibility
 const statusLabels: { [key: string]: string } = {
   'pending': 'در انتظار',
   'confirmed': 'تأیید شده', 
@@ -86,7 +141,8 @@ const statusLabels: { [key: string]: string } = {
   'in_transit': 'در راه',
   'delivered': 'تحویل داده شده',
   'completed': 'تکمیل شده',
-  'cancelled': 'لغو شده'
+  'cancelled': 'لغو شده',
+  'deleted': 'حذف شده'
 };
 
 // Department labels
@@ -415,7 +471,7 @@ export default function OrderTrackingManagement() {
                   <th className="text-right p-4 font-semibold w-[140px] min-w-[140px]">شماره سفارش</th>
                   <th className="text-right p-4 font-semibold w-[200px] min-w-[200px]">مشتری</th>
                   <th className="text-right p-4 font-semibold w-[120px] min-w-[120px]">مبلغ</th>
-                  <th className="text-right p-4 font-semibold w-[100px] min-w-[100px]">وضعیت</th>
+                  <th className="text-right p-4 font-semibold w-[100px] min-w-[100px]">وضعیت / بخش</th>
                   <th className="text-right p-4 font-semibold w-[100px] min-w-[100px]">کد تحویل</th>
                   <th className="text-right p-4 font-semibold w-[140px] min-w-[140px]">زمان ثبت سفارش</th>
                   <th className="text-right p-4 font-semibold w-[100px] min-w-[100px]">عملیات</th>
@@ -440,9 +496,19 @@ export default function OrderTrackingManagement() {
                       </div>
                     </td>
                     <td className="p-4 w-[100px] min-w-[100px]">
-                      <Badge variant={getStatusBadgeVariant(order.status)} className="text-xs whitespace-nowrap">
-                        {statusLabels[order.status] || order.status}
-                      </Badge>
+                      {(() => {
+                        const statusInfo = getStatusDisplay(order);
+                        return (
+                          <div className="space-y-1">
+                            <div className={`px-2 py-1 rounded-full text-xs font-medium border ${statusInfo.color}`}>
+                              {statusInfo.label}
+                            </div>
+                            <div className="text-xs text-gray-600 text-center">
+                              {statusInfo.department}
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </td>
                     <td className="p-4 w-[100px] min-w-[100px] text-center">
                       {order.deliveryCode ? (
@@ -505,10 +571,20 @@ export default function OrderTrackingManagement() {
                                   <CardContent className="space-y-2">
                                     <div><strong>مبلغ کل:</strong> {formatAmount(selectedOrder.totalAmount, selectedOrder.currency)}</div>
                                     <div><strong>روش پرداخت:</strong> {selectedOrder.paymentMethod || 'نامشخص'}</div>
-                                    <div><strong>وضعیت:</strong> 
-                                      <Badge variant={getStatusBadgeVariant(selectedOrder.status)} className="mr-2">
-                                        {statusLabels[selectedOrder.status] || selectedOrder.status}
-                                      </Badge>
+                                    <div><strong>وضعیت فعلی:</strong> 
+                                      {(() => {
+                                        const statusInfo = getStatusDisplay(selectedOrder);
+                                        return (
+                                          <div className="inline-flex items-center gap-2 mr-2">
+                                            <div className={`px-3 py-1 rounded-full text-sm font-medium border ${statusInfo.color}`}>
+                                              {statusInfo.label}
+                                            </div>
+                                            <div className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-700">
+                                              {statusInfo.department}
+                                            </div>
+                                          </div>
+                                        );
+                                      })()}
                                     </div>
                                   </CardContent>
                                 </Card>
