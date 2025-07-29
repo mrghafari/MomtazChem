@@ -772,6 +772,7 @@ export default function ProductsPage() {
     setImagePreview(null);
     setCatalogPreview(null);
     setMsdsPreview(null);
+    setManualBarcodeEntered(false); // Reset manual barcode flag
     form.reset();
     setDialogOpen(true);
   };
@@ -779,6 +780,7 @@ export default function ProductsPage() {
   const openEditDialog = (product: ShowcaseProduct) => {
     setEditingProduct(product);
     setValidationErrors({}); // Clear validation errors
+    setManualBarcodeEntered(false); // Reset manual barcode flag
     setImagePreview(product.imageUrl || null);
     setCatalogPreview(product.pdfCatalogUrl || null);
     setMsdsPreview(product.msdsUrl || null);
@@ -844,22 +846,29 @@ export default function ProductsPage() {
     return matchesCategory && matchesSearch && matchesInventoryStatus && matchesVisibility;
   });
 
+  // State to track if barcode was manually entered
+  const [manualBarcodeEntered, setManualBarcodeEntered] = useState(false);
+
   // Auto-generate barcode for new products when name and category are available
   useEffect(() => {
     const productName = form.watch("name");
     const category = form.watch("category");
     const currentBarcode = form.watch("barcode");
     
-    // Auto-generate barcode for new products (no existing barcode and not editing)
-    if (productName && category && !currentBarcode && !editingProduct) {
+    // Auto-generate barcode only if:
+    // 1. Product name and category exist
+    // 2. No current barcode exists
+    // 3. Not editing an existing product
+    // 4. Barcode was not manually entered by user
+    if (productName && category && !currentBarcode && !editingProduct && !manualBarcodeEntered) {
       const autoGenerateBarcode = async () => {
         try {
           const generatedBarcode = await generateEAN13Barcode(productName, category);
           form.setValue("barcode", generatedBarcode);
           
           toast({
-            title: "Barcode Auto-Generated",
-            description: `Generated EAN-13: ${generatedBarcode}`,
+            title: "بارکد خودکار تولید شد",
+            description: `بارکد EAN-13 تولید شد: ${generatedBarcode}`,
             variant: "default"
           });
         } catch (error) {
@@ -869,7 +878,7 @@ export default function ProductsPage() {
       
       autoGenerateBarcode();
     }
-  }, [form.watch("name"), form.watch("category"), editingProduct]);
+  }, [form.watch("name"), form.watch("category"), editingProduct, manualBarcodeEntered]);
 
   // Generate barcode image when barcode value changes or dialog opens
   useEffect(() => {
@@ -1881,13 +1890,16 @@ export default function ProductsPage() {
                               <rect x="111" y="0" width="3" height="24" fill="#333"/>
                               <rect x="117" y="0" width="3" height="24" fill="#333"/>
                             </svg>
+                            {manualBarcodeEntered && (
+                              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-md">دستی</span>
+                            )}
                             {(editingProduct || field.value) && <Lock className="h-3 w-3 text-gray-400" />}
                             <Tooltip>
                               <TooltipTrigger>
                                 <HelpCircle className="h-3 w-3 text-gray-400" />
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>بارکد استاندارد 13 رقمی محصول. بعد از ایجاد قابل تغییر نیست</p>
+                                <p>بارکد استاندارد 13 رقمی محصول. وارد کردن دستی از تولید خودکار جلوگیری می‌کند</p>
                               </TooltipContent>
                             </Tooltip>
                           </FormLabel>
@@ -1898,6 +1910,14 @@ export default function ProductsPage() {
                               className={`h-9 ${(editingProduct || field.value) ? "bg-gray-50 text-gray-500" : ""} ${validationErrors.barcode ? "border-red-500 focus:border-red-500" : ""}`}
                               {...field}
                               readOnly={!!(editingProduct || field.value)}
+                              onChange={(e) => {
+                                // Detect manual input
+                                if (e.target.value && !editingProduct) {
+                                  setManualBarcodeEntered(true);
+                                  console.log('📝 [MANUAL BARCODE] User manually entered barcode:', e.target.value);
+                                }
+                                field.onChange(e);
+                              }}
                             />
                           </FormControl>
                           <FormMessage />
