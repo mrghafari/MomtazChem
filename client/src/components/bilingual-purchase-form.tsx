@@ -865,8 +865,24 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       console.log('🎯 [ORDER SUCCESS] Response type:', typeof response);
       console.log('🎯 [ORDER SUCCESS] Response keys:', Object.keys(response || {}));
       
-      // Check if payment gateway redirect is needed
-      if (response.redirectToPayment && response.paymentGatewayUrl) {
+      // Check for hybrid payment redirect (new API structure)
+      if (response.requiresBankPayment && response.redirectUrl) {
+        console.log('🔄 [HYBRID PAYMENT] Redirecting to bank gateway:', response.redirectUrl);
+        console.log('🔄 [HYBRID PAYMENT] Wallet amount deducted:', response.walletAmountDeducted);
+        
+        toast({
+          title: "پرداخت ترکیبی",
+          description: `${response.walletAmountDeducted?.toLocaleString()} IQD از کیف پول کسر شد. هدایت به درگاه بانکی...`,
+        });
+        
+        // Force redirect to hybrid payment page
+        setTimeout(() => {
+          window.location.href = response.redirectUrl;
+        }, 1500);
+        return;
+      }
+      // Check if payment gateway redirect is needed (legacy)
+      else if (response.redirectToPayment && response.paymentGatewayUrl) {
         toast({
           title: "انتقال به درگاه پرداخت",
           description: "در حال انتقال شما به درگاه پرداخت..."
@@ -876,6 +892,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         setTimeout(() => {
           window.location.href = response.paymentGatewayUrl;
         }, 1500);
+        return;
       } 
       // Check if bank receipt upload is needed
       else if (paymentMethod === 'bank_receipt') {

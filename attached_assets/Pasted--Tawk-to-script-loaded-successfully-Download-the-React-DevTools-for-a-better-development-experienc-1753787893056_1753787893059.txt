@@ -1,0 +1,467 @@
+ Tawk.to script loaded successfully
+ Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+ 🎛️ [FRONTEND CONTROLS] Loaded: undefined
+ 🎛️ [VISIBILITY] Discount Banner: false AI Features: false
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ 🎛️ [FRONTEND CONTROLS] Loaded: undefined
+ 🎛️ [VISIBILITY] Discount Banner: false AI Features: false
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🎛️ [FRONTEND CONTROLS] Loaded: undefined
+ 🎛️ [VISIBILITY] Discount Banner: false AI Features: false
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 
+value @ twk-chunk-common.js:2
+ Tawk.to Live Chat loaded successfully
+ 🎛️ [FRONTEND CONTROLS] Loaded: undefined
+ 🎛️ [VISIBILITY] Discount Banner: false AI Features: false
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🎛️ [FRONTEND CONTROLS] Loaded: undefined
+ 🎛️ [VISIBILITY] Discount Banner: false AI Features: false
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🎛️ [FRONTEND CONTROLS] Loaded: undefined
+ 🎛️ [VISIBILITY] Discount Banner: false AI Features: false
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🎛️ [FRONTEND CONTROLS] Loaded: undefined
+ 🎛️ [VISIBILITY] Discount Banner: false AI Features: false
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🎛️ [FRONTEND CONTROLS] Loaded: undefined
+ 🎛️ [VISIBILITY] Discount Banner: false AI Features: false
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🎛️ [FRONTEND CONTROLS] Loaded: undefined
+ 🎛️ [VISIBILITY] Discount Banner: false AI Features: false
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(0)
+ 🎛️ [FRONTEND CONTROLS] Loaded: Object
+ 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+ 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(4)
+api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ 🎛️ [FRONTEND CONTROLS] Loaded: Object
+ 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+ 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(4)
+ 🎛️ [FRONTEND CONTROLS] Loaded: Object
+ 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+ 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(4)
+api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ 🎛️ [FRONTEND CONTROLS] Loaded: Object
+ 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+ 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(4)
+ Cart clicked, total items: 1
+ Customer: null
+ User not logged in, showing pre-checkout modal
+ 🎛️ [FRONTEND CONTROLS] Loaded: Object
+ 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+ 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(4)
+ 🔐 [LOGIN] Login choice selected
+ 🎛️ [FRONTEND CONTROLS] Loaded: Object
+ 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+ 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(4)
+ 🎛️ [FRONTEND CONTROLS] Loaded: Object
+ 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+ 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(4)
+ 🔐 [LOGIN] Starting handleLoginSuccess
+ 🔐 [LOGIN] Customer data: Object
+ 🔐 [LOGIN] Current cart state: Object
+ 🔐 [LOGIN] Customer state set
+ 🔐 [LOGIN] Wallet balance fetch initiated
+ 🔐 [LOGIN] Auth modal closed
+ 🔐 [LOGIN] Cache invalidated
+ 🔐 [LOGIN] Has cart items: true
+ 🔐 [LOGIN] Cart contents: Object
+ 🔐 [LOGIN] Cart migration completed
+ 🔐 [LOGIN] Welcome toast shown
+ 🔐 [LOGIN] Staying in shop after successful login
+ 🔐 [LOGIN] handleLoginSuccess completed successfully
+ 🎛️ [FRONTEND CONTROLS] Loaded: Object
+ 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+ 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(4)
+ 🎛️ [FRONTEND CONTROLS] Loaded: Object
+ 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+ 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(4)
+ 🎛️ [FRONTEND CONTROLS] Loaded: Object
+ 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+ 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(4)
+ Cart clicked, total items: 1
+ Customer: Object
+ User is logged in, showing checkout
+ 🎛️ [FRONTEND CONTROLS] Loaded: Object
+ 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+ 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(4)
+ 💳 [WALLET QUERY] Enabled check: Object
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+ Fetching shipping rates...
+ === BilingualPurchaseForm Debug ===
+ existingCustomer from parent: Object
+ customerData from API: Object
+ crmCustomerData from API: undefined
+ isLoadingCustomer: false
+ Using existingCustomer from parent
+ Customer object found: Object
+ Customer firstName: ABAS
+ Customer lastName: ABASI
+ Customer phone: 09124955173
+ Customer address: ✅ FINAL VERIFICATION - PROBLEM COMPLETELY SOLVED
+ Customer secondaryAddress: undefined
+ Customer city: undefined
+ Customer country: Iraq
+ Customer postalCode: undefined
+ Full name constructed: ABAS ABASI
+ Form data to reset: Object
+ Form reset completed
+ === End BilingualPurchaseForm Debug ===
+ 🚚 Shipping cost calculation: Object
+ 🔄 No shipping method selected or no data, resetting cost
+ Shipping rates state: Object
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+ CRM Customer API response: Object
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+ === BilingualPurchaseForm Debug ===
+ existingCustomer from parent: Object
+ customerData from API: Object
+ crmCustomerData from API: Object
+ isLoadingCustomer: false
+ Using CRM customer data (most complete)
+ Customer object found: Object
+ Customer firstName: ABAS
+ Customer lastName: ABASI
+ Customer phone: 09124955173
+ Customer address: ✅ FINAL VERIFICATION - PROBLEM COMPLETELY SOLVED
+ Customer secondaryAddress: NAGwer Road, Qaryataq Village, Erbil, Iraq
+ Customer city: undefined
+ Customer country: Iraq
+ Customer postalCode: 196891375
+ Full name constructed: ABAS ABASI
+ Form data to reset: Object
+ Form reset completed
+ === End BilingualPurchaseForm Debug ===
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+ 💰 [VAT] Tax settings API response: Object
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+ Shipping rates API response: Object
+ Successfully loaded shipping rates: 2 methods
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+ 🚚 Shipping cost calculation: Object
+ 🔄 No shipping method selected or no data, resetting cost
+ Shipping rates state: Object
+ 🚚 [AUTO SELECT] Auto-selecting smart vehicle method: 32
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+ 🚚 Shipping cost calculation: Object
+ 📦 Selected shipping rate: Object
+ ✅ SPECIAL DELIVERY METHOD: Zero cost for smart_vehicle
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+ 🚚 [SMART DELIVERY] Calculating cost for: Object
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+ ✅ [SMART DELIVERY] Cost calculated: Object
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+ 🎛️ [FRONTEND CONTROLS] Loaded: Object
+ 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+ 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Current products: Array(6)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(4)
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+ 🚀 [SUBMIT DEBUG] Submit button clicked
+ 🚀 [SUBMIT DEBUG] Event: SyntheticBaseEvent
+ 🚀 [SUBMIT DEBUG] Form state: Object
+ 🚀 [SUBMIT DEBUG] Form errors: Object
+ 🚀 [SUBMIT DEBUG] Form isValid: false
+ 🚀 [SUBMIT DEBUG] Form values: Object
+ 🚀 [SUBMIT DEBUG] Payment method: wallet_partial
+ 🚀 [SUBMIT DEBUG] Selected shipping method: 32
+ 💰 [PURCHASE FORM] Tax calculation: Object
+ 💳 [WALLET DEBUG] Complete wallet analysis: Object
+ 🚀 [SUBMIT DEBUG] Manual validation result: true
+ 🚀 [SUBMIT DEBUG] Form validation PASSED - proceeding with submission
+ 🚀 [SUBMIT DEBUG] onSubmit function called
+ 🚀 [SUBMIT DEBUG] Form data received: Object
+ 🚀 [SUBMIT DEBUG] Selected shipping method: 32
+ 🚀 [SUBMIT DEBUG] Payment method: wallet_partial
+ 🚀 [SUBMIT DEBUG] Form validation state: Object
+bilingual-purchase-form.tsx:931 🚀 [SUBMIT DEBUG] Form errors: Object
+bilingual-purchase-form.tsx:997 🚚 [DELIVERY LOGIC] Active delivery information: Object
+bilingual-purchase-form.tsx:1018 🚀 [ORDER SUBMIT] Submitting order with complete data: Object
+bilingual-purchase-form.tsx:645 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:678 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:645 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:678 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:864 🎯 [ORDER SUCCESS] Order response received: Object
+bilingual-purchase-form.tsx:865 🎯 [ORDER SUCCESS] Response type: object
+bilingual-purchase-form.tsx:866 🎯 [ORDER SUCCESS] Response keys: Array(7)
+shop.tsx:205 🎛️ [FRONTEND CONTROLS] Loaded: Object
+shop.tsx:206 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:230 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:231 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:235 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:236 🌟 [RATINGS DEBUG] Products with ratings: Array(4)
+shop.tsx:205 🎛️ [FRONTEND CONTROLS] Loaded: Object
+shop.tsx:206 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:230 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:231 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:235 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:236 🌟 [RATINGS DEBUG] Products with ratings: Array(4)
+api/admin/me:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+useAuth.ts:46 Auth check failed: Error: HTTP 500
+    at queryFn (useAuth.ts:39:17)
+queryFn @ useAuth.ts:46
+shop.tsx:205 🎛️ [FRONTEND CONTROLS] Loaded: Object
+shop.tsx:206 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:230 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:231 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:235 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:236 🌟 [RATINGS DEBUG] Products with ratings: Array(4)
+shop.tsx:205 🎛️ [FRONTEND CONTROLS] Loaded: Object
+shop.tsx:206 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:230 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:231 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:235 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:236 🌟 [RATINGS DEBUG] Products with ratings: Array(4)
+shop.tsx:205 🎛️ [FRONTEND CONTROLS] Loaded: Object
+shop.tsx:206 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:230 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:231 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:235 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:236 🌟 [RATINGS DEBUG] Products with ratings: Array(4)
+api/admin/me:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+useAuth.ts:46 Auth check failed: Error: HTTP 500
+    at queryFn (useAuth.ts:39:17)
+queryFn @ useAuth.ts:46
+shop.tsx:205 🎛️ [FRONTEND CONTROLS] Loaded: Object
+shop.tsx:206 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:230 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:231 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:235 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:236 🌟 [RATINGS DEBUG] Products with ratings: Array(4)
+shop.tsx:205 🎛️ [FRONTEND CONTROLS] Loaded: Object
+shop.tsx:206 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:230 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:231 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:235 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:236 🌟 [RATINGS DEBUG] Products with ratings: Array(4)
+shop.tsx:205 🎛️ [FRONTEND CONTROLS] Loaded: Object
+shop.tsx:206 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:230 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:231 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:235 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:236 🌟 [RATINGS DEBUG] Products with ratings: Array(4)
+shop.tsx:205 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:206 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:230 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:231 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:235 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:236 🌟 [RATINGS DEBUG] Products with ratings: (4) [{…}, {…}, {…}, {…}]
+shop.tsx:205 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:206 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:230 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:231 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:235 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:236 🌟 [RATINGS DEBUG] Products with ratings: (4) [{…}, {…}, {…}, {…}]
+shop.tsx:205 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:206 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:230 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:231 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:235 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:236 🌟 [RATINGS DEBUG] Products with ratings: (4) [{…}, {…}, {…}, {…}]
+shop.tsx:837 Cart clicked, total items: 2
+shop.tsx:838 Customer: {id: 8, firstName: 'ABAS', lastName: 'ABASI', email: 'oilstar@hotmail.com', company: 'پتروشیمی شازند', …}
+shop.tsx:845 User is logged in, showing checkout
+shop.tsx:205 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:206 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:230 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:231 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:235 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:236 🌟 [RATINGS DEBUG] Products with ratings: (4) [{…}, {…}, {…}, {…}]
+bilingual-purchase-form.tsx:316 💳 [WALLET QUERY] Enabled check: {existingCustomer: true, customerDataSuccess: true, enabled: true}
+bilingual-purchase-form.tsx:645 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:678 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 53042809.84, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:430 === BilingualPurchaseForm Debug ===
+bilingual-purchase-form.tsx:431 existingCustomer from parent: {id: 8, firstName: 'ABAS', lastName: 'ABASI', email: 'oilstar@hotmail.com', company: 'پتروشیمی شازند', …}
+bilingual-purchase-form.tsx:432 customerData from API: {success: true, customer: {…}}
+bilingual-purchase-form.tsx:433 crmCustomerData from API: {id: 8, email: 'oilstar@hotmail.com', passwordHash: '$2b$10$crhUIKi/UPq4FB04oSHFuum7rhx1UUE1miqwsK0JYRc.HF/u0b786', firstName: 'ABAS', lastName: 'ABASI', …}
+bilingual-purchase-form.tsx:434 isLoadingCustomer: false
+bilingual-purchase-form.tsx:442 Using CRM customer data (most complete)
+bilingual-purchase-form.tsx:452 Customer object found: {id: 8, email: 'oilstar@hotmail.com', passwordHash: '$2b$10$crhUIKi/UPq4FB04oSHFuum7rhx1UUE1miqwsK0JYRc.HF/u0b786', firstName: 'ABAS', lastName: 'ABASI', …}
+bilingual-purchase-form.tsx:453 Customer firstName: ABAS
+bilingual-purchase-form.tsx:454 Customer lastName: ABASI
+bilingual-purchase-form.tsx:455 Customer phone: 09124955173
+bilingual-purchase-form.tsx:456 Customer address: ✅ FINAL VERIFICATION - PROBLEM COMPLETELY SOLVED
+bilingual-purchase-form.tsx:457 Customer secondaryAddress: NAGwer Road, Qaryataq Village, Erbil, Iraq
+bilingual-purchase-form.tsx:458 Customer city: undefined
+bilingual-purchase-form.tsx:459 Customer country: Iraq
+bilingual-purchase-form.tsx:460 Customer postalCode: 196891375
+bilingual-purchase-form.tsx:463 Full name constructed: ABAS ABASI
+bilingual-purchase-form.tsx:477 Form data to reset: {customerName: 'ABAS ABASI', phone: '09124955173', address: '✅ FINAL VERIFICATION - PROBLEM COMPLETELY SOLVED', city: 'کربلا', country: 'Iraq', …}
+bilingual-purchase-form.tsx:479 Form reset completed
+bilingual-purchase-form.tsx:483 === End BilingualPurchaseForm Debug ===
+bilingual-purchase-form.tsx:559 🚚 Shipping cost calculation: {selectedShippingMethod: null, hasShippingData: true, subtotalAmount: '22.00'}
+bilingual-purchase-form.tsx:601 🔄 No shipping method selected or no data, resetting cost
+bilingual-purchase-form.tsx:608 Shipping rates state: {isLoadingShippingRates: false, shippingRatesError: null, dataLength: 2, data: Array(2)}
+bilingual-purchase-form.tsx:639 🚚 [AUTO SELECT] Auto-selecting smart vehicle method: 32
+bilingual-purchase-form.tsx:645 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:678 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 53042809.84, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:559 🚚 Shipping cost calculation: {selectedShippingMethod: 32, hasShippingData: true, subtotalAmount: '22.00'}
+bilingual-purchase-form.tsx:567 📦 Selected shipping rate: {id: 32, deliveryMethod: 'smart_vehicle', transportationType: 'smart', cityName: null, provinceName: null, …}
+bilingual-purchase-form.tsx:573 ✅ SPECIAL DELIVERY METHOD: Zero cost for smart_vehicle
+bilingual-purchase-form.tsx:645 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:678 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 53042809.84, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:298 CRM Customer API response: {success: true, data: {…}}
+bilingual-purchase-form.tsx:341 💰 [VAT] Tax settings API response: {success: true, data: Array(1)}
+bilingual-purchase-form.tsx:645 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:678 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 53042807.84, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:741 🚚 [SMART DELIVERY] Calculating cost for: {weight: 22, city: 'کربلا', province: 'کربلا', cartItems: 1}
+bilingual-purchase-form.tsx:645 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:678 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 53042807.84, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:778 ✅ [SMART DELIVERY] Cost calculated: {vehicle: 'اتوبوسهای مسافربری', cost: 8600, estimatedTime: 252}
+bilingual-purchase-form.tsx:645 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:678 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 53042807.84, canUseWallet: {…}, totalAmount: 8622, existingCustomer: true, …}
+shop.tsx:205 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:206 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:230 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:231 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:235 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:236 🌟 [RATINGS DEBUG] Products with ratings: (4) [{…}, {…}, {…}, {…}]
+bilingual-purchase-form.tsx:645 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:678 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 53042807.84, canUseWallet: {…}, totalAmount: 8622, existingCustomer: true, …}
+bilingual-purchase-form.tsx:645 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:678 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 53042807.84, canUseWallet: {…}, totalAmount: 8622, existingCustomer: true, …}
+bilingual-purchase-form.tsx:645 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:678 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 53042807.84, canUseWallet: {…}, totalAmount: 8622, existingCustomer: true, …}
+useAuth.ts:30  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 500 (Internal Server Error)
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=815b1335:840
+run @ @tanstack_react-query.js?v=815b1335:494
+start @ @tanstack_react-query.js?v=815b1335:536
+fetch @ @tanstack_react-query.js?v=815b1335:926
+executeFetch_fn @ @tanstack_react-query.js?v=815b1335:2211
+(anonymous) @ @tanstack_react-query.js?v=815b1335:2245
+useAuth.ts:46 Auth check failed: Error: HTTP 500
+    at queryFn (useAuth.ts:39:17)
+queryFn @ useAuth.ts:46
+await in queryFn
+fetchFn @ @tanstack_react-query.js?v=815b1335:840
+run @ @tanstack_react-query.js?v=815b1335:494
+start @ @tanstack_react-query.js?v=815b1335:536
+fetch @ @tanstack_react-query.js?v=815b1335:926
+executeFetch_fn @ @tanstack_react-query.js?v=815b1335:2211
+(anonymous) @ @tanstack_react-query.js?v=815b1335:2245
+shop.tsx:205 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:206 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:230 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:231 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:235 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:236 🌟 [RATINGS DEBUG] Products with ratings: (4) [{…}, {…}, {…}, {…}]
+bilingual-purchase-form.tsx:645 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:678 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 53042807.84, canUseWallet: {…}, totalAmount: 8622, existingCustomer: true, …}
+bilingual-purchase-form.tsx:1941 🚀 [SUBMIT DEBUG] Submit button clicked
+bilingual-purchase-form.tsx:1942 🚀 [SUBMIT DEBUG] Event: SyntheticBaseEvent {_reactName: 'onClick', _targetInst: null, type: 'click', nativeEvent: PointerEvent, target: button.inline-flex.items-center.justify-center.gap-2.whitespace-nowrap.rounded-md.text-sm.font-medi…, …}
+bilingual-purchase-form.tsx:1943 🚀 [SUBMIT DEBUG] Form state: {defaultValues: {…}, …}
+bilingual-purchase-form.tsx:1944 🚀 [SUBMIT DEBUG] Form errors: {}
+bilingual-purchase-form.tsx:1945 🚀 [SUBMIT DEBUG] Form isValid: false
+bilingual-purchase-form.tsx:1946 🚀 [SUBMIT DEBUG] Form values: {customerName: 'ABAS ABASI', phone: '09124955173', address: '✅ FINAL VERIFICATION - PROBLEM COMPLETELY SOLVED', city: 'کربلا', country: 'Iraq', …}
+bilingual-purchase-form.tsx:1947 🚀 [SUBMIT DEBUG] Payment method: wallet_partial
+bilingual-purchase-form.tsx:1948 🚀 [SUBMIT DEBUG] Selected shipping method: 32
+bilingual-purchase-form.tsx:645 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:678 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 53042807.84, canUseWallet: {…}, totalAmount: 8622, existingCustomer: true, …}
+bilingual-purchase-form.tsx:1952 🚀 [SUBMIT DEBUG] Manual validation result: true
+bilingual-purchase-form.tsx:1960 🚀 [SUBMIT DEBUG] Form validation PASSED - proceeding with submission
+bilingual-purchase-form.tsx:926 🚀 [SUBMIT DEBUG] onSubmit function called
+bilingual-purchase-form.tsx:927 🚀 [SUBMIT DEBUG] Form data received: {customerName: 'ABAS ABASI', phone: '09124955173', address: '✅ FINAL VERIFICATION - PROBLEM COMPLETELY SOLVED', city: 'کربلا', country: 'Iraq', …}
+bilingual-purchase-form.tsx:928 🚀 [SUBMIT DEBUG] Selected shipping method: 32
+bilingual-purchase-form.tsx:929 🚀 [SUBMIT DEBUG] Payment method: wallet_partial
+bilingual-purchase-form.tsx:930 🚀 [SUBMIT DEBUG] Form validation state: {defaultValues: {…}, …}
+bilingual-purchase-form.tsx:931 🚀 [SUBMIT DEBUG] Form errors: {}
+bilingual-purchase-form.tsx:997 🚚 [DELIVERY LOGIC] Active delivery information: {activeAddress: '✅ FINAL VERIFICATION - PROBLEM COMPLETELY SOLVED', activeCity: 'کربلا', activeProvince: 'کربلا', activePostalCode: '196891375', activePhone: '09124955173', …}
+bilingual-purchase-form.tsx:1018 🚀 [ORDER SUBMIT] Submitting order with complete data: {endpoint: '/api/customers/orders', paymentMethod: 'wallet_partial', totalAmount: 8622, walletAmountUsed: 8, remainingAmount: 8614, …}
+bilingual-purchase-form.tsx:645 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:678 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 53042807.84, canUseWallet: {…}, totalAmount: 8622, existingCustomer: true, …}
+bilingual-purchase-form.tsx:645 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:678 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 53042807.84, canUseWallet: {…}, totalAmount: 8622, existingCustomer: true, …}
+bilingual-purchase-form.tsx:741 🚚 [SMART DELIVERY] Calculating cost for: {weight: 22, city: 'کربلا', province: 'کربلا', cartItems: 1}
+bilingual-purchase-form.tsx:645 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:678 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 53042807.84, canUseWallet: {…}, totalAmount: 8622, existingCustomer: true, …}
+bilingual-purchase-form.tsx:778 ✅ [SMART DELIVERY] Cost calculated: {vehicle: 'اتوبوسهای مسافربری', cost: 8600, estimatedTime: 252}
+bilingual-purchase-form.tsx:645 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:678 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 53042807.84, canUseWallet: {…}, totalAmount: 8622, existingCustomer: true, …}
+bilingual-purchase-form.tsx:864 🎯 [ORDER SUCCESS] Order response received: {success: true, message: 'Order created successfully', orderId: 336, orderNumber: 'M2511307', paymentMethod: 'wallet_partial', …}
+bilingual-purchase-form.tsx:865 🎯 [ORDER SUCCESS] Response type: object
+bilingual-purchase-form.tsx:866 🎯 [ORDER SUCCESS] Response keys: (7) ['success', 'message', 'orderId', 'orderNumber', 'paymentMethod', 'totalAmount', 'walletAmountUsed']
+shop.tsx:205 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:206 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:230 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:231 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:235 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:236 🌟 [RATINGS DEBUG] Products with ratings: (4) [{…}, {…}, {…}, {…}]
+shop.tsx:205 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:206 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:230 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:231 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:235 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:236 🌟 [RATINGS DEBUG] Products with ratings: (4) [{…}, {…}, {…}, {…}]
