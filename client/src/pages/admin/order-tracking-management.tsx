@@ -159,7 +159,7 @@ export default function OrderTrackingManagement() {
     },
     refetchInterval: 5000, // Frequent refresh for debugging
     staleTime: 0, // Always fetch fresh
-    cacheTime: 0 // Don't cache
+    gcTime: 0 // Don't cache (v5 API)
   });
 
   // Fetch order statistics - REBUILT to match actual API
@@ -233,6 +233,15 @@ export default function OrderTrackingManagement() {
     if (isNaN(numericAmount)) return `0 ${currency}`;
     return `${numericAmount.toLocaleString()} ${currency}`;
   };
+
+  // Debug information display
+  console.log('🔍 [RENDER DEBUG] Component state:', {
+    isLoading,
+    isLoadingStats,
+    ordersData: orders,
+    ordersCount: orders?.length || 0,
+    hasOrders: !!orders,
+  });
 
   if (isLoading || isLoadingStats) {
     return (
