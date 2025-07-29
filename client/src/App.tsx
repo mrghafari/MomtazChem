@@ -38,6 +38,7 @@ import EmailTemplatesFixed from '@/pages/admin/email-templates-fixed';
 import EmailTemplatesCentral from '@/pages/admin/email-templates-central';
 import Template05View from '@/pages/admin/template05-view';
 import Template05StaticView from '@/pages/admin/template05-static-view';
+import MarketingModule from '@/pages/admin/marketing-module';
 import EmailRoutingStats from "@/pages/admin/email-routing-stats";
 import AutomatedEmailLogs from "@/pages/admin/automated-email-logs";
 import InquiryResponses from '@/pages/admin/inquiry-responses';
@@ -233,6 +234,7 @@ function Router() {
           <Route path="/admin/template05-view" component={Template05View} />
           <Route path="/admin/template05-static" component={Template05StaticView} />
           <Route path="/admin/inquiry-responses" component={InquiryResponses} />
+          <Route path="/admin/marketing-module" component={MarketingModule} />
           <Route path="/admin/security-management" component={SecurityManagement} />
           <Route path="/admin/ticketing-system" component={TicketingSystemFixed} />
           <Route path="/admin/ai-seo-assistant" component={AiSeoAssistant} />

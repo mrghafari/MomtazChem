@@ -103,6 +103,21 @@ import {
   type TransportationCompany,
   type DeliveryVehicle,
   type DeliveryPersonnel,
+} from "@shared/logistics-schema";
+
+// Marketing schema imports
+import { 
+  internationalMarkets, 
+  marketSegments, 
+  competitorAnalysis, 
+  marketIntelligence,
+  insertInternationalMarketSchema,
+  insertMarketSegmentSchema,
+  insertCompetitorAnalysisSchema,
+  insertMarketIntelligenceSchema
+} from "@shared/marketing-schema";
+
+import {
   type DeliveryRoute,
   type DeliveryVerificationCode,
   VEHICLE_TYPES,
@@ -26266,6 +26281,179 @@ momtazchem.com
         success: false, 
         message: 'Failed to import products to shop database' 
       });
+    }
+  });
+
+  // =============================================================================
+  // MARKETING MODULE API ROUTES
+  // =============================================================================
+
+  // Get all international markets
+  app.get('/api/marketing/international-markets', requireAuth, async (req, res) => {
+    try {
+      const markets = await db.select().from(internationalMarkets).orderBy(desc(internationalMarkets.priority));
+      res.json({ success: true, data: markets });
+    } catch (error) {
+      console.error('Error fetching international markets:', error);
+      res.status(500).json({ success: false, message: 'خطا در دریافت بازارهای بین‌المللی' });
+    }
+  });
+
+  // Create new international market
+  app.post('/api/marketing/international-markets', requireAuth, async (req, res) => {
+    try {
+      const validatedData = insertInternationalMarketSchema.parse(req.body);
+      const [market] = await db.insert(internationalMarkets).values(validatedData).returning();
+      res.json({ success: true, data: market });
+    } catch (error) {
+      console.error('Error creating international market:', error);
+      res.status(500).json({ success: false, message: 'خطا در ایجاد بازار بین‌المللی' });
+    }
+  });
+
+  // Update international market
+  app.put('/api/marketing/international-markets/:id', requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertInternationalMarketSchema.parse(req.body);
+      const [market] = await db
+        .update(internationalMarkets)
+        .set({ ...validatedData, lastUpdated: new Date() })
+        .where(eq(internationalMarkets.id, id))
+        .returning();
+      
+      if (!market) {
+        return res.status(404).json({ success: false, message: 'بازار یافت نشد' });
+      }
+      
+      res.json({ success: true, data: market });
+    } catch (error) {
+      console.error('Error updating international market:', error);
+      res.status(500).json({ success: false, message: 'خطا در بروزرسانی بازار بین‌المللی' });
+    }
+  });
+
+  // Delete international market
+  app.delete('/api/marketing/international-markets/:id', requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const [deletedMarket] = await db
+        .delete(internationalMarkets)
+        .where(eq(internationalMarkets.id, id))
+        .returning();
+      
+      if (!deletedMarket) {
+        return res.status(404).json({ success: false, message: 'بازار یافت نشد' });
+      }
+      
+      res.json({ success: true, message: 'بازار با موفقیت حذف شد' });
+    } catch (error) {
+      console.error('Error deleting international market:', error);
+      res.status(500).json({ success: false, message: 'خطا در حذف بازار بین‌المللی' });
+    }
+  });
+
+  // Get all market segments
+  app.get('/api/marketing/market-segments', requireAuth, async (req, res) => {
+    try {
+      const segments = await db.select().from(marketSegments).orderBy(desc(marketSegments.createdAt));
+      res.json({ success: true, data: segments });
+    } catch (error) {
+      console.error('Error fetching market segments:', error);
+      res.status(500).json({ success: false, message: 'خطا در دریافت بخش‌بندی بازار' });
+    }
+  });
+
+  // Create new market segment
+  app.post('/api/marketing/market-segments', requireAuth, async (req, res) => {
+    try {
+      const validatedData = insertMarketSegmentSchema.parse(req.body);
+      const [segment] = await db.insert(marketSegments).values(validatedData).returning();
+      res.json({ success: true, data: segment });
+    } catch (error) {
+      console.error('Error creating market segment:', error);
+      res.status(500).json({ success: false, message: 'خطا در ایجاد بخش بازار' });
+    }
+  });
+
+  // Get all competitor analysis
+  app.get('/api/marketing/competitor-analysis', requireAuth, async (req, res) => {
+    try {
+      const analysis = await db.select().from(competitorAnalysis).orderBy(desc(competitorAnalysis.lastAnalyzed));
+      res.json({ success: true, data: analysis });
+    } catch (error) {
+      console.error('Error fetching competitor analysis:', error);
+      res.status(500).json({ success: false, message: 'خطا در دریافت تحلیل رقبا' });
+    }
+  });
+
+  // Create new competitor analysis
+  app.post('/api/marketing/competitor-analysis', requireAuth, async (req, res) => {
+    try {
+      const validatedData = insertCompetitorAnalysisSchema.parse(req.body);
+      const [analysis] = await db.insert(competitorAnalysis).values(validatedData).returning();
+      res.json({ success: true, data: analysis });
+    } catch (error) {
+      console.error('Error creating competitor analysis:', error);
+      res.status(500).json({ success: false, message: 'خطا در ایجاد تحلیل رقیب' });
+    }
+  });
+
+  // Get all market intelligence
+  app.get('/api/marketing/market-intelligence', requireAuth, async (req, res) => {
+    try {
+      const intel = await db.select().from(marketIntelligence).orderBy(desc(marketIntelligence.createdAt));
+      res.json({ success: true, data: intel });
+    } catch (error) {
+      console.error('Error fetching market intelligence:', error);
+      res.status(500).json({ success: false, message: 'خطا در دریافت هوش بازار' });
+    }
+  });
+
+  // Create new market intelligence entry
+  app.post('/api/marketing/market-intelligence', requireAuth, async (req, res) => {
+    try {
+      const validatedData = insertMarketIntelligenceSchema.parse(req.body);
+      const [intel] = await db.insert(marketIntelligence).values(validatedData).returning();
+      res.json({ success: true, data: intel });
+    } catch (error) {
+      console.error('Error creating market intelligence:', error);
+      res.status(500).json({ success: false, message: 'خطا در ایجاد هوش بازار' });
+    }
+  });
+
+  // Get marketing dashboard statistics
+  app.get('/api/marketing/dashboard-stats', requireAuth, async (req, res) => {
+    try {
+      const [marketsCount] = await db.select({ count: sql<number>`count(*)` }).from(internationalMarkets);
+      const [activeMarketsCount] = await db.select({ count: sql<number>`count(*)` }).from(internationalMarkets).where(eq(internationalMarkets.status, 'active'));
+      const [segmentsCount] = await db.select({ count: sql<number>`count(*)` }).from(marketSegments);
+      const [competitorsCount] = await db.select({ count: sql<number>`count(*)` }).from(competitorAnalysis);
+      
+      // Calculate total estimated revenue
+      const revenueResult = await db.select({ 
+        totalRevenue: sql<string>`sum(${internationalMarkets.estimatedRevenue})` 
+      }).from(internationalMarkets);
+      
+      // Calculate average growth rate
+      const growthResult = await db.select({ 
+        avgGrowth: sql<string>`avg(${internationalMarkets.growthRate})` 
+      }).from(internationalMarkets);
+      
+      res.json({ 
+        success: true, 
+        data: {
+          totalMarkets: marketsCount.count || 0,
+          activeMarkets: activeMarketsCount.count || 0,
+          totalSegments: segmentsCount.count || 0,
+          totalCompetitors: competitorsCount.count || 0,
+          totalEstimatedRevenue: parseFloat(revenueResult[0]?.totalRevenue || '0'),
+          averageGrowthRate: parseFloat(growthResult[0]?.avgGrowth || '0')
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching marketing dashboard stats:', error);
+      res.status(500).json({ success: false, message: 'خطا در دریافت آمار داشبورد مارکتینگ' });
     }
   });
 

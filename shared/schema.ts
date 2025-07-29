@@ -1388,3 +1388,6 @@ export const insertReviewHelpfulnessSchema = createInsertSchema(reviewHelpfulnes
 
 export type InsertReviewHelpfulness = z.infer<typeof insertReviewHelpfulnessSchema>;
 export type ReviewHelpfulness = typeof reviewHelpfulness.$inferSelect;
+
+// Re-export marketing schema
+export * from './marketing-schema';
