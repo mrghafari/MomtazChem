@@ -36612,7 +36612,12 @@ momtazchem.com
         createdAt: row.created_at
       }));
       
-      console.log('🔍 [FIXED] Returning processed orders:', orders.slice(0, 2));
+      console.log('🔍 [FIXED] First order with createdAt:', {
+        id: orders[0]?.id,
+        orderNumber: orders[0]?.orderNumber,
+        createdAt: orders[0]?.createdAt,
+        rawCreatedAt: result.rows[0]?.created_at
+      });
       
       res.json({
         success: true,
