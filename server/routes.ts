@@ -5895,7 +5895,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       'server_config': 'تنظیمات سرور',
       'company_information': 'اطلاعات شرکت',
       'user_guide': 'User Guide',
-      'site_management': 'مدیریت سایت'
+      'site_management': 'مدیریت سایت',
+      'marketing_module': 'ماژول مارکتینگ'
     };
 
     return technicalToPersianMap[moduleId] || moduleId;
@@ -24479,7 +24480,8 @@ ${message ? `Additional Requirements:\n${message}` : ''}
             'تنظیمات سرور': 'server_config',
             'اطلاعات شرکت': 'company_information',
             'User Guide': 'user_guide',
-            'مدیریت سایت': 'site_management'
+            'مدیریت سایت': 'site_management',
+            'ماژول مارکتینگ': 'marketing_module'
           };
 
           // Convert Persian names to technical IDs
@@ -24578,7 +24580,8 @@ ${message ? `Additional Requirements:\n${message}` : ''}
             'تنظیمات سرور': 'server_config',
             'اطلاعات شرکت': 'company_information',
             'User Guide': 'user_guide',
-            'مدیریت سایت': 'site_management'
+            'مدیریت سایت': 'site_management',
+            'ماژول مارکتینگ': 'marketing_module'
           };
 
           // Convert Persian names to technical IDs

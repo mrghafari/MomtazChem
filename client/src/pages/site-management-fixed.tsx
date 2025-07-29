@@ -394,6 +394,14 @@ export default function SiteManagement() {
       onClick: () => trackButtonClick("user-guide", () => setLocation("/user-guide")),
       className: "border-teal-300 text-teal-600 hover:bg-teal-50",
       moduleId: "user_guide"
+    },
+    {
+      id: "marketing-module",
+      label: "ماژول مارکتینگ",
+      icon: BarChart3,
+      onClick: () => trackButtonClick("marketing-module", () => setLocation("/admin/marketing-module")),
+      className: "border-purple-300 text-purple-600 hover:bg-purple-50",
+      moduleId: "marketing_module"
     }
 
   ];
