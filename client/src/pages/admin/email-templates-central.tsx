@@ -200,34 +200,52 @@ const EmailTemplatesCentral: React.FC = () => {
     queryKey: ['email-templates-central'],
     queryFn: async () => {
       try {
+        console.log('🔍 [EMAIL TEMPLATES] Attempting to fetch templates from API...');
+        
         const response = await fetch('/api/admin/email/templates', {
+          method: 'GET',
           credentials: 'include',
-          headers: { 'Content-Type': 'application/json' }
+          headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
         });
         
+        console.log('🔍 [EMAIL TEMPLATES] API Response status:', response.status);
+        console.log('🔍 [EMAIL TEMPLATES] API Response headers:', Object.fromEntries(response.headers.entries()));
+        
         if (!response.ok) {
+          const errorText = await response.text();
+          console.error('❌ [EMAIL TEMPLATES] API Error response:', errorText);
+          
           if (response.status === 401) {
             throw new Error('Authentication required - please login');
           }
-          throw new Error(`HTTP ${response.status}: Failed to fetch templates`);
+          throw new Error(`HTTP ${response.status}: ${errorText || 'Failed to fetch templates'}`);
         }
         
         const data = await response.json();
-        console.log('✅ Templates loaded successfully:', data?.length || 0, 'templates');
+        console.log('✅ [EMAIL TEMPLATES] Templates loaded successfully:', {
+          count: data?.length || 0,
+          firstTemplate: data?.[0]?.name || 'None',
+          isArray: Array.isArray(data)
+        });
+        
         return Array.isArray(data) ? data : [] as EmailTemplate[];
       } catch (error) {
-        console.error('❌ Template loading error:', error);
+        console.error('❌ [EMAIL TEMPLATES] Complete error:', error);
         throw error;
       }
     },
     staleTime: 30000,
-    refetchInterval: 60000,
+    refetchInterval: false, // Disable auto-refresh to avoid spam
     retry: (failureCount, error) => {
-      // Don't retry auth errors, but retry other errors up to 3 times
+      console.log(`🔄 [EMAIL TEMPLATES] Retry attempt ${failureCount}:`, error.message);
+      // Don't retry auth errors, but retry other errors up to 2 times
       if (error.message?.includes('Authentication required')) {
         return false;
       }
-      return failureCount < 3;
+      return failureCount < 2;
     }
   });
 

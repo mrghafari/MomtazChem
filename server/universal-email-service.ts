@@ -26,26 +26,44 @@ export class UniversalEmailService {
       // If template number specified, load and use template
       if (options.templateNumber) {
         try {
+          console.log(`🔍 [Universal Email] Searching for template: ${options.templateNumber}`);
           const template = await emailStorage.getTemplateByNumber(options.templateNumber);
           if (template) {
-            console.log(`📧 Template ${options.templateNumber} found: ${template.name}`);
+            console.log(`📧 Template ${options.templateNumber} found: ${template.templateName || template.name}`);
+            console.log(`🔧 Template data:`, {
+              subject: template.subject,
+              hasHtmlContent: !!template.htmlContent,
+              variables: options.variables
+            });
             
             // Process template with variables if provided
             if (options.variables && template.htmlContent && template.subject) {
               let processedHtml = template.htmlContent || '';
               let processedSubject = template.subject || '';
               
+              console.log(`🔄 Processing template variables:`, Object.keys(options.variables));
+              
               for (const [key, value] of Object.entries(options.variables)) {
                 const placeholder = `{{${key}}}`;
-                processedHtml = processedHtml.replace(new RegExp(placeholder, 'g'), value);
-                processedSubject = processedSubject.replace(new RegExp(placeholder, 'g'), value);
+                const beforeHtml = processedHtml.includes(placeholder);
+                const beforeSubject = processedSubject.includes(placeholder);
+                
+                // Escape special regex characters and use global replace
+                const escapedPlaceholder = placeholder.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                processedHtml = processedHtml.replace(new RegExp(escapedPlaceholder, 'g'), value);
+                processedSubject = processedSubject.replace(new RegExp(escapedPlaceholder, 'g'), value);
+                
+                console.log(`🔄 Replaced ${placeholder}: HTML(${beforeHtml}→${!processedHtml.includes(placeholder)}), Subject(${beforeSubject}→${!processedSubject.includes(placeholder)})`);
               }
               
               // Update options with template content
               options.html = processedHtml;
               options.subject = processedSubject;
               options.text = template.textContent || processedHtml.replace(/<[^>]*>/g, ''); // Strip HTML for text version
+              
+              console.log(`✅ Template processing complete. Final subject: ${processedSubject.substring(0, 100)}...`);
             } else {
+              console.warn(`⚠️ Template processing skipped - missing variables or content`);
               // Use template as-is with null safety
               options.html = template.htmlContent || options.html;
               options.subject = template.subject || options.subject;
