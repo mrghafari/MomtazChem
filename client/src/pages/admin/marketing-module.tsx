@@ -29,7 +29,11 @@ import {
   PieChart,
   Activity,
   Calendar,
-  Filter
+  Filter,
+  Gift,
+  Award,
+  Star,
+  Trophy
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -262,7 +266,7 @@ const MarketingModule: React.FC = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4 mb-6">
+        <TabsList className="grid w-full grid-cols-5 mb-6">
           <TabsTrigger value="international-markets" className="flex items-center gap-2">
             <Globe className="w-4 h-4" />
             بازارهای بین‌المللی
@@ -278,6 +282,10 @@ const MarketingModule: React.FC = () => {
           <TabsTrigger value="market-intelligence" className="flex items-center gap-2">
             <Zap className="w-4 h-4" />
             هوش بازار
+          </TabsTrigger>
+          <TabsTrigger value="loyalty-system" className="flex items-center gap-2">
+            <Gift className="w-4 h-4" />
+            سیستم وفاداری
           </TabsTrigger>
         </TabsList>
 
@@ -504,6 +512,238 @@ const MarketingModule: React.FC = () => {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="loyalty-system" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Trophy className="w-5 h-5 text-yellow-600" />
+                  آمار کلی وفاداری
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">کل مشتریان فعال:</span>
+                    <span className="font-bold text-blue-600">1,247</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">امتیازات اعطا شده:</span>
+                    <span className="font-bold text-green-600">45,820</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">تخفیفات استفاده شده:</span>
+                    <span className="font-bold text-purple-600">156</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Star className="w-5 h-5 text-yellow-500" />
+                  توزیع سطح مشتریان
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-amber-500"></div>
+                      <span className="text-sm">برنزی</span>
+                    </div>
+                    <span className="font-bold">847</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-slate-400"></div>
+                      <span className="text-sm">نقره‌ای</span>
+                    </div>
+                    <span className="font-bold">312</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                      <span className="text-sm">طلایی</span>
+                    </div>
+                    <span className="font-bold">88</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Gift className="w-5 h-5 text-pink-600" />
+                  تنظیمات سریع
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                    <Plus className="w-4 h-4 mr-2" />
+                    افزودن قانون جدید
+                  </Button>
+                  <Button variant="outline" className="w-full">
+                    <Edit className="w-4 h-4 mr-2" />
+                    ویرایش نرخ امتیازات
+                  </Button>
+                  <Button variant="outline" className="w-full">
+                    <Trophy className="w-4 h-4 mr-2" />
+                    مدیریت سطوح
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Award className="w-5 h-5 text-blue-600" />
+                  سیستم امتیاز و وفاداری مشتریان (Loyalty)
+                </CardTitle>
+                <p className="text-gray-600">مدیریت جامع سیستم امتیازدهی و تخفیفات مشتریان</p>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <h3 className="font-semibold text-blue-800 mb-3 flex items-center gap-2">
+                    <Star className="w-4 h-4" />
+                    ویژگی‌های کلیدی سیستم:
+                  </h3>
+                  <ul className="space-y-2 text-sm text-blue-700">
+                    <li className="flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-blue-600"></div>
+                      ثبت امتیاز براساس مبلغ خرید
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-blue-600"></div>
+                      تبدیل امتیاز به کد تخفیف
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-blue-600"></div>
+                      سطح‌بندی مشتری‌ها (برنزی، نقره‌ای، طلایی)
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+                      <h4 className="font-semibold text-green-800 mb-1">نرخ امتیاز</h4>
+                      <p className="text-sm text-green-700">1 امتیاز = 1,000 دینار</p>
+                    </div>
+                    <div className="p-3 bg-purple-50 rounded-lg border border-purple-200">
+                      <h4 className="font-semibold text-purple-800 mb-1">نرخ تخفیف</h4>
+                      <p className="text-sm text-purple-700">100 امتیاز = 5% تخفیف</p>
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-amber-50 rounded-lg border border-amber-200">
+                    <h4 className="font-semibold text-amber-800 mb-2 flex items-center gap-2">
+                      <Trophy className="w-4 h-4" />
+                      سطوح مشتریان:
+                    </h4>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between items-center">
+                        <span className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full bg-amber-600"></div>
+                          سطح برنزی
+                        </span>
+                        <span className="text-amber-700">0 - 999,999 دینار</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full bg-slate-500"></div>
+                          سطح نقره‌ای
+                        </span>
+                        <span className="text-amber-700">1,000,000 - 4,999,999 دینار</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                          سطح طلایی
+                        </span>
+                        <span className="text-amber-700">5,000,000+ دینار</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <Button className="flex-1 bg-green-600 hover:bg-green-700">
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    فعال‌سازی سیستم
+                  </Button>
+                  <Button variant="outline" className="flex-1">
+                    <Eye className="w-4 h-4 mr-2" />
+                    مشاهده گزارش
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="w-5 h-5 text-purple-600" />
+                  مشتریان برتر و فعالیت‌های اخیر
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="border-b pb-3">
+                    <h4 className="font-semibold text-gray-800 mb-2">مشتریان برتر این ماه:</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center p-2 bg-yellow-50 rounded border border-yellow-200">
+                        <div className="flex items-center gap-2">
+                          <Trophy className="w-4 h-4 text-yellow-600" />
+                          <span className="text-sm font-medium">احمد علی محمدی</span>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-xs text-gray-600">امتیاز: 2,450</div>
+                          <div className="text-xs text-yellow-600">طلایی</div>
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center p-2 bg-slate-50 rounded border border-slate-200">
+                        <div className="flex items-center gap-2">
+                          <Star className="w-4 h-4 text-slate-600" />
+                          <span className="text-sm font-medium">فاطمه احمدی</span>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-xs text-gray-600">امتیاز: 1,230</div>
+                          <div className="text-xs text-slate-600">نقره‌ای</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-gray-800 mb-2">فعالیت‌های اخیر:</h4>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between items-center p-2 bg-green-50 rounded">
+                        <span>امتیاز جدید اعطا شده</span>
+                        <span className="text-green-600">+50 امتیاز</span>
+                      </div>
+                      <div className="flex justify-between items-center p-2 bg-red-50 rounded">
+                        <span>استفاده از تخفیف</span>
+                        <span className="text-red-600">-200 امتیاز</span>
+                      </div>
+                      <div className="flex justify-between items-center p-2 bg-blue-50 rounded">
+                        <span>ارتقاء سطح مشتری</span>
+                        <span className="text-blue-600">برنزی → نقره‌ای</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
 
