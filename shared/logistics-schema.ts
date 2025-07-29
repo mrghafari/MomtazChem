@@ -457,6 +457,10 @@ export const readyVehicles = pgTable("ready_vehicles", {
   // Capacity and specifications
   loadCapacity: decimal("load_capacity", { precision: 8, scale: 2 }).notNull(), // Load capacity in kg
   
+  // Special capabilities for flammable materials
+  supportsFlammable: boolean("supports_flammable").default(false), // Can transport flammable materials
+  notAllowedFlammable: boolean("not_allowed_flammable").default(false), // Explicitly not allowed for flammable materials
+  
   // Current status and location
   isAvailable: boolean("is_available").default(true), // Is the vehicle available for work
   currentLocation: text("current_location"), // Current location of the vehicle

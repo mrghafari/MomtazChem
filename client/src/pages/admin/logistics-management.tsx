@@ -33,7 +33,9 @@ import {
   Weight,
   Scale,
   ArrowUpDown,
-  Bus
+  Bus,
+  X,
+  Minus
 } from 'lucide-react';
 import { useOrderNotifications } from '@/hooks/useOrderNotifications';
 import PostalServicesTab from '@/components/PostalServicesTab';
@@ -2612,7 +2614,7 @@ const LogisticsManagement = () => {
                   <TableHead>شماره خودرو</TableHead>
                   <TableHead>نام راننده</TableHead>
                   <TableHead>موبایل راننده</TableHead>
-                  <TableHead>ظرفیت حمل (کیلوگرم)</TableHead>
+                  <TableHead>مواد آتش‌زا</TableHead>
                   <TableHead>موقعیت فعلی</TableHead>
                   <TableHead>وضعیت</TableHead>
                   <TableHead>عملیات</TableHead>
@@ -2621,11 +2623,11 @@ const LogisticsManagement = () => {
               <TableBody>
                 {readyVehiclesLoading ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8">در حال بارگذاری...</TableCell>
+                    <TableCell colSpan={9} className="text-center py-8">در حال بارگذاری...</TableCell>
                   </TableRow>
                 ) : readyVehicles.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8">
+                    <TableCell colSpan={9} className="text-center py-8">
                       <div className="flex flex-col items-center gap-2">
                         <Truck className="h-12 w-12 text-gray-400" />
                         <p className="text-gray-600">هیچ خودرو آماده‌ای ثبت نشده</p>
@@ -2649,9 +2651,23 @@ const LogisticsManagement = () => {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-1">
-                          <Weight className="h-3 w-3 text-orange-600" />
-                          <span>{vehicle.loadCapacity.toLocaleString()} کیلوگرم</span>
+                        <div className="flex items-center gap-2">
+                          {vehicle.supportsFlammable ? (
+                            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300 text-xs">
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                              مجاز
+                            </Badge>
+                          ) : vehicle.notAllowedFlammable ? (
+                            <Badge variant="outline" className="bg-red-50 text-red-700 border-red-300 text-xs">
+                              <X className="h-3 w-3 mr-1" />
+                              غیرمجاز
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="bg-gray-50 text-gray-600 border-gray-300 text-xs">
+                              <Minus className="h-3 w-3 mr-1" />
+                              نامشخص
+                            </Badge>
+                          )}
                         </div>
                       </TableCell>
                       <TableCell>
@@ -2784,6 +2800,40 @@ const LogisticsManagement = () => {
                       defaultChecked
                     />
                     <Label htmlFor="isAvailable">آماده به کار</Label>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-orange-700 flex items-center gap-2">
+                    <Flame className="h-4 w-4" />
+                    قابلیت حمل مواد آتش‌زا
+                  </Label>
+                  <div className="flex flex-col space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <input type="hidden" name="supportsFlammable" value="false" />
+                      <input 
+                        type="checkbox" 
+                        id="supportsFlammable" 
+                        name="supportsFlammable" 
+                        value="true"
+                      />
+                      <Label htmlFor="supportsFlammable" className="text-green-700">
+                        <CheckCircle className="h-3 w-3 mr-1 inline" />
+                        مجهز برای حمل مواد آتش‌زا
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input type="hidden" name="notAllowedFlammable" value="false" />
+                      <input 
+                        type="checkbox" 
+                        id="notAllowedFlammable" 
+                        name="notAllowedFlammable" 
+                        value="true"
+                      />
+                      <Label htmlFor="notAllowedFlammable" className="text-red-700">
+                        <X className="h-3 w-3 mr-1 inline" />
+                        غیرمجاز برای مواد آتش‌زا
+                      </Label>
+                    </div>
                   </div>
                 </div>
               </div>
