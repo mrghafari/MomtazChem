@@ -874,6 +874,12 @@ export default function VehicleTemplateEditor({ className = "" }: VehicleTemplat
                     {template.supportsFlammable && (
                       <Badge variant="destructive" className="text-xs bg-orange-500">آتش‌زا</Badge>
                     )}
+                    {(template as any).notAllowedFlammable && (
+                      <Badge variant="outline" className="text-xs bg-red-100 text-red-800 border-red-300">
+                        <X className="w-3 h-3 ml-1" />
+                        غیرمجاز آتش‌زا
+                      </Badge>
+                    )}
                     {template.supportsRefrigerated && (
                       <Badge variant="secondary" className="text-xs">یخچالی</Badge>
                     )}
