@@ -245,8 +245,25 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const { language, direction } = useLanguage();
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [locationData, setLocationData] = useState<{latitude: number, longitude: number} | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<'online_payment' | 'wallet_full' | 'wallet_partial' | 'bank_receipt' | 'bank_transfer_grace'>('online_payment');
+  const [paymentMethod, setPaymentMethod] = useState<'online_payment' | 'wallet_full' | 'wallet_partial' | 'bank_receipt' | 'bank_transfer_grace' | 'wallet_combined'>('online_payment');
   const [walletAmount, setWalletAmount] = useState<number>(0);
+  
+  // Auto-set wallet amount when wallet_combined is selected
+  useEffect(() => {
+    if (paymentMethod === 'wallet_combined') {
+      const maxUsage = Math.min(walletBalance, totalAmount);
+      setWalletAmount(maxUsage);
+      console.log('🔄 [AUTO WALLET] wallet_combined selected - setting walletAmount:', {
+        paymentMethod,
+        walletBalance,
+        totalAmount,
+        maxUsage,
+        autoSetValue: maxUsage
+      });
+    } else if (paymentMethod !== 'wallet_partial') {
+      setWalletAmount(0);
+    }
+  }, [paymentMethod, walletBalance, totalAmount]);
   const [selectedReceiptFile, setSelectedReceiptFile] = useState<File | null>(null);
   const [selectedShippingMethod, setSelectedShippingMethod] = useState<number | null>(null);
   const [shippingCost, setShippingCost] = useState<number>(0);
