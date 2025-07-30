@@ -167,6 +167,23 @@
 
 ## Recent Changes
 
+### COMPLETED: Province/City Dropdowns Integration with Delivery Cost Calculation - Complete Arabic Name Mapping (January 30, 2025)
+✅ **RESOLVED: Complete integration between province/city dropdowns and delivery cost calculation API with proper Arabic name mapping**
+- **User Issue Resolved**: "شهر مقصد در فرم محاسبه کرایه در انتخاب دوم همان شهری است که در لیست دراپ داون انتخاب میشود" - Fixed destination city mapping
+- **Critical Runtime Fix**: Resolved "selectedSecondaryProvinceId is not defined" error by reorganizing state variable declarations before API queries
+- **Arabic Name Integration**: Enhanced dropdown selections to store Arabic names internally while displaying bilingual format for users:
+  - **Province Selection**: English display names (e.g., "Erbil") mapped to Arabic API names (e.g., "اربیل") 
+  - **City Selection**: Bilingual dropdown showing "English / Arabic" format but storing Arabic names for delivery calculations
+  - **API Integration**: Delivery cost calculation now receives correct Arabic city names preventing "شهر مقصد یافت نشد" errors
+- **Enhanced Error Handling**: Added null/undefined checks for `optimalVehicle.totalCost` preventing runtime errors in delivery cost processing
+- **Console Logging**: Comprehensive debugging logs showing both display values and API-ready Arabic names for development clarity
+- **State Management**: Proper state variable organization ensuring all dropdown-related variables are declared before API queries that depend on them
+- **Testing Verified**: API logs confirm successful delivery cost calculation with Arabic city names:
+  ```
+  destinationCity: 'اربیل', destinationProvince: 'اربیل'
+  POST /api/calculate-delivery-cost 200 - SUCCESS
+  ```
+
 ### COMPLETED: Province/City Dropdowns Added to Bilingual Purchase Form Modal - Second Address Enhancement (January 30, 2025)
 ✅ **IMPLEMENTED: Complete province/city dropdown system in bilingual purchase form modal for second delivery address selection**
 - **User Request Fulfilled**: Added province/city dropdowns to the "Second Delivery Address" section in the bilingual purchase form modal (shop page cart checkout)

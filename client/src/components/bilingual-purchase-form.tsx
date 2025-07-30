@@ -918,24 +918,32 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
       const data = await response.json();
       
+      console.log('🚚 [SMART DELIVERY] API response:', data);
+      
       if (data.success && data.data) {
         const { optimalVehicle, alternatives } = data.data;
         
-        setOptimalVehicle(optimalVehicle);
-        setAlternativeVehicles(alternatives || []);
-        setSmartDeliveryCost(optimalVehicle.totalCost);
-        
-        console.log('✅ [SMART DELIVERY] Cost calculated:', {
-          vehicle: optimalVehicle.vehicleName,
-          cost: optimalVehicle.totalCost,
-          estimatedTime: optimalVehicle.estimatedTime
-        });
+        // Check if optimalVehicle exists and has required properties
+        if (optimalVehicle && optimalVehicle.totalCost !== undefined) {
+          setOptimalVehicle(optimalVehicle);
+          setAlternativeVehicles(alternatives || []);
+          setSmartDeliveryCost(optimalVehicle.totalCost);
+          
+          console.log('✅ [SMART DELIVERY] Cost calculated:', {
+            vehicle: optimalVehicle.vehicleName,
+            cost: optimalVehicle.totalCost,
+            estimatedTime: optimalVehicle.estimatedTime
+          });
+        } else {
+          console.error('❌ [SMART DELIVERY] Invalid optimalVehicle data:', optimalVehicle);
+          throw new Error('داده‌های وسیله نقلیه بهینه دریافت نشد');
+        }
       } else {
         throw new Error(data.message || 'محاسبه هزینه ارسال ناموفق بود');
       }
     } catch (error) {
       console.error('❌ [SMART DELIVERY] Calculation error:', error);
-      setSmartDeliveryError(error.message || 'خطا در محاسبه هزینه ارسال');
+      setSmartDeliveryError(error?.message || 'خطا در محاسبه هزینه ارسال');
       setSmartDeliveryCost(0);
       setOptimalVehicle(null);
       setAlternativeVehicles([]);
