@@ -1957,13 +1957,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                           )}
                         </div>
                       </div>
-                      
-                      {/* Read-only notice */}
-                      <div className="bg-blue-50 rounded p-2 border border-blue-200">
-                        <p className="text-xs text-blue-700 flex items-center">
-                          🔒 برای تغییر آدرس، به پروفایل خود مراجعه کنید
-                        </p>
-                      </div>
+
                     </div>
                   </div>
                 ) : (
