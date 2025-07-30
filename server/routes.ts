@@ -12067,7 +12067,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           walletAmountUsed,
           remainingAmount,
           finalCustomerId,
-          paymentMethod: orderData.paymentMethod
+          paymentMethod: orderData.paymentMethod,
+          'Bank payment required?': remainingAmount > 0
         });
         
         if (walletAmountUsed > 0) {
@@ -12084,10 +12085,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
             
             console.log(`✅ Wallet payment processed: ${walletAmountUsed} IQD deducted, transaction ID: ${transaction.id}`);
             
-            if (remainingAmount === 0) {
+            // CRITICAL FIX: Check if remainingAmount is 0 to send directly to warehouse
+            if (remainingAmount <= 0.01) {
               finalPaymentStatus = "paid"; // Fully paid by wallet
+              finalPaymentMethod = "wallet_full"; // Ensure correct method
+              console.log('🏪 [WAREHOUSE DIRECT] Bank payment = 0, sending order directly to warehouse');
             } else {
               finalPaymentStatus = "partial"; // Partially paid by wallet
+              finalPaymentMethod = "wallet_partial"; // Requires bank payment
+              console.log('🏦 [BANK REQUIRED] Bank payment > 0, will require bank gateway');
             }
           } catch (walletError) {
             console.log(`❌ Wallet payment failed:`, walletError);
@@ -12356,7 +12362,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         walletAmountUsed: walletAmountUsed,
       };
 
-      // Check for hybrid payment first (wallet_partial with remaining amount)
+      // CRITICAL FIX: Check for full wallet payment first (remainingAmount = 0)
+      if (finalPaymentStatus === "paid" && remainingAmount <= 0.01) {
+        console.log(`🏪 [WAREHOUSE DIRECT] Full wallet payment completed - sending order ${orderNumber} directly to warehouse`);
+        console.log(`💰 [PAYMENT COMPLETE] Wallet: ${walletAmountUsed} IQD, Remaining: ${remainingAmount} IQD`);
+        
+        return res.json({
+          success: true,
+          message: 'سفارش با موفقیت ثبت شد - ارسال به انبار',
+          orderId: order.id,
+          orderNumber: orderNumber,
+          totalAmount: totalAmount,
+          walletAmountUsed: walletAmountUsed,
+          remainingAmount: 0,
+          paymentStatus: "paid",
+          requiresBankPayment: false,
+          directToWarehouse: true
+        });
+      }
+
+      // Check for hybrid payment (wallet_partial with remaining amount > 0)
       if (orderData.paymentMethod === 'wallet_partial' && remainingAmount > 0) {
         console.log(`🔄 [HYBRID PAYMENT] Wallet partial payment detected - wallet: ${walletAmountUsed}, remaining: ${remainingAmount}`);
         return res.json({
