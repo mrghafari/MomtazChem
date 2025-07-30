@@ -1227,6 +1227,15 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     let finalPaymentMethod = paymentMethod;
     
     // Convert wallet_combined to appropriate wallet type based on wallet amount vs total
+    console.log('🔍 [PAYMENT ANALYSIS] Before conversion:', {
+      paymentMethod,
+      walletAmount,
+      totalAmount,
+      walletBalance,
+      canUseWallet,
+      comparison: `${walletAmount} >= ${totalAmount} = ${walletAmount >= totalAmount}`
+    });
+    
     if (paymentMethod === 'wallet_combined') {
       if (walletAmount >= totalAmount) {
         finalPaymentMethod = 'wallet_full';
@@ -1262,6 +1271,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       originalPaymentMethod: paymentMethod,
       finalPaymentMethod: finalPaymentMethod,
       totalAmount,
+      walletBalance,
+      walletAmount,
       walletAmountUsed: orderData.walletAmountUsed,
       remainingAmount: orderData.remainingAmount,
       walletBalance,
