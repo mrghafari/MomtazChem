@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>🚌🔥 Critical Bus Safety Bug Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .error { background: #fee; border: 2px solid #f00; padding: 15px; margin: 10px 0; }
+        .success { background: #efe; border: 2px solid #0f0; padding: 15px; margin: 10px 0; }
+        .warning { background: #ffeaa7; border: 2px solid #fdcb6e; padding: 15px; margin: 10px 0; }
+        pre { background: #f5f5f5; padding: 10px; overflow-x: auto; }
+        button { padding: 10px 20px; font-size: 16px; margin: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>🚌🔥 Critical Bus Safety Bug Test</h1>
+    <p><strong>Issue:</strong> Despite flammable materials detection, buses are still being selected for hazardous transport</p>
+
+    <div class="warning">
+        <h3>🧪 Test Case: Solvant 402 + Intercity Bus Route</h3>
+        <p><strong>Product:</strong> Solvant 402 (ID: 28, Flammable: TRUE)</p>
+        <p><strong>Route:</strong> اربیل → بغداد (both cities have intercity bus lines)</p>
+        <p><strong>Weight:</strong> 25 kg (within bus limit ≤ 50kg)</p>
+        <p><strong>Expected:</strong> Should detect flammable materials and EXCLUDE buses</p>
+        <p><strong>Bug:</strong> Bus is selected despite containsFlammableProducts = true</p>
+    </div>
+
+    <button onclick="testBusFlammableBug()" style="background: #e74c3c; color: white;">🔥 Test Critical Bug</button>
+    
+    <div id="test-results"></div>
+
+    <div class="warning">
+        <h3>📋 Request Payload</h3>
+        <pre id="request-payload">
+{
+  "weight": 25,
+  "destinationCity": "بغداد",
+  "destinationProvince": "بغداد", 
+  "cart": { "28": 2 },
+  "useSecondaryAddress": false,
+  "originCity": "اربیل"
+}
+        </pre>
+    </div>
+
+    <script>
+        async function testBusFlammableBug() {
+            const resultsDiv = document.getElementById('test-results');
+            resultsDiv.innerHTML = '<p>🔍 Testing bus safety compliance for flammable materials...</p>';
+            
+            try {
+                const response = await fetch('/api/calculate-delivery-cost', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        weight: 25,
+                        destinationCity: "بغداد",
+                        destinationProvince: "بغداد",
+                        cart: { "28": 2 }, // Solvant 402 x2
+                        useSecondaryAddress: false,
+                        originCity: "اربیل"
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    // Check if intercity bus was selected despite flammable materials
+                    if (result.data.transportMethod === 'intercity_bus') {
+                        resultsDiv.innerHTML = `
+                            <div class="error">
+                                <h4>🚨 CRITICAL SAFETY BUG CONFIRMED!</h4>
+                                <p><strong>BUS SELECTED FOR FLAMMABLE MATERIALS</strong></p>
+                                <p>Transport Method: ${result.data.transportMethod}</p>
+                                <p>Selected Option: ${result.data.selectedOption.transportName}</p>
+                                <p>Cost: ${result.data.selectedOption.totalCost} IQD</p>
+                                <p><strong>⚠️ This violates safety regulations!</strong></p>
+                                <p><strong>Fix Required:</strong> Intercity bus logic must check flammable materials BEFORE selection</p>
+                            </div>
+                        `;
+                    } else {
+                        resultsDiv.innerHTML = `
+                            <div class="success">
+                                <h4>✅ Safety System Working</h4>
+                                <p>Transport Method: ${result.data.transportMethod || 'vehicle_selection'}</p>
+                                <p>No bus selected for flammable materials</p>
+                            </div>
+                        `;
+                    }
+                } else {
+                    resultsDiv.innerHTML = `
+                        <div class="warning">
+                            <h4>⚠️ API Error</h4>
+                            <p>Error: ${result.message}</p>
+                        </div>
+                    `;
+                }
+                
+                // Show full response for debugging
+                resultsDiv.innerHTML += `
+                    <div style="margin-top: 20px;">
+                        <h4>🔍 Full API Response:</h4>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    </div>
+                `;
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Test Failed</h4>
+                        <p>Error: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

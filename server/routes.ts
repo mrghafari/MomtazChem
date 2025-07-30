@@ -22306,9 +22306,20 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         containsFlammableProducts: containsFlammableProducts
       });
 
-      // If both cities have bus lines AND no flammable products AND weight limit OK, use intercity bus transport
+      // SAFETY EXCLUSION LOGGING: Show why buses are excluded
+      if (hasIntercityBusOption && containsFlammableProducts) {
+        console.log('🔥 [SAFETY EXCLUSION] Intercity bus available but EXCLUDED due to flammable materials');
+        console.log('🚫 [BUS BLOCKED] Route', originCity, '→', destinationCity, 'has bus lines but cannot transport hazardous cargo');
+      } else if (hasIntercityBusOption && !containsFlammableProducts && weightKg > 50) {
+        console.log('⚖️ [WEIGHT EXCLUSION] Intercity bus available but EXCLUDED due to weight limit:', weightKg, 'kg > 50 kg');
+      } else if (!hasIntercityBusOption) {
+        console.log('🚌 [NO BUS LINES] No intercity bus service available for route', originCity, '→', destinationCity);
+      }
+
+      // CRITICAL SAFETY CHECK: If both cities have bus lines AND no flammable products AND weight limit OK, use intercity bus transport
       if (hasIntercityBusOption && !containsFlammableProducts && weightKg <= 50) {
-        console.log('🚌 [INTERCITY BUS] Automatic selection for route:', originCity, '→', destinationCity);
+        console.log('🚌 [INTERCITY BUS] ✅ Safety-compliant automatic selection for route:', originCity, '→', destinationCity);
+        console.log('🔥 [SAFETY VERIFIED] No flammable materials detected - bus transport authorized');
         
         // Calculate bus transport cost (typically cheaper than vehicle transport)
         const busCostPerKm = 50; // IQD per km for bus transport
@@ -22338,7 +22349,9 @@ ${message ? `Additional Requirements:\n${message}` : ''}
                 maxWeight: 50, // kg - typical bus cargo limit
                 weightExceeded: weightKg > 50,
                 message: weightKg > 50 ? `محموله شما ${weightKg} کیلوگرم است و از حد مجاز خط مسافربری (50 کیلوگرم) تجاوز می‌کند` : null
-              }
+              },
+              safetyCompliant: true,
+              flammableExcluded: true
             },
             hasIntercityBusOption: true,
             routeInfo: {
