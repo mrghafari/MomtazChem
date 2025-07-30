@@ -1639,12 +1639,16 @@ const Shop = () => {
                                 </div>
                               ) : null}
                               
-                            {/* Add to Cart Button - Always show */}
+                            {/* Add to Cart Button with Hazardous Indicator - Always show */}
                             <Button
-                              className="w-full"
+                              className="w-full flex items-center justify-center"
                               onClick={() => addToCart(product.id)}
                               disabled={!product.inStock || product.stockQuantity <= 0 || getProductQuantity(product.id) >= product.stockQuantity}
                             >
+                              {/* Hazardous Material Indicator - Between Star and Cart */}
+                              {product.isFlammable && (
+                                <AlertTriangle className="w-3 h-3 text-orange-500 animate-pulse ml-1" />
+                              )}
                               <ShoppingCart className="w-4 h-4 mr-2" />
                               {!product.inStock || product.stockQuantity <= 0 ? 'موجود نیست' : cart[product.id] && cart[product.id] > 0 ? 'افزودن بیشتر' : 'افزودن به سبد'}
                             </Button>
@@ -2004,12 +2008,16 @@ const Shop = () => {
                                     </div>
                                   ) : null}
                                   
-                                {/* Add to Cart Button - Always show */}
+                                {/* Add to Cart Button with Hazardous Indicator - Always show */}
                                 <Button
-                                  className="w-full"
+                                  className="w-full flex items-center justify-center"
                                   onClick={() => addToCart(product.id)}
                                   disabled={!product.inStock || product.stockQuantity <= 0 || getProductQuantity(product.id) >= product.stockQuantity}
                                 >
+                                  {/* Hazardous Material Indicator - Between Star and Cart */}
+                                  {product.isFlammable && (
+                                    <AlertTriangle className="w-3 h-3 text-orange-500 animate-pulse ml-1" />
+                                  )}
                                   <ShoppingCart className="w-4 h-4 mr-2" />
                                   {!product.inStock || product.stockQuantity <= 0 ? 'موجود نیست' : cart[product.id] && cart[product.id] > 0 ? 'افزودن بیشتر' : 'افزودن به سبد'}
                                 </Button>
