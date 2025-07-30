@@ -1319,16 +1319,13 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       finalPaymentMethod: finalPaymentMethod,
       totalAmount,
       walletBalance,
-      walletAmount,
       walletAmountUsed: orderData.walletAmountUsed,
       remainingAmount: orderData.remainingAmount,
-      walletBalance,
-      walletAmount: walletAmount,
-      'Wallet amount input value': walletAmount,
-      'Payment method selected': paymentMethod,
-      'Final payment method sent': finalPaymentMethod,
-      'Should use wallet': finalPaymentMethod === 'wallet_full' || finalPaymentMethod === 'wallet_partial',
-      'Payment conversion applied': paymentMethod !== finalPaymentMethod,
+      walletAmountInput: walletAmount,
+      paymentMethodSelected: paymentMethod,
+      finalPaymentMethodSent: finalPaymentMethod,
+      shouldUseWallet: finalPaymentMethod === 'wallet_full' || finalPaymentMethod === 'wallet_partial',
+      paymentConversionApplied: paymentMethod !== finalPaymentMethod,
       orderData
     });
 
@@ -1726,7 +1723,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                     <RadioGroupItem value="wallet_combined" id="wallet_combined" />
                     <Label htmlFor="wallet_combined" className="flex items-center gap-2 cursor-pointer">
                       <Wallet className="w-4 h-4 text-green-600" />
-                      <span className="font-semibold">استفاده از کیف پول (حداکثر {formatCurrency(Math.min(walletBalance, totalAmount))})</span>
+                      <span className="font-semibold">استفاده از کیف پول (حداکثر {Math.min(walletBalance, totalAmount).toLocaleString()} IQD)</span>
                     </Label>
                   </div>
                 )}
@@ -1764,7 +1761,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
               {paymentMethod === 'wallet_partial' && (
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="walletAmount">مبلغ از والت (حداکثر {formatCurrency(Math.min(walletBalance, totalAmount))})</Label>
+                    <Label htmlFor="walletAmount">مبلغ از والت (حداکثر {Math.min(walletBalance, totalAmount).toLocaleString()} IQD)</Label>
                     <Input
                       id="walletAmount"
                       type="number"
@@ -1775,7 +1772,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                         const value = parseFloat(e.target.value) || 0;
                         setWalletAmount(Math.min(value, Math.min(walletBalance, totalAmount)));
                       }}
-                      placeholder="مبلغ از والت"
+                      placeholder="مقدار دلخواه از کیف پول"
                       className="text-right"
                     />
                   </div>
