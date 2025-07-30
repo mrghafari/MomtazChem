@@ -122,12 +122,12 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   });
 
   // Iraqi provinces and cities queries for secondary address dropdowns
-  const { data: provincesData, isLoading: provincesLoading } = useQuery({
+  const { data: provincesData, isLoading: provincesLoading } = useQuery<{success: boolean, data: any[]}>({
     queryKey: ['/api/iraqi-provinces'],
     staleTime: 15 * 60 * 1000, // Consider fresh for 15 minutes
   });
 
-  const { data: citiesData, isLoading: citiesLoading } = useQuery({
+  const { data: citiesData, isLoading: citiesLoading } = useQuery<{success: boolean, data: any[]}>({
     queryKey: ['/api/iraqi-cities', selectedSecondaryProvinceId],
     queryFn: () => {
       const url = selectedSecondaryProvinceId 
@@ -139,24 +139,26 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
     staleTime: 10 * 60 * 1000,
   });
 
-  // Extract provinces and cities arrays from API responses
-  const provinces = (provincesData && typeof provincesData === 'object' && 'data' in provincesData) ? provincesData.data : [];
-  const secondaryCities = (citiesData && typeof citiesData === 'object' && 'data' in citiesData) ? citiesData.data : [];
+  // Extract provinces and cities arrays from API responses with proper type safety
+  const provinces = (provincesData?.success && Array.isArray(provincesData.data)) ? provincesData.data : [];
+  const secondaryCities = (citiesData?.success && Array.isArray(citiesData.data)) ? citiesData.data : [];
 
   // Debug logging for dropdown data
   console.log('🔍 [DROPDOWN DEBUG] Provinces data:', {
     raw: provincesData,
     processed: provinces,
-    count: provinces?.length || 0,
-    loading: provincesLoading
+    count: provinces.length,
+    loading: provincesLoading,
+    isArray: Array.isArray(provinces)
   });
   
   console.log('🔍 [DROPDOWN DEBUG] Cities data:', {
     raw: citiesData,
     processed: secondaryCities,
-    count: secondaryCities?.length || 0,
+    count: secondaryCities.length,
     loading: citiesLoading,
-    selectedProvinceId: selectedSecondaryProvinceId
+    selectedProvinceId: selectedSecondaryProvinceId,
+    isArray: Array.isArray(secondaryCities)
   });
 
   // Determine if user is logged in first
@@ -180,6 +182,12 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
       shippingMethod: "",
       paymentMethod: "",
       notes: "",
+      // Secondary address fields
+      secondDeliveryAddress: "",
+      secondDeliveryCity: "",
+      secondDeliveryProvince: "",
+      secondDeliveryPostalCode: "",
+      recipientMobile: "",
     },
   });
 
