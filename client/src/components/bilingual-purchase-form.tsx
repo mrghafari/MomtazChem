@@ -927,36 +927,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       });
       
       if (data.success && data.data) {
-        // Handle intercity bus response format
-        if (data.data.transportMethod === 'intercity_bus' && data.data.selectedOption) {
-          const busOption = data.data.selectedOption;
-          const optimalVehicle = {
-            vehicleId: 'intercity_bus',
-            vehicleName: busOption.transportName,
-            vehicleNameEn: busOption.transportNameEn,
-            vehicleType: 'intercity_bus',
-            totalCost: busOption.totalCost,
-            estimatedTime: busOption.estimatedTime,
-            routeDescription: busOption.routeDescription,
-            distance: busOption.distance,
-            advantages: busOption.advantages,
-            safetyCompliant: busOption.safetyCompliant
-          };
-          
-          setOptimalVehicle(optimalVehicle);
-          setAlternativeVehicles([]);
-          setSmartDeliveryCost(busOption.totalCost);
-          
-          console.log('✅ [SMART DELIVERY] Intercity bus selected:', {
-            vehicle: busOption.transportName,
-            cost: busOption.totalCost,
-            estimatedTime: busOption.estimatedTime,
-            route: busOption.routeDescription
-          });
-          return;
-        }
-        
-        // Handle standard vehicle selection response format
+        // Handle standard vehicle selection response format from database templates
         const { optimalVehicle, alternatives } = data.data;
         
         // Check if optimalVehicle exists and has required properties

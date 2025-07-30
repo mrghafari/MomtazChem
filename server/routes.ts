@@ -22293,85 +22293,8 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         cartItems: Object.keys(cart || {}).length
       });
 
-      // Check if both origin and destination cities have intercity bus lines
-      const hasIntercityBusOption = originCity_data.hasIntercityBusLine && destinationCity_data.hasIntercityBusLine;
-      
-      console.log('🚌 [BUS LINE CHECK]', {
-        origin: originCity,
-        destination: destinationCity,
-        originHasBusLine: originCity_data.hasIntercityBusLine,
-        destinationHasBusLine: destinationCity_data.hasIntercityBusLine,
-        hasIntercityBusOption: hasIntercityBusOption,
-        weight: weightKg,
-        containsFlammableProducts: containsFlammableProducts
-      });
-
-      // SAFETY EXCLUSION LOGGING: Show why buses are excluded
-      if (hasIntercityBusOption && containsFlammableProducts) {
-        console.log('🔥 [SAFETY EXCLUSION] Intercity bus available but EXCLUDED due to flammable materials');
-        console.log('🚫 [BUS BLOCKED] Route', originCity, '→', destinationCity, 'has bus lines but cannot transport hazardous cargo');
-      } else if (hasIntercityBusOption && !containsFlammableProducts && weightKg > 50) {
-        console.log('⚖️ [WEIGHT EXCLUSION] Intercity bus available but EXCLUDED due to weight limit:', weightKg, 'kg > 50 kg');
-      } else if (!hasIntercityBusOption) {
-        console.log('🚌 [NO BUS LINES] No intercity bus service available for route', originCity, '→', destinationCity);
-      }
-
-      // SAME-CITY DELIVERY CHECK: For same-city deliveries, prioritize motorcycles over intercity buses
-      const isSameCityDelivery = (originCity === destinationCity);
-      
-      if (isSameCityDelivery) {
-        console.log('🏍️ [SAME-CITY DELIVERY] Detected same-city delivery:', originCity, '- prioritizing motorcycle over intercity bus');
-        console.log('🚌 [BUS BYPASS] Intercity bus skipped for same-city delivery - motorcycles more appropriate for local transport');
-      }
-      
-      // CRITICAL SAFETY CHECK: If both cities have bus lines AND no flammable products AND weight limit OK AND NOT same city, use intercity bus transport
-      if (hasIntercityBusOption && !containsFlammableProducts && weightKg <= 50 && !isSameCityDelivery) {
-        console.log('🚌 [INTERCITY BUS] ✅ Safety-compliant automatic selection for route:', originCity, '→', destinationCity);
-        console.log('🔥 [SAFETY VERIFIED] No flammable materials detected - bus transport authorized');
-        console.log('🏙️ [ROUTE TYPE] Inter-city delivery - bus transport appropriate');
-        
-        // Calculate bus transport cost (typically cheaper than vehicle transport)
-        const busCostPerKm = 50; // IQD per km for bus transport
-        const busBasePrice = 15000; // Base price for bus service in IQD
-        const busTotalCost = busBasePrice + (distance * busCostPerKm);
-        
-        return res.json({
-          success: true,
-          data: {
-            transportMethod: 'intercity_bus',
-            message: `🚌 انتخاب خودکار خط مسافربری بین شهری برای مسیر ${originCity} به ${destinationCity}`,
-            selectedOption: {
-              transportType: 'intercity_bus',
-              transportName: 'خط مسافربری بین شهری',
-              transportNameEn: 'Intercity Bus Line',
-              routeDescription: `${originCity} ← → ${destinationCity}`,
-              distance: distance,
-              totalCost: busTotalCost,
-              estimatedTime: Math.round(distance / 60 * 60), // Assuming 60 km/h average speed
-              advantages: [
-                'هزینه کمتر نسبت به حمل بار خصوصی',
-                'خدمات منظم و قابل اعتماد',
-                'مناسب برای محموله‌های سبک تا متوسط',
-                'کاهش ترافیک و آلودگی محیط زیست'
-              ],
-              restrictions: {
-                maxWeight: 50, // kg - typical bus cargo limit
-                weightExceeded: weightKg > 50,
-                message: weightKg > 50 ? `محموله شما ${weightKg} کیلوگرم است و از حد مجاز خط مسافربری (50 کیلوگرم) تجاوز می‌کند` : null
-              },
-              safetyCompliant: true,
-              flammableExcluded: true
-            },
-            hasIntercityBusOption: true,
-            routeInfo: {
-              origin: originCity,
-              destination: destinationCity,
-              distance: distance,
-              estimatedDuration: `${Math.round(distance / 60)} ساعت`
-            }
-          }
-        });
-      }
+      // DISABLED: Intercity bus logic - using only vehicle templates from database
+      console.log('🚛 [VEHICLE TEMPLATES] Using only database vehicle templates - no automatic intercity bus selection');
 
       console.log('🎯 [DELIVERY COST] Calculation parameters:', {
         weight: weightKg,
