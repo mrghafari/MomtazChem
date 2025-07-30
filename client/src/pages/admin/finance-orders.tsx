@@ -428,11 +428,11 @@ function FinanceOrders() {
       queryClient.refetchQueries({ queryKey: ['/api/financial/orders'] });
       queryClient.refetchQueries({ queryKey: ['/api/financial/approved-orders'] });
       
-      // Force immediate refresh with a slight delay
+      // Force immediate refresh with a slight delay for database propagation
       setTimeout(() => {
         refetch();
         refetchApproved();
-      }, 100);
+      }, 500);
       
       // Close modals and reset state
       setDialogOpen(false);
