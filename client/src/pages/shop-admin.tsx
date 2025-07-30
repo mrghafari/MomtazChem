@@ -836,7 +836,18 @@ export default function ShopAdmin() {
                             </span>
                           </div>
                         )}
-                        {selectedOrder.paymentMethod === 'wallet_partial' && (
+                        {selectedOrder.paymentMethod === 'wallet_partial' && selectedOrder.walletAmountUsed === 0 && (
+                          <div className="flex justify-between items-center p-2 bg-orange-100 rounded-lg border border-orange-200">
+                            <div className="flex items-center gap-2">
+                              <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+                              <span className="text-sm font-medium text-orange-800">کیف پول (سفارش ناقص)</span>
+                            </div>
+                            <span className="font-bold text-orange-700">
+                              پرداخت ناتمام - کیف پول کسر نشده
+                            </span>
+                          </div>
+                        )}
+                        {selectedOrder.paymentMethod === 'wallet_partial' && selectedOrder.walletAmountUsed > 0 && (
                           <div className="flex justify-between items-center p-2 bg-blue-100 rounded-lg border border-blue-200">
                             <div className="flex items-center gap-2">
                               <div className="w-3 h-3 bg-blue-500 rounded-full"></div>

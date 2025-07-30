@@ -15842,6 +15842,29 @@ Momtaz Chemical Technical Team`,
           if (order.customerId) {
             customer = await customerStorage.getCustomerById(order.customerId);
           }
+
+          // Calculate wallet amount used for payment source display
+          let walletAmountUsed = 0;
+          if (order.paymentMethod === 'wallet_full') {
+            walletAmountUsed = parseFloat(order.totalAmount || 0);
+          } else if (order.paymentMethod === 'wallet_partial') {
+            // Get wallet transaction for this order to find actual amount used
+            try {
+              const { pool } = await import('./db');
+              const walletResult = await pool.query(`
+                SELECT amount FROM wallet_transactions 
+                WHERE reference_type = 'order' AND reference_id = $1 AND transaction_type = 'debit'
+                ORDER BY created_at DESC LIMIT 1
+              `, [order.id]);
+              
+              if (walletResult.rows.length > 0) {
+                walletAmountUsed = parseFloat(walletResult.rows[0].amount || 0);
+              }
+            } catch (error) {
+              console.error(`Error fetching wallet transaction for order ${order.id}:`, error);
+            }
+          }
+
           return {
             ...order,
             items,
@@ -15851,6 +15874,8 @@ Momtaz Chemical Technical Team`,
             // Include shipping method information
             carrier: order.carrier,
             paymentMethod: order.paymentMethod,
+            // Add wallet amount used for payment source display
+            walletAmountUsed: walletAmountUsed,
           };
         })
       );
