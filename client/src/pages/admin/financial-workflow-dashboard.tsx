@@ -146,6 +146,52 @@ export default function FinancialWorkflowDashboard() {
     repairOrphanedOrderMutation.mutate(customerOrderId);
   };
 
+  // Helper function to get status label in Persian
+  const getStatusLabel = (status: string) => {
+    const statusLabels: Record<string, string> = {
+      'pending': 'در انتظار',
+      'confirmed': 'تایید شده',
+      'pending_payment': 'در انتظار پرداخت',
+      'payment_uploaded': 'فیش آپلود شده',
+      'financial_reviewing': 'در حال بررسی مالی',
+      'financial_rejected': 'رد شده توسط مالی',
+      'warehouse_pending': 'در انتظار انبار',
+      'warehouse_ready': 'آماده انبار',
+      'logistics_pending': 'در انتظار لجستیک',
+      'out_for_delivery': 'در حال تحویل',
+      'delivered': 'تحویل داده شده',
+      'cancelled': 'لغو شده',
+      'rejected': 'رد شده'
+    };
+    return statusLabels[status] || status;
+  };
+
+  // Helper function to get status badge component
+  const getStatusBadge = (status: string) => {
+    const statusConfig: Record<string, { label: string; className: string }> = {
+      'pending': { label: 'در انتظار', className: 'bg-yellow-100 text-yellow-800' },
+      'confirmed': { label: 'تایید شده', className: 'bg-blue-100 text-blue-800' },
+      'pending_payment': { label: 'در انتظار پرداخت', className: 'bg-orange-100 text-orange-800' },
+      'payment_uploaded': { label: 'فیش آپلود شده', className: 'bg-purple-100 text-purple-800' },
+      'financial_reviewing': { label: 'در حال بررسی مالی', className: 'bg-indigo-100 text-indigo-800' },
+      'financial_rejected': { label: 'رد شده توسط مالی', className: 'bg-red-100 text-red-800' },
+      'warehouse_pending': { label: 'در انتظار انبار', className: 'bg-teal-100 text-teal-800' },
+      'warehouse_ready': { label: 'آماده انبار', className: 'bg-green-100 text-green-800' },
+      'logistics_pending': { label: 'در انتظار لجستیک', className: 'bg-cyan-100 text-cyan-800' },
+      'out_for_delivery': { label: 'در حال تحویل', className: 'bg-blue-100 text-blue-800' },
+      'delivered': { label: 'تحویل داده شده', className: 'bg-green-100 text-green-800' },
+      'cancelled': { label: 'لغو شده', className: 'bg-gray-100 text-gray-800' },
+      'rejected': { label: 'رد شده', className: 'bg-red-100 text-red-800' }
+    };
+    
+    const config = statusConfig[status] || { label: status, className: 'bg-gray-100 text-gray-800' };
+    return (
+      <Badge className={config.className}>
+        {config.label}
+      </Badge>
+    );
+  };
+
   const handleManualApproval = () => {
     if (!selectedOrder) return;
 
@@ -284,6 +330,9 @@ export default function FinancialWorkflowDashboard() {
           </TabsTrigger>
           <TabsTrigger value="approved" className="text-xs md:text-sm">
             تایید شده ({approvedOrders?.length || 0})
+          </TabsTrigger>
+          <TabsTrigger value="orphaned" className="text-xs md:text-sm">
+            سفارشات یتیم ({totalOrphaned || 0})
           </TabsTrigger>
         </TabsList>
 
@@ -1001,6 +1050,204 @@ export default function FinancialWorkflowDashboard() {
                 </Card>
               ))}
             </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="orphaned" className="space-y-4">
+          {orphanedLoading ? (
+            <Card>
+              <CardContent className="text-center py-12">
+                <Timer className="h-16 w-16 text-orange-500 mx-auto mb-4 animate-spin" />
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                  در حال بارگیری سفارشات یتیم...
+                </h3>
+              </CardContent>
+            </Card>
+          ) : (
+            <>
+              {/* آمار وضعیت‌های سفارشات یتیم */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <Card className="border-yellow-200 bg-yellow-50">
+                  <CardContent className="p-4 text-center">
+                    <div className="text-2xl font-bold text-yellow-600">
+                      {orphanedOrders?.filter(order => 
+                        order.currentStatus === 'pending' || 
+                        order.currentStatus === 'confirmed' ||
+                        order.currentStatus === 'pending_payment'
+                      ).length || 0}
+                    </div>
+                    <div className="text-sm text-yellow-700 mt-1">در انتظار بررسی</div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-green-200 bg-green-50">
+                  <CardContent className="p-4 text-center">
+                    <div className="text-2xl font-bold text-green-600">
+                      {orphanedOrders?.filter(order => 
+                        order.currentStatus === 'warehouse_ready' || 
+                        order.currentStatus === 'warehouse_pending' ||
+                        order.currentStatus === 'logistics_pending' ||
+                        order.currentStatus === 'out_for_delivery'
+                      ).length || 0}
+                    </div>
+                    <div className="text-sm text-green-700 mt-1">ارجاع شده به انبار</div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-red-200 bg-red-50">
+                  <CardContent className="p-4 text-center">
+                    <div className="text-2xl font-bold text-red-600">
+                      {orphanedOrders?.filter(order => 
+                        order.currentStatus === 'cancelled' || 
+                        order.currentStatus === 'rejected' ||
+                        order.currentStatus === 'financial_rejected'
+                      ).length || 0}
+                    </div>
+                    <div className="text-sm text-red-700 mt-1">رد شده</div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-blue-200 bg-blue-50">
+                  <CardContent className="p-4 text-center">
+                    <div className="text-2xl font-bold text-blue-600">
+                      {temporaryOrders?.length || 0}
+                    </div>
+                    <div className="text-sm text-blue-700 mt-1">سفارشات موقت</div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* لیست سفارشات یتیم */}
+              {totalOrphaned === 0 ? (
+                <Card>
+                  <CardContent className="text-center py-12">
+                    <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                      سفارش یتیمی یافت نشد
+                    </h3>
+                    <p className="text-gray-600">
+                      تمام سفارشات دارای رکورد مدیریت مناسب هستند
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                    سفارشات یتیم نیازمند تعمیر ({totalOrphaned} سفارش)
+                  </h3>
+                  
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {orphanedOrders?.map((order) => (
+                      <Card key={order.id} className="border-orange-200 bg-orange-50/50">
+                        <CardHeader className="pb-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <AlertTriangle className="h-5 w-5 text-orange-600" />
+                              <div>
+                                <Badge className="bg-orange-100 text-orange-800 border-orange-300">
+                                  سفارش یتیم
+                                </Badge>
+                                <p className="text-sm text-gray-600 mt-1">
+                                  {order.paymentSourceLabel}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <h3 className="font-bold text-lg">
+                                سفارش {order.orderNumber}
+                              </h3>
+                              <p className="text-sm text-gray-600">
+                                {new Date(order.createdAt).toLocaleDateString('fa-IR')}
+                              </p>
+                            </div>
+                          </div>
+                        </CardHeader>
+                        
+                        <CardContent className="space-y-3">
+                          {/* اطلاعات مشتری */}
+                          <div className="flex items-center gap-2">
+                            <User className="h-4 w-4 text-gray-500" />
+                            <span className="text-gray-700 font-medium">{order.customerName}</span>
+                          </div>
+
+                          {/* تاریخ سفارش */}
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-4 w-4 text-gray-500" />
+                            <span className="text-sm text-gray-600">
+                              {new Date(order.createdAt).toLocaleDateString('fa-IR')} - {new Date(order.createdAt).toLocaleTimeString('fa-IR')}
+                            </span>
+                          </div>
+
+                          {/* اطلاعات تماس مشتری */}
+                          {(order.customerEmail || order.customerPhone) && (
+                            <div className="bg-white p-2 rounded-lg space-y-1 border border-orange-100">
+                              {order.customerEmail && (
+                                <div className="flex items-center gap-2 text-sm">
+                                  <Mail className="h-3 w-3 text-gray-500" />
+                                  <span className="text-gray-600">{order.customerEmail}</span>
+                                </div>
+                              )}
+                              {order.customerPhone && (
+                                <div className="flex items-center gap-2 text-sm">
+                                  <Phone className="h-3 w-3 text-gray-500" />
+                                  <span className="text-gray-600">{order.customerPhone}</span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* روش پرداخت */}
+                          <div className="flex items-center gap-2">
+                            {getPaymentMethodIcon(order.paymentMethod)}
+                            <span className="text-sm font-medium text-gray-700">
+                              {order.paymentMethod || 'نامشخص'}
+                            </span>
+                          </div>
+
+                          {/* مبلغ کل */}
+                          <div className="flex justify-between items-center">
+                            <span className="text-gray-600">مبلغ کل:</span>
+                            <span className="font-bold text-lg text-orange-600">
+                              {parseFloat(order.totalAmount || '0').toLocaleString()} دینار
+                            </span>
+                          </div>
+
+                          {/* وضعیت */}
+                          <div className="bg-yellow-100 p-3 rounded-lg border border-yellow-200">
+                            <div className="flex items-center gap-2 text-yellow-800">
+                              <Settings className="h-4 w-4" />
+                              <span className="font-medium">وضعیت: {getStatusLabel(order.currentStatus)}</span>
+                            </div>
+                            <p className="text-sm text-yellow-700 mt-1">
+                              این سفارش فاقد رکورد مدیریت است و نیاز به تعمیر دارد
+                            </p>
+                          </div>
+
+                          {/* دکمه تعمیر */}
+                          <Button
+                            onClick={() => handleRepairOrphanedOrder(order.id)}
+                            disabled={repairOrphanedOrderMutation.isPending}
+                            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                          >
+                            {repairOrphanedOrderMutation.isPending ? (
+                              <>
+                                <Timer className="h-4 w-4 mr-2 animate-spin" />
+                                در حال تعمیر...
+                              </>
+                            ) : (
+                              <>
+                                <Wrench className="h-4 w-4 mr-2" />
+                                تعمیر سفارش یتیم
+                              </>
+                            )}
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </TabsContent>
       </Tabs>
