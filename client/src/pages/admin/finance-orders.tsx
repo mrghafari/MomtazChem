@@ -650,7 +650,7 @@ function FinanceOrders() {
                 <span>تصحیح خودکار workflow</span>
               </Button>
               <Button 
-                onClick={processPendingBankPayments.mutate}
+                onClick={() => processPendingBankPayments.mutate()}
                 disabled={processPendingBankPayments.isPending}
                 className="flex items-center space-x-2 space-x-reverse bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
               >
