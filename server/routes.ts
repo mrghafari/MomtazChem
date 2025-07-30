@@ -11900,8 +11900,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const isFullWalletPayment = finalPaymentMethod === 'wallet_full';
       const isPartialWalletPayment = finalPaymentMethod === 'wallet_partial';
       
-      // Enhanced logic: Only require bank payment if remaining amount > 5 IQD (ignore small amounts) AND not a full wallet payment
-      const requiresBankPayment = remainingAmountToPay > 5 && !isFullWalletPayment;
+      // Enhanced logic: No bank payment required for full wallet payments
+      const requiresBankPayment = !isFullWalletPayment && remainingAmountToPay > 0;
       
       console.log('🔍 [PAYMENT LOGIC DEBUG] Payment decision logic:', {
         actualWalletUsed,

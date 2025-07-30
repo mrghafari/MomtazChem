@@ -813,9 +813,25 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     return sum;
   }, 0);
 
-  // Calculate total amount (subtotal + VAT + duties + smart delivery cost)
-  const smartDeliveryFinalCost = optimalVehicle ? optimalVehicle.totalCost : smartDeliveryCost;
-  const totalAmount = subtotalAmount + totalTaxAmount + smartDeliveryFinalCost;
+  // Calculate shipping cost - prioritize smart delivery over regular shipping
+  const finalShippingCost = selectedShippingMethod && (shippingRatesData?.find((rate: any) => rate.id === selectedShippingMethod)?.deliveryMethod === 'smart_vehicle' || shippingRatesData?.find((rate: any) => rate.id === selectedShippingMethod)?.delivery_method === 'smart_vehicle')
+    ? (optimalVehicle ? optimalVehicle.totalCost : smartDeliveryCost)
+    : shippingCost;
+  
+  // Calculate total amount (subtotal + VAT + duties + final shipping cost - no double counting)
+  const totalAmount = subtotalAmount + totalTaxAmount + finalShippingCost;
+  
+  // Debug total calculation
+  console.log('💰 [TOTAL CALCULATION] Breakdown:', {
+    subtotalAmount,
+    totalTaxAmount,
+    finalShippingCost,
+    regularShippingCost: shippingCost,
+    smartDeliveryCost: smartDeliveryCost,
+    optimalVehicleCost: optimalVehicle?.totalCost,
+    totalAmount,
+    'Components': `${subtotalAmount} + ${totalTaxAmount} + ${finalShippingCost} = ${totalAmount}`
+  });
 
   // Calculate wallet payment amounts
   const walletBalance = (walletData as any)?.data?.wallet ? parseFloat((walletData as any).data.wallet.balance) : 
@@ -1183,13 +1199,13 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       cart,
       totalAmount,
       subtotalAmount,
-      shippingCost,
+      shippingCost: finalShippingCost,
       vatAmount: totalTaxAmount,
       selectedShippingMethod,
       currency: 'IQD',
       paymentMethod,
-      walletAmountUsed: 0,
-      remainingAmount: totalAmount,
+      walletAmountUsed: Math.round(walletAmount), // Use actual wallet amount in integer format
+      remainingAmount: Math.round(Math.max(0, totalAmount - walletAmount)), // Calculate remaining in integer format
       
       // Enhanced delivery information
       secondDeliveryAddress: showSecondAddress ? secondAddress : null,
@@ -1224,20 +1240,20 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     orderData.paymentMethod = finalPaymentMethod;
 
     if (finalPaymentMethod === 'wallet_full') {
-      orderData.walletAmountUsed = totalAmount;
+      orderData.walletAmountUsed = Math.round(totalAmount);
       orderData.remainingAmount = 0;
     } else if (finalPaymentMethod === 'wallet_partial') {
-      orderData.walletAmountUsed = walletAmount;
-      orderData.remainingAmount = totalAmount - walletAmount;
+      orderData.walletAmountUsed = Math.round(walletAmount);
+      orderData.remainingAmount = Math.round(Math.max(0, totalAmount - walletAmount));
     } else if (finalPaymentMethod === 'online_payment') {
       orderData.walletAmountUsed = 0;
-      orderData.remainingAmount = totalAmount;
+      orderData.remainingAmount = Math.round(totalAmount);
     } else if (finalPaymentMethod === 'bank_receipt') {
       orderData.walletAmountUsed = 0;
-      orderData.remainingAmount = totalAmount;
+      orderData.remainingAmount = Math.round(totalAmount);
     } else if (finalPaymentMethod === 'bank_transfer_grace') {
       orderData.walletAmountUsed = 0;
-      orderData.remainingAmount = totalAmount;
+      orderData.remainingAmount = Math.round(totalAmount);
       orderData.paymentGracePeriod = true; // Flag for 3-day grace period
     }
 
