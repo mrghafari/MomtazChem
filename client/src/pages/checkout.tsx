@@ -783,6 +783,15 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
         suggestedAmount,
         willBeFullPayment: suggestedAmount >= beforeWalletTotal
       });
+      
+      // Force immediate UI update verification
+      setTimeout(() => {
+        console.log('⚡ [WALLET VERIFY]:', {
+          currentWalletAmountToUse: walletAmountToUse,
+          afterSetState: suggestedAmount,
+          actualUsage: Math.min(suggestedAmount, Math.min(walletBalance, beforeWalletTotal))
+        });
+      }, 100);
     } else {
       setUseWallet(false);
       setWalletAmountToUse(0);
@@ -1042,15 +1051,10 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
       notes: data.notes || '',
       shippingMethod: data.shippingMethod,
       paymentMethod: (() => {
-        // Convert wallet_combined to appropriate wallet type based on actual usage
+        // Let backend handle wallet_combined conversion
         if (data.paymentMethod === 'wallet_combined') {
-          if (actualWalletUsage >= beforeWalletTotal) {
-            console.log('🔄 [PAYMENT CONVERSION] wallet_combined → wallet_full (sufficient balance)');
-            return 'wallet_full';
-          } else if (actualWalletUsage > 0) {
-            console.log('🔄 [PAYMENT CONVERSION] wallet_combined → wallet_partial (insufficient balance)');
-            return 'wallet_partial';
-          }
+          console.log('📤 [FRONTEND] Sending wallet_combined to backend for smart conversion');
+          return 'wallet_combined';
         }
         
         // Standard payment method determination

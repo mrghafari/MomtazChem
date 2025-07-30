@@ -11730,7 +11730,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const orderManagementStorage = new OrderManagementStorage();
       const orderNumber = await orderManagementStorage.generateOrderNumber();
 
-      // Handle wallet payments
+      // Handle wallet payments with smart conversion
       let finalPaymentStatus = "pending";
       let actualWalletUsed = 0;
       let finalPaymentMethod = paymentMethod || "bank_transfer";
@@ -11739,12 +11739,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const walletUsage = parseFloat(walletAmountUsed || 0);
       const remaining = parseFloat(remainingAmount || totalAmount);
       
+      // Smart conversion for wallet_combined payment method
+      if (paymentMethod === 'wallet_combined') {
+        if (walletUsage >= totalAmount && remaining <= 0.01) {
+          finalPaymentMethod = 'wallet_full';
+          console.log('🔄 [BACKEND CONVERSION] wallet_combined → wallet_full (sufficient balance)', {
+            walletUsage, totalAmount, remaining
+          });
+        } else if (walletUsage > 0) {
+          finalPaymentMethod = 'wallet_partial';
+          console.log('🔄 [BACKEND CONVERSION] wallet_combined → wallet_partial (insufficient balance)', {
+            walletUsage, totalAmount, remaining
+          });
+        } else {
+          finalPaymentMethod = 'bank_transfer';
+          console.log('🔄 [BACKEND CONVERSION] wallet_combined → bank_transfer (no wallet usage)');
+        }
+      }
+      
       console.log('💰 [WALLET DEBUG] Processing wallet payment:', {
-        paymentMethod,
+        originalPaymentMethod: paymentMethod,
+        finalPaymentMethod,
         walletUsage,
         remaining,
+        totalAmount,
         finalCrmCustomerId,
-        customerId
+        customerId,
+        conversionApplied: paymentMethod === 'wallet_combined'
       });
       
       if (walletUsage > 0 && (finalCrmCustomerId || customerId)) {
