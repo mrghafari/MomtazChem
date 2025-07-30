@@ -1918,7 +1918,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                       <h4 className={`font-medium ${
                         isPrimaryAddressDisabled ? 'text-gray-500' : 'text-green-800'
                       }`}>
-                        📍 {isPrimaryAddressDisabled ? 'آدرس پیش‌فرض (غیرفعال)' : 'آدرس پیش‌فرض تحویل (از CRM)'}
+                        📍 {isPrimaryAddressDisabled ? 'آدرس پیش‌فرض (غیرفعال)' : 'آدرس پیش‌فرض تحویل'}
                         {isPrimaryAddressDisabled && (
                           <span className="text-orange-500 mr-2">⚠️</span>
                         )}

@@ -2086,7 +2086,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                           <MapPin className="w-3 h-3" />
                           {(isPrimaryAddressDisabled || isPrimaryMobileDisabled) 
                             ? 'آدرس پیش‌فرض (غیرفعال)' 
-                            : 'آدرس پیش‌فرض تحویل (از CRM)'}
+                            : 'آدرس پیش‌فرض تحویل'}
                         </div>
                         <div className={`space-y-1 text-xs ${
                           (isPrimaryAddressDisabled || isPrimaryMobileDisabled)
