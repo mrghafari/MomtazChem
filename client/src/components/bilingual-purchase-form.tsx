@@ -1673,13 +1673,24 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                   </Label>
                 </div>
                 
-                {/* دوم: پرداخت بخشی از والت - نمایش همیشه */}
+                {/* دوم: پرداخت از کیف پول (تمام یا بخش از آن) */}
+                {canUseWallet && (
+                  <div className="flex items-center space-x-2 space-x-reverse">
+                    <RadioGroupItem value="wallet_combined" id="wallet_combined" />
+                    <Label htmlFor="wallet_combined" className="flex items-center gap-2 cursor-pointer">
+                      <Wallet className="w-4 h-4 text-green-600" />
+                      <span className="font-semibold">استفاده از کیف پول (حداکثر {formatCurrency(Math.min(walletBalance, totalAmount))})</span>
+                    </Label>
+                  </div>
+                )}
+                
+                {/* اضافی: والت جزئی - فقط برای نمایش */}
                 {canUseWallet && (
                   <div className="flex items-center space-x-2 space-x-reverse">
                     <RadioGroupItem value="wallet_partial" id="wallet_partial" />
                     <Label htmlFor="wallet_partial" className="flex items-center gap-2 cursor-pointer">
                       <Wallet className="w-4 h-4 text-orange-600" />
-                      پرداخت همه یا بخشی از والت - مبلغ از والت (حداکثر {formatCurrency(Math.min(walletBalance, totalAmount))})
+                      پرداخت بخشی از والت + بانک
                     </Label>
                   </div>
                 )}
