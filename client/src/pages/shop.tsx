@@ -1381,6 +1381,13 @@ const Shop = () => {
                             </Badge>
                           )}
 
+                          {/* Hazardous Material Indicator - Middle Bottom */}
+                          {product.isFlammable && (
+                            <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-orange-500/90 backdrop-blur-sm rounded-full p-2 shadow-lg animate-pulse">
+                              <AlertTriangle className="w-4 h-4 text-white" />
+                            </div>
+                          )}
+
                           {/* Reviews and Specs - Right side */}
                           <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-lg p-1 shadow-lg">
                             <TooltipProvider>
@@ -1639,16 +1646,12 @@ const Shop = () => {
                                 </div>
                               ) : null}
                               
-                            {/* Add to Cart Button with Hazardous Indicator - Always show */}
+                            {/* Add to Cart Button - Always show */}
                             <Button
-                              className="w-full flex items-center justify-center"
+                              className="w-full"
                               onClick={() => addToCart(product.id)}
                               disabled={!product.inStock || product.stockQuantity <= 0 || getProductQuantity(product.id) >= product.stockQuantity}
                             >
-                              {/* Hazardous Material Indicator - Between Star and Cart */}
-                              {product.isFlammable && (
-                                <AlertTriangle className="w-3 h-3 text-orange-500 animate-pulse ml-1" />
-                              )}
                               <ShoppingCart className="w-4 h-4 mr-2" />
                               {!product.inStock || product.stockQuantity <= 0 ? 'موجود نیست' : cart[product.id] && cart[product.id] > 0 ? 'افزودن بیشتر' : 'افزودن به سبد'}
                             </Button>
@@ -1746,6 +1749,13 @@ const Shop = () => {
                               <Flame className="w-3 h-3 mr-1" />
                               آتش‌زا
                             </Badge>
+                          )}
+
+                          {/* Hazardous Material Indicator - Middle Bottom - List View */}
+                          {product.isFlammable && (
+                            <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-orange-500/90 backdrop-blur-sm rounded-full p-2 shadow-lg animate-pulse">
+                              <AlertTriangle className="w-4 h-4 text-white" />
+                            </div>
                           )}
 
                           {/* Reviews and Specs - Right side - List View */}
@@ -2008,16 +2018,12 @@ const Shop = () => {
                                     </div>
                                   ) : null}
                                   
-                                {/* Add to Cart Button with Hazardous Indicator - Always show */}
+                                {/* Add to Cart Button - Always show */}
                                 <Button
-                                  className="w-full flex items-center justify-center"
+                                  className="w-full"
                                   onClick={() => addToCart(product.id)}
                                   disabled={!product.inStock || product.stockQuantity <= 0 || getProductQuantity(product.id) >= product.stockQuantity}
                                 >
-                                  {/* Hazardous Material Indicator - Between Star and Cart */}
-                                  {product.isFlammable && (
-                                    <AlertTriangle className="w-3 h-3 text-orange-500 animate-pulse ml-1" />
-                                  )}
                                   <ShoppingCart className="w-4 h-4 mr-2" />
                                   {!product.inStock || product.stockQuantity <= 0 ? 'موجود نیست' : cart[product.id] && cart[product.id] > 0 ? 'افزودن بیشتر' : 'افزودن به سبد'}
                                 </Button>

@@ -22363,13 +22363,41 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         });
       }
 
-      console.log('🎯 [DELIVERY COST] Calculation parameters:', {
-        weight: weightKg,
-        destination: destinationCity,
-        distance: distance,
-        vehicleTemplateCount: vehicleTemplates.length,
-        containsFlammableProducts: containsFlammableProducts
+      // === ENHANCED VEHICLE SELECTION USING VEHICLE TEMPLATES TABLE ===
+      console.log('🚛 [VEHICLE TEMPLATES] Starting enhanced vehicle selection from database');
+      console.log('🔍 [TEMPLATES] Available templates:', vehicleTemplates.map(vt => ({ 
+        id: vt.id, 
+        name: vt.name, 
+        type: vt.vehicleType, 
+        maxWeight: vt.maxWeightKg,
+        supportsFlammable: vt.supportsFlammable 
+      })));
+
+      // SAFETY CHECK: Filter vehicles based on flammable materials
+      console.log('🔥 [SAFETY FILTER] Applying flammable materials filtering');
+      const safeVehicles = vehicleTemplates.filter(template => {
+        if (containsFlammableProducts) {
+          // Only vehicles that support flammable materials
+          const isAuthorized = template.supportsFlammable === true;
+          console.log(`🚛 [VEHICLE] ${template.name}: ${isAuthorized ? '✅ AUTHORIZED' : '❌ EXCLUDED'} for flammable transport`);
+          return isAuthorized;
+        }
+        // All vehicles allowed for non-flammable products
+        console.log(`🚛 [VEHICLE] ${template.name}: ✅ AUTHORIZED for non-flammable transport`);
+        return true;
       });
+
+      console.log('🎯 [SAFETY RESULT] Authorized vehicles count:', safeVehicles.length);
+
+      if (safeVehicles.length === 0) {
+        console.log('❌ [NO VEHICLES] No authorized vehicles found for this transport request');
+        return res.status(400).json({
+          success: false,
+          message: containsFlammableProducts 
+            ? "هیچ خودرویی برای حمل مواد آتش‌زا مجاز نیست" 
+            : "هیچ خودرویی برای این درخواست در دسترس نیست"
+        });
+      }
 
       // Calculate route type based on distance
       let routeType = 'urban';
@@ -22422,8 +22450,8 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         console.log('🚛 [MULTI-VEHICLE] Starting calculation for weight:', weightKg, 'kg');
         const solutions = [];
 
-        // Try single vehicle solutions first
-        for (const template of vehicleTemplates) {
+        // Try single vehicle solutions first - Use ONLY safe vehicles
+        for (const template of safeVehicles) {
           const maxWeight = parseFloat(template.maxWeightKg);
           
           // If single vehicle can handle the weight
@@ -22441,13 +22469,12 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         }
 
         // If no single vehicle can handle the weight, try multiple vehicles
-        if (solutions.length === 0 || weightKg > Math.max(...vehicleTemplates.map(t => parseFloat(t.maxWeightKg)))) {
+        if (solutions.length === 0 || weightKg > Math.max(...safeVehicles.map(t => parseFloat(t.maxWeightKg)))) {
           console.log('🚛 [MULTI-VEHICLE] Heavy load detected, calculating multi-vehicle solutions');
 
-          // Sort templates by efficiency (cost per kg capacity)
-          const sortedTemplates = [...vehicleTemplates]
+          // Sort templates by efficiency (cost per kg capacity) - Use ONLY safe vehicles
+          const sortedTemplates = [...safeVehicles]
             .filter(t => t.allowedRoutes.includes(routeType))
-            .filter(t => !containsFlammableProducts || t.supportsFlammable) // Filter out vehicles that can't handle flammable materials
             .sort((a, b) => {
               const efficiencyA = parseFloat(a.basePrice) / parseFloat(a.maxWeightKg);
               const efficiencyB = parseFloat(b.basePrice) / parseFloat(b.maxWeightKg);
