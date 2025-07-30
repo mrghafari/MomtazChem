@@ -175,6 +175,10 @@ export const customerOrders = pgTable("customer_orders", {
   surchargeRate: decimal("surcharge_rate", { precision: 5, scale: 2 }).default("0"), // Surcharge percentage at time of order
   surchargeAmount: decimal("surcharge_amount", { precision: 10, scale: 2 }).default("0"), // Calculated surcharge amount
   
+  // Invoice type and conversion tracking
+  invoiceType: text("invoice_type").default("proforma"), // proforma, official_invoice
+  invoiceConvertedAt: timestamp("invoice_converted_at"), // When proforma was converted to official invoice
+  
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

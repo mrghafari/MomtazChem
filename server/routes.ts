@@ -37894,6 +37894,89 @@ momtazchem.com
     }
   });
 
+  // API endpoint for converting proforma invoice to official invoice for wallet-paid orders reaching warehouse
+  app.post("/api/orders/:orderNumber/convert-to-invoice", async (req: any, res: any) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ 
+        success: false, 
+        message: "احراز هویت ضروری است" 
+      });
+    }
+
+    try {
+      const { orderNumber } = req.params;
+      const customerId = req.user?.customerId || req.user?.id;
+      
+      console.log(`📄 [INVOICE CONVERT] Converting proforma to invoice for order ${orderNumber} by customer ${customerId}`);
+      
+      // Get order details
+      const order = await storage.getCustomerOrderByNumber(orderNumber);
+      if (!order) {
+        return res.status(404).json({
+          success: false,
+          message: "سفارش یافت نشد"
+        });
+      }
+      
+      // Verify order belongs to current customer
+      if (order.customerId !== customerId) {
+        return res.status(403).json({
+          success: false,
+          message: "دسترسی غیرمجاز"
+        });
+      }
+      
+      // Check if order is wallet-paid
+      const isWalletPaid = order.paymentMethod && (
+        order.paymentMethod.includes('wallet') || 
+        order.paymentMethod.includes('کیف پول') ||
+        order.paymentMethod === 'wallet_full' ||
+        order.paymentMethod === 'wallet_partial'
+      );
+      
+      if (!isWalletPaid) {
+        return res.status(400).json({
+          success: false,
+          message: "فقط سفارشات پرداخت شده از کیف پول قابل تبدیل به فاکتور هستند"
+        });
+      }
+      
+      // Check if order has reached warehouse status
+      const isWarehouseReady = ['warehouse_ready', 'warehouse_pending', 'warehouse_processing', 
+                                'logistics_ready', 'logistics_processing', 'delivered', 'completed'].includes(order.status);
+      
+      if (!isWarehouseReady) {
+        return res.status(400).json({
+          success: false,
+          message: "سفارش هنوز به انبار نرسیده است"
+        });
+      }
+      
+      // Update order to mark as official invoice
+      await storage.updateCustomerOrder(order.id, {
+        invoiceType: 'official_invoice',
+        invoiceConvertedAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      });
+      
+      console.log(`✅ [INVOICE CONVERT] Order ${orderNumber} converted from proforma to official invoice`);
+      
+      res.json({
+        success: true,
+        message: "پیش‌فاکتور با موفقیت به فاکتور رسمی تبدیل شد",
+        orderNumber,
+        invoiceType: 'official_invoice'
+      });
+      
+    } catch (error: any) {
+      console.error(`❌ [INVOICE CONVERT] Error converting proforma to invoice:`, error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در تبدیل پیش‌فاکتور به فاکتور"
+      });
+    }
+  });
+
   // Catch-all for unmatched API routes - return JSON 404
   app.all('/api/*', (req, res) => {
     console.log(`❌ 404 - Unmatched API route: ${req.method} ${req.originalUrl}`);
