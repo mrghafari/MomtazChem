@@ -245,6 +245,15 @@ function FinanceOrders() {
     order.currentStatus === 'financial_rejected'
   );
 
+  // Separate wallet orders for special display
+  const walletOrders = pendingOrders.filter(order => 
+    order.paymentMethod === 'wallet_full' || order.paymentMethod === 'wallet_partial'
+  );
+  
+  const bankOrders = pendingOrders.filter(order => 
+    order.paymentMethod !== 'wallet_full' && order.paymentMethod !== 'wallet_partial'
+  );
+
   // Statistics - Only calculate total for approved/transferred orders
   const totalAmount = transferredOrders.reduce((sum, order) => 
     sum + parseFloat(order.totalAmount || '0'), 0
@@ -676,42 +685,53 @@ function FinanceOrders() {
 
       {/* Statistics Dashboard */}
       <div className="container mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white border-0 shadow-lg">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-green-100 text-sm font-medium">کیف پول (تایید خودکار)</p>
+                  <p className="text-3xl font-bold text-white">{walletOrders.length}</p>
+                </div>
+                <Timer className="h-8 w-8 text-green-200" />
+              </div>
+            </CardContent>
+          </Card>
+          
           <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white border-0 shadow-lg">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-blue-100 text-sm font-medium">تایید شده</p>
-                  <p className="text-3xl font-bold text-white">{transferredOrders.length}</p>
+                  <p className="text-blue-100 text-sm font-medium">درگاه بانکی</p>
+                  <p className="text-3xl font-bold text-white">{bankOrders.length}</p>
                 </div>
-                <CheckCircle className="h-8 w-8 text-blue-200" />
+                <CreditCard className="h-8 w-8 text-blue-200" />
               </div>
             </CardContent>
           </Card>
-          
-          <Card className="bg-gradient-to-r from-orange-500 to-orange-600 text-white border-0 shadow-lg">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-orange-100 text-sm font-medium">در انتظار بررسی</p>
-                  <p className="text-3xl font-bold text-white">{pendingOrders.length}</p>
-                </div>
-                <Clock className="h-8 w-8 text-orange-200" />
-              </div>
-            </CardContent>
-          </Card>
-          
           
           <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white border-0 shadow-lg">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-purple-100 text-sm font-medium">مجموع مبالغ</p>
+                  <p className="text-purple-100 text-sm font-medium">تایید شده</p>
+                  <p className="text-3xl font-bold text-white">{transferredOrders.length}</p>
+                </div>
+                <CheckCircle className="h-8 w-8 text-purple-200" />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white border-0 shadow-lg">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-indigo-100 text-sm font-medium">مجموع مبالغ</p>
                   <p className="text-2xl font-bold text-white">
                     {totalAmount.toLocaleString()} IQD
                   </p>
                 </div>
-                <TrendingUp className="h-8 w-8 text-purple-200" />
+                <TrendingUp className="h-8 w-8 text-indigo-200" />
               </div>
             </CardContent>
           </Card>
@@ -783,12 +803,64 @@ function FinanceOrders() {
               </Card>
             ) : (
               <div className="space-y-4">
-                {pendingOrders.map((order) => (
-                  <OrderCard key={order.id} order={order} onOrderSelect={() => {
-                    setSelectedOrder(order);
-                    setDialogOpen(true);
-                  }} fetchOrderDetails={fetchOrderDetails} />
-                ))}
+                {/* Wallet Orders Section - Auto-approval enabled */}
+                {walletOrders.length > 0 && (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2 px-4 py-2 bg-green-50 border border-green-200 rounded-lg">
+                      <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                      <h3 className="font-medium text-green-800">سفارشات کیف پول - تایید خودکار فعال</h3>
+                      <span className="text-sm text-green-600">(5 دقیقه انتظار)</span>
+                    </div>
+                    {walletOrders.map((order) => (
+                      <div key={order.id} className="relative">
+                        <div className="absolute -right-2 top-4 w-1 h-16 bg-green-500 rounded-full"></div>
+                        <OrderCard 
+                          order={order} 
+                          onOrderSelect={() => {
+                            setSelectedOrder(order);
+                            setDialogOpen(true);
+                          }} 
+                          fetchOrderDetails={fetchOrderDetails} 
+                        />
+                        <div className="mt-2 mr-4 p-3 bg-green-50 border-r-4 border-green-500 rounded">
+                          <div className="flex items-center gap-2 text-sm text-green-700">
+                            <Timer className="h-4 w-4" />
+                            <span className="font-medium">
+                              {order.paymentMethod === 'wallet_full' ? 'پرداخت کامل کیف پول' : 'پرداخت ترکیبی کیف پول'} 
+                              - تایید خودکار در 5 دقیقه
+                            </span>
+                          </div>
+                          <p className="text-xs text-green-600 mt-1">
+                            در صورت عدم اقدام دستی، سفارش به‌طور خودکار تایید و به انبار منتقل می‌شود
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Bank Orders Section - Manual approval required */}
+                {bankOrders.length > 0 && (
+                  <div className="space-y-4">
+                    {walletOrders.length > 0 && (
+                      <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                        <h3 className="font-medium text-blue-800">سفارشات درگاه بانکی - بررسی دستی</h3>
+                      </div>
+                    )}
+                    {bankOrders.map((order) => (
+                      <OrderCard 
+                        key={order.id} 
+                        order={order} 
+                        onOrderSelect={() => {
+                          setSelectedOrder(order);
+                          setDialogOpen(true);
+                        }} 
+                        fetchOrderDetails={fetchOrderDetails} 
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </TabsContent>
