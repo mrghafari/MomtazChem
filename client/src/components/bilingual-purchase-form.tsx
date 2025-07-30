@@ -2314,27 +2314,34 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                         </details>
                       )}
 
-                      {/* Cost Breakdown */}
-                      <div className="bg-emerald-100 dark:bg-emerald-900/30 rounded-lg p-3 border border-emerald-200">
-                        <h5 className="font-medium text-emerald-800 dark:text-emerald-200 mb-2">📊 جزئیات محاسبه هزینه</h5>
-                        <div className="grid grid-cols-2 gap-2 text-sm">
-                          <div className="flex justify-between">
-                            <span>قیمت پایه:</span>
-                            <span>{new Intl.NumberFormat('fa-IR').format(optimalVehicle.basePrice)} IQD</span>
+                      {/* Cost Breakdown - Collapsible */}
+                      <div className="bg-emerald-100 dark:bg-emerald-900/30 rounded-lg border border-emerald-200">
+                        <details className="group">
+                          <summary className="cursor-pointer p-3 flex items-center justify-between hover:bg-emerald-200 dark:hover:bg-emerald-800/40 rounded-lg transition-colors">
+                            <h5 className="font-medium text-emerald-800 dark:text-emerald-200">📊 جزئیات محاسبه هزینه</h5>
+                            <span className="group-open:rotate-180 transition-transform text-emerald-600">▼</span>
+                          </summary>
+                          <div className="px-3 pb-3">
+                            <div className="grid grid-cols-2 gap-2 text-sm">
+                              <div className="flex justify-between">
+                                <span>قیمت پایه:</span>
+                                <span>{new Intl.NumberFormat('fa-IR').format(optimalVehicle.basePrice)} IQD</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>هزینه مسافت:</span>
+                                <span>{new Intl.NumberFormat('fa-IR').format(optimalVehicle.distanceCost)} IQD</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>هزینه وزن:</span>
+                                <span>{new Intl.NumberFormat('fa-IR').format(optimalVehicle.weightCost)} IQD</span>
+                              </div>
+                              <div className="flex justify-between font-bold border-t pt-1">
+                                <span>مجموع:</span>
+                                <span className="text-emerald-600">{new Intl.NumberFormat('fa-IR').format(optimalVehicle.totalCost)} IQD</span>
+                              </div>
+                            </div>
                           </div>
-                          <div className="flex justify-between">
-                            <span>هزینه مسافت:</span>
-                            <span>{new Intl.NumberFormat('fa-IR').format(optimalVehicle.distanceCost)} IQD</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span>هزینه وزن:</span>
-                            <span>{new Intl.NumberFormat('fa-IR').format(optimalVehicle.weightCost)} IQD</span>
-                          </div>
-                          <div className="flex justify-between font-bold border-t pt-1">
-                            <span>مجموع:</span>
-                            <span className="text-emerald-600">{new Intl.NumberFormat('fa-IR').format(optimalVehicle.totalCost)} IQD</span>
-                          </div>
-                        </div>
+                        </details>
                       </div>
                     </div>
                   )}
