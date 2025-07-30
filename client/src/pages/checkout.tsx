@@ -1022,8 +1022,18 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
       paymentMethod: actualWalletUsage >= beforeWalletTotal ? 'wallet_full' : 
                     actualWalletUsage > 0 ? 'wallet_partial' : data.paymentMethod,
       walletAmountUsed: actualWalletUsage,
-      remainingAmount: totalAmount,
+      remainingAmount: beforeWalletTotal - actualWalletUsage, // Fix: Send actual remaining amount after wallet deduction
     };
+
+    // Debug logging for payment data
+    console.log('💰 [FRONTEND PAYMENT DEBUG] Order data being sent:', {
+      totalAmount: beforeWalletTotal,
+      walletAmountUsed: actualWalletUsage,
+      remainingAmount: beforeWalletTotal - actualWalletUsage,
+      paymentMethod: orderData.paymentMethod,
+      fullPayment: actualWalletUsage >= beforeWalletTotal,
+      partialPayment: actualWalletUsage > 0 && actualWalletUsage < beforeWalletTotal
+    });
 
     createOrderMutation.mutate(orderData);
   };

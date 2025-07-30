@@ -167,6 +167,34 @@
 
 ## Recent Changes
 
+### COMPLETED: Critical Wallet Payment Logic Bug Fix - Full Payment Support (January 30, 2025)
+✅ **RESOLVED: Critical wallet payment logic bug where customers with sufficient wallet balance were incorrectly redirected to bank gateway**
+- **User Issue Identified**: Orders like M2511331 were incorrectly requiring bank payment even when wallet balance was sufficient for full payment
+- **Root Cause Fixed**: Double subtraction error in payment logic calculation:
+  - **Backend Error**: Line 11872 calculated `remainingAmountToPay = parseFloat(remainingAmount || totalAmount) - actualWalletUsed` (subtracting wallet usage twice)
+  - **Frontend Error**: Line 1025 sent `remainingAmount: totalAmount` instead of actual remaining amount after wallet deduction
+- **Technical Implementation**:
+  - **Backend Fix**: Updated payment decision logic to use `remainingAmount` directly without double subtraction
+  - **Frontend Fix**: Changed `remainingAmount: beforeWalletTotal - actualWalletUsage` to send correct remaining amount
+  - **Enhanced Debugging**: Added comprehensive payment logic debugging logs for troubleshooting
+- **Payment Logic Enhancement**: 
+  - **Full Wallet Payment**: When `actualWalletUsed >= totalAmount`, `remainingAmount = 0`, `requiresBankPayment = false`
+  - **Partial Wallet Payment**: When `actualWalletUsed < totalAmount`, `remainingAmount > 0`, `requiresBankPayment = true`
+  - **No Wallet Payment**: When `actualWalletUsed = 0`, standard payment flow proceeds
+- **Debug Logging**: Added payment decision debugging showing:
+  - `actualWalletUsed`, `remainingAmountToPay`, `originalRemainingAmount`, `totalAmount`
+  - `requiresBankPayment` boolean decision and `paymentMethod` selection
+- **Business Impact**: 
+  - **Customer Experience**: Customers with sufficient wallet balance now complete orders without unnecessary bank gateway redirects
+  - **Payment Accuracy**: Hybrid payment system only triggered when genuinely needed (insufficient wallet balance)
+  - **Order Processing**: Full wallet payments now properly marked as `paymentStatus: "paid"` without additional steps
+- **Testing Enhancement**: System now properly handles all payment scenarios:
+  - **Scenario 1**: Full wallet payment (sufficient balance) → Direct order completion
+  - **Scenario 2**: Partial wallet payment (insufficient balance) → Hybrid payment flow with bank gateway
+  - **Scenario 3**: No wallet payment → Standard bank payment flow
+- **Integration**: Seamless integration with existing abandoned order tracking, email automation, and order management systems
+- **Result**: Complete wallet payment logic operational - customers with sufficient wallet balance no longer incorrectly redirected to bank gateway, ensuring smooth payment experience
+
 ### COMPLETED: Vehicle Template System Implementation - Complete Admin Panel Control (January 30, 2025)
 ✅ **RESOLVED: System now exclusively uses vehicle templates from admin panel including bus options for optimal cost control**
 - **User Issue Identified**: "ببین در جدول الگوها این هست 'اتوبوس هست و ارزانتر هم هست'" - Bus exists in vehicle templates and is cheaper
