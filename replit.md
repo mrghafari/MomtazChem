@@ -231,6 +231,40 @@
 - **Prevention Success**: Order M2511322 immediately fixed and system now prevents similar issues from occurring
 - **Result**: Complete order status synchronization prevention system operational - orders cannot exist without management records, status changes automatically synchronized, ensuring permanent resolution of order tracking inconsistencies
 
+### COMPLETED: Payment Source Display Enhancement - Complete Financial Transparency (January 30, 2025)
+✅ **IMPLEMENTED: Comprehensive payment source display system in all order management interfaces**
+- **User Request Fulfilled**: Added detailed payment funding source information to order details across admin interfaces
+- **Shop Admin Enhancement**: Added payment source details to order details modal showing:
+  - **Wallet Payment**: Green-coded section displaying wallet amount used with precise calculations
+  - **Bank Gateway Payment**: Blue-coded section showing bank payment amount for partial wallet payments
+  - **Full Bank Payment**: Purple-coded section for complete bank gateway transactions
+  - **Visual Indicators**: Color-coded circular indicators and proper Persian labels for each payment source
+- **Finance Orders Enhancement**: Added comprehensive payment funding section to order details modal:
+  - **Payment Method Expansion**: Enhanced payment method display with wallet_partial, wallet_full recognition
+  - **Source Breakdown**: Detailed breakdown showing exact amounts from each funding source
+  - **Visual Hierarchy**: Professional card layout with proper spacing and color coding
+  - **Currency Formatting**: Proper Iraqi Dinar formatting with Math.floor() for whole number display
+- **Technical Implementation**:
+  - **Conditional Display**: Payment source details only appear when relevant (wallet usage > 0 or hybrid payments)
+  - **Dynamic Calculations**: Real-time calculation of bank portion for partial wallet payments
+  - **Type Safety**: Proper null checking and parseFloat handling for all amount calculations
+  - **Persian UI**: Complete RTL support with proper Persian terminology and labels
+- **Payment Source Categories**:
+  - **کیف پول مشتری**: Customer wallet funds with green color coding
+  - **درگاه بانکی**: Bank gateway payments with blue color coding  
+  - **درگاه بانکی (کامل)**: Full bank payments with purple color coding
+  - **کیف پول (کامل)**: Full wallet payments with emerald color coding
+- **Business Impact**:
+  - **Financial Transparency**: Complete visibility of payment funding sources for accounting and customer service
+  - **Audit Trail**: Clear documentation of how each order was funded for financial reporting
+  - **Customer Support**: Staff can quickly identify payment methods when handling customer inquiries
+  - **Admin Efficiency**: Instant understanding of payment breakdown without database queries
+- **Integration Points**:
+  - **Shop Admin**: Payment information section in order details modal
+  - **Finance Orders**: Payment information card in comprehensive order details
+  - **Both Interfaces**: Consistent visual design and calculation logic
+- **Result**: Complete payment source transparency operational - all order management interfaces now display detailed payment funding breakdown with professional visual indicators and precise amount calculations
+
 ### COMPLETED: Critical Wallet Payment Logic Bug Fix - Full Payment Support (January 30, 2025)
 ✅ **RESOLVED: Critical wallet payment logic bug where customers with sufficient wallet balance were incorrectly redirected to bank gateway**
 - **User Issue Identified**: Orders like M2511331 were incorrectly requiring bank payment even when wallet balance was sufficient for full payment

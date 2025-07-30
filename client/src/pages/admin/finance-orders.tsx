@@ -1247,6 +1247,62 @@ function FinanceOrders() {
                         </div>
                       </div>
 
+                      {/* Payment Source Details */}
+                      {(orderDetails.walletAmountUsed > 0 || orderDetails.paymentMethod === 'wallet_partial' || orderDetails.paymentMethod === 'wallet_full') && (
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-medium text-blue-900 mb-4 flex items-center gap-2">
+                            <CreditCard className="h-4 w-4" />
+                            منابع تامین وجه
+                          </h4>
+                          <div className="space-y-3">
+                            {orderDetails.walletAmountUsed > 0 && (
+                              <div className="flex justify-between items-center p-3 bg-green-100 rounded-lg border border-green-200">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                                  <span className="text-sm font-medium text-green-800">کیف پول مشتری</span>
+                                </div>
+                                <span className="font-bold text-green-700">
+                                  {Math.floor(parseFloat(orderDetails.walletAmountUsed || 0)).toLocaleString()} {orderDetails.currency}
+                                </span>
+                              </div>
+                            )}
+                            {orderDetails.paymentMethod === 'wallet_partial' && (
+                              <div className="flex justify-between items-center p-3 bg-blue-100 rounded-lg border border-blue-200">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                                  <span className="text-sm font-medium text-blue-800">درگاه بانکی</span>
+                                </div>
+                                <span className="font-bold text-blue-700">
+                                  {Math.floor(parseFloat(orderDetails.totalAmount || 0) - parseFloat(orderDetails.walletAmountUsed || 0)).toLocaleString()} {orderDetails.currency}
+                                </span>
+                              </div>
+                            )}
+                            {orderDetails.paymentMethod === 'bank_transfer' && !orderDetails.walletAmountUsed && (
+                              <div className="flex justify-between items-center p-3 bg-purple-100 rounded-lg border border-purple-200">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                                  <span className="text-sm font-medium text-purple-800">درگاه بانکی (کامل)</span>
+                                </div>
+                                <span className="font-bold text-purple-700">
+                                  {Math.floor(parseFloat(orderDetails.totalAmount || 0)).toLocaleString()} {orderDetails.currency}
+                                </span>
+                              </div>
+                            )}
+                            {orderDetails.paymentMethod === 'wallet_full' && (
+                              <div className="flex justify-between items-center p-3 bg-emerald-100 rounded-lg border border-emerald-200">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
+                                  <span className="text-sm font-medium text-emerald-800">کیف پول (کامل)</span>
+                                </div>
+                                <span className="font-bold text-emerald-700">
+                                  {Math.floor(parseFloat(orderDetails.totalAmount || 0)).toLocaleString()} {orderDetails.currency}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
                       {/* Order Status & Dates */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>

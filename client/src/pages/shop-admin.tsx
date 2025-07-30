@@ -805,6 +805,8 @@ export default function ShopAdmin() {
                        selectedOrder.paymentMethod === 'cash_on_delivery' ? 'پرداخت در محل' :
                        selectedOrder.paymentMethod === 'company_credit' ? 'اعتبار شرکت' :
                        selectedOrder.paymentMethod === 'wallet' ? 'کیف پول' :
+                       selectedOrder.paymentMethod === 'wallet_partial' ? 'پرداخت ترکیبی (کیف پول + درگاه)' :
+                       selectedOrder.paymentMethod === 'wallet_full' ? 'کیف پول (کامل)' :
                        selectedOrder.paymentMethod || 'نامشخص'}
                     </p>
                   </div>
@@ -817,6 +819,48 @@ export default function ShopAdmin() {
                        selectedOrder.paymentStatus || 'نامشخص'}
                     </Badge>
                   </div>
+                  
+                  {/* Payment Source Details */}
+                  {(selectedOrder.walletAmountUsed > 0 || selectedOrder.paymentMethod === 'wallet_partial' || selectedOrder.paymentMethod === 'wallet_full') && (
+                    <div className="md:col-span-2">
+                      <p className="text-sm text-gray-600 mb-2">جزئیات منابع تامین وجه</p>
+                      <div className="space-y-2">
+                        {selectedOrder.walletAmountUsed > 0 && (
+                          <div className="flex justify-between items-center p-2 bg-green-100 rounded-lg border border-green-200">
+                            <div className="flex items-center gap-2">
+                              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                              <span className="text-sm font-medium text-green-800">کیف پول</span>
+                            </div>
+                            <span className="font-bold text-green-700">
+                              ${parseFloat(selectedOrder.walletAmountUsed || 0).toLocaleString()}
+                            </span>
+                          </div>
+                        )}
+                        {selectedOrder.paymentMethod === 'wallet_partial' && (
+                          <div className="flex justify-between items-center p-2 bg-blue-100 rounded-lg border border-blue-200">
+                            <div className="flex items-center gap-2">
+                              <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                              <span className="text-sm font-medium text-blue-800">درگاه بانکی</span>
+                            </div>
+                            <span className="font-bold text-blue-700">
+                              ${(parseFloat(selectedOrder.totalAmount || 0) - parseFloat(selectedOrder.walletAmountUsed || 0)).toLocaleString()}
+                            </span>
+                          </div>
+                        )}
+                        {selectedOrder.paymentMethod === 'bank_transfer' && !selectedOrder.walletAmountUsed && (
+                          <div className="flex justify-between items-center p-2 bg-purple-100 rounded-lg border border-purple-200">
+                            <div className="flex items-center gap-2">
+                              <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                              <span className="text-sm font-medium text-purple-800">درگاه بانکی (کامل)</span>
+                            </div>
+                            <span className="font-bold text-purple-700">
+                              ${parseFloat(selectedOrder.totalAmount || 0).toLocaleString()}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                   {selectedOrder.discount && selectedOrder.discount > 0 && (
                     <div>
                       <p className="text-sm text-gray-600">تخفیف</p>
