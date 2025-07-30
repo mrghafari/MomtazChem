@@ -22310,12 +22310,80 @@ ${message ? `Additional Requirements:\n${message}` : ''}
   // SMART DELIVERY COST CALCULATION API
   // =============================================
 
+  // Helper function to standardize city/province names to Arabic format
+  const standardizeCityName = (cityName: string): string => {
+    const cityMappings: { [key: string]: string } = {
+      'Erbil': 'اربیل',
+      'Baghdad': 'بغداد',
+      'Karbala': 'کربلا',
+      'Basra': 'بصره',
+      'Mosul': 'موصل',
+      'Najaf': 'نجف',
+      'Sulaymaniyah': 'سلیمانیه',
+      'Dohuk': 'دهوک',
+      'Kirkuk': 'کرکوک',
+      'Hillah': 'حله',
+      'Nasiriyah': 'ناصریه',
+      'Amarah': 'عماره',
+      'Ramadi': 'رمادی',
+      'Fallujah': 'فلوجه',
+      'Tikrit': 'تکریت',
+      'Baqubah': 'بعقوبه',
+      'Samarra': 'سامراء'
+    };
+    
+    return cityMappings[cityName] || cityName;
+  };
+
+  const standardizeProvinceName = (provinceName: string): string => {
+    const provinceMappings: { [key: string]: string } = {
+      'Erbil': 'اربیل',
+      'Baghdad': 'بغداد',
+      'Karbala': 'کربلا',
+      'Basra': 'بصره',
+      'Ninawa': 'نینوا',
+      'Najaf': 'نجف',
+      'Sulaymaniyah': 'سلیمانیه',
+      'Dohuk': 'دهوک',
+      'Kirkuk': 'کرکوک',
+      'Babylon': 'بابل',
+      'Dhi Qar': 'ذیقار',
+      'Maysan': 'میسان',
+      'Anbar': 'انبار',
+      'Diyala': 'دیالی',
+      'Salah ad-Din': 'صلاح‌الدین',
+      'Al-Qadisiyyah': 'قادسیه',
+      'Al-Muthanna': 'مثنی',
+      'Wasit': 'واسط'
+    };
+    
+    return provinceMappings[provinceName] || provinceName;
+  };
+
   // Calculate optimal delivery cost based on weight and destination
   app.post("/api/calculate-delivery-cost", async (req, res) => {
     try {
       console.log('🚚 [DELIVERY COST] Request received:', req.body);
       
-      const { weight, destinationCity, destinationProvince, cart, useSecondaryAddress, secondaryAddress, originCity = 'اربیل' } = req.body;
+      const { 
+        weight, 
+        destinationCity: rawDestinationCity, 
+        destinationProvince: rawDestinationProvince, 
+        cart, 
+        useSecondaryAddress, 
+        secondaryAddress, 
+        originCity: rawOriginCity = 'اربیل' 
+      } = req.body;
+
+      // Standardize city and province names to Arabic format
+      const destinationCity = standardizeCityName(rawDestinationCity);
+      const destinationProvince = standardizeProvinceName(rawDestinationProvince);
+      const originCity = standardizeCityName(rawOriginCity);
+
+      console.log('🔤 [STANDARDIZATION] Name standardization:', {
+        raw: { originCity: rawOriginCity, destinationCity: rawDestinationCity, destinationProvince: rawDestinationProvince },
+        standardized: { originCity, destinationCity, destinationProvince }
+      });
       
       if (!weight || !destinationCity) {
         return res.status(400).json({
