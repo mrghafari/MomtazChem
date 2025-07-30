@@ -18,6 +18,31 @@ export * from "./cart-schema";
 export * from "./logistics-schema";
 
 // =============================================================================
+// DELIVERY COST CALCULATIONS TRACKING SYSTEM
+// =============================================================================
+
+// Delivery Cost Calculations table for tracking all delivery cost requests
+export const deliveryCostCalculations = pgTable("delivery_cost_calculations", {
+  id: serial("id").primaryKey(),
+  customerId: integer("customer_id"), // Optional - might be guest user
+  customerEmail: text("customer_email"), // If customer is logged in
+  calculationData: json("calculation_data").notNull(), // Complete calculation request
+  resultData: json("result_data").notNull(), // Calculation results including optimal vehicle
+  cartData: json("cart_data"), // Cart contents being calculated
+  sessionId: varchar("session_id", { length: 255 }), // Session identifier
+  ipAddress: varchar("ip_address", { length: 45 }), // Client IP address
+  userAgent: text("user_agent"), // Browser/client information
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  isConverted: boolean("is_converted").default(false), // Whether this led to actual order
+  orderId: integer("order_id"), // Reference to actual order if converted  
+  notes: text("notes"), // Additional notes from admin
+});
+
+export const insertDeliveryCostCalculationSchema = createInsertSchema(deliveryCostCalculations);
+export type InsertDeliveryCostCalculation = z.infer<typeof insertDeliveryCostCalculationSchema>;
+export type DeliveryCostCalculation = typeof deliveryCostCalculations.$inferSelect;
+
+// =============================================================================
 // SEO MANAGEMENT SCHEMA
 // =============================================================================
 
