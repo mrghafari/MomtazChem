@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dropdown Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .debug { background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>Dropdown API Test</h1>
+    
+    <div class="debug">
+        <h3>Provinces API Test:</h3>
+        <div id="provinces-result">Loading...</div>
+    </div>
+    
+    <div class="debug">
+        <h3>Cities API Test:</h3>
+        <div id="cities-result">Loading...</div>
+    </div>
+
+    <script>
+        // Test provinces API
+        fetch('/api/iraqi-provinces')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Provinces API response:', data);
+                document.getElementById('provinces-result').innerHTML = 
+                    `Success: ${data.success}, Count: ${data.data ? data.data.length : 0}`;
+            })
+            .catch(error => {
+                console.error('Provinces API error:', error);
+                document.getElementById('provinces-result').innerHTML = `Error: ${error}`;
+            });
+
+        // Test cities API
+        fetch('/api/iraqi-cities')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Cities API response:', data);
+                document.getElementById('cities-result').innerHTML = 
+                    `Success: ${data.success}, Count: ${data.data ? data.data.length : 0}`;
+            })
+            .catch(error => {
+                console.error('Cities API error:', error);
+                document.getElementById('cities-result').innerHTML = `Error: ${error}`;
+            });
+    </script>
+</body>
+</html>

@@ -88,7 +88,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   const [showRecipientFields, setShowRecipientFields] = useState(true); // Default to open for testing
   const [showPurchaseOrder, setShowPurchaseOrder] = useState(true);
   const [showCartManagement, setShowCartManagement] = useState(true);
-  const [showSecondAddress, setShowSecondAddress] = useState(false);
+  const [showSecondAddress, setShowSecondAddress] = useState(true); // Default to open for testing
   const [showRecipientMobile, setShowRecipientMobile] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState<any>(null);
   const [calculatedShippingCost, setCalculatedShippingCost] = useState(0);
