@@ -22293,7 +22293,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         cartItems: Object.keys(cart || {}).length
       });
 
-      console.log('🚛 [VEHICLE SELECTION] Using only vehicle templates from database - intercity bus system disabled as requested');
+      console.log('🚛 [VEHICLE SELECTION] Using vehicle templates from database exclusively - including bus templates from admin panel');
 
       // === ENHANCED VEHICLE SELECTION USING VEHICLE TEMPLATES TABLE ===
       console.log('🚛 [VEHICLE TEMPLATES] Starting enhanced vehicle selection from database');

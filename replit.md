@@ -167,29 +167,43 @@
 
 ## Recent Changes
 
-### COMPLETED: Vehicle Template System Enforcement - Intercity Bus Logic Removal (January 30, 2025)
-✅ **RESOLVED: System now exclusively uses vehicle templates from admin panel instead of automatic intercity bus selection**
-- **User Issue Identified**: "الان این خط مسافربری بین شهری انتخاب شده است در حالی که باید از جدول وسائل نقلیه بخش الگوهای خودرو انتخاب کند" - Intercity bus incorrectly selected over vehicle templates
-- **Root Cause Analysis**: Intercity bus logic had higher priority than vehicle templates, executing before database vehicle selection
-- **Intercity Bus Logic Removed**: Completely disabled automatic intercity bus selection system to force vehicle template usage:
-  - **Before**: `if (hasIntercityBusOption && !containsFlammableProducts && weightKg <= 50 && !isSameCityDelivery)` - intercity bus had priority
-  - **After**: `console.log('🚛 [VEHICLE SELECTION] Using only vehicle templates from database - intercity bus system disabled as requested')` - templates only
-- **Vehicle Template Priority**: System now exclusively uses vehicles from admin panel vehicle templates table:
-  - **Non-flammable materials**: کامیون سبک (360,330 IQD) selected from templates instead of intercity bus (36,000 IQD)
-  - **Flammable materials**: کامیون سنگین مجاز برای مواد آتش‌زا (686,200 IQD) properly selected with safety compliance
-  - **Complete Template Control**: All vehicle selection now controlled through admin panel vehicle optimization module
-- **Enhanced Logging**: Added clear indication that only vehicle templates are being used:
-  - `🚛 [VEHICLE SELECTION] Using only vehicle templates from database - intercity bus system disabled as requested`
-  - Complete template listing showing all 10 available vehicle types from database
+### COMPLETED: Vehicle Template System Implementation - Complete Admin Panel Control (January 30, 2025)
+✅ **RESOLVED: System now exclusively uses vehicle templates from admin panel including bus options for optimal cost control**
+- **User Issue Identified**: "ببین در جدول الگوها این هست 'اتوبوس هست و ارزانتر هم هست'" - Bus exists in vehicle templates and is cheaper
+- **Database Discovery**: Found "اتوبوسهای مسافربری" (ID: 10) in vehicle templates with extremely competitive pricing:
+  - **Base Price**: 0 IQD + 10 IQD per km = 4,200 IQD total for Erbil→Karbala (420km)
+  - **Weight Limit**: 50kg capacity matching intercity bus specifications
+  - **Safety Compliance**: Non-flammable materials only (supports_flammable = false)
+- **System Architecture Change**: Removed external intercity bus logic and now uses exclusively vehicle templates:
+  - **Before**: Hybrid system with separate intercity bus API + vehicle templates fallback
+  - **After**: Pure vehicle template system with admin-controlled bus options included
+  - **Template Activation**: Activated "اتوبوسهای مسافربری" template (is_active = true) for system inclusion
+- **Cost Optimization Results**: 
+  - **Non-flammable 22kg cargo**: اتوبوسهای مسافربری (4,200 IQD) - 85x cheaper than light truck (360,330 IQD)
+  - **Flammable 1kg cargo**: کامیون سنگین مجاز برای مواد آتش‌زا (686,200 IQD) with complete safety compliance
+  - **Alternative Options**: System provides 3+ alternatives including light trucks and heavy trucks
+- **Admin Panel Control**: Complete vehicle selection now managed through admin panel:
+  - **Pricing Control**: Admins can adjust base_price and price_per_km for all vehicles including buses
+  - **Capacity Management**: Weight limits and vehicle capabilities fully configurable
+  - **Safety Settings**: supports_flammable flags ensure proper hazardous materials compliance
+  - **Activation Control**: is_active flag allows enabling/disabling vehicles as needed
+- **Safety Compliance**: Maintained complete flammable materials detection:
+  - **Template-Based Safety**: Vehicle templates include supports_flammable flags for safety filtering
+  - **Hazardous Exclusion**: Non-compliant vehicles automatically excluded for dangerous goods
+  - **Authorized Selection**: Only flammable-authorized vehicles selected for products like Solvant 402
+- **Technical Implementation**: 
+  - **Single System**: Unified vehicle template system handles all transport types
+  - **Database Integration**: Complete reliance on vehicle_templates table for all selections
+  - **Admin Flexibility**: Full configurability through existing admin panel vehicle optimization module
 - **Business Impact**: 
-  - **Admin Control**: Complete control over vehicle selection through admin panel templates
-  - **Pricing Consistency**: All delivery costs calculated using admin-defined vehicle templates and pricing
-  - **No External Dependencies**: System no longer relies on intercity bus database flags or external transport systems
-- **Technical Achievement**: Clean separation between vehicle template system and intercity bus functionality
+  - **Cost Leadership**: Customers get absolute lowest-cost transport through optimized template pricing
+  - **Administrative Control**: Complete pricing and vehicle management through admin interface
+  - **Operational Flexibility**: Easy addition/removal of vehicle types and pricing adjustments
 - **Testing Verification**: 
-  - **22kg non-flammable cargo**: کامیون سبک (360,330 IQD) with alternatives از کامیون سنگین (636,220 IQD)
-  - **1kg flammable cargo**: کامیون سنگین مجاز برای مواد آتش‌زا (686,200 IQD) with proper safety compliance
-- **Result**: Complete vehicle template enforcement operational - system exclusively uses admin-defined vehicle templates for all delivery cost calculations, providing full administrative control over pricing and vehicle selection
+  - **22kg non-flammable**: اتوبوسهای مسافربری (4,200 IQD) - optimal template selection ✅
+  - **1kg flammable**: کامیون سنگین مجاز (686,200 IQD) - safety-compliant template selection ✅
+  - **Admin Control**: All vehicle options fully manageable through admin panel ✅
+- **Result**: Complete vehicle template system operational - all transport selections use admin-configurable templates including ultra-competitive bus pricing, providing full administrative control and optimal customer cost efficiency
 
 ### COMPLETED: Address Logic Bug Fix - Primary Address Calculation Enhancement (January 30, 2025)
 ✅ **RESOLVED: Critical address logic issue where primary address calculation failed while secondary address worked properly**
