@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { CheckCircle, ShoppingCart, CreditCard, Truck, User, MapPin, Weight, Car, Calculator } from "lucide-react";
+import { CheckCircle, ShoppingCart, CreditCard, Truck, User, MapPin, Weight, Car, Calculator, Flame } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
@@ -2567,7 +2567,25 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                       <div key={item.id} className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
                         <div className="flex justify-between items-start mb-2">
                           <div className="flex-1">
-                            <h4 className="font-medium text-sm">{item.name}</h4>
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-medium text-sm">{item.name}</h4>
+                              {item.isFlammable && (
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <div className="flex items-center cursor-help">
+                                        <Flame className="w-4 h-4 text-red-500" />
+                                        <span className="text-xs text-red-600 font-medium ml-1">آتش‌زا</span>
+                                      </div>
+                                    </TooltipTrigger>
+                                    <TooltipContent className="bg-red-700 text-white">
+                                      <p className="text-sm">⚠️ محصول آتش‌زا - حمل ویژه مورد نیاز</p>
+                                      <p className="text-xs">تنها خودروهای مجاز امکان حمل دارند</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              )}
+                            </div>
                             <p className="text-xs text-gray-500 mt-1">
                               کد محصول: {item.sku || 'N/A'}
                             </p>
