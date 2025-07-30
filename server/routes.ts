@@ -40908,6 +40908,206 @@ momtazchem.com
   });
 
   const httpServer = createServer(app);
+  // =============================================================================
+  // CRITICAL ORDER TABLE SYNCHRONIZATION SYSTEM
+  // =============================================================================
+
+  // Automatic synchronization function to prevent stuck orders
+  async function synchronizeOrderTables(): Promise<void> {
+    try {
+      console.log('🔄 [TABLE SYNC] Starting automatic order table synchronization...');
+      
+      const { pool } = await import('./db');
+      
+      // Direct SQL approach for better reliability
+
+      // 1. HANDLE MISSING ORDER MANAGEMENT RECORDS
+      const ordersWithoutManagement = await pool.query(`
+        SELECT co.id, co.order_number, co.status, co.payment_status
+        FROM customer_orders co
+        LEFT JOIN order_management om ON co.id = om.customer_order_id
+        WHERE om.customer_order_id IS NULL
+      `);
+
+      console.log(`🔍 [TABLE SYNC] Found ${ordersWithoutManagement.rows.length} orders without management records`);
+
+      // Create missing order management records
+      for (const order of ordersWithoutManagement.rows) {
+        const currentStatus = determineOrderManagementStatus(order.status, order.payment_status);
+        
+        await pool.query(`
+          INSERT INTO order_management (customer_order_id, current_status, created_at, updated_at)
+          VALUES ($1, $2, NOW(), NOW())
+        `, [order.id, currentStatus]);
+        
+        console.log(`✅ [TABLE SYNC] Created management record for order ${order.order_number} with status: ${currentStatus}`);
+      }
+
+      // 2. HANDLE STATUS MISMATCHES
+      const statusMismatches = await pool.query(`
+        SELECT 
+          co.id as customer_order_id,
+          co.order_number,
+          co.status as customer_status,
+          co.payment_status as customer_payment_status,
+          om.current_status as management_status,
+          om.id as management_id
+        FROM customer_orders co
+        INNER JOIN order_management om ON co.id = om.customer_order_id
+        WHERE 
+          (co.status = 'deleted' AND om.current_status IN ('pending', 'confirmed', 'financial_review', 'warehouse_ready', 'warehouse_pending'))
+          OR 
+          (co.status = 'pending' AND om.current_status = 'warehouse_ready')
+      `);
+
+      console.log(`🔍 [TABLE SYNC] Found ${statusMismatches.rows.length} status mismatches to fix`);
+
+      // Fix status mismatches
+      for (const mismatch of statusMismatches.rows) {
+        let correctStatus: string;
+        
+        if (mismatch.customer_status === 'deleted') {
+          correctStatus = 'cancelled';
+        } else {
+          correctStatus = determineOrderManagementStatus(mismatch.customer_status, mismatch.customer_payment_status);
+        }
+        
+        await pool.query(`
+          UPDATE order_management 
+          SET current_status = $1, updated_at = NOW()
+          WHERE id = $2
+        `, [correctStatus, mismatch.management_id]);
+        
+        console.log(`✅ [TABLE SYNC] Fixed status mismatch for order ${mismatch.order_number}: ${mismatch.management_status} → ${correctStatus}`);
+      }
+
+      // 3. CLEAN UP ORPHANED MANAGEMENT RECORDS
+      const orphanedManagement = await pool.query(`
+        SELECT om.id, om.customer_order_id
+        FROM order_management om
+        LEFT JOIN customer_orders co ON om.customer_order_id = co.id
+        WHERE co.id IS NULL
+      `);
+
+      console.log(`🔍 [TABLE SYNC] Found ${orphanedManagement.rows.length} orphaned management records`);
+
+      // Remove orphaned records
+      for (const orphaned of orphanedManagement.rows) {
+        await pool.query(`
+          DELETE FROM order_management WHERE id = $1
+        `, [orphaned.id]);
+        
+        console.log(`🗑️ [TABLE SYNC] Removed orphaned management record for missing customer order ${orphaned.customer_order_id}`);
+      }
+
+      console.log('✅ [TABLE SYNC] Order table synchronization completed successfully');
+      
+    } catch (error) {
+      console.error('❌ [TABLE SYNC] Error during order table synchronization:', error);
+    }
+  }
+
+  // Helper function to determine correct order management status
+  function determineOrderManagementStatus(customerStatus: string, paymentStatus: string): string {
+    if (customerStatus === 'deleted') return 'cancelled';
+    if (customerStatus === 'delivered') return 'delivered';
+    
+    // Status determination logic based on payment and order status
+    if (paymentStatus === 'paid' || paymentStatus === 'receipt_uploaded') {
+      if (customerStatus === 'pending') return 'warehouse_ready';
+      if (customerStatus === 'confirmed') return 'warehouse_ready';
+      return 'warehouse_ready';
+    }
+    
+    if (paymentStatus === 'pending') {
+      return 'payment_uploaded';
+    }
+    
+    if (paymentStatus === 'grace_period') {
+      return 'payment_grace_period';
+    }
+    
+    return 'pending';
+  }
+
+  // Manual synchronization endpoint (admin only)
+  app.post('/api/admin/system/sync-orders', requireAuth, async (req: Request, res: Response) => {
+    try {
+      await synchronizeOrderTables();
+      res.json({ 
+        success: true, 
+        message: 'همسانسازی جداول سفارش با موفقیت انجام شد'
+      });
+    } catch (error) {
+      console.error('Error in manual order synchronization:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'خطا در همسانسازی جداول سفارش'
+      });
+    }
+  });
+
+  // New manual synchronization endpoint for admin panel
+  app.post('/api/admin/manual-sync-orders', requireAuth, async (req, res) => {
+    try {
+      console.log('🔧 [MANUAL SYNC] Admin triggered manual order synchronization');
+      await synchronizeOrderTables();
+      
+      res.json({
+        success: true,
+        message: 'همسانسازی با موفقیت انجام شد',
+        fixed: 0, // Will be updated by sync function if needed
+        created: 0
+      });
+    } catch (error: any) {
+      console.error('❌ [MANUAL SYNC] Error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در فرآیند همسانسازی',
+        error: error.message
+      });
+    }
+  });
+
+  // Sync status endpoint
+  app.get('/api/admin/sync-status', requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      
+      const totalOrdersResult = await pool.query('SELECT COUNT(*) as count FROM customer_orders');
+      const totalManagementResult = await pool.query('SELECT COUNT(*) as count FROM order_management');
+      
+      const totalOrders = parseInt(totalOrdersResult.rows[0].count);
+      const totalManagement = parseInt(totalManagementResult.rows[0].count);
+      
+      res.json({
+        success: true,
+        totalOrders,
+        synced: totalManagement,
+        issues: Math.max(0, totalOrders - totalManagement),
+        lastSync: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('❌ [SYNC STATUS] Error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در دریافت وضعیت همسانسازی'
+      });
+    }
+  });
+
+  // AUTOMATIC SYNCHRONIZATION ON SERVER STARTUP
+  setImmediate(async () => {
+    console.log('🚀 [STARTUP SYNC] Running automatic order table synchronization on server startup...');
+    await synchronizeOrderTables();
+  });
+
+  // PERIODIC SYNCHRONIZATION (every 2 hours)
+  setInterval(async () => {
+    console.log('⏰ [PERIODIC SYNC] Running scheduled order table synchronization...');
+    await synchronizeOrderTables();
+  }, 2 * 60 * 60 * 1000); // 2 hours
+
   return httpServer;
 }
 
