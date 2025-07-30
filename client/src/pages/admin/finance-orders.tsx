@@ -353,7 +353,7 @@ function FinanceOrders() {
         description: "پرداخت تایید شد و سفارش به واحد انبار منتقل شد"
       });
       
-      // Enhanced cache invalidation strategy
+      // Enhanced cache invalidation strategy - force complete refresh
       queryClient.invalidateQueries({ queryKey: ['/api/order-management/financial'] });
       queryClient.invalidateQueries({ queryKey: ['/api/financial/orders'] });
       queryClient.invalidateQueries({ queryKey: ['/api/financial/approved-orders'] });
@@ -368,6 +368,9 @@ function FinanceOrders() {
       // Clear ALL query cache for these keys to force fresh data
       queryClient.removeQueries({ queryKey: ['/api/financial/orders'] });
       queryClient.removeQueries({ queryKey: ['/api/financial/approved-orders'] });
+      
+      // Reset all query cache to force immediate refresh
+      queryClient.clear();
       
       // Force immediate refresh with a slight delay to allow backend to complete
       setTimeout(() => {
@@ -408,7 +411,7 @@ function FinanceOrders() {
         description: "پرداخت رد شد و به قسمت سفارشات رد شده منتقل شد"
       });
       
-      // Enhanced cache invalidation strategy
+      // Enhanced cache invalidation strategy - force complete refresh
       queryClient.invalidateQueries({ queryKey: ['/api/order-management/financial'] });
       queryClient.invalidateQueries({ queryKey: ['/api/financial/orders'] });
       queryClient.invalidateQueries({ queryKey: ['/api/financial/approved-orders'] });
@@ -419,6 +422,9 @@ function FinanceOrders() {
       // Clear ALL query cache for these keys to force fresh data
       queryClient.removeQueries({ queryKey: ['/api/financial/orders'] });
       queryClient.removeQueries({ queryKey: ['/api/financial/approved-orders'] });
+      
+      // Reset all query cache to force immediate refresh
+      queryClient.clear();
       
       // Force immediate refresh with a slight delay
       setTimeout(() => {
