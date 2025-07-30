@@ -522,6 +522,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       recipientPhone: customerOrders.recipientPhone,
       recipientAddress: customerOrders.recipientAddress,
       deliveryNotes: customerOrders.deliveryNotes,
+      notes: customerOrders.notes, // یادداشت‌های مشتری از فرم سفارش
       
       // GPS Location data for logistics coordination
       gpsLatitude: customerOrders.gpsLatitude,
@@ -1446,6 +1447,8 @@ export class OrderManagementStorage implements IOrderManagementStorage {
                 customerName: customerOrder.customerName,
                 customerEmail: customerOrder.customerEmail,
                 customerPhone: customerOrder.customerPhone,
+                notes: customerOrder.notes, // یادداشت‌های مشتری از فرم سفارش
+                deliveryNotes: customerOrder.deliveryNotes, // یادداشت‌های تحویل از مشتری
               };
             }
           } catch (error) {

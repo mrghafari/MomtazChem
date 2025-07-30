@@ -23,7 +23,8 @@ import {
   Activity,
   Timer,
   DollarSign,
-  AlertTriangle
+  AlertTriangle,
+  MessageCircle
 } from 'lucide-react';
 
 // Order interface - Rebuilt to match actual backend database structure
@@ -48,6 +49,8 @@ interface Order {
   financialNotes?: string;
   warehouseNotes?: string;
   logisticsNotes?: string;
+  notes?: string; // یادداشت‌های مشتری از فرم سفارش
+  deliveryNotes?: string; // یادداشت‌های تحویل از مشتری
   createdAt: string;
   updatedAt: string;
 }
@@ -802,6 +805,37 @@ export default function OrderTrackingManagement() {
                                   <div><strong>تلفن تحویل‌دهنده:</strong> {selectedOrder.deliveryPersonPhone || 'تخصیص نشده'}</div>
                                 </CardContent>
                               </Card>
+
+                              {/* Customer Notes Section */}
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <Card className="bg-blue-50 border-blue-200">
+                                  <CardHeader>
+                                    <CardTitle className="text-sm flex items-center gap-2 text-blue-800">
+                                      <MessageCircle className="w-4 h-4" />
+                                      یادداشت‌های مشتری
+                                    </CardTitle>
+                                  </CardHeader>
+                                  <CardContent>
+                                    <p className="text-sm text-blue-700 bg-white p-3 rounded border">
+                                      {selectedOrder.notes || 'مشتری یادداشتی نداده است'}
+                                    </p>
+                                  </CardContent>
+                                </Card>
+
+                                <Card className="bg-green-50 border-green-200">
+                                  <CardHeader>
+                                    <CardTitle className="text-sm flex items-center gap-2 text-green-800">
+                                      <MapPin className="w-4 h-4" />
+                                      یادداشت‌های تحویل
+                                    </CardTitle>
+                                  </CardHeader>
+                                  <CardContent>
+                                    <p className="text-sm text-green-700 bg-white p-3 rounded border">
+                                      {selectedOrder.deliveryNotes || 'یادداشت تحویل خاصی ندارد'}
+                                    </p>
+                                  </CardContent>
+                                </Card>
+                              </div>
 
                               {/* Department Notes */}
                               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
