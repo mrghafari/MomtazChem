@@ -329,6 +329,34 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
 
 
+  // Fetch Iraqi provinces for second address dropdowns
+  const { data: provinces, isLoading: isLoadingProvinces } = useQuery({
+    queryKey: ['/api/iraqi-provinces'],
+    retry: 1,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Fetch cities for selected province in second address
+  const { data: secondaryCities, isLoading: isLoadingSecondaryCities } = useQuery({
+    queryKey: ['/api/iraqi-cities', selectedSecondaryProvinceId],
+    queryFn: async () => {
+      if (!selectedSecondaryProvinceId) return [];
+      
+      const response = await fetch('/api/iraqi-cities');
+      if (!response.ok) throw new Error('Failed to fetch cities');
+      
+      const result = await response.json();
+      if (result.success && result.data) {
+        // Filter cities by selected province
+        return result.data.filter((city: any) => city.provinceId === selectedSecondaryProvinceId);
+      }
+      return [];
+    },
+    enabled: !!selectedSecondaryProvinceId,
+    retry: 1,
+    staleTime: 5 * 60 * 1000,
+  });
+
   // Fetch VAT settings from public endpoint
   const { data: vatData } = useQuery({
     queryKey: ['/api/tax-settings'],
@@ -1843,6 +1871,92 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                           </FormControl>
                         </FormItem>
                         
+                        {/* Province and City Dropdowns for Second Address */}
+                        <div className="grid grid-cols-3 gap-3">
+                          {/* Province Dropdown */}
+                          <div>
+                            <label className={`block text-sm font-medium mb-1 ${isRTL ? 'text-right' : 'text-left'}`}>
+                              {language === 'ar' ? 'استان' : 'Province'}
+                            </label>
+                            <Select 
+                              onValueChange={(value) => {
+                                setSecondProvince(value);
+                                // Find province ID and set it for city filtering
+                                const selectedProvince = provinces?.data?.find((p: any) => 
+                                  p.nameEnglish === value || p.name === value
+                                );
+                                if (selectedProvince) {
+                                  setSelectedSecondaryProvinceId(selectedProvince.id);
+                                  // Clear city selection when province changes
+                                  setSecondCity("");
+                                }
+                                console.log('🏛️ [BILINGUAL] Province selected:', value, 'ID:', selectedProvince?.id);
+                              }} 
+                              value={secondProvince}
+                              disabled={isLoadingProvinces}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder={
+                                  isLoadingProvinces 
+                                    ? (language === 'ar' ? 'در حال بارگذاری...' : 'Loading...')
+                                    : (language === 'ar' ? 'انتخاب استان' : 'Select Province')
+                                } />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {provinces?.data && Array.isArray(provinces.data) && provinces.data.map((province: any) => (
+                                  <SelectItem key={province.id} value={province.nameEnglish || province.name}>
+                                    {province.nameEnglish} / {province.nameArabic || province.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          {/* City Dropdown */}
+                          <div>
+                            <label className={`block text-sm font-medium mb-1 ${isRTL ? 'text-right' : 'text-left'}`}>
+                              {language === 'ar' ? 'شهر' : 'City'}
+                            </label>
+                            <Select 
+                              onValueChange={(value) => {
+                                setSecondCity(value);
+                                console.log('🏙️ [BILINGUAL] City selected:', value);
+                              }} 
+                              value={secondCity}
+                              disabled={!selectedSecondaryProvinceId || isLoadingSecondaryCities}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder={
+                                  !selectedSecondaryProvinceId 
+                                    ? (language === 'ar' ? 'ابتدا استان را انتخاب کنید' : 'Select province first')
+                                    : isLoadingSecondaryCities
+                                    ? (language === 'ar' ? 'در حال بارگذاری...' : 'Loading...')
+                                    : (language === 'ar' ? 'انتخاب شهر' : 'Select City')
+                                } />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {secondaryCities && Array.isArray(secondaryCities) && secondaryCities.map((city: any) => (
+                                  <SelectItem key={city.id} value={city.nameEnglish || city.name}>
+                                    {city.nameEnglish} / {city.nameArabic || city.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          {/* Postal Code */}
+                          <div>
+                            <label className={`block text-sm font-medium mb-1 ${isRTL ? 'text-right' : 'text-left'}`}>
+                              {language === 'ar' ? 'کد پستی' : 'Postal Code'}
+                            </label>
+                            <Input 
+                              value={secondPostalCode}
+                              onChange={(e) => setSecondPostalCode(e.target.value)}
+                              placeholder="12345"
+                              className={`${isRTL ? 'text-right' : 'text-left'} bg-white`}
+                            />
+                          </div>
+                        </div>
 
                       </div>
                     )}
