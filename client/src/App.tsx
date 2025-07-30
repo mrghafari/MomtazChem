@@ -59,6 +59,7 @@ import CustomerWallet from "@/pages/customer-wallet";
 import WalletManagement from "@/pages/admin/wallet-management";
 import ProductVariants from "@/pages/admin/product-variants";
 import SalesAnalytics from "@/pages/sales-analytics";
+import FinancialWorkflowDashboard from "@/pages/admin/financial-workflow-dashboard";
 import Products from "@/pages/products";
 import ProductsPage from "@/pages/products";
 import BatchManagement from "@/pages/batch-management";
@@ -105,7 +106,6 @@ import LogisticsOrders from "@/pages/admin/logistics-orders";
 import LogisticsManagement from "@/pages/admin/logistics-management";
 import DeliveredOrders from "@/pages/admin/delivered-orders";
 import PaymentOptions from "@/pages/payment-options";
-import FinancialWorkflowDashboard from "@/pages/admin/financial-workflow-dashboard";
 import GlobalRefreshSettings from "@/pages/admin/global-refresh-settings";
 
 import InventoryNotificationSettings from "@/pages/admin/inventory-notification-settings";
@@ -231,7 +231,7 @@ function Router() {
           <Route path="/admin/logistics-orders" component={LogisticsOrders} />
           <Route path="/admin/logistics-management" component={LogisticsManagement} />
           <Route path="/admin/delivered-orders" component={DeliveredOrders} />
-          <Route path="/admin/financial-workflow-dashboard" component={FinancialWorkflowDashboard} />
+          <Route path="/admin/financial-workflow" component={FinancialWorkflowDashboard} />
           <Route path="/payment-options" component={PaymentOptions} />
           <Route path="/admin/global-refresh-settings" component={GlobalRefreshSettings} />
 

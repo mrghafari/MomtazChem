@@ -17,7 +17,14 @@ import {
   DollarSign,
   FileText,
   Timer,
-  Building2
+  Building2,
+  MapPin,
+  Phone,
+  Mail,
+  Package,
+  Weight,
+  Truck,
+  User
 } from "lucide-react";
 
 interface FinancialOrder {
@@ -27,15 +34,27 @@ interface FinancialOrder {
   currentStatus: string;
   paymentMethod: string;
   paymentSourceLabel: string;
-  walletAmountUsed: string;
-  bankAmountPaid: string;
-  excessAmountCredited: string;
-  autoApprovalScheduledAt: string;
+  walletAmountUsed?: string;
+  bankAmountPaid?: string;
+  excessAmountCredited?: string;
+  autoApprovalScheduledAt?: string;
   isAutoApprovalEnabled: boolean;
-  financialNotes: string;
+  financialNotes?: string;
   totalAmount: string;
   customerName: string;
   createdAt: string;
+  totalWeight?: string;
+  weightUnit?: string;
+  deliveryMethod?: string;
+  shippingAddress?: {
+    name: string;
+    phone: string;
+    address: string;
+    city: string;
+    postalCode?: string;
+  };
+  customerEmail?: string;
+  customerPhone?: string;
 }
 
 export default function FinancialWorkflowDashboard() {
@@ -48,7 +67,6 @@ export default function FinancialWorkflowDashboard() {
   // لیست سفارشات در انتظار بررسی مالی
   const { data: orders, isLoading } = useQuery<FinancialOrder[]>({
     queryKey: ['/api/financial/pending-orders'],
-    queryFn: () => apiRequest('/api/financial/pending-orders'),
     refetchInterval: 30000 // تازه‌سازی هر 30 ثانیه
   });
 
@@ -236,9 +254,51 @@ export default function FinancialWorkflowDashboard() {
                   <CardContent className="space-y-3">
                     {/* اطلاعات مشتری */}
                     <div className="flex items-center gap-2">
-                      <Building2 className="h-4 w-4 text-gray-500" />
-                      <span className="text-gray-700">{order.customerName}</span>
+                      <User className="h-4 w-4 text-gray-500" />
+                      <span className="text-gray-700 font-medium">{order.customerName}</span>
                     </div>
+
+                    {/* تاریخ سفارش */}
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-gray-500" />
+                      <span className="text-sm text-gray-600">
+                        {new Date(order.createdAt).toLocaleDateString('fa-IR')} - {new Date(order.createdAt).toLocaleTimeString('fa-IR')}
+                      </span>
+                    </div>
+
+                    {/* آدرس تحویل */}
+                    {order.shippingAddress && (
+                      <div className="flex items-start gap-2">
+                        <MapPin className="h-4 w-4 text-gray-500 mt-0.5" />
+                        <div className="text-sm text-gray-600">
+                          <div>{order.shippingAddress.city} - {order.shippingAddress.address}</div>
+                          {order.shippingAddress.phone && (
+                            <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
+                              <Phone className="h-3 w-3" />
+                              {order.shippingAddress.phone}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* اطلاعات تماس مشتری */}
+                    {(order.customerEmail || order.customerPhone) && (
+                      <div className="bg-gray-50 p-2 rounded-lg space-y-1">
+                        {order.customerEmail && (
+                          <div className="flex items-center gap-2 text-sm">
+                            <Mail className="h-3 w-3 text-gray-500" />
+                            <span className="text-gray-600">{order.customerEmail}</span>
+                          </div>
+                        )}
+                        {order.customerPhone && (
+                          <div className="flex items-center gap-2 text-sm">
+                            <Phone className="h-3 w-3 text-gray-500" />
+                            <span className="text-gray-600">{order.customerPhone}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     {/* روش پرداخت */}
                     <div className="flex items-center gap-2">
@@ -256,25 +316,69 @@ export default function FinancialWorkflowDashboard() {
                       </span>
                     </div>
 
+                    {/* وزن کل */}
+                    {order.totalWeight && (
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Weight className="h-4 w-4 text-gray-500" />
+                          <span className="text-gray-600">وزن کل:</span>
+                        </div>
+                        <span className="font-medium text-green-600">
+                          {order.totalWeight} {order.weightUnit || 'kg'}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* روش تحویل */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Truck className="h-4 w-4 text-gray-500" />
+                        <span className="text-gray-600">روش تحویل:</span>
+                      </div>
+                      <span className="text-sm text-gray-700">
+                        {order.deliveryMethod === 'courier' ? 'پیک' : 
+                         order.deliveryMethod === 'pickup' ? 'تحویل حضوری' : 
+                         order.deliveryMethod === 'mail' ? 'پست' : order.deliveryMethod}
+                      </span>
+                    </div>
+
                     {/* جزئیات پرداخت */}
-                    {(parseFloat(order.walletAmountUsed) > 0 || parseFloat(order.bankAmountPaid) > 0) && (
+                    {(parseFloat(order.walletAmountUsed || '0') > 0 || parseFloat(order.bankAmountPaid || '0') > 0) && (
                       <div className="bg-gray-50 p-3 rounded-lg space-y-2">
-                        {parseFloat(order.walletAmountUsed) > 0 && (
+                        {parseFloat(order.walletAmountUsed || '0') > 0 && (
                           <div className="flex justify-between text-sm">
                             <span className="text-green-600">کیف پول:</span>
                             <span className="font-medium">
-                              {parseFloat(order.walletAmountUsed).toLocaleString()} دینار
+                              {parseFloat(order.walletAmountUsed || '0').toLocaleString()} دینار
                             </span>
                           </div>
                         )}
-                        {parseFloat(order.bankAmountPaid) > 0 && (
+                        {parseFloat(order.bankAmountPaid || '0') > 0 && (
                           <div className="flex justify-between text-sm">
                             <span className="text-blue-600">درگاه بانکی:</span>
                             <span className="font-medium">
-                              {parseFloat(order.bankAmountPaid).toLocaleString()} دینار
+                              {parseFloat(order.bankAmountPaid || '0').toLocaleString()} دینار
                             </span>
                           </div>
                         )}
+                      </div>
+                    )}
+
+                    {/* یادداشت‌های مالی */}
+                    {order.financialNotes && (
+                      <div className="bg-blue-50 p-2 rounded text-sm">
+                        <span className="font-medium text-blue-800">یادداشت: </span>
+                        <span className="text-blue-700">{order.financialNotes}</span>
+                      </div>
+                    )}
+
+                    {/* مبلغ اضافی واریزی */}
+                    {parseFloat(order.excessAmountCredited || '0') > 0 && (
+                      <div className="bg-green-50 p-2 rounded text-sm">
+                        <span className="font-medium text-green-800">واریز اضافی: </span>
+                        <span className="text-green-700">
+                          {parseFloat(order.excessAmountCredited).toLocaleString()} دینار به کیف پول
+                        </span>
                       </div>
                     )}
 
