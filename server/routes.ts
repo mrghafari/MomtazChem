@@ -41502,6 +41502,103 @@ momtazchem.com
     }
   });
 
+  // Payment Workflow Automation - Fix Incomplete Payments  
+  app.post('/api/admin/fix-incomplete-payments', async (req, res) => {
+    if (!req.isAuthenticated() || (!req.user?.roleId && !req.session?.adminId)) {
+      return res.status(401).json({ success: false, message: 'احراز هویت مدیریت مورد نیاز است' });
+    }
+
+    try {
+      console.log('🚀 [PAYMENT AUTOMATION] Starting complete payment workflow automation...');
+      const fixedOrders: string[] = [];
+      
+      // Fix M2511133 - wallet_partial with no wallet transaction
+      const order133 = await storage.getOrderByNumber('M2511133');
+      if (order133 && order133.paymentMethod === 'wallet_partial') {
+        console.log(`💰 [AUTO FIX] Processing incomplete wallet order ${order133.orderNumber}`);
+        
+        // Check customer wallet
+        const customerWallet = await walletStorage.getWalletByCustomerId(order133.customerId);
+        if (customerWallet) {
+          const orderAmount = parseFloat(order133.totalAmount);
+          const walletBalance = parseFloat(customerWallet.balance);
+          
+          if (walletBalance >= orderAmount) {
+            // Full wallet payment
+            await walletStorage.createTransaction({
+              walletId: customerWallet.id,
+              customerId: order133.customerId,
+              transactionType: 'debit',
+              amount: orderAmount.toString(),
+              currency: order133.currency,
+              balanceBefore: walletBalance.toString(),
+              balanceAfter: (walletBalance - orderAmount).toString(),
+              description: `پرداخت کامل سفارش ${order133.orderNumber} - پردازش خودکار`,
+              referenceType: 'order',
+              referenceId: order133.id,
+              paymentMethod: 'wallet_full',
+              status: 'completed'
+            });
+
+            // Update order to paid
+            await storage.db.update(storage.schema.customerOrders)
+              .set({ 
+                paymentMethod: 'wallet_full',
+                paymentStatus: 'paid'
+              })
+              .where(storage.eq(storage.schema.customerOrders.id, order133.id));
+
+            // Move to warehouse
+            await orderManagementStorage.updateOrderManagement(order133.id, {
+              currentStatus: 'warehouse_pending',
+              financialReviewerId: req.user?.id || req.session?.adminId,
+              financialReviewedAt: new Date().toISOString(),
+              financialNotes: `پرداخت کامل از کیف پول - ${orderAmount} ${order133.currency} - پردازش خودکار`
+            });
+
+            console.log(`✅ [AUTO FIX] Order ${order133.orderNumber} fixed with full wallet payment`);
+            fixedOrders.push(order133.orderNumber);
+          }
+        }
+      }
+
+      // Fix M2511138 - bank_transfer_grace with receipt_uploaded
+      const order138 = await storage.getOrderByNumber('M2511138');
+      if (order138 && order138.paymentMethod === 'bank_transfer_grace' && order138.paymentStatus === 'receipt_uploaded') {
+        console.log(`🏦 [AUTO FIX] Processing bank receipt order ${order138.orderNumber}`);
+        
+        // Auto-approve bank payment
+        await storage.db.update(storage.schema.customerOrders)
+          .set({ paymentStatus: 'paid' })
+          .where(storage.eq(storage.schema.customerOrders.id, order138.id));
+
+        // Move to warehouse
+        await orderManagementStorage.updateOrderManagement(order138.id, {
+          currentStatus: 'warehouse_pending',
+          financialReviewerId: req.user?.id || req.session?.adminId,
+          financialReviewedAt: new Date().toISOString(),
+          financialNotes: `تایید خودکار پرداخت بانکی - رسید بارگذاری شده - پردازش اتوماتیک`
+        });
+
+        console.log(`✅ [AUTO FIX] Order ${order138.orderNumber} automatically approved and moved to warehouse`);
+        fixedOrders.push(order138.orderNumber);
+      }
+
+      res.json({ 
+        success: true, 
+        message: 'Payment workflow automation completed successfully',
+        ordersFixed: fixedOrders
+      });
+
+    } catch (error) {
+      console.error('❌ [PAYMENT AUTOMATION] Error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'خطا در اتوماسیون workflow پرداخت' 
+      });
+    }
+  });
+
   return httpServer;
 }
 
