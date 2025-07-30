@@ -12621,73 +12621,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`🔍 [ORDER DETAILS] Fetching details for order: ${orderNumber}`);
       
-      // Get order from customer_orders table with customer info
-      const orderQuery = await customerDb
-        .select({
-          id: customerOrders.id,
-          orderNumber: customerOrders.orderNumber,
-          totalAmount: customerOrders.totalAmount,
-          currency: customerOrders.currency,
-          paymentStatus: customerOrders.paymentStatus,
-          paymentMethod: customerOrders.paymentMethod,
-          status: customerOrders.status,
-          createdAt: customerOrders.createdAt,
-          updatedAt: customerOrders.updatedAt,
-          customerName: customerOrders.customerName,
-          phone: customerOrders.phone,
-          email: customerOrders.email,
-          address: customerOrders.address,
-          city: customerOrders.city,
-          province: customerOrders.province,
-          country: customerOrders.country,
-          postalCode: customerOrders.postalCode,
-          notes: customerOrders.notes,
-          shippingCost: customerOrders.shippingCost,
-          customerId: customerOrders.customerId
-        })
-        .from(customerOrders)
-        .where(eq(customerOrders.orderNumber, orderNumber))
-        .limit(1);
+      // Use direct SQL query to avoid Drizzle ORM issues
+      const orderQuery = await customerPool.query(
+        'SELECT * FROM customer_orders WHERE order_number = $1 LIMIT 1',
+        [orderNumber]
+      );
 
-      if (orderQuery.length === 0) {
+      if (orderQuery.rows.length === 0) {
         return res.status(404).json({
           success: false,
           message: "سفارش یافت نشد"
         });
       }
 
-      const order = orderQuery[0];
+      const order = orderQuery.rows[0];
 
-      // Get order items
-      const items = await customerDb
-        .select({
-          id: orderItems.id,
-          productId: orderItems.productId,
-          productName: orderItems.productName,
-          quantity: orderItems.quantity,
-          unitPrice: orderItems.unitPrice,
-          totalPrice: orderItems.totalPrice,
-          specifications: orderItems.specifications
-        })
-        .from(orderItems)
-        .where(eq(orderItems.orderId, order.id));
+      // Get order items using direct SQL
+      const itemsQuery = await customerPool.query(
+        'SELECT * FROM order_items WHERE order_id = $1',
+        [order.id]
+      );
+      const items = itemsQuery.rows;
 
       // Get customer info from CRM if available
       let customerDetails = {
-        firstName: order.customerName?.split(' ')[0] || '',
-        lastName: order.customerName?.split(' ').slice(1).join(' ') || '',
-        email: order.email,
-        phone: order.phone,
-        address: order.address,
-        city: order.city,
-        province: order.province,
-        country: order.country,
-        postalCode: order.postalCode
+        firstName: order.customer_name?.split(' ')[0] || '',
+        lastName: order.customer_name?.split(' ').slice(1).join(' ') || '',
+        email: order.guest_email,
+        phone: order.guest_name,
+        address: order.shipping_address?.address,
+        city: order.shipping_address?.city,
+        province: order.shipping_address?.province,
+        country: order.shipping_address?.country,
+        postalCode: order.shipping_address?.postalCode
       };
 
-      if (order.customerId) {
+      if (order.customer_id) {
         try {
-          const crmCustomer = await crmStorage.getCrmCustomerById(order.customerId);
+          const crmCustomer = await crmStorage.getCrmCustomerById(order.customer_id);
           if (crmCustomer) {
             customerDetails = {
               firstName: crmCustomer.firstName || customerDetails.firstName,
@@ -12730,11 +12701,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Look for additional customer documents in uploads
       // (This would require implementing a document tracking system)
 
+      // Fix column names to match database schema
       const orderDetails = {
-        ...order,
+        id: order.id,
+        orderNumber: order.order_number,
+        totalAmount: order.total_amount,
+        currency: order.currency || 'IQD',
+        paymentStatus: order.payment_status,
+        paymentMethod: order.payment_method,
+        status: order.status,
+        createdAt: order.created_at,
+        updatedAt: order.updated_at,
+        notes: order.notes,
+        shippingCost: order.shipping_cost,
+        customerName: order.customer_name,
+        guestName: order.guest_name,
+        guestEmail: order.guest_email,
+        shippingAddress: order.shipping_address,
+        billingAddress: order.billing_address,
+        walletAmountUsed: order.wallet_amount_used,
+        remainingAmount: order.remaining_amount,
         customer: customerDetails,
-        items: items,
-        currentStatus: order.status
+        items: items.map(item => ({
+          id: item.id,
+          productId: item.product_id,
+          productName: item.product_name,
+          productSku: item.product_sku,
+          quantity: item.quantity,
+          unitPrice: item.unit_price,
+          totalPrice: item.total_price,
+          specifications: item.specifications
+        })),
+        currentStatus: order.status,
+        orderType: (order.status === 'warehouse_ready' || order.status === 'shipped' || order.status === 'delivered') ? 'regular' : 'temporary'
       };
 
       console.log(`✅ [ORDER DETAILS] Successfully fetched details for order ${orderNumber}`);

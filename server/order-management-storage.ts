@@ -29,6 +29,7 @@ import { crmCustomers } from "@shared/schema";
 import { showcaseProducts as products } from "@shared/showcase-schema";
 import { shopProducts } from "@shared/shop-schema";
 import { db } from "./db";
+import { pool as dbPool } from "./db";
 import { eq, and, desc, asc, inArray, sql, isNotNull } from "drizzle-orm";
 
 export interface IOrderManagementStorage {
@@ -181,6 +182,24 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       .from(orderManagement)
       .where(eq(orderManagement.customerOrderId, customerOrderId));
     return order;
+  }
+
+  async getOrderByOrderNumber(orderNumber: string): Promise<OrderManagement | undefined> {
+    try {
+      // Use direct SQL to avoid Drizzle ORM issues
+      const result = await dbPool.query(`
+        SELECT om.* 
+        FROM order_management om
+        LEFT JOIN customer_orders co ON om.customer_order_id = co.id
+        WHERE co.order_number = $1
+        LIMIT 1
+      `, [orderNumber]);
+      
+      return result.rows[0] || undefined;
+    } catch (error) {
+      console.error('Error fetching order by order number:', error);
+      return undefined;
+    }
   }
   
   async updateOrderManagement(id: number, updateData: Partial<InsertOrderManagement>): Promise<OrderManagement> {
