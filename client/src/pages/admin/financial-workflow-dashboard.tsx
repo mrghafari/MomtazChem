@@ -14,6 +14,7 @@ import {
   Wallet, 
   CheckCircle, 
   AlertCircle,
+  AlertTriangle,
   DollarSign,
   FileText,
   Timer,
@@ -69,6 +70,22 @@ export default function FinancialWorkflowDashboard() {
     queryKey: ['/api/financial/pending-orders'],
     refetchInterval: 30000 // تازه‌سازی هر 30 ثانیه
   });
+
+  // لیست سفارشات موقت (سفارشات آزمایشی و در حال تست)
+  const { data: temporaryResponse, isLoading: temporaryLoading } = useQuery<{orders: FinancialOrder[]}>({
+    queryKey: ['/api/financial/temporary-orders'],
+    refetchInterval: 30000 // تازه‌سازی هر 30 ثانیه
+  });
+
+  // لیست سفارشات یتیم (پرداخت ناکامل از درگاه بانکی)
+  const { data: orphanedResponse, isLoading: orphanedLoading } = useQuery<{orders: FinancialOrder[]}>({
+    queryKey: ['/api/financial/orphaned-orders'],
+    refetchInterval: 30000 // تازه‌سازی هر 30 ثانیه
+  });
+
+  // Extract arrays from API responses
+  const temporaryOrders = temporaryResponse?.orders || [];
+  const orphanedOrders = orphanedResponse?.orders || [];
 
   // تایید دستی سفارش
   const approveOrderMutation = useMutation({
@@ -213,8 +230,10 @@ export default function FinancialWorkflowDashboard() {
       </Card>
 
       <Tabs defaultValue="pending" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="pending">سفارشات در انتظار</TabsTrigger>
+          <TabsTrigger value="temporary">سفارشات موقت</TabsTrigger>
+          <TabsTrigger value="orphaned">سفارشات یتیم</TabsTrigger>
           <TabsTrigger value="auto-approval">تایید خودکار</TabsTrigger>
           <TabsTrigger value="grace-period">مهلت‌دار</TabsTrigger>
         </TabsList>
@@ -391,6 +410,212 @@ export default function FinancialWorkflowDashboard() {
                         </span>
                       </div>
                     )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="temporary" className="space-y-4">
+          {temporaryLoading ? (
+            <Card>
+              <CardContent className="p-6">
+                <div className="animate-pulse space-y-4">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="h-20 bg-gray-100 rounded"></div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          ) : temporaryOrders?.length === 0 ? (
+            <Card>
+              <CardContent className="text-center py-12">
+                <Clock className="h-12 w-12 text-blue-500 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  هیچ سفارش موقتی یافت نشد
+                </h3>
+                <p className="text-gray-600">
+                  سفارشات آزمایشی و موقت در اینجا نمایش داده می‌شوند
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              {temporaryOrders?.map((order) => (
+                <Card key={order.id} className="border-blue-200 bg-blue-50/50">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Clock className="h-5 w-5 text-blue-600" />
+                        <div>
+                          <Badge className="bg-blue-100 text-blue-800 border-blue-300">
+                            سفارش موقت
+                          </Badge>
+                          <p className="text-sm text-gray-600 mt-1">
+                            سفارش آزمایشی / موقت
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <h3 className="font-bold text-lg">
+                          سفارش {order.orderNumber}
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          {new Date(order.createdAt).toLocaleDateString('fa-IR')}
+                        </p>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {/* اطلاعات مشتری */}
+                    <div className="flex items-center justify-between bg-white p-3 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-gray-500" />
+                        <span className="text-gray-600">مشتری:</span>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-medium">{order.customerName}</div>
+                        {order.customerPhone && (
+                          <div className="text-sm text-gray-600">{order.customerPhone}</div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* مبلغ کل */}
+                    <div className="flex justify-between items-center bg-white p-3 rounded-lg">
+                      <span className="text-gray-600">مبلغ کل:</span>
+                      <span className="font-bold text-lg text-blue-600">
+                        {parseFloat(order.totalAmount).toLocaleString()} دینار
+                      </span>
+                    </div>
+
+                    {/* وزن کل */}
+                    {order.totalWeight && (
+                      <div className="flex items-center justify-between bg-white p-3 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <Weight className="h-4 w-4 text-gray-500" />
+                          <span className="text-gray-600">وزن کل:</span>
+                        </div>
+                        <span className="font-medium text-green-600">
+                          {order.totalWeight} {order.weightUnit || 'kg'}
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="bg-blue-100 p-3 rounded-lg">
+                      <div className="flex items-center gap-2 text-blue-800">
+                        <Clock className="h-4 w-4" />
+                        <span className="font-medium">وضعیت: سفارش موقت/آزمایشی</span>
+                      </div>
+                      <p className="text-sm text-blue-700 mt-1">
+                        این سفارش جهت تست و بررسی ایجاد شده است
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="orphaned" className="space-y-4">
+          {orphanedLoading ? (
+            <Card>
+              <CardContent className="p-6">
+                <div className="animate-pulse space-y-4">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="h-20 bg-gray-100 rounded"></div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          ) : orphanedOrders?.length === 0 ? (
+            <Card>
+              <CardContent className="text-center py-12">
+                <AlertTriangle className="h-12 w-12 text-amber-500 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  هیچ سفارش یتیمی یافت نشد
+                </h3>
+                <p className="text-gray-600">
+                  تمام سفارشات درگاه بانکی با موفقیت کامل شده‌اند
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              {orphanedOrders?.map((order) => (
+                <Card key={order.id} className="border-amber-200 bg-amber-50/50">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <AlertTriangle className="h-5 w-5 text-amber-600" />
+                        <div>
+                          <Badge className="bg-amber-100 text-amber-800 border-amber-300">
+                            سفارش ناتمام
+                          </Badge>
+                          <p className="text-sm text-gray-600 mt-1">
+                            پرداخت درگاه بانکی ناکامل
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <h3 className="font-bold text-lg">
+                          سفارش {order.orderNumber}
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          {new Date(order.createdAt).toLocaleDateString('fa-IR')}
+                        </p>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {/* اطلاعات مشتری */}
+                    <div className="flex items-center justify-between bg-white p-3 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-gray-500" />
+                        <span className="text-gray-600">مشتری:</span>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-medium">{order.customerName}</div>
+                        {order.customerPhone && (
+                          <div className="text-sm text-gray-600">{order.customerPhone}</div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* مبلغ کل */}
+                    <div className="flex justify-between items-center bg-white p-3 rounded-lg">
+                      <span className="text-gray-600">مبلغ کل:</span>
+                      <span className="font-bold text-lg text-amber-600">
+                        {parseFloat(order.totalAmount).toLocaleString()} دینار
+                      </span>
+                    </div>
+
+                    {/* آدرس تحویل */}
+                    {order.shippingAddress && (
+                      <div className="bg-white p-3 rounded-lg">
+                        <div className="flex items-center gap-2 mb-2">
+                          <MapPin className="h-4 w-4 text-gray-500" />
+                          <span className="text-gray-600">آدرس تحویل:</span>
+                        </div>
+                        <div className="text-sm text-gray-700">
+                          <div>{order.shippingAddress.address}</div>
+                          <div>{order.shippingAddress.city}</div>
+                          <div className="text-gray-600">{order.shippingAddress.phone}</div>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="bg-amber-100 p-3 rounded-lg">
+                      <div className="flex items-center gap-2 text-amber-800">
+                        <AlertTriangle className="h-4 w-4" />
+                        <span className="font-medium">وضعیت: سفارش ناتمام</span>
+                      </div>
+                      <p className="text-sm text-amber-700 mt-1">
+                        این سفارش در لیست اصلی نمایش داده نمی‌شود تا زمان تکمیل پرداخت
+                      </p>
+                    </div>
                   </CardContent>
                 </Card>
               ))}

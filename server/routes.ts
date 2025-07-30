@@ -24566,6 +24566,91 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     }
   });
 
+  // لیست سفارشات موقت (آزمایشی و در حال تست)
+  app.get('/api/financial/temporary-orders', async (req, res) => {
+    try {
+      const result = await customerPool.query(`
+        SELECT om.*, co.order_number, co.total_amount, co.currency,
+               co.guest_name, co.guest_email, 
+               co.created_at, co.shipping_address, co.billing_address
+        FROM order_management om
+        LEFT JOIN customer_orders co ON om.customer_order_id = co.id
+        WHERE co.order_number LIKE '%TEST%' 
+           OR co.order_number LIKE '%DEMO%' 
+           OR co.order_number LIKE '%TEMP%'
+           OR om.current_status = 'temporary'
+        ORDER BY om.created_at DESC
+      `);
+      
+      const transformedOrders = result.rows.map(row => ({
+        id: row.id,
+        customerOrderId: row.customer_order_id,
+        orderNumber: row.order_number,
+        currentStatus: row.current_status,
+        totalAmount: row.total_amount,
+        currency: row.currency,
+        customerName: row.guest_name || '',
+        customerEmail: row.guest_email,
+        createdAt: row.created_at,
+        shippingAddress: row.shipping_address,
+        billingAddress: row.billing_address
+      }));
+
+      res.json({ success: true, orders: transformedOrders });
+    } catch (error) {
+      console.error('❌ [TEMPORARY ORDERS] Error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در دریافت سفارشات موقت",
+        error: error.message 
+      });
+    }
+  });
+
+  // لیست سفارشات یتیم (پرداخت ناکامل از درگاه بانکی)
+  app.get('/api/financial/orphaned-orders', async (req, res) => {
+    try {
+      const result = await customerPool.query(`
+        SELECT om.*, co.order_number, co.total_amount, co.currency,
+               co.guest_name, co.guest_email, 
+               co.created_at, co.shipping_address, co.billing_address,
+               co.payment_method, co.status as order_status
+        FROM order_management om
+        LEFT JOIN customer_orders co ON om.customer_order_id = co.id
+        WHERE (co.payment_method = 'online_payment' 
+               AND co.status IN ('pending', 'payment_pending', 'payment_failed', 'cart'))
+           OR (om.current_status = 'payment_incomplete' 
+               OR om.current_status = 'orphaned')
+        ORDER BY om.created_at DESC
+      `);
+      
+      const transformedOrders = result.rows.map(row => ({
+        id: row.id,
+        customerOrderId: row.customer_order_id,
+        orderNumber: row.order_number,
+        currentStatus: row.current_status,
+        totalAmount: row.total_amount,
+        currency: row.currency,
+        customerName: row.guest_name || '',
+        customerEmail: row.guest_email,
+        createdAt: row.created_at,
+        shippingAddress: row.shipping_address,
+        billingAddress: row.billing_address,
+        paymentMethod: row.payment_method,
+        orderStatus: row.order_status
+      }));
+
+      res.json({ success: true, orders: transformedOrders });
+    } catch (error) {
+      console.error('❌ [ORPHANED ORDERS] Error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در دریافت سفارشات یتیم",
+        error: error.message 
+      });
+    }
+  });
+
   // Migrate customer orders to order management system
   app.post('/api/admin/migrate-customer-orders', requireAuth, async (req, res) => {
     try {
