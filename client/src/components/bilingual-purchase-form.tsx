@@ -919,6 +919,12 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       const data = await response.json();
       
       console.log('🚚 [SMART DELIVERY] API response:', data);
+      console.log('🚚 [SMART DELIVERY] Response details:', {
+        success: data.success,
+        hasData: !!data.data,
+        hasOptimalVehicle: !!(data.data?.optimalVehicle),
+        optimalVehicle: data.data?.optimalVehicle
+      });
       
       if (data.success && data.data) {
         const { optimalVehicle, alternatives } = data.data;
@@ -943,7 +949,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       }
     } catch (error) {
       console.error('❌ [SMART DELIVERY] Calculation error:', error);
-      setSmartDeliveryError(error?.message || 'خطا در محاسبه هزینه ارسال');
+      setSmartDeliveryError((error as any)?.message || 'خطا در محاسبه هزینه ارسال');
       setSmartDeliveryCost(0);
       setOptimalVehicle(null);
       setAlternativeVehicles([]);
@@ -1448,7 +1454,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                                     ) : smartDeliveryLoading ? (
                                       <span className="font-bold text-emerald-800">در حال محاسبه...</span>
                                     ) : (
-                                      <span className="font-bold text-emerald-800">محاسبه خودکار در مرحله بعد</span>
+                                      <span className="font-bold text-orange-600">در انتظار آدرس مقصد...</span>
                                     )}
                                   </div>
                                 </div>
@@ -1460,7 +1466,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                                         <div>
                                           راه‌حل انتخابی: {optimalVehicle.vehicleName}
                                           <div className="text-xs mt-1 space-y-1">
-                                            {optimalVehicle.vehicles?.map((vehicle, index) => (
+                                            {optimalVehicle.vehicles?.map((vehicle: any, index: number) => (
                                               <div key={index} className="flex justify-between">
                                                 <span>خودرو {index + 1}: {vehicle.vehicleName}</span>
                                                 <span>{vehicle.weight} کیلو</span>
