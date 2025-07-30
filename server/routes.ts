@@ -11894,14 +11894,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Check if hybrid payment is required (wallet partially used + remaining amount)
       // Fix: Use remaining amount directly, don't subtract wallet usage twice
-      const remainingAmountToPay = parseFloat(remainingAmount || totalAmount);
+      const remainingAmountToPay = Math.round(parseFloat(remainingAmount || totalAmount));
       
       // Critical fix: For full wallet payments, completely bypass bank payment logic
       const isFullWalletPayment = finalPaymentMethod === 'wallet_full';
       const isPartialWalletPayment = finalPaymentMethod === 'wallet_partial';
       
-      // Enhanced logic: Only require bank payment if remaining amount > 10 IQD (ignore small amounts) AND not a full wallet payment
-      const requiresBankPayment = remainingAmountToPay > 10 && !isFullWalletPayment;
+      // Enhanced logic: Only require bank payment if remaining amount > 5 IQD (ignore small amounts) AND not a full wallet payment
+      const requiresBankPayment = remainingAmountToPay > 5 && !isFullWalletPayment;
       
       console.log('🔍 [PAYMENT LOGIC DEBUG] Payment decision logic:', {
         actualWalletUsed,
