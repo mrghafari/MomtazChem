@@ -786,6 +786,21 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   const maxWalletUsage = Math.min(walletBalance, beforeWalletTotal);
   const actualWalletUsage = useWallet ? Math.min(walletAmountToUse, maxWalletUsage) : 0;
   const totalAmount = beforeWalletTotal - actualWalletUsage;
+  
+  // Debug wallet calculation
+  console.log('🔍 [WALLET CALCULATION DEBUG]:', {
+    walletBalance,
+    beforeWalletTotal,
+    useWallet,
+    walletAmountToUse,
+    maxWalletUsage,
+    actualWalletUsage,
+    totalAmount,
+    isWalletEnabled: useWallet,
+    hasSufficientBalance: walletBalance >= beforeWalletTotal,
+    paymentMethodWillBe: actualWalletUsage >= beforeWalletTotal ? 'wallet_full' : 
+                         actualWalletUsage > 0 ? 'wallet_partial' : 'other'
+  });
 
   const createOrderMutation = useMutation({
     mutationFn: async (orderData: any) => {
@@ -1032,7 +1047,16 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
       remainingAmount: beforeWalletTotal - actualWalletUsage,
       paymentMethod: orderData.paymentMethod,
       fullPayment: actualWalletUsage >= beforeWalletTotal,
-      partialPayment: actualWalletUsage > 0 && actualWalletUsage < beforeWalletTotal
+      partialPayment: actualWalletUsage > 0 && actualWalletUsage < beforeWalletTotal,
+      // Extended debugging
+      walletBalance,
+      useWallet,
+      walletAmountToUse,
+      maxWalletUsage,
+      beforeWalletTotal,
+      actualWalletUsage,
+      isWalletSufficient: walletBalance >= beforeWalletTotal,
+      shouldBeFullPayment: useWallet && walletBalance >= beforeWalletTotal
     });
 
     createOrderMutation.mutate(orderData);
