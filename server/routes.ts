@@ -22316,10 +22316,19 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         console.log('🚌 [NO BUS LINES] No intercity bus service available for route', originCity, '→', destinationCity);
       }
 
-      // CRITICAL SAFETY CHECK: If both cities have bus lines AND no flammable products AND weight limit OK, use intercity bus transport
-      if (hasIntercityBusOption && !containsFlammableProducts && weightKg <= 50) {
+      // SAME-CITY DELIVERY CHECK: For same-city deliveries, prioritize motorcycles over intercity buses
+      const isSameCityDelivery = (originCity === destinationCity);
+      
+      if (isSameCityDelivery) {
+        console.log('🏍️ [SAME-CITY DELIVERY] Detected same-city delivery:', originCity, '- prioritizing motorcycle over intercity bus');
+        console.log('🚌 [BUS BYPASS] Intercity bus skipped for same-city delivery - motorcycles more appropriate for local transport');
+      }
+      
+      // CRITICAL SAFETY CHECK: If both cities have bus lines AND no flammable products AND weight limit OK AND NOT same city, use intercity bus transport
+      if (hasIntercityBusOption && !containsFlammableProducts && weightKg <= 50 && !isSameCityDelivery) {
         console.log('🚌 [INTERCITY BUS] ✅ Safety-compliant automatic selection for route:', originCity, '→', destinationCity);
         console.log('🔥 [SAFETY VERIFIED] No flammable materials detected - bus transport authorized');
+        console.log('🏙️ [ROUTE TYPE] Inter-city delivery - bus transport appropriate');
         
         // Calculate bus transport cost (typically cheaper than vehicle transport)
         const busCostPerKm = 50; // IQD per km for bus transport

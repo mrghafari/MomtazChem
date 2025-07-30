@@ -167,6 +167,29 @@
 
 ## Recent Changes
 
+### COMPLETED: Same-City Delivery Motorcycle Selection Fix - Vehicle Selection Algorithm Enhancement (January 30, 2025)
+✅ **RESOLVED: Vehicle selection algorithm issue where intercity buses were incorrectly selected instead of motorcycles for same-city deliveries**
+- **User Issue Resolved**: "اینجا میبایست موتورسیکلت را انتخاب میکرد" - System now correctly selects motorcycles for اربیل → اربیل same-city routes
+- **Root Cause Fixed**: Intercity bus selection logic executed BEFORE individual vehicle calculations, causing inappropriate bus selection for local deliveries
+- **Same-City Detection Logic**: Added `isSameCityDelivery = (originCity === destinationCity)` condition to identify local deliveries
+- **Bus Bypass Implementation**: Enhanced intercity bus logic with `!isSameCityDelivery` condition preventing bus selection for same-city routes
+- **Motorcycle Prioritization**: Individual vehicle selection algorithm now properly evaluates motorcycles for local transport:
+  - **موتور (Motorcycle)**: 1,000 IQD optimal selection for 11kg same-city delivery
+  - **موتورسیکلت تحویل سریع (Fast Delivery Motorcycle)**: 25,550 IQD premium alternative option
+- **Enhanced Logging**: Added comprehensive same-city delivery detection logs:
+  - `🏍️ [SAME-CITY DELIVERY] Detected same-city delivery: اربیل - prioritizing motorcycle over intercity bus`
+  - `🚌 [BUS BYPASS] Intercity bus skipped for same-city delivery - motorcycles more appropriate for local transport`
+- **Database Cleanup**: Disabled problematic vehicle template "اتوبوسهای مسافربری" with 0 cost that was causing incorrect optimal vehicle selection
+- **Technical Implementation**: 
+  - **Same-City Logic**: `if (hasIntercityBusOption && !containsFlammableProducts && weightKg <= 50 && !isSameCityDelivery)` ensures buses only for inter-city routes
+  - **Safety Preservation**: Maintains all flammable materials safety compliance and restrictions
+  - **Route Type Awareness**: Intercity buses preserved for appropriate different-city deliveries
+- **Business Impact**: Customers now receive appropriate transport method selection:
+  - **Same-City**: Motorcycles for fast, cost-effective local delivery (1,000-25,550 IQD)
+  - **Inter-City**: Buses maintained for longer routes with proper safety compliance
+- **User Experience**: Transparent vehicle selection with logical transport methods matching delivery requirements
+- **Result**: Complete same-city delivery vehicle selection operational - motorcycles properly prioritized for local transport while preserving intercity bus functionality for different-city routes with enhanced debugging logs
+
 ### COMPLETED: Province/City Dropdowns Integration with Delivery Cost Calculation - Complete Arabic Name Mapping (January 30, 2025)
 ✅ **RESOLVED: Complete integration between province/city dropdowns and delivery cost calculation API with proper Arabic name mapping**
 - **User Issue Resolved**: "شهر مقصد در فرم محاسبه کرایه در انتخاب دوم همان شهری است که در لیست دراپ داون انتخاب میشود" - Fixed destination city mapping
