@@ -37336,6 +37336,54 @@ momtazchem.com
 
   console.log('✅ [ROUTE DEBUG] All order tracking endpoints registered BEFORE catch-all');
 
+  // ORDER SYNCHRONIZATION ENDPOINTS - Added before catch-all for proper routing
+  app.post('/api/admin/manual-sync-orders', async (req, res) => {
+    try {
+      console.log('🔧 [MANUAL SYNC] Admin triggered manual order synchronization');
+      await synchronizeOrderTables();
+      
+      res.json({
+        success: true,
+        message: 'همسانسازی با موفقیت انجام شد',
+        fixed: 0, // Will be updated by sync function if needed
+        created: 0
+      });
+    } catch (error: any) {
+      console.error('❌ [MANUAL SYNC] Error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در فرآیند همسانسازی',
+        error: error.message
+      });
+    }
+  });
+
+  app.get('/api/admin/sync-status', async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      
+      const totalOrdersResult = await pool.query('SELECT COUNT(*) as count FROM customer_orders');
+      const totalManagementResult = await pool.query('SELECT COUNT(*) as count FROM order_management');
+      
+      const totalOrders = parseInt(totalOrdersResult.rows[0].count);
+      const totalManagement = parseInt(totalManagementResult.rows[0].count);
+      
+      res.json({
+        success: true,
+        totalOrders,
+        synced: totalManagement,
+        issues: Math.max(0, totalOrders - totalManagement),
+        lastSync: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('❌ [SYNC STATUS] Error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در دریافت وضعیت همسانسازی'
+      });
+    }
+  });
+
   // Catch-all for unmatched API routes - return JSON 404
   app.all('/api/*', (req, res) => {
     console.log(`❌ 404 - Unmatched API route: ${req.method} ${req.originalUrl}`);
@@ -40801,6 +40849,56 @@ momtazchem.com
     }
   });
 
+  // ORDER SYNCHRONIZATION ENDPOINTS - Added before error handlers for proper routing
+  // New manual synchronization endpoint for admin panel
+  app.post('/api/admin/manual-sync-orders', async (req, res) => {
+    try {
+      console.log('🔧 [MANUAL SYNC] Admin triggered manual order synchronization');
+      await synchronizeOrderTables();
+      
+      res.json({
+        success: true,
+        message: 'همسانسازی با موفقیت انجام شد',
+        fixed: 0, // Will be updated by sync function if needed
+        created: 0
+      });
+    } catch (error: any) {
+      console.error('❌ [MANUAL SYNC] Error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در فرآیند همسانسازی',
+        error: error.message
+      });
+    }
+  });
+
+  // Sync status endpoint
+  app.get('/api/admin/sync-status', async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      
+      const totalOrdersResult = await pool.query('SELECT COUNT(*) as count FROM customer_orders');
+      const totalManagementResult = await pool.query('SELECT COUNT(*) as count FROM order_management');
+      
+      const totalOrders = parseInt(totalOrdersResult.rows[0].count);
+      const totalManagement = parseInt(totalManagementResult.rows[0].count);
+      
+      res.json({
+        success: true,
+        totalOrders,
+        synced: totalManagement,
+        issues: Math.max(0, totalOrders - totalManagement),
+        lastSync: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('❌ [SYNC STATUS] Error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در دریافت وضعیت همسانسازی'
+      });
+    }
+  });
+
   // Global error handler for all API routes
   app.use('/api/*', (err: any, req: Request, res: Response, next: NextFunction) => {
     console.error('API Error:', err);
@@ -41047,66 +41145,7 @@ momtazchem.com
     }
   });
 
-  // New manual synchronization endpoint for admin panel
-  app.post('/api/admin/manual-sync-orders', requireAuth, async (req, res) => {
-    try {
-      console.log('🔧 [MANUAL SYNC] Admin triggered manual order synchronization');
-      await synchronizeOrderTables();
-      
-      res.json({
-        success: true,
-        message: 'همسانسازی با موفقیت انجام شد',
-        fixed: 0, // Will be updated by sync function if needed
-        created: 0
-      });
-    } catch (error: any) {
-      console.error('❌ [MANUAL SYNC] Error:', error);
-      res.status(500).json({
-        success: false,
-        message: 'خطا در فرآیند همسانسازی',
-        error: error.message
-      });
-    }
-  });
 
-  // Sync status endpoint
-  app.get('/api/admin/sync-status', requireAuth, async (req, res) => {
-    try {
-      const { pool } = await import('./db');
-      
-      const totalOrdersResult = await pool.query('SELECT COUNT(*) as count FROM customer_orders');
-      const totalManagementResult = await pool.query('SELECT COUNT(*) as count FROM order_management');
-      
-      const totalOrders = parseInt(totalOrdersResult.rows[0].count);
-      const totalManagement = parseInt(totalManagementResult.rows[0].count);
-      
-      res.json({
-        success: true,
-        totalOrders,
-        synced: totalManagement,
-        issues: Math.max(0, totalOrders - totalManagement),
-        lastSync: new Date().toISOString()
-      });
-    } catch (error: any) {
-      console.error('❌ [SYNC STATUS] Error:', error);
-      res.status(500).json({
-        success: false,
-        message: 'خطا در دریافت وضعیت همسانسازی'
-      });
-    }
-  });
-
-  // AUTOMATIC SYNCHRONIZATION ON SERVER STARTUP
-  setImmediate(async () => {
-    console.log('🚀 [STARTUP SYNC] Running automatic order table synchronization on server startup...');
-    await synchronizeOrderTables();
-  });
-
-  // PERIODIC SYNCHRONIZATION (every 2 hours)
-  setInterval(async () => {
-    console.log('⏰ [PERIODIC SYNC] Running scheduled order table synchronization...');
-    await synchronizeOrderTables();
-  }, 2 * 60 * 60 * 1000); // 2 hours
 
   return httpServer;
 }
