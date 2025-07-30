@@ -2146,46 +2146,6 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                         </div>
                       </div>
                     )}
-
-                    {/* Shipping Cost Breakdown */}
-                    {calculatedShippingCost > 0 && (
-                      <div className="bg-orange-50 dark:bg-orange-900/20 p-3 rounded-lg border border-orange-200 dark:border-orange-800">
-                        <div className="text-xs font-medium text-orange-800 dark:text-orange-300 mb-2 flex items-center gap-1">
-                          <Truck className="w-3 h-3" />
-                          تفکیک هزینه حمل
-                        </div>
-                        <div className="space-y-1 text-xs text-orange-700 dark:text-orange-400">
-                          {selectedVehicle && (
-                            <>
-                              <div className="flex justify-between">
-                                <span>هزینه پایه:</span>
-                                <span>{parseFloat(selectedVehicle.basePrice || '0').toLocaleString()} IQD</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span>هزینه فاصله ({iraqiCities?.find((city: any) => 
-                                  city.nameEnglish?.toLowerCase().includes(destinationCity.toLowerCase()) ||
-                                  city.nameArabic?.includes(destinationCity) ||
-                                  city.name?.toLowerCase().includes(destinationCity.toLowerCase())
-                                )?.distanceFromErbilKm || 0} کم):</span>
-                                <span>{(parseFloat(iraqiCities?.find((city: any) => 
-                                  city.nameEnglish?.toLowerCase().includes(destinationCity.toLowerCase()) ||
-                                  city.nameArabic?.includes(destinationCity) ||
-                                  city.name?.toLowerCase().includes(destinationCity.toLowerCase())
-                                )?.distanceFromErbilKm || '0') * parseFloat(selectedVehicle.pricePerKm || '0')).toLocaleString()} IQD</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span>هزینه وزن ({totalWeight.toFixed(2)} کگ):</span>
-                                <span>{(totalWeight * parseFloat(selectedVehicle.pricePerKg || '0')).toLocaleString()} IQD</span>
-                              </div>
-                              <div className="flex justify-between font-semibold border-t border-orange-200 pt-1">
-                                <span>مجموع هزینه حمل:</span>
-                                <span>{calculatedShippingCost.toLocaleString()} IQD</span>
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    )}
                     
                     {/* Second Address Option */}
                     <div className="space-y-2">
