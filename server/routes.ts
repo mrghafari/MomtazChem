@@ -68,6 +68,9 @@ import { ticketingStorage } from "./ticketing-storage";
 import { companyStorage } from "./company-storage";
 import { getLocalizedMessage, getLocalizedEmailSubject, generateSMSMessage } from "./multilingual-messages";
 import { supportTickets } from "../shared/ticketing-schema";
+import OrderStatusSyncMonitor from "./order-sync-monitor-fixed";
+import OrderSyncPrevention from "./order-sync-prevention";
+import AutomaticSyncService from "./automatic-sync-service";
 import { 
   insertSupportTicketSchema, 
   insertTicketResponseSchema,
@@ -40906,6 +40909,101 @@ momtazchem.com
       res.status(500).json({ error: 'Failed to mark order as recovered' });
     }
   });
+
+  // =============================================================================
+  // ORDER STATUS SYNCHRONIZATION PREVENTION & MONITORING API
+  // =============================================================================
+  
+  // Automatic order status synchronization monitoring endpoint
+  app.get('/api/orders/sync-monitor', requireAuth, async (req, res) => {
+    try {
+      console.log('🔄 [SYNC MONITOR] تشخیص دقیق مشکلات همگام‌سازی آغاز شد');
+      
+      const stats = await OrderStatusSyncMonitor.getSyncStatistics();
+      const result = await OrderStatusSyncMonitor.autoFixStatusMismatches();
+      
+      res.json({
+        success: true,
+        message: `همگام‌سازی با نقشه‌برداری صحیح: ${result.fixed}/${result.issues.length} مشکل واقعی برطرف شد`,
+        fixedCount: result.fixed,
+        totalIssues: result.issues.length,
+        syncPercentage: stats.percentage,
+        accurateStats: stats,
+        remainingIssues: result.issues.filter((_, index) => index >= result.fixed)
+      });
+      
+      console.log(`✅ [SYNC MONITOR] تکمیل: ${result.fixed}/${result.issues.length} مشکل واقعی حل شد (${stats.percentage}% همگام‌سازی)`);
+      
+    } catch (error) {
+      console.error('❌ [SYNC MONITOR] خطا در نظارت وضعیت سفارش‌ها:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در همگام‌سازی وضعیت سفارش‌ها',
+        error: error.message
+      });
+    }
+  });
+
+  // Drift prevention monitoring (runs automatically)
+  app.post('/api/orders/prevent-drift', requireAuth, async (req, res) => {
+    try {
+      console.log('🛡️ [DRIFT PREVENTION] شروع جلوگیری از انحراف وضعیت');
+      
+      const result = await OrderSyncPrevention.preventSyncDrift();
+      
+      res.json({
+        success: true,
+        message: `جلوگیری از انحراف: ${result.corrected} تصحیح انجام شد`,
+        correctedCount: result.corrected,
+        totalIssues: result.issues.length
+      });
+      
+      console.log(`🎯 [DRIFT PREVENTION] تکمیل شد: ${result.corrected} تصحیح`);
+      
+    } catch (error) {
+      console.error('❌ [DRIFT PREVENTION] خطا در جلوگیری از انحراف:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در جلوگیری از انحراف وضعیت',
+        error: error.message
+      });
+    }
+  });
+
+  // Manual status synchronization for specific order
+  app.post('/api/orders/:orderNumber/force-sync', requireAuth, async (req, res) => {
+    try {
+      const { orderNumber } = req.params;
+      const { targetStatus } = req.body;
+      
+      console.log(`🔄 [FORCE SYNC] همگام‌سازی اجباری سفارش ${orderNumber} به وضعیت: ${targetStatus}`);
+      
+      await OrderSyncPrevention.syncStatusUpdate(orderNumber, targetStatus, 'manual_admin');
+      
+      res.json({
+        success: true,
+        message: `سفارش ${orderNumber} با موفقیت همگام‌سازی شد`
+      });
+      
+      console.log(`✅ [FORCE SYNC] سفارش ${orderNumber} همگام‌سازی شد`);
+      
+    } catch (error) {
+      console.error('❌ [FORCE SYNC] خطا در همگام‌سازی اجباری:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در همگام‌سازی اجباری سفارش',
+        error: error.message
+      });
+    }
+  });
+
+  // =============================================================================
+  // AUTOMATIC SYNC SERVICE INITIALIZATION
+  // =============================================================================
+  
+  // Start automatic synchronization service to prevent future mismatches
+  console.log('🚀 [SYSTEM INIT] شروع سرویس همگام‌سازی خودکار سفارش‌ها...');
+  AutomaticSyncService.startAutomaticSync(30); // Check every 30 minutes
 
   const httpServer = createServer(app);
   return httpServer;
