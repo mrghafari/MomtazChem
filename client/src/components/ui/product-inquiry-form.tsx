@@ -29,32 +29,38 @@ const inquiryFormSchema = z.object({
 type InquiryFormData = z.infer<typeof inquiryFormSchema>;
 
 interface ProductInquiryFormProps {
-  product: ShowcaseProduct;
+  product?: ShowcaseProduct;
+  productName?: string;
   triggerText?: string;
   triggerVariant?: "default" | "outline" | "ghost";
   triggerSize?: "default" | "sm" | "lg";
   className?: string;
+  triggerClassName?: string;
 }
 
 export function ProductInquiryForm({ 
   product, 
+  productName,
   triggerText = "Inquire About Product",
   triggerVariant = "default",
   triggerSize = "default",
-  className = ""
+  className = "",
+  triggerClassName = ""
 }: ProductInquiryFormProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const { toast } = useToast();
 
+  const displayProductName = product?.name || productName || "Product";
+  
   const form = useForm<InquiryFormData>({
     resolver: zodResolver(inquiryFormSchema),
     defaultValues: {
       contactEmail: "",
       contactPhone: "",
       company: "",
-      subject: `Inquiry about ${product.name}`,
-      message: `I am interested in learning more about ${product.name}. Please provide me with detailed information including pricing, specifications, and availability.`,
+      subject: `Inquiry about ${displayProductName}`,
+      message: `I am interested in learning more about ${displayProductName}. Please provide me with detailed information including pricing, specifications, and availability.`,
       type: "product_info",
       priority: "normal",
     },
@@ -64,8 +70,8 @@ export function ProductInquiryForm({
     mutationFn: async (data: InquiryFormData) => {
       const inquiryData = {
         ...data,
-        category: product.category,
-        productIds: [product.id],
+        category: product?.category || "agricultural-products",
+        productIds: product ? [product.id] : [],
         customerId: null, // Guest inquiry
       };
       
@@ -104,7 +110,7 @@ export function ProductInquiryForm({
         <Button 
           variant={triggerVariant} 
           size={triggerSize}
-          className={className}
+          className={triggerClassName || className}
         >
           <MessageCircle className="w-4 h-4 mr-2" />
           {triggerText}
@@ -134,7 +140,7 @@ export function ProductInquiryForm({
             {/* Product Info */}
             <div className="bg-gray-50 rounded-lg p-4">
               <div className="flex items-start gap-3">
-                {product.imageUrl && (
+                {product?.imageUrl && (
                   <img 
                     src={product.imageUrl} 
                     alt={product.name}
@@ -142,11 +148,11 @@ export function ProductInquiryForm({
                   />
                 )}
                 <div className="flex-1">
-                  <h4 className="font-semibold text-gray-900">{product.name}</h4>
+                  <h4 className="font-semibold text-gray-900">{displayProductName}</h4>
                   <Badge variant="outline" className="mt-1 text-xs">
-                    {product.category.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                    {product?.category?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) || "Agricultural Products"}
                   </Badge>
-                  {product.priceRange && (
+                  {product?.priceRange && (
                     <p className="text-sm text-gray-600 mt-1">{product.priceRange}</p>
                   )}
                 </div>
