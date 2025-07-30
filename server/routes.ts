@@ -41056,27 +41056,48 @@ momtazchem.com
           (co.status = 'deleted' AND om.current_status IN ('pending', 'confirmed', 'financial_review', 'warehouse_ready', 'warehouse_pending'))
           OR 
           (co.status = 'pending' AND om.current_status = 'warehouse_ready')
+          OR
+          (co.status = 'warehouse_ready' AND co.payment_status = 'receipt_uploaded' AND om.current_status = 'payment_uploaded')
+          OR
+          (co.payment_status = 'receipt_uploaded' AND om.current_status NOT IN ('financial_review', 'financial_approved', 'warehouse_ready', 'warehouse_pending', 'warehouse_processing'))
       `);
 
       console.log(`🔍 [TABLE SYNC] Found ${statusMismatches.rows.length} status mismatches to fix`);
 
       // Fix status mismatches
       for (const mismatch of statusMismatches.rows) {
-        let correctStatus: string;
+        let correctManagementStatus: string;
+        let correctCustomerStatus: string | null = null;
         
         if (mismatch.customer_status === 'deleted') {
-          correctStatus = 'cancelled';
+          correctManagementStatus = 'cancelled';
         } else {
-          correctStatus = determineOrderManagementStatus(mismatch.customer_status, mismatch.customer_payment_status);
+          correctManagementStatus = determineOrderManagementStatus(mismatch.customer_status, mismatch.customer_payment_status);
         }
         
+        // Special fix for warehouse_ready + receipt_uploaded mismatch
+        if (mismatch.customer_status === 'warehouse_ready' && mismatch.customer_payment_status === 'receipt_uploaded') {
+          correctCustomerStatus = 'pending';
+          correctManagementStatus = 'financial_review';
+        }
+        
+        // Update order_management status
         await pool.query(`
           UPDATE order_management 
           SET current_status = $1, updated_at = NOW()
           WHERE id = $2
-        `, [correctStatus, mismatch.management_id]);
+        `, [correctManagementStatus, mismatch.management_id]);
         
-        console.log(`✅ [TABLE SYNC] Fixed status mismatch for order ${mismatch.order_number}: ${mismatch.management_status} → ${correctStatus}`);
+        // Update customer_orders status if needed
+        if (correctCustomerStatus) {
+          await pool.query(`
+            UPDATE customer_orders 
+            SET status = $1, updated_at = NOW()
+            WHERE id = $2
+          `, [correctCustomerStatus, mismatch.customer_order_id]);
+        }
+        
+        console.log(`✅ [TABLE SYNC] Fixed status mismatch for order ${mismatch.order_number}: ${mismatch.management_status} → ${correctManagementStatus}${correctCustomerStatus ? ` (customer: ${mismatch.customer_status} → ${correctCustomerStatus})` : ''}`);
       }
 
       // 3. CLEAN UP ORPHANED MANAGEMENT RECORDS
@@ -41111,10 +41132,16 @@ momtazchem.com
     if (customerStatus === 'delivered') return 'delivered';
     
     // Status determination logic based on payment and order status
-    if (paymentStatus === 'paid' || paymentStatus === 'receipt_uploaded') {
+    if (paymentStatus === 'paid') {
       if (customerStatus === 'pending') return 'warehouse_ready';
       if (customerStatus === 'confirmed') return 'warehouse_ready';
+      if (customerStatus === 'warehouse_ready') return 'warehouse_ready';
       return 'warehouse_ready';
+    }
+    
+    // CRITICAL FIX: receipt_uploaded should go to financial_review, not warehouse_ready
+    if (paymentStatus === 'receipt_uploaded') {
+      return 'financial_review';
     }
     
     if (paymentStatus === 'pending') {
