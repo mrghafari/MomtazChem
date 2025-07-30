@@ -425,9 +425,35 @@ export class OrderManagementStorage implements IOrderManagementStorage {
   
   // Helper method to calculate order weight from items
   async calculateOrderWeight(customerOrderId: number): Promise<number> {
-    // Weight calculation disabled to prevent infinite loops and system hangs
-    console.log(`⚠️ [WEIGHT] Weight calculation disabled for order ${customerOrderId} - preventing system hang`);
-    return 0;
+    try {
+      console.log('🏋️ [WEIGHT] Calculating weight for customer order:', customerOrderId);
+      
+      const items = await db.select({
+        itemId: orderItems.itemId,
+        quantity: orderItems.quantity,
+        productWeight: shopProducts.weight // وزن از جدول shop_products
+      })
+      .from(orderItems)
+      .leftJoin(shopProducts, eq(orderItems.itemId, shopProducts.id))
+      .where(eq(orderItems.orderId, customerOrderId));
+      
+      let totalWeight = 0;
+      
+      for (const item of items) {
+        const weight = parseFloat(item.productWeight || '0');
+        const quantity = item.quantity;
+        const itemTotalWeight = weight * quantity;
+        
+        console.log(`🏋️ [WEIGHT] Item ${item.itemId}: ${weight}kg x ${quantity} = ${itemTotalWeight}kg`);
+        totalWeight += itemTotalWeight;
+      }
+      
+      console.log(`🏋️ [WEIGHT] Total calculated weight for order ${customerOrderId}: ${totalWeight}kg`);
+      return totalWeight;
+    } catch (error) {
+      console.error('❌ [WEIGHT] Error calculating order weight:', error);
+      return 0;
+    }
   }
 
   async getOrdersByDepartment(department: Department, statuses?: OrderStatus[]): Promise<any[]> {
@@ -496,7 +522,6 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       recipientPhone: customerOrders.recipientPhone,
       recipientAddress: customerOrders.recipientAddress,
       deliveryNotes: customerOrders.deliveryNotes,
-      notes: customerOrders.notes, // یادداشت‌های مشتری از فرم سفارش
       
       // GPS Location data for logistics coordination
       gpsLatitude: customerOrders.gpsLatitude,
@@ -813,13 +838,12 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       } : null
     }));
 
-    // Weight calculation disabled to prevent system hang
-    // TODO: Re-enable after optimization
-    /*
+    // Calculate weight for orders that don't have it calculated yet (especially for warehouse and logistics)
     if (departmentFilter === 'warehouse' || departmentFilter === 'logistics') {
       for (const order of transformedResults) {
         if (!order.totalWeight || order.totalWeight === '0.000') {
           await this.calculateAndUpdateOrderWeight(order.customerOrderId);
+          // Update the order object with calculated weight
           const calculatedWeight = await this.calculateOrderWeight(order.customerOrderId);
           if (calculatedWeight > 0) {
             order.totalWeight = calculatedWeight.toFixed(3);
@@ -828,7 +852,6 @@ export class OrderManagementStorage implements IOrderManagementStorage {
         }
       }
     }
-    */
 
     return transformedResults;
   }
@@ -836,16 +859,100 @@ export class OrderManagementStorage implements IOrderManagementStorage {
   async getLogisticsPendingOrders(): Promise<OrderManagement[]> {
     const orders = await this.getOrdersByDepartment('logistics');
     
-    // Weight calculation disabled to prevent system hang - return orders as-is
-    // TODO: Implement efficient batch weight calculation
+    // Calculate total weight for each order if not already calculated
+    for (const order of orders) {
+      if (!order.totalWeight) {
+        await this.calculateAndUpdateOrderWeight(order.customerOrderId);
+        // Refresh order data after weight calculation
+        const updatedOrders = await this.getOrdersByDepartment('logistics');
+        const updatedOrder = updatedOrders.find(o => o.customerOrderId === order.customerOrderId);
+        if (updatedOrder) {
+          order.totalWeight = updatedOrder.totalWeight;
+          order.weightUnit = updatedOrder.weightUnit;
+        }
+      }
+    }
     
     return orders;
   }
   
   async calculateAndUpdateOrderWeight(customerOrderId: number): Promise<void> {
-    // Weight calculation disabled to prevent infinite loops and system hangs
-    console.log(`⚠️ [WEIGHT] Weight calculation disabled for order ${customerOrderId} - preventing system hang`);
-    return;
+    try {
+      // Get all order items for this order
+      const orderItemsData = await db
+        .select({
+          productId: orderItems.productId,
+          quantity: orderItems.quantity,
+        })
+        .from(orderItems)
+        .where(eq(orderItems.orderId, customerOrderId));
+      
+      if (orderItemsData.length === 0) {
+        return;
+      }
+      
+      let totalWeightKg = 0;
+      
+      // Calculate total weight from all products in the order
+      for (const item of orderItemsData) {
+        if (item.productId) {
+          // Get product weight from shop_products table - prioritize gross weight for logistics
+          const productWeight = await db
+            .select({
+              grossWeight: shopProducts.grossWeight,
+              netWeight: shopProducts.netWeight,
+              weight: shopProducts.weight, // Legacy fallback
+              weightUnit: shopProducts.weightUnit,
+            })
+            .from(shopProducts)
+            .where(eq(shopProducts.id, item.productId))
+            .limit(1);
+          
+          if (productWeight.length > 0) {
+            let weight = 0;
+            
+            // Priority: Use gross weight (وزن ناخالص) for logistics calculations
+            if (productWeight[0].grossWeight) {
+              weight = parseFloat(productWeight[0].grossWeight.toString());
+            } else if (productWeight[0].weight) {
+              weight = parseFloat(productWeight[0].weight.toString());
+            } else {
+              continue; // Skip if no weight available
+            }
+            
+            // Skip if weight is not a valid number
+            if (isNaN(weight) || weight <= 0) {
+              continue;
+            }
+            const unit = productWeight[0].weightUnit || 'kg';
+            const quantity = parseFloat(item.quantity);
+            
+            // Convert weight to kg if needed
+            let weightInKg = weight;
+            if (unit === 'g' || unit === 'gram') {
+              weightInKg = weight / 1000;
+            } else if (unit === 'ton') {
+              weightInKg = weight * 1000;
+            }
+            
+            totalWeightKg += weightInKg * quantity;
+          }
+        }
+      }
+      
+      // Update order management with calculated weight
+      if (totalWeightKg > 0) {
+        await db
+          .update(orderManagement)
+          .set({
+            totalWeight: totalWeightKg.toFixed(3),
+            weightUnit: 'kg',
+          })
+          .where(eq(orderManagement.customerOrderId, customerOrderId));
+      }
+    } catch (error) {
+      console.error('Error calculating order weight:', error);
+    }
   }
   
 
@@ -1339,8 +1446,6 @@ export class OrderManagementStorage implements IOrderManagementStorage {
                 customerName: customerOrder.customerName,
                 customerEmail: customerOrder.customerEmail,
                 customerPhone: customerOrder.customerPhone,
-                notes: customerOrder.notes, // یادداشت‌های مشتری از فرم سفارش
-                deliveryNotes: customerOrder.deliveryNotes, // یادداشت‌های تحویل از مشتری
               };
             }
           } catch (error) {
@@ -1372,9 +1477,80 @@ export class OrderManagementStorage implements IOrderManagementStorage {
   }
 
   async calculateOrderWeight(customerOrderId: number): Promise<number> {
-    // Weight calculation disabled to prevent infinite loops and system hangs
-    console.log(`⚠️ [WEIGHT] Weight calculation disabled for order ${customerOrderId} - preventing system hang`);
-    return 0;
+    try {
+      console.log(`🔍 [WEIGHT] Calculating weight for order ${customerOrderId}`);
+      
+      // Get order items and join with both shop_products and showcase_products to get weight
+      const items = await db
+        .select({
+          productId: orderItems.productId,
+          productName: orderItems.productName,
+          quantity: orderItems.quantity,
+          shopGrossWeight: shopProducts.grossWeight,
+          shopNetWeight: shopProducts.netWeight,
+          shopWeight: shopProducts.weight,
+          shopBarcode: shopProducts.barcode
+        })
+        .from(orderItems)
+        .leftJoin(shopProducts, eq(orderItems.productId, shopProducts.id))
+        .where(eq(orderItems.orderId, customerOrderId));
+
+      console.log(`📊 [WEIGHT] Found ${items.length} items for order ${customerOrderId}`);
+
+      // Calculate total weight using gross weight (وزن ناخالص) for logistics calculations
+      let totalWeight = 0;
+      
+      for (const item of items) {
+        let productWeight = 0;
+        const quantity = parseFloat(item.quantity?.toString() || '1');
+        
+        console.log(`🏷️ [WEIGHT] Processing item: ${item.productName} (ID: ${item.productId}) x${quantity}`);
+        
+        // First try to get weight from shop_products
+        if (item.shopGrossWeight) {
+          productWeight = parseFloat(item.shopGrossWeight.toString());
+          console.log(`⚖️ [WEIGHT] Using shop gross weight: ${productWeight} kg`);
+        } else if (item.shopWeight) {
+          productWeight = parseFloat(item.shopWeight.toString());
+          console.log(`⚖️ [WEIGHT] Using shop legacy weight: ${productWeight} kg`);
+        } else if (item.shopBarcode) {
+          // If no weight in shop, try to get from showcase_products by barcode
+          console.log(`🔍 [WEIGHT] No weight in shop, searching Kardex by barcode: ${item.shopBarcode}`);
+          
+          const { showcaseProducts } = await import('../shared/showcase-schema');
+          const showcaseWeight = await db
+            .select({
+              grossWeight: showcaseProducts.grossWeight,
+              netWeight: showcaseProducts.netWeight,
+              weight: showcaseProducts.weight
+            })
+            .from(showcaseProducts)
+            .where(eq(showcaseProducts.barcode, item.shopBarcode))
+            .limit(1);
+
+          if (showcaseWeight.length > 0 && showcaseWeight[0].grossWeight) {
+            productWeight = parseFloat(showcaseWeight[0].grossWeight.toString());
+            console.log(`⚖️ [WEIGHT] Using Kardex gross weight: ${productWeight} kg`);
+          } else if (showcaseWeight.length > 0 && showcaseWeight[0].weight) {
+            productWeight = parseFloat(showcaseWeight[0].weight.toString());
+            console.log(`⚖️ [WEIGHT] Using Kardex legacy weight: ${productWeight} kg`);
+          }
+        }
+        
+        const itemTotalWeight = productWeight * quantity;
+        totalWeight += itemTotalWeight;
+        
+        console.log(`📦 [WEIGHT] Item total: ${productWeight} kg x ${quantity} = ${itemTotalWeight} kg`);
+      }
+
+      const finalWeight = Math.round(totalWeight * 100) / 100; // Round to 2 decimal places
+      console.log(`🎯 [WEIGHT] Final calculated weight for order ${customerOrderId}: ${finalWeight} kg`);
+      
+      return finalWeight;
+    } catch (error) {
+      console.error(`❌ [WEIGHT] Error calculating weight for order ${customerOrderId}:`, error);
+      return 0;
+    }
   }
 
   async updateOrderWeight(customerOrderId: number, weight: number): Promise<void> {
@@ -1520,8 +1696,8 @@ export class OrderManagementStorage implements IOrderManagementStorage {
         }
       }
       
-      // Weight calculation disabled to prevent system hang
-      const totalWeight = 0; // TODO: Implement efficient weight calculation
+      // Calculate total weight from order items
+      const totalWeight = await this.calculateOrderWeight(orderId);
       
       const result = {
         // Order management info
@@ -1538,7 +1714,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
         
         // Calculated fields
         totalItems: orderItemsResult.length,
-        totalQuantity: orderItemsResult.reduce((sum, item) => sum + parseFloat(item.quantity.toString()), 0),
+        totalQuantity: orderItemsResult.reduce((sum, item) => sum + item.quantity, 0),
         totalAmount: customerOrder.totalAmount,
         totalWeight: totalWeight,
         weightUnit: 'kg',
