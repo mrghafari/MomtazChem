@@ -1881,19 +1881,32 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                             </label>
                             <Select 
                               onValueChange={(value) => {
-                                setSecondProvince(value);
-                                // Find province ID and set it for city filtering
+                                // Find the selected province object to get Arabic name
                                 const selectedProvince = provinces?.data?.find((p: any) => 
                                   p.nameEnglish === value || p.name === value
                                 );
+                                
                                 if (selectedProvince) {
+                                  // Use Arabic name for delivery calculations
+                                  const arabicProvinceName = selectedProvince.nameArabic || selectedProvince.name || value;
+                                  setSecondProvince(arabicProvinceName); // Store Arabic name for API calls
                                   setSelectedSecondaryProvinceId(selectedProvince.id);
                                   // Clear city selection when province changes
                                   setSecondCity("");
+                                  
+                                  console.log('🏛️ [BILINGUAL] Province selected:', {
+                                    displayValue: value,
+                                    arabicName: arabicProvinceName,
+                                    provinceId: selectedProvince.id
+                                  });
                                 }
-                                console.log('🏛️ [BILINGUAL] Province selected:', value, 'ID:', selectedProvince?.id);
                               }} 
-                              value={secondProvince}
+                              value={
+                                // Find the province with matching Arabic name to show English value
+                                provinces?.data?.find((province: any) => 
+                                  (province.nameArabic || province.name) === secondProvince
+                                )?.nameEnglish || secondProvince
+                              }
                               disabled={isLoadingProvinces}
                             >
                               <SelectTrigger>
@@ -1920,10 +1933,27 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                             </label>
                             <Select 
                               onValueChange={(value) => {
-                                setSecondCity(value);
-                                console.log('🏙️ [BILINGUAL] City selected:', value);
+                                // Find the selected city object to get Arabic name
+                                const selectedCity = secondaryCities?.find((city: any) => 
+                                  (city.nameEnglish || city.name) === value
+                                );
+                                
+                                // Use Arabic name for delivery calculations, but display value for UI
+                                const arabicCityName = selectedCity?.nameArabic || selectedCity?.name || value;
+                                setSecondCity(arabicCityName); // Store Arabic name for API calls
+                                
+                                console.log('🏙️ [BILINGUAL] City selected:', {
+                                  displayValue: value,
+                                  arabicName: arabicCityName,
+                                  selectedCity: selectedCity
+                                });
                               }} 
-                              value={secondCity}
+                              value={
+                                // Find the city with matching Arabic name to show English value
+                                secondaryCities?.find((city: any) => 
+                                  (city.nameArabic || city.name) === secondCity
+                                )?.nameEnglish || secondCity
+                              }
                               disabled={!selectedSecondaryProvinceId || isLoadingSecondaryCities}
                             >
                               <SelectTrigger>
