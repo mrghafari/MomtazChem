@@ -105,18 +105,18 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   });
 
   // Get available delivery methods
-  const { data: deliveryMethods = [] } = useQuery({
+  const { data: deliveryMethods = [] } = useQuery<any[]>({
     queryKey: ['/api/checkout/delivery-methods']
   });
 
   // Get vehicle templates for smart selection
-  const { data: vehicleTemplates = [] } = useQuery({
+  const { data: vehicleTemplates = [] } = useQuery<any[]>({
     queryKey: ['/api/logistics/vehicle-templates'],
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
 
   // Get Iraqi cities for distance calculation
-  const { data: iraqiCities = [] } = useQuery({
+  const { data: iraqiCities = [] } = useQuery<any[]>({
     queryKey: ['/api/iraqi-cities'],
     staleTime: 10 * 60 * 1000, // Cache for 10 minutes
   });
@@ -217,6 +217,8 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
       const customer = customerData.customer;
       setIsLoggedIn(true);
       
+      console.log('🔍 [FORM DEBUG] Customer data received:', customer);
+      
       // Fill form with customer data from CRM
       form.setValue("email", customer.email || "");
       form.setValue("firstName", customer.firstName || "");
@@ -228,6 +230,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
       if (customer.address) {
         form.setValue("billingAddress1", customer.address);
         form.setValue("shippingAddress1", customer.address); // Set as default shipping address
+        console.log('✅ [FORM DEBUG] Address set:', customer.address);
       }
       
       // Use cityRegion as city if regular city is not available
@@ -235,16 +238,19 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
       if (customerCity) {
         form.setValue("billingCity", customerCity);
         form.setValue("shippingCity", customerCity); // Set as default shipping city
+        console.log('✅ [FORM DEBUG] City set:', customerCity);
       }
       
       if (customer.country) {
         form.setValue("billingCountry", customer.country);
         form.setValue("shippingCountry", customer.country); // Set as default shipping country
+        console.log('✅ [FORM DEBUG] Country set:', customer.country);
       }
       
       if (customer.postalCode) {
         form.setValue("billingPostalCode", customer.postalCode);
         form.setValue("shippingPostalCode", customer.postalCode); // Set as default shipping postal code
+        console.log('✅ [FORM DEBUG] Postal code set:', customer.postalCode);
       }
       
       // Use province/state from CRM as default - prioritize province, then state, then cityRegion, then city
@@ -252,23 +258,35 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
       if (defaultState) {
         form.setValue("billingState", defaultState);
         form.setValue("shippingState", defaultState); // Set as default shipping state
+        console.log('✅ [FORM DEBUG] State set:', defaultState);
       }
       
       // Set destination city for delivery calculation
       if (customerCity) {
         setDestinationCity(customerCity);
+        console.log('✅ [FORM DEBUG] Destination city set for delivery:', customerCity);
       }
       
       // Auto-fill recipient information with customer data as default
       if (customer.firstName && customer.lastName) {
         form.setValue("recipientName", `${customer.firstName} ${customer.lastName}`);
+        console.log('✅ [FORM DEBUG] Recipient name set:', `${customer.firstName} ${customer.lastName}`);
       }
       if (customer.phone) {
         form.setValue("recipientPhone", customer.phone);
         form.setValue("recipientMobile", customer.phone); // Set as default recipient mobile
+        console.log('✅ [FORM DEBUG] Recipient phone set:', customer.phone);
       }
+      
+      // Debug: Log all form values after setting
+      setTimeout(() => {
+        const currentValues = form.getValues();
+        console.log('🔍 [FORM DEBUG] All form values after customer data fill:', currentValues);
+      }, 100);
+      
     } else {
       setIsLoggedIn(false);
+      console.log('❌ [FORM DEBUG] No customer data available or login failed');
     }
   }, [customerData, form, isLoggedIn]);
 
