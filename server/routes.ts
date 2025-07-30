@@ -69,6 +69,7 @@ import { companyStorage } from "./company-storage";
 import { getLocalizedMessage, getLocalizedEmailSubject, generateSMSMessage } from "./multilingual-messages";
 import { supportTickets } from "../shared/ticketing-schema";
 import OrderStatusSyncMonitor from "./order-sync-monitor-fixed";
+import ReliableOrderSync from "./order-sync-reliable";
 import OrderSyncPrevention from "./order-sync-prevention";
 import AutomaticSyncService from "./automatic-sync-service";
 import { 
@@ -40914,31 +40915,31 @@ momtazchem.com
   // ORDER STATUS SYNCHRONIZATION PREVENTION & MONITORING API
   // =============================================================================
   
-  // Automatic order status synchronization monitoring endpoint
-  app.get('/api/orders/sync-monitor', requireAuth, async (req, res) => {
+  // NEW: Prevention-based synchronization monitoring (RELIABLE)
+  app.get('/api/orders/sync-prevention-monitor', requireAuth, async (req, res) => {
     try {
-      console.log('🔄 [SYNC MONITOR] تشخیص دقیق مشکلات همگام‌سازی آغاز شد');
+      console.log('🛡️ [PREVENTION] شروع نظارت سیستم پیشگیری از مشکلات همگام‌سازی');
       
-      const stats = await OrderStatusSyncMonitor.getSyncStatistics();
-      const result = await OrderStatusSyncMonitor.autoFixStatusMismatches();
+      const healthCheck = await OrderSyncPrevention.monitorSyncHealth();
       
       res.json({
         success: true,
-        message: `همگام‌سازی با نقشه‌برداری صحیح: ${result.fixed}/${result.issues.length} مشکل واقعی برطرف شد`,
-        fixedCount: result.fixed,
-        totalIssues: result.issues.length,
-        syncPercentage: stats.percentage,
-        accurateStats: stats,
-        remainingIssues: result.issues.filter((_, index) => index >= result.fixed)
+        message: healthCheck.healthy 
+          ? `سیستم کاملاً سالم: ${healthCheck.statistics.healthPercentage}% همگام‌سازی`
+          : `${healthCheck.issues.length} مشکل شناسایی شد`,
+        isHealthy: healthCheck.healthy,
+        statistics: healthCheck.statistics,
+        issues: healthCheck.issues,
+        systemType: 'PREVENTION_BASED'
       });
       
-      console.log(`✅ [SYNC MONITOR] تکمیل: ${result.fixed}/${result.issues.length} مشکل واقعی حل شد (${stats.percentage}% همگام‌سازی)`);
+      console.log(`🛡️ [PREVENTION] نتیجه: ${healthCheck.statistics.healthPercentage}% سالم، ${healthCheck.issues.length} مشکل`);
       
     } catch (error) {
-      console.error('❌ [SYNC MONITOR] خطا در نظارت وضعیت سفارش‌ها:', error);
+      console.error('❌ [PREVENTION] خطا در سیستم پیشگیری:', error);
       res.status(500).json({
         success: false,
-        message: 'خطا در همگام‌سازی وضعیت سفارش‌ها',
+        message: 'خطا در سیستم پیشگیری همگام‌سازی',
         error: error.message
       });
     }

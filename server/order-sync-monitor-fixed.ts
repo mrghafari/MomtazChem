@@ -26,7 +26,7 @@ export class OrderStatusSyncMonitor {
           (co.status = 'delivered' AND om.current_status = 'delivered') OR
           (co.status = 'cancelled' AND om.current_status = 'financial_rejected') OR
           (co.status = 'pending' AND om.current_status = 'pending') OR
-          (co.status = 'payment_uploaded' AND om.current_status IN ('pending', 'financial_reviewing'))
+          (co.status = 'payment_uploaded' AND om.current_status IN ('pending', 'financial_reviewing', 'payment_grace_period'))
       )
       AND co.created_at >= '2025-01-01'
       ORDER BY co.created_at DESC
@@ -128,7 +128,7 @@ export class OrderStatusSyncMonitor {
                   (co.status = 'delivered' AND om.current_status = 'delivered') OR
                   (co.status = 'cancelled' AND om.current_status = 'financial_rejected') OR
                   (co.status = 'pending' AND om.current_status = 'pending') OR
-                  (co.status = 'payment_uploaded' AND om.current_status IN ('pending', 'financial_reviewing'))
+                  (co.status = 'payment_uploaded' AND om.current_status IN ('pending', 'financial_reviewing', 'payment_grace_period'))
               ) THEN 1 
           END) as synced_orders
       FROM customer_orders co
