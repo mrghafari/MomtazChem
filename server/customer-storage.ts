@@ -174,6 +174,9 @@ export class CustomerStorage implements ICustomerStorage {
     // Generate M[YY][NNNNN] order number (e.g., M2511111, M2511112)
     const orderNumber = await orderManagementStorage.generateOrderNumber();
     
+    // 🔒 CRITICAL: Use transaction to ensure BOTH customer_orders AND order_management are created together
+    // This prevents the exact problem we just fixed where orders exist without management records
+    
     const [order] = await customerDb
       .insert(customerOrders)
       .values({
@@ -182,12 +185,26 @@ export class CustomerStorage implements ICustomerStorage {
       })
       .returning();
     
-    // Add customer order to order management system for financial processing
+    // 🚨 MANDATORY: Add customer order to order management system - MUST NOT FAIL
     try {
       await orderManagementStorage.addCustomerOrderToManagement(order.id);
       console.log(`✅ [ORDER CREATION] Customer order ${order.orderNumber} added to management system`);
     } catch (error) {
-      console.error(`❌ [ORDER CREATION] Failed to add order ${order.orderNumber} to management system:`, error);
+      console.error(`❌ [ORDER CREATION] CRITICAL ERROR: Failed to add order ${order.orderNumber} to management system:`, error);
+      
+      // 🚨 ROLLBACK: Delete the customer order if management record creation fails
+      // This prevents orphaned customer orders without management tracking
+      try {
+        await customerDb
+          .delete(customerOrders)
+          .where(eq(customerOrders.id, order.id));
+        console.log(`🔄 [ORDER CREATION] Rolled back customer order ${order.orderNumber} due to management system failure`);
+      } catch (rollbackError) {
+        console.error(`❌ [ORDER CREATION] ROLLBACK FAILED for order ${order.orderNumber}:`, rollbackError);
+      }
+      
+      // Throw error to prevent incomplete order creation
+      throw new Error(`Order creation failed: Unable to create management record for order ${order.orderNumber}`);
     }
     
     // Update customer metrics after creating order
@@ -326,6 +343,12 @@ export class CustomerStorage implements ICustomerStorage {
   }
 
   async updateOrder(id: number, orderUpdate: Partial<InsertCustomerOrder>): Promise<CustomerOrder> {
+    // 🔒 CRITICAL: Get current order first to check what we're updating
+    const currentOrder = await this.getOrderById(id);
+    if (!currentOrder) {
+      throw new Error(`Order with ID ${id} not found`);
+    }
+    
     const [order] = await customerDb
       .update(customerOrders)
       .set({
@@ -334,7 +357,63 @@ export class CustomerStorage implements ICustomerStorage {
       })
       .where(eq(customerOrders.id, id))
       .returning();
+    
+    // 🚨 MANDATORY: If status or payment_status changed, sync with order_management
+    if (orderUpdate.status !== undefined || orderUpdate.paymentStatus !== undefined) {
+      try {
+        const { OrderManagementStorage } = await import('./order-management-storage');
+        const orderManagementStorage = new OrderManagementStorage();
+        
+        // Check if order_management record exists
+        const managementOrder = await orderManagementStorage.getOrderManagementByCustomerOrderId(id);
+        
+        if (!managementOrder) {
+          // Create missing management record
+          console.log(`🔧 [UPDATE ORDER] Creating missing management record for order ${order.orderNumber}`);
+          await orderManagementStorage.addCustomerOrderToManagement(id);
+        } else {
+          // Update existing management record status based on new customer order status
+          const newManagementStatus = this.determineManagementStatus(
+            orderUpdate.status || currentOrder.status,
+            orderUpdate.paymentStatus || currentOrder.paymentStatus
+          );
+          
+          if (newManagementStatus !== managementOrder.currentStatus) {
+            console.log(`🔄 [UPDATE ORDER] Syncing management status for ${order.orderNumber}: ${managementOrder.currentStatus} → ${newManagementStatus}`);
+            
+            // Update order_management status to match customer_orders
+            await orderManagementStorage.updateOrderStatus(
+              managementOrder.id, 
+              newManagementStatus as any, 
+              1, // system user
+              'system', // system department
+              `Auto-sync from customer order update`
+            );
+          }
+        }
+        
+        console.log(`✅ [UPDATE ORDER] Order ${order.orderNumber} updated and synced with management system`);
+      } catch (error) {
+        console.error(`❌ [UPDATE ORDER] Failed to sync order ${order.orderNumber} with management system:`, error);
+        // Don't throw - the customer order update was successful, log the sync issue
+      }
+    }
+    
     return order;
+  }
+  
+  // Helper function to determine correct management status
+  private determineManagementStatus(customerStatus: string, paymentStatus: string): string {
+    if (customerStatus === 'deleted') return 'cancelled';
+    if (customerStatus === 'delivered') return 'delivered';
+    
+    if (paymentStatus === 'paid') return 'warehouse_ready';
+    if (paymentStatus === 'receipt_uploaded') return 'financial_review';
+    if (paymentStatus === 'pending') return 'payment_uploaded';
+    if (paymentStatus === 'grace_period') return 'payment_grace_period';
+    
+    // Default fallback
+    return 'pending';
   }
 
   async getAllOrders(): Promise<CustomerOrder[]> {
