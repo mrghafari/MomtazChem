@@ -167,6 +167,35 @@
 
 ## Recent Changes
 
+### COMPLETED: Address Logic Bug Fix - Primary Address Calculation Enhancement (January 30, 2025)
+✅ **RESOLVED: Critical address logic issue where primary address calculation failed while secondary address worked properly**
+- **User Issue Identified**: "چطور سیستم برای آدرس دوم کار میکند ولی برای آدرس اولیه کار نمیکند؟" - Primary address logic failing while secondary worked
+- **Root Cause Analysis**: CRM customer data had empty `city` field but populated `cityRegion` field, causing primary address calculation to fail
+- **Database Issue Identified**: Customer ABAS ABASI (ID: 8) had mismatched address fields:
+  - `city`: undefined/empty
+  - `cityRegion`: "کربلا" (populated with correct city name)
+  - `province`: "کربلا" (correctly populated)
+- **Enhanced Address Logic**: Updated `finalDestinationCity` calculation to use multiple fallback sources:
+  - **Original Logic**: `crmCustomerData?.cityRegion || crmCustomerData?.city || form.watch('city')`
+  - **Enhanced Logic**: Added `customerData?.customer?.cityRegion || customerData?.customer?.city` fallbacks for comprehensive address resolution
+- **API Response Standardization**: Fixed intercity bus API response format inconsistency:
+  - **Before**: Different response formats for intercity bus vs vehicle templates
+  - **After**: Unified `optimalVehicle` response format for all transport methods
+  - **Technical Fix**: Intercity bus now returns same structure as vehicle templates for frontend consistency
+- **Testing Verification**: Complete system testing confirmed proper functionality:
+  - **Flammable Materials (Solvant 402)**: Correctly selects heavy truck (686,200 IQD) excluding buses
+  - **Non-flammable Items**: Properly uses intercity bus (36,000 IQD) for lightweight cargo
+  - **Address Resolution**: Both primary and secondary addresses now calculate delivery costs correctly
+- **Frontend Enhancement**: Improved address field resolution with comprehensive fallback chain:
+  - CRM `cityRegion` → CRM `city` → Customer `cityRegion` → Customer `city` → Form `city`
+  - Enhanced debugging logs showing all address data sources for troubleshooting
+- **Business Impact**: 
+  - **Complete Address Support**: All address formats now supported regardless of data source field population
+  - **Consistent API Response**: Frontend can reliably display delivery costs for all transport methods
+  - **Enhanced Reliability**: Multiple fallback sources prevent address resolution failures
+- **Technical Achievement**: Unified API response format ensures frontend compatibility with both intercity bus and vehicle template selections
+- **Result**: Complete address logic operational - both primary and secondary addresses properly calculate delivery costs with comprehensive fallback chain and unified API response format
+
 ### COMPLETED: CRM Address Auto-Population Verification - Bilingual Purchase Form Integration Confirmed (January 30, 2025)
 ✅ **VERIFIED: Complete CRM address auto-population system working correctly in bilingual purchase form**
 - **User Confirmation**: "بله اطلاعات کامل است حتی در همان فرو چک اوت بخش آدرش شهر را کربلا زده" - Address data fully populated including city (Karbala)

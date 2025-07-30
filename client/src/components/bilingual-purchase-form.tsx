@@ -964,7 +964,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     // Determine final destination city and province
     const finalDestinationCity = showSecondAddress && secondCity.trim() ? 
       secondCity : 
-      (crmCustomerData?.cityRegion || crmCustomerData?.city || form.watch('city'));
+      (crmCustomerData?.cityRegion || crmCustomerData?.city || customerData?.customer?.cityRegion || customerData?.customer?.city || form.watch('city'));
     
     const finalDestinationProvince = showSecondAddress && secondProvince.trim() ? 
       secondProvince : 
@@ -977,6 +977,9 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       crmCityRegion: crmCustomerData?.cityRegion,
       crmCity: crmCustomerData?.city,
       crmProvince: crmCustomerData?.province,
+      customerCityRegion: customerData?.customer?.cityRegion,
+      customerCity: customerData?.customer?.city,
+      customerProvince: customerData?.customer?.province,
       formCity: form.watch('city'),
       finalDestinationCity,
       finalDestinationProvince,
@@ -993,10 +996,12 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       console.log('🚚 [DELIVERY CALCULATION] Missing required data for calculation:', {
         hasCity: !!finalDestinationCity,
         hasProvince: !!finalDestinationProvince,
-        hasWeight: totalWeight > 0
+        hasWeight: totalWeight > 0,
+        cityValue: finalDestinationCity,
+        provinceValue: finalDestinationProvince
       });
     }
-  }, [showSecondAddress, secondCity, secondProvince, form.watch('city'), totalWeight, cart, crmCustomerData?.cityRegion, crmCustomerData?.province]);
+  }, [showSecondAddress, secondCity, secondProvince, form.watch('city'), totalWeight, cart, crmCustomerData?.cityRegion, crmCustomerData?.province, customerData?.customer?.cityRegion, customerData?.customer?.province]);
 
 
 
