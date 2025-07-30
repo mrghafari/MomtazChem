@@ -1,0 +1,110 @@
+admin:196 Tawk.to script loaded successfully
+chunk-RPCDYKBN.js?v=815b1335:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+queryClient.ts:81  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+(anonymous) @ queryClient.ts:81
+fetchFn @ @tanstack_react-query.js?v=815b1335:840
+run @ @tanstack_react-query.js?v=815b1335:494
+start @ @tanstack_react-query.js?v=815b1335:536
+fetch @ @tanstack_react-query.js?v=815b1335:926
+executeFetch_fn @ @tanstack_react-query.js?v=815b1335:2211
+onSubscribe @ @tanstack_react-query.js?v=815b1335:1898
+subscribe @ @tanstack_react-query.js?v=815b1335:24
+(anonymous) @ @tanstack_react-query.js?v=815b1335:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=815b1335:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=815b1335:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=815b1335:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=815b1335:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=815b1335:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=815b1335:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=815b1335:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=815b1335:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=815b1335:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=815b1335:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=815b1335:19432
+commitRoot @ chunk-RPCDYKBN.js?v=815b1335:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=815b1335:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=815b1335:18718
+workLoop @ chunk-RPCDYKBN.js?v=815b1335:197
+flushWork @ chunk-RPCDYKBN.js?v=815b1335:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=815b1335:384
+useAuth.ts:43 Auth check result: {success: true, user: {…}}
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:117574)
+    at t.value (twk-chunk-common.js:2:150658)
+    at p.updateUUID (twk-chunk-common.js:2:202310)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:124589)
+    at twk-chunk-common.js:2:123900
+value @ twk-chunk-common.js:2
+updateUUID @ twk-chunk-common.js:2
+(anonymous) @ twk-vendor.js:2
+(anonymous) @ twk-vendor.js:2
+(anonymous) @ twk-vendor.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+Promise.then
+value @ twk-chunk-common.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+56d7 @ twk-chunk-common.js:2
+a @ twk-runtime.js:1
+r @ twk-runtime.js:1
+t @ twk-runtime.js:1
+(anonymous) @ twk-runtime.js:1
+(anonymous) @ twk-runtime.js:1
+admin:168 Tawk.to Live Chat loaded successfully
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+site-management-fixed.tsx:71 🔍 [DEBUG] useEffect triggered, userPermissions: undefined
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+site-management-fixed.tsx:71 🔍 [DEBUG] useEffect triggered, userPermissions: {success: true, permissions: Array(34), modules: Array(34), roles: Array(1), roleInfo: {…}}
+site-management-fixed.tsx:74 🔍 [DEBUG] userPermissions modules: (34) ['kpi_dashboard', 'management_dashboard', 'syncing_shop', 'shop_management', 'product_management', 'order_management', 'warehouse_management', 'logistics_management', 'inquiries', 'crm', 'barcode', 'email_settings', 'database_backup', 'seo', 'categories', 'sms', 'factory', 'user_management', 'procedures', 'payment_management', 'accounting_management', 'finance', 'wallet_management', 'geography_analytics', 'ai_settings', 'refresh_control', 'content_management', 'ticketing_system', 'remote_desktop', 'server_config', 'company_information', 'user_guide', 'marketing_module', 'order_management']
+site-management-fixed.tsx:421 🔍 [DEBUG] Full userPermissions response: {success: true, permissions: Array(34), modules: Array(34), roles: Array(1), roleInfo: {…}}
+site-management-fixed.tsx:422 🔍 [DEBUG] userPermissions.modules: (34) ['kpi_dashboard', 'management_dashboard', 'syncing_shop', 'shop_management', 'product_management', 'order_management', 'warehouse_management', 'logistics_management', 'inquiries', 'crm', 'barcode', 'email_settings', 'database_backup', 'seo', 'categories', 'sms', 'factory', 'user_management', 'procedures', 'payment_management', 'accounting_management', 'finance', 'wallet_management', 'geography_analytics', 'ai_settings', 'refresh_control', 'content_management', 'ticketing_system', 'remote_desktop', 'server_config', 'company_information', 'user_guide', 'marketing_module', 'order_management']
+site-management-fixed.tsx:423 🔍 [DEBUG] userPermissions.permissions: (34) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+site-management-fixed.tsx:428 🔍 [DEBUG] Total allButtons count: 34
+site-management-fixed.tsx:429 🔍 [DEBUG] AI Settings exists in allButtons: true
+site-management-fixed.tsx:430 🔍 [DEBUG] Content Management exists in allButtons: true
+site-management-fixed.tsx:432 🔍 [DEBUG] allowedModules: (34) ['kpi_dashboard', 'management_dashboard', 'syncing_shop', 'shop_management', 'product_management', 'order_management', 'warehouse_management', 'logistics_management', 'inquiries', 'crm', 'barcode', 'email_settings', 'database_backup', 'seo', 'categories', 'sms', 'factory', 'user_management', 'procedures', 'payment_management', 'accounting_management', 'finance', 'wallet_management', 'geography_analytics', 'ai_settings', 'refresh_control', 'content_management', 'ticketing_system', 'remote_desktop', 'server_config', 'company_information', 'user_guide', 'marketing_module', 'order_management']
+site-management-fixed.tsx:433 🔍 [DEBUG] kpi_dashboard in allowedModules? true
+site-management-fixed.tsx:434 🔍 [DEBUG] management_dashboard in allowedModules? true
+site-management-fixed.tsx:435 🔍 [DEBUG] finance in allowedModules? true
+site-management-fixed.tsx:436 🔍 [DEBUG] geography_analytics in allowedModules? true
+site-management-fixed.tsx:437 🔍 [DEBUG] ai_settings in allowedModules? true
+site-management-fixed.tsx:438 🔍 [DEBUG] content_management in allowedModules? true
+site-management-fixed.tsx:444 🔍 [CRITICAL] Missing button detection:
+site-management-fixed.tsx:448 🔍 [MISSING] order-tracking-view Order Management & Tracking - View Only moduleId: order_tracking
+site-management-fixed.tsx:452 🔍 [CRITICAL] Missing buttons count: 1
+site-management-fixed.tsx:454 🔍 [DEBUG] finance button found in allButtons? {id: 'finance', label: 'Finance', icon: {…}, className: 'border-green-300 text-green-600 hover:bg-green-50', onClick: ƒ, …}
+site-management-fixed.tsx:455 🔍 [DEBUG] geography_analytics button found in allButtons? {id: 'geography-analytics', label: 'Geography Analytics', icon: {…}, className: 'border-teal-300 text-teal-600 hover:bg-teal-50', onClick: ƒ, …}
+site-management-fixed.tsx:456 🔍 [DEBUG] ai_settings button found in allButtons? {id: 'ai-settings', label: 'AI Control', icon: {…}, className: 'border-purple-300 text-purple-600 hover:bg-purple-50', onClick: ƒ, …}
+site-management-fixed.tsx:457 🔍 [DEBUG] content_management button found in allButtons? {id: 'content-management', label: 'Content Management', icon: {…}, className: 'border-lime-300 text-lime-600 hover:bg-lime-50', onClick: ƒ, …}
+site-management-fixed.tsx:458 🔍 [DEBUG] finance button in filtered? {id: 'finance', label: 'Finance', icon: {…}, className: 'border-green-300 text-green-600 hover:bg-green-50', onClick: ƒ, …}
+site-management-fixed.tsx:459 🔍 [DEBUG] geography_analytics button in filtered? {id: 'geography-analytics', label: 'Geography Analytics', icon: {…}, className: 'border-teal-300 text-teal-600 hover:bg-teal-50', onClick: ƒ, …}
+site-management-fixed.tsx:460 🔍 [DEBUG] ai_settings button in filtered? {id: 'ai-settings', label: 'AI Control', icon: {…}, className: 'border-purple-300 text-purple-600 hover:bg-purple-50', onClick: ƒ, …}
+site-management-fixed.tsx:461 🔍 [DEBUG] content_management button in filtered? {id: 'content-management', label: 'Content Management', icon: {…}, className: 'border-lime-300 text-lime-600 hover:bg-lime-50', onClick: ƒ, …}
+site-management-fixed.tsx:76 🔍 [DEBUG] filtered buttons count: 33
+site-management-fixed.tsx:77 🔍 [DEBUG] First 5 filtered buttons: (5) [{…}, {…}, {…}, {…}, {…}]
+site-management-fixed.tsx:78 🔍 [DEBUG] AI Control button in filtered: {id: 'ai-settings', label: 'AI Control', icon: {…}, className: 'border-purple-300 text-purple-600 hover:bg-purple-50', onClick: ƒ, …}
+site-management-fixed.tsx:79 🔍 [DEBUG] Content Management button in filtered: {id: 'content-management', label: 'Content Management', icon: {…}, className: 'border-lime-300 text-lime-600 hover:bg-lime-50', onClick: ƒ, …}
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+useOrderNotifications.ts:99 🔔 [FINANCIAL] نوتیفیکیشن: 67 سفارش جدید دریافت شد
+chunk-H56OBA7M.js?v=815b1335:341 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-H56OBA7M.js?v=815b1335:341
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=815b1335:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=815b1335:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=815b1335:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=815b1335:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=815b1335:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=815b1335:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=815b1335:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=815b1335:19416
+commitRoot @ chunk-RPCDYKBN.js?v=815b1335:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=815b1335:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=815b1335:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=815b1335:18627
+finance-orders.tsx:343 🔄 [FINANCE] Sending approve request for order 309 with receipt amount: 
+finance-orders.tsx:350 ✅ [FINANCE] Order approved successfully: {success: true, order: {…}, message: 'پرداخت تایید شد و به انبار ارسال گردید', walletTransaction: false}
+useOrderNotifications.ts:99 🔔 [FINANCIAL] نوتیفیکیشن: 67 سفارش جدید دریافت شد
