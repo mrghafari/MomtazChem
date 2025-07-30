@@ -31255,7 +31255,7 @@ momtazchem.com
         .innerJoin(crmCustomers, eq(customerOrders.customerId, crmCustomers.id))
         .where(eq(orderManagement.customerOrderId, customerOrderId));
 
-      // Update order status to warehouse_pending (approved by financial, ready for warehouse)
+      // Update order management status to warehouse_pending (approved by financial, ready for warehouse)
       await db
         .update(orderManagement)
         .set({
@@ -31265,6 +31265,18 @@ momtazchem.com
           financialNotes: notes
         })
         .where(eq(orderManagement.customerOrderId, customerOrderId));
+
+      // Also update customer order status to warehouse_ready and payment status to paid
+      await db
+        .update(customerOrders)
+        .set({
+          status: 'warehouse_ready',
+          paymentStatus: 'paid',
+          updatedAt: new Date()
+        })
+        .where(eq(customerOrders.id, customerOrderId));
+
+      console.log(`✅ [FINANCE] Order ${customerOrderId} approved: management status = warehouse_pending, customer status = warehouse_ready, payment = paid`);
 
       // Check for excess payment and credit to wallet if order is approved
       const [orderWithNotes] = await db
