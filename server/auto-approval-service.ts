@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { eq, lte, sql } from "drizzle-orm";
+import { eq, lte, sql, and } from "drizzle-orm";
 import { orderManagement } from "../shared/order-management-schema";
 import { customerOrders } from "../shared/customer-schema";
 
@@ -206,33 +206,33 @@ export class AutoApprovalService {
 
       // یافتن سفارشات bank_transfer_grace که مدارک آپلود کرده‌اند و نیاز به تایید دارند
       const bankTransferOrders = await db
-        .select({
-          id: customerOrders.id,
-          orderNumber: customerOrders.orderNumber,
-          paymentMethod: customerOrders.paymentMethod,
-          paymentStatus: customerOrders.paymentStatus,
-          status: customerOrders.status,
-          totalAmount: customerOrders.totalAmount,
-          currency: customerOrders.currency,
-          customerFirstName: customerOrders.customerFirstName,
-          customerLastName: customerOrders.customerLastName,
-          customerEmail: customerOrders.customerEmail,
-          customerPhone: customerOrders.customerPhone
-        })
+        .select()
         .from(customerOrders)
         .where(
-          sql`
-            payment_method = 'bank_transfer_grace'
-            AND payment_status = 'receipt_uploaded'
-            AND status = 'confirmed'
-          `
+          and(
+            eq(customerOrders.paymentMethod, 'bank_transfer_grace'),
+            eq(customerOrders.paymentStatus, 'receipt_uploaded')
+          )
         );
 
-      console.log(`🏦 [BANK TRANSFER AUTO] Query found ${bankTransferOrders.length} bank transfer orders`);
+      // یافتن سفارشات payment_uploaded که نیاز به تایید مالی دارند
+      const uploadedPaymentOrders = await db
+        .select()
+        .from(customerOrders)
+        .where(
+          eq(customerOrders.paymentStatus, 'payment_uploaded')
+        );
+
+      // ترکیب دو نوع سفارش: bank_transfer_grace و payment_uploaded
+      const allOrdersToProcess = [...bankTransferOrders, ...uploadedPaymentOrders];
       
-      if (bankTransferOrders.length > 0) {
-        console.log("🏦 [BANK TRANSFER AUTO] Bank transfer orders found:", 
-          JSON.stringify(bankTransferOrders.map(o => ({
+      console.log(`🏦 [BANK TRANSFER AUTO] Query found ${bankTransferOrders.length} bank transfer orders`);
+      console.log(`📋 [PAYMENT UPLOAD AUTO] Query found ${uploadedPaymentOrders.length} uploaded payment orders`);
+      console.log(`📊 [AUTO APPROVAL] Total orders to process: ${allOrdersToProcess.length}`);
+      
+      if (allOrdersToProcess.length > 0) {
+        console.log("🏦 [AUTO APPROVAL] Orders found for processing:", 
+          JSON.stringify(allOrdersToProcess.map(o => ({
             id: o.id,
             orderNumber: o.orderNumber,
             paymentMethod: o.paymentMethod,
@@ -242,18 +242,21 @@ export class AutoApprovalService {
         );
       }
 
-      if (bankTransferOrders.length === 0) {
-        console.log("✅ [BANK TRANSFER AUTO] No bank transfer orders pending auto-approval");
+      if (allOrdersToProcess.length === 0) {
+        console.log("✅ [AUTO APPROVAL] No orders pending auto-approval");
         return;
       }
 
-      console.log(`🏦 [BANK TRANSFER AUTO] Found ${bankTransferOrders.length} bank transfer orders ready for auto-approval`);
+      console.log(`🔄 [AUTO APPROVAL] Found ${allOrdersToProcess.length} orders ready for auto-approval`);
 
-      for (const order of bankTransferOrders) {
-        console.log(`🏦 [BANK TRANSFER AUTO] Processing order ${order.orderNumber} (bank_transfer_grace)`);
-
-        // تایید خودکار مالی و انتقال به انبار
-        await this.approveBankTransferOrder(order);
+      for (const order of allOrdersToProcess) {
+        if (order.paymentMethod === 'bank_transfer_grace') {
+          console.log(`🏦 [BANK TRANSFER AUTO] Processing order ${order.orderNumber} (bank_transfer_grace)`);
+          await this.approveBankTransferOrder(order);
+        } else if (order.paymentStatus === 'payment_uploaded') {
+          console.log(`📋 [PAYMENT UPLOAD AUTO] Processing order ${order.orderNumber} (payment_uploaded)`);
+          await this.approveBankTransferOrder(order); // Same approval process
+        }
       }
 
     } catch (error) {
@@ -288,7 +291,9 @@ export class AutoApprovalService {
           currentStatus: 'warehouse_pending',
           financialReviewerId: 0, // System auto-approval
           financialReviewedAt: new Date(),
-          financialNotes: 'تایید خودکار حواله بانکی - مدارک بررسی و تایید شد',
+          financialNotes: order.paymentMethod === 'bank_transfer_grace' 
+            ? 'تایید خودکار حواله بانکی - مدارک بررسی و تایید شد'
+            : 'تایید خودکار - مدارک پرداخت بررسی و تایید شد',
           totalAmount: order.totalAmount?.toString() || '0',
           currency: order.currency || 'IQD',
           orderNumber: order.orderNumber,
@@ -307,7 +312,9 @@ export class AutoApprovalService {
             currentStatus: 'warehouse_pending',
             financialReviewerId: 0, // System auto-approval
             financialReviewedAt: new Date(),
-            financialNotes: 'تایید خودکار حواله بانکی - مدارک بررسی و تایید شد',
+            financialNotes: order.paymentMethod === 'bank_transfer_grace' 
+              ? 'تایید خودکار حواله بانکی - مدارک بررسی و تایید شد'
+              : 'تایید خودکار - مدارک پرداخت بررسی و تایید شد',
             updatedAt: new Date()
           })
           .where(eq(orderManagement.customerOrderId, order.id));

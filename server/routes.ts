@@ -65,6 +65,7 @@ import {
 
 // SMS service will be imported dynamically when needed
 import { ticketingStorage } from "./ticketing-storage";
+import { autoApprovalService } from "./auto-approval-service";
 import { companyStorage } from "./company-storage";
 import { getLocalizedMessage, getLocalizedEmailSubject, generateSMSMessage } from "./multilingual-messages";
 import { supportTickets } from "../shared/ticketing-schema";
@@ -1083,8 +1084,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const order = orderResult[0];
 
-      // Check if order is confirmed (has financial approval)
-      if (order.status !== 'confirmed') {
+      // Check if order has financial approval or is approved
+      const validStatuses = ['confirmed', 'warehouse_ready', 'warehouse_pending', 'in_transit', 'delivered'];
+      if (!validStatuses.includes(order.status)) {
+        console.log('❌ [INVOICE ERROR] Order status not eligible for final invoice:', {
+          orderId: order.id,
+          orderNumber: order.orderNumber,
+          currentStatus: order.status,
+          validStatuses
+        });
         return res.status(400).json({ 
           success: false, 
           message: 'فقط سفارشات تأیید شده قابل صدور فاکتور نهایی هستند' 
@@ -42220,6 +42228,10 @@ momtazchem.com
       });
     }
   });
+
+  // شروع سیستم تایید خودکار
+  autoApprovalService.start();
+  console.log("🤖 [SYSTEM] Auto-approval service started for bank transfers and payment uploads");
 
   return httpServer;
 }
