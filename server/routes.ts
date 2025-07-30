@@ -11786,10 +11786,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.log(`✅ Wallet payment processed: ${walletUsage} IQD deducted, transaction ID: ${transaction.id}`);
             actualWalletUsed = walletUsage;
             
-            if (remaining === 0) {
+            // Enhanced payment status logic based on conversion
+            if (finalPaymentMethod === 'wallet_full' || remaining <= 0.01) {
               finalPaymentStatus = "paid"; // Fully paid by wallet
+              console.log('💰 [PAYMENT STATUS] Set to PAID - wallet_full conversion applied');
             } else {
               finalPaymentStatus = "partial"; // Partially paid by wallet
+              console.log('💰 [PAYMENT STATUS] Set to PARTIAL - wallet_partial conversion applied');
             }
           } catch (walletError) {
             console.log(`❌ Wallet payment failed:`, walletError);
