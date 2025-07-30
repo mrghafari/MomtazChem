@@ -11665,11 +11665,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let finalCustomerInfo = customerInfo;
       let finalCrmCustomerId = crmCustomerId;
 
-      // If user is logged in, get customer info from database
+      // If user is logged in, get customer info from CRM database
       if (customerId && !customerInfo) {
-        console.log('Getting customer info for customerId:', customerId);
-        const customer = await customerStorage.getCustomerById(customerId);
-        console.log('Retrieved customer:', customer);
+        console.log('Getting CRM customer info for customerId:', customerId);
+        const customer = await crmStorage.getCrmCustomerById(customerId);
+        console.log('Retrieved CRM customer:', customer);
         if (customer) {
           finalCustomerInfo = {
             email: customer.email,
@@ -11678,7 +11678,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             company: customer.company || '',
             phone: customer.phone || '',
             country: customer.country || 'Iraq',
-            city: customer.city || 'Baghdad',
+            city: customer.cityRegion || customer.city || 'Baghdad',
             address: customer.address || 'Default Address',
           };
           console.log('finalCustomerInfo set to:', finalCustomerInfo);
@@ -11819,15 +11819,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Create order items and update stock
       for (const item of items) {
-        const unitPrice = item.unitPrice || item.price || 0;
+        const unitPrice = parseFloat(item.unitPrice || item.price || '0') || 0;
+        const quantity = parseInt(item.quantity || '1') || 1;
         
         await customerStorage.createOrderItem({
           orderId: order.id,
           productId: item.productId,
           productName: item.productName || 'Unknown Product',
-          quantity: String(item.quantity),
+          quantity: String(quantity),
           unitPrice: String(unitPrice),
-          totalPrice: String(item.quantity * unitPrice),
+          totalPrice: String(quantity * unitPrice),
           productSku: item.productSku || '',
         });
 
@@ -12657,7 +12658,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (order.customerId) {
         try {
-          const crmCustomer = await crmStorage.getCustomerById(order.customerId);
+          const crmCustomer = await crmStorage.getCrmCustomerById(order.customerId);
           if (crmCustomer) {
             customerDetails = {
               firstName: crmCustomer.firstName || customerDetails.firstName,

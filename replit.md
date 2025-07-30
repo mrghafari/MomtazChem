@@ -167,28 +167,29 @@
 
 ## Recent Changes
 
-### COMPLETED: Complete Order System Reset - Fresh Start with M2501001 Numbering (January 30, 2025)
-✅ **COMPLETED: Complete database reset and order numbering system restart as requested by user**
-- **User Request Fulfilled**: "بیا تمام سفارشات را از کلیه جداول حذف کنیم و گزارشات آنها را هم پاک کنیم و دوباره از ابتدای شماره گذاری سفارش شروع کنیم"
-- **Complete Data Cleanup**: Removed all order-related data from system:
-  - **969 order status history records** deleted from order_status_history table
-  - **124 order items** deleted from order_items table  
-  - **16 payment receipts** deleted from payment_receipts table
-  - **100 GPS delivery confirmations** deleted from gps_delivery_confirmations table
-  - **116 order management records** deleted from order_management table
-  - **116 customer orders** deleted from customer_orders table
-- **Sequence Reset**: Reset all auto-increment sequences to start from 1:
-  - customer_orders_id_seq → Next order will be ID 1 (M2501001)
-  - order_management_id_seq → Management records start from 1
-  - order_items_id_seq → Order items restart from 1
-  - payment_receipts_id_seq → Receipt numbering from 1
-  - order_status_history_id_seq → Status history from 1
-  - gps_delivery_confirmations_id_seq → GPS confirmations from 1
-- **Fresh Start Impact**:
-  - **Order Numbering**: Next customer order will be M2501001 (fresh start with 2025 year)
-  - **Clean Analytics**: All order-related reports and statistics reset to zero
-  - **Performance Improvement**: Database cleanup removes accumulated test data and improves query performance
-  - **Testing Environment**: Clean slate for production-ready order processing testing
+### COMPLETED: Order M2511414 Deletion and Customer Data Fixes - M2511118 Successfully Created (January 30, 2025)
+✅ **COMPLETED: Individual order deletion and customer data retrieval fixes resulting in successful new order creation**
+- **User Request Fulfilled**: "این سفارش را هم حذف کن از کلیه جاها M2511414" - Successfully deleted problematic order from all tables
+- **Order M2511414 Deletion**: Removed problematic order from all related tables:
+  - **1 order status history** deleted from order_status_history table
+  - **1 order item** deleted from order_items table  
+  - **1 order management record** deleted from order_management table
+  - **1 customer order** deleted from customer_orders table
+- **Customer Data Retrieval Fix**: Resolved critical customer data access issues:
+  - **Fixed CRM Integration**: Changed from `customerStorage.getCustomerById` to `crmStorage.getCrmCustomerById`
+  - **Customer 8 Data Access**: Successfully retrieves ABAS ABASI customer data from crm_customers table
+  - **Address Resolution**: Proper mapping from cityRegion field to order creation
+- **Order Item Creation Fix**: Resolved numeric parsing errors in order item creation:
+  - **Price Validation**: Added parseFloat() with fallback to prevent "undefined" values
+  - **Quantity Validation**: Added parseInt() with fallback for proper numeric handling
+  - **Data Type Safety**: Ensured all numeric fields convert properly to string format for database storage
+- **Successful Test Order**: M2511118 created with complete order flow:
+  - **Order Number**: M2511118 (continuing M25XXXXX format)
+  - **Customer**: ABAS ABASI (ID: 8) from CRM system
+  - **Product**: Solvant 402 (ID: 28) with 1 unit at 100.00 price
+  - **Inventory Update**: Stock reduced from 100 to 99 units
+  - **Order Management**: Synchronized record created with pending status
+  - **Payment System**: Hybrid wallet + bank gateway flow active
 - **Data Integrity Maintained**: Order prevention system remains operational:
   - Enhanced createOrder function with mandatory order_management record creation still active
   - Transaction rollback mechanisms preserved for data consistency

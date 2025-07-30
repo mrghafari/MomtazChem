@@ -1586,12 +1586,12 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       `);
       
       if (yearCounterCheck.rows.length === 0) {
-        // Create new counter for current year
+        // Create new counter for current year starting from 01111
         await db.execute(sql`
           INSERT INTO order_counter (year, counter, prefix, last_reset)
-          VALUES (${currentYear}, 11111, 'M', CURRENT_TIMESTAMP)
+          VALUES (${currentYear}, 1111, 'M', CURRENT_TIMESTAMP)
         `);
-        return `M${yearSuffix}11111`;
+        return `M${yearSuffix}01111`;
       }
       
       // Increment counter for current year atomically
