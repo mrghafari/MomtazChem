@@ -24556,6 +24556,150 @@ ${message ? `Additional Requirements:\n${message}` : ''}
   });
 
   // Get financial pending orders  
+  // Get orphaned orders - orders in customer_orders but missing from order_management
+  app.get('/api/financial/orphaned-orders', requireAuth, async (req, res) => {
+    try {
+      console.log('🧟 [ORPHANED ORDERS] Fetching orphaned orders...');
+      
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        SELECT 
+          co.id,
+          co.order_number as "orderNumber",
+          co.customer_name as "customerName", 
+          co.customer_email as "customerEmail",
+          co.customer_phone as "customerPhone",
+          co.total_amount as "totalAmount",
+          co.currency,
+          co.payment_method as "paymentMethod",
+          co.payment_status as "paymentStatus",
+          co.status,
+          co.created_at as "createdAt",
+          co.updated_at as "updatedAt",
+          co.shipping_address as "shippingAddress",
+          co.billing_address as "billingAddress",
+          co.notes,
+          CASE 
+            WHEN om.id IS NULL THEN true 
+            ELSE false 
+          END as "isOrphaned"
+        FROM customer_orders co
+        LEFT JOIN order_management om ON co.id = om.customer_order_id
+        WHERE om.id IS NULL
+        ORDER BY co.created_at DESC
+      `);
+      
+      const orphanedOrders = result.rows;
+      console.log(`🧟 [ORPHANED ORDERS] Found ${orphanedOrders.length} orphaned orders`);
+      
+      if (orphanedOrders.length > 0) {
+        console.log('🧟 [ORPHANED ORDERS] Sample orphaned order:', JSON.stringify(orphanedOrders[0], null, 2));
+      }
+      
+      res.json({ 
+        success: true, 
+        orders: orphanedOrders,
+        totalOrphaned: orphanedOrders.length
+      });
+    } catch (error) {
+      console.error('❌ [ORPHANED ORDERS] Error fetching orphaned orders:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'خطا در بارگیری سفارشات یتیم' 
+      });
+    }
+  });
+
+  // Repair orphaned order - create missing order_management record
+  app.post('/api/financial/orphaned-orders/:customerOrderId/repair', requireAuth, async (req, res) => {
+    try {
+      const customerOrderId = parseInt(req.params.customerOrderId);
+      const adminId = req.session.adminId || 1;
+      
+      console.log(`🔧 [REPAIR ORPHANED] Repairing orphaned order ${customerOrderId}`);
+      
+      // Get customer order details
+      const { pool } = await import('./db');
+      const orderResult = await pool.query(`
+        SELECT * FROM customer_orders WHERE id = $1
+      `, [customerOrderId]);
+      
+      if (orderResult.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'سفارش یافت نشد'
+        });
+      }
+      
+      const order = orderResult.rows[0];
+      
+      // Check if order_management record already exists
+      const managementResult = await pool.query(`
+        SELECT id FROM order_management WHERE customer_order_id = $1
+      `, [customerOrderId]);
+      
+      if (managementResult.rows.length > 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'این سفارش دیگر یتیم نیست'
+        });
+      }
+      
+      // Create order_management record
+      const insertResult = await pool.query(`
+        INSERT INTO order_management (
+          customer_order_id,
+          current_status,
+          total_amount,
+          currency,
+          order_number,
+          customer_first_name,
+          customer_last_name,
+          customer_email,
+          customer_phone,
+          payment_method,
+          created_at,
+          updated_at
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+        RETURNING *
+      `, [
+        customerOrderId,
+        'pending', // Default status
+        order.total_amount?.toString() || '0',
+        order.currency || 'IQD',
+        order.order_number,
+        order.customer_first_name || order.customer_name?.split(' ')[0] || '',
+        order.customer_last_name || order.customer_name?.split(' ')[1] || '',
+        order.customer_email || '',
+        order.customer_phone || '',
+        order.payment_method || '',
+        new Date(),
+        new Date()
+      ]);
+      
+      const newManagementRecord = insertResult.rows[0];
+      
+      console.log(`✅ [REPAIR ORPHANED] Successfully repaired order ${order.order_number}`);
+      console.log(`📋 [REPAIR ORPHANED] Created management record with ID: ${newManagementRecord.id}`);
+      
+      res.json({
+        success: true,
+        message: 'سفارش یتیم با موفقیت تعمیر شد',
+        data: {
+          customerOrder: order,
+          managementRecord: newManagementRecord
+        }
+      });
+      
+    } catch (error) {
+      console.error('❌ [REPAIR ORPHANED] Error repairing orphaned order:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در تعمیر سفارش یتیم'
+      });
+    }
+  });
+
   app.get('/api/financial/orders', async (req, res) => {
     try {
       const orders = await orderManagementStorage.getFinancialPendingOrders();

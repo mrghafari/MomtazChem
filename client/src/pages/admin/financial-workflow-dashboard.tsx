@@ -25,7 +25,9 @@ import {
   Package,
   Weight,
   Truck,
-  User
+  User,
+  Settings,
+  Wrench
 } from "lucide-react";
 
 interface FinancialOrder {
@@ -77,8 +79,8 @@ export default function FinancialWorkflowDashboard() {
     refetchInterval: 30000 // تازه‌سازی هر 30 ثانیه
   });
 
-  // لیست سفارشات یتیم (پرداخت ناکامل از درگاه بانکی)
-  const { data: orphanedResponse, isLoading: orphanedLoading } = useQuery<{orders: FinancialOrder[]}>({
+  // لیست سفارشات یتیم (orders in customer_orders but missing from order_management)
+  const { data: orphanedResponse, isLoading: orphanedLoading } = useQuery<{orders: FinancialOrder[], totalOrphaned: number}>({
     queryKey: ['/api/financial/orphaned-orders'],
     refetchInterval: 30000 // تازه‌سازی هر 30 ثانیه
   });
@@ -86,6 +88,7 @@ export default function FinancialWorkflowDashboard() {
   // Extract arrays from API responses
   const temporaryOrders = temporaryResponse?.orders || [];
   const orphanedOrders = orphanedResponse?.orders || [];
+  const totalOrphaned = orphanedResponse?.totalOrphaned || 0;
 
   // تایید دستی سفارش
   const approveOrderMutation = useMutation({
@@ -109,6 +112,30 @@ export default function FinancialWorkflowDashboard() {
       });
     }
   });
+
+  // تعمیر سفارش یتیم
+  const repairOrphanedOrderMutation = useMutation({
+    mutationFn: (customerOrderId: number) =>
+      apiRequest(`/api/financial/orphaned-orders/${customerOrderId}/repair`, { method: 'POST', body: {} }),
+    onSuccess: () => {
+      toast({
+        title: "🔧 سفارش یتیم تعمیر شد",
+        description: "سفارش با موفقیت به سیستم مدیریت اضافه شد",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/financial/orphaned-orders'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "❌ خطا در تعمیر سفارش",
+        description: error.message || "لطفاً دوباره تلاش کنید",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const handleRepairOrphanedOrder = (customerOrderId: number) => {
+    repairOrphanedOrderMutation.mutate(customerOrderId);
+  };
 
   const handleManualApproval = () => {
     if (!selectedOrder) return;
@@ -620,6 +647,146 @@ export default function FinancialWorkflowDashboard() {
                 </Card>
               ))}
             </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="orphaned" className="space-y-4">
+          {orphanedLoading ? (
+            <Card>
+              <CardContent className="text-center py-12">
+                <Timer className="h-16 w-16 text-blue-500 mx-auto mb-4 animate-spin" />
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                  در حال بارگیری سفارشات یتیم...
+                </h3>
+              </CardContent>
+            </Card>
+          ) : orphanedOrders?.length === 0 ? (
+            <Card>
+              <CardContent className="text-center py-12">
+                <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                  سفارش یتیمی وجود ندارد
+                </h3>
+                <p className="text-gray-600">
+                  همه سفارشات دارای رکورد مدیریت مناسب هستند
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <>
+              <Card className="bg-red-50 border-red-200">
+                <CardContent className="py-4">
+                  <div className="flex items-center gap-3">
+                    <AlertTriangle className="h-6 w-6 text-red-600" />
+                    <div>
+                      <h3 className="font-semibold text-red-800">
+                        سفارشات یتیم - نیاز به تعمیر ({totalOrphaned} سفارش)
+                      </h3>
+                      <p className="text-sm text-red-600">
+                        این سفارشات در جدول customer_orders موجود هستند ولی رکورد مدیریت ندارند
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                {orphanedOrders?.map((order) => (
+                  <Card key={order.id} className="border-red-200 bg-red-50">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-lg text-red-800">
+                          سفارش {order.orderNumber}
+                        </CardTitle>
+                        <Badge variant="destructive" className="bg-red-600 text-white">
+                          یتیم
+                        </Badge>
+                      </div>
+                    </CardHeader>
+                    
+                    <CardContent className="space-y-3">
+                      {/* اطلاعات مشتری */}
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-gray-500" />
+                        <span className="text-gray-700 font-medium">{order.customerName}</span>
+                      </div>
+
+                      {/* تاریخ سفارش */}
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-gray-500" />
+                        <span className="text-sm text-gray-600">
+                          {new Date(order.createdAt).toLocaleDateString('fa-IR')} - {new Date(order.createdAt).toLocaleTimeString('fa-IR')}
+                        </span>
+                      </div>
+
+                      {/* اطلاعات تماس مشتری */}
+                      {(order.customerEmail || order.customerPhone) && (
+                        <div className="bg-white p-2 rounded-lg space-y-1 border border-red-100">
+                          {order.customerEmail && (
+                            <div className="flex items-center gap-2 text-sm">
+                              <Mail className="h-3 w-3 text-gray-500" />
+                              <span className="text-gray-600">{order.customerEmail}</span>
+                            </div>
+                          )}
+                          {order.customerPhone && (
+                            <div className="flex items-center gap-2 text-sm">
+                              <Phone className="h-3 w-3 text-gray-500" />
+                              <span className="text-gray-600">{order.customerPhone}</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* روش پرداخت */}
+                      <div className="flex items-center gap-2">
+                        {getPaymentMethodIcon(order.paymentMethod)}
+                        <span className="text-sm font-medium text-gray-700">
+                          {order.paymentMethod || 'نامشخص'}
+                        </span>
+                      </div>
+
+                      {/* مبلغ کل */}
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600">مبلغ کل:</span>
+                        <span className="font-bold text-lg text-red-600">
+                          {parseFloat(order.totalAmount || '0').toLocaleString()} دینار
+                        </span>
+                      </div>
+
+                      {/* وضعیت */}
+                      <div className="bg-yellow-100 p-3 rounded-lg border border-yellow-200">
+                        <div className="flex items-center gap-2 text-yellow-800">
+                          <Settings className="h-4 w-4" />
+                          <span className="font-medium">وضعیت: {order.status || 'نامشخص'}</span>
+                        </div>
+                        <p className="text-sm text-yellow-700 mt-1">
+                          این سفارش فاقد رکورد مدیریت است و نیاز به تعمیر دارد
+                        </p>
+                      </div>
+
+                      {/* دکمه تعمیر */}
+                      <Button
+                        onClick={() => handleRepairOrphanedOrder(order.id)}
+                        disabled={repairOrphanedOrderMutation.isPending}
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                      >
+                        {repairOrphanedOrderMutation.isPending ? (
+                          <>
+                            <Timer className="h-4 w-4 mr-2 animate-spin" />
+                            در حال تعمیر...
+                          </>
+                        ) : (
+                          <>
+                            <Wrench className="h-4 w-4 mr-2" />
+                            تعمیر سفارش یتیم
+                          </>
+                        )}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </>
           )}
         </TabsContent>
 
