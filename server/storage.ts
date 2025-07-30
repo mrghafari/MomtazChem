@@ -1,4 +1,4 @@
-import { users, leads, leadActivities, passwordResets, type User, type InsertUser, type Lead, type InsertLead, type LeadActivity, type InsertLeadActivity, type PasswordReset, type InsertPasswordReset } from "@shared/schema";
+import { users, leads, leadActivities, passwordResets, abandonedOrders, type User, type InsertUser, type Lead, type InsertLead, type LeadActivity, type InsertLeadActivity, type PasswordReset, type InsertPasswordReset, type AbandonedOrder, type InsertAbandonedOrder } from "@shared/schema";
 import { contacts, showcaseProducts, type Contact, type InsertContact, type ShowcaseProduct, type InsertShowcaseProduct } from "@shared/showcase-schema";
 import { db } from "./db";
 import { showcaseDb } from "./showcase-db";
@@ -113,7 +113,7 @@ export class DatabaseStorage implements IStorage {
       whereCondition = and(
         eq(showcaseProducts.sku, trimmedSku),
         sql`${showcaseProducts.id} != ${excludeId}`
-      );
+      ) as any;
     }
     
     const result = await showcaseDb
@@ -354,7 +354,7 @@ export class DatabaseStorage implements IStorage {
       
       // Extract price from unitPrice first, fallback to priceRange
       let productPrice = "50"; // Default price
-      if (showcaseProduct.unitPrice && showcaseProduct.unitPrice > 0) {
+      if (showcaseProduct.unitPrice && parseFloat(showcaseProduct.unitPrice.toString()) > 0) {
         productPrice = showcaseProduct.unitPrice.toString();
       } else if (showcaseProduct.priceRange) {
         const priceMatch = showcaseProduct.priceRange.match(/\$?(\d+(?:\.\d+)?)/);
@@ -778,7 +778,7 @@ export class DatabaseStorage implements IStorage {
       .update(abandonedOrders)
       .set({ 
         isRecovered: true, 
-        recoveredOrderId: recoveredOrderId 
+        recoveredOrderId: parseInt(recoveredOrderId) 
       })
       .where(eq(abandonedOrders.id, id));
   }
