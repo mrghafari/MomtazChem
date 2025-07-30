@@ -772,8 +772,17 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
     const paymentMethod = form.watch('paymentMethod');
     if (paymentMethod === 'wallet_combined') {
       setUseWallet(true);
-      // Start with full amount if possible, user can adjust
-      setWalletAmountToUse(Math.min(walletBalance, beforeWalletTotal));
+      // Always suggest full payment amount if wallet has sufficient balance
+      const suggestedAmount = Math.min(walletBalance, beforeWalletTotal);
+      setWalletAmountToUse(suggestedAmount);
+      
+      console.log('💰 [WALLET AUTO-SETUP]:', {
+        paymentMethod: 'wallet_combined',
+        walletBalance,
+        beforeWalletTotal,
+        suggestedAmount,
+        willBeFullPayment: suggestedAmount >= beforeWalletTotal
+      });
     } else {
       setUseWallet(false);
       setWalletAmountToUse(0);
@@ -1033,14 +1042,22 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
       notes: data.notes || '',
       shippingMethod: data.shippingMethod,
       paymentMethod: (() => {
-        // Smart payment method determination
+        // Convert wallet_combined to appropriate wallet type based on actual usage
+        if (data.paymentMethod === 'wallet_combined') {
+          if (actualWalletUsage >= beforeWalletTotal) {
+            console.log('🔄 [PAYMENT CONVERSION] wallet_combined → wallet_full (sufficient balance)');
+            return 'wallet_full';
+          } else if (actualWalletUsage > 0) {
+            console.log('🔄 [PAYMENT CONVERSION] wallet_combined → wallet_partial (insufficient balance)');
+            return 'wallet_partial';
+          }
+        }
+        
+        // Standard payment method determination
         if (actualWalletUsage >= beforeWalletTotal) {
           return 'wallet_full';
         } else if (actualWalletUsage > 0) {
           return 'wallet_partial';
-        } else if (data.paymentMethod === 'wallet_combined' && actualWalletUsage >= beforeWalletTotal) {
-          // Convert wallet_combined to wallet_full when wallet amount covers full order
-          return 'wallet_full';
         } else {
           return data.paymentMethod;
         }

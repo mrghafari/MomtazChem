@@ -1210,13 +1210,15 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     // Handle wallet payment calculations with smart wallet_combined conversion
     let finalPaymentMethod = paymentMethod;
     
-    // Smart conversion: If wallet_combined and wallet amount >= total, convert to wallet_full
-    if (paymentMethod === 'wallet_combined' && walletAmount >= totalAmount) {
-      finalPaymentMethod = 'wallet_full';
-      console.log('🔄 [PAYMENT CONVERSION] wallet_combined → wallet_full (sufficient wallet balance)');
-    } else if (paymentMethod === 'wallet_combined' && walletAmount > 0 && walletAmount < totalAmount) {
-      finalPaymentMethod = 'wallet_partial';
-      console.log('🔄 [PAYMENT CONVERSION] wallet_combined → wallet_partial (insufficient wallet balance)');
+    // Convert wallet_combined to appropriate wallet type based on wallet amount vs total
+    if (paymentMethod === 'wallet_combined') {
+      if (walletAmount >= totalAmount) {
+        finalPaymentMethod = 'wallet_full';
+        console.log('🔄 [PAYMENT CONVERSION] wallet_combined → wallet_full (sufficient balance)');
+      } else if (walletAmount > 0) {
+        finalPaymentMethod = 'wallet_partial';
+        console.log('🔄 [PAYMENT CONVERSION] wallet_combined → wallet_partial (insufficient balance)');
+      }
     }
 
     orderData.paymentMethod = finalPaymentMethod;
