@@ -129,6 +129,7 @@ import LogisticsGeography from "@/pages/admin/logistics-geography";
 import UserGuide from "@/pages/user-guide";
 import HybridPayment from "@/pages/hybrid-payment";
 import OrderSuccess from "@/pages/order-success";
+import AdminAbandonedOrders from "@/pages/admin-abandoned-orders";
 
 import NotFound from "@/pages/not-found";
 
@@ -243,6 +244,7 @@ function Router() {
 
           <Route path="/admin/security-management" component={SecurityManagement} />
           <Route path="/admin/ticketing-system" component={TicketingSystemFixed} />
+          <Route path="/admin/abandoned-orders" component={AdminAbandonedOrders} />
           <Route path="/admin/ai-seo-assistant" component={AiSeoAssistant} />
           <Route path="/admin/remote-desktop" component={RemoteDesktop} />
           <Route path="/admin/server-config" component={ServerConfig} />

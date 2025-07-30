@@ -22601,6 +22601,39 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         alternativeCount: alternatives.length
       });
 
+      // Track abandoned cart if customer information is available
+      if (req.isAuthenticated && req.isAuthenticated()) {
+        try {
+          const customerInfo = req.user || req.customer;
+          if (customerInfo && cart && Object.keys(cart).length > 0) {
+            await db.insert(abandonedOrders).values({
+              customerId: customerInfo.id,
+              customerEmail: customerInfo.email,
+              customerName: `${customerInfo.firstName || ''} ${customerInfo.lastName || ''}`.trim(),
+              customerPhone: customerInfo.phone,
+              cartData: cart,
+              shippingData: { 
+                destinationCity, 
+                destinationProvince, 
+                weight: weightKg,
+                useSecondaryAddress,
+                secondaryAddress 
+              },
+              totalAmount: optimalVehicle.totalCost.toString(),
+              currency: 'IQD',
+              checkoutStep: 'shipping',
+              sessionId: req.sessionID,
+              ipAddress: req.ip,
+              userAgent: req.get('User-Agent')
+            }).onConflictDoNothing();
+            
+            console.log('📋 [ABANDONED] Tracked potential abandoned order for customer:', customerInfo.id);
+          }
+        } catch (error) {
+          console.error('❌ [ABANDONED] Error tracking abandoned order:', error);
+        }
+      }
+
       res.json({
         success: true,
         data: {
@@ -22621,6 +22654,279 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         success: false,
         message: "خطا در محاسبه هزینه ارسال"
       });
+    }
+  });
+
+  // =============================================================================
+  // ABANDONED ORDERS TRACKING SYSTEM
+  // =============================================================================
+
+  // Track hybrid payment abandonment
+  app.post('/api/abandoned-orders/hybrid-payment', async (req, res) => {
+    try {
+      const { orderNumber, walletAmount, bankAmount, customerInfo, cartData } = req.body;
+
+      await db.insert(abandonedOrders).values({
+        customerId: customerInfo.id,
+        customerEmail: customerInfo.email,
+        customerName: `${customerInfo.firstName || ''} ${customerInfo.lastName || ''}`.trim(),
+        customerPhone: customerInfo.phone,
+        cartData: cartData,
+        totalAmount: (parseFloat(walletAmount) + parseFloat(bankAmount)).toString(),
+        currency: 'IQD',
+        checkoutStep: 'hybrid_payment_pending',
+        walletAmountUsed: walletAmount.toString(),
+        bankAmountPending: bankAmount.toString(),
+        hybridOrderNumber: orderNumber,
+        sessionId: req.sessionID,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent')
+      });
+
+      console.log('📋 [HYBRID ABANDONED] Tracked hybrid payment abandonment:', orderNumber);
+      
+      res.json({ success: true, message: 'Hybrid payment abandonment tracked' });
+    } catch (error) {
+      console.error('❌ [HYBRID ABANDONED] Error tracking hybrid abandonment:', error);
+      res.status(500).json({ success: false, message: 'خطا در ثبت سفارش رها شده' });
+    }
+  });
+
+  // Get abandoned orders for admin panel
+  app.get('/api/abandoned-orders', requireAuth, async (req, res) => {
+    try {
+      const abandonedOrdersList = await db
+        .select()
+        .from(abandonedOrders)
+        .orderBy(desc(abandonedOrders.createdAt))
+        .limit(100);
+
+      res.json({ 
+        success: true, 
+        data: abandonedOrdersList.map(order => ({
+          ...order,
+          isHybridPayment: order.checkoutStep === 'hybrid_payment_pending',
+          totalValue: parseFloat(order.totalAmount || '0'),
+          walletUsed: parseFloat(order.walletAmountUsed || '0'),
+          bankPending: parseFloat(order.bankAmountPending || '0')
+        }))
+      });
+    } catch (error) {
+      console.error('❌ [ABANDONED] Error fetching abandoned orders:', error);
+      res.status(500).json({ success: false, message: 'خطا در دریافت سفارشات رها شده' });
+    }
+  });
+
+  // Mark abandoned order as recovered
+  app.post('/api/abandoned-orders/:id/recover', requireAuth, async (req, res) => {
+    try {
+      const { orderId } = req.body;
+      const abandonedId = parseInt(req.params.id);
+
+      await db
+        .update(abandonedOrders)
+        .set({ 
+          isRecovered: true, 
+          recoveredOrderId: orderId,
+          lastUpdated: new Date()
+        })
+        .where(eq(abandonedOrders.id, abandonedId));
+
+      console.log('✅ [RECOVERED] Marked abandoned order as recovered:', abandonedId);
+      
+      res.json({ success: true, message: 'سفارش به عنوان بازیافت شده علامت‌گذاری شد' });
+    } catch (error) {
+      console.error('❌ [RECOVERED] Error marking as recovered:', error);
+      res.status(500).json({ success: false, message: 'خطا در علامت‌گذاری سفارش' });
+    }
+  });
+
+  // =============================================================================
+  // ABANDONED ORDERS AUTOMATED REMINDER SYSTEM
+  // =============================================================================
+
+  // Send automated reminders for abandoned orders
+  const sendAbandonedOrderReminders = async () => {
+    try {
+      console.log('📧 [ABANDONED REMINDERS] Starting automated reminder process...');
+      
+      const now = new Date();
+      const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000); // 1 hour ago
+      const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000); // 24 hours ago
+      const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000); // 3 days ago
+
+      // First reminder: 1 hour after abandonment
+      const firstReminderOrders = await db
+        .select()
+        .from(abandonedOrders)
+        .where(
+          and(
+            gte(abandonedOrders.createdAt, oneHourAgo),
+            eq(abandonedOrders.remindersSent, 0),
+            eq(abandonedOrders.isRecovered, false)
+          )
+        );
+
+      // Second reminder: 24 hours after abandonment
+      const secondReminderOrders = await db
+        .select()
+        .from(abandonedOrders)
+        .where(
+          and(
+            gte(abandonedOrders.createdAt, oneDayAgo),
+            eq(abandonedOrders.remindersSent, 1),
+            eq(abandonedOrders.isRecovered, false)
+          )
+        );
+
+      // Final reminder: 3 days after abandonment
+      const finalReminderOrders = await db
+        .select()
+        .from(abandonedOrders)
+        .where(
+          and(
+            gte(abandonedOrders.createdAt, threeDaysAgo),
+            eq(abandonedOrders.remindersSent, 2),
+            eq(abandonedOrders.isRecovered, false)
+          )
+        );
+
+      // Process first reminders
+      for (const order of firstReminderOrders) {
+        try {
+          await sendAbandonedOrderReminder(order, 'first');
+          await db
+            .update(abandonedOrders)
+            .set({ 
+              remindersSent: 1, 
+              lastReminderAt: now,
+              lastUpdated: now
+            })
+            .where(eq(abandonedOrders.id, order.id));
+          
+          console.log(`✅ [FIRST REMINDER] Sent to customer ${order.customerEmail} for order ${order.hybridOrderNumber || order.id}`);
+        } catch (error) {
+          console.error(`❌ [FIRST REMINDER] Failed for order ${order.id}:`, error);
+        }
+      }
+
+      // Process second reminders
+      for (const order of secondReminderOrders) {
+        try {
+          await sendAbandonedOrderReminder(order, 'second');
+          await db
+            .update(abandonedOrders)
+            .set({ 
+              remindersSent: 2, 
+              lastReminderAt: now,
+              lastUpdated: now
+            })
+            .where(eq(abandonedOrders.id, order.id));
+          
+          console.log(`✅ [SECOND REMINDER] Sent to customer ${order.customerEmail} for order ${order.hybridOrderNumber || order.id}`);
+        } catch (error) {
+          console.error(`❌ [SECOND REMINDER] Failed for order ${order.id}:`, error);
+        }
+      }
+
+      // Process final reminders
+      for (const order of finalReminderOrders) {
+        try {
+          await sendAbandonedOrderReminder(order, 'final');
+          await db
+            .update(abandonedOrders)
+            .set({ 
+              remindersSent: 3, 
+              lastReminderAt: now,
+              lastUpdated: now
+            })
+            .where(eq(abandonedOrders.id, order.id));
+          
+          console.log(`✅ [FINAL REMINDER] Sent to customer ${order.customerEmail} for order ${order.hybridOrderNumber || order.id}`);
+        } catch (error) {
+          console.error(`❌ [FINAL REMINDER] Failed for order ${order.id}:`, error);
+        }
+      }
+
+      console.log(`📧 [ABANDONED REMINDERS] Completed: ${firstReminderOrders.length + secondReminderOrders.length + finalReminderOrders.length} reminders sent`);
+    } catch (error) {
+      console.error('❌ [ABANDONED REMINDERS] Error in reminder process:', error);
+    }
+  };
+
+  // Helper function to send individual reminders
+  const sendAbandonedOrderReminder = async (order: AbandonedOrder, reminderType: 'first' | 'second' | 'final') => {
+    if (!order.customerEmail && !order.customerPhone) {
+      throw new Error('No contact information available');
+    }
+
+    const cartItems = Array.isArray(order.cartData) ? order.cartData : Object.entries(order.cartData || {});
+    const totalValue = parseFloat(order.totalAmount || '0');
+    const walletAmount = parseFloat(order.walletAmountUsed || '0');
+    const bankAmount = parseFloat(order.bankAmountPending || '0');
+
+    // Email reminder
+    if (order.customerEmail) {
+      const templateName = reminderType === 'first' ? 'سفارش رها شده - یادآوری اول' : 
+                          reminderType === 'second' ? 'سفارش رها شده - یادآوری دوم' : 
+                          'سفارش رها شده - یادآوری نهایی';
+      const emailTemplate = await emailStorage.getTemplateByName(templateName);
+      if (emailTemplate) {
+        const personalizedContent = emailTemplate.htmlContent
+          .replace(/{{customerName}}/g, order.customerName || 'مشتری گرامی')
+          .replace(/{{orderNumber}}/g, order.hybridOrderNumber || `AO-${order.id}`)
+          .replace(/{{totalAmount}}/g, totalValue.toLocaleString())
+          .replace(/{{walletAmount}}/g, walletAmount.toLocaleString())
+          .replace(/{{bankAmount}}/g, bankAmount.toLocaleString())
+          .replace(/{{itemCount}}/g, cartItems.length.toString())
+          .replace(/{{daysAgo}}/g, Math.ceil((new Date().getTime() - new Date(order.createdAt).getTime()) / (1000 * 60 * 60 * 24)).toString());
+
+        await emailService.sendEmail({
+          to: order.customerEmail,
+          subject: emailTemplate.subject,
+          html: personalizedContent,
+          templateId: emailTemplate.id,
+          customerId: order.customerId || undefined
+        });
+      }
+    }
+
+    // SMS reminder
+    if (order.customerPhone) {
+      let smsMessage = '';
+      switch (reminderType) {
+        case 'first':
+          smsMessage = `${order.customerName || 'مشتری گرامی'}، سفارش شما ${order.hybridOrderNumber || `AO-${order.id}`} به مبلغ ${totalValue.toLocaleString()} دینار ناتمام است. ${walletAmount > 0 ? `مبلغ ${walletAmount.toLocaleString()} دینار از کیف پول کسر شده و ${bankAmount.toLocaleString()} دینار نیاز به پرداخت بانکی دارد.` : ''} برای تکمیل: momtazchem.com`;
+          break;
+        case 'second':
+          smsMessage = `یادآوری مجدد: سفارش ${order.hybridOrderNumber || `AO-${order.id}`} شما به مبلغ ${totalValue.toLocaleString()} دینار در انتظار تکمیل پرداخت است. ممتازکم - momtazchem.com`;
+          break;
+        case 'final':
+          smsMessage = `آخرین فرصت: سفارش ${order.hybridOrderNumber || `AO-${order.id}`} شما به زودی منقضی می‌شود. مبلغ ${bankAmount.toLocaleString()} دینار نیاز به پرداخت دارد. ممتازکم`;
+          break;
+      }
+
+      await smsStorage.sendSMS({
+        to: order.customerPhone,
+        message: smsMessage,
+        customerId: order.customerId || undefined,
+        context: 'abandoned_order_reminder'
+      });
+    }
+  };
+
+  // Start abandoned order reminder service
+  setInterval(sendAbandonedOrderReminders, 30 * 60 * 1000); // Check every 30 minutes
+  console.log('📧 [ABANDONED REMINDERS] Reminder service started - checking every 30 minutes');
+
+  // Manual trigger endpoint for testing
+  app.post('/api/abandoned-orders/send-reminders', requireAuth, async (req, res) => {
+    try {
+      await sendAbandonedOrderReminders();
+      res.json({ success: true, message: 'یادآوری‌های سفارشات رها شده ارسال شد' });
+    } catch (error) {
+      console.error('❌ [MANUAL REMINDERS] Error:', error);
+      res.status(500).json({ success: false, message: 'خطا در ارسال یادآوری‌ها' });
     }
   });
 
@@ -40318,6 +40624,98 @@ momtazchem.com
         message: err.message || 'Internal server error',
         ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
       });
+    }
+  });
+
+  // Abandoned Orders API Routes
+  app.post('/api/abandoned-orders/hybrid-payment', async (req, res) => {
+    try {
+      const { orderNumber, walletAmount, bankAmount, customerInfo, cartData } = req.body;
+      
+      console.log('📧 [ABANDONED ORDER] Tracking abandoned hybrid payment:', { orderNumber, walletAmount, bankAmount });
+      
+      const abandonedOrder = await storage.createAbandonedOrder({
+        customerId: customerInfo.id,
+        customerEmail: customerInfo.email,
+        customerName: `${customerInfo.firstName} ${customerInfo.lastName}`.trim(),
+        customerPhone: customerInfo.phone,
+        cartData: cartData,
+        totalAmount: (walletAmount + bankAmount).toString(),
+        currency: 'IQD',
+        checkoutStep: 'bank_payment',
+        walletAmountUsed: walletAmount.toString(),
+        bankAmountPending: bankAmount.toString(),
+        hybridOrderNumber: orderNumber,
+        remindersSent: 0,
+        isRecovered: false,
+        isHybridPayment: true
+      });
+      
+      console.log(`🚫 [HYBRID PAYMENT ABANDONED] Customer ${customerInfo.email} abandoned order ${orderNumber} - Wallet: ${walletAmount} IQD, Bank: ${bankAmount} IQD`);
+      
+      res.json({ success: true, abandonedOrderId: abandonedOrder.id });
+    } catch (error) {
+      console.error('❌ [ABANDONED ORDER] Failed to track abandonment:', error);
+      res.status(500).json({ error: 'Failed to track abandonment' });
+    }
+  });
+
+  app.get('/api/abandoned-orders', async (req, res) => {
+    try {
+      const abandonedOrders = await storage.getAbandonedOrders();
+      
+      // Transform data for frontend with proper mapping
+      const transformedOrders = abandonedOrders.map(order => ({
+        id: order.id,
+        customerId: order.customerId,
+        customerEmail: order.customerEmail,
+        customerName: order.customerName,
+        customerPhone: order.customerPhone,
+        cartData: order.cartData,
+        totalAmount: order.totalAmount,
+        currency: order.currency,
+        checkoutStep: order.checkoutStep,
+        walletAmountUsed: order.walletAmountUsed,
+        bankAmountPending: order.bankAmountPending,
+        hybridOrderNumber: order.hybridOrderNumber,
+        remindersSent: order.remindersSent,
+        lastReminderAt: order.lastReminderAt,
+        createdAt: order.createdAt,
+        isRecovered: order.isRecovered,
+        isHybridPayment: order.isHybridPayment,
+        totalValue: parseFloat(order.totalAmount || '0'),
+        walletUsed: parseFloat(order.walletAmountUsed || '0'),
+        bankPending: parseFloat(order.bankAmountPending || '0')
+      }));
+      
+      res.json({ data: transformedOrders });
+    } catch (error) {
+      console.error('❌ [ABANDONED ORDERS] Failed to fetch:', error);
+      res.status(500).json({ error: 'Failed to fetch abandoned orders' });
+    }
+  });
+
+  app.post('/api/abandoned-orders/send-reminders', async (req, res) => {
+    try {
+      await sendAbandonedOrderReminders();
+      res.json({ success: true, message: 'Reminders sent successfully' });
+    } catch (error) {
+      console.error('❌ [SEND REMINDERS] Failed:', error);
+      res.status(500).json({ error: 'Failed to send reminders' });
+    }
+  });
+
+  app.post('/api/abandoned-orders/:id/recover', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { orderId } = req.body;
+      
+      await storage.markAbandonedOrderRecovered(parseInt(id), orderId);
+      
+      res.json({ success: true, message: 'Order marked as recovered' });
+    } catch (error) {
+      console.error('❌ [RECOVER ORDER] Failed:', error);
+      res.status(500).json({ error: 'Failed to mark order as recovered' });
     }
   });
 

@@ -50,6 +50,7 @@ export interface IEmailStorage {
   getTemplates(): Promise<EmailTemplate[]>;
   getTemplatesByCategory(categoryId: number): Promise<EmailTemplate[]>;
   getTemplateById(id: number): Promise<EmailTemplate | undefined>;
+  getTemplateByName(name: string): Promise<EmailTemplate | undefined>;
   updateTemplate(id: number, template: Partial<InsertEmailTemplate>): Promise<EmailTemplate>;
   deleteTemplate(id: number): Promise<void>;
   toggleTemplateStatus(id: number): Promise<EmailTemplate>;
@@ -380,6 +381,46 @@ export class EmailStorage implements IEmailStorage {
       .from(emailTemplates)
       .where(eq(emailTemplates.id, id));
     return template || undefined;
+  }
+
+  // Get template by name for abandoned order reminders
+  async getTemplateByName(name: string): Promise<EmailTemplate | undefined> {
+    try {
+      const { sql } = await import("drizzle-orm");
+      
+      const result = await emailDb.execute(sql`
+        SELECT 
+          id, 
+          name as templateName,
+          category as categoryName,
+          subject, 
+          html_content as htmlContent, 
+          text_content as textContent, 
+          variables, 
+          is_active as isActive, 
+          is_default as isDefault, 
+          language, 
+          created_by as createdBy, 
+          usage_count as usageCount, 
+          last_used as lastUsed, 
+          created_at as createdAt, 
+          updated_at as updatedAt
+        FROM email_templates 
+        WHERE name = ${name}
+        AND is_active = true
+        LIMIT 1
+      `);
+      
+      if (result.rows.length === 0) {
+        console.warn(`❌ Template "${name}" not found or inactive`);
+        return undefined;
+      }
+      
+      return result.rows[0] as EmailTemplate;
+    } catch (error) {
+      console.error(`Error fetching template "${name}":`, error);
+      return undefined;
+    }
   }
   
   async updateTemplate(id: number, templateUpdate: Partial<InsertEmailTemplate>): Promise<EmailTemplate> {

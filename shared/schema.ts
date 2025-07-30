@@ -18,29 +18,40 @@ export * from "./cart-schema";
 export * from "./logistics-schema";
 
 // =============================================================================
-// DELIVERY COST CALCULATIONS TRACKING SYSTEM
+// ABANDONED ORDERS TRACKING SYSTEM
 // =============================================================================
 
-// Delivery Cost Calculations table for tracking all delivery cost requests
-export const deliveryCostCalculations = pgTable("delivery_cost_calculations", {
+// Abandoned Orders table for tracking incomplete orders that customers started but didn't complete
+export const abandonedOrders = pgTable("abandoned_orders", {
   id: serial("id").primaryKey(),
-  customerId: integer("customer_id"), // Optional - might be guest user
-  customerEmail: text("customer_email"), // If customer is logged in
-  calculationData: json("calculation_data").notNull(), // Complete calculation request
-  resultData: json("result_data").notNull(), // Calculation results including optimal vehicle
-  cartData: json("cart_data"), // Cart contents being calculated
+  customerId: integer("customer_id"), // Customer who started the order
+  customerEmail: text("customer_email"), // Customer email for follow-up
+  customerName: text("customer_name"), // Customer name
+  customerPhone: text("customer_phone"), // Customer phone
+  cartData: json("cart_data").notNull(), // Cart contents when abandoned
+  shippingData: json("shipping_data"), // Shipping information if entered
+  paymentData: json("payment_data"), // Payment method if selected
+  totalAmount: decimal("total_amount", { precision: 10, scale: 2 }), // Order total
+  currency: text("currency").default("IQD"),
+  checkoutStep: text("checkout_step").notNull(), // cart, shipping, payment, review, hybrid_payment_pending
   sessionId: varchar("session_id", { length: 255 }), // Session identifier
   ipAddress: varchar("ip_address", { length: 45 }), // Client IP address
   userAgent: text("user_agent"), // Browser/client information
   createdAt: timestamp("created_at").notNull().defaultNow(),
-  isConverted: boolean("is_converted").default(false), // Whether this led to actual order
-  orderId: integer("order_id"), // Reference to actual order if converted  
-  notes: text("notes"), // Additional notes from admin
+  lastUpdated: timestamp("last_updated").notNull().defaultNow(),
+  isRecovered: boolean("is_recovered").default(false), // Whether customer came back to complete
+  recoveredOrderId: integer("recovered_order_id"), // Reference to completed order if recovered
+  walletAmountUsed: decimal("wallet_amount_used", { precision: 10, scale: 2 }), // Amount paid via wallet
+  bankAmountPending: decimal("bank_amount_pending", { precision: 10, scale: 2 }), // Amount pending from bank gateway
+  hybridOrderNumber: text("hybrid_order_number"), // Order number for hybrid payments
+  remindersSent: integer("reminders_sent").default(0), // Number of reminder emails sent
+  lastReminderAt: timestamp("last_reminder_at"), // When last reminder was sent
+  notes: text("notes"), // Admin notes
 });
 
-export const insertDeliveryCostCalculationSchema = createInsertSchema(deliveryCostCalculations);
-export type InsertDeliveryCostCalculation = z.infer<typeof insertDeliveryCostCalculationSchema>;
-export type DeliveryCostCalculation = typeof deliveryCostCalculations.$inferSelect;
+export const insertAbandonedOrderSchema = createInsertSchema(abandonedOrders);
+export type InsertAbandonedOrder = z.infer<typeof insertAbandonedOrderSchema>;
+export type AbandonedOrder = typeof abandonedOrders.$inferSelect;
 
 // =============================================================================
 // SEO MANAGEMENT SCHEMA
@@ -1413,6 +1424,8 @@ export const insertReviewHelpfulnessSchema = createInsertSchema(reviewHelpfulnes
 
 export type InsertReviewHelpfulness = z.infer<typeof insertReviewHelpfulnessSchema>;
 export type ReviewHelpfulness = typeof reviewHelpfulness.$inferSelect;
+
+
 
 // Re-export marketing schema
 export * from './marketing-schema';

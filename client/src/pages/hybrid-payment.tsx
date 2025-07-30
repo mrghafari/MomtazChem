@@ -67,6 +67,36 @@ export default function HybridPayment() {
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
+  // Track abandonment when user leaves the page
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (paymentInfo && !isProcessing) {
+        // Track hybrid payment abandonment
+        fetch('/api/abandoned-orders/hybrid-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            orderNumber: paymentInfo.orderNumber,
+            walletAmount: paymentInfo.walletAmountUsed,
+            bankAmount: paymentInfo.remainingAmount,
+            customerInfo: {
+              id: 8, // This should come from actual customer session
+              email: paymentInfo.customerEmail || 'customer@example.com',
+              firstName: paymentInfo.customerName?.split(' ')[0] || '',
+              lastName: paymentInfo.customerName?.split(' ').slice(1).join(' ') || '',
+              phone: '09xxxxxxxx' // This should come from customer session
+            },
+            cartData: {} // This should come from the actual cart
+          }),
+          keepalive: true
+        }).catch(err => console.error('Failed to track abandonment:', err));
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [paymentInfo, isProcessing]);
+
   const handleBankPayment = async () => {
     if (!paymentInfo) return;
     

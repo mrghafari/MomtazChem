@@ -749,6 +749,49 @@ export class DatabaseStorage implements IStorage {
     return contact || undefined;
   }
 
+  // Abandoned Orders Management
+  async createAbandonedOrder(orderData: InsertAbandonedOrder): Promise<AbandonedOrder> {
+    const [order] = await db
+      .insert(abandonedOrders)
+      .values(orderData)
+      .returning();
+    return order;
+  }
+
+  async getAbandonedOrders(): Promise<AbandonedOrder[]> {
+    return await db
+      .select()
+      .from(abandonedOrders)
+      .orderBy(desc(abandonedOrders.createdAt));
+  }
+
+  async getUnrecoveredAbandonedOrders(): Promise<AbandonedOrder[]> {
+    return await db
+      .select()
+      .from(abandonedOrders)
+      .where(eq(abandonedOrders.isRecovered, false))
+      .orderBy(desc(abandonedOrders.createdAt));
+  }
+
+  async markAbandonedOrderRecovered(id: number, recoveredOrderId: string): Promise<void> {
+    await db
+      .update(abandonedOrders)
+      .set({ 
+        isRecovered: true, 
+        recoveredOrderId: recoveredOrderId 
+      })
+      .where(eq(abandonedOrders.id, id));
+  }
+
+  async updateAbandonedOrderReminders(id: number, reminderCount: number): Promise<void> {
+    await db
+      .update(abandonedOrders)
+      .set({ 
+        remindersSent: reminderCount,
+        lastReminderAt: new Date()
+      })
+      .where(eq(abandonedOrders.id, id));
+  }
 
 }
 
