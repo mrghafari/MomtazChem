@@ -1,0 +1,112 @@
+admin:196 Tawk.to script loaded successfully
+App.tsx:35  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/shop-admin.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:36  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/admin/invoice-management.tsx 503 (Service Unavailable)
+App.tsx:33  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/payment.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:34  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/checkout-success.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:37  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/admin/payment-settings.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:38  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/admin.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:39  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/admin-login.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:40  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/admin-users.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:41  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/admin/barcode-inventory.tsx net::ERR_ABORTED 503 (Service Unavailable)
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:117574)
+    at t.value (twk-chunk-common.js:2:150658)
+    at p.updateUUID (twk-chunk-common.js:2:202310)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:124589)
+    at twk-chunk-common.js:2:123900
+value @ twk-chunk-common.js:2
+updateUUID @ twk-chunk-common.js:2
+(anonymous) @ twk-vendor.js:2
+(anonymous) @ twk-vendor.js:2
+(anonymous) @ twk-vendor.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+Promise.then
+value @ twk-chunk-common.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+56d7 @ twk-chunk-common.js:2
+a @ twk-runtime.js:1
+r @ twk-runtime.js:1
+t @ twk-runtime.js:1
+(anonymous) @ twk-runtime.js:1
+(anonymous) @ twk-runtime.js:1
+App.tsx:42  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/admin/database-management.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:43  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/admin/user-management-redesign.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:44  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/admin/factory-management.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:45  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/admin/procedures-management.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:46  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/admin/email-settings.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:47  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/admin/advanced-email-settings.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:48  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/admin/email-address-manager-fixed.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:50  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/admin/email-templates.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:49  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/admin/email-progress.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:51  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/admin/email-templates-fixed.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:52  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/admin/email-templates-central.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:53  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/admin/template05-view.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:54  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/admin/template05-static-view.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:55  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/admin/marketing-module.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:56  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/admin/email-routing-stats.tsx net::ERR_ABORTED 503 (Service Unavailable)
+admin:168 Tawk.to Live Chat loaded successfully
+App.tsx:57  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/admin/automated-email-logs.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:58  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/admin/inquiry-responses.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:59  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/admin/server-config.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:60  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/forgot-password.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:61  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/reset-password.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:62  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/password-reset.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:63  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/customer-forgot-password.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:64  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/customer-reset-password.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:65  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/crm.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:66  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/customer-profile.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:67  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/customer-profile-edit.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:68  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/customer-register.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:69  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/customer-login.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:70  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/customer-wallet.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:71  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/admin/wallet-management.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:72  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/admin/product-variants.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:73  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/sales-analytics.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:74  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/products.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:76  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/batch-management.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:77  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/product-recommendations.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:78  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/product-reviews.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:79  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/products/fuel-additives.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:80  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/products/water-treatment.tsx 503 (Service Unavailable)
+App.tsx:81  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/products/paint-thinner.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:82  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/products/agricultural-fertilizers.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:83  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/products/other.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:84  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/paint-solvents.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:85  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/industrial-chemicals.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:86  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/commercial-goods.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:87  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/technical-equipment.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:88  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/quote.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:89  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/dashboard.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:90  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/inquiry-detail.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:91  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/category-management.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:92  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/seo-management.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:93  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/admin-sms-management.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:94  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/widget-recommendations.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:95  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/abandoned-cart-management.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:96  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/financial-department.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:97  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/logistics-department.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:98  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/admin/finance-orders.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:100  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/financial-login.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:101  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/warehouse-login.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:99  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/logistics-simple.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:102  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/logistics-login.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:103  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/admin/ticketing-system-fixed.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:104  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/super-admin-settings.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:105  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/site-management-fixed.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:106  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/geographic-reports.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:107  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/admin/geographic-analytics.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:108  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/admin/iraqi-geography.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:109  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/admin/ai-settings.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:110  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/documentation.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:111  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/admin/warehouse-orders.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:112  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/admin/logistics-orders.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:113  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/admin/logistics-management.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:114  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/admin/delivered-orders.tsx 503 (Service Unavailable)
+App.tsx:115  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/admin/global-refresh-settings.tsx net::ERR_ABORTED 503 (Service Unavailable)
+App.tsx:116  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/admin/inventory-notification-settings.tsx net::ERR_ABORTED 503 (Service Unavailable)
