@@ -353,7 +353,7 @@ function FinanceOrders() {
         description: "پرداخت تایید شد و سفارش به واحد انبار منتقل شد"
       });
       
-      // Enhanced cache invalidation strategy - force complete refresh
+      // Targeted cache invalidation strategy
       queryClient.invalidateQueries({ queryKey: ['/api/order-management/financial'] });
       queryClient.invalidateQueries({ queryKey: ['/api/financial/orders'] });
       queryClient.invalidateQueries({ queryKey: ['/api/financial/approved-orders'] });
@@ -365,12 +365,13 @@ function FinanceOrders() {
       // Invalidate all order tracking queries
       queryClient.invalidateQueries({ queryKey: ['/api/orders/tracking'] });
       
-      // Clear ALL query cache for these keys to force fresh data
+      // Remove specific query data to force fresh fetch
       queryClient.removeQueries({ queryKey: ['/api/financial/orders'] });
       queryClient.removeQueries({ queryKey: ['/api/financial/approved-orders'] });
       
-      // Reset all query cache to force immediate refresh
-      queryClient.clear();
+      // Force refetch with staleTime 0 to bypass cache
+      queryClient.refetchQueries({ queryKey: ['/api/financial/orders'] });
+      queryClient.refetchQueries({ queryKey: ['/api/financial/approved-orders'] });
       
       // Force immediate refresh with a slight delay to allow backend to complete
       setTimeout(() => {
@@ -411,7 +412,7 @@ function FinanceOrders() {
         description: "پرداخت رد شد و به قسمت سفارشات رد شده منتقل شد"
       });
       
-      // Enhanced cache invalidation strategy - force complete refresh
+      // Targeted cache invalidation strategy
       queryClient.invalidateQueries({ queryKey: ['/api/order-management/financial'] });
       queryClient.invalidateQueries({ queryKey: ['/api/financial/orders'] });
       queryClient.invalidateQueries({ queryKey: ['/api/financial/approved-orders'] });
@@ -419,12 +420,13 @@ function FinanceOrders() {
       // Invalidate all order tracking queries
       queryClient.invalidateQueries({ queryKey: ['/api/orders/tracking'] });
       
-      // Clear ALL query cache for these keys to force fresh data
+      // Remove specific query data to force fresh fetch
       queryClient.removeQueries({ queryKey: ['/api/financial/orders'] });
       queryClient.removeQueries({ queryKey: ['/api/financial/approved-orders'] });
       
-      // Reset all query cache to force immediate refresh
-      queryClient.clear();
+      // Force refetch with staleTime 0 to bypass cache
+      queryClient.refetchQueries({ queryKey: ['/api/financial/orders'] });
+      queryClient.refetchQueries({ queryKey: ['/api/financial/approved-orders'] });
       
       // Force immediate refresh with a slight delay
       setTimeout(() => {
