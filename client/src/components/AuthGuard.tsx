@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Lock, RefreshCw, AlertTriangle } from "lucide-react";
+import { Lock, RefreshCw } from "lucide-react";
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -19,7 +19,6 @@ export function AuthGuard({
   const { isAuthenticated, isLoading, user } = useAuth();
   const [, setLocation] = useLocation();
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
-  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
     if (!requireAuth) {
@@ -37,14 +36,8 @@ export function AuthGuard({
 
     if (isAuthenticated && showLoginPrompt) {
       setShowLoginPrompt(false);
-      setRetryCount(0);
     }
   }, [isLoading, isAuthenticated, requireAuth, showLoginPrompt]);
-
-  const handleRetry = () => {
-    setRetryCount(prev => prev + 1);
-    window.location.reload();
-  };
 
   const handleLoginRedirect = () => {
     window.location.href = redirectTo;
@@ -76,44 +69,17 @@ export function AuthGuard({
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6 text-center">
-            <div className="space-y-2">
-              <p className="text-gray-600">
-                Your session has expired. Please log in again to continue working.
-              </p>
-              {retryCount > 0 && (
-                <div className="flex items-center justify-center gap-2 text-amber-600 text-sm">
-                  <AlertTriangle className="h-4 w-4" />
-                  <span>Attempt #{retryCount + 1}</span>
-                </div>
-              )}
-            </div>
+            <p className="text-gray-600">
+              Your session has expired. Please log in again to continue working.
+            </p>
             
-            <div className="space-y-3">
+            <div>
               <Button 
                 onClick={handleLoginRedirect}
                 className="w-full bg-blue-600 hover:bg-blue-700"
               >
                 <Lock className="h-4 w-4 mr-2" />
                 Go to Login
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                onClick={handleRetry}
-                className="w-full"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                    Checking...
-                  </>
-                ) : (
-                  <>
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Try Again
-                  </>
-                )}
               </Button>
             </div>
 
