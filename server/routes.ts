@@ -31453,6 +31453,33 @@ momtazchem.com
 
       console.log(`✅ [FINANCE] Order ${customerOrderId} approved: management status = warehouse_pending, customer status = warehouse_ready, payment = paid`);
 
+      // صدور خودکار فاکتور رسمی برای سفارشات wallet-paid پس از تایید مالی
+      const [orderDetails] = await db
+        .select({ 
+          paymentMethod: customerOrders.paymentMethod,
+          orderNumber: customerOrders.orderNumber 
+        })
+        .from(customerOrders)
+        .where(eq(customerOrders.id, customerOrderId));
+
+      if (orderDetails && (
+        orderDetails.paymentMethod?.includes('wallet') || 
+        orderDetails.paymentMethod === 'wallet_full' || 
+        orderDetails.paymentMethod === 'wallet_partial'
+      )) {
+        // تبدیل خودکار پیش‌فاکتور به فاکتور رسمی برای سفارشات wallet-paid
+        await db
+          .update(customerOrders)
+          .set({
+            invoiceType: 'official_invoice',
+            invoiceConvertedAt: new Date(),
+            updatedAt: new Date()
+          })
+          .where(eq(customerOrders.id, customerOrderId));
+
+        console.log(`📄 [AUTO INVOICE] Order ${orderDetails.orderNumber} automatically converted from proforma to official invoice after financial approval`);
+      }
+
       // Check for excess payment and credit to wallet if order is approved
       const [orderWithNotes] = await db
         .select({ financialNotes: orderManagement.financialNotes })

@@ -34,6 +34,9 @@ export class AutoApprovalService {
     try {
       console.log("🔍 [AUTO APPROVAL] Checking for orders ready for auto-approval...");
       
+      // ابتدا پردازش سفارشات wallet-paid که باید به warehouse منتقل شوند
+      await this.processWalletPaidOrders();
+      
       // یافتن سفارشات آماده برای تایید خودکار
       const ordersToApprove = await db
         .select({
@@ -101,6 +104,95 @@ export class AutoApprovalService {
 
     } catch (error) {
       console.error(`❌ [AUTO APPROVAL] Error approving order ${order.id}:`, error);
+    }
+  }
+
+  // پردازش سفارشات wallet-paid که باید به warehouse منتقل شوند
+  private async processWalletPaidOrders() {
+    try {
+      console.log("💰 [WALLET AUTO] Checking wallet-paid orders for warehouse transfer...");
+      
+      // یافتن سفارشات wallet-paid که هنوز pending هستند
+      const walletOrders = await db
+        .select()
+        .from(customerOrders)
+        .where(
+          sql`
+            (payment_method LIKE '%wallet%' OR payment_method = 'wallet_full' OR payment_method = 'wallet_partial')
+            AND status = 'pending'
+            AND (payment_status = 'paid' OR payment_status = 'partial')
+          `
+        );
+
+      if (walletOrders.length === 0) {
+        console.log("✅ [WALLET AUTO] No wallet-paid orders pending warehouse transfer");
+        return;
+      }
+
+      console.log(`💰 [WALLET AUTO] Found ${walletOrders.length} wallet-paid orders ready for warehouse transfer`);
+
+      for (const order of walletOrders) {
+        await this.transferWalletOrderToWarehouse(order);
+      }
+
+    } catch (error) {
+      console.error("❌ [WALLET AUTO] Error processing wallet-paid orders:", error);
+    }
+  }
+
+  // انتقال سفارش wallet-paid به warehouse
+  private async transferWalletOrderToWarehouse(order: any) {
+    try {
+      console.log(`🏭 [WAREHOUSE TRANSFER] Processing order ${order.orderNumber} (${order.paymentMethod})`);
+
+      // به‌روزرسانی وضعیت سفارش به warehouse_ready
+      await db
+        .update(customerOrders)
+        .set({
+          status: 'warehouse_ready',
+          paymentStatus: 'paid',
+          updatedAt: new Date()
+        })
+        .where(eq(customerOrders.id, order.id));
+
+      // ایجاد یا به‌روزرسانی order_management record
+      const existingManagement = await db
+        .select()
+        .from(orderManagement)
+        .where(eq(orderManagement.customerOrderId, order.id))
+        .limit(1);
+
+      if (existingManagement.length === 0) {
+        // ایجاد order_management record جدید
+        await db.insert(orderManagement).values({
+          customerOrderId: order.id,
+          currentStatus: 'warehouse_pending',
+          totalAmount: order.totalAmount?.toString() || '0',
+          currency: order.currency || 'IQD',
+          orderNumber: order.orderNumber,
+          customerFirstName: order.customerFirstName || '',
+          customerLastName: order.customerLastName || '',
+          customerEmail: order.customerEmail || '',
+          customerPhone: order.customerPhone || '',
+          createdAt: new Date(),
+          updatedAt: new Date()
+        });
+      } else {
+        // به‌روزرسانی order_management موجود
+        await db
+          .update(orderManagement)
+          .set({
+            currentStatus: 'warehouse_pending',
+            updatedAt: new Date()
+          })
+          .where(eq(orderManagement.customerOrderId, order.id));
+      }
+
+      console.log(`✅ [WAREHOUSE TRANSFER] Order ${order.orderNumber} transferred to warehouse successfully`);
+      console.log(`📄 [INVOICE READY] Order ${order.orderNumber} is now ready for proforma to invoice conversion`);
+
+    } catch (error) {
+      console.error(`❌ [WAREHOUSE TRANSFER] Error transferring order ${order.orderNumber}:`, error);
     }
   }
 }
