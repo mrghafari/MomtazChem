@@ -73,6 +73,7 @@ interface CheckoutProps {
 export default function Checkout({ cart, products, onOrderComplete }: CheckoutProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [isOrderComplete, setIsOrderComplete] = useState(false);
+  const [selectedSecondaryProvinceId, setSelectedSecondaryProvinceId] = useState<number | null>(null);
   const [orderNumber, setOrderNumber] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState<any>(null);
@@ -119,6 +120,28 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
     queryKey: ['/api/iraqi-cities'],
     staleTime: 10 * 60 * 1000, // Cache for 10 minutes
   });
+
+  // Iraqi provinces and cities queries for secondary address dropdowns
+  const { data: provincesData } = useQuery({
+    queryKey: ['/api/iraqi-provinces'],
+    staleTime: 15 * 60 * 1000, // Consider fresh for 15 minutes
+  });
+
+  const { data: citiesData } = useQuery({
+    queryKey: ['/api/iraqi-cities', selectedSecondaryProvinceId],
+    queryFn: () => {
+      const url = selectedSecondaryProvinceId 
+        ? `/api/iraqi-cities?provinceId=${selectedSecondaryProvinceId}`
+        : '/api/iraqi-cities';
+      return fetch(url).then(res => res.json());
+    },
+    enabled: selectedSecondaryProvinceId !== null,
+    staleTime: 10 * 60 * 1000,
+  });
+
+  // Extract provinces and cities arrays from API responses
+  const provinces = (provincesData && typeof provincesData === 'object' && 'data' in provincesData) ? provincesData.data : [];
+  const secondaryCities = (citiesData && typeof citiesData === 'object' && 'data' in citiesData) ? citiesData.data : [];
 
   // Determine if user is logged in first
   const isUserLoggedIn = (customerData?.success && customerData.customer) || isLoggedIn;
@@ -1396,9 +1419,32 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                   render={({ field }) => (
                                     <FormItem>
                                       <FormLabel>استان</FormLabel>
-                                      <FormControl>
-                                        <Input {...field} placeholder="استان" />
-                                      </FormControl>
+                                      <Select 
+                                        onValueChange={(value) => {
+                                          field.onChange(value);
+                                          // Find province ID and set it for city filtering
+                                          const selectedProvince = provinces.find((p: any) => p.nameEnglish === value || p.name === value);
+                                          if (selectedProvince) {
+                                            setSelectedSecondaryProvinceId(selectedProvince.id);
+                                            // Clear city selection when province changes
+                                            form.setValue("secondDeliveryCity", "");
+                                          }
+                                        }} 
+                                        value={field.value}
+                                      >
+                                        <FormControl>
+                                          <SelectTrigger>
+                                            <SelectValue placeholder="انتخاب استان" />
+                                          </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                          {Array.isArray(provinces) && provinces.map((province: any) => (
+                                            <SelectItem key={province.id} value={province.nameEnglish || province.name}>
+                                              {province.nameEnglish} / {province.name}
+                                            </SelectItem>
+                                          ))}
+                                        </SelectContent>
+                                      </Select>
                                       <FormMessage />
                                     </FormItem>
                                   )}
@@ -1410,9 +1456,24 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                   render={({ field }) => (
                                     <FormItem>
                                       <FormLabel>شهر</FormLabel>
-                                      <FormControl>
-                                        <Input {...field} placeholder="شهر" />
-                                      </FormControl>
+                                      <Select 
+                                        onValueChange={field.onChange} 
+                                        value={field.value}
+                                        disabled={!selectedSecondaryProvinceId}
+                                      >
+                                        <FormControl>
+                                          <SelectTrigger>
+                                            <SelectValue placeholder={selectedSecondaryProvinceId ? "انتخاب شهر" : "ابتدا استان را انتخاب کنید"} />
+                                          </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                          {Array.isArray(secondaryCities) && secondaryCities.map((city: any) => (
+                                            <SelectItem key={city.id} value={city.nameEnglish || city.name}>
+                                              {city.nameEnglish} / {city.nameArabic || city.name}
+                                            </SelectItem>
+                                          ))}
+                                        </SelectContent>
+                                      </Select>
                                       <FormMessage />
                                     </FormItem>
                                   )}
@@ -2173,9 +2234,32 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                 name="secondDeliveryProvince"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormControl>
-                                      <Input {...field} placeholder="Baghdad" className="text-sm" />
-                                    </FormControl>
+                                    <Select 
+                                      onValueChange={(value) => {
+                                        field.onChange(value);
+                                        // Find province ID and set it for city filtering
+                                        const selectedProvince = provinces.find((p: any) => p.nameEnglish === value || p.name === value);
+                                        if (selectedProvince) {
+                                          setSelectedSecondaryProvinceId(selectedProvince.id);
+                                          // Clear city selection when province changes
+                                          form.setValue("secondDeliveryCity", "");
+                                        }
+                                      }} 
+                                      value={field.value}
+                                    >
+                                      <FormControl>
+                                        <SelectTrigger className="text-sm">
+                                          <SelectValue placeholder="Select Province" />
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                        {Array.isArray(provinces) && provinces.map((province: any) => (
+                                          <SelectItem key={province.id} value={province.nameEnglish || province.name}>
+                                            {province.nameEnglish} / {province.name}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
                                   </FormItem>
                                 )}
                               />
@@ -2189,9 +2273,24 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                 name="secondDeliveryCity"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormControl>
-                                      <Input {...field} placeholder="Erbil" className="text-sm" />
-                                    </FormControl>
+                                    <Select 
+                                      onValueChange={field.onChange} 
+                                      value={field.value}
+                                      disabled={!selectedSecondaryProvinceId}
+                                    >
+                                      <FormControl>
+                                        <SelectTrigger className="text-sm">
+                                          <SelectValue placeholder={selectedSecondaryProvinceId ? "Select City" : "Select Province First"} />
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                        {Array.isArray(secondaryCities) && secondaryCities.map((city: any) => (
+                                          <SelectItem key={city.id} value={city.nameEnglish || city.name}>
+                                            {city.nameEnglish} / {city.nameArabic || city.name}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
                                   </FormItem>
                                 )}
                               />
@@ -2307,9 +2406,32 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                   render={({ field }) => (
                                     <FormItem>
                                       <FormLabel className="text-sm">استان</FormLabel>
-                                      <FormControl>
-                                        <Input {...field} placeholder="بغداد" />
-                                      </FormControl>
+                                      <Select 
+                                        onValueChange={(value) => {
+                                          field.onChange(value);
+                                          // Find province ID and set it for city filtering
+                                          const selectedProvince = provinces.find((p: any) => p.nameEnglish === value || p.name === value);
+                                          if (selectedProvince) {
+                                            setSelectedSecondaryProvinceId(selectedProvince.id);
+                                            // Clear city selection when province changes
+                                            form.setValue("secondDeliveryCity", "");
+                                          }
+                                        }} 
+                                        value={field.value}
+                                      >
+                                        <FormControl>
+                                          <SelectTrigger>
+                                            <SelectValue placeholder="انتخاب استان" />
+                                          </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                          {Array.isArray(provinces) && provinces.map((province: any) => (
+                                            <SelectItem key={province.id} value={province.nameEnglish || province.name}>
+                                              {province.nameEnglish} / {province.name}
+                                            </SelectItem>
+                                          ))}
+                                        </SelectContent>
+                                      </Select>
                                     </FormItem>
                                   )}
                                 />
@@ -2319,9 +2441,24 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                   render={({ field }) => (
                                     <FormItem>
                                       <FormLabel className="text-sm">شهر</FormLabel>
-                                      <FormControl>
-                                        <Input {...field} placeholder="اربیل" />
-                                      </FormControl>
+                                      <Select 
+                                        onValueChange={field.onChange} 
+                                        value={field.value}
+                                        disabled={!selectedSecondaryProvinceId}
+                                      >
+                                        <FormControl>
+                                          <SelectTrigger>
+                                            <SelectValue placeholder={selectedSecondaryProvinceId ? "انتخاب شهر" : "ابتدا استان را انتخاب کنید"} />
+                                          </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                          {Array.isArray(secondaryCities) && secondaryCities.map((city: any) => (
+                                            <SelectItem key={city.id} value={city.nameEnglish || city.name}>
+                                              {city.nameEnglish} / {city.nameArabic || city.name}
+                                            </SelectItem>
+                                          ))}
+                                        </SelectContent>
+                                      </Select>
                                     </FormItem>
                                   )}
                                 />
@@ -2559,9 +2696,32 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                 render={({ field }) => (
                                   <FormItem>
                                     <FormLabel className="text-xs">استان</FormLabel>
-                                    <FormControl>
-                                      <Input {...field} placeholder="بغداد" className="text-xs h-7" />
-                                    </FormControl>
+                                    <Select 
+                                      onValueChange={(value) => {
+                                        field.onChange(value);
+                                        // Find province ID and set it for city filtering
+                                        const selectedProvince = provinces.find((p: any) => p.nameEnglish === value || p.name === value);
+                                        if (selectedProvince) {
+                                          setSelectedSecondaryProvinceId(selectedProvince.id);
+                                          // Clear city selection when province changes
+                                          form.setValue("secondDeliveryCity", "");
+                                        }
+                                      }} 
+                                      value={field.value}
+                                    >
+                                      <FormControl>
+                                        <SelectTrigger className="text-xs h-7">
+                                          <SelectValue placeholder="انتخاب استان" />
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                        {Array.isArray(provinces) && provinces.map((province: any) => (
+                                          <SelectItem key={province.id} value={province.nameEnglish || province.name}>
+                                            {province.nameEnglish} / {province.name}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
                                   </FormItem>
                                 )}
                               />
@@ -2571,9 +2731,24 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                 render={({ field }) => (
                                   <FormItem>
                                     <FormLabel className="text-xs">شهر</FormLabel>
-                                    <FormControl>
-                                      <Input {...field} placeholder="اربیل" className="text-xs h-7" />
-                                    </FormControl>
+                                    <Select 
+                                      onValueChange={field.onChange} 
+                                      value={field.value}
+                                      disabled={!selectedSecondaryProvinceId}
+                                    >
+                                      <FormControl>
+                                        <SelectTrigger className="text-xs h-7">
+                                          <SelectValue placeholder={selectedSecondaryProvinceId ? "انتخاب شهر" : "ابتدا استان را انتخاب کنید"} />
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                        {Array.isArray(secondaryCities) && secondaryCities.map((city: any) => (
+                                          <SelectItem key={city.id} value={city.nameEnglish || city.name}>
+                                            {city.nameEnglish} / {city.nameArabic || city.name}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
                                   </FormItem>
                                 )}
                               />
