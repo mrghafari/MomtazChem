@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { MapPin, Globe, X, ShoppingCart, Plus, Minus, Trash2, Wallet, CreditCard, Upload, Clock } from "lucide-react";
+import { MapPin, Globe, X, ShoppingCart, Plus, Minus, Trash2, Wallet, CreditCard, Upload, Clock, Flame } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -1285,7 +1285,16 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                     <div className="flex items-start justify-between gap-3">
                       {/* Product Info */}
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-sm truncate">{product.name}</h4>
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-medium text-sm truncate">{product.name}</h4>
+                          {/* Flammable Product Safety Warning */}
+                          {product.isFlammable && (
+                            <div className="flex items-center">
+                              <Flame className="w-4 h-4 text-red-500" title="محصول آتش‌زا - نیاز به وسایل نقلیه مخصوص" />
+                              <span className="text-xs text-red-600 font-medium mr-1">آتش‌زا</span>
+                            </div>
+                          )}
+                        </div>
                         <p className="text-xs text-muted-foreground">{product.category}</p>
                         <p className="text-sm font-medium mt-1">
                           {discountedPrice < basePrice && (
