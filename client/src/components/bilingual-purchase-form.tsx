@@ -327,7 +327,11 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     refetchOnMount: true, // Always refetch on mount for fresh data
   });
 
-
+  // State for second address province/city selection (must be declared before API queries)
+  const [selectedSecondaryProvinceId, setSelectedSecondaryProvinceId] = useState<number | null>(null);
+  const [secondProvince, setSecondProvince] = useState('');
+  const [secondCity, setSecondCity] = useState('');
+  const [secondPostalCode, setSecondPostalCode] = useState('');
 
   // Fetch Iraqi provinces for second address dropdowns
   const { data: provinces, isLoading: isLoadingProvinces } = useQuery({
@@ -636,9 +640,6 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const [showSecondAddress, setShowSecondAddress] = useState(false);
   const [showRecipientMobile, setShowRecipientMobile] = useState(false);  
   const [secondAddress, setSecondAddress] = useState('');
-  const [secondCity, setSecondCity] = useState('');
-  const [secondProvince, setSecondProvince] = useState('');
-  const [secondPostalCode, setSecondPostalCode] = useState('');
   const [recipientMobile, setRecipientMobile] = useState('');
 
   // Get current translations based on site language
