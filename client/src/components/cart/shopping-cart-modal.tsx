@@ -1,6 +1,6 @@
 import { Plus, Minus, Trash2, ShoppingCart, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -55,6 +55,9 @@ export default function ShoppingCartModal({
               <ShoppingCart className="w-5 h-5" />
               Shopping Cart
             </DialogTitle>
+            <DialogDescription>
+              Your shopping cart is currently empty
+            </DialogDescription>
           </DialogHeader>
           <div className="text-center py-8">
             <ShoppingCart className="w-16 h-16 mx-auto text-gray-300 mb-4" />
@@ -87,6 +90,9 @@ export default function ShoppingCartModal({
               Clear All
             </Button>
           </DialogTitle>
+          <DialogDescription>
+            Review and manage your selected items
+          </DialogDescription>
         </DialogHeader>
 
         <ScrollArea className="max-h-[400px] pr-4">
