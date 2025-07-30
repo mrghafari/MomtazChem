@@ -167,6 +167,22 @@
 
 ## Recent Changes
 
+### COMPLETED: Province/City Dropdowns Added to Bilingual Purchase Form Modal - Second Address Enhancement (January 30, 2025)
+✅ **IMPLEMENTED: Complete province/city dropdown system in bilingual purchase form modal for second delivery address selection**
+- **User Request Fulfilled**: Added province/city dropdowns to the "Second Delivery Address" section in the bilingual purchase form modal (shop page cart checkout)
+- **API Integration**: Connected to `/api/iraqi-provinces` and `/api/iraqi-cities` endpoints providing access to 18 provinces and 188 cities
+- **Cascading Dropdown Logic**: Province selection automatically filters and populates cities for selected province with proper state management
+- **Bilingual Support**: Complete Arabic/English labels and placeholders with RTL text direction support
+- **Professional UI Layout**: 3-column grid layout (Province | City | Postal Code) with proper spacing and responsive design
+- **State Management Enhancement**: Added dedicated state variables for second address province/city selection
+- **Loading States**: Professional loading indicators during API data fetching with disabled states for dependent dropdowns
+- **Data Structure**: Uses proper Iraqi geographic data with English/Arabic naming conventions for user clarity
+- **Business Impact**: Enhanced user experience for customers requiring different delivery addresses with accurate geographic selection
+- **Location**: Dropdowns appear exactly where requested - in the showSecondAddress section after clicking "افزودن آدرس دوم" (Add Second Address) button
+- **Technical Achievement**: Complete integration with existing address system while maintaining backward compatibility with existing form logic
+- **User Experience**: Clear progression from province selection → city filtering → postal code entry with proper validation and error handling
+- **Result**: Complete second address province/city dropdown system operational - users can now select precise geographic locations for alternative delivery addresses through professional dropdown interface
+
 ### COMPLETED: Critical Intercity Bus Safety Bug Fixed - Complete Flammable Materials Compliance (January 30, 2025)
 ✅ **RESOLVED: Critical safety bug where intercity buses were still selected for flammable materials transport despite safety detection**
 - **User Safety Issue**: Despite flammable materials detection working correctly, intercity buses were still being selected for Solvant 402 transport
