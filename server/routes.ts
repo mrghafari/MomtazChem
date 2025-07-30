@@ -39996,6 +39996,137 @@ momtazchem.com
     }
   });
 
+  // Get vehicle details from checkout for order
+  app.get("/api/orders/:orderId/vehicle-details", requireAuth, async (req, res) => {
+    try {
+      const { orderId } = req.params;
+      console.log('🚚 [VEHICLE DETAILS] Fetching checkout vehicle details for order:', orderId);
+
+      // Try to get vehicle selection from vehicle_selection_history first
+      let vehicleSelectionResult = await db.execute(sql`
+        SELECT 
+          vsh.selected_vehicle_name,
+          vsh.total_cost,
+          vsh.order_weight_kg,
+          vsh.selected_vehicle_template_id,
+          vt.vehicle_type,
+          vt.max_weight
+        FROM vehicle_selection_history vsh
+        LEFT JOIN vehicle_templates vt ON vsh.selected_vehicle_template_id = vt.id
+        WHERE vsh.order_number = (SELECT order_number FROM customer_orders WHERE id = ${orderId})
+        ORDER BY vsh.created_at DESC
+        LIMIT 1
+      `);
+
+      // If no vehicle selection history, try to get from order management
+      if (vehicleSelectionResult.length === 0) {
+        vehicleSelectionResult = await db.execute(sql`
+          SELECT 
+            om.delivery_method as selected_vehicle_name,
+            om.transportation_type as vehicle_type,
+            om.total_amount as total_cost,
+            om.total_weight as order_weight_kg
+          FROM order_management om
+          WHERE om.customer_order_id = ${orderId}
+          LIMIT 1
+        `);
+      }
+
+      // If still no data, check customer_orders delivery_method
+      if (vehicleSelectionResult.length === 0) {
+        vehicleSelectionResult = await db.execute(sql`
+          SELECT 
+            co.delivery_method as selected_vehicle_name,
+            'unknown' as vehicle_type,
+            0 as total_cost,
+            oi.weight_kg as order_weight_kg
+          FROM customer_orders co
+          LEFT JOIN (
+            SELECT order_id, SUM(weight_kg * quantity) as weight_kg
+            FROM order_items
+            GROUP BY order_id
+          ) oi ON co.id = oi.order_id
+          WHERE co.id = ${orderId}
+          LIMIT 1
+        `);
+      }
+
+      if (vehicleSelectionResult.length === 0) {
+        console.log('❌ [VEHICLE DETAILS] No vehicle details found for order:', orderId);
+        return res.json({
+          success: true,
+          vehicleDetails: null,
+          message: "No vehicle selection history found - will suggest vehicles based on order weight"
+        });
+      }
+
+      const vehicleData = vehicleSelectionResult[0];
+      console.log('✅ [CHECKOUT VEHICLE] Found vehicle details:', vehicleData);
+
+      const vehicleDetails = {
+        vehicleType: vehicleData.vehicle_type || 'unknown',
+        vehicleName: vehicleData.selected_vehicle_name || 'Unknown Vehicle',
+        totalCost: vehicleData.total_cost || 0,
+        maxWeight: vehicleData.max_weight || vehicleData.order_weight_kg || 50,
+        orderWeight: vehicleData.order_weight_kg || 0
+      };
+
+      res.json({
+        success: true,
+        vehicleDetails
+      });
+    } catch (error) {
+      console.error('❌ [VEHICLE DETAILS] Error fetching vehicle details:', error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch vehicle details"
+      });
+    }
+  });
+
+  // Assign vehicle to order
+  app.post("/api/logistics/assign-vehicle", requireAuth, async (req, res) => {
+    try {
+      const { orderId, orderManagementId, vehicleId, truckNumber, driverName, driverPhone } = req.body;
+      console.log('🚛 [ASSIGN VEHICLE] Assigning vehicle to order:', { orderId, vehicleId, truckNumber });
+
+      // Update order management record with vehicle assignment
+      await db.execute(sql`
+        UPDATE order_management 
+        SET 
+          vehicle_type = (SELECT vehicle_type FROM ready_vehicles WHERE id = ${vehicleId}),
+          vehicle_plate = ${truckNumber},
+          driver_name = ${driverName},
+          driver_phone = ${driverPhone},
+          current_status = 'logistics_assigned',
+          updated_at = NOW()
+        WHERE id = ${orderManagementId}
+      `);
+
+      // Mark ready vehicle as assigned (not available)
+      await db.execute(sql`
+        UPDATE ready_vehicles 
+        SET 
+          is_available = false,
+          updated_at = NOW()
+        WHERE id = ${vehicleId}
+      `);
+
+      console.log('✅ [ASSIGN VEHICLE] Vehicle successfully assigned to order');
+
+      res.json({
+        success: true,
+        message: "Vehicle assigned successfully"
+      });
+    } catch (error) {
+      console.error('❌ [ASSIGN VEHICLE] Error assigning vehicle:', error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to assign vehicle"
+      });
+    }
+  });
+
   // ============= LOYALTY SYSTEM ENDPOINTS =============
   
   // Get loyalty system statistics

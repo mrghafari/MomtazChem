@@ -534,23 +534,54 @@ const LogisticsManagement = () => {
   // Handle vehicle assignment workflow
   const handleVehicleAssignment = async (order: LogisticsOrder) => {
     try {
-      // First, get customer's selected vehicle details from shopping cart
+      console.log('🚚 [VEHICLE ASSIGNMENT] Starting vehicle assignment for order:', order.orderNumber);
+      
+      // First, get customer's selected vehicle details from checkout
       const vehicleDetailsResponse = await fetch(`/api/orders/${order.customerOrderId}/vehicle-details`, {
         credentials: 'include'
       });
       
+      let checkoutVehicleDetails = null;
       if (vehicleDetailsResponse.ok) {
-        const vehicleDetails = await vehicleDetailsResponse.json();
-        setSelectedVehicleDetails(vehicleDetails);
+        checkoutVehicleDetails = await vehicleDetailsResponse.json();
+        setSelectedVehicleDetails(checkoutVehicleDetails);
+        console.log('✅ [CHECKOUT VEHICLE] Found customer selected vehicle:', checkoutVehicleDetails);
+      }
+      
+      // Get all ready vehicles (آماده به کار)
+      const readyVehiclesResponse = await fetch('/api/logistics/ready-vehicles', {
+        credentials: 'include'
+      });
+      
+      let readyVehicles = [];
+      if (readyVehiclesResponse.ok) {
+        const readyVehiclesData = await readyVehiclesResponse.json();
+        readyVehicles = readyVehiclesData.vehicles || [];
+        console.log('🚛 [READY VEHICLES] Found ready vehicles:', readyVehicles.length);
         
-        // Then get available fleet vehicles of the same type
-        const fleetResponse = await fetch(`/api/logistics/available-vehicles?vehicleType=${vehicleDetails.vehicleType}&weight=${order.calculatedWeight || order.totalWeight}`, {
-          credentials: 'include'
-        });
+        // Filter by weight capacity and availability
+        const orderWeight = order.calculatedWeight || order.totalWeight || 0;
+        const availableVehicles = readyVehicles.filter(vehicle => 
+          vehicle.isAvailable && 
+          vehicle.loadCapacity >= orderWeight
+        );
         
-        if (fleetResponse.ok) {
-          const fleetVehicles = await fleetResponse.json();
-          setAvailableFleetVehicles(fleetVehicles.vehicles || []);
+        setAvailableFleetVehicles(availableVehicles);
+        console.log('✅ [FILTERED VEHICLES] Available vehicles for', orderWeight, 'kg:', availableVehicles.length);
+        
+        // Find suggested vehicle based on checkout selection
+        if (checkoutVehicleDetails) {
+          const suggestedVehicle = availableVehicles.find(vehicle => 
+            vehicle.vehicleType === checkoutVehicleDetails.vehicleType ||
+            vehicle.vehicleType.includes(checkoutVehicleDetails.vehicleType) ||
+            checkoutVehicleDetails.vehicleType.includes(vehicle.vehicleType)
+          );
+          
+          if (suggestedVehicle) {
+            console.log('🎯 [SUGGESTED VEHICLE] Matching checkout selection:', suggestedVehicle);
+            // Mark as suggested for UI highlighting
+            suggestedVehicle.isCheckoutSuggested = true;
+          }
         }
       }
       
@@ -3467,16 +3498,43 @@ const LogisticsManagement = () => {
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {availableFleetVehicles.map((vehicle) => (
-                      <div key={vehicle.id} className="bg-white rounded-lg p-4 border border-orange-200">
+                      <div 
+                        key={vehicle.id} 
+                        className={`bg-white rounded-lg p-4 border transition-all duration-300 ${
+                          vehicle.isCheckoutSuggested 
+                            ? 'border-green-500 bg-green-50 ring-2 ring-green-200 shadow-lg' 
+                            : 'border-orange-200'
+                        }`}
+                      >
                         <div className="flex items-center justify-between mb-3">
-                          <h4 className="font-semibold text-gray-800">{vehicle.vehicleName}</h4>
-                          <Badge className="bg-green-500 text-white">آماده</Badge>
+                          <h4 className={`font-semibold ${
+                            vehicle.isCheckoutSuggested ? 'text-green-800' : 'text-gray-800'
+                          }`}>
+                            {vehicle.vehicleType || vehicle.vehicleName}
+                          </h4>
+                          <div className="flex gap-2">
+                            {vehicle.isCheckoutSuggested && (
+                              <Badge className="bg-gradient-to-r from-green-600 to-emerald-600 text-white animate-pulse">
+                                🎯 پیشنهاد سیستم
+                              </Badge>
+                            )}
+                            <Badge className="bg-green-500 text-white">آماده</Badge>
+                          </div>
                         </div>
+                        
+                        {vehicle.isCheckoutSuggested && (
+                          <div className="bg-green-100 border border-green-300 rounded-lg p-3 mb-4">
+                            <div className="flex items-center gap-2 text-green-800 text-sm font-medium">
+                              <CheckCircle className="w-4 h-4" />
+                              این خودرو مطابق انتخاب مشتری در سیستم هوشمند است
+                            </div>
+                          </div>
+                        )}
                         
                         <div className="space-y-2 mb-4">
                           <div className="flex justify-between">
                             <span className="text-sm text-gray-600">شماره پلاک:</span>
-                            <span className="font-medium">{vehicle.plateNumber}</span>
+                            <span className="font-medium">{vehicle.licensePlate || vehicle.plateNumber}</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-sm text-gray-600">راننده:</span>
@@ -3484,25 +3542,29 @@ const LogisticsManagement = () => {
                           </div>
                           <div className="flex justify-between">
                             <span className="text-sm text-gray-600">تلفن راننده:</span>
-                            <span className="font-medium">{vehicle.driverPhone}</span>
+                            <span className="font-medium">{vehicle.driverMobile || vehicle.driverPhone}</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-sm text-gray-600">ظرفیت:</span>
-                            <span className="font-medium">{vehicle.maxWeight} کیلوگرم</span>
+                            <span className="font-medium">{vehicle.loadCapacity || vehicle.maxWeight} کیلوگرم</span>
                           </div>
                         </div>
                         
                         <Button 
-                          className="w-full bg-orange-600 hover:bg-orange-700 text-white"
+                          className={`w-full transition-all duration-300 ${
+                            vehicle.isCheckoutSuggested 
+                              ? 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg' 
+                              : 'bg-orange-600 hover:bg-orange-700'
+                          } text-white`}
                           onClick={() => assignVehicleToOrder(
                             vehicle.id, 
-                            vehicle.plateNumber, 
+                            vehicle.licensePlate || vehicle.plateNumber, 
                             vehicle.driverName, 
-                            vehicle.driverPhone
+                            vehicle.driverMobile || vehicle.driverPhone
                           )}
                         >
                           <CheckCircle className="w-4 h-4 mr-2" />
-                          اختصاص این خودرو
+                          {vehicle.isCheckoutSuggested ? 'اختصاص خودروی پیشنهادی' : 'اختصاص این خودرو'}
                         </Button>
                       </div>
                     ))}
