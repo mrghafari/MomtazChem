@@ -183,6 +183,37 @@ function FinanceOrders() {
     enabled: activeTab === 'orphan'
   });
 
+  // Query for orphaned orders (orders in customer_orders but missing from order_management)
+  const { data: orphanedOrders, isLoading: orphanedLoading } = useQuery({
+    queryKey: ['/api/financial/orphaned-orders'],
+    enabled: activeTab === 'orphaned',
+    refetchInterval: 30000 // Refresh every 30 seconds
+  });
+
+  // Mutation to repair orphaned orders
+  const repairOrphanedOrderMutation = useMutation({
+    mutationFn: async (customerOrderId: number) => {
+      return apiRequest(`/api/financial/orphaned-orders/${customerOrderId}/repair`, {
+        method: 'POST',
+        body: {}
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "تعمیر موفق",
+        description: "سفارش یتیم با موفقیت تعمیر شد و به سیستم مدیریت اضافه شد",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/financial/orphaned-orders'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "خطا در تعمیر",
+        description: error.message || "امکان تعمیر سفارش یتیم وجود ندارد",
+        variant: "destructive",
+      });
+    }
+  });
+
 
 
   // Send reminder mutation
@@ -772,7 +803,7 @@ function FinanceOrders() {
 
         {/* Tabbed Interface */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 bg-white shadow-sm border rounded-lg p-1">
+          <TabsList className="grid w-full grid-cols-6 bg-white shadow-sm border rounded-lg p-1">
             <TabsTrigger value="pending" className="flex items-center space-x-2 space-x-reverse data-[state=active]:bg-orange-500 data-[state=active]:text-white">
               <Clock className="h-4 w-4" />
               <span>در انتظار بررسی ({pendingOrders.length})</span>
@@ -788,6 +819,10 @@ function FinanceOrders() {
             <TabsTrigger value="orphan" className="flex items-center space-x-2 space-x-reverse data-[state=active]:bg-amber-500 data-[state=active]:text-white">
               <AlertTriangle className="h-4 w-4" />
               <span>سفارشات موقت ({orphanStats?.stats?.active || 0})</span>
+            </TabsTrigger>
+            <TabsTrigger value="orphaned" className="flex items-center space-x-2 space-x-reverse data-[state=active]:bg-purple-500 data-[state=active]:text-white">
+              <AlertCircle className="h-4 w-4" />
+              <span>سفارشات یتیم ({orphanedOrders?.length || 0})</span>
             </TabsTrigger>
 
           </TabsList>
@@ -1076,6 +1111,171 @@ function FinanceOrders() {
 
 
                   </Tabs>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Orphaned Orders Tab */}
+          <TabsContent value="orphaned" className="space-y-6">
+            <div className="space-y-6">
+              {/* Header */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <AlertCircle className="h-5 w-5" />
+                    مدیریت سفارشات یتیم
+                  </CardTitle>
+                  <CardDescription>
+                    سفارشاتی که در جدول customer_orders موجود هستند اما در جدول order_management ثبت نشده‌اند
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <Card className="border-orange-200 bg-orange-50">
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-5 w-5 text-orange-600" />
+                          <div>
+                            <p className="text-sm text-muted-foreground">در انتظار بررسی</p>
+                            <p className="text-xl font-bold text-orange-600">
+                              {orphanedOrders?.orders?.filter(order => order.current_status === 'pending' || order.current_status === 'confirmed').length || 0}
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-blue-200 bg-blue-50">
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-2">
+                          <ChevronRight className="h-5 w-5 text-blue-600" />
+                          <div>
+                            <p className="text-sm text-muted-foreground">ارجاع شده به انبار</p>
+                            <p className="text-xl font-bold text-blue-600">
+                              {orphanedOrders?.orders?.filter(order => order.current_status === 'warehouse_ready' || order.current_status === 'warehouse_pending').length || 0}
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-red-200 bg-red-50">
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-2">
+                          <XCircle className="h-5 w-5 text-red-600" />
+                          <div>
+                            <p className="text-sm text-muted-foreground">رد شده</p>
+                            <p className="text-xl font-bold text-red-600">
+                              {orphanedOrders?.orders?.filter(order => order.current_status === 'rejected' || order.current_status === 'cancelled').length || 0}
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-amber-200 bg-amber-50">
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-2">
+                          <Timer className="h-5 w-5 text-amber-600" />
+                          <div>
+                            <p className="text-sm text-muted-foreground">سفارشات موقت</p>
+                            <p className="text-xl font-bold text-amber-600">
+                              {orphanedOrders?.orders?.filter(order => order.current_status === 'draft' || order.current_status === 'temporary').length || 0}
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Orphaned Orders List */}
+                  <div className="space-y-4">
+                    {orphanedLoading ? (
+                      <div className="text-center py-8">
+                        <RefreshCw className="h-8 w-8 animate-spin text-gray-400 mx-auto mb-2" />
+                        <p className="text-gray-500">در حال بارگذاری سفارشات یتیم...</p>
+                      </div>
+                    ) : orphanedOrders?.orders?.length > 0 ? (
+                      orphanedOrders.orders.map((order: any) => (
+                        <Card key={order.id} className="border-r-4 border-r-purple-500">
+                          <CardContent className="p-4">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <span className="font-medium">سفارش #{order.order_number}</span>
+                                <Badge className="bg-purple-100 text-purple-800">یتیم</Badge>
+                                <span className="text-sm text-muted-foreground">
+                                  {formatCurrency(parseFloat(order.total_amount || '0'), 'IQD')}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline" className={
+                                  order.current_status === 'pending' || order.current_status === 'confirmed' ? 'bg-orange-50 text-orange-700' :
+                                  order.current_status === 'warehouse_ready' || order.current_status === 'warehouse_pending' ? 'bg-blue-50 text-blue-700' :
+                                  order.current_status === 'rejected' || order.current_status === 'cancelled' ? 'bg-red-50 text-red-700' :
+                                  'bg-amber-50 text-amber-700'
+                                }>
+                                  {order.current_status === 'pending' ? 'در انتظار' :
+                                   order.current_status === 'confirmed' ? 'تایید شده' :
+                                   order.current_status === 'warehouse_ready' ? 'آماده انبار' :
+                                   order.current_status === 'warehouse_pending' ? 'در انتظار انبار' :
+                                   order.current_status === 'rejected' ? 'رد شده' :
+                                   order.current_status === 'cancelled' ? 'لغو شده' :
+                                   order.current_status === 'draft' ? 'پیش‌نویس' :
+                                   order.current_status === 'temporary' ? 'موقت' :
+                                   order.current_status}
+                                </Badge>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => {
+                                    repairOrphanedOrderMutation.mutate(order.customerOrderId || order.id);
+                                  }}
+                                  disabled={repairOrphanedOrderMutation.isPending}
+                                >
+                                  <Settings className="h-4 w-4 mr-1" />
+                                  {repairOrphanedOrderMutation.isPending ? 'در حال تعمیر...' : 'تعمیر سفارش'}
+                                </Button>
+                              </div>
+                            </div>
+                            <div className="mt-2 grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
+                              <div className="flex items-center gap-2 text-gray-600">
+                                <span className="font-medium">نام مشتری:</span>
+                                <span>{order.customer_name || 'نامشخص'}</span>
+                              </div>
+                              <div className="flex items-center gap-2 text-gray-600">
+                                <Phone className="h-4 w-4" />
+                                <span>{order.customer_phone || 'تلفن نامشخص'}</span>
+                              </div>
+                              <div className="flex items-center gap-2 text-gray-600">
+                                <Mail className="h-4 w-4" />
+                                <span>{order.customer_email || 'ایمیل نامشخص'}</span>
+                              </div>
+                              <div className="flex items-center gap-2 text-gray-600">
+                                <span className="font-medium">روش پرداخت:</span>
+                                <span>{order.payment_source_label || order.payment_method}</span>
+                              </div>
+                              <div className="flex items-center gap-2 text-gray-600">
+                                <Calendar className="h-4 w-4" />
+                                <span>تاریخ: {formatDateSafe(order.created_at)}</span>
+                              </div>
+                              <div className="flex items-center gap-2 text-gray-600">
+                                <span className="font-medium">وضعیت پرداخت:</span>
+                                <span>{order.payment_status === 'paid' ? 'پرداخت شده' : 
+                                       order.payment_status === 'pending' ? 'در انتظار' : 
+                                       order.payment_status || 'نامشخص'}</span>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))
+                    ) : (
+                      <Card>
+                        <CardContent className="p-12 text-center">
+                          <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
+                          <h3 className="text-lg font-medium text-gray-900 mb-2">سفارش یتیمی یافت نشد</h3>
+                          <p className="text-gray-500">همه سفارشات دارای رکورد مدیریت معتبر هستند</p>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             </div>

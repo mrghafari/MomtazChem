@@ -192,6 +192,21 @@ export default function FinancialWorkflowDashboard() {
     );
   };
 
+  // Helper function to get payment method icon
+  const getPaymentMethodIcon = (paymentMethod: string) => {
+    switch (paymentMethod) {
+      case 'wallet_full':
+      case 'wallet_partial':
+        return <Wallet className="h-4 w-4 text-green-600" />;
+      case 'online_payment':
+        return <CreditCard className="h-4 w-4 text-blue-600" />;
+      case 'bank_transfer_grace':
+        return <Clock className="h-4 w-4 text-orange-600" />;
+      default:
+        return <DollarSign className="h-4 w-4 text-gray-600" />;
+    }
+  };
+
   const handleManualApproval = () => {
     if (!selectedOrder) return;
 
@@ -203,34 +218,7 @@ export default function FinancialWorkflowDashboard() {
     });
   };
 
-  const getStatusBadge = (status: string) => {
-    const statusConfig: Record<string, { label: string; color: string }> = {
-      'financial_reviewing': { label: 'در حال بررسی', color: 'bg-yellow-100 text-yellow-700' },
-      'payment_grace_period': { label: 'مهلت پرداخت', color: 'bg-orange-100 text-orange-700' },
-      'payment_uploaded': { label: 'فیش آپلود شده', color: 'bg-blue-100 text-blue-700' }
-    };
 
-    const config = statusConfig[status] || { label: status, color: 'bg-gray-100 text-gray-700' };
-    return (
-      <Badge className={config.color}>
-        {config.label}
-      </Badge>
-    );
-  };
-
-  const getPaymentMethodIcon = (method: string) => {
-    switch (method) {
-      case 'bank_gateway':
-        return <CreditCard className="h-4 w-4 text-blue-600" />;
-      case 'wallet':
-      case 'wallet_partial':
-        return <Wallet className="h-4 w-4 text-green-600" />;
-      case 'grace_period':
-        return <Clock className="h-4 w-4 text-orange-600" />;
-      default:
-        return <DollarSign className="h-4 w-4 text-gray-600" />;
-    }
-  };
 
   const getRemainingTime = (scheduledAt: string) => {
     if (!scheduledAt) return null;
