@@ -1,0 +1,84 @@
+M2511343:196 Tawk.to script loaded successfully
+chunk-RPCDYKBN.js?v=815b1335:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+useAuth.ts:30  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 500 (Internal Server Error)
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=815b1335:840
+run @ @tanstack_react-query.js?v=815b1335:494
+start @ @tanstack_react-query.js?v=815b1335:536
+fetch @ @tanstack_react-query.js?v=815b1335:926
+executeFetch_fn @ @tanstack_react-query.js?v=815b1335:2211
+onSubscribe @ @tanstack_react-query.js?v=815b1335:1898
+subscribe @ @tanstack_react-query.js?v=815b1335:24
+(anonymous) @ @tanstack_react-query.js?v=815b1335:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=815b1335:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=815b1335:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=815b1335:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=815b1335:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=815b1335:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=815b1335:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=815b1335:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=815b1335:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=815b1335:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=815b1335:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=815b1335:19432
+commitRoot @ chunk-RPCDYKBN.js?v=815b1335:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=815b1335:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=815b1335:18718
+workLoop @ chunk-RPCDYKBN.js?v=815b1335:197
+flushWork @ chunk-RPCDYKBN.js?v=815b1335:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=815b1335:384
+useAuth.ts:46 Auth check failed: Error: HTTP 500
+    at queryFn (useAuth.ts:39:17)
+queryFn @ useAuth.ts:46
+await in queryFn
+fetchFn @ @tanstack_react-query.js?v=815b1335:840
+run @ @tanstack_react-query.js?v=815b1335:494
+start @ @tanstack_react-query.js?v=815b1335:536
+fetch @ @tanstack_react-query.js?v=815b1335:926
+executeFetch_fn @ @tanstack_react-query.js?v=815b1335:2211
+onSubscribe @ @tanstack_react-query.js?v=815b1335:1898
+subscribe @ @tanstack_react-query.js?v=815b1335:24
+(anonymous) @ @tanstack_react-query.js?v=815b1335:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=815b1335:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=815b1335:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=815b1335:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=815b1335:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=815b1335:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=815b1335:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=815b1335:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=815b1335:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=815b1335:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=815b1335:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=815b1335:19432
+commitRoot @ chunk-RPCDYKBN.js?v=815b1335:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=815b1335:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=815b1335:18718
+workLoop @ chunk-RPCDYKBN.js?v=815b1335:197
+flushWork @ chunk-RPCDYKBN.js?v=815b1335:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=815b1335:384
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:117574)
+    at t.value (twk-chunk-common.js:2:150658)
+    at p.updateUUID (twk-chunk-common.js:2:202310)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:124589)
+    at twk-chunk-common.js:2:123900
+value @ twk-chunk-common.js:2
+updateUUID @ twk-chunk-common.js:2
+(anonymous) @ twk-vendor.js:2
+p.dispatch @ twk-vendor.js:2
+dispatch @ twk-vendor.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+Promise.then
+value @ twk-chunk-common.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+56d7 @ twk-chunk-common.js:2
+a @ twk-runtime.js:1
+r @ twk-runtime.js:1
+t @ twk-runtime.js:1
+(anonymous) @ twk-chunk-vendors.js:2
