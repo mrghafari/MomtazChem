@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fix Cart for Solvant 402 Testing</title>
+</head>
+<body>
+    <h1>Cart Fix for Flammable Product Testing</h1>
+    <p>محصول Solvant 402 (ID: 28) را به سبد خرید اضافه می‌کنیم</p>
+    
+    <script>
+        // Clear existing cart and add Solvant 402
+        localStorage.setItem('momtazchem_user_cart', JSON.stringify({28: 2}));
+        sessionStorage.setItem('momtazchem_guest_cart', JSON.stringify({28: 2}));
+        
+        console.log('Cart updated with Solvant 402 (ID: 28)');
+        alert('سبد خرید با محصول Solvant 402 به‌روزرسانی شد. صفحه فروشگاه را refresh کنید.');
+        
+        // Redirect to shop after 2 seconds
+        setTimeout(() => {
+            window.location.href = '/shop';
+        }, 2000);
+    </script>
+</body>
+</html>
