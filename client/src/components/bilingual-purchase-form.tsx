@@ -1092,8 +1092,38 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       console.log('🎯 [ORDER SUCCESS] Response type:', typeof response);
       console.log('🎯 [ORDER SUCCESS] Response keys:', Object.keys(response || {}));
       
-      // Check for hybrid payment redirect (new API structure)
-      if (response.requiresBankPayment && response.redirectUrl) {
+      // CRITICAL FIX: If remainingAmount is 0, no bank payment needed regardless of other flags
+      const remainingAmount = parseFloat(response.remainingAmount || 0);
+      const isFullyPaidByWallet = remainingAmount === 0;
+      
+      console.log('💳 [PAYMENT DECISION] Frontend payment logic:', {
+        remainingAmount,
+        isFullyPaidByWallet,
+        requiresBankPayment: response.requiresBankPayment,
+        paymentStatus: response.paymentStatus,
+        walletAmountDeducted: response.walletAmountDeducted,
+        'Decision': isFullyPaidByWallet ? 'Complete order (no bank gateway)' : 'Check for bank payment'
+      });
+      
+      // If fully paid by wallet, complete the order without bank gateway
+      if (isFullyPaidByWallet) {
+        console.log('✅ [FULL WALLET PAYMENT] Order fully paid by wallet - completing without bank gateway');
+        
+        toast({
+          title: "سفارش ثبت شد",
+          description: `سفارش شما با موفقیت ثبت شد و کاملاً از کیف پول پرداخت شد. شماره سفارش: ${response.orderNumber || response.order?.orderNumber || 'N/A'}`,
+        });
+        
+        // Complete the order without bank gateway
+        setTimeout(() => {
+          onOrderComplete();
+          onClose();
+        }, 1500);
+        return;
+      }
+      
+      // Check for hybrid payment redirect only if remaining amount > 0
+      if (response.requiresBankPayment && response.redirectUrl && remainingAmount > 0) {
         console.log('🔄 [HYBRID PAYMENT] Redirecting to bank gateway:', response.redirectUrl);
         console.log('🔄 [HYBRID PAYMENT] Wallet amount deducted:', response.walletAmountDeducted);
         
