@@ -241,7 +241,7 @@ export default function WarehouseOrders() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">فوری</p>
+                <p className="text-sm font-medium text-gray-600">بیش از ۲۴ ساعت از پردازش مالی</p>
                 <p className="text-2xl font-bold text-red-600">
                   {orders.filter(order => 
                     new Date(order.financialReviewedAt) < new Date(Date.now() - 24 * 60 * 60 * 1000)
@@ -286,7 +286,7 @@ export default function WarehouseOrders() {
                         {formatCurrency(order.orderTotal, 'IQD')}
                       </p>
                       <p className="text-sm text-gray-500">
-                        تایید: {new Date(order.financialReviewedAt).toLocaleDateString('en-US', {
+                        پردازش مالی: {new Date(order.financialReviewedAt).toLocaleDateString('fa-IR', {
                           year: 'numeric',
                           month: 'short',
                           day: 'numeric'
@@ -342,7 +342,7 @@ export default function WarehouseOrders() {
                   <div className="flex justify-between items-center">
                     <div className="text-sm text-gray-500">
                       <Clock className="h-4 w-4 inline mr-1" />
-                      از تایید مالی: {Math.floor((new Date().getTime() - new Date(order.financialReviewedAt).getTime()) / (1000 * 60 * 60))} ساعت گذشته
+                      از پردازش مالی: {Math.floor((new Date().getTime() - new Date(order.financialReviewedAt).getTime()) / (1000 * 60 * 60))} ساعت گذشته
                     </div>
                     <Button onClick={() => handleOrderProcess(order)}>
                       <Package className="h-4 w-4 mr-2" />
