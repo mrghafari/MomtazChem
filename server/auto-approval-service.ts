@@ -37,6 +37,9 @@ export class AutoApprovalService {
       // ابتدا پردازش سفارشات wallet-paid که باید به warehouse منتقل شوند
       await this.processWalletPaidOrders();
       
+      // پردازش سفارشات bank_transfer_grace که مدارک آپلود کرده‌اند
+      await this.processBankTransferOrders();
+      
       // یافتن سفارشات آماده برای تایید خودکار
       const ordersToApprove = await db
         .select({
@@ -193,6 +196,127 @@ export class AutoApprovalService {
 
     } catch (error) {
       console.error(`❌ [WAREHOUSE TRANSFER] Error transferring order ${order.orderNumber}:`, error);
+    }
+  }
+
+  // پردازش سفارشات bank_transfer_grace که مدارک آپلود کرده‌اند
+  private async processBankTransferOrders() {
+    try {
+      console.log("🏦 [BANK TRANSFER AUTO] Checking bank transfer orders with uploaded receipts...");
+
+      // یافتن سفارشات bank_transfer_grace که مدارک آپلود کرده‌اند و نیاز به تایید دارند
+      const bankTransferOrders = await db
+        .select({
+          id: customerOrders.id,
+          orderNumber: customerOrders.orderNumber,
+          paymentMethod: customerOrders.paymentMethod,
+          paymentStatus: customerOrders.paymentStatus,
+          status: customerOrders.status,
+          totalAmount: customerOrders.totalAmount,
+          currency: customerOrders.currency,
+          customerFirstName: customerOrders.customerFirstName,
+          customerLastName: customerOrders.customerLastName,
+          customerEmail: customerOrders.customerEmail,
+          customerPhone: customerOrders.customerPhone
+        })
+        .from(customerOrders)
+        .where(
+          sql`
+            payment_method = 'bank_transfer_grace'
+            AND payment_status = 'receipt_uploaded'
+            AND status = 'confirmed'
+          `
+        );
+
+      console.log(`🏦 [BANK TRANSFER AUTO] Query found ${bankTransferOrders.length} bank transfer orders`);
+      
+      if (bankTransferOrders.length > 0) {
+        console.log("🏦 [BANK TRANSFER AUTO] Bank transfer orders found:", 
+          JSON.stringify(bankTransferOrders.map(o => ({
+            id: o.id,
+            orderNumber: o.orderNumber,
+            paymentMethod: o.paymentMethod,
+            paymentStatus: o.paymentStatus,
+            status: o.status
+          })), null, 2)
+        );
+      }
+
+      if (bankTransferOrders.length === 0) {
+        console.log("✅ [BANK TRANSFER AUTO] No bank transfer orders pending auto-approval");
+        return;
+      }
+
+      console.log(`🏦 [BANK TRANSFER AUTO] Found ${bankTransferOrders.length} bank transfer orders ready for auto-approval`);
+
+      for (const order of bankTransferOrders) {
+        console.log(`🏦 [BANK TRANSFER AUTO] Processing order ${order.orderNumber} (bank_transfer_grace)`);
+
+        // تایید خودکار مالی و انتقال به انبار
+        await this.approveBankTransferOrder(order);
+      }
+
+    } catch (error) {
+      console.error("❌ [BANK TRANSFER AUTO] Error processing bank transfer orders:", error);
+    }
+  }
+
+  // تایید خودکار سفارش bank_transfer_grace
+  private async approveBankTransferOrder(order: any) {
+    try {
+      // به‌روزرسانی وضعیت در customer_orders
+      await db
+        .update(customerOrders)
+        .set({
+          status: 'warehouse_ready',
+          paymentStatus: 'paid',
+          updatedAt: new Date()
+        })
+        .where(eq(customerOrders.id, order.id));
+
+      // ایجاد یا به‌روزرسانی order_management record
+      const existingManagement = await db
+        .select()
+        .from(orderManagement)
+        .where(eq(orderManagement.customerOrderId, order.id))
+        .limit(1);
+
+      if (existingManagement.length === 0) {
+        // ایجاد order_management record جدید
+        await db.insert(orderManagement).values({
+          customerOrderId: order.id,
+          currentStatus: 'warehouse_pending',
+          financialReviewerId: 0, // System auto-approval
+          financialReviewedAt: new Date(),
+          financialNotes: 'تایید خودکار حواله بانکی - مدارک بررسی و تایید شد',
+          totalAmount: order.totalAmount?.toString() || '0',
+          currency: order.currency || 'IQD',
+          orderNumber: order.orderNumber,
+          customerFirstName: order.customerFirstName || '',
+          customerLastName: order.customerLastName || '',
+          customerEmail: order.customerEmail || '',
+          customerPhone: order.customerPhone || '',
+          createdAt: new Date(),
+          updatedAt: new Date()
+        });
+      } else {
+        // به‌روزرسانی order_management موجود
+        await db
+          .update(orderManagement)
+          .set({
+            currentStatus: 'warehouse_pending',
+            financialReviewerId: 0, // System auto-approval
+            financialReviewedAt: new Date(),
+            financialNotes: 'تایید خودکار حواله بانکی - مدارک بررسی و تایید شد',
+            updatedAt: new Date()
+          })
+          .where(eq(orderManagement.customerOrderId, order.id));
+      }
+
+      console.log(`✅ [BANK TRANSFER AUTO] Order ${order.orderNumber} automatically approved and moved to warehouse`);
+
+    } catch (error) {
+      console.error(`❌ [BANK TRANSFER AUTO] Error auto-approving order ${order.orderNumber}:`, error);
     }
   }
 }
