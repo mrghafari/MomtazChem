@@ -1,0 +1,71 @@
+chunk-H56OBA7M.js?v=815b1335:341 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-H56OBA7M.js?v=815b1335:341
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=815b1335:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=815b1335:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=815b1335:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=815b1335:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=815b1335:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=815b1335:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=815b1335:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=815b1335:19416
+commitRoot @ chunk-RPCDYKBN.js?v=815b1335:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=815b1335:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=815b1335:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=815b1335:18627
+finance-orders.tsx:343 🔄 [FINANCE] Sending approve request for order 309 with receipt amount: 
+finance-orders.tsx:350 ✅ [FINANCE] Order approved successfully: {success: true, order: {…}, message: 'پرداخت تایید شد و به انبار ارسال گردید', walletTransaction: false}
+useOrderNotifications.ts:99 🔔 [FINANCIAL] نوتیفیکیشن: 67 سفارش جدید دریافت شد
+chunk-H56OBA7M.js?v=815b1335:341 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-H56OBA7M.js?v=815b1335:341
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=815b1335:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=815b1335:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=815b1335:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=815b1335:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=815b1335:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=815b1335:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=815b1335:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=815b1335:19416
+commitRoot @ chunk-RPCDYKBN.js?v=815b1335:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=815b1335:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=815b1335:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=815b1335:18627
+finance-orders.tsx:343 🔄 [FINANCE] Sending approve request for order 309 with receipt amount: 
+finance-orders.tsx:350 ✅ [FINANCE] Order approved successfully: {success: true, order: {…}, message: 'پرداخت تایید شد و به انبار ارسال گردید', walletTransaction: false}
+useAuth.ts:30  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 401 (Unauthorized)
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=815b1335:840
+run @ @tanstack_react-query.js?v=815b1335:494
+start @ @tanstack_react-query.js?v=815b1335:536
+fetch @ @tanstack_react-query.js?v=815b1335:926
+executeFetch_fn @ @tanstack_react-query.js?v=815b1335:2211
+(anonymous) @ @tanstack_react-query.js?v=815b1335:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=815b1335:2243
+updateTimers_fn @ @tanstack_react-query.js?v=815b1335:2250
+onQueryUpdate @ @tanstack_react-query.js?v=815b1335:2206
+(anonymous) @ @tanstack_react-query.js?v=815b1335:998
+(anonymous) @ @tanstack_react-query.js?v=815b1335:997
+batch @ @tanstack_react-query.js?v=815b1335:583
+dispatch_fn @ @tanstack_react-query.js?v=815b1335:996
+setData @ @tanstack_react-query.js?v=815b1335:696
+onSuccess @ @tanstack_react-query.js?v=815b1335:897
+resolve @ @tanstack_react-query.js?v=815b1335:456
+Promise.then
+run @ @tanstack_react-query.js?v=815b1335:498
+start @ @tanstack_react-query.js?v=815b1335:536
+fetch @ @tanstack_react-query.js?v=815b1335:926
+executeFetch_fn @ @tanstack_react-query.js?v=815b1335:2211
+fetch @ @tanstack_react-query.js?v=815b1335:2011
+refetch @ @tanstack_react-query.js?v=815b1335:2001
+onFocus @ @tanstack_react-query.js?v=815b1335:749
+(anonymous) @ @tanstack_react-query.js?v=815b1335:1112
+(anonymous) @ @tanstack_react-query.js?v=815b1335:1111
+batch @ @tanstack_react-query.js?v=815b1335:583
+onFocus @ @tanstack_react-query.js?v=815b1335:1110
+(anonymous) @ @tanstack_react-query.js?v=815b1335:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=815b1335:313
+onFocus @ @tanstack_react-query.js?v=815b1335:312
+(anonymous) @ @tanstack_react-query.js?v=815b1335:299
+listener @ @tanstack_react-query.js?v=815b1335:270
+useOrderNotifications.ts:99 🔔 [FINANCIAL] نوتیفیکیشن: 67 سفارش جدید دریافت شد

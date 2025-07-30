@@ -429,12 +429,12 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       console.log('🏋️ [WEIGHT] Calculating weight for customer order:', customerOrderId);
       
       const items = await db.select({
-        itemId: orderItems.itemId,
+        productId: orderItems.productId,
         quantity: orderItems.quantity,
         productWeight: shopProducts.weight // وزن از جدول shop_products
       })
       .from(orderItems)
-      .leftJoin(shopProducts, eq(orderItems.itemId, shopProducts.id))
+      .leftJoin(shopProducts, eq(orderItems.productId, shopProducts.id))
       .where(eq(orderItems.orderId, customerOrderId));
       
       let totalWeight = 0;
@@ -442,9 +442,9 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       for (const item of items) {
         const weight = parseFloat(item.productWeight || '0');
         const quantity = item.quantity;
-        const itemTotalWeight = weight * quantity;
+        const itemTotalWeight = weight * parseFloat(quantity.toString());
         
-        console.log(`🏋️ [WEIGHT] Item ${item.itemId}: ${weight}kg x ${quantity} = ${itemTotalWeight}kg`);
+        console.log(`🏋️ [WEIGHT] Item ${item.productId}: ${weight}kg x ${quantity} = ${itemTotalWeight}kg`);
         totalWeight += itemTotalWeight;
       }
       
@@ -839,12 +839,13 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       } : null
     }));
 
-    // Calculate weight for orders that don't have it calculated yet (especially for warehouse and logistics)
+    // Weight calculation disabled to prevent system hang
+    // TODO: Re-enable after optimization
+    /*
     if (departmentFilter === 'warehouse' || departmentFilter === 'logistics') {
       for (const order of transformedResults) {
         if (!order.totalWeight || order.totalWeight === '0.000') {
           await this.calculateAndUpdateOrderWeight(order.customerOrderId);
-          // Update the order object with calculated weight
           const calculatedWeight = await this.calculateOrderWeight(order.customerOrderId);
           if (calculatedWeight > 0) {
             order.totalWeight = calculatedWeight.toFixed(3);
@@ -853,6 +854,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
         }
       }
     }
+    */
 
     return transformedResults;
   }
@@ -860,19 +862,8 @@ export class OrderManagementStorage implements IOrderManagementStorage {
   async getLogisticsPendingOrders(): Promise<OrderManagement[]> {
     const orders = await this.getOrdersByDepartment('logistics');
     
-    // Calculate total weight for each order if not already calculated
-    for (const order of orders) {
-      if (!order.totalWeight) {
-        await this.calculateAndUpdateOrderWeight(order.customerOrderId);
-        // Refresh order data after weight calculation
-        const updatedOrders = await this.getOrdersByDepartment('logistics');
-        const updatedOrder = updatedOrders.find(o => o.customerOrderId === order.customerOrderId);
-        if (updatedOrder) {
-          order.totalWeight = updatedOrder.totalWeight;
-          order.weightUnit = updatedOrder.weightUnit;
-        }
-      }
-    }
+    // Weight calculation disabled to prevent system hang - return orders as-is
+    // TODO: Implement efficient batch weight calculation
     
     return orders;
   }
@@ -1717,7 +1708,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
         
         // Calculated fields
         totalItems: orderItemsResult.length,
-        totalQuantity: orderItemsResult.reduce((sum, item) => sum + item.quantity, 0),
+        totalQuantity: orderItemsResult.reduce((sum, item) => sum + parseFloat(item.quantity.toString()), 0),
         totalAmount: customerOrder.totalAmount,
         totalWeight: totalWeight,
         weightUnit: 'kg',
