@@ -257,12 +257,25 @@ export default function FinancialWorkflowDashboard() {
       </Card>
 
       <Tabs defaultValue="pending" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="pending">سفارشات در انتظار</TabsTrigger>
-          <TabsTrigger value="temporary">سفارشات موقت</TabsTrigger>
-          <TabsTrigger value="orphaned">سفارشات یتیم</TabsTrigger>
-          <TabsTrigger value="auto-approval">تایید خودکار</TabsTrigger>
-          <TabsTrigger value="grace-period">مهلت‌دار</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-6">
+          <TabsTrigger value="pending" className="text-xs md:text-sm">
+            سفارشات در انتظار ({orders?.length || 0})
+          </TabsTrigger>
+          <TabsTrigger value="temporary" className="text-xs md:text-sm">
+            سفارشات موقت ({temporaryOrders?.length || 0})
+          </TabsTrigger>
+          <TabsTrigger value="orphaned" className="text-xs md:text-sm">
+            یتیم و ناتمام ({totalOrphaned})
+          </TabsTrigger>
+          <TabsTrigger value="auto-approval" className="text-xs md:text-sm">
+            تایید خودکار
+          </TabsTrigger>
+          <TabsTrigger value="grace-period" className="text-xs md:text-sm">
+            مهلت‌دار
+          </TabsTrigger>
+          <TabsTrigger value="approved" className="text-xs md:text-sm">
+            تایید شده
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="pending" className="space-y-4">

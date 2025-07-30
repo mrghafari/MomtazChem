@@ -560,16 +560,17 @@ export class OrderManagementStorage implements IOrderManagementStorage {
     if (department === 'financial') {
       // بخش مالی فقط سفارشات در انتظار بررسی و رد شده را می‌بیند
       // سفارشات تایید شده (financial_approved) به انبار منتقل می‌شوند
+      // حذف سفارشات معلق که بیش از یک ساعت pending هستند
       const financialStatuses = statuses || [
-        'pending', // سفارشات در انتظار که نیاز به بررسی فیش بانکی دارند
         orderStatuses.PENDING_PAYMENT,
-        orderStatuses.PAYMENT_UPLOADED,
+        orderStatuses.PAYMENT_UPLOADED, 
         orderStatuses.FINANCIAL_REVIEWING,
         // orderStatuses.FINANCIAL_APPROVED, // حذف شد - این سفارشات به انبار می‌روند
         orderStatuses.FINANCIAL_REJECTED // فقط سفارشات رد شده در مالی باقی می‌مانند
       ];
       
       console.log('🔍 [FINANCIAL] Searching for orders with statuses:', financialStatuses);
+      
       query = query.where(inArray(orderManagement.currentStatus, financialStatuses));
     } else if (department === 'warehouse') {
       // انبار فقط سفارشات تایید شده مالی را می‌بیند

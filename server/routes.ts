@@ -24556,19 +24556,19 @@ ${message ? `Additional Requirements:\n${message}` : ''}
   });
 
   // Get financial pending orders  
-  // Get orphaned orders - orders in customer_orders but missing from order_management
+  // Get orphaned orders - orders that need special attention (either missing order_management or stuck in problematic states)
   app.get('/api/financial/orphaned-orders', requireAuth, async (req, res) => {
     try {
-      console.log('🧟 [ORPHANED ORDERS] Fetching orphaned orders...');
+      console.log('🧟 [ORPHANED ORDERS] Fetching orphaned and problematic orders...');
       
       const { pool } = await import('./db');
       const result = await pool.query(`
         SELECT 
           co.id,
           co.order_number as "orderNumber",
-          co.customer_name as "customerName", 
-          co.customer_email as "customerEmail",
-          co.customer_phone as "customerPhone",
+          COALESCE(co.guest_name, 'نامشخص') as "customerName", 
+          co.guest_email as "customerEmail",
+          co.recipient_mobile as "customerPhone",
           co.total_amount as "totalAmount",
           co.currency,
           co.payment_method as "paymentMethod",
@@ -24579,27 +24579,56 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           co.shipping_address as "shippingAddress",
           co.billing_address as "billingAddress",
           co.notes,
+          om.current_status as "managementStatus",
           CASE 
-            WHEN om.id IS NULL THEN true 
-            ELSE false 
-          END as "isOrphaned"
+            WHEN om.id IS NULL THEN 'یتیم - فاقد رکورد مدیریت'
+            WHEN (om.current_status = 'pending' AND co.payment_method = 'online_payment' AND co.payment_status = 'pending') THEN 'معلق - پرداخت آنلاین ناتمام'
+            WHEN (om.current_status = 'payment_uploaded' AND co.payment_method = 'bank_transfer_grace' AND co.payment_status = 'receipt_uploaded') THEN 'معلق - حواله بانکی آپلود شده'
+            ELSE 'مشکوک - نیاز به بررسی'
+          END as "orphanType"
         FROM customer_orders co
         LEFT JOIN order_management om ON co.id = om.customer_order_id
-        WHERE om.id IS NULL
+        WHERE (
+          -- 1. Truly orphaned orders (no order_management)
+          om.id IS NULL
+          OR
+          -- 2. Stuck online payments in pending state
+          (om.current_status = 'pending' AND co.payment_method = 'online_payment' AND co.payment_status = 'pending' AND co.created_at < NOW() - INTERVAL '1 hour')
+          OR
+          -- 3. Bank transfer receipts uploaded but stuck in financial review
+          (om.current_status = 'payment_uploaded' AND co.payment_method = 'bank_transfer_grace' AND co.payment_status = 'receipt_uploaded' AND co.updated_at < NOW() - INTERVAL '2 hours')
+        )
         ORDER BY co.created_at DESC
       `);
       
       const orphanedOrders = result.rows;
-      console.log(`🧟 [ORPHANED ORDERS] Found ${orphanedOrders.length} orphaned orders`);
+      console.log(`🧟 [ORPHANED ORDERS] Found ${orphanedOrders.length} orphaned/problematic orders`);
       
       if (orphanedOrders.length > 0) {
         console.log('🧟 [ORPHANED ORDERS] Sample orphaned order:', JSON.stringify(orphanedOrders[0], null, 2));
       }
       
+      // Categorize by orphan type
+      const categorized = {
+        trulyOrphaned: orphanedOrders.filter(o => o.orphanType === 'یتیم - فاقد رکورد مدیریت'),
+        stuckOnlinePayments: orphanedOrders.filter(o => o.orphanType === 'معلق - پرداخت آنلاین ناتمام'),
+        stuckBankTransfers: orphanedOrders.filter(o => o.orphanType === 'معلق - حواله بانکی آپلود شده'),
+        suspicious: orphanedOrders.filter(o => o.orphanType === 'مشکوک - نیاز به بررسی')
+      };
+      
+      console.log('📊 [ORPHANED CATEGORIZATION]:', {
+        total: orphanedOrders.length,
+        trulyOrphaned: categorized.trulyOrphaned.length,
+        stuckOnlinePayments: categorized.stuckOnlinePayments.length,
+        stuckBankTransfers: categorized.stuckBankTransfers.length,
+        suspicious: categorized.suspicious.length
+      });
+      
       res.json({ 
         success: true, 
         orders: orphanedOrders,
-        totalOrphaned: orphanedOrders.length
+        totalOrphaned: orphanedOrders.length,
+        categorized
       });
     } catch (error) {
       console.error('❌ [ORPHANED ORDERS] Error fetching orphaned orders:', error);
