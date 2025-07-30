@@ -22266,22 +22266,35 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         if (productIds.length > 0) {
           console.log('🔍 [FLAMMABLE] Checking products:', productIds);
           
-          // Query database to check if any products are flammable
+          // Query BOTH product tables to check if any products are flammable
           const { showcaseProducts } = await import('@shared/showcase-schema');
+          const { shopProducts } = await import('@shared/shop-schema');
           
-          // Use OR conditions for each product ID to avoid array issues
-          const orConditions = productIds.map(id => eq(showcaseProducts.id, id));
-          const products = await db.select().from(showcaseProducts).where(
-            orConditions.length === 1 ? orConditions[0] : or(...orConditions)
+          // Check showcase_products first
+          const showcaseOrConditions = productIds.map(id => eq(showcaseProducts.id, id));
+          const showcaseProductsFound = await db.select().from(showcaseProducts).where(
+            showcaseOrConditions.length === 1 ? showcaseOrConditions[0] : or(...showcaseOrConditions)
           );
           
-          console.log('🔍 [FLAMMABLE] Products found:', products.map(p => ({ id: p.id, name: p.name, isFlammable: p.isFlammable })));
+          // Check shop_products as well
+          const shopOrConditions = productIds.map(id => eq(shopProducts.id, id));
+          const shopProductsFound = await db.select().from(shopProducts).where(
+            shopOrConditions.length === 1 ? shopOrConditions[0] : or(...shopOrConditions)
+          );
+          
+          // Combine results from both tables
+          const allProducts = [
+            ...showcaseProductsFound.map(p => ({ id: p.id, name: p.name, isFlammable: p.isFlammable, source: 'showcase' })),
+            ...shopProductsFound.map(p => ({ id: p.id, name: p.name, isFlammable: p.isFlammable, source: 'shop' }))
+          ];
+          
+          console.log('🔍 [FLAMMABLE] Products found in both tables:', allProducts);
           
           // Check if any product is flammable
-          for (const product of products) {
+          for (const product of allProducts) {
             if (product.isFlammable === true) {
               containsFlammableProducts = true;
-              console.log(`🔥 [FLAMMABLE] Found flammable product: ${product.name} (ID: ${product.id})`);
+              console.log(`🔥 [FLAMMABLE] Found flammable product: ${product.name} (ID: ${product.id}) from ${product.source}_products table`);
               break;
             }
           }
