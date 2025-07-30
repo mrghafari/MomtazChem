@@ -11874,7 +11874,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Critical fix: For full wallet payments, completely bypass bank payment logic
       const isFullWalletPayment = finalPaymentMethod === 'wallet_full';
-      const requiresBankPayment = !isFullWalletPayment && actualWalletUsed > 0 && remainingAmountToPay > 0.01;
+      const isPartialWalletPayment = finalPaymentMethod === 'wallet_partial';
+      
+      // Only require bank payment for partial wallet payments with remaining balance
+      const requiresBankPayment = isPartialWalletPayment && remainingAmountToPay > 0.01;
       
       console.log('🔍 [PAYMENT LOGIC DEBUG] Payment decision logic:', {
         actualWalletUsed,
@@ -11887,6 +11890,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         remainingAmountString: remainingAmount,
         paymentMethodFromRequest: paymentMethod,
         isFullWalletPayment,
+        isPartialWalletPayment,
         walletPaymentComplete: isFullWalletPayment && actualWalletUsed > 0
       });
       
