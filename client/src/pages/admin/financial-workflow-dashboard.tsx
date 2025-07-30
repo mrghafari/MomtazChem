@@ -48,14 +48,14 @@ export default function FinancialWorkflowDashboard() {
   // لیست سفارشات در انتظار بررسی مالی
   const { data: orders, isLoading } = useQuery<FinancialOrder[]>({
     queryKey: ['/api/financial/pending-orders'],
-    queryFn: () => apiRequest('GET', '/api/financial/pending-orders'),
+    queryFn: () => apiRequest('/api/financial/pending-orders'),
     refetchInterval: 30000 // تازه‌سازی هر 30 ثانیه
   });
 
   // تایید دستی سفارش
   const approveOrderMutation = useMutation({
     mutationFn: (data: { orderMgmtId: number; reviewerId: number; notes?: string; excessAmount?: number }) =>
-      apiRequest('POST', `/api/finance/approve/${data.orderMgmtId}`, data),
+      apiRequest(`/api/finance/approve/${data.orderMgmtId}`, { method: 'POST', body: data }),
     onSuccess: () => {
       toast({
         title: "✅ سفارش تایید شد",
@@ -87,7 +87,7 @@ export default function FinancialWorkflowDashboard() {
   };
 
   const getStatusBadge = (status: string) => {
-    const statusConfig = {
+    const statusConfig: Record<string, { label: string; color: string }> = {
       'financial_reviewing': { label: 'در حال بررسی', color: 'bg-yellow-100 text-yellow-700' },
       'payment_grace_period': { label: 'مهلت پرداخت', color: 'bg-orange-100 text-orange-700' },
       'payment_uploaded': { label: 'فیش آپلود شده', color: 'bg-blue-100 text-blue-700' }
@@ -151,6 +151,48 @@ export default function FinancialWorkflowDashboard() {
           {orders?.length || 0} سفارش در انتظار
         </Badge>
       </div>
+
+      {/* نوع تسویه حساب/پرداخت Header */}
+      <Card className="bg-gradient-to-r from-blue-50 to-green-50 border-blue-200">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-blue-900">
+            <DollarSign className="h-6 w-6" />
+            انواع تسویه حساب و پرداخت
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="flex items-center gap-2 p-3 bg-blue-100 rounded-lg">
+              <CreditCard className="h-5 w-5 text-blue-600" />
+              <div>
+                <div className="font-medium text-blue-900">درگاه بانکی</div>
+                <div className="text-xs text-blue-700">تایید خودکار 5 دقیقه</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 p-3 bg-green-100 rounded-lg">
+              <Wallet className="h-5 w-5 text-green-600" />
+              <div>
+                <div className="font-medium text-green-900">کیف پول</div>
+                <div className="text-xs text-green-700">برداشت خودکار</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 p-3 bg-purple-100 rounded-lg">
+              <DollarSign className="h-5 w-5 text-purple-600" />
+              <div>
+                <div className="font-medium text-purple-900">ترکیبی</div>
+                <div className="text-xs text-purple-700">کیف پول + بانک</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 p-3 bg-orange-100 rounded-lg">
+              <Clock className="h-5 w-5 text-orange-600" />
+              <div>
+                <div className="font-medium text-orange-900">مهلت‌دار</div>
+                <div className="text-xs text-orange-700">3 روز واریز بانکی</div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <Tabs defaultValue="pending" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
