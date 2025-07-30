@@ -134,6 +134,9 @@ import {
   type GpsDeliveryAnalytics
 } from "@shared/gps-delivery-schema";
 
+// Import sync service for automatic table synchronization
+import { globalSyncService } from './sync-service';
+
 // Extend session type to include admin user and customer user
 declare module "express-session" {
   interface SessionData {
@@ -433,6 +436,14 @@ const requireCustomerAuth = (req: Request, res: Response, next: NextFunction) =>
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Initialize sync service at startup
+  console.log('🔄 [SYNC SERVICE] Initializing automatic table synchronization system...');
+  try {
+    globalSyncService.start();
+    console.log('✅ [SYNC SERVICE] Automatic synchronization service started successfully');
+  } catch (error) {
+    console.error('❌ [SYNC SERVICE] Failed to start sync service:', error);
+  }
   console.log("🚀 REGISTERING ROUTES - Vehicle optimization endpoints loading...");
   
   // Import department auth functions
@@ -11874,6 +11885,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await crmStorage.updateCustomerMetrics(finalCrmCustomerId);
       }
 
+      // Trigger automatic synchronization after shop order creation
+      try {
+        await globalSyncService.triggerOrderSync(order.id, 'shop_order_created');
+        console.log(`🔄 [SYNC] Triggered automatic sync for shop order creation - order ${order.id}`);
+      } catch (syncError) {
+        console.error(`❌ [SYNC] Auto-sync failed for shop order creation:`, syncError);
+        // Don't fail order creation if sync fails
+      }
+
       // Check if hybrid payment is required (wallet partially used + remaining amount)
       // Fix: Use remaining amount directly, don't subtract wallet usage twice
       const remainingAmountToPay = Math.round(parseFloat(remainingAmount || totalAmount));
@@ -12328,6 +12348,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         await orderManagementStorage.createOrderManagement(orderMgmtData);
         console.log(`✅ Order management record created for order ${orderNumber}`);
+        
+        // Trigger automatic synchronization after order creation
+        try {
+          await globalSyncService.triggerOrderSync(order.id, 'order_created');
+          console.log(`🔄 [SYNC] Triggered automatic sync for order ${orderNumber}`);
+        } catch (syncError) {
+          console.error(`❌ [SYNC] Auto-sync failed for order ${orderNumber}:`, syncError);
+          // Don't fail order creation if sync fails
+        }
       } catch (orderMgmtError) {
         console.error("❌ Error creating order management record:", orderMgmtError);
         // Don't fail the order if order management creation fails
@@ -15870,6 +15899,15 @@ Momtaz Chemical Technical Team`,
       // Update the customer order status
       const updatedOrder = await customerStorage.updateOrder(orderId, updates);
       
+      // Trigger automatic synchronization after order update
+      try {
+        await globalSyncService.triggerOrderSync(orderId, 'order_updated');
+        console.log(`🔄 [SYNC] Triggered automatic sync for order update ${orderId}`);
+      } catch (syncError) {
+        console.error(`❌ [SYNC] Auto-sync failed for order ${orderId}:`, syncError);
+        // Don't fail order update if sync fails
+      }
+      
       res.json({
         success: true,
         message: "Order status updated successfully",
@@ -16064,6 +16102,15 @@ Momtaz Chemical Technical Team`,
         notes: order.notes ? `${order.notes}\n\nPayment processed: ${paymentMethod}${transactionId ? ` (ID: ${transactionId})` : ''}` 
                : `Payment processed: ${paymentMethod}${transactionId ? ` (ID: ${transactionId})` : ''}`
       });
+
+      // Trigger automatic synchronization after payment update
+      try {
+        await globalSyncService.triggerOrderSync(orderId, 'payment_processed');
+        console.log(`🔄 [SYNC] Triggered automatic sync for payment update - order ${orderId}`);
+      } catch (syncError) {
+        console.error(`❌ [SYNC] Auto-sync failed for payment update:`, syncError);
+        // Don't fail payment update if sync fails
+      }
 
       // Log the payment activity in CRM if customer exists
       if (order.customerId) {
@@ -21113,6 +21160,15 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         'financial', 
         (notes || 'Payment approved by financial department - moving to warehouse') + walletTransactionMessage
       );
+      
+      // Trigger automatic synchronization after financial approval
+      try {
+        await globalSyncService.triggerOrderSync(orderData.customer_order_id, 'financial_approved');
+        console.log(`🔄 [SYNC] Triggered automatic sync for financial approval - order ${orderData.customer_order_id}`);
+      } catch (syncError) {
+        console.error(`❌ [SYNC] Auto-sync failed for financial approval:`, syncError);
+        // Don't fail order update if sync fails
+      }
 
       // If this was a temporary order (grace period), convert it to regular order
       if (isTemporaryOrder) {
@@ -21335,6 +21391,15 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         department, 
         notes
       );
+
+      // Trigger automatic synchronization after status update
+      try {
+        await globalSyncService.triggerOrderSync(updatedOrder.customerOrderId, 'status_updated');
+        console.log(`🔄 [SYNC] Triggered automatic sync for status update - order ${updatedOrder.customerOrderId}`);
+      } catch (syncError) {
+        console.error(`❌ [SYNC] Auto-sync failed for status update:`, syncError);
+        // Don't fail order update if sync fails
+      }
 
       res.json({ success: true, order: updatedOrder });
     } catch (error) {
@@ -41173,7 +41238,164 @@ momtazchem.com
     }
   });
 
+  // ==========================================================================
+  // SYNC SERVICE API ENDPOINTS - Automatic Table Synchronization System
+  // ==========================================================================
 
+  // Auto sync status endpoint - GET current sync service status
+  app.get('/api/admin/sync/status', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const stats = await globalSyncService.getSyncStats();
+      res.json({ 
+        success: true,
+        data: {
+          isEnabled: globalSyncService.isEnabled(),
+          lastRunTime: globalSyncService.getLastRunTime(),
+          syncStats: stats,
+          message: 'Sync service status retrieved successfully'
+        }
+      });
+    } catch (error) {
+      console.error('[SYNC API] Error getting sync status:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'خطا در دریافت وضعیت سرویس همسانسازی'
+      });
+    }
+  });
+
+  // Manual sync trigger endpoint - POST trigger immediate sync
+  app.post('/api/admin/sync/trigger', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const result = await globalSyncService.performManualSync();
+      res.json({ 
+        success: true,
+        data: result,
+        message: 'همسانسازی دستی با موفقیت انجام شد'
+      });
+    } catch (error) {
+      console.error('[SYNC API] Error in manual sync:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'خطا در همسانسازی دستی'
+      });
+    }
+  });
+
+  // Sync service configuration endpoint - POST update sync settings
+  app.post('/api/admin/sync/config', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { enabled, intervalMinutes } = req.body;
+      
+      if (typeof enabled === 'boolean') {
+        if (enabled) {
+          globalSyncService.enable();
+        } else {
+          globalSyncService.disable();
+        }
+      }
+      
+      if (typeof intervalMinutes === 'number' && intervalMinutes > 0) {
+        globalSyncService.setInterval(intervalMinutes);
+      }
+      
+      res.json({ 
+        success: true,
+        data: {
+          enabled: globalSyncService.isEnabled(),
+          intervalMinutes: globalSyncService.getIntervalMinutes()
+        },
+        message: 'تنظیمات سرویس همسانسازی بروزرسانی شد'
+      });
+    } catch (error) {
+      console.error('[SYNC API] Error updating sync config:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'خطا در بروزرسانی تنظیمات همسانسازی'
+      });
+    }
+  });
+
+  // Sync conflicts endpoint - GET current conflicts that need resolution
+  app.get('/api/admin/sync/conflicts', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const conflicts = await globalSyncService.getConflicts();
+      res.json({ 
+        success: true,
+        data: conflicts,
+        message: 'Sync conflicts retrieved successfully'
+      });
+    } catch (error) {
+      console.error('[SYNC API] Error getting sync conflicts:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'خطا در دریافت تعارضات همسانسازی'
+      });
+    }
+  });
+
+  // Resolve conflict endpoint - POST resolve specific conflict
+  app.post('/api/admin/sync/resolve-conflict', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { orderNumber, resolution } = req.body;
+      
+      if (!orderNumber || !resolution) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'شماره سفارش و نوع حل تعارض الزامی است'
+        });
+      }
+      
+      const result = await globalSyncService.resolveConflict(orderNumber, resolution);
+      res.json({ 
+        success: true,
+        data: result,
+        message: 'تعارض با موفقیت حل شد'
+      });
+    } catch (error) {
+      console.error('[SYNC API] Error resolving conflict:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'خطا در حل تعارض'
+      });
+    }
+  });
+
+  // Manual sync service API endpoints
+  app.post('/api/sync/manual-sync', requireAuth, async (req, res) => {
+    try {
+      console.log('🔄 [MANUAL SYNC] Starting manual synchronization...');
+      const result = await globalSyncService.performFullSync();
+      res.json({ 
+        success: true, 
+        message: 'همگام‌سازی دستی با موفقیت انجام شد',
+        result 
+      });
+    } catch (error) {
+      console.error('❌ [MANUAL SYNC] Manual sync failed:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'خطا در همگام‌سازی دستی'
+      });
+    }
+  });
+
+  app.get('/api/sync/status', requireAuth, async (req, res) => {
+    try {
+      const stats = await globalSyncService.getSyncStats();
+      res.json({ 
+        success: true, 
+        stats,
+        isRunning: globalSyncService.isRunning()
+      });
+    } catch (error) {
+      console.error('❌ [SYNC STATUS] Failed to get sync status:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'خطا در دریافت وضعیت همگام‌سازی'
+      });
+    }
+  });
 
   return httpServer;
 }
