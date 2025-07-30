@@ -1032,8 +1032,19 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
       shippingCost: shippingCost,
       notes: data.notes || '',
       shippingMethod: data.shippingMethod,
-      paymentMethod: actualWalletUsage >= beforeWalletTotal ? 'wallet_full' : 
-                    actualWalletUsage > 0 ? 'wallet_partial' : data.paymentMethod,
+      paymentMethod: (() => {
+        // Smart payment method determination
+        if (actualWalletUsage >= beforeWalletTotal) {
+          return 'wallet_full';
+        } else if (actualWalletUsage > 0) {
+          return 'wallet_partial';
+        } else if (data.paymentMethod === 'wallet_combined' && actualWalletUsage >= beforeWalletTotal) {
+          // Convert wallet_combined to wallet_full when wallet amount covers full order
+          return 'wallet_full';
+        } else {
+          return data.paymentMethod;
+        }
+      })(),
       walletAmountUsed: actualWalletUsage,
       remainingAmount: beforeWalletTotal - actualWalletUsage, // Fix: Send actual remaining amount after wallet deduction
     };

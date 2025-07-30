@@ -1207,20 +1207,33 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
     console.log('🚚 [DELIVERY LOGIC] Active delivery information:', activeDeliveryInfo);
 
-    // Handle wallet payment calculations
-    if (paymentMethod === 'wallet_full') {
+    // Handle wallet payment calculations with smart wallet_combined conversion
+    let finalPaymentMethod = paymentMethod;
+    
+    // Smart conversion: If wallet_combined and wallet amount >= total, convert to wallet_full
+    if (paymentMethod === 'wallet_combined' && walletAmount >= totalAmount) {
+      finalPaymentMethod = 'wallet_full';
+      console.log('🔄 [PAYMENT CONVERSION] wallet_combined → wallet_full (sufficient wallet balance)');
+    } else if (paymentMethod === 'wallet_combined' && walletAmount > 0 && walletAmount < totalAmount) {
+      finalPaymentMethod = 'wallet_partial';
+      console.log('🔄 [PAYMENT CONVERSION] wallet_combined → wallet_partial (insufficient wallet balance)');
+    }
+
+    orderData.paymentMethod = finalPaymentMethod;
+
+    if (finalPaymentMethod === 'wallet_full') {
       orderData.walletAmountUsed = totalAmount;
       orderData.remainingAmount = 0;
-    } else if (paymentMethod === 'wallet_partial') {
+    } else if (finalPaymentMethod === 'wallet_partial') {
       orderData.walletAmountUsed = walletAmount;
       orderData.remainingAmount = totalAmount - walletAmount;
-    } else if (paymentMethod === 'online_payment') {
+    } else if (finalPaymentMethod === 'online_payment') {
       orderData.walletAmountUsed = 0;
       orderData.remainingAmount = totalAmount;
-    } else if (paymentMethod === 'bank_receipt') {
+    } else if (finalPaymentMethod === 'bank_receipt') {
       orderData.walletAmountUsed = 0;
       orderData.remainingAmount = totalAmount;
-    } else if (paymentMethod === 'bank_transfer_grace') {
+    } else if (finalPaymentMethod === 'bank_transfer_grace') {
       orderData.walletAmountUsed = 0;
       orderData.remainingAmount = totalAmount;
       orderData.paymentGracePeriod = true; // Flag for 3-day grace period
@@ -1228,7 +1241,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
     console.log('🚀 [ORDER SUBMIT] Submitting order with complete data:', {
       endpoint: '/api/customers/orders',
-      paymentMethod,
+      originalPaymentMethod: paymentMethod,
+      finalPaymentMethod: finalPaymentMethod,
       totalAmount,
       walletAmountUsed: orderData.walletAmountUsed,
       remainingAmount: orderData.remainingAmount,
@@ -1236,7 +1250,9 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       walletAmount: walletAmount,
       'Wallet amount input value': walletAmount,
       'Payment method selected': paymentMethod,
-      'Should use wallet': paymentMethod === 'wallet_full' || paymentMethod === 'wallet_partial',
+      'Final payment method sent': finalPaymentMethod,
+      'Should use wallet': finalPaymentMethod === 'wallet_full' || finalPaymentMethod === 'wallet_partial',
+      'Payment conversion applied': paymentMethod !== finalPaymentMethod,
       orderData
     });
 
