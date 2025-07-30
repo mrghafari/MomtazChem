@@ -63,27 +63,47 @@ const AgriculturalFertilizersPage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-green-600 via-emerald-600 to-teal-700 text-white py-20">
+      <section className="relative bg-gradient-to-br from-green-600 via-emerald-600 to-teal-700 text-white py-20 overflow-hidden">
         <div className="absolute inset-0 bg-black/20"></div>
+        {/* Background Image */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30"
+          style={{ 
+            backgroundImage: "url('https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2000&q=80')" 
+          }}
+        ></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-white/20 rounded-full mb-6">
-              <Wheat className="h-10 w-10 text-white" />
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <div className="inline-flex items-center justify-center w-20 h-20 bg-white/20 rounded-full mb-6">
+                <Wheat className="h-10 w-10 text-white" />
+              </div>
+              <h1 className="text-5xl font-bold mb-6">محصولات کشاورزی پیشرفته</h1>
+              <h2 className="text-3xl font-semibold mb-4 text-green-100">Advanced Agricultural Solutions</h2>
+              <p className="text-xl text-green-100 mb-8">
+                راه‌حل‌های پیشرفته کود شیمیایی برای بهبود عملکرد محصولات کشاورزی، ترویج شیوه‌های کشاورزی پایدار و تقویت سلامت خاک در عراق و خاورمیانه
+              </p>
+              <div className="flex flex-wrap gap-4 mb-6">
+                <Badge className="bg-white/20 text-white border-0 px-4 py-2">
+                  🌾 عملکرد بالا
+                </Badge>
+                <Badge className="bg-white/20 text-white border-0 px-4 py-2">
+                  🌱 سلامت خاک
+                </Badge>
+                <Badge className="bg-white/20 text-white border-0 px-4 py-2">
+                  ♻️ پایدار
+                </Badge>
+                <Badge className="bg-white/20 text-white border-0 px-4 py-2">
+                  🔬 علمی
+                </Badge>
+              </div>
             </div>
-            <h1 className="text-5xl font-bold mb-6">Agricultural Fertilizers</h1>
-            <p className="text-xl text-green-100 max-w-3xl mx-auto mb-8">
-              Advanced fertilizer solutions designed to maximize crop yields while promoting sustainable farming practices and soil health enhancement.
-            </p>
-            <div className="flex flex-wrap justify-center gap-4">
-              <Badge className="bg-white/20 text-white border-0 px-4 py-2">
-                High Yield
-              </Badge>
-              <Badge className="bg-white/20 text-white border-0 px-4 py-2">
-                Soil Health
-              </Badge>
-              <Badge className="bg-white/20 text-white border-0 px-4 py-2">
-                Sustainable
-              </Badge>
+            <div className="lg:text-right">
+              <img 
+                src="https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" 
+                alt="Agricultural Fertilizers - Modern Farming"
+                className="w-full h-96 object-cover rounded-2xl shadow-2xl"
+              />
             </div>
           </div>
         </div>
@@ -93,22 +113,49 @@ const AgriculturalFertilizersPage = () => {
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Why Choose Our Agricultural Fertilizers?</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Our scientifically formulated fertilizers deliver superior results for modern agriculture
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">چرا محصولات کشاورزی ممتازکم؟</h2>
+            <p className="text-xl text-green-600 font-semibold mb-2">Why Choose Momtazchem Agricultural Solutions?</p>
+            <p className="text-gray-600 max-w-3xl mx-auto">
+              فرمولاسیون علمی پیشرفته ما نتایج برتری برای کشاورزی مدرن ارائه می‌دهد و به بهبود عملکرد محصولات در شرایط آب و هوایی عراق کمک می‌کند
             </p>
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
             {benefits.map((benefit, index) => (
-              <div key={index} className="text-center">
-                <div className={`w-16 h-16 ${benefit.bgColor} rounded-full flex items-center justify-center mx-auto mb-4`}>
-                  {benefit.icon}
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">{benefit.title}</h3>
-                <p className="text-gray-600">{benefit.description}</p>
-              </div>
+              <Card key={index} className="text-center p-6 hover:shadow-lg transition-shadow border-2 hover:border-green-200">
+                <CardContent className="p-0">
+                  <div className={`w-20 h-20 ${benefit.bgColor} rounded-full flex items-center justify-center mx-auto mb-6`}>
+                    {benefit.icon}
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-3">{benefit.title}</h3>
+                  <p className="text-gray-600 leading-relaxed">{benefit.description}</p>
+                </CardContent>
+              </Card>
             ))}
+          </div>
+          
+          {/* Additional Benefits Grid */}
+          <div className="mt-16 grid md:grid-cols-4 gap-6">
+            <div className="bg-green-50 rounded-lg p-6 text-center">
+              <div className="text-3xl mb-3">🧪</div>
+              <h4 className="font-semibold text-gray-900 mb-2">تست شده در آزمایشگاه</h4>
+              <p className="text-sm text-gray-600">کیفیت بالا تضمین شده</p>
+            </div>
+            <div className="bg-blue-50 rounded-lg p-6 text-center">
+              <div className="text-3xl mb-3">🌍</div>
+              <h4 className="font-semibold text-gray-900 mb-2">سازگار با محیط زیست</h4>
+              <p className="text-sm text-gray-600">حفظ کیفیت خاک</p>
+            </div>
+            <div className="bg-yellow-50 rounded-lg p-6 text-center">
+              <div className="text-3xl mb-3">📈</div>
+              <h4 className="font-semibold text-gray-900 mb-2">افزایش عملکرد</h4>
+              <p className="text-sm text-gray-600">تا 40% بهبود محصول</p>
+            </div>
+            <div className="bg-purple-50 rounded-lg p-6 text-center">
+              <div className="text-3xl mb-3">🎯</div>
+              <h4 className="font-semibold text-gray-900 mb-2">مناسب برای عراق</h4>
+              <p className="text-sm text-gray-600">خاک و آب و هوای منطقه</p>
+            </div>
           </div>
         </div>
       </section>
@@ -139,19 +186,113 @@ const AgriculturalFertilizersPage = () => {
       </section>
 
       {/* Crop Types Section */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-gradient-to-br from-green-50 to-emerald-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Suitable for All Crop Types</h2>
-            <p className="text-gray-600">Our fertilizers are formulated for diverse agricultural applications</p>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">انواع محصولات کشاورزی قابل پشتیبانی</h2>
+            <p className="text-xl text-green-600 font-semibold mb-2">Suitable for All Iraqi Crop Types</p>
+            <p className="text-gray-600 max-w-3xl mx-auto">
+              محصولات ما برای انواع مختلف کشت در مناطق مختلف عراق طراحی شده‌اند و در شرایط آب و هوایی این منطقه بهترین نتایج را ارائه می‌دهند
+            </p>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-4">
-            {cropTypes.map((crop, index) => (
-              <div key={index} className="bg-gray-50 rounded-lg p-4 text-center border border-gray-200 hover:border-green-300 hover:shadow-md transition-all duration-200">
-                <span className="text-gray-800 font-medium">{crop}</span>
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow border-2 hover:border-green-200">
+              <div className="text-4xl mb-4 text-center">🌾</div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2 text-center">غلات و دانه‌ها</h3>
+              <p className="text-sm text-gray-600 text-center mb-4">Cereals & Grains</p>
+              <ul className="text-sm text-gray-600 space-y-1">
+                <li>• گندم عراقی و بین‌المللی</li>
+                <li>• جو و برنج</li>
+                <li>• ذرت و سورگوم</li>
+                <li>• فستق و آفتابگردان</li>
+              </ul>
+            </div>
+            
+            <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow border-2 hover:border-green-200">
+              <div className="text-4xl mb-4 text-center">🥬</div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2 text-center">سبزیجات و حبوبات</h3>
+              <p className="text-sm text-gray-600 text-center mb-4">Vegetables & Legumes</p>
+              <ul className="text-sm text-gray-600 space-y-1">
+                <li>• گوجه فرنگی و خیار</li>
+                <li>• لوبیا و لپه</li>
+                <li>• سیب‌زمینی و پیاز</li>
+                <li>• سبزیجات برگی</li>
+              </ul>
+            </div>
+            
+            <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow border-2 hover:border-green-200">
+              <div className="text-4xl mb-4 text-center">🌳</div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2 text-center">درختان میوه</h3>
+              <p className="text-sm text-gray-600 text-center mb-4">Fruit Trees</p>
+              <ul className="text-sm text-gray-600 space-y-1">
+                <li>• خرما و انجیر</li>
+                <li>• مرکبات و انار</li>
+                <li>• انگور و بادام</li>
+                <li>• زیتون و سیب</li>
+              </ul>
+            </div>
+            
+            <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow border-2 hover:border-green-200">
+              <div className="text-4xl mb-4 text-center">🏭</div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2 text-center">محصولات صنعتی</h3>
+              <p className="text-sm text-gray-600 text-center mb-4">Industrial Crops</p>
+              <ul className="text-sm text-gray-600 space-y-1">
+                <li>• پنبه و کتان</li>
+                <li>• نیشکر و چغندرقند</li>
+                <li>• کلزا و کنجد</li>
+                <li>• گیاهان دارویی</li>
+              </ul>
+            </div>
+            
+            <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow border-2 hover:border-green-200">
+              <div className="text-4xl mb-4 text-center">🌿</div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2 text-center">مراتع و علوفه</h3>
+              <p className="text-sm text-gray-600 text-center mb-4">Pasture & Forage</p>
+              <ul className="text-sm text-gray-600 space-y-1">
+                <li>• یونجه و شبدر</li>
+                <li>• علف‌های مرتعی</li>
+                <li>• ذرت علوفه‌ای</li>
+                <li>• چمن و فضای سبز</li>
+              </ul>
+            </div>
+            
+            <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow border-2 hover:border-green-200">
+              <div className="text-4xl mb-4 text-center">⭐</div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2 text-center">محصولات ویژه</h3>
+              <p className="text-sm text-gray-600 text-center mb-4">Specialty Crops</p>
+              <ul className="text-sm text-gray-600 space-y-1">
+                <li>• زعفران و گل محمدی</li>
+                <li>• گیاهان گلخانه‌ای</li>
+                <li>• کشت بدون خاک</li>
+                <li>• کشت ارگانیک</li>
+              </ul>
+            </div>
+          </div>
+          
+          {/* Climate Suitability */}
+          <div className="mt-16 bg-white rounded-2xl p-8 shadow-lg">
+            <div className="text-center mb-8">
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">سازگاری با شرایط آب و هوایی عراق</h3>
+              <p className="text-green-600 font-semibold">Climate Adaptability for Iraqi Conditions</p>
+            </div>
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="text-center">
+                <div className="text-3xl mb-3">🌡️</div>
+                <h4 className="font-semibold text-gray-900 mb-2">تحمل گرمای بالا</h4>
+                <p className="text-sm text-gray-600">مناسب برای تابستان‌های گرم عراق تا 50 درجه سانتیگراد</p>
               </div>
-            ))}
+              <div className="text-center">
+                <div className="text-3xl mb-3">💧</div>
+                <h4 className="font-semibold text-gray-900 mb-2">بهینه‌سازی مصرف آب</h4>
+                <p className="text-sm text-gray-600">کاهش نیاز آبی تا 30% در شرایط خشکسالی</p>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl mb-3">🧂</div>
+                <h4 className="font-semibold text-gray-900 mb-2">مقاومت به شوری</h4>
+                <p className="text-sm text-gray-600">مناسب برای خاک‌های شور مناطق جنوبی عراق</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -355,25 +496,203 @@ const AgriculturalFertilizersPage = () => {
         </div>
       </section>
 
+      {/* Technical Information Section */}
+      <section className="py-20 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">اطلاعات فنی و کاربردی</h2>
+            <p className="text-xl text-blue-600 font-semibold mb-2">Technical Information & Application Guide</p>
+            <p className="text-gray-600 max-w-3xl mx-auto">
+              راهنمای کامل استفاده از محصولات کشاورزی ممتازکم برای بهترین نتایج در شرایط کشاورزی عراق
+            </p>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-12 mb-16">
+            <div className="bg-white rounded-2xl p-8 shadow-lg">
+              <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center mr-3">
+                  <span className="text-white font-bold">🧪</span>
+                </div>
+                ترکیبات شیمیایی اصلی
+              </h3>
+              <div className="space-y-4">
+                <div className="flex items-center p-3 bg-blue-50 rounded-lg">
+                  <div className="w-3 h-3 bg-blue-500 rounded-full mr-3"></div>
+                  <span className="font-semibold text-gray-800">نیتروژن (N): 15-20%</span>
+                  <span className="text-sm text-gray-600 mr-2">- رشد برگ و ساقه</span>
+                </div>
+                <div className="flex items-center p-3 bg-purple-50 rounded-lg">
+                  <div className="w-3 h-3 bg-purple-500 rounded-full mr-3"></div>
+                  <span className="font-semibold text-gray-800">فسفر (P): 8-12%</span>
+                  <span className="text-sm text-gray-600 mr-2">- تقویت ریشه</span>
+                </div>
+                <div className="flex items-center p-3 bg-orange-50 rounded-lg">
+                  <div className="w-3 h-3 bg-orange-500 rounded-full mr-3"></div>
+                  <span className="font-semibold text-gray-800">پتاسیم (K): 10-15%</span>
+                  <span className="text-sm text-gray-600 mr-2">- مقاومت به بیماری</span>
+                </div>
+                <div className="flex items-center p-3 bg-green-50 rounded-lg">
+                  <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+                  <span className="font-semibold text-gray-800">ریزمغذی‌ها: 2-5%</span>
+                  <span className="text-sm text-gray-600 mr-2">- آهن، منگنز، روی</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl p-8 shadow-lg">
+              <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center mr-3">
+                  <span className="text-white font-bold">📋</span>
+                </div>
+                دستورالعمل مصرف
+              </h3>
+              <div className="space-y-4">
+                <div className="border-r-4 border-green-500 pr-4">
+                  <h4 className="font-semibold text-gray-900 mb-2">💧 آبیاری قبل از کود</h4>
+                  <p className="text-sm text-gray-600">خاک را 24 ساعت قبل از کودپاشی مرطوب کنید</p>
+                </div>
+                <div className="border-r-4 border-blue-500 pr-4">
+                  <h4 className="font-semibold text-gray-900 mb-2">⚖️ مقدار مصرف</h4>
+                  <p className="text-sm text-gray-600">25-50 کیلوگرم در هکتار بسته به نوع خاک</p>
+                </div>
+                <div className="border-r-4 border-yellow-500 pr-4">
+                  <h4 className="font-semibold text-gray-900 mb-2">🕐 زمان بهینه</h4>
+                  <p className="text-sm text-gray-600">صبح زود یا عصر برای جلوگیری از تبخیر</p>
+                </div>
+                <div className="border-r-4 border-purple-500 pr-4">
+                  <h4 className="font-semibold text-gray-900 mb-2">🔄 تکرار مصرف</h4>
+                  <p className="text-sm text-gray-600">هر 3-4 هفته در فصل رشد</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Application Guide */}
+          <div className="bg-white rounded-2xl p-8 shadow-lg">
+            <h3 className="text-2xl font-bold text-gray-900 mb-8 text-center">راهنمای کاربرد بر اساس نوع خاک عراق</h3>
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="text-center p-6 bg-yellow-50 rounded-xl">
+                <div className="text-4xl mb-4">🏜️</div>
+                <h4 className="font-bold text-gray-900 mb-3">خاک‌های شنی (صحرا)</h4>
+                <ul className="text-sm text-gray-600 space-y-2 text-right">
+                  <li>• مصرف بیشتر: 40-50 کیلوگرم/هکتار</li>
+                  <li>• آبیاری مکرر پس از کود</li>
+                  <li>• استفاده از کود کند رهش</li>
+                  <li>• مناطق: الانبار، نجف، کربلا</li>
+                </ul>
+              </div>
+              
+              <div className="text-center p-6 bg-green-50 rounded-xl">
+                <div className="text-4xl mb-4">🌱</div>
+                <h4 className="font-bold text-gray-900 mb-3">خاک‌های رسی (حاصلخیز)</h4>
+                <ul className="text-sm text-gray-600 space-y-2 text-right">
+                  <li>• مصرف متوسط: 25-35 کیلوگرم/هکتار</li>
+                  <li>• آبیاری معتدل</li>
+                  <li>• کود مایع در کنار جامد</li>
+                  <li>• مناطق: بغداد، دیاله، میسان</li>
+                </ul>
+              </div>
+              
+              <div className="text-center p-6 bg-blue-50 rounded-xl">
+                <div className="text-4xl mb-4">💧</div>
+                <h4 className="font-bold text-gray-900 mb-3">خاک‌های شور (جنوب)</h4>
+                <ul className="text-sm text-gray-600 space-y-2 text-right">
+                  <li>• کود مقاوم به شوری</li>
+                  <li>• شستشوی خاک قبل از کود</li>
+                  <li>• افزودن مواد اصلاح‌کننده</li>
+                  <li>• مناطق: بصره، ذی‌قار، واسط</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          {/* Success Stories */}
+          <div className="mt-16 bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl p-8 text-white">
+            <div className="text-center mb-8">
+              <h3 className="text-2xl font-bold mb-2">نتایج موثق کشاورزان عراق</h3>
+              <p className="text-green-100">Real Results from Iraqi Farmers</p>
+            </div>
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="bg-white/10 rounded-lg p-6 text-center">
+                <div className="text-3xl font-bold mb-2">+42%</div>
+                <p className="text-sm">افزایش محصول گندم در استان نینوا</p>
+              </div>
+              <div className="bg-white/10 rounded-lg p-6 text-center">
+                <div className="text-3xl font-bold mb-2">-30%</div>
+                <p className="text-sm">کاهش مصرف آب در مزارع خرما</p>
+              </div>
+              <div className="bg-white/10 rounded-lg p-6 text-center">
+                <div className="text-3xl font-bold mb-2">+65%</div>
+                <p className="text-sm">بهبود کیفیت محصولات سبزیجات</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
-      <section className="py-16 bg-gradient-to-r from-green-600 to-emerald-600 text-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold mb-4">Ready to Boost Your Harvest?</h2>
-          <p className="text-xl text-green-100 mb-8">
-            Contact our agricultural specialists for customized fertilizer recommendations and expert farming advice.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+      <section className="py-20 bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 text-white relative overflow-hidden">
+        <div className="absolute inset-0">
+          <img 
+            src="https://images.unsplash.com/photo-1592982124091-833c0e19487f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2000&q=80" 
+            alt="Agricultural Success - Iraqi Farmland"
+            className="w-full h-full object-cover opacity-20"
+          />
+        </div>
+        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="mb-8">
+            <h2 className="text-4xl font-bold mb-4">آماده‌اید محصولتان را افزایش دهید؟</h2>
+            <p className="text-2xl text-green-100 font-semibold mb-2">Ready to Boost Your Iraqi Harvest?</p>
+            <p className="text-xl text-green-100 max-w-3xl mx-auto">
+              با متخصصان کشاورزی ممتازکم تماس بگیرید و بهترین توصیه‌های کودی و مشاوره تخصصی کشاورزی را برای شرایط عراق دریافت کنید
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-6 mb-12">
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
+              <div className="text-3xl mb-3">🌾</div>
+              <h3 className="text-lg font-semibold mb-2">مشاوره رایگان</h3>
+              <p className="text-sm text-green-100">تماس با کارشناسان کشاورزی</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
+              <div className="text-3xl mb-3">📞</div>
+              <h3 className="text-lg font-semibold mb-2">پشتیبانی 24/7</h3>
+              <p className="text-sm text-green-100">همه روزه در خدمت شما</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
+              <div className="text-3xl mb-3">🚚</div>
+              <h3 className="text-lg font-semibold mb-2">تحویل سریع</h3>
+              <p className="text-sm text-green-100">ارسال به سراسر عراق</p>
+            </div>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row gap-6 justify-center">
             <Link href="/contact">
-              <Button size="lg" className="bg-white text-green-600 hover:bg-gray-100">
-                Get Agricultural Consultation
-                <ArrowRight className="ml-2 h-5 w-5" />
+              <Button size="lg" className="bg-white text-green-600 hover:bg-gray-100 font-bold px-8 py-4 text-lg">
+                مشاوره کشاورزی رایگان
+                <ArrowRight className="mr-3 h-6 w-6" />
               </Button>
             </Link>
-            <Link href="/services">
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-green-600 bg-[#836fe5]">
-                View All Services
+            <Link href="/shop">
+              <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white hover:text-green-600 font-bold px-8 py-4 text-lg">
+                مشاهده فروشگاه آنلاین
+                <Wheat className="mr-3 h-6 w-6" />
               </Button>
             </Link>
+          </div>
+          
+          <div className="mt-12 bg-white/10 backdrop-blur-sm rounded-2xl p-6">
+            <h3 className="text-xl font-bold mb-4">تماس مستقیم با تیم فنی</h3>
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-6">
+              <div className="text-center">
+                <p className="text-green-100">شماره تماس:</p>
+                <p className="text-xl font-bold">+964 770 123 4567</p>
+              </div>
+              <div className="text-center">
+                <p className="text-green-100">ایمیل:</p>
+                <p className="text-xl font-bold">agriculture@momtazchem.com</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
