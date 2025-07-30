@@ -24545,6 +24545,94 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     res.json({ success: true, message: "خروج موفق" });
   });
 
+  // Get approved financial orders (completed financial approval)
+  app.get('/api/financial/approved-orders', async (req, res) => {
+    try {
+      console.log('✅ [APPROVED ORDERS] Fetching financially approved orders...');
+      
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        SELECT 
+          om.*,
+          co.order_number,
+          co.total_amount,
+          co.currency,
+          co.customer_id,
+          co.guest_email,
+          co.guest_phone,
+          co.payment_method,
+          co.payment_status,
+          co.status as customer_status,
+          co.delivery_address,
+          co.delivery_city,
+          co.delivery_province,
+          co.delivery_postal_code,
+          co.invoice_type,
+          co.invoice_converted_at,
+          -- Customer info from CRM
+          crm.full_name as customer_name,
+          crm.phone as customer_phone,
+          crm.email as customer_email,
+          crm.address as customer_address,
+          crm.city as customer_city_region
+        FROM order_management om
+        LEFT JOIN customer_orders co ON om.customer_order_id = co.id
+        LEFT JOIN crm_customers crm ON co.customer_id = crm.id
+        WHERE om.current_status IN ('warehouse_pending', 'warehouse_ready', 'logistics_pending', 'out_for_delivery', 'delivered')
+          AND om.financial_reviewed_at IS NOT NULL
+          AND om.financial_reviewer_id IS NOT NULL
+        ORDER BY om.financial_reviewed_at DESC
+        LIMIT 50
+      `);
+      
+      // Helper function for payment source labels
+      function getPaymentSourceLabel(paymentMethod: string) {
+        switch(paymentMethod) {
+          case 'wallet_full': return 'کیف پول (کامل)';
+          case 'wallet_partial': return 'ترکیبی (کیف پول + بانک)';
+          case 'online_payment': return 'درگاه بانکی';
+          case 'bank_transfer_grace': return 'مهلت‌دار (حواله بانکی)';
+          default: return 'نامشخص';
+        }
+      }
+      
+      const mappedOrders = result.rows.map(row => ({
+        id: row.id,
+        customerOrderId: row.customer_order_id,
+        orderNumber: row.order_number,
+        currentStatus: row.current_status,
+        paymentMethod: row.payment_method || 'نامشخص',
+        paymentSourceLabel: getPaymentSourceLabel(row.payment_method),
+        totalAmount: row.total_amount || '0',
+        customerName: row.customer_name || row.guest_email || 'مشتری ناشناس',
+        customerEmail: row.customer_email || row.guest_email,
+        customerPhone: row.customer_phone || row.guest_phone,
+        createdAt: row.created_at,
+        financialNotes: row.financial_notes,
+        financialReviewedAt: row.financial_reviewed_at,
+        invoiceType: row.invoice_type,
+        invoiceConvertedAt: row.invoice_converted_at,
+        shippingAddress: {
+          name: row.customer_name || 'نام نامشخص',
+          phone: row.customer_phone || row.guest_phone || '',
+          address: row.delivery_address || row.customer_address || '',
+          city: row.delivery_city || row.customer_city_region || '',
+          postalCode: row.delivery_postal_code || ''
+        }
+      }));
+      
+      console.log(`✅ [APPROVED ORDERS] Found ${mappedOrders.length} approved orders`);
+      
+      res.json(mappedOrders);
+    } catch (error) {
+      console.error('❌ [APPROVED ORDERS] Error fetching approved orders:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در دریافت سفارشات تایید شده" 
+      });
+    }
+  });
+
   // Financial auth check - temporary solution for session issue
   app.get('/api/financial/auth/me', (req: any, res) => {
     // Temporary user for testing VAT management

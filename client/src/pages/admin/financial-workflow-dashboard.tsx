@@ -43,6 +43,9 @@ interface FinancialOrder {
   autoApprovalScheduledAt?: string;
   isAutoApprovalEnabled: boolean;
   financialNotes?: string;
+  financialReviewedAt?: string;
+  invoiceType?: string;
+  invoiceConvertedAt?: string;
   totalAmount: string;
   customerName: string;
   createdAt: string;
@@ -70,6 +73,12 @@ export default function FinancialWorkflowDashboard() {
   // لیست سفارشات در انتظار بررسی مالی
   const { data: orders, isLoading } = useQuery<FinancialOrder[]>({
     queryKey: ['/api/financial/pending-orders'],
+    refetchInterval: 30000 // تازه‌سازی هر 30 ثانیه
+  });
+
+  // لیست سفارشات تایید شده مالی
+  const { data: approvedOrders, isLoading: isLoadingApproved } = useQuery<FinancialOrder[]>({
+    queryKey: ['/api/financial/approved-orders'],
     refetchInterval: 30000 // تازه‌سازی هر 30 ثانیه
   });
 
@@ -274,7 +283,7 @@ export default function FinancialWorkflowDashboard() {
             مهلت‌دار
           </TabsTrigger>
           <TabsTrigger value="approved" className="text-xs md:text-sm">
-            تایید شده
+            تایید شده ({approvedOrders?.length || 0})
           </TabsTrigger>
         </TabsList>
 
@@ -859,6 +868,140 @@ export default function FinancialWorkflowDashboard() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="approved" className="space-y-4">
+          {isLoadingApproved ? (
+            <Card>
+              <CardContent className="text-center py-12">
+                <Timer className="h-16 w-16 text-green-500 mx-auto mb-4 animate-spin" />
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                  در حال بارگیری سفارشات تایید شده...
+                </h3>
+              </CardContent>
+            </Card>
+          ) : approvedOrders?.length === 0 ? (
+            <Card>
+              <CardContent className="text-center py-12">
+                <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                  سفارش تایید شده‌ای یافت نشد
+                </h3>
+                <p className="text-gray-600">
+                  در حال حاضر سفارشی تایید مالی نشده است
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2">
+              {approvedOrders?.map((order) => (
+                <Card key={order.id} className="border-green-200 bg-green-50/50">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <CheckCircle className="h-5 w-5 text-green-600" />
+                        <div>
+                          <Badge className="bg-green-100 text-green-800 border-green-300">
+                            تایید شده
+                          </Badge>
+                          <p className="text-sm text-gray-600 mt-1">
+                            {order.paymentSourceLabel}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <h3 className="font-bold text-lg">
+                          سفارش {order.orderNumber}
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          {new Date(order.createdAt).toLocaleDateString('fa-IR')}
+                        </p>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {/* اطلاعات مشتری */}
+                    <div className="flex items-center justify-between bg-white p-3 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-gray-500" />
+                        <span className="text-gray-600">مشتری:</span>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-medium">{order.customerName}</div>
+                        {order.customerPhone && (
+                          <div className="text-sm text-gray-600">{order.customerPhone}</div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* مبلغ کل */}
+                    <div className="flex justify-between items-center bg-white p-3 rounded-lg">
+                      <span className="text-gray-600">مبلغ کل:</span>
+                      <span className="font-bold text-lg text-green-600">
+                        {parseFloat(order.totalAmount).toLocaleString()} دینار
+                      </span>
+                    </div>
+
+                    {/* وضعیت فعلی */}
+                    <div className="flex justify-between items-center bg-white p-3 rounded-lg">
+                      <span className="text-gray-600">وضعیت فعلی:</span>
+                      <span className="font-medium text-blue-600">
+                        {getStatusBadge(order.currentStatus)}
+                      </span>
+                    </div>
+
+                    {/* اطلاعات تایید مالی */}
+                    {order.financialReviewedAt && (
+                      <div className="bg-green-100 p-3 rounded-lg">
+                        <div className="flex items-center gap-2 mb-2">
+                          <CheckCircle className="h-4 w-4 text-green-600" />
+                          <span className="font-medium text-green-800">تایید مالی:</span>
+                        </div>
+                        <div className="text-sm text-green-700">
+                          <div>تاریخ تایید: {new Date(order.financialReviewedAt).toLocaleDateString('fa-IR')}</div>
+                          <div>زمان تایید: {new Date(order.financialReviewedAt).toLocaleTimeString('fa-IR')}</div>
+                          {order.financialNotes && (
+                            <div className="mt-1">یادداشت: {order.financialNotes}</div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* اطلاعات فاکتور */}
+                    {order.invoiceType && (
+                      <div className="bg-blue-100 p-3 rounded-lg">
+                        <div className="flex items-center gap-2 mb-2">
+                          <FileText className="h-4 w-4 text-blue-600" />
+                          <span className="font-medium text-blue-800">وضعیت فاکتور:</span>
+                        </div>
+                        <div className="text-sm text-blue-700">
+                          <div>نوع فاکتور: {order.invoiceType === 'official_invoice' ? 'فاکتور رسمی' : 'فاکتور موقت'}</div>
+                          {order.invoiceConvertedAt && (
+                            <div>تاریخ تبدیل: {new Date(order.invoiceConvertedAt).toLocaleDateString('fa-IR')}</div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* آدرس تحویل */}
+                    {order.shippingAddress && (
+                      <div className="bg-white p-3 rounded-lg">
+                        <div className="flex items-center gap-2 mb-2">
+                          <MapPin className="h-4 w-4 text-gray-500" />
+                          <span className="text-gray-600">آدرس تحویل:</span>
+                        </div>
+                        <div className="text-sm text-gray-700">
+                          <div>{order.shippingAddress.address}</div>
+                          <div>{order.shippingAddress.city}</div>
+                          <div className="text-gray-600">{order.shippingAddress.phone}</div>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </TabsContent>
       </Tabs>
 
