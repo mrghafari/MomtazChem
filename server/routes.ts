@@ -22325,19 +22325,28 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         const busBasePrice = 15000; // Base price for bus service in IQD
         const busTotalCost = busBasePrice + (distance * busCostPerKm);
         
+        // Return intercity bus with optimalVehicle format for consistency with frontend
         return res.json({
           success: true,
           data: {
-            transportMethod: 'intercity_bus',
-            message: `🚌 انتخاب خودکار خط مسافربری بین شهری برای مسیر ${originCity} به ${destinationCity}`,
-            selectedOption: {
-              transportType: 'intercity_bus',
-              transportName: 'خط مسافربری بین شهری',
-              transportNameEn: 'Intercity Bus Line',
-              routeDescription: `${originCity} ← → ${destinationCity}`,
-              distance: distance,
+            optimalVehicle: {
+              vehicleId: 'intercity_bus',
+              vehicleName: 'خط مسافربری بین شهری',
+              vehicleNameEn: 'Intercity Bus Line',
+              vehicleType: 'intercity_bus',
+              maxWeight: 50,
+              routeType: 'highway',
+              basePrice: busBasePrice,
+              distanceCost: distance * busCostPerKm,
+              weightCost: 0,
               totalCost: busTotalCost,
               estimatedTime: Math.round(distance / 60 * 60), // Assuming 60 km/h average speed
+              fuelConsumption: 0,
+              priority: 0,
+              weight: weightKg,
+              transportMethod: 'intercity_bus',
+              message: `🚌 انتخاب خودکار خط مسافربری بین شهری برای مسیر ${originCity} به ${destinationCity}`,
+              routeDescription: `${originCity} ← → ${destinationCity}`,
               advantages: [
                 'هزینه کمتر نسبت به حمل بار خصوصی',
                 'خدمات منظم و قابل اعتماد',
@@ -22345,19 +22354,19 @@ ${message ? `Additional Requirements:\n${message}` : ''}
                 'کاهش ترافیک و آلودگی محیط زیست'
               ],
               restrictions: {
-                maxWeight: 50, // kg - typical bus cargo limit
+                maxWeight: 50,
                 weightExceeded: weightKg > 50,
                 message: weightKg > 50 ? `محموله شما ${weightKg} کیلوگرم است و از حد مجاز خط مسافربری (50 کیلوگرم) تجاوز می‌کند` : null
               },
               safetyCompliant: true,
               flammableExcluded: true
             },
-            hasIntercityBusOption: true,
-            routeInfo: {
-              origin: originCity,
+            alternatives: [],
+            calculationDetails: {
+              weight: weightKg,
               destination: destinationCity,
               distance: distance,
-              estimatedDuration: `${Math.round(distance / 60)} ساعت`
+              routeType: 'highway'
             }
           }
         });
