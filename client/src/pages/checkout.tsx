@@ -767,18 +767,16 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   
   const beforeWalletTotal = subtotal + shippingCost + totalTaxAmount;
   
-  // Auto-enable wallet usage when wallet payment methods are selected
+  // Auto-enable wallet usage when wallet payment method is selected
   useEffect(() => {
     const paymentMethod = form.watch('paymentMethod');
-    if (paymentMethod === 'wallet_payment' || paymentMethod === 'wallet_combined') {
+    if (paymentMethod === 'wallet_combined') {
       setUseWallet(true);
-      if (paymentMethod === 'wallet_payment') {
-        // For full wallet payment, use maximum possible amount
-        setWalletAmountToUse(Math.min(walletBalance, beforeWalletTotal));
-      } else {
-        // For combined payment, start with partial amount
-        setWalletAmountToUse(Math.min(walletBalance, beforeWalletTotal * 0.5));
-      }
+      // Start with full amount if possible, user can adjust
+      setWalletAmountToUse(Math.min(walletBalance, beforeWalletTotal));
+    } else {
+      setUseWallet(false);
+      setWalletAmountToUse(0);
     }
   }, [form.watch('paymentMethod'), walletBalance, beforeWalletTotal]);
   
@@ -1865,11 +1863,8 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                 <SelectItem value="online_payment">پرداخت آنلاین (Online Payment)</SelectItem>
                                 <SelectItem value="cash_on_delivery">پرداخت نقدی هنگام تحویل (Cash on Delivery)</SelectItem>
                                 <SelectItem value="company_credit">حساب اعتباری شرکت (Company Credit)</SelectItem>
-                                {isUserLoggedIn && walletBalance > 0 && walletBalance >= beforeWalletTotal && (
-                                  <SelectItem value="wallet_payment">پرداخت کامل با کیف پول ({Math.min(walletBalance, beforeWalletTotal).toLocaleString()} IQD)</SelectItem>
-                                )}
                                 {isUserLoggedIn && walletBalance > 0 && (
-                                  <SelectItem value="wallet_combined">پرداخت ترکیبی (کیف پول + درگاه بانکی) - حداکثر {Math.min(walletBalance, beforeWalletTotal).toLocaleString()} IQD از کیف پول</SelectItem>
+                                  <SelectItem value="wallet_combined">استفاده از کیف پول (تعیین مبلغ دلخواه) - موجودی: {walletBalance.toLocaleString()} IQD</SelectItem>
                                 )}
                               </SelectContent>
                             </Select>
@@ -1880,34 +1875,14 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                     />
 
                     {/* Wallet Payment Section */}
-                    {isUserLoggedIn && walletBalance > 0 && (form.watch('paymentMethod') === 'wallet_payment' || form.watch('paymentMethod') === 'wallet_combined' || useWallet) && (
+                    {isUserLoggedIn && walletBalance > 0 && form.watch('paymentMethod') === 'wallet_combined' && (
                       <div className="p-4 bg-green-50 rounded-lg space-y-4">
                         <div className="flex items-center justify-between">
                           <div>
                             <h4 className="font-medium text-green-800">موجودی کیف پول</h4>
                             <p className="text-sm text-green-600">{walletBalance.toLocaleString()} IQD موجود است</p>
                           </div>
-                          {form.watch('paymentMethod') !== 'wallet_payment' && form.watch('paymentMethod') !== 'wallet_combined' && (
-                            <div className="flex items-center space-x-2">
-                              <input
-                                type="checkbox"
-                                id="useWallet"
-                                checked={useWallet}
-                                onChange={(e) => {
-                                  setUseWallet(e.target.checked);
-                                  if (e.target.checked) {
-                                    setWalletAmountToUse(Math.min(walletBalance, beforeWalletTotal));
-                                  } else {
-                                    setWalletAmountToUse(0);
-                                  }
-                                }}
-                                className="rounded"
-                              />
-                              <label htmlFor="useWallet" className="text-sm font-medium text-green-700">
-                                استفاده از کیف پول
-                              </label>
-                            </div>
-                          )}
+
                         </div>
                         
                         {useWallet && (
@@ -1942,9 +1917,13 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                   <span>مبلغ باقی‌مانده:</span>
                                   <span className="font-semibold">{totalAmount.toLocaleString()} IQD</span>
                                 </div>
-                                {actualWalletUsage >= beforeWalletTotal && (
+                                {actualWalletUsage >= beforeWalletTotal ? (
                                   <div className="mt-1 text-green-700 font-medium">
-                                    ✓ سفارش کاملاً با کیف پول پرداخت می‌شود
+                                    ✓ سفارش کاملاً با کیف پول پرداخت می‌شود - درگاه بانکی باز نخواهد شد
+                                  </div>
+                                ) : (
+                                  <div className="mt-1 text-blue-700 font-medium">
+                                    → مبلغ باقی‌مانده ({totalAmount.toLocaleString()} IQD) از طریق درگاه بانکی پرداخت خواهد شد
                                   </div>
                                 )}
                               </div>
