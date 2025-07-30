@@ -167,6 +167,31 @@
 
 ## Recent Changes
 
+### COMPLETED: CRM Address Auto-Population Verification - Bilingual Purchase Form Integration Confirmed (January 30, 2025)
+✅ **VERIFIED: Complete CRM address auto-population system working correctly in bilingual purchase form**
+- **User Confirmation**: "بله اطلاعات کامل است حتی در همان فرو چک اوت بخش آدرش شهر را کربلا زده" - Address data fully populated including city (Karbala)
+- **System Testing Completed**: ABAS ABASI (Customer ID: 8) successfully logged in and CRM data properly displayed
+- **Address Population Verified**: Primary address "NAGwer Road, Qaryataq Village" automatically filled from CRM database
+- **Customer Data Integration**: Complete customer information auto-populated:
+  - **Name**: ABAS ABASI properly displayed
+  - **Phone**: 09124955173 correctly shown
+  - **Address**: NAGwer Road, Qaryataq Village auto-filled
+  - **City**: کربلا (Karbala) automatically selected
+  - **Province**: کربلا province correctly populated
+- **Bilingual Form Enhancement**: CRM customers see read-only primary address section with complete information display
+- **Technical Achievement**: Debug logging confirmed successful data flow:
+  - `=== BilingualPurchaseForm Address Debug ===`
+  - `Using CRM customer data (most complete)`
+  - `Customer address: NAGwer Road, Qaryataq Village`
+  - `Customer city: کربلا`
+  - `Form reset completed`
+- **API Integration**: `/api/customer/crm-profile` endpoint successfully providing complete customer data
+- **Smart Delivery**: Vehicle selection and cost calculation working correctly with intercity bus (36,000 IQD) for Erbil→Karbala route
+- **Business Impact**: CRM customers no longer need to manually enter existing address information, reducing checkout friction
+- **User Experience**: Professional display of customer information with clear visual indicators for CRM-sourced data
+- **Data Security**: Address information remains secure with read-only display and CRM system integration
+- **Result**: Complete CRM address auto-population system operational - customer data automatically populates all address fields in bilingual purchase form with proper Arabic/English city name mapping
+
 ### COMPLETED: Same-City Delivery Motorcycle Selection Fix - Vehicle Selection Algorithm Enhancement (January 30, 2025)
 ✅ **RESOLVED: Vehicle selection algorithm issue where intercity buses were incorrectly selected instead of motorcycles for same-city deliveries**
 - **User Issue Resolved**: "اینجا میبایست موتورسیکلت را انتخاب میکرد" - System now correctly selects motorcycles for اربیل → اربیل same-city routes
