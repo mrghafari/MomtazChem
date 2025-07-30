@@ -352,20 +352,35 @@ function FinanceOrders() {
         title: "✅ سفارش تایید شد",
         description: "پرداخت تایید شد و سفارش به واحد انبار منتقل شد"
       });
-      // Invalidate all finance-related queries
+      
+      // Enhanced cache invalidation strategy
       queryClient.invalidateQueries({ queryKey: ['/api/order-management/financial'] });
       queryClient.invalidateQueries({ queryKey: ['/api/financial/orders'] });
       queryClient.invalidateQueries({ queryKey: ['/api/financial/approved-orders'] });
       
-      // Force refresh the data immediately
-      refetch();
-      refetchApproved();
+      // Also invalidate warehouse queries since orders move there
+      queryClient.invalidateQueries({ queryKey: ['/api/order-management/warehouse'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/warehouse'] });
+      
+      // Invalidate all order tracking queries
+      queryClient.invalidateQueries({ queryKey: ['/api/orders/tracking'] });
+      
+      // Clear ALL query cache for these keys to force fresh data
+      queryClient.removeQueries({ queryKey: ['/api/financial/orders'] });
+      queryClient.removeQueries({ queryKey: ['/api/financial/approved-orders'] });
+      
+      // Force immediate refresh with a slight delay to allow backend to complete
+      setTimeout(() => {
+        refetch();
+        refetchApproved();
+      }, 100);
       
       // Close modals and reset state
       setDialogOpen(false);
       setOrderDetailsModalOpen(false);
       setSelectedOrder(null);
       setOrderDetails(null);
+      setReceiptAmount("");
       setReviewNotes("");
     },
     onError: (error: any) => {
@@ -392,14 +407,24 @@ function FinanceOrders() {
         title: "❌ سفارش رد شد",
         description: "پرداخت رد شد و به قسمت سفارشات رد شده منتقل شد"
       });
-      // Invalidate all finance-related queries
+      
+      // Enhanced cache invalidation strategy
       queryClient.invalidateQueries({ queryKey: ['/api/order-management/financial'] });
       queryClient.invalidateQueries({ queryKey: ['/api/financial/orders'] });
       queryClient.invalidateQueries({ queryKey: ['/api/financial/approved-orders'] });
       
-      // Force refresh the data immediately
-      refetch();
-      refetchApproved();
+      // Invalidate all order tracking queries
+      queryClient.invalidateQueries({ queryKey: ['/api/orders/tracking'] });
+      
+      // Clear ALL query cache for these keys to force fresh data
+      queryClient.removeQueries({ queryKey: ['/api/financial/orders'] });
+      queryClient.removeQueries({ queryKey: ['/api/financial/approved-orders'] });
+      
+      // Force immediate refresh with a slight delay
+      setTimeout(() => {
+        refetch();
+        refetchApproved();
+      }, 100);
       
       // Close modals and reset state
       setDialogOpen(false);

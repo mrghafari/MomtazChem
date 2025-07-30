@@ -1,0 +1,195 @@
+ Tawk.to script loaded successfully
+ Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ Auth check result: Object
+ 
+value @ twk-chunk-common.js:2
+ Tawk.to Live Chat loaded successfully
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ Auth check result: Object
+ 🔍 [DEBUG] Site Management component initialized
+ 🔍 [DEBUG] useEffect triggered, userPermissions: undefined
+ 🔍 [DEBUG] Site Management component initialized
+ 🔍 [DEBUG] useEffect triggered, userPermissions: Object
+ 🔍 [DEBUG] userPermissions modules: Array(34)
+ 🔍 [DEBUG] Full userPermissions response: Object
+ 🔍 [DEBUG] userPermissions.modules: Array(34)
+ 🔍 [DEBUG] userPermissions.permissions: Array(34)
+ 🔍 [DEBUG] Total allButtons count: 34
+ 🔍 [DEBUG] AI Settings exists in allButtons: true
+ 🔍 [DEBUG] Content Management exists in allButtons: true
+ 🔍 [DEBUG] allowedModules: Array(34)
+ 🔍 [DEBUG] kpi_dashboard in allowedModules? true
+ 🔍 [DEBUG] management_dashboard in allowedModules? true
+ 🔍 [DEBUG] finance in allowedModules? true
+ 🔍 [DEBUG] geography_analytics in allowedModules? true
+ 🔍 [DEBUG] ai_settings in allowedModules? true
+ 🔍 [DEBUG] content_management in allowedModules? true
+ 🔍 [CRITICAL] Missing button detection:
+ 🔍 [MISSING] order-tracking-view Order Management & Tracking - View Only moduleId: order_tracking
+ 🔍 [CRITICAL] Missing buttons count: 1
+ 🔍 [DEBUG] finance button found in allButtons? Object
+ 🔍 [DEBUG] geography_analytics button found in allButtons? Object
+ 🔍 [DEBUG] ai_settings button found in allButtons? Object
+ 🔍 [DEBUG] content_management button found in allButtons? Object
+ 🔍 [DEBUG] finance button in filtered? Object
+ 🔍 [DEBUG] geography_analytics button in filtered? Object
+ 🔍 [DEBUG] ai_settings button in filtered? Object
+ 🔍 [DEBUG] content_management button in filtered? Object
+ 🔍 [DEBUG] filtered buttons count: 33
+ 🔍 [DEBUG] First 5 filtered buttons: Array(5)
+ 🔍 [DEBUG] AI Control button in filtered: Object
+ 🔍 [DEBUG] Content Management button in filtered: Object
+ 🔍 [DEBUG] Site Management component initialized
+ 🔍 [RENDER DEBUG] Component state: Object
+ 🔍 [RENDER DEBUG] Component state: Object
+ 📊 [STATS UPDATED] Fresh statistics loaded: Object
+ 🔍 [RENDER DEBUG] Component state: Object
+ Auth check result: Object
+ 📊 [STATS UPDATED] Fresh statistics loaded: Object
+ 📊 [STATS UPDATED] Fresh statistics loaded: Object
+ 🔍 [RENDER DEBUG] Component state: Object
+ Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-H56OBA7M.js:341
+ Auth check result: Object
+ 📊 [STATS UPDATED] Fresh statistics loaded: Object
+ Auth check result: Object
+ 🔍 [RENDER DEBUG] Component state: Object
+ Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-H56OBA7M.js:341
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ Auth check result: Object
+ 📊 [STATS UPDATED] Fresh statistics loaded: Object
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ 🔍 [RENDER DEBUG] Component state: Object
+ 🔍 [DEBUG] Site Management component initialized
+ 🔍 [DEBUG] useEffect triggered, userPermissions: Object
+ 🔍 [DEBUG] userPermissions modules: Array(34)
+ 🔍 [DEBUG] Full userPermissions response: Object
+ 🔍 [DEBUG] userPermissions.modules: Array(34)
+ 🔍 [DEBUG] userPermissions.permissions: Array(34)
+ 🔍 [DEBUG] Total allButtons count: 34
+ 🔍 [DEBUG] AI Settings exists in allButtons: true
+ 🔍 [DEBUG] Content Management exists in allButtons: true
+ 🔍 [DEBUG] allowedModules: Array(34)
+ 🔍 [DEBUG] kpi_dashboard in allowedModules? true
+ 🔍 [DEBUG] management_dashboard in allowedModules? true
+ 🔍 [DEBUG] finance in allowedModules? true
+ 🔍 [DEBUG] geography_analytics in allowedModules? true
+ 🔍 [DEBUG] ai_settings in allowedModules? true
+ 🔍 [DEBUG] content_management in allowedModules? true
+ 🔍 [CRITICAL] Missing button detection:
+ 🔍 [MISSING] order-tracking-view Order Management & Tracking - View Only moduleId: order_tracking
+ 🔍 [CRITICAL] Missing buttons count: 1
+ 🔍 [DEBUG] finance button found in allButtons? Object
+ 🔍 [DEBUG] geography_analytics button found in allButtons? Object
+ 🔍 [DEBUG] ai_settings button found in allButtons? Object
+site-management-fixed.tsx:457 🔍 [DEBUG] content_management button found in allButtons? Object
+site-management-fixed.tsx:458 🔍 [DEBUG] finance button in filtered? Object
+site-management-fixed.tsx:459 🔍 [DEBUG] geography_analytics button in filtered? Object
+site-management-fixed.tsx:460 🔍 [DEBUG] ai_settings button in filtered? Object
+site-management-fixed.tsx:461 🔍 [DEBUG] content_management button in filtered? Object
+site-management-fixed.tsx:76 🔍 [DEBUG] filtered buttons count: 33
+site-management-fixed.tsx:77 🔍 [DEBUG] First 5 filtered buttons: Array(5)
+site-management-fixed.tsx:78 🔍 [DEBUG] AI Control button in filtered: Object
+site-management-fixed.tsx:79 🔍 [DEBUG] Content Management button in filtered: Object
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+useAuth.ts:43 Auth check result: Object
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+site-management-fixed.tsx:71 🔍 [DEBUG] useEffect triggered, userPermissions: Object
+site-management-fixed.tsx:74 🔍 [DEBUG] userPermissions modules: Array(34)
+site-management-fixed.tsx:421 🔍 [DEBUG] Full userPermissions response: Object
+site-management-fixed.tsx:422 🔍 [DEBUG] userPermissions.modules: Array(34)
+site-management-fixed.tsx:423 🔍 [DEBUG] userPermissions.permissions: Array(34)
+site-management-fixed.tsx:428 🔍 [DEBUG] Total allButtons count: 34
+site-management-fixed.tsx:429 🔍 [DEBUG] AI Settings exists in allButtons: true
+site-management-fixed.tsx:430 🔍 [DEBUG] Content Management exists in allButtons: true
+site-management-fixed.tsx:432 🔍 [DEBUG] allowedModules: Array(34)
+site-management-fixed.tsx:433 🔍 [DEBUG] kpi_dashboard in allowedModules? true
+site-management-fixed.tsx:434 🔍 [DEBUG] management_dashboard in allowedModules? true
+site-management-fixed.tsx:435 🔍 [DEBUG] finance in allowedModules? true
+site-management-fixed.tsx:436 🔍 [DEBUG] geography_analytics in allowedModules? true
+site-management-fixed.tsx:437 🔍 [DEBUG] ai_settings in allowedModules? true
+site-management-fixed.tsx:438 🔍 [DEBUG] content_management in allowedModules? true
+site-management-fixed.tsx:444 🔍 [CRITICAL] Missing button detection:
+site-management-fixed.tsx:448 🔍 [MISSING] order-tracking-view Order Management & Tracking - View Only moduleId: order_tracking
+site-management-fixed.tsx:452 🔍 [CRITICAL] Missing buttons count: 1
+site-management-fixed.tsx:454 🔍 [DEBUG] finance button found in allButtons? Object
+site-management-fixed.tsx:455 🔍 [DEBUG] geography_analytics button found in allButtons? Object
+site-management-fixed.tsx:456 🔍 [DEBUG] ai_settings button found in allButtons? Object
+site-management-fixed.tsx:457 🔍 [DEBUG] content_management button found in allButtons? Object
+site-management-fixed.tsx:458 🔍 [DEBUG] finance button in filtered? Object
+site-management-fixed.tsx:459 🔍 [DEBUG] geography_analytics button in filtered? Object
+site-management-fixed.tsx:460 🔍 [DEBUG] ai_settings button in filtered? Object
+site-management-fixed.tsx:461 🔍 [DEBUG] content_management button in filtered? Object
+site-management-fixed.tsx:76 🔍 [DEBUG] filtered buttons count: 33
+site-management-fixed.tsx:77 🔍 [DEBUG] First 5 filtered buttons: Array(5)
+site-management-fixed.tsx:78 🔍 [DEBUG] AI Control button in filtered: Object
+site-management-fixed.tsx:79 🔍 [DEBUG] Content Management button in filtered: Object
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+useOrderNotifications.ts:99 🔔 [FINANCIAL] نوتیفیکیشن: 86 سفارش جدید دریافت شد
+finance-orders.tsx:285 📋 [ORDER DETAILS] Order fetched: M2511204
+finance-orders.tsx:286 📋 [ORDER DETAILS] Items count: 0
+finance-orders.tsx:287 📋 [ORDER DETAILS] Items data: Array(0)
+chunk-H56OBA7M.js?v=815b1335:341 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-H56OBA7M.js?v=815b1335:341
+useAuth.ts:43 Auth check result: Object
+finance-orders.tsx:560 🔄 [FINANCE] Accepting order from modal - Management ID: 283 Customer Order ID: 289
+finance-orders.tsx:343 🔄 [FINANCE] Sending approve request for order 289 with receipt amount: 
+finance-orders.tsx:350 ✅ [FINANCE] Order approved successfully: Object
+chunk-H56OBA7M.js?v=815b1335:341 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-H56OBA7M.js?v=815b1335:341
+useAuth.ts:43 Auth check result: Object
+finance-orders.tsx:343 🔄 [FINANCE] Sending approve request for order 289 with receipt amount: 11033.99
+finance-orders.tsx:350 ✅ [FINANCE] Order approved successfully: Object
+chunk-H56OBA7M.js?v=815b1335:341 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-H56OBA7M.js?v=815b1335:341
+finance-orders.tsx:343 🔄 [FINANCE] Sending approve request for order 289 with receipt amount: 11033.99
+finance-orders.tsx:350 ✅ [FINANCE] Order approved successfully: Object
+chunk-H56OBA7M.js?v=815b1335:341 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-H56OBA7M.js?v=815b1335:341
+finance-orders.tsx:343 🔄 [FINANCE] Sending approve request for order 289 with receipt amount: 11033.99
+finance-orders.tsx:350 ✅ [FINANCE] Order approved successfully: Object
+chunk-H56OBA7M.js?v=815b1335:341 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-H56OBA7M.js?v=815b1335:341
+finance-orders.tsx:343 🔄 [FINANCE] Sending approve request for order 289 with receipt amount: 11033.99
+finance-orders.tsx:350 ✅ [FINANCE] Order approved successfully: Object
+chunk-H56OBA7M.js?v=815b1335:341 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-H56OBA7M.js?v=815b1335:341
+finance-orders.tsx:343 🔄 [FINANCE] Sending approve request for order 289 with receipt amount: 11033.99
+finance-orders.tsx:350 ✅ [FINANCE] Order approved successfully: Object
+chunk-H56OBA7M.js?v=815b1335:341 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-H56OBA7M.js?v=815b1335:341
+useAuth.ts:43 Auth check result: Object
+finance-orders.tsx:343 🔄 [FINANCE] Sending approve request for order 289 with receipt amount: 11033.99
+finance-orders.tsx:350 ✅ [FINANCE] Order approved successfully: Object
+finance-orders.tsx:285 📋 [ORDER DETAILS] Order fetched: M2511204
+finance-orders.tsx:286 📋 [ORDER DETAILS] Items count: 0
+finance-orders.tsx:287 📋 [ORDER DETAILS] Items data: Array(0)
+chunk-H56OBA7M.js?v=815b1335:341 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-H56OBA7M.js?v=815b1335:341
+finance-orders.tsx:560 🔄 [FINANCE] Accepting order from modal - Management ID: 283 Customer Order ID: 289
+finance-orders.tsx:343 🔄 [FINANCE] Sending approve request for order 289 with receipt amount: 11033.99
+finance-orders.tsx:350 ✅ [FINANCE] Order approved successfully: Object
+chunk-H56OBA7M.js?v=815b1335:341 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-H56OBA7M.js?v=815b1335:341
+finance-orders.tsx:343 🔄 [FINANCE] Sending approve request for order 289 with receipt amount: 11033.99
+finance-orders.tsx:350 ✅ [FINANCE] Order approved successfully: Object
+useAuth.ts:43 Auth check result: Object
+chunk-H56OBA7M.js?v=815b1335:341 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-H56OBA7M.js?v=815b1335:341
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=815b1335:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=815b1335:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=815b1335:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=815b1335:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=815b1335:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=815b1335:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=815b1335:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=815b1335:19416
+commitRoot @ chunk-RPCDYKBN.js?v=815b1335:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=815b1335:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=815b1335:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=815b1335:18627
+finance-orders.tsx:343 🔄 [FINANCE] Sending approve request for order 289 with receipt amount: 11033.99
+finance-orders.tsx:350 ✅ [FINANCE] Order approved successfully: {success: true, order: {…}, message: 'پرداخت تایید شد و به انبار ارسال گردید - مبلغ 3,977.34 دینار از کیف پول کسر شد', walletTransaction: true}
