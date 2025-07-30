@@ -1610,8 +1610,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                         if (smartDeliveryLoading) {
                           return <span className="text-emerald-600">در حال محاسبه...</span>;
                         }
-                        if (smartDeliveryFinalCost > 0) {
-                          return <span className="text-emerald-600 font-bold">{formatCurrency(smartDeliveryFinalCost)}</span>;
+                        if (finalShippingCost > 0) {
+                          return <span className="text-emerald-600 font-bold">{formatCurrency(finalShippingCost)}</span>;
                         }
                         return <span className="text-gray-500">در انتظار آدرس</span>;
                       }
