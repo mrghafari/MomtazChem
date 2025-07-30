@@ -229,23 +229,34 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
         form.setValue("billingAddress1", customer.address);
         form.setValue("shippingAddress1", customer.address); // Set as default shipping address
       }
-      if (customer.city) {
-        form.setValue("billingCity", customer.city);
-        form.setValue("shippingCity", customer.city); // Set as default shipping city
+      
+      // Use cityRegion as city if regular city is not available
+      const customerCity = customer.city || customer.cityRegion || "";
+      if (customerCity) {
+        form.setValue("billingCity", customerCity);
+        form.setValue("shippingCity", customerCity); // Set as default shipping city
       }
+      
       if (customer.country) {
         form.setValue("billingCountry", customer.country);
         form.setValue("shippingCountry", customer.country); // Set as default shipping country
       }
+      
       if (customer.postalCode) {
         form.setValue("billingPostalCode", customer.postalCode);
         form.setValue("shippingPostalCode", customer.postalCode); // Set as default shipping postal code
       }
-      // Use province/state from CRM as default
-      const defaultState = customer.province || customer.state || customer.city || "";
+      
+      // Use province/state from CRM as default - prioritize province, then state, then cityRegion, then city
+      const defaultState = customer.province || customer.state || customer.cityRegion || customer.city || "";
       if (defaultState) {
         form.setValue("billingState", defaultState);
         form.setValue("shippingState", defaultState); // Set as default shipping state
+      }
+      
+      // Set destination city for delivery calculation
+      if (customerCity) {
+        setDestinationCity(customerCity);
       }
       
       // Auto-fill recipient information with customer data as default
