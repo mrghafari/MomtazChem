@@ -163,6 +163,14 @@ app.use((req, res, next) => {
 
 (async () => {
   try {
+    // Import and register payment routes
+    const { paymentRoutes } = await import('./payment-routes');
+    app.use('/api', paymentRoutes);
+    
+    // Start auto-approval service
+    const { autoApprovalService } = await import('./auto-approval-service');
+    autoApprovalService.start();
+    
     // Register routes BEFORE Vite middleware to ensure API routes take precedence
     const server = await registerRoutes(app);
 

@@ -24,6 +24,7 @@ export const orderStatuses = {
   FINANCIAL_REVIEWING: 'financial_reviewing',
   FINANCIAL_APPROVED: 'financial_approved',
   FINANCIAL_REJECTED: 'financial_rejected',
+  FINANCIAL_AUTO_APPROVED: 'financial_auto_approved', // 5-minute auto approval
   
   // Warehouse department statuses
   WAREHOUSE_PENDING: 'warehouse_pending',
@@ -43,6 +44,24 @@ export const orderStatuses = {
   CANCELLED: 'cancelled'
 } as const;
 
+// Payment method types
+export const paymentMethods = {
+  BANK_GATEWAY: 'bank_gateway',           // پرداخت از طریق درگاه بانکی
+  WALLET: 'wallet',                       // پرداخت از کیف پول
+  WALLET_PARTIAL: 'wallet_partial',       // پرداخت ترکیبی کیف پول + بانک
+  BANK_TRANSFER: 'bank_transfer',         // انتقال بانکی با آپلود فیش
+  GRACE_PERIOD: 'grace_period'            // سفارش مهلت‌دار 3 روزه
+} as const;
+
+// Payment source identification
+export const paymentSources = {
+  BANK_GATEWAY: 'از طریق درگاه بانکی',
+  WALLET: 'از طریق کیف پول',
+  WALLET_PARTIAL: 'ترکیبی: کیف پول + بانک',
+  BANK_TRANSFER: 'انتقال بانکی',
+  GRACE_PERIOD: 'سفارش مهلت‌دار 3 روزه'
+} as const;
+
 // Order management table - extends customer orders with department workflow
 export const orderManagement = pgTable("order_management", {
   id: serial("id").primaryKey(),
@@ -58,10 +77,22 @@ export const orderManagement = pgTable("order_management", {
   financialNotes: text("financial_notes"),
   paymentReceiptUrl: text("payment_receipt_url"), // Uploaded payment receipt
   
+  // Payment method and source tracking
+  paymentMethod: varchar("payment_method", { length: 50 }), // bank_gateway, wallet, wallet_partial, bank_transfer, grace_period
+  paymentSourceLabel: text("payment_source_label"), // Display label for payment source
+  walletAmountUsed: decimal("wallet_amount_used", { precision: 10, scale: 2 }).default("0.00"),
+  bankAmountPaid: decimal("bank_amount_paid", { precision: 10, scale: 2 }).default("0.00"),
+  excessAmountCredited: decimal("excess_amount_credited", { precision: 10, scale: 2 }).default("0.00"),
+  
   // Grace period for bank transfer payments
   paymentGracePeriodStart: timestamp("payment_grace_period_start"),
   paymentGracePeriodEnd: timestamp("payment_grace_period_end"),
   isOrderLocked: boolean("is_order_locked").default(false), // Lock order details during grace period
+  
+  // Auto-approval system
+  autoApprovalScheduledAt: timestamp("auto_approval_scheduled_at"), // When 5-minute timer started
+  isAutoApprovalEnabled: boolean("is_auto_approval_enabled").default(true),
+  autoApprovalExecutedAt: timestamp("auto_approval_executed_at"),
   
   // Warehouse department
   warehouseAssigneeId: integer("warehouse_assignee_id"),

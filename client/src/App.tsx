@@ -16,6 +16,7 @@ import Shop from "@/pages/shop";
 import Checkout from "@/pages/checkout";
 import Payment from "@/pages/payment";
 import CheckoutSuccess from "@/pages/checkout-success";
+import PaymentOptionsPage from "@/pages/payment-options";
 import ShopAdmin from "@/pages/shop-admin";
 import InvoiceManagement from "@/pages/admin/invoice-management";
 import PaymentSettings from "@/pages/admin/payment-settings";
@@ -103,6 +104,8 @@ import WarehouseOrders from "@/pages/admin/warehouse-orders";
 import LogisticsOrders from "@/pages/admin/logistics-orders";
 import LogisticsManagement from "@/pages/admin/logistics-management";
 import DeliveredOrders from "@/pages/admin/delivered-orders";
+import PaymentOptions from "@/pages/payment-options";
+import FinancialWorkflowDashboard from "@/pages/admin/financial-workflow-dashboard";
 import GlobalRefreshSettings from "@/pages/admin/global-refresh-settings";
 
 import InventoryNotificationSettings from "@/pages/admin/inventory-notification-settings";
@@ -146,6 +149,7 @@ function Router() {
           <Route path="/user-guide" component={UserGuide} />
           <Route path="/help" component={UserGuide} />
           <Route path="/shop" component={Shop} />
+          <Route path="/payment-options" component={PaymentOptionsPage} />
           <Route path="/product-recommendations" component={ProductRecommendations} />
           <Route path="/checkout" component={() => <Checkout cart={[]} products={[]} onOrderComplete={() => {}} />} />
           <Route path="/payment/:orderId" component={Payment} />
@@ -227,6 +231,8 @@ function Router() {
           <Route path="/admin/logistics-orders" component={LogisticsOrders} />
           <Route path="/admin/logistics-management" component={LogisticsManagement} />
           <Route path="/admin/delivered-orders" component={DeliveredOrders} />
+          <Route path="/admin/financial-workflow-dashboard" component={FinancialWorkflowDashboard} />
+          <Route path="/payment-options" component={PaymentOptions} />
           <Route path="/admin/global-refresh-settings" component={GlobalRefreshSettings} />
 
           <Route path="/admin/inventory-notification-settings" component={InventoryNotificationSettings} />
