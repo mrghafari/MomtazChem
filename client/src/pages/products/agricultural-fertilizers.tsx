@@ -8,10 +8,12 @@ import { ProductInquiryForm } from "@/components/ui/product-inquiry-form";
 
 import type { ShowcaseProduct } from "@shared/showcase-schema";
 import MolecularHoverEffect from "@/components/ui/molecular-hover-effect";
+import { useLanguage } from '@/contexts/LanguageContext';
 // import ProductInquiryForm from "@/components/product-inquiry-form";
 
 const AgriculturalFertilizersPage = () => {
   const [, navigate] = useLocation();
+  const { language, t, direction } = useLanguage();
   
   const { data: products, isLoading } = useQuery<ShowcaseProduct[]>({
     queryKey: ["/api/products", "agricultural-fertilizers"],
@@ -23,26 +25,125 @@ const AgriculturalFertilizersPage = () => {
     queryFn: () => fetch('/api/shop/product-stats').then(res => res.json()).then(data => data.data),
   });
 
-  const benefits = [
-    {
-      icon: <Sprout className="h-8 w-8 text-white" />,
-      title: "Enhanced Growth",
-      description: "Optimized nutrient formulations for maximum crop yield and quality",
-      bgColor: "bg-green-500"
-    },
-    {
-      icon: <Leaf className="h-8 w-8 text-white" />,
-      title: "Soil Health", 
-      description: "Sustainable solutions that improve and maintain soil fertility",
-      bgColor: "bg-emerald-600"
-    },
-    {
-      icon: <TreePine className="h-8 w-8 text-white" />,
-      title: "Eco-Friendly",
-      description: "Environmentally responsible formulations for sustainable agriculture",
-      bgColor: "bg-green-700"
+  // Define multilingual content
+  const getContent = () => {
+    switch (language) {
+      case 'ar':
+        return {
+          title: 'الأسمدة الزراعية من ممتازكم',
+          subtitle: 'حلول متطورة لزراعة ناجحة في العراق',
+          description: 'اكتشف مجموعتنا الشاملة من الأسمدة الزراعية المصممة خصيصاً لتحسين إنتاجية المحاصيل في ظروف التربة العراقية المتنوعة',
+          benefitsTitle: 'لماذا تختار الحلول الزراعية من ممتازكم؟',
+          benefitsDescription: 'تركيبتنا العلمية المتقدمة تقدم نتائج متفوقة للزراعة الحديثة وتساعد على تحسين أداء المحاصيل في الظروف المناخية العراقية',
+          benefits: [
+            {
+              icon: <Sprout className="h-8 w-8 text-white" />,
+              title: "نمو محسن",
+              description: "تركيبات غذائية محسنة لأقصى إنتاجية وجودة للمحاصيل",
+              bgColor: "bg-green-500"
+            },
+            {
+              icon: <Leaf className="h-8 w-8 text-white" />,
+              title: "صحة التربة", 
+              description: "حلول مستدامة تحسن وتحافظ على خصوبة التربة",
+              bgColor: "bg-emerald-600"
+            },
+            {
+              icon: <TreePine className="h-8 w-8 text-white" />,
+              title: "صديق للبيئة",
+              description: "تركيبات مسؤولة بيئياً للزراعة المستدامة",
+              bgColor: "bg-green-700"
+            }
+          ]
+        };
+      case 'ku':
+        return {
+          title: 'پەینی کشتوکاڵی لە ممتازکەم',
+          subtitle: 'چارەسەری پێشکەوتوو بۆ کشتوکاڵی سەرکەوتوو لە عێراق',
+          description: 'کۆمەڵە تەواوەکەمان لە پەینی کشتوکاڵی بدۆزەرەوە کە تایبەت دروستکراون بۆ باشترکردنی بەرهەمی دانەوێڵە لە جۆراوجۆری خاکی عێراق',
+          benefitsTitle: 'بۆچی چارەسەرەکانی کشتوکاڵی ممتازکەم هەڵبژێریت؟',
+          benefitsDescription: 'پێکهاتە زانستییە پێشکەوتووەکەمان ئەنجامێکی باشتر بۆ کشتوکاڵی هاوچەرخ دەبەخشێت و یارمەتی باشترکردنی کارایی دانەوێڵە دەدات لە بارودۆخی کەشوهەوای عێراق',
+          benefits: [
+            {
+              icon: <Sprout className="h-8 w-8 text-white" />,
+              title: "گەشەی باشتر",
+              description: "پێکهاتە خۆراکییە باشکراوەکان بۆ زۆرترین بەرهەم و جۆری دانەوێڵە",
+              bgColor: "bg-green-500"
+            },
+            {
+              icon: <Leaf className="h-8 w-8 text-white" />,
+              title: "تەندروستی خاک", 
+              description: "چارەسەری بەردەوام کە باشتری دەکات و پاراستنی بەرەوپێشچوونی خاک",
+              bgColor: "bg-emerald-600"
+            },
+            {
+              icon: <TreePine className="h-8 w-8 text-white" />,
+              title: "دۆستی ژینگە",
+              description: "پێکهاتەی بەرپرسیارانەی ژینگەیی بۆ کشتوکاڵی بەردەوام",
+              bgColor: "bg-green-700"
+            }
+          ]
+        };
+      case 'tr':
+        return {
+          title: 'Momtazchem Tarımsal Gübreler',
+          subtitle: 'Irak\'ta başarılı tarım için gelişmiş çözümler',
+          description: 'Irak\'ın çeşitli toprak koşullarında ürün verimliliğini artırmak için özel olarak tasarlanmış kapsamlı tarımsal gübre koleksiyonumuzu keşfedin',
+          benefitsTitle: 'Neden Momtazchem Tarımsal Çözümlerini Seçmelisiniz?',
+          benefitsDescription: 'Gelişmiş bilimsel formülasyonumuz modern tarım için üstün sonuçlar sağlar ve Irak\'ın iklim koşullarında ürün performansını artırmaya yardımcı olur',
+          benefits: [
+            {
+              icon: <Sprout className="h-8 w-8 text-white" />,
+              title: "Gelişmiş Büyüme",
+              description: "Maksimum ürün verimi ve kalitesi için optimize edilmiş besin formülasyonları",
+              bgColor: "bg-green-500"
+            },
+            {
+              icon: <Leaf className="h-8 w-8 text-white" />,
+              title: "Toprak Sağlığı", 
+              description: "Toprak verimliliğini iyileştiren ve koruyan sürdürülebilir çözümler",
+              bgColor: "bg-emerald-600"
+            },
+            {
+              icon: <TreePine className="h-8 w-8 text-white" />,
+              title: "Çevre Dostu",
+              description: "Sürdürülebilir tarım için çevresel olarak sorumlu formülasyonlar",
+              bgColor: "bg-green-700"
+            }
+          ]
+        };
+      default: // English
+        return {
+          title: 'Momtazchem Agricultural Fertilizers',
+          subtitle: 'Advanced Solutions for Successful Farming in Iraq',
+          description: 'Discover our comprehensive collection of agricultural fertilizers specially designed to enhance crop productivity in Iraq\'s diverse soil conditions',
+          benefitsTitle: 'Why Choose Momtazchem Agricultural Solutions?',
+          benefitsDescription: 'Our advanced scientific formulations deliver superior results for modern agriculture and help improve crop performance in Iraq\'s climate conditions',
+          benefits: [
+            {
+              icon: <Sprout className="h-8 w-8 text-white" />,
+              title: "Enhanced Growth",
+              description: "Optimized nutrient formulations for maximum crop yield and quality",
+              bgColor: "bg-green-500"
+            },
+            {
+              icon: <Leaf className="h-8 w-8 text-white" />,
+              title: "Soil Health", 
+              description: "Sustainable solutions that improve and maintain soil fertility",
+              bgColor: "bg-emerald-600"
+            },
+            {
+              icon: <TreePine className="h-8 w-8 text-white" />,
+              title: "Eco-Friendly",
+              description: "Environmentally responsible formulations for sustainable agriculture",
+              bgColor: "bg-green-700"
+            }
+          ]
+        };
     }
-  ];
+  };
+
+  const content = getContent();
 
   const cropTypes = [
     "Cereals & Grains",
@@ -78,10 +179,14 @@ const AgriculturalFertilizersPage = () => {
               <div className="inline-flex items-center justify-center w-20 h-20 bg-white/20 rounded-full mb-6">
                 <Wheat className="h-10 w-10 text-white" />
               </div>
-              <h1 className="text-5xl font-bold mb-6">محصولات کشاورزی پیشرفته</h1>
-              <h2 className="text-3xl font-semibold mb-4 text-green-100">Advanced Agricultural Solutions</h2>
-              <p className="text-xl text-green-100 mb-8">
-                راه‌حل‌های پیشرفته کود شیمیایی برای بهبود عملکرد محصولات کشاورزی، ترویج شیوه‌های کشاورزی پایدار و تقویت سلامت خاک در عراق و خاورمیانه
+              <h1 className="text-5xl font-bold mb-6" dir={direction}>
+                {content.title}
+              </h1>
+              <h2 className="text-3xl font-semibold mb-4 text-green-100" dir={direction}>
+                {content.subtitle}
+              </h2>
+              <p className="text-xl text-green-100 mb-8" dir={direction}>
+                {content.description}
               </p>
               <div className="flex flex-wrap gap-4 mb-6">
                 <Badge className="bg-white/20 text-white border-0 px-4 py-2">
@@ -113,15 +218,16 @@ const AgriculturalFertilizersPage = () => {
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">چرا محصولات کشاورزی ممتازکم؟</h2>
-            <p className="text-xl text-green-600 font-semibold mb-2">Why Choose Momtazchem Agricultural Solutions?</p>
-            <p className="text-gray-600 max-w-3xl mx-auto">
-              فرمولاسیون علمی پیشرفته ما نتایج برتری برای کشاورزی مدرن ارائه می‌دهد و به بهبود عملکرد محصولات در شرایط آب و هوایی عراق کمک می‌کند
+            <h2 className="text-4xl font-bold text-gray-900 mb-4" dir={direction}>
+              {content.benefitsTitle}
+            </h2>
+            <p className="text-gray-600 max-w-3xl mx-auto" dir={direction}>
+              {content.benefitsDescription}
             </p>
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
-            {benefits.map((benefit, index) => (
+            {content.benefits.map((benefit, index) => (
               <Card key={index} className="text-center p-6 hover:shadow-lg transition-shadow border-2 hover:border-green-200">
                 <CardContent className="p-0">
                   <div className={`w-20 h-20 ${benefit.bgColor} rounded-full flex items-center justify-center mx-auto mb-6`}>
