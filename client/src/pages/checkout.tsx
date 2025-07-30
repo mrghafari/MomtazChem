@@ -122,12 +122,12 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   });
 
   // Iraqi provinces and cities queries for secondary address dropdowns
-  const { data: provincesData } = useQuery({
+  const { data: provincesData, isLoading: provincesLoading } = useQuery({
     queryKey: ['/api/iraqi-provinces'],
     staleTime: 15 * 60 * 1000, // Consider fresh for 15 minutes
   });
 
-  const { data: citiesData } = useQuery({
+  const { data: citiesData, isLoading: citiesLoading } = useQuery({
     queryKey: ['/api/iraqi-cities', selectedSecondaryProvinceId],
     queryFn: () => {
       const url = selectedSecondaryProvinceId 
@@ -142,6 +142,22 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   // Extract provinces and cities arrays from API responses
   const provinces = (provincesData && typeof provincesData === 'object' && 'data' in provincesData) ? provincesData.data : [];
   const secondaryCities = (citiesData && typeof citiesData === 'object' && 'data' in citiesData) ? citiesData.data : [];
+
+  // Debug logging for dropdown data
+  console.log('🔍 [DROPDOWN DEBUG] Provinces data:', {
+    raw: provincesData,
+    processed: provinces,
+    count: provinces?.length || 0,
+    loading: provincesLoading
+  });
+  
+  console.log('🔍 [DROPDOWN DEBUG] Cities data:', {
+    raw: citiesData,
+    processed: secondaryCities,
+    count: secondaryCities?.length || 0,
+    loading: citiesLoading,
+    selectedProvinceId: selectedSecondaryProvinceId
+  });
 
   // Determine if user is logged in first
   const isUserLoggedIn = (customerData?.success && customerData.customer) || isLoggedIn;
