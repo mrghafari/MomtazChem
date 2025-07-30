@@ -954,9 +954,27 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
   // Watch for changes in destination to recalculate delivery cost
   useEffect(() => {
-    const finalDestinationCity = showSecondAddress && secondCity.trim() ? secondCity : form.watch('city');
-    const finalDestinationProvince = showSecondAddress && secondProvince.trim() ? secondProvince : 
+    // Determine final destination city and province
+    const finalDestinationCity = showSecondAddress && secondCity.trim() ? 
+      secondCity : 
+      (crmCustomerData?.cityRegion || crmCustomerData?.city || form.watch('city'));
+    
+    const finalDestinationProvince = showSecondAddress && secondProvince.trim() ? 
+      secondProvince : 
       (crmCustomerData?.province || customerData?.customer?.province);
+
+    console.log('🚚 [DELIVERY CALCULATION] Final destination determined:', {
+      showSecondAddress,
+      secondCity,
+      secondProvince,
+      crmCityRegion: crmCustomerData?.cityRegion,
+      crmCity: crmCustomerData?.city,
+      crmProvince: crmCustomerData?.province,
+      formCity: form.watch('city'),
+      finalDestinationCity,
+      finalDestinationProvince,
+      totalWeight
+    });
 
     if (finalDestinationCity && finalDestinationProvince && totalWeight > 0) {
       const debounceTimer = setTimeout(() => {
@@ -964,8 +982,14 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       }, 1000); // 1 second debounce
       
       return () => clearTimeout(debounceTimer);
+    } else {
+      console.log('🚚 [DELIVERY CALCULATION] Missing required data for calculation:', {
+        hasCity: !!finalDestinationCity,
+        hasProvince: !!finalDestinationProvince,
+        hasWeight: totalWeight > 0
+      });
     }
-  }, [showSecondAddress, secondCity, secondProvince, form.watch('city'), totalWeight, cart]);
+  }, [showSecondAddress, secondCity, secondProvince, form.watch('city'), totalWeight, cart, crmCustomerData?.cityRegion, crmCustomerData?.province]);
 
 
 
