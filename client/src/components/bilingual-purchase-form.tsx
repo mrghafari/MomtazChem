@@ -1849,10 +1849,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
           {/* Purchase Form */}
           <div>
             <p className="text-sm text-muted-foreground mb-4">
-              {customerData?.success && customerData.customer 
-                ? "Review and modify your details if needed" 
-                : t.enterDetails
-              }
+              {t.enterDetails}
             </p>
             
             <Form {...form}>
