@@ -63,7 +63,7 @@ function mapProductInterestToCategory(productInterest: string): string {
     'water-treatment': 'water-treatment',
     'fuel-additives': 'fuel-additives',
     'paint-solvents': 'paint-thinner',
-    'agricultural-products': 'agricultural-fertilizers',
+
     'agricultural-fertilizers': 'agricultural-fertilizers',
     'industrial-chemicals': 'admin',
     'paint-thinner': 'paint-thinner',
@@ -378,7 +378,7 @@ export async function sendProductInquiryEmail(inquiryData: ProductInquiryData): 
         'fuel-additives': 'fuel-additives',
         'water-treatment': 'water-treatment', 
         'paint-solvents': 'paint-solvents',
-        'agricultural-products': 'agricultural-products',
+
         'agricultural-fertilizers': 'agricultural-fertilizers',
         'industrial-chemicals': 'industrial-chemicals',
         'paint-thinner': 'paint-thinner',

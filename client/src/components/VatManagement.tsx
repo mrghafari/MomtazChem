@@ -49,7 +49,7 @@ const availableCategories = [
   'fuel-additives',
   'paint-solvents',
   'industrial-chemicals',
-  'agricultural-products',
+
   'agricultural-fertilizers',
   'water-treatment',
   'paint-thinner',

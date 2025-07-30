@@ -123,16 +123,7 @@ export default function Header() {
       iconColor: "text-orange-600 dark:text-orange-400",
       titleHover: "group-hover:text-orange-600 dark:group-hover:text-orange-400"
     },
-    {
-      title: "Agricultural Products",
-      href: "/products/agricultural-products",
-      description: "Complete agricultural solution products",
-      icon: <Wheat className="h-6 w-6" />,
-      color: "green",
-      hoverBg: "hover:bg-green-50 dark:hover:bg-green-900/20",
-      iconColor: "text-green-600 dark:text-green-400",
-      titleHover: "group-hover:text-green-600 dark:group-hover:text-green-400"
-    },
+
     {
       title: t.agriculturalFertilizers, 
       href: "/products/agricultural-fertilizers",

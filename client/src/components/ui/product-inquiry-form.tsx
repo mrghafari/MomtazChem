@@ -70,7 +70,7 @@ export function ProductInquiryForm({
     mutationFn: async (data: InquiryFormData) => {
       const inquiryData = {
         ...data,
-        category: product?.category || "agricultural-products",
+        category: product?.category || "agricultural-fertilizers",
         productIds: product ? [product.id] : [],
         customerId: null, // Guest inquiry
       };

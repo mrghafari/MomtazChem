@@ -3465,7 +3465,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'fuel-additives': 'fuel-additives',
         'water-treatment': 'water-treatment',
         'paint-solvents': 'paint-thinner',
-        'agricultural-products': 'agricultural-fertilizers',
         'agricultural-fertilizers': 'agricultural-fertilizers',
         'industrial-chemicals': 'industrial-chemicals',
         'paint-thinner': 'paint-thinner',
@@ -14885,7 +14884,6 @@ ${procedure.content}
           'fuel-additives': 'fuel-additives',
           'water-treatment': 'water-treatment', 
           'paint-solvents': 'paint-thinner',
-          'agricultural-products': 'agricultural-fertilizers',
           'agricultural-fertilizers': 'agricultural-fertilizers',
           'industrial-chemicals': 'admin',
           'paint-thinner': 'paint-thinner',
@@ -17677,7 +17675,6 @@ Momtaz Chemical Technical Team`,
             'fuel-additives': 'fuel-additives',
             'water-treatment': 'water-treatment', 
             'paint-solvents': 'paint-solvents',
-            'agricultural-products': 'agricultural-products',
             'agricultural-fertilizers': 'agricultural-fertilizers',
             'industrial-chemicals': 'industrial-chemicals',
             'paint-thinner': 'paint-thinner',
@@ -33677,7 +33674,7 @@ momtazchem.com
         'fuel-additives': `سلام ${customerName || "مشتری گرامی"}،\n\nاز تماس شما برای افزودنی‌های سوخت مومتاز کم متشکریم.\n\nمحصولات ما شامل:\n- افزودنی‌های بنزین\n- افزودنی‌های گازوئیل\n- پاک‌کننده‌های سیستم سوخت\n\nبا تشکر,\nتیم فروش مومتاز کم`,
         'water-treatment': `سلام ${customerName || "مشتری گرامی"}،\n\nاز علاقه شما به محصولات تصفیه آب سپاسگزاریم.\n\nمحصولات تصفیه آب ما:\n- مواد شیمیایی تصفیه\n- کلرین و فلوکولانت\n- ضدعفونی کننده‌ها\n\nبا احترام,\nتیم فنی مومتاز کم`,
         'paint-solvents': `سلام ${customerName || "مشتری گرامی"}،\n\nاز درخواست شما برای رنگ و حلال‌ها تشکر می‌کنیم.\n\nمحصولات ما:\n- رنگ‌های صنعتی\n- حلال‌های مختلف\n- مواد نازک‌کننده\n\nبا تشکر,\nتیم فروش رنگ مومتاز کم`,
-        'agricultural-products': `سلام ${customerName || "مشتری گرامی"}،\n\nاز تماس شما برای محصولات کشاورزی خرسندیم.\n\nمحصولات کشاورزی:\n- کودهای شیمیایی\n- سموم کشاورزی\n- تنظیم‌کننده‌های رشد\n\nبا احترام,\nتیم کشاورزی مومتاز کم`,
+
         'default': `سلام ${customerName || "مشتری گرامی"}،\n\nاز تماس شما با مومتاز کم متشکریم.\n\nما آماده ارائه بهترین محصولات شیمیایی هستیم.\n\nبا تشکر,\nتیم پشتیبانی مومتاز کم`
       };
 

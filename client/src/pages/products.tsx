@@ -192,7 +192,7 @@ export default function ProductsPage() {
     { value: "water-treatment", label: "Water Treatment", icon: <Droplet className="w-4 h-4" /> },
     { value: "fuel-additives", label: "Fuel Additives", icon: <Beaker className="w-4 h-4" /> },
     { value: "paint-solvents", label: "Paint & Solvents", icon: <Package className="w-4 h-4" /> },
-    { value: "agricultural-products", label: "Agricultural Products", icon: <Package className="w-4 h-4" /> },
+
     { value: "agricultural-fertilizers", label: "Agricultural Fertilizers", icon: <Package className="w-4 h-4" /> },
     { value: "industrial-chemicals", label: "Industrial Chemicals", icon: <Package className="w-4 h-4" /> },
     { value: "paint-thinner", label: "Paint Thinner", icon: <Droplet className="w-4 h-4" /> },
