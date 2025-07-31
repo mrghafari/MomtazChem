@@ -1580,25 +1580,32 @@ const LogisticsManagement = () => {
                         {(() => {
                           // Check if shipping address is already an object (parsed by API)
                           const shippingData = typeof order.shippingAddress === 'object' && order.shippingAddress !== null
-                            ? order.shippingAddress
+                            ? order.shippingAddress as any
                             : null;
                             
                           if (shippingData) {
                             return (
                               <>
-                                <p className="text-sm font-medium text-orange-800">
-                                  {(shippingData as any).name}
-                                </p>
-                                <p className="text-xs text-orange-600 flex items-center">
-                                  <Phone className="w-3 h-3 mr-1" />
-                                  {(shippingData as any).phone}
-                                </p>
+                                {shippingData.name && (
+                                  <p className="text-sm font-medium text-orange-800">
+                                    {shippingData.name}
+                                  </p>
+                                )}
+                                {shippingData.phone && (
+                                  <p className="text-xs text-orange-600 flex items-center">
+                                    <Phone className="w-3 h-3 mr-1" />
+                                    {shippingData.phone}
+                                  </p>
+                                )}
                                 <p className="text-sm text-orange-700">
-                                  {(shippingData as any).address}
+                                  {shippingData.address || 'آدرس مشخص نشده'}
                                 </p>
-                                <p className="text-xs text-orange-600">
-                                  {(shippingData as any).city} - {(shippingData as any).postalCode}
-                                </p>
+                                {(shippingData.city || shippingData.country) && (
+                                  <p className="text-xs text-orange-600">
+                                    {[shippingData.city, shippingData.country].filter(Boolean).join(' - ')}
+                                    {shippingData.postalCode && ` - ${shippingData.postalCode}`}
+                                  </p>
+                                )}
                               </>
                             );
                           }

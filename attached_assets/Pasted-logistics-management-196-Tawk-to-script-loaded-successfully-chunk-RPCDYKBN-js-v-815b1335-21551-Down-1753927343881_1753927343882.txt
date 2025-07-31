@@ -1,0 +1,155 @@
+logistics-management:196 Tawk.to script loaded successfully
+chunk-RPCDYKBN.js?v=815b1335:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+/api/admin/me:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+useAuth.ts:46 Auth check failed: Error: HTTP 403
+    at queryFn (useAuth.ts:39:17)
+queryFn @ useAuth.ts:46
+logistics-management.tsx:384 🔍 [LOGISTICS MGMT] First order data: Object
+useOrderNotifications.ts:40 The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio
+createBeep @ useOrderNotifications.ts:40
+useOrderNotifications.ts:99 🔔 [LOGISTICS] نوتیفیکیشن: 5 سفارش جدید دریافت شد
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:117574)
+    at t.value (twk-chunk-common.js:2:150658)
+    at p.updateUUID (twk-chunk-common.js:2:202310)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:124589)
+    at twk-chunk-common.js:2:123900
+value @ twk-chunk-common.js:2
+logistics-management:168 Tawk.to Live Chat loaded successfully
+logistics-management.tsx:384 🔍 [LOGISTICS MGMT] First order data: {id: 2, customerOrderId: 3, orderNumber: 'M2511118', hasOrderNumber: true, allFields: Array(54)}
+chunk-RPCDYKBN.js?v=815b1335:9934 Uncaught Error: Objects are not valid as a React child (found: object with keys {name, phone, address, city, postalCode}). If you meant to render a collection of children, use an array instead.
+    at throwOnInvalidObjectType (chunk-RPCDYKBN.js?v=815b1335:9934:17)
+    at reconcileChildFibers2 (chunk-RPCDYKBN.js?v=815b1335:10564:15)
+    at reconcileChildren (chunk-RPCDYKBN.js?v=815b1335:14290:37)
+    at updateHostComponent (chunk-RPCDYKBN.js?v=815b1335:14807:11)
+    at beginWork (chunk-RPCDYKBN.js?v=815b1335:15935:22)
+    at HTMLUnknownElement.callCallback2 (chunk-RPCDYKBN.js?v=815b1335:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-RPCDYKBN.js?v=815b1335:3699:24)
+    at invokeGuardedCallback (chunk-RPCDYKBN.js?v=815b1335:3733:39)
+    at beginWork$1 (chunk-RPCDYKBN.js?v=815b1335:19765:15)
+    at performUnitOfWork (chunk-RPCDYKBN.js?v=815b1335:19198:20)
+throwOnInvalidObjectType @ chunk-RPCDYKBN.js?v=815b1335:9934
+reconcileChildFibers2 @ chunk-RPCDYKBN.js?v=815b1335:10564
+reconcileChildren @ chunk-RPCDYKBN.js?v=815b1335:14290
+updateHostComponent @ chunk-RPCDYKBN.js?v=815b1335:14807
+beginWork @ chunk-RPCDYKBN.js?v=815b1335:15935
+callCallback2 @ chunk-RPCDYKBN.js?v=815b1335:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=815b1335:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=815b1335:3733
+beginWork$1 @ chunk-RPCDYKBN.js?v=815b1335:19765
+performUnitOfWork @ chunk-RPCDYKBN.js?v=815b1335:19198
+workLoopSync @ chunk-RPCDYKBN.js?v=815b1335:19137
+renderRootSync @ chunk-RPCDYKBN.js?v=815b1335:19116
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=815b1335:18874
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=815b1335:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=815b1335:18627
+chunk-RPCDYKBN.js?v=815b1335:9934 Uncaught Error: Objects are not valid as a React child (found: object with keys {name, phone, address, city, postalCode}). If you meant to render a collection of children, use an array instead.
+    at throwOnInvalidObjectType (chunk-RPCDYKBN.js?v=815b1335:9934:17)
+    at reconcileChildFibers2 (chunk-RPCDYKBN.js?v=815b1335:10564:15)
+    at reconcileChildren (chunk-RPCDYKBN.js?v=815b1335:14290:37)
+    at updateHostComponent (chunk-RPCDYKBN.js?v=815b1335:14807:11)
+    at beginWork (chunk-RPCDYKBN.js?v=815b1335:15935:22)
+    at HTMLUnknownElement.callCallback2 (chunk-RPCDYKBN.js?v=815b1335:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-RPCDYKBN.js?v=815b1335:3699:24)
+    at invokeGuardedCallback (chunk-RPCDYKBN.js?v=815b1335:3733:39)
+    at beginWork$1 (chunk-RPCDYKBN.js?v=815b1335:19765:15)
+    at performUnitOfWork (chunk-RPCDYKBN.js?v=815b1335:19198:20)
+throwOnInvalidObjectType @ chunk-RPCDYKBN.js?v=815b1335:9934
+reconcileChildFibers2 @ chunk-RPCDYKBN.js?v=815b1335:10564
+reconcileChildren @ chunk-RPCDYKBN.js?v=815b1335:14290
+updateHostComponent @ chunk-RPCDYKBN.js?v=815b1335:14807
+beginWork @ chunk-RPCDYKBN.js?v=815b1335:15935
+callCallback2 @ chunk-RPCDYKBN.js?v=815b1335:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=815b1335:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=815b1335:3733
+beginWork$1 @ chunk-RPCDYKBN.js?v=815b1335:19765
+performUnitOfWork @ chunk-RPCDYKBN.js?v=815b1335:19198
+workLoopSync @ chunk-RPCDYKBN.js?v=815b1335:19137
+renderRootSync @ chunk-RPCDYKBN.js?v=815b1335:19116
+recoverFromConcurrentError @ chunk-RPCDYKBN.js?v=815b1335:18736
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=815b1335:18879
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=815b1335:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=815b1335:18627
+chunk-RPCDYKBN.js?v=815b1335:14032 The above error occurred in the <p> component:
+
+    at p
+    at div
+    at div
+    at div
+    at div
+    at div
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-AXMZZQ2X.js?v=815b1335:42:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-QKC5UYY4.js?v=815b1335:55:7
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=815b1335:79:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=815b1335:56:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-AXMZZQ2X.js?v=815b1335:42:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-DT5BUL23.js?v=815b1335:29:5
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-H56OBA7M.js?v=815b1335:237:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-H56OBA7M.js?v=815b1335:160:58
+    at Presence (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-7QZBBLXT.js?v=815b1335:24:11)
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-H56OBA7M.js?v=815b1335:151:64
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=815b1335:79:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=815b1335:56:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-AXMZZQ2X.js?v=815b1335:42:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-U724R7WD.js?v=815b1335:27:22
+    at Presence (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-7QZBBLXT.js?v=815b1335:24:11)
+    at Provider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=815b1335:38:15)
+    at DialogPortal (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-H56OBA7M.js?v=815b1335:113:11)
+    at _c3 (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ui/dialog.tsx:52:12)
+    at Provider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=815b1335:38:15)
+    at Dialog (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-H56OBA7M.js?v=815b1335:54:5)
+    at div
+    at LogisticsManagement (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/admin/logistics-management.tsx:76:37)
+    at Route (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=815b1335:265:16)
+    at Switch (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=815b1335:321:17)
+    at main
+    at div
+    at Router
+    at Provider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=815b1335:38:15)
+    at TooltipProvider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=815b1335:65:5)
+    at LanguageProvider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/contexts/LanguageContext.tsx:21:36)
+    at QueryClientProvider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=815b1335:2805:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+logCapturedError @ chunk-RPCDYKBN.js?v=815b1335:14032
+update.callback @ chunk-RPCDYKBN.js?v=815b1335:14052
+callCallback @ chunk-RPCDYKBN.js?v=815b1335:11248
+commitUpdateQueue @ chunk-RPCDYKBN.js?v=815b1335:11265
+commitLayoutEffectOnFiber @ chunk-RPCDYKBN.js?v=815b1335:17093
+commitLayoutMountEffects_complete @ chunk-RPCDYKBN.js?v=815b1335:17980
+commitLayoutEffects_begin @ chunk-RPCDYKBN.js?v=815b1335:17969
+commitLayoutEffects @ chunk-RPCDYKBN.js?v=815b1335:17920
+commitRootImpl @ chunk-RPCDYKBN.js?v=815b1335:19353
+commitRoot @ chunk-RPCDYKBN.js?v=815b1335:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=815b1335:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=815b1335:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=815b1335:18627
+chunk-RPCDYKBN.js?v=815b1335:9934 Uncaught Error: Objects are not valid as a React child (found: object with keys {name, phone, address, city, postalCode}). If you meant to render a collection of children, use an array instead.
+    at throwOnInvalidObjectType (chunk-RPCDYKBN.js?v=815b1335:9934:17)
+    at reconcileChildFibers2 (chunk-RPCDYKBN.js?v=815b1335:10564:15)
+    at reconcileChildren (chunk-RPCDYKBN.js?v=815b1335:14290:37)
+    at updateHostComponent (chunk-RPCDYKBN.js?v=815b1335:14807:11)
+    at beginWork (chunk-RPCDYKBN.js?v=815b1335:15935:22)
+    at beginWork$1 (chunk-RPCDYKBN.js?v=815b1335:19753:22)
+    at performUnitOfWork (chunk-RPCDYKBN.js?v=815b1335:19198:20)
+    at workLoopSync (chunk-RPCDYKBN.js?v=815b1335:19137:13)
+    at renderRootSync (chunk-RPCDYKBN.js?v=815b1335:19116:15)
+    at recoverFromConcurrentError (chunk-RPCDYKBN.js?v=815b1335:18736:28)
+throwOnInvalidObjectType @ chunk-RPCDYKBN.js?v=815b1335:9934
+reconcileChildFibers2 @ chunk-RPCDYKBN.js?v=815b1335:10564
+reconcileChildren @ chunk-RPCDYKBN.js?v=815b1335:14290
+updateHostComponent @ chunk-RPCDYKBN.js?v=815b1335:14807
+beginWork @ chunk-RPCDYKBN.js?v=815b1335:15935
+beginWork$1 @ chunk-RPCDYKBN.js?v=815b1335:19753
+performUnitOfWork @ chunk-RPCDYKBN.js?v=815b1335:19198
+workLoopSync @ chunk-RPCDYKBN.js?v=815b1335:19137
+renderRootSync @ chunk-RPCDYKBN.js?v=815b1335:19116
+recoverFromConcurrentError @ chunk-RPCDYKBN.js?v=815b1335:18736
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=815b1335:18879
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=815b1335:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=815b1335:18627
