@@ -82,6 +82,7 @@ interface OrderManagement {
   currentStatus: string;
   totalAmount: string;
   currency: string;
+  paymentMethod: string; // Added payment method field
   paymentReceiptUrl?: string;
   financialNotes?: string;
   financialReviewedAt?: string;
@@ -546,7 +547,7 @@ function FinanceOrders() {
     if (!orderId) return;
     
     try {
-      const response = await apiRequest(`/api/tracking/order/${orderId}`);
+      const response = await apiRequest(`/api/tracking/order/${orderId}`, { method: 'GET' });
       // setTrackingCodes(response.trackingCodes || []);
     } catch (error) {
       console.error("Error loading tracking codes:", error);
@@ -1100,7 +1101,7 @@ function FinanceOrders() {
                           <Timer className="h-5 w-5 text-amber-600" />
                           <div>
                             <p className="text-sm text-muted-foreground">فعال</p>
-                            <p className="text-xl font-bold text-amber-600">{orphanStats?.stats?.active || 0}</p>
+                            <p className="text-xl font-bold text-amber-600">{(orphanStats as any)?.stats?.active || 0}</p>
                           </div>
                         </div>
                       </CardContent>
@@ -1112,7 +1113,7 @@ function FinanceOrders() {
                           <AlertTriangle className="h-5 w-5 text-red-600" />
                           <div>
                             <p className="text-sm text-muted-foreground">منقضی شده</p>
-                            <p className="text-xl font-bold text-red-600">{orphanStats?.stats?.expired || 0}</p>
+                            <p className="text-xl font-bold text-red-600">{(orphanStats as any)?.stats?.expired || 0}</p>
                           </div>
                         </div>
                       </CardContent>
@@ -1124,7 +1125,7 @@ function FinanceOrders() {
                           <Bell className="h-5 w-5 text-blue-600" />
                           <div>
                             <p className="text-sm text-muted-foreground">اطلاع‌رسانی امروز</p>
-                            <p className="text-xl font-bold text-blue-600">{orphanStats?.stats?.notificationsToday || 0}</p>
+                            <p className="text-xl font-bold text-blue-600">{(orphanStats as any)?.stats?.notificationsToday || 0}</p>
                           </div>
                         </div>
                       </CardContent>
@@ -1136,7 +1137,7 @@ function FinanceOrders() {
                           <CheckCircle className="h-5 w-5 text-green-600" />
                           <div>
                             <p className="text-sm text-muted-foreground">پرداخت شده</p>
-                            <p className="text-xl font-bold text-green-600">{orphanStats?.stats?.paid || 0}</p>
+                            <p className="text-xl font-bold text-green-600">{(orphanStats as any)?.stats?.paid || 0}</p>
                           </div>
                         </div>
                       </CardContent>
@@ -1163,8 +1164,8 @@ function FinanceOrders() {
                         </CardHeader>
                         <CardContent>
                           <div className="space-y-3">
-                            {activeOrders?.orders?.length > 0 ? (
-                              activeOrders.orders.map((order: any) => (
+                            {(activeOrders as any)?.orders?.length > 0 ? (
+                              (activeOrders as any).orders.map((order: any) => (
                                 <Card key={order.id} className="border-l-4 border-l-amber-500">
                                   <CardContent className="p-4">
                                     <div className="flex items-center justify-between">
@@ -1282,7 +1283,7 @@ function FinanceOrders() {
                           <div>
                             <p className="text-sm text-muted-foreground">در انتظار بررسی</p>
                             <p className="text-xl font-bold text-orange-600">
-                              {orphanedOrders?.orders?.filter(order => order.current_status === 'pending' || order.current_status === 'confirmed').length || 0}
+                              {(orphanedOrders as any)?.orders?.filter((order: any) => order.current_status === 'pending' || order.current_status === 'confirmed').length || 0}
                             </p>
                           </div>
                         </div>
@@ -1295,7 +1296,7 @@ function FinanceOrders() {
                           <div>
                             <p className="text-sm text-muted-foreground">ارجاع شده به انبار</p>
                             <p className="text-xl font-bold text-blue-600">
-                              {orphanedOrders?.orders?.filter(order => order.current_status === 'warehouse_ready' || order.current_status === 'warehouse_pending').length || 0}
+                              {(orphanedOrders as any)?.orders?.filter((order: any) => order.current_status === 'warehouse_ready' || order.current_status === 'warehouse_pending').length || 0}
                             </p>
                           </div>
                         </div>
@@ -1308,7 +1309,7 @@ function FinanceOrders() {
                           <div>
                             <p className="text-sm text-muted-foreground">رد شده</p>
                             <p className="text-xl font-bold text-red-600">
-                              {orphanedOrders?.orders?.filter(order => order.current_status === 'rejected' || order.current_status === 'cancelled').length || 0}
+                              {(orphanedOrders as any)?.orders?.filter((order: any) => order.current_status === 'rejected' || order.current_status === 'cancelled').length || 0}
                             </p>
                           </div>
                         </div>
@@ -1321,7 +1322,7 @@ function FinanceOrders() {
                           <div>
                             <p className="text-sm text-muted-foreground">سفارشات موقت</p>
                             <p className="text-xl font-bold text-amber-600">
-                              {orphanedOrders?.orders?.filter(order => order.current_status === 'draft' || order.current_status === 'temporary').length || 0}
+                              {(orphanedOrders as any)?.orders?.filter((order: any) => order.current_status === 'draft' || order.current_status === 'temporary').length || 0}
                             </p>
                           </div>
                         </div>
@@ -2378,7 +2379,7 @@ function OrderCard({ order, onOrderSelect, readOnly = false, fetchOrderDetails }
           <div className="flex justify-end gap-2">
             {fetchOrderDetails && order.orderNumber && (
               <Button 
-                onClick={() => fetchOrderDetails(order.orderNumber)}
+                onClick={() => fetchOrderDetails(order.orderNumber!)}
                 size="sm"
                 variant="outline"
                 className="flex items-center space-x-2 space-x-reverse"
