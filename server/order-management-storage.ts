@@ -562,6 +562,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       // سفارشات تایید شده (financial_approved) به انبار منتقل می‌شوند
       // حذف سفارشات معلق که بیش از یک ساعت pending هستند
       const financialStatuses = statuses || [
+        'pending', // سفارشات در انتظار - مهم: این status در ابتدای سفارش ست می‌شود
         orderStatuses.PENDING_PAYMENT,
         orderStatuses.PAYMENT_UPLOADED, 
         orderStatuses.FINANCIAL_REVIEWING,
