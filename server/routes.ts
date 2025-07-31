@@ -24559,22 +24559,18 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           co.currency,
           co.customer_id,
           co.guest_email,
-          co.guest_phone,
+          co.guest_name,
           co.payment_method,
           co.payment_status,
           co.status as customer_status,
-          co.delivery_address,
-          co.delivery_city,
-          co.delivery_province,
-          co.delivery_postal_code,
           co.invoice_type,
           co.invoice_converted_at,
           -- Customer info from CRM
-          crm.full_name as customer_name,
+          CONCAT(crm.first_name, ' ', crm.last_name) as customer_name,
           crm.phone as customer_phone,
           crm.email as customer_email,
           crm.address as customer_address,
-          crm.city as customer_city_region
+          crm.city_region as customer_city_region
         FROM order_management om
         LEFT JOIN customer_orders co ON om.customer_order_id = co.id
         LEFT JOIN crm_customers crm ON co.customer_id = crm.id
@@ -24606,7 +24602,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         totalAmount: row.total_amount || '0',
         customerName: row.customer_name || row.guest_email || 'مشتری ناشناس',
         customerEmail: row.customer_email || row.guest_email,
-        customerPhone: row.customer_phone || row.guest_phone,
+        customerPhone: row.customer_phone || null,
         createdAt: row.created_at,
         financialNotes: row.financial_notes,
         financialReviewedAt: row.financial_reviewed_at,
@@ -24614,10 +24610,10 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         invoiceConvertedAt: row.invoice_converted_at,
         shippingAddress: {
           name: row.customer_name || 'نام نامشخص',
-          phone: row.customer_phone || row.guest_phone || '',
-          address: row.delivery_address || row.customer_address || '',
-          city: row.delivery_city || row.customer_city_region || '',
-          postalCode: row.delivery_postal_code || ''
+          phone: row.customer_phone || '',
+          address: row.customer_address || '',
+          city: row.customer_city_region || '',
+          postalCode: ''
         }
       }));
       
@@ -24890,7 +24886,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           co.currency,
           co.guest_name,
           co.guest_email,
-          co.guest_phone,
+          NULL as guest_phone,
           co.created_at,
           co.updated_at,
           co.shipping_address,
@@ -24915,7 +24911,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           co.currency,
           co.guest_name,
           co.guest_email,
-          co.guest_phone,
+          NULL as guest_phone,
           co.created_at,
           co.updated_at,
           co.shipping_address,
