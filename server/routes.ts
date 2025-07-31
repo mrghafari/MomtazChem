@@ -12538,6 +12538,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           currentDepartment: 'customer',
           totalAmount: totalAmount.toString(),
           currency: orderData.currency || "IQD",
+          paymentMethod: finalPaymentMethod, // CRITICAL FIX: Include payment method
           notes: orderData.notes || "",
         };
 
