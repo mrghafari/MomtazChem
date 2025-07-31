@@ -2310,6 +2310,13 @@ function OrderCard({ order, onOrderSelect, readOnly = false, fetchOrderDetails }
                     <span className="text-sm text-blue-700 font-medium">درگاه بانکی</span>
                   </>
                 );
+              } else if (paymentMethod === 'online_payment') {
+                return (
+                  <>
+                    <CreditCard className="h-4 w-4 text-blue-600" />
+                    <span className="text-sm text-blue-700 font-medium">پرداخت آنلاین</span>
+                  </>
+                );
               } else {
                 return (
                   <>
@@ -2508,6 +2515,13 @@ function TransferredOrderCard({ order }: TransferredOrderCardProps) {
                   <>
                     <CreditCard className="h-4 w-4 text-blue-600" />
                     <span className="text-sm text-blue-700 font-medium">درگاه بانکی</span>
+                  </>
+                );
+              } else if (paymentMethod === 'online_payment') {
+                return (
+                  <>
+                    <CreditCard className="h-4 w-4 text-blue-600" />
+                    <span className="text-sm text-blue-700 font-medium">پرداخت آنلاین</span>
                   </>
                 );
               } else {

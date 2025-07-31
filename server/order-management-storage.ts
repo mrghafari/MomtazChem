@@ -604,6 +604,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
     const results = await query.orderBy(asc(orderManagement.createdAt)); // سفارشات قدیمی‌تر در بالای لیست
     
     console.log('📊 [DEPARTMENT] Retrieved', results.length, 'orders for department:', department);
+    console.log('🔍 [PAYMENT DEBUG] First order paymentMethod:', results[0]?.paymentMethod);
     if (results.length > 0) {
       console.log('📊 [DEPARTMENT] First order sample:', JSON.stringify(results[0], null, 2));
     } else {
