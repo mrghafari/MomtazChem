@@ -198,10 +198,20 @@ const LogisticsManagement = () => {
   const [isCreateReadyVehicleDialogOpen, setIsCreateReadyVehicleDialogOpen] = useState(false);
   const [selectedReadyVehicle, setSelectedReadyVehicle] = useState<ReadyVehicle | null>(null);
   const [isEditReadyVehicleDialogOpen, setIsEditReadyVehicleDialogOpen] = useState(false);
+  
+  // Order Details Dialog states
+  const [selectedOrderForDetails, setSelectedOrderForDetails] = useState<LogisticsOrder | null>(null);
+  const [isOrderDetailsDialogOpen, setIsOrderDetailsDialogOpen] = useState(false);
   const [customVehicleType, setCustomVehicleType] = useState('');
   const [customEditVehicleType, setCustomEditVehicleType] = useState('');
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [showCustomEditInput, setShowCustomEditInput] = useState(false);
+
+  // Handle showing order details
+  const handleShowOrderDetails = (order: LogisticsOrder) => {
+    setSelectedOrderForDetails(order);
+    setIsOrderDetailsDialogOpen(true);
+  };
   
   // State for vehicle editing (moved here before useEffect)
   const [editingVehicle, setEditingVehicle] = useState<any>(null);
@@ -529,11 +539,7 @@ const LogisticsManagement = () => {
     return <Badge className={config.color}>{config.text}</Badge>;
   };
 
-  // Show order details in modal
-  const handleShowOrderDetails = (order: LogisticsOrder) => {
-    setSelectedOrder(order);
-    setIsOrderDetailsOpen(true);
-  };
+
 
   // Handle enhanced vehicle assignment workflow
   const handleVehicleAssignment = async (order: LogisticsOrder) => {
@@ -4475,6 +4481,169 @@ const LogisticsManagement = () => {
               variant="outline" 
               onClick={() => setIsSuitableVehiclesOpen(false)}
             >
+              بستن
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Order Details Dialog */}
+      <Dialog open={isOrderDetailsDialogOpen} onOpenChange={setIsOrderDetailsDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-right">
+              جزئیات سفارش #{selectedOrderForDetails?.orderNumber || selectedOrderForDetails?.customerOrderId}
+            </DialogTitle>
+          </DialogHeader>
+          
+          {selectedOrderForDetails && (
+            <div className="space-y-6" dir="rtl">
+              {/* Order Status & Information */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="border rounded-lg p-4 bg-blue-50">
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <Package className="w-4 h-4" />
+                    اطلاعات سفارش
+                  </h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">شماره سفارش:</span>
+                      <span className="font-medium">{selectedOrderForDetails.orderNumber || selectedOrderForDetails.customerOrderId}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">وضعیت:</span>
+                      <span>{getStatusBadge(selectedOrderForDetails.currentStatus)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">مبلغ کل:</span>
+                      <span className="font-medium">{Math.floor(parseFloat(selectedOrderForDetails.totalAmount)).toLocaleString()} {selectedOrderForDetails.currency}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">وزن محموله:</span>
+                      <span className="font-medium">{selectedOrderForDetails.calculatedWeight || selectedOrderForDetails.totalWeight || 0} {selectedOrderForDetails.weightUnit || 'کگ'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">روش تحویل:</span>
+                      <span className="font-medium text-green-700 bg-green-100 px-2 py-1 rounded">
+                        {selectedOrderForDetails.deliveryMethod || 'مشخص نشده'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">نوع حمل‌ونقل:</span>
+                      <span className="font-medium">{selectedOrderForDetails.transportationType || 'تعیین نشده'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border rounded-lg p-4 bg-green-50">
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <User className="w-4 h-4" />
+                    اطلاعات مشتری
+                  </h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">نام مشتری:</span>
+                      <span className="font-medium">
+                        {selectedOrderForDetails.customer 
+                          ? `${selectedOrderForDetails.customer.firstName || ''} ${selectedOrderForDetails.customer.lastName || ''}`.trim() 
+                          : selectedOrderForDetails.customerFirstName && selectedOrderForDetails.customerLastName 
+                            ? `${selectedOrderForDetails.customerFirstName} ${selectedOrderForDetails.customerLastName}` 
+                            : 'نامشخص'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">تلفن:</span>
+                      <span className="font-medium">{selectedOrderForDetails.customer?.phone || selectedOrderForDetails.customerPhone || 'ثبت نشده'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">ایمیل:</span>
+                      <span className="font-medium">{selectedOrderForDetails.customer?.email || selectedOrderForDetails.customerEmail || 'ثبت نشده'}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Delivery Information */}
+              <div className="border rounded-lg p-4 bg-orange-50">
+                <h3 className="font-semibold mb-3 flex items-center gap-2">
+                  <MapPin className="w-4 h-4" />
+                  اطلاعات تحویل
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">آدرس ارسال:</p>
+                    <p className="font-medium">{selectedOrderForDetails.shippingAddress || selectedOrderForDetails.customerAddress || 'آدرس ثبت نشده'}</p>
+                  </div>
+                  {selectedOrderForDetails.recipientName && (
+                    <div>
+                      <p className="text-sm text-gray-600 mb-1">گیرنده:</p>
+                      <p className="font-medium">{selectedOrderForDetails.recipientName}</p>
+                      {selectedOrderForDetails.recipientPhone && (
+                        <p className="text-sm text-gray-500">{selectedOrderForDetails.recipientPhone}</p>
+                      )}
+                    </div>
+                  )}
+                  {selectedOrderForDetails.hasGpsLocation && (
+                    <div>
+                      <p className="text-sm text-gray-600 mb-1">موقعیت جغرافیایی:</p>
+                      <p className="text-sm text-green-600">✓ موقعیت GPS ثبت شده</p>
+                      <p className="text-xs text-gray-500">
+                        Lat: {selectedOrderForDetails.gpsLatitude}, Lng: {selectedOrderForDetails.gpsLongitude}
+                      </p>
+                    </div>
+                  )}
+                  {selectedOrderForDetails.deliveryNotes && (
+                    <div className="md:col-span-2">
+                      <p className="text-sm text-gray-600 mb-1">توضیحات تحویل:</p>
+                      <p className="font-medium">{selectedOrderForDetails.deliveryNotes}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Tracking Information */}
+              {(selectedOrderForDetails.trackingNumber || selectedOrderForDetails.deliveryPersonName) && (
+                <div className="border rounded-lg p-4 bg-purple-50">
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <Truck className="w-4 h-4" />
+                    اطلاعات ردیابی
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {selectedOrderForDetails.trackingNumber && (
+                      <div>
+                        <p className="text-sm text-gray-600 mb-1">کد رهگیری:</p>
+                        <p className="font-medium">{selectedOrderForDetails.trackingNumber}</p>
+                      </div>
+                    )}
+                    {selectedOrderForDetails.deliveryPersonName && (
+                      <div>
+                        <p className="text-sm text-gray-600 mb-1">تحویل‌دهنده:</p>
+                        <p className="font-medium">{selectedOrderForDetails.deliveryPersonName}</p>
+                        {selectedOrderForDetails.deliveryPersonPhone && (
+                          <p className="text-sm text-gray-500">{selectedOrderForDetails.deliveryPersonPhone}</p>
+                        )}
+                      </div>
+                    )}
+                    {selectedOrderForDetails.estimatedDeliveryDate && (
+                      <div>
+                        <p className="text-sm text-gray-600 mb-1">تاریخ تحویل تقریبی:</p>
+                        <p className="font-medium">{new Date(selectedOrderForDetails.estimatedDeliveryDate).toLocaleDateString('fa-IR')}</p>
+                      </div>
+                    )}
+                    {selectedOrderForDetails.actualDeliveryDate && (
+                      <div>
+                        <p className="text-sm text-gray-600 mb-1">تاریخ تحویل واقعی:</p>
+                        <p className="font-medium">{new Date(selectedOrderForDetails.actualDeliveryDate).toLocaleDateString('fa-IR')}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsOrderDetailsDialogOpen(false)}>
               بستن
             </Button>
           </DialogFooter>
