@@ -4129,6 +4129,109 @@ const LogisticsManagement = () => {
                 </Card>
               )}
 
+              {/* Available Fleet Vehicles Selection */}
+              <Card className="border-2 border-orange-500 bg-orange-50">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Truck className="h-5 w-5 text-orange-600" />
+                    انتخاب از خودروهای آماده ناوگان شرکت
+                  </CardTitle>
+                  <CardDescription>
+                    خودروهایی که نزدیک به انتخاب مشتری هستند و در حال حاضر آماده به کار می‌باشند
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {availableFleetVehicles && availableFleetVehicles.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {availableFleetVehicles.map((vehicle: any) => (
+                        <div 
+                          key={vehicle.id} 
+                          className={`bg-white rounded-lg p-4 border-2 transition-all duration-300 cursor-pointer hover:shadow-lg ${
+                            vehicle.isCheckoutSuggested 
+                              ? 'border-green-500 bg-green-50 ring-2 ring-green-200 shadow-lg' 
+                              : 'border-orange-300 hover:border-orange-500'
+                          }`}
+                          onClick={() => {
+                            // Handle vehicle selection
+                            console.log('انتخاب خودرو آماده:', vehicle);
+                          }}
+                        >
+                          <div className="flex items-center justify-between mb-3">
+                            <h4 className={`font-semibold ${
+                              vehicle.isCheckoutSuggested ? 'text-green-800' : 'text-gray-800'
+                            }`}>
+                              {vehicle.vehicleType || vehicle.vehicleName}
+                            </h4>
+                            <div className="flex gap-2">
+                              {vehicle.isCheckoutSuggested && (
+                                <Badge className="bg-gradient-to-r from-green-600 to-emerald-600 text-white animate-pulse">
+                                  🎯 پیشنهاد سیستم
+                                </Badge>
+                              )}
+                              <Badge className="bg-green-500 text-white">آماده</Badge>
+                            </div>
+                          </div>
+                          
+                          {vehicle.isCheckoutSuggested && (
+                            <div className="bg-green-100 border border-green-300 rounded-lg p-3 mb-4">
+                              <div className="flex items-center gap-2 text-green-800 text-sm font-medium">
+                                <CheckCircle className="w-4 h-4" />
+                                این خودرو مطابق انتخاب مشتری در سیستم هوشمند است
+                              </div>
+                            </div>
+                          )}
+                          
+                          <div className="space-y-2 mb-4">
+                            <div className="flex justify-between">
+                              <span className="text-sm text-gray-600">شماره پلاک:</span>
+                              <span className="font-medium">{vehicle.licensePlate || vehicle.plateNumber}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-sm text-gray-600">راننده:</span>
+                              <span className="font-medium">{vehicle.driverName}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-sm text-gray-600">تلفن راننده:</span>
+                              <span className="font-medium">{vehicle.driverMobile || vehicle.driverPhone}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-sm text-gray-600">ظرفیت:</span>
+                              <span className="font-medium">{vehicle.loadCapacity || vehicle.maxWeight} کیلوگرم</span>
+                            </div>
+                          </div>
+                          
+                          <Button 
+                            className={`w-full transition-all duration-300 ${
+                              vehicle.isCheckoutSuggested 
+                                ? 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg' 
+                                : 'bg-orange-600 hover:bg-orange-700'
+                            } text-white`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              assignVehicleToOrder(
+                                vehicle.id, 
+                                vehicle.licensePlate || vehicle.plateNumber, 
+                                vehicle.driverName, 
+                                vehicle.driverMobile || vehicle.driverPhone
+                              );
+                            }}
+                          >
+                            <CheckCircle className="w-4 h-4 mr-2" />
+                            {vehicle.isCheckoutSuggested ? 'اختصاص خودروی پیشنهادی' : 'اختصاص این خودرو'}
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <AlertTriangle className="w-12 h-12 mx-auto mb-4 text-orange-400" />
+                      <p className="text-orange-600 mb-2">هیچ خودروی آماده‌ای از ناوگان شرکت در دسترس نیست</p>
+                      <p className="text-sm text-gray-500">لطفاً از خودروهای مناسب زیر انتخاب کنید</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
               {/* All Suitable Vehicles */}
               {suitableVehiclesData.suitableVehicles && suitableVehiclesData.suitableVehicles.length > 0 && (
                 <Card>
@@ -4150,6 +4253,7 @@ const LogisticsManagement = () => {
                             <TableHead className="text-right">ظرفیت</TableHead>
                             <TableHead className="text-right">بهره‌وری</TableHead>
                             <TableHead className="text-right">ایمنی</TableHead>
+                            <TableHead className="text-right">انتخاب</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -4178,6 +4282,19 @@ const LogisticsManagement = () => {
                                     نامطابق
                                   </Badge>
                                 )}
+                              </TableCell>
+                              <TableCell>
+                                <Button 
+                                  size="sm" 
+                                  variant={index === 0 ? "default" : "outline"}
+                                  className={index === 0 ? "bg-green-600 hover:bg-green-700" : ""}
+                                  onClick={() => {
+                                    console.log('انتخاب خودروی مناسب:', vehicle);
+                                    // Handle vehicle selection from suitable vehicles
+                                  }}
+                                >
+                                  {index === 0 ? 'انتخاب بهینه' : 'انتخاب'}
+                                </Button>
                               </TableCell>
                             </TableRow>
                           ))}
