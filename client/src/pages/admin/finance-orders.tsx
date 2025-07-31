@@ -184,10 +184,18 @@ function FinanceOrders() {
   });
 
   // Query for orphaned orders (orders in customer_orders but missing from order_management)
-  const { data: orphanedOrders, isLoading: orphanedLoading } = useQuery({
+  const { data: orphanedOrders, isLoading: orphanedLoading, error: orphanedError } = useQuery({
     queryKey: ['/api/financial/orphaned-orders'],
+    queryFn: () => fetch('/api/financial/orphaned-orders', { credentials: 'include' }).then(res => {
+      if (!res.ok) {
+        throw new Error('Failed to fetch orphaned orders');
+      }
+      return res.json();
+    }),
     enabled: activeTab === 'orphaned',
-    refetchInterval: 30000 // Refresh every 30 seconds
+    refetchInterval: 30000, // Refresh every 30 seconds
+    retry: 3,
+    retryDelay: 1000
   });
 
   // Mutation to repair orphaned orders

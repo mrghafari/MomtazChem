@@ -24877,39 +24877,111 @@ ${message ? `Additional Requirements:\n${message}` : ''}
   });
 
   // لیست سفارشات یتیم (پرداخت ناکامل از درگاه بانکی)
-  app.get('/api/financial/orphaned-orders', async (req, res) => {
+  app.get('/api/financial/orphaned-orders', requireAuth, async (req, res) => {
     try {
-      const result = await customerPool.query(`
-        SELECT om.*, co.order_number, co.total_amount, co.currency,
-               co.guest_name, co.guest_email, 
-               co.created_at, co.shipping_address, co.billing_address,
-               co.payment_method, co.status as order_status
-        FROM order_management om
-        LEFT JOIN customer_orders co ON om.customer_order_id = co.id
-        WHERE (co.payment_method = 'online_payment' 
-               AND co.status IN ('pending', 'payment_pending', 'payment_failed', 'cart'))
-           OR (om.current_status = 'payment_incomplete' 
-               OR om.current_status = 'orphaned')
-        ORDER BY om.created_at DESC
+      console.log('🧟 [ORPHANED ORDERS] Fetching orphaned and problematic orders...');
+      
+      // Query for orphaned orders (orders without management records)
+      const orphanedResult = await customerPool.query(`
+        SELECT 
+          co.id,
+          co.order_number,
+          co.total_amount,
+          co.currency,
+          co.guest_name,
+          co.guest_email,
+          co.guest_phone,
+          co.created_at,
+          co.updated_at,
+          co.shipping_address,
+          co.billing_address,
+          co.payment_method,
+          co.payment_status,
+          co.status,
+          co.notes,
+          NULL as management_status,
+          'orphaned' as orphan_type
+        FROM customer_orders co
+        LEFT JOIN order_management om ON co.id = om.customer_order_id
+        WHERE om.customer_order_id IS NULL
+        
+        UNION ALL
+        
+        -- Query for problematic orders (stuck in pending payment states)
+        SELECT 
+          co.id,
+          co.order_number,
+          co.total_amount,
+          co.currency,
+          co.guest_name,
+          co.guest_email,
+          co.guest_phone,
+          co.created_at,
+          co.updated_at,
+          co.shipping_address,
+          co.billing_address,
+          co.payment_method,
+          co.payment_status,
+          co.status,
+          co.notes,
+          om.current_status as management_status,
+          CASE 
+            WHEN co.payment_method = 'online_payment' AND co.payment_status = 'pending' THEN 'معلق - پرداخت آنلاین ناتمام'
+            WHEN co.payment_method = 'bank_transfer_grace' AND co.payment_status = 'receipt_uploaded' THEN 'معلق - حواله بررسی شده'
+            WHEN co.payment_method = 'bank_transfer_grace' AND co.payment_status = 'pending' THEN 'معلق - در انتظار حواله'
+            ELSE 'سایر موارد معلق'
+          END as orphan_type
+        FROM customer_orders co
+        INNER JOIN order_management om ON co.id = om.customer_order_id
+        WHERE (co.payment_method = 'online_payment' AND co.payment_status = 'pending')
+           OR (co.payment_method = 'bank_transfer_grace' AND co.payment_status IN ('pending', 'receipt_uploaded'))
+           OR (om.current_status IN ('pending', 'payment_uploaded', 'payment_incomplete'))
+        
+        ORDER BY created_at DESC
       `);
       
-      const transformedOrders = result.rows.map(row => ({
+      console.log(`🧟 [ORPHANED ORDERS] Found ${orphanedResult.rows.length} orphaned/problematic orders`);
+      
+      if (orphanedResult.rows.length > 0) {
+        console.log('🧟 [ORPHANED ORDERS] Sample orphaned order:', JSON.stringify(orphanedResult.rows[0], null, 2));
+      }
+      
+      const transformedOrders = orphanedResult.rows.map(row => ({
         id: row.id,
-        customerOrderId: row.customer_order_id,
         orderNumber: row.order_number,
-        currentStatus: row.current_status,
+        customerName: row.guest_name || 'نامشخص',
+        customerEmail: row.guest_email,
+        customerPhone: row.guest_phone,
         totalAmount: row.total_amount,
         currency: row.currency,
-        customerName: row.guest_name || '',
-        customerEmail: row.guest_email,
+        paymentMethod: row.payment_method,
+        paymentStatus: row.payment_status,
+        status: row.status,
         createdAt: row.created_at,
+        updatedAt: row.updated_at,
         shippingAddress: row.shipping_address,
         billingAddress: row.billing_address,
-        paymentMethod: row.payment_method,
-        orderStatus: row.order_status
+        notes: row.notes,
+        managementStatus: row.management_status,
+        orphanType: row.orphan_type
       }));
+      
+      // Statistics for categorization
+      const stats = {
+        total: transformedOrders.length,
+        trulyOrphaned: transformedOrders.filter(order => order.orphanType === 'orphaned').length,
+        stuckOnlinePayments: transformedOrders.filter(order => order.orphanType === 'معلق - پرداخت آنلاین ناتمام').length,
+        stuckBankTransfers: transformedOrders.filter(order => order.orphanType === 'معلق - حواله بررسی شده').length,
+        suspicious: transformedOrders.filter(order => order.orphanType === 'سایر موارد معلق').length
+      };
+      
+      console.log('📊 [ORPHANED CATEGORIZATION]:', JSON.stringify(stats, null, 2));
 
-      res.json({ success: true, orders: transformedOrders });
+      res.json({ 
+        success: true, 
+        orders: transformedOrders,
+        stats: stats
+      });
     } catch (error) {
       console.error('❌ [ORPHANED ORDERS] Error:', error);
       res.status(500).json({ 
