@@ -1027,7 +1027,14 @@ function FinanceOrders() {
                           {order.shippingAddress && (
                             <div className="mt-3 p-3 bg-white rounded border">
                               <Label className="text-gray-600 text-xs">آدرس تحویل:</Label>
-                              <p className="text-sm mt-1">{JSON.parse(order.shippingAddress).address}</p>
+                              <p className="text-sm mt-1">{(() => {
+                                try {
+                                  const parsed = JSON.parse(order.shippingAddress);
+                                  return parsed.address || order.shippingAddress;
+                                } catch {
+                                  return order.shippingAddress;
+                                }
+                              })()}</p>
                             </div>
                           )}
                         </CardContent>
