@@ -44,7 +44,8 @@ import {
   Save,
   Edit,
   Trash2,
-  AlertCircle
+  AlertCircle,
+  Activity
 } from "lucide-react";
 import InternalBarcodeCard from "@/components/InternalBarcodeCard";
 import GlobalRefreshControl from "@/components/GlobalRefreshControl";
