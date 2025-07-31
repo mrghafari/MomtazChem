@@ -63,6 +63,27 @@ const formatDateSafe = (dateString: string | null | undefined, locale = 'en-US',
   }
 };
 
+// Status display name mapping function
+const getStatusDisplayName = (status: string): string => {
+  const statusMap: { [key: string]: string } = {
+    'pending': 'در انتظار',
+    'confirmed': 'تایید شده',
+    'financial_review': 'بررسی مالی',
+    'warehouse_pending': 'در انتظار انبار',
+    'warehouse_ready': 'آماده انبار',
+    'warehouse_processing': 'در حال پردازش انبار',
+    'logistics_pending': 'در انتظار لجستیک',
+    'logistics_assigned': 'اختصاص یافته لجستیک',
+    'logistics_dispatched': 'ارسال شده',
+    'in_transit': 'در حال حمل',
+    'delivered': 'تحویل داده شده',
+    'cancelled': 'لغو شده',
+    'returned': 'برگشت داده شده'
+  };
+  
+  return statusMap[status] || status;
+};
+
 interface TransportationCompany {
   id: number;
   name: string;
@@ -3783,22 +3804,120 @@ const LogisticsManagement = () => {
                 </div>
               )}
 
-              {/* Order Details */}
-              <div className="bg-orange-50 rounded-lg p-4">
-                <h3 className="text-lg font-semibold text-orange-800 mb-3 flex items-center">
-                  <Package className="w-5 h-5 mr-2" />
-                  جزئیات سفارش
+              {/* Order Details - Enhanced Format */}
+              <div className="bg-gradient-to-r from-orange-50 to-amber-50 rounded-lg p-6 border border-orange-200">
+                <h3 className="text-xl font-bold text-orange-800 mb-4 flex items-center">
+                  <Package className="w-6 h-6 mr-2" />
+                  جزئیات کامل سفارش
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label className="text-sm text-gray-600">وزن محموله</Label>
-                    <p className="font-medium">
-                      {selectedOrder.calculatedWeight || selectedOrder.totalWeight} کیلوگرم
-                    </p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Weight Information */}
+                  <div className="bg-white rounded-lg p-4 shadow-sm border">
+                    <Label className="text-sm font-semibold text-gray-700 flex items-center mb-2">
+                      <Weight className="w-4 h-4 mr-1 text-blue-600" />
+                      اطلاعات وزن
+                    </Label>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">وزن محاسبه شده:</span>
+                        <span className="font-semibold text-blue-700">{selectedOrder.calculatedWeight || 0} کیلوگرم</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">وزن کل:</span>
+                        <span className="font-semibold text-purple-700">{selectedOrder.totalWeight || 0} کیلوگرم</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">واحد وزن:</span>
+                        <span className="font-medium">{selectedOrder.weightUnit || 'kg'}</span>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <Label className="text-sm text-gray-600">روش تحویل</Label>
-                    <p className="font-medium">{selectedOrder.deliveryMethod || 'پیک'}</p>
+
+                  {/* Financial Information */}
+                  <div className="bg-white rounded-lg p-4 shadow-sm border">
+                    <Label className="text-sm font-semibold text-gray-700 flex items-center mb-2">
+                      <Calculator className="w-4 h-4 mr-1 text-green-600" />
+                      اطلاعات مالی
+                    </Label>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">مبلغ کل:</span>
+                        <span className="font-bold text-green-700">{Math.floor(parseFloat(selectedOrder.totalAmount || '0')).toLocaleString()} {selectedOrder.currency || 'IQD'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">ارز:</span>
+                        <span className="font-medium">{selectedOrder.currency || 'دینار عراق'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">شماره سفارش:</span>
+                        <span className="font-semibold text-orange-700">{selectedOrder.orderNumber}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Delivery Information */}
+                  <div className="bg-white rounded-lg p-4 shadow-sm border">
+                    <Label className="text-sm font-semibold text-gray-700 flex items-center mb-2">
+                      <Truck className="w-4 h-4 mr-1 text-purple-600" />
+                      اطلاعات تحویل
+                    </Label>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">روش تحویل:</span>
+                        <span className="font-semibold text-purple-700">{selectedOrder.deliveryMethod || 'پیک'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">نوع حمل:</span>
+                        <span className="font-medium">{selectedOrder.transportationType || 'استاندارد'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">کد ردیابی:</span>
+                        <span className="font-medium text-blue-600">{selectedOrder.trackingNumber || 'نامشخص'}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Status and Dates Row */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                  <div className="bg-white rounded-lg p-4 shadow-sm border">
+                    <Label className="text-sm font-semibold text-gray-700 flex items-center mb-2">
+                      <History className="w-4 h-4 mr-1 text-indigo-600" />
+                      تاریخ‌های مهم
+                    </Label>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">تاریخ ایجاد:</span>
+                        <span className="font-medium">{formatDateSafe(selectedOrder.createdAt)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">آخرین بروزرسانی:</span>
+                        <span className="font-medium">{formatDateSafe(selectedOrder.updatedAt)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">تاریخ تحویل تخمینی:</span>
+                        <span className="font-medium">{formatDateSafe(selectedOrder.estimatedDeliveryDate) || 'نامشخص'}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white rounded-lg p-4 shadow-sm border">
+                    <Label className="text-sm font-semibold text-gray-700 flex items-center mb-2">
+                      <AlertCircle className="w-4 h-4 mr-1 text-red-600" />
+                      وضعیت و کد تحویل
+                    </Label>
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">وضعیت فعلی:</span>
+                        <Badge variant={selectedOrder.currentStatus === 'logistics_dispatched' ? 'default' : 'secondary'}>
+                          {getStatusDisplayName(selectedOrder.currentStatus)}
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">کد تحویل:</span>
+                        <span className="font-bold text-red-600">{selectedOrder.deliveryCode || 'تعیین نشده'}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
