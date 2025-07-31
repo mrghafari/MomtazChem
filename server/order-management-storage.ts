@@ -527,6 +527,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       totalAmount: customerOrders.totalAmount,
       currency: customerOrders.currency,
       orderNumber: customerOrders.orderNumber, // شماره سفارش M[YY][NNNNN]
+      paymentMethod: customerOrders.paymentMethod, // نوع تسویه حساب
       
       // Customer info
       customerFirstName: crmCustomers.firstName,
