@@ -47,7 +47,8 @@ import {
   AlertCircle,
   Activity,
   BarChart3,
-  Wrench
+  Wrench,
+  HelpCircle
 } from "lucide-react";
 import InternalBarcodeCard from "@/components/InternalBarcodeCard";
 import GlobalRefreshControl from "@/components/GlobalRefreshControl";
@@ -202,6 +203,20 @@ function FinanceOrders() {
     retryDelay: 1000
   });
 
+  // Query for non-payment orphaned orders (pending payments without grace period)
+  const { data: nonPaymentOrders, isLoading: nonPaymentLoading } = useQuery({
+    queryKey: ['/api/financial/non-payment-orders'],
+    queryFn: () => fetch('/api/financial/non-payment-orders', { credentials: 'include' }).then(res => {
+      if (!res.ok) {
+        throw new Error('Failed to fetch non-payment orders');
+      }
+      return res.json();
+    }),
+    enabled: activeTab === 'non-payment',
+    refetchInterval: 30000, // Refresh every 30 seconds
+    retry: 3
+  });
+
   // Mutation to repair orphaned orders
   const repairOrphanedOrderMutation = useMutation({
     mutationFn: async (customerOrderId: number) => {
@@ -221,6 +236,30 @@ function FinanceOrders() {
       toast({
         title: "خطا در تعمیر",
         description: error.message || "امکان تعمیر سفارش یتیم وجود ندارد",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Mutation to cancel non-payment order
+  const cancelNonPaymentOrderMutation = useMutation({
+    mutationFn: async (orderNumber: string) => {
+      return apiRequest(`/api/financial/non-payment-orders/${orderNumber}/cancel`, {
+        method: 'POST',
+        body: {}
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "لغو موفق",
+        description: "سفارش بدون پرداخت با موفقیت لغو شد",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/financial/non-payment-orders'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "خطا در لغو",
+        description: error.message || "امکان لغو سفارش وجود ندارد",
         variant: "destructive",
       });
     }
@@ -894,29 +933,33 @@ function FinanceOrders() {
 
         {/* Tabbed Interface */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6 bg-white shadow-sm border rounded-lg p-1">
-            <TabsTrigger value="pending" className="flex items-center space-x-2 space-x-reverse data-[state=active]:bg-orange-500 data-[state=active]:text-white">
-              <Clock className="h-4 w-4" />
-              <span>در انتظار بررسی ({pendingOrders.length})</span>
+          <TabsList className="grid w-full grid-cols-7 bg-white shadow-sm border rounded-lg p-1">
+            <TabsTrigger value="pending" className="flex items-center space-x-1 space-x-reverse data-[state=active]:bg-orange-500 data-[state=active]:text-white text-xs">
+              <Clock className="h-3 w-3" />
+              <span>در انتظار ({pendingOrders.length})</span>
             </TabsTrigger>
-            <TabsTrigger value="transferred" className="flex items-center space-x-2 space-x-reverse data-[state=active]:bg-blue-500 data-[state=active]:text-white">
-              <ChevronRight className="h-4 w-4" />
-              <span>ارجاع شده به انبار ({filteredTransferredOrders.length})</span>
+            <TabsTrigger value="transferred" className="flex items-center space-x-1 space-x-reverse data-[state=active]:bg-blue-500 data-[state=active]:text-white text-xs">
+              <ChevronRight className="h-3 w-3" />
+              <span>انبار ({filteredTransferredOrders.length})</span>
             </TabsTrigger>
-            <TabsTrigger value="rejected" className="flex items-center space-x-2 space-x-reverse data-[state=active]:bg-red-500 data-[state=active]:text-white">
-              <XCircle className="h-4 w-4" />
+            <TabsTrigger value="rejected" className="flex items-center space-x-1 space-x-reverse data-[state=active]:bg-red-500 data-[state=active]:text-white text-xs">
+              <XCircle className="h-3 w-3" />
               <span>رد شده ({rejectedOrders.length})</span>
             </TabsTrigger>
-            <TabsTrigger value="orphaned" className="flex items-center space-x-2 space-x-reverse data-[state=active]:bg-amber-500 data-[state=active]:text-white">
-              <AlertTriangle className="h-4 w-4" />
-              <span>سفارشات یتیم ({orphanedOrders?.orders?.length || 0})</span>
+            <TabsTrigger value="orphaned" className="flex items-center space-x-1 space-x-reverse data-[state=active]:bg-amber-500 data-[state=active]:text-white text-xs">
+              <AlertTriangle className="h-3 w-3" />
+              <span>یتیم DB ({orphanedOrders?.orders?.length || 0})</span>
             </TabsTrigger>
-            <TabsTrigger value="temporary" className="flex items-center space-x-2 space-x-reverse data-[state=active]:bg-purple-500 data-[state=active]:text-white">
-              <Timer className="h-4 w-4" />
-              <span>سفارشات موقت (0)</span>
+            <TabsTrigger value="non-payment" className="flex items-center space-x-1 space-x-reverse data-[state=active]:bg-red-600 data-[state=active]:text-white text-xs">
+              <XCircle className="h-3 w-3" />
+              <span>بدون پرداخت ({nonPaymentOrders?.orders?.length || 0})</span>
             </TabsTrigger>
-            <TabsTrigger value="workflow" className="flex items-center space-x-2 space-x-reverse data-[state=active]:bg-indigo-500 data-[state=active]:text-white">
-              <Settings className="h-4 w-4" />
+            <TabsTrigger value="temporary" className="flex items-center space-x-1 space-x-reverse data-[state=active]:bg-purple-500 data-[state=active]:text-white text-xs">
+              <Timer className="h-3 w-3" />
+              <span>موقت (0)</span>
+            </TabsTrigger>
+            <TabsTrigger value="workflow" className="flex items-center space-x-1 space-x-reverse data-[state=active]:bg-indigo-500 data-[state=active]:text-white text-xs">
+              <Settings className="h-3 w-3" />
               <span>مانیتورینگ</span>
             </TabsTrigger>
 
@@ -1492,6 +1535,181 @@ function FinanceOrders() {
                           <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
                           <h3 className="text-lg font-medium text-gray-900 mb-2">سفارش یتیمی یافت نشد</h3>
                           <p className="text-gray-500">همه سفارشات دارای رکورد مدیریت معتبر هستند</p>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Non-Payment Orders Tab */}
+          <TabsContent value="non-payment" className="space-y-6">
+            <div className="space-y-6">
+              {/* Header */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <XCircle className="h-5 w-5 text-red-500" />
+                    مدیریت سفارشات بدون پرداخت
+                  </CardTitle>
+                  <CardDescription>
+                    سفارشاتی که پرداخت آن‌ها انجام نشده است (بجز سفارشات با مهلت ۳ روزه)
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {nonPaymentLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full"></div>
+                      <span className="mr-2">در حال بارگیری...</span>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                      <Card className="border-red-200 bg-red-50">
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-2">
+                            <AlertTriangle className="h-5 w-5 text-red-600" />
+                            <div>
+                              <p className="text-sm text-muted-foreground">درگاه آنلاین ناتمام</p>
+                              <p className="text-xl font-bold text-red-600">
+                                {nonPaymentOrders?.categorized?.onlinePaymentFailed?.length || 0}
+                              </p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      <Card className="border-purple-200 bg-purple-50">
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-2">
+                            <Wallet className="h-5 w-5 text-purple-600" />
+                            <div>
+                              <p className="text-sm text-muted-foreground">پرداخت ترکیبی ناتمام</p>
+                              <p className="text-xl font-bold text-purple-600">
+                                {nonPaymentOrders?.categorized?.hybridPaymentFailed?.length || 0}
+                              </p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      <Card className="border-gray-200 bg-gray-50">
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-2">
+                            <XCircle className="h-5 w-5 text-gray-600" />
+                            <div>
+                              <p className="text-sm text-muted-foreground">پرداخت ناموفق</p>
+                              <p className="text-xl font-bold text-gray-600">
+                                {nonPaymentOrders?.categorized?.completelyFailed?.length || 0}
+                              </p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      <Card className="border-amber-200 bg-amber-50">
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-2">
+                            <HelpCircle className="h-5 w-5 text-amber-600" />
+                            <div>
+                              <p className="text-sm text-muted-foreground">نیاز به بررسی</p>
+                              <p className="text-xl font-bold text-amber-600">
+                                {nonPaymentOrders?.categorized?.needsReview?.length || 0}
+                              </p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  )}
+
+                  {/* Orders List */}
+                  <div className="space-y-4">
+                    {nonPaymentOrders?.orders?.length > 0 ? (
+                      nonPaymentOrders.orders.map((order: any) => (
+                        <Card key={order.id} className="border-l-4 border-l-red-500">
+                          <CardContent className="p-6">
+                            <div className="flex items-center justify-between mb-4">
+                              <div className="flex items-center space-x-4 space-x-reverse">
+                                <div className="p-2 bg-red-100 rounded-lg">
+                                  <XCircle className="h-5 w-5 text-red-600" />
+                                </div>
+                                <div>
+                                  <h3 className="font-bold text-lg text-gray-900">سفارش {order.orderNumber}</h3>
+                                  <p className="text-sm text-gray-600">{order.customerName}</p>
+                                </div>
+                              </div>
+                              <div className="flex items-center space-x-3 space-x-reverse">
+                                <Badge variant="destructive" className="text-xs">
+                                  {order.nonPaymentType}
+                                </Badge>
+                                <div className="text-left">
+                                  <p className="font-bold text-lg text-red-600">
+                                    {parseFloat(order.totalAmount).toLocaleString()} {order.currency}
+                                  </p>
+                                  <p className="text-xs text-gray-500">
+                                    {order.ageCategory === 'قدیمی' ? '🔴' : order.ageCategory === 'متوسط' ? '🟡' : '🟢'} {order.ageCategory}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                              <div className="flex items-center space-x-2 space-x-reverse">
+                                <Mail className="h-4 w-4 text-gray-400" />
+                                <span className="text-sm text-gray-600">{order.customerEmail || 'نامشخص'}</span>
+                              </div>
+                              <div className="flex items-center space-x-2 space-x-reverse">
+                                <Phone className="h-4 w-4 text-gray-400" />
+                                <span className="text-sm text-gray-600">{order.customerPhone || 'نامشخص'}</span>
+                              </div>
+                              <div className="flex items-center space-x-2 space-x-reverse">
+                                <Calendar className="h-4 w-4 text-gray-400" />
+                                <span className="text-sm text-gray-600">
+                                  تاریخ: {new Date(order.createdAt).toLocaleDateString('fa-IR')}
+                                </span>
+                              </div>
+                              <div className="flex items-center space-x-2 space-x-reverse">
+                                <CreditCard className="h-4 w-4 text-gray-400" />
+                                <span className="text-sm text-gray-600">{order.paymentMethod}</span>
+                              </div>
+                            </div>
+
+                            <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-2 space-x-reverse">
+                                  <AlertTriangle className="h-4 w-4 text-red-600" />
+                                  <span className="text-sm font-medium text-red-900">سفارش بدون پرداخت</span>
+                                  <Badge variant="secondary" className="bg-red-100 text-red-800 text-xs">
+                                    وضعیت: {order.paymentStatus}
+                                  </Badge>
+                                </div>
+                                <div className="flex space-x-2 space-x-reverse">
+                                  <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    onClick={() => cancelNonPaymentOrderMutation.mutate(order.orderNumber)}
+                                    disabled={cancelNonPaymentOrderMutation.isPending}
+                                  >
+                                    {cancelNonPaymentOrderMutation.isPending ? 'در حال لغو...' : 'لغو سفارش'}
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+
+                            {order.notes && (
+                              <div className="bg-gray-50 rounded-lg p-3 mb-4">
+                                <p className="text-sm font-medium text-gray-700 mb-1">یادداشت:</p>
+                                <p className="text-sm text-gray-600">{order.notes}</p>
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      ))
+                    ) : (
+                      <Card>
+                        <CardContent className="p-12 text-center">
+                          <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
+                          <h3 className="text-lg font-medium text-gray-900 mb-2">سفارش بدون پرداختی یافت نشد</h3>
+                          <p className="text-gray-500">همه سفارشات پرداخت شده یا دارای مهلت ۳ روزه هستند</p>
                         </CardContent>
                       </Card>
                     )}
