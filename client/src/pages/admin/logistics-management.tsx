@@ -36,7 +36,11 @@ import {
   ArrowUpDown,
   Bus,
   X,
-  Minus
+  Minus,
+  CreditCard,
+  Wallet,
+  DollarSign,
+  Clock
 } from 'lucide-react';
 import { useOrderNotifications } from '@/hooks/useOrderNotifications';
 import PostalServicesTab from '@/components/PostalServicesTab';
@@ -1544,6 +1548,69 @@ const LogisticsManagement = () => {
                           <Phone className="w-3 h-3 mr-2 text-gray-500" />
                           <span className="text-sm text-gray-700">{order.customer?.phone || order.customerPhone}</span>
                         </div>
+                      </div>
+                    </div>
+
+                    {/* Payment Method Block */}
+                    <div className="bg-teal-50 rounded-lg p-3 border border-teal-200">
+                      <h5 className="font-medium text-teal-800 mb-2 flex items-center">
+                        <CreditCard className="w-4 h-4 mr-2" />
+                        نوع تسویه حساب
+                      </h5>
+                      <div className="space-y-1">
+                        {(() => {
+                          const paymentMethod = order.paymentMethod;
+                          if (paymentMethod === 'wallet_full') {
+                            return (
+                              <div className="bg-green-100 px-2 py-1 rounded-lg border border-green-300">
+                                <p className="text-sm font-bold text-green-800 flex items-center">
+                                  <Wallet className="w-3 h-3 mr-1" />
+                                  کیف پول (کامل)
+                                </p>
+                                <p className="text-xs text-green-600">پرداخت کامل از کیف پول</p>
+                              </div>
+                            );
+                          } else if (paymentMethod === 'wallet_partial') {
+                            return (
+                              <div className="bg-purple-100 px-2 py-1 rounded-lg border border-purple-300">
+                                <p className="text-sm font-bold text-purple-800 flex items-center">
+                                  <DollarSign className="w-3 h-3 mr-1" />
+                                  ترکیبی
+                                </p>
+                                <p className="text-xs text-purple-600">کیف پول + درگاه بانکی</p>
+                              </div>
+                            );
+                          } else if (paymentMethod === 'bank_transfer_grace') {
+                            return (
+                              <div className="bg-orange-100 px-2 py-1 rounded-lg border border-orange-300">
+                                <p className="text-sm font-bold text-orange-800 flex items-center">
+                                  <Clock className="w-3 h-3 mr-1" />
+                                  مهلت‌دار
+                                </p>
+                                <p className="text-xs text-orange-600">حواله بانکی 3 روزه</p>
+                              </div>
+                            );
+                          } else if (paymentMethod === 'bank_gateway') {
+                            return (
+                              <div className="bg-blue-100 px-2 py-1 rounded-lg border border-blue-300">
+                                <p className="text-sm font-bold text-blue-800 flex items-center">
+                                  <CreditCard className="w-3 h-3 mr-1" />
+                                  درگاه بانکی
+                                </p>
+                                <p className="text-xs text-blue-600">پرداخت آنلاین فوری</p>
+                              </div>
+                            );
+                          } else {
+                            return (
+                              <div className="bg-gray-100 px-2 py-1 rounded-lg border border-gray-300">
+                                <p className="text-sm font-medium text-gray-700">
+                                  {paymentMethod || 'نامشخص'}
+                                </p>
+                                <p className="text-xs text-gray-500">روش پرداخت تعیین نشده</p>
+                              </div>
+                            );
+                          }
+                        })()}
                       </div>
                     </div>
 
