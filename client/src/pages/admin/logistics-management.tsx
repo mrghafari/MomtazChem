@@ -661,6 +661,82 @@ const LogisticsManagement = () => {
     }
   };
 
+  // Handler for selecting vehicles from suitable vehicles list
+  const handleTemplateVehicleSelection = async (vehicle: any, isOptimal: boolean = false) => {
+    if (!selectedOrderForVehicle) {
+      toast({
+        title: "خطا",
+        description: "سفارش انتخاب شده‌ای برای اختصاص خودرو وجود ندارد",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      // Create a new ready vehicle based on the template selection
+      const readyVehicleData = {
+        vehicleName: vehicle.name,
+        vehicleType: vehicle.vehicleType,
+        plateNumber: `TMP-${Date.now()}`, // Temporary plate number
+        driverName: 'راننده موقت',
+        driverPhone: '09120000000',
+        licensePlate: `TMP-${Date.now()}`,
+        maxWeight: vehicle.maxWeightKg,
+        loadCapacity: vehicle.maxWeightKg,
+        status: 'available',
+        isCheckoutSuggested: isOptimal,
+        totalCost: vehicle.totalCost,
+        notes: `خودرو انتخاب شده از قالب ${vehicle.name} - ${isOptimal ? 'انتخاب بهینه سیستم' : 'انتخاب دستی'}`
+      };
+
+      // Call the create ready vehicle API
+      const response = await fetch('/api/logistics/ready-vehicles', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify(readyVehicleData)
+      });
+
+      if (response.ok) {
+        const newVehicle = await response.json();
+        
+        // Add to available fleet vehicles immediately
+        setAvailableFleetVehicles(prev => [
+          {
+            ...newVehicle,
+            isCheckoutSuggested: isOptimal,
+            driverMobile: newVehicle.driverPhone
+          },
+          ...prev
+        ]);
+
+        toast({
+          title: isOptimal ? "🎯 انتخاب بهینه اضافه شد" : "✅ خودرو اضافه شد",
+          description: `خودرو ${vehicle.name} ${isOptimal ? '(انتخاب بهینه سیستم)' : ''} به لیست خودروهای آماده اضافه شد و آماده اختصاص است`,
+          variant: "default"
+        });
+
+        // Close the suitable vehicles dialog
+        setIsSuitableVehiclesOpen(false);
+        
+        // Refresh ready vehicles list
+        queryClient.invalidateQueries({ queryKey: ['/api/logistics/ready-vehicles'] });
+
+      } else {
+        throw new Error('Failed to create ready vehicle');
+      }
+    } catch (error) {
+      console.error('Error creating ready vehicle from template:', error);
+      toast({
+        title: "خطا",
+        description: "خطا در ایجاد خودرو آماده از قالب انتخابی",
+        variant: "destructive"
+      });
+    }
+  };
+
   const VEHICLE_TYPES = {
     motorcycle: "موتور",
     van: "وانت", 
@@ -4287,13 +4363,15 @@ const LogisticsManagement = () => {
                                 <Button 
                                   size="sm" 
                                   variant={index === 0 ? "default" : "outline"}
-                                  className={index === 0 ? "bg-green-600 hover:bg-green-700" : ""}
+                                  className={index === 0 ? "bg-green-600 hover:bg-green-700 text-white" : "hover:bg-blue-50"}
                                   onClick={() => {
                                     console.log('انتخاب خودروی مناسب:', vehicle);
-                                    // Handle vehicle selection from suitable vehicles
+                                    // Handle template vehicle selection - create a ready vehicle entry
+                                    handleTemplateVehicleSelection(vehicle, index === 0);
                                   }}
                                 >
-                                  {index === 0 ? 'انتخاب بهینه' : 'انتخاب'}
+                                  <CheckCircle className="w-3 h-3 mr-1" />
+                                  {index === 0 ? 'انتخاب بهینه' : 'انتخاب این خودرو'}
                                 </Button>
                               </TableCell>
                             </TableRow>
@@ -4301,6 +4379,91 @@ const LogisticsManagement = () => {
                         </TableBody>
                       </Table>
                     </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Selected Vehicles Summary */}
+              {availableFleetVehicles && availableFleetVehicles.length > 0 && (
+                <Card className="border-2 border-blue-500 bg-blue-50">
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <CheckCircle className="h-5 w-5 text-blue-600" />
+                      خودروهای انتخاب شده آماده اختصاص ({availableFleetVehicles.length} خودرو)
+                    </CardTitle>
+                    <CardDescription>
+                      این خودروها از قالب‌های مناسب انتخاب شده و آماده اختصاص به سفارش هستند
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {availableFleetVehicles.slice(0, 6).map((vehicle: any, index: number) => (
+                        <div 
+                          key={vehicle.id || index} 
+                          className={`bg-white rounded-lg p-3 border transition-all duration-300 ${
+                            vehicle.isCheckoutSuggested 
+                              ? 'border-green-500 bg-green-50 ring-1 ring-green-200' 
+                              : 'border-blue-300'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className={`font-medium text-sm ${
+                              vehicle.isCheckoutSuggested ? 'text-green-800' : 'text-gray-800'
+                            }`}>
+                              {vehicle.vehicleType || vehicle.vehicleName}
+                            </h5>
+                            {vehicle.isCheckoutSuggested && (
+                              <Badge className="bg-green-600 text-white text-xs px-1 py-0">
+                                🎯 بهینه
+                              </Badge>
+                            )}
+                          </div>
+                          
+                          <div className="space-y-1 text-xs text-gray-600 mb-3">
+                            <div className="flex justify-between">
+                              <span>پلاک:</span>
+                              <span className="font-medium">{vehicle.licensePlate || vehicle.plateNumber}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>ظرفیت:</span>
+                              <span className="font-medium">{vehicle.loadCapacity || vehicle.maxWeight} کگ</span>
+                            </div>
+                            {vehicle.totalCost && (
+                              <div className="flex justify-between">
+                                <span>هزینه:</span>
+                                <span className="font-medium text-blue-700">{Math.floor(vehicle.totalCost).toLocaleString()} IQD</span>
+                              </div>
+                            )}
+                          </div>
+                          
+                          <Button 
+                            size="sm" 
+                            className={`w-full text-xs ${
+                              vehicle.isCheckoutSuggested 
+                                ? 'bg-green-600 hover:bg-green-700' 
+                                : 'bg-blue-600 hover:bg-blue-700'
+                            } text-white`}
+                            onClick={() => assignVehicleToOrder(
+                              vehicle.id, 
+                              vehicle.licensePlate || vehicle.plateNumber, 
+                              vehicle.driverName, 
+                              vehicle.driverMobile || vehicle.driverPhone
+                            )}
+                          >
+                            <CheckCircle className="w-3 h-3 mr-1" />
+                            اختصاص فوری
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {availableFleetVehicles.length > 6 && (
+                      <div className="mt-4 text-center">
+                        <Badge variant="outline" className="text-blue-600">
+                          +{availableFleetVehicles.length - 6} خودروی دیگر در دسترس
+                        </Badge>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               )}
