@@ -4579,7 +4579,15 @@ const LogisticsManagement = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <p className="text-sm text-gray-600 mb-1">آدرس ارسال:</p>
-                    <p className="font-medium">{selectedOrderForDetails.shippingAddress || selectedOrderForDetails.customerAddress || 'آدرس ثبت نشده'}</p>
+                    <p className="font-medium">
+                      {(() => {
+                        const shippingData = selectedOrderForDetails.shippingAddress;
+                        if (typeof shippingData === 'object' && shippingData !== null) {
+                          return [shippingData.address, shippingData.country].filter(Boolean).join(', ') || 'آدرس ثبت نشده';
+                        }
+                        return shippingData || selectedOrderForDetails.customerAddress || 'آدرس ثبت نشده';
+                      })()}
+                    </p>
                   </div>
                   {selectedOrderForDetails.recipientName && (
                     <div>
