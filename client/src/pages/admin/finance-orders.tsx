@@ -2259,7 +2259,7 @@ function OrderCard({ order, onOrderSelect, readOnly = false, fetchOrderDetails }
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
           <div className="flex items-center space-x-2 space-x-reverse">
             <Mail className="h-4 w-4 text-gray-400" />
             <span className="text-sm text-gray-600">{order.customer?.email}</span>
@@ -2278,6 +2278,47 @@ function OrderCard({ order, onOrderSelect, readOnly = false, fetchOrderDetails }
                 minute: '2-digit'
               })}
             </span>
+          </div>
+          <div className="flex items-center space-x-2 space-x-reverse">
+            {(() => {
+              const paymentMethod = order.paymentMethod;
+              if (paymentMethod === 'wallet_full') {
+                return (
+                  <>
+                    <Wallet className="h-4 w-4 text-green-600" />
+                    <span className="text-sm text-green-700 font-medium">کیف پول (کامل)</span>
+                  </>
+                );
+              } else if (paymentMethod === 'wallet_partial') {
+                return (
+                  <>
+                    <DollarSign className="h-4 w-4 text-purple-600" />
+                    <span className="text-sm text-purple-700 font-medium">ترکیبی</span>
+                  </>
+                );
+              } else if (paymentMethod === 'bank_transfer_grace') {
+                return (
+                  <>
+                    <Clock className="h-4 w-4 text-orange-600" />
+                    <span className="text-sm text-orange-700 font-medium">مهلت‌دار</span>
+                  </>
+                );
+              } else if (paymentMethod === 'bank_gateway') {
+                return (
+                  <>
+                    <CreditCard className="h-4 w-4 text-blue-600" />
+                    <span className="text-sm text-blue-700 font-medium">درگاه بانکی</span>
+                  </>
+                );
+              } else {
+                return (
+                  <>
+                    <CreditCard className="h-4 w-4 text-gray-400" />
+                    <span className="text-sm text-gray-600">{paymentMethod || 'نامشخص'}</span>
+                  </>
+                );
+              }
+            })()}
           </div>
         </div>
 
@@ -2418,7 +2459,7 @@ function TransferredOrderCard({ order }: TransferredOrderCardProps) {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
           <div className="flex items-center space-x-2 space-x-reverse">
             <Mail className="h-4 w-4 text-gray-400" />
             <span className="text-sm text-gray-600">{order.customer?.email}</span>
@@ -2437,6 +2478,47 @@ function TransferredOrderCard({ order }: TransferredOrderCardProps) {
                 minute: '2-digit'
               })}
             </span>
+          </div>
+          <div className="flex items-center space-x-2 space-x-reverse">
+            {(() => {
+              const paymentMethod = order.paymentMethod;
+              if (paymentMethod === 'wallet_full') {
+                return (
+                  <>
+                    <Wallet className="h-4 w-4 text-green-600" />
+                    <span className="text-sm text-green-700 font-medium">کیف پول (کامل)</span>
+                  </>
+                );
+              } else if (paymentMethod === 'wallet_partial') {
+                return (
+                  <>
+                    <DollarSign className="h-4 w-4 text-purple-600" />
+                    <span className="text-sm text-purple-700 font-medium">ترکیبی</span>
+                  </>
+                );
+              } else if (paymentMethod === 'bank_transfer_grace') {
+                return (
+                  <>
+                    <Clock className="h-4 w-4 text-orange-600" />
+                    <span className="text-sm text-orange-700 font-medium">مهلت‌دار</span>
+                  </>
+                );
+              } else if (paymentMethod === 'bank_gateway') {
+                return (
+                  <>
+                    <CreditCard className="h-4 w-4 text-blue-600" />
+                    <span className="text-sm text-blue-700 font-medium">درگاه بانکی</span>
+                  </>
+                );
+              } else {
+                return (
+                  <>
+                    <CreditCard className="h-4 w-4 text-gray-400" />
+                    <span className="text-sm text-gray-600">{paymentMethod || 'نامشخص'}</span>
+                  </>
+                );
+              }
+            })()}
           </div>
         </div>
 
