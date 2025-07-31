@@ -23,15 +23,13 @@ export default function CommercialGoodsPage() {
     queryFn: async () => {
       const response = await fetch('/api/content-management/items');
       if (!response.ok) throw new Error('Failed to fetch content');
-      const result = await response.json();
-      // Ensure we return an array, handle both direct array and nested data structure
-      return Array.isArray(result) ? result : (result.data || []);
+      return response.json();
     }
   });
 
-  const commercialContent = Array.isArray(contentItems) ? contentItems.filter(item => 
+  const commercialContent = contentItems.filter(item => 
     item.section === 'commercial_goods' && item.language === 'en'
-  ) : [];
+  );
 
   const getContent = (key: string) => {
     const item = commercialContent.find(item => item.key === key);

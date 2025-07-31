@@ -47,8 +47,7 @@ import {
   AlertCircle,
   Activity,
   BarChart3,
-  Wrench,
-  HelpCircle
+  Wrench
 } from "lucide-react";
 import InternalBarcodeCard from "@/components/InternalBarcodeCard";
 import GlobalRefreshControl from "@/components/GlobalRefreshControl";
@@ -83,7 +82,6 @@ interface OrderManagement {
   currentStatus: string;
   totalAmount: string;
   currency: string;
-  paymentMethod: string; // Added payment method field
   paymentReceiptUrl?: string;
   financialNotes?: string;
   financialReviewedAt?: string;
@@ -203,20 +201,6 @@ function FinanceOrders() {
     retryDelay: 1000
   });
 
-  // Query for non-payment orphaned orders (pending payments without grace period)
-  const { data: nonPaymentOrders, isLoading: nonPaymentLoading } = useQuery({
-    queryKey: ['/api/financial/non-payment-orders'],
-    queryFn: () => fetch('/api/financial/non-payment-orders', { credentials: 'include' }).then(res => {
-      if (!res.ok) {
-        throw new Error('Failed to fetch non-payment orders');
-      }
-      return res.json();
-    }),
-    enabled: activeTab === 'non-payment',
-    refetchInterval: 30000, // Refresh every 30 seconds
-    retry: 3
-  });
-
   // Mutation to repair orphaned orders
   const repairOrphanedOrderMutation = useMutation({
     mutationFn: async (customerOrderId: number) => {
@@ -236,30 +220,6 @@ function FinanceOrders() {
       toast({
         title: "خطا در تعمیر",
         description: error.message || "امکان تعمیر سفارش یتیم وجود ندارد",
-        variant: "destructive",
-      });
-    }
-  });
-
-  // Mutation to cancel non-payment order
-  const cancelNonPaymentOrderMutation = useMutation({
-    mutationFn: async (orderNumber: string) => {
-      return apiRequest(`/api/financial/non-payment-orders/${orderNumber}/cancel`, {
-        method: 'POST',
-        body: {}
-      });
-    },
-    onSuccess: () => {
-      toast({
-        title: "لغو موفق",
-        description: "سفارش بدون پرداخت با موفقیت لغو شد",
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/financial/non-payment-orders'] });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "خطا در لغو",
-        description: error.message || "امکان لغو سفارش وجود ندارد",
         variant: "destructive",
       });
     }
@@ -586,7 +546,7 @@ function FinanceOrders() {
     if (!orderId) return;
     
     try {
-      const response = await apiRequest(`/api/tracking/order/${orderId}`, { method: 'GET' });
+      const response = await apiRequest(`/api/tracking/order/${orderId}`);
       // setTrackingCodes(response.trackingCodes || []);
     } catch (error) {
       console.error("Error loading tracking codes:", error);
@@ -819,82 +779,6 @@ function FinanceOrders() {
           </Card>
         </div>
 
-        {/* Payment Methods Breakdown */}
-        <Card className="mb-6 border-2 border-dashed border-indigo-300 bg-gradient-to-r from-indigo-50 to-purple-50 shadow-lg">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-indigo-800">
-              <CreditCard className="h-5 w-5" />
-              تفکیک دقیق روش‌های پرداخت سفارشات
-            </CardTitle>
-            <CardDescription className="text-indigo-600">
-              🎯 هر سفارش با روش پرداخت مشخص شده در هنگام خرید ثبت می‌شود - اطلاعات زیر دقیقاً منعکس کننده انتخاب مشتری است
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-              <div className="text-center p-4 bg-white rounded-lg border-2 border-green-200 shadow-sm">
-                <Wallet className="h-8 w-8 text-green-600 mx-auto mb-2" />
-                <p className="text-2xl font-bold text-green-700">
-                  {filteredOrders.filter(order => order.paymentMethod === 'wallet_full').length}
-                </p>
-                <p className="text-xs text-green-600 font-medium">💰 کیف پول کامل</p>
-                <p className="text-xs text-green-500 mt-1">تایید خودکار در 5 دقیقه</p>
-              </div>
-              
-              <div className="text-center p-4 bg-white rounded-lg border-2 border-purple-200 shadow-sm">
-                <DollarSign className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-                <p className="text-2xl font-bold text-purple-700">
-                  {filteredOrders.filter(order => order.paymentMethod === 'wallet_partial').length}
-                </p>
-                <p className="text-xs text-purple-600 font-medium">💳 پرداخت ترکیبی</p>
-                <p className="text-xs text-purple-500 mt-1">کیف پول + درگاه بانک</p>
-              </div>
-              
-              <div className="text-center p-4 bg-white rounded-lg border-2 border-blue-200 shadow-sm">
-                <CreditCard className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-                <p className="text-2xl font-bold text-blue-700">
-                  {filteredOrders.filter(order => 
-                    order.paymentMethod === 'bank_gateway' || 
-                    order.paymentMethod === 'online_payment'
-                  ).length}
-                </p>
-                <p className="text-xs text-blue-600 font-medium">🌐 درگاه آنلاین</p>
-                <p className="text-xs text-blue-500 mt-1">پرداخت مستقیم بانکی</p>
-              </div>
-              
-              <div className="text-center p-4 bg-white rounded-lg border-2 border-orange-200 shadow-sm">
-                <Clock className="h-8 w-8 text-orange-600 mx-auto mb-2" />
-                <p className="text-2xl font-bold text-orange-700">
-                  {filteredOrders.filter(order => 
-                    order.paymentMethod === 'bank_transfer_grace' || 
-                    order.paymentMethod === 'bank_transfer'
-                  ).length}
-                </p>
-                <p className="text-xs text-orange-600 font-medium">⏰ انتقال بانکی</p>
-                <p className="text-xs text-orange-500 mt-1">مهلت 3 روزه برای فیش</p>
-              </div>
-              
-              <div className="text-center p-4 bg-white rounded-lg border-2 border-gray-200 shadow-sm">
-                <AlertTriangle className="h-8 w-8 text-gray-600 mx-auto mb-2" />
-                <p className="text-2xl font-bold text-gray-700">
-                  {filteredOrders.filter(order => 
-                    !order.paymentMethod || 
-                    !['wallet_full', 'wallet_partial', 'bank_gateway', 'online_payment', 'bank_transfer_grace', 'bank_transfer'].includes(order.paymentMethod)
-                  ).length}
-                </p>
-                <p className="text-xs text-gray-600 font-medium">❓ نامشخص</p>
-                <p className="text-xs text-gray-500 mt-1">نیاز به بررسی فوری</p>
-              </div>
-            </div>
-            
-            <div className="mt-4 p-3 bg-white rounded-lg border border-indigo-200">
-              <p className="text-sm text-indigo-700 text-center font-medium">
-                💡 این اطلاعات دقیقاً از انتخاب مشتری در هنگام تکمیل سفارش استخراج می‌شود و منعکس کننده روش پرداخت واقعی است
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Search and Filter */}
         <Card className="mb-6 shadow-lg border-0">
           <CardContent className="p-6">
@@ -933,33 +817,29 @@ function FinanceOrders() {
 
         {/* Tabbed Interface */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7 bg-white shadow-sm border rounded-lg p-1">
-            <TabsTrigger value="pending" className="flex items-center space-x-1 space-x-reverse data-[state=active]:bg-orange-500 data-[state=active]:text-white text-xs">
-              <Clock className="h-3 w-3" />
-              <span>در انتظار ({pendingOrders.length})</span>
+          <TabsList className="grid w-full grid-cols-6 bg-white shadow-sm border rounded-lg p-1">
+            <TabsTrigger value="pending" className="flex items-center space-x-2 space-x-reverse data-[state=active]:bg-orange-500 data-[state=active]:text-white">
+              <Clock className="h-4 w-4" />
+              <span>در انتظار بررسی ({pendingOrders.length})</span>
             </TabsTrigger>
-            <TabsTrigger value="transferred" className="flex items-center space-x-1 space-x-reverse data-[state=active]:bg-blue-500 data-[state=active]:text-white text-xs">
-              <ChevronRight className="h-3 w-3" />
-              <span>انبار ({filteredTransferredOrders.length})</span>
+            <TabsTrigger value="transferred" className="flex items-center space-x-2 space-x-reverse data-[state=active]:bg-blue-500 data-[state=active]:text-white">
+              <ChevronRight className="h-4 w-4" />
+              <span>ارجاع شده به انبار ({filteredTransferredOrders.length})</span>
             </TabsTrigger>
-            <TabsTrigger value="rejected" className="flex items-center space-x-1 space-x-reverse data-[state=active]:bg-red-500 data-[state=active]:text-white text-xs">
-              <XCircle className="h-3 w-3" />
+            <TabsTrigger value="rejected" className="flex items-center space-x-2 space-x-reverse data-[state=active]:bg-red-500 data-[state=active]:text-white">
+              <XCircle className="h-4 w-4" />
               <span>رد شده ({rejectedOrders.length})</span>
             </TabsTrigger>
-            <TabsTrigger value="orphaned" className="flex items-center space-x-1 space-x-reverse data-[state=active]:bg-amber-500 data-[state=active]:text-white text-xs">
-              <AlertTriangle className="h-3 w-3" />
-              <span>یتیم DB ({orphanedOrders?.orders?.length || 0})</span>
+            <TabsTrigger value="orphaned" className="flex items-center space-x-2 space-x-reverse data-[state=active]:bg-amber-500 data-[state=active]:text-white">
+              <AlertTriangle className="h-4 w-4" />
+              <span>سفارشات یتیم ({orphanedOrders?.orders?.length || 0})</span>
             </TabsTrigger>
-            <TabsTrigger value="non-payment" className="flex items-center space-x-1 space-x-reverse data-[state=active]:bg-red-600 data-[state=active]:text-white text-xs">
-              <XCircle className="h-3 w-3" />
-              <span>بدون پرداخت ({nonPaymentOrders?.orders?.length || 0})</span>
+            <TabsTrigger value="temporary" className="flex items-center space-x-2 space-x-reverse data-[state=active]:bg-purple-500 data-[state=active]:text-white">
+              <Timer className="h-4 w-4" />
+              <span>سفارشات موقت (0)</span>
             </TabsTrigger>
-            <TabsTrigger value="temporary" className="flex items-center space-x-1 space-x-reverse data-[state=active]:bg-purple-500 data-[state=active]:text-white text-xs">
-              <Timer className="h-3 w-3" />
-              <span>موقت (0)</span>
-            </TabsTrigger>
-            <TabsTrigger value="workflow" className="flex items-center space-x-1 space-x-reverse data-[state=active]:bg-indigo-500 data-[state=active]:text-white text-xs">
-              <Settings className="h-3 w-3" />
+            <TabsTrigger value="workflow" className="flex items-center space-x-2 space-x-reverse data-[state=active]:bg-indigo-500 data-[state=active]:text-white">
+              <Settings className="h-4 w-4" />
               <span>مانیتورینگ</span>
             </TabsTrigger>
 
@@ -1147,14 +1027,7 @@ function FinanceOrders() {
                           {order.shippingAddress && (
                             <div className="mt-3 p-3 bg-white rounded border">
                               <Label className="text-gray-600 text-xs">آدرس تحویل:</Label>
-                              <p className="text-sm mt-1">{(() => {
-                                try {
-                                  const parsed = JSON.parse(order.shippingAddress);
-                                  return parsed.address || order.shippingAddress;
-                                } catch {
-                                  return order.shippingAddress;
-                                }
-                              })()}</p>
+                              <p className="text-sm mt-1">{JSON.parse(order.shippingAddress).address}</p>
                             </div>
                           )}
                         </CardContent>
@@ -1220,7 +1093,7 @@ function FinanceOrders() {
                           <Timer className="h-5 w-5 text-amber-600" />
                           <div>
                             <p className="text-sm text-muted-foreground">فعال</p>
-                            <p className="text-xl font-bold text-amber-600">{(orphanStats as any)?.stats?.active || 0}</p>
+                            <p className="text-xl font-bold text-amber-600">{orphanStats?.stats?.active || 0}</p>
                           </div>
                         </div>
                       </CardContent>
@@ -1232,7 +1105,7 @@ function FinanceOrders() {
                           <AlertTriangle className="h-5 w-5 text-red-600" />
                           <div>
                             <p className="text-sm text-muted-foreground">منقضی شده</p>
-                            <p className="text-xl font-bold text-red-600">{(orphanStats as any)?.stats?.expired || 0}</p>
+                            <p className="text-xl font-bold text-red-600">{orphanStats?.stats?.expired || 0}</p>
                           </div>
                         </div>
                       </CardContent>
@@ -1244,7 +1117,7 @@ function FinanceOrders() {
                           <Bell className="h-5 w-5 text-blue-600" />
                           <div>
                             <p className="text-sm text-muted-foreground">اطلاع‌رسانی امروز</p>
-                            <p className="text-xl font-bold text-blue-600">{(orphanStats as any)?.stats?.notificationsToday || 0}</p>
+                            <p className="text-xl font-bold text-blue-600">{orphanStats?.stats?.notificationsToday || 0}</p>
                           </div>
                         </div>
                       </CardContent>
@@ -1256,7 +1129,7 @@ function FinanceOrders() {
                           <CheckCircle className="h-5 w-5 text-green-600" />
                           <div>
                             <p className="text-sm text-muted-foreground">پرداخت شده</p>
-                            <p className="text-xl font-bold text-green-600">{(orphanStats as any)?.stats?.paid || 0}</p>
+                            <p className="text-xl font-bold text-green-600">{orphanStats?.stats?.paid || 0}</p>
                           </div>
                         </div>
                       </CardContent>
@@ -1283,8 +1156,8 @@ function FinanceOrders() {
                         </CardHeader>
                         <CardContent>
                           <div className="space-y-3">
-                            {(activeOrders as any)?.orders?.length > 0 ? (
-                              (activeOrders as any).orders.map((order: any) => (
+                            {activeOrders?.orders?.length > 0 ? (
+                              activeOrders.orders.map((order: any) => (
                                 <Card key={order.id} className="border-l-4 border-l-amber-500">
                                   <CardContent className="p-4">
                                     <div className="flex items-center justify-between">
@@ -1402,7 +1275,7 @@ function FinanceOrders() {
                           <div>
                             <p className="text-sm text-muted-foreground">در انتظار بررسی</p>
                             <p className="text-xl font-bold text-orange-600">
-                              {(orphanedOrders as any)?.orders?.filter((order: any) => order.current_status === 'pending' || order.current_status === 'confirmed').length || 0}
+                              {orphanedOrders?.orders?.filter(order => order.current_status === 'pending' || order.current_status === 'confirmed').length || 0}
                             </p>
                           </div>
                         </div>
@@ -1415,7 +1288,7 @@ function FinanceOrders() {
                           <div>
                             <p className="text-sm text-muted-foreground">ارجاع شده به انبار</p>
                             <p className="text-xl font-bold text-blue-600">
-                              {(orphanedOrders as any)?.orders?.filter((order: any) => order.current_status === 'warehouse_ready' || order.current_status === 'warehouse_pending').length || 0}
+                              {orphanedOrders?.orders?.filter(order => order.current_status === 'warehouse_ready' || order.current_status === 'warehouse_pending').length || 0}
                             </p>
                           </div>
                         </div>
@@ -1428,7 +1301,7 @@ function FinanceOrders() {
                           <div>
                             <p className="text-sm text-muted-foreground">رد شده</p>
                             <p className="text-xl font-bold text-red-600">
-                              {(orphanedOrders as any)?.orders?.filter((order: any) => order.current_status === 'rejected' || order.current_status === 'cancelled').length || 0}
+                              {orphanedOrders?.orders?.filter(order => order.current_status === 'rejected' || order.current_status === 'cancelled').length || 0}
                             </p>
                           </div>
                         </div>
@@ -1441,7 +1314,7 @@ function FinanceOrders() {
                           <div>
                             <p className="text-sm text-muted-foreground">سفارشات موقت</p>
                             <p className="text-xl font-bold text-amber-600">
-                              {(orphanedOrders as any)?.orders?.filter((order: any) => order.current_status === 'draft' || order.current_status === 'temporary').length || 0}
+                              {orphanedOrders?.orders?.filter(order => order.current_status === 'draft' || order.current_status === 'temporary').length || 0}
                             </p>
                           </div>
                         </div>
@@ -1535,143 +1408,6 @@ function FinanceOrders() {
                           <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
                           <h3 className="text-lg font-medium text-gray-900 mb-2">سفارش یتیمی یافت نشد</h3>
                           <p className="text-gray-500">همه سفارشات دارای رکورد مدیریت معتبر هستند</p>
-                        </CardContent>
-                      </Card>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          {/* Non-Payment Orders Tab */}
-          <TabsContent value="non-payment" className="space-y-6">
-            <div className="space-y-6">
-              {/* Header */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <XCircle className="h-5 w-5 text-red-500" />
-                    مدیریت سفارشات بدون پرداخت
-                  </CardTitle>
-                  <CardDescription>
-                    سفارشاتی که پرداخت آن‌ها انجام نشده است (بجز سفارشات با مهلت ۳ روزه)
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {nonPaymentLoading ? (
-                    <div className="flex items-center justify-center py-8">
-                      <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full"></div>
-                      <span className="mr-2">در حال بارگیری...</span>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                      <Card className="border-red-200 bg-red-50">
-                        <CardContent className="p-4">
-                          <div className="flex items-center gap-2">
-                            <AlertTriangle className="h-5 w-5 text-red-600" />
-                            <div>
-                              <p className="text-sm text-muted-foreground">درگاه آنلاین ناتمام</p>
-                              <p className="text-xl font-bold text-red-600">
-                                {nonPaymentOrders?.categorized?.onlinePaymentFailed?.length || 0}
-                              </p>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                      <Card className="border-purple-200 bg-purple-50">
-                        <CardContent className="p-4">
-                          <div className="flex items-center gap-2">
-                            <Wallet className="h-5 w-5 text-purple-600" />
-                            <div>
-                              <p className="text-sm text-muted-foreground">پرداخت ترکیبی ناتمام</p>
-                              <p className="text-xl font-bold text-purple-600">
-                                {nonPaymentOrders?.categorized?.hybridPaymentFailed?.length || 0}
-                              </p>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                      <Card className="border-gray-200 bg-gray-50">
-                        <CardContent className="p-4">
-                          <div className="flex items-center gap-2">
-                            <XCircle className="h-5 w-5 text-gray-600" />
-                            <div>
-                              <p className="text-sm text-muted-foreground">پرداخت ناموفق</p>
-                              <p className="text-xl font-bold text-gray-600">
-                                {nonPaymentOrders?.categorized?.completelyFailed?.length || 0}
-                              </p>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                      <Card className="border-amber-200 bg-amber-50">
-                        <CardContent className="p-4">
-                          <div className="flex items-center gap-2">
-                            <HelpCircle className="h-5 w-5 text-amber-600" />
-                            <div>
-                              <p className="text-sm text-muted-foreground">نیاز به بررسی</p>
-                              <p className="text-xl font-bold text-amber-600">
-                                {nonPaymentOrders?.categorized?.needsReview?.length || 0}
-                              </p>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  )}
-
-                  {/* Orders List */}
-                  <div className="space-y-4">
-                    {nonPaymentOrders?.orders?.length > 0 ? (
-                      nonPaymentOrders.orders.map((order: any) => (
-                        <Card key={order.id} className="border-l-4 border-l-red-500">
-                          <CardContent className="p-4">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center space-x-3 space-x-reverse">
-                                <div className="p-2 bg-red-100 rounded-lg">
-                                  <XCircle className="h-4 w-4 text-red-600" />
-                                </div>
-                                <div>
-                                  <h3 className="font-bold text-gray-900">سفارش {order.orderNumber}</h3>
-                                  <p className="text-sm text-gray-600">{order.customerName}</p>
-                                  <div className="flex items-center gap-2 mt-1">
-                                    <CreditCard className="h-3 w-3 text-gray-400" />
-                                    <span className="text-xs text-gray-600">{order.paymentMethod}</span>
-                                    <Badge variant="destructive" className="text-xs px-1 py-0">
-                                      {order.paymentStatus}
-                                    </Badge>
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="flex items-center space-x-3 space-x-reverse">
-                                <div className="text-left">
-                                  <p className="font-bold text-lg text-red-600">
-                                    {parseFloat(order.totalAmount).toLocaleString()} {order.currency}
-                                  </p>
-                                  <p className="text-xs text-gray-500">
-                                    {new Date(order.createdAt).toLocaleDateString('fa-IR')}
-                                  </p>
-                                </div>
-                                <Button
-                                  variant="destructive"
-                                  size="sm"
-                                  onClick={() => cancelNonPaymentOrderMutation.mutate(order.orderNumber)}
-                                  disabled={cancelNonPaymentOrderMutation.isPending}
-                                >
-                                  {cancelNonPaymentOrderMutation.isPending ? 'لغو...' : 'لغو'}
-                                </Button>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))
-                    ) : (
-                      <Card>
-                        <CardContent className="p-12 text-center">
-                          <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-                          <h3 className="text-lg font-medium text-gray-900 mb-2">سفارش بدون پرداختی یافت نشد</h3>
-                          <p className="text-gray-500">همه سفارشات پرداخت شده یا دارای مهلت ۳ روزه هستند</p>
                         </CardContent>
                       </Card>
                     )}
@@ -2497,36 +2233,21 @@ function OrderCard({ order, onOrderSelect, readOnly = false, fetchOrderDetails }
 
   return (
     <Card className="hover:shadow-lg transition-shadow border-l-4 border-l-blue-500">
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3 space-x-reverse">
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-4 space-x-reverse">
             <div className="p-2 bg-blue-100 rounded-lg">
-              <Receipt className="h-4 w-4 text-blue-600" />
+              <Receipt className="h-5 w-5 text-blue-600" />
             </div>
             <div>
-              <h3 className="font-bold text-gray-900">سفارش {order.orderNumber || 'در حال بارگذاری...'}</h3>
+              <h3 className="font-bold text-lg text-gray-900">سفارش {order.orderNumber || 'در حال بارگذاری...'}</h3>
               <p className="text-sm text-gray-600">{customerInfo.firstName} {customerInfo.lastName}</p>
-              <div className="flex items-center gap-2 mt-1">
-                <CreditCard className="h-3 w-3 text-gray-400" />
-                <span className="text-xs text-gray-600">
-                  {(() => {
-                    const paymentMethod = order.paymentMethod;
-                    if (paymentMethod === 'wallet_full') return 'کیف پول';
-                    if (paymentMethod === 'wallet_partial') return 'پرداخت ترکیبی';
-                    if (paymentMethod === 'bank_transfer_grace') return 'انتقال بانکی (مهلت‌دار)';
-                    if (paymentMethod === 'bank_transfer') return 'انتقال بانکی';
-                    if (paymentMethod === 'bank_gateway') return 'درگاه بانکی';
-                    if (paymentMethod === 'online_payment') return 'پرداخت آنلاین';
-                    return paymentMethod || 'نامشخص';
-                  })()}
-                </span>
-                <Badge className={`text-xs px-1 py-0 ${getStatusBadgeColor(order.currentStatus)}`}>
-                  {getStatusDisplayName(order.currentStatus)}
-                </Badge>
-              </div>
             </div>
           </div>
           <div className="flex items-center space-x-3 space-x-reverse">
+            <Badge className={`border ${getStatusBadgeColor(order.currentStatus)}`}>
+              {getStatusDisplayName(order.currentStatus)}
+            </Badge>
             <div className="text-left">
               <p className="font-bold text-lg text-green-600">
                 {parseFloat(order.totalAmount).toLocaleString()} {order.currency}
@@ -2535,27 +2256,134 @@ function OrderCard({ order, onOrderSelect, readOnly = false, fetchOrderDetails }
                 {formatDateSafe(order.createdAt)}
               </p>
             </div>
-            {!readOnly && (
-              <div className="flex gap-1">
-                {fetchOrderDetails && order.orderNumber && (
-                  <Button 
-                    onClick={() => fetchOrderDetails(order.orderNumber!)}
-                    size="sm"
-                    variant="outline"
-                  >
-                    جزئیات
-                  </Button>
-                )}
-                <Button 
-                  onClick={onOrderSelect}
-                  size="sm"
-                >
-                  بررسی
-                </Button>
-              </div>
-            )}
           </div>
         </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+          <div className="flex items-center space-x-2 space-x-reverse">
+            <Mail className="h-4 w-4 text-gray-400" />
+            <span className="text-sm text-gray-600">{order.customer?.email}</span>
+          </div>
+          <div className="flex items-center space-x-2 space-x-reverse">
+            <Phone className="h-4 w-4 text-gray-400" />
+            <span className="text-sm text-gray-600">{order.customer?.phone}</span>
+          </div>
+          <div className="flex items-center space-x-2 space-x-reverse">
+            <Calendar className="h-4 w-4 text-gray-400" />
+            <span className="text-sm text-gray-600">
+              {formatDateSafe(order.updatedAt, 'en-US', {
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })}
+            </span>
+          </div>
+          <div className="flex items-center space-x-2 space-x-reverse">
+            {(() => {
+              const paymentMethod = order.paymentMethod;
+              if (paymentMethod === 'wallet_full') {
+                return (
+                  <>
+                    <Wallet className="h-4 w-4 text-green-600" />
+                    <span className="text-sm text-green-700 font-medium">کیف پول (کامل)</span>
+                  </>
+                );
+              } else if (paymentMethod === 'wallet_partial') {
+                return (
+                  <>
+                    <DollarSign className="h-4 w-4 text-purple-600" />
+                    <span className="text-sm text-purple-700 font-medium">ترکیبی</span>
+                  </>
+                );
+              } else if (paymentMethod === 'bank_transfer_grace') {
+                return (
+                  <>
+                    <Clock className="h-4 w-4 text-orange-600" />
+                    <span className="text-sm text-orange-700 font-medium">مهلت‌دار</span>
+                  </>
+                );
+              } else if (paymentMethod === 'bank_gateway') {
+                return (
+                  <>
+                    <CreditCard className="h-4 w-4 text-blue-600" />
+                    <span className="text-sm text-blue-700 font-medium">درگاه بانکی</span>
+                  </>
+                );
+              } else {
+                return (
+                  <>
+                    <CreditCard className="h-4 w-4 text-gray-400" />
+                    <span className="text-sm text-gray-600">{paymentMethod || 'نامشخص'}</span>
+                  </>
+                );
+              }
+            })()}
+          </div>
+        </div>
+
+        {order.receiptUrl && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+            <div className="flex items-center space-x-2 space-x-reverse">
+              <Receipt className="h-4 w-4 text-blue-600" />
+              <span className="text-sm font-medium text-blue-900">فیش بانکی ارسال شده</span>
+              <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs">
+                نیاز به بررسی
+              </Badge>
+            </div>
+          </div>
+        )}
+
+        {/* Special indicator for wallet-paid orders transferred to warehouse */}
+        {isWalletTransferred && (
+          <div className="bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-lg p-3 mb-4">
+            <div className="flex items-center space-x-2 space-x-reverse">
+              <div className="flex items-center space-x-1 space-x-reverse">
+                <CheckCircle className="h-4 w-4 text-emerald-600" />
+                <DollarSign className="h-4 w-4 text-green-600" />
+              </div>
+              <span className="text-sm font-medium text-emerald-900">پرداخت با کیف پول - منتقل شده به انبار</span>
+              <Badge variant="secondary" className="bg-emerald-100 text-emerald-800 text-xs">
+                💳 قابل مشاهده در مالی
+              </Badge>
+            </div>
+            <p className="text-xs text-emerald-700 mt-1">
+              این سفارش با کیف پول پرداخت شده و خودکار به انبار منتقل گردیده - برای نظارت مالی در این بخش قابل مشاهده است
+            </p>
+          </div>
+        )}
+
+        {order.financialNotes && (
+          <div className="bg-gray-50 rounded-lg p-3 mb-4">
+            <p className="text-sm font-medium text-gray-700 mb-1">یادداشت مالی:</p>
+            <p className="text-sm text-gray-600">{order.financialNotes}</p>
+          </div>
+        )}
+
+        {!readOnly && (
+          <div className="flex justify-end gap-2">
+            {fetchOrderDetails && order.orderNumber && (
+              <Button 
+                onClick={() => fetchOrderDetails(order.orderNumber)}
+                size="sm"
+                variant="outline"
+                className="flex items-center space-x-2 space-x-reverse"
+              >
+                <FileText className="h-4 w-4" />
+                <span>مشاهده جزئیات</span>
+              </Button>
+            )}
+            <Button 
+              onClick={onOrderSelect}
+              size="sm"
+              className="flex items-center space-x-2 space-x-reverse"
+            >
+              <Eye className="h-4 w-4" />
+              <span>بررسی و تایید</span>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
@@ -2680,13 +2508,6 @@ function TransferredOrderCard({ order }: TransferredOrderCardProps) {
                   <>
                     <CreditCard className="h-4 w-4 text-blue-600" />
                     <span className="text-sm text-blue-700 font-medium">درگاه بانکی</span>
-                  </>
-                );
-              } else if (paymentMethod === 'online_payment') {
-                return (
-                  <>
-                    <CreditCard className="h-4 w-4 text-blue-600" />
-                    <span className="text-sm text-blue-700 font-medium">پرداخت آنلاین</span>
                   </>
                 );
               } else {
