@@ -185,6 +185,10 @@ const LogisticsManagement = () => {
   const [selectedOrderForVehicle, setSelectedOrderForVehicle] = useState<LogisticsOrder | null>(null);
   const [selectedVehicleDetails, setSelectedVehicleDetails] = useState<any>(null);
   const [availableFleetVehicles, setAvailableFleetVehicles] = useState<any[]>([]);
+  
+  // States for enhanced suitable vehicles display
+  const [isSuitableVehiclesOpen, setIsSuitableVehiclesOpen] = useState(false);
+  const [suitableVehiclesData, setSuitableVehiclesData] = useState<any>(null);
 
   // States for postal services
   const [isCreatePostalDialogOpen, setIsCreatePostalDialogOpen] = useState(false);
@@ -531,12 +535,31 @@ const LogisticsManagement = () => {
     setIsOrderDetailsOpen(true);
   };
 
-  // Handle vehicle assignment workflow
+  // Handle enhanced vehicle assignment workflow
   const handleVehicleAssignment = async (order: LogisticsOrder) => {
     try {
-      console.log('🚚 [VEHICLE ASSIGNMENT] Starting vehicle assignment for order:', order.orderNumber);
+      console.log('🚚 [ENHANCED VEHICLE ASSIGNMENT] Starting for order:', order.orderNumber);
       
-      // First, get customer's selected vehicle details from checkout
+      // Get all suitable vehicles identified during checkout
+      const suitableVehiclesResponse = await fetch(`/api/orders/${order.customerOrderId}/suitable-vehicles`, {
+        credentials: 'include'
+      });
+      
+      if (suitableVehiclesResponse.ok) {
+        const suitableVehiclesData = await suitableVehiclesResponse.json();
+        if (suitableVehiclesData.success) {
+          setSuitableVehiclesData(suitableVehiclesData.data);
+          console.log('✅ [SUITABLE VEHICLES] Found vehicles:', suitableVehiclesData.data.suitableVehicles.length);
+          setSelectedOrderForVehicle(order);
+          setIsSuitableVehiclesOpen(true);
+          return;
+        }
+      }
+      
+      // Fallback to original vehicle assignment if suitable vehicles API fails
+      console.log('⚠️ [FALLBACK] Using original vehicle assignment method');
+      
+      // Get customer's selected vehicle details from checkout
       const vehicleDetailsResponse = await fetch(`/api/orders/${order.customerOrderId}/vehicle-details`, {
         credentials: 'include'
       });
@@ -561,7 +584,7 @@ const LogisticsManagement = () => {
         
         // Filter by weight capacity and availability
         const orderWeight = order.calculatedWeight || order.totalWeight || 0;
-        const availableVehicles = readyVehicles.filter(vehicle => 
+        const availableVehicles = readyVehicles.filter((vehicle: any) => 
           vehicle.isAvailable && 
           vehicle.loadCapacity >= orderWeight
         );
@@ -571,7 +594,7 @@ const LogisticsManagement = () => {
         
         // Find suggested vehicle based on checkout selection
         if (checkoutVehicleDetails) {
-          const suggestedVehicle = availableVehicles.find(vehicle => 
+          const suggestedVehicle = availableVehicles.find((vehicle: any) => 
             vehicle.vehicleType === checkoutVehicleDetails.vehicleType ||
             vehicle.vehicleType.includes(checkoutVehicleDetails.vehicleType) ||
             checkoutVehicleDetails.vehicleType.includes(vehicle.vehicleType)
@@ -3931,6 +3954,250 @@ const LogisticsManagement = () => {
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Enhanced Suitable Vehicles Dialog */}
+      <Dialog open={isSuitableVehiclesOpen} onOpenChange={setIsSuitableVehiclesOpen}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto" dir="rtl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Bus className="h-5 w-5 text-blue-600" />
+              خودروهای مناسب برای سفارش {selectedOrderForVehicle?.orderNumber}
+            </DialogTitle>
+            <DialogDescription>
+              تمام خودروهای مناسب که در زمان خرید شناسایی شده‌اند
+            </DialogDescription>
+          </DialogHeader>
+
+          {suitableVehiclesData && (
+            <div className="space-y-6">
+              {/* Order Summary */}
+              <Card className="bg-gradient-to-r from-blue-50 to-green-50 border-2 border-blue-200">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Package className="h-5 w-5 text-blue-600" />
+                    خلاصه سفارش
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-gray-500" />
+                      <span className="text-sm text-gray-600">مقصد:</span>
+                      <span className="font-medium">{suitableVehiclesData.order?.destinationCity}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Weight className="h-4 w-4 text-gray-500" />
+                      <span className="text-sm text-gray-600">وزن:</span>
+                      <span className="font-medium">{suitableVehiclesData.order?.weight} {suitableVehiclesData.order?.weightUnit}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <ArrowUpDown className="h-4 w-4 text-gray-500" />
+                      <span className="text-sm text-gray-600">مسافت:</span>
+                      <span className="font-medium">{suitableVehiclesData.order?.distance} کیلومتر</span>
+                    </div>
+                    {suitableVehiclesData.order?.containsFlammableProducts && (
+                      <div className="flex items-center gap-2">
+                        <Flame className="h-4 w-4 text-red-500" />
+                        <span className="text-sm text-red-600">حاوی مواد آتش‌زا</span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {suitableVehiclesData.order?.flammableProducts?.length > 0 && (
+                    <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                      <h4 className="font-medium text-red-800 mb-2">محصولات آتش‌زا:</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {suitableVehiclesData.order.flammableProducts.map((product: any, index: number) => (
+                          <Badge key={index} variant="destructive" className="text-xs">
+                            <Flame className="h-3 w-3 mr-1" />
+                            {product.name}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Optimal Vehicle */}
+              {suitableVehiclesData.optimalVehicle && (
+                <Card className="border-2 border-green-500 bg-green-50">
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <CheckCircle className="h-5 w-5 text-green-600" />
+                      خودرو بهینه (پیشنهاد اول)
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div>
+                        <span className="text-sm text-gray-600">نام:</span>
+                        <p className="font-medium">{suitableVehiclesData.optimalVehicle.name}</p>
+                      </div>
+                      <div>
+                        <span className="text-sm text-gray-600">نوع:</span>
+                        <p className="font-medium">{suitableVehiclesData.optimalVehicle.vehicleType}</p>
+                      </div>
+                      <div>
+                        <span className="text-sm text-gray-600">هزینه کل:</span>
+                        <p className="font-bold text-green-700">{Math.floor(suitableVehiclesData.optimalVehicle.totalCost).toLocaleString()} IQD</p>
+                      </div>
+                      <div>
+                        <span className="text-sm text-gray-600">ظرفیت:</span>
+                        <p className="font-medium">{suitableVehiclesData.optimalVehicle.maxWeightKg} کیلوگرم</p>
+                      </div>
+                      <div>
+                        <span className="text-sm text-gray-600">هزینه مسافت:</span>
+                        <p className="font-medium">{Math.floor(suitableVehiclesData.optimalVehicle.distanceCost).toLocaleString()} IQD</p>
+                      </div>
+                      <div>
+                        <span className="text-sm text-gray-600">هزینه وزن:</span>
+                        <p className="font-medium">{Math.floor(suitableVehiclesData.optimalVehicle.weightCost).toLocaleString()} IQD</p>
+                      </div>
+                      <div>
+                        <span className="text-sm text-gray-600">بهره‌وری وزن:</span>
+                        <p className="font-medium">{suitableVehiclesData.optimalVehicle.weightUtilization}%</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {suitableVehiclesData.optimalVehicle.safetyCompliant ? (
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <X className="h-4 w-4 text-red-500" />
+                        )}
+                        <span className="text-sm">{suitableVehiclesData.optimalVehicle.safetyCompliant ? 'مطابق ایمنی' : 'نامطابق ایمنی'}</span>
+                      </div>
+                    </div>
+                    {suitableVehiclesData.optimalVehicle.description && (
+                      <div className="mt-3 p-2 bg-white rounded border">
+                        <span className="text-sm text-gray-600">توضیحات:</span>
+                        <p className="text-sm mt-1">{suitableVehiclesData.optimalVehicle.description}</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Alternative Vehicles */}
+              {suitableVehiclesData.alternatives && suitableVehiclesData.alternatives.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <ArrowUpDown className="h-5 w-5 text-blue-600" />
+                      گزینه‌های جایگزین ({suitableVehiclesData.alternatives.length} گزینه)
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {suitableVehiclesData.alternatives.map((vehicle: any, index: number) => (
+                        <div key={index} className="p-4 border rounded-lg bg-gray-50">
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div>
+                              <span className="text-sm text-gray-600">نام:</span>
+                              <p className="font-medium">{vehicle.name}</p>
+                            </div>
+                            <div>
+                              <span className="text-sm text-gray-600">نوع:</span>
+                              <p className="font-medium">{vehicle.vehicleType}</p>
+                            </div>
+                            <div>
+                              <span className="text-sm text-gray-600">هزینه کل:</span>
+                              <p className="font-bold text-blue-700">{Math.floor(vehicle.totalCost).toLocaleString()} IQD</p>
+                            </div>
+                            <div>
+                              <span className="text-sm text-gray-600">ظرفیت:</span>
+                              <p className="font-medium">{vehicle.maxWeightKg} کیلوگرم</p>
+                            </div>
+                            <div>
+                              <span className="text-sm text-gray-600">بهره‌وری وزن:</span>
+                              <p className="font-medium">{vehicle.weightUtilization}%</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {vehicle.safetyCompliant ? (
+                                <CheckCircle className="h-4 w-4 text-green-500" />
+                              ) : (
+                                <X className="h-4 w-4 text-red-500" />
+                              )}
+                              <span className="text-sm">{vehicle.safetyCompliant ? 'مطابق ایمنی' : 'نامطابق ایمنی'}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* All Suitable Vehicles */}
+              {suitableVehiclesData.suitableVehicles && suitableVehiclesData.suitableVehicles.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Truck className="h-5 w-5 text-purple-600" />
+                      تمام خودروهای مناسب ({suitableVehiclesData.suitableVehicles.length} خودرو)
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="text-right">ردیف</TableHead>
+                            <TableHead className="text-right">نام خودرو</TableHead>
+                            <TableHead className="text-right">نوع</TableHead>
+                            <TableHead className="text-right">هزینه کل</TableHead>
+                            <TableHead className="text-right">ظرفیت</TableHead>
+                            <TableHead className="text-right">بهره‌وری</TableHead>
+                            <TableHead className="text-right">ایمنی</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {suitableVehiclesData.suitableVehicles.map((vehicle: any, index: number) => (
+                            <TableRow key={index} className={index === 0 ? "bg-green-50" : ""}>
+                              <TableCell className="font-medium">
+                                {index + 1}
+                                {index === 0 && <span className="mr-2 text-green-600 text-xs">(بهینه)</span>}
+                              </TableCell>
+                              <TableCell className="font-medium">{vehicle.name}</TableCell>
+                              <TableCell>{vehicle.vehicleType}</TableCell>
+                              <TableCell className="font-bold">
+                                {Math.floor(vehicle.totalCost).toLocaleString()} IQD
+                              </TableCell>
+                              <TableCell>{vehicle.maxWeightKg} کگ</TableCell>
+                              <TableCell>{vehicle.weightUtilization}%</TableCell>
+                              <TableCell>
+                                {vehicle.safetyCompliant ? (
+                                  <Badge variant="default" className="bg-green-100 text-green-800">
+                                    <CheckCircle className="h-3 w-3 mr-1" />
+                                    مطابق
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="destructive" className="bg-red-100 text-red-800">
+                                    <X className="h-3 w-3 mr-1" />
+                                    نامطابق
+                                  </Badge>
+                                )}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsSuitableVehiclesOpen(false)}
+            >
+              بستن
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

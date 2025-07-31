@@ -8637,6 +8637,182 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get suitable vehicles for order - recreate delivery cost calculation for specific order
+  app.get("/api/orders/:orderId/suitable-vehicles", requireAuth, async (req, res) => {
+    try {
+      const { orderId } = req.params;
+      console.log(`🚚 [SUITABLE VEHICLES] Getting suitable vehicles for order ${orderId}`);
+      
+      // Get order details and items
+      const orderResult = await db
+        .select({
+          id: customerOrders.id,
+          orderNumber: customerOrders.orderNumber,
+          shippingAddress: customerOrders.shippingAddress,
+          totalWeight: customerOrders.totalWeight,
+          weightUnit: customerOrders.weightUnit
+        })
+        .from(customerOrders)
+        .where(eq(customerOrders.id, parseInt(orderId)))
+        .limit(1);
+
+      if (orderResult.length === 0) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "سفارش یافت نشد" 
+        });
+      }
+
+      const order = orderResult[0];
+      
+      // Get order items to check for flammable materials
+      const orderItems = await db
+        .select({
+          productId: orderItems_table.productId,
+          quantity: orderItems_table.quantity,
+          unitPrice: orderItems_table.unitPrice,
+          productName: orderItems_table.productName
+        })
+        .from(orderItems_table)
+        .where(eq(orderItems_table.orderId, parseInt(orderId)));
+
+      // Check if any products are flammable
+      const productIds = orderItems.map(item => item.productId);
+      const flammableProducts = await db
+        .select({
+          id: showcaseProducts.id,
+          name: showcaseProducts.name,
+          isFlammable: showcaseProducts.isFlammable
+        })
+        .from(showcaseProducts)
+        .where(or(...productIds.map(id => eq(showcaseProducts.id, id))));
+
+      const containsFlammableProducts = flammableProducts.some(product => product.isFlammable);
+      console.log(`🔥 [FLAMMABLE CHECK] Order contains flammable products: ${containsFlammableProducts}`);
+
+      // Extract destination city from shipping address
+      let destinationCity = 'اربیل'; // default
+      if (order.shippingAddress) {
+        const address = typeof order.shippingAddress === 'string' 
+          ? JSON.parse(order.shippingAddress) 
+          : order.shippingAddress;
+        
+        if (address && address.city) {
+          destinationCity = address.city;
+        }
+      }
+
+      // Standardize city name to Arabic
+      const standardizeCityName = (cityName: string): string => {
+        const cityMapping: { [key: string]: string } = {
+          'Erbil': 'اربیل', 'erbil': 'اربیل', 'ERBIL': 'اربیل',
+          'Baghdad': 'بغداد', 'baghdad': 'بغداد', 'BAGHDAD': 'بغداد',
+          'Basra': 'بصره', 'basra': 'بصره', 'BASRA': 'بصره',
+          'Mosul': 'موصل', 'mosul': 'موصل', 'MOSUL': 'موصل',
+          'Karbala': 'کربلا', 'karbala': 'کربلا', 'KARBALA': 'کربلا',
+          'Najaf': 'نجف', 'najaf': 'نجف', 'NAJAF': 'نجف',
+          'Sulaymaniyah': 'سلیمانیه', 'sulaymaniyah': 'سلیمانیه',
+          'Dohuk': 'دهوک', 'dohuk': 'دهوک', 'DOHUK': 'دهوک'
+        };
+        return cityMapping[cityName] || cityName;
+      };
+
+      destinationCity = standardizeCityName(destinationCity);
+      const orderWeight = parseFloat(order.totalWeight || '0');
+
+      console.log(`📍 [ORDER DETAILS] City: ${destinationCity}, Weight: ${orderWeight}kg, Flammable: ${containsFlammableProducts}`);
+
+      // Get suitable vehicles from vehicle templates
+      const vehicleTemplates = await db
+        .select()
+        .from(vehicleTemplates_table)
+        .where(eq(vehicleTemplates_table.isActive, true));
+
+      // Get city data for distance calculation
+      const cityData = await db
+        .select()
+        .from(iraqiCities)
+        .where(eq(iraqiCities.name, destinationCity))
+        .limit(1);
+
+      const distance = cityData.length > 0 ? parseFloat(cityData[0].distanceFromErbilKm || '0') : 0;
+
+      // Filter and calculate costs for suitable vehicles
+      const suitableVehicles = vehicleTemplates
+        .filter(vehicle => {
+          // Weight capacity check
+          if (orderWeight > parseFloat(vehicle.maxWeightKg || '0')) {
+            return false;
+          }
+
+          // Flammable materials safety check
+          if (containsFlammableProducts && !vehicle.supportsFlammable) {
+            return false;
+          }
+
+          return true;
+        })
+        .map(vehicle => {
+          const basePrice = parseFloat(vehicle.basePrice || '0');
+          const pricePerKm = parseFloat(vehicle.pricePerKm || '0');
+          const pricePerKg = parseFloat(vehicle.pricePerKg || '0');
+          
+          const distanceCost = distance * pricePerKm;
+          const weightCost = orderWeight * pricePerKg;
+          const totalCost = basePrice + distanceCost + weightCost;
+
+          return {
+            id: vehicle.id,
+            name: vehicle.name,
+            vehicleType: vehicle.vehicleType,
+            maxWeightKg: vehicle.maxWeightKg,
+            maxVolumeM3: vehicle.maxVolumeM3,
+            supportsFlammable: vehicle.supportsFlammable,
+            basePrice: basePrice,
+            pricePerKm: pricePerKm,
+            pricePerKg: pricePerKg,
+            totalCost: Math.round(totalCost),
+            distanceCost: Math.round(distanceCost),
+            weightCost: Math.round(weightCost),
+            distance: distance,
+            weightUtilization: Math.round((orderWeight / parseFloat(vehicle.maxWeightKg || '1')) * 100),
+            safetyCompliant: !containsFlammableProducts || vehicle.supportsFlammable,
+            description: vehicle.description || '',
+            fuelConsumptionL100km: vehicle.fuelConsumptionL100km
+          };
+        })
+        .sort((a, b) => a.totalCost - b.totalCost); // Sort by cost (cheapest first)
+
+      console.log(`🚛 [SUITABLE VEHICLES] Found ${suitableVehicles.length} suitable vehicles for order ${orderId}`);
+
+      res.json({
+        success: true,
+        data: {
+          order: {
+            id: order.id,
+            orderNumber: order.orderNumber,
+            destinationCity: destinationCity,
+            weight: orderWeight,
+            weightUnit: order.weightUnit || 'kg',
+            containsFlammableProducts: containsFlammableProducts,
+            flammableProducts: flammableProducts.filter(p => p.isFlammable),
+            distance: distance
+          },
+          suitableVehicles: suitableVehicles,
+          optimalVehicle: suitableVehicles.length > 0 ? suitableVehicles[0] : null,
+          alternatives: suitableVehicles.slice(1, 4) // Top 3 alternatives
+        }
+      });
+
+    } catch (error) {
+      console.error("Error getting suitable vehicles for order:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در دریافت خودروهای مناسب" 
+      });
+    }
+  });
+
   // =============================================================================
   // PROCEDURES MANAGEMENT ENDPOINTS
   // =============================================================================
