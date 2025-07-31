@@ -8664,7 +8664,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const order = orderResult[0];
       
       // Get order items to check for flammable materials using order_items table
-      const orderItems = await db
+      const orderItemsList = await db
         .select({
           productId: orderItems.productId,
           quantity: orderItems.quantity,
@@ -8675,7 +8675,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .where(eq(orderItems.orderId, parseInt(orderId)));
 
       // Check if any products are flammable
-      const productIds = orderItems.map(item => item.productId);
+      const productIds = orderItemsList.map(item => item.productId);
       let containsFlammableProducts = false;
       let flammableProducts: any[] = [];
       
@@ -8725,9 +8725,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Calculate order weight from items
       let orderWeight = 0;
-      if (orderItems.length > 0) {
+      if (orderItemsList.length > 0) {
         // Use calculated weight function similar to logistics endpoint
-        orderWeight = orderItems.reduce((total, item) => {
+        orderWeight = orderItemsList.reduce((total, item) => {
           const itemQuantity = parseFloat(item.quantity.toString()) || 0;
           // For simplicity, use a default weight or get from product
           const itemWeight = 10; // kg - this could be fetched from product data
@@ -8738,7 +8738,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`📍 [ORDER DETAILS] City: ${destinationCity}, Weight: ${orderWeight}kg, Flammable: ${containsFlammableProducts}`);
 
       // Get suitable vehicles from vehicle templates
-      const vehicleTemplates = await db
+      const availableVehicles = await db
         .select()
         .from(vehicleTemplates)
         .where(eq(vehicleTemplates.isActive, true));
@@ -8763,7 +8763,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                       destinationCity === 'موصل' ? 80 : 200; // default
 
       // Filter and calculate costs for suitable vehicles
-      const suitableVehicles = vehicleTemplates
+      const suitableVehicles = availableVehicles
         .filter(vehicle => {
           // Weight capacity check
           if (orderWeight > parseFloat(vehicle.maxWeightKg || '0')) {
@@ -8823,7 +8823,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             containsFlammableProducts: containsFlammableProducts,
             flammableProducts: flammableProducts.filter(p => p.isFlammable),
             distance: distance,
-            orderItems: orderItems
+            orderItems: orderItemsList
           },
           suitableVehicles: suitableVehicles,
           optimalVehicle: suitableVehicles.length > 0 ? suitableVehicles[0] : null,
