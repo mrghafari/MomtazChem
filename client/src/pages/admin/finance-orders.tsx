@@ -806,6 +806,9 @@ function FinanceOrders() {
                   <option value="financial_reviewing">در حال بررسی</option>
                   <option value="financial_approved">تایید شده</option>
                   <option value="financial_rejected">رد شده</option>
+                  <option value="warehouse_pending">منتقل شده به انبار</option>
+                  <option value="warehouse_processing">در حال پردازش انبار</option>
+                  <option value="warehouse_approved">تایید شده از انبار</option>
                 </select>
               </div>
             </div>
@@ -2174,6 +2177,10 @@ interface OrderCardProps {
 
 function OrderCard({ order, onOrderSelect, readOnly = false, fetchOrderDetails }: OrderCardProps) {
   const customerInfo = getCustomerInfo(order);
+  
+  // Check if this is a wallet-paid order that has been transferred to warehouse
+  const isWalletTransferred = ['warehouse_pending', 'warehouse_processing', 'warehouse_approved'].includes(order.currentStatus);
+  
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
       case 'pending':
@@ -2188,6 +2195,12 @@ function OrderCard({ order, onOrderSelect, readOnly = false, fetchOrderDetails }
         return 'bg-green-100 text-green-800 border-green-200';
       case 'financial_rejected':
         return 'bg-red-100 text-red-800 border-red-200';
+      case 'warehouse_pending':
+        return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+      case 'warehouse_processing':
+        return 'bg-teal-100 text-teal-800 border-teal-200';
+      case 'warehouse_approved':
+        return 'bg-green-100 text-green-800 border-green-200';
       default:
         return 'bg-gray-100 text-gray-800 border-gray-200';
     }
@@ -2207,6 +2220,12 @@ function OrderCard({ order, onOrderSelect, readOnly = false, fetchOrderDetails }
         return 'تایید شده';
       case 'financial_rejected':
         return 'رد شده';
+      case 'warehouse_pending':
+        return 'منتقل شده به انبار';
+      case 'warehouse_processing':
+        return 'در حال پردازش انبار';
+      case 'warehouse_approved':
+        return 'تایید شده از انبار';
       default:
         return status;
     }
@@ -2271,6 +2290,25 @@ function OrderCard({ order, onOrderSelect, readOnly = false, fetchOrderDetails }
                 نیاز به بررسی
               </Badge>
             </div>
+          </div>
+        )}
+
+        {/* Special indicator for wallet-paid orders transferred to warehouse */}
+        {isWalletTransferred && (
+          <div className="bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-lg p-3 mb-4">
+            <div className="flex items-center space-x-2 space-x-reverse">
+              <div className="flex items-center space-x-1 space-x-reverse">
+                <CheckCircle className="h-4 w-4 text-emerald-600" />
+                <DollarSign className="h-4 w-4 text-green-600" />
+              </div>
+              <span className="text-sm font-medium text-emerald-900">پرداخت با کیف پول - منتقل شده به انبار</span>
+              <Badge variant="secondary" className="bg-emerald-100 text-emerald-800 text-xs">
+                💳 قابل مشاهده در مالی
+              </Badge>
+            </div>
+            <p className="text-xs text-emerald-700 mt-1">
+              این سفارش با کیف پول پرداخت شده و خودکار به انبار منتقل گردیده - برای نظارت مالی در این بخش قابل مشاهده است
+            </p>
           </div>
         )}
 

@@ -566,10 +566,14 @@ export class OrderManagementStorage implements IOrderManagementStorage {
         orderStatuses.PAYMENT_UPLOADED, 
         orderStatuses.FINANCIAL_REVIEWING,
         // orderStatuses.FINANCIAL_APPROVED, // حذف شد - این سفارشات به انبار می‌روند
-        orderStatuses.FINANCIAL_REJECTED // فقط سفارشات رد شده در مالی باقی می‌مانند
+        orderStatuses.FINANCIAL_REJECTED, // فقط سفارشات رد شده در مالی باقی می‌مانند
+        orderStatuses.WAREHOUSE_PENDING, // سفارشات پرداخت شده با کیف پول که به انبار منتقل شده‌اند
+        orderStatuses.WAREHOUSE_PROCESSING, // سفارشات پرداخت شده با کیف پول در حال پردازش انبار
+        orderStatuses.WAREHOUSE_APPROVED // سفارشات پرداخت شده با کیف پول تایید شده از انبار
       ];
       
-      console.log('🔍 [FINANCIAL] Searching for orders with statuses:', financialStatuses);
+      console.log('🔍 [FINANCIAL] Searching for orders with statuses (including wallet-paid transferred orders):', financialStatuses);
+      console.log('💳 [WALLET VISIBILITY] Finance department now includes wallet-paid orders transferred to warehouse for complete payment tracking');
       
       query = query.where(inArray(orderManagement.currentStatus, financialStatuses));
     } else if (department === 'warehouse') {
