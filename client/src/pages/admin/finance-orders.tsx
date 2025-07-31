@@ -780,6 +780,82 @@ function FinanceOrders() {
           </Card>
         </div>
 
+        {/* Payment Methods Breakdown */}
+        <Card className="mb-6 border-2 border-dashed border-indigo-300 bg-gradient-to-r from-indigo-50 to-purple-50 shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-indigo-800">
+              <CreditCard className="h-5 w-5" />
+              تفکیک دقیق روش‌های پرداخت سفارشات
+            </CardTitle>
+            <CardDescription className="text-indigo-600">
+              🎯 هر سفارش با روش پرداخت مشخص شده در هنگام خرید ثبت می‌شود - اطلاعات زیر دقیقاً منعکس کننده انتخاب مشتری است
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              <div className="text-center p-4 bg-white rounded-lg border-2 border-green-200 shadow-sm">
+                <Wallet className="h-8 w-8 text-green-600 mx-auto mb-2" />
+                <p className="text-2xl font-bold text-green-700">
+                  {filteredOrders.filter(order => order.paymentMethod === 'wallet_full').length}
+                </p>
+                <p className="text-xs text-green-600 font-medium">💰 کیف پول کامل</p>
+                <p className="text-xs text-green-500 mt-1">تایید خودکار در 5 دقیقه</p>
+              </div>
+              
+              <div className="text-center p-4 bg-white rounded-lg border-2 border-purple-200 shadow-sm">
+                <DollarSign className="h-8 w-8 text-purple-600 mx-auto mb-2" />
+                <p className="text-2xl font-bold text-purple-700">
+                  {filteredOrders.filter(order => order.paymentMethod === 'wallet_partial').length}
+                </p>
+                <p className="text-xs text-purple-600 font-medium">💳 پرداخت ترکیبی</p>
+                <p className="text-xs text-purple-500 mt-1">کیف پول + درگاه بانک</p>
+              </div>
+              
+              <div className="text-center p-4 bg-white rounded-lg border-2 border-blue-200 shadow-sm">
+                <CreditCard className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+                <p className="text-2xl font-bold text-blue-700">
+                  {filteredOrders.filter(order => 
+                    order.paymentMethod === 'bank_gateway' || 
+                    order.paymentMethod === 'online_payment'
+                  ).length}
+                </p>
+                <p className="text-xs text-blue-600 font-medium">🌐 درگاه آنلاین</p>
+                <p className="text-xs text-blue-500 mt-1">پرداخت مستقیم بانکی</p>
+              </div>
+              
+              <div className="text-center p-4 bg-white rounded-lg border-2 border-orange-200 shadow-sm">
+                <Clock className="h-8 w-8 text-orange-600 mx-auto mb-2" />
+                <p className="text-2xl font-bold text-orange-700">
+                  {filteredOrders.filter(order => 
+                    order.paymentMethod === 'bank_transfer_grace' || 
+                    order.paymentMethod === 'bank_transfer'
+                  ).length}
+                </p>
+                <p className="text-xs text-orange-600 font-medium">⏰ انتقال بانکی</p>
+                <p className="text-xs text-orange-500 mt-1">مهلت 3 روزه برای فیش</p>
+              </div>
+              
+              <div className="text-center p-4 bg-white rounded-lg border-2 border-gray-200 shadow-sm">
+                <AlertTriangle className="h-8 w-8 text-gray-600 mx-auto mb-2" />
+                <p className="text-2xl font-bold text-gray-700">
+                  {filteredOrders.filter(order => 
+                    !order.paymentMethod || 
+                    !['wallet_full', 'wallet_partial', 'bank_gateway', 'online_payment', 'bank_transfer_grace', 'bank_transfer'].includes(order.paymentMethod)
+                  ).length}
+                </p>
+                <p className="text-xs text-gray-600 font-medium">❓ نامشخص</p>
+                <p className="text-xs text-gray-500 mt-1">نیاز به بررسی فوری</p>
+              </div>
+            </div>
+            
+            <div className="mt-4 p-3 bg-white rounded-lg border border-indigo-200">
+              <p className="text-sm text-indigo-700 text-center font-medium">
+                💡 این اطلاعات دقیقاً از انتخاب مشتری در هنگام تکمیل سفارش استخراج می‌شود و منعکس کننده روش پرداخت واقعی است
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Search and Filter */}
         <Card className="mb-6 shadow-lg border-0">
           <CardContent className="p-6">
@@ -2267,7 +2343,74 @@ function OrderCard({ order, onOrderSelect, readOnly = false, fetchOrderDetails }
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+        {/* Payment Method Highlight - Top Priority Display */}
+        <div className="bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-200 rounded-lg p-4 mb-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3 space-x-reverse">
+              <div className="p-2 bg-white rounded-lg shadow-sm border">
+                {(() => {
+                  const paymentMethod = order.paymentMethod;
+                  if (paymentMethod === 'wallet_full') {
+                    return <Wallet className="h-5 w-5 text-green-600" />;
+                  } else if (paymentMethod === 'wallet_partial') {
+                    return <DollarSign className="h-5 w-5 text-purple-600" />;
+                  } else if (paymentMethod === 'bank_transfer_grace' || paymentMethod === 'bank_transfer') {
+                    return <Clock className="h-5 w-5 text-orange-600" />;
+                  } else if (paymentMethod === 'bank_gateway' || paymentMethod === 'online_payment') {
+                    return <CreditCard className="h-5 w-5 text-blue-600" />;
+                  } else {
+                    return <CreditCard className="h-5 w-5 text-gray-400" />;
+                  }
+                })()}
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 mb-1">روش پرداخت</p>
+                <p className="font-bold text-lg">
+                  {(() => {
+                    const paymentMethod = order.paymentMethod;
+                    if (paymentMethod === 'wallet_full') {
+                      return <span className="text-green-700">💰 کیف پول (پرداخت کامل)</span>;
+                    } else if (paymentMethod === 'wallet_partial') {
+                      return <span className="text-purple-700">💳 پرداخت ترکیبی (کیف پول + بانک)</span>;
+                    } else if (paymentMethod === 'bank_transfer_grace') {
+                      return <span className="text-orange-700">⏰ انتقال بانکی (مهلت 3 روزه)</span>;
+                    } else if (paymentMethod === 'bank_transfer') {
+                      return <span className="text-orange-700">🏦 انتقال بانکی مستقیم</span>;
+                    } else if (paymentMethod === 'bank_gateway') {
+                      return <span className="text-blue-700">💳 درگاه بانکی آنلاین</span>;
+                    } else if (paymentMethod === 'online_payment') {
+                      return <span className="text-blue-700">🌐 پرداخت آنلاین</span>;
+                    } else {
+                      return <span className="text-gray-600">❓ {paymentMethod || 'روش پرداخت نامشخص'}</span>;
+                    }
+                  })()}
+                </p>
+              </div>
+            </div>
+            <div className="text-left">
+              <Badge className={`text-sm px-3 py-1 ${
+                order.paymentMethod === 'wallet_full' ? 'bg-green-100 text-green-800 border-green-200' :
+                order.paymentMethod === 'wallet_partial' ? 'bg-purple-100 text-purple-800 border-purple-200' :
+                order.paymentMethod === 'bank_transfer_grace' || order.paymentMethod === 'bank_transfer' ? 'bg-orange-100 text-orange-800 border-orange-200' :
+                order.paymentMethod === 'bank_gateway' || order.paymentMethod === 'online_payment' ? 'bg-blue-100 text-blue-800 border-blue-200' :
+                'bg-gray-100 text-gray-800 border-gray-200'
+              }`}>
+                {(() => {
+                  const paymentMethod = order.paymentMethod;
+                  if (paymentMethod === 'wallet_full') return 'کیف پول';
+                  if (paymentMethod === 'wallet_partial') return 'ترکیبی';
+                  if (paymentMethod === 'bank_transfer_grace') return 'مهلت‌دار';
+                  if (paymentMethod === 'bank_transfer') return 'انتقال بانکی';
+                  if (paymentMethod === 'bank_gateway') return 'درگاه بانکی';
+                  if (paymentMethod === 'online_payment') return 'آنلاین';
+                  return 'نامشخص';
+                })()}
+              </Badge>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <div className="flex items-center space-x-2 space-x-reverse">
             <Mail className="h-4 w-4 text-gray-400" />
             <span className="text-sm text-gray-600">{order.customer?.email}</span>
@@ -2286,54 +2429,6 @@ function OrderCard({ order, onOrderSelect, readOnly = false, fetchOrderDetails }
                 minute: '2-digit'
               })}
             </span>
-          </div>
-          <div className="flex items-center space-x-2 space-x-reverse">
-            {(() => {
-              const paymentMethod = order.paymentMethod;
-              if (paymentMethod === 'wallet_full') {
-                return (
-                  <>
-                    <Wallet className="h-4 w-4 text-green-600" />
-                    <span className="text-sm text-green-700 font-medium">کیف پول (کامل)</span>
-                  </>
-                );
-              } else if (paymentMethod === 'wallet_partial') {
-                return (
-                  <>
-                    <DollarSign className="h-4 w-4 text-purple-600" />
-                    <span className="text-sm text-purple-700 font-medium">ترکیبی</span>
-                  </>
-                );
-              } else if (paymentMethod === 'bank_transfer_grace') {
-                return (
-                  <>
-                    <Clock className="h-4 w-4 text-orange-600" />
-                    <span className="text-sm text-orange-700 font-medium">مهلت‌دار</span>
-                  </>
-                );
-              } else if (paymentMethod === 'bank_gateway') {
-                return (
-                  <>
-                    <CreditCard className="h-4 w-4 text-blue-600" />
-                    <span className="text-sm text-blue-700 font-medium">درگاه بانکی</span>
-                  </>
-                );
-              } else if (paymentMethod === 'online_payment') {
-                return (
-                  <>
-                    <CreditCard className="h-4 w-4 text-blue-600" />
-                    <span className="text-sm text-blue-700 font-medium">پرداخت آنلاین</span>
-                  </>
-                );
-              } else {
-                return (
-                  <>
-                    <CreditCard className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm text-gray-600">{paymentMethod || 'نامشخص'}</span>
-                  </>
-                );
-              }
-            })()}
           </div>
         </div>
 
