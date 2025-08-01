@@ -419,6 +419,7 @@ export default function SiteManagement() {
     
     const allButtons = getInitialButtons();
     console.log('🔍 [DEBUG] total buttons:', allButtons.length);
+    console.log('🔍 [DEBUG] super-admin-order-management button exists:', allButtons.find(b => b.id === 'super-admin-order-management'));
     
     // If no moduleId specified, show button (for universal access buttons)
     // If moduleId specified, check if user has access to that module
