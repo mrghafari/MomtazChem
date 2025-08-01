@@ -2251,16 +2251,16 @@ function OrderCard({ order, onOrderSelect, readOnly = false, fetchOrderDetails }
   };
 
   return (
-    <Card className="hover:shadow-lg transition-shadow border-l-4 border-l-blue-500">
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-4 space-x-reverse">
-            <div className="p-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl shadow-lg">
-              <Receipt className="h-6 w-6 text-white" />
+    <Card className="hover:shadow-md transition-shadow border-l-4 border-l-blue-500">
+      <CardContent className="p-4">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-3 space-x-reverse">
+            <div className="p-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg shadow-md">
+              <Receipt className="h-4 w-4 text-white" />
             </div>
             <div>
-              <h3 className="font-bold text-xl text-gray-900">سفارش {order.orderNumber || 'در حال بارگذاری...'}</h3>
-              <p className="text-sm text-gray-600 font-medium">
+              <h3 className="font-bold text-lg text-gray-900">سفارش {order.orderNumber || 'در حال بارگذاری...'}</h3>
+              <p className="text-xs text-gray-600 font-medium">
                 {customerInfo.firstName && customerInfo.lastName 
                   ? `${customerInfo.firstName} ${customerInfo.lastName}` 
                   : order.customerName || 'نام مشتری نامشخص'}
@@ -2269,11 +2269,11 @@ function OrderCard({ order, onOrderSelect, readOnly = false, fetchOrderDetails }
             </div>
           </div>
           <div className="flex items-center space-x-3 space-x-reverse">
-            <Badge className={`border text-sm px-3 py-1 font-medium ${getStatusBadgeColor(order.currentStatus)}`}>
+            <Badge className={`border text-xs px-2 py-1 font-medium ${getStatusBadgeColor(order.currentStatus)}`}>
               {getStatusDisplayName(order.currentStatus)}
             </Badge>
             <div className="text-left">
-              <p className="font-bold text-2xl text-green-600">
+              <p className="font-bold text-lg text-green-600">
                 {parseFloat(order.totalAmount).toLocaleString()} {order.currency}
               </p>
               <p className="text-xs text-gray-500">
@@ -2287,27 +2287,27 @@ function OrderCard({ order, onOrderSelect, readOnly = false, fetchOrderDetails }
           </div>
         </div>
 
-        {/* Enhanced Customer Information Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <div className="flex items-center space-x-2 space-x-reverse bg-gray-50 rounded-lg p-3">
-            <Mail className="h-4 w-4 text-gray-500" />
+        {/* Compact Customer Information Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+          <div className="flex items-center space-x-2 space-x-reverse bg-gray-50 rounded-md p-2">
+            <Mail className="h-3 w-3 text-gray-500" />
             <div>
               <p className="text-xs text-gray-500">ایمیل</p>
-              <p className="text-sm font-medium text-gray-700">{customerInfo.email || order.customerEmail || 'نامشخص'}</p>
+              <p className="text-xs font-medium text-gray-700 truncate">{customerInfo.email || order.customerEmail || 'نامشخص'}</p>
             </div>
           </div>
-          <div className="flex items-center space-x-2 space-x-reverse bg-gray-50 rounded-lg p-3">
-            <Phone className="h-4 w-4 text-gray-500" />
+          <div className="flex items-center space-x-2 space-x-reverse bg-gray-50 rounded-md p-2">
+            <Phone className="h-3 w-3 text-gray-500" />
             <div>
               <p className="text-xs text-gray-500">تلفن</p>
-              <p className="text-sm font-medium text-gray-700">{customerInfo.phone || order.customerPhone || 'نامشخص'}</p>
+              <p className="text-xs font-medium text-gray-700">{customerInfo.phone || order.customerPhone || 'نامشخص'}</p>
             </div>
           </div>
-          <div className="flex items-center space-x-2 space-x-reverse bg-gray-50 rounded-lg p-3">
-            <Calendar className="h-4 w-4 text-gray-500" />
+          <div className="flex items-center space-x-2 space-x-reverse bg-gray-50 rounded-md p-2">
+            <Calendar className="h-3 w-3 text-gray-500" />
             <div>
-              <p className="text-xs text-gray-500">آخرین بروزرسانی</p>
-              <p className="text-sm font-medium text-gray-700">
+              <p className="text-xs text-gray-500">بروزرسانی</p>
+              <p className="text-xs font-medium text-gray-700">
                 {new Date(order.updatedAt).toLocaleDateString('en-US', {
                   month: 'short',
                   day: 'numeric',
@@ -2317,7 +2317,7 @@ function OrderCard({ order, onOrderSelect, readOnly = false, fetchOrderDetails }
               </p>
             </div>
           </div>
-          <div className="flex items-center space-x-2 space-x-reverse bg-gray-50 rounded-lg p-3">
+          <div className="flex items-center space-x-2 space-x-reverse bg-gray-50 rounded-md p-2">
             {(() => {
               const paymentMethod = order.paymentMethod;
               if (paymentMethod === 'wallet_full') {
