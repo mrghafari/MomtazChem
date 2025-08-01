@@ -21780,7 +21780,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         res.json({ 
           success: true, 
           order: updatedOrder, 
-          message: 'سفارش موقت تایید شد و به سفارش معمولی تبدیل شد' + walletTransactionMessage,
+          message: 'سفارش موقت تایید شد و آماده بررسی انبار است' + walletTransactionMessage,
           walletTransaction: walletTransactionMessage.length > 0
         });
       } else {
@@ -21788,7 +21788,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         res.json({ 
           success: true, 
           order: updatedOrder, 
-          message: 'پرداخت تایید شد و به انبار ارسال گردید' + walletTransactionMessage,
+          message: 'پرداخت تایید شد و آماده بررسی انبار است' + walletTransactionMessage,
           walletTransaction: walletTransactionMessage.length > 0
         });
       }
@@ -42776,7 +42776,7 @@ momtazchem.com
           om.id as order_id,
           om.customer_order_id,
           om.order_number,
-          om.status,
+          om.current_status,
           om.total_amount,
           om.created_at,
           om.payment_method,
@@ -42788,7 +42788,8 @@ momtazchem.com
           cc.email
         FROM order_management om
         LEFT JOIN crm_customers cc ON om.customer_id = cc.id
-        WHERE om.status IN ('pending', 'financial_approved', 'financial_rejected')
+        WHERE om.current_status IN ('pending', 'financial_rejected') 
+        AND om.current_status NOT IN ('warehouse_pending', 'warehouse_processing', 'warehouse_ready', 'logistics_processing', 'in_transit', 'delivered')
         ORDER BY om.created_at DESC
         LIMIT 50
       `);
@@ -42797,7 +42798,7 @@ momtazchem.com
         id: row.order_id,
         customerOrderId: row.customer_order_id,
         orderNumber: row.order_number,
-        status: row.status,
+        status: row.current_status,
         totalAmount: parseFloat(row.total_amount) || 0,
         createdAt: row.created_at,
         paymentMethod: row.payment_method,
