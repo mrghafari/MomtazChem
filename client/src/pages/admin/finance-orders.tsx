@@ -177,7 +177,12 @@ function FinanceOrders() {
   // Fetch approved orders that have been transferred to warehouse
   const { data: approvedOrdersResponse, isLoading: isLoadingApproved, refetch: refetchApproved } = useQuery({
     queryKey: ['/api/financial/approved-orders'],
-    queryFn: () => fetch('/api/financial/approved-orders', { credentials: 'include' }).then(res => res.json())
+    queryFn: async () => {
+      const res = await fetch('/api/financial/approved-orders', { credentials: 'include' });
+      const data = await res.json();
+      console.log('🔍 [APPROVED ORDERS] Raw response:', data);
+      return data;
+    }
   });
 
   // Orphan orders queries
@@ -272,7 +277,13 @@ function FinanceOrders() {
   });
 
   const allOrders: OrderManagement[] = ordersResponse?.orders || [];
-  const transferredOrders: OrderManagement[] = approvedOrdersResponse?.orders || [];
+  // Handle both array and object response formats
+  const transferredOrders: OrderManagement[] = Array.isArray(approvedOrdersResponse) 
+    ? approvedOrdersResponse 
+    : (approvedOrdersResponse?.orders || []);
+    
+  console.log('🔍 [DEBUG] Approved orders response:', approvedOrdersResponse);
+  console.log('🔍 [DEBUG] Transferred orders count:', transferredOrders.length);
   
   // Filter and search functionality
   const filteredOrders = allOrders.filter(order => {
