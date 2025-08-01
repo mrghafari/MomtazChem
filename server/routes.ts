@@ -25227,7 +25227,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           om.current_status as "managementStatus",
           CASE 
             WHEN om.id IS NULL THEN 'یتیم - فاقد رکورد مدیریت'
-            WHEN (om.current_status = 'pending' AND co.payment_method = 'online_payment' AND co.payment_status = 'pending') THEN 'معلق - پرداخت آنلاین ناتمام'
+            WHEN (om.current_status = 'pending' AND co.status = 'pending' AND co.payment_status = 'pending') THEN 'نیمه تمام - پرداخت ناتمام در درگاه بانکی'
             WHEN (om.current_status = 'payment_uploaded' AND co.payment_method = 'bank_transfer_grace' AND co.payment_status = 'receipt_uploaded') THEN 'معلق - حواله بانکی آپلود شده'
             ELSE 'مشکوک - نیاز به بررسی'
           END as "orphanType"
@@ -25237,8 +25237,8 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           -- 1. Truly orphaned orders (no order_management)
           om.id IS NULL
           OR
-          -- 2. Stuck online payments in pending state
-          (om.current_status = 'pending' AND co.payment_method = 'online_payment' AND co.payment_status = 'pending' AND co.created_at < NOW() - INTERVAL '1 hour')
+          -- 2. All pending/pending orders that failed bank payment (after 30 minutes grace period)
+          (om.current_status = 'pending' AND co.status = 'pending' AND co.payment_status = 'pending' AND co.created_at < NOW() - INTERVAL '30 minutes')
           OR
           -- 3. Bank transfer receipts uploaded but stuck in financial review
           (om.current_status = 'payment_uploaded' AND co.payment_method = 'bank_transfer_grace' AND co.payment_status = 'receipt_uploaded' AND co.updated_at < NOW() - INTERVAL '2 hours')
@@ -25256,7 +25256,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       // Categorize by orphan type
       const categorized = {
         trulyOrphaned: orphanedOrders.filter(o => o.orphanType === 'یتیم - فاقد رکورد مدیریت'),
-        stuckOnlinePayments: orphanedOrders.filter(o => o.orphanType === 'معلق - پرداخت آنلاین ناتمام'),
+        incompleteBankPayment: orphanedOrders.filter(o => o.orphanType === 'نیمه تمام - پرداخت ناتمام در درگاه بانکی'),
         stuckBankTransfers: orphanedOrders.filter(o => o.orphanType === 'معلق - حواله بانکی آپلود شده'),
         suspicious: orphanedOrders.filter(o => o.orphanType === 'مشکوک - نیاز به بررسی')
       };
@@ -25264,7 +25264,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       console.log('📊 [ORPHANED CATEGORIZATION]:', {
         total: orphanedOrders.length,
         trulyOrphaned: categorized.trulyOrphaned.length,
-        stuckOnlinePayments: categorized.stuckOnlinePayments.length,
+        incompleteBankPayment: categorized.incompleteBankPayment.length,
         stuckBankTransfers: categorized.stuckBankTransfers.length,
         suspicious: categorized.suspicious.length
       });
@@ -25272,8 +25272,15 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       res.json({ 
         success: true, 
         orders: orphanedOrders,
+        categorized: categorized,
         totalOrphaned: orphanedOrders.length,
-        categorized
+        stats: {
+          total: orphanedOrders.length,
+          trulyOrphaned: categorized.trulyOrphaned.length,
+          incompleteBankPayment: categorized.incompleteBankPayment.length,
+          stuckBankTransfers: categorized.stuckBankTransfers.length,
+          suspicious: categorized.suspicious.length
+        }
       });
     } catch (error) {
       console.error('❌ [ORPHANED ORDERS] Error fetching orphaned orders:', error);

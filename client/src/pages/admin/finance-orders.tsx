@@ -959,7 +959,7 @@ function FinanceOrders() {
                   سفارشات یتیم ({orphanedOrders?.orders?.length || 0})
                 </CardTitle>
                 <CardDescription>
-                  سفارشاتی که در جدول customer_orders موجود هستند اما در order_management وجود ندارند
+                  سفارشاتی که نیاز به توجه ویژه دارند: یتیم، پرداخت ناتمام، یا معلق
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -976,60 +976,191 @@ function FinanceOrders() {
                     <p className="text-gray-500">هیچ سفارش یتیمی یافت نشد</p>
                   </div>
                 ) : (
-                  <div className="space-y-4">
-                    {orphanedOrders?.orders?.map((order: any) => (
-                      <Card key={order.id} className="border-amber-200 bg-amber-50">
+                  <div className="space-y-6">
+                    {/* Statistics Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <Card className="border-red-200 bg-red-50">
                         <CardContent className="p-4">
-                          <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
-                                <AlertTriangle className="h-5 w-5 text-amber-600" />
-                              </div>
-                              <div>
-                                <h4 className="font-bold text-gray-900">{order.orderNumber}</h4>
-                                <p className="text-sm text-gray-600">{order.customerName}</p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Badge variant="destructive" className="bg-amber-100 text-amber-800 border-amber-200">
-                                {order.orphanType}
-                              </Badge>
-                              <Button
-                                size="sm"
-                                onClick={() => repairOrphanedOrderMutation.mutate(order.id)}
-                                disabled={repairOrphanedOrderMutation.isPending}
-                                className="bg-amber-500 hover:bg-amber-600 text-white"
-                              >
-                                <Wrench className="h-4 w-4 mr-1" />
-                                تعمیر
-                              </Button>
+                          <div className="flex items-center gap-2">
+                            <AlertTriangle className="h-5 w-5 text-red-600" />
+                            <div>
+                              <p className="text-sm text-muted-foreground">یتیم</p>
+                              <p className="text-xl font-bold text-red-600">
+                                {orphanedOrders?.categorized?.trulyOrphaned?.length || 0}
+                              </p>
                             </div>
                           </div>
-                          
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                            <div>
-                              <Label className="text-gray-600">مبلغ:</Label>
-                              <p className="font-medium">{Math.floor(parseFloat(order.totalAmount)).toLocaleString()} {order.currency}</p>
-                            </div>
-                            <div>
-                              <Label className="text-gray-600">روش پرداخت:</Label>
-                              <p className="font-medium">{order.paymentMethod}</p>
-                            </div>
-                            <div>
-                              <Label className="text-gray-600">وضعیت:</Label>
-                              <p className="font-medium">{order.status}</p>
-                            </div>
-                          </div>
-
-                          {order.shippingAddress && (
-                            <div className="mt-3 p-3 bg-white rounded border">
-                              <Label className="text-gray-600 text-xs">آدرس تحویل:</Label>
-                              <p className="text-sm mt-1">{JSON.parse(order.shippingAddress).address}</p>
-                            </div>
-                          )}
                         </CardContent>
                       </Card>
-                    ))}
+                      
+                      <Card className="border-amber-200 bg-amber-50">
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-5 w-5 text-amber-600" />
+                            <div>
+                              <p className="text-sm text-muted-foreground">پرداخت ناتمام</p>
+                              <p className="text-xl font-bold text-amber-600">
+                                {orphanedOrders?.categorized?.incompleteBankPayment?.length || 0}
+                              </p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card className="border-blue-200 bg-blue-50">
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-2">
+                            <Upload className="h-5 w-5 text-blue-600" />
+                            <div>
+                              <p className="text-sm text-muted-foreground">حواله آپلود شده</p>
+                              <p className="text-xl font-bold text-blue-600">
+                                {orphanedOrders?.categorized?.stuckBankTransfers?.length || 0}
+                              </p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card className="border-purple-200 bg-purple-50">
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-2">
+                            <HelpCircle className="h-5 w-5 text-purple-600" />
+                            <div>
+                              <p className="text-sm text-muted-foreground">مشکوک</p>
+                              <p className="text-xl font-bold text-purple-600">
+                                {orphanedOrders?.categorized?.suspicious?.length || 0}
+                              </p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+
+                    {/* Orders List by Category */}
+                    <div className="space-y-4">
+                      {/* Incomplete Bank Payment Orders */}
+                      {orphanedOrders?.categorized?.incompleteBankPayment?.length > 0 && (
+                        <div>
+                          <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                            <Clock className="h-5 w-5 text-amber-600" />
+                            سفارشات پرداخت ناتمام در درگاه بانکی ({orphanedOrders.categorized.incompleteBankPayment.length})
+                          </h3>
+                          <div className="space-y-3">
+                            {orphanedOrders.categorized.incompleteBankPayment.map((order: any) => (
+                              <Card key={order.id} className="border-amber-200 bg-amber-50">
+                                <CardContent className="p-4">
+                                  <div className="flex items-center justify-between mb-3">
+                                    <div className="flex items-center gap-3">
+                                      <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                                        <Clock className="h-5 w-5 text-amber-600" />
+                                      </div>
+                                      <div>
+                                        <h4 className="font-bold text-gray-900">{order.orderNumber}</h4>
+                                        <p className="text-sm text-gray-600">{order.customerName || 'نامشخص'}</p>
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <Badge className="bg-amber-100 text-amber-800 border-amber-200">
+                                        {order.orphanType}
+                                      </Badge>
+                                      <Button
+                                        size="sm"
+                                        variant="destructive"
+                                        onClick={() => repairOrphanedOrderMutation.mutate(order.id)}
+                                        disabled={repairOrphanedOrderMutation.isPending}
+                                      >
+                                        <Trash2 className="h-4 w-4 mr-1" />
+                                        حذف سفارش ناتمام
+                                      </Button>
+                                    </div>
+                                  </div>
+                                  
+                                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+                                    <div>
+                                      <Label className="text-gray-600">مبلغ:</Label>
+                                      <p className="font-medium">{Math.floor(parseFloat(order.totalAmount)).toLocaleString()} {order.currency}</p>
+                                    </div>
+                                    <div>
+                                      <Label className="text-gray-600">روش پرداخت:</Label>
+                                      <p className="font-medium">{order.paymentMethod}</p>
+                                    </div>
+                                    <div>
+                                      <Label className="text-gray-600">وضعیت:</Label>
+                                      <p className="font-medium text-amber-600">{order.status}/{order.paymentStatus}</p>
+                                    </div>
+                                    <div>
+                                      <Label className="text-gray-600">تاریخ ایجاد:</Label>
+                                      <p className="font-medium">{new Date(order.createdAt).toLocaleDateString('fa-IR')}</p>
+                                    </div>
+                                  </div>
+
+                                  <div className="mt-3 p-3 bg-white rounded border border-amber-200">
+                                    <p className="text-sm text-amber-800">
+                                      💡 این سفارش در درگاه بانکی تکمیل نشده و به عنوان سفارش ناتمام محسوب می‌شود.
+                                    </p>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Other Categories */}
+                      {orphanedOrders?.orders?.filter((order: any) => order.orphanType !== 'نیمه تمام - پرداخت ناتمام در درگاه بانکی').map((order: any) => (
+                        <Card key={order.id} className="border-red-200 bg-red-50">
+                          <CardContent className="p-4">
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                                  <AlertTriangle className="h-5 w-5 text-red-600" />
+                                </div>
+                                <div>
+                                  <h4 className="font-bold text-gray-900">{order.orderNumber}</h4>
+                                  <p className="text-sm text-gray-600">{order.customerName || 'نامشخص'}</p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Badge variant="destructive" className="bg-red-100 text-red-800 border-red-200">
+                                  {order.orphanType}
+                                </Badge>
+                                <Button
+                                  size="sm"
+                                  onClick={() => repairOrphanedOrderMutation.mutate(order.id)}
+                                  disabled={repairOrphanedOrderMutation.isPending}
+                                  className="bg-red-500 hover:bg-red-600 text-white"
+                                >
+                                  <Wrench className="h-4 w-4 mr-1" />
+                                  تعمیر
+                                </Button>
+                              </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                              <div>
+                                <Label className="text-gray-600">مبلغ:</Label>
+                                <p className="font-medium">{Math.floor(parseFloat(order.totalAmount)).toLocaleString()} {order.currency}</p>
+                              </div>
+                              <div>
+                                <Label className="text-gray-600">روش پرداخت:</Label>
+                                <p className="font-medium">{order.paymentMethod}</p>
+                              </div>
+                              <div>
+                                <Label className="text-gray-600">وضعیت:</Label>
+                                <p className="font-medium">{order.status}</p>
+                              </div>
+                            </div>
+
+                            {order.shippingAddress && (
+                              <div className="mt-3 p-3 bg-white rounded border">
+                                <Label className="text-gray-600 text-xs">آدرس تحویل:</Label>
+                                <p className="text-sm mt-1">{JSON.parse(order.shippingAddress).address}</p>
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
                   </div>
                 )}
               </CardContent>
