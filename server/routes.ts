@@ -25237,8 +25237,8 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           -- 1. Truly orphaned orders (no order_management)
           om.id IS NULL
           OR
-          -- 2. All pending/pending orders that failed bank payment (after 30 minutes grace period)
-          (om.current_status = 'pending' AND co.status = 'pending' AND co.payment_status = 'pending' AND co.created_at < NOW() - INTERVAL '30 minutes')
+          -- 2. All pending/pending orders that failed bank payment (immediately include them)
+          (om.current_status = 'pending' AND co.status = 'pending' AND co.payment_status = 'pending')
           OR
           -- 3. Bank transfer receipts uploaded but stuck in financial review
           (om.current_status = 'payment_uploaded' AND co.payment_method = 'bank_transfer_grace' AND co.payment_status = 'receipt_uploaded' AND co.updated_at < NOW() - INTERVAL '2 hours')
@@ -25451,11 +25451,10 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           pr.original_file_name as "receiptFileName",
           pr.mime_type as "receiptMimeType"
         FROM order_management om
-        LEFT JOIN customer_orders co ON om.customer_order_id = co.id
+        INNER JOIN customer_orders co ON om.customer_order_id = co.id
         LEFT JOIN crm_customers c ON co.customer_id = c.id
         LEFT JOIN payment_receipts pr ON pr.customer_order_id = co.id
         WHERE om.current_status IN (
-          'pending',
           'pending_payment',
           'payment_uploaded', 
           'financial_reviewing',
@@ -25464,6 +25463,10 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           'warehouse_processing',
           'warehouse_approved'
         )
+        -- Exclude incomplete bank payment orders (pending/pending) from main list
+        AND NOT (om.current_status = 'pending' AND co.status = 'pending' AND co.payment_status = 'pending')
+        -- Ensure order_management record exists (exclude true orphans)
+        AND om.id IS NOT NULL
         ORDER BY om.created_at ASC
       `);
       
