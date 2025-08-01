@@ -103,30 +103,46 @@ export default function HybridPayment() {
     setIsProcessing(true);
     
     try {
-      // Simulate bank gateway redirect
       toast({
         title: "هدایت به درگاه بانکی",
         description: "در حال اتصال به درگاه پرداخت...",
       });
       
-      // Here you would integrate with actual bank gateway
-      // For now, we'll simulate the process
-      setTimeout(() => {
+      // Call backend API to create bank payment
+      const response = await fetch('/api/payment/create-bank-payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          orderNumber: paymentInfo.orderNumber,
+          totalAmount: paymentInfo.totalAmount,
+          remainingAmount: paymentInfo.remainingAmount,
+          walletAmountUsed: paymentInfo.walletAmountUsed
+        })
+      });
+      
+      const result = await response.json();
+      
+      if (result.success && result.redirectUrl) {
         toast({
-          title: "پرداخت موفق",
-          description: "پرداخت شما با موفقیت انجام شد",
+          title: "انتقال به درگاه بانکی",
+          description: "شما به درگاه پرداخت هدایت می‌شوید...",
         });
-        setLocation(`/order-success/${paymentInfo.orderNumber}`);
-      }, 2000);
+        
+        // Redirect to actual bank gateway
+        window.location.href = result.redirectUrl;
+      } else {
+        throw new Error(result.message || 'خطا در ایجاد پرداخت');
+      }
       
     } catch (error) {
       console.error('Payment error:', error);
       toast({
         title: "خطا در پرداخت",
-        description: "لطفاً دوباره تلاش کنید",
+        description: error instanceof Error ? error.message : "لطفاً دوباره تلاش کنید",
         variant: "destructive",
       });
-    } finally {
       setIsProcessing(false);
     }
   };

@@ -28580,6 +28580,141 @@ momtazchem.com
     }
   });
 
+  // Create bank gateway payment redirect
+  app.post('/api/payment/create-bank-payment', requireCustomerAuth, async (req, res) => {
+    try {
+      const { orderNumber, totalAmount, remainingAmount, walletAmountUsed } = req.body;
+      const customerId = req.session.customerId;
+      
+      if (!orderNumber || !totalAmount) {
+        return res.status(400).json({ success: false, message: 'اطلاعات پرداخت ناقص است' });
+      }
+
+      // Get customer order
+      const customerOrder = await customerStorage.getOrderByNumber(orderNumber);
+      if (!customerOrder || customerOrder.customerId !== customerId) {
+        return res.status(404).json({ success: false, message: 'سفارش یافت نشد' });
+      }
+
+      // Generate payment reference
+      const paymentReference = `PAY_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      // For demo/development - redirect to Iraqi bank simulation
+      // In production, you would redirect to actual bank gateway
+      const bankGatewayUrl = `https://gateway.rasheedbank.gov.iq/payment?` + 
+        `merchantId=MOMTAZ_${process.env.BANK_MERCHANT_ID || 'DEMO'}&` +
+        `amount=${remainingAmount || totalAmount}&` +
+        `currency=IQD&` +
+        `reference=${paymentReference}&` +
+        `orderNumber=${orderNumber}&` +
+        `returnUrl=${encodeURIComponent(`${process.env.FRONTEND_URL || 'http://localhost:5000'}/payment-callback`)}&` +
+        `cancelUrl=${encodeURIComponent(`${process.env.FRONTEND_URL || 'http://localhost:5000'}/payment-cancelled`)}`;
+
+      // Update order with payment method
+      await customerStorage.updateOrder(customerOrder.id, {
+        paymentMethod: 'online_payment',
+        paymentStatus: 'processing',
+        paymentReference: paymentReference
+      });
+
+      console.log(`🏦 [BANK GATEWAY] Payment redirect created for order ${orderNumber}:`, {
+        reference: paymentReference,
+        amount: remainingAmount || totalAmount,
+        customerId,
+        gatewayUrl: bankGatewayUrl
+      });
+
+      res.json({ 
+        success: true, 
+        redirectUrl: bankGatewayUrl,
+        paymentReference,
+        message: 'در حال هدایت به درگاه بانکی...'
+      });
+
+    } catch (error) {
+      console.error('Error creating bank payment:', error);
+      res.status(500).json({ success: false, message: 'خطا در ایجاد پرداخت بانکی' });
+    }
+  });
+
+  // Payment callback from bank gateway
+  app.all('/api/payment/callback', async (req, res) => {
+    try {
+      const { reference, status, orderNumber, transactionId, amount } = req.body || req.query;
+      
+      console.log(`🏦 [PAYMENT CALLBACK] Received payment callback:`, {
+        reference,
+        status,
+        orderNumber,
+        transactionId,
+        amount,
+        method: req.method
+      });
+
+      if (!reference || !orderNumber) {
+        return res.status(400).json({ success: false, message: 'Invalid payment callback data' });
+      }
+
+      // Get the order
+      const customerOrder = await customerStorage.getOrderByNumber(orderNumber);
+      if (!customerOrder) {
+        return res.status(404).json({ success: false, message: 'Order not found' });
+      }
+
+      // Update order based on payment status
+      let paymentStatus = 'failed';
+      let orderStatus = 'pending';
+      
+      if (status === 'success' || status === 'completed' || status === '1') {
+        paymentStatus = 'paid';
+        orderStatus = 'confirmed';
+        
+        // Process successful payment
+        await customerStorage.updateOrder(customerOrder.id, {
+          paymentStatus: 'paid',
+          orderStatus: 'confirmed',
+          paymentReference: reference,
+          transactionId: transactionId
+        });
+
+        console.log(`✅ [PAYMENT SUCCESS] Order ${orderNumber} payment confirmed via bank gateway`);
+        
+        // Redirect to success page
+        return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5000'}/order-success/${orderNumber}?payment=success`);
+        
+      } else if (status === 'failed' || status === 'error' || status === '0') {
+        // Payment failed
+        await customerStorage.updateOrder(customerOrder.id, {
+          paymentStatus: 'failed',
+          paymentReference: reference,
+          transactionId: transactionId
+        });
+
+        console.log(`❌ [PAYMENT FAILED] Order ${orderNumber} payment failed via bank gateway`);
+        
+        // Redirect to failure page
+        return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5000'}/payment-failed/${orderNumber}?reason=bank_decline`);
+        
+      } else {
+        // Payment pending/processing
+        await customerStorage.updateOrder(customerOrder.id, {
+          paymentStatus: 'processing',
+          paymentReference: reference,
+          transactionId: transactionId
+        });
+
+        console.log(`⏳ [PAYMENT PENDING] Order ${orderNumber} payment is processing`);
+        
+        // Redirect to pending page
+        return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5000'}/payment-pending/${orderNumber}`);
+      }
+
+    } catch (error) {
+      console.error('Error processing payment callback:', error);
+      res.status(500).json({ success: false, message: 'خطا در پردازش نتیجه پرداخت' });
+    }
+  });
+
   // Process Iraqi bank transfer payment
   app.post('/api/payment/iraqi-bank-transfer', async (req, res) => {
     try {
