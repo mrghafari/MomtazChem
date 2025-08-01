@@ -393,8 +393,15 @@ export default function SiteManagement() {
       onClick: () => trackButtonClick("user-guide", () => setLocation("/user-guide")),
       className: "border-emerald-300 text-emerald-600 hover:bg-emerald-50",
       moduleId: "user_guide"
+    },
+    {
+      id: "super-admin-order-management",
+      label: "Super Admin Order Management",
+      icon: Shield,
+      onClick: () => trackButtonClick("super-admin-order-management", () => setLocation("/admin/super-admin-order-management")),
+      className: "border-red-300 text-red-600 hover:bg-red-50",
+      moduleId: "order_management"
     }
-
 
   ];
 
