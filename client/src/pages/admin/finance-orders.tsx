@@ -523,14 +523,14 @@ function FinanceOrders() {
     },
     onSuccess: (response) => {
       toast({
-        title: "پردازش خودکار انجام شد",
+        title: "پردازش درگاه انجام شد",
         description: `${response.data?.processed} سفارش از ${response.data?.totalFound} سفارش پردازش شد`
       });
       queryClient.invalidateQueries({ queryKey: ['/api/financial/orders'] });
     },
     onError: (error: any) => {
       toast({
-        title: "خطا در پردازش خودکار",
+        title: "خطا در پردازش درگاه",
         description: error.message || "امکان پردازش سفارشات وجود ندارد",
         variant: "destructive"
       });
@@ -588,7 +588,7 @@ function FinanceOrders() {
       case 'financial_approved':
         return <Badge variant="outline" className="bg-green-50 text-green-700">تأیید شده</Badge>;
       case 'auto_approved':
-        return <Badge variant="outline" className="bg-emerald-50 text-emerald-700">تأیید خودکار درگاه</Badge>;
+        return <Badge variant="outline" className="bg-emerald-50 text-emerald-700">تأیید درگاه بانکی</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -725,7 +725,7 @@ function FinanceOrders() {
                 className="flex items-center space-x-2 space-x-reverse bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
               >
                 <Timer className={`h-4 w-4 ${processPendingBankPayments.isPending ? 'animate-spin' : ''}`} />
-                <span>پردازش خودکار درگاه</span>
+                <span>پردازش درگاه</span>
               </Button>
               <Button 
                 onClick={() => {
@@ -751,7 +751,7 @@ function FinanceOrders() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-green-100 text-sm font-medium">کیف پول (تایید خودکار)</p>
+                  <p className="text-green-100 text-sm font-medium">کیف پول (نیاز به تایید)</p>
                   <p className="text-3xl font-bold text-white">{walletOrders.length}</p>
                 </div>
                 <Timer className="h-8 w-8 text-green-200" />
@@ -878,14 +878,14 @@ function FinanceOrders() {
                 {/* Wallet Orders Section - Auto-approval enabled */}
                 {walletOrders.length > 0 && (
                   <div className="space-y-4">
-                    <div className="flex items-center gap-2 px-4 py-2 bg-green-50 border border-green-200 rounded-lg">
-                      <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                      <h3 className="font-medium text-green-800">سفارشات کیف پول - تایید خودکار فعال</h3>
-                      <span className="text-sm text-green-600">(5 دقیقه انتظار)</span>
+                    <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg">
+                      <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                      <h3 className="font-medium text-blue-800">سفارشات کیف پول - نیاز به تایید دستی</h3>
+                      <span className="text-sm text-blue-600">(بررسی توسط بخش مالی)</span>
                     </div>
                     {walletOrders.map((order) => (
                       <div key={order.id} className="relative">
-                        <div className="absolute -right-2 top-4 w-1 h-16 bg-green-500 rounded-full"></div>
+                        <div className="absolute -right-2 top-4 w-1 h-16 bg-blue-500 rounded-full"></div>
                         <OrderCard 
                           order={order} 
                           onOrderSelect={() => {
@@ -894,16 +894,16 @@ function FinanceOrders() {
                           }} 
                           fetchOrderDetails={fetchOrderDetails} 
                         />
-                        <div className="mt-2 mr-4 p-3 bg-green-50 border-r-4 border-green-500 rounded">
-                          <div className="flex items-center gap-2 text-sm text-green-700">
-                            <Timer className="h-4 w-4" />
+                        <div className="mt-2 mr-4 p-3 bg-blue-50 border-r-4 border-blue-500 rounded">
+                          <div className="flex items-center gap-2 text-sm text-blue-700">
+                            <CheckCircle className="h-4 w-4" />
                             <span className="font-medium">
                               {order.paymentMethod === 'wallet_full' ? 'پرداخت کامل کیف پول' : 'پرداخت ترکیبی کیف پول'} 
-                              - تایید خودکار در 5 دقیقه
+                              - نیاز به تایید دستی مالی
                             </span>
                           </div>
-                          <p className="text-xs text-green-600 mt-1">
-                            در صورت عدم اقدام دستی، سفارش به‌طور خودکار تایید و به انبار منتقل می‌شود
+                          <p className="text-xs text-blue-600 mt-1">
+                            تمام سفارشات باید توسط بخش مالی بررسی و تایید شوند
                           </p>
                         </div>
                       </div>
@@ -1455,26 +1455,26 @@ function FinanceOrders() {
                     <CardHeader className="pb-3">
                       <CardTitle className="flex items-center gap-2 text-sm">
                         <CheckCircle className="h-4 w-4 text-green-500" />
-                        تایید خودکار
+                        تایید دستی
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3">
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-gray-600">سفارشات کیف پول:</span>
                         <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                          <span className="text-sm font-medium text-green-700">فعال</span>
+                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                          <span className="text-sm font-medium text-blue-700">تایید دستی</span>
                         </div>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-gray-600">حواله بانکی:</span>
                         <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                          <span className="text-sm font-medium text-green-700">فعال</span>
+                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                          <span className="text-sm font-medium text-blue-700">تایید دستی</span>
                         </div>
                       </div>
                       <div className="text-xs text-gray-500 mt-2">
-                        آخرین اجرا: هر 60 ثانیه
+                        تمام سفارشات نیاز به تایید دستی مالی دارند
                       </div>
                     </CardContent>
                   </Card>
@@ -1522,8 +1522,8 @@ function FinanceOrders() {
                       <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
                         <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                         <div className="flex-1">
-                          <p className="text-sm font-medium">سرویس تایید خودکار در حال اجرا</p>
-                          <p className="text-xs text-gray-500">هر 60 ثانیه بررسی می‌شود</p>
+                          <p className="text-sm font-medium">سرویس تایید دستی فعال</p>
+                          <p className="text-xs text-gray-500">همه سفارشات نیاز به تایید دستی دارند</p>
                         </div>
                         <Badge className="bg-green-100 text-green-800">فعال</Badge>
                       </div>
@@ -1639,7 +1639,7 @@ function FinanceOrders() {
                     <div className="flex items-center justify-center p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
                       <CheckCircle className="h-6 w-6 text-emerald-600 mr-2" />
                       <span className="text-emerald-700 font-medium">
-                        این سفارش به صورت خودکار از طریق درگاه بانکی تأیید شده است
+                        این سفارش از طریق درگاه بانکی تأیید شده است
                       </span>
                     </div>
                   ) : (
@@ -2020,8 +2020,8 @@ function FinanceOrders() {
                         <div className="col-span-2 flex items-center justify-center p-6 bg-emerald-50 border border-emerald-200 rounded-lg">
                           <CheckCircle className="h-8 w-8 text-emerald-600 mr-3" />
                           <div className="text-center">
-                            <p className="text-lg font-bold text-emerald-700">تأیید خودکار درگاه بانکی</p>
-                            <p className="text-sm text-emerald-600 mt-1">این سفارش خودکار تأیید شده و به انبار ارسال گردیده</p>
+                            <p className="text-lg font-bold text-emerald-700">تأیید درگاه بانکی</p>
+                            <p className="text-sm text-emerald-600 mt-1">این سفارش تأیید شده و به انبار ارسال گردیده</p>
                           </div>
                         </div>
                       ) : (
@@ -2470,7 +2470,7 @@ function OrderCard({ order, onOrderSelect, readOnly = false, fetchOrderDetails }
               </Badge>
             </div>
             <p className="text-xs text-emerald-700 mt-2">
-              این سفارش با کیف پول پرداخت شده و خودکار به انبار منتقل گردیده - برای نظارت مالی در این بخش قابل مشاهده است
+              این سفارش با کیف پول پرداخت شده - برای نظارت مالی در این بخش قابل مشاهده است
             </p>
           </div>
         )}
@@ -2742,7 +2742,7 @@ function NotificationSettingsManager({ notificationSettings, onSettingsUpdate }:
           تنظیمات کلی اطلاع‌رسانی
         </CardTitle>
         <CardDescription>
-          مدیریت تنظیمات اطلاع‌رسانی خودکار برای سفارشات موقت
+          مدیریت تنظیمات اطلاع‌رسانی برای سفارشات موقت
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -3055,7 +3055,7 @@ function ScheduleManager({ schedules, notificationSettings }: ScheduleManagerPro
           برنامه‌ریزی ارسال یادآورها
         </CardTitle>
         <CardDescription>
-          مدیریت زمان‌بندی خودکار ارسال یادآورها
+          مدیریت زمان‌بندی ارسال یادآورها
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
