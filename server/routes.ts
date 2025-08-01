@@ -8565,6 +8565,253 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // =============================================================================
+  // PAYMENT GATEWAY MANAGEMENT ENDPOINTS
+  // =============================================================================
+
+  // Get all payment gateways
+  app.get("/api/payment/gateways", requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      
+      const result = await pool.query(`
+        SELECT 
+          id,
+          name,
+          type,
+          enabled,
+          config,
+          created_at as "createdAt",
+          updated_at as "updatedAt"
+        FROM payment_gateways
+        ORDER BY enabled DESC, created_at DESC
+      `);
+
+      res.json(result.rows);
+    } catch (error) {
+      console.error("❌ [PAYMENT GATEWAYS] Error fetching gateways:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت درگاه‌های پرداخت"
+      });
+    }
+  });
+
+  // Create new payment gateway
+  app.post("/api/payment/gateways", requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      const { name, type, enabled, config } = req.body;
+
+      // If enabling this gateway, disable all others (only one active at a time)
+      if (enabled) {
+        await pool.query(`UPDATE payment_gateways SET enabled = false`);
+      }
+
+      const result = await pool.query(`
+        INSERT INTO payment_gateways (name, type, enabled, config)
+        VALUES ($1, $2, $3, $4)
+        RETURNING id, name, type, enabled, config, created_at as "createdAt", updated_at as "updatedAt"
+      `, [name, type, enabled, JSON.stringify(config)]);
+
+      console.log("✅ [PAYMENT GATEWAY] Created:", result.rows[0]);
+      
+      res.json({
+        success: true,
+        gateway: result.rows[0],
+        message: "درگاه پرداخت با موفقیت ایجاد شد"
+      });
+    } catch (error) {
+      console.error("❌ [PAYMENT GATEWAY] Creation error:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در ایجاد درگاه پرداخت"
+      });
+    }
+  });
+
+  // Update payment gateway
+  app.patch("/api/payment/gateways/:id", requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      const gatewayId = parseInt(req.params.id);
+      const { name, type, enabled, config } = req.body;
+
+      if (isNaN(gatewayId)) {
+        return res.status(400).json({
+          success: false,
+          message: "شناسه درگاه نامعتبر است"
+        });
+      }
+
+      // If enabling this gateway, disable all others (only one active at a time)
+      if (enabled) {
+        await pool.query(`UPDATE payment_gateways SET enabled = false WHERE id != $1`, [gatewayId]);
+      }
+
+      const result = await pool.query(`
+        UPDATE payment_gateways 
+        SET name = $1, type = $2, enabled = $3, config = $4, updated_at = CURRENT_TIMESTAMP
+        WHERE id = $5
+        RETURNING id, name, type, enabled, config, created_at as "createdAt", updated_at as "updatedAt"
+      `, [name, type, enabled, JSON.stringify(config), gatewayId]);
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "درگاه پرداخت یافت نشد"
+        });
+      }
+
+      console.log("✅ [PAYMENT GATEWAY] Updated:", result.rows[0]);
+      
+      res.json({
+        success: true,
+        gateway: result.rows[0],
+        message: "درگاه پرداخت با موفقیت بروزرسانی شد"
+      });
+    } catch (error) {
+      console.error("❌ [PAYMENT GATEWAY] Update error:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در بروزرسانی درگاه پرداخت"
+      });
+    }
+  });
+
+  // Toggle gateway status (enable/disable)
+  app.patch("/api/payment/gateways/:id/toggle", requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      const gatewayId = parseInt(req.params.id);
+
+      if (isNaN(gatewayId)) {
+        return res.status(400).json({
+          success: false,
+          message: "شناسه درگاه نامعتبر است"
+        });
+      }
+
+      // Get current status
+      const currentResult = await pool.query(`
+        SELECT enabled FROM payment_gateways WHERE id = $1
+      `, [gatewayId]);
+
+      if (currentResult.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "درگاه پرداخت یافت نشد"
+        });
+      }
+
+      const currentEnabled = currentResult.rows[0].enabled;
+      const newEnabled = !currentEnabled;
+
+      // If enabling this gateway, disable all others (only one active at a time)
+      if (newEnabled) {
+        await pool.query(`UPDATE payment_gateways SET enabled = false WHERE id != $1`, [gatewayId]);
+      }
+
+      // Update the target gateway
+      const result = await pool.query(`
+        UPDATE payment_gateways 
+        SET enabled = $1, updated_at = CURRENT_TIMESTAMP
+        WHERE id = $2
+        RETURNING id, name, type, enabled, config, created_at as "createdAt", updated_at as "updatedAt"
+      `, [newEnabled, gatewayId]);
+
+      console.log(`✅ [PAYMENT GATEWAY] Toggled gateway ${gatewayId}: ${currentEnabled} → ${newEnabled}`);
+      
+      res.json({
+        success: true,
+        gateway: result.rows[0],
+        message: newEnabled ? "درگاه پرداخت فعال شد" : "درگاه پرداخت غیرفعال شد"
+      });
+    } catch (error) {
+      console.error("❌ [PAYMENT GATEWAY] Toggle error:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در تغییر وضعیت درگاه پرداخت"
+      });
+    }
+  });
+
+  // Delete payment gateway
+  app.delete("/api/payment/gateways/:id", requireAuth, async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      const gatewayId = parseInt(req.params.id);
+
+      if (isNaN(gatewayId)) {
+        return res.status(400).json({
+          success: false,
+          message: "شناسه درگاه نامعتبر است"
+        });
+      }
+
+      const result = await pool.query(`
+        DELETE FROM payment_gateways WHERE id = $1
+        RETURNING name
+      `, [gatewayId]);
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "درگاه پرداخت یافت نشد"
+        });
+      }
+
+      console.log(`✅ [PAYMENT GATEWAY] Deleted: ${result.rows[0].name}`);
+      
+      res.json({
+        success: true,
+        message: "درگاه پرداخت با موفقیت حذف شد"
+      });
+    } catch (error) {
+      console.error("❌ [PAYMENT GATEWAY] Delete error:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در حذف درگاه پرداخت"
+      });
+    }
+  });
+
+  // Get active payment gateway
+  app.get("/api/payment/active-gateway", async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      
+      const result = await pool.query(`
+        SELECT 
+          id,
+          name,
+          type,
+          config
+        FROM payment_gateways
+        WHERE enabled = true
+        LIMIT 1
+      `);
+
+      if (result.rows.length === 0) {
+        return res.json({
+          success: false,
+          message: "هیچ درگاه پرداخت فعالی یافت نشد"
+        });
+      }
+
+      res.json({
+        success: true,
+        gateway: result.rows[0]
+      });
+    } catch (error) {
+      console.error("❌ [ACTIVE GATEWAY] Error:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت درگاه فعال"
+      });
+    }
+  });
+
+  // =============================================================================
   // M[YY][NNNNN] ORDER NUMBERING ENDPOINTS
   // =============================================================================
 
@@ -28596,19 +28843,64 @@ momtazchem.com
         return res.status(404).json({ success: false, message: 'سفارش یافت نشد' });
       }
 
+      // Get active payment gateway
+      const { pool } = await import('./db');
+      const activeGatewayResult = await pool.query(`
+        SELECT id, name, type, config 
+        FROM payment_gateways 
+        WHERE enabled = true 
+        LIMIT 1
+      `);
+
+      if (activeGatewayResult.rows.length === 0) {
+        return res.status(503).json({ 
+          success: false, 
+          message: 'هیچ درگاه پرداخت فعالی در دسترس نیست' 
+        });
+      }
+
+      const activeGateway = activeGatewayResult.rows[0];
+      const gatewayConfig = activeGateway.config || {};
+
       // Generate payment reference
       const paymentReference = `PAY_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       
-      // For demo/development - redirect to Iraqi bank simulation
-      // In production, you would redirect to actual bank gateway
-      const bankGatewayUrl = `https://gateway.rasheedbank.gov.iq/payment?` + 
-        `merchantId=MOMTAZ_${process.env.BANK_MERCHANT_ID || 'DEMO'}&` +
-        `amount=${remainingAmount || totalAmount}&` +
-        `currency=IQD&` +
-        `reference=${paymentReference}&` +
-        `orderNumber=${orderNumber}&` +
-        `returnUrl=${encodeURIComponent(`${process.env.FRONTEND_URL || 'http://localhost:5000'}/payment-callback`)}&` +
-        `cancelUrl=${encodeURIComponent(`${process.env.FRONTEND_URL || 'http://localhost:5000'}/payment-cancelled`)}`;
+      // Build gateway URL based on active gateway configuration
+      let bankGatewayUrl;
+      
+      if (activeGateway.type === 'iraqi_bank') {
+        // Use configured gateway URL or fallback to default
+        const baseUrl = gatewayConfig.apiBaseUrl || 'https://gateway.rasheedbank.gov.iq/payment';
+        bankGatewayUrl = `${baseUrl}?` + 
+          `merchantId=MOMTAZ_${gatewayConfig.merchantId || process.env.BANK_MERCHANT_ID || 'DEMO'}&` +
+          `amount=${remainingAmount || totalAmount}&` +
+          `currency=IQD&` +
+          `reference=${paymentReference}&` +
+          `orderNumber=${orderNumber}&` +
+          `returnUrl=${encodeURIComponent(`${process.env.FRONTEND_URL || 'http://localhost:5000'}/payment-callback`)}&` +
+          `cancelUrl=${encodeURIComponent(`${process.env.FRONTEND_URL || 'http://localhost:5000'}/payment-cancelled`)}`;
+      } else if (activeGateway.type === 'credit_card') {
+        // Handle credit card gateway
+        const baseUrl = gatewayConfig.apiBaseUrl || 'https://api.creditcard.gateway.iq/payment';
+        bankGatewayUrl = `${baseUrl}?` + 
+          `merchantId=${gatewayConfig.merchantId || 'DEMO'}&` +
+          `amount=${remainingAmount || totalAmount}&` +
+          `currency=IQD&` +
+          `reference=${paymentReference}&` +
+          `orderNumber=${orderNumber}&` +
+          `returnUrl=${encodeURIComponent(`${process.env.FRONTEND_URL || 'http://localhost:5000'}/payment-callback`)}&` +
+          `cancelUrl=${encodeURIComponent(`${process.env.FRONTEND_URL || 'http://localhost:5000'}/payment-cancelled`)}`;
+      } else {
+        // Default fallback for unknown gateway types
+        bankGatewayUrl = `https://gateway.rasheedbank.gov.iq/payment?` + 
+          `merchantId=MOMTAZ_DEMO&` +
+          `amount=${remainingAmount || totalAmount}&` +
+          `currency=IQD&` +
+          `reference=${paymentReference}&` +
+          `orderNumber=${orderNumber}&` +
+          `returnUrl=${encodeURIComponent(`${process.env.FRONTEND_URL || 'http://localhost:5000'}/payment-callback`)}&` +
+          `cancelUrl=${encodeURIComponent(`${process.env.FRONTEND_URL || 'http://localhost:5000'}/payment-cancelled`)}`;
+      }
 
       // Update order with payment method
       await customerStorage.updateOrder(customerOrder.id, {
@@ -28621,6 +28913,8 @@ momtazchem.com
         reference: paymentReference,
         amount: remainingAmount || totalAmount,
         customerId,
+        activeGateway: activeGateway.name,
+        gatewayType: activeGateway.type,
         gatewayUrl: bankGatewayUrl
       });
 
@@ -28628,7 +28922,9 @@ momtazchem.com
         success: true, 
         redirectUrl: bankGatewayUrl,
         paymentReference,
-        message: 'در حال هدایت به درگاه بانکی...'
+        gatewayName: activeGateway.name,
+        gatewayType: activeGateway.type,
+        message: `در حال هدایت به درگاه ${activeGateway.name}...`
       });
 
     } catch (error) {

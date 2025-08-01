@@ -57,8 +57,8 @@ const PaymentSettings = () => {
     },
     onSuccess: () => {
       toast({
-        title: "Payment Gateway Saved",
-        description: "Payment gateway configuration has been saved successfully.",
+        title: "تنظیمات درگاه پرداخت ذخیره شد",
+        description: "تنظیمات درگاه پرداخت با موفقیت ذخیره شد.",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/payment/gateways'] });
       setIsEditDialogOpen(false);
@@ -66,8 +66,29 @@ const PaymentSettings = () => {
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to save payment gateway configuration.",
+        title: "خطا",
+        description: "ذخیره تنظیمات درگاه پرداخت با شکست مواجه شد.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Toggle gateway status mutation (only one can be enabled at a time)
+  const toggleGatewayMutation = useMutation({
+    mutationFn: async (gatewayId: number) => {
+      return apiRequest(`/api/payment/gateways/${gatewayId}/toggle`, 'PATCH');
+    },
+    onSuccess: () => {
+      toast({
+        title: "وضعیت درگاه تغییر کرد",
+        description: "وضعیت درگاه پرداخت با موفقیت تغییر کرد. فقط یک درگاه می‌تواند فعال باشد.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/payment/gateways'] });
+    },
+    onError: () => {
+      toast({
+        title: "خطا",
+        description: "تغییر وضعیت درگاه با شکست مواجه شد.",
         variant: "destructive",
       });
     },
@@ -761,6 +782,14 @@ const PaymentSettings = () => {
                       
                       <div className="flex space-x-2">
                         <Button
+                          variant={gateway.enabled ? "destructive" : "default"}
+                          size="sm"
+                          onClick={() => toggleGatewayMutation.mutate(gateway.id)}
+                          disabled={toggleGatewayMutation.isPending}
+                        >
+                          {gateway.enabled ? 'غیرفعال' : 'فعال'}
+                        </Button>
+                        <Button
                           variant="outline"
                           size="sm"
                           onClick={() => {
@@ -774,7 +803,7 @@ const PaymentSettings = () => {
                           variant="outline"
                           size="sm"
                           onClick={() => {
-                            if (confirm('Are you sure you want to delete this gateway?')) {
+                            if (confirm('آیا مطمئن هستید که می‌خواهید این درگاه را حذف کنید؟')) {
                               deleteGatewayMutation.mutate(gateway.id);
                             }
                           }}
