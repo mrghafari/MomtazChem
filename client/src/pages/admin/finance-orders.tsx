@@ -2398,7 +2398,7 @@ function OrderCard({ order, onOrderSelect, readOnly = false, fetchOrderDetails }
               <div className="bg-white p-3 rounded border">
                 <div className="font-medium text-gray-800 mb-1">📅 تاریخ ایجاد:</div>
                 <div className="text-gray-700">
-                  {formatDateSafe(order.createdAt, 'fa-IR', {
+                  {formatDateSafe(order.createdAt, 'en-US', {
                     year: 'numeric',
                     month: 'short',
                     day: 'numeric',
