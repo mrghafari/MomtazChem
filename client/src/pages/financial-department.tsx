@@ -328,89 +328,80 @@ export default function FinancialDepartment() {
                 </CardContent>
               </Card>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {orders.map((order: OrderManagement) => (
               <Card key={order.id} className="hover:shadow-md transition-shadow border border-gray-200">
-                <CardContent className="p-4">
+                <CardContent className="p-3">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <Badge variant="secondary" className="px-2 py-1 text-xs">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge variant="secondary" className="px-2 py-0.5 text-xs">
                           {order.orderNumber || `سفارش #${order.customerOrderId}`}
                         </Badge>
-                        <Badge variant="outline" className="text-orange-600 border-orange-300 text-xs">
+                        <Badge variant="outline" className="text-orange-600 border-orange-300 text-xs px-1 py-0.5">
                           در انتظار بررسی مالی
                         </Badge>
                         {order.paymentReceiptUrl && (
-                          <Badge variant="default" className="bg-blue-100 text-blue-800 text-xs">
-                            <FileText className="w-3 h-3 mr-1" />
-                            رسید موجود
+                          <Badge variant="default" className="bg-blue-100 text-blue-800 text-xs px-1 py-0.5">
+                            <FileText className="w-3 h-3 mr-0.5" />
+                            رسید
                           </Badge>
                         )}
                       </div>
                       
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                        <div>
-                          <h5 className="font-medium text-gray-900 mb-1 text-sm">مشتری</h5>
-                          <p className="text-xs text-gray-600 font-medium">
-                            {order.customerFirstName && order.customerLastName 
-                              ? `${order.customerFirstName} ${order.customerLastName}`
-                              : 'نام مشتری ناشناس'
-                            }
-                          </p>
-                          <p className="text-xs text-gray-500 truncate">
-                            {order.customerEmail || 'ایمیل ثبت نشده'}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            {order.customerPhone || 'شماره تلفن ثبت نشده'}
-                          </p>
-                        </div>
-                        
-                        <div>
-                          <h5 className="font-medium text-gray-900 mb-1 text-sm">اطلاعات سفارش</h5>
-                          {/* مبلغ سفارش */}
-                          {order.totalAmount && (
-                            <p className="text-xs text-gray-600 font-bold">
-                              مبلغ کل: {typeof order.totalAmount === 'number' 
-                                ? order.totalAmount.toLocaleString('fa-IR')
-                                : order.totalAmount
-                              } {order.currency || 'IQD'}
-                            </p>
-                          )}
-                          <p className="text-xs text-gray-500">
-                            تاریخ ثبت: {new Date(order.createdAt).toLocaleDateString('en-US')}
-                          </p>
-                          {order.paymentReceiptUrl && (
-                            <p className="text-xs text-green-600 font-medium">
-                              ✓ فیش پرداخت آپلود شده
-                            </p>
-                          )}
-                        </div>
-                        
-                        <div className="flex items-center justify-between">
-                          {/* Receipt Thumbnail - Compact */}
-                          {(order.receipt?.url || order.paymentReceiptUrl) && (
-                            <div className="flex items-center gap-2">
-                              {isImageUrl(order.receipt?.url || order.paymentReceiptUrl!, order.receipt?.mimeType) ? (
-                                <div 
-                                  className="relative w-10 h-10 rounded-md overflow-hidden border border-gray-200 cursor-pointer hover:border-blue-400 transition-colors"
-                                  onClick={() => openImageModal(order.receipt?.url || order.paymentReceiptUrl!)}
-                                >
-                                  <img 
-                                    src={order.receipt?.url || order.paymentReceiptUrl!}
-                                    alt="فیش پرداخت"
-                                    className="w-full h-full object-cover"
-                                  />
-                                </div>
-                              ) : (
-                                <div 
-                                  className="w-10 h-10 rounded-md border border-gray-200 flex items-center justify-center cursor-pointer hover:border-blue-400 bg-gray-50"
-                                  onClick={() => window.open(order.receipt?.url || order.paymentReceiptUrl!, '_blank')}
-                                >
-                                  <FileText className="w-3 h-3 text-gray-400" />
-                                </div>
+                      <div className="flex items-center gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-4 text-xs">
+                            <div>
+                              <span className="font-medium text-gray-900">
+                                {order.customerFirstName && order.customerLastName 
+                                  ? `${order.customerFirstName} ${order.customerLastName}`
+                                  : 'نام مشتری ناشناس'
+                                }
+                              </span>
+                              <span className="text-gray-500 ml-2">
+                                {order.customerEmail || 'ایمیل ثبت نشده'}
+                              </span>
+                            </div>
+                            
+                            <div>
+                              {order.totalAmount && (
+                                <span className="font-bold text-green-600">
+                                  {typeof order.totalAmount === 'number' 
+                                    ? order.totalAmount.toLocaleString('fa-IR')
+                                    : order.totalAmount
+                                  } {order.currency || 'IQD'}
+                                </span>
                               )}
-                              <span className="text-xs text-gray-600">فیش پرداخت</span>
+                              <span className="text-gray-500 ml-2">
+                                {new Date(order.createdAt).toLocaleDateString('en-US')}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                          {/* Receipt Thumbnail - Ultra Compact */}
+                          {(order.receipt?.url || order.paymentReceiptUrl) && (
+                            <div 
+                              className="w-8 h-8 rounded border border-gray-200 cursor-pointer hover:border-blue-400 transition-colors overflow-hidden flex items-center justify-center bg-gray-50"
+                              onClick={() => {
+                                if (isImageUrl(order.receipt?.url || order.paymentReceiptUrl!, order.receipt?.mimeType)) {
+                                  openImageModal(order.receipt?.url || order.paymentReceiptUrl!);
+                                } else {
+                                  window.open(order.receipt?.url || order.paymentReceiptUrl!, '_blank');
+                                }
+                              }}
+                            >
+                              {isImageUrl(order.receipt?.url || order.paymentReceiptUrl!, order.receipt?.mimeType) ? (
+                                <img 
+                                  src={order.receipt?.url || order.paymentReceiptUrl!}
+                                  alt="فیش پرداخت"
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <FileText className="w-3 h-3 text-gray-400" />
+                              )}
                             </div>
                           )}
                           
@@ -420,7 +411,7 @@ export default function FinancialDepartment() {
                               setDialogOpen(true);
                             }}
                             size="sm"
-                            className="bg-blue-600 hover:bg-blue-700"
+                            className="bg-blue-600 hover:bg-blue-700 text-xs px-2 py-1 h-8"
                           >
                             <Eye className="w-3 h-3 mr-1" />
                             بررسی
