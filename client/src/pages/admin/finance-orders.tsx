@@ -709,6 +709,16 @@ function FinanceOrders() {
     setImageModalOpen(true);
   };
 
+  // Helper function for safe date formatting
+  const formatDateSafe = (dateString: string | undefined, locale: string = 'fa-IR') => {
+    if (!dateString) return 'نامشخص';
+    try {
+      return new Date(dateString).toLocaleDateString(locale);
+    } catch {
+      return 'نامشخص';
+    }
+  };
+
   // Print function for order details
   const handlePrintOrder = () => {
     if (!orderDetails) return;
@@ -899,7 +909,7 @@ function FinanceOrders() {
             </tr>
           </thead>
           <tbody>
-            ${orderDetails.items?.map(item => `
+            ${orderDetails.items?.map((item: any) => `
               <tr>
                 <td>${item.productName}</td>
                 <td>${Math.floor(parseFloat(item.price)).toLocaleString('fa-IR')} ${orderDetails.currency}</td>
@@ -2782,18 +2792,16 @@ function OrderCard({ order, onOrderSelect, readOnly = false, fetchOrderDetails }
                 <span className="text-gray-600">مبلغ:</span>
                 <span className="font-bold text-gray-800">{parseFloat(order.totalAmount).toLocaleString()} {order.currency}</span>
               </div>
-              {order.deliveryCost && parseFloat(order.deliveryCost) > 0 && (
+              {order.deliveryCode && (
                 <div className="flex justify-between text-xs">
-                  <span className="text-gray-600">حمل:</span>
-                  <span className="font-medium text-gray-700">{parseFloat(order.deliveryCost).toLocaleString()}</span>
+                  <span className="text-gray-600">کد تحویل:</span>
+                  <span className="font-medium text-gray-700">{order.deliveryCode}</span>
                 </div>
               )}
-              {order.walletAmountUsed && parseFloat(order.walletAmountUsed) > 0 && (
-                <div className="flex justify-between text-xs">
-                  <span className="text-gray-600">کیف پول:</span>
-                  <span className="font-medium text-green-700">{parseFloat(order.walletAmountUsed).toLocaleString()}</span>
-                </div>
-              )}
+              <div className="flex justify-between text-xs">
+                <span className="text-gray-600">پرداخت:</span>
+                <span className="font-medium text-blue-700">{order.paymentMethod === 'digital_wallet' ? 'کیف پول' : order.paymentMethod === 'iraqi_bank_gateway' ? 'بانک' : order.paymentMethod}</span>
+              </div>
             </div>
           </div>
 
