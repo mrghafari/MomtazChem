@@ -62,10 +62,10 @@ export default function AdminEmailLogs() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString('fa-IR', {
+    return new Date(dateString).toLocaleString('en-US', {
       year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
+      month: 'short',
+      day: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
     });

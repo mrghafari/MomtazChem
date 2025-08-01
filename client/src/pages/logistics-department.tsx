@@ -446,7 +446,7 @@ export default function LogisticsDepartment() {
                                   <Calendar className="w-4 h-4 text-green-600" />
                                   <span className="text-sm font-medium text-green-800">
                                     تاریخ پردازش انبار: {order.warehouseProcessedAt ? 
-                                      new Date(order.warehouseProcessedAt).toLocaleDateString('fa-IR', {
+                                      new Date(order.warehouseProcessedAt).toLocaleDateString('en-US', {
                                         year: 'numeric',
                                         month: 'short',
                                         day: 'numeric'
