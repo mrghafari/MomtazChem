@@ -171,11 +171,15 @@ app.use((req, res, next) => {
     const { autoApprovalService } = await import('./auto-approval-service');
     autoApprovalService.start();
     
-    // Start sync service to prevent future order sync issues
+    // 🔥 INSTALL REALTIME DATABASE TRIGGERS - ZERO TOLERANCE FOR INCONSISTENCY
+    const { RealtimeSyncTriggers } = await import('./realtime-sync-triggers');
+    await RealtimeSyncTriggers.installTriggers();
+    
+    // Start backup sync service as secondary safety net
     const { SyncService } = await import('./sync-service');
     const syncService = new SyncService();
-    syncService.startAutoSync(2); // هر 2 دقیقه یکبار همگام‌سازی
-    console.log('🔄 [SYSTEM] Sync service started - orders will be synchronized every 2 minutes');
+    syncService.startAutoSync(5); // هر 5 دقیقه به عنوان backup چک
+    console.log('🔄 [SYSTEM] Backup sync service started - orders will be checked every 5 minutes as secondary safety');
     
     // Register routes BEFORE Vite middleware to ensure API routes take precedence
     const server = await registerRoutes(app);

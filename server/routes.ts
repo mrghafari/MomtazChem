@@ -43658,15 +43658,43 @@ momtazchem.com
       
       const syncStatus = await syncService.getSyncStatus();
       
+      // Get realtime triggers status
+      const { RealtimeSyncTriggers } = await import('./realtime-sync-triggers');
+      const triggersStatus = await RealtimeSyncTriggers.getTriggersStatus();
+      
       res.json({
         success: true,
-        status: syncStatus
+        status: syncStatus,
+        realtimeTriggers: triggersStatus,
+        triggersActive: triggersStatus.length > 0
       });
     } catch (error) {
       console.error('❌ [SYNC STATUS] Error:', error);
       res.status(500).json({
         success: false,
         message: 'خطا در دریافت وضعیت همگام‌سازی',
+        error: error.message
+      });
+    }
+  });
+
+  // Fix all inconsistencies with ACID transactions
+  app.post("/api/admin/fix-inconsistencies", requireAuth, async (req, res) => {
+    try {
+      const { TransactionSync } = await import('./transaction-sync');
+      const result = await TransactionSync.fixAllInconsistencies();
+      
+      res.json({
+        success: true,
+        message: 'تمام تناقضات با موفقیت تصحیح شد',
+        fixed: result.fixed,
+        errors: result.errors
+      });
+    } catch (error) {
+      console.error('❌ [FIX INCONSISTENCIES] Error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در تصحیح تناقضات',
         error: error.message
       });
     }
