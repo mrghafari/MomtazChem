@@ -258,9 +258,24 @@ const WarehouseManagementFixed: React.FC = () => {
   // Queries
   const { data: ordersResponse, isLoading: ordersLoading, refetch: refetchOrders } = useQuery({
     queryKey: ['/api/order-management/warehouse'],
-    staleTime: 0,
-    refetchOnWindowFocus: false,
+    staleTime: 0, // Always consider data stale
+    gcTime: 0, // Don't cache at all - always fresh (v5 syntax)
+    refetchOnWindowFocus: true, // Refetch when user comes back
+    refetchInterval: 30000, // Auto-refresh every 30 seconds
   });
+
+  // Force refresh function that completely clears cache
+  const forceRefreshOrders = async () => {
+    // Clear all cache first
+    await queryClient.invalidateQueries({ queryKey: ['/api/order-management/warehouse'] });
+    await queryClient.removeQueries({ queryKey: ['/api/order-management/warehouse'] });
+    // Then refetch
+    await refetchOrders();
+    toast({
+      title: "🔄 به‌روزرسانی شد",
+      description: "لیست سفارشات از سرور بازیابی شد",
+    });
+  };
 
   const orders = ordersResponse?.orders || [];
 
@@ -550,11 +565,11 @@ const WarehouseManagementFixed: React.FC = () => {
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      onClick={() => refetchOrders()}
-                      className="flex items-center gap-1"
+                      onClick={forceRefreshOrders}
+                      className="flex items-center gap-1 bg-green-50 hover:bg-green-100 text-green-700 border-green-200"
                     >
                       <RefreshCw className="w-4 h-4" />
-                      به‌روزرسانی
+                      به‌روزرسانی قوی
                     </Button>
                   </div>
                 </div>

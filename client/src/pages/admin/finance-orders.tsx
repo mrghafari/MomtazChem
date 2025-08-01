@@ -171,10 +171,14 @@ function FinanceOrders() {
     enabled: true
   });
 
-  // Get orders for financial review
+  // Get orders for financial review  
   const { data: ordersResponse, isLoading, refetch } = useQuery({
     queryKey: ['/api/financial/orders'],
-    queryFn: () => fetch('/api/financial/orders', { credentials: 'include' }).then(res => res.json())
+    queryFn: () => fetch('/api/financial/orders', { credentials: 'include' }).then(res => res.json()),
+    staleTime: 0, // Always consider data stale
+    gcTime: 0, // Don't cache at all - always fresh (v5 syntax)
+    refetchOnWindowFocus: true, // Refetch when user comes back
+    refetchInterval: 30000, // Auto-refresh every 30 seconds
   });
 
   // Fetch approved orders that have been transferred to warehouse
@@ -185,8 +189,28 @@ function FinanceOrders() {
       const data = await res.json();
       console.log('🔍 [APPROVED ORDERS] Raw response:', data);
       return data;
-    }
+    },
+    staleTime: 0, // Always consider data stale
+    gcTime: 0, // Don't cache at all - always fresh (v5 syntax)
+    refetchOnWindowFocus: true, // Refetch when user comes back
+    refetchInterval: 30000, // Auto-refresh every 30 seconds
   });
+
+  // Force refresh function that completely clears all finance cache
+  const forceRefreshFinanceOrders = async () => {
+    // Clear all finance cache first
+    await queryClient.invalidateQueries({ queryKey: ['/api/financial/orders'] });
+    await queryClient.removeQueries({ queryKey: ['/api/financial/orders'] });
+    await queryClient.invalidateQueries({ queryKey: ['/api/financial/approved-orders'] });
+    await queryClient.removeQueries({ queryKey: ['/api/financial/approved-orders'] });
+    // Then refetch both
+    await refetch();
+    await refetchApproved();
+    toast({
+      title: "🔄 به‌روزرسانی شد",
+      description: "تمام اطلاعات مالی از سرور بازیابی شد",
+    });
+  };
 
   // Orphan orders queries
   const { data: orphanStats } = useQuery({
@@ -761,6 +785,17 @@ function FinanceOrders() {
                 </p>
               </div>
             </div>
+            
+            {/* Refresh Button */}
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={forceRefreshFinanceOrders}
+              className="flex items-center gap-1 bg-green-50 hover:bg-green-100 text-green-700 border-green-200"
+            >
+              <RefreshCw className="w-4 h-4" />
+              به‌روزرسانی قوی
+            </Button>
 
           </div>
         </div>

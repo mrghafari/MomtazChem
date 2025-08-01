@@ -74,8 +74,25 @@ export default function SuperAdminOrderManagement() {
     retry: (failureCount, error) => {
       if (error.message.includes('401') || error.message.includes('403')) return false;
       return failureCount < 2;
-    }
+    },
+    staleTime: 0, // Always consider data stale
+    gcTime: 0, // Don't cache at all - always fresh (v5 syntax)
+    refetchOnWindowFocus: true, // Refetch when user comes back
+    refetchInterval: 30000, // Auto-refresh every 30 seconds
   });
+
+  // Force refresh function that completely clears super-admin cache
+  const forceRefreshSuperAdminOrders = async () => {
+    // Clear all super-admin cache first
+    await queryClient.invalidateQueries({ queryKey: ['/api/super-admin/deletable-orders'] });
+    await queryClient.removeQueries({ queryKey: ['/api/super-admin/deletable-orders'] });
+    // Then refetch
+    await refetch();
+    toast({
+      title: "🔄 به‌روزرسانی شد",
+      description: "لیست سفارشات قابل حذف از سرور بازیابی شد",
+    });
+  };
 
   // Fetch payment gateways
   const { data: gatewaysResponse, isLoading: gatewaysLoading } = useQuery({
@@ -271,14 +288,29 @@ export default function SuperAdminOrderManagement() {
     <div className="min-h-screen bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 p-6" dir="rtl">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-red-900 dark:text-red-100 flex items-center gap-3">
-            <Shield className="h-8 w-8 text-red-600" />
-            مدیریت سایت - سوپر ادمین
-          </h1>
-          <p className="text-red-700 dark:text-red-300 mt-2 flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5" />
-            مدیریت کامل سیستم شامل سفارشات، درگاه‌های پرداخت و تنظیمات
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-red-900 dark:text-red-100 flex items-center gap-3">
+                <Shield className="h-8 w-8 text-red-600" />
+                مدیریت سایت - سوپر ادمین
+              </h1>
+              <p className="text-red-700 dark:text-red-300 mt-2 flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5" />
+                مدیریت کامل سیستم شامل سفارشات، درگاه‌های پرداخت و تنظیمات
+              </p>
+            </div>
+            
+            {/* Refresh Button */}
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={forceRefreshSuperAdminOrders}
+              className="flex items-center gap-1 bg-green-50 hover:bg-green-100 text-green-700 border-green-200"
+            >
+              <RefreshCw className="w-4 h-4" />
+              به‌روزرسانی قوی
+            </Button>
+          </div>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
