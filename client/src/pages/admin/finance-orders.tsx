@@ -2353,43 +2353,109 @@ function OrderCard({ order, onOrderSelect, readOnly = false, fetchOrderDetails }
           </div>
         )}
 
-        {/* Payment Investigation Summary for Order M2511116 */}
-        {order.orderNumber === 'M2511116' && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-            <div className="flex items-center space-x-2 space-x-reverse mb-3">
-              <AlertCircle className="h-5 w-5 text-blue-600" />
-              <span className="font-medium text-blue-900">خلاصه تحقیق پرداخت</span>
-            </div>
-            <div className="space-y-2 text-sm">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div className="bg-white p-3 rounded border">
-                  <div className="font-medium text-gray-800 mb-1">✅ روش پرداخت:</div>
-                  <div className="text-green-700">کیف پول الکترونیکی (Wallet)</div>
-                </div>
-                <div className="bg-white p-3 rounded border">
-                  <div className="font-medium text-gray-800 mb-1">💰 مبلغ کل:</div>
-                  <div className="text-blue-700">$50,000.00 USD</div>
-                </div>
-                <div className="bg-white p-3 rounded border">
-                  <div className="font-medium text-gray-800 mb-1">⚠️ وضعیت پرداخت:</div>
-                  <div className="text-orange-600">در انتظار (Pending)</div>
-                </div>
-                <div className="bg-white p-3 rounded border">
-                  <div className="font-medium text-gray-800 mb-1">📊 وضعیت سفارش:</div>
-                  <div className="text-emerald-600">آماده انبار (Warehouse Ready)</div>
+        {/* Payment Summary for All Orders */}
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4 mb-4">
+          <div className="flex items-center space-x-2 space-x-reverse mb-3">
+            <Receipt className="h-5 w-5 text-blue-600" />
+            <span className="font-medium text-blue-900">خلاصه اطلاعات پرداخت</span>
+          </div>
+          <div className="space-y-2 text-sm">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="bg-white p-3 rounded border">
+                <div className="font-medium text-gray-800 mb-1">💳 روش پرداخت:</div>
+                <div className={`font-medium ${
+                  order.paymentMethod === 'wallet' || order.paymentMethod === 'wallet_full' ? 'text-green-700' :
+                  order.paymentMethod === 'wallet_partial' ? 'text-purple-700' :
+                  order.paymentMethod === 'bank_gateway' ? 'text-blue-700' :
+                  order.paymentMethod === 'bank_transfer_grace' ? 'text-orange-700' :
+                  'text-gray-700'
+                }`}>
+                  {order.paymentMethod === 'wallet' || order.paymentMethod === 'wallet_full' ? 'کیف پول الکترونیکی' :
+                   order.paymentMethod === 'wallet_partial' ? 'ترکیبی (کیف پول + بانک)' :
+                   order.paymentMethod === 'bank_gateway' ? 'درگاه بانکی' :
+                   order.paymentMethod === 'bank_transfer_grace' ? 'حواله بانکی مهلت‌دار' :
+                   order.paymentMethod || 'نامشخص'}
                 </div>
               </div>
+              <div className="bg-white p-3 rounded border">
+                <div className="font-medium text-gray-800 mb-1">💰 مبلغ کل:</div>
+                <div className="text-blue-700 font-bold">
+                  {parseFloat(order.totalAmount || '0').toLocaleString()} {order.currency || 'IQD'}
+                </div>
+              </div>
+              <div className="bg-white p-3 rounded border">
+                <div className="font-medium text-gray-800 mb-1">📊 وضعیت پرداخت:</div>
+                <div className={`font-medium ${
+                  order.currentStatus === 'financial_approved' ? 'text-green-600' :
+                  order.currentStatus === 'financial_rejected' ? 'text-red-600' :
+                  order.currentStatus === 'pending_payment' ? 'text-orange-600' :
+                  order.currentStatus === 'payment_uploaded' ? 'text-blue-600' :
+                  'text-yellow-600'
+                }`}>
+                  {getStatusDisplayName(order.currentStatus)}
+                </div>
+              </div>
+              <div className="bg-white p-3 rounded border">
+                <div className="font-medium text-gray-800 mb-1">📅 تاریخ ایجاد:</div>
+                <div className="text-gray-700">
+                  {formatDateSafe(order.createdAt, 'fa-IR', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </div>
+              </div>
+            </div>
+            
+            {/* Payment Details Section */}
+            {(order.walletAmountUsed && parseFloat(order.walletAmountUsed) > 0) || 
+             (order.bankAmountPaid && parseFloat(order.bankAmountPaid) > 0) || 
+             (order.excessAmountCredited && parseFloat(order.excessAmountCredited) > 0) ? (
+              <div className="bg-green-50 border border-green-200 rounded p-3 mt-3">
+                <div className="font-medium text-green-800 mb-2">💰 تفصیل مبالغ پرداختی:</div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs">
+                  {order.walletAmountUsed && parseFloat(order.walletAmountUsed) > 0 && (
+                    <div className="flex justify-between">
+                      <span>کیف پول:</span>
+                      <span className="font-medium text-green-700">
+                        {parseFloat(order.walletAmountUsed).toLocaleString()} {order.currency || 'IQD'}
+                      </span>
+                    </div>
+                  )}
+                  {order.bankAmountPaid && parseFloat(order.bankAmountPaid) > 0 && (
+                    <div className="flex justify-between">
+                      <span>بانک:</span>
+                      <span className="font-medium text-blue-700">
+                        {parseFloat(order.bankAmountPaid).toLocaleString()} {order.currency || 'IQD'}
+                      </span>
+                    </div>
+                  )}
+                  {order.excessAmountCredited && parseFloat(order.excessAmountCredited) > 0 && (
+                    <div className="flex justify-between">
+                      <span>اضافه به کیف پول:</span>
+                      <span className="font-medium text-purple-700">
+                        {parseFloat(order.excessAmountCredited).toLocaleString()} {order.currency || 'IQD'}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : null}
+
+            {/* Special Alert for M2511116 */}
+            {order.orderNumber === 'M2511116' && (
               <div className="bg-yellow-50 border border-yellow-200 rounded p-3 mt-3">
-                <div className="font-medium text-yellow-800 mb-1">🔍 مشکل تشخیص داده شده:</div>
+                <div className="font-medium text-yellow-800 mb-1">⚠️ مشکل تشخیص داده شده:</div>
                 <div className="text-yellow-700 text-xs">
                   عدم تطابق در تزامن اطلاعات بین سیستم مشتری و سیستم مدیریت سفارشات.
                   سفارش در سیستم مشتری به عنوان "آماده انبار" ثبت شده ولی در سیستم مالی هنوز "در انتظار" است.
-                  مبلغ کیف پول استفاده شده در سیستم مدیریت صفر نشان داده می‌شود.
                 </div>
               </div>
-            </div>
+            )}
           </div>
-        )}
+        </div>
 
         {order.financialNotes && (
           <div className="bg-gray-50 rounded-lg p-3 mb-4">
