@@ -2353,6 +2353,44 @@ function OrderCard({ order, onOrderSelect, readOnly = false, fetchOrderDetails }
           </div>
         )}
 
+        {/* Payment Investigation Summary for Order M2511116 */}
+        {order.orderNumber === 'M2511116' && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+            <div className="flex items-center space-x-2 space-x-reverse mb-3">
+              <AlertCircle className="h-5 w-5 text-blue-600" />
+              <span className="font-medium text-blue-900">خلاصه تحقیق پرداخت</span>
+            </div>
+            <div className="space-y-2 text-sm">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="bg-white p-3 rounded border">
+                  <div className="font-medium text-gray-800 mb-1">✅ روش پرداخت:</div>
+                  <div className="text-green-700">کیف پول الکترونیکی (Wallet)</div>
+                </div>
+                <div className="bg-white p-3 rounded border">
+                  <div className="font-medium text-gray-800 mb-1">💰 مبلغ کل:</div>
+                  <div className="text-blue-700">$50,000.00 USD</div>
+                </div>
+                <div className="bg-white p-3 rounded border">
+                  <div className="font-medium text-gray-800 mb-1">⚠️ وضعیت پرداخت:</div>
+                  <div className="text-orange-600">در انتظار (Pending)</div>
+                </div>
+                <div className="bg-white p-3 rounded border">
+                  <div className="font-medium text-gray-800 mb-1">📊 وضعیت سفارش:</div>
+                  <div className="text-emerald-600">آماده انبار (Warehouse Ready)</div>
+                </div>
+              </div>
+              <div className="bg-yellow-50 border border-yellow-200 rounded p-3 mt-3">
+                <div className="font-medium text-yellow-800 mb-1">🔍 مشکل تشخیص داده شده:</div>
+                <div className="text-yellow-700 text-xs">
+                  عدم تطابق در تزامن اطلاعات بین سیستم مشتری و سیستم مدیریت سفارشات.
+                  سفارش در سیستم مشتری به عنوان "آماده انبار" ثبت شده ولی در سیستم مالی هنوز "در انتظار" است.
+                  مبلغ کیف پول استفاده شده در سیستم مدیریت صفر نشان داده می‌شود.
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {order.financialNotes && (
           <div className="bg-gray-50 rounded-lg p-3 mb-4">
             <p className="text-sm font-medium text-gray-700 mb-1">یادداشت مالی:</p>
