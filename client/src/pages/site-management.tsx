@@ -134,8 +134,8 @@ export default function SiteManagement() {
 
   // Initial button configuration ordered by most frequent usage (top-left priority)
   const getInitialButtons = (): QuickActionButton[] => {
-    console.log('🔍 [DEBUG] getInitialButtons called');
-    return [
+    console.log('🔍 [DEBUG] getInitialButtons called - creating button array');
+    const buttonArray = [
     // Row 1: Most frequently used daily operations
     {
       id: "kardex-sync",
@@ -405,6 +405,9 @@ export default function SiteManagement() {
       moduleId: "order_management"
     }
   ];
+  console.log('🔍 [DEBUG] Created buttons array with length:', buttonArray.length);
+  console.log('🔍 [DEBUG] Super admin button exists in array:', buttonArray.find(b => b.id === 'super-admin-order-management'));
+  return buttonArray;
   };
 
   // Filter buttons based on user permissions
@@ -422,6 +425,7 @@ export default function SiteManagement() {
     const allButtons = getInitialButtons();
     console.log('🔍 [DEBUG] total buttons:', allButtons.length);
     console.log('🔍 [DEBUG] super-admin-order-management button exists:', allButtons.find(b => b.id === 'super-admin-order-management'));
+    console.log('🔍 [DEBUG] Last 5 buttons in allButtons:', allButtons.slice(-5).map(b => ({ id: b.id, moduleId: b.moduleId })));
     
     // If no moduleId specified, show button (for universal access buttons)
     // If moduleId specified, check if user has access to that module
