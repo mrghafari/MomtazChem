@@ -2234,87 +2234,117 @@ function OrderCard({ order, onOrderSelect, readOnly = false, fetchOrderDetails }
   return (
     <Card className="hover:shadow-lg transition-shadow border-l-4 border-l-blue-500">
       <CardContent className="p-6">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-4 space-x-reverse">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <Receipt className="h-5 w-5 text-blue-600" />
+            <div className="p-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl shadow-lg">
+              <Receipt className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h3 className="font-bold text-lg text-gray-900">سفارش {order.orderNumber || 'در حال بارگذاری...'}</h3>
-              <p className="text-sm text-gray-600">{customerInfo.firstName} {customerInfo.lastName}</p>
+              <h3 className="font-bold text-xl text-gray-900">سفارش {order.orderNumber || 'در حال بارگذاری...'}</h3>
+              <p className="text-sm text-gray-600 font-medium">{customerInfo.firstName} {customerInfo.lastName}</p>
+              <p className="text-xs text-gray-500">ID: {order.customerOrderId}</p>
             </div>
           </div>
           <div className="flex items-center space-x-3 space-x-reverse">
-            <Badge className={`border ${getStatusBadgeColor(order.currentStatus)}`}>
+            <Badge className={`border text-sm px-3 py-1 font-medium ${getStatusBadgeColor(order.currentStatus)}`}>
               {getStatusDisplayName(order.currentStatus)}
             </Badge>
             <div className="text-left">
-              <p className="font-bold text-lg text-green-600">
+              <p className="font-bold text-2xl text-green-600">
                 {parseFloat(order.totalAmount).toLocaleString()} {order.currency}
               </p>
               <p className="text-xs text-gray-500">
-                {formatDateSafe(order.createdAt)}
+                {new Date(order.createdAt).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'short',
+                  day: '2-digit'
+                })}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-          <div className="flex items-center space-x-2 space-x-reverse">
-            <Mail className="h-4 w-4 text-gray-400" />
-            <span className="text-sm text-gray-600">{order.customer?.email}</span>
+        {/* Enhanced Customer Information Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div className="flex items-center space-x-2 space-x-reverse bg-gray-50 rounded-lg p-3">
+            <Mail className="h-4 w-4 text-gray-500" />
+            <div>
+              <p className="text-xs text-gray-500">ایمیل</p>
+              <p className="text-sm font-medium text-gray-700">{order.customer?.email || 'نامشخص'}</p>
+            </div>
           </div>
-          <div className="flex items-center space-x-2 space-x-reverse">
-            <Phone className="h-4 w-4 text-gray-400" />
-            <span className="text-sm text-gray-600">{order.customer?.phone}</span>
+          <div className="flex items-center space-x-2 space-x-reverse bg-gray-50 rounded-lg p-3">
+            <Phone className="h-4 w-4 text-gray-500" />
+            <div>
+              <p className="text-xs text-gray-500">تلفن</p>
+              <p className="text-sm font-medium text-gray-700">{order.customer?.phone || 'نامشخص'}</p>
+            </div>
           </div>
-          <div className="flex items-center space-x-2 space-x-reverse">
-            <Calendar className="h-4 w-4 text-gray-400" />
-            <span className="text-sm text-gray-600">
-              {formatDateSafe(order.updatedAt, 'en-US', {
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-              })}
-            </span>
+          <div className="flex items-center space-x-2 space-x-reverse bg-gray-50 rounded-lg p-3">
+            <Calendar className="h-4 w-4 text-gray-500" />
+            <div>
+              <p className="text-xs text-gray-500">آخرین بروزرسانی</p>
+              <p className="text-sm font-medium text-gray-700">
+                {new Date(order.updatedAt).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </p>
+            </div>
           </div>
-          <div className="flex items-center space-x-2 space-x-reverse">
+          <div className="flex items-center space-x-2 space-x-reverse bg-gray-50 rounded-lg p-3">
             {(() => {
               const paymentMethod = order.paymentMethod;
               if (paymentMethod === 'wallet_full') {
                 return (
                   <>
                     <Wallet className="h-4 w-4 text-green-600" />
-                    <span className="text-sm text-green-700 font-medium">کیف پول (کامل)</span>
+                    <div>
+                      <p className="text-xs text-gray-500">روش پرداخت</p>
+                      <p className="text-sm font-medium text-green-700">کیف پول (کامل)</p>
+                    </div>
                   </>
                 );
               } else if (paymentMethod === 'wallet_partial') {
                 return (
                   <>
                     <DollarSign className="h-4 w-4 text-purple-600" />
-                    <span className="text-sm text-purple-700 font-medium">ترکیبی</span>
+                    <div>
+                      <p className="text-xs text-gray-500">روش پرداخت</p>
+                      <p className="text-sm font-medium text-purple-700">ترکیبی</p>
+                    </div>
                   </>
                 );
               } else if (paymentMethod === 'bank_transfer_grace') {
                 return (
                   <>
                     <Clock className="h-4 w-4 text-orange-600" />
-                    <span className="text-sm text-orange-700 font-medium">مهلت‌دار</span>
+                    <div>
+                      <p className="text-xs text-gray-500">روش پرداخت</p>
+                      <p className="text-sm font-medium text-orange-700">مهلت‌دار</p>
+                    </div>
                   </>
                 );
               } else if (paymentMethod === 'bank_gateway') {
                 return (
                   <>
                     <CreditCard className="h-4 w-4 text-blue-600" />
-                    <span className="text-sm text-blue-700 font-medium">درگاه بانکی</span>
+                    <div>
+                      <p className="text-xs text-gray-500">روش پرداخت</p>
+                      <p className="text-sm font-medium text-blue-700">درگاه بانکی</p>
+                    </div>
                   </>
                 );
               } else {
                 return (
                   <>
                     <CreditCard className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm text-gray-600">{paymentMethod || 'نامشخص'}</span>
+                    <div>
+                      <p className="text-xs text-gray-500">روش پرداخت</p>
+                      <p className="text-sm font-medium text-gray-600">{paymentMethod || 'نامشخص'}</p>
+                    </div>
                   </>
                 );
               }
@@ -2322,66 +2352,152 @@ function OrderCard({ order, onOrderSelect, readOnly = false, fetchOrderDetails }
           </div>
         </div>
 
+        {/* Order Details Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          {/* Payment Information */}
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
+            <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+              <DollarSign className="h-5 w-5 text-blue-600" />
+              جزئیات پرداخت
+            </h4>
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">مبلغ کل:</span>
+                <span className="font-bold text-gray-800">{parseFloat(order.totalAmount).toLocaleString()} {order.currency}</span>
+              </div>
+              {order.deliveryCost && parseFloat(order.deliveryCost) > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">هزینه حمل:</span>
+                  <span className="font-medium text-gray-700">{parseFloat(order.deliveryCost).toLocaleString()} {order.currency}</span>
+                </div>
+              )}
+              {order.walletAmountUsed && parseFloat(order.walletAmountUsed) > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">مقدار کیف پول:</span>
+                  <span className="font-medium text-green-700">{parseFloat(order.walletAmountUsed).toLocaleString()} {order.currency}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Shipping Information */}
+          {order.shippingAddress && (
+            <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-4 border border-green-200">
+              <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-green-600" />
+                آدرس تحویل
+              </h4>
+              <div className="text-sm text-gray-700">
+                {(() => {
+                  try {
+                    const address = typeof order.shippingAddress === 'string' 
+                      ? JSON.parse(order.shippingAddress) 
+                      : order.shippingAddress;
+                    return (
+                      <div className="space-y-1">
+                        <p className="font-medium">{address.address || address.street || 'آدرس نامشخص'}</p>
+                        {address.city && <p className="text-gray-600">شهر: {address.city}</p>}
+                        {address.province && <p className="text-gray-600">استان: {address.province}</p>}
+                        {address.postalCode && <p className="text-gray-600">کد پستی: {address.postalCode}</p>}
+                      </div>
+                    );
+                  } catch {
+                    return <p className="text-gray-600">آدرس نامعتبر</p>;
+                  }
+                })()}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Special Status Indicators */}
         {order.receiptUrl && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
-            <div className="flex items-center space-x-2 space-x-reverse">
-              <Receipt className="h-4 w-4 text-blue-600" />
-              <span className="text-sm font-medium text-blue-900">فیش بانکی ارسال شده</span>
-              <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs">
-                نیاز به بررسی
-              </Badge>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2 space-x-reverse">
+                <Receipt className="h-5 w-5 text-blue-600" />
+                <span className="text-sm font-medium text-blue-900">فیش بانکی ارسال شده</span>
+                <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs">
+                  نیاز به بررسی
+                </Badge>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => window.open(order.receiptUrl, '_blank')}
+                className="flex items-center gap-2 text-xs"
+              >
+                <ExternalLink className="h-3 w-3" />
+                مشاهده فیش
+              </Button>
             </div>
           </div>
         )}
 
-        {/* Special indicator for wallet-paid orders transferred to warehouse */}
         {isWalletTransferred && (
-          <div className="bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-lg p-3 mb-4">
+          <div className="bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-lg p-4 mb-4">
             <div className="flex items-center space-x-2 space-x-reverse">
               <div className="flex items-center space-x-1 space-x-reverse">
-                <CheckCircle className="h-4 w-4 text-emerald-600" />
-                <DollarSign className="h-4 w-4 text-green-600" />
+                <CheckCircle className="h-5 w-5 text-emerald-600" />
+                <DollarSign className="h-5 w-5 text-green-600" />
               </div>
               <span className="text-sm font-medium text-emerald-900">پرداخت با کیف پول - منتقل شده به انبار</span>
               <Badge variant="secondary" className="bg-emerald-100 text-emerald-800 text-xs">
                 💳 قابل مشاهده در مالی
               </Badge>
             </div>
-            <p className="text-xs text-emerald-700 mt-1">
+            <p className="text-xs text-emerald-700 mt-2">
               این سفارش با کیف پول پرداخت شده و خودکار به انبار منتقل گردیده - برای نظارت مالی در این بخش قابل مشاهده است
             </p>
           </div>
         )}
 
         {order.financialNotes && (
-          <div className="bg-gray-50 rounded-lg p-3 mb-4">
-            <p className="text-sm font-medium text-gray-700 mb-1">یادداشت مالی:</p>
-            <p className="text-sm text-gray-600">{order.financialNotes}</p>
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
+            <div className="flex items-start gap-2">
+              <FileText className="h-5 w-5 text-amber-600 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-amber-800 mb-1">یادداشت مالی:</p>
+                <p className="text-sm text-amber-700">{order.financialNotes}</p>
+              </div>
+            </div>
           </div>
         )}
 
+        {/* Action Buttons */}
         {!readOnly && (
-          <div className="flex justify-end gap-2">
-            {fetchOrderDetails && order.orderNumber && (
-              <Button 
-                onClick={() => fetchOrderDetails(order.orderNumber)}
-                size="sm"
-                variant="outline"
-                className="flex items-center space-x-2 space-x-reverse"
-              >
-                <FileText className="h-4 w-4" />
-                <span>مشاهده جزئیات</span>
-              </Button>
-            )}
-            <Button 
-              onClick={onOrderSelect}
-              size="sm"
-              className="flex items-center space-x-2 space-x-reverse"
-            >
-              <Eye className="h-4 w-4" />
-              <span>بررسی و تایید</span>
-              <ChevronRight className="h-4 w-4" />
-            </Button>
+          <div className="flex justify-between items-center pt-4 border-t border-gray-200">
+            <div className="flex gap-3">
+              {fetchOrderDetails && order.orderNumber && (
+                <Button 
+                  onClick={() => fetchOrderDetails(order.orderNumber)}
+                  size="sm"
+                  variant="outline"
+                  className="flex items-center space-x-2 space-x-reverse hover:bg-blue-50 hover:border-blue-300"
+                >
+                  <FileText className="h-4 w-4" />
+                  <span>مشاهده جزئیات کامل</span>
+                </Button>
+              )}
+              {onOrderSelect && (
+                <Button 
+                  onClick={onOrderSelect}
+                  size="sm"
+                  className="flex items-center space-x-2 space-x-reverse bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
+                >
+                  <CheckCircle2 className="h-4 w-4" />
+                  <span>بررسی سفارش</span>
+                </Button>
+              )}
+            </div>
+            <div className="text-xs text-gray-500">
+              آخرین بروزرسانی: {new Date(order.updatedAt).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })}
+            </div>
           </div>
         )}
       </CardContent>
