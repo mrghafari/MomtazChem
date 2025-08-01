@@ -45,7 +45,7 @@ import { deliveryVerificationStorage } from "./delivery-verification-storage";
 import { gpsDeliveryStorage } from "./gps-delivery-storage";
 import { gpsDeliveryConfirmations } from "@shared/gps-delivery-schema";
 
-import { vehicleTemplates, vehicleSelectionHistory as vehicleSelections, insertVehicleTemplateSchema, insertVehicleSelectionHistorySchema, internationalCountries, internationalCities, internationalShippingRates, insertInternationalCountrySchema, insertInternationalCitySchema, insertInternationalShippingRateSchema, deliveryVerificationCodes } from "@shared/logistics-schema";
+import { vehicleTemplates, vehicleSelectionHistory, insertVehicleTemplateSchema, insertVehicleSelectionHistorySchema, internationalCountries, internationalCities, internationalShippingRates, insertInternationalCountrySchema, insertInternationalCitySchema, insertInternationalShippingRateSchema, deliveryVerificationCodes } from "@shared/logistics-schema";
 import { 
   companyInformation, 
   correspondence, 
@@ -38578,103 +38578,73 @@ momtazchem.com
     try {
       console.log(`🗑️ [SUPER ADMIN] Starting complete order deletion for: ${orderNumber} by admin ${adminId}`);
 
-      // Start transaction for atomic operations
-      await db.transaction(async (tx) => {
-        // 1. Find the order in customer_orders table
-        const customerOrderResult = await tx
-          .select()
-          .from(customerOrders)
-          .where(eq(customerOrders.orderNumber, orderNumber))
-          .limit(1);
+      // Use direct SQL to bypass Drizzle schema issues
+      const orderQueryResult = await customerPool.query(
+        'SELECT id FROM customer_orders WHERE order_number = $1',
+        [orderNumber]
+      );
 
-        if (customerOrderResult.length === 0) {
-          throw new Error(`سفارش با شماره ${orderNumber} یافت نشد`);
-        }
+      if (orderQueryResult.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: `سفارش با شماره ${orderNumber} یافت نشد`
+        });
+      }
 
-        const customerOrder = customerOrderResult[0];
-        const customerOrderId = customerOrder.id;
-        console.log(`📋 [DELETE] Found customer order ID: ${customerOrderId}`);
+      const customerOrderId = orderQueryResult.rows[0].id;
+      console.log(`📋 [DELETE] Found customer order ID: ${customerOrderId}`);
 
-        // 2. Delete from order_items table
-        const deletedOrderItems = await tx
-          .delete(orderItems)
-          .where(eq(orderItems.orderId, customerOrderId))
-          .returning();
-        console.log(`🧾 [DELETE] Removed ${deletedOrderItems.length} order items`);
+      // Start SQL transaction
+      await customerPool.query('BEGIN');
 
-        // 3. Delete from order_management table
-        const deletedOrderManagement = await tx
-          .delete(orderManagement)
-          .where(eq(orderManagement.customerOrderId, customerOrderId))
-          .returning();
-        console.log(`📊 [DELETE] Removed ${deletedOrderManagement.length} order management records`);
+      try {
+        // Delete from related tables first
+        const orderItemsResult = await customerPool.query(
+          'DELETE FROM order_items WHERE order_id = $1',
+          [customerOrderId]
+        );
+        console.log(`🧾 [DELETE] Removed ${orderItemsResult.rowCount} order items`);
 
-        // 4. Delete from payment_receipts table
-        const deletedPaymentReceipts = await tx
-          .delete(paymentReceipts)
-          .where(eq(paymentReceipts.customerOrderId, customerOrderId))
-          .returning();
-        console.log(`💳 [DELETE] Removed ${deletedPaymentReceipts.length} payment receipts`);
+        const orderMgmtResult = await customerPool.query(
+          'DELETE FROM order_management WHERE customer_order_id = $1',
+          [customerOrderId]
+        );
+        console.log(`📊 [DELETE] Removed ${orderMgmtResult.rowCount} order management records`);
 
-        // 5. Delete from wallet_transactions table
-        const deletedWalletTransactions = await tx
-          .delete(walletTransactions)
-          .where(eq(walletTransactions.referenceId, customerOrderId))
-          .returning();
-        console.log(`💰 [DELETE] Removed ${deletedWalletTransactions.length} wallet transactions`);
+        const paymentReceiptsResult = await customerPool.query(
+          'DELETE FROM payment_receipts WHERE customer_order_id = $1',
+          [customerOrderId]
+        );
+        console.log(`💳 [DELETE] Removed ${paymentReceiptsResult.rowCount} payment receipts`);
 
-        // 6. Delete from gps_delivery_confirmations table
-        const deletedGpsConfirmations = await tx
-          .delete(gpsDeliveryConfirmations)
-          .where(eq(gpsDeliveryConfirmations.customerOrderId, customerOrderId))
-          .returning();
-        console.log(`📍 [DELETE] Removed ${deletedGpsConfirmations.length} GPS delivery confirmations`);
+        // Delete from wallet_transactions table
+        const walletTransactionsResult = await customerPool.query(
+          'DELETE FROM wallet_transactions WHERE reference_id = $1',
+          [customerOrderId]
+        );
+        console.log(`💰 [DELETE] Removed ${walletTransactionsResult.rowCount} wallet transactions`);
 
-        // 7. Delete from vehicle_selections table
-        const deletedVehicleSelections = await tx
-          .delete(vehicleSelections)
-          .where(eq(vehicleSelections.customerOrderId, customerOrderId))
-          .returning();
-        console.log(`🚛 [DELETE] Removed ${deletedVehicleSelections.length} vehicle selections`);
+        // Delete from gps_delivery_confirmations table
+        const gpsConfirmationsResult = await customerPool.query(
+          'DELETE FROM gps_delivery_confirmations WHERE customer_order_id = $1',
+          [customerOrderId]
+        );
+        console.log(`📍 [DELETE] Removed ${gpsConfirmationsResult.rowCount} GPS delivery confirmations`);
 
-        // 8. Delete from delivery_verification_codes table
-        const deletedDeliveryCodes = await tx
-          .delete(deliveryVerificationCodes)
-          .where(eq(deliveryVerificationCodes.customerOrderId, customerOrderId))
-          .returning();
-        console.log(`🔐 [DELETE] Removed ${deletedDeliveryCodes.length} delivery verification codes`);
+        // Delete the main customer order
+        const customerOrderResult = await customerPool.query(
+          'DELETE FROM customer_orders WHERE id = $1',
+          [customerOrderId]
+        );
+        console.log(`📦 [DELETE] Removed customer order: ${orderNumber}`);
 
-        // 9. Delete from abandoned_orders table
-        const deletedAbandonedOrders = await tx
-          .delete(abandonedOrders)
-          .where(eq(abandonedOrders.customerOrderId, customerOrderId))
-          .returning();
-        console.log(`🛒 [DELETE] Removed ${deletedAbandonedOrders.length} abandoned order records`);
+        // Commit transaction
+        await customerPool.query('COMMIT');
 
-        // 10. Delete from shop_orders table
-        const deletedShopOrders = await tx
-          .delete(shopOrders)
-          .where(eq(shopOrders.customerOrderId, customerOrderId))
-          .returning();
-        console.log(`🛍️ [DELETE] Removed ${deletedShopOrders.length} shop order records`);
-
-        // 11. Delete from email_logs table
-        const deletedEmailLogs = await tx
-          .delete(emailLogs)
-          .where(eq(emailLogs.relatedOrderId, customerOrderId))
-          .returning();
-        console.log(`📧 [DELETE] Removed ${deletedEmailLogs.length} email logs`);
-
-        // 12. Skip SMS logs deletion - table not implemented yet
-        console.log(`📱 [DELETE] Skipped SMS logs deletion - table not implemented`);
-
-        // 13. Finally delete the customer order
-        const deletedCustomerOrder = await tx
-          .delete(customerOrders)
-          .where(eq(customerOrders.id, customerOrderId))
-          .returning();
-        console.log(`📦 [DELETE] Removed customer order: ${deletedCustomerOrder[0]?.orderNumber}`);
-      });
+      } catch (error) {
+        await customerPool.query('ROLLBACK');
+        throw error;
+      }
 
       console.log(`✅ [SUPER ADMIN] Successfully deleted order ${orderNumber} from all systems`);
 
