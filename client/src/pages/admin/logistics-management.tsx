@@ -146,6 +146,7 @@ interface LogisticsOrder {
   totalWeight?: string;
   totalAmount: string;
   currency: string;
+  paymentMethod?: string; // نوع تسویه حساب
   deliveryMethod?: string;
   transportationType?: string;
   trackingNumber?: string;
@@ -1603,14 +1604,15 @@ const LogisticsManagement = () => {
                           } else {
                             return (
                               <div className="bg-gray-100 px-2 py-1 rounded-lg border border-gray-300">
-                                <p className="text-sm font-medium text-gray-700">
-                                  {paymentMethod || 'نامشخص'}
-                                </p>
-                                <p className="text-xs text-gray-500">روش پرداخت تعیین نشده</p>
+                                <p className="text-sm font-bold text-gray-700">نامشخص</p>
+                                <p className="text-xs text-gray-500">نوع پرداخت تعریف نشده</p>
                               </div>
                             );
                           }
                         })()}
+                        <p className="text-xs text-teal-600 mt-2">
+                          💰 {order.totalAmount} {order.currency}
+                        </p>
                       </div>
                     </div>
 
