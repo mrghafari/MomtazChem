@@ -401,7 +401,7 @@ export default function SiteManagement() {
       label: "Super Admin Order Management",
       icon: Shield,
       onClick: () => trackButtonClick("super-admin-order-management", () => setLocation("/admin/super-admin-order-management")),
-      className: "border-red-300 text-red-600 hover:bg-red-50",
+      className: "border-red-300 text-red-600 hover:bg-red-50 font-semibold",
       moduleId: "order_management"
     }
   ];
