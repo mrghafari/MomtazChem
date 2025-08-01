@@ -50,7 +50,8 @@ import {
   BarChart3,
   Wrench,
   Upload,
-  HelpCircle
+  HelpCircle,
+  Printer
 } from "lucide-react";
 import InternalBarcodeCard from "@/components/InternalBarcodeCard";
 import GlobalRefreshControl from "@/components/GlobalRefreshControl";
@@ -706,6 +707,231 @@ function FinanceOrders() {
     
     setSelectedImageUrl(imageUrl);
     setImageModalOpen(true);
+  };
+
+  // Print function for order details
+  const handlePrintOrder = () => {
+    if (!orderDetails) return;
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const printContent = `
+    <!DOCTYPE html>
+    <html dir="rtl" lang="ar">
+    <head>
+      <meta charset="utf-8">
+      <title>جزئیات سفارش ${orderDetails.orderNumber}</title>
+      <style>
+        body { 
+          font-family: 'Segoe UI', Tahoma, Arial, sans-serif; 
+          margin: 20px; 
+          direction: rtl; 
+          font-size: 14px;
+          line-height: 1.6;
+        }
+        .header { 
+          text-align: center; 
+          border-bottom: 2px solid #2563eb; 
+          padding-bottom: 10px; 
+          margin-bottom: 20px; 
+        }
+        .company-name { 
+          font-size: 24px; 
+          font-weight: bold; 
+          color: #2563eb; 
+          margin-bottom: 5px;
+        }
+        .section { 
+          margin-bottom: 15px; 
+          border: 1px solid #e5e7eb; 
+          border-radius: 8px; 
+          padding: 12px;
+        }
+        .section-title { 
+          font-weight: bold; 
+          font-size: 16px; 
+          color: #374151; 
+          margin-bottom: 8px;
+          border-bottom: 1px solid #e5e7eb;
+          padding-bottom: 4px;
+        }
+        .info-grid { 
+          display: grid; 
+          grid-template-columns: 1fr 1fr; 
+          gap: 10px; 
+        }
+        .info-item { 
+          display: flex; 
+          justify-content: space-between; 
+          padding: 4px 0;
+        }
+        .label { 
+          font-weight: 600; 
+          color: #6b7280; 
+        }
+        .value { 
+          color: #374151; 
+        }
+        .items-table { 
+          width: 100%; 
+          border-collapse: collapse; 
+          margin-top: 10px;
+        }
+        .items-table th, .items-table td { 
+          border: 1px solid #d1d5db; 
+          padding: 8px; 
+          text-align: right; 
+        }
+        .items-table th { 
+          background-color: #f3f4f6; 
+          font-weight: bold; 
+        }
+        .total-row { 
+          background-color: #fef3c7; 
+          font-weight: bold; 
+        }
+        .status-badge {
+          padding: 4px 8px;
+          border-radius: 4px;
+          font-size: 12px;
+          font-weight: bold;
+        }
+        .status-confirmed { background-color: #dcfce7; color: #166534; }
+        .status-pending { background-color: #fef3c7; color: #92400e; }
+        .status-rejected { background-color: #fecaca; color: #dc2626; }
+        @media print {
+          body { margin: 0; }
+          .no-print { display: none !important; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <div class="company-name">ممتاز شیمی</div>
+        <div>جزئیات سفارش ${orderDetails.orderNumber}</div>
+        <div style="font-size: 12px; color: #6b7280;">تاریخ چاپ: ${new Date().toLocaleDateString('fa-IR')}</div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">اطلاعات سفارش</div>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="label">شماره سفارش:</span>
+            <span class="value">${orderDetails.orderNumber}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">تاریخ ثبت:</span>
+            <span class="value">${formatDateSafe(orderDetails.createdAt, 'fa-IR')}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">وضعیت:</span>
+            <span class="value status-badge ${orderDetails.status === 'confirmed' ? 'status-confirmed' : 
+                                              orderDetails.status === 'pending' ? 'status-pending' : 'status-rejected'}">
+              ${orderDetails.status === 'confirmed' ? 'تایید شده' : 
+                orderDetails.status === 'pending' ? 'در انتظار' : 
+                orderDetails.status === 'rejected' ? 'رد شده' : orderDetails.status}
+            </span>
+          </div>
+          <div class="info-item">
+            <span class="label">روش پرداخت:</span>
+            <span class="value">${orderDetails.paymentMethod === 'digital_wallet' ? 'کیف پول دیجیتال' : 
+                                  orderDetails.paymentMethod === 'iraqi_bank_gateway' ? 'درگاه بانکی عراقی' : 
+                                  orderDetails.paymentMethod}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">اطلاعات مشتری</div>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="label">نام:</span>
+            <span class="value">${orderDetails.customer?.firstName || ''} ${orderDetails.customer?.lastName || ''}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">ایمیل:</span>
+            <span class="value">${orderDetails.customer?.email || 'نامشخص'}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">تلفن:</span>
+            <span class="value">${orderDetails.customer?.phone || 'نامشخص'}</span>
+          </div>
+        </div>
+      </div>
+
+      ${orderDetails.shippingAddress ? `
+      <div class="section">
+        <div class="section-title">آدرس تحویل</div>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="label">نام گیرنده:</span>
+            <span class="value">${orderDetails.shippingAddress.name || 'نامشخص'}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">تلفن:</span>
+            <span class="value">${orderDetails.shippingAddress.phone || 'نامشخص'}</span>
+          </div>
+          <div class="info-item" style="grid-column: 1 / -1;">
+            <span class="label">آدرس:</span>
+            <span class="value">${orderDetails.shippingAddress.address || 'نامشخص'}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">شهر:</span>
+            <span class="value">${orderDetails.shippingAddress.city || 'نامشخص'}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">کد پستی:</span>
+            <span class="value">${orderDetails.shippingAddress.postalCode || 'نامشخص'}</span>
+          </div>
+        </div>
+      </div>` : ''}
+
+      <div class="section">
+        <div class="section-title">اقلام سفارش</div>
+        <table class="items-table">
+          <thead>
+            <tr>
+              <th>نام محصول</th>
+              <th>قیمت واحد</th>
+              <th>تعداد</th>
+              <th>مجموع</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${orderDetails.items?.map(item => `
+              <tr>
+                <td>${item.productName}</td>
+                <td>${Math.floor(parseFloat(item.price)).toLocaleString('fa-IR')} ${orderDetails.currency}</td>
+                <td>${item.quantity}</td>
+                <td>${Math.floor(parseFloat(item.price) * item.quantity).toLocaleString('fa-IR')} ${orderDetails.currency}</td>
+              </tr>
+            `).join('') || ''}
+            <tr class="total-row">
+              <td colspan="3">جمع کل:</td>
+              <td>${Math.floor(parseFloat(orderDetails.totalAmount)).toLocaleString('fa-IR')} ${orderDetails.currency}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      ${orderDetails.deliveryNotes ? `
+      <div class="section">
+        <div class="section-title">یادداشت تحویل</div>
+        <div class="value">${orderDetails.deliveryNotes}</div>
+      </div>` : ''}
+
+      <div style="margin-top: 30px; text-align: center; font-size: 12px; color: #6b7280;">
+        این سند توسط سیستم مدیریت ممتاز شیمی تولید شده است
+      </div>
+    </body>
+    </html>
+    `;
+
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
   };
 
   // Handle accept order from order details modal
@@ -1864,10 +2090,21 @@ function FinanceOrders() {
         <Dialog open={orderDetailsModalOpen} onOpenChange={setOrderDetailsModalOpen}>
           <DialogContent className="max-w-6xl max-h-[90vh]" dir="rtl">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5" />
-                جزئیات کامل سفارش {orderDetails?.orderNumber}
-              </DialogTitle>
+              <div className="flex items-center justify-between">
+                <DialogTitle className="flex items-center gap-2">
+                  <FileText className="h-5 w-5" />
+                  جزئیات کامل سفارش {orderDetails?.orderNumber}
+                </DialogTitle>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handlePrintOrder}
+                  className="flex items-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
+                >
+                  <Printer className="h-4 w-4" />
+                  چاپ جزئیات
+                </Button>
+              </div>
             </DialogHeader>
             
             <ScrollArea className="max-h-[75vh] pr-4">
