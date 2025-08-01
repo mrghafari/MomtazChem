@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import PaymentMethodBadge from '@/components/PaymentMethodBadge';
 
 interface Order {
   id: number;
@@ -24,6 +25,7 @@ interface Order {
   deliveryCode: string | null;
   totalAmount: string;
   currency: string;
+  paymentMethod?: string;
   totalWeight: string | null;
   weightUnit: string;
   deliveryMethod: string;
@@ -448,6 +450,13 @@ const WarehouseManagementFixed: React.FC = () => {
                                 <div className="text-xs text-gray-500 truncate">
                                   📧 {order.customer?.email || order.customerEmail || 'ایمیل نامشخص'}
                                 </div>
+                                <PaymentMethodBadge 
+                                  paymentMethod={order.paymentMethod}
+                                  totalAmount={order.totalAmount}
+                                  currency={order.currency}
+                                  size="sm"
+                                  showAmount={false}
+                                />
                               </div>
                             </td>
                             <td className="p-4" style={{ width: '140px' }}>

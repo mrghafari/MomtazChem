@@ -58,6 +58,7 @@ import GlobalRefreshControl from "@/components/GlobalRefreshControl";
 import { useToast } from "@/hooks/use-toast";
 import { useOrderNotifications } from "@/hooks/useOrderNotifications";
 import { formatCurrency } from "@/lib/utils";
+import PaymentMethodBadge from "@/components/PaymentMethodBadge";
 
 // Safe date formatting function to prevent Invalid Date errors
 const formatDateSafe = (dateString: string | null | undefined, locale = 'en-US', options = {}): string => {
@@ -2483,60 +2484,16 @@ function OrderCard({ order, onOrderSelect, readOnly = false, fetchOrderDetails }
             </div>
           </div>
           <div className="flex items-center space-x-2 space-x-reverse bg-gray-50 rounded-md p-2">
-            {(() => {
-              const paymentMethod = order.paymentMethod;
-              if (paymentMethod === 'wallet_full') {
-                return (
-                  <>
-                    <Wallet className="h-4 w-4 text-green-600" />
-                    <div>
-                      <p className="text-xs text-gray-500">روش پرداخت</p>
-                      <p className="text-sm font-medium text-green-700">کیف پول (کامل)</p>
-                    </div>
-                  </>
-                );
-              } else if (paymentMethod === 'wallet_partial') {
-                return (
-                  <>
-                    <DollarSign className="h-4 w-4 text-purple-600" />
-                    <div>
-                      <p className="text-xs text-gray-500">روش پرداخت</p>
-                      <p className="text-sm font-medium text-purple-700">ترکیبی</p>
-                    </div>
-                  </>
-                );
-              } else if (paymentMethod === 'bank_transfer_grace') {
-                return (
-                  <>
-                    <Clock className="h-4 w-4 text-orange-600" />
-                    <div>
-                      <p className="text-xs text-gray-500">روش پرداخت</p>
-                      <p className="text-sm font-medium text-orange-700">مهلت‌دار</p>
-                    </div>
-                  </>
-                );
-              } else if (paymentMethod === 'bank_gateway' || paymentMethod === 'online_payment') {
-                return (
-                  <>
-                    <CreditCard className="h-4 w-4 text-blue-600" />
-                    <div>
-                      <p className="text-xs text-gray-500">روش پرداخت</p>
-                      <p className="text-sm font-medium text-blue-700">درگاه آنلاین</p>
-                    </div>
-                  </>
-                );
-              } else {
-                return (
-                  <>
-                    <CreditCard className="h-4 w-4 text-gray-400" />
-                    <div>
-                      <p className="text-xs text-gray-500">روش پرداخت</p>
-                      <p className="text-sm font-medium text-gray-600">{paymentMethod || 'نامشخص'}</p>
-                    </div>
-                  </>
-                );
-              }
-            })()}
+            <div className="w-full">
+              <p className="text-xs text-gray-500 mb-1">روش پرداخت</p>
+              <PaymentMethodBadge 
+                paymentMethod={order.paymentMethod}
+                totalAmount={order.totalAmount}
+                currency={order.currency}
+                size="sm"
+                showAmount={false}
+              />
+            </div>
           </div>
         </div>
 

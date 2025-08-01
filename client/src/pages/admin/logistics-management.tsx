@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import PaymentMethodBadge from '@/components/PaymentMethodBadge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -1558,62 +1559,13 @@ const LogisticsManagement = () => {
                         <CreditCard className="w-4 h-4 mr-2" />
                         نوع تسویه حساب
                       </h5>
-                      <div className="space-y-1">
-                        {(() => {
-                          const paymentMethod = order.paymentMethod;
-                          if (paymentMethod === 'wallet_full') {
-                            return (
-                              <div className="bg-green-100 px-2 py-1 rounded-lg border border-green-300">
-                                <p className="text-sm font-bold text-green-800 flex items-center">
-                                  <Wallet className="w-3 h-3 mr-1" />
-                                  کیف پول (کامل)
-                                </p>
-                                <p className="text-xs text-green-600">پرداخت کامل از کیف پول</p>
-                              </div>
-                            );
-                          } else if (paymentMethod === 'wallet_partial') {
-                            return (
-                              <div className="bg-purple-100 px-2 py-1 rounded-lg border border-purple-300">
-                                <p className="text-sm font-bold text-purple-800 flex items-center">
-                                  <DollarSign className="w-3 h-3 mr-1" />
-                                  ترکیبی
-                                </p>
-                                <p className="text-xs text-purple-600">کیف پول + درگاه بانکی</p>
-                              </div>
-                            );
-                          } else if (paymentMethod === 'bank_transfer_grace') {
-                            return (
-                              <div className="bg-orange-100 px-2 py-1 rounded-lg border border-orange-300">
-                                <p className="text-sm font-bold text-orange-800 flex items-center">
-                                  <Clock className="w-3 h-3 mr-1" />
-                                  مهلت‌دار
-                                </p>
-                                <p className="text-xs text-orange-600">حواله بانکی 3 روزه</p>
-                              </div>
-                            );
-                          } else if (paymentMethod === 'bank_gateway') {
-                            return (
-                              <div className="bg-blue-100 px-2 py-1 rounded-lg border border-blue-300">
-                                <p className="text-sm font-bold text-blue-800 flex items-center">
-                                  <CreditCard className="w-3 h-3 mr-1" />
-                                  درگاه بانکی
-                                </p>
-                                <p className="text-xs text-blue-600">پرداخت آنلاین فوری</p>
-                              </div>
-                            );
-                          } else {
-                            return (
-                              <div className="bg-gray-100 px-2 py-1 rounded-lg border border-gray-300">
-                                <p className="text-sm font-bold text-gray-700">نامشخص</p>
-                                <p className="text-xs text-gray-500">نوع پرداخت تعریف نشده</p>
-                              </div>
-                            );
-                          }
-                        })()}
-                        <p className="text-xs text-teal-600 mt-2">
-                          💰 {order.totalAmount} {order.currency}
-                        </p>
-                      </div>
+                      <PaymentMethodBadge 
+                        paymentMethod={order.paymentMethod}
+                        totalAmount={order.totalAmount}
+                        currency={order.currency}
+                        size="md"
+                        showAmount={true}
+                      />
                     </div>
 
                     {/* Total Weight Block */}

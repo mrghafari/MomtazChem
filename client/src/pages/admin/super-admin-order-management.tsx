@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import PaymentMethodBadge from '@/components/PaymentMethodBadge';
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
@@ -388,7 +389,13 @@ export default function SuperAdminOrderManagement() {
                             <DollarSign className="h-4 w-4 text-yellow-500" />
                             <span className="font-medium">{formatAmount(order.totalAmount, order.currency)}</span>
                           </div>
-                          <Badge variant="outline">{order.paymentMethod}</Badge>
+                          <PaymentMethodBadge 
+                            paymentMethod={order.paymentMethod}
+                            totalAmount={order.totalAmount}
+                            currency={order.currency}
+                            size="sm"
+                            showAmount={false}
+                          />
                         </div>
                         
                         <div>
