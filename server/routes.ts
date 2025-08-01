@@ -25047,10 +25047,157 @@ ${message ? `Additional Requirements:\n${message}` : ''}
 
   app.get('/api/financial/orders', async (req, res) => {
     try {
-      const orders = await orderManagementStorage.getFinancialPendingOrders();
+      console.log('🔍 [FINANCIAL ORDERS] Fetching all orders for financial department');
+      
+      // Use direct SQL to get all orders that need financial review
+      const result = await customerPool.query(`
+        SELECT 
+          om.id,
+          om.customer_order_id as "customerOrderId",
+          om.current_status as "currentStatus",
+          om.delivery_code as "deliveryCode",
+          om.financial_reviewer_id as "financialReviewerId",
+          om.financial_reviewed_at as "financialReviewedAt",
+          om.financial_notes as "financialNotes",
+          om.payment_receipt_url as "paymentReceiptUrl",
+          om.warehouse_assignee_id as "warehouseAssigneeId",
+          om.warehouse_processed_at as "warehouseProcessedAt",
+          om.warehouse_notes as "warehouseNotes",
+          om.logistics_assignee_id as "logisticsAssigneeId",
+          om.logistics_processed_at as "logisticsProcessedAt",
+          om.logistics_notes as "logisticsNotes",
+          om.created_at as "createdAt",
+          om.updated_at as "updatedAt",
+          om.total_weight as "totalWeight",
+          om.weight_unit as "weightUnit",
+          om.delivery_method as "deliveryMethod",
+          om.transportation_type as "transportationType",
+          om.tracking_number as "trackingNumber",
+          om.estimated_delivery_date as "estimatedDeliveryDate",
+          om.actual_delivery_date as "actualDeliveryDate",
+          om.delivery_person_name as "deliveryPersonName",
+          om.delivery_person_phone as "deliveryPersonPhone",
+          om.postal_service_name as "postalServiceName",
+          om.postal_tracking_code as "postalTrackingCode",
+          om.vehicle_type as "vehicleType",
+          om.vehicle_plate as "vehiclePlate",
+          om.vehicle_model as "vehicleModel",
+          om.vehicle_color as "vehicleColor",
+          om.driver_name as "driverName",
+          om.driver_phone as "driverPhone",
+          om.delivery_company_name as "deliveryCompanyName",
+          om.delivery_company_phone as "deliveryCompanyPhone",
+          -- Customer Order fields
+          co.total_amount as "totalAmount",
+          co.currency,
+          co.order_number as "orderNumber",
+          co.payment_method as "paymentMethod",
+          co.payment_status as "paymentStatus",
+          co.status as "orderStatus",
+          co.shipping_address as "shippingAddress",
+          co.billing_address as "billingAddress",
+          co.recipient_name as "recipientName",
+          co.recipient_phone as "recipientPhone",
+          co.recipient_address as "recipientAddress",
+          co.delivery_notes as "deliveryNotes",
+          co.gps_latitude as "gpsLatitude",
+          co.gps_longitude as "gpsLongitude",
+          co.location_accuracy as "locationAccuracy",
+          co.receipt_path as "receiptUrl",
+          co.guest_name,
+          co.guest_email,
+          -- Customer info
+          c.first_name as "customerFirstName",
+          c.last_name as "customerLastName", 
+          c.email as "customerEmail",
+          c.phone as "customerPhone",
+          -- Payment Receipt info
+          pr.original_file_name as "receiptFileName",
+          pr.mime_type as "receiptMimeType"
+        FROM order_management om
+        LEFT JOIN customer_orders co ON om.customer_order_id = co.id
+        LEFT JOIN crm_customers c ON co.customer_id = c.id
+        LEFT JOIN payment_receipts pr ON pr.customer_order_id = co.id
+        WHERE om.current_status IN (
+          'pending',
+          'pending_payment',
+          'payment_uploaded', 
+          'financial_reviewing',
+          'financial_rejected',
+          'warehouse_pending',
+          'warehouse_processing',
+          'warehouse_approved'
+        )
+        ORDER BY om.created_at ASC
+      `);
+      
+      console.log(`💰 [FINANCIAL ORDERS] Found ${result.rows.length} orders for financial review`);
+      
+      const orders = result.rows.map(row => ({
+        id: row.id,
+        customerOrderId: row.customerOrderId,
+        currentStatus: row.currentStatus,
+        deliveryCode: row.deliveryCode,
+        financialReviewerId: row.financialReviewerId,
+        financialReviewedAt: row.financialReviewedAt,
+        financialNotes: row.financialNotes,
+        paymentReceiptUrl: row.paymentReceiptUrl,
+        warehouseAssigneeId: row.warehouseAssigneeId,
+        warehouseProcessedAt: row.warehouseProcessedAt,
+        warehouseNotes: row.warehouseNotes,
+        logisticsAssigneeId: row.logisticsAssigneeId,
+        logisticsProcessedAt: row.logisticsProcessedAt,
+        logisticsNotes: row.logisticsNotes,
+        createdAt: row.createdAt,
+        updatedAt: row.updatedAt,
+        totalWeight: row.totalWeight,
+        weightUnit: row.weightUnit,
+        deliveryMethod: row.deliveryMethod,
+        transportationType: row.transportationType,
+        trackingNumber: row.trackingNumber,
+        estimatedDeliveryDate: row.estimatedDeliveryDate,
+        actualDeliveryDate: row.actualDeliveryDate,
+        deliveryPersonName: row.deliveryPersonName,
+        deliveryPersonPhone: row.deliveryPersonPhone,
+        postalServiceName: row.postalServiceName,
+        postalTrackingCode: row.postalTrackingCode,
+        vehicleType: row.vehicleType,
+        vehiclePlate: row.vehiclePlate,
+        vehicleModel: row.vehicleModel,
+        vehicleColor: row.vehicleColor,
+        driverName: row.driverName,
+        driverPhone: row.driverPhone,
+        deliveryCompanyName: row.deliveryCompanyName,
+        deliveryCompanyPhone: row.deliveryCompanyPhone,
+        totalAmount: row.totalAmount,
+        currency: row.currency,
+        orderNumber: row.orderNumber,
+        paymentMethod: row.paymentMethod,
+        paymentStatus: row.paymentStatus,
+        orderStatus: row.orderStatus,
+        customerFirstName: row.customerFirstName,
+        customerLastName: row.customerLastName,
+        customerEmail: row.customerEmail,
+        customerPhone: row.customerPhone,
+        shippingAddress: row.shippingAddress,
+        billingAddress: row.billingAddress,
+        recipientName: row.recipientName,
+        recipientPhone: row.recipientPhone,
+        recipientAddress: row.recipientAddress,
+        deliveryNotes: row.deliveryNotes,
+        gpsLatitude: row.gpsLatitude,
+        gpsLongitude: row.gpsLongitude,
+        locationAccuracy: row.locationAccuracy,
+        receiptUrl: row.receiptUrl,
+        receiptFileName: row.receiptFileName,
+        receiptMimeType: row.receiptMimeType,
+        // Compatibility with UI
+        customerName: row.guest_name || `${row.customerFirstName || ''} ${row.customerLastName || ''}`.trim()
+      }));
+
       res.json({ success: true, orders });
     } catch (error) {
-      console.error('Error fetching financial orders:', error);
+      console.error('❌ [FINANCIAL ORDERS] Error fetching financial orders:', error);
       res.status(500).json({ success: false, message: "خطا در دریافت سفارشات" });
     }
   });
