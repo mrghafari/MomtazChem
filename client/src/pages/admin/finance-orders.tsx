@@ -718,7 +718,15 @@ function FinanceOrders() {
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-700 to-indigo-800 bg-clip-text text-transparent">
                   واحد مالی
                 </h1>
-                <p className="text-gray-600 mt-1">مدیریت و بررسی پرداخت‌های دریافتی</p>
+                <p className="text-gray-600 mt-1">مدیریت پرداخت‌ها</p>
+              </div>
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 max-w-sm">
+                <p className="text-amber-800 text-sm font-medium">
+                  پرداخت ترکیبی کیف پول - نیاز به تایید دستی مالی
+                </p>
+                <p className="text-amber-700 text-xs mt-1">
+                  تمام سفارشات باید توسط بخش مالی بررسی و تایید شوند
+                </p>
               </div>
             </div>
 
