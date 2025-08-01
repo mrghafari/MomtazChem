@@ -2363,40 +2363,40 @@ function OrderCard({ order, onOrderSelect, readOnly = false, fetchOrderDetails }
           </div>
         </div>
 
-        {/* Order Details Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          {/* Payment Information */}
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
-            <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-              <DollarSign className="h-5 w-5 text-blue-600" />
-              جزئیات پرداخت
+        {/* Order Details Section - Compact Payment, Extended Address */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+          {/* Payment Information - Compact (1 column) */}
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-3 border border-blue-200">
+            <h4 className="font-medium text-gray-800 mb-2 flex items-center gap-1 text-sm">
+              <DollarSign className="h-4 w-4 text-blue-600" />
+              پرداخت
             </h4>
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">مبلغ کل:</span>
+            <div className="space-y-1">
+              <div className="flex justify-between text-xs">
+                <span className="text-gray-600">مبلغ:</span>
                 <span className="font-bold text-gray-800">{parseFloat(order.totalAmount).toLocaleString()} {order.currency}</span>
               </div>
               {order.deliveryCost && parseFloat(order.deliveryCost) > 0 && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">هزینه حمل:</span>
-                  <span className="font-medium text-gray-700">{parseFloat(order.deliveryCost).toLocaleString()} {order.currency}</span>
+                <div className="flex justify-between text-xs">
+                  <span className="text-gray-600">حمل:</span>
+                  <span className="font-medium text-gray-700">{parseFloat(order.deliveryCost).toLocaleString()}</span>
                 </div>
               )}
               {order.walletAmountUsed && parseFloat(order.walletAmountUsed) > 0 && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">مقدار کیف پول:</span>
-                  <span className="font-medium text-green-700">{parseFloat(order.walletAmountUsed).toLocaleString()} {order.currency}</span>
+                <div className="flex justify-between text-xs">
+                  <span className="text-gray-600">کیف پول:</span>
+                  <span className="font-medium text-green-700">{parseFloat(order.walletAmountUsed).toLocaleString()}</span>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Shipping Information */}
-          {order.shippingAddress && (
-            <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-4 border border-green-200">
+          {/* Shipping Information - Extended (2 columns) */}
+          {order.shippingAddress ? (
+            <div className="lg:col-span-2 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-4 border border-green-200">
               <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
                 <MapPin className="h-5 w-5 text-green-600" />
-                آدرس تحویل
+                آدرس کامل تحویل محصولات
               </h4>
               <div className="text-sm text-gray-700">
                 {(() => {
@@ -2405,11 +2405,42 @@ function OrderCard({ order, onOrderSelect, readOnly = false, fetchOrderDetails }
                       ? JSON.parse(order.shippingAddress) 
                       : order.shippingAddress;
                     return (
-                      <div className="space-y-1">
-                        <p className="font-medium">{address.address || address.street || 'آدرس نامشخص'}</p>
-                        {address.city && <p className="text-gray-600">شهر: {address.city}</p>}
-                        {address.province && <p className="text-gray-600">استان: {address.province}</p>}
-                        {address.postalCode && <p className="text-gray-600">کد پستی: {address.postalCode}</p>}
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <div className="bg-white p-3 rounded-lg border border-green-100">
+                            <p className="font-medium text-gray-900 text-base leading-relaxed">
+                              {address.address || address.street || 'آدرس نامشخص'}
+                            </p>
+                          </div>
+                          {address.notes && (
+                            <div className="bg-yellow-50 p-2 rounded border border-yellow-200">
+                              <p className="text-xs text-yellow-800">یادداشت: {address.notes}</p>
+                            </div>
+                          )}
+                        </div>
+                        <div className="space-y-2">
+                          {address.city && (
+                            <div className="flex items-center gap-2">
+                              <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                              <span className="text-gray-600 text-xs">شهر:</span>
+                              <span className="font-medium">{address.city}</span>
+                            </div>
+                          )}
+                          {address.province && (
+                            <div className="flex items-center gap-2">
+                              <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                              <span className="text-gray-600 text-xs">استان:</span>
+                              <span className="font-medium">{address.province}</span>
+                            </div>
+                          )}
+                          {address.postalCode && (
+                            <div className="flex items-center gap-2">
+                              <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
+                              <span className="text-gray-600 text-xs">کد پستی:</span>
+                              <span className="font-medium">{address.postalCode}</span>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     );
                   } catch {
@@ -2417,6 +2448,14 @@ function OrderCard({ order, onOrderSelect, readOnly = false, fetchOrderDetails }
                   }
                 })()}
               </div>
+            </div>
+          ) : (
+            <div className="lg:col-span-2 bg-gray-50 rounded-lg p-4 border border-gray-200">
+              <h4 className="font-medium text-gray-600 mb-2 flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-gray-400" />
+                آدرس تحویل
+              </h4>
+              <p className="text-sm text-gray-500">آدرس تحویل تعیین نشده است</p>
             </div>
           )}
         </div>
