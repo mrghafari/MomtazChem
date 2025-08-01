@@ -2906,6 +2906,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin wallet correction endpoints
+  app.post("/api/admin/wallet/find-order", requireAuth, async (req, res) => {
+    try {
+      const { order_number } = req.body;
+      
+      if (!order_number) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "شماره سفارش الزامی است" 
+        });
+      }
+
+      // اجرای تابع جستجوی سفارش
+      const result = await db.execute(sql`
+        SELECT * FROM find_order_info_by_number(${order_number})
+      `);
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "سفارش یافت نشد" 
+        });
+      }
+
+      const orderInfo = result.rows[0];
+      res.json({ 
+        success: true, 
+        order: {
+          order_id: orderInfo.order_id,
+          customer_id: orderInfo.customer_id,
+          customer_name: orderInfo.customer_name,
+          order_total: parseFloat(orderInfo.order_total),
+          wallet_balance: parseFloat(orderInfo.wallet_balance),
+          order_status: orderInfo.order_status
+        }
+      });
+    } catch (error) {
+      console.error('خطا در جستجوی سفارش:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطای داخلی سرور" 
+      });
+    }
+  });
+
+  app.post("/api/admin/wallet/correction", requireAuth, async (req, res) => {
+    try {
+      const { order_number, correction_amount, description } = req.body;
+      
+      if (!order_number || correction_amount === undefined) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "شماره سفارش و مبلغ تصحیح الزامی است" 
+        });
+      }
+
+      // اجرای تابع تصحیح امن
+      const result = await db.execute(sql`
+        SELECT manage_wallet_payment_by_order_number(
+          ${order_number}, 
+          ${correction_amount}, 
+          ${description || null}
+        ) as result
+      `);
+
+      const correctionResult = JSON.parse(result.rows[0].result);
+      
+      if (correctionResult.success) {
+        res.json(correctionResult);
+      } else {
+        res.status(400).json(correctionResult);
+      }
+    } catch (error) {
+      console.error('خطا در تصحیح کیف پول:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطای داخلی سرور",
+        error: error.message
+      });
+    }
+  });
+
   // Admin endpoint to change any user's password
   app.put("/api/admin/users/:id/password", requireAuth, async (req, res) => {
     try {

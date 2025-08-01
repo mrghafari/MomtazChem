@@ -210,6 +210,14 @@ export default function SiteManagement() {
       moduleId: "wallet_management"
     },
     {
+      id: "wallet-correction",
+      label: "Wallet Correction",
+      icon: DollarSign,
+      onClick: () => trackButtonClick("wallet-correction", () => setLocation("/admin/wallet-correction")),
+      className: "border-orange-300 text-orange-600 hover:bg-orange-50",
+      moduleId: "wallet_management"
+    },
+    {
       id: "finance",
       label: "Finance",
       icon: DollarSign,
