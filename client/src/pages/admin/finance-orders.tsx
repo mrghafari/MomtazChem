@@ -82,6 +82,8 @@ interface OrderManagement {
   currentStatus: string;
   totalAmount: string;
   currency: string;
+  paymentMethod?: string;
+  paymentStatus?: string;
   paymentReceiptUrl?: string;
   financialNotes?: string;
   financialReviewedAt?: string;
@@ -91,6 +93,7 @@ interface OrderManagement {
   customerLastName?: string;
   customerEmail?: string;
   customerPhone?: string;
+  customerName?: string; // اضافه شده: نام کامل مشتری
   customer?: {
     firstName: string;
     lastName: string;
@@ -107,10 +110,24 @@ interface OrderManagement {
   receiptMimeType?: string;
   financialReviewerId?: number;
   deliveryCode?: string;
+  shippingAddress?: any;
+  billingAddress?: any;
 }
 
 // Helper function to get customer info with fallback
 const getCustomerInfo = (order: OrderManagement) => {
+  // Try to use the customerName field first (from API)
+  if (order.customerName && order.customerName.trim()) {
+    const nameParts = order.customerName.trim().split(' ');
+    return {
+      firstName: nameParts[0] || '',
+      lastName: nameParts.slice(1).join(' ') || '',
+      email: order.customerEmail || '',
+      phone: order.customerPhone || ''
+    };
+  }
+  
+  // Fallback to customer object
   if (order.customer) {
     return {
       firstName: order.customer.firstName,
@@ -119,6 +136,8 @@ const getCustomerInfo = (order: OrderManagement) => {
       phone: order.customer.phone
     };
   }
+  
+  // Final fallback to individual fields
   return {
     firstName: order.customerFirstName || '',
     lastName: order.customerLastName || '',
@@ -2241,7 +2260,11 @@ function OrderCard({ order, onOrderSelect, readOnly = false, fetchOrderDetails }
             </div>
             <div>
               <h3 className="font-bold text-xl text-gray-900">سفارش {order.orderNumber || 'در حال بارگذاری...'}</h3>
-              <p className="text-sm text-gray-600 font-medium">{customerInfo.firstName} {customerInfo.lastName}</p>
+              <p className="text-sm text-gray-600 font-medium">
+                {customerInfo.firstName && customerInfo.lastName 
+                  ? `${customerInfo.firstName} ${customerInfo.lastName}` 
+                  : order.customerName || 'نام مشتری نامشخص'}
+              </p>
               <p className="text-xs text-gray-500">ID: {order.customerOrderId}</p>
             </div>
           </div>
@@ -2270,14 +2293,14 @@ function OrderCard({ order, onOrderSelect, readOnly = false, fetchOrderDetails }
             <Mail className="h-4 w-4 text-gray-500" />
             <div>
               <p className="text-xs text-gray-500">ایمیل</p>
-              <p className="text-sm font-medium text-gray-700">{order.customer?.email || 'نامشخص'}</p>
+              <p className="text-sm font-medium text-gray-700">{customerInfo.email || order.customerEmail || 'نامشخص'}</p>
             </div>
           </div>
           <div className="flex items-center space-x-2 space-x-reverse bg-gray-50 rounded-lg p-3">
             <Phone className="h-4 w-4 text-gray-500" />
             <div>
               <p className="text-xs text-gray-500">تلفن</p>
-              <p className="text-sm font-medium text-gray-700">{order.customer?.phone || 'نامشخص'}</p>
+              <p className="text-sm font-medium text-gray-700">{customerInfo.phone || order.customerPhone || 'نامشخص'}</p>
             </div>
           </div>
           <div className="flex items-center space-x-2 space-x-reverse bg-gray-50 rounded-lg p-3">
@@ -2327,13 +2350,13 @@ function OrderCard({ order, onOrderSelect, readOnly = false, fetchOrderDetails }
                     </div>
                   </>
                 );
-              } else if (paymentMethod === 'bank_gateway') {
+              } else if (paymentMethod === 'bank_gateway' || paymentMethod === 'online_payment') {
                 return (
                   <>
                     <CreditCard className="h-4 w-4 text-blue-600" />
                     <div>
                       <p className="text-xs text-gray-500">روش پرداخت</p>
-                      <p className="text-sm font-medium text-blue-700">درگاه بانکی</p>
+                      <p className="text-sm font-medium text-blue-700">درگاه آنلاین</p>
                     </div>
                   </>
                 );
