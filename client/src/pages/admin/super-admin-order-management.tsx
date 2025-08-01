@@ -138,7 +138,7 @@ export default function SuperAdminOrderManagement() {
   // Toggle gateway status mutation
   const toggleGatewayMutation = useMutation({
     mutationFn: async (gatewayId: number) => {
-      return apiRequest(`/api/payment/gateways/${gatewayId}/toggle`, 'PATCH');
+      return apiRequest(`/api/payment/gateways/${gatewayId}/toggle`, { method: 'PATCH' });
     },
     onSuccess: () => {
       toast({

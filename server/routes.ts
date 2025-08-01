@@ -28786,31 +28786,7 @@ momtazchem.com
     }
   });
 
-  // Toggle payment gateway status
-  app.post('/api/payment/gateways/:id/toggle', requireAuth, async (req, res) => {
-    try {
-      const gatewayId = parseInt(req.params.id);
-      
-      const [currentGateway] = await db.select().from(paymentGateways).where(eq(paymentGateways.id, gatewayId));
-      
-      if (!currentGateway) {
-        return res.status(404).json({ success: false, message: 'Payment gateway not found' });
-      }
-      
-      const [gateway] = await db.update(paymentGateways)
-        .set({
-          enabled: !currentGateway.enabled,
-          updatedAt: new Date(),
-        })
-        .where(eq(paymentGateways.id, gatewayId))
-        .returning();
-      
-      res.json({ success: true, data: gateway });
-    } catch (error) {
-      console.error('Error toggling payment gateway:', error);
-      res.status(500).json({ success: false, message: 'Failed to toggle payment gateway' });
-    }
-  });
+
 
   // ============================================================================
   // IRAQI BANKING PAYMENT API

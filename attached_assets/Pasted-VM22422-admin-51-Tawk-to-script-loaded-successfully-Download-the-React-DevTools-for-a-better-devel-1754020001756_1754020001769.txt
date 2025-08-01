@@ -1,0 +1,85 @@
+VM22422 admin:51 Tawk.to script loaded successfully
+ Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ Auth check result: Object
+ Error: Unable to store cookie
+    at e.value (embed.tawk.to/_s/v4/app/6880b98ef42/js/twk-chunk-common.js:2:117574)
+    at t.value (embed.tawk.to/_s/v4/app/6880b98ef42/js/twk-chunk-common.js:2:150658)
+    at p.updateUUID (embed.tawk.to/_s/v4/app/6880b98ef42/js/twk-chunk-common.js:2:202310)
+    at Array.<anonymous> (embed.tawk.to/_s/v4/app/6880b98ef42/js/twk-vendor.js:2:76358)
+    at p.dispatch (embed.tawk.to/_s/v4/app/6880b98ef42/js/twk-vendor.js:2:78106)
+    at p.dispatch (embed.tawk.to/_s/v4/app/6880b98ef42/js/twk-vendor.js:2:73855)
+    at t.value (embed.tawk.to/_s/v4/app/6880b98ef42/js/twk-chunk-common.js:2:124589)
+    at embed.tawk.to/_s/v4/app/6880b98ef42/js/twk-chunk-common.js:2:123900
+value @ embed.tawk.to/_s/v4/…k-chunk-common.js:2
+VM22422 admin:23 Tawk.to Live Chat loaded successfully
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ Auth check result: Object
+ 🔍 [DEBUG] Site Management component initialized
+ 🔍 [DEBUG] useEffect triggered, userPermissions: undefined
+ 🔍 [DEBUG] Site Management component initialized
+ 🔍 [DEBUG] useEffect triggered, userPermissions: Object
+ 🔍 [DEBUG] userPermissions modules: Array(34)
+ 🔍 [DEBUG] Full userPermissions response: Object
+ 🔍 [DEBUG] userPermissions.modules: Array(34)
+ 🔍 [DEBUG] userPermissions.permissions: Array(34)
+ 🔍 [DEBUG] Total allButtons count: 34
+ 🔍 [DEBUG] AI Settings exists in allButtons: true
+ 🔍 [DEBUG] Content Management exists in allButtons: true
+ 🔍 [DEBUG] allowedModules: Array(34)
+ 🔍 [DEBUG] kpi_dashboard in allowedModules? true
+ 🔍 [DEBUG] management_dashboard in allowedModules? true
+ 🔍 [DEBUG] finance in allowedModules? true
+ 🔍 [DEBUG] geography_analytics in allowedModules? true
+ 🔍 [DEBUG] ai_settings in allowedModules? true
+ 🔍 [DEBUG] content_management in allowedModules? true
+ 🔍 [CRITICAL] Missing button detection:
+ 🔍 [MISSING] order-tracking-view Order Management & Tracking - View Only moduleId: order_tracking
+ 🔍 [CRITICAL] Missing buttons count: 1
+ 🔍 [DEBUG] finance button found in allButtons? Object
+ 🔍 [DEBUG] geography_analytics button found in allButtons? Object
+ 🔍 [DEBUG] ai_settings button found in allButtons? Object
+ 🔍 [DEBUG] content_management button found in allButtons? Object
+ 🔍 [DEBUG] finance button in filtered? Object
+ 🔍 [DEBUG] geography_analytics button in filtered? Object
+ 🔍 [DEBUG] ai_settings button in filtered? Object
+ 🔍 [DEBUG] content_management button in filtered? Object
+ 🔍 [DEBUG] filtered buttons count: 33
+ 🔍 [DEBUG] First 5 filtered buttons: Array(5)
+ 🔍 [DEBUG] AI Control button in filtered: Object
+ 🔍 [DEBUG] Content Management button in filtered: Object
+ 🔍 [DEBUG] Site Management component initialized
+/api/payment/gateways/4/toggle:1  Failed to load resource: the server responded with a status of 404 (Not Found)
+  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/payment/gateways/4/toggle 404 (Not Found)
+apiRequest @ /src/lib/queryClient.ts:39
+mutationFn @ /src/pages/admin/payment-settings.tsx:69
+fn @ /@fs/home/runner/wor….js?v=815b1335:1189
+run @ /@fs/home/runner/wor…y.js?v=815b1335:494
+start @ /@fs/home/runner/wor…y.js?v=815b1335:536
+execute @ /@fs/home/runner/wor….js?v=815b1335:1225
+  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/payment/gateways/4/toggle 404 (Not Found)
+apiRequest @ /src/lib/queryClient.ts:39
+mutationFn @ /src/pages/admin/payment-settings.tsx:69
+fn @ /@fs/home/runner/wor….js?v=815b1335:1189
+run @ /@fs/home/runner/wor…y.js?v=815b1335:494
+start @ /@fs/home/runner/wor…y.js?v=815b1335:536
+execute @ /@fs/home/runner/wor….js?v=815b1335:1225
+await in execute
+mutate @ /@fs/home/runner/wor….js?v=815b1335:2630
+(anonymous) @ /@fs/home/runner/wor….js?v=815b1335:3295
+onClick @ /src/pages/admin/pay…t-settings.tsx:1889
+callCallback2 @ /@fs/home/runner/wor….js?v=815b1335:3674
+invokeGuardedCallbackDev @ /@fs/home/runner/wor….js?v=815b1335:3699
+invokeGuardedCallback @ /@fs/home/runner/wor….js?v=815b1335:3733
+invokeGuardedCallbackAndCatchFirstError @ /@fs/home/runner/wor….js?v=815b1335:3736
+executeDispatch @ /@fs/home/runner/wor….js?v=815b1335:7014
+processDispatchQueueItemsInOrder @ /@fs/home/runner/wor….js?v=815b1335:7034
+processDispatchQueue @ /@fs/home/runner/wor….js?v=815b1335:7043
+dispatchEventsForPlugins @ /@fs/home/runner/wor….js?v=815b1335:7051
+(anonymous) @ /@fs/home/runner/wor….js?v=815b1335:7174
+batchedUpdates$1 @ /@fs/home/runner/wor…js?v=815b1335:18913
+batchedUpdates @ /@fs/home/runner/wor….js?v=815b1335:3579
+dispatchEventForPluginEventSystem @ /@fs/home/runner/wor….js?v=815b1335:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ /@fs/home/runner/wor….js?v=815b1335:5478
+dispatchEvent @ /@fs/home/runner/wor….js?v=815b1335:5472
+dispatchDiscreteEvent @ /@fs/home/runner/wor….js?v=815b1335:5449
