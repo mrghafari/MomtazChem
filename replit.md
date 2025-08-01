@@ -6,6 +6,13 @@ Momtazchem Chemical Solutions Platform is a comprehensive, multilingual solution
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
+**Critical Security Requirements:**
+- Extreme vigilance in wallet transaction processing
+- Always verify customer_id matches between orders and wallet transactions
+- Never allow cross-customer wallet operations
+- Implement quadruple verification for all payment corrections
+- Maintain detailed audit trails for all financial operations
+
 ## System Architecture
 
 ### UI/UX Decisions
@@ -13,6 +20,13 @@ The platform features a professional, modern, and multilingual user interface. I
 
 ### Technical Implementations
 The system is built on a robust full-stack architecture. Features include comprehensive security with multi-level authentication, session management, password hashing (Bcrypt), and role-based access control. Real-time capabilities such as GPS tracking, inventory alerts, and order status updates are integrated. The platform supports dynamic multilingual content localization and adaptable UI layouts. Core business logic is implemented for product management, order processing, customer relationship management, and logistics, with a strong focus on automation and data integrity. Key implementations include a systematic auto-approval system for payments, standardized geographical data, a vehicle template system for optimized logistics, and a hybrid payment system combining digital wallet and bank gateway functionalities.
+
+**Recent Security Enhancements (August 2025):**
+- Implemented comprehensive wallet security audit system (`audit_wallet_security()`)
+- Created secure payment correction function (`secure_payment_correction()`) with quadruple verification
+- Resolved critical cross-customer wallet transaction issues affecting 35M+ IQD
+- Added systematic payment correction algorithm for all historical orders
+- Established wallet security controls documentation and best practices
 
 ### System Design Choices
 The architecture emphasizes modularity and scalability. Core architectural patterns include a RESTful API design for backend-frontend communication, ensuring clear separation of concerns. Data integrity is maintained through transactional operations for critical processes like order creation and inventory updates. The system employs a prevention-first approach to avoid data inconsistencies. A unified vehicle selection algorithm prioritizes cost-efficiency and safety compliance, particularly for hazardous materials. Inventory management strictly adheres to FIFO (First-In, First-Out) principles. A comprehensive email and SMS automation system leverages templates and intelligent routing. The system is designed for continuous integration and deployment, with a focus on performance optimization through database indexing, caching, and asset optimization.
