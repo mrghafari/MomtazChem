@@ -33027,6 +33027,54 @@ momtazchem.com
     }
   });
 
+  // Warehouse Department - Save notes without approval/rejection
+  app.post("/api/warehouse/orders/:orderId/notes", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { db } = await import("./db");
+      const { orderManagement } = await import("../shared/order-management-schema");
+      const { eq } = await import("drizzle-orm");
+      
+      const customerOrderId = parseInt(req.params.orderId);
+      const { notes } = req.body;
+      const adminId = req.session.adminId;
+
+      console.log(`📝 [WAREHOUSE] Saving notes for customer order ID: ${customerOrderId}`);
+
+      // Update warehouse notes in order management
+      const [updated] = await db
+        .update(orderManagement)
+        .set({
+          warehouseNotes: notes,
+          warehouseAssigneeId: adminId,
+          updatedAt: new Date()
+        })
+        .where(eq(orderManagement.customerOrderId, customerOrderId))
+        .returning();
+
+      if (!updated) {
+        return res.status(404).json({
+          success: false,
+          message: "سفارش در سیستم مدیریت یافت نشد"
+        });
+      }
+
+      console.log(`✅ [WAREHOUSE] Notes saved successfully for order ${customerOrderId}`);
+
+      res.json({ 
+        success: true, 
+        message: "یادداشت انبار ذخیره شد",
+        data: { warehouseNotes: notes }
+      });
+    } catch (error) {
+      console.error("Error saving warehouse notes:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در ذخیره یادداشت",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   // Warehouse Department - Approve order (items ready)
   app.post("/api/warehouse/orders/:orderId/approve", requireAuth, attachUserDepartments, requireDepartment('warehouse'), async (req: Request, res: Response) => {
     try {

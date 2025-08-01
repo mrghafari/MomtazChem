@@ -231,11 +231,10 @@ const WarehouseManagementFixed: React.FC = () => {
 
     setSavingNotes(true);
     try {
-      // Use the warehouse process endpoint without closing the form
-      await apiRequest(`/api/order-management/warehouse/${selectedOrder.id}/process`, {
-        method: 'PATCH',
+      // Use the dedicated warehouse notes endpoint
+      await apiRequest(`/api/warehouse/orders/${selectedOrder.customerOrderId}/notes`, {
+        method: 'POST',
         body: { 
-          status: selectedOrder.currentStatus, // Keep current status
           notes: warehouseNotes 
         }
       });
@@ -244,13 +243,13 @@ const WarehouseManagementFixed: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['/api/order-management/warehouse'] });
       
       toast({
-        title: "یادداشت ذخیره شد",
+        title: "✅ یادداشت ذخیره شد",
         description: "یادداشت انبار با موفقیت ذخیره شد",
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "خطا در ذخیره",
-        description: "خطایی در ذخیره یادداشت رخ داد",
+        description: error.message || "خطایی در ذخیره یادداشت رخ داد",
         variant: "destructive",
       });
     } finally {
