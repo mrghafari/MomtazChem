@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Package, Search, Filter, ArrowLeft, FileText, Clock, CheckCircle, XCircle, Plus, Edit3, Trash2, Download, Upload, RefreshCw, AlertTriangle, Calendar, Users, TrendingUp, TrendingDown, Eye, BarChart3, Package2, Truck, Weight, Calculator, FileSpreadsheet, ChevronRight, ChevronLeft } from 'lucide-react';
+import { Package, Search, Filter, ArrowLeft, FileText, Clock, CheckCircle, XCircle, Plus, Edit3, Trash2, Download, Upload, RefreshCw, AlertTriangle, Calendar, Users, TrendingUp, TrendingDown, Eye, BarChart3, Package2, Truck, Weight, Calculator, FileSpreadsheet, ChevronRight, ChevronLeft, Printer } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
@@ -73,6 +73,171 @@ const WarehouseManagementFixed: React.FC = () => {
   const [activeTab, setActiveTab] = useState("orders");
   const [orderDetails, setOrderDetails] = useState<any>(null);
   const [loadingOrderDetails, setLoadingOrderDetails] = useState(false);
+
+  // Print function for order details
+  const handlePrintOrder = () => {
+    if (!orderDetails) return;
+    
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+    
+    const formatCurrencyForPrint = (amount: number) => {
+      return new Intl.NumberFormat('fa-IR', {
+        style: 'currency',
+        currency: 'IQD',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      }).format(amount).replace('IQD', 'دینار عراقی');
+    };
+
+    const printContent = `
+      <!DOCTYPE html>
+      <html dir="rtl" lang="fa">
+      <head>
+        <meta charset="UTF-8">
+        <title>جزئیات سفارش ${orderDetails.orderNumber || `#${selectedOrder?.customerOrderId}`}</title>
+        <style>
+          body { font-family: 'Tahoma', sans-serif; margin: 20px; direction: rtl; }
+          .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 20px; }
+          .company-name { font-size: 24px; font-weight: bold; color: #1a365d; }
+          .order-title { font-size: 18px; margin-top: 10px; }
+          .section { margin-bottom: 20px; }
+          .section-title { font-size: 16px; font-weight: bold; border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-bottom: 10px; }
+          .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+          .info-item { border: 1px solid #ddd; padding: 10px; border-radius: 4px; }
+          .info-label { font-weight: bold; color: #666; font-size: 12px; }
+          .info-value { margin-top: 5px; font-size: 14px; }
+          .items-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+          .items-table th, .items-table td { border: 1px solid #ddd; padding: 8px; text-align: right; }
+          .items-table th { background-color: #f5f5f5; font-weight: bold; }
+          .summary-box { background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 15px; }
+          .status-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 10px; }
+          .status-item { padding: 10px; border-radius: 4px; text-align: center; border: 1px solid #ddd; }
+          .status-approved { background-color: #d4edda; border-color: #c3e6cb; }
+          .status-pending { background-color: #f8f9fa; border-color: #dee2e6; }
+          .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #666; }
+          @media print { body { margin: 0; } }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div class="company-name">شرکت ممتاز شیمی</div>
+          <div class="order-title">جزئیات سفارش ${orderDetails.orderNumber || `#${selectedOrder?.customerOrderId}`}</div>
+          <div style="font-size: 12px; margin-top: 10px;">تاریخ چاپ: ${new Date().toLocaleDateString('fa-IR')}</div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">اطلاعات مشتری</div>
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">نام مشتری</div>
+              <div class="info-value">${orderDetails.customer?.firstName || ''} ${orderDetails.customer?.lastName || ''}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">شماره تماس</div>
+              <div class="info-value">${orderDetails.customer?.phone || 'نامشخص'}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">ایمیل</div>
+              <div class="info-value">${orderDetails.customer?.email || 'نامشخص'}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">مبلغ کل</div>
+              <div class="info-value" style="color: #059669; font-weight: bold;">${formatCurrencyForPrint(parseFloat(orderDetails.totalAmount) || 0)}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">خلاصه سفارش</div>
+          <div class="summary-box">
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; text-align: center;">
+              <div>
+                <div class="info-label">تعداد آیتم‌ها</div>
+                <div style="font-size: 18px; font-weight: bold; color: #1d4ed8;">${orderDetails.totalItems}</div>
+              </div>
+              <div>
+                <div class="info-label">مجموع وزن ناخالص</div>
+                <div style="font-size: 18px; font-weight: bold; color: #1d4ed8;">${orderDetails.totalWeight ? `${parseFloat(orderDetails.totalWeight).toFixed(1)} kg` : 'محاسبه نشده'}</div>
+              </div>
+              <div>
+                <div class="info-label">تاریخ سفارش</div>
+                <div style="font-size: 14px; font-weight: bold;">${new Date(orderDetails.orderDate).toLocaleDateString('fa-IR')}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">آیتم‌های سفارش</div>
+          <table class="items-table">
+            <thead>
+              <tr>
+                <th style="width: 35%">نام محصول</th>
+                <th style="width: 20%">کد محصول</th>
+                <th style="width: 15%">تعداد</th>
+                <th style="width: 15%">قیمت واحد</th>
+                <th style="width: 15%">قیمت کل</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${orderDetails.items?.map((item: any) => `
+                <tr>
+                  <td>${item.productName}</td>
+                  <td style="font-family: monospace;">${item.productSku}</td>
+                  <td style="text-align: center; font-weight: bold;">${item.quantity}</td>
+                  <td>${formatCurrencyForPrint(parseFloat(item.unitPrice) || 0)}</td>
+                  <td style="font-weight: bold;">${formatCurrencyForPrint(parseFloat(item.totalPrice) || 0)}</td>
+                </tr>
+              `).join('') || ''}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="section">
+          <div class="section-title">وضعیت سفارش</div>
+          <div class="status-grid">
+            <div class="status-item ${orderDetails.financialApproved ? 'status-approved' : 'status-pending'}">
+              <div style="font-weight: bold;">تایید مالی</div>
+              <div>${orderDetails.financialApproved ? '✅ تایید شده' : '⏳ در انتظار'}</div>
+            </div>
+            <div class="status-item ${orderDetails.warehouseProcessed ? 'status-approved' : 'status-pending'}">
+              <div style="font-weight: bold;">پردازش انبار</div>
+              <div>${orderDetails.warehouseProcessed ? '✅ تایید شده' : '⏳ در انتظار'}</div>
+            </div>
+            <div class="status-item ${orderDetails.logisticsProcessed ? 'status-approved' : 'status-pending'}">
+              <div style="font-weight: bold;">پردازش لجستیک</div>
+              <div>${orderDetails.logisticsProcessed ? '✅ تایید شده' : '⏳ در انتظار'}</div>
+            </div>
+          </div>
+        </div>
+
+        ${orderDetails.warehouseNotes ? `
+          <div class="section">
+            <div class="section-title">یادداشت انبار</div>
+            <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #dee2e6;">
+              ${orderDetails.warehouseNotes}
+            </div>
+          </div>
+        ` : ''}
+
+        <div class="footer">
+          <p>این سند توسط سیستم مدیریت انبار ممتاز شیمی تولید شده است</p>
+          <p>تاریخ و زمان چاپ: ${new Date().toLocaleString('fa-IR')}</p>
+        </div>
+      </body>
+      </html>
+    `;
+
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    printWindow.focus();
+    
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 500);
+  };
   
   // Header filter states
   const [orderIdFilter, setOrderIdFilter] = useState('');
@@ -702,6 +867,14 @@ const WarehouseManagementFixed: React.FC = () => {
                     onClick={() => setShowOrderDetails(false)}
                   >
                     انصراف
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={handlePrintOrder}
+                    className="bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
+                  >
+                    <Printer className="w-4 h-4 mr-1" />
+                    پرینت جزئیات
                   </Button>
                   {selectedOrder?.currentStatus === 'warehouse_approved' && (
                     <Button
