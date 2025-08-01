@@ -38555,6 +38555,177 @@ momtazchem.com
     }
   });
 
+  // =============================================================================
+  // SUPER ADMIN ORDER DELETION SYSTEM - MUST BE BEFORE CATCH-ALL
+  // سیستم حذف کامل سفارشات توسط سوپر ادمین
+  // =============================================================================
+
+  // Delete order completely from all systems - SUPER ADMIN ONLY
+  app.delete('/api/super-admin/orders/:orderNumber', requireSuperAdmin, async (req: Request, res: Response) => {
+    const { orderNumber } = req.params;
+    const adminId = req.session?.adminId;
+
+    try {
+      console.log(`🗑️ [SUPER ADMIN] Starting complete order deletion for: ${orderNumber} by admin ${adminId}`);
+
+      // Start transaction for atomic operations
+      await db.transaction(async (tx) => {
+        // 1. Find the order in customer_orders table
+        const customerOrderResult = await tx
+          .select()
+          .from(customerOrders)
+          .where(eq(customerOrders.orderNumber, orderNumber))
+          .limit(1);
+
+        if (customerOrderResult.length === 0) {
+          throw new Error(`سفارش با شماره ${orderNumber} یافت نشد`);
+        }
+
+        const customerOrder = customerOrderResult[0];
+        const customerOrderId = customerOrder.id;
+        console.log(`📋 [DELETE] Found customer order ID: ${customerOrderId}`);
+
+        // 2. Delete from order_items table
+        const deletedOrderItems = await tx
+          .delete(orderItems)
+          .where(eq(orderItems.orderId, customerOrderId))
+          .returning();
+        console.log(`🧾 [DELETE] Removed ${deletedOrderItems.length} order items`);
+
+        // 3. Delete from order_management table
+        const deletedOrderManagement = await tx
+          .delete(orderManagement)
+          .where(eq(orderManagement.customerOrderId, customerOrderId))
+          .returning();
+        console.log(`📊 [DELETE] Removed ${deletedOrderManagement.length} order management records`);
+
+        // 4. Delete from payment_receipts table
+        const deletedPaymentReceipts = await tx
+          .delete(paymentReceipts)
+          .where(eq(paymentReceipts.customerOrderId, customerOrderId))
+          .returning();
+        console.log(`💳 [DELETE] Removed ${deletedPaymentReceipts.length} payment receipts`);
+
+        // 5. Delete from wallet_transactions table
+        const deletedWalletTransactions = await tx
+          .delete(walletTransactions)
+          .where(eq(walletTransactions.referenceId, customerOrderId))
+          .returning();
+        console.log(`💰 [DELETE] Removed ${deletedWalletTransactions.length} wallet transactions`);
+
+        // 6. Delete from gps_delivery_confirmations table
+        const deletedGpsConfirmations = await tx
+          .delete(gpsDeliveryConfirmations)
+          .where(eq(gpsDeliveryConfirmations.customerOrderId, customerOrderId))
+          .returning();
+        console.log(`📍 [DELETE] Removed ${deletedGpsConfirmations.length} GPS delivery confirmations`);
+
+        // 7. Delete from vehicle_selections table
+        const deletedVehicleSelections = await tx
+          .delete(vehicleSelections)
+          .where(eq(vehicleSelections.customerOrderId, customerOrderId))
+          .returning();
+        console.log(`🚛 [DELETE] Removed ${deletedVehicleSelections.length} vehicle selections`);
+
+        // 8. Delete from delivery_verification_codes table
+        const deletedDeliveryCodes = await tx
+          .delete(deliveryVerificationCodes)
+          .where(eq(deliveryVerificationCodes.customerOrderId, customerOrderId))
+          .returning();
+        console.log(`🔐 [DELETE] Removed ${deletedDeliveryCodes.length} delivery verification codes`);
+
+        // 9. Delete from abandoned_orders table
+        const deletedAbandonedOrders = await tx
+          .delete(abandonedOrders)
+          .where(eq(abandonedOrders.customerOrderId, customerOrderId))
+          .returning();
+        console.log(`🛒 [DELETE] Removed ${deletedAbandonedOrders.length} abandoned order records`);
+
+        // 10. Delete from shop_orders table
+        const deletedShopOrders = await tx
+          .delete(shopOrders)
+          .where(eq(shopOrders.customerOrderId, customerOrderId))
+          .returning();
+        console.log(`🛍️ [DELETE] Removed ${deletedShopOrders.length} shop order records`);
+
+        // 11. Delete from email_logs table
+        const deletedEmailLogs = await tx
+          .delete(emailLogs)
+          .where(eq(emailLogs.relatedOrderId, customerOrderId))
+          .returning();
+        console.log(`📧 [DELETE] Removed ${deletedEmailLogs.length} email logs`);
+
+        // 12. Delete from sms_logs table  
+        const deletedSmsLogs = await tx
+          .delete(smsLogs)
+          .where(eq(smsLogs.relatedOrderId, customerOrderId))
+          .returning();
+        console.log(`📱 [DELETE] Removed ${deletedSmsLogs.length} SMS logs`);
+
+        // 13. Finally delete the customer order
+        const deletedCustomerOrder = await tx
+          .delete(customerOrders)
+          .where(eq(customerOrders.id, customerOrderId))
+          .returning();
+        console.log(`📦 [DELETE] Removed customer order: ${deletedCustomerOrder[0]?.orderNumber}`);
+      });
+
+      console.log(`✅ [SUPER ADMIN] Successfully deleted order ${orderNumber} from all systems`);
+
+      res.json({
+        success: true,
+        message: `سفارش ${orderNumber} با موفقیت از تمام بخش‌های سیستم حذف شد`,
+        orderNumber,
+        deletedBy: adminId,
+        deletedAt: new Date().toISOString()
+      });
+
+    } catch (error: any) {
+      console.error(`❌ [SUPER ADMIN] Failed to delete order ${orderNumber}:`, error);
+      res.status(500).json({
+        success: false,
+        message: error.message || 'خطا در حذف کامل سفارش'
+      });
+    }
+  });
+
+  // Get all orders available for deletion - SUPER ADMIN ONLY
+  app.get('/api/super-admin/deletable-orders', requireSuperAdmin, async (req: Request, res: Response) => {
+    try {
+      console.log(`🔍 [SUPER ADMIN] Fetching deletable orders for admin ${req.session?.adminId}`);
+
+      // Get orders from customer_orders table with basic filtering
+      const orders = await db
+        .select({
+          id: customerOrders.id,
+          orderNumber: customerOrders.orderNumber,
+          customerName: customerOrders.customerName,
+          customerEmail: customerOrders.customerEmail,
+          totalAmount: customerOrders.totalAmount,
+          currency: customerOrders.currency,
+          status: customerOrders.status,
+          paymentMethod: customerOrders.paymentMethod,
+          createdAt: customerOrders.createdAt,
+          updatedAt: customerOrders.updatedAt
+        })
+        .from(customerOrders)
+        .orderBy(desc(customerOrders.createdAt))
+        .limit(100);
+
+      res.json({
+        success: true,
+        data: orders,
+        message: `${orders.length} سفارش قابل حذف یافت شد`
+      });
+    } catch (error) {
+      console.error('❌ [SUPER ADMIN] Failed to fetch deletable orders:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در دریافت لیست سفارشات قابل حذف'
+      });
+    }
+  });
+
   // Catch-all for unmatched API routes - return JSON 404
   app.all('/api/*', (req, res) => {
     console.log(`❌ 404 - Unmatched API route: ${req.method} ${req.originalUrl}`);
@@ -42502,15 +42673,13 @@ momtazchem.com
     }
   });
 
-  // =============================================================================
-  // SUPER ADMIN ORDER DELETION SYSTEM
-  // سیستم حذف کامل سفارشات توسط سوپر ادمین
-  // =============================================================================
+  // Super admin routes moved before catch-all above
 
-  // Delete order completely from all systems - SUPER ADMIN ONLY
-  app.delete('/api/super-admin/orders/:orderNumber', requireSuperAdmin, async (req: Request, res: Response) => {
-    const { orderNumber } = req.params;
-    const adminId = req.session?.adminId;
+  // Payment Workflow Automation - Fix Incomplete Payments  
+  app.post('/api/admin/fix-incomplete-payments', async (req, res) => {
+    if (!req.isAuthenticated() || (!req.user?.roleId && !req.session?.adminId)) {
+      return res.status(401).json({ success: false, message: 'احراز هویت مدیریت مورد نیاز است' });
+    }
 
     try {
       console.log(`🗑️ [SUPER ADMIN] Starting complete order deletion for: ${orderNumber} by admin ${adminId}`);
