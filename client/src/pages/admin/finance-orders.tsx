@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { 
@@ -1671,7 +1672,7 @@ function FinanceOrders() {
 
         {/* Order Details Modal */}
         <Dialog open={orderDetailsModalOpen} onOpenChange={setOrderDetailsModalOpen}>
-          <DialogContent className="max-w-6xl max-h-[90vh] overflow-auto" dir="rtl">
+          <DialogContent className="max-w-6xl max-h-[90vh]" dir="rtl">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5" />
@@ -1679,8 +1680,9 @@ function FinanceOrders() {
               </DialogTitle>
             </DialogHeader>
             
-            {orderDetails && (
-              <div className="space-y-6">
+            <ScrollArea className="max-h-[75vh] pr-4">
+              {orderDetails && (
+                <div className="space-y-6">
                 {/* Customer Information */}
                 <Card>
                   <CardHeader>
@@ -2070,20 +2072,21 @@ function FinanceOrders() {
                     </div>
                   </CardContent>
                 </Card>
-              </div>
-            )}
+                </div>
+              )}
+            </ScrollArea>
           </DialogContent>
         </Dialog>
 
         {/* Enhanced Image Modal with Zoom */}
         <Dialog open={imageModalOpen} onOpenChange={setImageModalOpen}>
-          <DialogContent className="max-w-6xl max-h-[95vh] overflow-hidden">
+          <DialogContent className="max-w-6xl max-h-[95vh]">
             <DialogHeader>
               <DialogTitle className="text-right">مشاهده فیش بانکی</DialogTitle>
             </DialogHeader>
-            {selectedImageUrl ? (
-              <div className="relative bg-gray-100 rounded-lg" style={{ minHeight: '500px' }}>
-                <div className="overflow-auto max-h-[75vh] p-4">
+            <ScrollArea className="max-h-[80vh]">
+              {selectedImageUrl ? (
+                <div className="relative bg-gray-100 rounded-lg p-4" style={{ minHeight: '500px' }}>
                   <div className="flex justify-center items-center min-h-[400px]">
                     <img 
                       src={selectedImageUrl} 
@@ -2148,7 +2151,6 @@ function FinanceOrders() {
                       }}
                     />
                   </div>
-                </div>
                 
                 {/* Zoom indicator */}
                 <div className="absolute top-4 right-4 bg-black bg-opacity-70 text-white px-3 py-1 rounded-lg text-sm">
@@ -2179,6 +2181,7 @@ function FinanceOrders() {
                 </div>
               </div>
             )}
+            </ScrollArea>
           </DialogContent>
         </Dialog>
       </div>
