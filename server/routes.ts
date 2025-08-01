@@ -25227,7 +25227,8 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           om.current_status as "managementStatus",
           CASE 
             WHEN om.id IS NULL THEN 'یتیم - فاقد رکورد مدیریت'
-            WHEN (om.current_status = 'pending' AND co.status = 'pending' AND co.payment_status = 'pending') THEN 'نیمه تمام - پرداخت ناتمام در درگاه بانکی'
+            WHEN (om.current_status = 'pending' AND co.status = 'pending' AND co.payment_status = 'pending' AND co.payment_method = 'online_payment') THEN 'نیمه تمام - پرداخت ناتمام در درگاه بانکی'
+            WHEN (co.payment_method = 'bank_transfer_grace' AND co.status IN ('pending', 'awaiting_payment') AND co.payment_status IN ('pending', 'grace_period') AND COALESCE(co.notification_stage, 0) > 0) THEN 'مهلت سه روزه - در حال اطلاع رسانی'
             WHEN (om.current_status = 'payment_uploaded' AND co.payment_method = 'bank_transfer_grace' AND co.payment_status = 'receipt_uploaded') THEN 'معلق - حواله بانکی آپلود شده'
             ELSE 'مشکوک - نیاز به بررسی'
           END as "orphanType"
@@ -25238,9 +25239,12 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           om.id IS NULL
           OR
           -- 2. All pending/pending orders that failed bank payment (immediately include them)
-          (om.current_status = 'pending' AND co.status = 'pending' AND co.payment_status = 'pending' AND COALESCE(co.notification_stage, 0) = 0)
+          (om.current_status = 'pending' AND co.status = 'pending' AND co.payment_status = 'pending' AND co.payment_method = 'online_payment' AND COALESCE(co.notification_stage, 0) = 0)
           OR
-          -- 3. Bank transfer receipts uploaded but stuck in financial review
+          -- 3. Grace period orders with notifications in progress (exclude from main workflow)
+          (co.payment_method = 'bank_transfer_grace' AND co.status IN ('pending', 'awaiting_payment') AND co.payment_status IN ('pending', 'grace_period') AND COALESCE(co.notification_stage, 0) > 0)
+          OR
+          -- 4. Bank transfer receipts uploaded but stuck in financial review
           (om.current_status = 'payment_uploaded' AND co.payment_method = 'bank_transfer_grace' AND co.payment_status = 'receipt_uploaded' AND co.updated_at < NOW() - INTERVAL '2 hours')
         )
         ORDER BY co.created_at DESC
@@ -25257,6 +25261,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       const categorized = {
         trulyOrphaned: orphanedOrders.filter(o => o.orphanType === 'یتیم - فاقد رکورد مدیریت'),
         incompleteBankPayment: orphanedOrders.filter(o => o.orphanType === 'نیمه تمام - پرداخت ناتمام در درگاه بانکی'),
+        gracePeriodNotifications: orphanedOrders.filter(o => o.orphanType === 'مهلت سه روزه - در حال اطلاع رسانی'),
         stuckBankTransfers: orphanedOrders.filter(o => o.orphanType === 'معلق - حواله بانکی آپلود شده'),
         suspicious: orphanedOrders.filter(o => o.orphanType === 'مشکوک - نیاز به بررسی')
       };
@@ -25265,6 +25270,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         total: orphanedOrders.length,
         trulyOrphaned: categorized.trulyOrphaned.length,
         incompleteBankPayment: categorized.incompleteBankPayment.length,
+        gracePeriodNotifications: categorized.gracePeriodNotifications.length,
         stuckBankTransfers: categorized.stuckBankTransfers.length,
         suspicious: categorized.suspicious.length
       });
