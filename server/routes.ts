@@ -25238,7 +25238,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           om.id IS NULL
           OR
           -- 2. All pending/pending orders that failed bank payment (immediately include them)
-          (om.current_status = 'pending' AND co.status = 'pending' AND co.payment_status = 'pending')
+          (om.current_status = 'pending' AND co.status = 'pending' AND co.payment_status = 'pending' AND COALESCE(co.notification_stage, 0) = 0)
           OR
           -- 3. Bank transfer receipts uploaded but stuck in financial review
           (om.current_status = 'payment_uploaded' AND co.payment_method = 'bank_transfer_grace' AND co.payment_status = 'receipt_uploaded' AND co.updated_at < NOW() - INTERVAL '2 hours')
