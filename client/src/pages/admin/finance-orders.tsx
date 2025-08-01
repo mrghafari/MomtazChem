@@ -49,7 +49,8 @@ import {
   Activity,
   BarChart3,
   Wrench,
-  Upload
+  Upload,
+  HelpCircle
 } from "lucide-react";
 import InternalBarcodeCard from "@/components/InternalBarcodeCard";
 import GlobalRefreshControl from "@/components/GlobalRefreshControl";
@@ -544,6 +545,35 @@ function FinanceOrders() {
       toast({
         title: "خطا در پردازش درگاه",
         description: error.message || "امکان پردازش سفارشات وجود ندارد",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Save financial notes without approval/rejection
+  const saveNotesMutation = useMutation({
+    mutationFn: async ({ orderId, notes }: { orderId: number; notes: string }) => {
+      console.log(`📝 [FINANCE] Saving notes for order ${orderId}`);
+      return apiRequest(`/api/finance/orders/${orderId}/notes`, {
+        method: 'POST',
+        body: { notes }
+      });
+    },
+    onSuccess: (response) => {
+      console.log(`✅ [FINANCE] Notes saved successfully:`, response);
+      toast({
+        title: "✅ یادداشت ذخیره شد",
+        description: "یادداشت مالی با موفقیت ذخیره شد"
+      });
+      // Refresh the orders list to show updated notes
+      refetch();
+      refetchApproved();
+    },
+    onError: (error: any) => {
+      console.error(`❌ [FINANCE] Save notes error:`, error);
+      toast({
+        title: "خطا در ذخیره یادداشت",
+        description: error.message || "امکان ذخیره یادداشت وجود ندارد",
         variant: "destructive"
       });
     }
@@ -1742,6 +1772,21 @@ function FinanceOrders() {
                     className="mt-1"
                     rows={3}
                   />
+                  <div className="mt-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => saveNotesMutation.mutate({ 
+                        orderId: selectedOrder.customerOrderId, 
+                        notes: reviewNotes 
+                      })}
+                      disabled={saveNotesMutation.isPending || !reviewNotes.trim()}
+                      className="flex items-center gap-2"
+                    >
+                      <Save className="h-4 w-4" />
+                      {saveNotesMutation.isPending ? 'در حال ذخیره...' : 'ذخیره یادداشت'}
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="flex justify-between gap-4 pt-4">

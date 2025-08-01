@@ -32783,6 +32783,54 @@ momtazchem.com
     }
   });
 
+  // Finance Department - Save notes without approval/rejection
+  app.post("/api/finance/orders/:orderId/notes", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { db } = await import("./db");
+      const { orderManagement } = await import("../shared/order-management-schema");
+      const { eq } = await import("drizzle-orm");
+      
+      const customerOrderId = parseInt(req.params.orderId);
+      const { notes } = req.body;
+      const adminId = req.session.adminId;
+
+      console.log(`📝 [FINANCE] Saving notes for customer order ID: ${customerOrderId}`);
+
+      // Update financial notes in order management
+      const [updated] = await db
+        .update(orderManagement)
+        .set({
+          financialNotes: notes,
+          financialReviewerId: adminId,
+          updatedAt: new Date()
+        })
+        .where(eq(orderManagement.customerOrderId, customerOrderId))
+        .returning();
+
+      if (!updated) {
+        return res.status(404).json({
+          success: false,
+          message: "سفارش در سیستم مدیریت یافت نشد"
+        });
+      }
+
+      console.log(`✅ [FINANCE] Notes saved successfully for order ${customerOrderId}`);
+
+      res.json({ 
+        success: true, 
+        message: "یادداشت مالی ذخیره شد",
+        data: { financialNotes: notes }
+      });
+    } catch (error) {
+      console.error("Error saving financial notes:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در ذخیره یادداشت",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   // Finance Department - Reject payment
   app.post("/api/finance/orders/:orderId/reject", requireAuth, async (req: Request, res: Response) => {
     try {
