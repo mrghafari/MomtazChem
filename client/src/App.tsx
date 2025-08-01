@@ -95,6 +95,7 @@ import LogisticsLogin from "@/pages/logistics-login";
 import TicketingSystemFixed from "@/pages/admin/ticketing-system-fixed";
 
 import SuperAdminSettings from "@/pages/super-admin-settings";
+import SuperAdminOrderManagement from "@/pages/admin/super-admin-order-management";
 import SiteManagementFixed from "@/pages/site-management-fixed";
 import GeographicReports from "@/pages/geographic-reports";
 import GeographicAnalytics from "@/pages/admin/geographic-analytics";
@@ -278,6 +279,8 @@ function Router() {
 
           <Route path="/super-admin/settings" component={SuperAdminSettings} />
           <Route path="/admin/super-admin-settings" component={SuperAdminSettings} />
+          <Route path="/admin/super-admin-order-management" component={SuperAdminOrderManagement} />
+          <Route path="/super-admin/order-management" component={SuperAdminOrderManagement} />
           
           <Route path="/analytics/sales" component={SalesAnalytics} />
           <Route path="/products" component={Products} />
