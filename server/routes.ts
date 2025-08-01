@@ -25,10 +25,10 @@ import { widgetRecommendationStorage } from "./widget-recommendation-storage";
 import { orderManagementStorage } from "./order-management-storage";
 import { walletStorage } from "./wallet-storage";
 import { requireDepartment, attachUserDepartments } from "./department-auth";
-import { insertCustomerInquirySchema, insertEmailTemplateSchema, insertCustomerSchema, insertCustomerAddressSchema, walletRechargeRequests, customerOrders, orderItems } from "@shared/customer-schema";
+import { insertCustomerInquirySchema, insertEmailTemplateSchema, insertCustomerSchema, insertCustomerAddressSchema, walletRechargeRequests, customerOrders, orderItems, walletTransactions } from "@shared/customer-schema";
 import { customerDb, customerPool } from "./customer-db";
 import { insertEmailCategorySchema, insertSmtpSettingSchema, insertEmailRecipientSchema, smtpConfigSchema, emailLogs, emailCategories, smtpSettings, emailRecipients, categoryEmailAssignments, insertCategoryEmailAssignmentSchema } from "@shared/email-schema";
-import { insertShopProductSchema, insertShopCategorySchema, paymentGateways, orders, shopProducts } from "@shared/shop-schema";
+import { insertShopProductSchema, insertShopCategorySchema, paymentGateways, orders as shopOrders, shopProducts } from "@shared/shop-schema";
 import { sendContactEmail } from "./email";
 import TemplateProcessor from "./template-processor";
 import InventoryAlertService from "./inventory-alerts";
@@ -37,14 +37,15 @@ import { sql, eq, and, or, isNull, isNotNull, desc, gte } from "drizzle-orm";
 import { findCorruptedOrders, getDataIntegrityStats, validateOrderIntegrity, markCorruptedOrderAsDeleted } from './data-integrity-tools';
 import { z } from "zod";
 import * as schema from "@shared/schema";
-const { crmCustomers, iraqiProvinces, iraqiCities } = schema;
+const { crmCustomers, iraqiProvinces, iraqiCities, abandonedOrders } = schema;
 import { orderManagement, shippingRates, deliveryMethods, paymentReceipts } from "@shared/order-management-schema";
 import { generateEAN13Barcode, validateEAN13, parseEAN13Barcode, isMomtazchemBarcode } from "@shared/barcode-utils";
 import { generateSmartSKU, validateSKUUniqueness } from "./ai-sku-generator";
 import { deliveryVerificationStorage } from "./delivery-verification-storage";
 import { gpsDeliveryStorage } from "./gps-delivery-storage";
+import { gpsDeliveryConfirmations } from "@shared/gps-delivery-schema";
 
-import { vehicleTemplates, vehicleSelectionHistory, insertVehicleTemplateSchema, insertVehicleSelectionHistorySchema, internationalCountries, internationalCities, internationalShippingRates, insertInternationalCountrySchema, insertInternationalCitySchema, insertInternationalShippingRateSchema } from "@shared/logistics-schema";
+import { vehicleTemplates, vehicleSelectionHistory as vehicleSelections, insertVehicleTemplateSchema, insertVehicleSelectionHistorySchema, internationalCountries, internationalCities, internationalShippingRates, insertInternationalCountrySchema, insertInternationalCitySchema, insertInternationalShippingRateSchema, deliveryVerificationCodes } from "@shared/logistics-schema";
 import { 
   companyInformation, 
   correspondence, 
@@ -38664,12 +38665,8 @@ momtazchem.com
           .returning();
         console.log(`📧 [DELETE] Removed ${deletedEmailLogs.length} email logs`);
 
-        // 12. Delete from sms_logs table  
-        const deletedSmsLogs = await tx
-          .delete(smsLogs)
-          .where(eq(smsLogs.relatedOrderId, customerOrderId))
-          .returning();
-        console.log(`📱 [DELETE] Removed ${deletedSmsLogs.length} SMS logs`);
+        // 12. Skip SMS logs deletion - table not implemented yet
+        console.log(`📱 [DELETE] Skipped SMS logs deletion - table not implemented`);
 
         // 13. Finally delete the customer order
         const deletedCustomerOrder = await tx
