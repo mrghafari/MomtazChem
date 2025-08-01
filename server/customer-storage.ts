@@ -402,17 +402,42 @@ export class CustomerStorage implements ICustomerStorage {
     return order;
   }
   
-  // Helper function to determine correct management status
+  // Helper function to determine correct management status - SYNCHRONIZED VERSION
   private determineManagementStatus(customerStatus: string, paymentStatus: string): string {
-    if (customerStatus === 'deleted') return 'cancelled';
+    // اولویت اول: وضعیت‌های نهایی
     if (customerStatus === 'delivered') return 'delivered';
+    if (customerStatus === 'cancelled' || customerStatus === 'deleted') return 'cancelled';
     
-    if (paymentStatus === 'paid') return 'warehouse_ready';
-    if (paymentStatus === 'receipt_uploaded') return 'financial_review';
-    if (paymentStatus === 'pending') return 'payment_uploaded';
-    if (paymentStatus === 'grace_period') return 'payment_grace_period';
+    // اولویت دوم: وضعیت‌های در حال پردازش
+    if (customerStatus === 'warehouse_ready') {
+      // سفارش تایید مالی شده و آماده انبار
+      return 'warehouse_pending';
+    }
     
-    // Default fallback
+    if (customerStatus === 'confirmed' || customerStatus === 'processing') {
+      return 'warehouse_processing';
+    }
+    
+    if (customerStatus === 'shipped' || customerStatus === 'in_transit') {
+      return 'in_transit';
+    }
+    
+    // اولویت سوم: وضعیت‌های پرداخت
+    if (customerStatus === 'pending') {
+      if (paymentStatus === 'paid') {
+        // پرداخت انجام شده ولی هنوز تایید نشده - نیاز به تایید مالی ندارد
+        return 'warehouse_pending';
+      } else if (paymentStatus === 'receipt_uploaded') {
+        // فیش آپلود شده - نیاز به بررسی مالی
+        return 'pending';
+      } else if (paymentStatus === 'rejected') {
+        return 'financial_rejected';
+      } else {
+        // پرداخت انجام نشده
+        return 'pending';
+      }
+    }
+    
     return 'pending';
   }
 

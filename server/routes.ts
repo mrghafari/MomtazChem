@@ -43622,6 +43622,56 @@ momtazchem.com
     }
   });
 
+  // Manual sync endpoint for troubleshooting
+  app.post("/api/admin/manual-sync", requireAuth, async (req, res) => {
+    try {
+      const { SyncService } = await import('./sync-service');
+      const syncService = new SyncService();
+      
+      console.log('🔄 [MANUAL SYNC] Manual synchronization requested by admin');
+      await syncService.performFullSync();
+      
+      // Get sync status
+      const syncStatus = await syncService.getSyncStatus();
+      
+      res.json({
+        success: true,
+        message: 'همگام‌سازی دستی با موفقیت انجام شد',
+        status: syncStatus,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('❌ [MANUAL SYNC] Error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در همگام‌سازی دستی',
+        error: error.message
+      });
+    }
+  });
+
+  // Get sync status endpoint
+  app.get("/api/admin/sync-status", requireAuth, async (req, res) => {
+    try {
+      const { SyncService } = await import('./sync-service');
+      const syncService = new SyncService();
+      
+      const syncStatus = await syncService.getSyncStatus();
+      
+      res.json({
+        success: true,
+        status: syncStatus
+      });
+    } catch (error) {
+      console.error('❌ [SYNC STATUS] Error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در دریافت وضعیت همگام‌سازی',
+        error: error.message
+      });
+    }
+  });
+
   // شروع سیستم تایید خودکار
   autoApprovalService.start();
   console.log("🤖 [SYSTEM] Auto-approval service started for bank transfers and payment uploads");

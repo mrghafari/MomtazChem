@@ -211,33 +211,47 @@ export class SyncService {
 
   /**
    * تعیین وضعیت مناسب برای order_management بر اساس customer_orders
+   * FIXED VERSION - منطق صحیح نقشه‌برداری وضعیت‌ها
    */
   private determineManagementStatus(customerStatus: string, paymentStatus: string): string {
-    // نقشه‌برداری وضعیت‌ها
-    const statusMap: Record<string, string> = {
-      'pending': paymentStatus === 'paid' ? 'confirmed' : 'pending',
-      'confirmed': 'warehouse_pending',
-      'processing': 'warehouse_processing',
-      'shipped': 'dispatched',
-      'delivered': 'delivered',
-      'cancelled': 'cancelled',
-      'deleted': 'cancelled',
-    };
-
-    // بررسی وضعیت پرداخت
-    if (paymentStatus === 'paid' && customerStatus === 'pending') {
-      return 'confirmed';
+    // console.log(`🔄 [STATUS MAPPING] Customer: ${customerStatus}, Payment: ${paymentStatus}`); // Reduced logging
+    
+    // اولویت اول: وضعیت‌های نهایی
+    if (customerStatus === 'delivered') return 'delivered';
+    if (customerStatus === 'cancelled' || customerStatus === 'deleted') return 'cancelled';
+    
+    // اولویت دوم: وضعیت‌های در حال پردازش
+    if (customerStatus === 'warehouse_ready') {
+      // سفارش تایید مالی شده و آماده انبار
+      return 'warehouse_pending';
     }
-
-    if (paymentStatus === 'receipt_uploaded') {
-      return 'financial_reviewing';
+    
+    if (customerStatus === 'confirmed' || customerStatus === 'processing') {
+      return 'warehouse_processing';
     }
-
-    if (paymentStatus === 'rejected') {
-      return 'financial_rejected';
+    
+    if (customerStatus === 'shipped' || customerStatus === 'in_transit') {
+      return 'in_transit';
     }
-
-    return statusMap[customerStatus] || 'pending';
+    
+    // اولویت سوم: وضعیت‌های پرداخت
+    if (customerStatus === 'pending') {
+      if (paymentStatus === 'paid') {
+        // پرداخت انجام شده ولی هنوز تایید نشده - نیاز به تایید مالی ندارد
+        return 'warehouse_pending';
+      } else if (paymentStatus === 'receipt_uploaded') {
+        // فیش آپلود شده - نیاز به بررسی مالی
+        return 'pending';
+      } else if (paymentStatus === 'rejected') {
+        return 'financial_rejected';
+      } else {
+        // پرداخت انجام نشده
+        return 'pending';
+      }
+    }
+    
+    // console.log(`⚠️ [STATUS MAPPING] Unmapped status combination: ${customerStatus}/${paymentStatus} - defaulting to pending`); // Reduced logging
+    return 'pending';
   }
 
   /**

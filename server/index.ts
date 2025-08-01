@@ -171,6 +171,12 @@ app.use((req, res, next) => {
     const { autoApprovalService } = await import('./auto-approval-service');
     autoApprovalService.start();
     
+    // Start sync service to prevent future order sync issues
+    const { SyncService } = await import('./sync-service');
+    const syncService = new SyncService();
+    syncService.startAutoSync(2); // هر 2 دقیقه یکبار همگام‌سازی
+    console.log('🔄 [SYSTEM] Sync service started - orders will be synchronized every 2 minutes');
+    
     // Register routes BEFORE Vite middleware to ensure API routes take precedence
     const server = await registerRoutes(app);
 
