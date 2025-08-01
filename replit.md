@@ -18,6 +18,7 @@ The platform aims to streamline operations, enhance customer engagement, and pro
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
+Payment summaries: Always implement comprehensive payment summaries for ALL orders in financial interfaces, not just specific orders. Include payment method, amounts, status, dates, and detailed breakdowns when available.
 
 ## System Architecture
 
