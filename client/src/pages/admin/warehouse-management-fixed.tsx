@@ -126,6 +126,30 @@ const WarehouseManagementFixed: React.FC = () => {
     },
   });
 
+  // Warehouse Notes Save Mutation
+  const saveNotesMutation = useMutation({
+    mutationFn: async ({ customerOrderId, notes }: { customerOrderId: number; notes: string }) => {
+      return await apiRequest(`/api/warehouse/orders/${customerOrderId}/notes`, {
+        method: 'POST',
+        body: { notes }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/order-management/warehouse'] });
+      toast({
+        title: "✅ یادداشت ذخیره شد",
+        description: "یادداشت انبار با موفقیت ذخیره شد",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "خطا در ذخیره",
+        description: error.message || "خطایی در ذخیره یادداشت رخ داد",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Filter orders based on search and status
   const filteredOrders = orders?.filter((order: Order) => {
     // Build customer name from API response structure
@@ -219,7 +243,7 @@ const WarehouseManagementFixed: React.FC = () => {
     setWarehouseNotes('');
   };
 
-  const handleSaveNotes = async () => {
+  const handleSaveNotes = () => {
     if (!selectedOrder || !warehouseNotes.trim()) {
       toast({
         title: "خطا",
@@ -229,32 +253,10 @@ const WarehouseManagementFixed: React.FC = () => {
       return;
     }
 
-    setSavingNotes(true);
-    try {
-      // Use the dedicated warehouse notes endpoint
-      await apiRequest(`/api/warehouse/orders/${selectedOrder.customerOrderId}/notes`, {
-        method: 'POST',
-        body: { 
-          notes: warehouseNotes 
-        }
-      });
-      
-      // Update the cache but don't close the dialog
-      queryClient.invalidateQueries({ queryKey: ['/api/order-management/warehouse'] });
-      
-      toast({
-        title: "✅ یادداشت ذخیره شد",
-        description: "یادداشت انبار با موفقیت ذخیره شد",
-      });
-    } catch (error: any) {
-      toast({
-        title: "خطا در ذخیره",
-        description: error.message || "خطایی در ذخیره یادداشت رخ داد",
-        variant: "destructive",
-      });
-    } finally {
-      setSavingNotes(false);
-    }
+    saveNotesMutation.mutate({
+      customerOrderId: selectedOrder.customerOrderId,
+      notes: warehouseNotes
+    });
   };
 
   const clearAllFilters = () => {
@@ -666,10 +668,10 @@ const WarehouseManagementFixed: React.FC = () => {
                     <Button
                       size="sm"
                       onClick={handleSaveNotes}
-                      disabled={savingNotes}
+                      disabled={saveNotesMutation.isPending}
                       className="bg-blue-600 hover:bg-blue-700"
                     >
-                      {savingNotes ? 'در حال ذخیره...' : 'ثبت یادداشت'}
+                      {saveNotesMutation.isPending ? 'در حال ذخیره...' : 'ذخیره یادداشت'}
                     </Button>
                   </div>
                 </div>

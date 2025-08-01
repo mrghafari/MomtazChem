@@ -1,0 +1,65 @@
+VM19898 admin:51 Tawk.to script loaded successfully
+chunk-RPCDYKBN.js?v=815b1335:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+useAuth.ts:43 Auth check result: Object
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:117574)
+    at t.value (twk-chunk-common.js:2:150658)
+    at p.updateUUID (twk-chunk-common.js:2:202310)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:124589)
+    at twk-chunk-common.js:2:123900
+value @ twk-chunk-common.js:2
+VM19898 admin:23 Tawk.to Live Chat loaded successfully
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+site-management-fixed.tsx:71 🔍 [DEBUG] useEffect triggered, userPermissions: undefined
+useAuth.ts:43 Auth check result: Object
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+site-management-fixed.tsx:71 🔍 [DEBUG] useEffect triggered, userPermissions: Object
+site-management-fixed.tsx:74 🔍 [DEBUG] userPermissions modules: Array(34)
+site-management-fixed.tsx:430 🔍 [DEBUG] Full userPermissions response: Object
+site-management-fixed.tsx:431 🔍 [DEBUG] userPermissions.modules: Array(34)
+site-management-fixed.tsx:432 🔍 [DEBUG] userPermissions.permissions: Array(34)
+site-management-fixed.tsx:437 🔍 [DEBUG] Total allButtons count: 35
+site-management-fixed.tsx:438 🔍 [DEBUG] AI Settings exists in allButtons: true
+site-management-fixed.tsx:439 🔍 [DEBUG] Content Management exists in allButtons: true
+site-management-fixed.tsx:441 🔍 [DEBUG] allowedModules: Array(34)
+site-management-fixed.tsx:442 🔍 [DEBUG] kpi_dashboard in allowedModules? true
+site-management-fixed.tsx:443 🔍 [DEBUG] management_dashboard in allowedModules? true
+site-management-fixed.tsx:444 🔍 [DEBUG] finance in allowedModules? true
+site-management-fixed.tsx:445 🔍 [DEBUG] geography_analytics in allowedModules? true
+site-management-fixed.tsx:446 🔍 [DEBUG] ai_settings in allowedModules? true
+site-management-fixed.tsx:447 🔍 [DEBUG] content_management in allowedModules? true
+site-management-fixed.tsx:453 🔍 [CRITICAL] Missing button detection:
+site-management-fixed.tsx:457 🔍 [MISSING] order-tracking-view Order Management & Tracking - View Only moduleId: order_tracking
+site-management-fixed.tsx:461 🔍 [CRITICAL] Missing buttons count: 1
+site-management-fixed.tsx:463 🔍 [DEBUG] finance button found in allButtons? Object
+site-management-fixed.tsx:464 🔍 [DEBUG] geography_analytics button found in allButtons? Object
+site-management-fixed.tsx:465 🔍 [DEBUG] ai_settings button found in allButtons? Object
+site-management-fixed.tsx:466 🔍 [DEBUG] content_management button found in allButtons? Object
+site-management-fixed.tsx:467 🔍 [DEBUG] finance button in filtered? Object
+site-management-fixed.tsx:468 🔍 [DEBUG] geography_analytics button in filtered? Object
+site-management-fixed.tsx:469 🔍 [DEBUG] ai_settings button in filtered? Object
+site-management-fixed.tsx:470 🔍 [DEBUG] content_management button in filtered? Object
+site-management-fixed.tsx:76 🔍 [DEBUG] filtered buttons count: 34
+site-management-fixed.tsx:77 🔍 [DEBUG] First 5 filtered buttons: Array(5)
+site-management-fixed.tsx:78 🔍 [DEBUG] AI Control button in filtered: Object
+site-management-fixed.tsx:79 🔍 [DEBUG] Content Management button in filtered: Object
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+chunk-H56OBA7M.js?v=815b1335:341 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-H56OBA7M.js?v=815b1335:341
+warehouse-management-fixed.tsx:277 Order details fetched: Object
+useAuth.ts:43 Auth check result: Object
+chunk-H56OBA7M.js?v=815b1335:341 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-H56OBA7M.js?v=815b1335:341
+warehouse-management-fixed.tsx:277 Order details fetched: Object
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+useAuth.ts:43 Auth check result: Object
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+useAuth.ts:43 Auth check result: Object
+chunk-H56OBA7M.js?v=815b1335:341 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-H56OBA7M.js?v=815b1335:341
+warehouse-management-fixed.tsx:277 Order details fetched: Object
+warehouse-management:1  Failed to load resource: the server responded with a status of 503 (Service Unavailable)
