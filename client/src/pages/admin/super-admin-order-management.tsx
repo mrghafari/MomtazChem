@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -18,7 +19,11 @@ import {
   User,
   Mail,
   DollarSign,
-  Package
+  Package,
+  CreditCard,
+  Settings,
+  Building2,
+  Wallet
 } from "lucide-react";
 import {
   AlertDialog,
@@ -44,10 +49,21 @@ interface Order {
   updatedAt: string;
 }
 
+interface PaymentGateway {
+  id: number;
+  name: string;
+  type: string;
+  enabled: boolean;
+  config: any;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export default function SuperAdminOrderManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [activeTab, setActiveTab] = useState('orders');
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -60,12 +76,26 @@ export default function SuperAdminOrderManagement() {
     }
   });
 
+  // Fetch payment gateways
+  const { data: gatewaysResponse, isLoading: gatewaysLoading } = useQuery({
+    queryKey: ['/api/payment/gateways'],
+    retry: (failureCount, error) => {
+      if (error.message.includes('401') || error.message.includes('403')) return false;
+      return failureCount < 2;
+    }
+  });
+
+  // Extract gateways with proper error handling
+  const gateways = Array.isArray(gatewaysResponse) ? gatewaysResponse : [];
+
   // Extract orders from response with proper error handling
   const orders = Array.isArray(response?.data) ? response.data : [];
   
   // Debug logging
   console.log('API Response:', response);
   console.log('Orders array:', orders);
+  console.log('Gateways Response:', gatewaysResponse);
+  console.log('Gateways array:', gateways);
 
   // Delete order mutation
   const deleteOrderMutation = useMutation({
@@ -105,12 +135,60 @@ export default function SuperAdminOrderManagement() {
     }
   });
 
+  // Toggle gateway status mutation
+  const toggleGatewayMutation = useMutation({
+    mutationFn: async (gatewayId: number) => {
+      return apiRequest(`/api/payment/gateways/${gatewayId}/toggle`, 'PATCH');
+    },
+    onSuccess: () => {
+      toast({
+        title: "وضعیت درگاه تغییر کرد",
+        description: "وضعیت درگاه پرداخت با موفقیت تغییر کرد. فقط یک درگاه می‌تواند فعال باشد.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/payment/gateways'] });
+    },
+    onError: () => {
+      toast({
+        title: "خطا",
+        description: "تغییر وضعیت درگاه با شکست مواجه شد.",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Filter orders based on search with null safety
   const filteredOrders = (orders || []).filter(order => 
     order?.orderNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     order?.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     order?.customerEmail?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Check for authentication errors
+  const hasAuthError = response?.error?.message?.includes('401') || gatewaysResponse?.error?.message?.includes('401');
+  
+  if (hasAuthError) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 p-6 flex items-center justify-center" dir="rtl">
+        <Card className="max-w-md w-full">
+          <CardHeader>
+            <CardTitle className="text-center text-red-600 flex items-center justify-center gap-2">
+              <AlertTriangle className="h-6 w-6" />
+              خطای احراز هویت
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-center">
+            <p className="text-gray-600 mb-4">برای دسترسی به این بخش باید وارد حساب مدیریت شوید.</p>
+            <Button 
+              onClick={() => window.location.href = '/admin/login'}
+              className="w-full"
+            >
+              ورود به پنل مدیریت
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const handleDeleteClick = (order: Order) => {
     setSelectedOrder(order);
@@ -151,7 +229,35 @@ export default function SuperAdminOrderManagement() {
     });
   };
 
-  if (isLoading) {
+  const getGatewayIcon = (type: string) => {
+    switch (type) {
+      case 'iraqi_bank':
+        return <Building2 className="w-5 h-5" />;
+      case 'credit_card':
+        return <CreditCard className="w-5 h-5" />;
+      case 'digital_wallet':
+        return <Wallet className="w-5 h-5" />;
+      default:
+        return <Settings className="w-5 h-5" />;
+    }
+  };
+
+  const getGatewayTypeLabel = (type: string) => {
+    switch (type) {
+      case 'iraqi_bank':
+        return 'بانک عراقی';
+      case 'credit_card':
+        return 'کارت اعتباری';
+      case 'digital_wallet':
+        return 'کیف پول دیجیتال';
+      case 'bank_transfer':
+        return 'حواله بانکی';
+      default:
+        return type;
+    }
+  };
+
+  if (isLoading || gatewaysLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <RefreshCw className="h-8 w-8 animate-spin text-blue-500" />
@@ -166,15 +272,28 @@ export default function SuperAdminOrderManagement() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-red-900 dark:text-red-100 flex items-center gap-3">
             <Shield className="h-8 w-8 text-red-600" />
-            مدیریت حذف سفارشات - سوپر ادمین
+            مدیریت سایت - سوپر ادمین
           </h1>
           <p className="text-red-700 dark:text-red-300 mt-2 flex items-center gap-2">
             <AlertTriangle className="h-5 w-5" />
-            حذف کامل سفارشات از تمام بخش‌های سیستم - عملیات غیرقابل بازگشت
+            مدیریت کامل سیستم شامل سفارشات، درگاه‌های پرداخت و تنظیمات
           </p>
         </div>
 
-        {/* Search and Stats */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="orders" className="flex items-center gap-2">
+              <Package className="h-4 w-4" />
+              مدیریت سفارشات
+            </TabsTrigger>
+            <TabsTrigger value="gateways" className="flex items-center gap-2">
+              <CreditCard className="h-4 w-4" />
+              درگاه‌های پرداخت
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="orders" className="space-y-6">
+            {/* Search and Stats */}
         <Card className="mb-6 border-red-200 bg-red-50/30">
           <CardHeader>
             <CardTitle className="text-xl flex items-center gap-2">
@@ -207,12 +326,12 @@ export default function SuperAdminOrderManagement() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="text-center p-3 bg-white rounded-lg border border-red-200">
                 <Package className="h-6 w-6 text-red-600 mx-auto mb-1" />
-                <div className="text-2xl font-bold text-red-900">{orders.length}</div>
+                <div className="text-2xl font-bold text-red-900">{(orders || []).length}</div>
                 <div className="text-sm text-red-600">کل سفارشات</div>
               </div>
               <div className="text-center p-3 bg-white rounded-lg border border-red-200">
                 <Search className="h-6 w-6 text-blue-600 mx-auto mb-1" />
-                <div className="text-2xl font-bold text-blue-900">{filteredOrders.length}</div>
+                <div className="text-2xl font-bold text-blue-900">{(filteredOrders || []).length}</div>
                 <div className="text-sm text-blue-600">نتایج فیلتر</div>
               </div>
             </div>
@@ -224,11 +343,11 @@ export default function SuperAdminOrderManagement() {
           <CardHeader>
             <CardTitle className="text-xl flex items-center gap-2">
               <Package className="h-6 w-6 text-red-600" />
-              لیست سفارشات قابل حذف ({filteredOrders.length})
+              لیست سفارشات قابل حذف ({(filteredOrders || []).length})
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {filteredOrders.length === 0 ? (
+            {(filteredOrders || []).length === 0 ? (
               <div className="text-center py-12">
                 <Package className="h-16 w-16 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-gray-600 mb-2">سفارشی یافت نشد</h3>
@@ -238,7 +357,7 @@ export default function SuperAdminOrderManagement() {
               </div>
             ) : (
               <div className="space-y-4">
-                {filteredOrders.map((order) => (
+                {(filteredOrders || []).map((order) => (
                   <div
                     key={order.id}
                     className="p-4 border rounded-lg bg-white hover:bg-gray-50 transition-colors"
@@ -298,6 +417,86 @@ export default function SuperAdminOrderManagement() {
             )}
           </CardContent>
         </Card>
+
+          </TabsContent>
+
+          <TabsContent value="gateways" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl flex items-center gap-2">
+                  <CreditCard className="h-6 w-6 text-blue-600" />
+                  مدیریت درگاه‌های پرداخت
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4">
+                  {(gateways || []).length === 0 ? (
+                    <div className="text-center py-12">
+                      <CreditCard className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold text-gray-600 mb-2">درگاه پرداختی یافت نشد</h3>
+                      <p className="text-gray-500">هیچ درگاه پرداختی در سیستم ثبت نشده است</p>
+                    </div>
+                  ) : (
+                    (gateways || []).map((gateway: PaymentGateway) => (
+                      <div key={gateway.id} className="p-4 border rounded-lg bg-white hover:bg-gray-50">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2">
+                              {getGatewayIcon(gateway.type)}
+                              <div>
+                                <h3 className="font-semibold text-lg">{gateway.name}</h3>
+                                <p className="text-sm text-gray-600">{getGatewayTypeLabel(gateway.type)}</p>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-4">
+                            <div className="text-right">
+                              <Badge 
+                                variant={gateway.enabled ? "default" : "secondary"}
+                                className={gateway.enabled ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}
+                              >
+                                {gateway.enabled ? 'فعال' : 'غیرفعال'}
+                              </Badge>
+                              <p className="text-xs text-gray-500 mt-1">
+                                {formatDate(gateway.updatedAt)}
+                              </p>
+                            </div>
+                            
+                            <Button
+                              onClick={() => toggleGatewayMutation.mutate(gateway.id)}
+                              disabled={toggleGatewayMutation.isPending}
+                              size="sm"
+                              variant={gateway.enabled ? "outline" : "default"}
+                            >
+                              {gateway.enabled ? 'غیرفعال کردن' : 'فعال کردن'}
+                            </Button>
+                          </div>
+                        </div>
+                        
+                        {gateway.config && (
+                          <div className="mt-4 p-3 bg-gray-50 rounded text-sm">
+                            <h4 className="font-medium mb-2">تنظیمات درگاه:</h4>
+                            <div className="grid grid-cols-2 gap-2 text-xs">
+                              {Object.entries(gateway.config).map(([key, value]) => (
+                                <div key={key} className="flex justify-between">
+                                  <span className="font-medium">{key}:</span>
+                                  <span className="text-gray-600">
+                                    {key.toLowerCase().includes('secret') ? '***' : String(value)}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
 
         {/* Delete Confirmation Dialog */}
         <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
