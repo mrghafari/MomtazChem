@@ -237,13 +237,13 @@ export class IncompletePaymentCleaner {
       let templateName: string;
       
       if (orderType === 'grace_period') {
-        if (stage === 1) templateName = 'grace_period_first_reminder';
-        else if (stage === 2) templateName = 'grace_period_second_reminder';
-        else if (stage === 3) templateName = 'grace_period_final_warning';
+        if (stage === 1) templateName = '#27 - یادآوری اول مهلت سه روزه';
+        else if (stage === 2) templateName = '#28 - یادآوری دوم مهلت سه روزه (48 ساعت)';
+        else if (stage === 3) templateName = '#29 - هشدار نهایی مهلت سه روزه (24 ساعت)';
         else return;
       } else {
-        if (stage === 1) templateName = 'incomplete_online_payment_first';
-        else if (stage === 2) templateName = 'incomplete_online_payment_final';
+        if (stage === 1) templateName = '#25 - اطلاع‌رسانی اول پرداخت ناتمام آنلاین';
+        else if (stage === 2) templateName = '#26 - هشدار نهایی پرداخت ناتمام آنلاین';
         else return;
       }
       
@@ -389,7 +389,7 @@ export class IncompletePaymentCleaner {
       const templateResult = await pool.query(`
         SELECT subject, html_content, text_content 
         FROM email_templates 
-        WHERE name = 'order_deleted_notification' AND is_active = true
+        WHERE name = '#30 - اطلاع‌رسانی حذف سفارش' AND is_active = true
       `, []);
       
       if (templateResult.rows.length > 0) {
