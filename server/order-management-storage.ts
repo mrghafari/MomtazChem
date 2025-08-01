@@ -736,74 +736,22 @@ export class OrderManagementStorage implements IOrderManagementStorage {
     const newOrder = await this.createOrderManagement(orderData);
     console.log(`✅ [ORDER MANAGEMENT] Added customer order ${customerOrderId} to management system with ID ${newOrder.id}`);
     
-    // Schedule auto-approval for wallet payments
+    // IMPORTANT: تایید خودکار کیف پول غیرفعال شده - همه پرداخت‌ها نیاز به تایید دستی دارند
     if ((customerOrder.paymentMethod === 'wallet_full' || customerOrder.paymentMethod === 'wallet_partial') 
         && customerOrder.paymentStatus === 'paid') {
-      this.scheduleWalletAutoApproval(customerOrderId);
+      console.log(`🚫 [AUTO-APPROVAL] DISABLED for wallet order ${customerOrder.orderNumber} - requires manual financial approval`);
+      // this.scheduleWalletAutoApproval(customerOrderId); // DISABLED
     }
     
     return newOrder;
   }
 
-  // Auto-approval scheduler for wallet payments (moved from routes.ts)
+  // Auto-approval scheduler for wallet payments - DISABLED
   private scheduleWalletAutoApproval(customerOrderId: number) {
-    console.log(`⏰ [AUTO-APPROVAL] Scheduling auto-approval for wallet order ${customerOrderId} in 5 minutes`);
-    
-    setTimeout(async () => {
-      try {
-        // Check if order is still pending financial review
-        const [orderCheck] = await db
-          .select({
-            managementStatus: orderManagement.currentStatus,
-            paymentMethod: customerOrders.paymentMethod,
-            orderNumber: customerOrders.orderNumber
-          })
-          .from(orderManagement)
-          .innerJoin(customerOrders, eq(orderManagement.customerOrderId, customerOrders.id))
-          .where(eq(orderManagement.customerOrderId, customerOrderId));
-          
-        if (!orderCheck) {
-          console.log(`⏭️ [AUTO-APPROVAL] Order ${customerOrderId} not found - skipping auto-approval`);
-          return;
-        }
-        
-        // Only auto-approve if it's still in financial review and is wallet payment
-        if (orderCheck.managementStatus === 'payment_uploaded' && 
-            (orderCheck.paymentMethod === 'wallet_full' || orderCheck.paymentMethod === 'wallet_partial')) {
-          
-          console.log(`🤖 [AUTO-APPROVAL] Auto-approving wallet order ${orderCheck.orderNumber} after 5 minutes`);
-          
-          // Update order management status to warehouse_pending
-          await db
-            .update(orderManagement)
-            .set({
-              currentStatus: 'warehouse_pending',
-              financialReviewerId: 0, // System auto-approval
-              financialReviewedAt: new Date(),
-              financialNotes: 'تایید خودکار پرداخت کیف پول - 5 دقیقه انتظار طبق سیستم'
-            })
-            .where(eq(orderManagement.customerOrderId, customerOrderId));
-
-          // Update customer order status
-          await db
-            .update(customerOrders)
-            .set({
-              status: 'warehouse_ready',
-              paymentStatus: 'paid',
-              updatedAt: new Date()
-            })
-            .where(eq(customerOrders.id, customerOrderId));
-            
-          console.log(`✅ [AUTO-APPROVAL] Wallet order ${orderCheck.orderNumber} automatically approved and moved to warehouse`);
-          
-        } else {
-          console.log(`⏭️ [AUTO-APPROVAL] Order ${orderCheck.orderNumber} status changed (${orderCheck.managementStatus}) - skipping auto-approval`);
-        }
-        
-      } catch (error) {
-        console.error(`❌ [AUTO-APPROVAL] Error auto-approving order ${customerOrderId}:`, error);
-      }
-    }, 5 * 60 * 1000); // 5 minutes in milliseconds
+    console.log(`🚫 [AUTO-APPROVAL] DISABLED - Wallet order ${customerOrderId} requires manual financial approval`);
+    console.log(`💡 [AUTO-APPROVAL] All wallet payments must be manually approved by financial department`);
+    // ALL AUTO-APPROVAL FUNCTIONALITY DISABLED
+    return;
   }
 
   // Migrate all customer orders to order management system
@@ -1926,16 +1874,10 @@ export class OrderManagementStorage implements IOrderManagementStorage {
         return;
       }
 
-      // Automatically approve the order in financial department
-      console.log(`✅ [AUTO APPROVAL] Automatically approving order ${customerOrder.orderNumber} in financial department`);
-      
-      await this.updateOrderStatus(
-        orderManagementRecord.id,
-        'financial_approved' as OrderStatus,
-        999999, // System auto-approval user ID
-        'financial',
-        `تأیید اتوماتیک پرداخت درگاه بانکی - مبلغ: ${customerOrder.totalAmount} ${customerOrder.currency} - تاریخ: ${new Date().toLocaleDateString('fa-IR')}`
-      );
+      // IMPORTANT: غیرفعال کردن تایید خودکار - همه سفارشات نیاز به تایید دستی دارند
+      console.log(`🚫 [AUTO APPROVAL] DISABLED - Order ${customerOrder.orderNumber} requires manual financial approval`);
+      console.log(`💡 [AUTO APPROVAL] Bank gateway payments must be manually approved by financial department`);
+      return; // غیرفعال کردن کامل تایید خودکار
 
       // Update customer order status to confirmed
       await db

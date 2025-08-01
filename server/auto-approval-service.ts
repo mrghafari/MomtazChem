@@ -34,11 +34,12 @@ export class AutoApprovalService {
     try {
       console.log("🔍 [AUTO APPROVAL] Checking for orders ready for auto-approval...");
       
-      // ابتدا پردازش سفارشات wallet-paid که باید به warehouse منتقل شوند
-      await this.processWalletPaidOrders();
+      // IMPORTANT: تمام پردازش‌های خودکار غیرفعال شده
+      console.log("🚫 [AUTO APPROVAL] ALL AUTO-PROCESSING DISABLED");
+      console.log("💡 [AUTO APPROVAL] All orders require manual financial department approval");
       
-      // پردازش سفارشات bank_transfer_grace که مدارک آپلود کرده‌اند
-      await this.processBankTransferOrders();
+      // await this.processWalletPaidOrders(); // DISABLED
+      // await this.processBankTransferOrders(); // DISABLED
       
       // یافتن سفارشات آماده برای تایید خودکار
       const ordersToApprove = await db
@@ -77,187 +78,57 @@ export class AutoApprovalService {
     }
   }
 
-  // تایید خودکار یک سفارش
+  // تایید خودکار یک سفارش - فقط کیف پول و نه انتقال به انبار
   private async approveOrder(order: any) {
     try {
       console.log(`🤖 [AUTO APPROVAL] Processing order management ID: ${order.id}`);
 
-      // بروزرسانی order_management
-      await db
-        .update(orderManagement)
-        .set({
-          currentStatus: 'warehouse_pending',
-          financialReviewedAt: new Date(),
-          financialNotes: `تایید خودکار سیستم - ${order.paymentSourceLabel}`,
-          autoApprovalExecutedAt: new Date()
-        })
-        .where(eq(orderManagement.id, order.id));
-
-      // همزمان‌سازی با customer_orders
-      await db
-        .update(customerOrders)
-        .set({
-          status: 'warehouse_ready',
-          paymentStatus: 'paid',
-          updatedAt: new Date()
-        })
-        .where(eq(customerOrders.id, order.customerOrderId));
-
-      console.log(`✅ [AUTO APPROVAL] Order ${order.customerOrderId} automatically approved and moved to warehouse`);
+      // IMPORTANT: غیرفعال کردن تایید خودکار - همه سفارشات نیاز به تایید دستی دارند
+      console.log(`🚫 [AUTO APPROVAL] DISABLED - Order ${order.id} requires manual financial approval`);
+      console.log(`💡 [AUTO APPROVAL] All orders must be manually approved by financial department`);
+      return; // غیرفعال کردن کامل تایید خودکار
 
     } catch (error) {
       console.error(`❌ [AUTO APPROVAL] Error approving order ${order.id}:`, error);
     }
   }
 
-  // پردازش سفارشات wallet-paid که باید به warehouse منتقل شوند
+  // پردازش سفارشات wallet-paid - DISABLED
   private async processWalletPaidOrders() {
     try {
-      console.log("💰 [WALLET AUTO] Checking wallet-paid orders for warehouse transfer...");
+      console.log("💰 [WALLET AUTO] Checking wallet-paid orders...");
       
-      // یافتن سفارشات wallet-paid که هنوز pending هستند
-      const walletOrders = await db
-        .select()
-        .from(customerOrders)
-        .where(
-          sql`
-            (payment_method LIKE '%wallet%' OR payment_method = 'wallet_full' OR payment_method = 'wallet_partial')
-            AND status = 'pending'
-            AND (payment_status = 'paid' OR payment_status = 'partial')
-          `
-        );
-
-      if (walletOrders.length === 0) {
-        console.log("✅ [WALLET AUTO] No wallet-paid orders pending warehouse transfer");
-        return;
-      }
-
-      console.log(`💰 [WALLET AUTO] Found ${walletOrders.length} wallet-paid orders ready for warehouse transfer`);
-
-      for (const order of walletOrders) {
-        await this.transferWalletOrderToWarehouse(order);
-      }
+      // IMPORTANT: غیرفعال کردن انتقال خودکار کیف پول
+      console.log("🚫 [WALLET AUTO] DISABLED - Wallet orders require manual financial approval");
+      console.log("💡 [WALLET AUTO] All wallet payments must be manually approved by financial department");
+      return; // غیرفعال کردن کامل انتقال خودکار کیف پول
 
     } catch (error) {
       console.error("❌ [WALLET AUTO] Error processing wallet-paid orders:", error);
     }
   }
 
-  // انتقال سفارش wallet-paid به warehouse
+  // انتقال سفارش wallet-paid به warehouse - DISABLED
   private async transferWalletOrderToWarehouse(order: any) {
     try {
-      console.log(`🏭 [WAREHOUSE TRANSFER] Processing order ${order.orderNumber} (${order.paymentMethod})`);
-
-      // به‌روزرسانی وضعیت سفارش به warehouse_ready
-      await db
-        .update(customerOrders)
-        .set({
-          status: 'warehouse_ready',
-          paymentStatus: 'paid',
-          updatedAt: new Date()
-        })
-        .where(eq(customerOrders.id, order.id));
-
-      // ایجاد یا به‌روزرسانی order_management record
-      const existingManagement = await db
-        .select()
-        .from(orderManagement)
-        .where(eq(orderManagement.customerOrderId, order.id))
-        .limit(1);
-
-      if (existingManagement.length === 0) {
-        // ایجاد order_management record جدید
-        await db.insert(orderManagement).values({
-          customerOrderId: order.id,
-          currentStatus: 'warehouse_pending',
-          totalAmount: order.totalAmount?.toString() || '0',
-          currency: order.currency || 'IQD',
-          orderNumber: order.orderNumber,
-          customerFirstName: order.customerFirstName || '',
-          customerLastName: order.customerLastName || '',
-          customerEmail: order.customerEmail || '',
-          customerPhone: order.customerPhone || '',
-          createdAt: new Date(),
-          updatedAt: new Date()
-        });
-      } else {
-        // به‌روزرسانی order_management موجود
-        await db
-          .update(orderManagement)
-          .set({
-            currentStatus: 'warehouse_pending',
-            updatedAt: new Date()
-          })
-          .where(eq(orderManagement.customerOrderId, order.id));
-      }
-
-      console.log(`✅ [WAREHOUSE TRANSFER] Order ${order.orderNumber} transferred to warehouse successfully`);
-      console.log(`📄 [INVOICE READY] Order ${order.orderNumber} is now ready for proforma to invoice conversion`);
+      console.log(`🚫 [WAREHOUSE TRANSFER] DISABLED - Order ${order.orderNumber} requires manual approval`);
+      console.log(`💡 [WAREHOUSE TRANSFER] Financial department must manually approve all orders`);
+      return; // غیرفعال کردن کامل انتقال خودکار
 
     } catch (error) {
       console.error(`❌ [WAREHOUSE TRANSFER] Error transferring order ${order.orderNumber}:`, error);
     }
   }
 
-  // پردازش سفارشات bank_transfer_grace که مدارک آپلود کرده‌اند
+  // پردازش سفارشات bank_transfer_grace - DISABLED
   private async processBankTransferOrders() {
     try {
-      console.log("🏦 [BANK TRANSFER AUTO] Checking bank transfer orders with uploaded receipts...");
+      console.log("🏦 [BANK TRANSFER AUTO] Checking bank transfer orders...");
 
-      // یافتن سفارشات bank_transfer_grace که مدارک آپلود کرده‌اند و نیاز به تایید دارند
-      const bankTransferOrders = await db
-        .select()
-        .from(customerOrders)
-        .where(
-          and(
-            eq(customerOrders.paymentMethod, 'bank_transfer_grace'),
-            eq(customerOrders.paymentStatus, 'receipt_uploaded')
-          )
-        );
-
-      // یافتن سفارشات payment_uploaded که نیاز به تایید مالی دارند
-      const uploadedPaymentOrders = await db
-        .select()
-        .from(customerOrders)
-        .where(
-          eq(customerOrders.paymentStatus, 'payment_uploaded')
-        );
-
-      // ترکیب دو نوع سفارش: bank_transfer_grace و payment_uploaded
-      const allOrdersToProcess = [...bankTransferOrders, ...uploadedPaymentOrders];
-      
-      console.log(`🏦 [BANK TRANSFER AUTO] Query found ${bankTransferOrders.length} bank transfer orders`);
-      console.log(`📋 [PAYMENT UPLOAD AUTO] Query found ${uploadedPaymentOrders.length} uploaded payment orders`);
-      console.log(`📊 [AUTO APPROVAL] Total orders to process: ${allOrdersToProcess.length}`);
-      
-      if (allOrdersToProcess.length > 0) {
-        console.log("🏦 [AUTO APPROVAL] Orders found for processing:", 
-          JSON.stringify(allOrdersToProcess.map(o => ({
-            id: o.id,
-            orderNumber: o.orderNumber,
-            paymentMethod: o.paymentMethod,
-            paymentStatus: o.paymentStatus,
-            status: o.status
-          })), null, 2)
-        );
-      }
-
-      if (allOrdersToProcess.length === 0) {
-        console.log("✅ [AUTO APPROVAL] No orders pending auto-approval");
-        return;
-      }
-
-      console.log(`🔄 [AUTO APPROVAL] Found ${allOrdersToProcess.length} orders ready for auto-approval`);
-
-      for (const order of allOrdersToProcess) {
-        if (order.paymentMethod === 'bank_transfer_grace') {
-          console.log(`🏦 [BANK TRANSFER AUTO] Processing order ${order.orderNumber} (bank_transfer_grace)`);
-          await this.approveBankTransferOrder(order);
-        } else if (order.paymentStatus === 'payment_uploaded') {
-          console.log(`📋 [PAYMENT UPLOAD AUTO] Processing order ${order.orderNumber} (payment_uploaded)`);
-          await this.approveBankTransferOrder(order); // Same approval process
-        }
-      }
+      // IMPORTANT: غیرفعال کردن تایید خودکار انتقال بانکی
+      console.log("🚫 [BANK TRANSFER AUTO] DISABLED - Bank transfer orders require manual financial approval");
+      console.log("💡 [BANK TRANSFER AUTO] All bank transfers must be manually approved by financial department");
+      return; // غیرفعال کردن کامل تایید خودکار انتقال بانکی
 
     } catch (error) {
       console.error("❌ [BANK TRANSFER AUTO] Error processing bank transfer orders:", error);
