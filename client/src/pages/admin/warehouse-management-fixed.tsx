@@ -244,7 +244,12 @@ const WarehouseManagementFixed: React.FC = () => {
   };
 
   const handleSaveNotes = () => {
+    console.log("🔍 [WAREHOUSE NOTES] Save notes clicked");
+    console.log("🔍 [WAREHOUSE NOTES] Selected order:", selectedOrder);
+    console.log("🔍 [WAREHOUSE NOTES] Warehouse notes:", warehouseNotes);
+    
     if (!selectedOrder || !warehouseNotes.trim()) {
+      console.log("❌ [WAREHOUSE NOTES] Validation failed - missing order or notes");
       toast({
         title: "خطا",
         description: "لطفاً یادداشت را وارد کنید",
@@ -252,6 +257,11 @@ const WarehouseManagementFixed: React.FC = () => {
       });
       return;
     }
+
+    console.log("✅ [WAREHOUSE NOTES] Starting mutation with data:", {
+      customerOrderId: selectedOrder.customerOrderId,
+      notes: warehouseNotes
+    });
 
     saveNotesMutation.mutate({
       customerOrderId: selectedOrder.customerOrderId,
