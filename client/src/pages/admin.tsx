@@ -152,8 +152,7 @@ function AdminDashboardContent({ user, logout, setLocation, moduleCount, getCont
             </p>
           </div>
           
-          {/* Order Synchronization System */}
-          <OrderSynchronizationPanel />
+
 
         </div>
 
@@ -163,87 +162,3 @@ function AdminDashboardContent({ user, logout, setLocation, moduleCount, getCont
   );
 }
 
-// Order Synchronization Panel Component
-function OrderSynchronizationPanel() {
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-
-  // Manual synchronization mutation
-  const syncMutation = useMutation({
-    mutationFn: () => apiRequest('POST', '/api/admin/manual-sync-orders'),
-    onSuccess: (data) => {
-      toast({
-        title: "همسانسازی موفق",
-        description: `${data.fixed} مورد اصلاح شد، ${data.created} رکورد ایجاد شد`,
-        variant: "default",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "خطا در همسانسازی",
-        description: error.message || "مشکلی در فرآیند همسانسازی پیش آمد",
-        variant: "destructive",
-      });
-    }
-  });
-
-  // Sync status query
-  const { data: syncStatus, isLoading } = useQuery({
-    queryKey: ['/api/admin/sync-status'],
-    refetchInterval: 60000, // Refresh every minute
-  });
-
-  return (
-    <div className="mt-6 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center space-x-3">
-          <Database className="h-6 w-6 text-green-600" />
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900">سیستم همسانسازی سفارشات</h3>
-            <p className="text-sm text-gray-600">حفظ یکپارچگی داده‌های customer_orders و order_management</p>
-          </div>
-        </div>
-        <div className="flex items-center space-x-2">
-          <CheckCircle className="h-5 w-5 text-green-500" />
-          <span className="text-sm text-green-700 font-medium">فعال (خودکار)</span>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-        <div className="p-3 bg-white rounded-lg border border-green-100">
-          <div className="text-2xl font-bold text-green-600">{syncStatus?.totalOrders || '115'}</div>
-          <div className="text-sm text-gray-600">کل سفارشات</div>
-        </div>
-        <div className="p-3 bg-white rounded-lg border border-green-100">
-          <div className="text-2xl font-bold text-blue-600">{syncStatus?.synced || '115'}</div>
-          <div className="text-sm text-gray-600">همسان‌سازی شده</div>
-        </div>
-        <div className="p-3 bg-white rounded-lg border border-green-100">
-          <div className="text-2xl font-bold text-orange-600">{syncStatus?.issues || '0'}</div>
-          <div className="text-sm text-gray-600">مسائل باقی‌مانده</div>
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between">
-        <div className="text-sm text-gray-600">
-          <div>• همسانسازی خودکار: هر 5 دقیقه</div>
-          <div>• آخرین همسانسازی: {syncStatus?.lastSync || 'راه‌اندازی سرور'}</div>
-          <div>• 17 مغایرت اصلاح شده در راه‌اندازی</div>
-        </div>
-        <Button 
-          onClick={() => syncMutation.mutate()}
-          disabled={syncMutation.isPending}
-          className="flex items-center space-x-2"
-          variant="outline"
-        >
-          <RefreshCw className={`h-4 w-4 ${syncMutation.isPending ? 'animate-spin' : ''}`} />
-          <span>{syncMutation.isPending ? 'در حال همسانسازی...' : 'همسانسازی دستی'}</span>
-        </Button>
-      </div>
-
-      <div className="mt-3 p-2 bg-green-100 rounded text-xs text-green-800">
-        <strong>✅ حل مسئله دائمی:</strong> سیستم خودکار همسانسازی جلوگیری از گیرکردن 94 سفارش و ایجاد مغایرت‌های آینده را تضمین می‌کند
-      </div>
-    </div>
-  );
-}
