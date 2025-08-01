@@ -222,8 +222,9 @@ export class SyncService {
     
     // اولویت دوم: وضعیت‌های در حال پردازش
     if (customerStatus === 'warehouse_ready') {
-      // سفارش تایید مالی شده و آماده انبار
-      return 'warehouse_pending';
+      // سفارش آماده انبار یعنی انبار آن را تایید کرده است
+      // پس باید در وضعیت warehouse_approved باشد نه warehouse_pending
+      return 'warehouse_approved';
     }
     
     if (customerStatus === 'confirmed' || customerStatus === 'processing') {
