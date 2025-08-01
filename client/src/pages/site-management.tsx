@@ -133,7 +133,9 @@ export default function SiteManagement() {
   };
 
   // Initial button configuration ordered by most frequent usage (top-left priority)
-  const getInitialButtons = (): QuickActionButton[] => [
+  const getInitialButtons = (): QuickActionButton[] => {
+    console.log('🔍 [DEBUG] getInitialButtons called');
+    return [
     // Row 1: Most frequently used daily operations
     {
       id: "kardex-sync",
@@ -402,8 +404,8 @@ export default function SiteManagement() {
       className: "border-red-300 text-red-600 hover:bg-red-50",
       moduleId: "order_management"
     }
-
   ];
+  };
 
   // Filter buttons based on user permissions
   const getFilteredButtons = () => {
