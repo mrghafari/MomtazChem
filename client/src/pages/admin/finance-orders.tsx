@@ -1660,16 +1660,16 @@ function FinanceOrders() {
             <ScrollArea className="max-h-[75vh] pr-4">
               {orderDetails && (
                 <div className="space-y-6">
-                {/* Customer Information */}
+                {/* Customer Information - Extended Layout */}
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Users className="h-5 w-5" />
-                      اطلاعات مشتری
+                      اطلاعات مشتری و آدرس تحویل
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                       <div>
                         <Label className="text-sm font-medium text-gray-600">نام مشتری</Label>
                         <p className="font-medium">{orderDetails.customer?.firstName} {orderDetails.customer?.lastName}</p>
@@ -1683,16 +1683,28 @@ function FinanceOrders() {
                         <p className="font-medium">{orderDetails.customer?.phone}</p>
                       </div>
                       <div>
-                        <Label className="text-sm font-medium text-gray-600">آدرس</Label>
-                        <p className="font-medium">{orderDetails.customer?.address}</p>
+                        <Label className="text-sm font-medium text-gray-600">وضعیت سفارش</Label>
+                        <Badge className="mt-1">{orderDetails.currentStatus}</Badge>
                       </div>
-                      <div>
-                        <Label className="text-sm font-medium text-gray-600">شهر</Label>
-                        <p className="font-medium">{orderDetails.customer?.city}</p>
+                      
+                      {/* Extended Address Section */}
+                      <div className="md:col-span-3">
+                        <Label className="text-sm font-medium text-gray-600">آدرس کامل تحویل</Label>
+                        <div className="bg-gray-50 p-3 rounded-lg mt-1">
+                          <p className="font-medium text-gray-900">
+                            {orderDetails.customer?.address}
+                          </p>
+                          <p className="text-sm text-gray-600 mt-1">
+                            {orderDetails.customer?.city} - {orderDetails.customer?.province}
+                          </p>
+                        </div>
                       </div>
+                      
                       <div>
-                        <Label className="text-sm font-medium text-gray-600">استان</Label>
-                        <p className="font-medium">{orderDetails.customer?.province}</p>
+                        <Label className="text-sm font-medium text-gray-600">تاریخ سفارش</Label>
+                        <p className="font-medium text-sm">
+                          {formatDateSafe(orderDetails.createdAt)}
+                        </p>
                       </div>
                     </div>
                   </CardContent>
@@ -1746,22 +1758,22 @@ function FinanceOrders() {
                   </CardContent>
                 </Card>
 
-                {/* Payment Information */}
+                {/* Payment Information - Compact */}
                 <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <CreditCard className="h-5 w-5" />
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2 text-base">
+                      <CreditCard className="h-4 w-4" />
                       اطلاعات پرداخت
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-6">
-                      {/* Cost Breakdown */}
-                      <div className="bg-gray-50 rounded-lg p-4">
-                        <h4 className="font-medium text-gray-900 mb-4">تفکیک هزینه‌ها</h4>
-                        <div className="space-y-3">
+                    <div className="space-y-4">
+                      {/* Cost Breakdown - Compact */}
+                      <div className="bg-gray-50 rounded-lg p-3">
+                        <h4 className="font-medium text-gray-900 mb-3 text-sm">تفکیک هزینه‌ها</h4>
+                        <div className="space-y-2">
                           {/* Items Subtotal */}
-                          <div className="flex justify-between items-center">
+                          <div className="flex justify-between items-center text-sm">
                             <span className="text-gray-600">مجموع اقلام:</span>
                             <span className="font-medium">
                               {(() => {
@@ -1773,7 +1785,7 @@ function FinanceOrders() {
                           </div>
                           
                           {/* Shipping Cost - Always show */}
-                          <div className="flex justify-between items-center">
+                          <div className="flex justify-between items-center text-sm">
                             <span className="text-blue-600">هزینه حمل:</span>
                             <span className="font-medium text-blue-600">
                               {Math.floor(parseFloat(orderDetails.shippingCost || orderDetails.shipping_cost || 0)).toLocaleString()} {orderDetails.currency}
@@ -1782,8 +1794,8 @@ function FinanceOrders() {
                           
                           {/* VAT - Only show if non-zero */}
                           {(parseFloat(orderDetails.vatAmount || orderDetails.vat_amount || 0) > 0) && (
-                            <div className="flex justify-between items-center">
-                              <span className="text-green-600">مالیات بر ارزش افزوده:</span>
+                            <div className="flex justify-between items-center text-sm">
+                              <span className="text-green-600">مالیات:</span>
                               <span className="font-medium text-green-600">
                                 {Math.floor(parseFloat(orderDetails.vatAmount || orderDetails.vat_amount || 0)).toLocaleString()} {orderDetails.currency}
                               </span>
@@ -1791,10 +1803,10 @@ function FinanceOrders() {
                           )}
                           
                           {/* Total with separator */}
-                          <div className="border-t pt-3">
+                          <div className="border-t pt-2">
                             <div className="flex justify-between items-center">
-                              <span className="font-bold text-lg text-gray-900">مجموع کل:</span>
-                              <span className="font-bold text-lg text-green-600">
+                              <span className="font-bold text-gray-900">مجموع کل:</span>
+                              <span className="font-bold text-green-600">
                                 {Math.floor(parseFloat(orderDetails.totalAmount)).toLocaleString()} {orderDetails.currency}
                               </span>
                             </div>
@@ -1802,21 +1814,21 @@ function FinanceOrders() {
                         </div>
                       </div>
 
-                      {/* Payment Source Details */}
+                      {/* Payment Source Details - Compact */}
                       {(orderDetails.walletAmountUsed > 0 || orderDetails.paymentMethod === 'wallet_partial' || orderDetails.paymentMethod === 'wallet_full') && (
-                        <div className="bg-blue-50 rounded-lg p-4">
-                          <h4 className="font-medium text-blue-900 mb-4 flex items-center gap-2">
-                            <CreditCard className="h-4 w-4" />
+                        <div className="bg-blue-50 rounded-lg p-3">
+                          <h4 className="font-medium text-blue-900 mb-2 flex items-center gap-2 text-sm">
+                            <CreditCard className="h-3 w-3" />
                             منابع تامین وجه
                           </h4>
-                          <div className="space-y-3">
+                          <div className="space-y-2">
                             {orderDetails.walletAmountUsed > 0 && (
-                              <div className="flex justify-between items-center p-3 bg-green-100 rounded-lg border border-green-200">
+                              <div className="flex justify-between items-center p-2 bg-green-100 rounded border border-green-200">
                                 <div className="flex items-center gap-2">
-                                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                                  <span className="text-sm font-medium text-green-800">کیف پول مشتری</span>
+                                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                  <span className="text-xs font-medium text-green-800">کیف پول</span>
                                 </div>
-                                <span className="font-bold text-green-700">
+                                <span className="font-bold text-green-700 text-sm">
                                   {Math.floor(parseFloat(orderDetails.walletAmountUsed || 0)).toLocaleString()} {orderDetails.currency}
                                 </span>
                               </div>
@@ -1869,22 +1881,18 @@ function FinanceOrders() {
                         </div>
                       )}
 
-                      {/* Order Status & Dates */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Order Status & Dates - Compact */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div>
-                          <Label className="text-sm font-medium text-gray-600">وضعیت پرداخت</Label>
-                          <Badge className="mt-1">{orderDetails.currentStatus}</Badge>
-                        </div>
-                        <div>
-                          <Label className="text-sm font-medium text-gray-600">تاریخ سفارش</Label>
-                          <p className="font-medium">
-                            {formatDateSafe(orderDetails.createdAt)}
+                          <Label className="text-xs font-medium text-gray-600">آخرین بروزرسانی</Label>
+                          <p className="font-medium text-sm">
+                            {formatDateSafe(orderDetails.updatedAt)}
                           </p>
                         </div>
                         <div>
-                          <Label className="text-sm font-medium text-gray-600">آخرین بروزرسانی</Label>
-                          <p className="font-medium">
-                            {formatDateSafe(orderDetails.updatedAt)}
+                          <Label className="text-xs font-medium text-gray-600">روش پرداخت</Label>
+                          <p className="font-medium text-sm">
+                            {orderDetails.paymentMethod || 'نامشخص'}
                           </p>
                         </div>
                       </div>
