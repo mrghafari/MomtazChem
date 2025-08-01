@@ -721,36 +721,7 @@ function FinanceOrders() {
                 <p className="text-gray-600 mt-1">مدیریت و بررسی پرداخت‌های دریافتی</p>
               </div>
             </div>
-            <div className="flex items-center space-x-4 space-x-reverse">
-              <Button 
-                onClick={() => paymentAutomationMutation.mutate()}
-                disabled={paymentAutomationMutation.isPending}
-                className="flex items-center space-x-2 space-x-reverse bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700"
-              >
-                <Settings className={`h-4 w-4 ${paymentAutomationMutation.isPending ? 'animate-spin' : ''}`} />
-                <span>تصحیح خودکار workflow</span>
-              </Button>
-              <Button 
-                onClick={() => processPendingBankPayments.mutate()}
-                disabled={processPendingBankPayments.isPending}
-                className="flex items-center space-x-2 space-x-reverse bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
-              >
-                <Timer className={`h-4 w-4 ${processPendingBankPayments.isPending ? 'animate-spin' : ''}`} />
-                <span>پردازش درگاه</span>
-              </Button>
-              <Button 
-                onClick={() => {
-                  refetch();
-                  refetchApproved();
-                }}
-                variant="outline"
-                className="flex items-center space-x-2 space-x-reverse"
-                disabled={isLoading || isLoadingApproved}
-              >
-                <RefreshCw className={`h-4 w-4 ${(isLoading || isLoadingApproved) ? 'animate-spin' : ''}`} />
-                <span>تازه‌سازی سفارشات</span>
-              </Button>
-            </div>
+
           </div>
         </div>
       </div>
