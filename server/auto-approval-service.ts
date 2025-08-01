@@ -3,13 +3,13 @@ import { eq, lte, sql, and } from "drizzle-orm";
 import { orderManagement } from "../shared/order-management-schema";
 import { customerOrders } from "../shared/customer-schema";
 
-// سرویس تایید خودکار 5 دقیقه‌ای
+// سرویس تایید خودکار - DISABLED (همه سفارشات نیاز به تایید دستی دارند)
 export class AutoApprovalService {
   private intervalId: NodeJS.Timeout | null = null;
 
-  // شروع سرویس تایید خودکار
+  // شروع سرویس تایید خودکار - DISABLED
   start() {
-    console.log("🤖 [AUTO APPROVAL] Service started - checking every minute");
+    console.log("🚫 [AUTO APPROVAL] Service DISABLED - all orders require manual approval");
     
     // بررسی هر دقیقه
     this.intervalId = setInterval(() => {

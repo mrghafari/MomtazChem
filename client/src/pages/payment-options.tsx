@@ -81,21 +81,13 @@ const PaymentOptionsPage = () => {
   };
 
   const getMethodBadge = (option: PaymentOption) => {
-    if (option.autoApproval) {
-      return (
-        <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-300">
-          <CheckCircle className="h-3 w-3 mr-1" />
-          تایید خودکار {option.approvalMinutes} دقیقه
-        </Badge>
-      );
-    } else {
-      return (
-        <Badge variant="outline" className="bg-orange-100 text-orange-800 border-orange-300">
-          <Clock className="h-3 w-3 mr-1" />
-          مهلت {option.graceDays} روزه
-        </Badge>
-      );
-    }
+    // همه روش‌های پرداخت نیاز به تایید دستی مالی دارند
+    return (
+      <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-300">
+        <Clock className="h-3 w-3 mr-1" />
+        نیاز به تایید دستی مالی
+      </Badge>
+    );
   };
 
   const handlePaymentSelection = async (method: string) => {
