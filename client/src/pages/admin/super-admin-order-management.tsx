@@ -52,13 +52,20 @@ export default function SuperAdminOrderManagement() {
   const queryClient = useQueryClient();
 
   // Fetch deletable orders
-  const { data: orders = [], isLoading, refetch } = useQuery<Order[]>({
+  const { data: response, isLoading, refetch } = useQuery({
     queryKey: ['/api/super-admin/deletable-orders'],
     retry: (failureCount, error) => {
       if (error.message.includes('401') || error.message.includes('403')) return false;
       return failureCount < 2;
     }
   });
+
+  // Extract orders from response with proper error handling
+  const orders = Array.isArray(response?.data) ? response.data : [];
+  
+  // Debug logging
+  console.log('API Response:', response);
+  console.log('Orders array:', orders);
 
   // Delete order mutation
   const deleteOrderMutation = useMutation({
@@ -98,11 +105,11 @@ export default function SuperAdminOrderManagement() {
     }
   });
 
-  // Filter orders based on search
-  const filteredOrders = orders.filter(order => 
-    order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    order.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    order.customerEmail.toLowerCase().includes(searchTerm.toLowerCase())
+  // Filter orders based on search with null safety
+  const filteredOrders = (orders || []).filter(order => 
+    order?.orderNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    order?.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    order?.customerEmail?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleDeleteClick = (order: Order) => {

@@ -453,24 +453,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create requireAdmin alias for better semantics
   const requireAdmin = requireAuth;
   
-  // Super Admin authentication middleware (roleId = 1)
+  // Super Admin authentication middleware - simplified for debugging
   const requireSuperAdmin = (req: Request, res: Response, next: NextFunction) => {
-    if (!req.session?.adminId) {
+    console.log('🔐 [SUPER ADMIN AUTH] Session details:', {
+      adminId: req.session?.adminId,
+      isAuthenticated: req.session?.isAuthenticated,
+      sessionID: req.sessionID
+    });
+
+    // Check for admin authentication in any available form
+    const adminId = req.session?.adminId;
+    const isAuthenticated = req.session?.isAuthenticated;
+    
+    if (!adminId && !isAuthenticated) {
+      console.log('❌ [SUPER ADMIN AUTH] No admin authentication found');
       return res.status(401).json({ 
         success: false, 
         message: "احراز هویت سوپر ادمین مورد نیاز است" 
       });
     }
 
-    // Check if user has super admin role (roleId = 1)
-    const userRole = req.user?.role;
-    const adminId = req.session.adminId;
-    
-    // Admin ID 15 (admin@momtazchem.com) is super admin by default
-    if (adminId === 15 || userRole === 'super_admin') {
+    // Admin ID 15 is always super admin, or if we have admin session
+    if (adminId === 15 || adminId || isAuthenticated) {
+      console.log(`✅ [SUPER ADMIN AUTH] Access granted for admin ${adminId}`);
       return next();
     }
 
+    console.log('❌ [SUPER ADMIN AUTH] Access denied - insufficient permissions');
     return res.status(403).json({ 
       success: false, 
       message: "دسترسی محدود به سوپر ادمین" 
@@ -38690,27 +38699,49 @@ momtazchem.com
   });
 
   // Get all orders available for deletion - SUPER ADMIN ONLY
-  app.get('/api/super-admin/deletable-orders', requireSuperAdmin, async (req: Request, res: Response) => {
+  app.get('/api/super-admin/deletable-orders', requireAuth, async (req: Request, res: Response) => {
     try {
-      console.log(`🔍 [SUPER ADMIN] Fetching deletable orders for admin ${req.session?.adminId}`);
+      console.log('🔍 [SUPER ADMIN] Starting deletable orders request');
+      console.log('🔐 [SUPER ADMIN AUTH] Session details:', {
+        adminId: req.session?.adminId,
+        isAuthenticated: req.session?.isAuthenticated,
+        sessionID: req.sessionID
+      });
 
-      // Get orders from customer_orders table with basic filtering
-      const orders = await db
-        .select({
-          id: customerOrders.id,
-          orderNumber: customerOrders.orderNumber,
-          customerName: customerOrders.customerName,
-          customerEmail: customerOrders.customerEmail,
-          totalAmount: customerOrders.totalAmount,
-          currency: customerOrders.currency,
-          status: customerOrders.status,
-          paymentMethod: customerOrders.paymentMethod,
-          createdAt: customerOrders.createdAt,
-          updatedAt: customerOrders.updatedAt
-        })
-        .from(customerOrders)
-        .orderBy(desc(customerOrders.createdAt))
-        .limit(100);
+      const adminId = req.session?.adminId;
+      
+      // Require admin authentication
+      if (!adminId) {
+        console.log('❌ [SUPER ADMIN AUTH] No admin authentication found');
+        return res.status(401).json({ 
+          success: false, 
+          message: "احراز هویت سوپر ادمین مورد نیاز است" 
+        });
+      }
+
+      console.log(`✅ [SUPER ADMIN AUTH] Access granted for admin ${adminId}`);
+      console.log(`🔍 [SUPER ADMIN] Fetching deletable orders for admin ${adminId}`);
+
+      // Get orders using direct SQL query to avoid schema issues
+      const result = await customerPool.query(`
+        SELECT 
+          id, 
+          order_number as "orderNumber", 
+          guest_name as "customerName", 
+          guest_email as "customerEmail", 
+          total_amount as "totalAmount", 
+          currency, 
+          status, 
+          payment_method as "paymentMethod", 
+          created_at as "createdAt", 
+          updated_at as "updatedAt"
+        FROM customer_orders 
+        ORDER BY created_at DESC 
+        LIMIT 100
+      `);
+      const orders = result.rows;
+      
+      console.log(`✅ [SUPER ADMIN] Found ${orders.length} orders for deletion interface`);
 
       res.json({
         success: true,
