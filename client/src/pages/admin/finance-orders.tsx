@@ -282,8 +282,7 @@ function FinanceOrders() {
     ? approvedOrdersResponse 
     : (approvedOrdersResponse?.orders || []);
     
-  console.log('🔍 [DEBUG] Approved orders response:', approvedOrdersResponse);
-  console.log('🔍 [DEBUG] Transferred orders count:', transferredOrders.length);
+
   
   // Filter and search functionality
   const filteredOrders = allOrders.filter(order => {
@@ -779,18 +778,6 @@ function FinanceOrders() {
                   <p className="text-3xl font-bold text-white">{bankOrders.length}</p>
                 </div>
                 <CreditCard className="h-8 w-8 text-blue-200" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white border-0 shadow-lg">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-purple-100 text-sm font-medium">تایید شده</p>
-                  <p className="text-3xl font-bold text-white">{transferredOrders.length}</p>
-                </div>
-                <CheckCircle className="h-8 w-8 text-purple-200" />
               </div>
             </CardContent>
           </Card>
