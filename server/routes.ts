@@ -30156,6 +30156,99 @@ momtazchem.com
     }
   });
 
+  // Direct wallet balance modification by financial managers
+  app.post('/api/admin/wallet/modify-balance', async (req, res) => {
+    try {
+      console.log('💰 [WALLET-MODIFY] Request received:', req.body);
+      
+      if (!req.session.adminId) {
+        return res.status(401).json({ success: false, message: "Admin authentication required" });
+      }
+
+      const { customerId, amount, reason, modificationType } = req.body;
+
+      // Validate required fields
+      if (!customerId || amount === undefined || !reason || !modificationType) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Customer ID, amount, reason, and modification type are required" 
+        });
+      }
+
+      // Validate modification type
+      if (!['credit', 'debit', 'set_balance'].includes(modificationType)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid modification type. Use 'credit', 'debit', or 'set_balance'" 
+        });
+      }
+
+      let transaction;
+      const currentBalance = await walletStorage.getWalletBalance(customerId);
+
+      if (modificationType === 'credit') {
+        transaction = await walletStorage.creditWallet(
+          customerId,
+          parseFloat(amount),
+          `Manual credit by admin: ${reason}`,
+          'admin_adjustment',
+          null,
+          req.session.adminId
+        );
+      } else if (modificationType === 'debit') {
+        transaction = await walletStorage.debitWallet(
+          customerId,
+          parseFloat(amount),
+          `Manual debit by admin: ${reason}`,
+          'admin_adjustment',
+          null,
+          req.session.adminId
+        );
+      } else if (modificationType === 'set_balance') {
+        // For set balance, calculate the difference and create appropriate transaction
+        const targetBalance = parseFloat(amount);
+        const difference = targetBalance - currentBalance;
+        
+        if (difference > 0) {
+          transaction = await walletStorage.creditWallet(
+            customerId,
+            difference,
+            `Balance adjustment by admin: ${reason}`,
+            'admin_adjustment',
+            null,
+            req.session.adminId
+          );
+        } else if (difference < 0) {
+          transaction = await walletStorage.debitWallet(
+            customerId,
+            Math.abs(difference),
+            `Balance adjustment by admin: ${reason}`,
+            'admin_adjustment',
+            null,
+            req.session.adminId
+          );
+        } else {
+          return res.json({
+            success: true,
+            message: "No change needed - balance already at target amount",
+            currentBalance: currentBalance
+          });
+        }
+      }
+
+      console.log('💰 [WALLET-MODIFY] Transaction completed:', transaction);
+
+      res.json({ 
+        success: true, 
+        data: transaction,
+        message: `Wallet ${modificationType} completed successfully`
+      });
+    } catch (error) {
+      console.error('Error modifying wallet balance:', error);
+      res.status(500).json({ success: false, message: error.message || 'Failed to modify wallet balance' });
+    }
+  });
+
   // Manual wallet adjustment (admin only)
   app.post('/api/admin/wallet/adjust', requireAuth, async (req, res) => {
     try {

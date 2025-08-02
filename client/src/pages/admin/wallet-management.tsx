@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { ArrowLeft, Wallet, CheckCircle, XCircle, Clock, Eye, Users, DollarSign, CreditCard, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -55,6 +56,13 @@ export default function WalletManagement() {
   const [isApprovalDialogOpen, setIsApprovalDialogOpen] = useState(false);
   const [adminNotes, setAdminNotes] = useState("");
   const [rejectionReason, setRejectionReason] = useState("");
+  
+  // Wallet modification states
+  const [isModifyDialogOpen, setIsModifyDialogOpen] = useState(false);
+  const [modifyCustomerId, setModifyCustomerId] = useState<number | null>(null);
+  const [modifyAmount, setModifyAmount] = useState("");
+  const [modifyReason, setModifyReason] = useState("");
+  const [modificationType, setModificationType] = useState<'credit' | 'debit' | 'set_balance'>('credit');
 
   // Check if user is super admin (id = 1)
   const isSuperAdmin = user?.id === 1;
@@ -127,6 +135,31 @@ export default function WalletManagement() {
     },
     onError: () => {
       toast({ title: "Error", description: "Failed to reject recharge request", variant: "destructive" });
+    }
+  });
+
+  // Modify wallet balance
+  const modifyBalanceMutation = useMutation({
+    mutationFn: (data: { customerId: number; amount: string; reason: string; modificationType: string }) => 
+      apiRequest('/api/admin/wallet/modify-balance', 'POST', data),
+    onSuccess: (data) => {
+      toast({ 
+        title: "موفق", 
+        description: data.message || "تغییر مقدار کیف پول با موفقیت انجام شد" 
+      });
+      setIsModifyDialogOpen(false);
+      setModifyCustomerId(null);
+      setModifyAmount("");
+      setModifyReason("");
+      setModificationType('credit');
+      queryClient.invalidateQueries({ queryKey: ['/api/wallet'] });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: "خطا", 
+        description: error?.message || "خطا در تغییر مقدار کیف پول", 
+        variant: "destructive" 
+      });
     }
   });
 
@@ -208,16 +241,26 @@ export default function WalletManagement() {
               </p>
             </div>
           </div>
-          <Button 
-            onClick={() => {
-              queryClient.invalidateQueries({ queryKey: ['/api/wallet'] });
-              toast({ title: "Refreshed", description: "Data refreshed successfully" });
-            }}
-            variant="outline"
-          >
-            <RefreshCw className="w-4 h-4 mr-2" />
-            Refresh
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              onClick={() => setIsModifyDialogOpen(true)}
+              variant="default"
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              <CreditCard className="w-4 h-4 mr-2" />
+              تغییر مقدار کیف پول
+            </Button>
+            <Button 
+              onClick={() => {
+                queryClient.invalidateQueries({ queryKey: ['/api/wallet'] });
+                toast({ title: "Refreshed", description: "Data refreshed successfully" });
+              }}
+              variant="outline"
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Refresh
+            </Button>
+          </div>
         </div>
 
         {/* Statistics Cards */}
@@ -613,6 +656,114 @@ export default function WalletManagement() {
                 </div>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Wallet Balance Modification Dialog */}
+        <Dialog open={isModifyDialogOpen} onOpenChange={setIsModifyDialogOpen}>
+          <DialogContent className="sm:max-w-[500px]" dir="rtl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <CreditCard className="w-5 h-5" />
+                تغییر مقدار کیف پول مشتری
+              </DialogTitle>
+              <DialogDescription>
+                می‌توانید مقدار کیف پول مشتری را تغییر دهید. تمام تغییرات در سابقه تراکنش‌ها ثبت می‌شود.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="customerId" className="text-right">شناسه مشتری</Label>
+                <Input
+                  id="customerId"
+                  type="number"
+                  value={modifyCustomerId || ''}
+                  onChange={(e) => setModifyCustomerId(parseInt(e.target.value) || null)}
+                  placeholder="شناسه مشتری را وارد کنید"
+                  className="text-right"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="modificationType" className="text-right">نوع تغییر</Label>
+                <select
+                  id="modificationType"
+                  value={modificationType}
+                  onChange={(e) => setModificationType(e.target.value as 'credit' | 'debit' | 'set_balance')}
+                  className="w-full p-2 border border-gray-300 rounded-md text-right"
+                >
+                  <option value="credit">افزایش موجودی (Credit)</option>
+                  <option value="debit">کاهش موجودی (Debit)</option>
+                  <option value="set_balance">تنظیم موجودی (Set Balance)</option>
+                </select>
+              </div>
+
+              <div>
+                <Label htmlFor="amount" className="text-right">
+                  {modificationType === 'set_balance' ? 'موجودی جدید' : 'مقدار تغییر'} (IQD)
+                </Label>
+                <Input
+                  id="amount"
+                  type="number"
+                  value={modifyAmount}
+                  onChange={(e) => setModifyAmount(e.target.value)}
+                  placeholder="مقدار را وارد کنید"
+                  className="text-right"
+                  min="0"
+                  step="0.01"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="reason" className="text-right">علت تغییر</Label>
+                <Input
+                  id="reason"
+                  value={modifyReason}
+                  onChange={(e) => setModifyReason(e.target.value)}
+                  placeholder="علت تغییر را وارد کنید"
+                  className="text-right"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 mt-6">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsModifyDialogOpen(false);
+                  setModifyCustomerId(null);
+                  setModifyAmount("");
+                  setModifyReason("");
+                  setModificationType('credit');
+                }}
+              >
+                انصراف
+              </Button>
+              <Button
+                onClick={() => {
+                  if (!modifyCustomerId || !modifyAmount || !modifyReason) {
+                    toast({
+                      title: "خطا",
+                      description: "لطفاً تمام فیلدها را پر کنید",
+                      variant: "destructive"
+                    });
+                    return;
+                  }
+                  
+                  modifyBalanceMutation.mutate({
+                    customerId: modifyCustomerId,
+                    amount: modifyAmount,
+                    reason: modifyReason,
+                    modificationType: modificationType
+                  });
+                }}
+                disabled={modifyBalanceMutation.isPending}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                {modifyBalanceMutation.isPending ? "در حال پردازش..." : "تایید تغییر"}
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       </div>
