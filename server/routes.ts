@@ -25816,16 +25816,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     }
   });
 
-  // Get approved orders that have been transferred to warehouse
-  app.get('/api/financial/approved-orders', async (req, res) => {
-    try {
-      const approvedOrders = await orderManagementStorage.getFinancialApprovedOrders();
-      res.json({ success: true, orders: approvedOrders });
-    } catch (error) {
-      console.error('Error fetching financial approved orders:', error);
-      res.status(500).json({ success: false, message: "خطا در دریافت سفارشات تأیید شده" });
-    }
-  });
+  // [REMOVED] Removed duplicate endpoint - using the comprehensive one above (line 25196)
 
   // Process financial order
   app.post('/api/financial/orders/:id/process', requireDepartmentAuth('financial'), async (req: any, res) => {
