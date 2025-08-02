@@ -633,7 +633,7 @@ function FinanceOrders() {
     if (!orderId) return;
     
     try {
-      const response = await apiRequest(`/api/tracking/order/${orderId}`);
+      const response = await apiRequest(`/api/tracking/order/${orderId}`, { method: 'GET' });
       // setTrackingCodes(response.trackingCodes || []);
     } catch (error) {
       console.error("Error loading tracking codes:", error);
@@ -710,7 +710,7 @@ function FinanceOrders() {
   };
 
   // Helper function for safe date formatting
-  const formatDateSafe = (dateString: string | undefined, locale: string = 'fa-IR') => {
+  const formatDateSafe = (dateString: string | undefined, locale: string = 'en-US') => {
     if (!dateString) return 'نامشخص';
     try {
       return new Date(dateString).toLocaleDateString(locale);
@@ -718,6 +718,12 @@ function FinanceOrders() {
       return 'نامشخص';
     }
   };
+
+  // Fetch company information for logo
+  const { data: companyInfo } = useQuery({
+    queryKey: ['/api/admin/company-information'],
+    enabled: true
+  });
 
   // Print function for order details
   const handlePrintOrder = () => {
@@ -818,9 +824,10 @@ function FinanceOrders() {
     </head>
     <body>
       <div class="header">
+        ${(companyInfo as any)?.data?.[0]?.logoUrl ? `<img src="${(companyInfo as any).data[0].logoUrl}" alt="شرکت ممتاز شیمی" style="max-width: 120px; max-height: 80px; margin-bottom: 15px;">` : ''}
         <div class="company-name">ممتاز شیمی</div>
         <div>جزئیات سفارش ${orderDetails.orderNumber}</div>
-        <div style="font-size: 12px; color: #6b7280;">تاریخ چاپ: ${new Date().toLocaleDateString('fa-IR')}</div>
+        <div style="font-size: 12px; color: #6b7280;">تاریخ چاپ: ${formatDateSafe(new Date().toISOString(), 'en-US')}</div>
       </div>
 
       <div class="section">
@@ -903,23 +910,21 @@ function FinanceOrders() {
           <thead>
             <tr>
               <th>نام محصول</th>
-              <th>قیمت واحد</th>
               <th>تعداد</th>
-              <th>مجموع</th>
+              <th>وزن (کیلوگرم)</th>
             </tr>
           </thead>
           <tbody>
             ${orderDetails.items?.map((item: any) => `
               <tr>
                 <td>${item.productName}</td>
-                <td>${Math.floor(parseFloat(item.price)).toLocaleString('fa-IR')} ${orderDetails.currency}</td>
                 <td>${item.quantity}</td>
-                <td>${Math.floor(parseFloat(item.price) * item.quantity).toLocaleString('fa-IR')} ${orderDetails.currency}</td>
+                <td>${item.weight || 'نامشخص'}</td>
               </tr>
             `).join('') || ''}
             <tr class="total-row">
-              <td colspan="3">جمع کل:</td>
-              <td>${Math.floor(parseFloat(orderDetails.totalAmount)).toLocaleString('fa-IR')} ${orderDetails.currency}</td>
+              <td colspan="2">جمع کل اقلام:</td>
+              <td>${orderDetails.items?.length || 0} عدد</td>
             </tr>
           </tbody>
         </table>
@@ -1524,7 +1529,7 @@ function FinanceOrders() {
                           <Timer className="h-5 w-5 text-amber-600" />
                           <div>
                             <p className="text-sm text-muted-foreground">فعال</p>
-                            <p className="text-xl font-bold text-amber-600">{orphanStats?.stats?.active || 0}</p>
+                            <p className="text-xl font-bold text-amber-600">{(orphanStats as any)?.stats?.active || 0}</p>
                           </div>
                         </div>
                       </CardContent>
@@ -1536,7 +1541,7 @@ function FinanceOrders() {
                           <AlertTriangle className="h-5 w-5 text-red-600" />
                           <div>
                             <p className="text-sm text-muted-foreground">منقضی شده</p>
-                            <p className="text-xl font-bold text-red-600">{orphanStats?.stats?.expired || 0}</p>
+                            <p className="text-xl font-bold text-red-600">{(orphanStats as any)?.stats?.expired || 0}</p>
                           </div>
                         </div>
                       </CardContent>
@@ -1548,7 +1553,7 @@ function FinanceOrders() {
                           <Bell className="h-5 w-5 text-blue-600" />
                           <div>
                             <p className="text-sm text-muted-foreground">اطلاع‌رسانی امروز</p>
-                            <p className="text-xl font-bold text-blue-600">{orphanStats?.stats?.notificationsToday || 0}</p>
+                            <p className="text-xl font-bold text-blue-600">{(orphanStats as any)?.stats?.notificationsToday || 0}</p>
                           </div>
                         </div>
                       </CardContent>
@@ -1560,7 +1565,7 @@ function FinanceOrders() {
                           <CheckCircle className="h-5 w-5 text-green-600" />
                           <div>
                             <p className="text-sm text-muted-foreground">پرداخت شده</p>
-                            <p className="text-xl font-bold text-green-600">{orphanStats?.stats?.paid || 0}</p>
+                            <p className="text-xl font-bold text-green-600">{(orphanStats as any)?.stats?.paid || 0}</p>
                           </div>
                         </div>
                       </CardContent>
@@ -1587,8 +1592,8 @@ function FinanceOrders() {
                         </CardHeader>
                         <CardContent>
                           <div className="space-y-3">
-                            {activeOrders?.orders?.length > 0 ? (
-                              activeOrders.orders.map((order: any) => (
+                            {(activeOrders as any)?.orders?.length > 0 ? (
+                              (activeOrders as any).orders.map((order: any) => (
                                 <Card key={order.id} className="border-l-4 border-l-amber-500">
                                   <CardContent className="p-4">
                                     <div className="flex items-center justify-between">
@@ -1706,7 +1711,7 @@ function FinanceOrders() {
                           <div>
                             <p className="text-sm text-muted-foreground">در انتظار بررسی</p>
                             <p className="text-xl font-bold text-orange-600">
-                              {orphanedOrders?.orders?.filter(order => order.current_status === 'pending' || order.current_status === 'confirmed').length || 0}
+                              {(orphanedOrders as any)?.orders?.filter((order: any) => order.current_status === 'pending' || order.current_status === 'confirmed').length || 0}
                             </p>
                           </div>
                         </div>
@@ -1719,7 +1724,7 @@ function FinanceOrders() {
                           <div>
                             <p className="text-sm text-muted-foreground">ارجاع شده به انبار</p>
                             <p className="text-xl font-bold text-blue-600">
-                              {orphanedOrders?.orders?.filter(order => order.current_status === 'warehouse_ready' || order.current_status === 'warehouse_pending').length || 0}
+                              {(orphanedOrders as any)?.orders?.filter((order: any) => order.current_status === 'warehouse_ready' || order.current_status === 'warehouse_pending').length || 0}
                             </p>
                           </div>
                         </div>
@@ -1732,7 +1737,7 @@ function FinanceOrders() {
                           <div>
                             <p className="text-sm text-muted-foreground">رد شده</p>
                             <p className="text-xl font-bold text-red-600">
-                              {orphanedOrders?.orders?.filter(order => order.current_status === 'rejected' || order.current_status === 'cancelled').length || 0}
+                              {(orphanedOrders as any)?.orders?.filter((order: any) => order.current_status === 'rejected' || order.current_status === 'cancelled').length || 0}
                             </p>
                           </div>
                         </div>
@@ -1745,7 +1750,7 @@ function FinanceOrders() {
                           <div>
                             <p className="text-sm text-muted-foreground">سفارشات موقت</p>
                             <p className="text-xl font-bold text-amber-600">
-                              {orphanedOrders?.orders?.filter(order => order.current_status === 'draft' || order.current_status === 'temporary').length || 0}
+                              {(orphanedOrders as any)?.orders?.filter((order: any) => order.current_status === 'draft' || order.current_status === 'temporary').length || 0}
                             </p>
                           </div>
                         </div>
@@ -1760,8 +1765,8 @@ function FinanceOrders() {
                         <RefreshCw className="h-8 w-8 animate-spin text-gray-400 mx-auto mb-2" />
                         <p className="text-gray-500">در حال بارگذاری سفارشات یتیم...</p>
                       </div>
-                    ) : orphanedOrders?.orders?.length > 0 ? (
-                      orphanedOrders.orders.map((order: any) => (
+                    ) : (orphanedOrders as any)?.orders?.length > 0 ? (
+                      (orphanedOrders as any).orders.map((order: any) => (
                         <Card key={order.id} className="border-r-4 border-r-purple-500">
                           <CardContent className="p-4">
                             <div className="flex items-center justify-between">
@@ -2934,7 +2939,7 @@ function OrderCard({ order, onOrderSelect, readOnly = false, fetchOrderDetails }
             <div className="flex gap-3">
               {fetchOrderDetails && order.orderNumber && (
                 <Button 
-                  onClick={() => fetchOrderDetails(order.orderNumber)}
+                  onClick={() => fetchOrderDetails(order.orderNumber || '')}
                   size="sm"
                   variant="outline"
                   className="flex items-center space-x-2 space-x-reverse hover:bg-blue-50 hover:border-blue-300"
