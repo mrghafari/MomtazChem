@@ -1,0 +1,169 @@
+ Tawk.to script loaded successfully
+ Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ Auth check result: Object
+ 
+value @ twk-chunk-common.js:2
+ Tawk.to Live Chat loaded successfully
+ 🔍 [DEBUG] Site Management component initialized
+ 🔍 [DEBUG] useEffect triggered, userPermissions: undefined
+ 🔍 [DEBUG] Site Management component initialized
+ 🔍 [DEBUG] useEffect triggered, userPermissions: Object
+ 🔍 [DEBUG] userPermissions modules: Array(34)
+ 🔍 [DEBUG] Full userPermissions response: Object
+ 🔍 [DEBUG] userPermissions.modules: Array(34)
+ 🔍 [DEBUG] userPermissions.permissions: Array(34)
+ 🔍 [DEBUG] Total allButtons count: 35
+ 🔍 [DEBUG] AI Settings exists in allButtons: true
+ 🔍 [DEBUG] Content Management exists in allButtons: true
+ 🔍 [DEBUG] allowedModules: Array(34)
+ 🔍 [DEBUG] kpi_dashboard in allowedModules? true
+ 🔍 [DEBUG] management_dashboard in allowedModules? true
+ 🔍 [DEBUG] finance in allowedModules? true
+ 🔍 [DEBUG] geography_analytics in allowedModules? true
+ 🔍 [DEBUG] ai_settings in allowedModules? true
+ 🔍 [DEBUG] content_management in allowedModules? true
+ 🔍 [CRITICAL] Missing button detection:
+site-management-fixed.tsx:457 🔍 [MISSING] order-tracking-view Order Management & Tracking - View Only moduleId: order_tracking
+site-management-fixed.tsx:461 🔍 [CRITICAL] Missing buttons count: 1
+site-management-fixed.tsx:463 🔍 [DEBUG] finance button found in allButtons? Object
+site-management-fixed.tsx:464 🔍 [DEBUG] geography_analytics button found in allButtons? Object
+site-management-fixed.tsx:465 🔍 [DEBUG] ai_settings button found in allButtons? Object
+site-management-fixed.tsx:466 🔍 [DEBUG] content_management button found in allButtons? Object
+site-management-fixed.tsx:467 🔍 [DEBUG] finance button in filtered? Object
+site-management-fixed.tsx:468 🔍 [DEBUG] geography_analytics button in filtered? Object
+site-management-fixed.tsx:469 🔍 [DEBUG] ai_settings button in filtered? Object
+site-management-fixed.tsx:470 🔍 [DEBUG] content_management button in filtered? Object
+site-management-fixed.tsx:76 🔍 [DEBUG] filtered buttons count: 34
+site-management-fixed.tsx:77 🔍 [DEBUG] First 5 filtered buttons: Array(5)
+site-management-fixed.tsx:78 🔍 [DEBUG] AI Control button in filtered: Object
+site-management-fixed.tsx:79 🔍 [DEBUG] Content Management button in filtered: Object
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+useAuth.ts:43 Auth check result: Object
+useAuth.ts:43 Auth check result: Object
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+site-management-fixed.tsx:71 🔍 [DEBUG] useEffect triggered, userPermissions: Object
+site-management-fixed.tsx:74 🔍 [DEBUG] userPermissions modules: Array(34)
+site-management-fixed.tsx:430 🔍 [DEBUG] Full userPermissions response: Object
+site-management-fixed.tsx:431 🔍 [DEBUG] userPermissions.modules: Array(34)
+site-management-fixed.tsx:432 🔍 [DEBUG] userPermissions.permissions: Array(34)
+site-management-fixed.tsx:437 🔍 [DEBUG] Total allButtons count: 35
+site-management-fixed.tsx:438 🔍 [DEBUG] AI Settings exists in allButtons: true
+site-management-fixed.tsx:439 🔍 [DEBUG] Content Management exists in allButtons: true
+site-management-fixed.tsx:441 🔍 [DEBUG] allowedModules: Array(34)
+site-management-fixed.tsx:442 🔍 [DEBUG] kpi_dashboard in allowedModules? true
+site-management-fixed.tsx:443 🔍 [DEBUG] management_dashboard in allowedModules? true
+site-management-fixed.tsx:444 🔍 [DEBUG] finance in allowedModules? true
+site-management-fixed.tsx:445 🔍 [DEBUG] geography_analytics in allowedModules? true
+site-management-fixed.tsx:446 🔍 [DEBUG] ai_settings in allowedModules? true
+site-management-fixed.tsx:447 🔍 [DEBUG] content_management in allowedModules? true
+site-management-fixed.tsx:453 🔍 [CRITICAL] Missing button detection:
+site-management-fixed.tsx:457 🔍 [MISSING] order-tracking-view Order Management & Tracking - View Only moduleId: order_tracking
+site-management-fixed.tsx:461 🔍 [CRITICAL] Missing buttons count: 1
+site-management-fixed.tsx:463 🔍 [DEBUG] finance button found in allButtons? Object
+site-management-fixed.tsx:464 🔍 [DEBUG] geography_analytics button found in allButtons? Object
+site-management-fixed.tsx:465 🔍 [DEBUG] ai_settings button found in allButtons? Object
+site-management-fixed.tsx:466 🔍 [DEBUG] content_management button found in allButtons? Object
+site-management-fixed.tsx:467 🔍 [DEBUG] finance button in filtered? Object
+site-management-fixed.tsx:468 🔍 [DEBUG] geography_analytics button in filtered? Object
+site-management-fixed.tsx:469 🔍 [DEBUG] ai_settings button in filtered? Object
+site-management-fixed.tsx:470 🔍 [DEBUG] content_management button in filtered? Object
+site-management-fixed.tsx:76 🔍 [DEBUG] filtered buttons count: 34
+site-management-fixed.tsx:77 🔍 [DEBUG] First 5 filtered buttons: Array(5)
+site-management-fixed.tsx:78 🔍 [DEBUG] AI Control button in filtered: Object
+site-management-fixed.tsx:79 🔍 [DEBUG] Content Management button in filtered: Object
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+useAuth.ts:43 Auth check result: Object
+logistics-management.tsx:460 🔍 [LOGISTICS MGMT] First order data: Object
+useOrderNotifications.ts:99 🔔 [LOGISTICS] نوتیفیکیشن: 22 سفارش جدید دریافت شد
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+logistics-management.tsx:241 🔍 [LOGISTICS MGMT] Opening order details for: M2511124
+logistics-management.tsx:460 🔍 [LOGISTICS MGMT] First order data: Object
+chunk-H56OBA7M.js?v=815b1335:341 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-H56OBA7M.js?v=815b1335:341
+logistics-management.tsx:249 ❌ [LOGISTICS MGMT] Closing order details dialog
+logistics-management.tsx:460 🔍 [LOGISTICS MGMT] First order data: Object
+chunk-RPCDYKBN.js?v=815b1335:16670 Uncaught NotFoundError: Failed to execute 'removeChild' on 'Node': The node to be removed is not a child of this node.
+    at removeChildFromContainer (chunk-RPCDYKBN.js?v=815b1335:8462:23)
+    at commitDeletionEffectsOnFiber (chunk-RPCDYKBN.js?v=815b1335:17508:21)
+    at recursivelyTraverseDeletionEffects (chunk-RPCDYKBN.js?v=815b1335:17486:13)
+    at commitDeletionEffectsOnFiber (chunk-RPCDYKBN.js?v=815b1335:17577:15)
+    at recursivelyTraverseDeletionEffects (chunk-RPCDYKBN.js?v=815b1335:17486:13)
+    at commitDeletionEffectsOnFiber (chunk-RPCDYKBN.js?v=815b1335:17577:15)
+    at recursivelyTraverseDeletionEffects (chunk-RPCDYKBN.js?v=815b1335:17486:13)
+    at commitDeletionEffectsOnFiber (chunk-RPCDYKBN.js?v=815b1335:17577:15)
+    at recursivelyTraverseDeletionEffects (chunk-RPCDYKBN.js?v=815b1335:17486:13)
+    at commitDeletionEffectsOnFiber (chunk-RPCDYKBN.js?v=815b1335:17577:15)
+chunk-RPCDYKBN.js?v=815b1335:16670 Uncaught NotFoundError: Failed to execute 'removeChild' on 'Node': The node to be removed is not a child of this node.
+    at removeChildFromContainer (chunk-RPCDYKBN.js?v=815b1335:8462:23)
+    at commitDeletionEffectsOnFiber (chunk-RPCDYKBN.js?v=815b1335:17508:21)
+    at recursivelyTraverseDeletionEffects (chunk-RPCDYKBN.js?v=815b1335:17486:13)
+    at commitDeletionEffectsOnFiber (chunk-RPCDYKBN.js?v=815b1335:17577:15)
+    at recursivelyTraverseDeletionEffects (chunk-RPCDYKBN.js?v=815b1335:17486:13)
+    at commitDeletionEffectsOnFiber (chunk-RPCDYKBN.js?v=815b1335:17577:15)
+    at recursivelyTraverseDeletionEffects (chunk-RPCDYKBN.js?v=815b1335:17486:13)
+    at commitDeletionEffectsOnFiber (chunk-RPCDYKBN.js?v=815b1335:17577:15)
+    at recursivelyTraverseDeletionEffects (chunk-RPCDYKBN.js?v=815b1335:17486:13)
+    at commitDeletionEffectsOnFiber (chunk-RPCDYKBN.js?v=815b1335:17577:15)
+chunk-RPCDYKBN.js?v=815b1335:14032 The above error occurred in the <Portal> component:
+
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-U724R7WD.js?v=815b1335:27:22
+    at Presence (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-7QZBBLXT.js?v=815b1335:24:11)
+    at Provider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=815b1335:38:15)
+    at DialogPortal (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-H56OBA7M.js?v=815b1335:113:11)
+    at _c3 (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ui/dialog.tsx:52:12)
+    at Provider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=815b1335:38:15)
+    at Dialog (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-H56OBA7M.js?v=815b1335:54:5)
+    at div
+    at LogisticsManagement (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/admin/logistics-management.tsx:98:37)
+    at Route (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=815b1335:265:16)
+    at Switch (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=815b1335:321:17)
+    at main
+    at div
+    at Router
+    at Provider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=815b1335:38:15)
+    at TooltipProvider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=815b1335:65:5)
+    at LanguageProvider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/contexts/LanguageContext.tsx:21:36)
+    at QueryClientProvider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=815b1335:2805:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+logCapturedError @ chunk-RPCDYKBN.js?v=815b1335:14032
+chunk-RPCDYKBN.js?v=815b1335:14032 The above error occurred in the <Portal> component:
+
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-U724R7WD.js?v=815b1335:27:22
+    at Presence (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-7QZBBLXT.js?v=815b1335:24:11)
+    at Provider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=815b1335:38:15)
+    at DialogPortal (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-H56OBA7M.js?v=815b1335:113:11)
+    at _c3 (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ui/dialog.tsx:52:12)
+    at Provider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=815b1335:38:15)
+    at Dialog (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-H56OBA7M.js?v=815b1335:54:5)
+    at div
+    at LogisticsManagement (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/admin/logistics-management.tsx:98:37)
+    at Route (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=815b1335:265:16)
+    at Switch (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=815b1335:321:17)
+    at main
+    at div
+    at Router
+    at Provider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=815b1335:38:15)
+    at TooltipProvider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=815b1335:65:5)
+    at LanguageProvider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/contexts/LanguageContext.tsx:21:36)
+    at QueryClientProvider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=815b1335:2805:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+logCapturedError @ chunk-RPCDYKBN.js?v=815b1335:14032
+chunk-RPCDYKBN.js?v=815b1335:9129 Uncaught NotFoundError: Failed to execute 'removeChild' on 'Node': The node to be removed is not a child of this node.
+    at removeChildFromContainer (chunk-RPCDYKBN.js?v=815b1335:8462:23)
+    at commitDeletionEffectsOnFiber (chunk-RPCDYKBN.js?v=815b1335:17508:21)
+    at recursivelyTraverseDeletionEffects (chunk-RPCDYKBN.js?v=815b1335:17486:13)
+    at commitDeletionEffectsOnFiber (chunk-RPCDYKBN.js?v=815b1335:17577:15)
+    at recursivelyTraverseDeletionEffects (chunk-RPCDYKBN.js?v=815b1335:17486:13)
+    at commitDeletionEffectsOnFiber (chunk-RPCDYKBN.js?v=815b1335:17577:15)
+    at recursivelyTraverseDeletionEffects (chunk-RPCDYKBN.js?v=815b1335:17486:13)
+    at commitDeletionEffectsOnFiber (chunk-RPCDYKBN.js?v=815b1335:17577:15)
+    at recursivelyTraverseDeletionEffects (chunk-RPCDYKBN.js?v=815b1335:17486:13)
+    at commitDeletionEffectsOnFiber (chunk-RPCDYKBN.js?v=815b1335:17577:15)
