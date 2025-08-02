@@ -99,6 +99,7 @@ const WarehouseManagementFixed: React.FC = () => {
         <style>
           body { font-family: 'Tahoma', sans-serif; margin: 20px; direction: rtl; }
           .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 20px; }
+          .company-logo { max-width: 150px; height: auto; margin-bottom: 10px; }
           .company-name { font-size: 24px; font-weight: bold; color: #1a365d; }
           .order-title { font-size: 18px; margin-top: 10px; }
           .section { margin-bottom: 20px; }
@@ -121,9 +122,10 @@ const WarehouseManagementFixed: React.FC = () => {
       </head>
       <body>
         <div class="header">
+          <img src="/uploads/Logo_1753245273579.jpeg" alt="لوگوی شرکت" class="company-logo" />
           <div class="company-name">شرکت ممتاز شیمی</div>
           <div class="order-title">جزئیات سفارش ${orderDetails.orderNumber || `#${selectedOrder?.customerOrderId}`}</div>
-          <div style="font-size: 12px; margin-top: 10px;">تاریخ چاپ: ${new Date().toLocaleDateString('fa-IR')}</div>
+          <div style="font-size: 12px; margin-top: 10px;">تاریخ چاپ: ${new Date().toLocaleDateString('en-GB')}</div>
         </div>
 
         <div class="section">
