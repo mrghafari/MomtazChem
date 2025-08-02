@@ -51,8 +51,10 @@ const VisualBarcode = ({
   useEffect(() => {
     if (canvasRef.current && value) {
       try {
-        // Clear previous content
-        canvasRef.current.innerHTML = '';
+        // Clear previous content safely
+        while (canvasRef.current.firstChild) {
+          canvasRef.current.removeChild(canvasRef.current.firstChild);
+        }
         setError(null);
         
         // Validate barcode format
@@ -114,8 +116,10 @@ const VisualBarcode = ({
   const generatePrintVersion = () => {
     if (!printCanvasRef.current) return;
     
-    // Clear existing content
-    printCanvasRef.current.innerHTML = '';
+    // Clear existing content safely
+    while (printCanvasRef.current.firstChild) {
+      printCanvasRef.current.removeChild(printCanvasRef.current.firstChild);
+    }
     
     // Create container div styled like label preview
     const container = document.createElement('div');
@@ -302,7 +306,11 @@ const VisualBarcode = ({
                   a.download = `label-${productName || 'product'}-${value}.png`;
                   document.body.appendChild(a);
                   a.click();
-                  document.body.removeChild(a);
+                  setTimeout(() => {
+                    if (document.body.contains(a)) {
+                      document.body.removeChild(a);
+                    }
+                  }, 100);
                   URL.revokeObjectURL(url);
                   
                   toast({
@@ -351,7 +359,11 @@ const VisualBarcode = ({
                 a.download = `label-${productName || 'product'}-${value}.png`;
                 document.body.appendChild(a);
                 a.click();
-                document.body.removeChild(a);
+                setTimeout(() => {
+                  if (document.body.contains(a)) {
+                    document.body.removeChild(a);
+                  }
+                }, 100);
                 URL.revokeObjectURL(url);
                 
                 toast({
