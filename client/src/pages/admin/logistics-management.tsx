@@ -1354,6 +1354,7 @@ const LogisticsManagement = () => {
         </head>
         <body>
           <div class="header">
+            <img src="/uploads/Logo_1753245273579.jpeg" alt="شرکت ممتاز شیمی" style="max-width: 120px; max-height: 80px; margin-bottom: 15px;" onerror="this.style.display='none'">
             <h1>جزئیات سفارش لجستیک</h1>
             <h2>سفارش ${selectedOrder.orderNumber}</h2>
             <p>تاریخ چاپ: ${new Date().toLocaleDateString('en-US')}</p>
@@ -1534,7 +1535,7 @@ const LogisticsManagement = () => {
     </head>
     <body>
       <div class="header">
-        <img src="/attached_assets/Logo_1753245273579.jpeg" alt="شرکت ممتاز شیمی" style="max-width: 120px; max-height: 80px; margin-bottom: 15px;" onerror="this.style.display='none'">
+        <img src="/uploads/Logo_1753245273579.jpeg" alt="شرکت ممتاز شیمی" style="max-width: 120px; max-height: 80px; margin-bottom: 15px;" onerror="this.style.display='none'">
         <div class="company-name">ممتاز شیمی</div>
         <div>جزئیات سفارش ${orderDetails.orderNumber}</div>
         <div style="font-size: 12px; color: #6b7280;">تاریخ چاپ: ${new Date().toLocaleDateString('en-GB')}</div>
