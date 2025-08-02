@@ -12,6 +12,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { User, Phone, Mail, MapPin, Building, CreditCard, ShoppingBag, Calendar, Edit, Save, X, Eye, FileText, Activity } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import PaymentMethodBadge from "@/components/PaymentMethodBadge";
 
 interface UnifiedCustomerProfileProps {
   customerId: number;
@@ -747,9 +748,14 @@ export default function UnifiedCustomerProfile({ customerId, mode = 'view', onUp
                         </div>
                       </div>
                       {(order.paymentMethod || order.carrier) && (
-                        <div className="text-sm text-gray-600">
-                          {order.paymentMethod && <span>Payment: {order.paymentMethod}</span>}
-                          {order.paymentMethod && order.carrier && <span> • </span>}
+                        <div className="text-sm text-gray-600 flex items-center gap-2">
+                          {order.paymentMethod && (
+                            <PaymentMethodBadge 
+                              paymentMethod={order.paymentMethod}
+                              showIcon={true}
+                              className="text-xs"
+                            />
+                          )}
                           {order.carrier && <span>Carrier: {order.carrier}</span>}
                         </div>
                       )}

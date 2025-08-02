@@ -641,10 +641,8 @@ const WarehouseManagementFixed: React.FC = () => {
                                 </div>
                                 <PaymentMethodBadge 
                                   paymentMethod={order.paymentMethod}
-                                  totalAmount={order.totalAmount}
-                                  currency={order.currency}
-                                  size="sm"
-                                  showAmount={false}
+                                  showIcon={true}
+                                  className="text-xs"
                                 />
                               </div>
                             </td>

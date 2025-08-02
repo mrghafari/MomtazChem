@@ -25,6 +25,7 @@ import {
   DollarSign,
   AlertTriangle
 } from 'lucide-react';
+import PaymentMethodBadge from '@/components/PaymentMethodBadge';
 
 // Order interface - Rebuilt to match actual backend database structure
 interface Order {
@@ -765,7 +766,18 @@ export default function OrderTrackingManagement() {
                                   </CardHeader>
                                   <CardContent className="space-y-2">
                                     <div><strong>مبلغ کل:</strong> {formatAmount(selectedOrder.totalAmount, selectedOrder.currency)}</div>
-                                    <div><strong>روش پرداخت:</strong> {selectedOrder.paymentMethod || 'نامشخص'}</div>
+                                    <div className="flex items-center gap-2">
+                                      <strong>روش پرداخت:</strong>
+                                      {selectedOrder.paymentMethod ? (
+                                        <PaymentMethodBadge 
+                                          paymentMethod={selectedOrder.paymentMethod}
+                                          showIcon={true}
+                                          className="text-xs"
+                                        />
+                                      ) : (
+                                        <span>نامشخص</span>
+                                      )}
+                                    </div>
                                     <div><strong>وضعیت فعلی:</strong> 
                                       {(() => {
                                         const statusInfo = getStatusDisplay(selectedOrder);

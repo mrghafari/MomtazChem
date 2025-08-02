@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { FileText, Download, Eye, Search, Filter, Receipt, Calendar, Building, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
+import PaymentMethodBadge from '@/components/PaymentMethodBadge';
 
 interface PaidOrder {
   id: number;
@@ -528,9 +529,11 @@ export default function ShopInvoiceManagement() {
                     </td>
                     <td className="p-3 font-bold text-green-600">{formatCurrency(order.totalAmount)}</td>
                     <td className="p-3">
-                      <Badge variant="secondary">
-                        {getPaymentMethodName(order.paymentMethod)}
-                      </Badge>
+                      <PaymentMethodBadge 
+                        paymentMethod={order.paymentMethod}
+                        showIcon={true}
+                        className="text-xs"
+                      />
                     </td>
                     <td className="p-3 text-sm">{formatGregorianDate(order.paymentDate)}</td>
                     <td className="p-3">

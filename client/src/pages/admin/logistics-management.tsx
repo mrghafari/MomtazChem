@@ -1777,10 +1777,7 @@ const LogisticsManagement = () => {
                       </h5>
                       <PaymentMethodBadge 
                         paymentMethod={order.paymentMethod}
-                        totalAmount={order.totalAmount}
-                        currency={order.currency}
-                        size="md"
-                        showAmount={true}
+                        showIcon={true}
                       />
                     </div>
 

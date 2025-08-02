@@ -1,112 +1,115 @@
+import React from 'react';
 import { Badge } from '@/components/ui/badge';
-import { CreditCard, Wallet, DollarSign, Clock, Building, AlertCircle } from 'lucide-react';
+import { CreditCard, Wallet, DollarSign, Clock, AlertTriangle } from 'lucide-react';
 
 interface PaymentMethodBadgeProps {
-  paymentMethod: string | undefined;
-  totalAmount?: string;
-  currency?: string;
-  size?: 'sm' | 'md' | 'lg';
-  showAmount?: boolean;
+  paymentMethod?: string | null;
+  className?: string;
+  showIcon?: boolean;
 }
 
-export default function PaymentMethodBadge({ 
+const PaymentMethodBadge: React.FC<PaymentMethodBadgeProps> = ({ 
   paymentMethod, 
-  totalAmount, 
-  currency = 'IQD', 
-  size = 'md',
-  showAmount = true 
-}: PaymentMethodBadgeProps) {
-  
-  const getPaymentMethodDisplay = () => {
-    switch (paymentMethod) {
+  className = "",
+  showIcon = true 
+}) => {
+  const getPaymentMethodInfo = (method?: string | null) => {
+    if (!method) {
+      return {
+        label: 'نامشخص',
+        variant: 'secondary' as const,
+        icon: AlertTriangle,
+        className: 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+      };
+    }
+
+    switch (method.toLowerCase()) {
       case 'wallet_full':
         return {
           label: 'کیف پول (کامل)',
-          description: 'پرداخت کامل از کیف پول',
-          icon: <Wallet className="w-3 h-3" />,
-          className: 'bg-green-100 text-green-800 border-green-300'
+          variant: 'default' as const,
+          icon: Wallet,
+          className: 'bg-green-100 text-green-800 hover:bg-green-200 border-green-300'
         };
+      
       case 'wallet_partial':
         return {
-          label: 'ترکیبی',
-          description: 'کیف پول + درگاه بانکی',
-          icon: <DollarSign className="w-3 h-3" />,
-          className: 'bg-purple-100 text-purple-800 border-purple-300'
+          label: 'کیف پول (جزئی)',
+          variant: 'outline' as const,
+          icon: Wallet,
+          className: 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100 border-yellow-300'
         };
-      case 'bank_transfer_grace':
+      
+      case 'online_payment':
         return {
-          label: 'مهلت‌دار',
-          description: 'حواله بانکی 3 روزه',
-          icon: <Clock className="w-3 h-3" />,
-          className: 'bg-orange-100 text-orange-800 border-orange-300'
+          label: 'پرداخت آنلاین',
+          variant: 'default' as const,
+          icon: CreditCard,
+          className: 'bg-blue-100 text-blue-800 hover:bg-blue-200 border-blue-300'
         };
-      case 'bank_gateway':
-        return {
-          label: 'درگاه بانکی',
-          description: 'پرداخت آنلاین فوری',
-          icon: <CreditCard className="w-3 h-3" />,
-          className: 'bg-blue-100 text-blue-800 border-blue-300'
-        };
+      
       case 'bank_transfer':
         return {
-          label: 'حواله بانکی',
-          description: 'انتقال مستقیم بانکی',
-          icon: <Building className="w-3 h-3" />,
-          className: 'bg-indigo-100 text-indigo-800 border-indigo-300'
+          label: 'انتقال بانکی',
+          variant: 'outline' as const,
+          icon: DollarSign,
+          className: 'bg-purple-50 text-purple-700 hover:bg-purple-100 border-purple-300'
         };
-      case 'cash_on_delivery':
+      
+      case 'bank_transfer_grace':
         return {
-          label: 'پرداخت در محل',
-          description: 'پرداخت هنگام تحویل',
-          icon: <DollarSign className="w-3 h-3" />,
-          className: 'bg-yellow-100 text-yellow-800 border-yellow-300'
+          label: 'انتقال بانکی (دوره مهلت)',
+          variant: 'secondary' as const,
+          icon: Clock,
+          className: 'bg-orange-50 text-orange-700 hover:bg-orange-100 border-orange-300'
         };
-      case 'company_credit':
+      
+      case 'hybrid':
         return {
-          label: 'اعتبار شرکت',
-          description: 'پرداخت از اعتبار شرکت',
-          icon: <Building className="w-3 h-3" />,
-          className: 'bg-cyan-100 text-cyan-800 border-cyan-300'
+          label: 'ترکیبی (کیف پول + بانک)',
+          variant: 'outline' as const,
+          icon: DollarSign,
+          className: 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-300'
         };
+      
+      case 'cash':
+        return {
+          label: 'نقدی',
+          variant: 'secondary' as const,
+          icon: DollarSign,
+          className: 'bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-300'
+        };
+      
+      case 'credit':
+        return {
+          label: 'اعتباری',
+          variant: 'outline' as const,
+          icon: CreditCard,
+          className: 'bg-red-50 text-red-700 hover:bg-red-100 border-red-300'
+        };
+      
       default:
         return {
-          label: paymentMethod || 'نامشخص',
-          description: 'نوع پرداخت تعریف نشده',
-          icon: <AlertCircle className="w-3 h-3" />,
-          className: 'bg-gray-100 text-gray-800 border-gray-300'
+          label: method,
+          variant: 'secondary' as const,
+          icon: AlertTriangle,
+          className: 'bg-gray-100 text-gray-600 hover:bg-gray-200'
         };
     }
   };
 
-  const payment = getPaymentMethodDisplay();
-  
-  const sizeClasses = {
-    sm: 'text-xs px-2 py-1',
-    md: 'text-sm px-3 py-1.5',
-    lg: 'text-base px-4 py-2'
-  };
+  const paymentInfo = getPaymentMethodInfo(paymentMethod);
+  const IconComponent = paymentInfo.icon;
 
   return (
-    <div className="space-y-1">
-      <Badge 
-        variant="outline" 
-        className={`${payment.className} ${sizeClasses[size]} flex items-center gap-1 border`}
-      >
-        {payment.icon}
-        {payment.label}
-      </Badge>
-      
-      {size !== 'sm' && (
-        <p className="text-xs text-gray-600">
-          {payment.description}
-        </p>
-      )}
-      
-      {showAmount && totalAmount && (
-        <p className="text-xs font-medium text-gray-700">
-          💰 {totalAmount} {currency}
-        </p>
-      )}
-    </div>
+    <Badge 
+      variant={paymentInfo.variant}
+      className={`${paymentInfo.className} ${className} flex items-center gap-1 text-xs font-medium`}
+    >
+      {showIcon && <IconComponent className="w-3 h-3" />}
+      {paymentInfo.label}
+    </Badge>
   );
-}
+};
+
+export default PaymentMethodBadge;
