@@ -824,10 +824,10 @@ function FinanceOrders() {
     </head>
     <body>
       <div class="header">
-        ${(companyInfo as any)?.data?.[0]?.logoUrl ? `<img src="${(companyInfo as any).data[0].logoUrl}" alt="شرکت ممتاز شیمی" style="max-width: 120px; max-height: 80px; margin-bottom: 15px;">` : ''}
+        <img src="/attached_assets/Logo_1753245273579.jpeg" alt="شرکت ممتاز شیمی" style="max-width: 120px; max-height: 80px; margin-bottom: 15px;" onerror="this.style.display='none'">
         <div class="company-name">ممتاز شیمی</div>
         <div>جزئیات سفارش ${orderDetails.orderNumber}</div>
-        <div style="font-size: 12px; color: #6b7280;">تاریخ چاپ: ${formatDateSafe(new Date().toISOString(), 'en-US')}</div>
+        <div style="font-size: 12px; color: #6b7280;">تاریخ چاپ: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' })}</div>
       </div>
 
       <div class="section">
