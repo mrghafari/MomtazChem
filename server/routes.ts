@@ -30182,7 +30182,7 @@ momtazchem.com
   });
 
   // Direct wallet balance modification by financial managers
-  app.post('/api/admin/wallet/modify-balance', async (req, res) => {
+  app.post('/api/admin/wallet/modify-balance', requireAuth, async (req, res) => {
     try {
       console.log('💰 [WALLET-MODIFY] Request received:', req.body);
       
