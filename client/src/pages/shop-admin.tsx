@@ -161,6 +161,27 @@ export default function ShopAdmin() {
     },
   });
 
+  // Delete discount mutation
+  const deleteDiscountMutation = useMutation({
+    mutationFn: async (discountId: number) => {
+      return apiRequest(`/api/shop/discounts/${discountId}`, { method: "DELETE" });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/shop/discounts"] });
+      toast({
+        title: "موفقیت",
+        description: "تخفیف با موفقیت حذف شد",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "خطا",
+        description: "خطا در حذف تخفیف",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Returns handlers
   const handleDeleteReturn = async (returnId: number) => {
     try {
@@ -451,35 +472,69 @@ export default function ShopAdmin() {
           {/* Discounts Tab */}
           <TabsContent value="discounts" className="space-y-6">
             <Card>
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
                   <Percent className="w-5 h-5" />
                   Discount Settings
                 </CardTitle>
+                <Button 
+                  onClick={() => {
+                    setEditingDiscount(null);
+                    setIsDiscountDialogOpen(true);
+                  }}
+                  className="flex items-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Create New Discount
+                </Button>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {discounts.map((discount: any) => (
-                    <div key={discount.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div>
-                        <h3 className="font-medium">{discount.name}</h3>
-                        <p className="text-sm text-gray-600">{discount.description}</p>
-                        <p className="text-sm text-green-600">{discount.discountPercentage}% off</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant={discount.isActive ? 'default' : 'secondary'}>
-                          {discount.isActive ? 'Active' : 'Inactive'}
-                        </Badge>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => setEditingDiscount(discount)}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                      </div>
+                  {discounts.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
+                      <Percent className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                      <p>No discounts created yet</p>
+                      <p className="text-sm">Click "Create New Discount" to get started</p>
                     </div>
-                  ))}
+                  ) : (
+                    discounts.map((discount: any) => (
+                      <div key={discount.id} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                          <h3 className="font-medium">{discount.name}</h3>
+                          <p className="text-sm text-gray-600">{discount.description}</p>
+                          <p className="text-sm text-green-600">{discount.discountPercentage}% off</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={discount.isActive ? 'default' : 'secondary'}>
+                            {discount.isActive ? 'Active' : 'Inactive'}
+                          </Badge>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setEditingDiscount(discount);
+                              setIsDiscountDialogOpen(true);
+                            }}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              if (confirm('آیا از حذف این تخفیف اطمینان دارید؟')) {
+                                deleteDiscountMutation.mutate(discount.id);
+                              }
+                            }}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            disabled={deleteDiscountMutation.isPending}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -999,7 +1054,234 @@ export default function ShopAdmin() {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Discount Creation/Edit Dialog */}
+      <Dialog open={isDiscountDialogOpen} onOpenChange={setIsDiscountDialogOpen}>
+        <DialogContent className="max-w-lg" dir="rtl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Percent className="w-5 h-5" />
+              {editingDiscount ? 'ویرایش تخفیف' : 'ایجاد تخفیف جدید'}
+            </DialogTitle>
+          </DialogHeader>
+          <DiscountForm 
+            discount={editingDiscount} 
+            onClose={() => {
+              setIsDiscountDialogOpen(false);
+              setEditingDiscount(null);
+            }} 
+          />
+        </DialogContent>
+      </Dialog>
     </div>
+  );
+}
+
+// Discount Form Component
+function DiscountForm({ discount, onClose }: { discount?: any; onClose: () => void }) {
+  const [name, setName] = useState(discount?.name || '');
+  const [description, setDescription] = useState(discount?.description || '');
+  const [discountPercentage, setDiscountPercentage] = useState(discount?.discountPercentage || '');
+  const [minOrderAmount, setMinOrderAmount] = useState(discount?.minOrderAmount || '');
+  const [maxDiscountAmount, setMaxDiscountAmount] = useState(discount?.maxDiscountAmount || '');
+  const [validFrom, setValidFrom] = useState(discount?.validFrom?.split('T')[0] || '');
+  const [validTo, setValidTo] = useState(discount?.validTo?.split('T')[0] || '');
+  const [isActive, setIsActive] = useState(discount?.isActive ?? true);
+  const [usageLimit, setUsageLimit] = useState(discount?.usageLimit || '');
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Create/Update mutation
+  const saveDiscountMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const url = discount ? `/api/shop/discounts/${discount.id}` : '/api/shop/discounts';
+      const method = discount ? 'PATCH' : 'POST';
+      return apiRequest(url, { method, body: data });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/shop/discounts'] });
+      toast({ 
+        title: "موفقیت", 
+        description: discount ? "تخفیف با موفقیت بروزرسانی شد" : "تخفیف با موفقیت ایجاد شد" 
+      });
+      onClose();
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: "خطا", 
+        description: error?.message || "خطا در ذخیره تخفیف", 
+        variant: "destructive" 
+      });
+    }
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const data = {
+      name: name.trim(),
+      description: description.trim(),
+      discountPercentage: parseFloat(discountPercentage),
+      minOrderAmount: minOrderAmount ? parseFloat(minOrderAmount) : null,
+      maxDiscountAmount: maxDiscountAmount ? parseFloat(maxDiscountAmount) : null,
+      validFrom: validFrom || null,
+      validTo: validTo || null,
+      isActive,
+      usageLimit: usageLimit ? parseInt(usageLimit) : null
+    };
+
+    if (!data.name || !data.discountPercentage) {
+      toast({ 
+        title: "خطا", 
+        description: "نام و درصد تخفیف الزامی است", 
+        variant: "destructive" 
+      });
+      return;
+    }
+
+    if (data.discountPercentage < 0 || data.discountPercentage > 100) {
+      toast({ 
+        title: "خطا", 
+        description: "درصد تخفیف باید بین 0 و 100 باشد", 
+        variant: "destructive" 
+      });
+      return;
+    }
+
+    saveDiscountMutation.mutate(data);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <Label htmlFor="name">نام تخفیف *</Label>
+        <Input
+          id="name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="تخفیف ویژه"
+          required
+          className="text-right"
+        />
+      </div>
+      
+      <div>
+        <Label htmlFor="description">توضیحات</Label>
+        <Input
+          id="description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="توضیحات تخفیف..."
+          className="text-right"
+        />
+      </div>
+      
+      <div>
+        <Label htmlFor="discountPercentage">درصد تخفیف (%) *</Label>
+        <Input
+          id="discountPercentage"
+          type="number"
+          min="0"
+          max="100"
+          step="0.01"
+          value={discountPercentage}
+          onChange={(e) => setDiscountPercentage(e.target.value)}
+          placeholder="10"
+          required
+          className="text-center"
+        />
+      </div>
+      
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="minOrderAmount">حداقل مبلغ سفارش ($)</Label>
+          <Input
+            id="minOrderAmount"
+            type="number"
+            min="0"
+            step="0.01"
+            value={minOrderAmount}
+            onChange={(e) => setMinOrderAmount(e.target.value)}
+            placeholder="100"
+            className="text-center"
+          />
+        </div>
+        
+        <div>
+          <Label htmlFor="maxDiscountAmount">حداکثر مبلغ تخفیف ($)</Label>
+          <Input
+            id="maxDiscountAmount"
+            type="number"
+            min="0"
+            step="0.01"
+            value={maxDiscountAmount}
+            onChange={(e) => setMaxDiscountAmount(e.target.value)}
+            placeholder="50"
+            className="text-center"
+          />
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="validFrom">تاریخ شروع</Label>
+          <Input
+            id="validFrom"
+            type="date"
+            value={validFrom}
+            onChange={(e) => setValidFrom(e.target.value)}
+          />
+        </div>
+        
+        <div>
+          <Label htmlFor="validTo">تاریخ پایان</Label>
+          <Input
+            id="validTo"
+            type="date"
+            value={validTo}
+            onChange={(e) => setValidTo(e.target.value)}
+          />
+        </div>
+      </div>
+      
+      <div>
+        <Label htmlFor="usageLimit">محدودیت استفاده</Label>
+        <Input
+          id="usageLimit"
+          type="number"
+          min="1"
+          value={usageLimit}
+          onChange={(e) => setUsageLimit(e.target.value)}
+          placeholder="100"
+          className="text-center"
+        />
+      </div>
+      
+      <div className="flex items-center space-x-2">
+        <Checkbox
+          id="isActive"
+          checked={isActive}
+          onCheckedChange={(checked) => setIsActive(checked as boolean)}
+        />
+        <Label htmlFor="isActive">فعال</Label>
+      </div>
+      
+      <div className="flex gap-4 pt-4">
+        <Button type="button" variant="outline" onClick={onClose} className="flex-1">
+          انصراف
+        </Button>
+        <Button 
+          type="submit" 
+          disabled={saveDiscountMutation.isPending}
+          className="flex-1"
+        >
+          {saveDiscountMutation.isPending 
+            ? 'در حال ذخیره...' 
+            : (discount ? 'بروزرسانی' : 'ایجاد')
+          }
+        </Button>
+      </div>
+    </form>
   );
 }
 
