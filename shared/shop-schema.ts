@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, decimal, boolean, integer, json } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, decimal, boolean, integer, json, date } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -180,13 +180,22 @@ export const discountSettings = pgTable("discount_settings", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(), // e.g., "Bulk Discount 1"
   type: text("type").notNull().default("quantity"), // quantity, percentage, fixed
-  minQuantity: integer("min_quantity").notNull(),
+  minQuantity: integer("min_quantity").default(1),
   discountPercentage: decimal("discount_percentage", { precision: 5, scale: 2 }).notNull(),
   isActive: boolean("is_active").default(true),
   description: text("description"),
   applicableProducts: json("applicable_products"), // Array of selected product IDs
   applyToAllProducts: boolean("apply_to_all_products").default(true), // If false, apply only to selected products
   applicableCategories: json("applicable_categories"), // Array of category IDs for category-based discounts
+  // Date range fields for discount validity
+  validFrom: date("valid_from"), // Start date (Gregorian)
+  validTo: date("valid_to"), // End date (Gregorian)
+  // Usage limits
+  usageLimit: integer("usage_limit"), // Maximum number of times this discount can be used
+  usedCount: integer("used_count").default(0), // Current usage count
+  // Minimum order amount
+  minOrderAmount: decimal("min_order_amount", { precision: 10, scale: 2 }), // Minimum order value to apply discount
+  maxDiscountAmount: decimal("max_discount_amount", { precision: 10, scale: 2 }), // Maximum discount amount (cap)
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

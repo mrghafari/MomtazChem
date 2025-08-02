@@ -1088,8 +1088,16 @@ function DiscountForm({ discount, onClose }: { discount?: any; onClose: () => vo
   const [validTo, setValidTo] = useState(discount?.validTo?.split('T')[0] || '');
   const [isActive, setIsActive] = useState(discount?.isActive ?? true);
   const [usageLimit, setUsageLimit] = useState(discount?.usageLimit || '');
+  const [applyToAllProducts, setApplyToAllProducts] = useState(discount?.applyToAllProducts ?? true);
+  const [selectedProducts, setSelectedProducts] = useState<number[]>(discount?.applicableProducts || []);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Fetch products for selection
+  const { data: products = [] } = useQuery({
+    queryKey: ["/api/products"],
+    enabled: !applyToAllProducts,
+  });
 
   // Create/Update mutation
   const saveDiscountMutation = useMutation({
@@ -1127,7 +1135,9 @@ function DiscountForm({ discount, onClose }: { discount?: any; onClose: () => vo
       validFrom: validFrom || null,
       validTo: validTo || null,
       isActive,
-      usageLimit: usageLimit ? parseInt(usageLimit) : null
+      usageLimit: usageLimit ? parseInt(usageLimit) : null,
+      applyToAllProducts,
+      applicableProducts: applyToAllProducts ? [] : selectedProducts
     };
 
     if (!data.name || !data.discountPercentage) {
@@ -1224,22 +1234,24 @@ function DiscountForm({ discount, onClose }: { discount?: any; onClose: () => vo
       
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="validFrom">تاریخ شروع</Label>
+          <Label htmlFor="validFrom">تاریخ شروع (میلادی)</Label>
           <Input
             id="validFrom"
             type="date"
             value={validFrom}
             onChange={(e) => setValidFrom(e.target.value)}
+            className="text-left"
           />
         </div>
         
         <div>
-          <Label htmlFor="validTo">تاریخ پایان</Label>
+          <Label htmlFor="validTo">تاریخ پایان (میلادی)</Label>
           <Input
             id="validTo"
             type="date"
             value={validTo}
             onChange={(e) => setValidTo(e.target.value)}
+            className="text-left"
           />
         </div>
       </div>
@@ -1257,6 +1269,54 @@ function DiscountForm({ discount, onClose }: { discount?: any; onClose: () => vo
         />
       </div>
       
+      {/* Product Selection */}
+      <div className="space-y-3">
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="applyToAllProducts"
+            checked={applyToAllProducts}
+            onCheckedChange={(checked) => {
+              setApplyToAllProducts(checked as boolean);
+              if (checked) {
+                setSelectedProducts([]);
+              }
+            }}
+          />
+          <Label htmlFor="applyToAllProducts">اعمال روی تمام محصولات</Label>
+        </div>
+        
+        {!applyToAllProducts && (
+          <div>
+            <Label>انتخاب محصول مشخص:</Label>
+            <div className="border rounded-lg p-3 max-h-40 overflow-y-auto space-y-2">
+              {products.map((product: any) => (
+                <div key={product.id} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`product-${product.id}`}
+                    checked={selectedProducts.includes(product.id)}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setSelectedProducts([...selectedProducts, product.id]);
+                      } else {
+                        setSelectedProducts(selectedProducts.filter(id => id !== product.id));
+                      }
+                    }}
+                  />
+                  <Label htmlFor={`product-${product.id}`} className="flex-1 text-sm">
+                    {product.name}
+                  </Label>
+                </div>
+              ))}
+            </div>
+            {selectedProducts.length > 0 && (
+              <p className="text-sm text-gray-600 mt-2">
+                {selectedProducts.length} محصول انتخاب شده
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+
       <div className="flex items-center space-x-2">
         <Checkbox
           id="isActive"
