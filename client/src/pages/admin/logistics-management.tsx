@@ -1455,6 +1455,238 @@ const LogisticsManagement = () => {
     }
   };
 
+  // Print function for order details
+  const handlePrintOrder = (orderDetails: any) => {
+    if (!orderDetails) return;
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const printContent = `
+    <!DOCTYPE html>
+    <html dir="rtl" lang="ar">
+    <head>
+      <meta charset="utf-8">
+      <title>جزئیات سفارش ${orderDetails.orderNumber}</title>
+      <style>
+        body { 
+          font-family: 'Segoe UI', Tahoma, Arial, sans-serif; 
+          margin: 20px; 
+          direction: rtl; 
+          font-size: 14px;
+          line-height: 1.6;
+        }
+        .header { 
+          text-align: center; 
+          border-bottom: 2px solid #2563eb; 
+          padding-bottom: 10px; 
+          margin-bottom: 20px; 
+        }
+        .company-name { 
+          font-size: 24px; 
+          font-weight: bold; 
+          color: #2563eb; 
+          margin-bottom: 5px;
+        }
+        .section { 
+          margin-bottom: 15px; 
+          border: 1px solid #e5e7eb; 
+          border-radius: 8px; 
+          padding: 12px;
+        }
+        .section-title { 
+          font-weight: bold; 
+          font-size: 16px; 
+          color: #374151; 
+          margin-bottom: 8px;
+          border-bottom: 1px solid #e5e7eb;
+          padding-bottom: 4px;
+        }
+        .info-grid { 
+          display: grid; 
+          grid-template-columns: 1fr 1fr; 
+          gap: 10px; 
+        }
+        .info-item { 
+          display: flex; 
+          justify-content: space-between; 
+          padding: 4px 0;
+        }
+        .label { 
+          font-weight: 600; 
+          color: #6b7280; 
+        }
+        .value { 
+          color: #374151; 
+        }
+        .items-table { 
+          width: 100%; 
+          border-collapse: collapse; 
+          margin-top: 10px;
+        }
+        .items-table th, .items-table td { 
+          border: 1px solid #d1d5db; 
+          padding: 8px; 
+          text-align: right; 
+        }
+        .items-table th { 
+          background-color: #f3f4f6; 
+          font-weight: bold; 
+        }
+        .total-row { 
+          background-color: #fef3c7; 
+          font-weight: bold; 
+        }
+        .status-badge {
+          padding: 4px 8px;
+          border-radius: 4px;
+          font-size: 12px;
+          font-weight: bold;
+        }
+        .status-confirmed { background-color: #dcfce7; color: #166534; }
+        .status-pending { background-color: #fef3c7; color: #92400e; }
+        .status-rejected { background-color: #fecaca; color: #dc2626; }
+        @media print {
+          body { margin: 0; }
+          .no-print { display: none !important; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <img src="/attached_assets/Logo_1753245273579.jpeg" alt="شرکت ممتاز شیمی" style="max-width: 120px; max-height: 80px; margin-bottom: 15px;" onerror="this.style.display='none'">
+        <div class="company-name">ممتاز شیمی</div>
+        <div>جزئیات سفارش ${orderDetails.orderNumber}</div>
+        <div style="font-size: 12px; color: #6b7280;">تاریخ چاپ: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' })}</div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">اطلاعات سفارش</div>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="label">شماره سفارش:</span>
+            <span class="value">${orderDetails.orderNumber}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">تاریخ ثبت:</span>
+            <span class="value">${orderDetails.createdAt ? new Date(orderDetails.createdAt).toLocaleDateString('fa-IR') : 'نامشخص'}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">وضعیت:</span>
+            <span class="value status-badge ${orderDetails.status === 'warehouse_approved' ? 'status-confirmed' : 
+                                              orderDetails.status === 'pending' ? 'status-pending' : 'status-rejected'}">
+              ${orderDetails.status === 'warehouse_approved' ? 'تایید انبار' : 
+                orderDetails.status === 'logistics_dispatched' ? 'ارسال شده' : 
+                orderDetails.status || 'نامشخص'}
+            </span>
+          </div>
+          <div class="info-item">
+            <span class="label">روش پرداخت:</span>
+            <span class="value">${orderDetails.paymentMethod === 'digital_wallet' ? 'کیف پول دیجیتال' : 
+                                  orderDetails.paymentMethod === 'iraqi_bank_gateway' ? 'درگاه بانکی عراقی' : 
+                                  orderDetails.paymentMethod || 'نامشخص'}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">کد تحویل:</span>
+            <span class="value">${orderDetails.deliveryCode || 'تولید نشده'}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">وزن کل:</span>
+            <span class="value">${orderDetails.calculatedWeight || orderDetails.totalWeight || 'محاسبه نشده'} کیلوگرم</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">اطلاعات مشتری</div>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="label">نام:</span>
+            <span class="value">${orderDetails.customerFirstName || ''} ${orderDetails.customerLastName || ''}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">ایمیل:</span>
+            <span class="value">${orderDetails.customerEmail || 'نامشخص'}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">تلفن:</span>
+            <span class="value">${orderDetails.customerPhone || 'نامشخص'}</span>
+          </div>
+        </div>
+      </div>
+
+      ${orderDetails.shippingAddress ? `
+      <div class="section">
+        <div class="section-title">آدرس تحویل</div>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="label">نام گیرنده:</span>
+            <span class="value">${orderDetails.shippingAddress.name || 'نامشخص'}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">تلفن:</span>
+            <span class="value">${orderDetails.shippingAddress.phone || 'نامشخص'}</span>
+          </div>
+          <div class="info-item" style="grid-column: 1 / -1;">
+            <span class="label">آدرس:</span>
+            <span class="value">${orderDetails.shippingAddress.address || 'نامشخص'}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">شهر:</span>
+            <span class="value">${orderDetails.shippingAddress.city || 'نامشخص'}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">کد پستی:</span>
+            <span class="value">${orderDetails.shippingAddress.postalCode || 'نامشخص'}</span>
+          </div>
+        </div>
+      </div>` : ''}
+
+      <div class="section">
+        <div class="section-title">اقلام سفارش</div>
+        <table class="items-table">
+          <thead>
+            <tr>
+              <th>نام محصول</th>
+              <th>تعداد</th>
+              <th>وزن (کیلوگرم)</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${orderDetails.items?.map((item: any) => `
+              <tr>
+                <td>${item.productName || item.name}</td>
+                <td>${item.quantity}</td>
+                <td>${item.weight || 'نامشخص'}</td>
+              </tr>
+            `).join('') || ''}
+            <tr class="total-row">
+              <td colspan="2">جمع کل اقلام:</td>
+              <td>${orderDetails.items?.length || 0} عدد</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      ${orderDetails.deliveryNotes || orderDetails.logisticsNotes ? `
+      <div class="section">
+        <div class="section-title">یادداشت تحویل</div>
+        <div class="value">${orderDetails.deliveryNotes || orderDetails.logisticsNotes}</div>
+      </div>` : ''}
+
+      <div style="margin-top: 30px; text-align: center; font-size: 12px; color: #6b7280;">
+        این سند توسط سیستم مدیریت ممتاز شیمی تولید شده است
+      </div>
+    </body>
+    </html>
+    `;
+
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+  };
+
   // Send or resend delivery code SMS using template #3
   const handleSendDeliveryCode = async (orderManagementId: number, hasExistingCode: boolean) => {
     setResendingCodes(prev => ({ ...prev, [orderManagementId]: true }));
@@ -4825,6 +5057,14 @@ const LogisticsManagement = () => {
           )}
 
           <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => handlePrintOrder(selectedOrderForDetails)}
+              className="flex items-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
+            >
+              <Printer className="w-4 h-4" />
+              چاپ جزئیات
+            </Button>
             <Button variant="outline" onClick={() => setIsOrderDetailsDialogOpen(false)}>
               بستن
             </Button>
