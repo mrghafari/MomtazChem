@@ -28,6 +28,13 @@ The system is built on a robust full-stack architecture. Features include compre
 - Added systematic payment correction algorithm for all historical orders
 - Established wallet security controls documentation and best practices
 
+**Financial Management System Fixes (August 2025):**
+- Fixed transferred orders list in finance section by removing duplicate API endpoints
+- Implemented email-based customer search in wallet modification form with autocomplete
+- Added proper authentication middleware to wallet balance modification endpoint
+- Resolved apiRequest method compatibility issues for POST requests
+- Enhanced customer search with name/mobile display for better user experience
+
 **Payment Method Display Standardization (August 2025):**
 - Created centralized PaymentMethodBadge component for consistent payment method visualization
 - Standardized payment method icons and color schemes across all management modules
