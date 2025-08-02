@@ -195,7 +195,7 @@ export default function WalletManagement() {
   // Modify wallet balance
   const modifyBalanceMutation = useMutation({
     mutationFn: (data: { customerId: number; amount: string; reason: string; modificationType: string }) => 
-      apiRequest('/api/admin/wallet/modify-balance', 'POST', data),
+      apiRequest('/api/admin/wallet/modify-balance', { method: 'POST', body: data }),
     onSuccess: (data) => {
       toast({ 
         title: "موفق", 
