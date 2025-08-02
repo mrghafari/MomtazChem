@@ -1557,7 +1557,7 @@ const LogisticsManagement = () => {
         <img src="/attached_assets/Logo_1753245273579.jpeg" alt="شرکت ممتاز شیمی" style="max-width: 120px; max-height: 80px; margin-bottom: 15px;" onerror="this.style.display='none'">
         <div class="company-name">ممتاز شیمی</div>
         <div>جزئیات سفارش ${orderDetails.orderNumber}</div>
-        <div style="font-size: 12px; color: #6b7280;">تاریخ چاپ: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' })}</div>
+        <div style="font-size: 12px; color: #6b7280;">تاریخ چاپ: ${new Date().toLocaleDateString('en-GB')}</div>
       </div>
 
       <div class="section">
@@ -1569,7 +1569,7 @@ const LogisticsManagement = () => {
           </div>
           <div class="info-item">
             <span class="label">تاریخ ثبت:</span>
-            <span class="value">${orderDetails.createdAt ? new Date(orderDetails.createdAt).toLocaleDateString('fa-IR') : 'نامشخص'}</span>
+            <span class="value">${orderDetails.createdAt ? new Date(orderDetails.createdAt).toLocaleDateString('en-GB') : 'نامشخص'}</span>
           </div>
           <div class="info-item">
             <span class="label">وضعیت:</span>
@@ -1586,10 +1586,7 @@ const LogisticsManagement = () => {
                                   orderDetails.paymentMethod === 'iraqi_bank_gateway' ? 'درگاه بانکی عراقی' : 
                                   orderDetails.paymentMethod || 'نامشخص'}</span>
           </div>
-          <div class="info-item">
-            <span class="label">کد تحویل:</span>
-            <span class="value">${orderDetails.deliveryCode || 'تولید نشده'}</span>
-          </div>
+
           <div class="info-item">
             <span class="label">وزن کل:</span>
             <span class="value">${orderDetails.calculatedWeight || orderDetails.totalWeight || 'محاسبه نشده'} کیلوگرم</span>
@@ -1642,31 +1639,7 @@ const LogisticsManagement = () => {
         </div>
       </div>` : ''}
 
-      <div class="section">
-        <div class="section-title">اقلام سفارش</div>
-        <table class="items-table">
-          <thead>
-            <tr>
-              <th>نام محصول</th>
-              <th>تعداد</th>
-              <th>وزن (کیلوگرم)</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${orderDetails.items?.map((item: any) => `
-              <tr>
-                <td>${item.productName || item.name}</td>
-                <td>${item.quantity}</td>
-                <td>${item.weight || 'نامشخص'}</td>
-              </tr>
-            `).join('') || ''}
-            <tr class="total-row">
-              <td colspan="2">جمع کل اقلام:</td>
-              <td>${orderDetails.items?.length || 0} عدد</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+
 
       ${orderDetails.deliveryNotes || orderDetails.logisticsNotes ? `
       <div class="section">
