@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -230,6 +230,7 @@ const LogisticsManagement = () => {
   // Order Details Dialog states
   const [selectedOrderForDetails, setSelectedOrderForDetails] = useState<LogisticsOrder | null>(null);
   const [isOrderDetailsDialogOpen, setIsOrderDetailsDialogOpen] = useState(false);
+  const [dialogKey, setDialogKey] = useState(0);
   const [customVehicleType, setCustomVehicleType] = useState('');
   const [customEditVehicleType, setCustomEditVehicleType] = useState('');
   const [showCustomInput, setShowCustomInput] = useState(false);
@@ -237,9 +238,39 @@ const LogisticsManagement = () => {
 
   // Handle showing order details
   const handleShowOrderDetails = (order: LogisticsOrder) => {
+    console.log('🔍 [LOGISTICS MGMT] Opening order details for:', order.orderNumber || order.customerOrderId);
     setSelectedOrderForDetails(order);
     setIsOrderDetailsDialogOpen(true);
+    setDialogKey(prev => prev + 1); // Force remount
   };
+
+  // Handle closing order details with proper cleanup
+  const handleCloseOrderDetails = useCallback(() => {
+    console.log('❌ [LOGISTICS MGMT] Closing order details dialog');
+    setIsOrderDetailsDialogOpen(false);
+    // Use timeout to ensure state is properly cleared and prevent Portal errors
+    setTimeout(() => {
+      setSelectedOrderForDetails(null);
+      setDialogKey(prev => prev + 1);
+    }, 150);
+  }, []);
+
+  // Add escape key handler
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isOrderDetailsDialogOpen) {
+        handleCloseOrderDetails();
+      }
+    };
+
+    if (isOrderDetailsDialogOpen) {
+      document.addEventListener('keydown', handleEscapeKey);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [isOrderDetailsDialogOpen, handleCloseOrderDetails]);
   
   // State for vehicle editing (moved here before useEffect)
   const [editingVehicle, setEditingVehicle] = useState<any>(null);
@@ -4860,7 +4891,15 @@ const LogisticsManagement = () => {
       </Dialog>
 
       {/* Order Details Dialog */}
-      <Dialog open={isOrderDetailsDialogOpen} onOpenChange={setIsOrderDetailsDialogOpen}>
+      <Dialog 
+        key={`order-details-${dialogKey}`}
+        open={isOrderDetailsDialogOpen} 
+        onOpenChange={(open) => {
+          if (!open) {
+            handleCloseOrderDetails();
+          }
+        }}
+      >
         <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold text-right">
@@ -5031,7 +5070,10 @@ const LogisticsManagement = () => {
               <Printer className="w-4 h-4" />
               چاپ جزئیات
             </Button>
-            <Button variant="outline" onClick={() => setIsOrderDetailsDialogOpen(false)}>
+            <Button 
+              variant="outline" 
+              onClick={handleCloseOrderDetails}
+            >
               بستن
             </Button>
           </DialogFooter>
