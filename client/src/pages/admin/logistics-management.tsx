@@ -1563,9 +1563,21 @@ const LogisticsManagement = () => {
           </div>
           <div class="info-item">
             <span class="label">روش پرداخت:</span>
-            <span class="value">${orderDetails.paymentMethod === 'digital_wallet' ? 'کیف پول دیجیتال' : 
-                                  orderDetails.paymentMethod === 'iraqi_bank_gateway' ? 'درگاه بانکی عراقی' : 
-                                  orderDetails.paymentMethod || 'نامشخص'}</span>
+            <span class="value">${(() => {
+              switch (orderDetails.paymentMethod) {
+                case 'wallet_full': return 'کیف پول کامل';
+                case 'wallet_partial': return 'پرداخت ترکیبی';
+                case 'bank_transfer': return 'واریز بانکی';
+                case 'bank_transfer_grace': return 'واریز بانکی (مهلت‌دار)';
+                case 'online_payment': return 'درگاه آنلاین';
+                case 'digital_wallet': return 'کیف پول دیجیتال';
+                case 'iraqi_bank_gateway': return 'درگاه بانکی عراقی';
+                case 'hybrid': return 'ترکیبی';
+                case 'cash': return 'نقدی';
+                case 'credit': return 'اعتباری';
+                default: return orderDetails.paymentMethod || 'نامشخص';
+              }
+            })()}</span>
           </div>
 
           <div class="info-item">

@@ -852,9 +852,21 @@ function FinanceOrders() {
           </div>
           <div class="info-item">
             <span class="label">روش پرداخت:</span>
-            <span class="value">${orderDetails.paymentMethod === 'digital_wallet' ? 'کیف پول دیجیتال' : 
-                                  orderDetails.paymentMethod === 'iraqi_bank_gateway' ? 'درگاه بانکی عراقی' : 
-                                  orderDetails.paymentMethod}</span>
+            <span class="value">${(() => {
+              switch (orderDetails.paymentMethod) {
+                case 'wallet_full': return 'کیف پول کامل';
+                case 'wallet_partial': return 'پرداخت ترکیبی';
+                case 'bank_transfer': return 'واریز بانکی';
+                case 'bank_transfer_grace': return 'واریز بانکی (مهلت‌دار)';
+                case 'online_payment': return 'درگاه آنلاین';
+                case 'digital_wallet': return 'کیف پول دیجیتال';
+                case 'iraqi_bank_gateway': return 'درگاه بانکی عراقی';
+                case 'hybrid': return 'ترکیبی';
+                case 'cash': return 'نقدی';
+                case 'credit': return 'اعتباری';
+                default: return orderDetails.paymentMethod || 'نامشخص';
+              }
+            })()}</span>
           </div>
         </div>
       </div>
@@ -1019,7 +1031,7 @@ function FinanceOrders() {
               </div>
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 max-w-sm">
                 <p className="text-amber-800 text-sm font-medium">
-                  پرداخت ترکیبی کیف پول - نیاز به تایید دستی مالی
+                  تمام انواع پرداخت - نیاز به تایید دستی مالی
                 </p>
                 <p className="text-amber-700 text-xs mt-1">
                   تمام سفارشات باید توسط بخش مالی بررسی و تایید شوند
@@ -1184,7 +1196,7 @@ function FinanceOrders() {
                           <div className="flex items-center gap-2 text-sm text-blue-700">
                             <CheckCircle className="h-4 w-4" />
                             <span className="font-medium">
-                              {order.paymentMethod === 'wallet_full' ? 'پرداخت کامل کیف پول' : 'پرداخت ترکیبی کیف پول'} 
+                              <PaymentMethodBadge paymentMethod={order.paymentMethod} size="sm" />
                               - نیاز به تایید دستی مالی
                             </span>
                           </div>
@@ -2801,9 +2813,9 @@ function OrderCard({ order, onOrderSelect, readOnly = false, fetchOrderDetails }
                   <span className="font-medium text-gray-700">{order.deliveryCode}</span>
                 </div>
               )}
-              <div className="flex justify-between text-xs">
+              <div className="flex justify-between items-center text-xs">
                 <span className="text-gray-600">پرداخت:</span>
-                <span className="font-medium text-blue-700">{order.paymentMethod === 'digital_wallet' ? 'کیف پول' : order.paymentMethod === 'iraqi_bank_gateway' ? 'بانک' : order.paymentMethod}</span>
+                <PaymentMethodBadge paymentMethod={order.paymentMethod} size="xs" />
               </div>
             </div>
           </div>

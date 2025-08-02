@@ -386,6 +386,8 @@ export default function ShopInvoiceManagement() {
   const getPaymentMethodName = (method: string) => {
     const methods: Record<string, string> = {
       'bank_transfer': 'انتقال بانکی',
+      'wallet_full': 'کیف پول کامل',
+      'wallet_partial': 'پرداخت ترکیبی',
       'wallet': 'کیف پول دیجیتال', 
       'wallet_partial': 'کیف پول + سایر',
       'cash_on_delivery': 'پرداخت در محل',

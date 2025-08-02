@@ -47,6 +47,7 @@ import type { ShopProduct, Customer, Order } from "@shared/shop-schema";
 import SalesReport from "@/pages/sales-report";
 import InvoiceManagement from "@/pages/admin/invoice-management";
 import ShopInvoiceManagement from "@/components/ShopInvoiceManagement";
+import PaymentMethodBadge from "@/components/PaymentMethodBadge";
 
 export default function ShopAdmin() {
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
@@ -856,15 +857,7 @@ export default function ShopAdmin() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <p className="text-sm text-gray-600">روش پرداخت</p>
-                    <p className="font-medium">
-                      {selectedOrder.paymentMethod === 'bank_transfer' ? 'واریز بانکی' : 
-                       selectedOrder.paymentMethod === 'cash_on_delivery' ? 'پرداخت در محل' :
-                       selectedOrder.paymentMethod === 'company_credit' ? 'اعتبار شرکت' :
-                       selectedOrder.paymentMethod === 'wallet' ? 'کیف پول' :
-                       selectedOrder.paymentMethod === 'wallet_partial' ? 'پرداخت ترکیبی (کیف پول + درگاه)' :
-                       selectedOrder.paymentMethod === 'wallet_full' ? 'کیف پول (کامل)' :
-                       selectedOrder.paymentMethod || 'نامشخص'}
-                    </p>
+                    <PaymentMethodBadge paymentMethod={selectedOrder.paymentMethod} />
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">وضعیت پرداخت</p>

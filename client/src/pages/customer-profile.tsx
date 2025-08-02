@@ -10,6 +10,7 @@ import { User, Package, Calendar, DollarSign, ShoppingBag, LogOut, MapPin, Build
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import PaymentMethodBadge from "@/components/PaymentMethodBadge";
 
 // کامپوننت کنتور زمانی برای ارسال حواله بانکی
 const BankTransferCountdown = ({ orderDate, gracePeriodHours = 72 }: { orderDate: string, gracePeriodHours?: number }) => {

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import PaymentMethodBadge from "@/components/PaymentMethodBadge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -277,21 +278,21 @@ export default function FinancialWorkflowDashboard() {
             <div className="flex items-center gap-2 p-3 bg-green-100 rounded-lg">
               <Wallet className="h-5 w-5 text-green-600" />
               <div>
-                <div className="font-medium text-green-900">کیف پول</div>
+                <PaymentMethodBadge paymentMethod="wallet_full" size="sm" />
                 <div className="text-xs text-green-700">برداشت خودکار</div>
               </div>
             </div>
             <div className="flex items-center gap-2 p-3 bg-purple-100 rounded-lg">
               <DollarSign className="h-5 w-5 text-purple-600" />
               <div>
-                <div className="font-medium text-purple-900">ترکیبی</div>
+                <PaymentMethodBadge paymentMethod="wallet_partial" size="sm" />
                 <div className="text-xs text-purple-700">کیف پول + بانک</div>
               </div>
             </div>
             <div className="flex items-center gap-2 p-3 bg-orange-100 rounded-lg">
               <Clock className="h-5 w-5 text-orange-600" />
               <div>
-                <div className="font-medium text-orange-900">مهلت‌دار</div>
+                <PaymentMethodBadge paymentMethod="bank_transfer_grace" size="sm" />
                 <div className="text-xs text-orange-700">3 روز واریز بانکی</div>
               </div>
             </div>
