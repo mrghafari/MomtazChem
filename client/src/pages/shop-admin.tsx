@@ -46,6 +46,7 @@ import { apiRequest } from "@/lib/queryClient";
 import type { ShopProduct, Customer, Order } from "@shared/shop-schema";
 import SalesReport from "@/pages/sales-report";
 import InvoiceManagement from "@/pages/admin/invoice-management";
+import ShopInvoiceManagement from "@/components/ShopInvoiceManagement";
 
 export default function ShopAdmin() {
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
@@ -542,7 +543,7 @@ export default function ShopAdmin() {
 
           {/* Invoice Management Tab */}
           <TabsContent value="invoices" className="space-y-6">
-            <InvoiceManagement />
+            <ShopInvoiceManagement />
           </TabsContent>
 
           {/* Returns Tab */}

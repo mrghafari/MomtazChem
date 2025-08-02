@@ -16665,6 +16665,100 @@ Momtaz Chemical Technical Team`,
     }
   });
 
+  // Get paid orders only for invoice management
+  app.get("/api/shop/orders/paid", requireAuth, async (req, res) => {
+    try {
+      // Get all customer orders that are paid/settled
+      const allOrders = await customerStorage.getAllOrders();
+      
+      // Filter for orders with completed payments (settled orders)
+      const paidOrders = allOrders.filter(order => 
+        order.status === 'completed' || 
+        order.status === 'delivered' ||
+        (order.paymentMethod && ['wallet_full', 'wallet_partial', 'bank_transfer'].includes(order.paymentMethod))
+      );
+      
+      // Get detailed information for each paid order including items
+      const detailedPaidOrders = await Promise.all(
+        paidOrders.map(async (order) => {
+          const items = await customerStorage.getOrderItems(order.id);
+          let customer = null;
+          if (order.customerId) {
+            customer = await customerStorage.getCustomerById(order.customerId);
+          }
+
+          return {
+            id: order.id,
+            orderNumber: order.orderNumber,
+            customerFirstName: customer?.firstName || 'نامشخص',
+            customerLastName: customer?.lastName || '',
+            customerEmail: customer?.email || '',
+            customerPhone: customer?.phone || '',
+            totalAmount: order.totalAmount,
+            currency: order.currency || 'IQD',
+            paymentMethod: order.paymentMethod || 'نامشخص',
+            paymentDate: order.paymentConfirmedAt || order.updatedAt,
+            createdAt: order.createdAt,
+            status: order.status,
+            items: items.map(item => ({
+              productName: item.productName,
+              quantity: item.quantity,
+              unitPrice: item.unitPrice,
+              totalPrice: item.totalPrice
+            }))
+          };
+        })
+      );
+
+      res.json({ success: true, data: detailedPaidOrders });
+    } catch (error) {
+      console.error("Error fetching paid orders:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch paid orders" });
+    }
+  });
+
+  // Get invoice statistics for shop admin
+  app.get("/api/shop/invoices/stats", requireAuth, async (req, res) => {
+    try {
+      // Get all customer orders
+      const allOrders = await customerStorage.getAllOrders();
+      
+      // Filter for paid/settled orders
+      const paidOrders = allOrders.filter(order => 
+        order.status === 'completed' || 
+        order.status === 'delivered' ||
+        (order.paymentMethod && ['wallet_full', 'wallet_partial', 'bank_transfer'].includes(order.paymentMethod))
+      );
+
+      // Calculate statistics
+      const totalPaidOrders = paidOrders.length;
+      const totalInvoiceAmount = paidOrders.reduce((sum, order) => {
+        return sum + parseFloat(order.totalAmount || '0');
+      }, 0);
+      const averageOrderValue = totalPaidOrders > 0 ? totalInvoiceAmount / totalPaidOrders : 0;
+
+      // Calculate this month's invoices
+      const currentMonth = new Date().getMonth();
+      const currentYear = new Date().getFullYear();
+      const thisMonthInvoices = paidOrders.filter(order => {
+        const orderDate = new Date(order.createdAt);
+        return orderDate.getMonth() === currentMonth && orderDate.getFullYear() === currentYear;
+      }).length;
+
+      const stats = {
+        totalPaidOrders,
+        totalInvoiceAmount: Math.round(totalInvoiceAmount),
+        averageOrderValue: Math.round(averageOrderValue),
+        thisMonthInvoices
+      };
+
+      res.json({ success: true, data: stats });
+    } catch (error) {
+      console.error("Error fetching invoice statistics:", error);
+      res.status(500).json({ success: false, message: "Failed to fetch invoice statistics" });
+    }
+  });
+
   // Payment processing endpoints
   app.post("/api/shop/orders/:id/payment", async (req, res) => {
     try {
