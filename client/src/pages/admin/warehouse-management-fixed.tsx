@@ -78,9 +78,6 @@ const WarehouseManagementFixed: React.FC = () => {
   const handlePrintOrder = () => {
     if (!orderDetails) return;
     
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
-    
     const formatCurrencyForPrint = (amount: number) => {
       return new Intl.NumberFormat('fa-IR', {
         style: 'currency',
@@ -231,14 +228,24 @@ const WarehouseManagementFixed: React.FC = () => {
       </html>
     `;
 
-    printWindow.document.write(printContent);
-    printWindow.document.close();
-    printWindow.focus();
+    // Create a temporary div to hold the print content
+    const printDiv = document.createElement('div');
+    printDiv.innerHTML = printContent;
+    printDiv.style.display = 'none';
+    document.body.appendChild(printDiv);
     
-    setTimeout(() => {
-      printWindow.print();
-      printWindow.close();
-    }, 500);
+    // Save current body content and replace with print content
+    const originalContent = document.body.innerHTML;
+    document.body.innerHTML = printContent;
+    
+    // Print and restore
+    window.print();
+    document.body.innerHTML = originalContent;
+    
+    // Clean up
+    if (printDiv.parentNode) {
+      printDiv.parentNode.removeChild(printDiv);
+    }
   };
   
   // Header filter states

@@ -1329,7 +1329,7 @@ const LogisticsManagement = () => {
     );
   };
 
-  // Print order details
+  // Print order details - deprecated in favor of direct same-tab print
   const handlePrintOrderDetails = () => {
     if (!selectedOrder) return;
     
@@ -1429,38 +1429,18 @@ const LogisticsManagement = () => {
       </html>
     `;
 
-    // Create a temporary iframe for printing instead of opening a new window
-    const iframe = document.createElement('iframe');
-    iframe.style.position = 'absolute';
-    iframe.style.width = '0';
-    iframe.style.height = '0';
-    iframe.style.border = 'none';
+    // Use same-tab print instead of iframe
+    const originalContent = document.body.innerHTML;
+    document.body.innerHTML = printContent;
     
-    document.body.appendChild(iframe);
-    
-    const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-    if (iframeDoc) {
-      iframeDoc.open();
-      iframeDoc.write(printContent);
-      iframeDoc.close();
-      
-      // Wait a moment for content to load, then print
-      setTimeout(() => {
-        iframe.contentWindow?.print();
-        // Remove iframe after printing
-        setTimeout(() => {
-          document.body.removeChild(iframe);
-        }, 1000);
-      }, 500);
-    }
+    // Print and restore
+    window.print();
+    document.body.innerHTML = originalContent;
   };
 
   // Print function for order details
   const handlePrintOrder = (orderDetails: any) => {
     if (!orderDetails) return;
-
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
 
     const printContent = `
     <!DOCTYPE html>
@@ -1654,10 +1634,13 @@ const LogisticsManagement = () => {
     </html>
     `;
 
-    printWindow.document.write(printContent);
-    printWindow.document.close();
-    printWindow.focus();
-    printWindow.print();
+    // Save current body content and replace with print content
+    const originalContent = document.body.innerHTML;
+    document.body.innerHTML = printContent;
+    
+    // Print and restore
+    window.print();
+    document.body.innerHTML = originalContent;
   };
 
   // Send or resend delivery code SMS using template #3
