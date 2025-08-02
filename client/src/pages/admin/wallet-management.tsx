@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Wallet, CheckCircle, XCircle, Clock, Eye, Users, DollarSign, CreditCard, RefreshCw } from "lucide-react";
+import { ArrowLeft, Wallet, CheckCircle, XCircle, Clock, Eye, Users, DollarSign, CreditCard, RefreshCw, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
@@ -60,6 +60,10 @@ export default function WalletManagement() {
   // Wallet modification states
   const [isModifyDialogOpen, setIsModifyDialogOpen] = useState(false);
   const [modifyCustomerId, setModifyCustomerId] = useState<number | null>(null);
+  const [modifyCustomerEmail, setModifyCustomerEmail] = useState("");
+  const [customerSearchResults, setCustomerSearchResults] = useState<any[]>([]);
+  const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
+  const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
   const [modifyAmount, setModifyAmount] = useState("");
   const [modifyReason, setModifyReason] = useState("");
   const [modificationType, setModificationType] = useState<'credit' | 'debit' | 'set_balance'>('credit');
@@ -138,6 +142,56 @@ export default function WalletManagement() {
     }
   });
 
+  // Search customers by email
+  const searchCustomers = async (email: string) => {
+    if (email.length < 3) {
+      setCustomerSearchResults([]);
+      setShowCustomerDropdown(false);
+      return;
+    }
+
+    try {
+      const response = await apiRequest(`/api/admin/customers/search?email=${encodeURIComponent(email)}`);
+      if (response.success) {
+        setCustomerSearchResults(response.data || []);
+        setShowCustomerDropdown(true);
+      }
+    } catch (error) {
+      console.error('Error searching customers:', error);
+      setCustomerSearchResults([]);
+      setShowCustomerDropdown(false);
+    }
+  };
+
+  // Handle email input change
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      searchCustomers(modifyCustomerEmail);
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [modifyCustomerEmail]);
+
+  // Handle customer selection
+  const handleCustomerSelect = (customer: any) => {
+    setSelectedCustomer(customer);
+    setModifyCustomerId(customer.id);
+    setModifyCustomerEmail(customer.email);
+    setShowCustomerDropdown(false);
+  };
+
+  // Reset customer form
+  const resetCustomerForm = () => {
+    setModifyCustomerId(null);
+    setModifyCustomerEmail("");
+    setSelectedCustomer(null);
+    setCustomerSearchResults([]);
+    setShowCustomerDropdown(false);
+    setModifyAmount("");
+    setModifyReason("");
+    setModificationType('credit');
+  };
+
   // Modify wallet balance
   const modifyBalanceMutation = useMutation({
     mutationFn: (data: { customerId: number; amount: string; reason: string; modificationType: string }) => 
@@ -148,10 +202,7 @@ export default function WalletManagement() {
         description: data.message || "تغییر مقدار کیف پول با موفقیت انجام شد" 
       });
       setIsModifyDialogOpen(false);
-      setModifyCustomerId(null);
-      setModifyAmount("");
-      setModifyReason("");
-      setModificationType('credit');
+      resetCustomerForm();
       queryClient.invalidateQueries({ queryKey: ['/api/wallet'] });
     },
     onError: (error: any) => {
@@ -673,17 +724,73 @@ export default function WalletManagement() {
             </DialogHeader>
             
             <div className="space-y-4">
-              <div>
-                <Label htmlFor="customerId" className="text-right">شناسه مشتری</Label>
-                <Input
-                  id="customerId"
-                  type="number"
-                  value={modifyCustomerId || ''}
-                  onChange={(e) => setModifyCustomerId(parseInt(e.target.value) || null)}
-                  placeholder="شناسه مشتری را وارد کنید"
-                  className="text-right"
-                />
+              <div className="relative">
+                <Label htmlFor="customerEmail" className="text-right">آدرس ایمیل مشتری</Label>
+                <div className="relative">
+                  <Input
+                    id="customerEmail"
+                    type="email"
+                    value={modifyCustomerEmail}
+                    onChange={(e) => {
+                      setModifyCustomerEmail(e.target.value);
+                      setSelectedCustomer(null);
+                      setModifyCustomerId(null);
+                    }}
+                    placeholder="آدرس ایمیل مشتری را وارد کنید (حداقل 3 حرف)"
+                    className="text-right pr-10"
+                  />
+                  <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                </div>
+                
+                {/* Customer Search Results Dropdown */}
+                {showCustomerDropdown && customerSearchResults.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-md shadow-lg z-50 max-h-60 overflow-y-auto">
+                    {customerSearchResults.map((customer) => (
+                      <div
+                        key={customer.id}
+                        className="p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                        onClick={() => handleCustomerSelect(customer)}
+                      >
+                        <div className="text-right">
+                          <div className="font-medium text-gray-900">
+                            {customer.firstName} {customer.lastName}
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            ایمیل: {customer.email}
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            موبایل: {customer.phone}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            شناسه: {customer.id}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                {/* No Results Message */}
+                {showCustomerDropdown && customerSearchResults.length === 0 && modifyCustomerEmail.length >= 3 && (
+                  <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-md shadow-lg z-50 p-3 text-center text-gray-500 text-sm">
+                    هیچ مشتری با این ایمیل پیدا نشد
+                  </div>
+                )}
               </div>
+
+              {/* Selected Customer Display */}
+              {selectedCustomer && (
+                <div className="bg-green-50 border border-green-200 rounded-md p-3">
+                  <div className="text-right">
+                    <div className="font-medium text-green-800">
+                      مشتری انتخاب شده: {selectedCustomer.firstName} {selectedCustomer.lastName}
+                    </div>
+                    <div className="text-sm text-green-700 mt-1">
+                      ایمیل: {selectedCustomer.email} | موبایل: {selectedCustomer.phone}
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div>
                 <Label htmlFor="modificationType" className="text-right">نوع تغییر</Label>
@@ -732,20 +839,17 @@ export default function WalletManagement() {
                 variant="outline"
                 onClick={() => {
                   setIsModifyDialogOpen(false);
-                  setModifyCustomerId(null);
-                  setModifyAmount("");
-                  setModifyReason("");
-                  setModificationType('credit');
+                  resetCustomerForm();
                 }}
               >
                 انصراف
               </Button>
               <Button
                 onClick={() => {
-                  if (!modifyCustomerId || !modifyAmount || !modifyReason) {
+                  if (!modifyCustomerId || !selectedCustomer || !modifyAmount || !modifyReason) {
                     toast({
                       title: "خطا",
-                      description: "لطفاً تمام فیلدها را پر کنید",
+                      description: "لطفاً مشتری را انتخاب کنید و تمام فیلدها را پر کنید",
                       variant: "destructive"
                     });
                     return;

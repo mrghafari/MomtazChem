@@ -30156,6 +30156,40 @@ momtazchem.com
     }
   });
 
+  // Search customers by email for admin (wallet management)
+  app.get('/api/admin/customers/search', requireAuth, async (req, res) => {
+    try {
+      const { email } = req.query;
+      
+      if (!email || typeof email !== 'string' || email.length < 3) {
+        return res.json({ success: true, data: [] });
+      }
+      
+      // Search in CRM customers table
+      const customers = await db.select({
+        id: crmCustomers.id,
+        firstName: crmCustomers.firstName,
+        lastName: crmCustomers.lastName,
+        email: crmCustomers.email,
+        phone: crmCustomers.phone,
+      })
+      .from(crmCustomers)
+      .where(sql`LOWER(${crmCustomers.email}) LIKE LOWER(${`%${email}%`})`)
+      .limit(10);
+      
+      res.json({ 
+        success: true, 
+        data: customers 
+      });
+    } catch (error) {
+      console.error('Error searching customers by email:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در جستجوی مشتریان" 
+      });
+    }
+  });
+
   // Direct wallet balance modification by financial managers
   app.post('/api/admin/wallet/modify-balance', async (req, res) => {
     try {
