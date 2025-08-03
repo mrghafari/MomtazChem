@@ -1709,6 +1709,44 @@ const LogisticsManagement = () => {
     }
   };
 
+  // Handle delivery completion
+  const handleDelivered = async (orderManagementId: number) => {
+    try {
+      const response = await fetch('/api/order-management/update-order-status', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          orderManagementId,
+          newStatus: 'delivered',
+          notes: 'سفارش با موفقیت تحویل داده شد'
+        })
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        // Refresh orders list
+        queryClient.invalidateQueries({ queryKey: ['/api/order-management/logistics'] });
+        toast({
+          title: "موفقیت",
+          description: "سفارش با موفقیت به عنوان تحویل شده ثبت گردید",
+        });
+      } else {
+        throw new Error(result.message || 'خطا در ثبت تحویل');
+      }
+    } catch (error) {
+      console.error('Error marking order as delivered:', error);
+      toast({
+        title: "خطا",
+        description: "خطا در ثبت تحویل سفارش",
+        variant: "destructive"
+      });
+    }
+  };
+
   // Send or resend delivery code SMS using template #3
   const handleSendDeliveryCode = async (orderManagementId: number, hasExistingCode: boolean) => {
     setResendingCodes(prev => ({ ...prev, [orderManagementId]: true }));
@@ -2019,7 +2057,11 @@ const LogisticsManagement = () => {
                         <MapPin className="w-4 h-4 mr-2" />
                         پیگیری مسیر
                       </Button>
-                      <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white">
+                      <Button 
+                        size="sm" 
+                        className="bg-green-600 hover:bg-green-700 text-white"
+                        onClick={() => handleDelivered(order.id)}
+                      >
                         <CheckCircle className="w-4 h-4 mr-2" />
                         تحویل شد
                       </Button>
