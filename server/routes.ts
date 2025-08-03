@@ -8094,37 +8094,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log('🔍 [ROUTES] Delivered orders endpoint called');
       
-      // Get delivered orders from order_management table
+      // Get delivered orders from order_management table with customer_orders join
       const orders = await db
         .select({
           id: orderManagement.id,
           customerOrderId: orderManagement.customerOrderId,
           currentStatus: orderManagement.currentStatus,
           deliveryCode: orderManagement.deliveryCode,
-          totalAmount: orderManagement.totalAmount,
-          currency: orderManagement.currency,
-          orderNumber: orderManagement.orderNumber,
+          // Data from customer_orders table
+          totalAmount: customerOrders.totalAmount,
+          currency: customerOrders.currency,
+          orderNumber: customerOrders.orderNumber,
           paymentMethod: orderManagement.paymentMethod,
-          totalWeight: orderManagement.totalWeight,
-          calculatedWeight: orderManagement.calculatedWeight,
-          weightUnit: orderManagement.weightUnit,
-          deliveryMethod: orderManagement.deliveryMethod,
-          transportationType: orderManagement.transportationType,
+          // Order logistics data from order_management
           trackingNumber: orderManagement.trackingNumber,
           estimatedDeliveryDate: orderManagement.estimatedDeliveryDate,
           actualDeliveryDate: orderManagement.actualDeliveryDate,
           deliveryPersonName: orderManagement.deliveryPersonName,
           deliveryPersonPhone: orderManagement.deliveryPersonPhone,
-          postalServiceName: orderManagement.postalServiceName,
-          postalTrackingCode: orderManagement.postalTrackingCode,
-          vehicleType: orderManagement.vehicleType,
-          vehiclePlate: orderManagement.vehiclePlate,
-          vehicleModel: orderManagement.vehicleModel,
-          vehicleColor: orderManagement.vehicleColor,
-          driverName: orderManagement.driverName,
-          driverPhone: orderManagement.driverPhone,
-          deliveryCompanyName: orderManagement.deliveryCompanyName,
-          deliveryCompanyPhone: orderManagement.deliveryCompanyPhone,
           financialReviewerId: orderManagement.financialReviewerId,
           financialReviewedAt: orderManagement.financialReviewedAt,
           financialNotes: orderManagement.financialNotes,
@@ -8138,18 +8125,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
             email: crmCustomers.email,
             phone: crmCustomers.phone
           },
-          // Shipping address
-          shippingAddress: orderManagement.shippingAddress,
-          billingAddress: orderManagement.billingAddress,
-          // Delivery details
+          // Address data from customer_orders
+          shippingAddress: customerOrders.shippingAddress,
+          billingAddress: customerOrders.billingAddress,
+          // Delivery details from order_management
           recipientName: orderManagement.recipientName,
           recipientPhone: orderManagement.recipientPhone,
-          recipientAddress: orderManagement.recipientAddress,
-          deliveryNotes: orderManagement.deliveryNotes,
+          recipientAddress: orderManagement.recipientAddress, 
+          deliveryNotes: orderManagement.logisticsNotes,
           // GPS data
-          gpsLatitude: orderManagement.gpsLatitude,
-          gpsLongitude: orderManagement.gpsLongitude,
-          locationAccuracy: orderManagement.locationAccuracy,
+          gpsLatitude: orderManagement.carrierLatitude,
+          gpsLongitude: orderManagement.carrierLongitude,
+          locationAccuracy: sql`null`.as('locationAccuracy'),
           // Payment receipt
           receipt: {
             url: paymentReceipts.receiptUrl,
@@ -8158,7 +8145,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         })
         .from(orderManagement)
-        .leftJoin(crmCustomers, eq(orderManagement.customerId, crmCustomers.id))
+        .leftJoin(customerOrders, eq(orderManagement.customerOrderId, customerOrders.id))
+        .leftJoin(crmCustomers, eq(customerOrders.customerId, crmCustomers.id))
         .leftJoin(paymentReceipts, eq(orderManagement.customerOrderId, paymentReceipts.customerOrderId))
         .where(eq(orderManagement.currentStatus, 'delivered'))
         .orderBy(desc(orderManagement.actualDeliveryDate), desc(orderManagement.updatedAt));
