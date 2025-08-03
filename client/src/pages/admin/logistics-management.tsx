@@ -685,6 +685,11 @@ const LogisticsManagement = () => {
         // Enhanced vehicle matching based on checkout selection
         if (checkoutVehicleDetails) {
           console.log('🔍 [CHECKOUT DETAILS] Customer selected:', checkoutVehicleDetails);
+          console.log('🔍 [MATCHING TEST] Checking vehicle type:', checkoutVehicleDetails.vehicleType);
+          console.log('🔍 [AVAILABLE VEHICLES] Total available vehicles:', availableVehicles.length);
+          availableVehicles.forEach((v: any, i: number) => {
+            console.log(`🚛 [VEHICLE ${i+1}] Type: "${v.vehicleType}", Plate: "${v.plateNumber || v.licensePlate}", Match: ${v.vehicleType === checkoutVehicleDetails.vehicleType ? '✅ EXACT' : '❌ NO'}`);
+          });
           
           // Find exact matches and close matches
           const exactMatches = availableVehicles.filter((vehicle: any) => 
