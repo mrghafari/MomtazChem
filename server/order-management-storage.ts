@@ -591,13 +591,15 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       console.log('🔍 [WAREHOUSE] Searching for orders with statuses:', warehouseStatuses);
       query = query.where(inArray(orderManagement.currentStatus, warehouseStatuses));
     } else if (department === 'logistics') {
-      // لجستیک فقط سفارشات تایید شده انبار را می‌بیند
+      // لجستیک سفارشات آماده انبار و تایید شده انبار را می‌بیند
       const logisticsStatuses = statuses || [
+        orderStatuses.WAREHOUSE_PENDING, // سفارشات آماده انبار - اضافه شد برای نمایش سفارشات
         orderStatuses.WAREHOUSE_APPROVED, // تایید شده توسط انبار
         orderStatuses.LOGISTICS_ASSIGNED,
         orderStatuses.LOGISTICS_PROCESSING,
         orderStatuses.LOGISTICS_DISPATCHED
       ];
+      console.log('🔍 [LOGISTICS] Searching for orders with statuses:', logisticsStatuses);
       query = query.where(inArray(orderManagement.currentStatus, logisticsStatuses));
     }
     
