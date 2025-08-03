@@ -42,6 +42,14 @@ The system is built on a robust full-stack architecture. Features include compre
 - Updated logistics, warehouse, finance, super-admin, shop-admin, and customer profile modules
 - Enhanced print layouts with professional company branding integration
 
+**Payment Method Data Integrity Fix (August 2025):**
+- **RESOLVED:** PaymentMethodBadge showing "نامشخص" (Unknown) for valid payment methods
+- **ROOT CAUSE:** Payment method data not properly copied from customer_orders to order_management table
+- **IMPLEMENTED:** Modified addCustomerOrderToManagement() to copy paymentMethod field during order creation
+- **DATABASE FIX:** Updated 31 existing orders to sync payment_method from customer_orders to order_management
+- **STANDARDIZED:** Null payment methods now display as "واریز بانکی" (Bank Transfer) instead of "نامشخص"
+- **GUARANTEED:** All future orders will properly maintain payment method consistency across tables
+
 **Critical Database Synchronization Solution (August 2025):**
 - **RESOLVED:** 26 orders stuck in financial department due to status sync issues
 - **IMPLEMENTED:** Real-time database triggers for INSTANT synchronization between `customer_orders` and `order_management`

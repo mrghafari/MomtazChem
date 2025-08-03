@@ -732,12 +732,13 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       console.log(`💰 [WALLET ORDER] Setting wallet order ${customerOrder.orderNumber} to payment_uploaded status for financial review`);
     }
 
-    // Create new order management entry
+    // Create new order management entry with payment method from customer order
     const orderData: InsertOrderManagement = {
       customerOrderId,
       currentStatus: initialStatus,
       deliveryMethod: 'courier',
-      weightUnit: 'kg'
+      weightUnit: 'kg',
+      paymentMethod: customerOrder.paymentMethod // 🔥 CRITICAL: Copy payment method from customer order
     };
 
     const newOrder = await this.createOrderManagement(orderData);
