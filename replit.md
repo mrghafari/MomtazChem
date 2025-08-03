@@ -47,8 +47,10 @@ The system is built on a robust full-stack architecture. Features include compre
 - **ROOT CAUSE:** Payment method data not properly copied from customer_orders to order_management table
 - **IMPLEMENTED:** Modified addCustomerOrderToManagement() to copy paymentMethod field during order creation
 - **DATABASE FIX:** Updated 31 existing orders to sync payment_method from customer_orders to order_management
-- **STANDARDIZED:** Null payment methods now display as "واریز بانکی" (Bank Transfer) instead of "نامشخص"
+- **API FIX:** Added paymentMethod field to getOrdersByDepartment() transformed results for frontend access
+- **STANDARDIZED:** Removed fallback display - now shows actual payment settlement method from database
 - **GUARANTEED:** All future orders will properly maintain payment method consistency across tables
+- **USER REQUIREMENT:** No default payment method display - always shows actual settlement method from database
 
 **Critical Database Synchronization Solution (August 2025):**
 - **RESOLVED:** 26 orders stuck in financial department due to status sync issues

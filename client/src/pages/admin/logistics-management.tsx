@@ -1656,7 +1656,8 @@ const LogisticsManagement = () => {
               console.log('🔍 [PAYMENT DEBUG] Payment method value:', method, 'Type:', typeof method);
               
               if (!method || method === null || method === undefined) {
-                return 'واریز بانکی';
+                console.warn('⚠️ [PAYMENT METHOD] Missing payment method in order details:', orderDetails);
+                return 'داده نامعلوم - خطا در سیستم';
               }
               
               switch (method.toLowerCase()) {

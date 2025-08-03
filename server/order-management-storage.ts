@@ -632,6 +632,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
         totalAmount: row.totalAmount,
         currency: row.currency,
         orderNumber: row.orderNumber, // شماره سفارش M[YY][NNNNN] یا فرمت قدیمی
+        paymentMethod: row.paymentMethod, // 🔥 CRITICAL: Include payment method from database
         
         // Weight and delivery information - with calculated weight
         totalWeight: calculatedWeight,

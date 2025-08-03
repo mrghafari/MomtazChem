@@ -14,12 +14,14 @@ const PaymentMethodBadge: React.FC<PaymentMethodBadgeProps> = ({
   showIcon = true 
 }) => {
   const getPaymentMethodInfo = (method?: string | null) => {
+    // 🚨 CRITICAL: Never use fallback - always show actual payment method from database
     if (!method || method === null || method === undefined) {
+      console.warn('⚠️ [PAYMENT METHOD] Missing payment method data - this should not happen!', { method });
       return {
-        label: 'واریز بانکی',
-        variant: 'outline' as const,
-        icon: DollarSign,
-        className: 'bg-purple-50 text-purple-700 hover:bg-purple-100 border-purple-300'
+        label: 'داده نامعلوم',
+        variant: 'destructive' as const,
+        icon: AlertTriangle,
+        className: 'bg-red-100 text-red-800 hover:bg-red-200 border-red-300'
       };
     }
 
