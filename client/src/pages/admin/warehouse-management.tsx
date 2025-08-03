@@ -1618,18 +1618,23 @@ const WarehouseManagement: React.FC = () => {
       </Dialog>
 
       {/* Order Items Modal */}
-      {showOrderItems && selectedOrderForItems && (
-        <Dialog open={showOrderItems} onOpenChange={setShowOrderItems}>
-          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Package className="w-5 h-5" />
-                لیست کالاهای سفارش #{selectedOrderForItems.customerOrderId}
-              </DialogTitle>
+      <Dialog open={showOrderItems} onOpenChange={setShowOrderItems}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Package className="w-5 h-5" />
+              {selectedOrderForItems ? (
+                <>لیست کالاهای سفارش #{selectedOrderForItems.customerOrderId}</>
+              ) : (
+                <>جزئیات سفارش</>
+              )}
+            </DialogTitle>
+            {selectedOrderForItems && (
               <p className="text-sm text-gray-600">
                 مشتری: {selectedOrderForItems.customer?.firstName} {selectedOrderForItems.customer?.lastName}
               </p>
-            </DialogHeader>
+            )}
+          </DialogHeader>
             
             <div className="space-y-4">
               {orderItems.length === 0 ? (
@@ -1682,7 +1687,7 @@ const WarehouseManagement: React.FC = () => {
                   <div className="border-t pt-4">
                     <div className="flex justify-between items-center text-lg font-semibold">
                       <span>تعداد کل اقلام: {orderItems.length}</span>
-                      <span>مبلغ کل سفارش: {formatCurrency(parseFloat(selectedOrderForItems.totalAmount))}</span>
+                      <span>مبلغ کل سفارش: {selectedOrderForItems ? formatCurrency(parseFloat(selectedOrderForItems.totalAmount)) : '0'}</span>
                     </div>
                   </div>
                 </div>
@@ -1706,7 +1711,6 @@ const WarehouseManagement: React.FC = () => {
             </div>
           </DialogContent>
         </Dialog>
-      )}
     </div>
   );
 };
