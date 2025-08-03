@@ -413,8 +413,12 @@ const WarehouseManagementFixed: React.FC = () => {
     const customerOrderIdA = parseInt(a.customerOrderId) || 0;
     const customerOrderIdB = parseInt(b.customerOrderId) || 0;
     
+    console.log('🔄 [SORTING DEBUG] Order A:', customerOrderIdA, 'Order B:', customerOrderIdB);
+    
     if (customerOrderIdA !== customerOrderIdB) {
-      return customerOrderIdA - customerOrderIdB;
+      const result = customerOrderIdA - customerOrderIdB;
+      console.log('🔄 [SORTING DEBUG] Sort result:', result, '(', customerOrderIdA, '-', customerOrderIdB, ')');
+      return result;
     }
     
     // If customerOrderId is the same, sort by creation date
@@ -422,6 +426,13 @@ const WarehouseManagementFixed: React.FC = () => {
     const dateB = new Date(b.createdAt || b.orderDate || '').getTime();
     return dateA - dateB;
   }) || [];
+
+  // Debug log the final sorted order
+  console.log('🔄 [FINAL ORDER] Orders after sorting:', filteredOrders?.map(o => ({ 
+    id: o.id, 
+    customerOrderId: o.customerOrderId, 
+    orderNumber: o.orderNumber 
+  })));
 
 
 
