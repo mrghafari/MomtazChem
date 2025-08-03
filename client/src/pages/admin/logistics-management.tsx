@@ -725,7 +725,7 @@ const LogisticsManagement = () => {
           });
           
           console.log('🎯 [ENHANCED MATCHING] Exact matches:', exactMatches.length, 'Close matches:', closeMatches.length);
-          console.log('🚛 [SORTED VEHICLES] First 3 vehicles:', availableVehicles.slice(0, 3).map(v => ({
+          console.log('🚛 [SORTED VEHICLES] First 3 vehicles:', availableVehicles.slice(0, 3).map((v: any) => ({
             name: v.vehicleName,
             type: v.vehicleType,
             plate: v.plateNumber,
@@ -3508,7 +3508,7 @@ const LogisticsManagement = () => {
                       <SelectValue placeholder="انتخاب نوع خودرو" />
                     </SelectTrigger>
                     <SelectContent>
-                      {vehicleTemplatesData?.data?.map((template: any) => (
+                      {(vehicleTemplatesData as any)?.data?.map((template: any) => (
                         <SelectItem key={template.id} value={template.name}>
                           {template.name}
                         </SelectItem>
@@ -3986,7 +3986,7 @@ const LogisticsManagement = () => {
                 {selectedVehicleDetails && (
                   <div className="bg-blue-100 border border-blue-300 rounded-lg p-3 mb-4">
                     <div className="flex items-center gap-2 text-blue-800 text-sm font-medium">
-                      <Star className="w-4 h-4" />
+                      <CheckCircle className="w-4 h-4" />
                       خودروها بر اساس انطباق با انتخاب مشتری مرتب شده‌اند - خودروهای سبز رنگ بالاترین اولویت را دارند
                     </div>
                   </div>
@@ -5094,7 +5094,7 @@ const LogisticsManagement = () => {
                       {(() => {
                         const shippingData = selectedOrderForDetails.shippingAddress;
                         if (typeof shippingData === 'object' && shippingData !== null) {
-                          return [shippingData.address, shippingData.city].filter(Boolean).join(', ') || 'آدرس ثبت نشده';
+                          return [(shippingData as any).address, (shippingData as any).city].filter(Boolean).join(', ') || 'آدرس ثبت نشده';
                         }
                         return shippingData || selectedOrderForDetails.customerAddress || 'آدرس ثبت نشده';
                       })()}
@@ -5128,7 +5128,7 @@ const LogisticsManagement = () => {
               </div>
 
               {/* Tracking Information */}
-              {(selectedOrderForDetails.trackingNumber || selectedOrderForDetails.deliveryPersonName || selectedOrderForDetails.vehicleType) && (
+              {(selectedOrderForDetails.trackingNumber || selectedOrderForDetails.deliveryPersonName || (selectedOrderForDetails as any).vehicleType) && (
                 <div className="border rounded-lg p-4 bg-purple-50">
                   <h3 className="font-semibold mb-3 flex items-center gap-2">
                     <Truck className="w-4 h-4" />
@@ -5150,12 +5150,12 @@ const LogisticsManagement = () => {
                         )}
                       </div>
                     )}
-                    {selectedOrderForDetails.vehicleType && (
+                    {(selectedOrderForDetails as any).vehicleType && (
                       <div>
                         <p className="text-sm text-gray-600 mb-1">نوع خودرو:</p>
-                        <p className="font-medium">{selectedOrderForDetails.vehicleType}</p>
-                        {selectedOrderForDetails.vehiclePlate && (
-                          <p className="text-sm text-gray-500">پلاک: {selectedOrderForDetails.vehiclePlate}</p>
+                        <p className="font-medium">{(selectedOrderForDetails as any).vehicleType}</p>
+                        {(selectedOrderForDetails as any).vehiclePlate && (
+                          <p className="text-sm text-gray-500">پلاک: {(selectedOrderForDetails as any).vehiclePlate}</p>
                         )}
                       </div>
                     )}
@@ -5176,7 +5176,7 @@ const LogisticsManagement = () => {
               )}
 
               {/* Financial Information */}
-              {selectedOrderForDetails.financialReviewedAt && (
+              {(selectedOrderForDetails as any).financialReviewedAt && (
                 <div className="border rounded-lg p-4 bg-yellow-50">
                   <h3 className="font-semibold mb-3 flex items-center gap-2">
                     <DollarSign className="w-4 h-4" />
@@ -5185,12 +5185,12 @@ const LogisticsManagement = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <p className="text-sm text-gray-600 mb-1">تاریخ بررسی مالی:</p>
-                      <p className="font-medium">{new Date(selectedOrderForDetails.financialReviewedAt).toLocaleDateString('fa-IR')}</p>
+                      <p className="font-medium">{new Date((selectedOrderForDetails as any).financialReviewedAt).toLocaleDateString('fa-IR')}</p>
                     </div>
-                    {selectedOrderForDetails.financialNotes && (
+                    {(selectedOrderForDetails as any).financialNotes && (
                       <div>
                         <p className="text-sm text-gray-600 mb-1">یادداشت‌های مالی:</p>
-                        <p className="font-medium">{selectedOrderForDetails.financialNotes}</p>
+                        <p className="font-medium">{(selectedOrderForDetails as any).financialNotes}</p>
                       </div>
                     )}
                   </div>
