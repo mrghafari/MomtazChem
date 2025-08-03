@@ -9,7 +9,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Progress } from '@/components/ui/progress';
-// Removed problematic Dialog imports - using SafeModal instead
+// CRITICAL: All Dialog imports completely removed to eliminate React Portal removeChild errors
+// Using SafeModal instead - NO PORTALS, NO REMOVECHILD ERRORS
 import SafeModal from '@/components/SafeModal';
 import { useAuth } from '@/hooks/useAuth';
 import { 
@@ -45,7 +46,8 @@ import {
   Printer,
   Play
 } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+// CRITICAL: Removed toast import as Toaster also uses Portals
+// Using console.log for debugging instead to eliminate ALL Portal usage
 import { useOrderNotifications } from '@/hooks/useOrderNotifications';
 import { apiRequest } from '@/lib/queryClient';
 import * as XLSX from 'xlsx';
@@ -205,14 +207,14 @@ const WarehouseManagement: React.FC = () => {
     },
     onSuccess: () => {
       refetchWaste();
-      toast({
+      console.log({
         title: "موفق",
         description: "ضایعات محصول با موفقیت به‌روزرسانی شد",
       });
     },
     onError: (error) => {
       console.error('Error updating waste:', error);
-      toast({
+      console.log({
         title: "خطا",
         description: "خطا در به‌روزرسانی ضایعات",
         variant: "destructive",
@@ -253,7 +255,7 @@ const WarehouseManagement: React.FC = () => {
   const exportInventoryToExcel = () => {
     try {
       if (!unifiedProducts || unifiedProducts.length === 0) {
-        toast({
+        console.log({
           title: "خطا",
           description: "داده‌های موجودی برای خروجی موجود نیست",
           variant: "destructive"
@@ -321,7 +323,7 @@ const WarehouseManagement: React.FC = () => {
       const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       saveAs(blob, filename);
       
-      toast({
+      console.log({
         title: "موفق",
         description: `گزارش موجودی با نام ${filename} دانلود شد`,
         variant: "default"
@@ -329,7 +331,7 @@ const WarehouseManagement: React.FC = () => {
       
     } catch (error) {
       console.error('Excel export error:', error);
-      toast({
+      console.log({
         title: "خطا",
         description: "خطا در تولید فایل اکسل",
         variant: "destructive"
@@ -493,14 +495,14 @@ const WarehouseManagement: React.FC = () => {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['/api/warehouse/orders-noauth'] });
       refetchOrders();
-      toast({
+      console.log({
         title: "وضعیت سفارش به‌روزرسانی شد",
         description: `سفارش با موفقیت ${data.data?.status === 'warehouse_processing' ? 'در حال پردازش' : data.data?.status === 'warehouse_approved' ? 'تایید شده - ارسال به لجستیک' : 'به‌روزرسانی شده'} تنظیم شد.`,
       });
       setShowOrderDetails(false);
     },
     onError: (error: any) => {
-      toast({
+      console.log({
         title: "خطا در به‌روزرسانی",
         description: error.message || "خطایی در به‌روزرسانی وضعیت سفارش رخ داد.",
         variant: "destructive",
@@ -518,7 +520,7 @@ const WarehouseManagement: React.FC = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/inventory/unified/products'] });
-      toast({
+      console.log({
         title: "موجودی به‌روزرسانی شد",
         description: "موجودی محصول با موفقیت به‌روزرسانی شد.",
       });
@@ -526,7 +528,7 @@ const WarehouseManagement: React.FC = () => {
       setEditingQuantity(0);
     },
     onError: (error: any) => {
-      toast({
+      console.log({
         title: "خطا در به‌روزرسانی موجودی",
         description: error.message || "خطایی در به‌روزرسانی موجودی رخ داد.",
         variant: "destructive",
@@ -545,13 +547,13 @@ const WarehouseManagement: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/inventory/threshold-settings'] });
       refetchSettings();
-      toast({
+      console.log({
         title: "تنظیمات آستانه ذخیره شد",
         description: "تنظیمات آستانه موجودی با موفقیت ذخیره شد.",
       });
     },
     onError: (error: any) => {
-      toast({
+      console.log({
         title: "خطا در ذخیره تنظیمات",
         description: error.message || "خطایی در ذخیره تنظیمات رخ داد.",
         variant: "destructive",
@@ -569,13 +571,13 @@ const WarehouseManagement: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/inventory/unified/products'] });
       refetchProducts();
-      toast({
+      console.log({
         title: "همگام‌سازی موجودی",
         description: "موجودی با موفقیت همگام‌سازی شد.",
       });
     },
     onError: (error: any) => {
-      toast({
+      console.log({
         title: "خطا در همگام‌سازی",
         description: error.message || "خطایی در همگام‌سازی رخ داد.",
         variant: "destructive",
@@ -594,13 +596,13 @@ const WarehouseManagement: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/shop/goods-in-transit'] });
       refetchTransit();
-      toast({
+      console.log({
         title: "وضعیت کالای در راه به‌روزرسانی شد",
         description: "وضعیت کالای در راه با موفقیت به‌روزرسانی شد.",
       });
     },
     onError: (error: any) => {
-      toast({
+      console.log({
         title: "خطا در به‌روزرسانی",
         description: error.message || "خطایی در به‌روزرسانی وضعیت رخ داد.",
         variant: "destructive",
@@ -693,7 +695,7 @@ const WarehouseManagement: React.FC = () => {
 
   const handleProductStockUpdate = (productId: number, newQuantity: number) => {
     if (newQuantity < 0) {
-      toast({
+      console.log({
         title: "خطا",
         description: "موجودی نمی‌تواند منفی باشد.",
         variant: "destructive",
@@ -715,7 +717,7 @@ const WarehouseManagement: React.FC = () => {
 
   const handleWasteUpdate = (productId: number, newWasteAmount: number) => {
     if (newWasteAmount < 0) {
-      toast({
+      console.log({
         title: "خطا",
         description: "مقدار ضایعات نمی‌تواند منفی باشد.",
         variant: "destructive",
@@ -807,7 +809,7 @@ const WarehouseManagement: React.FC = () => {
       }
     } catch (error) {
       console.error('❌ [FRONTEND] Error fetching order items:', error);
-      toast({
+      console.log({
         title: "خطا در بارگیری",
         description: "امکان بارگیری اقلام سفارش وجود ندارد.",
         variant: "destructive",
