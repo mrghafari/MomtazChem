@@ -394,9 +394,9 @@ const WarehouseManagement: React.FC = () => {
   });
 
   // Fetch orders pending warehouse processing
-  // Fetch orders that are approved by financial department  
+  // Using new unified order management endpoint
   const { data: ordersResponse, isLoading: ordersLoading, refetch: refetchOrders } = useQuery({
-    queryKey: ['/api/warehouse/orders-noauth'],
+    queryKey: ['/api/order-management/warehouse'],
     staleTime: 10000,
   });
   
@@ -473,7 +473,7 @@ const WarehouseManagement: React.FC = () => {
       });
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['/api/warehouse/orders-noauth'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/order-management/warehouse'] });
       refetchOrders();
       toast({
         title: "وضعیت سفارش به‌روزرسانی شد",

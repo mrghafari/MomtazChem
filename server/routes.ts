@@ -22178,7 +22178,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         GROUP BY o.id, o.customer_name, o.customer_email, o.total_amount, o.status, 
                  o.created_at, o.shipping_address, o.payment_method, o.notes, 
                  o.warehouse_notes, o.financial_approved_at, o.fulfilled_at, o.fulfilled_by
-        ORDER BY o.financial_approved_at DESC
+        ORDER BY o.financial_approved_at ASC
       `);
       
       const orders = result.rows;
