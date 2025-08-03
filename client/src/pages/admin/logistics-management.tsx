@@ -660,6 +660,61 @@ const LogisticsManagement = () => {
     try {
       console.log('🚚 [ENHANCED VEHICLE ASSIGNMENT] Starting for order:', order.orderNumber);
       
+      // First try to get optimization results using the same logic as the optimization button
+      try {
+        console.log('🎯 [VEHICLE ASSIGNMENT] Using optimization logic...');
+        const optimizationResponse = await fetch('/api/logistics/vehicle-optimization', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            orderNumber: order.orderNumber,
+            orderWeight: order.calculatedWeight || order.totalWeight || 0,
+            destinationCity: typeof order.shippingAddress === 'object' ? order.shippingAddress?.city || '' : '',
+            destinationProvince: typeof order.shippingAddress === 'object' ? order.shippingAddress?.city || '' : '',
+            containsFlammable: false, // You might want to get this from order items
+            orderValue: parseFloat(order.totalAmount) || 0,
+            orderId: order.id
+          })
+        });
+
+        if (optimizationResponse.ok) {
+          const optimizationData = await optimizationResponse.json();
+          if (optimizationData.success && optimizationData.suggestions?.length > 0) {
+            console.log('✅ [OPTIMIZATION SUCCESS] Found suggestions:', optimizationData.suggestions.length);
+            
+            // Convert optimization suggestions to vehicle format for the assignment dialog
+            const optimizedVehicles = optimizationData.suggestions.map((suggestion: any) => ({
+              id: suggestion.readyVehicle?.id || suggestion.templateId,
+              vehicleType: suggestion.vehicleType,
+              licensePlate: suggestion.readyVehicle?.licensePlate || suggestion.suggestedLicensePlate,
+              driverName: suggestion.readyVehicle?.driverName || suggestion.suggestedDriverName,
+              driverPhone: suggestion.readyVehicle?.driverPhone || suggestion.suggestedDriverPhone,
+              loadCapacity: suggestion.readyVehicle?.loadCapacity || suggestion.maxWeight,
+              isAvailable: true,
+              status: 'available',
+              isOptimized: true, // Mark as optimization result
+              costPerKm: suggestion.costPerKm,
+              estimatedCost: suggestion.estimatedCost,
+              matchScore: suggestion.matchScore
+            }));
+
+            setAvailableFleetVehicles(optimizedVehicles);
+            console.log('🎯 [OPTIMIZED VEHICLES] Set optimized vehicles for assignment:', optimizedVehicles.length);
+            setSelectedOrderForVehicle(order);
+            setIsVehicleAssignmentOpen(true);
+            return;
+          }
+        }
+      } catch (optimizationError) {
+        console.log('⚠️ [OPTIMIZATION FALLBACK] Optimization failed, using fallback method:', optimizationError);
+      }
+      
+      // Fallback to original method if optimization fails
+      console.log('⚠️ [FALLBACK] Using original vehicle assignment method');
+      
       // Get all suitable vehicles identified during checkout
       const suitableVehiclesResponse = await fetch(`/api/orders/${order.customerOrderId}/suitable-vehicles`, {
         credentials: 'include'
@@ -675,9 +730,6 @@ const LogisticsManagement = () => {
           return;
         }
       }
-      
-      // Fallback to original vehicle assignment if suitable vehicles API fails
-      console.log('⚠️ [FALLBACK] Using original vehicle assignment method');
       
       // Get customer's selected vehicle details from checkout
       const vehicleDetailsResponse = await fetch(`/api/orders/${order.customerOrderId}/vehicle-details`, {
@@ -4106,6 +4158,11 @@ const LogisticsManagement = () => {
                 <h3 className="text-lg font-semibold text-orange-800 mb-3 flex items-center">
                   <Truck className="w-5 h-5 mr-2" />
                   خودروهای آماده از ناوگان شرکت
+                  {availableFleetVehicles.some(v => v.isOptimized) && (
+                    <Badge className="mr-2 bg-blue-600 text-white animate-pulse">
+                      🎯 بهینه‌سازی شده
+                    </Badge>
+                  )}
                 </h3>
                 
                 {availableFleetVehicles.length === 0 ? (
@@ -4115,37 +4172,57 @@ const LogisticsManagement = () => {
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {availableFleetVehicles.map((vehicle) => (
+                    {availableFleetVehicles.map((vehicle, index) => (
                       <div 
-                        key={vehicle.id} 
+                        key={vehicle.id || index} 
                         className={`bg-white rounded-lg p-4 border transition-all duration-300 ${
-                          vehicle.isCheckoutSuggested 
+                          vehicle.isOptimized 
+                            ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200 shadow-lg' 
+                            : vehicle.isCheckoutSuggested 
                             ? 'border-green-500 bg-green-50 ring-2 ring-green-200 shadow-lg' 
                             : 'border-orange-200'
                         }`}
                       >
                         <div className="flex items-center justify-between mb-3">
                           <h4 className={`font-semibold ${
+                            vehicle.isOptimized ? 'text-blue-800' :
                             vehicle.isCheckoutSuggested ? 'text-green-800' : 'text-gray-800'
                           }`}>
                             {vehicle.vehicleType || vehicle.vehicleName}
                           </h4>
-                          <div className="flex gap-2">
+                          <div className="flex gap-2 flex-wrap">
+                            {vehicle.isOptimized && (
+                              <Badge className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white animate-pulse">
+                                🎯 بهینه‌شده
+                              </Badge>
+                            )}
                             {vehicle.isCheckoutSuggested && (
                               <Badge className="bg-gradient-to-r from-green-600 to-emerald-600 text-white animate-pulse">
-                                🎯 پیشنهاد سیستم
+                                ✅ پیشنهاد مشتری
                               </Badge>
                             )}
                             <Badge className="bg-green-500 text-white">آماده</Badge>
                           </div>
                         </div>
                         
-                        {vehicle.isCheckoutSuggested && (
-                          <div className="bg-green-100 border border-green-300 rounded-lg p-3 mb-4">
-                            <div className="flex items-center gap-2 text-green-800 text-sm font-medium">
+                        {(vehicle.isOptimized || vehicle.isCheckoutSuggested) && (
+                          <div className={`${
+                            vehicle.isOptimized ? 'bg-blue-100 border-blue-300' : 'bg-green-100 border-green-300'
+                          } border rounded-lg p-3 mb-4`}>
+                            <div className={`flex items-center gap-2 ${
+                              vehicle.isOptimized ? 'text-blue-800' : 'text-green-800'
+                            } text-sm font-medium`}>
                               <CheckCircle className="w-4 h-4" />
-                              این خودرو مطابق انتخاب مشتری در سیستم هوشمند است
+                              {vehicle.isOptimized 
+                                ? `بهترین انتخاب برای این سفارش (امتیاز: ${vehicle.matchScore || 100}%)` 
+                                : 'این خودرو مطابق انتخاب مشتری در سیستم هوشمند است'
+                              }
                             </div>
+                            {vehicle.isOptimized && vehicle.estimatedCost && (
+                              <div className="mt-2 text-sm text-gray-600">
+                                هزینه تخمینی: {Math.floor(vehicle.estimatedCost).toLocaleString()} دینار
+                              </div>
+                            )}
                           </div>
                         )}
                         
@@ -4166,11 +4243,19 @@ const LogisticsManagement = () => {
                             <span className="text-sm text-gray-600">ظرفیت:</span>
                             <span className="font-medium">{vehicle.loadCapacity || vehicle.maxWeight} کیلوگرم</span>
                           </div>
+                          {vehicle.isOptimized && vehicle.costPerKm && (
+                            <div className="flex justify-between">
+                              <span className="text-sm text-gray-600">هزینه/کیلومتر:</span>
+                              <span className="font-medium text-blue-600">{vehicle.costPerKm.toLocaleString()} دینار</span>
+                            </div>
+                          )}
                         </div>
                         
                         <Button 
                           className={`w-full transition-all duration-300 ${
-                            vehicle.isCheckoutSuggested 
+                            vehicle.isOptimized 
+                              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg' 
+                              : vehicle.isCheckoutSuggested 
                               ? 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg' 
                               : 'bg-orange-600 hover:bg-orange-700'
                           } text-white`}
@@ -4182,7 +4267,12 @@ const LogisticsManagement = () => {
                           )}
                         >
                           <CheckCircle className="w-4 h-4 mr-2" />
-                          {vehicle.isCheckoutSuggested ? 'اختصاص خودروی پیشنهادی' : 'اختصاص این خودرو'}
+                          {vehicle.isOptimized 
+                            ? 'اختصاص خودروی بهینه' 
+                            : vehicle.isCheckoutSuggested 
+                            ? 'اختصاص خودروی پیشنهادی' 
+                            : 'اختصاص این خودرو'
+                          }
                         </Button>
                       </div>
                     ))}
