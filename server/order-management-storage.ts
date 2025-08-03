@@ -356,12 +356,12 @@ export class OrderManagementStorage implements IOrderManagementStorage {
         ].includes(currentStatus as any);
         
       case 'warehouse':
-        // انبار فقط سفارشات تایید شده مالی را می‌بیند
+        // انبار فقط سفارشات در حال پردازش را می‌بیند - تایید شده‌ها به لجستیک منتقل می‌شوند
         return [
           orderStatuses.WAREHOUSE_PENDING,
           orderStatuses.WAREHOUSE_NOTIFIED,
           orderStatuses.WAREHOUSE_PROCESSING,
-          orderStatuses.WAREHOUSE_APPROVED,
+          // orderStatuses.WAREHOUSE_APPROVED, // حذف: سفارشات تایید شده دیگر در انبار نمایش داده نمی‌شوند
           orderStatuses.WAREHOUSE_REJECTED
         ].includes(currentStatus as any);
         
@@ -579,13 +579,13 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       
       query = query.where(inArray(orderManagement.currentStatus, financialStatuses));
     } else if (department === 'warehouse') {
-      // انبار فقط سفارشات تایید شده مالی را می‌بیند
+      // انبار فقط سفارشات در حال پردازش را می‌بیند - تایید شده‌ها به لجستیک منتقل می‌شوند
       const warehouseStatuses = statuses || [
         orderStatuses.WAREHOUSE_PENDING, // جدید: سفارشات منتظر انبار
         orderStatuses.FINANCIAL_APPROVED, // تایید شده توسط مالی
         orderStatuses.WAREHOUSE_NOTIFIED,
         orderStatuses.WAREHOUSE_PROCESSING,
-        orderStatuses.WAREHOUSE_APPROVED,
+        // orderStatuses.WAREHOUSE_APPROVED, // حذف: سفارشات تایید شده به لجستیک منتقل می‌شوند
         orderStatuses.WAREHOUSE_REJECTED
       ];
       console.log('🔍 [WAREHOUSE] Searching for orders with statuses:', warehouseStatuses);
