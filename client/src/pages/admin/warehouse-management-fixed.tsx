@@ -229,23 +229,36 @@ const WarehouseManagementFixed: React.FC = () => {
       </html>
     `;
 
-    // Create a temporary div to hold the print content
-    const printDiv = document.createElement('div');
-    printDiv.innerHTML = printContent;
-    printDiv.style.display = 'none';
-    document.body.appendChild(printDiv);
-    
-    // Save current body content and replace with print content
-    const originalContent = document.body.innerHTML;
-    document.body.innerHTML = printContent;
-    
-    // Print and restore
-    window.print();
-    document.body.innerHTML = originalContent;
-    
-    // Clean up
-    if (printDiv.parentNode) {
-      printDiv.parentNode.removeChild(printDiv);
+    // CRITICAL FIX: Use a safer print method that doesn't destroy React DOM
+    // Create a new window for printing instead of manipulating current DOM
+    const printWindow = window.open('', '_blank', 'width=800,height=600');
+    if (printWindow) {
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+      
+      // Wait for content to load, then print and close
+      printWindow.onload = () => {
+        printWindow.print();
+        printWindow.close();
+      };
+      
+      // Fallback if onload doesn't fire
+      setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+      }, 500);
+    } else {
+      // Fallback: Use a blob and object URL (safer than DOM manipulation)
+      const blob = new Blob([printContent], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const printWindow2 = window.open(url, '_blank');
+      if (printWindow2) {
+        printWindow2.onload = () => {
+          printWindow2.print();
+          printWindow2.close();
+          URL.revokeObjectURL(url);
+        };
+      }
     }
   };
   
