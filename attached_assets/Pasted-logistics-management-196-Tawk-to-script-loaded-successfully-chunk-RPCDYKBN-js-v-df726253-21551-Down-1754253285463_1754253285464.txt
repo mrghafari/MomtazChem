@@ -1,0 +1,41 @@
+logistics-management:196 Tawk.to script loaded successfully
+chunk-RPCDYKBN.js?v=df726253:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+useAuth.ts:43 Auth check result: Object
+logistics-management.tsx:460 🔍 [LOGISTICS MGMT] First order data: Object
+useOrderNotifications.ts:40 The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio
+createBeep @ useOrderNotifications.ts:40
+useOrderNotifications.ts:99 🔔 [LOGISTICS] نوتیفیکیشن: 24 سفارش جدید دریافت شد
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:117574)
+    at t.value (twk-chunk-common.js:2:150658)
+    at p.updateUUID (twk-chunk-common.js:2:202310)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:124589)
+    at twk-chunk-common.js:2:123900
+value @ twk-chunk-common.js:2
+logistics-management:168 Tawk.to Live Chat loaded successfully
+logistics-management.tsx:623 🚚 [ENHANCED VEHICLE ASSIGNMENT] Starting for order: M2511124
+logistics-management.tsx:634 ✅ [SUITABLE VEHICLES] Found vehicles: 11
+logistics-management.tsx:460 🔍 [LOGISTICS MGMT] First order data: Object
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+useAuth.ts:43 Auth check result: Object
+logistics-management.tsx:460 🔍 [LOGISTICS MGMT] First order data: Object
+logistics-management.tsx:4791 انتخاب خودروی مناسب: Object
+/api/logistics/ready-vehicles:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+logistics-management.tsx:813 Error creating ready vehicle from template: Error: Failed to create ready vehicle
+    at handleTemplateVehicleSelection (logistics-management.tsx:810:15)
+handleTemplateVehicleSelection @ logistics-management.tsx:813
+logistics-management.tsx:460 🔍 [LOGISTICS MGMT] First order data: Object
+logistics-management.tsx:460 🔍 [LOGISTICS MGMT] First order data: Object
+logistics-management.tsx:460 🔍 [LOGISTICS MGMT] First order data: Object
+useAuth.ts:43 Auth check result: Object
+logistics-management.tsx:460 🔍 [LOGISTICS MGMT] First order data: Object
+logistics-management.tsx:460 🔍 [LOGISTICS MGMT] First order data: Object
+logistics-management.tsx:460 🔍 [LOGISTICS MGMT] First order data: Object
+useAuth.ts:43 Auth check result: Object
+useAuth.ts:43 Auth check result: Object
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+useAuth.ts:43 Auth check result: Object
