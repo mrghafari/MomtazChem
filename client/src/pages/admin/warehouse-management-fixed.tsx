@@ -457,6 +457,7 @@ const WarehouseManagementFixed: React.FC = () => {
       'financial_approved': 'bg-green-100 text-green-800',
       'warehouse_notified': 'bg-blue-100 text-blue-800',
       'warehouse_processing': 'bg-orange-100 text-orange-800',
+      'warehouse_verified': 'bg-blue-100 text-blue-800',
       'warehouse_approved': 'bg-green-100 text-green-800',
       'warehouse_rejected': 'bg-red-100 text-red-800'
     };
@@ -466,7 +467,8 @@ const WarehouseManagementFixed: React.FC = () => {
       'financial_approved': 'تایید مالی',
       'warehouse_notified': 'اطلاع رسانی انبار',
       'warehouse_processing': 'در حال پردازش',
-      'warehouse_approved': 'تایید شده',
+      'warehouse_verified': 'تایید مرحله اول',
+      'warehouse_approved': 'تایید نهایی',
       'warehouse_rejected': 'رد شده'
     };
     
@@ -745,6 +747,18 @@ const WarehouseManagementFixed: React.FC = () => {
                                   </Button>
                                 )}
                                 {order.currentStatus === 'warehouse_processing' && (
+                                  <Button
+                                    size="sm"
+                                    variant="default"
+                                    onClick={() => handleOrderAction(order.id, 'warehouse_verified')}
+                                    disabled={loadingOrderId === order.id}
+                                    className="bg-blue-500 hover:bg-blue-600 text-xs"
+                                  >
+                                    <CheckCircle className="w-4 h-4 mr-1" />
+                                    {loadingOrderId === order.id ? 'در حال تایید...' : 'تایید مرحله اول'}
+                                  </Button>
+                                )}
+                                {order.currentStatus === 'warehouse_verified' && (
                                   <Button
                                     size="sm"
                                     variant="default"

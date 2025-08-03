@@ -361,6 +361,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
           orderStatuses.WAREHOUSE_PENDING,
           orderStatuses.WAREHOUSE_NOTIFIED,
           orderStatuses.WAREHOUSE_PROCESSING,
+          'warehouse_verified', // مرحله اول تایید انبار
           // orderStatuses.WAREHOUSE_APPROVED, // حذف: سفارشات تایید شده دیگر در انبار نمایش داده نمی‌شوند
           orderStatuses.WAREHOUSE_REJECTED
         ].includes(currentStatus as any);
@@ -398,6 +399,9 @@ export class OrderManagementStorage implements IOrderManagementStorage {
           return [orderStatuses.WAREHOUSE_NOTIFIED, orderStatuses.WAREHOUSE_PROCESSING];
         }
         if (currentStatus === orderStatuses.WAREHOUSE_PROCESSING) {
+          return ['warehouse_verified' as OrderStatus, orderStatuses.WAREHOUSE_REJECTED];
+        }
+        if (currentStatus === 'warehouse_verified') {
           return [orderStatuses.WAREHOUSE_APPROVED, orderStatuses.WAREHOUSE_REJECTED];
         }
         break;
