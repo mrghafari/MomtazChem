@@ -507,9 +507,6 @@ const LogisticsManagement = () => {
   // Vehicle optimization states
   const [isCreateVehicleDialogOpen, setIsCreateVehicleDialogOpen] = useState(false);
   const [optimizationRequest, setOptimizationRequest] = useState<any>({});
-  const [vehicleOptimizationResults, setVehicleOptimizationResults] = useState<any>(null);
-  const [isVehicleOptimizationOpen, setIsVehicleOptimizationOpen] = useState(false);
-  const [selectedOrderForOptimization, setSelectedOrderForOptimization] = useState<any>(null);
 
   const { data: citiesResponse, isLoading: loadingCities } = useQuery({
     queryKey: ['/api/logistics/cities'],
@@ -601,41 +598,6 @@ const LogisticsManagement = () => {
     }
   });
 
-  // New vehicle optimization mutation for specific orders
-  const getVehicleOptimizationMutation = useMutation({
-    mutationFn: (data: any) => 
-      fetch('/api/logistics/vehicle-optimization', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      }).then(res => res.json()),
-    onSuccess: (result) => {
-      console.log('🎯 [VEHICLE-OPTIMIZATION] Results received:', result);
-      if (result.success) {
-        setVehicleOptimizationResults(result.data);
-        setIsVehicleOptimizationOpen(true);
-        toast({ 
-          title: "✅ بهینه‌سازی انجام شد", 
-          description: `${result.data.totalOptions} گزینه خودرو برای این سفارش یافت شد`
-        });
-      } else {
-        toast({ 
-          title: "⚠️ هشدار", 
-          description: result.message || "خطا در بهینه‌سازی خودرو", 
-          variant: "destructive" 
-        });
-      }
-    },
-    onError: (error) => {
-      console.error('❌ [VEHICLE-OPTIMIZATION] Error:', error);
-      toast({ 
-        title: "خطا", 
-        description: "خطا در بهینه‌سازی خودرو", 
-        variant: "destructive" 
-      });
-    }
-  });
-
   const getStatusBadge = (status: string) => {
     const statusMap = {
       'warehouse_approved': { color: 'bg-blue-500', text: 'تایید انبار' },
@@ -660,61 +622,6 @@ const LogisticsManagement = () => {
     try {
       console.log('🚚 [ENHANCED VEHICLE ASSIGNMENT] Starting for order:', order.orderNumber);
       
-      // First try to get optimization results using the same logic as the optimization button
-      try {
-        console.log('🎯 [VEHICLE ASSIGNMENT] Using optimization logic...');
-        const optimizationResponse = await fetch('/api/logistics/vehicle-optimization', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          credentials: 'include',
-          body: JSON.stringify({
-            orderNumber: order.orderNumber,
-            orderWeight: order.calculatedWeight || order.totalWeight || 0,
-            destinationCity: typeof order.shippingAddress === 'object' ? order.shippingAddress?.city || '' : '',
-            destinationProvince: typeof order.shippingAddress === 'object' ? order.shippingAddress?.city || '' : '',
-            containsFlammable: false, // You might want to get this from order items
-            orderValue: parseFloat(order.totalAmount) || 0,
-            orderId: order.id
-          })
-        });
-
-        if (optimizationResponse.ok) {
-          const optimizationData = await optimizationResponse.json();
-          if (optimizationData.success && optimizationData.suggestions?.length > 0) {
-            console.log('✅ [OPTIMIZATION SUCCESS] Found suggestions:', optimizationData.suggestions.length);
-            
-            // Convert optimization suggestions to vehicle format for the assignment dialog
-            const optimizedVehicles = optimizationData.suggestions.map((suggestion: any) => ({
-              id: suggestion.readyVehicle?.id || suggestion.templateId,
-              vehicleType: suggestion.vehicleType,
-              licensePlate: suggestion.readyVehicle?.licensePlate || suggestion.suggestedLicensePlate,
-              driverName: suggestion.readyVehicle?.driverName || suggestion.suggestedDriverName,
-              driverPhone: suggestion.readyVehicle?.driverPhone || suggestion.suggestedDriverPhone,
-              loadCapacity: suggestion.readyVehicle?.loadCapacity || suggestion.maxWeight,
-              isAvailable: true,
-              status: 'available',
-              isOptimized: true, // Mark as optimization result
-              costPerKm: suggestion.costPerKm,
-              estimatedCost: suggestion.estimatedCost,
-              matchScore: suggestion.matchScore
-            }));
-
-            setAvailableFleetVehicles(optimizedVehicles);
-            console.log('🎯 [OPTIMIZED VEHICLES] Set optimized vehicles for assignment:', optimizedVehicles.length);
-            setSelectedOrderForVehicle(order);
-            setIsVehicleAssignmentOpen(true);
-            return;
-          }
-        }
-      } catch (optimizationError) {
-        console.log('⚠️ [OPTIMIZATION FALLBACK] Optimization failed, using fallback method:', optimizationError);
-      }
-      
-      // Fallback to original method if optimization fails
-      console.log('⚠️ [FALLBACK] Using original vehicle assignment method');
-      
       // Get all suitable vehicles identified during checkout
       const suitableVehiclesResponse = await fetch(`/api/orders/${order.customerOrderId}/suitable-vehicles`, {
         credentials: 'include'
@@ -730,6 +637,9 @@ const LogisticsManagement = () => {
           return;
         }
       }
+      
+      // Fallback to original vehicle assignment if suitable vehicles API fails
+      console.log('⚠️ [FALLBACK] Using original vehicle assignment method');
       
       // Get customer's selected vehicle details from checkout
       const vehicleDetailsResponse = await fetch(`/api/orders/${order.customerOrderId}/vehicle-details`, {
@@ -904,83 +814,6 @@ const LogisticsManagement = () => {
       toast({
         title: "خطا",
         description: "خطا در ایجاد خودرو آماده از قالب انتخابی",
-        variant: "destructive"
-      });
-    }
-  };
-
-  // Handle vehicle optimization for a specific order
-  const handleOrderVehicleOptimization = (order: any) => {
-    console.log('🚛 [ORDER-OPTIMIZATION] Starting optimization for order:', order.orderNumber);
-    
-    setSelectedOrderForOptimization(order);
-    
-    // Extract destination city from shipping address
-    const destinationCity = order.shippingAddress?.city || order.billingAddress?.city || 'بغداد';
-    const destinationProvince = order.shippingAddress?.province || order.billingAddress?.province || 'بغداد';
-    
-    // Calculate if order contains flammable products (basic check)
-    const containsFlammable = false; // This would need to be enhanced with actual product data
-    
-    const optimizationData = {
-      orderNumber: order.orderNumber,
-      orderWeight: order.calculatedWeight || order.totalWeight || 1,
-      destinationCity: destinationCity,
-      destinationProvince: destinationProvince,
-      containsFlammable: containsFlammable,
-      orderValue: parseFloat(order.totalAmount || '0'),
-      orderId: order.id
-    };
-    
-    console.log('🔄 [ORDER-OPTIMIZATION] Sending optimization request:', optimizationData);
-    getVehicleOptimizationMutation.mutate(optimizationData);
-  };
-
-  // Create a ready vehicle from optimization results
-  const createReadyVehicleFromOptimization = async (vehicleMatch: any) => {
-    try {
-      console.log('🚛 [CREATE-VEHICLE] Creating ready vehicle from optimization:', vehicleMatch);
-      
-      const vehicleData = {
-        vehicleType: vehicleMatch.vehicleDescription || vehicleMatch.templateName,
-        licensePlate: vehicleMatch.licensePlate || `${vehicleMatch.templateName}-${Math.floor(Math.random() * 10000)}`,
-        driverName: vehicleMatch.driverName || `راننده ${vehicleMatch.templateName}`,
-        driverMobile: vehicleMatch.driverMobile || '07xxxxxxxxx',
-        loadCapacity: vehicleMatch.vehicleCapacity || vehicleMatch.maxWeight || 1000,
-        isAvailable: true,
-        notes: `ایجاد شده از بهینه‌سازی سفارش ${selectedOrderForOptimization?.orderNumber} - هزینه: ${Math.round(vehicleMatch.totalCost)} دینار`,
-        supportsFlammable: vehicleMatch.supportsFlammable || false
-      };
-
-      const response = await fetch('/api/logistics/ready-vehicles', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(vehicleData)
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        toast({
-          title: "✅ خودرو ایجاد شد",
-          description: `خودرو ${vehicleMatch.licensePlate} با راننده ${vehicleMatch.driverName} ایجاد شد و آماده اختصاص است`
-        });
-        
-        // Refresh ready vehicles
-        queryClient.invalidateQueries({ queryKey: ['/api/logistics/ready-vehicles'] });
-        
-        // Close optimization dialog
-        setIsVehicleOptimizationOpen(false);
-        
-        return result;
-      } else {
-        throw new Error('Failed to create vehicle');
-      }
-    } catch (error) {
-      console.error('❌ [CREATE-VEHICLE] Error:', error);
-      toast({
-        title: "خطا",
-        description: "خطا در ایجاد خودرو آماده",
         variant: "destructive"
       });
     }
@@ -2151,16 +1984,6 @@ const LogisticsManagement = () => {
                         )}
                       </Button>
 
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        className="border-blue-500 text-blue-700 hover:bg-blue-100"
-                        onClick={() => handleOrderVehicleOptimization(order)}
-                        disabled={getVehicleOptimizationMutation.isPending}
-                      >
-                        <Calculator className="w-4 h-4 mr-2" />
-                        {getVehicleOptimizationMutation.isPending ? 'در حال بهینه‌سازی...' : 'بهینه‌سازی خودرو'}
-                      </Button>
                       <Button 
                         size="sm" 
                         variant="outline" 
@@ -3737,89 +3560,6 @@ const LogisticsManagement = () => {
           </DialogContent>
         </Dialog>
 
-        {/* Vehicle Optimization Results Dialog */}
-        <Dialog open={isVehicleOptimizationOpen} onOpenChange={setIsVehicleOptimizationOpen}>
-          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto" dir="rtl">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Calculator className="h-5 w-5 text-blue-600" />
-                نتایج بهینه‌سازی خودرو برای سفارش {selectedOrderForOptimization?.orderNumber}
-              </DialogTitle>
-              <DialogDescription>
-                خودروهای پیشنهادی بر اساس وزن، مقصد و محتوای سفارش
-              </DialogDescription>
-            </DialogHeader>
-            
-            {vehicleOptimizationResults && (
-              <div className="space-y-4">
-                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                  <h4 className="font-semibold text-blue-800 mb-2">خلاصه سفارش</h4>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>وزن: {vehicleOptimizationResults.requestedWeight} کیلوگرم</div>
-                    <div>مقصد: {vehicleOptimizationResults.destination}</div>
-                    <div>حاوی مواد آتش‌زا: {vehicleOptimizationResults.containsFlammable ? 'بله' : 'خیر'}</div>
-                    <div>تعداد گزینه‌ها: {vehicleOptimizationResults.totalOptions}</div>
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <h4 className="font-semibold text-gray-800">خودروهای پیشنهادی:</h4>
-                  {vehicleOptimizationResults.vehicleMatches?.map((match: any, index: number) => (
-                    <div key={index} className="border rounded-lg p-4 bg-white hover:bg-gray-50">
-                      <div className="flex justify-between items-start mb-3">
-                        <div>
-                          <h5 className="font-medium text-lg">{match.licensePlate || match.templateName}</h5>
-                          <p className="text-gray-600">{match.vehicleDescription}</p>
-                        </div>
-                        <div className="text-left">
-                          <div className="text-lg font-bold text-green-600">
-                            {Math.round(match.totalCost)} دینار
-                          </div>
-                          {match.isOptimal && (
-                            <Badge className="bg-yellow-500 text-white mt-1">انتخاب بهینه</Badge>
-                          )}
-                        </div>
-                      </div>
-                      
-                      <div className="grid grid-cols-2 gap-4 text-sm mb-3">
-                        <div>راننده: {match.driverName || 'نامشخص'}</div>
-                        <div>تلفن: {match.driverMobile || 'نامشخص'}</div>
-                        <div>ظرفیت: {match.vehicleCapacity || match.maxWeight} کیلوگرم</div>
-                        <div>نوع: {match.vehicleType}</div>
-                      </div>
-
-                      {match.supportsFlammable && (
-                        <div className="flex items-center gap-2 text-orange-700 mb-2">
-                          <Flame className="h-4 w-4" />
-                          <span className="text-sm">مجهز برای حمل مواد آتش‌زا</span>
-                        </div>
-                      )}
-
-                      <div className="flex justify-end">
-                        <Button
-                          size="sm"
-                          onClick={() => createReadyVehicleFromOptimization(match)}
-                          className="bg-blue-600 hover:bg-blue-700"
-                        >
-                          <Plus className="h-4 w-4 mr-2" />
-                          ایجاد خودرو آماده
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {vehicleOptimizationResults.totalOptions === 0 && (
-                  <div className="text-center py-8 text-gray-500">
-                    <Truck className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                    <p>هیچ خودرو مناسبی برای این سفارش یافت نشد</p>
-                  </div>
-                )}
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
-
         {/* Edit Ready Vehicle Dialog */}
         <Dialog open={isEditReadyVehicleDialogOpen} onOpenChange={setIsEditReadyVehicleDialogOpen}>
           <DialogContent className="max-w-2xl" dir="rtl">
@@ -4158,11 +3898,6 @@ const LogisticsManagement = () => {
                 <h3 className="text-lg font-semibold text-orange-800 mb-3 flex items-center">
                   <Truck className="w-5 h-5 mr-2" />
                   خودروهای آماده از ناوگان شرکت
-                  {availableFleetVehicles.some(v => v.isOptimized) && (
-                    <Badge className="mr-2 bg-blue-600 text-white animate-pulse">
-                      🎯 بهینه‌سازی شده
-                    </Badge>
-                  )}
                 </h3>
                 
                 {availableFleetVehicles.length === 0 ? (
@@ -4172,57 +3907,37 @@ const LogisticsManagement = () => {
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {availableFleetVehicles.map((vehicle, index) => (
+                    {availableFleetVehicles.map((vehicle) => (
                       <div 
-                        key={vehicle.id || index} 
+                        key={vehicle.id} 
                         className={`bg-white rounded-lg p-4 border transition-all duration-300 ${
-                          vehicle.isOptimized 
-                            ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200 shadow-lg' 
-                            : vehicle.isCheckoutSuggested 
+                          vehicle.isCheckoutSuggested 
                             ? 'border-green-500 bg-green-50 ring-2 ring-green-200 shadow-lg' 
                             : 'border-orange-200'
                         }`}
                       >
                         <div className="flex items-center justify-between mb-3">
                           <h4 className={`font-semibold ${
-                            vehicle.isOptimized ? 'text-blue-800' :
                             vehicle.isCheckoutSuggested ? 'text-green-800' : 'text-gray-800'
                           }`}>
                             {vehicle.vehicleType || vehicle.vehicleName}
                           </h4>
-                          <div className="flex gap-2 flex-wrap">
-                            {vehicle.isOptimized && (
-                              <Badge className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white animate-pulse">
-                                🎯 بهینه‌شده
-                              </Badge>
-                            )}
+                          <div className="flex gap-2">
                             {vehicle.isCheckoutSuggested && (
                               <Badge className="bg-gradient-to-r from-green-600 to-emerald-600 text-white animate-pulse">
-                                ✅ پیشنهاد مشتری
+                                🎯 پیشنهاد سیستم
                               </Badge>
                             )}
                             <Badge className="bg-green-500 text-white">آماده</Badge>
                           </div>
                         </div>
                         
-                        {(vehicle.isOptimized || vehicle.isCheckoutSuggested) && (
-                          <div className={`${
-                            vehicle.isOptimized ? 'bg-blue-100 border-blue-300' : 'bg-green-100 border-green-300'
-                          } border rounded-lg p-3 mb-4`}>
-                            <div className={`flex items-center gap-2 ${
-                              vehicle.isOptimized ? 'text-blue-800' : 'text-green-800'
-                            } text-sm font-medium`}>
+                        {vehicle.isCheckoutSuggested && (
+                          <div className="bg-green-100 border border-green-300 rounded-lg p-3 mb-4">
+                            <div className="flex items-center gap-2 text-green-800 text-sm font-medium">
                               <CheckCircle className="w-4 h-4" />
-                              {vehicle.isOptimized 
-                                ? `بهترین انتخاب برای این سفارش (امتیاز: ${vehicle.matchScore || 100}%)` 
-                                : 'این خودرو مطابق انتخاب مشتری در سیستم هوشمند است'
-                              }
+                              این خودرو مطابق انتخاب مشتری در سیستم هوشمند است
                             </div>
-                            {vehicle.isOptimized && vehicle.estimatedCost && (
-                              <div className="mt-2 text-sm text-gray-600">
-                                هزینه تخمینی: {Math.floor(vehicle.estimatedCost).toLocaleString()} دینار
-                              </div>
-                            )}
                           </div>
                         )}
                         
@@ -4243,19 +3958,11 @@ const LogisticsManagement = () => {
                             <span className="text-sm text-gray-600">ظرفیت:</span>
                             <span className="font-medium">{vehicle.loadCapacity || vehicle.maxWeight} کیلوگرم</span>
                           </div>
-                          {vehicle.isOptimized && vehicle.costPerKm && (
-                            <div className="flex justify-between">
-                              <span className="text-sm text-gray-600">هزینه/کیلومتر:</span>
-                              <span className="font-medium text-blue-600">{vehicle.costPerKm.toLocaleString()} دینار</span>
-                            </div>
-                          )}
                         </div>
                         
                         <Button 
                           className={`w-full transition-all duration-300 ${
-                            vehicle.isOptimized 
-                              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg' 
-                              : vehicle.isCheckoutSuggested 
+                            vehicle.isCheckoutSuggested 
                               ? 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg' 
                               : 'bg-orange-600 hover:bg-orange-700'
                           } text-white`}
@@ -4267,12 +3974,7 @@ const LogisticsManagement = () => {
                           )}
                         >
                           <CheckCircle className="w-4 h-4 mr-2" />
-                          {vehicle.isOptimized 
-                            ? 'اختصاص خودروی بهینه' 
-                            : vehicle.isCheckoutSuggested 
-                            ? 'اختصاص خودروی پیشنهادی' 
-                            : 'اختصاص این خودرو'
-                          }
+                          {vehicle.isCheckoutSuggested ? 'اختصاص خودروی پیشنهادی' : 'اختصاص این خودرو'}
                         </Button>
                       </div>
                     ))}

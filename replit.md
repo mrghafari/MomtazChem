@@ -51,15 +51,6 @@ The system is built on a robust full-stack architecture. Features include compre
 - **DATABASE TRIGGERS:** `customer_orders_sync_trigger`, `customer_orders_insert_sync_trigger`, `customer_orders_delete_sync_trigger`
 - **GUARANTEED CONSISTENCY:** Even if application crashes, database maintains perfect synchronization
 
-**Vehicle Optimization System (August 2025):**
-- **INTELLIGENT MATCHING:** Implemented API endpoint `/api/logistics/vehicle-optimization` that matches vehicle templates to ready vehicles
-- **SMART SUGGESTIONS:** System suggests specific vehicles with license plates, drivers, and mobile numbers for each order
-- **AUTOMATED CREATION:** Missing vehicles are automatically created in database when suggested vehicles don't exist
-- **COMPREHENSIVE ANALYSIS:** Optimization considers order weight, destination, flammable content, and cost efficiency
-- **SEAMLESS INTEGRATION:** New "بهینه‌سازی خودرو" button added to logistics management interface
-- **REAL-TIME RESULTS:** Interactive dialog shows optimization results with vehicle details and cost breakdown
-- **ONE-CLICK DEPLOYMENT:** Users can instantly create ready vehicles from optimization suggestions
-
 ### System Design Choices
 The architecture emphasizes modularity and scalability. Core architectural patterns include a RESTful API design for backend-frontend communication, ensuring clear separation of concerns. Data integrity is maintained through transactional operations for critical processes like order creation and inventory updates. The system employs a prevention-first approach to avoid data inconsistencies. A unified vehicle selection algorithm prioritizes cost-efficiency and safety compliance, particularly for hazardous materials. Inventory management strictly adheres to FIFO (First-In, First-Out) principles. A comprehensive email and SMS automation system leverages templates and intelligent routing. The system is designed for continuous integration and deployment, with a focus on performance optimization through database indexing, caching, and asset optimization.
 
