@@ -1771,6 +1771,8 @@ const LogisticsManagement = () => {
 
   // Handle delivery completion
   const handleDelivered = async (orderManagementId: number) => {
+    console.log('🚚 [DELIVERY] Starting delivery completion for order:', orderManagementId);
+    
     try {
       const response = await fetch('/api/order-management/update-order-status', {
         method: 'POST',
@@ -1785,24 +1787,28 @@ const LogisticsManagement = () => {
         })
       });
 
+      console.log('🚚 [DELIVERY] Response status:', response.status);
       const result = await response.json();
+      console.log('🚚 [DELIVERY] API response:', result);
       
       if (result.success) {
         // Refresh both logistics and delivered orders lists
         queryClient.invalidateQueries({ queryKey: ['/api/order-management/logistics'] });
         queryClient.invalidateQueries({ queryKey: ['/api/order-management/delivered'] });
+        console.log('🚚 [DELIVERY] Cache invalidated for both tabs');
         toast({
           title: "موفقیت",
           description: "سفارش با موفقیت به عنوان تحویل شده ثبت گردید",
         });
       } else {
+        console.error('🚚 [DELIVERY] API returned error:', result.message);
         throw new Error(result.message || 'خطا در ثبت تحویل');
       }
     } catch (error) {
-      console.error('Error marking order as delivered:', error);
+      console.error('🚚 [DELIVERY] Error marking order as delivered:', error);
       toast({
         title: "خطا",
-        description: "خطا در ثبت تحویل سفارش",
+        description: error instanceof Error ? error.message : "خطا در ثبت تحویل سفارش",
         variant: "destructive"
       });
     }
