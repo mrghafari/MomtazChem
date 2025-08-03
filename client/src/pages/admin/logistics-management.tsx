@@ -1652,7 +1652,14 @@ const LogisticsManagement = () => {
           <div class="info-item">
             <span class="label">روش پرداخت:</span>
             <span class="value">${(() => {
-              switch (orderDetails.paymentMethod) {
+              const method = orderDetails.paymentMethod;
+              console.log('🔍 [PAYMENT DEBUG] Payment method value:', method, 'Type:', typeof method);
+              
+              if (!method || method === null || method === undefined) {
+                return 'واریز بانکی (پیش‌فرض)';
+              }
+              
+              switch (method.toLowerCase()) {
                 case 'wallet_full': return 'کیف پول کامل';
                 case 'wallet_partial': return 'پرداخت ترکیبی';
                 case 'bank_transfer': return 'واریز بانکی';
@@ -1663,7 +1670,7 @@ const LogisticsManagement = () => {
                 case 'hybrid': return 'ترکیبی';
                 case 'cash': return 'نقدی';
                 case 'credit': return 'اعتباری';
-                default: return orderDetails.paymentMethod || 'نامشخص';
+                default: return method + ' (سایر)';
               }
             })()}</span>
           </div>

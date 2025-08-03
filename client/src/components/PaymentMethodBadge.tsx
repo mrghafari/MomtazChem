@@ -14,12 +14,12 @@ const PaymentMethodBadge: React.FC<PaymentMethodBadgeProps> = ({
   showIcon = true 
 }) => {
   const getPaymentMethodInfo = (method?: string | null) => {
-    if (!method) {
+    if (!method || method === null || method === undefined) {
       return {
-        label: 'نامشخص',
-        variant: 'secondary' as const,
-        icon: AlertTriangle,
-        className: 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+        label: 'واریز بانکی (پیش‌فرض)',
+        variant: 'outline' as const,
+        icon: DollarSign,
+        className: 'bg-purple-50 text-purple-700 hover:bg-purple-100 border-purple-300'
       };
     }
 
