@@ -1,0 +1,104 @@
+VM69912:51 Tawk.to script loaded successfully
+chunk-RPCDYKBN.js?v=df726253:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+useAuth.ts:43 Auth check result: Object
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:117574)
+    at t.value (twk-chunk-common.js:2:150658)
+    at p.updateUUID (twk-chunk-common.js:2:202310)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:124589)
+    at twk-chunk-common.js:2:123900
+value @ twk-chunk-common.js:2
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+site-management-fixed.tsx:71 🔍 [DEBUG] useEffect triggered, userPermissions: undefined
+VM69912:23 Tawk.to Live Chat loaded successfully
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+site-management-fixed.tsx:71 🔍 [DEBUG] useEffect triggered, userPermissions: Object
+site-management-fixed.tsx:74 🔍 [DEBUG] userPermissions modules: Array(34)
+site-management-fixed.tsx:430 🔍 [DEBUG] Full userPermissions response: Object
+site-management-fixed.tsx:431 🔍 [DEBUG] userPermissions.modules: Array(34)
+site-management-fixed.tsx:432 🔍 [DEBUG] userPermissions.permissions: Array(34)
+site-management-fixed.tsx:437 🔍 [DEBUG] Total allButtons count: 35
+site-management-fixed.tsx:438 🔍 [DEBUG] AI Settings exists in allButtons: true
+site-management-fixed.tsx:439 🔍 [DEBUG] Content Management exists in allButtons: true
+site-management-fixed.tsx:441 🔍 [DEBUG] allowedModules: Array(34)
+site-management-fixed.tsx:442 🔍 [DEBUG] kpi_dashboard in allowedModules? true
+site-management-fixed.tsx:443 🔍 [DEBUG] management_dashboard in allowedModules? true
+site-management-fixed.tsx:444 🔍 [DEBUG] finance in allowedModules? true
+site-management-fixed.tsx:445 🔍 [DEBUG] geography_analytics in allowedModules? true
+site-management-fixed.tsx:446 🔍 [DEBUG] ai_settings in allowedModules? true
+site-management-fixed.tsx:447 🔍 [DEBUG] content_management in allowedModules? true
+site-management-fixed.tsx:453 🔍 [CRITICAL] Missing button detection:
+site-management-fixed.tsx:457 🔍 [MISSING] order-tracking-view Order Management & Tracking - View Only moduleId: order_tracking
+site-management-fixed.tsx:461 🔍 [CRITICAL] Missing buttons count: 1
+site-management-fixed.tsx:463 🔍 [DEBUG] finance button found in allButtons? Object
+site-management-fixed.tsx:464 🔍 [DEBUG] geography_analytics button found in allButtons? Object
+site-management-fixed.tsx:465 🔍 [DEBUG] ai_settings button found in allButtons? Object
+site-management-fixed.tsx:466 🔍 [DEBUG] content_management button found in allButtons? Object
+site-management-fixed.tsx:467 🔍 [DEBUG] finance button in filtered? Object
+site-management-fixed.tsx:468 🔍 [DEBUG] geography_analytics button in filtered? Object
+site-management-fixed.tsx:469 🔍 [DEBUG] ai_settings button in filtered? Object
+site-management-fixed.tsx:470 🔍 [DEBUG] content_management button in filtered? Object
+site-management-fixed.tsx:76 🔍 [DEBUG] filtered buttons count: 34
+site-management-fixed.tsx:77 🔍 [DEBUG] First 5 filtered buttons: Array(5)
+site-management-fixed.tsx:78 🔍 [DEBUG] AI Control button in filtered: Object
+site-management-fixed.tsx:79 🔍 [DEBUG] Content Management button in filtered: Object
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+logistics-management.tsx:468 🔍 [LOGISTICS MGMT] First order data: Object
+useOrderNotifications.ts:99 🔔 [LOGISTICS] نوتیفیکیشن: 22 سفارش جدید دریافت شد
+/api/order-management/update-order-status:1  Failed to load resource: the server responded with a status of 404 (Not Found)
+logistics-management.tsx:1783 Error marking order as delivered: Error: API endpoint not found
+    at handleDelivered (logistics-management.tsx:1780:15)
+handleDelivered @ logistics-management.tsx:1783
+logistics-management.tsx:468 🔍 [LOGISTICS MGMT] First order data: Object
+logistics-management.tsx:468 🔍 [LOGISTICS MGMT] First order data: Object
+/api/order-management/update-order-status:1  Failed to load resource: the server responded with a status of 404 (Not Found)
+logistics-management.tsx:1783 Error marking order as delivered: Error: API endpoint not found
+    at handleDelivered (logistics-management.tsx:1780:15)
+handleDelivered @ logistics-management.tsx:1783
+logistics-management.tsx:468 🔍 [LOGISTICS MGMT] First order data: Object
+logistics-management.tsx:468 🔍 [LOGISTICS MGMT] First order data: {id: 8, customerOrderId: 6, orderNumber: 'M2511124', hasOrderNumber: true, allFields: Array(54)}
+logistics-management.tsx:1757  POST https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/order-management/update-order-status 404 (Not Found)
+handleDelivered @ logistics-management.tsx:1757
+onClick @ logistics-management.tsx:2105
+callCallback2 @ chunk-RPCDYKBN.js?v=df726253:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=df726253:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=df726253:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=df726253:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=df726253:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=df726253:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=df726253:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=df726253:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=df726253:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=df726253:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=df726253:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=df726253:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=df726253:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=df726253:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=df726253:5449
+logistics-management.tsx:1783 Error marking order as delivered: Error: API endpoint not found
+    at handleDelivered (logistics-management.tsx:1780:15)
+handleDelivered @ logistics-management.tsx:1783
+await in handleDelivered
+onClick @ logistics-management.tsx:2105
+callCallback2 @ chunk-RPCDYKBN.js?v=df726253:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=df726253:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=df726253:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=df726253:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=df726253:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=df726253:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=df726253:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=df726253:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=df726253:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=df726253:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=df726253:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=df726253:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=df726253:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=df726253:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=df726253:5449
+logistics-management.tsx:468 🔍 [LOGISTICS MGMT] First order data: {id: 8, customerOrderId: 6, orderNumber: 'M2511124', hasOrderNumber: true, allFields: Array(54)}
+useAuth.ts:43 Auth check result: {success: true, user: {…}}
+logistics-management.tsx:468 🔍 [LOGISTICS MGMT] First order data: {id: 8, customerOrderId: 6, orderNumber: 'M2511124', hasOrderNumber: true, allFields: Array(54)}

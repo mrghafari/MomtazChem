@@ -45,7 +45,7 @@ import { deliveryVerificationStorage } from "./delivery-verification-storage";
 import { gpsDeliveryStorage } from "./gps-delivery-storage";
 import { gpsDeliveryConfirmations } from "@shared/gps-delivery-schema";
 
-import { vehicleTemplates, vehicleSelectionHistory, insertVehicleTemplateSchema, insertVehicleSelectionHistorySchema, internationalCountries, internationalCities, internationalShippingRates, insertInternationalCountrySchema, insertInternationalCitySchema, insertInternationalShippingRateSchema, deliveryVerificationCodes } from "@shared/logistics-schema";
+import { vehicleTemplates, vehicleSelectionHistory, insertVehicleTemplateSchema, insertVehicleSelectionHistorySchema, internationalCountries, internationalCities, internationalShippingRates, insertInternationalCountrySchema, insertInternationalCitySchema, insertInternationalShippingRateSchema, deliveryVerificationCodes, readyVehicles } from "@shared/logistics-schema";
 import { 
   companyInformation, 
   correspondence, 
@@ -9334,6 +9334,116 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         success: false, 
         message: "خطا در دریافت خودروهای مناسب" 
+      });
+    }
+  });
+
+  // =============================================================================
+  // ORDER MANAGEMENT STATUS UPDATE ENDPOINTS
+  // =============================================================================
+
+  // Update order status (for logistics delivered status)
+  app.post("/api/order-management/update-order-status", requireAuth, async (req, res) => {
+    try {
+      const { orderManagementId, newStatus, notes } = req.body;
+      
+      if (!orderManagementId || !newStatus) {
+        return res.status(400).json({
+          success: false,
+          message: "شناسه سفارش و وضعیت جدید الزامی است"
+        });
+      }
+
+      console.log(`📦 [ORDER STATUS UPDATE] Updating order ${orderManagementId} to status: ${newStatus}`);
+      
+      // Get current order details
+      const currentOrder = await orderManagementStorage.getOrderById(orderManagementId);
+      
+      if (!currentOrder) {
+        return res.status(404).json({
+          success: false,
+          message: "سفارش یافت نشد"
+        });
+      }
+
+      // Prepare update data based on status
+      const updateData: any = {
+        currentStatus: newStatus,
+        updatedAt: new Date()
+      };
+
+      // Add specific fields for delivered status
+      if (newStatus === 'delivered' || newStatus === 'logistics_delivered') {
+        updateData.actualDeliveryDate = new Date();
+        updateData.currentStatus = 'logistics_delivered';
+        
+        if (notes) {
+          updateData.deliveryNotes = notes;
+        }
+      }
+
+      // Update the order status
+      await orderManagementStorage.updateTicketStatus(orderManagementId, updateData);
+      
+      console.log(`✅ [ORDER STATUS UPDATE] Successfully updated order ${orderManagementId} to ${newStatus}`);
+      
+      res.json({
+        success: true,
+        message: `وضعیت سفارش با موفقیت به ${newStatus} تغییر یافت`,
+        orderId: orderManagementId,
+        newStatus: newStatus
+      });
+
+    } catch (error) {
+      console.error('❌ [ORDER STATUS UPDATE] Error updating order status:', error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در به‌روزرسانی وضعیت سفارش"
+      });
+    }
+  });
+
+  // Get ready vehicles for logistics assignment
+  app.get("/api/logistics/ready-vehicles", requireAuth, async (req, res) => {
+    try {
+      console.log(`🚛 [READY VEHICLES] Getting all ready vehicles for logistics assignment`);
+      
+      // Get all ready vehicles from ready_vehicles table
+      const readyVehicles = await db
+        .select()
+        .from(readyVehicles)
+        .where(eq(readyVehicles.isAvailable, true))
+        .orderBy(readyVehicles.vehicleType, readyVehicles.licensePlate);
+
+      console.log(`✅ [READY VEHICLES] Found ${readyVehicles.length} available vehicles`);
+      
+      // Format vehicles for frontend
+      const formattedVehicles = readyVehicles.map(vehicle => ({
+        id: vehicle.id,
+        vehicleType: vehicle.vehicleType,
+        licensePlate: vehicle.licensePlate || vehicle.plateNumber,
+        plateNumber: vehicle.licensePlate || vehicle.plateNumber,
+        driverName: vehicle.driverName,
+        driverMobile: vehicle.driverMobile,
+        loadCapacity: parseFloat(vehicle.loadCapacity?.toString() || '0'),
+        currentLocation: vehicle.currentLocation,
+        notes: vehicle.notes,
+        supportsFlammable: vehicle.supportsFlammable || false,
+        notAllowedFlammable: vehicle.notAllowedFlammable || false,
+        isAvailable: vehicle.isAvailable
+      }));
+
+      res.json({
+        success: true,
+        vehicles: formattedVehicles,
+        count: formattedVehicles.length
+      });
+
+    } catch (error) {
+      console.error('❌ [READY VEHICLES] Error getting ready vehicles:', error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت خودروهای آماده"
       });
     }
   });
