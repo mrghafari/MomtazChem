@@ -1618,7 +1618,18 @@ const WarehouseManagement: React.FC = () => {
       </Dialog>
 
       {/* Order Items Modal */}
-      <Dialog open={showOrderItems} onOpenChange={setShowOrderItems}>
+      <Dialog 
+        open={showOrderItems} 
+        onOpenChange={(open) => {
+          setShowOrderItems(open);
+          if (!open) {
+            // Clear selected order when dialog closes
+            setTimeout(() => {
+              setSelectedOrderForItems(null);
+            }, 100);
+          }
+        }}
+      >
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -1695,13 +1706,21 @@ const WarehouseManagement: React.FC = () => {
             </div>
             
             <div className="flex justify-end gap-2 pt-4">
-              <Button variant="outline" onClick={() => setShowOrderItems(false)}>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setShowOrderItems(false);
+                  setSelectedOrderForItems(null);
+                }}
+              >
                 بستن
               </Button>
               <Button 
                 onClick={() => {
-                  // Open print dialog for warehouse staff
-                  window.print();
+                  // Delay print to ensure DOM is stable
+                  setTimeout(() => {
+                    window.print();
+                  }, 100);
                 }}
                 className="bg-blue-600 hover:bg-blue-700"
               >

@@ -1461,13 +1461,20 @@ const LogisticsManagement = () => {
       </html>
     `;
 
-    // Use same-tab print instead of iframe
-    const originalContent = document.body.innerHTML;
-    document.body.innerHTML = printContent;
-    
-    // Print and restore
-    window.print();
-    document.body.innerHTML = originalContent;
+    // Create a new window for printing to avoid DOM conflicts
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+      
+      // Wait for content to load then print
+      printWindow.onload = () => {
+        setTimeout(() => {
+          printWindow.print();
+          printWindow.close();
+        }, 500);
+      };
+    }
   };
 
   // Print function for order details
@@ -1678,13 +1685,20 @@ const LogisticsManagement = () => {
     </html>
     `;
 
-    // Save current body content and replace with print content
-    const originalContent = document.body.innerHTML;
-    document.body.innerHTML = printContent;
-    
-    // Print and restore
-    window.print();
-    document.body.innerHTML = originalContent;
+    // Create a new window for printing to avoid DOM conflicts
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+      
+      // Wait for content to load then print
+      printWindow.onload = () => {
+        setTimeout(() => {
+          printWindow.print();
+          printWindow.close();
+        }, 500);
+      };
+    }
   };
 
   // Send or resend delivery code SMS using template #3
