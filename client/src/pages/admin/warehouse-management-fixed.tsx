@@ -236,28 +236,34 @@ const WarehouseManagementFixed: React.FC = () => {
       printWindow.document.write(printContent);
       printWindow.document.close();
       
-      // Wait for content to load, then print and close
-      printWindow.onload = () => {
-        printWindow.print();
-        printWindow.close();
+      // Better approach: Wait for images and content to load completely
+      const handlePrint = () => {
+        setTimeout(() => {
+          printWindow.print();
+          // Don't auto-close - let user close manually
+          // printWindow.close();
+        }, 1000); // Give more time for content to load
       };
       
-      // Fallback if onload doesn't fire
-      setTimeout(() => {
-        printWindow.print();
-        printWindow.close();
-      }, 500);
+      // Multiple event listeners to ensure print dialog opens
+      if (printWindow.document.readyState === 'complete') {
+        handlePrint();
+      } else {
+        printWindow.onload = handlePrint;
+        // Additional fallback
+        setTimeout(handlePrint, 1500);
+      }
     } else {
       // Fallback: Use a blob and object URL (safer than DOM manipulation)
       const blob = new Blob([printContent], { type: 'text/html' });
       const url = URL.createObjectURL(blob);
       const printWindow2 = window.open(url, '_blank');
       if (printWindow2) {
-        printWindow2.onload = () => {
+        setTimeout(() => {
           printWindow2.print();
-          printWindow2.close();
+          // Don't auto-close
           URL.revokeObjectURL(url);
-        };
+        }, 1500);
       }
     }
   };
@@ -300,7 +306,7 @@ const WarehouseManagementFixed: React.FC = () => {
     });
   };
 
-  const orders = ordersResponse?.orders || [];
+  const orders = (ordersResponse as any)?.orders || [];
 
   // Mutations
   const updateOrderMutation = useMutation({
@@ -396,7 +402,7 @@ const WarehouseManagementFixed: React.FC = () => {
     const matchesAmount = amountFilter === '' || parseFloat(order.totalAmount || '0').toString().includes(amountFilter);
     
     return matchesSearch && matchesStatus && matchesOrderId && matchesCustomerName && matchesPhone && matchesEmail && matchesStatusFilter && matchesAmount;
-  })?.sort((a, b) => {
+  })?.sort((a: any, b: any) => {
     // Sort by creation date - older orders first (ascending order)
     const dateA = new Date(a.createdAt || a.orderDate || '').getTime();
     const dateB = new Date(b.createdAt || b.orderDate || '').getTime();
@@ -414,7 +420,7 @@ const WarehouseManagementFixed: React.FC = () => {
   };
 
   const getStatusBadge = (status: string) => {
-    const statusColors = {
+    const statusColors: Record<string, string> = {
       'warehouse_pending': 'bg-yellow-100 text-yellow-800',
       'financial_approved': 'bg-green-100 text-green-800',
       'warehouse_notified': 'bg-blue-100 text-blue-800',
@@ -423,7 +429,7 @@ const WarehouseManagementFixed: React.FC = () => {
       'warehouse_rejected': 'bg-red-100 text-red-800'
     };
     
-    const statusLabels = {
+    const statusLabels: Record<string, string> = {
       'warehouse_pending': 'در انتظار انبار',
       'financial_approved': 'تایید مالی',
       'warehouse_notified': 'اطلاع رسانی انبار',
