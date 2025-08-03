@@ -4433,6 +4433,10 @@ const LogisticsManagement = () => {
                         <span className="text-sm text-gray-600">شماره سفارش:</span>
                         <span className="font-semibold text-orange-700">{selectedOrder.orderNumber}</span>
                       </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">نوع تسویه حساب:</span>
+                        <PaymentMethodBadge method={selectedOrder.paymentMethod} />
+                      </div>
                     </div>
                   </div>
 
