@@ -1656,7 +1656,7 @@ const LogisticsManagement = () => {
               console.log('🔍 [PAYMENT DEBUG] Payment method value:', method, 'Type:', typeof method);
               
               if (!method || method === null || method === undefined) {
-                return 'واریز بانکی (پیش‌فرض)';
+                return 'واریز بانکی';
               }
               
               switch (method.toLowerCase()) {

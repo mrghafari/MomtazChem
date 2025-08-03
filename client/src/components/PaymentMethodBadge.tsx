@@ -16,7 +16,7 @@ const PaymentMethodBadge: React.FC<PaymentMethodBadgeProps> = ({
   const getPaymentMethodInfo = (method?: string | null) => {
     if (!method || method === null || method === undefined) {
       return {
-        label: 'واریز بانکی (پیش‌فرض)',
+        label: 'واریز بانکی',
         variant: 'outline' as const,
         icon: DollarSign,
         className: 'bg-purple-50 text-purple-700 hover:bg-purple-100 border-purple-300'
