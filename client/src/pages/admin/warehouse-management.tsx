@@ -805,7 +805,24 @@ const WarehouseManagement: React.FC = () => {
   };
 
   const formatDate = (dateString: string) => {
-    return formatDateSafe(dateString);
+    // تاریخ میلادی برای پرینت - اصلاح مطابق درخواست کاربر
+    if (!dateString) return 'تاریخ نامشخص';
+    
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return 'تاریخ نامعتبر';
+      
+      // فرمت میلادی صریح برای پرینت انبار
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      return 'خطا در تاریخ';
+    }
   };
 
   return (
@@ -1069,7 +1086,7 @@ const WarehouseManagement: React.FC = () => {
                           <td className="p-4">
                             <div className="text-sm">
                               {order.warehouseProcessedAt ? (
-                                <span className="text-green-600 font-medium">
+                                <span className="text-green-600 font-medium print:text-black print:font-bold">
                                   {formatDate(order.warehouseProcessedAt)}
                                 </span>
                               ) : (
@@ -1077,7 +1094,7 @@ const WarehouseManagement: React.FC = () => {
                               )}
                             </div>
                           </td>
-                          <td className="p-4">{formatDate(order.createdAt)}</td>
+                          <td className="p-4 print:font-bold print:text-black">{formatDate(order.createdAt)}</td>
                           <td className="p-4">
                             <div className="flex justify-center gap-2">
                               <Button
