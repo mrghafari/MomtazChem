@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Progress } from '@/components/ui/progress';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+// Removed problematic Dialog imports - using SafeModal instead
 import SafeModal from '@/components/SafeModal';
 import { useAuth } from '@/hooks/useAuth';
 import { 
@@ -1577,12 +1577,13 @@ const WarehouseManagement: React.FC = () => {
         </TabsContent>
       </Tabs>
 
-      {/* Order Details Dialog */}
-      <Dialog open={showOrderDetails} onOpenChange={setShowOrderDetails}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>جزئیات سفارش #{selectedOrder?.id}</DialogTitle>
-          </DialogHeader>
+      {/* Order Details Modal - Using SafeModal (No React Portal Issues) */}
+      <SafeModal
+        isOpen={showOrderDetails}
+        onClose={() => setShowOrderDetails(false)}
+        title={`جزئیات سفارش #${selectedOrder?.id || ''}`}
+        maxWidth="max-w-2xl"
+      >
           {selectedOrder && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -1654,8 +1655,7 @@ const WarehouseManagement: React.FC = () => {
               </div>
             </div>
           )}
-        </DialogContent>
-      </Dialog>
+      </SafeModal>
 
       {/* Order Items Modal - Using SafeModal (No React Portal Issues) */}
       <SafeModal
