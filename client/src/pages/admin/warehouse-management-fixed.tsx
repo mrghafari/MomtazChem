@@ -403,10 +403,10 @@ const WarehouseManagementFixed: React.FC = () => {
     
     return matchesSearch && matchesStatus && matchesOrderId && matchesCustomerName && matchesPhone && matchesEmail && matchesStatusFilter && matchesAmount;
   })?.sort((a: any, b: any) => {
-    // Sort by creation date - older orders first (ascending order)
-    const dateA = new Date(a.createdAt || a.orderDate || '').getTime();
-    const dateB = new Date(b.createdAt || b.orderDate || '').getTime();
-    return dateA - dateB;
+    // Sort by order ID - older orders (lower IDs) first
+    const idA = a.customerOrderId || a.id || 0;
+    const idB = b.customerOrderId || b.id || 0;
+    return idA - idB;
   }) || [];
 
   // Helper functions
