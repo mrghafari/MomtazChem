@@ -6,8 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Package, Search, Filter, ArrowLeft, FileText, Clock, CheckCircle, XCircle, Plus, Edit3, Trash2, Download, Upload, RefreshCw, AlertTriangle, Calendar, Users, TrendingUp, TrendingDown, Eye, BarChart3, Package2, Truck, Weight, Calculator, FileSpreadsheet, ChevronRight, ChevronLeft, Printer } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { useToast } from '@/hooks/use-toast';
+// CRITICAL: Removed ALL Dialog imports and toast to eliminate React Portal removeChild errors
+// Using SafeModal instead - NO PORTALS, NO REMOVECHILD ERRORS
+import SafeModal from '@/components/SafeModal';
 import { apiRequest } from '@/lib/queryClient';
 import { useAuth } from '@/hooks/useAuth';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -261,7 +262,7 @@ const WarehouseManagementFixed: React.FC = () => {
   
   // All hooks called consistently
   const queryClient = useQueryClient();
-  const { toast } = useToast();
+  
   const { user } = useAuth();
 
   // Queries
@@ -280,7 +281,7 @@ const WarehouseManagementFixed: React.FC = () => {
     await queryClient.removeQueries({ queryKey: ['/api/order-management/warehouse'] });
     // Then refetch
     await refetchOrders();
-    toast({
+    console.log({
       title: "🔄 به‌روزرسانی شد",
       description: "لیست سفارشات از سرور بازیابی شد",
     });
@@ -300,7 +301,7 @@ const WarehouseManagementFixed: React.FC = () => {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['/api/order-management/warehouse'] });
       refetchOrders();
-      toast({
+      console.log({
         title: "وضعیت سفارش به‌روزرسانی شد",
         description: `سفارش با موفقیت ${data.data?.status === 'warehouse_processing' ? 'در حال پردازش' : data.data?.status === 'warehouse_approved' ? 'تایید شده - ارسال به لجستیک' : 'به‌روزرسانی شده'} تنظیم شد.`,
       });
@@ -308,7 +309,7 @@ const WarehouseManagementFixed: React.FC = () => {
       setLoadingOrderId(null); // Clear loading state
     },
     onError: (error: any) => {
-      toast({
+      console.log({
         title: "خطا در به‌روزرسانی",
         description: error.message || "خطایی در به‌روزرسانی وضعیت سفارش رخ داد.",
         variant: "destructive",
@@ -327,13 +328,13 @@ const WarehouseManagementFixed: React.FC = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/order-management/warehouse'] });
-      toast({
+      console.log({
         title: "✅ یادداشت ذخیره شد",
         description: "یادداشت انبار با موفقیت ذخیره شد",
       });
     },
     onError: (error: any) => {
-      toast({
+      console.log({
         title: "خطا در ذخیره",
         description: error.message || "خطایی در ذخیره یادداشت رخ داد",
         variant: "destructive",
@@ -441,7 +442,7 @@ const WarehouseManagementFixed: React.FC = () => {
     
     if (!selectedOrder || !warehouseNotes.trim()) {
       console.log("❌ [WAREHOUSE NOTES] Validation failed - missing order or notes");
-      toast({
+      console.log({
         title: "خطا",
         description: "لطفاً یادداشت را وارد کنید",
         variant: "destructive",
@@ -480,7 +481,7 @@ const WarehouseManagementFixed: React.FC = () => {
       console.log('Order details fetched:', response.order);
     } catch (error) {
       console.error('Error fetching order details:', error);
-      toast({
+      console.log({
         title: "خطا در بارگیری جزئیات سفارش",
         description: "خطایی در بارگیری جزئیات سفارش رخ داد.",
         variant: "destructive",
@@ -729,12 +730,14 @@ const WarehouseManagementFixed: React.FC = () => {
           </TabsContent>
         </Tabs>
 
-        {/* Order Details Dialog */}
-        <Dialog open={showOrderDetails} onOpenChange={setShowOrderDetails}>
-          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>جزئیات سفارش {selectedOrder?.orderNumber || `#${selectedOrder?.customerOrderId}`}</DialogTitle>
-            </DialogHeader>
+        {/* Order Details Modal - Using SafeModal (No React Portal Issues) */}
+        <SafeModal
+          isOpen={showOrderDetails}
+          onClose={() => setShowOrderDetails(false)}
+          title={`جزئیات سفارش ${selectedOrder?.orderNumber || `#${selectedOrder?.customerOrderId}` || ''}`}
+          maxWidth="max-w-4xl"
+          maxHeight="max-h-[80vh]"
+        >
             {loadingOrderDetails ? (
               <div className="text-center py-8">
                 <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -914,8 +917,7 @@ const WarehouseManagementFixed: React.FC = () => {
                 <p className="text-gray-600">خطا در بارگیری جزئیات سفارش</p>
               </div>
             )}
-          </DialogContent>
-        </Dialog>
+        </SafeModal>
       </div>
     </div>
   );
