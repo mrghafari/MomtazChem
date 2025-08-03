@@ -39,6 +39,7 @@ import {
   TrendingUp,
   TrendingDown,
   Plus,
+  Play,
   Minus,
   Save,
   Printer,
@@ -1146,19 +1147,30 @@ const WarehouseManagement: React.FC = () => {
                                 </Button>
                               )}
                               {order.currentStatus === 'warehouse_processing' && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => {
-                                    setSelectedOrder(order);
-                                    setWarehouseNotes(order.warehouseNotes || '');
-                                    setShowOrderDetails(true);
-                                  }}
-                                  className="text-orange-600 hover:text-orange-800"
-                                >
-                                  <Package className="w-4 h-4 mr-1" />
-                                  تکمیل
-                                </Button>
+                                <>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      setSelectedOrder(order);
+                                      setWarehouseNotes(order.warehouseNotes || '');
+                                      setShowOrderDetails(true);
+                                    }}
+                                    className="text-blue-600 hover:text-blue-800"
+                                  >
+                                    <Settings className="w-4 h-4 mr-1" />
+                                    ویرایش
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleApproveToLogistics(order)}
+                                    className="text-green-600 hover:text-green-800"
+                                  >
+                                    <CheckCircle className="w-4 h-4 mr-1" />
+                                    تایید و ارسال به لجستیک
+                                  </Button>
+                                </>
                               )}
                             </div>
                           </td>
