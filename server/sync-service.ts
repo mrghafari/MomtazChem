@@ -216,7 +216,7 @@ export class SyncService {
 
   /**
    * تعیین وضعیت مناسب برای order_management بر اساس customer_orders
-   * FIXED VERSION - منطق صحیح نقشه‌برداری وضعیت‌ها
+   * FIXED VERSION - منطق صحیح نقشه‌برداری وضعیت‌ها با پشتیبانی از دو مرحله انبار
    */
   private determineManagementStatus(customerStatus: string, paymentStatus: string): string {
     // console.log(`🔄 [STATUS MAPPING] Customer: ${customerStatus}, Payment: ${paymentStatus}`); // Reduced logging
@@ -230,6 +230,11 @@ export class SyncService {
       // سفارش آماده انبار یعنی انبار آن را تایید کرده است
       // پس باید در وضعیت warehouse_approved باشد نه warehouse_pending
       return 'warehouse_approved';
+    }
+    
+    // IMPORTANT: حفظ وضعیت‌های دو مرحله‌ای انبار
+    if (customerStatus === 'warehouse_verified') {
+      return 'warehouse_verified'; // حفظ وضعیت مرحله اول
     }
     
     if (customerStatus === 'confirmed' || customerStatus === 'processing') {
