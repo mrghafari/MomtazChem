@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import SafeModal from '@/components/SafeModal';
 import { useAuth } from '@/hooks/useAuth';
 import { 
   Package, 
@@ -218,39 +219,24 @@ const WarehouseManagement: React.FC = () => {
     },
   });
   
-  // Order items modal state with error prevention
+  // Order items modal state - simplified and safe
   const [showOrderItems, setShowOrderItems] = useState(false);
   const [selectedOrderForItems, setSelectedOrderForItems] = useState<any>(null);
-  const dialogTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isClosingRef = useRef(false);
   
-  // Enhanced safe dialog close handler to prevent React Portal errors
+  // Simple and safe dialog close handler - no React Portal issues
   const handleCloseDialog = useCallback(() => {
-    if (isClosingRef.current) return; // Prevent multiple close calls
+    if (isClosingRef.current) return;
     
     isClosingRef.current = true;
     setShowOrderItems(false);
+    setSelectedOrderForItems(null);
+    setOrderItems([]);
     
-    // Clear any existing timeout
-    if (dialogTimeoutRef.current) {
-      clearTimeout(dialogTimeoutRef.current);
-    }
-    
-    // Use multiple strategies to ensure safe cleanup
-    dialogTimeoutRef.current = setTimeout(() => {
-      setSelectedOrderForItems(null);
+    // Reset closing flag after state updates
+    setTimeout(() => {
       isClosingRef.current = false;
-      dialogTimeoutRef.current = null;
-    }, 200);
-  }, []);
-  
-  // Cleanup effect to prevent memory leaks
-  useEffect(() => {
-    return () => {
-      if (dialogTimeoutRef.current) {
-        clearTimeout(dialogTimeoutRef.current);
-      }
-    };
+    }, 100);
   }, []);
   const [orderItems, setOrderItems] = useState<any[]>([]);
 
@@ -1659,138 +1645,117 @@ const WarehouseManagement: React.FC = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Order Items Modal with Enhanced Error Prevention */}
-      <Dialog 
-        open={showOrderItems && !isClosingRef.current} 
-        onOpenChange={(open) => {
-          if (!open && !isClosingRef.current) {
-            handleCloseDialog();
-          } else if (open && !isClosingRef.current) {
-            setShowOrderItems(true);
-          }
-        }}
+      {/* Order Items Modal - Using SafeModal (No React Portal Issues) */}
+      <SafeModal
+        isOpen={showOrderItems && !!selectedOrderForItems}
+        onClose={handleCloseDialog}
+        title={`لیست کالاهای سفارش #${selectedOrderForItems?.customerOrderId || ''}`}
+        maxWidth="max-w-4xl"
+        maxHeight="max-h-[80vh]"
       >
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Package className="w-5 h-5" />
-              {selectedOrderForItems ? (
-                <>لیست کالاهای سفارش #{selectedOrderForItems.customerOrderId}</>
-              ) : (
-                <>جزئیات سفارش</>
-              )}
-            </DialogTitle>
-            {selectedOrderForItems && (
-              <p className="text-sm text-gray-600">
-                مشتری: {selectedOrderForItems.customer?.firstName} {selectedOrderForItems.customer?.lastName}
-              </p>
-            )}
-          </DialogHeader>
+        {selectedOrderForItems && (
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600">
+              مشتری: {selectedOrderForItems.customer?.firstName} {selectedOrderForItems.customer?.lastName}
+            </p>
             
-            <div className="space-y-4">
-              {orderItems.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  <Package className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                  <p>در حال بارگیری لیست کالاها...</p>
-                </div>
-              ) : (
-                <div className="order-items-content space-y-4">
-                  <div className="grid grid-cols-1 gap-4">
-                    {orderItems.map((item: any, index: number) => (
-                      <Card key={item.id || index} className="p-4">
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
-                          <div className="space-y-1">
-                            <h4 className="font-semibold text-gray-900">{item.product_name}</h4>
-                            <p className="text-sm text-gray-500">SKU: {item.product_sku || 'نامشخص'}</p>
-                            {item.barcode && (
-                              <p className="text-xs text-gray-400">بارکد: {item.barcode}</p>
-                            )}
-                          </div>
-                          
-                          <div className="space-y-1">
-                            <p className="text-sm font-medium">تعداد: {item.quantity} {item.unit}</p>
-                            <p className="text-sm text-gray-600">قیمت واحد: {formatCurrency(parseFloat(item.unit_price))}</p>
-                          </div>
-                          
-                          <div className="space-y-1">
-                            <p className="text-sm font-medium">مجموع: {formatCurrency(parseFloat(item.total_price))}</p>
-                            {item.category && (
-                              <p className="text-xs text-gray-500">دسته: {item.category}</p>
-                            )}
-                          </div>
-                          
-                          <div className="space-y-1">
-                            {item.stock_quantity !== undefined && (
-                              <p className="text-sm text-gray-600">موجودی فعلی: {item.stock_quantity}</p>
-                            )}
-                            {item.specifications && (
-                              <p className="text-xs text-gray-500">مشخصات: {typeof item.specifications === 'string' ? item.specifications : JSON.stringify(item.specifications)}</p>
-                            )}
-                            {item.notes && (
-                              <p className="text-xs text-gray-500">یادداشت: {item.notes}</p>
-                            )}
-                          </div>
+            {orderItems.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <Package className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                <p>در حال بارگیری لیست کالاها...</p>
+              </div>
+            ) : (
+              <div className="order-items-content space-y-4">
+                <div className="grid grid-cols-1 gap-4">
+                  {orderItems.map((item: any, index: number) => (
+                    <Card key={item.id || index} className="p-4">
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+                        <div className="space-y-1">
+                          <h4 className="font-semibold text-gray-900">{item.product_name}</h4>
+                          <p className="text-sm text-gray-500">SKU: {item.product_sku || 'نامشخص'}</p>
+                          {item.barcode && (
+                            <p className="text-xs text-gray-400">بارکد: {item.barcode}</p>
+                          )}
                         </div>
-                      </Card>
-                    ))}
-                  </div>
-                  
-                  <div className="border-t pt-4">
-                    <div className="flex justify-between items-center text-lg font-semibold">
-                      <span>تعداد کل اقلام: {orderItems.length}</span>
-                      <span>مبلغ کل سفارش: {selectedOrderForItems ? formatCurrency(parseFloat(selectedOrderForItems.totalAmount)) : '0'}</span>
-                    </div>
+                        
+                        <div className="space-y-1">
+                          <p className="text-sm font-medium">تعداد: {item.quantity} {item.unit}</p>
+                          <p className="text-sm text-gray-600">قیمت واحد: {formatCurrency(parseFloat(item.unit_price))}</p>
+                        </div>
+                        
+                        <div className="space-y-1">
+                          <p className="text-sm font-medium">مجموع: {formatCurrency(parseFloat(item.total_price))}</p>
+                          {item.category && (
+                            <p className="text-xs text-gray-500">دسته: {item.category}</p>
+                          )}
+                        </div>
+                        
+                        <div className="space-y-1">
+                          {item.stock_quantity !== undefined && (
+                            <p className="text-sm text-gray-600">موجودی فعلی: {item.stock_quantity}</p>
+                          )}
+                          {item.specifications && (
+                            <p className="text-xs text-gray-500">مشخصات: {typeof item.specifications === 'string' ? item.specifications : JSON.stringify(item.specifications)}</p>
+                          )}
+                          {item.notes && (
+                            <p className="text-xs text-gray-500">یادداشت: {item.notes}</p>
+                          )}
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+                
+                <div className="border-t pt-4">
+                  <div className="flex justify-between items-center text-lg font-semibold">
+                    <span>تعداد کل اقلام: {orderItems.length}</span>
+                    <span>مبلغ کل سفارش: {selectedOrderForItems ? formatCurrency(parseFloat(selectedOrderForItems.totalAmount)) : '0'}</span>
                   </div>
                 </div>
-              )}
-            </div>
-            
-            <div className="flex justify-end gap-2 pt-4">
-              <Button 
-                variant="outline" 
-                onClick={handleCloseDialog}
-              >
-                بستن
-              </Button>
-              <Button 
-                onClick={() => {
-                  // Create a safe print function that doesn't interfere with React
-                  const printContent = document.querySelector('.order-items-content')?.innerHTML;
-                  if (printContent) {
-                    const printWindow = window.open('', '_blank');
-                    if (printWindow) {
-                      printWindow.document.write(`
-                        <!DOCTYPE html>
-                        <html dir="rtl">
-                        <head>
-                          <title>جزئیات سفارش</title>
-                          <style>
-                            body { font-family: Arial, sans-serif; padding: 20px; direction: rtl; }
-                            .order-items-content { max-width: 800px; margin: 0 auto; }
-                            @media print { body { margin: 0; } }
-                          </style>
-                        </head>
-                        <body>
-                          ${printContent}
-                        </body>
-                        </html>
-                      `);
-                      printWindow.document.close();
-                      setTimeout(() => {
-                        printWindow.print();
-                        printWindow.close();
-                      }, 500);
-                    }
-                  }
-                }}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                <Printer className="w-4 h-4 ml-1" />
-                چاپ لیست
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+                
+                <div className="flex justify-end gap-2 pt-4">
+                  <button 
+                    onClick={() => {
+                      // Create a safe print function that doesn't interfere with React
+                      const printContent = document.querySelector('.order-items-content')?.innerHTML;
+                      if (printContent) {
+                        const printWindow = window.open('', '_blank');
+                        if (printWindow) {
+                          printWindow.document.write(`
+                            <!DOCTYPE html>
+                            <html dir="rtl">
+                            <head>
+                              <title>جزئیات سفارش</title>
+                              <style>
+                                body { font-family: Arial, sans-serif; padding: 20px; direction: rtl; }
+                                .order-items-content { max-width: 800px; margin: 0 auto; }
+                                @media print { body { margin: 0; } }
+                              </style>
+                            </head>
+                            <body>
+                              ${printContent}
+                            </body>
+                            </html>
+                          `);
+                          printWindow.document.close();
+                          setTimeout(() => {
+                            printWindow.print();
+                            printWindow.close();
+                          }, 500);
+                        }
+                      }
+                    }}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center gap-2"
+                  >
+                    <Printer className="w-4 h-4" />
+                    چاپ لیست
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </SafeModal>
     </div>
   );
 };
