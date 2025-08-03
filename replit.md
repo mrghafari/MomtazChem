@@ -61,6 +61,13 @@ The system is built on a robust full-stack architecture. Features include compre
 - **GUARANTEED:** Zero removeChild errors since no Portal APIs are used anywhere
 - **ARCHITECTURE:** All modals now render directly in component tree without DOM manipulation
 
+**Gregorian Date Formatting Implementation (August 2025):**
+- **STANDARDIZED:** All print functionality date formats converted from Persian/Hijri to Gregorian calendar
+- **WAREHOUSE PRINT:** Fixed order date and print timestamp in warehouse management print details
+- **MODAL DISPLAY:** Updated warehouse processed date and order date in order details modal
+- **FORMAT:** Using en-GB locale for consistent DD/MM/YYYY format across all print documents
+- **CONSISTENCY:** All administrative print functionality now uses Gregorian dates exclusively
+
 ### System Design Choices
 The architecture emphasizes modularity and scalability. Core architectural patterns include a RESTful API design for backend-frontend communication, ensuring clear separation of concerns. Data integrity is maintained through transactional operations for critical processes like order creation and inventory updates. The system employs a prevention-first approach to avoid data inconsistencies. A unified vehicle selection algorithm prioritizes cost-efficiency and safety compliance, particularly for hazardous materials. Inventory management strictly adheres to FIFO (First-In, First-Out) principles. A comprehensive email and SMS automation system leverages templates and intelligent routing. The system is designed for continuous integration and deployment, with a focus on performance optimization through database indexing, caching, and asset optimization.
 

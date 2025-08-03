@@ -162,7 +162,7 @@ const WarehouseManagementFixed: React.FC = () => {
               </div>
               <div>
                 <div class="info-label">تاریخ سفارش</div>
-                <div style="font-size: 14px; font-weight: bold;">${new Date(orderDetails.orderDate).toLocaleDateString('fa-IR')}</div>
+                <div style="font-size: 14px; font-weight: bold;">${new Date(orderDetails.orderDate).toLocaleDateString('en-GB')}</div>
               </div>
             </div>
           </div>
@@ -223,7 +223,13 @@ const WarehouseManagementFixed: React.FC = () => {
 
         <div class="footer">
           <p>این سند توسط سیستم مدیریت انبار ممتاز شیمی تولید شده است</p>
-          <p>تاریخ و زمان چاپ: ${new Date().toLocaleString('fa-IR')}</p>
+          <p>تاریخ و زمان چاپ: ${new Date().toLocaleString('en-GB', { 
+            year: 'numeric', 
+            month: '2-digit', 
+            day: '2-digit', 
+            hour: '2-digit', 
+            minute: '2-digit' 
+          })}</p>
         </div>
       </body>
       </html>
@@ -690,7 +696,7 @@ const WarehouseManagementFixed: React.FC = () => {
                             <td className="p-4" style={{ width: '120px' }}>{getStatusBadge(order.currentStatus || order.status)}</td>
                             <td className="p-4" style={{ width: '140px' }}>
                               <div className="text-sm text-gray-600 truncate">
-                                {order.warehouseProcessedAt ? new Date(order.warehouseProcessedAt).toLocaleDateString('fa-IR') : 'پردازش نشده'}
+                                {order.warehouseProcessedAt ? new Date(order.warehouseProcessedAt).toLocaleDateString('en-GB') : 'پردازش نشده'}
                               </div>
                             </td>
                             <td className="p-4 text-center" style={{ width: '200px' }}>
@@ -815,7 +821,7 @@ const WarehouseManagementFixed: React.FC = () => {
                     </div>
                     <div className="text-center">
                       <Label className="text-sm font-medium text-gray-700">تاریخ سفارش</Label>
-                      <p className="text-sm font-medium text-gray-900">{new Date(orderDetails.orderDate).toLocaleDateString('fa-IR')}</p>
+                      <p className="text-sm font-medium text-gray-900">{new Date(orderDetails.orderDate).toLocaleDateString('en-GB')}</p>
                     </div>
                   </div>
                 </div>
