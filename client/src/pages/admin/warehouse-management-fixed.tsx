@@ -403,11 +403,21 @@ const WarehouseManagementFixed: React.FC = () => {
     
     return matchesSearch && matchesStatus && matchesOrderId && matchesCustomerName && matchesPhone && matchesEmail && matchesStatusFilter && matchesAmount;
   })?.sort((a: any, b: any) => {
-    // Sort by order ID - older orders (lower IDs) first
-    const idA = a.customerOrderId || a.id || 0;
-    const idB = b.customerOrderId || b.id || 0;
-    return idA - idB;
+    // Sort by customerOrderId - older orders (lower customer order IDs) first
+    const customerOrderIdA = parseInt(a.customerOrderId) || 0;
+    const customerOrderIdB = parseInt(b.customerOrderId) || 0;
+    
+    if (customerOrderIdA !== customerOrderIdB) {
+      return customerOrderIdA - customerOrderIdB;
+    }
+    
+    // If customerOrderId is the same, sort by creation date
+    const dateA = new Date(a.createdAt || a.orderDate || '').getTime();
+    const dateB = new Date(b.createdAt || b.orderDate || '').getTime();
+    return dateA - dateB;
   }) || [];
+
+
 
   // Helper functions
   const formatCurrency = (amount: number) => {
