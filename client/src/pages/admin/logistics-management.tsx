@@ -507,6 +507,9 @@ const LogisticsManagement = () => {
   // Vehicle optimization states
   const [isCreateVehicleDialogOpen, setIsCreateVehicleDialogOpen] = useState(false);
   const [optimizationRequest, setOptimizationRequest] = useState<any>({});
+  const [vehicleOptimizationResults, setVehicleOptimizationResults] = useState<any>(null);
+  const [isVehicleOptimizationOpen, setIsVehicleOptimizationOpen] = useState(false);
+  const [selectedOrderForOptimization, setSelectedOrderForOptimization] = useState<any>(null);
 
   const { data: citiesResponse, isLoading: loadingCities } = useQuery({
     queryKey: ['/api/logistics/cities'],
@@ -595,6 +598,41 @@ const LogisticsManagement = () => {
     },
     onError: () => {
       toast({ title: "خطا", description: "خطا در انتخاب وسیله بهینه", variant: "destructive" });
+    }
+  });
+
+  // New vehicle optimization mutation for specific orders
+  const getVehicleOptimizationMutation = useMutation({
+    mutationFn: (data: any) => 
+      fetch('/api/logistics/vehicle-optimization', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      }).then(res => res.json()),
+    onSuccess: (result) => {
+      console.log('🎯 [VEHICLE-OPTIMIZATION] Results received:', result);
+      if (result.success) {
+        setVehicleOptimizationResults(result.data);
+        setIsVehicleOptimizationOpen(true);
+        toast({ 
+          title: "✅ بهینه‌سازی انجام شد", 
+          description: `${result.data.totalOptions} گزینه خودرو برای این سفارش یافت شد`
+        });
+      } else {
+        toast({ 
+          title: "⚠️ هشدار", 
+          description: result.message || "خطا در بهینه‌سازی خودرو", 
+          variant: "destructive" 
+        });
+      }
+    },
+    onError: (error) => {
+      console.error('❌ [VEHICLE-OPTIMIZATION] Error:', error);
+      toast({ 
+        title: "خطا", 
+        description: "خطا در بهینه‌سازی خودرو", 
+        variant: "destructive" 
+      });
     }
   });
 
@@ -814,6 +852,83 @@ const LogisticsManagement = () => {
       toast({
         title: "خطا",
         description: "خطا در ایجاد خودرو آماده از قالب انتخابی",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Handle vehicle optimization for a specific order
+  const handleOrderVehicleOptimization = (order: any) => {
+    console.log('🚛 [ORDER-OPTIMIZATION] Starting optimization for order:', order.orderNumber);
+    
+    setSelectedOrderForOptimization(order);
+    
+    // Extract destination city from shipping address
+    const destinationCity = order.shippingAddress?.city || order.billingAddress?.city || 'بغداد';
+    const destinationProvince = order.shippingAddress?.province || order.billingAddress?.province || 'بغداد';
+    
+    // Calculate if order contains flammable products (basic check)
+    const containsFlammable = false; // This would need to be enhanced with actual product data
+    
+    const optimizationData = {
+      orderNumber: order.orderNumber,
+      orderWeight: order.calculatedWeight || order.totalWeight || 1,
+      destinationCity: destinationCity,
+      destinationProvince: destinationProvince,
+      containsFlammable: containsFlammable,
+      orderValue: parseFloat(order.totalAmount || '0'),
+      orderId: order.id
+    };
+    
+    console.log('🔄 [ORDER-OPTIMIZATION] Sending optimization request:', optimizationData);
+    getVehicleOptimizationMutation.mutate(optimizationData);
+  };
+
+  // Create a ready vehicle from optimization results
+  const createReadyVehicleFromOptimization = async (vehicleMatch: any) => {
+    try {
+      console.log('🚛 [CREATE-VEHICLE] Creating ready vehicle from optimization:', vehicleMatch);
+      
+      const vehicleData = {
+        vehicleType: vehicleMatch.vehicleDescription || vehicleMatch.templateName,
+        licensePlate: vehicleMatch.licensePlate || `${vehicleMatch.templateName}-${Math.floor(Math.random() * 10000)}`,
+        driverName: vehicleMatch.driverName || `راننده ${vehicleMatch.templateName}`,
+        driverMobile: vehicleMatch.driverMobile || '07xxxxxxxxx',
+        loadCapacity: vehicleMatch.vehicleCapacity || vehicleMatch.maxWeight || 1000,
+        isAvailable: true,
+        notes: `ایجاد شده از بهینه‌سازی سفارش ${selectedOrderForOptimization?.orderNumber} - هزینه: ${Math.round(vehicleMatch.totalCost)} دینار`,
+        supportsFlammable: vehicleMatch.supportsFlammable || false
+      };
+
+      const response = await fetch('/api/logistics/ready-vehicles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(vehicleData)
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        toast({
+          title: "✅ خودرو ایجاد شد",
+          description: `خودرو ${vehicleMatch.licensePlate} با راننده ${vehicleMatch.driverName} ایجاد شد و آماده اختصاص است`
+        });
+        
+        // Refresh ready vehicles
+        queryClient.invalidateQueries({ queryKey: ['/api/logistics/ready-vehicles'] });
+        
+        // Close optimization dialog
+        setIsVehicleOptimizationOpen(false);
+        
+        return result;
+      } else {
+        throw new Error('Failed to create vehicle');
+      }
+    } catch (error) {
+      console.error('❌ [CREATE-VEHICLE] Error:', error);
+      toast({
+        title: "خطا",
+        description: "خطا در ایجاد خودرو آماده",
         variant: "destructive"
       });
     }
@@ -1984,6 +2099,16 @@ const LogisticsManagement = () => {
                         )}
                       </Button>
 
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="border-blue-500 text-blue-700 hover:bg-blue-100"
+                        onClick={() => handleOrderVehicleOptimization(order)}
+                        disabled={getVehicleOptimizationMutation.isPending}
+                      >
+                        <Calculator className="w-4 h-4 mr-2" />
+                        {getVehicleOptimizationMutation.isPending ? 'در حال بهینه‌سازی...' : 'بهینه‌سازی خودرو'}
+                      </Button>
                       <Button 
                         size="sm" 
                         variant="outline" 
@@ -3557,6 +3682,89 @@ const LogisticsManagement = () => {
                 </Button>
               </DialogFooter>
             </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Vehicle Optimization Results Dialog */}
+        <Dialog open={isVehicleOptimizationOpen} onOpenChange={setIsVehicleOptimizationOpen}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto" dir="rtl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Calculator className="h-5 w-5 text-blue-600" />
+                نتایج بهینه‌سازی خودرو برای سفارش {selectedOrderForOptimization?.orderNumber}
+              </DialogTitle>
+              <DialogDescription>
+                خودروهای پیشنهادی بر اساس وزن، مقصد و محتوای سفارش
+              </DialogDescription>
+            </DialogHeader>
+            
+            {vehicleOptimizationResults && (
+              <div className="space-y-4">
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <h4 className="font-semibold text-blue-800 mb-2">خلاصه سفارش</h4>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>وزن: {vehicleOptimizationResults.requestedWeight} کیلوگرم</div>
+                    <div>مقصد: {vehicleOptimizationResults.destination}</div>
+                    <div>حاوی مواد آتش‌زا: {vehicleOptimizationResults.containsFlammable ? 'بله' : 'خیر'}</div>
+                    <div>تعداد گزینه‌ها: {vehicleOptimizationResults.totalOptions}</div>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-gray-800">خودروهای پیشنهادی:</h4>
+                  {vehicleOptimizationResults.vehicleMatches?.map((match: any, index: number) => (
+                    <div key={index} className="border rounded-lg p-4 bg-white hover:bg-gray-50">
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <h5 className="font-medium text-lg">{match.licensePlate || match.templateName}</h5>
+                          <p className="text-gray-600">{match.vehicleDescription}</p>
+                        </div>
+                        <div className="text-left">
+                          <div className="text-lg font-bold text-green-600">
+                            {Math.round(match.totalCost)} دینار
+                          </div>
+                          {match.isOptimal && (
+                            <Badge className="bg-yellow-500 text-white mt-1">انتخاب بهینه</Badge>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4 text-sm mb-3">
+                        <div>راننده: {match.driverName || 'نامشخص'}</div>
+                        <div>تلفن: {match.driverMobile || 'نامشخص'}</div>
+                        <div>ظرفیت: {match.vehicleCapacity || match.maxWeight} کیلوگرم</div>
+                        <div>نوع: {match.vehicleType}</div>
+                      </div>
+
+                      {match.supportsFlammable && (
+                        <div className="flex items-center gap-2 text-orange-700 mb-2">
+                          <Flame className="h-4 w-4" />
+                          <span className="text-sm">مجهز برای حمل مواد آتش‌زا</span>
+                        </div>
+                      )}
+
+                      <div className="flex justify-end">
+                        <Button
+                          size="sm"
+                          onClick={() => createReadyVehicleFromOptimization(match)}
+                          className="bg-blue-600 hover:bg-blue-700"
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          ایجاد خودرو آماده
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {vehicleOptimizationResults.totalOptions === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    <Truck className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                    <p>هیچ خودرو مناسبی برای این سفارش یافت نشد</p>
+                  </div>
+                )}
+              </div>
+            )}
           </DialogContent>
         </Dialog>
 

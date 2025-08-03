@@ -29711,6 +29711,278 @@ momtazchem.com
     }
   });
 
+  // =============================================
+  // INTELLIGENT VEHICLE OPTIMIZATION API
+  // =============================================
+
+  // Get optimized vehicle suggestions for an order
+  app.post('/api/logistics/vehicle-optimization', requireAuth, async (req, res) => {
+    try {
+      console.log('🚛 [VEHICLE-OPT] Vehicle optimization request:', req.body);
+      
+      const { 
+        orderNumber, 
+        orderWeight, 
+        destinationCity, 
+        destinationProvince, 
+        containsFlammable = false,
+        orderValue,
+        orderId 
+      } = req.body;
+
+      if (!orderWeight || !destinationCity) {
+        return res.status(400).json({
+          success: false,
+          message: "وزن سفارش و شهر مقصد اجباری است"
+        });
+      }
+
+      // Get vehicle templates and ready vehicles
+      const { vehicleTemplates, readyVehicles, iraqiCities } = await import('@shared/logistics-schema');
+      
+      // Get active templates
+      const templates = await db.select().from(vehicleTemplates).where(eq(vehicleTemplates.isActive, true));
+      
+      // Get available ready vehicles
+      const availableVehicles = await db.select().from(readyVehicles).where(eq(readyVehicles.isAvailable, true));
+
+      console.log('🔍 [VEHICLE-OPT] Data loaded:', {
+        templates: templates.length,
+        availableVehicles: availableVehicles.length,
+        orderWeight: orderWeight,
+        containsFlammable: containsFlammable
+      });
+
+      // Get destination city data
+      const cityData = await db.select().from(iraqiCities).where(eq(iraqiCities.nameArabic, destinationCity)).limit(1);
+      const distance = cityData.length > 0 ? parseFloat(cityData[0].distanceFromErbilKm || '0') : 0;
+
+      // Calculate route type
+      let routeType = 'urban';
+      if (distance > 100) routeType = 'highway';
+      else if (distance > 30) routeType = 'interurban';
+
+      // Function to match ready vehicles to templates
+      const matchVehiclesToTemplates = () => {
+        const matches = [];
+        
+        for (const template of templates) {
+          // Skip templates that don't support flammable if needed
+          if (containsFlammable && !template.supportsFlammable) {
+            console.log(`🔥 [FLAMMABLE] Template ${template.name} excluded - doesn't support flammable materials`);
+            continue;
+          }
+
+          // Skip templates that don't support this route type
+          if (!template.allowedRoutes || !template.allowedRoutes.includes(routeType)) {
+            console.log(`🛣️ [ROUTE] Template ${template.name} excluded - doesn't support ${routeType} routes`);
+            continue;
+          }
+
+          // Skip if weight exceeds template capacity
+          if (orderWeight > parseFloat(template.maxWeightKg)) {
+            console.log(`⚖️ [WEIGHT] Template ${template.name} excluded - weight ${orderWeight}kg > capacity ${template.maxWeightKg}kg`);
+            continue;
+          }
+
+          // Find matching ready vehicles for this template
+          const matchingVehicles = availableVehicles.filter(vehicle => {
+            // Match by vehicle type keywords
+            const templateType = template.vehicleType.toLowerCase();
+            const templateName = template.name.toLowerCase();
+            const vehicleType = vehicle.vehicleType.toLowerCase();
+
+            // Direct type matching
+            if (templateType === 'motorcycle' && vehicleType.includes('موتورسیکلت')) return true;
+            if (templateType === 'van' && (vehicleType.includes('وانت') || vehicleType.includes('ون'))) return true;
+            if (templateType === 'city_bus' && vehicleType.includes('اتوبوس')) return true;
+            if (templateType === 'اتوبوس' && vehicleType.includes('اتوبوس')) return true;
+            if (templateType === 'light_truck' && vehicleType.includes('کامیون')) return true;
+            if (templateType === 'heavy_truck' && vehicleType.includes('کامیون')) return true;
+
+            // Name-based matching
+            if (templateName.includes('موتورسیکلت') && vehicleType.includes('موتورسیکلت')) return true;
+            if (templateName.includes('اتوبوس') && vehicleType.includes('اتوبوس')) return true;
+            if (templateName.includes('وانت') && vehicleType.includes('وانت')) return true;
+            if (templateName.includes('ون') && vehicleType.includes('ون')) return true;
+            if (templateName.includes('کامیون') && vehicleType.includes('کامیون')) return true;
+
+            return false;
+          });
+
+          // Calculate costs and add matching vehicles
+          for (const vehicle of matchingVehicles) {
+            // Use vehicle's actual capacity for calculations
+            const vehicleCapacity = parseFloat(vehicle.loadCapacity || template.maxWeightKg);
+            
+            // Skip if vehicle capacity is too small
+            if (orderWeight > vehicleCapacity) {
+              console.log(`⚖️ [VEHICLE-CAP] Vehicle ${vehicle.licensePlate} excluded - weight ${orderWeight}kg > capacity ${vehicleCapacity}kg`);
+              continue;
+            }
+
+            // Calculate costs
+            const basePrice = parseFloat(template.basePrice || '0');
+            const pricePerKm = parseFloat(template.pricePerKm || '0');
+            const pricePerKg = parseFloat(template.pricePerKg || '0');
+
+            const distanceCost = distance * pricePerKm;
+            const weightCost = orderWeight * pricePerKg;
+            const totalCost = basePrice + distanceCost + weightCost;
+
+            matches.push({
+              templateId: template.id,
+              templateName: template.name,
+              templateNameEn: template.nameEn,
+              vehicleId: vehicle.id,
+              vehicleType: template.vehicleType,
+              
+              // Specific vehicle details
+              licensePlate: vehicle.licensePlate,
+              driverName: vehicle.driverName,
+              driverMobile: vehicle.driverMobile,
+              vehicleCapacity: vehicleCapacity,
+              vehicleDescription: vehicle.vehicleType,
+              
+              // Cost breakdown
+              basePrice: basePrice,
+              distanceCost: distanceCost,
+              weightCost: weightCost,
+              totalCost: totalCost,
+              
+              // Additional info
+              estimatedTime: Math.round(distance / parseFloat(template.averageSpeedKmh || '50') * 60), // minutes
+              routeType: routeType,
+              distance: distance,
+              priority: template.priority || 0,
+              supportsFlammable: template.supportsFlammable || false,
+              
+              // Optimization metrics
+              costPerKg: totalCost / orderWeight,
+              capacityUtilization: (orderWeight / vehicleCapacity) * 100,
+              efficiency: (vehicleCapacity / totalCost) * 1000 // Higher is better
+            });
+          }
+        }
+
+        return matches;
+      };
+
+      // Get all vehicle matches
+      const vehicleMatches = matchVehiclesToTemplates();
+
+      console.log('🎯 [MATCHES] Found vehicle matches:', vehicleMatches.length);
+
+      if (vehicleMatches.length === 0) {
+        // Try to create missing ready vehicles if templates exist
+        const missingVehicles = [];
+        
+        for (const template of templates) {
+          if (containsFlammable && !template.supportsFlammable) continue;
+          if (!template.allowedRoutes || !template.allowedRoutes.includes(routeType)) continue;
+          if (orderWeight > parseFloat(template.maxWeightKg)) continue;
+
+          // Check if we have any ready vehicles for this template type
+          const hasMatchingVehicle = availableVehicles.some(vehicle => {
+            const templateType = template.vehicleType.toLowerCase();
+            const templateName = template.name.toLowerCase();
+            const vehicleType = vehicle.vehicleType.toLowerCase();
+
+            return (templateType === 'motorcycle' && vehicleType.includes('موتورسیکلت')) ||
+                   (templateType === 'van' && (vehicleType.includes('وانت') || vehicleType.includes('ون'))) ||
+                   (templateType === 'city_bus' && vehicleType.includes('اتوبوس')) ||
+                   (templateType === 'اتوبوس' && vehicleType.includes('اتوبوس')) ||
+                   (templateType === 'light_truck' && vehicleType.includes('کامیون')) ||
+                   (templateType === 'heavy_truck' && vehicleType.includes('کامیون')) ||
+                   (templateName.includes('موتورسیکلت') && vehicleType.includes('موتورسیکلت')) ||
+                   (templateName.includes('اتوبوس') && vehicleType.includes('اتوبوس')) ||
+                   (templateName.includes('وانت') && vehicleType.includes('وانت')) ||
+                   (templateName.includes('ون') && vehicleType.includes('ون')) ||
+                   (templateName.includes('کامیون') && vehicleType.includes('کامیون'));
+          });
+
+          if (!hasMatchingVehicle) {
+            missingVehicles.push({
+              templateId: template.id,
+              templateName: template.name,
+              vehicleType: template.vehicleType,
+              maxWeight: template.maxWeightKg,
+              suggestedLicensePlate: `${template.vehicleType}-${Math.floor(Math.random() * 1000000)}`,
+              suggestedDriver: `راننده ${template.name}`,
+              suggestedMobile: '07xxxxxxxxx'
+            });
+          }
+        }
+
+        return res.json({
+          success: true,
+          data: {
+            matches: [],
+            missingVehicles: missingVehicles,
+            message: missingVehicles.length > 0 
+              ? "خودروهای مناسب برای این سفارش در دیتابیس موجود نیست. لطفاً خودروهای پیشنهادی را اضافه کنید."
+              : "هیچ خودرویی برای این سفارش یافت نشد"
+          }
+        });
+      }
+
+      // Sort matches by efficiency and cost
+      const sortedMatches = vehicleMatches.sort((a, b) => {
+        // Primary: Priority (higher first)
+        if (a.priority !== b.priority) return b.priority - a.priority;
+        // Secondary: Cost (lower first)
+        if (Math.abs(a.totalCost - b.totalCost) > 1000) return a.totalCost - b.totalCost;
+        // Tertiary: Capacity utilization (closer to 70-80% is optimal)
+        const optimalUtilization = 75;
+        const aUtilDiff = Math.abs(a.capacityUtilization - optimalUtilization);
+        const bUtilDiff = Math.abs(b.capacityUtilization - optimalUtilization);
+        return aUtilDiff - bUtilDiff;
+      });
+
+      // Group by vehicle type for better presentation
+      const groupedMatches = {};
+      for (const match of sortedMatches) {
+        const group = match.vehicleDescription || match.templateName;
+        if (!groupedMatches[group]) {
+          groupedMatches[group] = [];
+        }
+        groupedMatches[group].push(match);
+      }
+
+      console.log('✅ [SUCCESS] Vehicle optimization completed:', {
+        totalMatches: sortedMatches.length,
+        groups: Object.keys(groupedMatches).length,
+        bestOption: sortedMatches[0] ? {
+          licensePlate: sortedMatches[0].licensePlate,
+          driver: sortedMatches[0].driverName,
+          cost: sortedMatches[0].totalCost
+        } : null
+      });
+
+      res.json({
+        success: true,
+        data: {
+          orderNumber: orderNumber,
+          orderWeight: orderWeight,
+          destinationCity: destinationCity,
+          routeType: routeType,
+          distance: distance,
+          matches: sortedMatches,
+          groupedMatches: groupedMatches,
+          bestRecommendation: sortedMatches[0] || null,
+          totalOptions: sortedMatches.length
+        }
+      });
+
+    } catch (error) {
+      console.error('❌ [VEHICLE-OPT] Error in vehicle optimization:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'خطا در بهینه‌سازی خودرو' 
+      });
+    }
+  });
+
   // Get pending payments for admin review
   app.get('/api/admin/pending-payments', requireAuth, async (req, res) => {
     try {
