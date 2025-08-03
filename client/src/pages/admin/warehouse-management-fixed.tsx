@@ -409,19 +409,24 @@ const WarehouseManagementFixed: React.FC = () => {
     
     return matchesSearch && matchesStatus && matchesOrderId && matchesCustomerName && matchesPhone && matchesEmail && matchesStatusFilter && matchesAmount;
   })?.sort((a: any, b: any) => {
-    // Sort by customerOrderId - older orders (lower customer order IDs) first
-    const customerOrderIdA = parseInt(a.customerOrderId) || 0;
-    const customerOrderIdB = parseInt(b.customerOrderId) || 0;
+    // Sort by order number - older orders (lower order numbers) first
+    // Extract numeric part from order numbers like M2511401, M2511501
+    const orderNumberA = a.orderNumber || '';
+    const orderNumberB = b.orderNumber || '';
     
-    console.log('🔄 [SORTING DEBUG] Order A:', customerOrderIdA, 'Order B:', customerOrderIdB);
+    // Extract the numeric part after 'M'
+    const numericA = parseInt(orderNumberA.replace(/[^0-9]/g, '')) || 0;
+    const numericB = parseInt(orderNumberB.replace(/[^0-9]/g, '')) || 0;
     
-    if (customerOrderIdA !== customerOrderIdB) {
-      const result = customerOrderIdA - customerOrderIdB;
-      console.log('🔄 [SORTING DEBUG] Sort result:', result, '(', customerOrderIdA, '-', customerOrderIdB, ')');
+    console.log('🔄 [SORTING DEBUG] Order A:', orderNumberA, '(', numericA, ') Order B:', orderNumberB, '(', numericB, ')');
+    
+    if (numericA !== numericB) {
+      const result = numericA - numericB;
+      console.log('🔄 [SORTING DEBUG] Sort result:', result, '- older order first');
       return result;
     }
     
-    // If customerOrderId is the same, sort by creation date
+    // If order numbers are the same, sort by creation date
     const dateA = new Date(a.createdAt || a.orderDate || '').getTime();
     const dateB = new Date(b.createdAt || b.orderDate || '').getTime();
     return dateA - dateB;
