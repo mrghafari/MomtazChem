@@ -728,11 +728,7 @@ const WarehouseManagement: React.FC = () => {
   const handleStartProcessing = (order: Order) => {
     setSelectedOrder(order);
     setWarehouseNotes(order.warehouseNotes || '');
-    updateOrderMutation.mutate({
-      orderId: order.id,
-      status: 'warehouse_processing',
-      notes: 'شروع پردازش در انبار'
-    });
+    setShowOrderDetails(true);
   };
 
   // Handle approve and send to logistics
@@ -1606,9 +1602,27 @@ const WarehouseManagement: React.FC = () => {
                 <Button variant="outline" onClick={() => setShowOrderDetails(false)}>
                   انصراف
                 </Button>
+                {/* مرحله اول: شروع پردازش */}
+                {(selectedOrder.currentStatus === 'financial_approved' || selectedOrder.currentStatus === 'warehouse_pending') && (
+                  <Button 
+                    onClick={() => {
+                      updateOrderMutation.mutate({
+                        orderId: selectedOrder.id,
+                        status: 'warehouse_processing',
+                        notes: warehouseNotes || 'شروع پردازش در انبار'
+                      });
+                    }} 
+                    disabled={updateOrderMutation.isPending}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    {updateOrderMutation.isPending ? 'در حال پردازش...' : 'شروع پردازش انبار'}
+                  </Button>
+                )}
+                {/* مرحله دوم: تکمیل و ارسال به لجستیک */}
                 {(selectedOrder.currentStatus === 'warehouse_processing' || selectedOrder.status === 'warehouse_processing') && (
-                  <Button onClick={handleFulfillOrder} disabled={updateOrderMutation.isPending}>
-                    {updateOrderMutation.isPending ? 'در حال پردازش...' : 'تکمیل سفارش'}
+                  <Button onClick={handleFulfillOrder} disabled={updateOrderMutation.isPending}
+                    className="bg-green-600 hover:bg-green-700">
+                    {updateOrderMutation.isPending ? 'در حال پردازش...' : 'تکمیل و ارسال به لجستیک'}
                   </Button>
                 )}
               </div>

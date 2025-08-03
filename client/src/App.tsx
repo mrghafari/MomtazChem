@@ -245,6 +245,7 @@ function Router() {
 
           <Route path="/admin/inventory-notification-settings" component={InventoryNotificationSettings} />
           <Route path="/admin/warehouse-management" component={WarehouseManagementFixed} />
+          <Route path="/admin/warehouse" component={WarehouseManagement} />
 
           <Route path="/admin/content-management" component={ContentManagement} />
           <Route path="/content-management" component={ContentManagement} />
