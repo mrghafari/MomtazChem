@@ -38446,7 +38446,7 @@ momtazchem.com
   });
 
   // Get all vehicle templates
-  app.get("/api/logistics/vehicle-templates", requireAuth, async (req, res) => {
+  app.get("/api/logistics/vehicle-templates", async (req, res) => {
     try {
       const vehicles = await db.select().from(vehicleTemplates).orderBy(vehicleTemplates.priority, vehicleTemplates.name);
       res.json({ success: true, data: vehicles });
