@@ -3290,7 +3290,7 @@ const LogisticsManagement = () => {
                   <TableHead>مواد آتش‌زا</TableHead>
                   <TableHead>موقعیت فعلی</TableHead>
                   <TableHead>وضعیت</TableHead>
-                  <TableHead>عملیات</TableHead>
+                  <TableHead>حذف</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -3362,16 +3362,20 @@ const LogisticsManagement = () => {
                               setSelectedReadyVehicle(vehicle);
                               setIsEditReadyVehicleDialogOpen(true);
                             }}
+                            className="text-blue-600 border-blue-300 hover:bg-blue-50"
                           >
-                            <Edit className="h-4 w-4" />
+                            <Edit className="h-4 w-4 ml-1" />
+                            ویرایش
                           </Button>
                           <Button 
                             size="sm" 
                             variant="outline" 
                             onClick={() => deleteReadyVehicleMutation.mutate(vehicle.id)}
                             disabled={deleteReadyVehicleMutation.isPending}
+                            className="text-red-600 border-red-300 hover:bg-red-50"
                           >
-                            <AlertTriangle className="h-4 w-4" />
+                            <AlertTriangle className="h-4 w-4 ml-1" />
+                            حذف
                           </Button>
                         </div>
                       </TableCell>
