@@ -304,6 +304,12 @@ const LogisticsManagement = () => {
     enabled: activeTab === 'ready-vehicles'
   });
 
+  // Vehicle templates API integration
+  const { data: vehicleTemplatesData, isLoading: loadingVehicleTemplates } = useQuery({
+    queryKey: ['/api/logistics/vehicle-templates'],
+    enabled: activeTab === 'ready-vehicles'
+  });
+
   const readyVehicles = readyVehiclesData || [];
 
   // Create ready vehicle mutation
