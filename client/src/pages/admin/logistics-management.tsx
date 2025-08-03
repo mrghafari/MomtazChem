@@ -682,19 +682,56 @@ const LogisticsManagement = () => {
         setAvailableFleetVehicles(availableVehicles);
         console.log('✅ [FILTERED VEHICLES] Available vehicles for', orderWeight, 'kg:', availableVehicles.length);
         
-        // Find suggested vehicle based on checkout selection
+        // Enhanced vehicle matching based on checkout selection
         if (checkoutVehicleDetails) {
-          const suggestedVehicle = availableVehicles.find((vehicle: any) => 
-            vehicle.vehicleType === checkoutVehicleDetails.vehicleType ||
-            vehicle.vehicleType.includes(checkoutVehicleDetails.vehicleType) ||
-            checkoutVehicleDetails.vehicleType.includes(vehicle.vehicleType)
+          console.log('🔍 [CHECKOUT DETAILS] Customer selected:', checkoutVehicleDetails);
+          
+          // Find exact matches and close matches
+          const exactMatches = availableVehicles.filter((vehicle: any) => 
+            vehicle.vehicleType === checkoutVehicleDetails.vehicleType
           );
           
-          if (suggestedVehicle) {
-            console.log('🎯 [SUGGESTED VEHICLE] Matching checkout selection:', suggestedVehicle);
-            // Mark as suggested for UI highlighting
-            suggestedVehicle.isCheckoutSuggested = true;
-          }
+          const closeMatches = availableVehicles.filter((vehicle: any) => 
+            vehicle.vehicleType !== checkoutVehicleDetails.vehicleType && (
+              vehicle.vehicleType.includes(checkoutVehicleDetails.vehicleType) ||
+              checkoutVehicleDetails.vehicleType.includes(vehicle.vehicleType)
+            )
+          );
+          
+          // Mark vehicles for UI highlighting
+          exactMatches.forEach((vehicle: any) => {
+            vehicle.isCheckoutSuggested = true;
+            vehicle.matchType = 'exact';
+            vehicle.suggestionPriority = 1;
+          });
+          
+          closeMatches.forEach((vehicle: any) => {
+            vehicle.isCheckoutSuggested = true;
+            vehicle.matchType = 'close';
+            vehicle.suggestionPriority = 2;
+          });
+          
+          // Sort vehicles to prioritize suggested ones
+          availableVehicles.sort((a: any, b: any) => {
+            // First sort by suggestion priority (exact matches first)
+            if (a.suggestionPriority && b.suggestionPriority) {
+              return a.suggestionPriority - b.suggestionPriority;
+            }
+            if (a.suggestionPriority && !b.suggestionPriority) return -1;
+            if (!a.suggestionPriority && b.suggestionPriority) return 1;
+            
+            // Then by availability and weight capacity
+            return (b.loadCapacity - a.loadCapacity);
+          });
+          
+          console.log('🎯 [ENHANCED MATCHING] Exact matches:', exactMatches.length, 'Close matches:', closeMatches.length);
+          console.log('🚛 [SORTED VEHICLES] First 3 vehicles:', availableVehicles.slice(0, 3).map(v => ({
+            name: v.vehicleName,
+            type: v.vehicleType,
+            plate: v.plateNumber,
+            suggested: v.isCheckoutSuggested,
+            matchType: v.matchType
+          })));
         }
       }
       
@@ -3946,6 +3983,14 @@ const LogisticsManagement = () => {
                   <Truck className="w-5 h-5 mr-2" />
                   خودروهای آماده از ناوگان شرکت
                 </h3>
+                {selectedVehicleDetails && (
+                  <div className="bg-blue-100 border border-blue-300 rounded-lg p-3 mb-4">
+                    <div className="flex items-center gap-2 text-blue-800 text-sm font-medium">
+                      <Star className="w-4 h-4" />
+                      خودروها بر اساس انطباق با انتخاب مشتری مرتب شده‌اند - خودروهای سبز رنگ بالاترین اولویت را دارند
+                    </div>
+                  </div>
+                )}
                 
                 {availableFleetVehicles.length === 0 ? (
                   <div className="text-center py-8">
@@ -3971,8 +4016,12 @@ const LogisticsManagement = () => {
                           </h4>
                           <div className="flex gap-2">
                             {vehicle.isCheckoutSuggested && (
-                              <Badge className="bg-gradient-to-r from-green-600 to-emerald-600 text-white animate-pulse">
-                                🎯 پیشنهاد سیستم
+                              <Badge className={`${
+                                vehicle.matchType === 'exact' 
+                                  ? 'bg-gradient-to-r from-green-600 to-emerald-600 animate-pulse' 
+                                  : 'bg-gradient-to-r from-yellow-500 to-orange-500'
+                              } text-white`}>
+                                {vehicle.matchType === 'exact' ? '🎯 انطباق کامل' : '🔍 انطباق نزدیک'}
                               </Badge>
                             )}
                             <Badge className="bg-green-500 text-white">آماده</Badge>
@@ -3980,10 +4029,19 @@ const LogisticsManagement = () => {
                         </div>
                         
                         {vehicle.isCheckoutSuggested && (
-                          <div className="bg-green-100 border border-green-300 rounded-lg p-3 mb-4">
-                            <div className="flex items-center gap-2 text-green-800 text-sm font-medium">
+                          <div className={`border rounded-lg p-3 mb-4 ${
+                            vehicle.matchType === 'exact' 
+                              ? 'bg-green-100 border-green-300' 
+                              : 'bg-yellow-50 border-yellow-300'
+                          }`}>
+                            <div className={`flex items-center gap-2 text-sm font-medium ${
+                              vehicle.matchType === 'exact' ? 'text-green-800' : 'text-yellow-800'
+                            }`}>
                               <CheckCircle className="w-4 h-4" />
-                              این خودرو مطابق انتخاب مشتری در سیستم هوشمند است
+                              {vehicle.matchType === 'exact' 
+                                ? 'انطباق کامل با انتخاب مشتری در checkout' 
+                                : 'انطباق نزدیک با انتخاب مشتری در checkout'
+                              }
                             </div>
                           </div>
                         )}
