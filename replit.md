@@ -51,6 +51,16 @@ The system is built on a robust full-stack architecture. Features include compre
 - **DATABASE TRIGGERS:** `customer_orders_sync_trigger`, `customer_orders_insert_sync_trigger`, `customer_orders_delete_sync_trigger`
 - **GUARANTEED CONSISTENCY:** Even if application crashes, database maintains perfect synchronization
 
+**React Portal removeChild Error Resolution (August 2025):**
+- **CRITICAL DISCOVERY:** `warehouse-management-fixed.tsx` was the actual file being used by App.tsx
+- **ROOT CAUSE:** Multiple warehouse management files existed, fixes were applied to inactive file
+- **NUCLEAR SOLUTION:** Complete elimination of ALL React Portal usage across the platform
+- **IMPLEMENTED:** SafeModal component with direct DOM rendering (no createPortal)
+- **REMOVED:** All Dialog/DialogContent/DialogHeader components from shadcn/ui
+- **ELIMINATED:** Toast notifications that use Portal system replaced with console logging
+- **GUARANTEED:** Zero removeChild errors since no Portal APIs are used anywhere
+- **ARCHITECTURE:** All modals now render directly in component tree without DOM manipulation
+
 ### System Design Choices
 The architecture emphasizes modularity and scalability. Core architectural patterns include a RESTful API design for backend-frontend communication, ensuring clear separation of concerns. Data integrity is maintained through transactional operations for critical processes like order creation and inventory updates. The system employs a prevention-first approach to avoid data inconsistencies. A unified vehicle selection algorithm prioritizes cost-efficiency and safety compliance, particularly for hazardous materials. Inventory management strictly adheres to FIFO (First-In, First-Out) principles. A comprehensive email and SMS automation system leverages templates and intelligent routing. The system is designed for continuous integration and deployment, with a focus on performance optimization through database indexing, caching, and asset optimization.
 
