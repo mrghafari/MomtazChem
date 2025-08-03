@@ -897,34 +897,7 @@ const CustomerProfile = () => {
                           </div>
                         )}
 
-                        {/* Shipping Address Notification */}
-                        <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                          <div className="flex items-start gap-3">
-                            <div className="flex-shrink-0">
-                              <svg className="w-5 h-5 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                              </svg>
-                            </div>
-                            <div className="flex-1">
-                              <h6 className="text-sm font-medium text-blue-900 mb-1">
-                                💡 نکته مهم برای محاسبه دقیق کرایه حمل
-                              </h6>
-                              <p className="text-xs text-blue-800 leading-relaxed">
-                                برای محاسبه دقیق کرایه حمل و ارسال، لطفاً آدرس دقیق خود را در{' '}
-                                <Button 
-                                  variant="link" 
-                                  size="sm"
-                                  className="p-0 h-auto text-blue-700 underline font-medium text-xs"
-                                  onClick={() => setLocation("/customer/profile/edit")}
-                                >
-                                  پروفایل کاربری
-                                </Button>
-                                {' '}ثبت کرده یا به‌روزرسانی کنید. آدرس کامل شامل استان، شهر/منطقه و جزئیات آدرس برای تعیین هزینه حمل ضروری است.
-                              </p>
-                            </div>
-                          </div>
-                        </div>
+
 
                         {/* دکمه تبدیل پیش‌فاکتور به فاکتور برای سفارشات پرداخت شده از کیف پول که به انبار رسیده‌اند */}
                         {(() => {
