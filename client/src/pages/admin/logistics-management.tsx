@@ -629,33 +629,42 @@ const LogisticsManagement = () => {
   const handleVehicleAssignment = async (order: LogisticsOrder) => {
     try {
       console.log('🚚 [ENHANCED VEHICLE ASSIGNMENT] Starting for order:', order.orderNumber);
-      console.log('🔍 [DEBUG] Customer Order ID:', order.customerOrderId);
       
-      // Always use fallback method for debugging
-      console.log('⚠️ [DEBUG] Using direct vehicle assignment method for testing');
+      // Get all suitable vehicles identified during checkout
+      const suitableVehiclesResponse = await fetch(`/api/orders/${order.customerOrderId}/suitable-vehicles`, {
+        credentials: 'include'
+      });
+      
+      if (suitableVehiclesResponse.ok) {
+        const suitableVehiclesData = await suitableVehiclesResponse.json();
+        if (suitableVehiclesData.success) {
+          setSuitableVehiclesData(suitableVehiclesData.data);
+          console.log('✅ [SUITABLE VEHICLES] Found vehicles:', suitableVehiclesData.data.suitableVehicles.length);
+          setSelectedOrderForVehicle(order);
+          setIsSuitableVehiclesOpen(true);
+          return;
+        }
+      }
+      
+      // Fallback to original vehicle assignment if suitable vehicles API fails
+      console.log('⚠️ [FALLBACK] Using original vehicle assignment method');
       
       // Get customer's selected vehicle details from checkout
       const vehicleDetailsResponse = await fetch(`/api/orders/${order.customerOrderId}/vehicle-details`, {
         credentials: 'include'
       });
       
-      console.log('🔍 [API CALL] Vehicle details response status:', vehicleDetailsResponse.status);
-      
       let checkoutVehicleDetails = null;
       if (vehicleDetailsResponse.ok) {
         checkoutVehicleDetails = await vehicleDetailsResponse.json();
         setSelectedVehicleDetails(checkoutVehicleDetails);
         console.log('✅ [CHECKOUT VEHICLE] Found customer selected vehicle:', checkoutVehicleDetails);
-      } else {
-        console.error('❌ [CHECKOUT VEHICLE] Failed to get vehicle details:', await vehicleDetailsResponse.text());
       }
       
       // Get all ready vehicles (آماده به کار)
       const readyVehiclesResponse = await fetch('/api/logistics/ready-vehicles', {
         credentials: 'include'
       });
-      
-      console.log('🔍 [API CALL] Ready vehicles response status:', readyVehiclesResponse.status);
       
       let readyVehicles = [];
       if (readyVehiclesResponse.ok) {
@@ -675,7 +684,7 @@ const LogisticsManagement = () => {
         
         // Enhanced vehicle matching based on checkout selection
         if (checkoutVehicleDetails) {
-          console.log('🔍 [CHECKOUT DETAILS] Customer selected:', checkoutVehicleDetails.vehicleType);
+          console.log('🔍 [CHECKOUT DETAILS] Customer selected:', checkoutVehicleDetails);
           
           // Find exact matches and close matches
           const exactMatches = availableVehicles.filter((vehicle: any) => 
@@ -716,16 +725,14 @@ const LogisticsManagement = () => {
           });
           
           console.log('🎯 [ENHANCED MATCHING] Exact matches:', exactMatches.length, 'Close matches:', closeMatches.length);
-          console.log('🚛 [SORTED VEHICLES] First 3 vehicles:', availableVehicles.slice(0, 3).map((v: any) => ({
-            name: v.vehicleName || v.license_plate,
+          console.log('🚛 [SORTED VEHICLES] First 3 vehicles:', availableVehicles.slice(0, 3).map(v => ({
+            name: v.vehicleName,
             type: v.vehicleType,
-            plate: v.plateNumber || v.license_plate,
+            plate: v.plateNumber,
             suggested: v.isCheckoutSuggested,
             matchType: v.matchType
           })));
         }
-      } else {
-        console.error('❌ [READY VEHICLES] Failed to get ready vehicles:', await readyVehiclesResponse.text());
       }
       
       setSelectedOrderForVehicle(order);
