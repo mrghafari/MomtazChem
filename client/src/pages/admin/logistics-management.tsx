@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import PaymentMethodBadge from '@/components/PaymentMethodBadge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
@@ -235,6 +236,7 @@ const LogisticsManagement = () => {
   const [customEditVehicleType, setCustomEditVehicleType] = useState('');
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [showCustomEditInput, setShowCustomEditInput] = useState(false);
+  const [selectedVehicleType, setSelectedVehicleType] = useState('');
 
   // Handle showing order details
   const handleShowOrderDetails = (order: LogisticsOrder) => {
@@ -361,7 +363,6 @@ const LogisticsManagement = () => {
     const formData = new FormData(e.currentTarget);
     
     // Determine vehicle type based on selection
-    const selectedVehicleType = formData.get('vehicleType') as string;
     const finalVehicleType = selectedVehicleType === 'سایر' ? customVehicleType : selectedVehicleType;
     
     const vehicleData = {
@@ -379,7 +380,8 @@ const LogisticsManagement = () => {
 
     createReadyVehicleMutation.mutate(vehicleData);
     
-    // Reset custom input state
+    // Reset state
+    setSelectedVehicleType('');
     setShowCustomInput(false);
     setCustomVehicleType('');
   };
@@ -3398,13 +3400,12 @@ const LogisticsManagement = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="vehicleType">نوع خودرو *</Label>
-                  <select 
-                    id="vehicleType" 
+                  <Select 
                     name="vehicleType" 
-                    required 
-                    value={showCustomInput ? 'سایر' : ''}
-                    onChange={(e) => {
-                      if (e.target.value === 'سایر') {
+                    value={selectedVehicleType}
+                    onValueChange={(value) => {
+                      setSelectedVehicleType(value);
+                      if (value === 'سایر') {
                         setShowCustomInput(true);
                         setCustomVehicleType('');
                       } else {
@@ -3412,50 +3413,30 @@ const LogisticsManagement = () => {
                         setCustomVehicleType('');
                       }
                     }}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
                   >
-                    <option value="">انتخاب نوع خودرو</option>
-                    <option value="اتوبوس مسافربری">اتوبوس مسافربری</option>
-                    <option value="اتوبوس شهری">اتوبوس شهری</option>
-                    <option value="مینی‌بوس">مینی‌بوس</option>
-                    <option value="کامیون سنگین">کامیون سنگین</option>
-                    <option value="کامیون متوسط">کامیون متوسط</option>
-                    <option value="کامیون سبک">کامیون سبک</option>
-                    <option value="وانت سبک">وانت سبک</option>
-                    <option value="وانت متوسط">وانت متوسط</option>
-                    <option value="ون سبک">ون سبک</option>
-                    <option value="ون متوسط">ون متوسط</option>
-                    <option value="موتورسیکلت">موتورسیکلت</option>
-                    <option value="خودرو سواری">خودرو سواری</option>
-                    <option value="تریلر">تریلر</option>
-                    <option value="نیم‌تریلر">نیم‌تریلر</option>
-                    <option value="کشنده">کشنده</option>
-                    <option value="کامیون کمپرسی">کامیون کمپرسی</option>
-                    <option value="کامیون یخچالی">کامیون یخچالی</option>
-                    <option value="تانکر">تانکر</option>
-                    <option value="کامیون جرثقیل">کامیون جرثقیل</option>
-                    <option value="یدک‌کش">یدک‌کش</option>
-                    <option value="آمبولانس">آمبولانس</option>
-                    <option value="ماشین آتش‌نشانی">ماشین آتش‌نشانی</option>
-                    <option value="تاکسی">تاکسی</option>
-                    <option value="دوچرخه">دوچرخه</option>
-                    <option value="اسکوتر">اسکوتر</option>
-                    <option value="سایر">➕ سایر (نوع دلخواه)</option>
-                  </select>
-                  
-                  {/* Custom vehicle type input */}
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="انتخاب نوع خودرو" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {vehicleTemplatesData?.data?.map((template: any) => (
+                        <SelectItem key={template.id} value={template.name}>
+                          {template.name}
+                        </SelectItem>
+                      ))}
+                      <SelectItem value="سایر">سایر (نوع دلخواه)</SelectItem>
+                    </SelectContent>
+                  </Select>
                   {showCustomInput && (
                     <div className="mt-2">
-                      <input
-                        type="text"
+                      <Input 
                         name="customVehicleType"
                         value={customVehicleType}
                         onChange={(e) => setCustomVehicleType(e.target.value)}
-                        placeholder="نوع خودرو جدید را وارد کنید..."
-                        required
-                        className="w-full p-2 border border-blue-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-blue-50"
+                        placeholder="نوع خودروی مورد نظر را وارد کنید"
+                        required={showCustomInput}
+                        className="w-full"
                       />
-                      <p className="text-xs text-blue-600 mt-1">💡 مثال: کامیون اسکانیا، اتوبوس مدرسه، ون سوخت‌رسانی</p>
                     </div>
                   )}
                 </div>
