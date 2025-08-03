@@ -151,7 +151,10 @@ export class SyncService {
         record.customerPaymentStatus
       );
 
-      if (expectedManagementStatus !== record.managementStatus) {
+      // Skip sync for warehouse intermediate status (warehouse_verified) and final statuses
+      const protectedStatuses = ['warehouse_verified', 'warehouse_approved', 'logistics_assigned', 'logistics_processing', 'logistics_dispatched', 'delivered', 'cancelled'];
+      
+      if (expectedManagementStatus !== record.managementStatus && !protectedStatuses.includes(record.managementStatus)) {
         mismatchCount++;
         console.log(`🔄 [AUTO-SYNC] Status mismatch found for ${record.orderNumber}: management(${record.managementStatus}) → expected(${expectedManagementStatus})`);
 
@@ -167,6 +170,8 @@ export class SyncService {
         } catch (error) {
           console.error(`❌ [AUTO-SYNC] Failed to fix status for order ${record.orderNumber}:`, error);
         }
+      } else if (protectedStatuses.includes(record.managementStatus)) {
+        console.log(`🔒 [AUTO-SYNC] Skipping protected status ${record.managementStatus} for order ${record.orderNumber}`);
       }
     }
 

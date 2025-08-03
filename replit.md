@@ -51,6 +51,16 @@ The system is built on a robust full-stack architecture. Features include compre
 - **DATABASE TRIGGERS:** `customer_orders_sync_trigger`, `customer_orders_insert_sync_trigger`, `customer_orders_delete_sync_trigger`
 - **GUARANTEED CONSISTENCY:** Even if application crashes, database maintains perfect synchronization
 
+**Two-Stage Warehouse Approval System (August 2025):**
+- **IMPLEMENTED:** Complete two-stage approval workflow for warehouse operations
+- **STAGE 1:** `warehouse_pending` → `warehouse_verified` (initial verification and preparation)
+- **STAGE 2:** `warehouse_verified` → `warehouse_approved` (final approval and logistics transfer)
+- **AUTO-SYNC PROTECTION:** Sync service respects protected statuses and won't override warehouse approvals
+- **DELIVERY CODES:** New codes generated at each stage (tested: 3026, 3027, 3028)
+- **SMS NOTIFICATIONS:** Automatic delivery code SMS sent on final approval
+- **WAREHOUSE VISIBILITY:** Orders remain visible in warehouse interface during intermediate stage
+- **LOGISTICS TRANSFER:** Final approved orders automatically transfer to logistics department
+
 **React Portal removeChild Error Resolution (August 2025):**
 - **CRITICAL DISCOVERY:** `warehouse-management-fixed.tsx` was the actual file being used by App.tsx
 - **ROOT CAUSE:** Multiple warehouse management files existed, fixes were applied to inactive file

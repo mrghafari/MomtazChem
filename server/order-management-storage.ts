@@ -589,6 +589,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
         orderStatuses.FINANCIAL_APPROVED, // تایید شده توسط مالی
         orderStatuses.WAREHOUSE_NOTIFIED,
         orderStatuses.WAREHOUSE_PROCESSING,
+        'warehouse_verified', // مرحله اول تایید انبار - دو مرحله‌ای
         // orderStatuses.WAREHOUSE_APPROVED, // حذف: سفارشات تایید شده به لجستیک منتقل می‌شوند
         orderStatuses.WAREHOUSE_REJECTED
       ];
