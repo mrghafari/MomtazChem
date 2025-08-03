@@ -1,0 +1,82 @@
+logistics-management:196 Tawk.to script loaded successfully
+chunk-RPCDYKBN.js?v=df726253:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+useAuth.ts:43 Auth check result: Object
+logistics-management.tsx:478 🔍 [LOGISTICS MGMT] First order data: Object
+useOrderNotifications.ts:40 The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio
+createBeep @ useOrderNotifications.ts:40
+useOrderNotifications.ts:99 🔔 [LOGISTICS] نوتیفیکیشن: 21 سفارش جدید دریافت شد
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:117574)
+    at t.value (twk-chunk-common.js:2:150658)
+    at p.updateUUID (twk-chunk-common.js:2:202310)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:124589)
+    at twk-chunk-common.js:2:123900
+value @ twk-chunk-common.js:2
+logistics-management:168 Tawk.to Live Chat loaded successfully
+logistics-management.tsx:1774 🚚 [DELIVERY] Starting delivery completion for order: 16
+logistics-management.tsx:1777  POST https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/order-management/update-order-status 500 (Internal Server Error)
+handleDelivered @ logistics-management.tsx:1777
+onClick @ logistics-management.tsx:2130
+callCallback2 @ chunk-RPCDYKBN.js?v=df726253:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=df726253:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=df726253:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=df726253:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=df726253:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=df726253:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=df726253:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=df726253:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=df726253:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=df726253:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=df726253:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=df726253:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=df726253:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=df726253:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=df726253:5449
+logistics-management.tsx:1790 🚚 [DELIVERY] Response status: 500
+logistics-management.tsx:1792 🚚 [DELIVERY] API response: {success: false, message: 'خطا در به‌روزرسانی وضعیت سفارش'}
+logistics-management.tsx:1804 🚚 [DELIVERY] API returned error: خطا در به‌روزرسانی وضعیت سفارش
+handleDelivered @ logistics-management.tsx:1804
+await in handleDelivered
+onClick @ logistics-management.tsx:2130
+callCallback2 @ chunk-RPCDYKBN.js?v=df726253:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=df726253:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=df726253:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=df726253:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=df726253:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=df726253:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=df726253:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=df726253:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=df726253:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=df726253:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=df726253:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=df726253:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=df726253:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=df726253:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=df726253:5449
+logistics-management.tsx:1808 🚚 [DELIVERY] Error marking order as delivered: Error: خطا در به‌روزرسانی وضعیت سفارش
+    at handleDelivered (logistics-management.tsx:1805:15)
+handleDelivered @ logistics-management.tsx:1808
+await in handleDelivered
+onClick @ logistics-management.tsx:2130
+callCallback2 @ chunk-RPCDYKBN.js?v=df726253:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=df726253:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=df726253:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=df726253:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=df726253:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=df726253:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=df726253:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=df726253:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=df726253:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=df726253:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=df726253:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=df726253:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=df726253:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=df726253:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=df726253:5449
+logistics-management.tsx:478 🔍 [LOGISTICS MGMT] First order data: {id: 16, customerOrderId: 10, orderNumber: 'M2511133', hasOrderNumber: true, allFields: Array(55)}
+logistics-management.tsx:478 🔍 [LOGISTICS MGMT] First order data: {id: 16, customerOrderId: 10, orderNumber: 'M2511133', hasOrderNumber: true, allFields: Array(55)}
+logistics-management.tsx:478 🔍 [LOGISTICS MGMT] First order data: {id: 20, customerOrderId: 12, orderNumber: 'M2511138', hasOrderNumber: true, allFields: Array(55)}
