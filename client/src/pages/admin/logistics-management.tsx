@@ -1788,8 +1788,9 @@ const LogisticsManagement = () => {
       const result = await response.json();
       
       if (result.success) {
-        // Refresh orders list
+        // Refresh both logistics and delivered orders lists
         queryClient.invalidateQueries({ queryKey: ['/api/order-management/logistics'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/order-management/delivered'] });
         toast({
           title: "موفقیت",
           description: "سفارش با موفقیت به عنوان تحویل شده ثبت گردید",

@@ -8196,6 +8196,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update order status (for marking orders as delivered)
+  app.post("/api/order-management/update-order-status", requireAuth, async (req, res) => {
+    try {
+      const { orderManagementId, newStatus, notes } = req.body;
+      
+      console.log(`🔄 [ROUTES] Updating order ${orderManagementId} status to ${newStatus}`);
+      
+      if (!orderManagementId || !newStatus) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "شناسه سفارش و وضعیت جدید الزامی است" 
+        });
+      }
+
+      // Get the order management record first
+      const orderRecord = await db
+        .select()
+        .from(orderManagement)
+        .where(eq(orderManagement.id, orderManagementId))
+        .limit(1);
+
+      if (orderRecord.length === 0) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "سفارش یافت نشد" 
+        });
+      }
+
+      const currentOrder = orderRecord[0];
+      
+      // Prepare update data
+      const updateData: any = {
+        currentStatus: newStatus,
+        updatedAt: new Date()
+      };
+
+      // If marking as delivered, set delivery date and time
+      if (newStatus === 'delivered') {
+        updateData.actualDeliveryDate = new Date();
+        updateData.currentDepartment = 'delivered';
+        
+        // Add delivery notes if provided
+        if (notes) {
+          updateData.deliveryNotes = notes;
+        }
+      }
+
+      // Update the order_management record
+      await db
+        .update(orderManagement)
+        .set(updateData)
+        .where(eq(orderManagement.id, orderManagementId));
+
+      // Also update the customer_orders table to maintain consistency
+      if (currentOrder.customerOrderId) {
+        await db
+          .update(customerOrders)
+          .set({
+            status: newStatus,
+            updatedAt: new Date()
+          })
+          .where(eq(customerOrders.id, currentOrder.customerOrderId));
+      }
+
+      console.log(`✅ [ROUTES] Order ${orderManagementId} status updated to ${newStatus}`);
+      
+      res.json({ 
+        success: true, 
+        message: newStatus === 'delivered' ? "سفارش با موفقیت به عنوان تحویل شده ثبت گردید" : "وضعیت سفارش به‌روزرسانی شد" 
+      });
+    } catch (error) {
+      console.error("Error updating order status:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در به‌روزرسانی وضعیت سفارش" 
+      });
+    }
+  });
+
   // Get order status history
   app.get("/api/orders/:orderId/status-history", requireAuth, async (req, res) => {
     try {
