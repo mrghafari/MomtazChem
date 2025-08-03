@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -218,9 +218,40 @@ const WarehouseManagement: React.FC = () => {
     },
   });
   
-  // Order items modal state
+  // Order items modal state with error prevention
   const [showOrderItems, setShowOrderItems] = useState(false);
   const [selectedOrderForItems, setSelectedOrderForItems] = useState<any>(null);
+  const dialogTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isClosingRef = useRef(false);
+  
+  // Enhanced safe dialog close handler to prevent React Portal errors
+  const handleCloseDialog = useCallback(() => {
+    if (isClosingRef.current) return; // Prevent multiple close calls
+    
+    isClosingRef.current = true;
+    setShowOrderItems(false);
+    
+    // Clear any existing timeout
+    if (dialogTimeoutRef.current) {
+      clearTimeout(dialogTimeoutRef.current);
+    }
+    
+    // Use multiple strategies to ensure safe cleanup
+    dialogTimeoutRef.current = setTimeout(() => {
+      setSelectedOrderForItems(null);
+      isClosingRef.current = false;
+      dialogTimeoutRef.current = null;
+    }, 200);
+  }, []);
+  
+  // Cleanup effect to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (dialogTimeoutRef.current) {
+        clearTimeout(dialogTimeoutRef.current);
+      }
+    };
+  }, []);
   const [orderItems, setOrderItems] = useState<any[]>([]);
 
   // Helper function to get goods in transit for a product
@@ -760,7 +791,10 @@ const WarehouseManagement: React.FC = () => {
     setShowOrderDetails(true);
   };
 
-  const handleViewOrderItems = async (order: any) => {
+  const handleViewOrderItems = useCallback(async (order: any) => {
+    // Prevent opening multiple dialogs at once
+    if (isClosingRef.current || showOrderItems) return;
+    
     try {
       console.log('📦 [FRONTEND] Fetching order items for customer order:', order.customerOrderId);
       setSelectedOrderForItems(order);
@@ -782,11 +816,19 @@ const WarehouseManagement: React.FC = () => {
         setOrderItems(data.orderItems || []);
       } else {
         console.error('❌ [FRONTEND] Failed to fetch order items:', data.message);
+        throw new Error(data.message || 'Invalid response format');
       }
     } catch (error) {
       console.error('❌ [FRONTEND] Error fetching order items:', error);
+      toast({
+        title: "خطا در بارگیری",
+        description: "امکان بارگیری اقلام سفارش وجود ندارد.",
+        variant: "destructive",
+      });
+      // Close dialog on error to prevent stuck state
+      handleCloseDialog();
     }
-  };
+  }, [isClosingRef, showOrderItems, handleCloseDialog]);
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
@@ -1617,16 +1659,14 @@ const WarehouseManagement: React.FC = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Order Items Modal */}
+      {/* Order Items Modal with Enhanced Error Prevention */}
       <Dialog 
-        open={showOrderItems} 
+        open={showOrderItems && !isClosingRef.current} 
         onOpenChange={(open) => {
-          setShowOrderItems(open);
-          if (!open) {
-            // Clear selected order when dialog closes
-            setTimeout(() => {
-              setSelectedOrderForItems(null);
-            }, 100);
+          if (!open && !isClosingRef.current) {
+            handleCloseDialog();
+          } else if (open && !isClosingRef.current) {
+            setShowOrderItems(true);
           }
         }}
       >
@@ -1654,7 +1694,7 @@ const WarehouseManagement: React.FC = () => {
                   <p>در حال بارگیری لیست کالاها...</p>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="order-items-content space-y-4">
                   <div className="grid grid-cols-1 gap-4">
                     {orderItems.map((item: any, index: number) => (
                       <Card key={item.id || index} className="p-4">
@@ -1708,19 +1748,40 @@ const WarehouseManagement: React.FC = () => {
             <div className="flex justify-end gap-2 pt-4">
               <Button 
                 variant="outline" 
-                onClick={() => {
-                  setShowOrderItems(false);
-                  setSelectedOrderForItems(null);
-                }}
+                onClick={handleCloseDialog}
               >
                 بستن
               </Button>
               <Button 
                 onClick={() => {
-                  // Delay print to ensure DOM is stable
-                  setTimeout(() => {
-                    window.print();
-                  }, 100);
+                  // Create a safe print function that doesn't interfere with React
+                  const printContent = document.querySelector('.order-items-content')?.innerHTML;
+                  if (printContent) {
+                    const printWindow = window.open('', '_blank');
+                    if (printWindow) {
+                      printWindow.document.write(`
+                        <!DOCTYPE html>
+                        <html dir="rtl">
+                        <head>
+                          <title>جزئیات سفارش</title>
+                          <style>
+                            body { font-family: Arial, sans-serif; padding: 20px; direction: rtl; }
+                            .order-items-content { max-width: 800px; margin: 0 auto; }
+                            @media print { body { margin: 0; } }
+                          </style>
+                        </head>
+                        <body>
+                          ${printContent}
+                        </body>
+                        </html>
+                      `);
+                      printWindow.document.close();
+                      setTimeout(() => {
+                        printWindow.print();
+                        printWindow.close();
+                      }, 500);
+                    }
+                  }
                 }}
                 className="bg-blue-600 hover:bg-blue-700"
               >
