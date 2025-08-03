@@ -8089,6 +8089,113 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get delivered orders (orders with status 'delivered')
+  app.get("/api/order-management/delivered", requireAuth, async (req, res) => {
+    try {
+      console.log('🔍 [ROUTES] Delivered orders endpoint called');
+      
+      // Get delivered orders from order_management table
+      const orders = await db
+        .select({
+          id: orderManagement.id,
+          customerOrderId: orderManagement.customerOrderId,
+          currentStatus: orderManagement.currentStatus,
+          deliveryCode: orderManagement.deliveryCode,
+          totalAmount: orderManagement.totalAmount,
+          currency: orderManagement.currency,
+          orderNumber: orderManagement.orderNumber,
+          paymentMethod: orderManagement.paymentMethod,
+          totalWeight: orderManagement.totalWeight,
+          calculatedWeight: orderManagement.calculatedWeight,
+          weightUnit: orderManagement.weightUnit,
+          deliveryMethod: orderManagement.deliveryMethod,
+          transportationType: orderManagement.transportationType,
+          trackingNumber: orderManagement.trackingNumber,
+          estimatedDeliveryDate: orderManagement.estimatedDeliveryDate,
+          actualDeliveryDate: orderManagement.actualDeliveryDate,
+          deliveryPersonName: orderManagement.deliveryPersonName,
+          deliveryPersonPhone: orderManagement.deliveryPersonPhone,
+          postalServiceName: orderManagement.postalServiceName,
+          postalTrackingCode: orderManagement.postalTrackingCode,
+          vehicleType: orderManagement.vehicleType,
+          vehiclePlate: orderManagement.vehiclePlate,
+          vehicleModel: orderManagement.vehicleModel,
+          vehicleColor: orderManagement.vehicleColor,
+          driverName: orderManagement.driverName,
+          driverPhone: orderManagement.driverPhone,
+          deliveryCompanyName: orderManagement.deliveryCompanyName,
+          deliveryCompanyPhone: orderManagement.deliveryCompanyPhone,
+          financialReviewerId: orderManagement.financialReviewerId,
+          financialReviewedAt: orderManagement.financialReviewedAt,
+          financialNotes: orderManagement.financialNotes,
+          paymentReceiptUrl: orderManagement.paymentReceiptUrl,
+          createdAt: orderManagement.createdAt,
+          updatedAt: orderManagement.updatedAt,
+          // Customer data
+          customer: {
+            firstName: crmCustomers.firstName,
+            lastName: crmCustomers.lastName,
+            email: crmCustomers.email,
+            phone: crmCustomers.phone
+          },
+          // Shipping address
+          shippingAddress: orderManagement.shippingAddress,
+          billingAddress: orderManagement.billingAddress,
+          // Delivery details
+          recipientName: orderManagement.recipientName,
+          recipientPhone: orderManagement.recipientPhone,
+          recipientAddress: orderManagement.recipientAddress,
+          deliveryNotes: orderManagement.deliveryNotes,
+          // GPS data
+          gpsLatitude: orderManagement.gpsLatitude,
+          gpsLongitude: orderManagement.gpsLongitude,
+          locationAccuracy: orderManagement.locationAccuracy,
+          // Payment receipt
+          receipt: {
+            url: paymentReceipts.receiptUrl,
+            fileName: paymentReceipts.originalFileName,
+            mimeType: paymentReceipts.mimeType
+          }
+        })
+        .from(orderManagement)
+        .leftJoin(crmCustomers, eq(orderManagement.customerId, crmCustomers.id))
+        .leftJoin(paymentReceipts, eq(orderManagement.customerOrderId, paymentReceipts.customerOrderId))
+        .where(eq(orderManagement.currentStatus, 'delivered'))
+        .orderBy(desc(orderManagement.actualDeliveryDate), desc(orderManagement.updatedAt));
+      
+      console.log('🔍 [ROUTES] Found', orders.length, 'delivered orders');
+      
+      // Transform orders to ensure compatibility with frontend interface
+      const transformedOrders = orders.map(order => ({
+        ...order,
+        // Extract customer fields from nested customer object for legacy compatibility
+        customerName: `${order.customer?.firstName || ''} ${order.customer?.lastName || ''}`.trim() || 'نامشخص',
+        customerFirstName: order.customer?.firstName || '',
+        customerLastName: order.customer?.lastName || '',
+        customerEmail: order.customer?.email || '',
+        customerPhone: order.customer?.phone || '',
+        customerAddress: order.customer?.address || 'آدرس نامشخص',
+        // Map order total from totalAmount field
+        orderTotal: parseFloat(order.totalAmount || '0'),
+        // Extract delivery date info
+        orderDate: order.createdAt,
+        // GPS location data
+        hasGpsLocation: !!(order.gpsLatitude && order.gpsLongitude)
+      }));
+      
+      res.json({ 
+        success: true, 
+        orders: transformedOrders 
+      });
+    } catch (error) {
+      console.error("Error fetching delivered orders:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error" 
+      });
+    }
+  });
+
   // Get order status history
   app.get("/api/orders/:orderId/status-history", requireAuth, async (req, res) => {
     try {

@@ -448,6 +448,16 @@ const LogisticsManagement = () => {
     refetchInterval: 30000, // Auto-refresh every 30 seconds
   });
 
+  // Get delivered orders for delivered tab
+  const { data: deliveredOrdersResponse, isLoading: loadingDeliveredOrders, refetch: refetchDeliveredOrders } = useQuery({
+    queryKey: ['/api/order-management/delivered'],
+    enabled: activeTab === 'delivered',
+    staleTime: 0, // Always consider data stale
+    gcTime: 0, // Don't cache at all - always fresh (v5 syntax)
+    refetchOnWindowFocus: true, // Refetch when user comes back
+    refetchInterval: 60000, // Auto-refresh every 60 seconds (less frequent for delivered orders)
+  });
+
   // Force refresh function that completely clears cache
   const forceRefreshLogisticsOrders = async () => {
     // Clear all cache first
@@ -2208,6 +2218,176 @@ const LogisticsManagement = () => {
     );
   };
 
+  // Delivered Orders Tab Component
+  const DeliveredOrdersTab = () => {
+    const deliveredOrders = (deliveredOrdersResponse as any)?.orders || [];
+    
+    // Map data for compatibility
+    const mappedDeliveredOrders = deliveredOrders.map((order: any) => ({
+      ...order,
+      customer: order.customer || {
+        firstName: order.customerFirstName,
+        lastName: order.customerLastName,
+        email: order.customerEmail,
+        phone: order.customerPhone
+      },
+      customerAddress: order.customerAddress || 'آدرس ثبت نشده',
+      hasGpsLocation: !!(order.gpsLatitude && order.gpsLongitude)
+    }));
+
+    if (loadingDeliveredOrders) {
+      return (
+        <div className="flex justify-center items-center py-12">
+          <RefreshCw className="w-6 h-6 animate-spin mr-2" />
+          <span>در حال بارگیری سفارشات تحویل شده...</span>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <h2 className="text-xl font-bold text-green-700 flex items-center">
+              <CheckCircle className="w-6 h-6 mr-2" />
+              سفارشات تحویل شده
+            </h2>
+            <Badge variant="secondary" className="bg-green-100 text-green-800">
+              {mappedDeliveredOrders.length} سفارش
+            </Badge>
+          </div>
+          
+          <Button 
+            onClick={() => refetchDeliveredOrders()}
+            variant="outline" 
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className="w-4 h-4" />
+            بروزرسانی
+          </Button>
+        </div>
+
+        {mappedDeliveredOrders.length === 0 ? (
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <CheckCircle className="w-16 h-16 text-green-400 mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">هیچ سفارش تحویل شده‌ای وجود ندارد</h3>
+              <p className="text-gray-500 text-center">
+                پس از تحویل سفارشات، آن‌ها در این بخش نمایش داده می‌شوند
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-4">
+            {mappedDeliveredOrders.map((order: any) => (
+              <Card key={order.id} className="border-green-200 bg-green-50">
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex items-center gap-3">
+                      <CheckCircle className="w-8 h-8 text-green-600" />
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          سفارش {order.orderNumber || `#${order.customerOrderId}`}
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          مشتری: {order.customer?.firstName} {order.customer?.lastName}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <Badge className="bg-green-600 text-white">
+                        تحویل شده
+                      </Badge>
+                      <PaymentMethodBadge paymentMethod={order.paymentMethod} />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                    <div>
+                      <Label className="text-sm text-gray-600">مبلغ کل</Label>
+                      <p className="font-medium">
+                        {parseInt(order.totalAmount || 0).toLocaleString()} {order.currency || 'IQD'}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-sm text-gray-600">تاریخ تحویل</Label>
+                      <p className="font-medium">
+                        {order.actualDeliveryDate ? formatDateSafe(order.actualDeliveryDate, 'en-GB') : 'نامشخص'}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-sm text-gray-600">کد تحویل</Label>
+                      <p className="font-medium text-blue-600">
+                        {order.deliveryCode || 'ندارد'}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-sm text-gray-600">وزن محموله</Label>
+                      <p className="font-medium">
+                        {order.calculatedWeight || order.totalWeight || 0} کیلوگرم
+                      </p>
+                    </div>
+                  </div>
+
+                  {order.trackingNumber && (
+                    <div className="bg-blue-50 rounded-lg p-3 mb-4">
+                      <div className="flex items-center gap-2">
+                        <Package className="w-4 h-4 text-blue-600" />
+                        <span className="text-sm font-medium text-blue-800">کد رهگیری:</span>
+                        <span className="text-blue-700">{order.trackingNumber}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex justify-between items-center">
+                    <div className="text-sm text-gray-500">
+                      تحویل‌دهنده: {order.deliveryPersonName || 'نامشخص'} 
+                      {order.deliveryPersonPhone && ` - ${order.deliveryPersonPhone}`}
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedOrder(order);
+                          setIsOrderDetailsOpen(true);
+                        }}
+                        className="flex items-center gap-2"
+                      >
+                        <Eye className="w-4 h-4" />
+                        جزئیات
+                      </Button>
+                      
+                      {order.hasGpsLocation && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const lat = parseFloat(order.gpsLatitude?.toString() || '0');
+                            const lng = parseFloat(order.gpsLongitude?.toString() || '0');
+                            const mapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
+                            window.open(mapsUrl, '_blank');
+                          }}
+                          className="flex items-center gap-2 text-green-600 border-green-300 hover:bg-green-50"
+                        >
+                          <MapPin className="w-4 h-4" />
+                          موقعیت
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const CompaniesTab = () => {
     const [showAddForm, setShowAddForm] = useState(false);
     const [companyFormData, setCompanyFormData] = useState({
@@ -3874,8 +4054,9 @@ const LogisticsManagement = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="grid w-full grid-cols-8">
           <TabsTrigger value="orders">سفارشات</TabsTrigger>
+          <TabsTrigger value="delivered">تحویل شده</TabsTrigger>
           <TabsTrigger value="companies">شرکت‌های حمل</TabsTrigger>
           <TabsTrigger value="geography">جغرافیای عراق</TabsTrigger>
           <TabsTrigger value="international">جغرافیای خارج از عراق</TabsTrigger>
@@ -3886,6 +4067,10 @@ const LogisticsManagement = () => {
 
         <TabsContent value="orders">
           <OrdersTab />
+        </TabsContent>
+
+        <TabsContent value="delivered">
+          <DeliveredOrdersTab />
         </TabsContent>
 
         <TabsContent value="companies">
