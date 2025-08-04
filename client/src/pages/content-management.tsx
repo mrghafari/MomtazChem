@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Upload, Image, Type, Globe, Palette, Save, RefreshCw, Trash2, Eye, Edit3 } from "lucide-react";
+import { ArrowLeft, Upload, Image, Type, Globe, Palette, Save, RefreshCw, Trash2, Eye, Edit3, Package } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
@@ -40,6 +40,27 @@ interface ImageAsset {
   createdAt: string;
 }
 
+interface ShowcaseProduct {
+  id: number;
+  name: string;
+  technicalName?: string;
+  description?: string;
+  category: string;
+  features?: string[];
+  applications?: string[];
+  inventoryStatus: 'in_stock' | 'low_stock' | 'out_of_stock';
+  imageUrl?: string;
+  pdfCatalogUrl?: string;
+  isActive: boolean;
+}
+
+interface CategoryProductSettings {
+  category: string;
+  randomDisplayEnabled: boolean;
+  maxDisplayCount: number;
+  selectedProductIds: number[];
+}
+
 export default function ContentManagement() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -49,6 +70,7 @@ export default function ContentManagement() {
   const [selectedSection, setSelectedSection] = useState<string>('contact');
   const [editingContent, setEditingContent] = useState<ContentItem | null>(null);
   const [activeTab, setActiveTab] = useState<string>('content');
+  const [selectedCategory, setSelectedCategory] = useState<string>('agricultural-fertilizers');
 
   // Check URL parameters on component mount
   useEffect(() => {
@@ -78,6 +100,15 @@ export default function ContentManagement() {
       fetch(`/api/admin/content/images?section=${selectedSection}`)
         .then(res => res.json())
         .then(data => data.success ? data.data : [])
+  });
+
+  // Query for products by category
+  const { data: categoryProducts, isLoading: loadingProducts } = useQuery({
+    queryKey: ['/api/products', selectedCategory],
+    queryFn: () => 
+      fetch(`/api/products?category=${selectedCategory}`)
+        .then(res => res.json())
+        .then(data => Array.isArray(data) ? data : [])
   });
 
   // Mutation for updating content
@@ -287,7 +318,7 @@ export default function ContentManagement() {
 
         {/* Content Management Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="content" className="flex items-center gap-2">
               <Type className="w-4 h-4" />
               Text Content
@@ -295,6 +326,10 @@ export default function ContentManagement() {
             <TabsTrigger value="settings-control" className="flex items-center gap-2">
               <Switch className="w-4 h-4" />
               کنترل تنظیمات
+            </TabsTrigger>
+            <TabsTrigger value="products-display" className="flex items-center gap-2">
+              <Package className="w-4 h-4" />
+              نمایش محصولات
             </TabsTrigger>
             <TabsTrigger value="images" className="flex items-center gap-2">
               <Image className="w-4 h-4" />
@@ -616,6 +651,261 @@ export default function ContentManagement() {
                   </div>
                 </CardContent>
               </Card>
+            </div>
+          </TabsContent>
+
+          {/* Products Display Tab */}
+          <TabsContent value="products-display" className="space-y-6">
+            <div className="grid gap-6">
+              {/* Category Selection */}
+              <Card className="border-purple-200 bg-purple-50/50">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-purple-800">
+                    <Package className="w-5 h-5" />
+                    مدیریت نمایش محصولات در دسته‌بندی‌ها
+                  </CardTitle>
+                  <CardDescription>
+                    تنظیم نمایش تصادفی محصولات در صفحات دسته‌بندی
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Category Selector */}
+                  <div className="space-y-3">
+                    <Label>انتخاب دسته‌بندی</Label>
+                    <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="agricultural-fertilizers">
+                          <div className="flex items-center gap-2">
+                            <span>🌾</span>
+                            <span>کودهای کشاورزی (Agricultural Fertilizers)</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="industrial-chemicals">
+                          <div className="flex items-center gap-2">
+                            <span>⚗️</span>
+                            <span>مواد شیمیایی صنعتی (Industrial Chemicals)</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="paint-solvents">
+                          <div className="flex items-center gap-2">
+                            <span>🎨</span>
+                            <span>حلال‌های رنگ (Paint Solvents)</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="fuel-additives">
+                          <div className="flex items-center gap-2">
+                            <span>⛽</span>
+                            <span>افزودنی‌های سوخت (Fuel Additives)</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="water-treatment">
+                          <div className="flex items-center gap-2">
+                            <span>💧</span>
+                            <span>تصفیه آب (Water Treatment)</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="other">
+                          <div className="flex items-center gap-2">
+                            <span>📦</span>
+                            <span>سایر محصولات (Other Products)</span>
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Random Display Settings */}
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="flex items-center justify-between p-4 bg-white rounded-lg border">
+                      <div>
+                        <h4 className="font-medium text-gray-900">نمایش تصادفی فعال</h4>
+                        <p className="text-sm text-gray-600">نمایش محصولات به صورت تصادفی در این دسته‌بندی</p>
+                      </div>
+                      <Switch
+                        checked={contentItems?.find((item: ContentItem) => item.key === `random_display_${selectedCategory}`)?.isActive || false}
+                        disabled={updateContentMutation.isPending || createContentMutation.isPending}
+                        onCheckedChange={(checked) => {
+                          const existingItem = contentItems?.find((item: ContentItem) => item.key === `random_display_${selectedCategory}`);
+                          if (existingItem) {
+                            updateContentMutation.mutate({
+                              id: existingItem.id,
+                              content: checked ? 'true' : 'false',
+                              isActive: checked
+                            });
+                          } else {
+                            createContentMutation.mutate({
+                              key: `random_display_${selectedCategory}`,
+                              content: checked ? 'true' : 'false',
+                              contentType: 'text',
+                              language: selectedLanguage,
+                              section: 'product_display',
+                              isActive: checked
+                            });
+                          }
+                        }}
+                      />
+                    </div>
+
+                    <div className="space-y-3">
+                      <Label>تعداد محصولات نمایشی</Label>
+                      <Select
+                        value={contentItems?.find((item: ContentItem) => item.key === `max_display_${selectedCategory}`)?.content || '3'}
+                        onValueChange={(value) => {
+                          const existingItem = contentItems?.find((item: ContentItem) => item.key === `max_display_${selectedCategory}`);
+                          if (existingItem) {
+                            updateContentMutation.mutate({
+                              id: existingItem.id,
+                              content: value,
+                              isActive: existingItem.isActive
+                            });
+                          } else {
+                            createContentMutation.mutate({
+                              key: `max_display_${selectedCategory}`,
+                              content: value,
+                              contentType: 'text',
+                              language: selectedLanguage,
+                              section: 'product_display',
+                              isActive: true
+                            });
+                          }
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="1">1 محصول</SelectItem>
+                          <SelectItem value="2">2 محصول</SelectItem>
+                          <SelectItem value="3">3 محصول</SelectItem>
+                          <SelectItem value="4">4 محصول</SelectItem>
+                          <SelectItem value="5">5 محصول</SelectItem>
+                          <SelectItem value="6">6 محصول</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Products List for Category */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Package className="w-5 h-5" />
+                    محصولات موجود در دسته‌بندی {selectedCategory}
+                  </CardTitle>
+                  <CardDescription>
+                    {categoryProducts?.length || 0} محصول در این دسته‌بندی موجود است
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {loadingProducts ? (
+                    <div className="flex items-center justify-center p-8">
+                      <RefreshCw className="w-6 h-6 animate-spin" />
+                      <span className="ml-2">در حال بارگذاری محصولات...</span>
+                    </div>
+                  ) : categoryProducts && categoryProducts.length > 0 ? (
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {categoryProducts.map((product: ShowcaseProduct) => (
+                        <div
+                          key={product.id}
+                          className="p-4 border rounded-lg hover:shadow-md transition-shadow"
+                        >
+                          {product.imageUrl && (
+                            <div className="aspect-video w-full mb-3 bg-gray-100 rounded-lg overflow-hidden">
+                              <img
+                                src={product.imageUrl}
+                                alt={product.name}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          )}
+                          <h3 className="font-medium text-gray-900 mb-2">{product.name}</h3>
+                          {product.technicalName && (
+                            <p className="text-sm text-gray-600 mb-2">{product.technicalName}</p>
+                          )}
+                          {product.description && (
+                            <p className="text-xs text-gray-500 line-clamp-2">{product.description}</p>
+                          )}
+                          <div className="flex items-center justify-between mt-3">
+                            <Badge 
+                              variant={product.inventoryStatus === 'in_stock' ? 'default' : 'secondary'}
+                              className="text-xs"
+                            >
+                              {product.inventoryStatus === 'in_stock' ? '✅ موجود' : 
+                               product.inventoryStatus === 'low_stock' ? '⚠️ کم' : '❌ ناموجود'}
+                            </Badge>
+                            <Badge variant="outline" className="text-xs">
+                              ID: {product.id}
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <Package className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                      <p className="text-gray-500">هیچ محصولی در این دسته‌بندی یافت نشد</p>
+                      <p className="text-sm text-gray-400 mt-2">
+                        ابتدا محصولاتی را به این دسته‌بندی اضافه کنید
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Preview Section */}
+              {categoryProducts && categoryProducts.length > 0 && (
+                <Card className="border-green-200 bg-green-50/50">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-green-800">
+                      <Eye className="w-5 h-5" />
+                      پیش‌نمایش نمایش تصادفی
+                    </CardTitle>
+                    <CardDescription>
+                      مثال از نحوه نمایش محصولات در صفحه دسته‌بندی
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="bg-white p-6 rounded-lg border-2 border-dashed border-green-300">
+                      <h3 className="text-lg font-bold text-gray-900 mb-4">
+                        محصولات پیشنهادی {selectedCategory}
+                      </h3>
+                      <div className="grid md:grid-cols-3 gap-4">
+                        {categoryProducts
+                          .sort(() => Math.random() - 0.5)
+                          .slice(0, parseInt(contentItems?.find((item: ContentItem) => item.key === `max_display_${selectedCategory}`)?.content || '3'))
+                          .map((product: ShowcaseProduct) => (
+                            <div
+                              key={product.id}
+                              className="p-3 bg-gray-50 rounded-lg border text-center"
+                            >
+                              {product.imageUrl && (
+                                <div className="aspect-square w-16 h-16 mx-auto mb-2 bg-gray-200 rounded-lg overflow-hidden">
+                                  <img
+                                    src={product.imageUrl}
+                                    alt={product.name}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                              )}
+                              <h4 className="font-medium text-sm text-gray-900">{product.name}</h4>
+                              <Badge variant="outline" className="text-xs mt-1">
+                                Get Quote
+                              </Badge>
+                            </div>
+                          ))}
+                      </div>
+                      <p className="text-xs text-gray-500 mt-3 text-center">
+                        * محصولات هر بار به صورت تصادفی انتخاب و نمایش داده می‌شوند
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </TabsContent>
 

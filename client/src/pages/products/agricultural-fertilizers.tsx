@@ -20,6 +20,11 @@ const AgriculturalFertilizersPage = () => {
     queryFn: () => fetch("/api/products?category=agricultural-fertilizers").then(res => res.json()),
   });
 
+  const { data: randomProductsData, isLoading: loadingRandomProducts } = useQuery({
+    queryKey: ["/api/products/random", "agricultural-fertilizers"],
+    queryFn: () => fetch("/api/products/random/agricultural-fertilizers").then(res => res.json()),
+  });
+
   const { data: productStatsData, isLoading: statsLoading } = useQuery({
     queryKey: ['/api/shop/product-stats'],
     queryFn: () => fetch('/api/shop/product-stats').then(res => res.json()).then(data => data.data),
@@ -601,6 +606,123 @@ const AgriculturalFertilizersPage = () => {
           )}
         </div>
       </section>
+
+      {/* Random Products Recommendations Section */}
+      {randomProductsData?.success && randomProductsData?.data && randomProductsData.data.length > 0 && (
+        <section className="py-16 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center gap-2 bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-medium mb-4">
+                <Star className="w-4 h-4" />
+                {content.benefitsTitle?.includes('کشاورزی') ? 'محصولات پیشنهادی' : 'Recommended Products'}
+              </div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                {content.benefitsTitle?.includes('کشاورزی') 
+                  ? 'محصولات منتخب کشاورزی' 
+                  : 'Featured Agricultural Products'}
+              </h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                {content.benefitsTitle?.includes('کشاورزی')
+                  ? 'مجموعه‌ای از بهترین محصولات کشاورزی ممتازکم که برای شرایط عراق انتخاب شده‌اند'
+                  : 'A curated selection of our best agricultural products specifically chosen for Iraqi farming conditions'}
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {randomProductsData.data.map((product: ShowcaseProduct) => (
+                <MolecularHoverEffect key={product.id}>
+                <Card className="h-full hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm">
+                  <CardContent className="p-6 h-full flex flex-col">
+                    {product.imageUrl && (
+                      <div className="aspect-video w-full mb-4 bg-gray-100 rounded-lg overflow-hidden">
+                        <img
+                          src={product.imageUrl}
+                          alt={product.name}
+                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                        />
+                      </div>
+                    )}
+                    
+                    <div className="flex items-center gap-2 mb-3">
+                      <Badge variant="outline" className="text-green-600 border-green-600">
+                        {product.category}
+                      </Badge>
+                      <Badge 
+                        variant={product.inventoryStatus === 'in_stock' ? 'default' : 'secondary'}
+                        className="text-xs"
+                      >
+                        {product.inventoryStatus === 'in_stock' ? '✅ Available' : 
+                         product.inventoryStatus === 'low_stock' ? '⚠️ Low Stock' : '❌ Out of Stock'}
+                      </Badge>
+                    </div>
+                    
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">{product.name}</h3>
+                    
+                    {product.technicalName && (
+                      <p className="text-sm text-gray-600 mb-3 font-medium">{product.technicalName}</p>
+                    )}
+                    
+                    {product.description && (
+                      <p className="text-gray-600 mb-4 line-clamp-2 flex-grow">{product.description}</p>
+                    )}
+                    
+                    <div className="mt-auto space-y-3">
+                      {product.features && Array.isArray(product.features) && product.features.slice(0, 2).map((feature, index) => (
+                        <div key={index} className="flex items-center text-sm text-gray-700">
+                          <CheckCircle className="h-3 w-3 text-green-500 mr-2 flex-shrink-0" />
+                          {String(feature)}
+                        </div>
+                      ))}
+                      
+                      <div className="flex items-center gap-2 pt-2">
+                        {product.imageUrl && (
+                          <Badge variant="outline" className="text-xs">
+                            <Image className="w-3 h-3 mr-1" />
+                            Image
+                          </Badge>
+                        )}
+                        {product.pdfCatalogUrl && (
+                          <a 
+                            href={product.pdfCatalogUrl} 
+                            download={`${product.name}_catalog.pdf`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex"
+                          >
+                            <Badge variant="outline" className="text-xs hover:bg-green-50 hover:text-green-600 cursor-pointer transition-colors">
+                              <Download className="w-3 h-3 mr-1" />
+                              Catalog
+                            </Badge>
+                          </a>
+                        )}
+                      </div>
+                      
+                      <ProductInquiryForm 
+                        product={product}
+                        triggerText="Get Quote"
+                        triggerVariant="default"
+                        triggerSize="sm"
+                        className="w-full bg-green-600 hover:bg-green-700 text-white"
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+                </MolecularHoverEffect>
+              ))}
+            </div>
+
+            {/* Settings Info */}
+            <div className="mt-8 text-center">
+              <div className="inline-flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-lg text-sm">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                {content.benefitsTitle?.includes('کشاورزی')
+                  ? `نمایش ${randomProductsData.settings?.selectedCount} محصول از ${randomProductsData.settings?.totalProducts} محصول موجود`
+                  : `Showing ${randomProductsData.settings?.selectedCount} products out of ${randomProductsData.settings?.totalProducts} available`}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Technical Information Section */}
       <section className="py-20 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">

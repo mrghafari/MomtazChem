@@ -4036,6 +4036,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get random products for category page display based on content management settings
+  app.get("/api/products/random/:category", async (req, res) => {
+    try {
+      const { category } = req.params;
+      console.log(`🎲 [RANDOM PRODUCTS] Fetching random products for category: ${category}`);
+      
+      // First get all products in the category
+      const products = await storage.getProductsByCategory(category);
+      console.log(`📦 [RANDOM PRODUCTS] Found ${products.length} products in category ${category}`);
+      
+      if (products.length === 0) {
+        return res.json({
+          success: true,
+          data: [],
+          message: "No products found in category"
+        });
+      }
+      
+      // Get content management settings for this category
+      const randomDisplaySetting = await db
+        .select()
+        .from(contentItems)
+        .where(eq(contentItems.key, `random_display_${category}`))
+        .limit(1);
+        
+      const maxDisplaySetting = await db
+        .select()
+        .from(contentItems)
+        .where(eq(contentItems.key, `max_display_${category}`))
+        .limit(1);
+      
+      // Check if random display is enabled
+      const isRandomEnabled = randomDisplaySetting.length > 0 && 
+                             randomDisplaySetting[0].isActive && 
+                             randomDisplaySetting[0].content === 'true';
+      
+      if (!isRandomEnabled) {
+        console.log(`❌ [RANDOM PRODUCTS] Random display is disabled for category ${category}`);
+        return res.json({
+          success: true,
+          data: [],
+          message: "Random display is disabled for this category"
+        });
+      }
+      
+      // Get max display count (default: 3)
+      const maxDisplay = maxDisplaySetting.length > 0 ? 
+                        parseInt(maxDisplaySetting[0].content) : 3;
+      
+      console.log(`🎯 [RANDOM PRODUCTS] Random display enabled, max display: ${maxDisplay}`);
+      
+      // Shuffle products and select random ones
+      const shuffledProducts = [...products].sort(() => Math.random() - 0.5);
+      const randomProducts = shuffledProducts.slice(0, Math.min(maxDisplay, products.length));
+      
+      console.log(`✅ [RANDOM PRODUCTS] Returning ${randomProducts.length} random products`);
+      
+      res.json({
+        success: true,
+        data: randomProducts,
+        settings: {
+          category,
+          randomEnabled: isRandomEnabled,
+          maxDisplay,
+          totalProducts: products.length,
+          selectedCount: randomProducts.length
+        }
+      });
+      
+    } catch (error) {
+      console.error("Error fetching random products:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Internal server error",
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
   app.get("/api/products/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
