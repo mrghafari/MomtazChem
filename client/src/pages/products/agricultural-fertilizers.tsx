@@ -21,20 +21,12 @@ const AgriculturalFertilizersPage = () => {
   });
 
   const { data: randomProductsData, isLoading: loadingRandomProducts } = useQuery({
-    queryKey: ["/api/products/random", "agricultural-fertilizers", Math.random()], // Force fresh data every time
-    queryFn: async () => {
-      const timestamp = new Date().getTime();
-      const response = await fetch(`/api/products/random/agricultural-fertilizers?cache_bust=${timestamp}`);
-      const data = await response.json();
-      console.log('🔄 [AGRICULTURAL-FERTILIZERS] Random products API response:', data);
-      return data;
-    },
-    staleTime: 0,
-    cacheTime: 0,
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
+    queryKey: ["/api/products/random/agricultural-fertilizers"],
     refetchInterval: 10000, // Refetch every 10 seconds to catch database changes
   });
+
+  // Debug the actual data received
+  console.log('🔄 [AGRICULTURAL-FERTILIZERS] useQuery randomProductsData:', randomProductsData);
 
   const { data: productStatsData, isLoading: statsLoading } = useQuery({
     queryKey: ['/api/shop/product-stats'],
