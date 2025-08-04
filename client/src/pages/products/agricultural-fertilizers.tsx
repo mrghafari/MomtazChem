@@ -642,7 +642,8 @@ const AgriculturalFertilizersPage = () => {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {randomProductsData.data.map((product: ShowcaseProduct) => (
                 <MolecularHoverEffect key={product.id}>
-                <Card className="h-full hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm">
+                <Card className="h-full hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm cursor-pointer group"
+                      onClick={() => window.location.href = `/shop?product=${product.id}`}>
                   <CardContent className="p-6 h-full flex flex-col">
                     {product.imageUrl && (
                       <div className="aspect-video w-full mb-4 bg-gray-100 rounded-lg overflow-hidden">
@@ -667,7 +668,7 @@ const AgriculturalFertilizersPage = () => {
                       </Badge>
                     </div>
                     
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">{product.name}</h3>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-green-600 transition-colors">{product.name}</h3>
                     
                     {product.technicalName && (
                       <p className="text-sm text-gray-600 mb-3 font-medium">{product.technicalName}</p>
@@ -708,13 +709,26 @@ const AgriculturalFertilizersPage = () => {
                         )}
                       </div>
                       
-                      <ProductInquiryForm 
-                        product={product}
-                        triggerText="Get Quote"
-                        triggerVariant="default"
-                        triggerSize="sm"
-                        className="w-full bg-green-600 hover:bg-green-700 text-white"
-                      />
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            window.location.href = `/shop?product=${product.id}`;
+                          }}
+                          className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md text-sm font-medium transition-colors"
+                        >
+                          🛒 View in Shop
+                        </button>
+                        <div onClick={(e) => e.stopPropagation()}>
+                          <ProductInquiryForm 
+                            product={product}
+                            triggerText="Quote"
+                            triggerVariant="outline"
+                            triggerSize="sm"
+                            className="border-green-600 text-green-600 hover:bg-green-50"
+                          />
+                        </div>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
