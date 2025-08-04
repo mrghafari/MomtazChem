@@ -724,29 +724,31 @@ export default function ContentManagement() {
                         <h4 className="font-medium text-gray-900">نمایش تصادفی فعال</h4>
                         <p className="text-sm text-gray-600">نمایش محصولات به صورت تصادفی در این دسته‌بندی</p>
                       </div>
-                      <Switch
-                        checked={contentItems?.find((item: ContentItem) => item.key === `random_display_${selectedCategory}`)?.isActive || false}
-                        disabled={updateContentMutation.isPending || createContentMutation.isPending}
-                        onCheckedChange={(checked) => {
-                          const existingItem = contentItems?.find((item: ContentItem) => item.key === `random_display_${selectedCategory}`);
-                          if (existingItem) {
-                            updateContentMutation.mutate({
-                              id: existingItem.id,
-                              content: checked ? 'true' : 'false',
-                              isActive: checked
-                            });
-                          } else {
-                            createContentMutation.mutate({
-                              key: `random_display_${selectedCategory}`,
-                              content: checked ? 'true' : 'false',
-                              contentType: 'text',
-                              language: selectedLanguage,
-                              section: 'product_display',
-                              isActive: checked
-                            });
-                          }
-                        }}
-                      />
+                      <div>
+                        <Switch
+                          checked={contentItems?.find((item: ContentItem) => item.key === `random_display_${selectedCategory}`)?.isActive || false}
+                          disabled={updateContentMutation.isPending || createContentMutation.isPending}
+                          onCheckedChange={(checked) => {
+                            const existingItem = contentItems?.find((item: ContentItem) => item.key === `random_display_${selectedCategory}`);
+                            if (existingItem) {
+                              updateContentMutation.mutate({
+                                id: existingItem.id,
+                                content: checked ? 'true' : 'false',
+                                isActive: checked
+                              });
+                            } else {
+                              createContentMutation.mutate({
+                                key: `random_display_${selectedCategory}`,
+                                content: checked ? 'true' : 'false',
+                                contentType: 'text',
+                                language: selectedLanguage,
+                                section: 'product_display',
+                                isActive: checked
+                              });
+                            }
+                          }}
+                        />
+                      </div>
                     </div>
 
                     <div className="space-y-3">

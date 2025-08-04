@@ -4067,6 +4067,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .where(eq(contentItems.key, `max_display_${category}`))
         .limit(1);
       
+      console.log(`🔍 [RANDOM PRODUCTS] Random display settings:`, {
+        found: randomDisplaySetting.length > 0,
+        setting: randomDisplaySetting[0] || null,
+        isActive: randomDisplaySetting[0]?.isActive,
+        content: randomDisplaySetting[0]?.content
+      });
+      
       // Check if random display is enabled
       const isRandomEnabled = randomDisplaySetting.length > 0 && 
                              randomDisplaySetting[0].isActive && 
