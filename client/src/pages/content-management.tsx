@@ -737,15 +737,22 @@ export default function ContentManagement() {
                       </div>
                       <Switch
                         checked={(() => {
+                          // Wait for data to load before checking
+                          if (loadingContent && loadingPublicContent) {
+                            console.log('🔄 [LOADING] Still loading content and public data...');
+                            return false;
+                          }
+                          
                           // Debug: Let's see what data we have
-                          console.log('🔍 [DEBUG] All contentItems keys:', contentItems?.map(item => item.key));
-                          console.log('🔍 [DEBUG] All publicContentItems keys:', publicContentItems?.map(item => item.key));
+                          console.log('🔍 [DEBUG] contentItems loaded:', !!contentItems, contentItems?.length);
+                          console.log('🔍 [DEBUG] publicContentItems loaded:', !!publicContentItems, publicContentItems?.length);
                           console.log('🔍 [DEBUG] Looking for key:', `random_display_${selectedCategory}`);
                           
                           // Use admin authenticated data if available, fallback to public data
                           const adminItem = contentItems?.find((item: ContentItem) => item.key === `random_display_${selectedCategory}`);
                           const publicItem = publicContentItems?.find((item: ContentItem) => item.key === `random_display_${selectedCategory}`);
                           const isChecked = adminItem?.isActive || publicItem?.isActive || false;
+                          
                           console.log('🎛️ [TOGGLE STATE] Random display switch:', { 
                             category: selectedCategory, 
                             adminItem: adminItem?.isActive, 
@@ -754,7 +761,7 @@ export default function ContentManagement() {
                           });
                           return isChecked;
                         })()}
-                        disabled={updateContentMutation.isPending || createContentMutation.isPending}
+                        disabled={loadingContent || loadingPublicContent || updateContentMutation.isPending || createContentMutation.isPending}
                         onCheckedChange={(checked) => {
                           console.log('🎛️ [TOGGLE] Random display toggle clicked:', { category: selectedCategory, checked });
                           const existingItem = contentItems?.find((item: ContentItem) => item.key === `random_display_${selectedCategory}`);
