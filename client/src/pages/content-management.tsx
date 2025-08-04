@@ -67,7 +67,7 @@ export default function ContentManagement() {
   const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedLanguage, setSelectedLanguage] = useState<'en' | 'ar' | 'ku' | 'tr'>('en');
-  const [selectedSection, setSelectedSection] = useState<string>('contact');
+  const [selectedSection, setSelectedSection] = useState<string>('product_display');
   const [editingContent, setEditingContent] = useState<ContentItem | null>(null);
   const [activeTab, setActiveTab] = useState<string>('content');
   const [selectedCategory, setSelectedCategory] = useState<string>('agricultural-fertilizers');
