@@ -1,0 +1,81 @@
+agricultural-fertilizers:196 Tawk.to script loaded successfully
+chunk-RPCDYKBN.js?v=df726253:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+agricultural-fertilizers.tsx:29 🔄 [AGRICULTURAL-FERTILIZERS] useQuery randomProductsData: undefined
+agricultural-fertilizers.tsx:615 🐛 [DEBUG] Random Products Conditional Check: {success: undefined, randomEnabled: undefined, isArray: false, dataLength: undefined, shouldShow: undefined}
+queryClient.ts:81  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+(anonymous) @ queryClient.ts:81
+fetchFn @ @tanstack_react-query.js?v=df726253:840
+run @ @tanstack_react-query.js?v=df726253:494
+start @ @tanstack_react-query.js?v=df726253:536
+fetch @ @tanstack_react-query.js?v=df726253:926
+executeFetch_fn @ @tanstack_react-query.js?v=df726253:2211
+onSubscribe @ @tanstack_react-query.js?v=df726253:1898
+subscribe @ @tanstack_react-query.js?v=df726253:24
+(anonymous) @ @tanstack_react-query.js?v=df726253:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=df726253:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=df726253:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=df726253:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=df726253:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=df726253:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=df726253:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=df726253:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=df726253:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=df726253:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=df726253:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=df726253:19432
+commitRoot @ chunk-RPCDYKBN.js?v=df726253:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=df726253:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=df726253:18718
+workLoop @ chunk-RPCDYKBN.js?v=df726253:197
+flushWork @ chunk-RPCDYKBN.js?v=df726253:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=df726253:384
+useAuth.ts:43 Auth check result: {success: true, user: {…}}
+agricultural-fertilizers.tsx:29 🔄 [AGRICULTURAL-FERTILIZERS] useQuery randomProductsData: {success: true, data: Array(0), message: 'Random display is disabled for this category'}
+agricultural-fertilizers.tsx:615 🐛 [DEBUG] Random Products Conditional Check: {success: true, randomEnabled: undefined, isArray: true, dataLength: 0, shouldShow: undefined}
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:117574)
+    at t.value (twk-chunk-common.js:2:150658)
+    at p.updateUUID (twk-chunk-common.js:2:202310)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:124589)
+    at twk-chunk-common.js:2:123900
+value @ twk-chunk-common.js:2
+updateUUID @ twk-chunk-common.js:2
+(anonymous) @ twk-vendor.js:2
+p.dispatch @ twk-vendor.js:2
+dispatch @ twk-vendor.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+Promise.then
+value @ twk-chunk-common.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+56d7 @ twk-chunk-common.js:2
+a @ twk-runtime.js:1
+r @ twk-runtime.js:1
+t @ twk-runtime.js:1
+(anonymous) @ twk-chunk-common.js:2
+queryClient.ts:81  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+(anonymous) @ queryClient.ts:81
+fetchFn @ @tanstack_react-query.js?v=df726253:840
+run @ @tanstack_react-query.js?v=df726253:494
+start @ @tanstack_react-query.js?v=df726253:536
+fetch @ @tanstack_react-query.js?v=df726253:926
+executeFetch_fn @ @tanstack_react-query.js?v=df726253:2211
+fetch @ @tanstack_react-query.js?v=df726253:2011
+refetch @ @tanstack_react-query.js?v=df726253:2001
+onFocus @ @tanstack_react-query.js?v=df726253:749
+(anonymous) @ @tanstack_react-query.js?v=df726253:1112
+(anonymous) @ @tanstack_react-query.js?v=df726253:1111
+batch @ @tanstack_react-query.js?v=df726253:583
+onFocus @ @tanstack_react-query.js?v=df726253:1110
+(anonymous) @ @tanstack_react-query.js?v=df726253:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=df726253:313
+onFocus @ @tanstack_react-query.js?v=df726253:312
+(anonymous) @ @tanstack_react-query.js?v=df726253:299
+listener @ @tanstack_react-query.js?v=df726253:270
+agricultural-fertilizers:168 Tawk.to Live Chat loaded successfully

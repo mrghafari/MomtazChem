@@ -612,20 +612,17 @@ const AgriculturalFertilizersPage = () => {
 
       {/* Random Products Recommendations Section */}
       {(() => {
+        const shouldShow = randomProductsData?.success && 
+                          Array.isArray(randomProductsData?.data) && 
+                          randomProductsData.data.length > 0;
         console.log('🐛 [DEBUG] Random Products Conditional Check:', {
           success: randomProductsData?.success,
-          randomEnabled: randomProductsData?.settings?.randomEnabled,
           isArray: Array.isArray(randomProductsData?.data),
           dataLength: randomProductsData?.data?.length,
-          shouldShow: randomProductsData?.success && 
-                     randomProductsData?.settings?.randomEnabled && 
-                     Array.isArray(randomProductsData?.data) && 
-                     randomProductsData.data.length > 0
+          shouldShow: shouldShow,
+          fullData: randomProductsData
         });
-        return randomProductsData?.success && 
-               randomProductsData?.settings?.randomEnabled && 
-               Array.isArray(randomProductsData?.data) && 
-               randomProductsData.data.length > 0;
+        return shouldShow;
       })() && (
         <section className="py-16 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
