@@ -1398,6 +1398,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+
+
   // ============================================================================
   // CORRESPONDENCE MANAGEMENT
   // ============================================================================
@@ -40199,6 +40201,31 @@ momtazchem.com
         success: false,
         message: 'خطا در دریافت لیست سفارشات قابل حذف'
       });
+    }
+  });
+
+  // Get content settings - Public endpoint for category toggles (must be before catch-all)
+  app.get('/api/public/content-settings', async (req, res) => {
+    try {
+      console.log('📊 [PUBLIC CONTENT] Fetching public content settings:', req.query);
+      const { language = 'en', section } = req.query;
+      
+      let query = db.select().from(contentItems);
+      
+      if (language && language !== 'all') {
+        query = query.where(eq(contentItems.language, language as string));
+      }
+      
+      if (section && section !== 'all') {
+        query = query.where(eq(contentItems.section, section as string));
+      }
+      
+      const items = await query;
+      console.log(`✅ [PUBLIC CONTENT] Found ${items.length} content items`);
+      res.json({ success: true, data: items });
+    } catch (error) {
+      console.error('❌ [PUBLIC CONTENT] Error fetching content settings:', error);
+      res.status(500).json({ success: false, message: "خطا در دریافت تنظیمات محتوا" });
     }
   });
 

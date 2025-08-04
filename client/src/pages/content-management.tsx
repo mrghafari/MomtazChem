@@ -84,11 +84,20 @@ export default function ContentManagement() {
   // Check if user is super admin (id = 1)
   const isSuperAdmin = user?.id === 1;
 
-  // Query for content items
+  // Query for content items using admin API
   const { data: contentItems, isLoading: loadingContent } = useQuery({
     queryKey: ['/api/admin/content', selectedLanguage, selectedSection],
     queryFn: () => 
       fetch(`/api/admin/content?language=${selectedLanguage}&section=${selectedSection}`)
+        .then(res => res.json())
+        .then(data => data.success ? data.data : [])
+  });
+
+  // Query for public content settings (for non-authenticated toggle state display)
+  const { data: publicContentItems, isLoading: loadingPublicContent } = useQuery({
+    queryKey: ['/api/public/content-settings', selectedLanguage, selectedSection],
+    queryFn: () => 
+      fetch(`/api/public/content-settings?language=${selectedLanguage}&section=${selectedSection}`)
         .then(res => res.json())
         .then(data => data.success ? data.data : [])
   });
@@ -727,17 +736,32 @@ export default function ContentManagement() {
                         <p className="text-sm text-gray-600">نمایش محصولات به صورت تصادفی در این دسته‌بندی</p>
                       </div>
                       <Switch
-                        checked={contentItems?.find((item: ContentItem) => item.key === `random_display_${selectedCategory}`)?.isActive || false}
+                        checked={(() => {
+                          // Use admin authenticated data if available, fallback to public data
+                          const adminItem = contentItems?.find((item: ContentItem) => item.key === `random_display_${selectedCategory}`);
+                          const publicItem = publicContentItems?.find((item: ContentItem) => item.key === `random_display_${selectedCategory}`);
+                          const isChecked = adminItem?.isActive || publicItem?.isActive || false;
+                          console.log('🎛️ [TOGGLE STATE] Random display switch:', { 
+                            category: selectedCategory, 
+                            adminItem: adminItem?.isActive, 
+                            publicItem: publicItem?.isActive, 
+                            final: isChecked 
+                          });
+                          return isChecked;
+                        })()}
                         disabled={updateContentMutation.isPending || createContentMutation.isPending}
                         onCheckedChange={(checked) => {
+                          console.log('🎛️ [TOGGLE] Random display toggle clicked:', { category: selectedCategory, checked });
                           const existingItem = contentItems?.find((item: ContentItem) => item.key === `random_display_${selectedCategory}`);
                           if (existingItem) {
+                            console.log('🎛️ [TOGGLE] Updating existing item:', existingItem.id);
                             updateContentMutation.mutate({
                               id: existingItem.id,
                               content: checked ? 'true' : 'false',
                               isActive: checked
                             });
                           } else {
+                            console.log('🎛️ [TOGGLE] Creating new item');
                             createContentMutation.mutate({
                               key: `random_display_${selectedCategory}`,
                               content: checked ? 'true' : 'false',
@@ -754,16 +778,23 @@ export default function ContentManagement() {
                     <div className="space-y-3">
                       <Label>تعداد محصولات نمایشی</Label>
                       <Select
-                        value={contentItems?.find((item: ContentItem) => item.key === `max_display_${selectedCategory}`)?.content || '3'}
+                        value={(() => {
+                          const adminItem = contentItems?.find((item: ContentItem) => item.key === `max_display_${selectedCategory}`);
+                          const publicItem = publicContentItems?.find((item: ContentItem) => item.key === `max_display_${selectedCategory}`);
+                          return adminItem?.content || publicItem?.content || '3';
+                        })()}
                         onValueChange={(value) => {
+                          console.log('🎛️ [MAX DISPLAY] Value changed:', { category: selectedCategory, value });
                           const existingItem = contentItems?.find((item: ContentItem) => item.key === `max_display_${selectedCategory}`);
                           if (existingItem) {
+                            console.log('🎛️ [MAX DISPLAY] Updating existing item:', existingItem.id);
                             updateContentMutation.mutate({
                               id: existingItem.id,
                               content: value,
                               isActive: existingItem.isActive
                             });
                           } else {
+                            console.log('🎛️ [MAX DISPLAY] Creating new item');
                             createContentMutation.mutate({
                               key: `max_display_${selectedCategory}`,
                               content: value,
