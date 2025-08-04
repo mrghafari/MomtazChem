@@ -18,7 +18,7 @@ interface ContentItem {
 export default function IndustrialChemicalsPage() {
   const [, setLocation] = useLocation();
 
-  const { data: contentItems = [], isLoading } = useQuery<ContentItem[]>({
+  const { data: contentResponse, isLoading } = useQuery({
     queryKey: ['/api/content-management/items'],
     queryFn: async () => {
       const response = await fetch('/api/content-management/items');
@@ -27,9 +27,10 @@ export default function IndustrialChemicalsPage() {
     }
   });
 
-  const industrialContent = contentItems.filter(item => 
+  const contentItems = contentResponse?.data || [];
+  const industrialContent = Array.isArray(contentItems) ? contentItems.filter((item: ContentItem) => 
     item.section === 'industrial_chemicals' && item.language === 'en'
-  );
+  ) : [];
 
   const getContent = (key: string) => {
     const item = industrialContent.find(item => item.key === key);
