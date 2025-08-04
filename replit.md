@@ -88,6 +88,14 @@ The system is built on a robust full-stack architecture. Features include compre
 - **FORMAT:** Using en-GB locale for consistent DD/MM/YYYY format across all print documents
 - **CONSISTENCY:** All administrative print functionality now uses Gregorian dates exclusively
 
+**Product Inventory Filtering Implementation (August 2025):**
+- **RESOLVED:** Random products display now shows only real products with proper inventory (kardex)
+- **BACKEND FILTER:** Modified `getProductsByCategory()` method to filter products with active status, stock quantity > 0, valid SKU, and barcode
+- **FAKE PRODUCTS REMOVED:** All fake/demo products automatically excluded from category page displays
+- **VERIFIED CATEGORIES:** agricultural-fertilizers (6 products), fuel-additives (1 product), paint-solvents (2 products), paint-thinner (3 products)
+- **INVENTORY INTEGRITY:** Only products with proper kardex system (stock, SKU, barcode) are displayed to customers
+- **CONTENT MANAGEMENT:** Toggle system works correctly for enabling/disabling random product display per category
+
 ### System Design Choices
 The architecture emphasizes modularity and scalability. Core architectural patterns include a RESTful API design for backend-frontend communication, ensuring clear separation of concerns. Data integrity is maintained through transactional operations for critical processes like order creation and inventory updates. The system employs a prevention-first approach to avoid data inconsistencies. A unified vehicle selection algorithm prioritizes cost-efficiency and safety compliance, particularly for hazardous materials. Inventory management strictly adheres to FIFO (First-In, First-Out) principles. A comprehensive email and SMS automation system leverages templates and intelligent routing. The system is designed for continuous integration and deployment, with a focus on performance optimization through database indexing, caching, and asset optimization.
 

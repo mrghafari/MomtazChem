@@ -181,7 +181,20 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getProductsByCategory(category: string): Promise<ShowcaseProduct[]> {
-    return await showcaseDb.select().from(showcaseProducts).where(eq(showcaseProducts.category, category));
+    // Filter to show only active products with proper inventory (kardex)
+    return await showcaseDb
+      .select()
+      .from(showcaseProducts)
+      .where(
+        and(
+          eq(showcaseProducts.category, category),
+          eq(showcaseProducts.isActive, true),
+          sql`${showcaseProducts.stockQuantity} > 0`, // Only products with stock
+          sql`${showcaseProducts.sku} IS NOT NULL`, // Must have SKU (proper kardex)
+          sql`${showcaseProducts.barcode} IS NOT NULL` // Must have barcode (proper kardex)
+        )
+      )
+      .orderBy(desc(showcaseProducts.updatedAt));
   }
 
   async updateProduct(id: number, productUpdate: Partial<InsertShowcaseProduct>): Promise<ShowcaseProduct> {
