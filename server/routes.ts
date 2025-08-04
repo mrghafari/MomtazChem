@@ -37,7 +37,7 @@ import { sql, eq, and, or, isNull, isNotNull, desc, gte } from "drizzle-orm";
 import { findCorruptedOrders, getDataIntegrityStats, validateOrderIntegrity, markCorruptedOrderAsDeleted } from './data-integrity-tools';
 import { z } from "zod";
 import * as schema from "@shared/schema";
-const { crmCustomers, iraqiProvinces, iraqiCities, abandonedOrders } = schema;
+const { crmCustomers, iraqiProvinces, iraqiCities, abandonedOrders, contentItems } = schema;
 import { orderManagement, shippingRates, deliveryMethods, paymentReceipts } from "@shared/order-management-schema";
 import { generateEAN13Barcode, validateEAN13, parseEAN13Barcode, isMomtazchemBarcode } from "@shared/barcode-utils";
 import { generateSmartSKU, validateSKUUniqueness } from "./ai-sku-generator";

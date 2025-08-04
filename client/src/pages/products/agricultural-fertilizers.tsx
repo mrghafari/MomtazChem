@@ -20,10 +20,21 @@ const AgriculturalFertilizersPage = () => {
     queryFn: () => fetch("/api/products?category=agricultural-fertilizers").then(res => res.json()),
   });
 
-  const { data: randomProductsData, isLoading: loadingRandomProducts } = useQuery({
+  const { data: randomProductsData, isLoading: loadingRandomProducts, error: randomProductsError } = useQuery({
     queryKey: ["/api/products/random", "agricultural-fertilizers"],
-    queryFn: () => fetch("/api/products/random/agricultural-fertilizers").then(res => res.json()),
+    queryFn: () => fetch("/api/products/random/agricultural-fertilizers").then(res => {
+      console.log("🎲 Random Products API Response Status:", res.status);
+      return res.json();
+    }).then(data => {
+      console.log("🎲 Random Products API Data:", data);
+      return data;
+    }),
   });
+
+  // Debug logging for random products
+  console.log("🎲 [DEBUG] Random Products Data:", randomProductsData);
+  console.log("🎲 [DEBUG] Random Products Loading:", loadingRandomProducts);
+  console.log("🎲 [DEBUG] Random Products Error:", randomProductsError);
 
   const { data: productStatsData, isLoading: statsLoading } = useQuery({
     queryKey: ['/api/shop/product-stats'],
