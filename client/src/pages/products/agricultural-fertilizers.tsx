@@ -618,6 +618,7 @@ const AgriculturalFertilizersPage = () => {
 
       {/* Random Products Recommendations Section */}
       {randomProductsData?.success && 
+       randomProductsData?.settings?.randomEnabled && 
        Array.isArray(randomProductsData?.data) && 
        randomProductsData.data.length > 0 && (
         <section className="py-16 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
