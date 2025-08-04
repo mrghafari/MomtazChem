@@ -558,32 +558,34 @@ export default function ContentManagement() {
                       <h4 className="font-medium text-gray-900">وضعیت AI</h4>
                       <p className="text-sm text-gray-600">فعال‌سازی قابلیت‌های هوش مصنوعی</p>
                     </div>
-                    <Switch
-                      checked={contentItems?.find((item: ContentItem) => item.key === 'ai_enabled')?.isActive || false}
-                      disabled={updateContentMutation.isPending || createContentMutation.isPending}
-                      onCheckedChange={(checked) => {
-                        console.log('🎛️ [TOGGLE] AI toggle clicked:', checked);
-                        const existingItem = contentItems?.find((item: ContentItem) => item.key === 'ai_enabled');
-                        if (existingItem) {
-                          console.log('🎛️ [TOGGLE] Updating existing AI item:', existingItem.id);
-                          updateContentMutation.mutate({
-                            id: existingItem.id,
-                            content: checked ? 'true' : 'false',
-                            isActive: checked
-                          });
-                        } else {
-                          console.log('🎛️ [TOGGLE] Creating new AI item');
-                          createContentMutation.mutate({
-                            key: 'ai_enabled',
-                            content: checked ? 'true' : 'false',
-                            contentType: 'text',
-                            language: selectedLanguage,
-                            section: 'ai_settings',
-                            isActive: checked
-                          });
-                        }
-                      }}
-                    />
+                    <div>
+                      <Switch
+                        checked={contentItems?.find((item: ContentItem) => item.key === 'ai_enabled')?.isActive || false}
+                        disabled={updateContentMutation.isPending || createContentMutation.isPending}
+                        onCheckedChange={(checked) => {
+                          console.log('🎛️ [TOGGLE] AI toggle clicked:', checked);
+                          const existingItem = contentItems?.find((item: ContentItem) => item.key === 'ai_enabled');
+                          if (existingItem) {
+                            console.log('🎛️ [TOGGLE] Updating existing AI item:', existingItem.id);
+                            updateContentMutation.mutate({
+                              id: existingItem.id,
+                              content: checked ? 'true' : 'false',
+                              isActive: checked
+                            });
+                          } else {
+                            console.log('🎛️ [TOGGLE] Creating new AI item');
+                            createContentMutation.mutate({
+                              key: 'ai_enabled',
+                              content: checked ? 'true' : 'false',
+                              contentType: 'text',
+                              language: selectedLanguage,
+                              section: 'ai_settings',
+                              isActive: checked
+                            });
+                          }
+                        }}
+                      />
+                    </div>
                   </div>
                   
                   <div className="space-y-3">
@@ -724,31 +726,29 @@ export default function ContentManagement() {
                         <h4 className="font-medium text-gray-900">نمایش تصادفی فعال</h4>
                         <p className="text-sm text-gray-600">نمایش محصولات به صورت تصادفی در این دسته‌بندی</p>
                       </div>
-                      <div>
-                        <Switch
-                          checked={contentItems?.find((item: ContentItem) => item.key === `random_display_${selectedCategory}`)?.isActive || false}
-                          disabled={updateContentMutation.isPending || createContentMutation.isPending}
-                          onCheckedChange={(checked) => {
-                            const existingItem = contentItems?.find((item: ContentItem) => item.key === `random_display_${selectedCategory}`);
-                            if (existingItem) {
-                              updateContentMutation.mutate({
-                                id: existingItem.id,
-                                content: checked ? 'true' : 'false',
-                                isActive: checked
-                              });
-                            } else {
-                              createContentMutation.mutate({
-                                key: `random_display_${selectedCategory}`,
-                                content: checked ? 'true' : 'false',
-                                contentType: 'text',
-                                language: selectedLanguage,
-                                section: 'product_display',
-                                isActive: checked
-                              });
-                            }
-                          }}
-                        />
-                      </div>
+                      <Switch
+                        checked={contentItems?.find((item: ContentItem) => item.key === `random_display_${selectedCategory}`)?.isActive || false}
+                        disabled={updateContentMutation.isPending || createContentMutation.isPending}
+                        onCheckedChange={(checked) => {
+                          const existingItem = contentItems?.find((item: ContentItem) => item.key === `random_display_${selectedCategory}`);
+                          if (existingItem) {
+                            updateContentMutation.mutate({
+                              id: existingItem.id,
+                              content: checked ? 'true' : 'false',
+                              isActive: checked
+                            });
+                          } else {
+                            createContentMutation.mutate({
+                              key: `random_display_${selectedCategory}`,
+                              content: checked ? 'true' : 'false',
+                              contentType: 'text',
+                              language: selectedLanguage,
+                              section: 'product_display',
+                              isActive: checked
+                            });
+                          }
+                        }}
+                      />
                     </div>
 
                     <div className="space-y-3">
