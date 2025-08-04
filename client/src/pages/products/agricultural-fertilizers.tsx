@@ -25,7 +25,9 @@ const AgriculturalFertilizersPage = () => {
     queryFn: async () => {
       const timestamp = new Date().getTime();
       const response = await fetch(`/api/products/random/agricultural-fertilizers?cache_bust=${timestamp}`);
-      return response.json();
+      const data = await response.json();
+      console.log('🔄 [AGRICULTURAL-FERTILIZERS] Random products API response:', data);
+      return data;
     },
     staleTime: 0,
     cacheTime: 0,

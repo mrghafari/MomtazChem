@@ -1,0 +1,661 @@
+content-management:196 Tawk.to script loaded successfully
+chunk-RPCDYKBN.js?v=df726253:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+content-management.tsx:742 🔄 [LOADING] Still loading content and public data...
+chunk-RPCDYKBN.js?v=df726253:521 Warning: validateDOMNesting(...): <button> cannot appear as a descendant of <button>.
+    at button
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-AXMZZQ2X.js?v=df726253:42:13
+    at Provider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=df726253:38:15)
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-switch.js?v=df726253:43:7
+    at _c (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ui/switch.tsx:21:11)
+    at button
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-AXMZZQ2X.js?v=df726253:42:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=df726253:79:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=df726253:56:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-AXMZZQ2X.js?v=df726253:42:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=df726253:79:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=df726253:56:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-TPYHSINA.js?v=df726253:51:15
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-7ONK63EX.js?v=df726253:147:7
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tabs.js?v=df726253:123:13
+    at _c3 (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ui/tabs.tsx:47:12)
+    at div
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-AXMZZQ2X.js?v=df726253:42:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=df726253:79:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=df726253:56:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-AXMZZQ2X.js?v=df726253:42:13
+    at Provider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=df726253:38:15)
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-7ONK63EX.js?v=df726253:56:5
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=df726253:79:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=df726253:56:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-TPYHSINA.js?v=df726253:39:15
+    at Provider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=df726253:38:15)
+    at CollectionProvider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-TPYHSINA.js?v=df726253:29:13)
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-7ONK63EX.js?v=df726253:50:76
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tabs.js?v=df726253:95:13
+    at _c (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ui/tabs.tsx:22:11)
+    at div
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-AXMZZQ2X.js?v=df726253:42:13
+    at Provider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=df726253:38:15)
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tabs.js?v=df726253:53:7
+    at div
+    at div
+    at ContentManagement (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/content-management.tsx:36:27)
+    at Route (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df726253:265:16)
+    at Switch (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df726253:321:17)
+    at main
+    at div
+    at Router
+    at Provider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=df726253:38:15)
+    at TooltipProvider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=df726253:65:5)
+    at LanguageProvider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/contexts/LanguageContext.tsx:21:36)
+    at QueryClientProvider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=df726253:2805:3)
+    at App
+printWarning @ chunk-RPCDYKBN.js?v=df726253:521
+error @ chunk-RPCDYKBN.js?v=df726253:505
+validateDOMNesting @ chunk-RPCDYKBN.js?v=df726253:8256
+createInstance @ chunk-RPCDYKBN.js?v=df726253:8328
+completeWork @ chunk-RPCDYKBN.js?v=df726253:16290
+completeUnitOfWork @ chunk-RPCDYKBN.js?v=df726253:19224
+performUnitOfWork @ chunk-RPCDYKBN.js?v=df726253:19206
+workLoopSync @ chunk-RPCDYKBN.js?v=df726253:19137
+renderRootSync @ chunk-RPCDYKBN.js?v=df726253:19116
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=df726253:18678
+workLoop @ chunk-RPCDYKBN.js?v=df726253:197
+flushWork @ chunk-RPCDYKBN.js?v=df726253:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=df726253:384
+useAuth.ts:30  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 401 (Unauthorized)
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=df726253:840
+run @ @tanstack_react-query.js?v=df726253:494
+start @ @tanstack_react-query.js?v=df726253:536
+fetch @ @tanstack_react-query.js?v=df726253:926
+executeFetch_fn @ @tanstack_react-query.js?v=df726253:2211
+onSubscribe @ @tanstack_react-query.js?v=df726253:1898
+subscribe @ @tanstack_react-query.js?v=df726253:24
+(anonymous) @ @tanstack_react-query.js?v=df726253:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=df726253:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=df726253:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=df726253:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=df726253:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=df726253:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=df726253:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=df726253:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=df726253:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=df726253:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=df726253:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=df726253:19432
+commitRoot @ chunk-RPCDYKBN.js?v=df726253:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=df726253:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=df726253:18718
+workLoop @ chunk-RPCDYKBN.js?v=df726253:197
+flushWork @ chunk-RPCDYKBN.js?v=df726253:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=df726253:384
+queryClient.ts:81  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+(anonymous) @ queryClient.ts:81
+fetchFn @ @tanstack_react-query.js?v=df726253:840
+run @ @tanstack_react-query.js?v=df726253:494
+start @ @tanstack_react-query.js?v=df726253:536
+fetch @ @tanstack_react-query.js?v=df726253:926
+executeFetch_fn @ @tanstack_react-query.js?v=df726253:2211
+onSubscribe @ @tanstack_react-query.js?v=df726253:1898
+subscribe @ @tanstack_react-query.js?v=df726253:24
+(anonymous) @ @tanstack_react-query.js?v=df726253:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=df726253:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=df726253:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=df726253:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=df726253:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=df726253:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=df726253:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=df726253:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=df726253:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=df726253:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=df726253:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=df726253:19432
+commitRoot @ chunk-RPCDYKBN.js?v=df726253:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=df726253:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=df726253:18718
+workLoop @ chunk-RPCDYKBN.js?v=df726253:197
+flushWork @ chunk-RPCDYKBN.js?v=df726253:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=df726253:384
+content-management.tsx:91  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/content?language=en&section=product_display 401 (Unauthorized)
+queryFn @ content-management.tsx:91
+fetchFn @ @tanstack_react-query.js?v=df726253:840
+run @ @tanstack_react-query.js?v=df726253:494
+start @ @tanstack_react-query.js?v=df726253:536
+fetch @ @tanstack_react-query.js?v=df726253:926
+executeFetch_fn @ @tanstack_react-query.js?v=df726253:2211
+onSubscribe @ @tanstack_react-query.js?v=df726253:1898
+subscribe @ @tanstack_react-query.js?v=df726253:24
+(anonymous) @ @tanstack_react-query.js?v=df726253:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=df726253:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=df726253:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=df726253:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=df726253:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=df726253:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=df726253:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=df726253:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=df726253:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=df726253:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=df726253:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=df726253:19432
+commitRoot @ chunk-RPCDYKBN.js?v=df726253:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=df726253:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=df726253:18718
+workLoop @ chunk-RPCDYKBN.js?v=df726253:197
+flushWork @ chunk-RPCDYKBN.js?v=df726253:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=df726253:384
+content-management.tsx:109  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/content/images?section=product_display 401 (Unauthorized)
+queryFn @ content-management.tsx:109
+fetchFn @ @tanstack_react-query.js?v=df726253:840
+run @ @tanstack_react-query.js?v=df726253:494
+start @ @tanstack_react-query.js?v=df726253:536
+fetch @ @tanstack_react-query.js?v=df726253:926
+executeFetch_fn @ @tanstack_react-query.js?v=df726253:2211
+onSubscribe @ @tanstack_react-query.js?v=df726253:1898
+subscribe @ @tanstack_react-query.js?v=df726253:24
+(anonymous) @ @tanstack_react-query.js?v=df726253:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=df726253:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=df726253:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=df726253:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=df726253:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=df726253:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=df726253:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=df726253:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=df726253:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=df726253:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=df726253:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=df726253:19432
+commitRoot @ chunk-RPCDYKBN.js?v=df726253:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=df726253:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=df726253:18718
+workLoop @ chunk-RPCDYKBN.js?v=df726253:197
+flushWork @ chunk-RPCDYKBN.js?v=df726253:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=df726253:384
+content-management.tsx:742 🔄 [LOADING] Still loading content and public data...
+content-management.tsx:747 🔍 [DEBUG] contentItems loaded: true 0
+content-management.tsx:748 🔍 [DEBUG] publicContentItems loaded: true 6
+content-management.tsx:749 🔍 [DEBUG] Looking for key: random_display_agricultural-fertilizers
+content-management.tsx:756 🎛️ [TOGGLE STATE] Random display switch: {category: 'agricultural-fertilizers', adminItem: undefined, publicItem: true, final: true}
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:117574)
+    at t.value (twk-chunk-common.js:2:150658)
+    at p.updateUUID (twk-chunk-common.js:2:202310)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:124589)
+    at twk-chunk-common.js:2:123900
+value @ twk-chunk-common.js:2
+updateUUID @ twk-chunk-common.js:2
+(anonymous) @ twk-vendor.js:2
+p.dispatch @ twk-vendor.js:2
+dispatch @ twk-vendor.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+Promise.then
+value @ twk-chunk-common.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+56d7 @ twk-chunk-common.js:2
+a @ twk-runtime.js:1
+r @ twk-runtime.js:1
+t @ twk-runtime.js:1
+(anonymous) @ twk-chunk-vendors.js:2
+content-management.tsx:747 🔍 [DEBUG] contentItems loaded: true 0
+content-management.tsx:748 🔍 [DEBUG] publicContentItems loaded: true 6
+content-management.tsx:749 🔍 [DEBUG] Looking for key: random_display_agricultural-fertilizers
+content-management.tsx:756 🎛️ [TOGGLE STATE] Random display switch: {category: 'agricultural-fertilizers', adminItem: undefined, publicItem: true, final: true}
+content-management:168 Tawk.to Live Chat loaded successfully
+content-management.tsx:766 🎛️ [TOGGLE] Random display toggle clicked: {category: 'agricultural-fertilizers', checked: false}
+content-management.tsx:776 🎛️ [TOGGLE] Creating new item
+content-management.tsx:747 🔍 [DEBUG] contentItems loaded: true 0
+content-management.tsx:748 🔍 [DEBUG] publicContentItems loaded: true 6
+content-management.tsx:749 🔍 [DEBUG] Looking for key: random_display_agricultural-fertilizers
+content-management.tsx:756 🎛️ [TOGGLE STATE] Random display switch: {category: 'agricultural-fertilizers', adminItem: undefined, publicItem: true, final: true}
+queryClient.ts:54  POST https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/content 401 (Unauthorized)
+apiRequest @ queryClient.ts:54
+mutationFn @ content-management.tsx:146
+fn @ @tanstack_react-query.js?v=df726253:1189
+run @ @tanstack_react-query.js?v=df726253:494
+start @ @tanstack_react-query.js?v=df726253:536
+execute @ @tanstack_react-query.js?v=df726253:1225
+await in execute
+mutate @ @tanstack_react-query.js?v=df726253:2630
+(anonymous) @ @tanstack_react-query.js?v=df726253:3295
+onCheckedChange @ content-management.tsx:777
+(anonymous) @ chunk-K3KUYG4W.js?v=df726253:27
+(anonymous) @ chunk-2UGGF4OY.js?v=df726253:28
+(anonymous) @ @radix-ui_react-switch.js?v=df726253:78
+handleEvent @ chunk-K3KUYG4W.js?v=df726253:13
+callCallback2 @ chunk-RPCDYKBN.js?v=df726253:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=df726253:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=df726253:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=df726253:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=df726253:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=df726253:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=df726253:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=df726253:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=df726253:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=df726253:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=df726253:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=df726253:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=df726253:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=df726253:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=df726253:5449
+queryClient.ts:70 Failed to parse JSON response: TypeError: Failed to execute 'json' on 'Response': body stream already read
+    at apiRequest (queryClient.ts:68:22)
+apiRequest @ queryClient.ts:70
+await in apiRequest
+mutationFn @ content-management.tsx:146
+fn @ @tanstack_react-query.js?v=df726253:1189
+run @ @tanstack_react-query.js?v=df726253:494
+start @ @tanstack_react-query.js?v=df726253:536
+execute @ @tanstack_react-query.js?v=df726253:1225
+await in execute
+mutate @ @tanstack_react-query.js?v=df726253:2630
+(anonymous) @ @tanstack_react-query.js?v=df726253:3295
+onCheckedChange @ content-management.tsx:777
+(anonymous) @ chunk-K3KUYG4W.js?v=df726253:27
+(anonymous) @ chunk-2UGGF4OY.js?v=df726253:28
+(anonymous) @ @radix-ui_react-switch.js?v=df726253:78
+handleEvent @ chunk-K3KUYG4W.js?v=df726253:13
+callCallback2 @ chunk-RPCDYKBN.js?v=df726253:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=df726253:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=df726253:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=df726253:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=df726253:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=df726253:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=df726253:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=df726253:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=df726253:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=df726253:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=df726253:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=df726253:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=df726253:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=df726253:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=df726253:5449
+content-management.tsx:747 🔍 [DEBUG] contentItems loaded: true 0
+content-management.tsx:748 🔍 [DEBUG] publicContentItems loaded: true 6
+content-management.tsx:749 🔍 [DEBUG] Looking for key: random_display_agricultural-fertilizers
+content-management.tsx:756 🎛️ [TOGGLE STATE] Random display switch: {category: 'agricultural-fertilizers', adminItem: undefined, publicItem: true, final: true}
+useAuth.ts:30  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 401 (Unauthorized)
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=df726253:840
+run @ @tanstack_react-query.js?v=df726253:494
+start @ @tanstack_react-query.js?v=df726253:536
+fetch @ @tanstack_react-query.js?v=df726253:926
+executeFetch_fn @ @tanstack_react-query.js?v=df726253:2211
+fetch @ @tanstack_react-query.js?v=df726253:2011
+refetch @ @tanstack_react-query.js?v=df726253:2001
+onFocus @ @tanstack_react-query.js?v=df726253:749
+(anonymous) @ @tanstack_react-query.js?v=df726253:1112
+(anonymous) @ @tanstack_react-query.js?v=df726253:1111
+batch @ @tanstack_react-query.js?v=df726253:583
+onFocus @ @tanstack_react-query.js?v=df726253:1110
+(anonymous) @ @tanstack_react-query.js?v=df726253:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=df726253:313
+onFocus @ @tanstack_react-query.js?v=df726253:312
+(anonymous) @ @tanstack_react-query.js?v=df726253:299
+listener @ @tanstack_react-query.js?v=df726253:270
+queryClient.ts:81  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+(anonymous) @ queryClient.ts:81
+fetchFn @ @tanstack_react-query.js?v=df726253:840
+run @ @tanstack_react-query.js?v=df726253:494
+start @ @tanstack_react-query.js?v=df726253:536
+fetch @ @tanstack_react-query.js?v=df726253:926
+executeFetch_fn @ @tanstack_react-query.js?v=df726253:2211
+fetch @ @tanstack_react-query.js?v=df726253:2011
+refetch @ @tanstack_react-query.js?v=df726253:2001
+onFocus @ @tanstack_react-query.js?v=df726253:749
+(anonymous) @ @tanstack_react-query.js?v=df726253:1112
+(anonymous) @ @tanstack_react-query.js?v=df726253:1111
+batch @ @tanstack_react-query.js?v=df726253:583
+onFocus @ @tanstack_react-query.js?v=df726253:1110
+(anonymous) @ @tanstack_react-query.js?v=df726253:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=df726253:313
+onFocus @ @tanstack_react-query.js?v=df726253:312
+(anonymous) @ @tanstack_react-query.js?v=df726253:299
+listener @ @tanstack_react-query.js?v=df726253:270
+content-management.tsx:766 🎛️ [TOGGLE] Random display toggle clicked: {category: 'agricultural-fertilizers', checked: false}
+content-management.tsx:776 🎛️ [TOGGLE] Creating new item
+content-management.tsx:747 🔍 [DEBUG] contentItems loaded: true 0
+content-management.tsx:748 🔍 [DEBUG] publicContentItems loaded: true 6
+content-management.tsx:749 🔍 [DEBUG] Looking for key: random_display_agricultural-fertilizers
+content-management.tsx:756 🎛️ [TOGGLE STATE] Random display switch: {category: 'agricultural-fertilizers', adminItem: undefined, publicItem: true, final: true}
+queryClient.ts:54  POST https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/content 401 (Unauthorized)
+apiRequest @ queryClient.ts:54
+mutationFn @ content-management.tsx:146
+fn @ @tanstack_react-query.js?v=df726253:1189
+run @ @tanstack_react-query.js?v=df726253:494
+start @ @tanstack_react-query.js?v=df726253:536
+execute @ @tanstack_react-query.js?v=df726253:1225
+await in execute
+mutate @ @tanstack_react-query.js?v=df726253:2630
+(anonymous) @ @tanstack_react-query.js?v=df726253:3295
+onCheckedChange @ content-management.tsx:777
+(anonymous) @ chunk-K3KUYG4W.js?v=df726253:27
+(anonymous) @ chunk-2UGGF4OY.js?v=df726253:28
+(anonymous) @ @radix-ui_react-switch.js?v=df726253:78
+handleEvent @ chunk-K3KUYG4W.js?v=df726253:13
+callCallback2 @ chunk-RPCDYKBN.js?v=df726253:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=df726253:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=df726253:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=df726253:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=df726253:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=df726253:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=df726253:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=df726253:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=df726253:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=df726253:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=df726253:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=df726253:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=df726253:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=df726253:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=df726253:5449
+queryClient.ts:70 Failed to parse JSON response: TypeError: Failed to execute 'json' on 'Response': body stream already read
+    at apiRequest (queryClient.ts:68:22)
+apiRequest @ queryClient.ts:70
+await in apiRequest
+mutationFn @ content-management.tsx:146
+fn @ @tanstack_react-query.js?v=df726253:1189
+run @ @tanstack_react-query.js?v=df726253:494
+start @ @tanstack_react-query.js?v=df726253:536
+execute @ @tanstack_react-query.js?v=df726253:1225
+await in execute
+mutate @ @tanstack_react-query.js?v=df726253:2630
+(anonymous) @ @tanstack_react-query.js?v=df726253:3295
+onCheckedChange @ content-management.tsx:777
+(anonymous) @ chunk-K3KUYG4W.js?v=df726253:27
+(anonymous) @ chunk-2UGGF4OY.js?v=df726253:28
+(anonymous) @ @radix-ui_react-switch.js?v=df726253:78
+handleEvent @ chunk-K3KUYG4W.js?v=df726253:13
+callCallback2 @ chunk-RPCDYKBN.js?v=df726253:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=df726253:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=df726253:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=df726253:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=df726253:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=df726253:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=df726253:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=df726253:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=df726253:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=df726253:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=df726253:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=df726253:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=df726253:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=df726253:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=df726253:5449
+content-management.tsx:747 🔍 [DEBUG] contentItems loaded: true 0
+content-management.tsx:748 🔍 [DEBUG] publicContentItems loaded: true 6
+content-management.tsx:749 🔍 [DEBUG] Looking for key: random_display_agricultural-fertilizers
+content-management.tsx:756 🎛️ [TOGGLE STATE] Random display switch: {category: 'agricultural-fertilizers', adminItem: undefined, publicItem: true, final: true}
+queryClient.ts:81  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+(anonymous) @ queryClient.ts:81
+fetchFn @ @tanstack_react-query.js?v=df726253:840
+run @ @tanstack_react-query.js?v=df726253:494
+start @ @tanstack_react-query.js?v=df726253:536
+fetch @ @tanstack_react-query.js?v=df726253:926
+executeFetch_fn @ @tanstack_react-query.js?v=df726253:2211
+fetch @ @tanstack_react-query.js?v=df726253:2011
+refetch @ @tanstack_react-query.js?v=df726253:2001
+onFocus @ @tanstack_react-query.js?v=df726253:749
+(anonymous) @ @tanstack_react-query.js?v=df726253:1112
+(anonymous) @ @tanstack_react-query.js?v=df726253:1111
+batch @ @tanstack_react-query.js?v=df726253:583
+onFocus @ @tanstack_react-query.js?v=df726253:1110
+(anonymous) @ @tanstack_react-query.js?v=df726253:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=df726253:313
+onFocus @ @tanstack_react-query.js?v=df726253:312
+(anonymous) @ @tanstack_react-query.js?v=df726253:299
+listener @ @tanstack_react-query.js?v=df726253:270
+content-management.tsx:109  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/content/images?section=product_display 401 (Unauthorized)
+queryFn @ content-management.tsx:109
+fetchFn @ @tanstack_react-query.js?v=df726253:840
+run @ @tanstack_react-query.js?v=df726253:494
+start @ @tanstack_react-query.js?v=df726253:536
+fetch @ @tanstack_react-query.js?v=df726253:926
+executeFetch_fn @ @tanstack_react-query.js?v=df726253:2211
+fetch @ @tanstack_react-query.js?v=df726253:2011
+refetch @ @tanstack_react-query.js?v=df726253:2001
+onFocus @ @tanstack_react-query.js?v=df726253:749
+(anonymous) @ @tanstack_react-query.js?v=df726253:1112
+(anonymous) @ @tanstack_react-query.js?v=df726253:1111
+batch @ @tanstack_react-query.js?v=df726253:583
+onFocus @ @tanstack_react-query.js?v=df726253:1110
+(anonymous) @ @tanstack_react-query.js?v=df726253:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=df726253:313
+onFocus @ @tanstack_react-query.js?v=df726253:312
+(anonymous) @ @tanstack_react-query.js?v=df726253:299
+listener @ @tanstack_react-query.js?v=df726253:270
+useAuth.ts:30  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 401 (Unauthorized)
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=df726253:840
+run @ @tanstack_react-query.js?v=df726253:494
+start @ @tanstack_react-query.js?v=df726253:536
+fetch @ @tanstack_react-query.js?v=df726253:926
+executeFetch_fn @ @tanstack_react-query.js?v=df726253:2211
+fetch @ @tanstack_react-query.js?v=df726253:2011
+refetch @ @tanstack_react-query.js?v=df726253:2001
+onFocus @ @tanstack_react-query.js?v=df726253:749
+(anonymous) @ @tanstack_react-query.js?v=df726253:1112
+(anonymous) @ @tanstack_react-query.js?v=df726253:1111
+batch @ @tanstack_react-query.js?v=df726253:583
+onFocus @ @tanstack_react-query.js?v=df726253:1110
+(anonymous) @ @tanstack_react-query.js?v=df726253:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=df726253:313
+onFocus @ @tanstack_react-query.js?v=df726253:312
+(anonymous) @ @tanstack_react-query.js?v=df726253:299
+listener @ @tanstack_react-query.js?v=df726253:270
+content-management.tsx:91  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/content?language=en&section=product_display 401 (Unauthorized)
+queryFn @ content-management.tsx:91
+fetchFn @ @tanstack_react-query.js?v=df726253:840
+run @ @tanstack_react-query.js?v=df726253:494
+start @ @tanstack_react-query.js?v=df726253:536
+fetch @ @tanstack_react-query.js?v=df726253:926
+executeFetch_fn @ @tanstack_react-query.js?v=df726253:2211
+fetch @ @tanstack_react-query.js?v=df726253:2011
+refetch @ @tanstack_react-query.js?v=df726253:2001
+onFocus @ @tanstack_react-query.js?v=df726253:749
+(anonymous) @ @tanstack_react-query.js?v=df726253:1112
+(anonymous) @ @tanstack_react-query.js?v=df726253:1111
+batch @ @tanstack_react-query.js?v=df726253:583
+onFocus @ @tanstack_react-query.js?v=df726253:1110
+(anonymous) @ @tanstack_react-query.js?v=df726253:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=df726253:313
+onFocus @ @tanstack_react-query.js?v=df726253:312
+(anonymous) @ @tanstack_react-query.js?v=df726253:299
+listener @ @tanstack_react-query.js?v=df726253:270
+content-management.tsx:747 🔍 [DEBUG] contentItems loaded: true 0
+content-management.tsx:748 🔍 [DEBUG] publicContentItems loaded: true 6
+content-management.tsx:749 🔍 [DEBUG] Looking for key: random_display_agricultural-fertilizers
+content-management.tsx:756 🎛️ [TOGGLE STATE] Random display switch: {category: 'agricultural-fertilizers', adminItem: undefined, publicItem: true, final: true}
+content-management.tsx:766 🎛️ [TOGGLE] Random display toggle clicked: {category: 'agricultural-fertilizers', checked: false}
+content-management.tsx:776 🎛️ [TOGGLE] Creating new item
+content-management.tsx:747 🔍 [DEBUG] contentItems loaded: true 0
+content-management.tsx:748 🔍 [DEBUG] publicContentItems loaded: true 6
+content-management.tsx:749 🔍 [DEBUG] Looking for key: random_display_agricultural-fertilizers
+content-management.tsx:756 🎛️ [TOGGLE STATE] Random display switch: {category: 'agricultural-fertilizers', adminItem: undefined, publicItem: true, final: true}
+queryClient.ts:54  POST https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/content 401 (Unauthorized)
+apiRequest @ queryClient.ts:54
+mutationFn @ content-management.tsx:146
+fn @ @tanstack_react-query.js?v=df726253:1189
+run @ @tanstack_react-query.js?v=df726253:494
+start @ @tanstack_react-query.js?v=df726253:536
+execute @ @tanstack_react-query.js?v=df726253:1225
+await in execute
+mutate @ @tanstack_react-query.js?v=df726253:2630
+(anonymous) @ @tanstack_react-query.js?v=df726253:3295
+onCheckedChange @ content-management.tsx:777
+(anonymous) @ chunk-K3KUYG4W.js?v=df726253:27
+(anonymous) @ chunk-2UGGF4OY.js?v=df726253:28
+(anonymous) @ @radix-ui_react-switch.js?v=df726253:78
+handleEvent @ chunk-K3KUYG4W.js?v=df726253:13
+callCallback2 @ chunk-RPCDYKBN.js?v=df726253:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=df726253:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=df726253:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=df726253:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=df726253:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=df726253:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=df726253:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=df726253:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=df726253:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=df726253:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=df726253:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=df726253:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=df726253:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=df726253:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=df726253:5449
+queryClient.ts:70 Failed to parse JSON response: TypeError: Failed to execute 'json' on 'Response': body stream already read
+    at apiRequest (queryClient.ts:68:22)
+apiRequest @ queryClient.ts:70
+await in apiRequest
+mutationFn @ content-management.tsx:146
+fn @ @tanstack_react-query.js?v=df726253:1189
+run @ @tanstack_react-query.js?v=df726253:494
+start @ @tanstack_react-query.js?v=df726253:536
+execute @ @tanstack_react-query.js?v=df726253:1225
+await in execute
+mutate @ @tanstack_react-query.js?v=df726253:2630
+(anonymous) @ @tanstack_react-query.js?v=df726253:3295
+onCheckedChange @ content-management.tsx:777
+(anonymous) @ chunk-K3KUYG4W.js?v=df726253:27
+(anonymous) @ chunk-2UGGF4OY.js?v=df726253:28
+(anonymous) @ @radix-ui_react-switch.js?v=df726253:78
+handleEvent @ chunk-K3KUYG4W.js?v=df726253:13
+callCallback2 @ chunk-RPCDYKBN.js?v=df726253:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=df726253:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=df726253:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=df726253:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=df726253:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=df726253:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=df726253:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=df726253:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=df726253:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=df726253:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=df726253:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=df726253:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=df726253:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=df726253:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=df726253:5449
+content-management.tsx:747 🔍 [DEBUG] contentItems loaded: true 0
+content-management.tsx:748 🔍 [DEBUG] publicContentItems loaded: true 6
+content-management.tsx:749 🔍 [DEBUG] Looking for key: random_display_agricultural-fertilizers
+content-management.tsx:756 🎛️ [TOGGLE STATE] Random display switch: {category: 'agricultural-fertilizers', adminItem: undefined, publicItem: true, final: true}
+queryClient.ts:81  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+(anonymous) @ queryClient.ts:81
+fetchFn @ @tanstack_react-query.js?v=df726253:840
+run @ @tanstack_react-query.js?v=df726253:494
+start @ @tanstack_react-query.js?v=df726253:536
+fetch @ @tanstack_react-query.js?v=df726253:926
+executeFetch_fn @ @tanstack_react-query.js?v=df726253:2211
+fetch @ @tanstack_react-query.js?v=df726253:2011
+refetch @ @tanstack_react-query.js?v=df726253:2001
+onFocus @ @tanstack_react-query.js?v=df726253:749
+(anonymous) @ @tanstack_react-query.js?v=df726253:1112
+(anonymous) @ @tanstack_react-query.js?v=df726253:1111
+batch @ @tanstack_react-query.js?v=df726253:583
+onFocus @ @tanstack_react-query.js?v=df726253:1110
+(anonymous) @ @tanstack_react-query.js?v=df726253:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=df726253:313
+onFocus @ @tanstack_react-query.js?v=df726253:312
+(anonymous) @ @tanstack_react-query.js?v=df726253:299
+listener @ @tanstack_react-query.js?v=df726253:270
+useAuth.ts:30  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 401 (Unauthorized)
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=df726253:840
+run @ @tanstack_react-query.js?v=df726253:494
+start @ @tanstack_react-query.js?v=df726253:536
+fetch @ @tanstack_react-query.js?v=df726253:926
+executeFetch_fn @ @tanstack_react-query.js?v=df726253:2211
+fetch @ @tanstack_react-query.js?v=df726253:2011
+refetch @ @tanstack_react-query.js?v=df726253:2001
+onFocus @ @tanstack_react-query.js?v=df726253:749
+(anonymous) @ @tanstack_react-query.js?v=df726253:1112
+(anonymous) @ @tanstack_react-query.js?v=df726253:1111
+batch @ @tanstack_react-query.js?v=df726253:583
+onFocus @ @tanstack_react-query.js?v=df726253:1110
+(anonymous) @ @tanstack_react-query.js?v=df726253:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=df726253:313
+onFocus @ @tanstack_react-query.js?v=df726253:312
+(anonymous) @ @tanstack_react-query.js?v=df726253:299
+listener @ @tanstack_react-query.js?v=df726253:270
+content-management.tsx:766 🎛️ [TOGGLE] Random display toggle clicked: {category: 'agricultural-fertilizers', checked: false}
+content-management.tsx:776 🎛️ [TOGGLE] Creating new item
+content-management.tsx:747 🔍 [DEBUG] contentItems loaded: true 0
+content-management.tsx:748 🔍 [DEBUG] publicContentItems loaded: true 6
+content-management.tsx:749 🔍 [DEBUG] Looking for key: random_display_agricultural-fertilizers
+content-management.tsx:756 🎛️ [TOGGLE STATE] Random display switch: {category: 'agricultural-fertilizers', adminItem: undefined, publicItem: true, final: true}
+queryClient.ts:54  POST https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/content 401 (Unauthorized)
+apiRequest @ queryClient.ts:54
+mutationFn @ content-management.tsx:146
+fn @ @tanstack_react-query.js?v=df726253:1189
+run @ @tanstack_react-query.js?v=df726253:494
+start @ @tanstack_react-query.js?v=df726253:536
+execute @ @tanstack_react-query.js?v=df726253:1225
+await in execute
+mutate @ @tanstack_react-query.js?v=df726253:2630
+(anonymous) @ @tanstack_react-query.js?v=df726253:3295
+onCheckedChange @ content-management.tsx:777
+(anonymous) @ chunk-K3KUYG4W.js?v=df726253:27
+(anonymous) @ chunk-2UGGF4OY.js?v=df726253:28
+(anonymous) @ @radix-ui_react-switch.js?v=df726253:78
+handleEvent @ chunk-K3KUYG4W.js?v=df726253:13
+callCallback2 @ chunk-RPCDYKBN.js?v=df726253:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=df726253:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=df726253:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=df726253:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=df726253:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=df726253:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=df726253:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=df726253:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=df726253:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=df726253:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=df726253:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=df726253:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=df726253:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=df726253:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=df726253:5449
+queryClient.ts:70 Failed to parse JSON response: TypeError: Failed to execute 'json' on 'Response': body stream already read
+    at apiRequest (queryClient.ts:68:22)
+apiRequest @ queryClient.ts:70
+await in apiRequest
+mutationFn @ content-management.tsx:146
+fn @ @tanstack_react-query.js?v=df726253:1189
+run @ @tanstack_react-query.js?v=df726253:494
+start @ @tanstack_react-query.js?v=df726253:536
+execute @ @tanstack_react-query.js?v=df726253:1225
+await in execute
+mutate @ @tanstack_react-query.js?v=df726253:2630
+(anonymous) @ @tanstack_react-query.js?v=df726253:3295
+onCheckedChange @ content-management.tsx:777
+(anonymous) @ chunk-K3KUYG4W.js?v=df726253:27
+(anonymous) @ chunk-2UGGF4OY.js?v=df726253:28
+(anonymous) @ @radix-ui_react-switch.js?v=df726253:78
+handleEvent @ chunk-K3KUYG4W.js?v=df726253:13
+callCallback2 @ chunk-RPCDYKBN.js?v=df726253:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=df726253:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=df726253:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=df726253:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=df726253:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=df726253:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=df726253:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=df726253:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=df726253:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=df726253:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=df726253:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=df726253:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=df726253:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=df726253:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=df726253:5449
+content-management.tsx:747 🔍 [DEBUG] contentItems loaded: true 0
+content-management.tsx:748 🔍 [DEBUG] publicContentItems loaded: true 6
+content-management.tsx:749 🔍 [DEBUG] Looking for key: random_display_agricultural-fertilizers
+content-management.tsx:756 🎛️ [TOGGLE STATE] Random display switch: {category: 'agricultural-fertilizers', adminItem: undefined, publicItem: true, final: true}
