@@ -96,13 +96,14 @@ The system is built on a robust full-stack architecture. Features include compre
 - **INVENTORY INTEGRITY:** Only products with proper kardex system (stock, SKU, barcode) are displayed to customers
 - **CONTENT MANAGEMENT:** Toggle system works correctly for enabling/disabling random product display per category
 
-**Controlled Product Display Implementation (August 2025):**
-- **USER PREFERENCE:** Switched from random product selection to controlled content management system
-- **RANDOM PRODUCTS REMOVED:** Completely eliminated random products section from agricultural-fertilizers page
-- **DATABASE-DRIVEN DISPLAY:** Now shows all available products from database with kardex filtering
-- **CONSISTENT DISPLAY:** Products display is now predictable and manageable rather than randomized
-- **FULL PRODUCT SHOWCASE:** All 6 agricultural fertilizer products with proper inventory displayed simultaneously
-- **CONTROLLED CONTENT:** Administrative control over product visibility without random selection algorithm
+**Enhanced Random Products with Complete Documentation Filter (August 2025):**
+- **ENHANCED FILTERING:** Modified getProductsByCategory() to require kardex + catalog + MSDS documentation
+- **STRICT REQUIREMENTS:** Only products with stock>0, SKU, barcode, pdfCatalogUrl, and msdsUrl are displayed
+- **CONTENT MANAGEMENT:** Full administrative control via content_items table (random_display_{category})
+- **MULTI-CATEGORY SUPPORT:** Implemented across agricultural-fertilizers, paint-thinner, and other categories
+- **DOCUMENTATION BADGES:** Visual indicators show Kardex, Catalog, and MSDS compliance
+- **USER CONTROL:** Administrators can enable/disable random products per category via content management
+- **REAL-TIME FILTERING:** API endpoint respects both content management settings and documentation requirements
 
 ### System Design Choices
 The architecture emphasizes modularity and scalability. Core architectural patterns include a RESTful API design for backend-frontend communication, ensuring clear separation of concerns. Data integrity is maintained through transactional operations for critical processes like order creation and inventory updates. The system employs a prevention-first approach to avoid data inconsistencies. A unified vehicle selection algorithm prioritizes cost-efficiency and safety compliance, particularly for hazardous materials. Inventory management strictly adheres to FIFO (First-In, First-Out) principles. A comprehensive email and SMS automation system leverages templates and intelligent routing. The system is designed for continuous integration and deployment, with a focus on performance optimization through database indexing, caching, and asset optimization.

@@ -181,7 +181,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getProductsByCategory(category: string): Promise<ShowcaseProduct[]> {
-    // Filter to show only active products with proper inventory (kardex)
+    // Filter to show only complete products with kardex + catalog + MSDS
     return await showcaseDb
       .select()
       .from(showcaseProducts)
@@ -191,7 +191,11 @@ export class DatabaseStorage implements IStorage {
           eq(showcaseProducts.isActive, true),
           sql`${showcaseProducts.stockQuantity} > 0`, // Only products with stock
           sql`${showcaseProducts.sku} IS NOT NULL`, // Must have SKU (proper kardex)
-          sql`${showcaseProducts.barcode} IS NOT NULL` // Must have barcode (proper kardex)
+          sql`${showcaseProducts.barcode} IS NOT NULL`, // Must have barcode (proper kardex)
+          sql`${showcaseProducts.pdfCatalogUrl} IS NOT NULL`, // Must have catalog
+          sql`${showcaseProducts.pdfCatalogUrl} != ''`, // Catalog URL not empty
+          sql`${showcaseProducts.msdsUrl} IS NOT NULL`, // Must have MSDS
+          sql`${showcaseProducts.msdsUrl} != ''` // MSDS URL not empty
         )
       )
       .orderBy(desc(showcaseProducts.updatedAt));

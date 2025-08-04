@@ -1,4 +1,4 @@
-import { CheckCircle, ArrowRight, Wheat, Sprout, TreePine, Leaf, Download, Image, Star } from "lucide-react";
+import { CheckCircle, ArrowRight, Wheat, Sprout, TreePine, Leaf, Download, Image, Star, Package, FileText, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -20,7 +20,13 @@ const AgriculturalFertilizersPage = () => {
     queryFn: () => fetch("/api/products?category=agricultural-fertilizers").then(res => res.json()),
   });
 
-  // Use controlled product display instead of random products
+  const { data: randomProductsData, isLoading: loadingRandomProducts } = useQuery({
+    queryKey: ["/api/products/random/agricultural-fertilizers"],
+    refetchInterval: 10000, // Refetch every 10 seconds to catch database changes
+  });
+
+  // Debug the actual data received
+  console.log('🔄 [AGRICULTURAL-FERTILIZERS] useQuery randomProductsData:', randomProductsData);
 
   const { data: productStatsData, isLoading: statsLoading } = useQuery({
     queryKey: ['/api/shop/product-stats'],
@@ -604,7 +610,139 @@ const AgriculturalFertilizersPage = () => {
         </div>
       </section>
 
+      {/* Random Products Recommendations Section - Controlled by Content Management */}
+      {(() => {
+        const shouldShow = randomProductsData?.success && 
+                          Array.isArray(randomProductsData?.data) && 
+                          randomProductsData.data.length > 0;
+        console.log('🐛 [DEBUG] Random Products Conditional Check:', {
+          success: randomProductsData?.success,
+          isArray: Array.isArray(randomProductsData?.data),
+          dataLength: randomProductsData?.data?.length,
+          shouldShow: shouldShow,
+          fullData: randomProductsData
+        });
+        return shouldShow;
+      })() && (
+        <section className="py-16 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-medium mb-4">
+                <Star className="w-4 h-4" />
+                {content.benefitsTitle?.includes('کشاورزی') ? 'محصولات کامل و مستند' : 'Complete & Documented Products'}
+              </div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-4" dir={direction}>
+                {content.benefitsTitle?.includes('کشاورزی') 
+                  ? 'محصولات کاملاً مستندسازی شده' 
+                  : 'Fully Documented Products'}
+              </h2>
+              <p className="text-lg text-gray-600 max-w-4xl mx-auto" dir={direction}>
+                {content.benefitsTitle?.includes('کشاورزی') 
+                  ? 'محصولاتی با کاردکس کامل، کاتالوگ فنی و برگه اطلاعات ایمنی (MSDS) برای استفاده حرفه‌ای'
+                  : 'Products with complete kardex, technical catalog, and MSDS safety data sheets for professional use'}
+              </p>
+            </div>
 
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {randomProductsData.data.map((product: ShowcaseProduct) => (
+                <MolecularHoverEffect key={product.id}>
+                <Card className="h-full hover:shadow-xl transition-all duration-300 border-0 bg-white/90 backdrop-blur-sm cursor-pointer group"
+                      onClick={() => window.location.href = `/shop?product=${product.id}`}>
+                  <CardContent className="p-6 h-full flex flex-col">
+                    {product.imageUrl && (
+                      <div className="aspect-video w-full mb-4 bg-gray-100 rounded-lg overflow-hidden">
+                        <img
+                          src={product.imageUrl}
+                          alt={product.name}
+                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      </div>
+                    )}
+                    
+                    <div className="flex items-center gap-2 mb-3">
+                      <Badge variant="outline" className="text-blue-600 border-blue-600">
+                        {product.category}
+                      </Badge>
+                      <Badge className="bg-green-100 text-green-800 border-green-300">
+                        ✅ مستندسازی کامل
+                      </Badge>
+                    </div>
+                    
+                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">{product.name}</h3>
+                    
+                    {product.technicalName && (
+                      <p className="text-sm text-gray-600 mb-3 font-medium">{product.technicalName}</p>
+                    )}
+                    
+                    {product.description && (
+                      <p className="text-gray-600 mb-4 line-clamp-2 flex-grow">{product.description}</p>
+                    )}
+                    
+                    <div className="mt-auto space-y-3">
+                      {product.features && Array.isArray(product.features) && product.features.slice(0, 2).map((feature, index) => (
+                        <div key={index} className="flex items-center text-sm text-gray-700">
+                          <CheckCircle className="h-3 w-3 text-green-500 mr-2 flex-shrink-0" />
+                          {String(feature)}
+                        </div>
+                      ))}
+                      
+                      <div className="flex items-center gap-2 pt-2">
+                        <Badge variant="outline" className="text-xs">
+                          <Package className="w-3 h-3 mr-1" />
+                          Kardex
+                        </Badge>
+                        <Badge variant="outline" className="text-xs">
+                          <FileText className="w-3 h-3 mr-1" />
+                          Catalog
+                        </Badge>
+                        <Badge variant="outline" className="text-xs">
+                          <Shield className="w-3 h-3 mr-1" />
+                          MSDS
+                        </Badge>
+                      </div>
+                      
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            window.location.href = `/shop?product=${product.id}`;
+                          }}
+                          className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md text-sm font-medium transition-colors"
+                        >
+                          🛒 View in Shop
+                        </button>
+                        <div onClick={(e) => e.stopPropagation()}>
+                          <ProductInquiryForm 
+                            product={product}
+                            triggerText="Quote"
+                            triggerVariant="outline"
+                            triggerSize="sm"
+                            className="border-blue-600 text-blue-600 hover:bg-blue-50"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                </MolecularHoverEffect>
+              ))}
+            </div>
+
+            {/* Settings Info */}
+            <div className="mt-8 text-center">
+              <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-lg text-sm">
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                {content.benefitsTitle?.includes('کشاورزی')
+                  ? `نمایش ${randomProductsData.settings?.selectedCount} محصول کامل از ${randomProductsData.settings?.totalProducts} محصول موجود`
+                  : `Showing ${randomProductsData.settings?.selectedCount} complete products out of ${randomProductsData.settings?.totalProducts} available`}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Technical Information Section */}
       <section className="py-20 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
