@@ -737,6 +737,11 @@ export default function ContentManagement() {
                       </div>
                       <Switch
                         checked={(() => {
+                          // Debug: Let's see what data we have
+                          console.log('🔍 [DEBUG] All contentItems keys:', contentItems?.map(item => item.key));
+                          console.log('🔍 [DEBUG] All publicContentItems keys:', publicContentItems?.map(item => item.key));
+                          console.log('🔍 [DEBUG] Looking for key:', `random_display_${selectedCategory}`);
+                          
                           // Use admin authenticated data if available, fallback to public data
                           const adminItem = contentItems?.find((item: ContentItem) => item.key === `random_display_${selectedCategory}`);
                           const publicItem = publicContentItems?.find((item: ContentItem) => item.key === `random_display_${selectedCategory}`);
