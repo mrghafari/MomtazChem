@@ -23,7 +23,8 @@ export default function PaintSolventsPage() {
     queryFn: async () => {
       const response = await fetch('/api/content-management/items');
       if (!response.ok) throw new Error('Failed to fetch content');
-      return response.json();
+      const result = await response.json();
+      return result.success ? result.data : [];
     }
   });
 
