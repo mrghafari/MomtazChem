@@ -27,14 +27,13 @@ export default function PaymentSettingsPage() {
   // Fetch payment gateways
   const { data: gateways, isLoading } = useQuery({
     queryKey: ['/api/payment/gateways'],
-    queryFn: () => apiRequest('GET', '/api/payment/gateways').then(res => res.json()),
+    queryFn: () => apiRequest('/api/payment/gateways', { method: 'GET' }),
   });
 
   // Toggle gateway status mutation
   const toggleGatewayMutation = useMutation({
     mutationFn: async ({ gatewayId }: { gatewayId: number }) => {
-      const response = await apiRequest('PATCH', `/api/payment/gateways/${gatewayId}/toggle`);
-      return response.json();
+      return await apiRequest(`/api/payment/gateways/${gatewayId}/toggle`, { method: 'PATCH' });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/payment/gateways'] });
