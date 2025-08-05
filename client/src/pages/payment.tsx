@@ -10,6 +10,8 @@ import { apiRequest } from "@/lib/queryClient";
 import PaymentGateway from "@/components/checkout/payment-gateway";
 
 export default function Payment() {
+  console.log('🚀 [PAYMENT COMPONENT] Payment component starting to load...');
+  
   const [, params] = useRoute('/payment/:orderId');
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -17,11 +19,21 @@ export default function Payment() {
   const [paymentProcessed, setPaymentProcessed] = useState(false);
   const [paymentData, setPaymentData] = useState<any>(null);
 
-  const orderId = params?.orderId ? parseInt(params.orderId) : null;
+  console.log('🚀 [PAYMENT COMPONENT] useRoute params:', params);
   
-  console.log('🚀 [PAYMENT COMPONENT] Payment component mounted');
-  console.log('🚀 [PAYMENT COMPONENT] Params:', params);
-  console.log('🚀 [PAYMENT COMPONENT] Order ID:', orderId);
+  // Also try URL params directly
+  const urlParams = new URLSearchParams(window.location.search);
+  const orderIdFromUrl = urlParams.get('orderId');
+  const orderIdFromPath = params?.orderId;
+  
+  console.log('🚀 [PAYMENT COMPONENT] URL Params orderId:', orderIdFromUrl);
+  console.log('🚀 [PAYMENT COMPONENT] Path Params orderId:', orderIdFromPath);
+  
+  const orderId = orderIdFromPath ? parseInt(orderIdFromPath) : 
+                   orderIdFromUrl ? parseInt(orderIdFromUrl) : null;
+  
+  console.log('🚀 [PAYMENT COMPONENT] Final Order ID:', orderId);
+  console.log('🚀 [PAYMENT COMPONENT] Window location:', window.location.href);
 
   // Fetch order details
   const { data: orderData, isLoading: orderLoading, error: orderError } = useQuery({
