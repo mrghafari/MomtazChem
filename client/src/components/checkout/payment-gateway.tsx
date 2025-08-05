@@ -74,16 +74,22 @@ const PaymentGateway = ({
   };
 
   // Handle hybrid payment (wallet + bank)
-  const handleHybridPayment = async () => {
+  const handleHybridPayment = async (walletAmount: number, remainingAmount: number) => {
     console.log('🔄 [HYBRID PAYMENT] Processing hybrid payment for order:', orderId);
-    const currentBalance = walletBalance?.balance || 0;
-    const remainingAmount = Math.max(0, totalAmount - currentBalance);
+    console.log('🔄 [HYBRID PAYMENT] Wallet amount:', walletAmount, 'Remaining:', remainingAmount);
     
     if (remainingAmount > 0) {
       console.log('🏦 [HYBRID PAYMENT] Redirecting to bank gateway for remaining amount:', remainingAmount);
+      // Store wallet deduction info for later processing
+      setFormData(prev => ({
+        ...prev,
+        walletAmount,
+        remainingAmount,
+        paymentMethod: 'wallet_partial'
+      }));
       handleOnlinePayment();
     } else {
-      console.log('💰 [HYBRID PAYMENT] Sufficient wallet balance, processing as wallet-only');
+      console.log('💰 [HYBRID PAYMENT] Processing as wallet-only payment');
       handleWalletOnlyPayment();
     }
   };
@@ -223,6 +229,18 @@ const PaymentGateway = ({
       // Get gateway config and build redirect URL
       const gatewayConfig = activeGateway.config;
       console.log('🔍 [PAYMENT GATEWAY] Gateway config:', gatewayConfig);
+      console.log('🔍 [PAYMENT GATEWAY] Form data:', formData);
+      
+      // Determine amount for gateway - use remainingAmount if hybrid, otherwise totalAmount
+      const amountForGateway = formData.remainingAmount || totalAmount;
+      const walletAmount = formData.walletAmount || 0;
+      
+      console.log('💰 [PAYMENT GATEWAY] Payment breakdown:', {
+        totalAmount,
+        walletAmount,
+        amountForGateway,
+        isHybrid: formData.paymentMethod === 'wallet_partial'
+      });
       
       if (gatewayConfig && gatewayConfig.apiBaseUrl) {
         // Build payment URL with proper parameters for Shaparak
@@ -232,10 +250,12 @@ const PaymentGateway = ({
         
         const paymentUrl = `${baseUrl}?` +
           `merchantId=${encodeURIComponent(merchantId)}&` +
-          `amount=${totalAmount}&` +
+          `amount=${amountForGateway}&` +
           `currency=IQD&` +
           `reference=${encodeURIComponent(paymentReference)}&` +
           `orderNumber=${encodeURIComponent(orderId)}&` +
+          `walletAmount=${walletAmount}&` +
+          `paymentMethod=${encodeURIComponent(formData.paymentMethod || 'online_payment')}&` +
           `returnUrl=${encodeURIComponent(window.location.origin + '/payment-callback')}&` +
           `cancelUrl=${encodeURIComponent(window.location.origin + '/payment-cancelled')}`;
         
@@ -689,11 +709,20 @@ const PaymentGateway = ({
 
   const renderWalletPartialPayment = () => {
     const currentBalance = walletBalance?.balance || 0;
-    const remainingAmount = Math.max(0, totalAmount - currentBalance);
+    // User specifies wallet amount instead of auto-calculation
+    const [walletAmount, setWalletAmount] = useState(Math.min(currentBalance, totalAmount));
+    const remainingAmount = Math.max(0, totalAmount - walletAmount);
     
     console.log('🔍 [WALLET PARTIAL DEBUG] Current balance:', currentBalance);
     console.log('🔍 [WALLET PARTIAL DEBUG] Total amount:', totalAmount);
+    console.log('🔍 [WALLET PARTIAL DEBUG] User wallet amount:', walletAmount);
     console.log('🔍 [WALLET PARTIAL DEBUG] Remaining amount:', remainingAmount);
+
+    const handleWalletAmountChange = (value: string) => {
+      const amount = parseFloat(value) || 0;
+      const maxWallet = Math.min(currentBalance, totalAmount);
+      setWalletAmount(Math.min(Math.max(0, amount), maxWallet));
+    };
 
     return (
       <Card>
@@ -715,8 +744,37 @@ const PaymentGateway = ({
                 <span>موجودی کیف پول:</span>
                 <span className="font-semibold text-green-600">{formatCurrency(currentBalance)}</span>
               </div>
-              <div className="border-t pt-2 flex justify-between">
-                <span>مانده برای پرداخت:</span>
+            </div>
+          </div>
+          
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="walletAmount" className="text-sm font-medium">
+                مقدار کسری از کیف پول (IQD)
+              </Label>
+              <Input
+                id="walletAmount"
+                type="number"
+                value={walletAmount}
+                onChange={(e) => handleWalletAmountChange(e.target.value)}
+                min="0"
+                max={Math.min(currentBalance, totalAmount)}
+                step="0.01"
+                className="mt-1"
+                placeholder="مقدار از کیف پول"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                حداکثر: {formatCurrency(Math.min(currentBalance, totalAmount))}
+              </p>
+            </div>
+            
+            <div className="bg-gray-50 p-3 rounded-lg space-y-1 text-sm">
+              <div className="flex justify-between">
+                <span>از کیف پول:</span>
+                <span className="font-semibold text-blue-600">{formatCurrency(walletAmount)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>مانده برای بانک:</span>
                 <span className="font-semibold text-red-600">{formatCurrency(remainingAmount)}</span>
               </div>
             </div>
@@ -728,7 +786,7 @@ const PaymentGateway = ({
                 <CheckCircle className="w-12 h-12 text-green-600 mx-auto mb-2" />
                 <h4 className="font-semibold text-green-900 mb-2">پرداخت از کیف پول</h4>
                 <p className="text-sm text-green-800">
-                  موجودی کیف پول شما برای پرداخت کامل این سفارش کافی است.
+                  پرداخت کامل از کیف پول انجام خواهد شد.
                 </p>
               </div>
               
@@ -746,7 +804,7 @@ const PaymentGateway = ({
                 ) : (
                   <>
                     <Wallet className="w-5 h-5 mr-2" />
-                    پرداخت از کیف پول ({formatCurrency(totalAmount)})
+                    پرداخت از کیف پول ({formatCurrency(walletAmount)})
                   </>
                 )}
               </Button>
@@ -755,16 +813,16 @@ const PaymentGateway = ({
             <div className="text-center space-y-4">
               <div className="bg-amber-50 p-4 rounded-lg">
                 <AlertCircle className="w-12 h-12 text-amber-600 mx-auto mb-2" />
-                <h4 className="font-semibold text-amber-900 mb-2">نیاز به پرداخت بانکی</h4>
+                <h4 className="font-semibold text-amber-900 mb-2">پرداخت ترکیبی</h4>
                 <p className="text-sm text-amber-800">
-                  {formatCurrency(currentBalance)} از کیف پول استفاده می‌شود و 
+                  {formatCurrency(walletAmount)} از کیف پول کسر و 
                   {formatCurrency(remainingAmount)} از طریق بانک پرداخت خواهد شد.
                 </p>
               </div>
               
               <Button 
-                onClick={handleHybridPayment}
-                disabled={isProcessing}
+                onClick={() => handleHybridPayment(walletAmount, remainingAmount)}
+                disabled={isProcessing || walletAmount <= 0}
                 size="lg"
                 className="w-full bg-blue-600 hover:bg-blue-700"
               >
