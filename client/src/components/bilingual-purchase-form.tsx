@@ -1169,6 +1169,21 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         }, 1500);
         return;
       }
+      // Handle online_payment method - redirect to bank gateway
+      else if (paymentMethod === 'online_payment' && response.redirectToPayment && response.paymentGatewayUrl) {
+        console.log('🏦 [ONLINE PAYMENT] Redirecting to bank gateway:', response.paymentGatewayUrl);
+        
+        toast({
+          title: "انتقال به درگاه بانکی",
+          description: "در حال انتقال شما به درگاه پرداخت بانکی..."
+        });
+        
+        // Redirect to payment gateway
+        setTimeout(() => {
+          window.location.href = response.paymentGatewayUrl;
+        }, 1500);
+        return;
+      }
       // Check if payment gateway redirect is needed (legacy)
       else if (response.redirectToPayment && response.paymentGatewayUrl) {
         toast({
