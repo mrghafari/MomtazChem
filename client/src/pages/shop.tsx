@@ -1353,11 +1353,11 @@ const Shop = () => {
                               <img 
                                 src={product.imageUrl} 
                                 alt={product.name}
-                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110 pointer-events-none"
+                                className="w-full h-full object-cover transition-transform duration-100 group-hover:scale-105 pointer-events-none"
                               />
                               {/* Zoom overlay on hover */}
-                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center pointer-events-none">
-                                <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-100 flex items-center justify-center pointer-events-none">
+                                <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-100" />
                               </div>
                             </div>
                           ) : (
@@ -1546,7 +1546,7 @@ const Shop = () => {
                                             return (
                                               <div
                                                 key={i}
-                                                className={`flex-1 h-1.5 rounded-full transition-all duration-300 ${
+                                                className={`flex-1 h-1.5 rounded-full transition-all duration-100 ${
                                                   isActive 
                                                     ? 'bg-yellow-400 shadow-lg shadow-yellow-400/50' 
                                                     : currentQty >= d.minQty 
@@ -1712,11 +1712,11 @@ const Shop = () => {
                               <img 
                                 src={product.imageUrl} 
                                 alt={product.name}
-                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110 pointer-events-none"
+                                className="w-full h-full object-cover transition-transform duration-100 group-hover:scale-105 pointer-events-none"
                               />
                               {/* Zoom overlay on hover */}
-                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center pointer-events-none">
-                                <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-100 flex items-center justify-center pointer-events-none">
+                                <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-100" />
                               </div>
                             </div>
                           ) : (
@@ -1884,7 +1884,7 @@ const Shop = () => {
                                               return (
                                                 <div
                                                   key={i}
-                                                  className={`w-8 h-2 rounded-full transition-all duration-300 ${
+                                                  className={`w-8 h-2 rounded-full transition-all duration-100 ${
                                                     isActive 
                                                       ? 'bg-yellow-400 shadow-lg shadow-yellow-400/50' 
                                                       : currentQty >= d.minQty 
