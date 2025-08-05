@@ -106,7 +106,7 @@ const PaymentGateway = ({
           console.log('✅ [WALLET DEDUCTION] Wallet successfully deducted:', walletAmount);
           console.log('🏦 [BANK REDIRECT] Now redirecting to bank gateway for remaining:', remainingAmount);
           
-          // Step 2: Redirect to bank gateway for remaining amount
+          // Step 2: Update form data for bank gateway
           setFormData(prev => ({
             ...prev,
             walletAmount,
@@ -114,8 +114,14 @@ const PaymentGateway = ({
             paymentMethod: 'wallet_partial'
           }));
           
-          // Trigger bank gateway redirect
-          handleOnlinePayment();
+          // Reset processing state before triggering bank redirect
+          setIsProcessing(false);
+          
+          // Small delay to ensure state is updated, then trigger bank gateway redirect
+          setTimeout(() => {
+            console.log('🚀 [BANK REDIRECT] Triggering handleOnlinePayment after wallet deduction');
+            handleOnlinePayment();
+          }, 100);
         } else {
           throw new Error(walletResponse.message || 'Wallet deduction failed');
         }
