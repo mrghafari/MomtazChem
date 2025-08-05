@@ -1267,6 +1267,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     console.log('🚀 [SUBMIT DEBUG] Payment method:', paymentMethod);
     console.log('🚀 [SUBMIT DEBUG] Form validation state:', form.formState);
     console.log('🚀 [SUBMIT DEBUG] Form errors:', form.formState.errors);
+    console.log('🚀 [SUBMIT DEBUG] Mutation pending before submit:', submitOrderMutation.isPending);
     
     // Validate shipping method selection
     if (!selectedShippingMethod) {
@@ -2350,6 +2351,16 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                     type="submit"
                     disabled={submitOrderMutation.isPending}
                     className="flex-1"
+                    onClick={(e) => {
+                      console.log('🔘 [BUTTON DEBUG] Submit button clicked');
+                      console.log('🔘 [BUTTON DEBUG] Mutation pending:', submitOrderMutation.isPending);
+                      console.log('🔘 [BUTTON DEBUG] Form valid:', form.formState.isValid);
+                      console.log('🔘 [BUTTON DEBUG] Form errors:', form.formState.errors);
+                      console.log('🔘 [BUTTON DEBUG] Selected shipping method:', selectedShippingMethod);
+                      console.log('🔘 [BUTTON DEBUG] Payment method:', paymentMethod);
+                      
+                      // Don't prevent default - let form handle submission
+                    }}
                   >
                     {submitOrderMutation.isPending ? t.loading : t.submitOrder}
                   </Button>
