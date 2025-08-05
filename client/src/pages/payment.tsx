@@ -25,6 +25,12 @@ export default function Payment() {
     enabled: !!orderId,
   });
 
+  // Fetch active payment gateway
+  const { data: activeGateway, isLoading: gatewayLoading } = useQuery({
+    queryKey: ['/api/payment/active-gateway'],
+    enabled: !!orderId,
+  });
+
   // Update payment status mutation
   const updatePaymentMutation = useMutation({
     mutationFn: async (paymentData: any) => {
@@ -228,13 +234,34 @@ export default function Payment() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Payment Gateway */}
           <div className="lg:col-span-2">
-            <PaymentGateway
-              paymentMethod={order.paymentMethod}
-              totalAmount={order.totalAmount}
-              orderId={order.orderNumber}
-              onPaymentSuccess={handlePaymentSuccess}
-              onPaymentError={handlePaymentError}
-            />
+            {gatewayLoading ? (
+              <Card>
+                <CardContent className="p-8 text-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                  <p>در حال بارگذاری درگاه پرداخت...</p>
+                </CardContent>
+              </Card>
+            ) : activeGateway?.success ? (
+              <PaymentGateway
+                paymentMethod={order.paymentMethod}
+                totalAmount={order.totalAmount}
+                orderId={order.orderNumber}
+                onPaymentSuccess={handlePaymentSuccess}
+                onPaymentError={handlePaymentError}
+                activeGateway={activeGateway.gateway}
+              />
+            ) : (
+              <Card>
+                <CardContent className="p-8 text-center">
+                  <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-700 mb-2">درگاه پرداخت در دسترس نیست</h3>
+                  <p className="text-gray-500 mb-6">در حال حاضر هیچ درگاه پرداخت فعالی موجود نیست. لطفاً با پشتیبانی تماس بگیرید.</p>
+                  <Button onClick={() => setLocation("/shop")} className="w-full">
+                    بازگشت به فروشگاه
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           {/* Order Summary */}

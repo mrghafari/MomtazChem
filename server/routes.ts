@@ -9119,7 +9119,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get active payment gateway
+  // Get active payment gateway (public endpoint - no auth required)
   app.get("/api/payment/active-gateway", async (req, res) => {
     try {
       const { pool } = await import('./db');

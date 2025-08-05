@@ -17,6 +17,7 @@ interface PaymentGatewayProps {
   orderId: string;
   onPaymentSuccess: (paymentData: any) => void;
   onPaymentError: (error: string) => void;
+  activeGateway?: any;
 }
 
 const PaymentGateway = ({ 
@@ -24,7 +25,8 @@ const PaymentGateway = ({
   totalAmount, 
   orderId, 
   onPaymentSuccess, 
-  onPaymentError 
+  onPaymentError,
+  activeGateway 
 }: PaymentGatewayProps) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [formData, setFormData] = useState<any>({});
@@ -129,7 +131,38 @@ const PaymentGateway = ({
     }
   };
 
+  const handleOnlinePayment = async () => {
+    if (!activeGateway) {
+      onPaymentError('هیچ درگاه پرداخت فعالی موجود نیست');
+      return;
+    }
+
+    setIsProcessing(true);
+    
+    try {
+      // Get gateway config and redirect URL
+      const gatewayConfig = activeGateway.config;
+      
+      if (gatewayConfig && gatewayConfig.paymentUrl) {
+        // Redirect to active gateway
+        const paymentUrl = `${gatewayConfig.paymentUrl}?amount=${totalAmount}&order=${orderId}&currency=IQD`;
+        window.location.href = paymentUrl;
+      } else {
+        throw new Error('تنظیمات درگاه پرداخت نامعتبر است');
+      }
+    } catch (error: any) {
+      console.error('Online payment error:', error);
+      onPaymentError(error.message || 'خطا در اتصال به درگاه پرداخت');
+      setIsProcessing(false);
+    }
+  };
+
   const simulatePaymentProcessing = async () => {
+    if (paymentMethod === 'online_payment') {
+      await handleOnlinePayment();
+      return;
+    }
+
     setIsProcessing(true);
     
     // Simulate processing delay
@@ -448,6 +481,69 @@ const PaymentGateway = ({
     </Card>
   );
 
+
+
+
+
+  const renderOnlinePayment = () => (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center">
+          <CreditCard className="w-5 h-5 mr-2" />
+          پرداخت آنلاین - Online Payment
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {activeGateway ? (
+          <div className="space-y-4">
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h4 className="font-semibold text-blue-900 mb-2">درگاه پرداخت فعال</h4>
+              <div className="space-y-2 text-sm text-blue-800">
+                <p><strong>درگاه:</strong> {activeGateway.name}</p>
+                <p><strong>نوع:</strong> {activeGateway.type}</p>
+                <p><strong>مبلغ قابل پرداخت:</strong> {formatCurrency(totalAmount)}</p>
+              </div>
+            </div>
+            
+            <div className="text-center">
+              <Button 
+                onClick={handleOnlinePayment}
+                disabled={isProcessing}
+                size="lg"
+                className="w-full bg-blue-600 hover:bg-blue-700"
+              >
+                {isProcessing ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    در حال هدایت به درگاه پرداخت...
+                  </>
+                ) : (
+                  <>
+                    <CreditCard className="w-5 h-5 mr-2" />
+                    هدایت به درگاه پرداخت
+                  </>
+                )}
+              </Button>
+            </div>
+            
+            <div className="bg-green-50 p-3 rounded-lg flex items-center">
+              <CheckCircle className="w-4 h-4 text-green-600 mr-2" />
+              <p className="text-sm text-green-800">
+                پرداخت امن از طریق {activeGateway.name}
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <AlertCircle className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-700 mb-2">درگاه پرداخت در دسترس نیست</h3>
+            <p className="text-gray-500">در حال حاضر هیچ درگاه پرداخت آنلاینی فعال نیست.</p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+
   const renderPaymentMethod = () => {
     switch (paymentMethod) {
       case 'iraqi_bank':
@@ -458,6 +554,8 @@ const PaymentGateway = ({
         return renderDigitalWallet();
       case 'bank_transfer':
         return renderInternationalBankTransfer();
+      case 'online_payment':
+        return renderOnlinePayment();
       default:
         return (
           <Card>
