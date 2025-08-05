@@ -60,6 +60,16 @@ const PaymentGateway = ({
 
       if (response.success) {
         console.log('✅ [WALLET ONLY] Payment completed successfully');
+        
+        // Clear cart after successful payment
+        console.log('🧹 [CART CLEAR] Clearing cart after successful wallet payment');
+        try {
+          await apiRequest('/api/cart/clear', { method: 'POST' });
+          console.log('✅ [CART CLEAR] Cart cleared successfully');
+        } catch (cartError) {
+          console.warn('⚠️ [CART CLEAR] Failed to clear cart:', cartError);
+        }
+        
         onPaymentSuccess({
           method: 'wallet_full',
           transactionId: response.transactionId,

@@ -171,6 +171,12 @@ export default function Payment() {
     setPaymentData(paymentResult);
     setPaymentProcessed(true);
     
+    // Clear cart after successful payment
+    console.log('🧹 [CART CLEAR] Clearing cart after successful payment');
+    apiRequest('/api/cart/clear', { method: 'POST' })
+      .then(() => console.log('✅ [CART CLEAR] Cart cleared successfully'))
+      .catch(err => console.warn('⚠️ [CART CLEAR] Failed to clear cart:', err));
+    
     // Clear localStorage for this order
     localStorage.removeItem(`wallet_amount_${orderId}`);
     console.log('🧹 [CLEANUP] Removed localStorage data for order:', orderId);

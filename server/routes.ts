@@ -17742,18 +17742,33 @@ Momtaz Chemical Technical Team`,
   // Payment processing endpoints
   app.post("/api/shop/orders/:id/payment", async (req, res) => {
     try {
-      const orderId = parseInt(req.params.id);
-      if (isNaN(orderId)) {
-        return res.status(400).json({ success: false, message: "Invalid order ID" });
+      const orderParam = req.params.id;
+      console.log('🔍 [PAYMENT ENDPOINT] Received order parameter:', orderParam, typeof orderParam);
+      
+      // Try to parse as integer first, if fails use as string (order number)
+      let orderId;
+      let order;
+      
+      if (/^\d+$/.test(orderParam)) {
+        // It's a numeric ID
+        orderId = parseInt(orderParam);
+        order = await customerStorage.getOrderById(orderId);
+      } else {
+        // It's an order number (string like M2511420)
+        console.log('🔍 [PAYMENT ENDPOINT] Looking up order by number:', orderParam);
+        const orders = await customerStorage.getAllOrders();
+        order = orders.find(o => o.orderNumber === orderParam);
+        orderId = order?.id;
       }
 
       const { paymentStatus, paymentMethod, transactionId, paymentData } = req.body;
       
-      // Get the order from customer_orders table
-      const order = await customerStorage.getOrderById(orderId);
-      if (!order) {
+      if (!order || !orderId) {
+        console.log('❌ [PAYMENT ENDPOINT] Order not found for:', orderParam);
         return res.status(404).json({ success: false, message: "Order not found" });
       }
+      
+      console.log('✅ [PAYMENT ENDPOINT] Order found:', { id: orderId, orderNumber: order.orderNumber });
 
       // Update order with payment information and auto-complete for successful payments
       const updatedOrder = await customerStorage.updateOrder(orderId, {
