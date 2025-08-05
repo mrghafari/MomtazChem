@@ -18,6 +18,10 @@ export default function Payment() {
   const [paymentData, setPaymentData] = useState<any>(null);
 
   const orderId = params?.orderId ? parseInt(params.orderId) : null;
+  
+  console.log('🚀 [PAYMENT COMPONENT] Payment component mounted');
+  console.log('🚀 [PAYMENT COMPONENT] Params:', params);
+  console.log('🚀 [PAYMENT COMPONENT] Order ID:', orderId);
 
   // Fetch order details
   const { data: orderData, isLoading: orderLoading, error: orderError } = useQuery({
