@@ -156,6 +156,7 @@ function Router() {
           <Route path="/product-recommendations" component={ProductRecommendations} />
           <Route path="/checkout" component={() => <Checkout cart={[]} products={[]} onOrderComplete={() => {}} />} />
           <Route path="/payment/:orderId" component={Payment} />
+          <Route path="/payment" component={Payment} />
           <Route path="/payment/:orderNumber" component={HybridPayment} />
           <Route path="/payment-callback" component={PaymentCallback} />
           <Route path="/payment-cancelled" component={PaymentCallback} />
