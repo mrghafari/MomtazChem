@@ -251,36 +251,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const [selectedShippingMethod, setSelectedShippingMethod] = useState<number | null>(null);
   const [shippingCost, setShippingCost] = useState<number>(0);
   
-  // Draggable states
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+  // Form reference for static positioning
   const formRef = useRef<HTMLDivElement>(null);
-
-  // Mouse drag handlers
-  const handleMouseDown = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-    
-    const startX = e.clientX - position.x;
-    const startY = e.clientY - position.y;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      const newX = e.clientX - startX;
-      const newY = e.clientY - startY;
-      setPosition({ x: newX, y: newY });
-    };
-
-    const handleMouseUp = () => {
-      setIsDragging(false);
-      // Keep the new position - don't reset it
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-  };
 
   
 
@@ -1417,69 +1389,24 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
 
   return (
-    <div 
-      className={`fixed inset-0 flex items-center justify-center p-4 ${
-        (isDragging || (position.x !== 0 || position.y !== 0)) 
-          ? 'pointer-events-none z-50' 
-          : 'bg-black/50 z-50'
-      }`}
-      style={{
-        backgroundColor: (isDragging || (position.x !== 0 || position.y !== 0)) 
-          ? 'transparent' 
-          : 'rgba(0, 0, 0, 0.5)'
-      }}
-    >
+    <div className="fixed inset-0 flex items-center justify-center p-4 bg-black/50 z-50">
       <Card 
         ref={formRef}
-        className={`w-full max-w-2xl max-h-[90vh] overflow-y-auto ${isRTL ? 'rtl' : 'ltr'} ${
-          isDragging ? 'cursor-grabbing' : 'cursor-grab'
-        } ${
-          (isDragging || (position.x !== 0 || position.y !== 0)) 
-            ? 'pointer-events-auto shadow-2xl border-2 border-blue-400' 
-            : 'pointer-events-auto'
-        }`}
-        style={{
-          position: (isDragging || (position.x !== 0 || position.y !== 0)) ? 'fixed' : 'relative',
-          left: (isDragging || (position.x !== 0 || position.y !== 0)) ? position.x : 'auto',
-          top: (isDragging || (position.x !== 0 || position.y !== 0)) ? position.y : 'auto',
-          zIndex: isDragging ? 9999 : 1000,
-          opacity: isDragging ? 0.8 : 1,
-          transform: isDragging ? 'scale(1.02)' : 'scale(1)',
-          transition: isDragging ? 'none' : 'transform 0.2s ease',
-          width: (isDragging || (position.x !== 0 || position.y !== 0)) ? '600px' : 'auto',
-          maxWidth: (isDragging || (position.x !== 0 || position.y !== 0)) ? '600px' : '48rem',
-        }}
-        onMouseDown={handleMouseDown}
-        title="کلیک و بکشید تا فرم را جابجا کنید!"
+        className={`w-full max-w-2xl max-h-[90vh] overflow-y-auto ${isRTL ? 'rtl' : 'ltr'}`}
       >
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 drag-handle">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <div className="flex items-center gap-2">
             <ShoppingCart className="w-5 h-5" />
             <CardTitle className="text-lg">{t.purchaseOrder}</CardTitle>
-            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-              {isDragging ? '🖱️ در حال جابجایی...' : '🖱️ قابل جابجایی'}
-            </span>
           </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setPosition({ x: 0, y: 0 })}
-              title="بازگشت به مرکز"
-            >
-              📍
-            </Button>
-            <span className="text-xs text-gray-500">
-              {(position.x !== 0 || position.y !== 0) ? 'صفحه زیرین قابل کلیک است' : 'حالت modal'}
-            </span>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-            >
-              <X className="w-4 h-4" />
-            </Button>
-          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="no-drag"
+          >
+            <X className="w-4 h-4" />
+          </Button>
         </CardHeader>
 
         <CardContent className="space-y-4">
@@ -2355,27 +2282,26 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                 />
 
                 {/* Submit Buttons */}
-                <div className="flex gap-2 pt-4">
+                <div className="flex gap-2 pt-4 no-drag">
                   <Button
                     type="button"
                     variant="outline"
                     onClick={onClose}
-                    className="flex-1"
+                    className="flex-1 no-drag"
                   >
                     {t.cancel}
                   </Button>
                   <Button
                     type="submit"
                     disabled={submitOrderMutation.isPending || !paymentMethod}
-                    className="flex-1"
+                    className="flex-1 no-drag"
                     onClick={(e) => {
-                      console.log('🔘 [BUTTON DEBUG] Submit button clicked');
+                      console.log('🔘 [BUTTON DEBUG] Submit button clicked - drag protection active');
                       console.log('🔘 [BUTTON DEBUG] Mutation pending:', submitOrderMutation.isPending);
                       console.log('🔘 [BUTTON DEBUG] Form valid:', form.formState.isValid);
                       console.log('🔘 [BUTTON DEBUG] Form errors:', form.formState.errors);
                       console.log('🔘 [BUTTON DEBUG] Selected shipping method:', selectedShippingMethod);
                       console.log('🔘 [BUTTON DEBUG] Payment method:', paymentMethod);
-                      console.log('🔘 [BUTTON DEBUG] Button disabled:', submitOrderMutation.isPending || !selectedShippingMethod || !paymentMethod);
                       
                       // Force form submission if all conditions met
                       if (!submitOrderMutation.isPending && selectedShippingMethod && paymentMethod) {
