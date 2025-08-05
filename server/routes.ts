@@ -13490,11 +13490,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Add redirect URL for online payment
-      if (finalPaymentMethod === 'online_payment') {
+      // Add redirect URL for online payment and bank transfer
+      if (finalPaymentMethod === 'online_payment' || finalPaymentMethod === 'bank_transfer') {
         responseData.redirectToPayment = true;
-        responseData.paymentGatewayUrl = `/payment?orderId=${order.id}&amount=${remainingAmount > 0 ? remainingAmount : totalAmount}`;
-        console.log(`✅ Order ${orderNumber} created - redirecting to payment gateway for ${remainingAmount > 0 ? remainingAmount : totalAmount} IQD`);
+        responseData.paymentGatewayUrl = `/payment?orderId=${order.id}&amount=${remainingAmount > 0 ? remainingAmount : totalAmount}&method=${finalPaymentMethod}`;
+        console.log(`✅ Order ${orderNumber} created - redirecting to payment gateway for ${remainingAmount > 0 ? remainingAmount : totalAmount} IQD (method: ${finalPaymentMethod})`);
         
         // For hybrid payment (wallet + bank gateway), return special response
         if (remainingAmount > 0 && walletAmountUsed > 0) {
@@ -13507,7 +13507,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             walletAmountUsed: walletAmountUsed,
             remainingAmount: remainingAmount,
             requiresBankPayment: true,
-            redirectToPayment: `/payment/${orderNumber}?amount=${remainingAmount}&wallet=${walletAmountUsed}`
+            redirectToPayment: `/payment/${orderNumber}?amount=${remainingAmount}&wallet=${walletAmountUsed}&method=${finalPaymentMethod}`
           });
         }
       }

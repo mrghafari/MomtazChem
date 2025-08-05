@@ -1211,6 +1211,20 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         });
         onOrderComplete();
       }
+      // Handle bank transfer - redirect to payment gateway  
+      else if (response.paymentMethod === 'bank_transfer' || finalPaymentMethod === 'bank_transfer') {
+        toast({
+          title: "انتقال به درگاه بانک",
+          description: "در حال هدایت شما به درگاه پرداخت بانکی..."
+        });
+        
+        // Redirect to bank payment gateway
+        setTimeout(() => {
+          const totalAmount = response.totalAmount || response.remainingAmount || (products.reduce((sum, p) => sum + (parseFloat(p.price || '0') * (cart[p.id] || 0)), 0) + shippingCost);
+          window.location.href = `/payment?orderId=${response.orderId || response.order?.id}&amount=${totalAmount}&method=bank`;
+        }, 1500);
+        return;
+      }
       else {
         toast({
           title: t.orderSubmitted,
@@ -1457,7 +1471,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                           {/* Flammable Product Safety Warning */}
                           {product.isFlammable && (
                             <div className="flex items-center">
-                              <Flame className="w-4 h-4 text-red-500" title="محصول آتش‌زا - نیاز به وسایل نقلیه مخصوص" />
+                              <Flame className="w-4 h-4 text-red-500" />
                               <span className="text-xs text-red-600 font-medium mr-1">آتش‌زا</span>
                             </div>
                           )}
