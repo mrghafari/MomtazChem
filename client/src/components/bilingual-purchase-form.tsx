@@ -468,8 +468,9 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
   // Fetch active shipping rates with FLAMMABLE MATERIALS FILTERING
   const { data: shippingRatesData, isLoading: isLoadingShippingRates, error: shippingRatesError } = useQuery({
-    queryKey: ['/api/shipping-rates', containsFlammableProducts],
+    queryKey: ['/api/shipping-rates'],
     queryFn: async () => {
+      console.log('🚚 [BILINGUAL FORM] ===== SHIPPING RATES QUERY STARTED =====');
       try {
         console.log('🚚 [BILINGUAL FORM] Fetching shipping rates with flammable filtering...', {
           containsFlammableProducts,
@@ -738,6 +739,12 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
   // Auto-select first shipping method when data loads
   useEffect(() => {
+    console.log('🚚 [AUTO-SELECT DEBUG] useEffect triggered:', {
+      shippingRatesLength: shippingRatesData?.length,
+      selectedShippingMethod,
+      hasShippingData: !!shippingRatesData
+    });
+    
     if (shippingRatesData?.length > 0 && !selectedShippingMethod) {
       const firstMethod = shippingRatesData[0];
       console.log('🚚 [AUTO-SELECT] Auto-selecting first shipping method:', firstMethod.id, firstMethod.name);
@@ -2359,7 +2366,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                   </Button>
                   <Button
                     type="submit"
-                    disabled={submitOrderMutation.isPending || !selectedShippingMethod || !paymentMethod}
+                    disabled={submitOrderMutation.isPending || !paymentMethod}
                     className="flex-1"
                     onClick={(e) => {
                       console.log('🔘 [BUTTON DEBUG] Submit button clicked');
