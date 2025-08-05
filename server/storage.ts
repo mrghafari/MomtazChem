@@ -800,8 +800,7 @@ export class DatabaseStorage implements IStorage {
           quantity,
           unitPrice: unitPrice || "0.00",
           addedAt: new Date(),
-          updatedAt: new Date(),
-          isActive: true
+          updatedAt: new Date()
         })
         .returning();
       return cart;
@@ -812,16 +811,13 @@ export class DatabaseStorage implements IStorage {
     return await db
       .select()
       .from(persistentCarts)
-      .where(and(
-        eq(persistentCarts.customerId, customerId),
-        eq(persistentCarts.isActive, true)
-      ))
+      .where(eq(persistentCarts.customerId, customerId))
       .orderBy(persistentCarts.addedAt);
   }
 
   async updatePersistentCartQuantity(customerId: number, productId: number, quantity: number): Promise<void> {
     if (quantity <= 0) {
-      // اگر کمیت صفر یا منفی باشد، آیتم را حذف کنیم
+      // اگر کمیت صفر یا منفی باشد، آیتم را حذف کنیम
       await this.removePersistentCartItem(customerId, productId);
       return;
     }
@@ -834,36 +830,24 @@ export class DatabaseStorage implements IStorage {
       })
       .where(and(
         eq(persistentCarts.customerId, customerId),
-        eq(persistentCarts.productId, productId),
-        eq(persistentCarts.isActive, true)
+        eq(persistentCarts.productId, productId)
       ));
   }
 
   async removePersistentCartItem(customerId: number, productId: number): Promise<void> {
     await db
-      .update(persistentCarts)
-      .set({ 
-        isActive: false, 
-        updatedAt: new Date() 
-      })
+      .delete(persistentCarts)
       .where(and(
         eq(persistentCarts.customerId, customerId),
-        eq(persistentCarts.productId, productId),
-        eq(persistentCarts.isActive, true)
+        eq(persistentCarts.productId, productId)
       ));
   }
 
   async clearPersistentCart(customerId: number): Promise<void> {
+    // Simply delete all persistent cart items for this customer
     await db
-      .update(persistentCarts)
-      .set({ 
-        isActive: false, 
-        updatedAt: new Date() 
-      })
-      .where(and(
-        eq(persistentCarts.customerId, customerId),
-        eq(persistentCarts.isActive, true)
-      ));
+      .delete(persistentCarts)
+      .where(eq(persistentCarts.customerId, customerId));
   }
 
   async syncLocalCartToDatabase(customerId: number, cartData: {[key: number]: number}): Promise<void> {

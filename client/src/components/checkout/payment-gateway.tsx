@@ -64,7 +64,12 @@ const PaymentGateway = ({
         // Clear cart after successful payment
         console.log('🧹 [CART CLEAR] Clearing cart after successful wallet payment');
         try {
-          await apiRequest('/api/cart/clear', { method: 'POST' });
+          // Get customer ID from local storage (set during login)
+          const customerId = localStorage.getItem('customerId');
+          await apiRequest('/api/cart/clear', { 
+            method: 'POST',
+            body: { customerId: customerId ? parseInt(customerId) : undefined }
+          });
           console.log('✅ [CART CLEAR] Cart cleared successfully');
         } catch (cartError) {
           console.warn('⚠️ [CART CLEAR] Failed to clear cart:', cartError);
@@ -124,6 +129,20 @@ const PaymentGateway = ({
         // Double-check: If remaining amount is actually 0, complete as wallet-only
         if (remainingAmount <= 0) {
           console.log('💰 [HYBRID PAYMENT] Remaining amount is 0 after deduction - completing as wallet-only');
+          
+          // Clear cart after successful wallet-only payment
+          console.log('🧹 [CART CLEAR] Clearing cart after successful wallet-only payment');
+          try {
+            const customerId = localStorage.getItem('customerId');
+            await apiRequest('/api/cart/clear', { 
+              method: 'POST',
+              body: { customerId: customerId ? parseInt(customerId) : undefined }
+            });
+            console.log('✅ [CART CLEAR] Cart cleared successfully');
+          } catch (cartError) {
+            console.warn('⚠️ [CART CLEAR] Failed to clear cart:', cartError);
+          }
+          
           setIsProcessing(false);
           onPaymentSuccess({
             method: 'wallet_full',

@@ -37854,22 +37854,29 @@ momtazchem.com
         sessionExists: !!req.session,
         sessionId: req.sessionID,
         customerId: (req.session as any)?.customerId,
+        adminId: (req.session as any)?.adminId,
         isAuthenticated: req.isAuthenticated ? req.isAuthenticated() : false,
         sessionData: req.session
       });
 
+      // Support both customer-only session and hybrid admin+customer session
       const customerId = (req.session as any)?.customerId;
-      if (!customerId) {
-        return res.status(401).json({ success: false, message: "Authentication required" });
+      const { customerId: requestCustomerId } = req.body; // Allow passing customerId in request body
+
+      const actualCustomerId = customerId || requestCustomerId;
+      
+      if (!actualCustomerId) {
+        console.log(`❌ [CART CLEAR] No customer ID found in session or request body`);
+        return res.status(401).json({ success: false, message: "Authentication required - no customer ID" });
       }
 
-      console.log(`🧹 [CART CLEAR] Clearing both cart session and persistent cart for customer: ${customerId}`);
+      console.log(`🧹 [CART CLEAR] Clearing both cart session and persistent cart for customer: ${actualCustomerId}`);
       
       // Clear both cart session and persistent cart
-      await cartStorage.clearCartSession(customerId);
-      await storage.clearPersistentCart(customerId);
+      await cartStorage.clearCartSession(actualCustomerId);
+      await storage.clearPersistentCart(actualCustomerId);
       
-      console.log(`✅ [CART CLEAR] Both cart session and persistent cart cleared successfully for customer: ${customerId}`);
+      console.log(`✅ [CART CLEAR] Both cart session and persistent cart cleared successfully for customer: ${actualCustomerId}`);
       
       res.json({ success: true, message: "Cart cleared successfully" });
     } catch (error) {
