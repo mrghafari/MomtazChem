@@ -64,20 +64,24 @@ const PaymentGateway = ({
         // Clear cart after successful payment
         console.log('🧹 [CART CLEAR] Clearing cart after successful wallet payment');
         try {
-          // Get customer ID from local storage (set during login)
-          const customerId = localStorage.getItem('customerId');
-          await apiRequest('/api/cart/clear', { 
+          // Use fetch with credentials to ensure session is included
+          const cartResponse = await fetch('/api/cart/clear', { 
             method: 'POST',
-            body: { customerId: customerId ? parseInt(customerId) : undefined }
+            body: JSON.stringify({}), 
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include'  // Include session cookies
           });
+          
+          const cartResult = await cartResponse.json();
+          console.log('✅ [CART CLEAR] Database cart cleared:', cartResult);
           
           // Also clear localStorage cart immediately
           localStorage.removeItem('cart');
           console.log('🧹 [CART CLEAR] Cleared localStorage cart');
-          
-          console.log('✅ [CART CLEAR] Cart cleared successfully');
         } catch (cartError) {
           console.warn('⚠️ [CART CLEAR] Failed to clear cart:', cartError);
+          // Force clear localStorage even if database clear fails
+          localStorage.removeItem('cart');
         }
         
         onPaymentSuccess({
