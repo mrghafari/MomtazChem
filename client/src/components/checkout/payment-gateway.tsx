@@ -35,6 +35,59 @@ const PaymentGateway = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
+  // Fetch wallet balance for hybrid payment calculations
+  const { data: walletBalance } = useQuery({
+    queryKey: ['/api/customers/wallet/balance'],
+    enabled: paymentMethod === 'wallet_partial',
+  });
+
+  // Handle wallet-only payment (when remaining balance is 0)
+  const handleWalletOnlyPayment = async () => {
+    console.log('🔄 [WALLET ONLY] Processing wallet-only payment for order:', orderId);
+    setIsProcessing(true);
+    
+    try {
+      const response = await apiRequest('/api/customers/wallet/complete-payment', 'POST', {
+        orderId: orderId,
+        totalAmount: totalAmount,
+        paymentMethod: 'wallet_full'
+      });
+
+      if (response.success) {
+        console.log('✅ [WALLET ONLY] Payment completed successfully');
+        onPaymentSuccess({
+          method: 'wallet_full',
+          transactionId: response.transactionId,
+          amount: totalAmount,
+          walletDeducted: totalAmount,
+          bankPaid: 0
+        });
+      } else {
+        throw new Error(response.message || 'Wallet payment failed');
+      }
+    } catch (error) {
+      console.error('❌ [WALLET ONLY] Payment failed:', error);
+      onPaymentError('پرداخت از کیف پول با خطا مواجه شد');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // Handle hybrid payment (wallet + bank)
+  const handleHybridPayment = async () => {
+    console.log('🔄 [HYBRID PAYMENT] Processing hybrid payment for order:', orderId);
+    const currentBalance = walletBalance?.balance || 0;
+    const remainingAmount = Math.max(0, totalAmount - currentBalance);
+    
+    if (remainingAmount > 0) {
+      console.log('🏦 [HYBRID PAYMENT] Redirecting to bank gateway for remaining amount:', remainingAmount);
+      handleOnlinePayment();
+    } else {
+      console.log('💰 [HYBRID PAYMENT] Sufficient wallet balance, processing as wallet-only');
+      handleWalletOnlyPayment();
+    }
+  };
+
   // Auto-redirect for online payment method
   useEffect(() => {
     console.log('🔍 [AUTO REDIRECT DEBUG] Payment method:', paymentMethod);
@@ -201,9 +254,55 @@ const PaymentGateway = ({
     }
   };
 
+  const handleWalletPayment = async () => {
+    try {
+      setIsProcessing(true);
+      
+      console.log('💰 [WALLET PAYMENT] Processing wallet payment:', {
+        orderId,
+        totalAmount,
+        paymentMethod
+      });
+      
+      const response = await apiRequest('/api/customers/wallet/complete-payment', 'POST', {
+        orderId,
+        totalAmount,
+        paymentMethod: 'wallet_full'
+      });
+      
+      console.log('💰 [WALLET PAYMENT] Response:', response);
+      
+      if (response.success) {
+        const paymentData = {
+          method: 'wallet_full',
+          transactionId: response.transactionId,
+          amount: totalAmount,
+          orderId,
+          newWalletBalance: response.newWalletBalance,
+          amountDeducted: response.amountDeducted,
+          timestamp: new Date().toISOString()
+        };
+        
+        setIsProcessing(false);
+        onPaymentSuccess(paymentData);
+      } else {
+        throw new Error(response.message || 'خطا در پردازش پرداخت از کیف پول');
+      }
+    } catch (error: any) {
+      console.error('💰 [WALLET PAYMENT] Error:', error);
+      setIsProcessing(false);
+      onPaymentError(error.message || 'خطا در پردازش پرداخت از کیف پول');
+    }
+  };
+
   const simulatePaymentProcessing = async () => {
     if (paymentMethod === 'online_payment') {
       await handleOnlinePayment();
+      return;
+    }
+
+    if (paymentMethod === 'wallet_full' || paymentMethod === 'wallet_partial') {
+      await handleWalletPayment();
       return;
     }
 
@@ -588,6 +687,106 @@ const PaymentGateway = ({
     </Card>
   );
 
+  const renderWalletPartialPayment = () => {
+    const currentBalance = walletBalance?.balance || 0;
+    const remainingAmount = Math.max(0, totalAmount - currentBalance);
+    
+    console.log('🔍 [WALLET PARTIAL DEBUG] Current balance:', currentBalance);
+    console.log('🔍 [WALLET PARTIAL DEBUG] Total amount:', totalAmount);
+    console.log('🔍 [WALLET PARTIAL DEBUG] Remaining amount:', remainingAmount);
+
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Wallet className="w-5 h-5 mr-2" />
+            پرداخت ترکیبی - Hybrid Payment
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="bg-blue-50 p-4 rounded-lg">
+            <h4 className="font-semibold text-blue-900 mb-3">جزئیات پرداخت ترکیبی</h4>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span>مبلغ کل سفارش:</span>
+                <span className="font-semibold">{formatCurrency(totalAmount)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>موجودی کیف پول:</span>
+                <span className="font-semibold text-green-600">{formatCurrency(currentBalance)}</span>
+              </div>
+              <div className="border-t pt-2 flex justify-between">
+                <span>مانده برای پرداخت:</span>
+                <span className="font-semibold text-red-600">{formatCurrency(remainingAmount)}</span>
+              </div>
+            </div>
+          </div>
+          
+          {remainingAmount === 0 ? (
+            <div className="text-center space-y-4">
+              <div className="bg-green-50 p-4 rounded-lg">
+                <CheckCircle className="w-12 h-12 text-green-600 mx-auto mb-2" />
+                <h4 className="font-semibold text-green-900 mb-2">پرداخت از کیف پول</h4>
+                <p className="text-sm text-green-800">
+                  موجودی کیف پول شما برای پرداخت کامل این سفارش کافی است.
+                </p>
+              </div>
+              
+              <Button 
+                onClick={handleWalletOnlyPayment}
+                disabled={isProcessing}
+                size="lg"
+                className="w-full bg-green-600 hover:bg-green-700"
+              >
+                {isProcessing ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    در حال پردازش...
+                  </>
+                ) : (
+                  <>
+                    <Wallet className="w-5 h-5 mr-2" />
+                    پرداخت از کیف پول ({formatCurrency(totalAmount)})
+                  </>
+                )}
+              </Button>
+            </div>
+          ) : (
+            <div className="text-center space-y-4">
+              <div className="bg-amber-50 p-4 rounded-lg">
+                <AlertCircle className="w-12 h-12 text-amber-600 mx-auto mb-2" />
+                <h4 className="font-semibold text-amber-900 mb-2">نیاز به پرداخت بانکی</h4>
+                <p className="text-sm text-amber-800">
+                  {formatCurrency(currentBalance)} از کیف پول استفاده می‌شود و 
+                  {formatCurrency(remainingAmount)} از طریق بانک پرداخت خواهد شد.
+                </p>
+              </div>
+              
+              <Button 
+                onClick={handleHybridPayment}
+                disabled={isProcessing}
+                size="lg"
+                className="w-full bg-blue-600 hover:bg-blue-700"
+              >
+                {isProcessing ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    در حال هدایت به درگاه پرداخت...
+                  </>
+                ) : (
+                  <>
+                    <CreditCard className="w-5 h-5 mr-2" />
+                    ادامه پرداخت ترکیبی
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    );
+  };
+
   const renderPaymentMethod = () => {
     switch (paymentMethod) {
       case 'iraqi_bank':
@@ -600,6 +799,8 @@ const PaymentGateway = ({
         return renderInternationalBankTransfer();
       case 'online_payment':
         return renderOnlinePayment();
+      case 'wallet_partial':
+        return renderWalletPartialPayment();
       default:
         return (
           <Card>

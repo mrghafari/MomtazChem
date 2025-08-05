@@ -30665,6 +30665,90 @@ momtazchem.com
     }
   });
 
+  // Complete wallet-only payment
+  app.post("/api/customers/wallet/complete-payment", async (req, res) => {
+    try {
+      // Prevent admin from accessing customer wallet data
+      if (req.session.adminId) {
+        return res.status(401).json({ success: false, message: "Admin authenticated - not a customer" });
+      }
+      
+      if (!req.session.customerId) {
+        return res.status(401).json({ success: false, message: "Customer authentication required" });
+      }
+
+      const customerId = req.session.customerId;
+      const { orderId, totalAmount, paymentMethod } = req.body;
+      
+      console.log('🔄 [WALLET COMPLETE] Processing wallet-only payment:', {
+        customerId,
+        orderId,
+        totalAmount,
+        paymentMethod
+      });
+
+      // Verify customer has sufficient wallet balance
+      const currentBalance = await walletStorage.getWalletBalance(customerId);
+      console.log('🔍 [WALLET COMPLETE] Current balance:', currentBalance);
+      
+      if (currentBalance < totalAmount) {
+        return res.status(400).json({
+          success: false,
+          message: `موجودی کیف پول (${currentBalance} IQD) برای پرداخت مبلغ ${totalAmount} IQD کافی نیست`
+        });
+      }
+
+      // Get order details to verify it exists and belongs to customer
+      const [order] = await customerDb
+        .select()
+        .from(customerOrders)
+        .where(and(
+          eq(customerOrders.orderNumber, orderId),
+          eq(customerOrders.customerId, customerId)
+        ));
+        
+      if (!order) {
+        return res.status(404).json({
+          success: false,
+          message: "سفارش یافت نشد"
+        });
+      }
+
+      // Deduct amount from wallet
+      const description = `Payment for order ${orderId}`;
+      await walletStorage.debitWallet(customerId, totalAmount, description, 'order_payment');
+      console.log('💰 [WALLET COMPLETE] Wallet deducted successfully');
+
+      // Update order payment status
+      await customerDb
+        .update(customerOrders)
+        .set({ paymentStatus: 'completed' })
+        .where(eq(customerOrders.id, order.id));
+      console.log('✅ [WALLET COMPLETE] Order payment status updated to completed');
+
+      // Generate transaction ID
+      const transactionId = `WAL-${Date.now()}-${Math.random().toString(36).substr(2, 8).toUpperCase()}`;
+
+      // Get new balance
+      const newBalance = await walletStorage.getWalletBalance(customerId);
+
+      res.json({
+        success: true,
+        message: "پرداخت از کیف پول با موفقیت انجام شد",
+        transactionId: transactionId,
+        newWalletBalance: newBalance,
+        amountDeducted: totalAmount
+      });
+
+    } catch (error) {
+      console.error("[WALLET COMPLETE] Error:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در پردازش پرداخت از کیف پول"
+      });
+    }
+  });
+
   // Get wallet recharge information/status
   app.get('/api/customer/wallet/recharge', async (req, res) => {
     try {
