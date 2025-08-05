@@ -1366,11 +1366,26 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div 
+      className={`fixed inset-0 flex items-center justify-center p-4 ${
+        (isDragging || (position.x !== 0 || position.y !== 0)) 
+          ? 'pointer-events-none z-50' 
+          : 'bg-black/50 z-50'
+      }`}
+      style={{
+        backgroundColor: (isDragging || (position.x !== 0 || position.y !== 0)) 
+          ? 'transparent' 
+          : 'rgba(0, 0, 0, 0.5)'
+      }}
+    >
       <Card 
         ref={formRef}
         className={`w-full max-w-2xl max-h-[90vh] overflow-y-auto ${isRTL ? 'rtl' : 'ltr'} ${
           isDragging ? 'cursor-grabbing' : 'cursor-grab'
+        } ${
+          (isDragging || (position.x !== 0 || position.y !== 0)) 
+            ? 'pointer-events-auto shadow-2xl border-2 border-blue-400' 
+            : 'pointer-events-auto'
         }`}
         style={{
           position: (isDragging || (position.x !== 0 || position.y !== 0)) ? 'fixed' : 'relative',
@@ -1380,6 +1395,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
           opacity: isDragging ? 0.8 : 1,
           transform: isDragging ? 'scale(1.02)' : 'scale(1)',
           transition: isDragging ? 'none' : 'transform 0.2s ease',
+          width: (isDragging || (position.x !== 0 || position.y !== 0)) ? '600px' : 'auto',
+          maxWidth: (isDragging || (position.x !== 0 || position.y !== 0)) ? '600px' : '48rem',
         }}
         onMouseDown={handleMouseDown}
         title="کلیک و بکشید تا فرم را جابجا کنید!"
@@ -1401,6 +1418,9 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
             >
               📍
             </Button>
+            <span className="text-xs text-gray-500">
+              {(position.x !== 0 || position.y !== 0) ? 'صفحه زیرین قابل کلیک است' : 'حالت modal'}
+            </span>
             <Button
               variant="ghost"
               size="sm"
