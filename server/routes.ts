@@ -435,6 +435,101 @@ const requireCustomerAuth = (req: Request, res: Response, next: NextFunction) =>
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  
+  // *** CRITICAL PAYMENT ENDPOINT - MUST BE FIRST TO PREVENT CONFLICTS ***
+  // Get order payment details by order number for hybrid payment processing
+  // Accessible by both customers and admins  
+  app.get("/api/customers/orders/:orderNumber/payment", async (req, res) => {
+    console.log(`🚨🚨🚨 [PAYMENT ENDPOINT FIRST] DEFINITELY STARTED - Request received for order: ${req.params.orderNumber}`);
+    console.log(`🚨🚨🚨 [PAYMENT ENDPOINT FIRST] URL Path: ${req.path}`);
+    console.log(`🚨🚨🚨 [PAYMENT ENDPOINT FIRST] Method: ${req.method}`);
+    
+    try {
+      const { orderNumber } = req.params;
+      
+      console.log(`🔍 [PAYMENT DETAILS] Request for order ${orderNumber}`);
+      console.log(`🔍 [PAYMENT DETAILS] Session check:`, {
+        hasSession: !!req.session,
+        isAuthenticated: req.session?.isAuthenticated,
+        customerId: req.session?.customerId,
+        crmCustomerId: req.session?.crmCustomerId,
+        adminId: req.session?.adminId,
+        sessionID: req.sessionID
+      });
+      
+      // Check if user is authenticated (either as customer or admin)
+      const isCustomer = req.session?.customerId || req.session?.crmCustomerId;
+      const isAdmin = req.session?.adminId;
+      const isAuthenticated = req.session?.isAuthenticated;
+      
+      if (!isAuthenticated || (!isCustomer && !isAdmin)) {
+        console.log(`❌ [PAYMENT DETAILS] Authentication failed for order ${orderNumber}`);
+        console.log(`❌ [PAYMENT DETAILS] Session details:`, {
+          isCustomer: !!isCustomer,
+          isAdmin: !!isAdmin,
+          isAuthenticated,
+          sessionExists: !!req.session
+        });
+        return res.status(400).json({
+          success: false,
+          message: "FIRST ENDPOINT: شناسه سفارش نامعتبر است"
+        });
+      }
+      
+      const { pool } = await import('./db');
+      
+      // Get order details from customer_orders table using order_number
+      const result = await pool.query(`
+        SELECT 
+          co.id,
+          co.order_number as "orderNumber",
+          co.total_amount as "totalAmount",
+          co.payment_method as "paymentMethod",
+          co.payment_status as "paymentStatus",
+          co.status,
+          co.customer_id as "customerId",
+          co.created_at as "createdAt"
+        FROM customer_orders co
+        WHERE co.order_number = $1
+      `, [orderNumber]);
+
+      if (result.rows.length === 0) {
+        console.log(`❌ [PAYMENT DETAILS] Order not found: ${orderNumber}`);
+        return res.status(404).json({
+          success: false,
+          message: "سفارش یافت نشد"
+        });
+      }
+
+      const order = result.rows[0];
+      console.log(`✅ [PAYMENT DETAILS] Order found:`, order);
+      
+      // If authenticated as customer, verify they own this order
+      if (isCustomer && !isAdmin) {
+        const customerIdToCheck = req.session?.customerId || req.session?.crmCustomerId;
+        if (order.customerId !== customerIdToCheck) {
+          console.log(`❌ [PAYMENT DETAILS] Customer ${customerIdToCheck} doesn't own order ${orderNumber} (belongs to ${order.customerId})`);
+          return res.status(403).json({
+            success: false,
+            message: "دسترسی غیرمجاز"
+          });
+        }
+      }
+
+      res.json({
+        success: true,
+        order: order
+      });
+
+    } catch (error) {
+      console.error('❌ [PAYMENT DETAILS] Error fetching order payment details:', error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت اطلاعات پرداخت"
+      });
+    }
+  });
+
   // Initialize sync service at startup
   console.log('🔄 [SYNC SERVICE] Initializing automatic table synchronization system...');
   try {
@@ -8939,8 +9034,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // REMOVED: Duplicate endpoint - using the one later in the file
 
-  // Get customer order for payment (public endpoint for payment page)
-  app.get("/api/customers/orders/:orderId/payment", async (req, res) => {
+  // OLD ENDPOINT - DISABLED in favor of enhanced orderNumber endpoint below
+  /*app.get("/api/customers/orders/:orderId/payment", async (req, res) => {
     try {
       const orderId = parseInt(req.params.orderId);
       
@@ -8986,7 +9081,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: "خطا در دریافت اطلاعات سفارش"
       });
     }
-  });
+  });*/
 
   // Create new payment gateway
   app.post("/api/payment/gateways", requireAuth, async (req, res) => {
@@ -13991,28 +14086,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get order payment details by order number for hybrid payment processing
+  // Accessible by both customers and admins
   app.get("/api/customers/orders/:orderNumber/payment", async (req, res) => {
+    console.log(`🚨🚨🚨 [PAYMENT ENDPOINT v2] DEFINITELY STARTED - Request received for order: ${req.params.orderNumber}`);
+    console.log(`🚨🚨🚨 [PAYMENT ENDPOINT v2] URL Path: ${req.path}`);
+    console.log(`🚨🚨🚨 [PAYMENT ENDPOINT v2] Method: ${req.method}`);
+    
     try {
       const { orderNumber } = req.params;
-      const customerId = req.session?.customerId;
       
-      if (!customerId) {
-        return res.status(401).json({
+      console.log(`🔍 [PAYMENT DETAILS] Request for order ${orderNumber}`);
+      console.log(`🔍 [PAYMENT DETAILS] Session check:`, {
+        hasSession: !!req.session,
+        isAuthenticated: req.session?.isAuthenticated,
+        customerId: req.session?.customerId,
+        crmCustomerId: req.session?.crmCustomerId,
+        adminId: req.session?.adminId,
+        sessionID: req.sessionID
+      });
+      
+      // Check if user is authenticated (either as customer or admin)
+      const isCustomer = req.session?.customerId || req.session?.crmCustomerId;
+      const isAdmin = req.session?.adminId;
+      const isAuthenticated = req.session?.isAuthenticated;
+      
+      if (!isAuthenticated || (!isCustomer && !isAdmin)) {
+        console.log(`❌ [PAYMENT DETAILS] Authentication failed for order ${orderNumber}`);
+        console.log(`❌ [PAYMENT DETAILS] Session details:`, {
+          isCustomer: !!isCustomer,
+          isAdmin: !!isAdmin,
+          isAuthenticated,
+          sessionExists: !!req.session
+        });
+        return res.status(400).json({
           success: false,
-          message: "احراز هویت نشده"
+          message: "شناسه سفارش نامعتبر است"
         });
       }
       
-      console.log(`🔍 [PAYMENT DETAILS] Fetching payment details for order ${orderNumber}, customer ${customerId}`);
+      // If admin, get order without customer ID restriction
+      // If customer, only get their own orders
+      let customerId = null;
+      if (isCustomer) {
+        customerId = req.session?.customerId || req.session?.crmCustomerId;
+      }
       
-      // Find order by orderNumber
-      const orderResult = await db
-        .select()
-        .from(customerOrders)
-        .where(and(
-          eq(customerOrders.orderNumber, orderNumber),
-          eq(customerOrders.customerId, customerId)
-        ));
+      console.log(`🔍 [PAYMENT DETAILS] Fetching payment details for order ${orderNumber}, customer ${customerId}, admin: ${!!isAdmin}`);
+      
+      // Find order by orderNumber (admin can see all orders, customer only their own)
+      let orderResult;
+      if (isAdmin) {
+        // Admin can access any order
+        orderResult = await db
+          .select()
+          .from(customerOrders)
+          .where(eq(customerOrders.orderNumber, orderNumber));
+      } else {
+        // Customer can only access their own orders
+        orderResult = await db
+          .select()
+          .from(customerOrders)
+          .where(and(
+            eq(customerOrders.orderNumber, orderNumber),
+            eq(customerOrders.customerId, customerId)
+          ));
+      }
+        
+      console.log(`🔍 [PAYMENT DETAILS] Database query result: ${orderResult.length} orders found`);
       
       if (orderResult.length === 0) {
         return res.status(404).json({
