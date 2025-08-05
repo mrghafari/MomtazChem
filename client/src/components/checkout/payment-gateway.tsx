@@ -796,7 +796,20 @@ const PaymentGateway = ({
     const [walletAmount, setWalletAmount] = useState(defaultWalletAmount);
     const remainingAmount = Math.max(0, totalAmount - walletAmount);
     
-    // Don't auto-update wallet amount - let user control it completely
+    // Auto-execute wallet-only payment when remaining is 0
+    useEffect(() => {
+      if (remainingAmount === 0 && walletAmount > 0 && !isProcessing) {
+        console.log('🚀 [AUTO WALLET] Executing automatic wallet-only payment');
+        console.log('🚀 [AUTO WALLET] Wallet amount:', walletAmount, 'Remaining:', remainingAmount);
+        
+        // Small delay to ensure UI is stable
+        const timer = setTimeout(() => {
+          handleWalletOnlyPayment();
+        }, 500);
+        
+        return () => clearTimeout(timer);
+      }
+    }, [remainingAmount, walletAmount, isProcessing]);
     
     console.log('🔍 [WALLET PARTIAL DEBUG] Current balance:', currentBalance);
     console.log('🔍 [WALLET PARTIAL DEBUG] Total amount:', totalAmount);
