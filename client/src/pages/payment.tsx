@@ -45,6 +45,12 @@ export default function Payment() {
     console.log('🔍 [PAYMENT PAGE DEBUG] Gateway loading:', gatewayLoading);
     console.log('🔍 [PAYMENT PAGE DEBUG] Order data:', orderData);
     console.log('🔍 [PAYMENT PAGE DEBUG] Order loading:', orderLoading);
+    
+    if (orderData && activeGateway) {
+      const order = orderData?.order || orderData;
+      console.log('🔍 [PAYMENT PAGE DEBUG] Payment method from order:', order?.paymentMethod);
+      console.log('🔍 [PAYMENT PAGE DEBUG] Will auto-redirect?', order?.paymentMethod === 'online_payment');
+    }
   }, [orderId, activeGateway, gatewayLoading, orderData, orderLoading]);
 
   // Update payment status mutation
