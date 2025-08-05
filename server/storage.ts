@@ -1,4 +1,4 @@
-import { users, leads, leadActivities, passwordResets, abandonedOrders, type User, type InsertUser, type Lead, type InsertLead, type LeadActivity, type InsertLeadActivity, type PasswordReset, type InsertPasswordReset, type AbandonedOrder, type InsertAbandonedOrder } from "@shared/schema";
+import { users, leads, leadActivities, passwordResets, abandonedOrders, persistentCarts, type User, type InsertUser, type Lead, type InsertLead, type LeadActivity, type InsertLeadActivity, type PasswordReset, type InsertPasswordReset, type AbandonedOrder, type InsertAbandonedOrder, type PersistentCart, type InsertPersistentCart } from "@shared/schema";
 import { contacts, showcaseProducts, type Contact, type InsertContact, type ShowcaseProduct, type InsertShowcaseProduct } from "@shared/showcase-schema";
 import { db } from "./db";
 import { showcaseDb } from "./showcase-db";
@@ -61,8 +61,14 @@ export interface IStorage {
     conversionRate: number;
     averageDealSize: number;
   }>;
-  
 
+  // Persistent Cart Management
+  savePersistentCart(customerId: number, productId: number, quantity: number, unitPrice?: string): Promise<PersistentCart>;
+  getPersistentCart(customerId: number): Promise<PersistentCart[]>;
+  updatePersistentCartQuantity(customerId: number, productId: number, quantity: number): Promise<void>;
+  removePersistentCartItem(customerId: number, productId: number): Promise<void>;
+  clearPersistentCart(customerId: number): Promise<void>;
+  syncLocalCartToDatabase(customerId: number, cartData: {[key: number]: number}): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -758,6 +764,118 @@ export class DatabaseStorage implements IStorage {
       conversionRate: Math.round(conversionRate * 100) / 100,
       averageDealSize: Math.round(result.avgDealSize * 100) / 100,
     };
+  }
+
+  // Persistent Cart Management
+  async savePersistentCart(customerId: number, productId: number, quantity: number, unitPrice?: string): Promise<PersistentCart> {
+    // ابتدا بررسی کنیم که آیا این محصول قبلاً در سبد وجود دارد
+    const existing = await db
+      .select()
+      .from(persistentCarts)
+      .where(and(
+        eq(persistentCarts.customerId, customerId),
+        eq(persistentCarts.productId, productId),
+        eq(persistentCarts.isActive, true)
+      ));
+
+    if (existing.length > 0) {
+      // اگر وجود دارد، کمیت را بروزرسانی کنیم
+      const [updated] = await db
+        .update(persistentCarts)
+        .set({ 
+          quantity, 
+          updatedAt: new Date(),
+          unitPrice: unitPrice ? unitPrice : existing[0].unitPrice
+        })
+        .where(eq(persistentCarts.id, existing[0].id))
+        .returning();
+      return updated;
+    } else {
+      // اگر وجود ندارد، رکورد جدید ایجاد کنیم
+      const [cart] = await db
+        .insert(persistentCarts)
+        .values({
+          customerId,
+          productId,
+          quantity,
+          unitPrice: unitPrice || "0.00",
+          addedAt: new Date(),
+          updatedAt: new Date(),
+          isActive: true
+        })
+        .returning();
+      return cart;
+    }
+  }
+
+  async getPersistentCart(customerId: number): Promise<PersistentCart[]> {
+    return await db
+      .select()
+      .from(persistentCarts)
+      .where(and(
+        eq(persistentCarts.customerId, customerId),
+        eq(persistentCarts.isActive, true)
+      ))
+      .orderBy(persistentCarts.addedAt);
+  }
+
+  async updatePersistentCartQuantity(customerId: number, productId: number, quantity: number): Promise<void> {
+    if (quantity <= 0) {
+      // اگر کمیت صفر یا منفی باشد، آیتم را حذف کنیم
+      await this.removePersistentCartItem(customerId, productId);
+      return;
+    }
+
+    await db
+      .update(persistentCarts)
+      .set({ 
+        quantity, 
+        updatedAt: new Date() 
+      })
+      .where(and(
+        eq(persistentCarts.customerId, customerId),
+        eq(persistentCarts.productId, productId),
+        eq(persistentCarts.isActive, true)
+      ));
+  }
+
+  async removePersistentCartItem(customerId: number, productId: number): Promise<void> {
+    await db
+      .update(persistentCarts)
+      .set({ 
+        isActive: false, 
+        updatedAt: new Date() 
+      })
+      .where(and(
+        eq(persistentCarts.customerId, customerId),
+        eq(persistentCarts.productId, productId),
+        eq(persistentCarts.isActive, true)
+      ));
+  }
+
+  async clearPersistentCart(customerId: number): Promise<void> {
+    await db
+      .update(persistentCarts)
+      .set({ 
+        isActive: false, 
+        updatedAt: new Date() 
+      })
+      .where(and(
+        eq(persistentCarts.customerId, customerId),
+        eq(persistentCarts.isActive, true)
+      ));
+  }
+
+  async syncLocalCartToDatabase(customerId: number, cartData: {[key: number]: number}): Promise<void> {
+    console.log(`🔄 [PERSISTENT CART] Syncing local cart to database for customer ${customerId}`);
+    
+    for (const [productId, quantity] of Object.entries(cartData)) {
+      if (quantity > 0) {
+        await this.savePersistentCart(customerId, parseInt(productId), quantity);
+      }
+    }
+    
+    console.log(`✅ [PERSISTENT CART] Cart synced for customer ${customerId}`);
   }
 
   // Helper method for contact conversion

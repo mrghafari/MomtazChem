@@ -15,6 +15,7 @@ export * from "./content-schema";
 export * from "./security-schema";
 export * from "./ticketing-schema";
 export * from "./cart-schema";
+export * from "./persistent-cart-schema";
 export * from "./logistics-schema";
 
 // =============================================================================

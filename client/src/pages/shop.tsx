@@ -399,8 +399,8 @@ const Shop = () => {
           // Fetch wallet balance
           fetchWalletBalance();
           
-          // Handle cart migration from guest to authenticated user
-          migrateGuestCartToUser();
+          // 🛒 Load and sync persistent cart
+          await loadPersistentCart();
         } else {
           // User is not authenticated, handle guest cart
           handleGuestCart();
@@ -441,24 +441,66 @@ const Shop = () => {
     }
   };
 
-  const migrateGuestCartToUser = () => {
-    // Since guest cart is only in memory, get current cart state
-    const currentCart = cart;
-    
-    if (Object.keys(currentCart).length > 0) {
-      // Merge current guest cart with existing user cart if any
-      const userCart = localStorage.getItem('momtazchem_user_cart');
-      const userCartData = userCart ? JSON.parse(userCart) : {};
+  // 🛒 Load persistent cart from database and sync with local storage
+  const loadPersistentCart = async () => {
+    try {
+      console.log('🛒 [PERSISTENT CART] Loading cart from database...');
       
-      const mergedCart = { ...userCartData, ...currentCart };
-      localStorage.setItem('momtazchem_user_cart', JSON.stringify(mergedCart));
+      // Get current local cart (guest cart or existing user cart)
+      const localCart = localStorage.getItem('momtazchem_user_cart') || sessionStorage.getItem('momtazchem_guest_cart');
+      const localCartData = localCart ? JSON.parse(localCart) : {};
       
-      setCart(mergedCart);
-    } else {
-      // Load existing user cart
-      const userCart = localStorage.getItem('momtazchem_user_cart');
-      if (userCart) {
-        setCart(JSON.parse(userCart));
+      // Load cart from database
+      const cartResponse = await fetch('/api/customers/persistent-cart', {
+        credentials: 'include'
+      });
+      
+      if (cartResponse.ok) {
+        const cartResult = await cartResponse.json();
+        if (cartResult.success) {
+          const databaseCart = cartResult.cart || {};
+          console.log('🛒 [PERSISTENT CART] Database cart:', databaseCart);
+          console.log('🛒 [PERSISTENT CART] Local cart:', localCartData);
+          
+          // If local cart has items, sync them to database
+          if (Object.keys(localCartData).length > 0) {
+            console.log('🔄 [PERSISTENT CART] Syncing local cart to database');
+            const syncResponse = await fetch('/api/customers/persistent-cart/sync', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({ cartData: localCartData })
+            });
+            
+            if (syncResponse.ok) {
+              const syncResult = await syncResponse.json();
+              if (syncResult.success) {
+                setCart(syncResult.cart);
+                localStorage.setItem('momtazchem_user_cart', JSON.stringify(syncResult.cart));
+                console.log('✅ [PERSISTENT CART] Cart synced successfully');
+                return;
+              }
+            }
+          }
+          
+          // Use database cart if sync failed or no local cart
+          setCart(databaseCart);
+          localStorage.setItem('momtazchem_user_cart', JSON.stringify(databaseCart));
+          console.log('✅ [PERSISTENT CART] Cart loaded from database');
+        }
+      } else {
+        console.log('⚠️ [PERSISTENT CART] Failed to load from database, using local cart');
+        if (Object.keys(localCartData).length > 0) {
+          setCart(localCartData);
+          localStorage.setItem('momtazchem_user_cart', JSON.stringify(localCartData));
+        }
+      }
+    } catch (error) {
+      console.error('❌ [PERSISTENT CART] Error loading cart:', error);
+      // Fallback to local cart if available
+      const localCart = localStorage.getItem('momtazchem_user_cart');
+      if (localCart) {
+        setCart(JSON.parse(localCart));
       }
     }
   };
@@ -592,10 +634,25 @@ const Shop = () => {
     });
 
   // Save cart to appropriate storage based on authentication
-  const saveCartToStorage = (cartData: {[key: number]: number}) => {
+  const saveCartToStorage = async (cartData: {[key: number]: number}) => {
     if (customer) {
-      // Authenticated user - use localStorage (persists through refresh)
+      // Authenticated user - save to localStorage AND database
       localStorage.setItem('momtazchem_user_cart', JSON.stringify(cartData));
+      
+      // 🛒 Save to database asynchronously (don't block UI)
+      try {
+        console.log('🛒 [PERSISTENT CART] Saving to database:', cartData);
+        await fetch('/api/customers/persistent-cart/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ cartData })
+        });
+        console.log('✅ [PERSISTENT CART] Saved to database successfully');
+      } catch (error) {
+        console.error('❌ [PERSISTENT CART] Error saving to database:', error);
+        // Still keep in localStorage even if database save fails
+      }
     } else {
       // Guest user - don't save to any persistent storage
       // Cart will be lost on refresh as requested
