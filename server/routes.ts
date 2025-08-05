@@ -13377,9 +13377,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const orderNumber = await orderManagementStorage.generateOrderNumber();
       
       // Calculate order totals and taxes (using dynamic tax settings)
-      // Note: orderData.totalAmount from frontend already includes all components
-      // We need to extract the actual item subtotal for proper VAT calculation
-      const itemsSubtotal = orderData.subtotalAmount || 0;
+      // Calculate items subtotal from products and quantities
+      let itemsSubtotal = 0;
+      
+      if (orderData.items && orderData.items.length > 0) {
+        for (const item of orderData.items) {
+          const product = await db.select().from(showcaseProducts).where(eq(showcaseProducts.id, item.productId)).limit(1);
+          if (product.length > 0) {
+            console.log(`🔍 [PRODUCT DEBUG] Raw product data for ID ${item.productId}:`, JSON.stringify(product[0], null, 2));
+            const productPrice = parseFloat(product[0].price?.toString() || '0') || 0;
+            const quantity = parseInt(item.quantity) || 1;
+            itemsSubtotal += productPrice * quantity;
+            console.log(`📦 [PRODUCT CALC] ${product[0].name}: ${productPrice} × ${quantity} = ${productPrice * quantity} IQD`);
+          } else {
+            console.log(`❌ [PRODUCT NOT FOUND] Product ID ${item.productId} not found in database`);
+          }
+        }
+      }
+      
+      console.log(`💰 [SUBTOTAL] Calculated items subtotal: ${itemsSubtotal} IQD`);
       const shippingAmount = orderData.shippingCost || 0;
       
       // Get current tax rates from tax_settings table and freeze them for this order
@@ -13434,7 +13450,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log("✅ [CUSTOMER CHOICE] Bank transfer selected - NO wallet substitution allowed");
       }
       // Only process wallet payments when customer explicitly chose wallet options
-      else if (orderData.paymentMethod === 'wallet_full' || orderData.paymentMethod === 'wallet_partial') {
+      else if (orderData.paymentMethod === 'wallet_full' || orderData.paymentMethod === 'wallet_partial' || orderData.paymentMethod === 'wallet_combined') {
         walletAmountUsed = parseFloat(orderData.walletAmountUsed || 0);
         remainingAmount = parseFloat(orderData.remainingAmount || totalAmount);
         
