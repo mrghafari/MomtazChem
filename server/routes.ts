@@ -43,8 +43,6 @@ import { generateEAN13Barcode, validateEAN13, parseEAN13Barcode, isMomtazchemBar
 import { generateSmartSKU, validateSKUUniqueness } from "./ai-sku-generator";
 import { deliveryVerificationStorage } from "./delivery-verification-storage";
 import { gpsDeliveryStorage } from "./gps-delivery-storage";
-import { gpsDeliveryConfirmations } from "@shared/gps-delivery-schema";
-
 import { vehicleTemplates, vehicleSelectionHistory, insertVehicleTemplateSchema, insertVehicleSelectionHistorySchema, internationalCountries, internationalCities, internationalShippingRates, insertInternationalCountrySchema, insertInternationalCitySchema, insertInternationalShippingRateSchema, deliveryVerificationCodes, readyVehicles } from "@shared/logistics-schema";
 import { 
   companyInformation, 
@@ -95,7 +93,6 @@ import {
   deliveryVehicles,
   deliveryPersonnel,
   deliveryRoutes,
-  deliveryVerificationCodes,
   logisticsAnalytics,
   insertTransportationCompanySchema,
   insertDeliveryVehicleSchema,
