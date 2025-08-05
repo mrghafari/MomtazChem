@@ -17755,12 +17755,16 @@ Momtaz Chemical Technical Team`,
         return res.status(404).json({ success: false, message: "Order not found" });
       }
 
-      // Update order with payment information
+      // Update order with payment information and auto-complete for successful payments
       const updatedOrder = await customerStorage.updateOrder(orderId, {
-        status: paymentStatus === 'paid' ? 'payment_confirmed' : order.status,
+        status: paymentStatus === 'paid' ? 'completed' : order.status, // Auto-complete for paid orders
+        paymentStatus: paymentStatus,
+        paymentMethod: paymentMethod,
         notes: order.notes ? `${order.notes}\n\nPayment processed: ${paymentMethod}${transactionId ? ` (ID: ${transactionId})` : ''}` 
                : `Payment processed: ${paymentMethod}${transactionId ? ` (ID: ${transactionId})` : ''}`
       });
+      
+      console.log(`✅ [PAYMENT UPDATE] Order ${orderId} automatically completed after successful payment`);
 
       // Trigger automatic synchronization after payment update
       try {

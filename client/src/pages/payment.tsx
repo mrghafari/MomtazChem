@@ -79,31 +79,41 @@ export default function Payment() {
     console.log('🔍 [PAYMENT PAGE DEBUG] Wallet amount from localStorage:', walletAmount);
     
     if (orderData && activeGateway) {
-      const order = orderData?.order || orderData;
-      console.log('🔍 [PAYMENT PAGE DEBUG] Payment method from order:', order?.paymentMethod);
-      console.log('🔍 [PAYMENT PAGE DEBUG] Will auto-redirect?', order?.paymentMethod === 'online_payment');
+      const order = (orderData as any)?.order || orderData;
+      console.log('🔍 [PAYMENT PAGE DEBUG] Payment method from order:', (order as any)?.paymentMethod);
+      console.log('🔍 [PAYMENT PAGE DEBUG] Will auto-redirect?', (order as any)?.paymentMethod === 'online_payment');
     }
   }, [orderId, activeGateway, gatewayLoading, orderData, orderLoading, walletAmount]);
 
   // Update payment status mutation
   const updatePaymentMutation = useMutation({
     mutationFn: async (paymentData: any) => {
-      return apiRequest(`/api/shop/orders/${orderId}/payment`, 'POST', paymentData);
-    },
-    onSuccess: () => {
-      toast({
-        title: "Payment Processed",
-        description: "Your payment has been processed successfully.",
+      console.log('💰 [PAYMENT UPDATE] Sending payment data:', paymentData);
+      return apiRequest(`/api/shop/orders/${orderId}/payment`, {
+        method: 'POST',
+        body: paymentData
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/shop/orders'] });
+    },
+    onSuccess: (response, variables) => {
+      console.log('✅ [PAYMENT UPDATE] Payment update successful:', response);
       
-      // Generate invoice after successful payment
+      toast({
+        title: "پرداخت تایید شد",
+        description: "پرداخت شما ثبت شد و در حال تولید فاکتور است.",
+      });
+      
+      queryClient.invalidateQueries({ queryKey: ['/api/shop/orders'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/customers/orders/${orderId}/payment`] });
+      
+      // Auto-generate invoice after successful payment - no manual intervention needed
+      console.log('📄 [INVOICE] Auto-generating invoice...');
       generateInvoiceMutation.mutate();
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('❌ [PAYMENT UPDATE] Payment update failed:', error);
       toast({
-        title: "Payment Update Failed",
-        description: "Failed to update payment status.",
+        title: "خطا در ثبت پرداخت",
+        description: "پرداخت انجام شد ولی ثبت آن با مشکل مواجه شد. با پشتیبانی تماس بگیرید.",
         variant: "destructive",
       });
     },
@@ -112,42 +122,72 @@ export default function Payment() {
   // Generate invoice mutation
   const generateInvoiceMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest('/api/invoices', 'POST', {
-        orderId: orderId,
-        customerId: orderData?.customerId,
-        language: 'ar' // Default to Arabic, can be made configurable
+      console.log('📄 [INVOICE GENERATION] Starting invoice generation for order:', orderId);
+      return apiRequest('/api/invoices', {
+        method: 'POST',
+        body: {
+          orderId: orderId,
+          customerId: (orderData as any)?.customerId || (orderData as any)?.order?.customerId,
+          language: 'ar' // Default to Arabic, can be made configurable
+        }
       });
     },
-    onSuccess: () => {
+    onSuccess: (response) => {
+      console.log('✅ [INVOICE GENERATION] Invoice generated successfully:', response);
+      
       toast({
-        title: "Invoice Generated",
-        description: "Your invoice has been generated and will be sent to your email.",
+        title: "فاکتور ایجاد شد",
+        description: "فاکتور شما ایجاد شد و به ایمیل ارسال خواهد شد. در حال هدایت...",
       });
       
-      // Redirect to success page
+      // Clear any cached order data
+      queryClient.invalidateQueries({ queryKey: ['/api/shop/orders'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/customers/orders/${orderId}/payment`] });
+      
+      // Immediate redirect to success page - fully automated
+      console.log('🚀 [REDIRECT] Auto-redirecting to success page in 1.5 seconds');
       setTimeout(() => {
         setLocation(`/checkout/success/${orderId}`);
-      }, 2000);
+      }, 1500); // Reduced delay for faster UX
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('❌ [INVOICE GENERATION] Invoice generation failed:', error);
+      
       toast({
-        title: "Invoice Generation Failed",
-        description: "Payment successful but invoice generation failed. Please contact support.",
+        title: "مشکل در ایجاد فاکتور",
+        description: "پرداخت موفق بود ولی فاکتور ایجاد نشد. با پشتیبانی تماس بگیرید.",
         variant: "destructive",
       });
+      
+      // Even if invoice fails, redirect to success page since payment was successful
+      setTimeout(() => {
+        setLocation(`/checkout/success/${orderId}`);
+      }, 3000);
     },
   });
 
   const handlePaymentSuccess = (paymentResult: any) => {
+    console.log('✅ [PAYMENT SUCCESS] Processing payment success:', paymentResult);
     setPaymentData(paymentResult);
     setPaymentProcessed(true);
     
-    // Update order with payment information
+    // Clear localStorage for this order
+    localStorage.removeItem(`wallet_amount_${orderId}`);
+    console.log('🧹 [CLEANUP] Removed localStorage data for order:', orderId);
+    
+    // Immediate success notification
+    toast({
+      title: "پرداخت موفق",
+      description: "پرداخت شما با موفقیت انجام شد. در حال تولید فاکتور...",
+    });
+    
+    // Update order with payment information and automatically generate invoice
     updatePaymentMutation.mutate({
       paymentStatus: 'paid',
       paymentMethod: paymentResult.method,
       transactionId: paymentResult.transactionId,
-      paymentData: paymentResult
+      paymentData: paymentResult,
+      autoComplete: true // Flag to indicate this should auto-complete
     });
   };
 
@@ -196,10 +236,10 @@ export default function Payment() {
     );
   }
 
-  const order = orderData?.order || orderData;
+  const order = (orderData as any)?.order || orderData;
 
   // Skip payment for cash on delivery and company credit
-  if (order.paymentMethod === 'cash_on_delivery' || order.paymentMethod === 'company_credit') {
+  if ((order as any).paymentMethod === 'cash_on_delivery' || (order as any).paymentMethod === 'company_credit') {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Card className="w-full max-w-lg">
