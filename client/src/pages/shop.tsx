@@ -2279,34 +2279,6 @@ const Shop = () => {
         </div>
       )}
 
-      {/* Floating Cart Button - Always Visible for Testing */}
-      <div className="fixed bottom-6 right-6 z-50">
-        <Button
-          onClick={handleCartClick}
-          disabled={getTotalItems() === 0}
-          className={`${getTotalItems() > 0 ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 hover:bg-gray-500'} text-white rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center gap-3 px-6 py-4 h-auto`}
-          size="lg"
-        >
-          <div className="relative">
-            <ShoppingCart className="w-6 h-6" />
-            {getTotalItems() > 0 && (
-              <Badge 
-                variant="destructive" 
-                className="absolute -top-2 -right-2 min-w-[20px] h-5 flex items-center justify-center text-xs font-bold rounded-full px-1.5"
-              >
-                {getTotalItems()}
-              </Badge>
-            )}
-          </div>
-          <div className="flex flex-col items-start">
-            <span className="text-sm font-medium">سبد خرید</span>
-            <span className="text-xs opacity-90">
-              {getTotalItems() > 0 ? `${getTotalPrice().toFixed(0)} IQD` : 'خالی'}
-            </span>
-          </div>
-        </Button>
-      </div>
-
       {/* Auth Dialog */}
       <CustomerAuth 
         open={showAuth}
