@@ -1369,11 +1369,12 @@ const Shop = () => {
                             </div>
                           </div>
                           
-
-                          
-
-
-
+                          {/* Flammable Product Badge - Top Right */}
+                          {product.isFlammable && (
+                            <Badge variant="outline" className="absolute top-2 right-2 bg-orange-100 text-orange-800 border-orange-300">
+                              آتش‌زا
+                            </Badge>
+                          )}
 
                           {/* Reviews and Specs - Right side */}
                           <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-lg p-1 shadow-lg">
@@ -1726,11 +1727,12 @@ const Shop = () => {
                             </div>
                           </div>
                           
-
-                          
-
-
-
+                          {/* Flammable Product Badge - Top Right - List View */}
+                          {product.isFlammable && (
+                            <Badge variant="outline" className="absolute top-2 right-2 bg-orange-100 text-orange-800 border-orange-300">
+                              آتش‌زا
+                            </Badge>
+                          )}
 
                           {/* Reviews and Specs - Right side - List View */}
                           <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-lg p-1 shadow-lg">
