@@ -495,6 +495,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (result.rows.length === 0) {
         console.log(`❌ [PAYMENT DETAILS] Order not found: ${orderNumber}`);
+        
+        // Attempt automatic cached order recovery
+        if (isCustomer && !isAdmin) {
+          const customerIdToRecover = req.session?.customerId || req.session?.crmCustomerId;
+          if (customerIdToRecover) {
+            console.log(`🔄 [CACHED RECOVERY] Attempting auto-recovery for order ${orderNumber} and customer ${customerIdToRecover}`);
+            
+            try {
+              const { cachedOrderRecovery } = await import('./cached-order-recovery');
+              const recoveryResult = await cachedOrderRecovery.attemptRecovery(orderNumber, customerIdToRecover);
+              
+              if (recoveryResult.success) {
+                console.log(`✅ [CACHED RECOVERY] Successfully recovered order ${orderNumber}`);
+                
+                // Re-query the order after recovery
+                const recoveredResult = await pool.query(`
+                  SELECT 
+                    co.id,
+                    co.order_number as "orderNumber",
+                    co.total_amount as "totalAmount",
+                    co.payment_method as "paymentMethod",
+                    co.payment_status as "paymentStatus",
+                    co.status,
+                    co.customer_id as "customerId",
+                    co.created_at as "createdAt"
+                  FROM customer_orders co
+                  WHERE co.order_number = $1
+                `, [orderNumber]);
+                
+                if (recoveredResult.rows.length > 0) {
+                  const recoveredOrder = recoveredResult.rows[0];
+                  console.log(`✅ [CACHED RECOVERY] Order successfully recovered and returned:`, recoveredOrder);
+                  
+                  return res.json({
+                    success: true,
+                    order: recoveredOrder,
+                    recovered: true,
+                    message: recoveryResult.message
+                  });
+                }
+              } else {
+                console.log(`❌ [CACHED RECOVERY] Recovery failed: ${recoveryResult.message}`);
+              }
+            } catch (recoveryError) {
+              console.error(`❌ [CACHED RECOVERY] Recovery error:`, recoveryError);
+            }
+          }
+        }
+        
         return res.status(404).json({
           success: false,
           message: "سفارش یافت نشد"
