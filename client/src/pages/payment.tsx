@@ -31,6 +31,13 @@ export default function Payment() {
     enabled: !!orderId,
   });
 
+  // Debug active gateway data
+  useEffect(() => {
+    console.log('🔍 [PAYMENT PAGE DEBUG] Active gateway data:', activeGateway);
+    console.log('🔍 [PAYMENT PAGE DEBUG] Gateway loading:', gatewayLoading);
+    console.log('🔍 [PAYMENT PAGE DEBUG] Order data:', orderData);
+  }, [activeGateway, gatewayLoading, orderData]);
+
   // Update payment status mutation
   const updatePaymentMutation = useMutation({
     mutationFn: async (paymentData: any) => {

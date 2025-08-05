@@ -37,11 +37,16 @@ const PaymentGateway = ({
 
   // Auto-redirect for online payment method
   useEffect(() => {
+    console.log('🔍 [AUTO REDIRECT DEBUG] Payment method:', paymentMethod);
+    console.log('🔍 [AUTO REDIRECT DEBUG] Active gateway:', activeGateway);
+    console.log('🔍 [AUTO REDIRECT DEBUG] Is processing:', isProcessing);
+    
     if (paymentMethod === 'online_payment' && activeGateway && !isProcessing) {
       console.log('🔄 [AUTO REDIRECT] Triggering auto-redirect for online payment');
+      console.log('🔄 [AUTO REDIRECT] Gateway config:', activeGateway.config);
       handleOnlinePayment();
     }
-  }, [paymentMethod, activeGateway]);
+  }, [paymentMethod, activeGateway, isProcessing]);
 
   // Fetch company banking information for dynamic banking details
   const { data: companyInfo, isLoading: isLoadingCompanyInfo } = useQuery({
