@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -34,6 +34,14 @@ const PaymentGateway = ({
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  // Auto-redirect for online payment method
+  useEffect(() => {
+    if (paymentMethod === 'online_payment' && activeGateway && !isProcessing) {
+      console.log('🔄 [AUTO REDIRECT] Triggering auto-redirect for online payment');
+      handleOnlinePayment();
+    }
+  }, [paymentMethod, activeGateway]);
 
   // Fetch company banking information for dynamic banking details
   const { data: companyInfo, isLoading: isLoadingCompanyInfo } = useQuery({
@@ -140,15 +148,32 @@ const PaymentGateway = ({
     setIsProcessing(true);
     
     try {
-      // Get gateway config and redirect URL
+      // Get gateway config and build redirect URL
       const gatewayConfig = activeGateway.config;
+      console.log('🔍 [PAYMENT GATEWAY] Gateway config:', gatewayConfig);
       
-      if (gatewayConfig && gatewayConfig.paymentUrl) {
-        // Redirect to active gateway
-        const paymentUrl = `${gatewayConfig.paymentUrl}?amount=${totalAmount}&order=${orderId}&currency=IQD`;
+      if (gatewayConfig && gatewayConfig.apiBaseUrl) {
+        // Build payment URL with proper parameters for Shaparak
+        const baseUrl = gatewayConfig.apiBaseUrl;
+        const merchantId = gatewayConfig.merchantId || 'DEMO_MERCHANT';
+        const paymentReference = `MOMTAZ_${orderId}_${Date.now()}`;
+        
+        const paymentUrl = `${baseUrl}?` +
+          `merchantId=${encodeURIComponent(merchantId)}&` +
+          `amount=${totalAmount}&` +
+          `currency=IQD&` +
+          `reference=${encodeURIComponent(paymentReference)}&` +
+          `orderNumber=${encodeURIComponent(orderId)}&` +
+          `returnUrl=${encodeURIComponent(window.location.origin + '/payment-callback')}&` +
+          `cancelUrl=${encodeURIComponent(window.location.origin + '/payment-cancelled')}`;
+        
+        console.log('🚀 [PAYMENT GATEWAY] Redirecting to:', paymentUrl);
+        
+        // Redirect to external payment gateway
         window.location.href = paymentUrl;
+        
       } else {
-        throw new Error('تنظیمات درگاه پرداخت نامعتبر است');
+        throw new Error('آدرس درگاه پرداخت در تنظیمات موجود نیست');
       }
     } catch (error: any) {
       console.error('Online payment error:', error);
