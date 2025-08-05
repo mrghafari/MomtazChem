@@ -29,8 +29,8 @@ export default function Payment() {
   console.log('🚀 [PAYMENT COMPONENT] URL Params orderId:', orderIdFromUrl);
   console.log('🚀 [PAYMENT COMPONENT] Path Params orderId:', orderIdFromPath);
   
-  const orderId = orderIdFromPath ? parseInt(orderIdFromPath) : 
-                   orderIdFromUrl ? parseInt(orderIdFromUrl) : null;
+  // Keep orderId as string since orderNumber is a string (like "M123456")
+  const orderId = orderIdFromPath || orderIdFromUrl;
   
   console.log('🚀 [PAYMENT COMPONENT] Final Order ID:', orderId);
   console.log('🚀 [PAYMENT COMPONENT] Window location:', window.location.href);

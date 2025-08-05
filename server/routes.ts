@@ -13990,6 +13990,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get order payment details by order number for hybrid payment processing
+  app.get("/api/customers/orders/:orderNumber/payment", async (req, res) => {
+    try {
+      const { orderNumber } = req.params;
+      const customerId = req.session?.customerId;
+      
+      if (!customerId) {
+        return res.status(401).json({
+          success: false,
+          message: "احراز هویت نشده"
+        });
+      }
+      
+      console.log(`🔍 [PAYMENT DETAILS] Fetching payment details for order ${orderNumber}, customer ${customerId}`);
+      
+      // Find order by orderNumber
+      const orderResult = await db
+        .select()
+        .from(customerOrders)
+        .where(and(
+          eq(customerOrders.orderNumber, orderNumber),
+          eq(customerOrders.customerId, customerId)
+        ));
+      
+      if (orderResult.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "سفارش یافت نشد"
+        });
+      }
+      
+      const order = orderResult[0];
+      
+      console.log(`✅ [PAYMENT DETAILS] Found order ${orderNumber} with payment status: ${order.paymentStatus}`);
+      
+      res.json({
+        success: true,
+        order: {
+          id: order.id,
+          orderNumber: order.orderNumber,
+          totalAmount: order.totalAmount,
+          paymentStatus: order.paymentStatus,
+          paymentMethod: order.paymentMethod,
+          walletAmountUsed: order.walletAmountUsed,
+          remainingAmount: order.totalAmount - (order.walletAmountUsed || 0),
+          createdAt: order.createdAt,
+          customerId: order.customerId
+        }
+      });
+      
+    } catch (error) {
+      console.error('❌ [PAYMENT DETAILS] Error fetching payment details:', error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت جزئیات پرداخت"
+      });
+    }
+  });
+
   // Get complete customer order history for purchase history modal
   app.get("/api/customers/orders/complete-history", async (req, res) => {
     try {
