@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { MapPin, Globe, X, ShoppingCart, Plus, Minus, Trash2, Wallet, CreditCard, Upload, Clock, Flame } from "lucide-react";
+import { MapPin, Globe, X, ShoppingCart, Plus, Minus, Trash2, Wallet, CreditCard, Upload, Clock, Flame, Move } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -251,8 +251,56 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const [selectedShippingMethod, setSelectedShippingMethod] = useState<number | null>(null);
   const [shippingCost, setShippingCost] = useState<number>(0);
   
+  // Draggable cart state
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isMinimized, setIsMinimized] = useState(false);
+  
   // Form reference for static positioning
   const formRef = useRef<HTMLDivElement>(null);
+
+  // Drag handlers
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!formRef.current) return;
+    const rect = formRef.current.getBoundingClientRect();
+    setIsDragging(true);
+    setDragOffset({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    });
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!isDragging) return;
+    const newX = e.clientX - dragOffset.x;
+    const newY = e.clientY - dragOffset.y;
+    
+    // Keep cart within viewport bounds
+    const maxX = window.innerWidth - 400; // 400px is cart width
+    const maxY = window.innerHeight - 100;
+    
+    setPosition({
+      x: Math.max(0, Math.min(newX, maxX)),
+      y: Math.max(0, Math.min(newY, maxY))
+    });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  // Add global mouse listeners for drag
+  useEffect(() => {
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [isDragging, dragOffset]);
 
   
 
@@ -1389,26 +1437,56 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center p-4 bg-black/50 z-50">
+    <div 
+      className="fixed w-96 z-50 shadow-2xl transition-all duration-200"
+      style={{
+        left: position.x || 'auto',
+        top: position.y || 'auto',
+        right: position.x === 0 ? '1rem' : 'auto',
+        bottom: position.y === 0 ? '1rem' : 'auto',
+        cursor: isDragging ? 'grabbing' : 'auto'
+      }}
+    >
       <Card 
         ref={formRef}
-        className={`w-full max-w-2xl max-h-[90vh] overflow-y-auto ${isRTL ? 'rtl' : 'ltr'}`}
+        className={`w-full ${isMinimized ? 'max-h-16' : 'max-h-[80vh]'} overflow-y-auto border-2 border-blue-200 transition-all duration-300 ${isRTL ? 'rtl' : 'ltr'}`}
+        style={{ 
+          background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+        }}
       >
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+        <CardHeader 
+          className="flex flex-row items-center justify-between space-y-0 pb-4 cursor-grab active:cursor-grabbing bg-gradient-to-r from-blue-50 to-purple-50 rounded-t-lg"
+          onMouseDown={handleMouseDown}
+        >
           <div className="flex items-center gap-2">
-            <ShoppingCart className="w-5 h-5" />
-            <CardTitle className="text-lg">{t.purchaseOrder}</CardTitle>
+            <Move className="w-4 h-4 text-gray-400" />
+            <ShoppingCart className="w-5 h-5 text-blue-600" />
+            <CardTitle className="text-lg font-semibold text-gray-800">{t.purchaseOrder}</CardTitle>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-            className="no-drag"
-          >
-            <X className="w-4 h-4" />
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsMinimized(!isMinimized)}
+              className="h-8 w-8 p-0 hover:bg-blue-100"
+              title={isMinimized ? "Expand" : "Minimize"}
+            >
+              {isMinimized ? <Plus className="w-3 h-3" /> : <Minus className="w-3 h-3" />}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClose}
+              className="h-8 w-8 p-0 hover:bg-red-100 text-red-600"
+              title="Close"
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
         </CardHeader>
 
+        {!isMinimized && (
         <CardContent className="space-y-4">
           {/* Cart Management */}
           <div className="bg-muted p-3 rounded-lg">
@@ -2317,6 +2395,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
             </Form>
           </div>
         </CardContent>
+        )}
       </Card>
     </div>
   );
