@@ -17804,7 +17804,9 @@ Momtaz Chemical Technical Team`,
               paymentMethod: paymentMethod,
               walletAmountUsed: paymentData?.walletDeducted ? parseFloat(paymentData.walletDeducted.toString()) : 0,
               bankAmountPaid: paymentData?.bankPaid ? parseFloat(paymentData.bankPaid.toString()) : 0,
-              currentStatus: paymentStatus === 'paid' ? 'financial_approved' : orderManagementRecord.currentStatus
+              currentStatus: paymentStatus === 'paid' ? 'financial_approved' : orderManagementRecord.currentStatus,
+              // Mark as protected status to prevent sync service from overriding
+              isProtectedStatus: paymentStatus === 'paid' ? true : orderManagementRecord.isProtectedStatus
             })
             .where(eq(orderManagement.customerOrderId, orderId));
           
