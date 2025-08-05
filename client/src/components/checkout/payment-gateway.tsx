@@ -70,6 +70,11 @@ const PaymentGateway = ({
             method: 'POST',
             body: { customerId: customerId ? parseInt(customerId) : undefined }
           });
+          
+          // Also clear localStorage cart immediately
+          localStorage.removeItem('cart');
+          console.log('🧹 [CART CLEAR] Cleared localStorage cart');
+          
           console.log('✅ [CART CLEAR] Cart cleared successfully');
         } catch (cartError) {
           console.warn('⚠️ [CART CLEAR] Failed to clear cart:', cartError);
@@ -138,6 +143,11 @@ const PaymentGateway = ({
               method: 'POST',
               body: { customerId: customerId ? parseInt(customerId) : undefined }
             });
+            
+            // Also clear localStorage cart immediately
+            localStorage.removeItem('cart');
+            console.log('🧹 [CART CLEAR] Cleared localStorage cart');
+            
             console.log('✅ [CART CLEAR] Cart cleared successfully');
           } catch (cartError) {
             console.warn('⚠️ [CART CLEAR] Failed to clear cart:', cartError);

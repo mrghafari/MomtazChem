@@ -17768,7 +17768,16 @@ Momtaz Chemical Technical Team`,
         return res.status(404).json({ success: false, message: "Order not found" });
       }
       
-      console.log('✅ [PAYMENT ENDPOINT] Order found:', { id: orderId, orderNumber: order.orderNumber });
+      console.log('✅ [PAYMENT ENDPOINT] Order found:', { id: orderId, orderNumber: order.orderNumber, customerId: order.customerId });
+
+      // CRITICAL SECURITY CHECK: Verify customer ownership to prevent order mix-ups
+      if (req.session?.customerId && req.session.customerId !== order.customerId) {
+        console.log(`🚨 [SECURITY] Customer ID mismatch! Session: ${req.session.customerId}, Order: ${order.customerId}`);
+        return res.status(403).json({ 
+          success: false, 
+          message: "Access denied: Order belongs to different customer" 
+        });
+      }
 
       // Update order with payment information and auto-complete for successful payments
       const updatedOrder = await customerStorage.updateOrder(orderId, {
@@ -17780,6 +17789,33 @@ Momtaz Chemical Technical Team`,
       });
       
       console.log(`✅ [PAYMENT UPDATE] Order ${orderId} automatically completed after successful payment`);
+
+      // Critical: Update order_management table for financial system integration
+      try {
+        const [orderManagementRecord] = await db
+          .select()
+          .from(orderManagement)
+          .where(eq(orderManagement.customerOrderId, orderId));
+          
+        if (orderManagementRecord) {
+          await db
+            .update(orderManagement)
+            .set({
+              paymentMethod: paymentMethod,
+              walletAmountUsed: paymentData?.walletDeducted ? parseFloat(paymentData.walletDeducted.toString()) : 0,
+              bankAmountPaid: paymentData?.bankPaid ? parseFloat(paymentData.bankPaid.toString()) : 0,
+              currentStatus: paymentStatus === 'paid' ? 'financial_approved' : orderManagementRecord.currentStatus
+            })
+            .where(eq(orderManagement.customerOrderId, orderId));
+          
+          console.log(`✅ [ORDER MANAGEMENT] Updated order management record for order ${orderId}`);
+        } else {
+          console.log(`⚠️ [ORDER MANAGEMENT] No order management record found for order ${orderId}`);
+        }
+      } catch (orderMgmtError) {
+        console.error(`❌ [ORDER MANAGEMENT] Failed to update order management:`, orderMgmtError);
+        // Don't fail payment update if order management update fails
+      }
 
       // Trigger automatic synchronization after payment update
       try {

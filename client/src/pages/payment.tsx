@@ -85,6 +85,21 @@ export default function Payment() {
     }
   }, [orderId, activeGateway, gatewayLoading, orderData, orderLoading, walletAmount]);
 
+  // Clear cart mutation
+  const clearCartMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest('/api/cart/clear', {
+        method: 'POST'
+      });
+    },
+    onSuccess: () => {
+      console.log('✅ [CART CLEAR] Server cart cleared successfully');
+    },
+    onError: (error) => {
+      console.error('❌ [CART CLEAR] Failed to clear server cart:', error);
+    }
+  });
+
   // Update payment status mutation
   const updatePaymentMutation = useMutation({
     mutationFn: async (paymentData: any) => {
@@ -96,6 +111,14 @@ export default function Payment() {
     },
     onSuccess: (response, variables) => {
       console.log('✅ [PAYMENT UPDATE] Payment update successful:', response);
+      
+      // CRITICAL: Clear all cart data immediately after successful payment
+      console.log('🧹 [CART CLEANUP] Clearing all cart data after successful payment');
+      localStorage.removeItem('cart');
+      localStorage.removeItem(`wallet_amount_${orderId}`);
+      
+      // Clear cart from server
+      clearCartMutation.mutate();
       
       toast({
         title: "پرداخت تایید شد",
@@ -174,7 +197,12 @@ export default function Payment() {
     // Clear cart after successful payment
     console.log('🧹 [CART CLEAR] Clearing cart after successful payment');
     apiRequest('/api/cart/clear', { method: 'POST' })
-      .then(() => console.log('✅ [CART CLEAR] Cart cleared successfully'))
+      .then(() => {
+        console.log('✅ [CART CLEAR] Cart cleared successfully');
+        // Also clear localStorage cart immediately
+        localStorage.removeItem('cart');
+        console.log('🧹 [CART CLEAR] Cleared localStorage cart');
+      })
       .catch(err => console.warn('⚠️ [CART CLEAR] Failed to clear cart:', err));
     
     // Clear localStorage for this order
