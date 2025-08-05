@@ -18,7 +18,7 @@ import { apiRequest } from "@/lib/queryClient";
 interface PaymentGateway {
   id: number;
   name: string;
-  type: 'iraqi_bank' | 'credit_card' | 'digital_wallet' | 'bank_transfer';
+  type: 'iraqi_bank' | 'credit_card' | 'digital_wallet' | 'bank_transfer' | 'shaparak' | 'sep' | 'parsian' | 'mellat' | 'saderat' | 'melli' | 'tejarat' | 'pasargad' | 'zarinpal' | 'idpay' | 'payping' | 'nextpay' | 'zibal' | 'payir' | 'cryptocurrency' | 'mobile_payment' | 'instant_transfer' | 'pos_terminal' | 'custom';
   enabled: boolean;
   config: {
     apiKey?: string;
@@ -145,6 +145,44 @@ const PaymentSettings = () => {
         return 'Digital Wallets';
       case 'bank_transfer':
         return 'International Bank Transfer';
+      case 'shaparak':
+        return 'Shaparak Payment Gateway';
+      case 'sep':
+        return 'Saman Electronic Payment (SEP)';
+      case 'parsian':
+        return 'Parsian Bank Gateway';
+      case 'mellat':
+        return 'Bank Mellat Gateway';
+      case 'saderat':
+        return 'Bank Saderat Gateway';
+      case 'melli':
+        return 'Bank Melli Gateway';
+      case 'tejarat':
+        return 'Tejarat Bank Gateway';
+      case 'pasargad':
+        return 'Pasargad Bank Gateway';
+      case 'zarinpal':
+        return 'ZarinPal';
+      case 'idpay':
+        return 'IDPay';
+      case 'payping':
+        return 'PayPing';
+      case 'nextpay':
+        return 'NextPay';
+      case 'zibal':
+        return 'Zibal';
+      case 'payir':
+        return 'Pay.ir';
+      case 'cryptocurrency':
+        return 'Cryptocurrency Gateway';
+      case 'mobile_payment':
+        return 'Mobile Payment';
+      case 'instant_transfer':
+        return 'Instant Transfer';
+      case 'pos_terminal':
+        return 'POS Terminal';
+      case 'custom':
+        return 'Custom Gateway';
       default:
         return type;
     }
@@ -195,6 +233,25 @@ const PaymentSettings = () => {
                 <SelectItem value="credit_card">Credit/Debit Cards</SelectItem>
                 <SelectItem value="digital_wallet">Digital Wallets</SelectItem>
                 <SelectItem value="bank_transfer">International Bank Transfer</SelectItem>
+                <SelectItem value="shaparak">Shaparak Payment Gateway</SelectItem>
+                <SelectItem value="sep">Saman Electronic Payment (SEP)</SelectItem>
+                <SelectItem value="parsian">Parsian Bank Gateway</SelectItem>
+                <SelectItem value="mellat">Bank Mellat Gateway</SelectItem>
+                <SelectItem value="saderat">Bank Saderat Gateway</SelectItem>
+                <SelectItem value="melli">Bank Melli Gateway</SelectItem>
+                <SelectItem value="tejarat">Tejarat Bank Gateway</SelectItem>
+                <SelectItem value="pasargad">Pasargad Bank Gateway</SelectItem>
+                <SelectItem value="zarinpal">ZarinPal</SelectItem>
+                <SelectItem value="idpay">IDPay</SelectItem>
+                <SelectItem value="payping">PayPing</SelectItem>
+                <SelectItem value="nextpay">NextPay</SelectItem>
+                <SelectItem value="zibal">Zibal</SelectItem>
+                <SelectItem value="payir">Pay.ir</SelectItem>
+                <SelectItem value="cryptocurrency">Cryptocurrency Gateway</SelectItem>
+                <SelectItem value="mobile_payment">Mobile Payment</SelectItem>
+                <SelectItem value="instant_transfer">Instant Transfer</SelectItem>
+                <SelectItem value="pos_terminal">POS Terminal</SelectItem>
+                <SelectItem value="custom">Custom Gateway</SelectItem>
               </SelectContent>
             </Select>
           </div>
