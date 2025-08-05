@@ -247,10 +247,10 @@ export class SyncService {
     }
     
     // اولویت سوم: وضعیت‌های پرداخت
-    if (customerStatus === 'pending') {
+    if (customerStatus === 'pending' || customerStatus === 'completed') {
       if (paymentStatus === 'paid') {
-        // پرداخت انجام شده ولی هنوز تایید نشده - نیاز به تایید مالی ندارد
-        return 'warehouse_pending';
+        // CRITICAL FIX: پرداخت کامل شده - باید financial_approved باشد
+        return 'financial_approved';
       } else if (paymentStatus === 'receipt_uploaded') {
         // فیش آپلود شده - نیاز به بررسی مالی
         return 'pending';

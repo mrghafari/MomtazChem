@@ -194,15 +194,17 @@ export default function Payment() {
     setPaymentData(paymentResult);
     setPaymentProcessed(true);
     
-    // Clear cart after successful payment - FIXED VERSION
+    // Clear cart after successful payment - WITH SESSION
     console.log('🧹 [CART CLEAR] Clearing cart after successful payment');
     fetch('/api/cart/clear', { 
       method: 'POST',
       body: JSON.stringify({}), 
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include'  // Include session cookies
     })
-      .then(() => {
-        console.log('✅ [CART CLEAR] Database cart cleared successfully');
+      .then(response => response.json())
+      .then(data => {
+        console.log('✅ [CART CLEAR] Database cart cleared:', data);
         // Also clear localStorage cart immediately
         localStorage.removeItem('cart');
         console.log('🧹 [CART CLEAR] Cleared localStorage cart');
@@ -211,6 +213,7 @@ export default function Payment() {
         console.warn('⚠️ [CART CLEAR] Failed to clear cart:', err);
         // Force clear localStorage even if database clear fails
         localStorage.removeItem('cart');
+        console.log('🧹 [CART CLEAR] Force cleared localStorage despite API error');
       });
     
     // Clear localStorage for this order
