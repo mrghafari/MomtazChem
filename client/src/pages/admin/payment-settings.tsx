@@ -53,7 +53,7 @@ const PaymentSettings = () => {
     mutationFn: async (gatewayData: Partial<PaymentGateway>) => {
       const url = gatewayData.id ? `/api/payment/gateways/${gatewayData.id}` : '/api/payment/gateways';
       const method = gatewayData.id ? 'PATCH' : 'POST';
-      return apiRequest(url, { method, body: gatewayData });
+      return apiRequest(url, method, gatewayData);
     },
     onSuccess: () => {
       toast({
@@ -76,7 +76,7 @@ const PaymentSettings = () => {
   // Toggle gateway status mutation (only one can be enabled at a time)
   const toggleGatewayMutation = useMutation({
     mutationFn: async (gatewayId: number) => {
-      return apiRequest(`/api/payment/gateways/${gatewayId}/toggle`, { method: 'PATCH' });
+      return apiRequest(`/api/payment/gateways/${gatewayId}/toggle`, 'PATCH');
     },
     onSuccess: () => {
       toast({
@@ -97,7 +97,7 @@ const PaymentSettings = () => {
   // Delete gateway mutation
   const deleteGatewayMutation = useMutation({
     mutationFn: async (gatewayId: number) => {
-      return apiRequest(`/api/payment/gateways/${gatewayId}`, { method: 'DELETE' });
+      return apiRequest(`/api/payment/gateways/${gatewayId}`, 'DELETE');
     },
     onSuccess: () => {
       toast({
