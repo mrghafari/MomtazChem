@@ -37850,6 +37850,14 @@ momtazchem.com
   // Clear cart after successful payment
   app.post("/api/cart/clear", async (req, res) => {
     try {
+      console.log(`🔐 [CART CLEAR AUTH] Session details:`, {
+        sessionExists: !!req.session,
+        sessionId: req.sessionID,
+        customerId: (req.session as any)?.customerId,
+        isAuthenticated: req.isAuthenticated ? req.isAuthenticated() : false,
+        sessionData: req.session
+      });
+
       const customerId = (req.session as any)?.customerId;
       if (!customerId) {
         return res.status(401).json({ success: false, message: "Authentication required" });
