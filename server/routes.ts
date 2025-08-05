@@ -484,6 +484,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           co.id,
           co.order_number as "orderNumber",
           co.total_amount as "totalAmount",
+          co.shipping_cost as "shippingAmount",
+          co.vat_amount as "vatAmount",
+          co.vat_rate as "vatRate",
+          co.surcharge_amount as "surchargeAmount",
+          co.surcharge_rate as "surchargeRate",
           co.payment_method as "paymentMethod",
           co.payment_status as "paymentStatus",
           co.status,
@@ -515,6 +520,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
                     co.id,
                     co.order_number as "orderNumber",
                     co.total_amount as "totalAmount",
+                    co.shipping_cost as "shippingAmount",
+                    co.vat_amount as "vatAmount",
+                    co.vat_rate as "vatRate",
+                    co.surcharge_amount as "surchargeAmount",
+                    co.surcharge_rate as "surchargeRate",
                     co.payment_method as "paymentMethod",
                     co.payment_status as "paymentStatus",
                     co.status,
@@ -528,9 +538,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   const recoveredOrder = recoveredResult.rows[0];
                   console.log(`✅ [CACHED RECOVERY] Order successfully recovered and returned:`, recoveredOrder);
                   
+                  // Calculate itemsSubtotal for recovered order
+                  const recoveredItemsSubtotal = (
+                    parseFloat(recoveredOrder.totalAmount) - 
+                    parseFloat(recoveredOrder.shippingAmount || '0') - 
+                    parseFloat(recoveredOrder.vatAmount || '0') - 
+                    parseFloat(recoveredOrder.surchargeAmount || '0')
+                  ).toFixed(2);
+
+                  const enhancedRecoveredOrder = {
+                    ...recoveredOrder,
+                    itemsSubtotal: recoveredItemsSubtotal
+                  };
+                  
                   return res.json({
                     success: true,
-                    order: recoveredOrder,
+                    order: enhancedRecoveredOrder,
                     recovered: true,
                     message: recoveryResult.message
                   });
@@ -565,9 +588,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
+      // Calculate itemsSubtotal: totalAmount - (shipping + vat + surcharge)
+      const itemsSubtotal = (
+        parseFloat(order.totalAmount) - 
+        parseFloat(order.shippingAmount || '0') - 
+        parseFloat(order.vatAmount || '0') - 
+        parseFloat(order.surchargeAmount || '0')
+      ).toFixed(2);
+
+      // Enhance order object with calculated fields
+      const enhancedOrder = {
+        ...order,
+        itemsSubtotal: itemsSubtotal
+      };
+
+      console.log(`✅ [PAYMENT DETAILS] Enhanced order with itemsSubtotal:`, enhancedOrder);
+
       res.json({
         success: true,
-        order: order
+        order: enhancedOrder
       });
 
     } catch (error) {

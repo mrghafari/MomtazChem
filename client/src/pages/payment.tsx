@@ -321,16 +321,26 @@ export default function Payment() {
                 <div className="border-t pt-4 space-y-2">
                   <div className="flex justify-between">
                     <span>Subtotal</span>
-                    <span>{formatCurrency(order.totalAmount - (order.totalAmount * 0.09) - 50)}</span>
+                    <span>{formatCurrency(order.itemsSubtotal || order.totalAmount)}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Shipping</span>
-                    <span>{formatCurrency(50)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Tax (9%)</span>
-                    <span>{formatCurrency(order.totalAmount * 0.09)}</span>
-                  </div>
+                  {order.shippingAmount > 0 && (
+                    <div className="flex justify-between">
+                      <span>Shipping</span>
+                      <span>{formatCurrency(order.shippingAmount)}</span>
+                    </div>
+                  )}
+                  {order.vatAmount > 0 && (
+                    <div className="flex justify-between">
+                      <span>Tax (VAT)</span>
+                      <span>{formatCurrency(order.vatAmount)}</span>
+                    </div>
+                  )}
+                  {order.dutiesAmount > 0 && (
+                    <div className="flex justify-between">
+                      <span>Duties</span>
+                      <span>{formatCurrency(order.dutiesAmount)}</span>
+                    </div>
+                  )}
                   <div className="border-t pt-2 flex justify-between font-bold text-lg">
                     <span>Total</span>
                     <span>{formatCurrency(order.totalAmount)}</span>
