@@ -360,31 +360,8 @@ const Shop = () => {
     }
   }, [customer, isLoadingCustomer]);
 
-  // Force cart refresh on page load/navigation
-  useEffect(() => {
-    const refreshCart = () => {
-      if (customer) {
-        const userCart = localStorage.getItem('momtazchem_user_cart');
-        if (userCart) {
-          const cartData = JSON.parse(userCart);
-          setCart(cartData);
-        }
-      } else if (!isLoadingCustomer) {
-        const guestCart = sessionStorage.getItem('momtazchem_guest_cart');
-        if (guestCart) {
-          const cartData = JSON.parse(guestCart);
-          setCart(cartData);
-        }
-      }
-    };
-
-    // Refresh cart on window focus (navigation between tabs/pages)
-    window.addEventListener('focus', refreshCart);
-    
-    return () => {
-      window.removeEventListener('focus', refreshCart);
-    };
-  }, [customer, isLoadingCustomer]);
+  // Disabled: This was conflicting with database cart loading
+  // The persistent cart loading is now handled in loadPersistentCart function
 
   const checkCustomerAuth = async () => {
     try {
@@ -635,25 +612,35 @@ const Shop = () => {
 
   // Save cart to appropriate storage based on authentication
   const saveCartToStorage = async (cartData: {[key: number]: number}) => {
+    console.log('🛒 [SAVE CART] Called with cart data:', cartData);
+    console.log('🛒 [SAVE CART] Customer state:', customer ? 'logged in' : 'guest');
+    
     if (customer) {
       // Authenticated user - save to localStorage AND database
       localStorage.setItem('momtazchem_user_cart', JSON.stringify(cartData));
+      console.log('🛒 [SAVE CART] Saved to localStorage');
       
       // 🛒 Save to database asynchronously (don't block UI)
       try {
         console.log('🛒 [PERSISTENT CART] Saving to database:', cartData);
-        await fetch('/api/customers/persistent-cart/sync', {
+        const response = await fetch('/api/customers/persistent-cart/sync', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
           body: JSON.stringify({ cartData })
         });
-        console.log('✅ [PERSISTENT CART] Saved to database successfully');
+        
+        if (response.ok) {
+          console.log('✅ [PERSISTENT CART] Saved to database successfully');
+        } else {
+          console.error('❌ [PERSISTENT CART] Database save failed:', response.status);
+        }
       } catch (error) {
         console.error('❌ [PERSISTENT CART] Error saving to database:', error);
         // Still keep in localStorage even if database save fails
       }
     } else {
+      console.log('🛒 [SAVE CART] Guest user - not saving to persistent storage');
       // Guest user - don't save to any persistent storage
       // Cart will be lost on refresh as requested
       // Only keep in memory during current session
