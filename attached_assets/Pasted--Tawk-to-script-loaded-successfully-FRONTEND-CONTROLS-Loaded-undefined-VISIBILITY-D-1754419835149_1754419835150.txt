@@ -1,0 +1,207 @@
+ Tawk.to script loaded successfully
+ 🎛️ [FRONTEND CONTROLS] Loaded: undefined
+ 🎛️ [VISIBILITY] Discount Banner: false AI Features: false
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+api/admin/me:1  Failed to load resource: the server responded with a status of 403 ()
+ Auth check failed: 
+queryFn @ index-CcXUZgCJ.js:1011
+ 🎛️ [FRONTEND CONTROLS] Loaded: undefined
+ 🎛️ [VISIBILITY] Discount Banner: false AI Features: false
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🎛️ [FRONTEND CONTROLS] Loaded: undefined
+ 🎛️ [VISIBILITY] Discount Banner: false AI Features: false
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🎛️ [FRONTEND CONTROLS] Loaded: undefined
+ 🎛️ [VISIBILITY] Discount Banner: false AI Features: false
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🎛️ [FRONTEND CONTROLS] Loaded: Object
+ 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🎛️ [FRONTEND CONTROLS] Loaded: Object
+ 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🎛️ [FRONTEND CONTROLS] Loaded: Object
+ 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+ 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🎛️ [FRONTEND CONTROLS] Loaded: Object
+ 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+ 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Current products: Array(5)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(2)
+ 🎛️ [FRONTEND CONTROLS] Loaded: Object
+ 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+ 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🌟 [RATINGS DEBUG] Current products: Array(5)
+ 🌟 [RATINGS DEBUG] Products with ratings: Array(2)
+ 🎛️ [FRONTEND CONTROLS] Loaded: Object
+ 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+ 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Current products: Array(5)
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Products with ratings: Array(2)
+index-CcXUZgCJ.js:1015 🎛️ [FRONTEND CONTROLS] Loaded: Object
+index-CcXUZgCJ.js:1015 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Product stats data: Object
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Current products: Array(5)
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Products with ratings: Array(2)
+index-CcXUZgCJ.js:1015 🎛️ [FRONTEND CONTROLS] Loaded: Object
+index-CcXUZgCJ.js:1015 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Product stats data: Object
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Current products: Array(5)
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Products with ratings: Array(2)
+index-CcXUZgCJ.js:1015 🎛️ [FRONTEND CONTROLS] Loaded: Object
+index-CcXUZgCJ.js:1015 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Product stats data: Object
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Current products: Array(5)
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Products with ratings: Array(2)
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:117574)
+    at t.value (twk-chunk-common.js:2:150658)
+    at p.updateUUID (twk-chunk-common.js:2:202310)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:124589)
+    at twk-chunk-common.js:2:123900
+value @ twk-chunk-common.js:2
+index-CcXUZgCJ.js:1015 🎛️ [FRONTEND CONTROLS] Loaded: Object
+index-CcXUZgCJ.js:1015 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Product stats data: Object
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Current products: Array(5)
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Products with ratings: Array(2)
+shop:44 Tawk.to Live Chat loaded successfully
+index-CcXUZgCJ.js:1015 🎛️ [FRONTEND CONTROLS] Loaded: Object
+index-CcXUZgCJ.js:1015 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Product stats data: Object
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Current products: Array(5)
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Products with ratings: Array(2)
+index-CcXUZgCJ.js:1015 🎛️ [FRONTEND CONTROLS] Loaded: Object
+index-CcXUZgCJ.js:1015 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Product stats data: Object
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Current products: Array(5)
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Products with ratings: Array(2)
+index-CcXUZgCJ.js:1015 🎛️ [FRONTEND CONTROLS] Loaded: Object
+index-CcXUZgCJ.js:1015 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Product stats data: Object
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Current products: Array(5)
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Products with ratings: Array(2)
+index-CcXUZgCJ.js:1015 🔐 [LOGIN] Starting handleLoginSuccess
+index-CcXUZgCJ.js:1015 🔐 [LOGIN] Customer data: Object
+index-CcXUZgCJ.js:1015 🔐 [LOGIN] Current cart state: Object
+index-CcXUZgCJ.js:1015 🔐 [LOGIN] Customer state set
+index-CcXUZgCJ.js:1015 🔐 [LOGIN] Wallet balance fetch initiated
+index-CcXUZgCJ.js:1015 🔐 [LOGIN] Auth modal closed
+index-CcXUZgCJ.js:1015 🔐 [LOGIN] Cache invalidated
+index-CcXUZgCJ.js:1015 🔐 [LOGIN] Has cart items: false
+index-CcXUZgCJ.js:1015 🔐 [LOGIN] Cart contents: Object
+index-CcXUZgCJ.js:1015 🔐 [LOGIN] Cart migration completed
+index-CcXUZgCJ.js:1015 🔐 [LOGIN] Welcome toast shown
+index-CcXUZgCJ.js:1015 🔐 [LOGIN] Staying in shop after successful login
+index-CcXUZgCJ.js:1015 🔐 [LOGIN] handleLoginSuccess completed successfully
+index-CcXUZgCJ.js:1015 🎛️ [FRONTEND CONTROLS] Loaded: Object
+index-CcXUZgCJ.js:1015 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Product stats data: Object
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Current products: Array(5)
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Products with ratings: Array(2)
+index-CcXUZgCJ.js:1015 🎛️ [FRONTEND CONTROLS] Loaded: Object
+index-CcXUZgCJ.js:1015 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Product stats data: Object
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Current products: Array(5)
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Products with ratings: Array(2)
+index-CcXUZgCJ.js:1015 🎛️ [FRONTEND CONTROLS] Loaded: Object
+index-CcXUZgCJ.js:1015 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Product stats data: Object
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Current products: Array(5)
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Products with ratings: Array(2)
+index-CcXUZgCJ.js:1015 🎛️ [FRONTEND CONTROLS] Loaded: Object
+index-CcXUZgCJ.js:1015 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Product stats data: Object
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Current products: Array(5)
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Products with ratings: Array(2)
+index-CcXUZgCJ.js:1015 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+index-CcXUZgCJ.js:1015 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]
+index-CcXUZgCJ.js:1015 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+index-CcXUZgCJ.js:1015 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]
+index-CcXUZgCJ.js:1015 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+index-CcXUZgCJ.js:1015 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]
+index-CcXUZgCJ.js:1015 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+index-CcXUZgCJ.js:1015 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]
+index-CcXUZgCJ.js:1015 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+index-CcXUZgCJ.js:1015 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]
+index-CcXUZgCJ.js:1015 🔐 [LOGIN] Starting handleLoginSuccess
+index-CcXUZgCJ.js:1015 🔐 [LOGIN] Customer data: {id: 94, firstName: 'Omid', lastName: 'Mohammad', email: 'water@momtazchem.com', company: 'Momtazchem Chemical Solutions', …}
+index-CcXUZgCJ.js:1015 🔐 [LOGIN] Current cart state: {}
+index-CcXUZgCJ.js:1015 🔐 [LOGIN] Customer state set
+index-CcXUZgCJ.js:1015 🔐 [LOGIN] Wallet balance fetch initiated
+index-CcXUZgCJ.js:1015 🔐 [LOGIN] Auth modal closed
+index-CcXUZgCJ.js:1015 🔐 [LOGIN] Cache invalidated
+index-CcXUZgCJ.js:1015 🔐 [LOGIN] Has cart items: false
+index-CcXUZgCJ.js:1015 🔐 [LOGIN] Cart contents: {}
+index-CcXUZgCJ.js:1015 🔐 [LOGIN] Cart migration completed
+index-CcXUZgCJ.js:1015 🔐 [LOGIN] Welcome toast shown
+index-CcXUZgCJ.js:1015 🔐 [LOGIN] Staying in shop after successful login
+index-CcXUZgCJ.js:1015 🔐 [LOGIN] handleLoginSuccess completed successfully
+index-CcXUZgCJ.js:1015 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+index-CcXUZgCJ.js:1015 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]
+index-CcXUZgCJ.js:1015 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+index-CcXUZgCJ.js:1015 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]
+index-CcXUZgCJ.js:1015 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+index-CcXUZgCJ.js:1015 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]
+index-CcXUZgCJ.js:1015 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+index-CcXUZgCJ.js:1015 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+index-CcXUZgCJ.js:1015 🌟 [RATINGS DEBUG] Products with ratings: (2) [{…}, {…}]

@@ -494,7 +494,7 @@ const Shop = () => {
     }
   };
 
-  const handleLoginSuccess = (customerData: any) => {
+  const handleLoginSuccess = async (customerData: any) => {
     console.log('🔐 [LOGIN] Starting handleLoginSuccess');
     console.log('🔐 [LOGIN] Customer data:', customerData);
     console.log('🔐 [LOGIN] Current cart state:', cart);
@@ -514,6 +514,11 @@ const Shop = () => {
       queryClient.invalidateQueries({ queryKey: ["/api/customers/me"] });
       queryClient.invalidateQueries({ queryKey: ["/api/customer/wallet"] });
       console.log('🔐 [LOGIN] Cache invalidated');
+      
+      // 🛒 Load persistent cart from database FIRST
+      console.log('🔐 [LOGIN] Loading persistent cart...');
+      await loadPersistentCart();
+      console.log('🔐 [LOGIN] Persistent cart loaded');
       
       // Check if user has items in cart before migration
       const hasCartItems = Object.keys(cart).length > 0;
