@@ -709,8 +709,13 @@ const PaymentGateway = ({
 
   const renderWalletPartialPayment = () => {
     const currentBalance = walletBalance?.balance || 0;
-    // User specifies wallet amount - start with 0 to let user choose
-    const [walletAmount, setWalletAmount] = useState(0);
+    
+    // Try to restore wallet amount from localStorage if available
+    const savedWalletAmount = localStorage.getItem(`wallet_amount_${orderId}`);
+    const initialWalletAmount = savedWalletAmount ? parseFloat(savedWalletAmount) : 0;
+    
+    // User specifies wallet amount - start with saved amount or 0
+    const [walletAmount, setWalletAmount] = useState(initialWalletAmount);
     const remainingAmount = Math.max(0, totalAmount - walletAmount);
     
     // Don't auto-update wallet amount - let user control it completely
@@ -723,7 +728,11 @@ const PaymentGateway = ({
     const handleWalletAmountChange = (value: string) => {
       const amount = parseFloat(value) || 0;
       const maxWallet = Math.min(currentBalance, totalAmount);
-      setWalletAmount(Math.min(Math.max(0, amount), maxWallet));
+      const finalAmount = Math.min(Math.max(0, amount), maxWallet);
+      setWalletAmount(finalAmount);
+      
+      // Save to localStorage for persistence across page loads
+      localStorage.setItem(`wallet_amount_${orderId}`, finalAmount.toString());
     };
 
     return (
