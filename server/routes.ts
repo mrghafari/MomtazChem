@@ -37855,9 +37855,13 @@ momtazchem.com
         return res.status(401).json({ success: false, message: "Authentication required" });
       }
 
-      console.log(`🧹 [CART CLEAR] Clearing cart for customer: ${customerId}`);
+      console.log(`🧹 [CART CLEAR] Clearing both cart session and persistent cart for customer: ${customerId}`);
+      
+      // Clear both cart session and persistent cart
       await cartStorage.clearCartSession(customerId);
-      console.log(`✅ [CART CLEAR] Cart cleared successfully for customer: ${customerId}`);
+      await storage.clearPersistentCart(customerId);
+      
+      console.log(`✅ [CART CLEAR] Both cart session and persistent cart cleared successfully for customer: ${customerId}`);
       
       res.json({ success: true, message: "Cart cleared successfully" });
     } catch (error) {
