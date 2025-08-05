@@ -107,7 +107,7 @@ const PaymentGateway = ({
           console.log('🏦 [BANK REDIRECT] Now redirecting to bank gateway for remaining:', remainingAmount);
           
           // Step 2: Update form data for bank gateway
-          setFormData(prev => ({
+          setFormData((prev: any) => ({
             ...prev,
             walletAmount,
             remainingAmount,
@@ -754,7 +754,7 @@ const PaymentGateway = ({
   );
 
   const renderWalletPartialPayment = () => {
-    const currentBalance = walletBalance?.balance || 0;
+    const currentBalance = (walletBalance as any)?.balance || 0;
     
     // Try to restore wallet amount from localStorage if available, or use passed prop
     const savedWalletAmount = localStorage.getItem(`wallet_amount_${orderId}`);
