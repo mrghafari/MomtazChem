@@ -3844,46 +3844,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // API endpoint for deleting a batch
-  app.delete("/api/batches/:batchId", requireAuth, async (req, res) => {
-    try {
-      const { batchId } = req.params;
-      const { pool } = await import('./db');
-      
-      // First check if the batch exists
-      const checkBatch = await pool.query('SELECT id, name FROM showcase_products WHERE id = $1', [batchId]);
-      
-      if (checkBatch.rows.length === 0) {
-        return res.status(404).json({
-          success: false,
-          message: "بچ مورد نظر یافت نشد"
-        });
-      }
-      
-      // Delete the batch
-      const deleteResult = await pool.query('DELETE FROM showcase_products WHERE id = $1', [batchId]);
-      
-      if (deleteResult.rowCount === 0) {
-        return res.status(500).json({
-          success: false,
-          message: "خطا در حذف بچ"
-        });
-      }
-      
-      res.json({
-        success: true,
-        message: `بچ "${checkBatch.rows[0].name}" با موفقیت حذف شد`
-      });
-      
-    } catch (error) {
-      console.error("Error deleting batch:", error);
-      res.status(500).json({ 
-        success: false, 
-        message: "خطا در حذف بچ: " + error.message 
-      });
-    }
-  });
-
   // API endpoint for getting product unit from kardex by shop product ID
   app.get("/api/products/kardex/:id/unit", async (req, res) => {
     try {
