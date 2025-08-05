@@ -13141,8 +13141,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let remainingAmount = totalAmount;
       let finalPaymentMethod = orderData.paymentMethod || "traditional";
 
-      // Handle wallet payments
-      if (orderData.paymentMethod === 'wallet_full' || orderData.paymentMethod === 'wallet_partial') {
+      // RESPECT CUSTOMER'S PAYMENT CHOICE - NO AUTO-SUBSTITUTION
+      // If customer explicitly chose online_payment, NEVER use wallet instead
+      if (orderData.paymentMethod === 'online_payment') {
+        finalPaymentStatus = "pending";
+        finalPaymentMethod = "online_payment";
+        walletAmountUsed = 0;
+        remainingAmount = totalAmount;
+        console.log("✅ [CUSTOMER CHOICE] Online payment selected - NO wallet substitution allowed");
+      }
+      // If customer explicitly chose bank_transfer, NEVER use wallet instead
+      else if (orderData.paymentMethod === 'bank_transfer') {
+        finalPaymentStatus = "pending";
+        finalPaymentMethod = "bank_transfer";
+        walletAmountUsed = 0;
+        remainingAmount = totalAmount;
+        console.log("✅ [CUSTOMER CHOICE] Bank transfer selected - NO wallet substitution allowed");
+      }
+      // Only process wallet payments when customer explicitly chose wallet options
+      else if (orderData.paymentMethod === 'wallet_full' || orderData.paymentMethod === 'wallet_partial') {
         walletAmountUsed = parseFloat(orderData.walletAmountUsed || 0);
         remainingAmount = parseFloat(orderData.remainingAmount || totalAmount);
         
@@ -13186,13 +13203,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
             });
           }
         }
-      }
-      
-      // Handle online payment method
-      else if (orderData.paymentMethod === 'online_payment') {
-        finalPaymentStatus = "pending";
-        finalPaymentMethod = "online_payment";
-        console.log("✅ Online payment method selected - order will redirect to payment gateway");
       }
       
       // Handle bank receipt method
