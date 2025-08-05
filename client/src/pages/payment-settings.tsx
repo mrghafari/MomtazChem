@@ -4,7 +4,7 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, CreditCard, Building2, Clock, Wallet, AlertTriangle, CheckCircle } from "lucide-react";
+import { ArrowLeft, CreditCard, Building2, Clock, Wallet, AlertTriangle, CheckCircle, Plus, Trash2, Edit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import AuthGuard from "@/components/AuthGuard";
@@ -56,6 +56,67 @@ export default function PaymentSettingsPage() {
     toggleGatewayMutation.mutate({ gatewayId });
   };
 
+  // Delete gateway mutation
+  const deleteGatewayMutation = useMutation({
+    mutationFn: async (gatewayId: number) => {
+      return await apiRequest(`/api/payment/gateways/${gatewayId}`, { method: 'DELETE' });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/payment/gateways'] });
+      toast({
+        title: "موفقیت‌آمیز",
+        description: "درگاه پرداخت حذف شد",
+      });
+    },
+    onError: (error) => {
+      console.error('Gateway delete error:', error);
+      toast({
+        title: "خطا",
+        description: "خطا در حذف درگاه پرداخت",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleDeleteGateway = (gatewayId: number, gatewayName: string) => {
+    if (confirm(`آیا از حذف درگاه "${gatewayName}" اطمینان دارید؟`)) {
+      deleteGatewayMutation.mutate(gatewayId);
+    }
+  };
+
+  const handleAddGateway = () => {
+    const name = prompt('نام درگاه پرداخت:');
+    if (!name) return;
+    
+    const type = prompt('نوع درگاه (iraqi_bank, international, mobile_payment):') || 'iraqi_bank';
+    
+    // Create new gateway mutation
+    const newGateway = {
+      name,
+      type,
+      enabled: false,
+      config: {}
+    };
+    
+    apiRequest('/api/payment/gateways', {
+      method: 'POST',
+      body: newGateway
+    }).then(() => {
+      queryClient.invalidateQueries({ queryKey: ['/api/payment/gateways'] });
+      toast({
+        title: "موفقیت‌آمیز",
+        description: "درگاه پرداخت جدید اضافه شد",
+      });
+    }).catch(error => {
+      console.error('Add gateway error:', error);
+      toast({
+        title: "خطا",
+        description: "خطا در اضافه کردن درگاه پرداخت",
+        variant: "destructive",
+      });
+    });
+  };
+
   const getGatewayIcon = (type: string) => {
     switch (type) {
       case 'iraqi_bank':
@@ -86,23 +147,32 @@ export default function PaymentSettingsPage() {
     <AuthGuard requireAuth={true} redirectTo="/admin/login">
       <div className="container mx-auto p-6 space-y-6 bg-white dark:bg-gray-900 min-h-screen">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              onClick={() => setLocation("/admin/site-management")}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              بازگشت به مدیریت سایت
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                تنظیمات درگاه‌های پرداخت
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400">
+                مدیریت و کنترل درگاه‌های پرداخت فعال
+              </p>
+            </div>
+          </div>
           <Button
-            variant="outline"
-            onClick={() => setLocation("/admin/site-management")}
+            onClick={() => handleAddGateway()}
             className="flex items-center gap-2"
           >
-            <ArrowLeft className="w-4 h-4" />
-            بازگشت به مدیریت سایت
+            <Plus className="w-4 h-4" />
+            افزودن درگاه جدید
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              تنظیمات درگاه‌های پرداخت
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400">
-              مدیریت و کنترل درگاه‌های پرداخت فعال
-            </p>
-          </div>
         </div>
 
         {/* Payment Gateways Grid */}
@@ -205,6 +275,20 @@ export default function PaymentSettingsPage() {
                         ? 'این درگاه برای مشتریان در دسترس است'
                         : 'این درگاه برای مشتریان مخفی است'
                       }
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-2 pt-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDeleteGateway(gateway.id, gateway.name)}
+                        disabled={deleteGatewayMutation.isPending}
+                        className="flex items-center gap-1 text-red-600 hover:text-red-700 hover:border-red-300"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                        حذف
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
