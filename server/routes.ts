@@ -12461,6 +12461,91 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // =============================================================================
+  // PERSISTENT CART ENDPOINTS (CUSTOMER SECTION)
+  // =============================================================================
+
+  // Get customer's persistent cart
+  app.get("/api/customers/persistent-cart", requireCustomerAuth, async (req, res) => {
+    try {
+      const customerId = (req.session as any).customerId;
+      console.log('🛒 [PERSISTENT CART] Getting cart for customer:', customerId);
+      
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        SELECT * FROM persistent_carts 
+        WHERE customer_id = $1 
+        ORDER BY updated_at DESC 
+        LIMIT 1
+      `, [customerId]);
+      
+      if (result.rows.length > 0) {
+        const cart = result.rows[0];
+        const cartData = typeof cart.cart_data === 'string' ? JSON.parse(cart.cart_data) : cart.cart_data;
+        console.log('✅ [PERSISTENT CART] Found cart:', cartData);
+        
+        res.json({
+          success: true,
+          data: {
+            cartData,
+            lastUpdated: cart.updated_at
+          }
+        });
+      } else {
+        console.log('⚠️ [PERSISTENT CART] No cart found for customer');
+        res.json({
+          success: true,
+          data: {
+            cartData: {},
+            lastUpdated: null
+          }
+        });
+      }
+    } catch (error) {
+      console.error('❌ [PERSISTENT CART] Error getting cart:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در دریافت سبد خرید'
+      });
+    }
+  });
+
+  // Sync customer's persistent cart to database
+  app.post("/api/customers/persistent-cart/sync", requireCustomerAuth, async (req, res) => {
+    try {
+      const customerId = (req.session as any).customerId;
+      const { cartData } = req.body;
+      
+      console.log('🛒 [PERSISTENT CART] Syncing cart for customer:', customerId);
+      console.log('🛒 [PERSISTENT CART] Cart data:', cartData);
+      
+      const { pool } = await import('./db');
+      
+      // Upsert cart data (insert or update)
+      await pool.query(`
+        INSERT INTO persistent_carts (customer_id, cart_data, updated_at)
+        VALUES ($1, $2, NOW())
+        ON CONFLICT (customer_id)
+        DO UPDATE SET 
+          cart_data = $2,
+          updated_at = NOW()
+      `, [customerId, JSON.stringify(cartData)]);
+      
+      console.log('✅ [PERSISTENT CART] Cart synced successfully');
+      
+      res.json({
+        success: true,
+        message: 'سبد خرید با موفقیت ذخیره شد'
+      });
+    } catch (error) {
+      console.error('❌ [PERSISTENT CART] Error syncing cart:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در ذخیره سبد خرید'
+      });
+    }
+  });
+
   // Update customer profile
   app.patch("/api/customers/:id", async (req, res) => {
     try {
