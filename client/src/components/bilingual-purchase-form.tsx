@@ -523,6 +523,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
             }
             
             console.log('✅ [BILINGUAL FORM] Successfully loaded shipping rates:', filteredRates.length, 'methods');
+            console.log('🚚 [BILINGUAL FORM] Shipping rates details:', filteredRates);
             return filteredRates;
           }
         }
@@ -734,6 +735,15 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     }
     return sum;
   }, 0);
+
+  // Auto-select first shipping method when data loads
+  useEffect(() => {
+    if (shippingRatesData?.length > 0 && !selectedShippingMethod) {
+      const firstMethod = shippingRatesData[0];
+      console.log('🚚 [AUTO-SELECT] Auto-selecting first shipping method:', firstMethod.id, firstMethod.name);
+      setSelectedShippingMethod(firstMethod.id);  
+    }
+  }, [shippingRatesData, selectedShippingMethod]);
 
   // Calculate shipping cost based on selected method - Real-time update
   useEffect(() => {
