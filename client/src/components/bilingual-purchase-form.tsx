@@ -1213,6 +1213,15 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       }
       // Handle bank transfer - redirect to payment gateway  
       else if (response.paymentMethod === 'bank_transfer' || finalPaymentMethod === 'bank_transfer') {
+        console.log('💳 [BANK TRANSFER] Preparing redirect to bank gateway:', {
+          responsePaymentMethod: response.paymentMethod,
+          finalPaymentMethod: finalPaymentMethod,
+          orderId: response.orderId,
+          orderIdFromOrder: response.order?.id,
+          totalAmount: response.totalAmount,
+          remainingAmount: response.remainingAmount
+        });
+        
         toast({
           title: "انتقال به درگاه بانک",
           description: "در حال هدایت شما به درگاه پرداخت بانکی..."
@@ -1220,8 +1229,12 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         
         // Redirect to bank payment gateway
         setTimeout(() => {
-          const totalAmount = response.totalAmount || response.remainingAmount || (products.reduce((sum, p) => sum + (parseFloat(p.price || '0') * (cart[p.id] || 0)), 0) + shippingCost);
-          window.location.href = `/payment?orderId=${response.orderId || response.order?.id}&amount=${totalAmount}&method=bank`;
+          const orderId = response.orderId || response.order?.id;
+          const amount = response.totalAmount || response.remainingAmount || finalTotalAmount;
+          const redirectUrl = `/payment?orderId=${orderId}&amount=${amount}&method=bank_transfer`;
+          
+          console.log('💳 [BANK TRANSFER] Redirecting to:', redirectUrl);
+          window.location.href = redirectUrl;
         }, 1500);
         return;
       }
