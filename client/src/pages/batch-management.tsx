@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Search, Package, Calendar, Hash, Weight, DollarSign, TrendingDown, TrendingUp } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { Search, Package, Calendar, Hash, Weight, DollarSign, TrendingDown, TrendingUp, Trash2 } from "lucide-react";
 
 interface Batch {
   id: number;
@@ -31,6 +32,8 @@ export default function BatchManagement() {
   const [searchBarcode, setSearchBarcode] = useState("");
   const [selectedBarcode, setSelectedBarcode] = useState<string | null>(null);
   const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   // Check for barcode in URL query parameters
   useEffect(() => {
@@ -88,6 +91,47 @@ export default function BatchManagement() {
       return { text: 'در حال فروش', color: 'bg-green-500' };
     }
     return { text: 'در انتظار', color: 'bg-blue-500' };
+  };
+
+  const handleDeleteBatch = async (batchId: number, batchName: string) => {
+    if (!confirm(`آیا مطمئن هستید که می‌خواهید بچ "${batchName}" را حذف کنید؟`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/batches/${batchId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete batch');
+      }
+
+      const result = await response.json();
+      
+      if (result.success) {
+        toast({
+          title: "حذف موفق",
+          description: `بچ "${batchName}" با موفقیت حذف شد`,
+        });
+        
+        // Refresh the batch data
+        queryClient.invalidateQueries({ queryKey: ['batches', selectedBarcode] });
+        queryClient.invalidateQueries({ queryKey: ['selling-batch', selectedBarcode] });
+      } else {
+        throw new Error(result.message || 'Failed to delete batch');
+      }
+    } catch (error) {
+      console.error('Error deleting batch:', error);
+      toast({
+        title: "خطا در حذف",
+        description: `خطا در حذف بچ "${batchName}": ${error instanceof Error ? error.message : 'خطای ناشناخته'}`,
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -290,6 +334,17 @@ export default function BatchManagement() {
                         <div className="text-center">
                           <p className="text-sm text-gray-600">تاریخ تولید</p>
                           <p className="font-medium">{formatDate(batch.created_at)}</p>
+                        </div>
+                        <div className="text-center">
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleDeleteBatch(batch.id, batch.name)}
+                            className="flex items-center gap-1"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                            حذف
+                          </Button>
                         </div>
                       </div>
                     </div>
