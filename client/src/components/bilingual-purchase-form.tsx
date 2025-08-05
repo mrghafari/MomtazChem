@@ -2350,30 +2350,6 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                     type="submit"
                     disabled={submitOrderMutation.isPending}
                     className="flex-1"
-                    onClick={(e) => {
-                      console.log('🚀 [SUBMIT DEBUG] Submit button clicked');
-                      console.log('🚀 [SUBMIT DEBUG] Event:', e);
-                      console.log('🚀 [SUBMIT DEBUG] Form state:', form.formState);
-                      console.log('🚀 [SUBMIT DEBUG] Form errors:', form.formState.errors);
-                      console.log('🚀 [SUBMIT DEBUG] Form isValid:', form.formState.isValid);
-                      console.log('🚀 [SUBMIT DEBUG] Form values:', form.getValues());
-                      console.log('🚀 [SUBMIT DEBUG] Payment method:', paymentMethod);
-                      console.log('🚀 [SUBMIT DEBUG] Selected shipping method:', selectedShippingMethod);
-                      
-                      // Force validation trigger to see what's failing
-                      form.trigger().then((isValid) => {
-                        console.log('🚀 [SUBMIT DEBUG] Manual validation result:', isValid);
-                        if (!isValid) {
-                          console.log('🚀 [SUBMIT DEBUG] Validation failed, errors:', form.formState.errors);
-                          // Show specific field errors
-                          Object.entries(form.formState.errors).forEach(([field, error]) => {
-                            console.log(`🚀 [SUBMIT DEBUG] Field '${field}' error:`, error);
-                          });
-                        } else {
-                          console.log('🚀 [SUBMIT DEBUG] Form validation PASSED - proceeding with submission');
-                        }
-                      });
-                    }}
                   >
                     {submitOrderMutation.isPending ? t.loading : t.submitOrder}
                   </Button>
