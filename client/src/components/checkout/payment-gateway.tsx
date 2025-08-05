@@ -83,57 +83,74 @@ const PaymentGateway = ({
     console.log('🔄 [HYBRID PAYMENT] Processing hybrid payment for order:', orderId);
     console.log('🔄 [HYBRID PAYMENT] Wallet amount:', walletAmount, 'Remaining:', remainingAmount);
     
-    if (remainingAmount > 0) {
-      console.log('🏦 [HYBRID PAYMENT] Starting wallet deduction first, then bank redirect');
+    // Critical check: If remaining amount is 0 or less, this is wallet-only payment
+    if (remainingAmount <= 0) {
+      console.log('💰 [HYBRID PAYMENT] Remaining amount is 0 - processing as wallet-only payment');
+      handleWalletOnlyPayment();
+      return;
+    }
+    
+    console.log('🏦 [HYBRID PAYMENT] Starting wallet deduction first, then bank redirect');
+    
+    setIsProcessing(true);
+    
+    try {
+      // Step 1: Immediately deduct from wallet
+      console.log('💰 [WALLET DEDUCTION] Deducting', walletAmount, 'from wallet for order:', orderId);
       
-      setIsProcessing(true);
-      
-      try {
-        // Step 1: Immediately deduct from wallet
-        console.log('💰 [WALLET DEDUCTION] Deducting', walletAmount, 'from wallet for order:', orderId);
-        
-        const walletResponse = await apiRequest('/api/customers/wallet/hybrid-deduction', {
-          method: 'POST',
-          body: {
-            orderId: orderId,
-            walletAmount: walletAmount,
-            remainingAmount: remainingAmount,
-            totalAmount: totalAmount
-          }
-        });
+      const walletResponse = await apiRequest('/api/customers/wallet/hybrid-deduction', {
+        method: 'POST',
+        body: {
+          orderId: orderId,
+          walletAmount: walletAmount,
+          remainingAmount: remainingAmount,
+          totalAmount: totalAmount
+        }
+      });
 
-        if (walletResponse.success) {
-          console.log('✅ [WALLET DEDUCTION] Wallet successfully deducted:', walletAmount);
-          console.log('🏦 [BANK REDIRECT] Now redirecting to bank gateway for remaining:', remainingAmount);
-          
-          // Step 2: Update form data for bank gateway
-          setFormData((prev: any) => ({
-            ...prev,
-            walletAmount,
-            remainingAmount,
-            paymentMethod: 'wallet_partial'
-          }));
-          
-          // Reset processing state before triggering bank redirect
+      if (walletResponse.success) {
+        console.log('✅ [WALLET DEDUCTION] Wallet successfully deducted:', walletAmount);
+        
+        // Double-check: If remaining amount is actually 0, complete as wallet-only
+        if (remainingAmount <= 0) {
+          console.log('💰 [HYBRID PAYMENT] Remaining amount is 0 after deduction - completing as wallet-only');
           setIsProcessing(false);
-          
-          // Small delay to ensure state is updated, then trigger bank gateway redirect
-          setTimeout(() => {
-            console.log('🚀 [BANK REDIRECT] Triggering handleOnlinePayment after wallet deduction');
-            handleOnlinePayment();
-          }, 100);
-        } else {
-          throw new Error(walletResponse.message || 'Wallet deduction failed');
+          onPaymentSuccess({
+            method: 'wallet_full',
+            transactionId: walletResponse.transactionId,
+            amount: totalAmount,
+            walletDeducted: walletAmount,
+            bankPaid: 0
+          });
+          return;
         }
         
-      } catch (error) {
-        console.error('❌ [HYBRID PAYMENT] Error during wallet deduction:', error);
-        onPaymentError('خطا در کسر از کیف پول. لطفاً دوباره تلاش کنید.');
+        console.log('🏦 [BANK REDIRECT] Now redirecting to bank gateway for remaining:', remainingAmount);
+        
+        // Step 2: Update form data for bank gateway
+        setFormData((prev: any) => ({
+          ...prev,
+          walletAmount,
+          remainingAmount,
+          paymentMethod: 'wallet_partial'
+        }));
+        
+        // Reset processing state before triggering bank redirect
         setIsProcessing(false);
+        
+        // Small delay to ensure state is updated, then trigger bank gateway redirect
+        setTimeout(() => {
+          console.log('🚀 [BANK REDIRECT] Triggering handleOnlinePayment after wallet deduction');
+          handleOnlinePayment();
+        }, 100);
+      } else {
+        throw new Error(walletResponse.message || 'Wallet deduction failed');
       }
-    } else {
-      console.log('💰 [HYBRID PAYMENT] Processing as wallet-only payment');
-      handleWalletOnlyPayment();
+      
+    } catch (error) {
+      console.error('❌ [HYBRID PAYMENT] Error during wallet deduction:', error);
+      onPaymentError('خطا در کسر از کیف پول. لطفاً دوباره تلاش کنید.');
+      setIsProcessing(false);
     }
   };
 
@@ -144,12 +161,13 @@ const PaymentGateway = ({
     console.log('🔍 [AUTO REDIRECT DEBUG] Is processing:', isProcessing);
     console.log('🔍 [AUTO REDIRECT DEBUG] Gateway config:', activeGateway?.config);
     
-    if ((paymentMethod === 'online_payment' || paymentMethod === 'wallet_partial') && activeGateway && !isProcessing) {
-      console.log('🔄 [AUTO REDIRECT] Triggering auto-redirect for payment method:', paymentMethod);
+    // Check if we have remaining amount for wallet_partial payments
+    const hasRemainingAmount = formData?.remainingAmount > 0;
+    
+    if (paymentMethod === 'online_payment' && activeGateway && !isProcessing) {
+      console.log('🔄 [AUTO REDIRECT] Triggering auto-redirect for online payment');
       console.log('🔄 [AUTO REDIRECT] Gateway config:', activeGateway.config);
-      console.log('🔄 [AUTO REDIRECT] API Base URL:', activeGateway.config?.apiBaseUrl);
       
-      // Small delay to ensure everything is loaded
       setTimeout(() => {
         console.log('🚀 [AUTO REDIRECT] Executing handleOnlinePayment now');
         try {
@@ -157,9 +175,23 @@ const PaymentGateway = ({
         } catch (error) {
           console.error('❌ [AUTO REDIRECT] Error during auto redirect:', error);
         }
-      }, 2000); // Increased delay
+      }, 2000);
+    } else if (paymentMethod === 'wallet_partial' && activeGateway && !isProcessing && hasRemainingAmount) {
+      console.log('🔄 [AUTO REDIRECT] Triggering auto-redirect for wallet_partial with remaining amount:', formData?.remainingAmount);
+      console.log('🔄 [AUTO REDIRECT] Gateway config:', activeGateway.config);
+      
+      setTimeout(() => {
+        console.log('🚀 [AUTO REDIRECT] Executing handleOnlinePayment for remaining amount');
+        try {
+          handleOnlinePayment();
+        } catch (error) {
+          console.error('❌ [AUTO REDIRECT] Error during auto redirect:', error);
+        }
+      }, 2000);
+    } else if (paymentMethod === 'wallet_partial' && !hasRemainingAmount) {
+      console.log('💰 [AUTO REDIRECT] wallet_partial with 0 remaining - no bank redirect needed');
     }
-  }, [paymentMethod, activeGateway, isProcessing]);
+  }, [paymentMethod, activeGateway, isProcessing, formData?.remainingAmount]);
 
   // Fetch company banking information for dynamic banking details
   const { data: companyInfo, isLoading: isLoadingCompanyInfo } = useQuery({
