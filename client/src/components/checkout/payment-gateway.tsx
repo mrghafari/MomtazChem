@@ -49,8 +49,13 @@ const PaymentGateway = ({
       
       // Small delay to ensure everything is loaded
       setTimeout(() => {
-        handleOnlinePayment();
-      }, 1000);
+        console.log('🚀 [AUTO REDIRECT] Executing handleOnlinePayment now');
+        try {
+          handleOnlinePayment();
+        } catch (error) {
+          console.error('❌ [AUTO REDIRECT] Error during auto redirect:', error);
+        }
+      }, 2000); // Increased delay
     }
   }, [paymentMethod, activeGateway, isProcessing]);
 
@@ -151,10 +156,13 @@ const PaymentGateway = ({
   };
 
   const handleOnlinePayment = async () => {
+    console.log('🚀 [HANDLE ONLINE PAYMENT] Function called');
     if (!activeGateway) {
+      console.error('❌ [HANDLE ONLINE PAYMENT] No active gateway found');
       onPaymentError('هیچ درگاه پرداخت فعالی موجود نیست');
       return;
     }
+    console.log('✅ [HANDLE ONLINE PAYMENT] Active gateway exists:', activeGateway);
 
     setIsProcessing(true);
     

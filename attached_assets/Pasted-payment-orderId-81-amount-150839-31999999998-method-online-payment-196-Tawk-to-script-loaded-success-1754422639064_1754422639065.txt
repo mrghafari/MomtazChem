@@ -1,0 +1,68 @@
+payment?orderId=81&amount=150839.31999999998&method=online_payment:196 Tawk.to script loaded successfully
+client:560 [vite] server connection lost. Polling for restart...
+App.tsx:143  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/not-found.tsx net::ERR_ABORTED 502 (Bad Gateway)
+toaster.tsx:18  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/hooks/use-toast.ts net::ERR_ABORTED 502 (Bad Gateway)
+toaster.tsx:26  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ui/toast.tsx net::ERR_ABORTED 502 (Bad Gateway)
+tooltip.tsx:20  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/lib/utils.ts net::ERR_ABORTED 502 (Bad Gateway)
+ShopSearch.tsx:21  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ui/input.tsx net::ERR_ABORTED 502 (Bad Gateway)
+ShopSearch.tsx:22  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ui/button.tsx net::ERR_ABORTED 502 (Bad Gateway)
+ShopSearch.tsx:23  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ui/badge.tsx net::ERR_ABORTED 502 (Bad Gateway)
+ShopSearch.tsx:24  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ui/card.tsx net::ERR_ABORTED 502 (Bad Gateway)
+ShopSearch.tsx:26  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ui/slider.tsx net::ERR_ABORTED 502 (Bad Gateway)
+ShopSearch.tsx:27  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ui/select.tsx net::ERR_ABORTED 502 (Bad Gateway)
+ShopSearch.tsx:28  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ui/checkbox.tsx net::ERR_ABORTED 502 (Bad Gateway)
+ShopSearch.tsx:29  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ui/label.tsx net::ERR_ABORTED 502 (Bad Gateway)
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:117574)
+    at t.value (twk-chunk-common.js:2:150658)
+    at p.updateUUID (twk-chunk-common.js:2:202310)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:124589)
+    at twk-chunk-common.js:2:123900
+value @ twk-chunk-common.js:2
+updateUUID @ twk-chunk-common.js:2
+(anonymous) @ twk-vendor.js:2
+(anonymous) @ twk-vendor.js:2
+(anonymous) @ twk-vendor.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+Promise.then
+value @ twk-chunk-common.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+56d7 @ twk-chunk-common.js:2
+a @ twk-runtime.js:1
+r @ twk-runtime.js:1
+t @ twk-runtime.js:1
+(anonymous) @ twk-runtime.js:1
+(anonymous) @ twk-runtime.js:1
+ShopSearch.tsx:30  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ui/collapsible.tsx net::ERR_ABORTED 502 (Bad Gateway)
+header.tsx:25  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/LanguageSwitcher.tsx net::ERR_ABORTED 502 (Bad Gateway)
+header.tsx:26  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/hooks/useCustomer.ts net::ERR_ABORTED 502 (Bad Gateway)
+header.tsx:28  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/hooks/useAuth.ts net::ERR_ABORTED 502 (Bad Gateway)
+header.tsx:36  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ui/navigation-menu.tsx 502 (Bad Gateway)
+header.tsx:37  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/attached_assets/company-logo.png?import net::ERR_ABORTED 502 (Bad Gateway)
+LanguageContext.tsx:19  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/lib/i18n.ts net::ERR_ABORTED 502 (Bad Gateway)
+home.tsx:18  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ui/hero-section.tsx net::ERR_ABORTED 502 (Bad Gateway)
+home.tsx:19  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ui/stats-section.tsx net::ERR_ABORTED 502 (Bad Gateway)
+home.tsx:26  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/attached_assets/download_1749877891276.jpeg?import net::ERR_ABORTED 502 (Bad Gateway)
+services.tsx:21  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ui/dialog.tsx net::ERR_ABORTED 502 (Bad Gateway)
+services.tsx:23  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ui/textarea.tsx net::ERR_ABORTED 502 (Bad Gateway)
+contact.tsx:22  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/shared/schema.ts net::ERR_ABORTED 502 (Bad Gateway)
+contact.tsx:30  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ui/form.tsx net::ERR_ABORTED 502 (Bad Gateway)
+shop.tsx:29  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ui/range-slider.tsx net::ERR_ABORTED 502 (Bad Gateway)
+shop.tsx:31  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ui/separator.tsx net::ERR_ABORTED 502 (Bad Gateway)
+shop.tsx:33  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/bilingual-purchase-form.tsx net::ERR_ABORTED 502 (Bad Gateway)
+shop.tsx:34  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/checkout/pre-checkout-modal.tsx net::ERR_ABORTED 502 (Bad Gateway)
+shop.tsx:35  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/auth/customer-auth.tsx net::ERR_ABORTED 502 (Bad Gateway)
+payment?orderId=81&amount=150839.31999999998&method=online_payment:168 Tawk.to Live Chat loaded successfully
+shop.tsx:36  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/hooks/use-multilingual-toast.ts net::ERR_ABORTED 502 (Bad Gateway)
+shop.tsx:37  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ProductSpecsModal.tsx net::ERR_ABORTED 502 (Bad Gateway)
+checkout.tsx:35  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/checkout/address-selector.tsx 502 (Bad Gateway)
+checkout.tsx:36  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/checkout/auth-modal.tsx net::ERR_ABORTED 502 (Bad Gateway)
+payment.tsx:27  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/checkout/payment-gateway.tsx?t=1754422596269 net::ERR_ABORTED 502 (Bad Gateway)
+shop-admin.tsx:47  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ui/tabs.tsx net::ERR_ABORTED 502 (Bad Gateway)
+shop-admin.tsx:53  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/sales-report.tsx net::ERR_ABORTED 502 (Bad Gateway)
