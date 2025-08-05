@@ -13385,7 +13385,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const product = await db.select().from(showcaseProducts).where(eq(showcaseProducts.id, item.productId)).limit(1);
           if (product.length > 0) {
             console.log(`🔍 [PRODUCT DEBUG] Raw product data for ID ${item.productId}:`, JSON.stringify(product[0], null, 2));
-            const productPrice = parseFloat(product[0].price?.toString() || '0') || 0;
+            console.log(`🔍 [PRICE DEBUG] Checking price fields: unitPrice=${product[0].unitPrice}, unit_price=${product[0].unit_price}`);
+            const productPrice = parseFloat(product[0].unitPrice?.toString() || '0') || 0;
             const quantity = parseInt(item.quantity) || 1;
             itemsSubtotal += productPrice * quantity;
             console.log(`📦 [PRODUCT CALC] ${product[0].name}: ${productPrice} × ${quantity} = ${productPrice * quantity} IQD`);

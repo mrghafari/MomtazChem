@@ -1,0 +1,231 @@
+M2511372:196 Tawk.to script loaded successfully
+chunk-RPCDYKBN.js?v=638b47a7:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+payment.tsx:13 🚀 [PAYMENT COMPONENT] Payment component starting to load...
+payment.tsx:22 🚀 [PAYMENT COMPONENT] useRoute params: {0: 'M2511372', orderId: 'M2511372'}
+payment.tsx:29 🚀 [PAYMENT COMPONENT] URL Params orderId: null
+payment.tsx:30 🚀 [PAYMENT COMPONENT] Path Params orderId: M2511372
+payment.tsx:35 🚀 [PAYMENT COMPONENT] Final Order ID: M2511372
+payment.tsx:36 🚀 [PAYMENT COMPONENT] Window location: https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/payment/M2511372
+payment.tsx:59 🔍 [PAYMENT PAGE DEBUG] Order ID: M2511372
+payment.tsx:60 🔍 [PAYMENT PAGE DEBUG] Active gateway data: undefined
+payment.tsx:61 🔍 [PAYMENT PAGE DEBUG] Gateway loading: true
+payment.tsx:62 🔍 [PAYMENT PAGE DEBUG] Order data: undefined
+payment.tsx:63 🔍 [PAYMENT PAGE DEBUG] Order loading: true
+useAuth.ts:30  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 403 (Forbidden)
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=638b47a7:840
+run @ @tanstack_react-query.js?v=638b47a7:494
+start @ @tanstack_react-query.js?v=638b47a7:536
+fetch @ @tanstack_react-query.js?v=638b47a7:926
+executeFetch_fn @ @tanstack_react-query.js?v=638b47a7:2211
+onSubscribe @ @tanstack_react-query.js?v=638b47a7:1898
+subscribe @ @tanstack_react-query.js?v=638b47a7:24
+(anonymous) @ @tanstack_react-query.js?v=638b47a7:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=638b47a7:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=638b47a7:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=638b47a7:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=638b47a7:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=638b47a7:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=638b47a7:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=638b47a7:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=638b47a7:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=638b47a7:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=638b47a7:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=638b47a7:19432
+commitRoot @ chunk-RPCDYKBN.js?v=638b47a7:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=638b47a7:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=638b47a7:18718
+workLoop @ chunk-RPCDYKBN.js?v=638b47a7:197
+flushWork @ chunk-RPCDYKBN.js?v=638b47a7:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=638b47a7:384
+useAuth.ts:46 Auth check failed: Error: HTTP 403
+    at queryFn (useAuth.ts:39:17)
+queryFn @ useAuth.ts:46
+await in queryFn
+fetchFn @ @tanstack_react-query.js?v=638b47a7:840
+run @ @tanstack_react-query.js?v=638b47a7:494
+start @ @tanstack_react-query.js?v=638b47a7:536
+fetch @ @tanstack_react-query.js?v=638b47a7:926
+executeFetch_fn @ @tanstack_react-query.js?v=638b47a7:2211
+onSubscribe @ @tanstack_react-query.js?v=638b47a7:1898
+subscribe @ @tanstack_react-query.js?v=638b47a7:24
+(anonymous) @ @tanstack_react-query.js?v=638b47a7:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=638b47a7:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=638b47a7:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=638b47a7:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=638b47a7:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=638b47a7:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=638b47a7:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=638b47a7:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=638b47a7:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=638b47a7:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=638b47a7:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=638b47a7:19432
+commitRoot @ chunk-RPCDYKBN.js?v=638b47a7:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=638b47a7:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=638b47a7:18718
+workLoop @ chunk-RPCDYKBN.js?v=638b47a7:197
+flushWork @ chunk-RPCDYKBN.js?v=638b47a7:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=638b47a7:384
+payment.tsx:13 🚀 [PAYMENT COMPONENT] Payment component starting to load...
+payment.tsx:22 🚀 [PAYMENT COMPONENT] useRoute params: {0: 'M2511372', orderId: 'M2511372'}
+payment.tsx:29 🚀 [PAYMENT COMPONENT] URL Params orderId: null
+payment.tsx:30 🚀 [PAYMENT COMPONENT] Path Params orderId: M2511372
+payment.tsx:35 🚀 [PAYMENT COMPONENT] Final Order ID: M2511372
+payment.tsx:36 🚀 [PAYMENT COMPONENT] Window location: https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/payment/M2511372
+payment.tsx:59 🔍 [PAYMENT PAGE DEBUG] Order ID: M2511372
+payment.tsx:60 🔍 [PAYMENT PAGE DEBUG] Active gateway data: {id: 3, name: 'Shaparak Payment Gateway', type: 'sep', config: {…}}
+payment.tsx:61 🔍 [PAYMENT PAGE DEBUG] Gateway loading: false
+payment.tsx:62 🔍 [PAYMENT PAGE DEBUG] Order data: undefined
+payment.tsx:63 🔍 [PAYMENT PAGE DEBUG] Order loading: true
+payment.tsx:13 🚀 [PAYMENT COMPONENT] Payment component starting to load...
+payment.tsx:22 🚀 [PAYMENT COMPONENT] useRoute params: {0: 'M2511372', orderId: 'M2511372'}
+payment.tsx:29 🚀 [PAYMENT COMPONENT] URL Params orderId: null
+payment.tsx:30 🚀 [PAYMENT COMPONENT] Path Params orderId: M2511372
+payment.tsx:35 🚀 [PAYMENT COMPONENT] Final Order ID: M2511372
+payment.tsx:36 🚀 [PAYMENT COMPONENT] Window location: https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/payment/M2511372
+payment-gateway.tsx:723 🔍 [WALLET PARTIAL DEBUG] Current balance: 0
+payment-gateway.tsx:724 🔍 [WALLET PARTIAL DEBUG] Total amount: 81.75
+payment-gateway.tsx:725 🔍 [WALLET PARTIAL DEBUG] User wallet amount: 0
+payment-gateway.tsx:726 🔍 [WALLET PARTIAL DEBUG] Remaining amount: 81.75
+payment-gateway.tsx:99 🔍 [AUTO REDIRECT DEBUG] Payment method: wallet_partial
+payment-gateway.tsx:100 🔍 [AUTO REDIRECT DEBUG] Active gateway: {id: 3, name: 'Shaparak Payment Gateway', type: 'sep', config: {…}}
+payment-gateway.tsx:101 🔍 [AUTO REDIRECT DEBUG] Is processing: false
+payment-gateway.tsx:102 🔍 [AUTO REDIRECT DEBUG] Gateway config: {bankName: 'Shaparak Payment Gateway', accountNumber: 'IQ56TBIQ9876543210987654', swiftCode: 'TBIRIQBA', instructions: 'Please make a bank transfer to our Shaparak Payment Gateway account.', testMode: false, …}
+payment.tsx:59 🔍 [PAYMENT PAGE DEBUG] Order ID: M2511372
+payment.tsx:60 🔍 [PAYMENT PAGE DEBUG] Active gateway data: {id: 3, name: 'Shaparak Payment Gateway', type: 'sep', config: {…}}
+payment.tsx:61 🔍 [PAYMENT PAGE DEBUG] Gateway loading: false
+payment.tsx:62 🔍 [PAYMENT PAGE DEBUG] Order data: {success: true, order: {…}, recovered: true, message: 'سفارش M2511372 با موفقیت بازیابی شد'}
+payment.tsx:63 🔍 [PAYMENT PAGE DEBUG] Order loading: false
+payment.tsx:67 🔍 [PAYMENT PAGE DEBUG] Payment method from order: wallet_partial
+payment.tsx:68 🔍 [PAYMENT PAGE DEBUG] Will auto-redirect? false
+payment-gateway.tsx:723 🔍 [WALLET PARTIAL DEBUG] Current balance: 9601.24
+payment-gateway.tsx:724 🔍 [WALLET PARTIAL DEBUG] Total amount: 81.75
+payment-gateway.tsx:725 🔍 [WALLET PARTIAL DEBUG] User wallet amount: 0
+payment-gateway.tsx:726 🔍 [WALLET PARTIAL DEBUG] Remaining amount: 81.75
+payment-gateway.tsx:723 🔍 [WALLET PARTIAL DEBUG] Current balance: 9601.24
+payment-gateway.tsx:724 🔍 [WALLET PARTIAL DEBUG] Total amount: 81.75
+payment-gateway.tsx:725 🔍 [WALLET PARTIAL DEBUG] User wallet amount: 81.75
+payment-gateway.tsx:726 🔍 [WALLET PARTIAL DEBUG] Remaining amount: 0
+payment-gateway.tsx:723 🔍 [WALLET PARTIAL DEBUG] Current balance: 9601.24
+payment-gateway.tsx:724 🔍 [WALLET PARTIAL DEBUG] Total amount: 81.75
+payment-gateway.tsx:725 🔍 [WALLET PARTIAL DEBUG] User wallet amount: 81.75
+payment-gateway.tsx:726 🔍 [WALLET PARTIAL DEBUG] Remaining amount: 0
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:117574)
+    at t.value (twk-chunk-common.js:2:150658)
+    at p.updateUUID (twk-chunk-common.js:2:202310)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:124589)
+    at twk-chunk-common.js:2:123900
+value @ twk-chunk-common.js:2
+updateUUID @ twk-chunk-common.js:2
+(anonymous) @ twk-vendor.js:2
+(anonymous) @ twk-vendor.js:2
+(anonymous) @ twk-vendor.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+Promise.then
+value @ twk-chunk-common.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+56d7 @ twk-chunk-common.js:2
+a @ twk-runtime.js:1
+r @ twk-runtime.js:1
+t @ twk-runtime.js:1
+(anonymous) @ twk-runtime.js:1
+(anonymous) @ twk-runtime.js:1
+M2511372:168 Tawk.to Live Chat loaded successfully
+useAuth.ts:30  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 403 (Forbidden)
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=638b47a7:840
+run @ @tanstack_react-query.js?v=638b47a7:494
+start @ @tanstack_react-query.js?v=638b47a7:536
+fetch @ @tanstack_react-query.js?v=638b47a7:926
+executeFetch_fn @ @tanstack_react-query.js?v=638b47a7:2211
+(anonymous) @ @tanstack_react-query.js?v=638b47a7:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=638b47a7:2243
+updateTimers_fn @ @tanstack_react-query.js?v=638b47a7:2250
+onQueryUpdate @ @tanstack_react-query.js?v=638b47a7:2206
+(anonymous) @ @tanstack_react-query.js?v=638b47a7:998
+(anonymous) @ @tanstack_react-query.js?v=638b47a7:997
+batch @ @tanstack_react-query.js?v=638b47a7:583
+dispatch_fn @ @tanstack_react-query.js?v=638b47a7:996
+setData @ @tanstack_react-query.js?v=638b47a7:696
+onSuccess @ @tanstack_react-query.js?v=638b47a7:897
+resolve @ @tanstack_react-query.js?v=638b47a7:456
+Promise.then
+run @ @tanstack_react-query.js?v=638b47a7:498
+start @ @tanstack_react-query.js?v=638b47a7:536
+fetch @ @tanstack_react-query.js?v=638b47a7:926
+executeFetch_fn @ @tanstack_react-query.js?v=638b47a7:2211
+onSubscribe @ @tanstack_react-query.js?v=638b47a7:1898
+subscribe @ @tanstack_react-query.js?v=638b47a7:24
+(anonymous) @ @tanstack_react-query.js?v=638b47a7:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=638b47a7:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=638b47a7:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=638b47a7:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=638b47a7:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=638b47a7:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=638b47a7:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=638b47a7:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=638b47a7:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=638b47a7:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=638b47a7:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=638b47a7:19432
+commitRoot @ chunk-RPCDYKBN.js?v=638b47a7:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=638b47a7:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=638b47a7:18718
+workLoop @ chunk-RPCDYKBN.js?v=638b47a7:197
+flushWork @ chunk-RPCDYKBN.js?v=638b47a7:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=638b47a7:384
+useAuth.ts:46 Auth check failed: Error: HTTP 403
+    at queryFn (useAuth.ts:39:17)
+queryFn @ useAuth.ts:46
+await in queryFn
+fetchFn @ @tanstack_react-query.js?v=638b47a7:840
+run @ @tanstack_react-query.js?v=638b47a7:494
+start @ @tanstack_react-query.js?v=638b47a7:536
+fetch @ @tanstack_react-query.js?v=638b47a7:926
+executeFetch_fn @ @tanstack_react-query.js?v=638b47a7:2211
+(anonymous) @ @tanstack_react-query.js?v=638b47a7:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=638b47a7:2243
+updateTimers_fn @ @tanstack_react-query.js?v=638b47a7:2250
+onQueryUpdate @ @tanstack_react-query.js?v=638b47a7:2206
+(anonymous) @ @tanstack_react-query.js?v=638b47a7:998
+(anonymous) @ @tanstack_react-query.js?v=638b47a7:997
+batch @ @tanstack_react-query.js?v=638b47a7:583
+dispatch_fn @ @tanstack_react-query.js?v=638b47a7:996
+setData @ @tanstack_react-query.js?v=638b47a7:696
+onSuccess @ @tanstack_react-query.js?v=638b47a7:897
+resolve @ @tanstack_react-query.js?v=638b47a7:456
+Promise.then
+run @ @tanstack_react-query.js?v=638b47a7:498
+start @ @tanstack_react-query.js?v=638b47a7:536
+fetch @ @tanstack_react-query.js?v=638b47a7:926
+executeFetch_fn @ @tanstack_react-query.js?v=638b47a7:2211
+onSubscribe @ @tanstack_react-query.js?v=638b47a7:1898
+subscribe @ @tanstack_react-query.js?v=638b47a7:24
+(anonymous) @ @tanstack_react-query.js?v=638b47a7:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=638b47a7:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=638b47a7:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=638b47a7:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=638b47a7:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=638b47a7:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=638b47a7:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=638b47a7:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=638b47a7:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=638b47a7:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=638b47a7:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=638b47a7:19432
+commitRoot @ chunk-RPCDYKBN.js?v=638b47a7:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=638b47a7:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=638b47a7:18718
+workLoop @ chunk-RPCDYKBN.js?v=638b47a7:197
+flushWork @ chunk-RPCDYKBN.js?v=638b47a7:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=638b47a7:384

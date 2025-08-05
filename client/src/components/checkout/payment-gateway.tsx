@@ -709,16 +709,11 @@ const PaymentGateway = ({
 
   const renderWalletPartialPayment = () => {
     const currentBalance = walletBalance?.balance || 0;
-    // User specifies wallet amount instead of auto-calculation
-    const [walletAmount, setWalletAmount] = useState(() => Math.min(currentBalance, totalAmount));
+    // User specifies wallet amount - start with 0 to let user choose
+    const [walletAmount, setWalletAmount] = useState(0);
     const remainingAmount = Math.max(0, totalAmount - walletAmount);
     
-    // Update wallet amount when balance loads
-    useEffect(() => {
-      if (currentBalance > 0) {
-        setWalletAmount(Math.min(currentBalance, totalAmount));
-      }
-    }, [currentBalance, totalAmount]);
+    // Don't auto-update wallet amount - let user control it completely
     
     console.log('🔍 [WALLET PARTIAL DEBUG] Current balance:', currentBalance);
     console.log('🔍 [WALLET PARTIAL DEBUG] Total amount:', totalAmount);
