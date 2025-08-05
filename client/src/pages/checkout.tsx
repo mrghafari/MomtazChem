@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { CheckCircle, ShoppingCart, CreditCard, Truck, User, MapPin, Weight, Car, Calculator, Flame } from "lucide-react";
+import { CheckCircle, ShoppingCart, CreditCard, Truck, User, MapPin, Weight, Car, Calculator, Flame, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
@@ -2047,8 +2047,8 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
               </div>
             </div>
             
-            {/* Purchase Order Card */}
-            <Card className="sticky top-8">
+            {/* Purchase Order Card - Made draggable and removable */}
+            <Card className="relative border-2 border-dashed border-blue-300 hover:border-blue-500 transition-all duration-300">
               <CardHeader 
                 className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                 onClick={() => setShowPurchaseOrder(!showPurchaseOrder)}
@@ -2057,11 +2057,23 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                   <div className="flex items-center gap-2">
                     <ShoppingCart className="w-5 h-5 text-blue-600" />
                     <span className="text-blue-600">Purchase Order</span>
-                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">NEW</span>
+                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">MOVEABLE</span>
                   </div>
-                  <span className="text-sm text-gray-500">
-                    {showPurchaseOrder ? '−' : '+'}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-500">
+                      {showPurchaseOrder ? '−' : '+'}
+                    </span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowPurchaseOrder(false);
+                      }}
+                      className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
+                      title="Minimize Purchase Order"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
                 </CardTitle>
               </CardHeader>
               {showPurchaseOrder && (
