@@ -49,10 +49,13 @@ const PaymentGateway = ({
     setIsProcessing(true);
     
     try {
-      const response = await apiRequest('/api/customers/wallet/complete-payment', 'POST', {
-        orderId: orderId,
-        totalAmount: totalAmount,
-        paymentMethod: 'wallet_full'
+      const response = await apiRequest('/api/customers/wallet/complete-payment', {
+        method: 'POST',
+        body: {
+          orderId: orderId,
+          totalAmount: totalAmount,
+          paymentMethod: 'wallet_full'
+        }
       });
 
       if (response.success) {
@@ -89,11 +92,14 @@ const PaymentGateway = ({
         // Step 1: Immediately deduct from wallet
         console.log('💰 [WALLET DEDUCTION] Deducting', walletAmount, 'from wallet for order:', orderId);
         
-        const walletResponse = await apiRequest('/api/customers/wallet/hybrid-deduction', 'POST', {
-          orderId: orderId,
-          walletAmount: walletAmount,
-          remainingAmount: remainingAmount,
-          totalAmount: totalAmount
+        const walletResponse = await apiRequest('/api/customers/wallet/hybrid-deduction', {
+          method: 'POST',
+          body: {
+            orderId: orderId,
+            walletAmount: walletAmount,
+            remainingAmount: remainingAmount,
+            totalAmount: totalAmount
+          }
         });
 
         if (walletResponse.success) {
@@ -315,10 +321,13 @@ const PaymentGateway = ({
         paymentMethod
       });
       
-      const response = await apiRequest('/api/customers/wallet/complete-payment', 'POST', {
-        orderId,
-        totalAmount,
-        paymentMethod: 'wallet_full'
+      const response = await apiRequest('/api/customers/wallet/complete-payment', {
+        method: 'POST',
+        body: {
+          orderId,
+          totalAmount,
+          paymentMethod: 'wallet_full'
+        }
       });
       
       console.log('💰 [WALLET PAYMENT] Response:', response);
