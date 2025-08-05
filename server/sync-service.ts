@@ -152,7 +152,8 @@ export class SyncService {
       );
 
       // Skip sync for warehouse intermediate status (warehouse_verified) and final statuses
-      const protectedStatuses = ['warehouse_verified', 'warehouse_approved', 'logistics_assigned', 'logistics_processing', 'logistics_dispatched', 'delivered', 'cancelled'];
+      // CRITICAL: Also protect financial_approved to prevent successful payment rollback
+      const protectedStatuses = ['financial_approved', 'warehouse_verified', 'warehouse_approved', 'logistics_assigned', 'logistics_processing', 'logistics_dispatched', 'delivered', 'cancelled'];
       
       if (expectedManagementStatus !== record.managementStatus && !protectedStatuses.includes(record.managementStatus)) {
         mismatchCount++;
