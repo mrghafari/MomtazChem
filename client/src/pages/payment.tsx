@@ -194,8 +194,15 @@ export default function Payment() {
     setPaymentData(paymentResult);
     setPaymentProcessed(true);
     
-    // Clear cart after successful payment - WITH SESSION
+    // IMMEDIATE CART CLEARING - Multiple approaches for reliability
     console.log('🧹 [CART CLEAR] Clearing cart after successful payment');
+    
+    // Clear localStorage immediately
+    localStorage.removeItem('cart');
+    localStorage.removeItem(`wallet_amount_${orderId}`);
+    console.log('🧹 [CART CLEAR] Cleared localStorage cart and wallet data');
+    
+    // Clear persistent cart from database
     fetch('/api/cart/clear', { 
       method: 'POST',
       body: JSON.stringify({}), 
@@ -205,16 +212,17 @@ export default function Payment() {
       .then(response => response.json())
       .then(data => {
         console.log('✅ [CART CLEAR] Database cart cleared:', data);
-        // Also clear localStorage cart immediately
-        localStorage.removeItem('cart');
-        console.log('🧹 [CART CLEAR] Cleared localStorage cart');
       })
       .catch(err => {
-        console.warn('⚠️ [CART CLEAR] Failed to clear cart:', err);
-        // Force clear localStorage even if database clear fails
-        localStorage.removeItem('cart');
-        console.log('🧹 [CART CLEAR] Force cleared localStorage despite API error');
+        console.warn('⚠️ [CART CLEAR] Failed to clear database cart:', err);
       });
+    
+    // Clear cart using mutation
+    clearCartMutation.mutate();
+    
+    // Force cart state update through query invalidation
+    queryClient.invalidateQueries({ queryKey: ['/api/customers/persistent-cart'] });
+    queryClient.invalidateQueries({ queryKey: ['/api/cart'] });
     
     // Clear localStorage for this order
     localStorage.removeItem(`wallet_amount_${orderId}`);
