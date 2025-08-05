@@ -1468,13 +1468,6 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <h4 className="font-medium text-sm truncate">{product.name}</h4>
-                          {/* Flammable Product Safety Warning */}
-                          {product.isFlammable && (
-                            <div className="flex items-center">
-                              <Flame className="w-4 h-4 text-red-500" />
-                              <span className="text-xs text-red-600 font-medium mr-1">آتش‌زا</span>
-                            </div>
-                          )}
                         </div>
                         <p className="text-xs text-muted-foreground">{product.category}</p>
                         <p className="text-sm font-medium mt-1">
