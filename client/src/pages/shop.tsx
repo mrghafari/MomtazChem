@@ -458,7 +458,7 @@ const Shop = () => {
       if (cartResponse.ok) {
         const cartResult = await cartResponse.json();
         if (cartResult.success) {
-          const databaseCart = cartResult.cart || {};
+          const databaseCart = cartResult.data?.cartData || {};
           console.log('🛒 [PERSISTENT CART] Database cart:', databaseCart);
           console.log('🛒 [PERSISTENT CART] Local cart:', localCartData);
           
@@ -475,9 +475,9 @@ const Shop = () => {
             if (syncResponse.ok) {
               const syncResult = await syncResponse.json();
               if (syncResult.success) {
-                setCart(syncResult.cart);
-                localStorage.setItem('momtazchem_user_cart', JSON.stringify(syncResult.cart));
-                console.log('✅ [PERSISTENT CART] Cart synced successfully');
+                setCart(localCartData);
+                localStorage.setItem('momtazchem_user_cart', JSON.stringify(localCartData));
+                console.log('✅ [PERSISTENT CART] Local cart synced to database successfully');
                 return;
               }
             }
