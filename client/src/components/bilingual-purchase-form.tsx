@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -250,6 +250,37 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const [selectedReceiptFile, setSelectedReceiptFile] = useState<File | null>(null);
   const [selectedShippingMethod, setSelectedShippingMethod] = useState<number | null>(null);
   const [shippingCost, setShippingCost] = useState<number>(0);
+  
+  // Draggable states
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const formRef = useRef<HTMLDivElement>(null);
+
+  // Mouse drag handlers
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+    setDragStart({
+      x: e.clientX - position.x,
+      y: e.clientY - position.y
+    });
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const newX = e.clientX - dragStart.x;
+      const newY = e.clientY - dragStart.y;
+      setPosition({ x: newX, y: newY });
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  };
 
   
 
@@ -1336,11 +1367,28 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <Card className={`w-full max-w-2xl max-h-[90vh] overflow-y-auto ${isRTL ? 'rtl' : 'ltr'}`}>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+      <Card 
+        ref={formRef}
+        className={`w-full max-w-2xl max-h-[90vh] overflow-y-auto ${isRTL ? 'rtl' : 'ltr'} ${
+          isDragging ? 'cursor-grabbing' : 'cursor-grab'
+        }`}
+        style={{
+          position: isDragging ? 'fixed' : 'relative',
+          left: isDragging ? position.x : 'auto',
+          top: isDragging ? position.y : 'auto',
+          zIndex: isDragging ? 9999 : 'auto',
+          opacity: isDragging ? 0.8 : 1,
+        }}
+        onMouseDown={handleMouseDown}
+        title="کلیک و بکشید تا فرم را جابجا کنید!"
+      >
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 drag-handle">
           <div className="flex items-center gap-2">
             <ShoppingCart className="w-5 h-5" />
             <CardTitle className="text-lg">{t.purchaseOrder}</CardTitle>
+            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+              {isDragging ? '🖱️ در حال جابجایی...' : '🖱️ قابل جابجایی'}
+            </span>
           </div>
           <div className="flex items-center gap-2">
             <Button

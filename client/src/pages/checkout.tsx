@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -90,6 +90,41 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   const [showCartManagement, setShowCartManagement] = useState(true);
   const [showSecondAddress, setShowSecondAddress] = useState(true); // Default to open for testing
   const [showRecipientMobile, setShowRecipientMobile] = useState(false);
+  
+  // Draggable card states
+  const [cardPosition, setCardPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // Mouse event handlers for drag functionality
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!cardRef.current) return;
+    
+    setIsDragging(true);
+    setDragStart({
+      x: e.clientX - cardPosition.x,
+      y: e.clientY - cardPosition.y
+    });
+    
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDragging) return;
+      
+      const newX = e.clientX - dragStart.x;
+      const newY = e.clientY - dragStart.y;
+      
+      setCardPosition({ x: newX, y: newY });
+    };
+    
+    const handleMouseUp = () => {
+      setIsDragging(false);
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+    
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  };
   const [selectedVehicle, setSelectedVehicle] = useState<any>(null);
   const [calculatedShippingCost, setCalculatedShippingCost] = useState(0);
   const [totalWeight, setTotalWeight] = useState(0);
@@ -2058,39 +2093,42 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
             <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-3 text-center">
               <div className="text-sm font-medium text-blue-800 mb-1">🎉 Enhanced Checkout Features</div>
               <div className="text-xs text-blue-600">
-                Purchase Order card is now fully draggable! Drag it anywhere you want.
+کارت Purchase Order حالا کاملاً قابل جابجایی است! کلیک و درگ کنید.
               </div>
             </div>
             
-            {/* Purchase Order Card - Fully Draggable */}
+            {/* Purchase Order Card - Mouse Draggable */}
             <Card 
-              draggable={true}
-              onDragStart={(e) => {
-                e.dataTransfer.effectAllowed = 'move';
-                e.currentTarget.style.opacity = '0.5';
+              ref={cardRef}
+              onMouseDown={handleMouseDown}
+              className={`relative border-2 border-dashed border-blue-300 hover:border-blue-500 transition-all duration-300 select-none ${
+                isDragging ? 'cursor-grabbing opacity-70 z-50' : 'cursor-grab hover:shadow-lg'
+              }`}
+              style={{
+                position: isDragging ? 'fixed' : 'relative',
+                left: isDragging ? cardPosition.x : 'auto',
+                top: isDragging ? cardPosition.y : 'auto',
+                zIndex: isDragging ? 9999 : 'auto',
+                transform: isDragging ? 'none' : 'scale(1)',
               }}
-              onDragEnd={(e) => {
-                e.currentTarget.style.opacity = '1';
-              }}
-              className="relative border-2 border-dashed border-blue-300 hover:border-blue-500 transition-all duration-300 cursor-move hover:shadow-lg active:scale-95 select-none"
-              title="Drag me to move this card anywhere!"
+              title="کلیک کنید و بکشید تا کارت را جابجا کنید!"
             >
               <CardHeader 
-                className="cursor-grab active:cursor-grabbing hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors drag-handle"
-                onClick={() => setShowPurchaseOrder(!showPurchaseOrder)}
-                onMouseDown={(e) => {
-                  // Visual feedback when dragging starts
-                  e.currentTarget.style.cursor = 'grabbing';
-                }}
-                onMouseUp={(e) => {
-                  e.currentTarget.style.cursor = 'grab';
+                className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors drag-handle"
+                onClick={(e) => {
+                  // Only toggle if not dragging
+                  if (!isDragging) {
+                    setShowPurchaseOrder(!showPurchaseOrder);
+                  }
                 }}
               >
                 <CardTitle className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <ShoppingCart className="w-5 h-5 text-blue-600" />
                     <span className="text-blue-600">Purchase Order</span>
-                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded animate-pulse">🖱️ DRAGGABLE</span>
+                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                      {isDragging ? '🖱️ در حال جابجایی...' : '🖱️ قابل جابجایی'}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-gray-500">
