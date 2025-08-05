@@ -8937,43 +8937,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get active payment gateway (public endpoint for frontend)
-  app.get("/api/payment/active-gateway", async (req, res) => {
-    try {
-      const { pool } = await import('./db');
-      
-      const result = await pool.query(`
-        SELECT 
-          id,
-          name,
-          type,
-          enabled,
-          config,
-          created_at as "createdAt",
-          updated_at as "updatedAt"
-        FROM payment_gateways
-        WHERE enabled = true
-        ORDER BY updated_at DESC
-        LIMIT 1
-      `);
-
-      if (result.rows.length === 0) {
-        return res.status(404).json({
-          success: false,
-          message: "هیچ درگاه پرداخت فعالی یافت نشد"
-        });
-      }
-
-      console.log("✅ [ACTIVE GATEWAY] Found:", result.rows[0]);
-      res.json(result.rows[0]);
-    } catch (error) {
-      console.error("❌ [ACTIVE GATEWAY] Error fetching active gateway:", error);
-      res.status(500).json({
-        success: false,
-        message: "خطا در دریافت درگاه پرداخت فعال"
-      });
-    }
-  });
+  // REMOVED: Duplicate endpoint - using the one later in the file
 
   // Get customer order for payment (public endpoint for payment page)
   app.get("/api/customers/orders/:orderId/payment", async (req, res) => {
@@ -9226,10 +9190,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      res.json({
-        success: true,
-        gateway: result.rows[0]
-      });
+      console.log("✅ [ACTIVE GATEWAY] Found:", result.rows[0]);
+      res.json(result.rows[0]);
     } catch (error) {
       console.error("❌ [ACTIVE GATEWAY] Error:", error);
       res.status(500).json({
