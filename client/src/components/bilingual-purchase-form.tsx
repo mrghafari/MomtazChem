@@ -261,19 +261,19 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
     setIsDragging(true);
-    setDragStart({
-      x: e.clientX - position.x,
-      y: e.clientY - position.y
-    });
+    
+    const startX = e.clientX - position.x;
+    const startY = e.clientY - position.y;
 
     const handleMouseMove = (e: MouseEvent) => {
-      const newX = e.clientX - dragStart.x;
-      const newY = e.clientY - dragStart.y;
+      const newX = e.clientX - startX;
+      const newY = e.clientY - startY;
       setPosition({ x: newX, y: newY });
     };
 
     const handleMouseUp = () => {
       setIsDragging(false);
+      // Keep the new position - don't reset it
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
@@ -1373,11 +1373,13 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
           isDragging ? 'cursor-grabbing' : 'cursor-grab'
         }`}
         style={{
-          position: isDragging ? 'fixed' : 'relative',
-          left: isDragging ? position.x : 'auto',
-          top: isDragging ? position.y : 'auto',
-          zIndex: isDragging ? 9999 : 'auto',
+          position: (isDragging || (position.x !== 0 || position.y !== 0)) ? 'fixed' : 'relative',
+          left: (isDragging || (position.x !== 0 || position.y !== 0)) ? position.x : 'auto',
+          top: (isDragging || (position.x !== 0 || position.y !== 0)) ? position.y : 'auto',
+          zIndex: isDragging ? 9999 : 1000,
           opacity: isDragging ? 0.8 : 1,
+          transform: isDragging ? 'scale(1.02)' : 'scale(1)',
+          transition: isDragging ? 'none' : 'transform 0.2s ease',
         }}
         onMouseDown={handleMouseDown}
         title="کلیک و بکشید تا فرم را جابجا کنید!"
@@ -1391,6 +1393,14 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
             </span>
           </div>
           <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setPosition({ x: 0, y: 0 })}
+              title="بازگشت به مرکز"
+            >
+              📍
+            </Button>
             <Button
               variant="ghost"
               size="sm"
