@@ -1123,21 +1123,25 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       console.log('🎯 [ORDER SUCCESS] Response type:', typeof response);
       console.log('🎯 [ORDER SUCCESS] Response keys:', Object.keys(response || {}));
       
-      // CRITICAL FIX: If remainingAmount is 0, no bank payment needed regardless of other flags
+      // RESPECT CUSTOMER'S PAYMENT CHOICE - NO AUTO-SUBSTITUTION
+      // Only consider wallet payment if customer explicitly chose wallet methods
       const remainingAmount = parseFloat(response.remainingAmount || 0);
-      const isFullyPaidByWallet = remainingAmount === 0;
+      const customerChoseWallet = paymentMethod === 'wallet_full' || paymentMethod === 'wallet_partial' || paymentMethod === 'wallet_combined';
+      const isFullyPaidByWallet = remainingAmount === 0 && customerChoseWallet;
       
-      console.log('💳 [PAYMENT DECISION] Frontend payment logic:', {
+      console.log('💳 [PAYMENT DECISION] RESPECTING CUSTOMER CHOICE:', {
+        paymentMethod,
+        customerChoseWallet,
         remainingAmount,
         isFullyPaidByWallet,
         requiresBankPayment: response.requiresBankPayment,
         paymentStatus: response.paymentStatus,
         walletAmountDeducted: response.walletAmountDeducted,
-        'Decision': isFullyPaidByWallet ? 'Complete order (no bank gateway)' : 'Check for bank payment'
+        'Decision': customerChoseWallet && isFullyPaidByWallet ? 'Complete order (wallet chosen)' : 'Respect customer payment method'
       });
       
-      // If fully paid by wallet, complete the order without bank gateway
-      if (isFullyPaidByWallet) {
+      // Only auto-complete if customer EXPLICITLY chose wallet payment AND it's fully paid
+      if (isFullyPaidByWallet && customerChoseWallet) {
         console.log('✅ [FULL WALLET PAYMENT] Order fully paid by wallet - completing without bank gateway');
         
         toast({
