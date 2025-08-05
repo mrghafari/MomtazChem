@@ -20,10 +20,17 @@ export default function Payment() {
   const orderId = params?.orderId ? parseInt(params.orderId) : null;
 
   // Fetch order details
-  const { data: orderData, isLoading: orderLoading } = useQuery({
-    queryKey: ['/api/customers/orders', orderId, 'payment'],
+  const { data: orderData, isLoading: orderLoading, error: orderError } = useQuery({
+    queryKey: [`/api/customers/orders/${orderId}/payment`],
     enabled: !!orderId,
   });
+
+  // Debug order query issues
+  useEffect(() => {
+    if (orderError) {
+      console.error('🔍 [ORDER QUERY ERROR]:', orderError);
+    }
+  }, [orderError]);
 
   // Fetch active payment gateway
   const { data: activeGateway, isLoading: gatewayLoading } = useQuery({
@@ -33,10 +40,12 @@ export default function Payment() {
 
   // Debug active gateway data
   useEffect(() => {
+    console.log('🔍 [PAYMENT PAGE DEBUG] Order ID:', orderId);
     console.log('🔍 [PAYMENT PAGE DEBUG] Active gateway data:', activeGateway);
     console.log('🔍 [PAYMENT PAGE DEBUG] Gateway loading:', gatewayLoading);
     console.log('🔍 [PAYMENT PAGE DEBUG] Order data:', orderData);
-  }, [activeGateway, gatewayLoading, orderData]);
+    console.log('🔍 [PAYMENT PAGE DEBUG] Order loading:', orderLoading);
+  }, [orderId, activeGateway, gatewayLoading, orderData, orderLoading]);
 
   // Update payment status mutation
   const updatePaymentMutation = useMutation({
@@ -248,14 +257,14 @@ export default function Payment() {
                   <p>در حال بارگذاری درگاه پرداخت...</p>
                 </CardContent>
               </Card>
-            ) : activeGateway?.success ? (
+            ) : activeGateway ? (
               <PaymentGateway
                 paymentMethod={order.paymentMethod}
-                totalAmount={order.totalAmount}
+                totalAmount={parseFloat(order.totalAmount)}
                 orderId={order.orderNumber}
                 onPaymentSuccess={handlePaymentSuccess}
                 onPaymentError={handlePaymentError}
-                activeGateway={activeGateway.gateway}
+                activeGateway={activeGateway}
               />
             ) : (
               <Card>

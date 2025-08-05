@@ -40,11 +40,17 @@ const PaymentGateway = ({
     console.log('🔍 [AUTO REDIRECT DEBUG] Payment method:', paymentMethod);
     console.log('🔍 [AUTO REDIRECT DEBUG] Active gateway:', activeGateway);
     console.log('🔍 [AUTO REDIRECT DEBUG] Is processing:', isProcessing);
+    console.log('🔍 [AUTO REDIRECT DEBUG] Gateway config:', activeGateway?.config);
     
     if (paymentMethod === 'online_payment' && activeGateway && !isProcessing) {
       console.log('🔄 [AUTO REDIRECT] Triggering auto-redirect for online payment');
       console.log('🔄 [AUTO REDIRECT] Gateway config:', activeGateway.config);
-      handleOnlinePayment();
+      console.log('🔄 [AUTO REDIRECT] API Base URL:', activeGateway.config?.apiBaseUrl);
+      
+      // Small delay to ensure everything is loaded
+      setTimeout(() => {
+        handleOnlinePayment();
+      }, 1000);
     }
   }, [paymentMethod, activeGateway, isProcessing]);
 
