@@ -30897,6 +30897,16 @@ momtazchem.com
       // Get new balance
       const newBalance = await walletStorage.getWalletBalance(customerId);
 
+      // Clear customer cart after successful wallet payment
+      console.log('🧹 [WALLET COMPLETE] Clearing cart after successful payment');
+      try {
+        await cartStorage.clearCart(customerId);
+        console.log('✅ [WALLET COMPLETE] Cart cleared successfully');
+      } catch (cartError) {
+        console.warn('⚠️ [WALLET COMPLETE] Failed to clear cart:', cartError);
+        // Continue with payment success even if cart clearing fails
+      }
+
       res.json({
         success: true,
         message: "پرداخت از کیف پول با موفقیت انجام شد",
