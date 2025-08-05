@@ -1191,53 +1191,51 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       console.log('🎯 [ORDER SUCCESS] Response type:', typeof response);
       console.log('🎯 [ORDER SUCCESS] Response keys:', Object.keys(response || {}));
       
-      // RESPECT CUSTOMER'S PAYMENT CHOICE - NO AUTO-SUBSTITUTION
-      // Only consider wallet payment if customer explicitly chose wallet methods
+      // CRITICAL: Check if hybrid payment (wallet + bank) is required
       const remainingAmount = parseFloat(response.remainingAmount || 0);
-      const customerChoseWallet = paymentMethod === 'wallet_full' || paymentMethod === 'wallet_partial' || paymentMethod === 'wallet_combined';
-      const isFullyPaidByWallet = remainingAmount === 0 && customerChoseWallet;
+      const walletDeducted = parseFloat(response.walletAmountDeducted || 0);
+      const requiresBankPayment = response.requiresBankPayment === true;
       
-      console.log('💳 [PAYMENT DECISION] RESPECTING CUSTOMER CHOICE:', {
+      console.log('💳 [HYBRID PAYMENT DEBUG] Response analysis:', {
         paymentMethod,
-        customerChoseWallet,
         remainingAmount,
-        isFullyPaidByWallet,
-        requiresBankPayment: response.requiresBankPayment,
-        paymentStatus: response.paymentStatus,
-        walletAmountDeducted: response.walletAmountDeducted,
-        'Decision': customerChoseWallet && isFullyPaidByWallet ? 'Complete order (wallet chosen)' : 'Respect customer payment method'
+        walletDeducted,
+        requiresBankPayment,
+        responseKeys: Object.keys(response),
+        redirectUrl: response.redirectUrl,
+        fullResponse: response
       });
       
-      // Only auto-complete if customer EXPLICITLY chose wallet payment AND it's fully paid
-      if (isFullyPaidByWallet && customerChoseWallet) {
-        console.log('✅ [FULL WALLET PAYMENT] Order fully paid by wallet - completing without bank gateway');
-        
-        toast({
-          title: "سفارش ثبت شد",
-          description: `سفارش شما با موفقیت ثبت شد و کاملاً از کیف پول پرداخت شد. شماره سفارش: ${response.orderNumber || response.order?.orderNumber || 'N/A'}`,
-        });
-        
-        // Complete the order without bank gateway
-        setTimeout(() => {
-          onOrderComplete();
-          onClose();
-        }, 1500);
-        return;
-      }
-      
-      // Check for hybrid payment redirect only if remaining amount > 0
-      if (response.requiresBankPayment && response.redirectUrl && remainingAmount > 0) {
+      // PRIORITY 1: Check for hybrid payment (wallet partial + bank required)
+      if (requiresBankPayment && response.redirectUrl && remainingAmount > 0) {
+        console.log('🔄 [HYBRID PAYMENT] Wallet partial payment + bank required');
         console.log('🔄 [HYBRID PAYMENT] Redirecting to bank gateway:', response.redirectUrl);
-        console.log('🔄 [HYBRID PAYMENT] Wallet amount deducted:', response.walletAmountDeducted);
         
         toast({
-          title: "پرداخت ترکیبی",
-          description: `${response.walletAmountDeducted?.toLocaleString()} IQD از کیف پول کسر شد. هدایت به درگاه بانکی...`,
+          title: "پرداخت ترکیبی انجام شد",
+          description: `${walletDeducted?.toLocaleString()} IQD از کیف پول کسر شد. هدایت به درگاه بانکی برای پرداخت ${remainingAmount?.toLocaleString()} IQD باقیمانده...`,
         });
         
         // Force redirect to hybrid payment page
         setTimeout(() => {
+          console.log('🔄 [REDIRECT] Going to:', response.redirectUrl);
           window.location.href = response.redirectUrl;
+        }, 2000);
+        return;
+      }
+      
+      // PRIORITY 2: Full wallet payment completion
+      if (remainingAmount === 0 && walletDeducted > 0) {
+        console.log('✅ [FULL WALLET PAYMENT] Order fully paid by wallet');
+        
+        toast({
+          title: "سفارش ثبت شد",
+          description: `سفارش شما با موفقیت ثبت شد و کاملاً از کیف پول پرداخت شد. مبلغ کسرشده: ${walletDeducted?.toLocaleString()} IQD`,
+        });
+        
+        setTimeout(() => {
+          onOrderComplete();
+          onClose();
         }, 1500);
         return;
       }
