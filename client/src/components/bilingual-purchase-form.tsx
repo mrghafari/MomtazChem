@@ -1211,6 +1211,13 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         console.log('🔄 [HYBRID PAYMENT] Wallet partial payment + bank required');
         console.log('🔄 [HYBRID PAYMENT] Redirecting to bank gateway:', response.redirectUrl);
         
+        // Save wallet amount to localStorage for payment page persistence
+        const orderNumber = response.orderNumber || response.orderId;
+        if (orderNumber && walletAmount > 0) {
+          localStorage.setItem(`wallet_amount_${orderNumber}`, walletAmount.toString());
+          console.log('💾 [LOCALSTORAGE] Wallet amount saved for order:', orderNumber, '→', walletAmount);
+        }
+        
         toast({
           title: "پرداخت ترکیبی انجام شد",
           description: `${walletDeducted?.toLocaleString()} IQD از کیف پول کسر شد. هدایت به درگاه بانکی برای پرداخت ${remainingAmount?.toLocaleString()} IQD باقیمانده...`,
@@ -1242,6 +1249,13 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       // Handle online_payment method - redirect to bank gateway
       else if (paymentMethod === 'online_payment' && response.redirectToPayment && response.paymentGatewayUrl) {
         console.log('🏦 [ONLINE PAYMENT] Redirecting to bank gateway:', response.paymentGatewayUrl);
+        
+        // Save wallet amount to localStorage even for pure online payment (wallet_partial may still have amount)
+        const orderNumber = response.orderNumber || response.orderId;
+        if (orderNumber && walletAmount > 0) {
+          localStorage.setItem(`wallet_amount_${orderNumber}`, walletAmount.toString());
+          console.log('💾 [LOCALSTORAGE] Wallet amount saved for online payment order:', orderNumber, '→', walletAmount);
+        }
         
         toast({
           title: "انتقال به درگاه بانکی",
@@ -1311,6 +1325,13 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         return;
       }
       else {
+        // Save wallet amount to localStorage for any order that might use wallet later
+        const orderNumber = response.orderNumber || response.orderId;
+        if (orderNumber && walletAmount > 0) {
+          localStorage.setItem(`wallet_amount_${orderNumber}`, walletAmount.toString());
+          console.log('💾 [LOCALSTORAGE] Wallet amount saved for general order:', orderNumber, '→', walletAmount);
+        }
+        
         toast({
           title: t.orderSubmitted,
           description: "سفارش شما با موفقیت ثبت شد"

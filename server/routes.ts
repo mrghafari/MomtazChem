@@ -30854,6 +30854,103 @@ momtazchem.com
     }
   });
 
+  // Hybrid payment: Immediate wallet deduction
+  app.post("/api/customers/wallet/hybrid-deduction", async (req, res) => {
+    try {
+      // Prevent admin from accessing customer wallet data
+      if (req.session.adminId) {
+        return res.status(401).json({ success: false, message: "Admin authenticated - not a customer" });
+      }
+      
+      if (!req.session.customerId) {
+        return res.status(401).json({ success: false, message: "Customer authentication required" });
+      }
+
+      const customerId = req.session.customerId;
+      const { orderId, walletAmount, remainingAmount, totalAmount } = req.body;
+      
+      console.log('🔄 [HYBRID DEDUCTION] Processing hybrid wallet deduction:', {
+        customerId,
+        orderId,
+        walletAmount,
+        remainingAmount,
+        totalAmount
+      });
+
+      // Verify inputs
+      if (!orderId || !walletAmount || walletAmount <= 0) {
+        return res.status(400).json({
+          success: false,
+          message: "اطلاعات پرداخت نامعتبر است"
+        });
+      }
+
+      // Verify customer has sufficient wallet balance
+      const currentBalance = await walletStorage.getWalletBalance(customerId);
+      console.log('🔍 [HYBRID DEDUCTION] Current balance:', currentBalance);
+      
+      if (currentBalance < walletAmount) {
+        return res.status(400).json({
+          success: false,
+          message: `موجودی کیف پول (${currentBalance} IQD) برای کسر مبلغ ${walletAmount} IQD کافی نیست`
+        });
+      }
+
+      // Get order details to verify it exists and belongs to customer
+      const [order] = await customerDb
+        .select()
+        .from(customerOrders)
+        .where(and(
+          eq(customerOrders.orderNumber, orderId),
+          eq(customerOrders.customerId, customerId)
+        ));
+        
+      if (!order) {
+        return res.status(404).json({
+          success: false,
+          message: "سفارش یافت نشد"
+        });
+      }
+
+      // Immediately deduct wallet amount
+      const description = `Partial payment for order ${orderId} (${walletAmount} IQD from wallet)`;
+      await walletStorage.debitWallet(customerId, walletAmount, description, 'hybrid_payment');
+      console.log('💰 [HYBRID DEDUCTION] Wallet deducted successfully:', walletAmount);
+
+      // Update order payment status to 'partial' since bank payment is still pending
+      await customerDb
+        .update(customerOrders)
+        .set({ 
+          paymentStatus: 'partial',
+          paymentMethod: 'wallet_partial'
+        })
+        .where(eq(customerOrders.id, order.id));
+      console.log('✅ [HYBRID DEDUCTION] Order payment status updated to partial');
+
+      // Generate transaction ID for wallet portion
+      const transactionId = `HYB-${Date.now()}-${Math.random().toString(36).substr(2, 8).toUpperCase()}`;
+
+      // Get new balance
+      const newBalance = await walletStorage.getWalletBalance(customerId);
+
+      res.json({
+        success: true,
+        message: "بخش کیف پول پرداخت شد. در حال هدایت به درگاه بانکی...",
+        transactionId: transactionId,
+        newWalletBalance: newBalance,
+        walletAmountDeducted: walletAmount,
+        remainingBankAmount: remainingAmount
+      });
+
+    } catch (error) {
+      console.error("[HYBRID DEDUCTION] Error:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در کسر از کیف پول"
+      });
+    }
+  });
+
   // Get wallet recharge information/status
   app.get('/api/customer/wallet/recharge', async (req, res) => {
     try {

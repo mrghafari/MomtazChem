@@ -18,6 +18,7 @@ interface PaymentGatewayProps {
   onPaymentSuccess: (paymentData: any) => void;
   onPaymentError: (error: string) => void;
   activeGateway?: any;
+  walletAmount?: number;
 }
 
 const PaymentGateway = ({ 
@@ -26,7 +27,8 @@ const PaymentGateway = ({
   orderId, 
   onPaymentSuccess, 
   onPaymentError,
-  activeGateway 
+  activeGateway,
+  walletAmount: initialWalletAmount = 0
 }: PaymentGatewayProps) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [formData, setFormData] = useState<any>({});
@@ -79,15 +81,44 @@ const PaymentGateway = ({
     console.log('🔄 [HYBRID PAYMENT] Wallet amount:', walletAmount, 'Remaining:', remainingAmount);
     
     if (remainingAmount > 0) {
-      console.log('🏦 [HYBRID PAYMENT] Redirecting to bank gateway for remaining amount:', remainingAmount);
-      // Store wallet deduction info for later processing
-      setFormData(prev => ({
-        ...prev,
-        walletAmount,
-        remainingAmount,
-        paymentMethod: 'wallet_partial'
-      }));
-      handleOnlinePayment();
+      console.log('🏦 [HYBRID PAYMENT] Starting wallet deduction first, then bank redirect');
+      
+      setIsProcessing(true);
+      
+      try {
+        // Step 1: Immediately deduct from wallet
+        console.log('💰 [WALLET DEDUCTION] Deducting', walletAmount, 'from wallet for order:', orderId);
+        
+        const walletResponse = await apiRequest('/api/customers/wallet/hybrid-deduction', 'POST', {
+          orderId: orderId,
+          walletAmount: walletAmount,
+          remainingAmount: remainingAmount,
+          totalAmount: totalAmount
+        });
+
+        if (walletResponse.success) {
+          console.log('✅ [WALLET DEDUCTION] Wallet successfully deducted:', walletAmount);
+          console.log('🏦 [BANK REDIRECT] Now redirecting to bank gateway for remaining:', remainingAmount);
+          
+          // Step 2: Redirect to bank gateway for remaining amount
+          setFormData(prev => ({
+            ...prev,
+            walletAmount,
+            remainingAmount,
+            paymentMethod: 'wallet_partial'
+          }));
+          
+          // Trigger bank gateway redirect
+          handleOnlinePayment();
+        } else {
+          throw new Error(walletResponse.message || 'Wallet deduction failed');
+        }
+        
+      } catch (error) {
+        console.error('❌ [HYBRID PAYMENT] Error during wallet deduction:', error);
+        onPaymentError('خطا در کسر از کیف پول. لطفاً دوباره تلاش کنید.');
+        setIsProcessing(false);
+      }
     } else {
       console.log('💰 [HYBRID PAYMENT] Processing as wallet-only payment');
       handleWalletOnlyPayment();
@@ -710,12 +741,12 @@ const PaymentGateway = ({
   const renderWalletPartialPayment = () => {
     const currentBalance = walletBalance?.balance || 0;
     
-    // Try to restore wallet amount from localStorage if available
+    // Try to restore wallet amount from localStorage if available, or use passed prop
     const savedWalletAmount = localStorage.getItem(`wallet_amount_${orderId}`);
-    const initialWalletAmount = savedWalletAmount ? parseFloat(savedWalletAmount) : 0;
+    const defaultWalletAmount = savedWalletAmount ? parseFloat(savedWalletAmount) : initialWalletAmount;
     
-    // User specifies wallet amount - start with saved amount or 0
-    const [walletAmount, setWalletAmount] = useState(initialWalletAmount);
+    // User specifies wallet amount - start with saved amount, prop value, or 0
+    const [walletAmount, setWalletAmount] = useState(defaultWalletAmount);
     const remainingAmount = Math.max(0, totalAmount - walletAmount);
     
     // Don't auto-update wallet amount - let user control it completely

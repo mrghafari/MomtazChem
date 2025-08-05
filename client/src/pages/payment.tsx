@@ -18,6 +18,7 @@ export default function Payment() {
   const queryClient = useQueryClient();
   const [paymentProcessed, setPaymentProcessed] = useState(false);
   const [paymentData, setPaymentData] = useState<any>(null);
+  const [walletAmount, setWalletAmount] = useState<number>(0);
 
   console.log('🚀 [PAYMENT COMPONENT] useRoute params:', params);
   
@@ -54,6 +55,20 @@ export default function Payment() {
     enabled: !!orderId,
   });
 
+  // Read wallet amount from localStorage
+  useEffect(() => {
+    if (orderId) {
+      const savedWalletAmount = localStorage.getItem(`wallet_amount_${orderId}`);
+      if (savedWalletAmount) {
+        const amount = parseFloat(savedWalletAmount);
+        setWalletAmount(amount);
+        console.log('💾 [LOCALSTORAGE] Retrieved wallet amount for order', orderId, ':', amount);
+      } else {
+        console.log('💾 [LOCALSTORAGE] No wallet amount found for order', orderId);
+      }
+    }
+  }, [orderId]);
+
   // Debug active gateway data
   useEffect(() => {
     console.log('🔍 [PAYMENT PAGE DEBUG] Order ID:', orderId);
@@ -61,13 +76,14 @@ export default function Payment() {
     console.log('🔍 [PAYMENT PAGE DEBUG] Gateway loading:', gatewayLoading);
     console.log('🔍 [PAYMENT PAGE DEBUG] Order data:', orderData);
     console.log('🔍 [PAYMENT PAGE DEBUG] Order loading:', orderLoading);
+    console.log('🔍 [PAYMENT PAGE DEBUG] Wallet amount from localStorage:', walletAmount);
     
     if (orderData && activeGateway) {
       const order = orderData?.order || orderData;
       console.log('🔍 [PAYMENT PAGE DEBUG] Payment method from order:', order?.paymentMethod);
       console.log('🔍 [PAYMENT PAGE DEBUG] Will auto-redirect?', order?.paymentMethod === 'online_payment');
     }
-  }, [orderId, activeGateway, gatewayLoading, orderData, orderLoading]);
+  }, [orderId, activeGateway, gatewayLoading, orderData, orderLoading, walletAmount]);
 
   // Update payment status mutation
   const updatePaymentMutation = useMutation({
@@ -286,6 +302,7 @@ export default function Payment() {
                 orderId={order.orderNumber}
                 onPaymentSuccess={handlePaymentSuccess}
                 onPaymentError={handlePaymentError}
+                walletAmount={walletAmount}
                 activeGateway={activeGateway}
               />
             ) : (
