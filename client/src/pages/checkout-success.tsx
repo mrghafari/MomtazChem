@@ -47,11 +47,11 @@ export default function CheckoutSuccess() {
   const [showLanguagePrompt, setShowLanguagePrompt] = useState(true);
   const [selectedLanguage, setSelectedLanguage] = useState<'ar' | 'en' | null>(null);
 
-  const orderId = params?.orderId ? parseInt(params.orderId) : null;
+  const orderId = params?.orderId || null;
 
   // Fetch order details
   const { data: orderData, isLoading: orderLoading } = useQuery({
-    queryKey: ['/api/shop/orders', orderId],
+    queryKey: [`/api/customers/orders/${orderId}/payment`],
     enabled: !!orderId,
   });
 
@@ -270,7 +270,24 @@ export default function CheckoutSuccess() {
     );
   }
 
-  const order: Order = orderData;
+  if (!orderData || !orderData.success) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <Card>
+          <CardContent className="text-center p-12">
+            <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold mb-2">خطا در بارگذاری سفارش</h2>
+            <p className="text-gray-600 mb-4">امکان بارگذاری اطلاعات سفارش وجود ندارد</p>
+            <Button onClick={() => setLocation('/shop')}>
+              بازگشت به فروشگاه
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const order: Order = orderData.order;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl" dir="rtl">
