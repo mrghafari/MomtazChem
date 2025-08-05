@@ -1837,6 +1837,15 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                   </div>
                 )}
                 
+                {/* سوم: پرداخت بانکی مستقیم (تست gateway) */}
+                <div className="flex items-center space-x-2 space-x-reverse">
+                  <RadioGroupItem value="bank_transfer" id="bank_transfer" />
+                  <Label htmlFor="bank_transfer" className="flex items-center gap-2 cursor-pointer">
+                    <CreditCard className="w-4 h-4 text-purple-600" />
+                    <span className="font-semibold">پرداخت بانکی مستقیم (درگاه بانک)</span>
+                  </Label>
+                </div>
+
                 {/* چهارم: واریز بانکی با مهلت 3 روزه */}
                 <div className="flex items-center space-x-2 space-x-reverse">
                   <RadioGroupItem 
