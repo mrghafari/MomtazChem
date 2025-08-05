@@ -144,8 +144,8 @@ const PaymentGateway = ({
     console.log('🔍 [AUTO REDIRECT DEBUG] Is processing:', isProcessing);
     console.log('🔍 [AUTO REDIRECT DEBUG] Gateway config:', activeGateway?.config);
     
-    if (paymentMethod === 'online_payment' && activeGateway && !isProcessing) {
-      console.log('🔄 [AUTO REDIRECT] Triggering auto-redirect for online payment');
+    if ((paymentMethod === 'online_payment' || paymentMethod === 'wallet_partial') && activeGateway && !isProcessing) {
+      console.log('🔄 [AUTO REDIRECT] Triggering auto-redirect for payment method:', paymentMethod);
       console.log('🔄 [AUTO REDIRECT] Gateway config:', activeGateway.config);
       console.log('🔄 [AUTO REDIRECT] API Base URL:', activeGateway.config?.apiBaseUrl);
       
