@@ -1,0 +1,958 @@
+VM3063:51 Tawk.to script loaded successfully
+chunk-RPCDYKBN.js?v=638b47a7:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+me:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+useAuth.ts:46 Auth check failed: Error: HTTP 403
+    at queryFn (useAuth.ts:39:17)
+queryFn @ useAuth.ts:46
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:117574)
+    at t.value (twk-chunk-common.js:2:150658)
+    at p.updateUUID (twk-chunk-common.js:2:202310)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:124589)
+    at twk-chunk-common.js:2:123900
+value @ twk-chunk-common.js:2
+VM3063:23 Tawk.to Live Chat loaded successfully
+me:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+useAuth.ts:46 Auth check failed: Error: HTTP 403
+    at queryFn (useAuth.ts:39:17)
+queryFn @ useAuth.ts:46
+shop.tsx:205 🎛️ [FRONTEND CONTROLS] Loaded: undefined
+shop.tsx:206 🎛️ [VISIBILITY] Discount Banner: false AI Features: false
+shop.tsx:230 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:231 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:205 🎛️ [FRONTEND CONTROLS] Loaded: undefined
+shop.tsx:206 🎛️ [VISIBILITY] Discount Banner: false AI Features: false
+shop.tsx:230 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:231 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:205 🎛️ [FRONTEND CONTROLS] Loaded: undefined
+shop.tsx:206 🎛️ [VISIBILITY] Discount Banner: false AI Features: false
+shop.tsx:230 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:231 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:205 🎛️ [FRONTEND CONTROLS] Loaded: Object
+shop.tsx:206 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:230 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:231 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:205 🎛️ [FRONTEND CONTROLS] Loaded: Object
+shop.tsx:206 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:230 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:231 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:205 🎛️ [FRONTEND CONTROLS] Loaded: Object
+shop.tsx:206 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:230 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:231 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:205 🎛️ [FRONTEND CONTROLS] Loaded: Object
+shop.tsx:206 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:230 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:231 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:205 🎛️ [FRONTEND CONTROLS] Loaded: Object
+shop.tsx:206 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:230 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:231 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:205 🎛️ [FRONTEND CONTROLS] Loaded: Object
+shop.tsx:206 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:230 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:231 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:235 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:236 🌟 [RATINGS DEBUG] Products with ratings: Array(3)
+shop.tsx:205 🎛️ [FRONTEND CONTROLS] Loaded: Object
+shop.tsx:206 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:230 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:231 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:235 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:236 🌟 [RATINGS DEBUG] Products with ratings: Array(3)
+shop.tsx:205 🎛️ [FRONTEND CONTROLS] Loaded: Object
+shop.tsx:206 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:230 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:231 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:235 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:236 🌟 [RATINGS DEBUG] Products with ratings: Array(3)
+shop.tsx:205 🎛️ [FRONTEND CONTROLS] Loaded: Object
+shop.tsx:206 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:230 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:231 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:235 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:236 🌟 [RATINGS DEBUG] Products with ratings: Array(3)
+shop.tsx:205 🎛️ [FRONTEND CONTROLS] Loaded: Object
+shop.tsx:206 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:230 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:231 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:235 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:236 🌟 [RATINGS DEBUG] Products with ratings: Array(3)
+shop.tsx:205 🎛️ [FRONTEND CONTROLS] Loaded: Object
+shop.tsx:206 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:230 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:231 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:235 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:236 🌟 [RATINGS DEBUG] Products with ratings: Array(3)
+shop.tsx:837 Cart clicked, total items: 2
+shop.tsx:838 Customer: Object
+shop.tsx:845 User is logged in, showing checkout
+shop.tsx:205 🎛️ [FRONTEND CONTROLS] Loaded: Object
+shop.tsx:206 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:230 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:231 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:235 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:236 🌟 [RATINGS DEBUG] Products with ratings: Array(3)
+bilingual-purchase-form.tsx:347 💳 [WALLET QUERY] Enabled check: Object
+bilingual-purchase-form.tsx:460 🔥 [BILINGUAL FORM] Cart flammable check result: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:473 🚚 [BILINGUAL FORM] ===== SHIPPING RATES QUERY STARTED =====
+bilingual-purchase-form.tsx:475 🚚 [BILINGUAL FORM] Fetching shipping rates with flammable filtering... Object
+bilingual-purchase-form.tsx:565 === BilingualPurchaseForm Address Debug ===
+bilingual-purchase-form.tsx:566 existingCustomer from parent: Object
+bilingual-purchase-form.tsx:567 customerData from API: Object
+bilingual-purchase-form.tsx:568 crmCustomerData from API: undefined
+bilingual-purchase-form.tsx:569 isLoadingCustomer: false
+bilingual-purchase-form.tsx:580 Using existingCustomer from parent
+bilingual-purchase-form.tsx:587 Customer object found: Object
+bilingual-purchase-form.tsx:588 Customer firstName: Omid
+bilingual-purchase-form.tsx:589 Customer lastName: Mohammad
+bilingual-purchase-form.tsx:590 Customer phone: +9647503533769
+bilingual-purchase-form.tsx:591 Customer address: NAGwer Road, Qaryataq Village, Erbil, Iraq
+bilingual-purchase-form.tsx:592 Customer secondaryAddress: NAGwer Road, Qaryataq Village, Erbil, Iraq
+bilingual-purchase-form.tsx:593 Customer city: 
+bilingual-purchase-form.tsx:594 Customer country: Iraq
+bilingual-purchase-form.tsx:595 Customer postalCode: 44001
+bilingual-purchase-form.tsx:598 Full name constructed: Omid Mohammad
+bilingual-purchase-form.tsx:622 🏠 [ADDRESS DEBUG] Enhanced address mapping result: Object
+bilingual-purchase-form.tsx:663 Form data to reset: Object
+bilingual-purchase-form.tsx:665 Form reset completed
+bilingual-purchase-form.tsx:669 === End BilingualPurchaseForm Debug ===
+bilingual-purchase-form.tsx:742 🚚 [AUTO-SELECT DEBUG] useEffect triggered: Object
+bilingual-purchase-form.tsx:757 🚚 Shipping cost calculation: Object
+bilingual-purchase-form.tsx:799 🔄 No shipping method selected or no data, resetting cost
+bilingual-purchase-form.tsx:806 Shipping rates state: Object
+bilingual-purchase-form.tsx:1054 🚚 [DELIVERY CALCULATION] Final destination determined: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:1054 🚚 [DELIVERY CALCULATION] Final destination determined: Object
+bilingual-purchase-form.tsx:329 CRM Customer API response: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:565 === BilingualPurchaseForm Address Debug ===
+bilingual-purchase-form.tsx:566 existingCustomer from parent: Object
+bilingual-purchase-form.tsx:567 customerData from API: Object
+bilingual-purchase-form.tsx:568 crmCustomerData from API: Object
+bilingual-purchase-form.tsx:569 isLoadingCustomer: false
+bilingual-purchase-form.tsx:577 Using CRM customer data (most complete)
+bilingual-purchase-form.tsx:587 Customer object found: Object
+bilingual-purchase-form.tsx:588 Customer firstName: Omid
+bilingual-purchase-form.tsx:589 Customer lastName: Mohammad
+bilingual-purchase-form.tsx:590 Customer phone: +9647503533769
+bilingual-purchase-form.tsx:591 Customer address: NAGwer Road, Qaryataq Village, Erbil, Iraq
+bilingual-purchase-form.tsx:592 Customer secondaryAddress: NAGwer Road, Qaryataq Village, Erbil, Iraq
+bilingual-purchase-form.tsx:593 Customer city: undefined
+bilingual-purchase-form.tsx:594 Customer country: Iraq
+bilingual-purchase-form.tsx:595 Customer postalCode: 44001
+bilingual-purchase-form.tsx:598 Full name constructed: Omid Mohammad
+bilingual-purchase-form.tsx:622 🏠 [ADDRESS DEBUG] Enhanced address mapping result: Object
+bilingual-purchase-form.tsx:663 Form data to reset: Object
+bilingual-purchase-form.tsx:665 Form reset completed
+bilingual-purchase-form.tsx:669 === End BilingualPurchaseForm Debug ===
+bilingual-purchase-form.tsx:1054 🚚 [DELIVERY CALCULATION] Final destination determined: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:404 💰 [VAT] Tax settings API response: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:491 📦 [BILINGUAL FORM] Raw shipping rates API response: Object
+bilingual-purchase-form.tsx:526 ✅ [BILINGUAL FORM] Successfully loaded shipping rates: 2 methods
+bilingual-purchase-form.tsx:527 🚚 [BILINGUAL FORM] Shipping rates details: Array(2)
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:742 🚚 [AUTO-SELECT DEBUG] useEffect triggered: Object
+bilingual-purchase-form.tsx:750 🚚 [AUTO-SELECT] Auto-selecting first shipping method: 33 undefined
+bilingual-purchase-form.tsx:757 🚚 Shipping cost calculation: Object
+bilingual-purchase-form.tsx:799 🔄 No shipping method selected or no data, resetting cost
+bilingual-purchase-form.tsx:806 Shipping rates state: Object
+bilingual-purchase-form.tsx:837 🚚 [AUTO SELECT] Auto-selecting smart vehicle method: 32
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:742 🚚 [AUTO-SELECT DEBUG] useEffect triggered: Object
+bilingual-purchase-form.tsx:757 🚚 Shipping cost calculation: Object
+bilingual-purchase-form.tsx:765 📦 Selected shipping rate: Object
+bilingual-purchase-form.tsx:771 ✅ SPECIAL DELIVERY METHOD: Zero cost for smart_vehicle
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:972 🚚 [SMART DELIVERY] Calculating cost for: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:1002 🚚 [SMART DELIVERY] API response: Object
+bilingual-purchase-form.tsx:1003 🚚 [SMART DELIVERY] Response details: Object
+bilingual-purchase-form.tsx:1020 ✅ [SMART DELIVERY] Cost calculated: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+shop.tsx:205 🎛️ [FRONTEND CONTROLS] Loaded: Object
+shop.tsx:206 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:230 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:231 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:235 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:236 🌟 [RATINGS DEBUG] Products with ratings: Array(3)
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+api/admin/me:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+useAuth.ts:46 Auth check failed: Error: HTTP 403
+    at queryFn (useAuth.ts:39:17)
+queryFn @ useAuth.ts:46
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+shop.tsx:205 🎛️ [FRONTEND CONTROLS] Loaded: Object
+shop.tsx:206 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:230 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:231 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:235 🌟 [RATINGS DEBUG] Current products: Array(6)
+shop.tsx:236 🌟 [RATINGS DEBUG] Products with ratings: Array(3)
+bilingual-purchase-form.tsx:460 🔥 [BILINGUAL FORM] Cart flammable check result: Object
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: Object
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: Object
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: Object
+bilingual-purchase-form.tsx:1054 🚚 [DELIVERY CALCULATION] Final destination determined: Object
+bilingual-purchase-form.tsx:972 🚚 [SMART DELIVERY] Calculating cost for: {weight: 22, city: 'Erbil', province: 'Erbil', cartItems: 1}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:1002 🚚 [SMART DELIVERY] API response: {success: true, data: {…}}
+bilingual-purchase-form.tsx:1003 🚚 [SMART DELIVERY] Response details: {success: true, hasData: true, hasOptimalVehicle: true, optimalVehicle: {…}}
+bilingual-purchase-form.tsx:1020 ✅ [SMART DELIVERY] Cost calculated: {vehicle: 'اتوبوسهای مسافربری', cost: 0, estimatedTime: 0}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+useAuth.ts:30  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 403 (Forbidden)
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=638b47a7:840
+run @ @tanstack_react-query.js?v=638b47a7:494
+start @ @tanstack_react-query.js?v=638b47a7:536
+fetch @ @tanstack_react-query.js?v=638b47a7:926
+executeFetch_fn @ @tanstack_react-query.js?v=638b47a7:2211
+(anonymous) @ @tanstack_react-query.js?v=638b47a7:2245
+useAuth.ts:46 Auth check failed: Error: HTTP 403
+    at queryFn (useAuth.ts:39:17)
+queryFn @ useAuth.ts:46
+await in queryFn
+fetchFn @ @tanstack_react-query.js?v=638b47a7:840
+run @ @tanstack_react-query.js?v=638b47a7:494
+start @ @tanstack_react-query.js?v=638b47a7:536
+fetch @ @tanstack_react-query.js?v=638b47a7:926
+executeFetch_fn @ @tanstack_react-query.js?v=638b47a7:2211
+(anonymous) @ @tanstack_react-query.js?v=638b47a7:2245
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+useAuth.ts:30  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 403 (Forbidden)
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=638b47a7:840
+run @ @tanstack_react-query.js?v=638b47a7:494
+start @ @tanstack_react-query.js?v=638b47a7:536
+fetch @ @tanstack_react-query.js?v=638b47a7:926
+executeFetch_fn @ @tanstack_react-query.js?v=638b47a7:2211
+(anonymous) @ @tanstack_react-query.js?v=638b47a7:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=638b47a7:2243
+updateTimers_fn @ @tanstack_react-query.js?v=638b47a7:2250
+onQueryUpdate @ @tanstack_react-query.js?v=638b47a7:2206
+(anonymous) @ @tanstack_react-query.js?v=638b47a7:998
+(anonymous) @ @tanstack_react-query.js?v=638b47a7:997
+batch @ @tanstack_react-query.js?v=638b47a7:583
+dispatch_fn @ @tanstack_react-query.js?v=638b47a7:996
+setData @ @tanstack_react-query.js?v=638b47a7:696
+onSuccess @ @tanstack_react-query.js?v=638b47a7:897
+resolve @ @tanstack_react-query.js?v=638b47a7:456
+Promise.then
+run @ @tanstack_react-query.js?v=638b47a7:498
+start @ @tanstack_react-query.js?v=638b47a7:536
+fetch @ @tanstack_react-query.js?v=638b47a7:926
+executeFetch_fn @ @tanstack_react-query.js?v=638b47a7:2211
+(anonymous) @ @tanstack_react-query.js?v=638b47a7:2245
+useAuth.ts:46 Auth check failed: Error: HTTP 403
+    at queryFn (useAuth.ts:39:17)
+queryFn @ useAuth.ts:46
+await in queryFn
+fetchFn @ @tanstack_react-query.js?v=638b47a7:840
+run @ @tanstack_react-query.js?v=638b47a7:494
+start @ @tanstack_react-query.js?v=638b47a7:536
+fetch @ @tanstack_react-query.js?v=638b47a7:926
+executeFetch_fn @ @tanstack_react-query.js?v=638b47a7:2211
+(anonymous) @ @tanstack_react-query.js?v=638b47a7:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=638b47a7:2243
+updateTimers_fn @ @tanstack_react-query.js?v=638b47a7:2250
+onQueryUpdate @ @tanstack_react-query.js?v=638b47a7:2206
+(anonymous) @ @tanstack_react-query.js?v=638b47a7:998
+(anonymous) @ @tanstack_react-query.js?v=638b47a7:997
+batch @ @tanstack_react-query.js?v=638b47a7:583
+dispatch_fn @ @tanstack_react-query.js?v=638b47a7:996
+setData @ @tanstack_react-query.js?v=638b47a7:696
+onSuccess @ @tanstack_react-query.js?v=638b47a7:897
+resolve @ @tanstack_react-query.js?v=638b47a7:456
+Promise.then
+run @ @tanstack_react-query.js?v=638b47a7:498
+start @ @tanstack_react-query.js?v=638b47a7:536
+fetch @ @tanstack_react-query.js?v=638b47a7:926
+executeFetch_fn @ @tanstack_react-query.js?v=638b47a7:2211
+(anonymous) @ @tanstack_react-query.js?v=638b47a7:2245
+useAuth.ts:30  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 403 (Forbidden)
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=638b47a7:840
+run @ @tanstack_react-query.js?v=638b47a7:494
+start @ @tanstack_react-query.js?v=638b47a7:536
+fetch @ @tanstack_react-query.js?v=638b47a7:926
+executeFetch_fn @ @tanstack_react-query.js?v=638b47a7:2211
+fetch @ @tanstack_react-query.js?v=638b47a7:2011
+refetch @ @tanstack_react-query.js?v=638b47a7:2001
+onFocus @ @tanstack_react-query.js?v=638b47a7:749
+(anonymous) @ @tanstack_react-query.js?v=638b47a7:1112
+(anonymous) @ @tanstack_react-query.js?v=638b47a7:1111
+batch @ @tanstack_react-query.js?v=638b47a7:583
+onFocus @ @tanstack_react-query.js?v=638b47a7:1110
+(anonymous) @ @tanstack_react-query.js?v=638b47a7:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=638b47a7:313
+onFocus @ @tanstack_react-query.js?v=638b47a7:312
+(anonymous) @ @tanstack_react-query.js?v=638b47a7:299
+listener @ @tanstack_react-query.js?v=638b47a7:270
+useAuth.ts:46 Auth check failed: Error: HTTP 403
+    at queryFn (useAuth.ts:39:17)
+queryFn @ useAuth.ts:46
+await in queryFn
+fetchFn @ @tanstack_react-query.js?v=638b47a7:840
+run @ @tanstack_react-query.js?v=638b47a7:494
+start @ @tanstack_react-query.js?v=638b47a7:536
+fetch @ @tanstack_react-query.js?v=638b47a7:926
+executeFetch_fn @ @tanstack_react-query.js?v=638b47a7:2211
+fetch @ @tanstack_react-query.js?v=638b47a7:2011
+refetch @ @tanstack_react-query.js?v=638b47a7:2001
+onFocus @ @tanstack_react-query.js?v=638b47a7:749
+(anonymous) @ @tanstack_react-query.js?v=638b47a7:1112
+(anonymous) @ @tanstack_react-query.js?v=638b47a7:1111
+batch @ @tanstack_react-query.js?v=638b47a7:583
+onFocus @ @tanstack_react-query.js?v=638b47a7:1110
+(anonymous) @ @tanstack_react-query.js?v=638b47a7:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=638b47a7:313
+onFocus @ @tanstack_react-query.js?v=638b47a7:312
+(anonymous) @ @tanstack_react-query.js?v=638b47a7:299
+listener @ @tanstack_react-query.js?v=638b47a7:270
+bilingual-purchase-form.tsx:329 CRM Customer API response: {success: true, data: {…}}
+bilingual-purchase-form.tsx:404 💰 [VAT] Tax settings API response: {success: true, data: Array(1)}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
+bilingual-purchase-form.tsx:843 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0, dutiesRate: 0, subtotalAmount: 22, vatAmount: 0, …}
+bilingual-purchase-form.tsx:873 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 22, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:909 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 10000, canUseWallet: {…}, totalAmount: 22, existingCustomer: true, …}
