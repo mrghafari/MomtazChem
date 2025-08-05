@@ -8978,6 +8978,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get customer order for payment (public endpoint for payment page)
+  app.get("/api/customers/orders/:orderId/payment", async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      
+      if (isNaN(orderId)) {
+        return res.status(400).json({
+          success: false,
+          message: "شناسه سفارش نامعتبر است"
+        });
+      }
+
+      const { pool } = await import('./db');
+      
+      const result = await pool.query(`
+        SELECT 
+          co.id,
+          co.order_number as "orderNumber",
+          co.total_amount as "totalAmount",
+          co.payment_method as "paymentMethod",
+          co.payment_status as "paymentStatus",
+          co.status,
+          co.customer_id as "customerId",
+          co.created_at as "createdAt"
+        FROM customer_orders co
+        WHERE co.id = $1
+      `, [orderId]);
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "سفارش یافت نشد"
+        });
+      }
+
+      console.log("✅ [CUSTOMER ORDER] Found for payment:", result.rows[0]);
+      res.json({
+        success: true,
+        order: result.rows[0]
+      });
+    } catch (error) {
+      console.error("❌ [CUSTOMER ORDER] Error fetching order for payment:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت اطلاعات سفارش"
+      });
+    }
+  });
+
   // Create new payment gateway
   app.post("/api/payment/gateways", requireAuth, async (req, res) => {
     try {

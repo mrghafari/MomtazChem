@@ -21,7 +21,7 @@ export default function Payment() {
 
   // Fetch order details
   const { data: orderData, isLoading: orderLoading } = useQuery({
-    queryKey: ['/api/shop/orders', orderId],
+    queryKey: ['/api/customers/orders', orderId, 'payment'],
     enabled: !!orderId,
   });
 
@@ -149,7 +149,7 @@ export default function Payment() {
     );
   }
 
-  const order = orderData;
+  const order = orderData?.order || orderData;
 
   // Skip payment for cash on delivery and company credit
   if (order.paymentMethod === 'cash_on_delivery' || order.paymentMethod === 'company_credit') {
