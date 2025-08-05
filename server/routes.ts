@@ -13507,7 +13507,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
             walletAmountUsed: walletAmountUsed,
             remainingAmount: remainingAmount,
             requiresBankPayment: true,
-            redirectToPayment: `/payment/${orderNumber}?amount=${remainingAmount}&wallet=${walletAmountUsed}&method=${finalPaymentMethod}`
+            redirectToPayment: true,
+            redirectUrl: `/payment/${orderNumber}?amount=${remainingAmount}&wallet=${walletAmountUsed}&method=${finalPaymentMethod}`,
+            paymentGatewayUrl: `/payment?orderId=${order.id}&amount=${remainingAmount}&method=${finalPaymentMethod}`
+          });
+        }
+        
+        // For pure online payment, return special response  
+        if (finalPaymentMethod === 'online_payment') {
+          return res.json({
+            success: true,
+            message: 'سفارش ثبت شد - هدایت به درگاه پرداخت آنلاین',
+            orderId: orderNumber,
+            orderNumber: orderNumber,
+            totalAmount: totalAmount,
+            redirectToPayment: true,
+            paymentGatewayUrl: `/payment?orderId=${order.id}&amount=${totalAmount}&method=online_payment`
           });
         }
       }
