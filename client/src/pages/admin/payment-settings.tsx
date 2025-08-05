@@ -10,7 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Building2, CreditCard, Wallet, Settings, Plus, Edit, Trash2, CheckCircle, AlertCircle, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -53,7 +53,7 @@ const PaymentSettings = () => {
     mutationFn: async (gatewayData: Partial<PaymentGateway>) => {
       const url = gatewayData.id ? `/api/payment/gateways/${gatewayData.id}` : '/api/payment/gateways';
       const method = gatewayData.id ? 'PATCH' : 'POST';
-      return apiRequest(url, method, gatewayData);
+      return apiRequest(url, { method, body: gatewayData });
     },
     onSuccess: () => {
       toast({
@@ -76,7 +76,7 @@ const PaymentSettings = () => {
   // Toggle gateway status mutation (only one can be enabled at a time)
   const toggleGatewayMutation = useMutation({
     mutationFn: async (gatewayId: number) => {
-      return apiRequest(`/api/payment/gateways/${gatewayId}/toggle`, 'PATCH');
+      return apiRequest(`/api/payment/gateways/${gatewayId}/toggle`, { method: 'PATCH' });
     },
     onSuccess: () => {
       toast({
@@ -97,7 +97,7 @@ const PaymentSettings = () => {
   // Delete gateway mutation
   const deleteGatewayMutation = useMutation({
     mutationFn: async (gatewayId: number) => {
-      return apiRequest(`/api/payment/gateways/${gatewayId}`, 'DELETE');
+      return apiRequest(`/api/payment/gateways/${gatewayId}`, { method: 'DELETE' });
     },
     onSuccess: () => {
       toast({
@@ -731,6 +731,9 @@ const PaymentSettings = () => {
                     <DialogTitle>
                       {selectedGateway?.id ? 'Edit Payment Gateway' : 'Add Payment Gateway'}
                     </DialogTitle>
+                    <DialogDescription>
+                      Configure payment gateway settings and integration parameters.
+                    </DialogDescription>
                   </DialogHeader>
                   {renderGatewayForm()}
                 </DialogContent>
