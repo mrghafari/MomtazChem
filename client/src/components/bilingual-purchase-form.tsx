@@ -254,7 +254,10 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   // Draggable cart state
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [position, setPosition] = useState({ 
+    x: typeof window !== 'undefined' ? (window.innerWidth - 400) / 2 : 200, 
+    y: typeof window !== 'undefined' ? (window.innerHeight - 600) / 2 : 100 
+  });
   const [isMinimized, setIsMinimized] = useState(false);
   
   // Form reference for static positioning
@@ -289,6 +292,34 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const handleMouseUp = () => {
     setIsDragging(false);
   };
+
+  // Center the cart on initial load
+  useEffect(() => {
+    const centerCart = () => {
+      const screenWidth = window.innerWidth;
+      const screenHeight = window.innerHeight;
+      const cartWidth = 400; // w-96 = 24rem = ~384px
+      const cartHeight = 600; // estimated height
+      
+      setPosition({
+        x: Math.max(0, (screenWidth - cartWidth) / 2),
+        y: Math.max(0, (screenHeight - cartHeight) / 2)
+      });
+    };
+
+    // Center on mount
+    centerCart();
+
+    // Also center on window resize if not dragged yet
+    const handleResize = () => {
+      if (!isDragging) {
+        centerCart();
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Add global mouse listeners for drag
   useEffect(() => {
@@ -1440,10 +1471,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     <div 
       className="fixed w-96 z-50 shadow-2xl transition-all duration-200"
       style={{
-        left: position.x || 'auto',
-        top: position.y || 'auto',
-        right: position.x === 0 ? '1rem' : 'auto',
-        bottom: position.y === 0 ? '1rem' : 'auto',
+        left: position.x,
+        top: position.y,
         cursor: isDragging ? 'grabbing' : 'auto'
       }}
     >
