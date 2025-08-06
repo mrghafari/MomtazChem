@@ -362,23 +362,22 @@ const Shop = () => {
           // Fetch wallet balance
           fetchWalletBalance();
           
-          // 🛒 Load and sync persistent cart
-          await loadPersistentCart();
+          // 🛒 Cart will be synced by usePersistentCart hook
         } else {
-          // User is not authenticated, handle guest cart
-          handleGuestCart();
+          // User is not authenticated - cart will be handled by hook
+          setCustomer(null);
         }
       } else {
-        // User is not authenticated, handle guest cart
-        handleGuestCart();
+        // User is not authenticated - cart will be handled by hook  
+        setCustomer(null);
       }
     } catch (error) {
       // Suppress auth errors as they're expected for guest users
       if (!error.message?.includes('401') && !error.message?.includes('احراز هویت نشده')) {
         console.error('Error checking customer auth:', error);
       }
-      // Handle as guest
-      handleGuestCart();
+      // Handle as guest - cart will be handled by hook
+      setCustomer(null);
     } finally {
       setIsLoadingCustomer(false);
     }
