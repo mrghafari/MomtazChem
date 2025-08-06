@@ -33,6 +33,32 @@ const Shop = () => {
   const { toast } = useMultilingualToast();
   const { t, direction } = useLanguage();
   const queryClient = useQueryClient();
+  
+  // Function to refresh product data when admin makes changes
+  const refreshProductData = () => {
+    queryClient.invalidateQueries({ queryKey: ["/api/shop/products"] });
+    queryClient.invalidateQueries({ queryKey: ['shopSearch'] });
+    queryClient.invalidateQueries({ queryKey: ["/api/shop/product-stats"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/shop/discounts"] });
+    console.log('🔄 Product data refreshed');
+  };
+
+  // Auto-refresh products when page regains focus (admin made changes in another tab)
+  useEffect(() => {
+    const handleFocus = () => {
+      if (document.visibilityState === 'visible') {
+        refreshProductData();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleFocus);
+    window.addEventListener('focus', handleFocus);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleFocus);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [queryClient]);
   const { isAuthenticated: isAdminAuthenticated } = useAuth();
 
 
@@ -144,12 +170,18 @@ const Shop = () => {
       const response = await fetch(`/api/shop/search?${params}`);
       if (!response.ok) throw new Error('Search failed');
       return response.json();
-    }
+    },
+    refetchOnWindowFocus: true,
+    staleTime: 60000, // 1 minute - auto-refresh when data changes
   });
 
   // Fetch all shop products for total count
   const { data: products = [] } = useQuery<ShopProduct[]>({
     queryKey: ["/api/shop/products"],
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    staleTime: 30000, // 30 seconds
+    cacheTime: 300000, // 5 minutes
   });
 
   // Fetch discount settings to get the highest discount percentage
@@ -161,6 +193,7 @@ const Shop = () => {
       return response.json();
     },
     staleTime: 2 * 60 * 1000, // 2 minutes
+    refetchOnWindowFocus: true,
   });
 
   // Calculate the highest discount percentage
@@ -188,6 +221,7 @@ const Shop = () => {
       return response.json();
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: true,
   });
 
   // Extract control states - only show if explicitly enabled (no fallback to true)
@@ -213,6 +247,8 @@ const Shop = () => {
   const { data: productStats, isLoading: statsLoading, error: statsError } = useQuery({
     queryKey: ["/api/shop/product-stats"],
     retry: false,
+    refetchOnWindowFocus: true,
+    staleTime: 60000, // 1 minute
   });
   
   // Extract the actual data from API response
