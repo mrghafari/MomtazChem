@@ -873,16 +873,19 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   // No additional shipping, tax, or other calculations - only cart products
   const totalAmount = subtotalAmount;
   
-  // ✅ WEIGHT CALCULATION: Calculate total weight from sessionCart
+  // ✅ WEIGHT CALCULATION: Calculate total weight from cart and products
   const totalWeight = useMemo(() => {
-    if (!sessionCart || sessionCart.length === 0) return 0;
+    if (!cart || Object.keys(cart).length === 0) return 0;
     
-    return sessionCart.reduce((total: number, item: any) => {
-      const weight = parseFloat(item.weight || '0');
-      const quantity = item.quantity || 1;
+    return Object.entries(cart).reduce((total: number, [productIdStr, quantity]) => {
+      const productId = parseInt(productIdStr);
+      const product = products.find(p => p.id === productId);
+      if (!product) return total;
+      
+      const weight = parseFloat(product.weight || product.netWeight || '0');
       return total + (weight * quantity);
     }, 0);
-  }, [sessionCart]);
+  }, [cart, products]);
 
   // ✅ NO SHIPPING COST CALCULATION: Only cart products
   const finalShippingCost = 0;
@@ -906,7 +909,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     subtotalAmount,
     totalAmount,
     totalWeight: `${totalWeight} kg`,
-    cartLength: sessionCart?.length || 0,
+    cartItems: Object.keys(cart).length,
+    cart: cart,
     'Note': 'قیمت کالاها + وزن محاسبه شده'
   });
   
@@ -1174,7 +1178,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         onOrderComplete();
       }
       // Handle bank transfer - redirect to payment gateway  
-      else if (response.paymentMethod === 'bank_transfer' || finalPaymentMethod === 'bank_transfer') {
+      else if (response.paymentMethod === 'bank_transfer' || paymentMethod === 'online_payment') {
         toast({
           title: "انتقال به درگاه بانک",
           description: "در حال هدایت شما به درگاه پرداخت بانکی..."
@@ -1365,7 +1369,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
     // Store calculation data before submitting order
     try {
-      await apiRequest('POST', '/api/cart/temp-order-data', tempCalculationData);
+      await apiRequest('POST', '/api/cart/temp-order-data', tempCalculationData, {});
       console.log('✅ [TEMP CALCULATION] Successfully stored calculation data');
     } catch (error) {
       console.error('❌ [TEMP CALCULATION] Failed to store calculation data:', error);
@@ -1522,7 +1526,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
               {/* VAT */}
               {vatData?.vatEnabled && vatAmount > 0 && (
                 <div className="flex justify-between text-sm">
-                  <span>مالیات بر ارزش افزوده ({(vatRate * 100).toFixed(0)}%)</span>
+                  <span>مالیات بر ارزش افزوده ({(vatData?.vatRate * 100 || 0).toFixed(0)}%)</span>
                   <span>{formatCurrency(vatAmount)}</span>
                 </div>
               )}
@@ -1530,7 +1534,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
               {/* Duties */}
               {vatData?.dutiesEnabled && dutiesAmount > 0 && (
                 <div className="flex justify-between text-sm">
-                  <span>عوارض بر ارزش افزوده ({(dutiesRate * 100).toFixed(0)}%)</span>
+                  <span>عوارض بر ارزش افزوده ({(vatData?.dutiesRate * 100 || 0).toFixed(0)}%)</span>
                   <span>{formatCurrency(dutiesAmount)}</span>
                 </div>
               )}
@@ -2063,7 +2067,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                             <Select 
                               onValueChange={(value) => {
                                 // Find the selected province object to get Arabic name
-                                const selectedProvince = provinces?.data?.find((p: any) => 
+                                const selectedProvince = provinces?.find((p: any) => 
                                   p.nameEnglish === value || p.name === value
                                 );
                                 
@@ -2084,7 +2088,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                               }} 
                               value={
                                 // Find the province with matching Arabic name to show English value
-                                provinces?.data?.find((province: any) => 
+                                provinces?.find((province: any) => 
                                   (province.nameArabic || province.name) === secondProvince
                                 )?.nameEnglish || secondProvince
                               }
@@ -2098,7 +2102,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                                 } />
                               </SelectTrigger>
                               <SelectContent>
-                                {provinces?.data && Array.isArray(provinces.data) && provinces.data.map((province: any) => (
+                                {provinces && Array.isArray(provinces) && provinces.map((province: any) => (
                                   <SelectItem key={province.id} value={province.nameEnglish || province.name}>
                                     {province.nameEnglish} / {province.nameArabic || province.name}
                                   </SelectItem>

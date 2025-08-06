@@ -15,6 +15,9 @@ Preferred communication style: Simple, everyday language.
 - bilingual-purchase-form.tsx: totalAmount = subtotalAmount (no additional costs)
 - payment-gateway.tsx: amountForGateway = finalAmount (cart total only)
 - Session authentication working: Customer ID 8 logged in successfully
+- Weight calculations restored: Calculate total weight from cart products (August 6, 2025)
+- Fixed runtime errors: optimalVehicle, sessionCart variables removed/corrected
+- Working example: Customer ABAS ABASI, 50× Solvant 402 = 1,250 IQD + 550kg total weight
 
 **Critical Security Requirements:**
 - Extreme vigilance in wallet transaction processing
