@@ -77,14 +77,14 @@ export default function CheckoutSuccess() {
     }
   };
 
+  const orderId = params?.orderId || null;
+
   // Clear cart automatically when page loads
   useEffect(() => {
     if (orderId) {
       clearCartCompletely();
     }
   }, [orderId]);
-
-  const orderId = params?.orderId || null;
 
   // Fetch order details
   const { data: orderData, isLoading: orderLoading } = useQuery({
