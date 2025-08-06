@@ -576,6 +576,7 @@ const Shop = () => {
   const handleLogout = async () => {
     try {
       const currentCustomerId = customer?.id;
+      console.log(`🔐 [LOGOUT] Starting logout for customer ${currentCustomerId}`);
       
       const response = await fetch('/api/customers/logout', {
         method: 'POST',
@@ -583,24 +584,57 @@ const Shop = () => {
       });
 
       if (response.ok) {
-        // Clear customer-specific cart from localStorage on logout
+        console.log(`🔐 [LOGOUT] Logout API successful for customer ${currentCustomerId}`);
+        
+        // 1. Clear cart state immediately
+        setCart({});
+        console.log('🛒 [LOGOUT] Cart state cleared');
+        
+        // 2. Clear customer-specific localStorage
         if (currentCustomerId) {
           const customerCartKey = `momtazchem_cart_${currentCustomerId}`;
           localStorage.removeItem(customerCartKey);
-          console.log(`🛒 [CART ISOLATION] Cleared customer ${currentCustomerId} cart on logout`);
+          console.log(`🛒 [LOGOUT] Removed customer ${currentCustomerId} cart from localStorage`);
+          
+          // Also clear any other customer-related localStorage items
+          Object.keys(localStorage).forEach(key => {
+            if (key.includes(`momtazchem_cart_${currentCustomerId}`)) {
+              localStorage.removeItem(key);
+              console.log(`🛒 [LOGOUT] Removed additional cart key: ${key}`);
+            }
+          });
         }
         
+        // 3. Clear all localStorage keys that might be customer-related
+        localStorage.removeItem('momtazchem_user_cart');
+        console.log('🛒 [LOGOUT] Cleared legacy user cart');
+        
+        // 4. Clear customer and wallet state
         setCustomer(null);
         setWalletBalance(0);
-        setCart({}); // Clear cart state
+        console.log('🔐 [LOGOUT] Customer state cleared');
+        
+        // 5. Update display stock to reflect empty cart
+        if (currentProducts?.length > 0) {
+          const resetStock: {[key: number]: number} = {};
+          currentProducts.forEach(product => {
+            resetStock[product.id] = product.stockQuantity || 0;
+          });
+          setDisplayStock(resetStock);
+          console.log('📦 [LOGOUT] Display stock reset');
+        }
         
         toast({
           title: "خروج موفق",
           description: "با موفقیت از حساب کاربری خارج شدید",
         });
+        
+        console.log('🔐 [LOGOUT] Logout completed successfully');
+      } else {
+        console.error('🔐 [LOGOUT] Logout API failed:', response.status);
       }
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('🔐 [LOGOUT] Error during logout:', error);
       toast({
         title: "خطا",
         description: "خطا در خروج از حساب کاربری",

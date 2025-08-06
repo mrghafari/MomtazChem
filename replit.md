@@ -14,6 +14,7 @@ Preferred communication style: Simple, everyday language.
 - CRITICAL FIX: Payment gateway now ALWAYS sends finalAmount to bank (August 6, 2025)
 - Fixed payment-gateway.tsx to use finalAmount instead of remainingAmount for all bank transactions
 - Persian/Farsi client requirement implemented: Final Amount IQD 1,025.00 is critical data for all payments
+- **CART ISOLATION SYSTEM COMPLETED (August 6, 2025):** Full customer cart isolation implemented with PostgreSQL persistence. Each customer has separate cart stored in `persistent_carts` table with complete isolation. Cart clears properly on logout while maintaining database persistence for recovery.
 
 **Critical Security Requirements:**
 - Extreme vigilance in wallet transaction processing
