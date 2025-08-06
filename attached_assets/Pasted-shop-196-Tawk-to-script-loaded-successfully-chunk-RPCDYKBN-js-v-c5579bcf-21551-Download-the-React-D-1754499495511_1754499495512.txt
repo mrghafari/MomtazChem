@@ -1,0 +1,549 @@
+shop:196 Tawk.to script loaded successfully
+chunk-RPCDYKBN.js?v=c5579bcf:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: undefined
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: false AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {}
+usePersistentCart.ts:32 🛒 Loading guest cart from localStorage: {474: 1}
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: undefined
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: false AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {}
+useAuth.ts:30  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 401 (Unauthorized)
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=c5579bcf:840
+run @ @tanstack_react-query.js?v=c5579bcf:494
+start @ @tanstack_react-query.js?v=c5579bcf:536
+fetch @ @tanstack_react-query.js?v=c5579bcf:926
+executeFetch_fn @ @tanstack_react-query.js?v=c5579bcf:2211
+onSubscribe @ @tanstack_react-query.js?v=c5579bcf:1898
+subscribe @ @tanstack_react-query.js?v=c5579bcf:24
+(anonymous) @ @tanstack_react-query.js?v=c5579bcf:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=c5579bcf:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=c5579bcf:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=c5579bcf:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=c5579bcf:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=c5579bcf:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=c5579bcf:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=c5579bcf:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=c5579bcf:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=c5579bcf:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=c5579bcf:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=c5579bcf:19432
+commitRoot @ chunk-RPCDYKBN.js?v=c5579bcf:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=c5579bcf:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=c5579bcf:18718
+workLoop @ chunk-RPCDYKBN.js?v=c5579bcf:197
+flushWork @ chunk-RPCDYKBN.js?v=c5579bcf:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=c5579bcf:384
+queryClient.ts:81  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+(anonymous) @ queryClient.ts:81
+fetchFn @ @tanstack_react-query.js?v=c5579bcf:840
+run @ @tanstack_react-query.js?v=c5579bcf:494
+start @ @tanstack_react-query.js?v=c5579bcf:536
+fetch @ @tanstack_react-query.js?v=c5579bcf:926
+executeFetch_fn @ @tanstack_react-query.js?v=c5579bcf:2211
+onSubscribe @ @tanstack_react-query.js?v=c5579bcf:1898
+subscribe @ @tanstack_react-query.js?v=c5579bcf:24
+(anonymous) @ @tanstack_react-query.js?v=c5579bcf:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=c5579bcf:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=c5579bcf:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=c5579bcf:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=c5579bcf:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=c5579bcf:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=c5579bcf:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=c5579bcf:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=c5579bcf:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=c5579bcf:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=c5579bcf:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=c5579bcf:19432
+commitRoot @ chunk-RPCDYKBN.js?v=c5579bcf:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=c5579bcf:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=c5579bcf:18718
+workLoop @ chunk-RPCDYKBN.js?v=c5579bcf:197
+flushWork @ chunk-RPCDYKBN.js?v=c5579bcf:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=c5579bcf:384
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: undefined
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: false AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {}
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: undefined
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: false AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {}
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {}
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {}
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:240 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:241 🌟 [RATINGS DEBUG] Products with ratings: (3) [{…}, {…}, {…}]
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:240 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:241 🌟 [RATINGS DEBUG] Products with ratings: (3) [{…}, {…}, {…}]
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:240 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:241 🌟 [RATINGS DEBUG] Products with ratings: (3) [{…}, {…}, {…}]
+shop.tsx:394  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+checkCustomerAuth @ shop.tsx:394
+(anonymous) @ shop.tsx:317
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=c5579bcf:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=c5579bcf:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=c5579bcf:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=c5579bcf:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=c5579bcf:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=c5579bcf:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=c5579bcf:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=c5579bcf:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=c5579bcf:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=c5579bcf:19432
+commitRoot @ chunk-RPCDYKBN.js?v=c5579bcf:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=c5579bcf:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=c5579bcf:18718
+workLoop @ chunk-RPCDYKBN.js?v=c5579bcf:197
+flushWork @ chunk-RPCDYKBN.js?v=c5579bcf:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=c5579bcf:384
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:240 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:241 🌟 [RATINGS DEBUG] Products with ratings: (3) [{…}, {…}, {…}]
+shop.tsx:388 🔐 [AUTH] Guest user confirmed
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:117574)
+    at t.value (twk-chunk-common.js:2:150658)
+    at p.updateUUID (twk-chunk-common.js:2:202310)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:124589)
+    at twk-chunk-common.js:2:123900
+value @ twk-chunk-common.js:2
+updateUUID @ twk-chunk-common.js:2
+(anonymous) @ twk-vendor.js:2
+p.dispatch @ twk-vendor.js:2
+dispatch @ twk-vendor.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+Promise.then
+value @ twk-chunk-common.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+56d7 @ twk-chunk-common.js:2
+a @ twk-runtime.js:1
+r @ twk-runtime.js:1
+t @ twk-runtime.js:1
+(anonymous) @ twk-runtime.js:1
+(anonymous) @ twk-runtime.js:1
+shop.tsx:697 Cart clicked, total items: 1
+shop.tsx:698 Customer: null
+shop.tsx:709 User not logged in, showing pre-checkout modal
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:240 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:241 🌟 [RATINGS DEBUG] Products with ratings: (3) [{…}, {…}, {…}]
+shop:168 Tawk.to Live Chat loaded successfully
+shop.tsx:715 🔐 [LOGIN] Login choice selected
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:240 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:241 🌟 [RATINGS DEBUG] Products with ratings: (3) [{…}, {…}, {…}]
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:240 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:241 🌟 [RATINGS DEBUG] Products with ratings: (3) [{…}, {…}, {…}]
+shop.tsx:385 🔐 [AUTH] Customer authenticated, cart will be synced automatically
+useCustomerAuth.ts:26 Customer auth check result: {success: true, customer: {…}}
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:240 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:241 🌟 [RATINGS DEBUG] Products with ratings: (3) [{…}, {…}, {…}]
+usePersistentCart.ts:50 🛒 Loading persistent cart for customer: 8
+usePersistentCart.ts:54 🔄 Syncing local cart to database: {474: 1}
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:240 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:241 🌟 [RATINGS DEBUG] Products with ratings: (3) [{…}, {…}, {…}]
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:240 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:241 🌟 [RATINGS DEBUG] Products with ratings: (3) [{…}, {…}, {…}]
+queryClient.ts:54  POST https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/persistent-cart/sync 400 (Bad Request)
+apiRequest @ queryClient.ts:54
+loadPersistentCart @ usePersistentCart.ts:55
+(anonymous) @ usePersistentCart.ts:87
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=c5579bcf:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=c5579bcf:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=c5579bcf:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=c5579bcf:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=c5579bcf:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=c5579bcf:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=c5579bcf:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=c5579bcf:19416
+commitRoot @ chunk-RPCDYKBN.js?v=c5579bcf:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=c5579bcf:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=c5579bcf:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=c5579bcf:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=c5579bcf:555
+flush @ @tanstack_react-query.js?v=c5579bcf:569
+batch @ @tanstack_react-query.js?v=c5579bcf:587
+dispatch_fn @ @tanstack_react-query.js?v=c5579bcf:996
+setData @ @tanstack_react-query.js?v=c5579bcf:696
+onSuccess @ @tanstack_react-query.js?v=c5579bcf:897
+resolve @ @tanstack_react-query.js?v=c5579bcf:456
+Promise.then
+run @ @tanstack_react-query.js?v=c5579bcf:498
+start @ @tanstack_react-query.js?v=c5579bcf:536
+fetch @ @tanstack_react-query.js?v=c5579bcf:926
+(anonymous) @ @tanstack_react-query.js?v=c5579bcf:1726
+(anonymous) @ @tanstack_react-query.js?v=c5579bcf:1725
+batch @ @tanstack_react-query.js?v=c5579bcf:583
+refetchQueries @ @tanstack_react-query.js?v=c5579bcf:1724
+(anonymous) @ @tanstack_react-query.js?v=c5579bcf:1716
+batch @ @tanstack_react-query.js?v=c5579bcf:583
+invalidateQueries @ @tanstack_react-query.js?v=c5579bcf:1705
+handleLoginSuccess @ shop.tsx:456
+onLogin @ customer-auth.tsx:194
+await in onLogin
+(anonymous) @ chunk-4BFJKWC4.js?v=c5579bcf:1465
+await in (anonymous)
+callCallback2 @ chunk-RPCDYKBN.js?v=c5579bcf:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=c5579bcf:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=c5579bcf:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=c5579bcf:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=c5579bcf:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=c5579bcf:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=c5579bcf:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=c5579bcf:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=c5579bcf:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=c5579bcf:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=c5579bcf:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=c5579bcf:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=c5579bcf:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=c5579bcf:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=c5579bcf:5449
+usePersistentCart.ts:77 ❌ Error loading persistent cart: Error: 400: {"success":false,"message":"Unexpected token '\"', \"\"{\\\"cartDa\"... is not valid JSON","stack":"SyntaxError: Unexpected token '\"', \"\"{\\\"cartDa\"... is not valid JSON\n    at JSON.parse (<anonymous>)\n    at createStrictSyntaxError (/home/runner/workspace/node_modules/body-parser/lib/types/json.js:169:10)\n    at parse (/home/runner/workspace/node_modules/body-parser/lib/types/json.js:86:15)\n    at /home/runner/workspace/node_modules/body-parser/lib/read.js:128:18\n    at AsyncResource.runInAsyncScope (node:async_hooks:206:9)\n    at invokeCallback (/home/runner/workspace/node_modules/raw-body/index.js:238:16)\n    at done (/home/runner/workspace/node_modules/raw-body/index.js:227:7)\n    at IncomingMessage.onEnd (/home/runner/workspace/node_modules/raw-body/index.js:287:7)\n    at IncomingMessage.emit (node:events:524:28)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)"}
+    at throwIfResNotOk (queryClient.ts:41:13)
+    at async apiRequest (queryClient.ts:63:5)
+    at async loadPersistentCart (usePersistentCart.ts:55:13)
+loadPersistentCart @ usePersistentCart.ts:77
+await in loadPersistentCart
+(anonymous) @ usePersistentCart.ts:87
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=c5579bcf:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=c5579bcf:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=c5579bcf:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=c5579bcf:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=c5579bcf:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=c5579bcf:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=c5579bcf:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=c5579bcf:19416
+commitRoot @ chunk-RPCDYKBN.js?v=c5579bcf:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=c5579bcf:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=c5579bcf:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=c5579bcf:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=c5579bcf:555
+flush @ @tanstack_react-query.js?v=c5579bcf:569
+batch @ @tanstack_react-query.js?v=c5579bcf:587
+dispatch_fn @ @tanstack_react-query.js?v=c5579bcf:996
+setData @ @tanstack_react-query.js?v=c5579bcf:696
+onSuccess @ @tanstack_react-query.js?v=c5579bcf:897
+resolve @ @tanstack_react-query.js?v=c5579bcf:456
+Promise.then
+run @ @tanstack_react-query.js?v=c5579bcf:498
+start @ @tanstack_react-query.js?v=c5579bcf:536
+fetch @ @tanstack_react-query.js?v=c5579bcf:926
+(anonymous) @ @tanstack_react-query.js?v=c5579bcf:1726
+(anonymous) @ @tanstack_react-query.js?v=c5579bcf:1725
+batch @ @tanstack_react-query.js?v=c5579bcf:583
+refetchQueries @ @tanstack_react-query.js?v=c5579bcf:1724
+(anonymous) @ @tanstack_react-query.js?v=c5579bcf:1716
+batch @ @tanstack_react-query.js?v=c5579bcf:583
+invalidateQueries @ @tanstack_react-query.js?v=c5579bcf:1705
+handleLoginSuccess @ shop.tsx:456
+onLogin @ customer-auth.tsx:194
+await in onLogin
+(anonymous) @ chunk-4BFJKWC4.js?v=c5579bcf:1465
+await in (anonymous)
+callCallback2 @ chunk-RPCDYKBN.js?v=c5579bcf:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=c5579bcf:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=c5579bcf:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=c5579bcf:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=c5579bcf:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=c5579bcf:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=c5579bcf:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=c5579bcf:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=c5579bcf:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=c5579bcf:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=c5579bcf:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=c5579bcf:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=c5579bcf:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=c5579bcf:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=c5579bcf:5449
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:240 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:241 🌟 [RATINGS DEBUG] Products with ratings: (3) [{…}, {…}, {…}]
+shop.tsx:697 Cart clicked, total items: 1
+shop.tsx:698 Customer: {id: 8, firstName: 'ABAS', lastName: 'ABASI', email: 'oilstar@hotmail.com', company: 'پتروشیمی شازند', …}
+shop.tsx:705 User is logged in, showing checkout
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:240 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:241 🌟 [RATINGS DEBUG] Products with ratings: (3) [{…}, {…}, {…}]
+bilingual-purchase-form.tsx:377 💳 [WALLET QUERY] Enabled check: {existingCustomer: true, customerDataSuccess: true, enabled: true}
+bilingual-purchase-form.tsx:490 🔥 [BILINGUAL FORM] Cart flammable check result: {containsFlammableProducts: false, cartItems: 1, totalQuantity: 1}
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: undefined, vatRate: 0, dutiesRate: 0, subtotalAmount: 11, vatAmount: 0, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 11, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: undefined, walletBalance: 0, canUseWallet: false, totalAmount: 11, existingCustomer: true, …}
+bilingual-purchase-form.tsx:503 🚚 [BILINGUAL FORM] ===== SHIPPING RATES QUERY STARTED =====
+bilingual-purchase-form.tsx:505 🚚 [BILINGUAL FORM] Fetching shipping rates with flammable filtering... {containsFlammableProducts: false, cartProducts: Array(1)}
+bilingual-purchase-form.tsx:595 === BilingualPurchaseForm Address Debug ===
+bilingual-purchase-form.tsx:596 existingCustomer from parent: {id: 8, firstName: 'ABAS', lastName: 'ABASI', email: 'oilstar@hotmail.com', company: 'پتروشیمی شازند', …}
+bilingual-purchase-form.tsx:597 customerData from API: {success: true, customer: {…}}
+bilingual-purchase-form.tsx:598 crmCustomerData from API: undefined
+bilingual-purchase-form.tsx:599 isLoadingCustomer: false
+bilingual-purchase-form.tsx:610 Using existingCustomer from parent
+bilingual-purchase-form.tsx:617 Customer object found: {id: 8, firstName: 'ABAS', lastName: 'ABASI', email: 'oilstar@hotmail.com', company: 'پتروشیمی شازند', …}
+bilingual-purchase-form.tsx:618 Customer firstName: ABAS
+bilingual-purchase-form.tsx:619 Customer lastName: ABASI
+bilingual-purchase-form.tsx:620 Customer phone: 09124955173
+bilingual-purchase-form.tsx:621 Customer address: NAGwer Road, Qaryataq Village
+bilingual-purchase-form.tsx:622 Customer secondaryAddress: undefined
+bilingual-purchase-form.tsx:623 Customer city: undefined
+bilingual-purchase-form.tsx:624 Customer country: Iraq
+bilingual-purchase-form.tsx:625 Customer postalCode: undefined
+bilingual-purchase-form.tsx:628 Full name constructed: ABAS ABASI
+bilingual-purchase-form.tsx:652 🏠 [ADDRESS DEBUG] Enhanced address mapping result: {originalCustomer: {…}, mappedAddress: 'NAGwer Road, Qaryataq Village', mappedCity: '', mappedProvince: '', addressSources: {…}, …}
+bilingual-purchase-form.tsx:693 Form data to reset: {customerName: 'ABAS ABASI', phone: '09124955173', address: 'NAGwer Road, Qaryataq Village', city: 'Iraq', country: 'Iraq', …}
+bilingual-purchase-form.tsx:695 Form reset completed
+bilingual-purchase-form.tsx:699 === End BilingualPurchaseForm Debug ===
+bilingual-purchase-form.tsx:772 🚚 [AUTO-SELECT DEBUG] useEffect triggered: {shippingRatesLength: undefined, selectedShippingMethod: null, hasShippingData: false}
+bilingual-purchase-form.tsx:787 🚚 Shipping cost calculation: {selectedShippingMethod: null, hasShippingData: false, subtotalAmount: 11}
+bilingual-purchase-form.tsx:829 🔄 No shipping method selected or no data, resetting cost
+bilingual-purchase-form.tsx:836 Shipping rates state: {isLoadingShippingRates: true, shippingRatesError: null, dataLength: 0, data: undefined}
+bilingual-purchase-form.tsx:1089 🚚 [DELIVERY CALCULATION] Final destination determined: {showSecondAddress: false, secondCity: '', secondProvince: '', crmCityRegion: undefined, crmCity: undefined, …}
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: undefined, vatRate: 0, dutiesRate: 0, subtotalAmount: 11, vatAmount: 0, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 11, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: undefined, walletBalance: 0, canUseWallet: false, totalAmount: 11, existingCustomer: true, …}
+bilingual-purchase-form.tsx:1089 🚚 [DELIVERY CALCULATION] Final destination determined: {showSecondAddress: false, secondCity: '', secondProvince: '', crmCityRegion: undefined, crmCity: undefined, …}
+bilingual-purchase-form.tsx:359 CRM Customer API response: {success: true, data: {…}}
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: undefined, vatRate: 0, dutiesRate: 0, subtotalAmount: 11, vatAmount: 0, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 11, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: undefined, walletBalance: 0, canUseWallet: false, totalAmount: 11, existingCustomer: true, …}
+bilingual-purchase-form.tsx:595 === BilingualPurchaseForm Address Debug ===
+bilingual-purchase-form.tsx:596 existingCustomer from parent: {id: 8, firstName: 'ABAS', lastName: 'ABASI', email: 'oilstar@hotmail.com', company: 'پتروشیمی شازند', …}
+bilingual-purchase-form.tsx:597 customerData from API: {success: true, customer: {…}}
+bilingual-purchase-form.tsx:598 crmCustomerData from API: {id: 8, email: 'oilstar@hotmail.com', passwordHash: '$2b$10$PjYLLvrJjPx2vVVC9tu52OKcyBPujbuD00yGHkXRJ691H3PNbs21m', firstName: 'ABAS', lastName: 'ABASI', …}
+bilingual-purchase-form.tsx:599 isLoadingCustomer: false
+bilingual-purchase-form.tsx:607 Using CRM customer data (most complete)
+bilingual-purchase-form.tsx:617 Customer object found: {id: 8, email: 'oilstar@hotmail.com', passwordHash: '$2b$10$PjYLLvrJjPx2vVVC9tu52OKcyBPujbuD00yGHkXRJ691H3PNbs21m', firstName: 'ABAS', lastName: 'ABASI', …}
+bilingual-purchase-form.tsx:618 Customer firstName: ABAS
+bilingual-purchase-form.tsx:619 Customer lastName: ABASI
+bilingual-purchase-form.tsx:620 Customer phone: 09124955173
+bilingual-purchase-form.tsx:621 Customer address: NAGwer Road, Qaryataq Village
+bilingual-purchase-form.tsx:622 Customer secondaryAddress: NAGwer Road, Qaryataq Village, Erbil, Iraq
+bilingual-purchase-form.tsx:623 Customer city: undefined
+bilingual-purchase-form.tsx:624 Customer country: Iraq
+bilingual-purchase-form.tsx:625 Customer postalCode: 196891375
+bilingual-purchase-form.tsx:628 Full name constructed: ABAS ABASI
+bilingual-purchase-form.tsx:652 🏠 [ADDRESS DEBUG] Enhanced address mapping result: {originalCustomer: {…}, mappedAddress: 'NAGwer Road, Qaryataq Village', mappedCity: 'کربلا', mappedProvince: 'کربلا', addressSources: {…}, …}
+bilingual-purchase-form.tsx:693 Form data to reset: {customerName: 'ABAS ABASI', phone: '09124955173', address: 'NAGwer Road, Qaryataq Village', city: 'کربلا', country: 'Iraq', …}
+bilingual-purchase-form.tsx:695 Form reset completed
+bilingual-purchase-form.tsx:699 === End BilingualPurchaseForm Debug ===
+bilingual-purchase-form.tsx:1089 🚚 [DELIVERY CALCULATION] Final destination determined: {showSecondAddress: false, secondCity: '', secondProvince: '', crmCityRegion: 'کربلا', crmCity: undefined, …}
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: undefined, vatRate: 0, dutiesRate: 0, subtotalAmount: 11, vatAmount: 0, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 11, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: undefined, walletBalance: 0, canUseWallet: false, totalAmount: 11, existingCustomer: true, …}
+bilingual-purchase-form.tsx:1089 🚚 [DELIVERY CALCULATION] Final destination determined: {showSecondAddress: false, secondCity: '', secondProvince: '', crmCityRegion: 'کربلا', crmCity: undefined, …}
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: undefined, vatRate: 0, dutiesRate: 0, subtotalAmount: 11, vatAmount: 0, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 11, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: undefined, walletBalance: 0, canUseWallet: false, totalAmount: 11, existingCustomer: true, …}
+bilingual-purchase-form.tsx:434 💰 [VAT] Tax settings API response: {success: true, data: Array(1)}
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.1, dutiesRate: 0, subtotalAmount: 11, vatAmount: 1, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 11, totalTaxAmount: 1, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: undefined, walletBalance: 0, canUseWallet: false, totalAmount: 12, existingCustomer: true, …}
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.1, dutiesRate: 0, subtotalAmount: 11, vatAmount: 1, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 11, totalTaxAmount: 1, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: undefined, walletBalance: 0, canUseWallet: false, totalAmount: 12, existingCustomer: true, …}
+bilingual-purchase-form.tsx:521 📦 [BILINGUAL FORM] Raw shipping rates API response: {success: true, data: Array(2)}
+bilingual-purchase-form.tsx:556 ✅ [BILINGUAL FORM] Successfully loaded shipping rates: 2 methods
+bilingual-purchase-form.tsx:557 🚚 [BILINGUAL FORM] Shipping rates details: (2) [{…}, {…}]
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.1, dutiesRate: 0, subtotalAmount: 11, vatAmount: 1, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 11, totalTaxAmount: 1, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: undefined, walletBalance: 0, canUseWallet: false, totalAmount: 12, existingCustomer: true, …}
+bilingual-purchase-form.tsx:772 🚚 [AUTO-SELECT DEBUG] useEffect triggered: {shippingRatesLength: 2, selectedShippingMethod: null, hasShippingData: true}
+bilingual-purchase-form.tsx:780 🚚 [AUTO-SELECT] Auto-selecting first shipping method: 33 undefined
+bilingual-purchase-form.tsx:787 🚚 Shipping cost calculation: {selectedShippingMethod: null, hasShippingData: true, subtotalAmount: 11}
+bilingual-purchase-form.tsx:829 🔄 No shipping method selected or no data, resetting cost
+bilingual-purchase-form.tsx:836 Shipping rates state: {isLoadingShippingRates: false, shippingRatesError: null, dataLength: 2, data: Array(2)}
+bilingual-purchase-form.tsx:868 🚚 [AUTO SELECT] Auto-selecting smart vehicle method: 32
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.1, dutiesRate: 0, subtotalAmount: 11, vatAmount: 1, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 11, totalTaxAmount: 1, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: undefined, walletBalance: 0, canUseWallet: false, totalAmount: 12, existingCustomer: true, …}
+bilingual-purchase-form.tsx:772 🚚 [AUTO-SELECT DEBUG] useEffect triggered: {shippingRatesLength: 2, selectedShippingMethod: 32, hasShippingData: true}
+bilingual-purchase-form.tsx:787 🚚 Shipping cost calculation: {selectedShippingMethod: 32, hasShippingData: true, subtotalAmount: 11}
+bilingual-purchase-form.tsx:795 📦 Selected shipping rate: {id: 32, deliveryMethod: 'smart_vehicle', transportationType: 'smart', cityName: null, provinceName: null, …}
+bilingual-purchase-form.tsx:801 ✅ SPECIAL DELIVERY METHOD: Zero cost for smart_vehicle
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.1, dutiesRate: 0, subtotalAmount: 11, vatAmount: 1, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 11, totalTaxAmount: 1, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: undefined, walletBalance: 0, canUseWallet: false, totalAmount: 12, existingCustomer: true, …}
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.1, dutiesRate: 0, subtotalAmount: 11, vatAmount: 1, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 11, totalTaxAmount: 1, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 5243501558.21, canUseWallet: {…}, totalAmount: 12, existingCustomer: true, …}
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.1, dutiesRate: 0, subtotalAmount: 11, vatAmount: 1, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 11, totalTaxAmount: 1, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 5243501558.21, canUseWallet: {…}, totalAmount: 12, existingCustomer: true, …}
+bilingual-purchase-form.tsx:1007 🚚 [SMART DELIVERY] Calculating cost for: {weight: 11, city: 'کربلا', province: 'کربلا', cartItems: 1}
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.1, dutiesRate: 0, subtotalAmount: 11, vatAmount: 1, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 11, totalTaxAmount: 1, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 5243501558.21, canUseWallet: {…}, totalAmount: 12, existingCustomer: true, …}
+bilingual-purchase-form.tsx:1037 🚚 [SMART DELIVERY] API response: {success: true, data: {…}}
+bilingual-purchase-form.tsx:1038 🚚 [SMART DELIVERY] Response details: {success: true, hasData: true, hasOptimalVehicle: true, optimalVehicle: {…}}
+bilingual-purchase-form.tsx:1055 ✅ [SMART DELIVERY] Cost calculated: {vehicle: 'اتوبوسهای مسافربری', cost: 4200, estimatedTime: 252}
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.1, dutiesRate: 0, subtotalAmount: 11, vatAmount: 1, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 11, totalTaxAmount: 1, finalShippingCost: 4200, regularShippingCost: 0, smartDeliveryCost: 4200, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 5243501558.21, canUseWallet: {…}, totalAmount: 4212, existingCustomer: true, …}
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.1, dutiesRate: 0, subtotalAmount: 11, vatAmount: 1, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 11, totalTaxAmount: 1, finalShippingCost: 4200, regularShippingCost: 0, smartDeliveryCost: 4200, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 5243501558.21, canUseWallet: {…}, totalAmount: 4212, existingCustomer: true, …}
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:240 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:241 🌟 [RATINGS DEBUG] Products with ratings: (3) [{…}, {…}, {…}]
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.1, dutiesRate: 0, subtotalAmount: 11, vatAmount: 1, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 11, totalTaxAmount: 1, finalShippingCost: 4200, regularShippingCost: 0, smartDeliveryCost: 4200, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 5243501558.21, canUseWallet: {…}, totalAmount: 4212, existingCustomer: true, …}
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.1, dutiesRate: 0, subtotalAmount: 11, vatAmount: 1, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 11, totalTaxAmount: 1, finalShippingCost: 4200, regularShippingCost: 0, smartDeliveryCost: 4200, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 5243501558.21, canUseWallet: {…}, totalAmount: 4212, existingCustomer: true, …}
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.1, dutiesRate: 0, subtotalAmount: 11, vatAmount: 1, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 11, totalTaxAmount: 1, finalShippingCost: 4200, regularShippingCost: 0, smartDeliveryCost: 4200, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 5243501558.21, canUseWallet: {…}, totalAmount: 4212, existingCustomer: true, …}
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.1, dutiesRate: 0, subtotalAmount: 11, vatAmount: 1, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 11, totalTaxAmount: 1, finalShippingCost: 4200, regularShippingCost: 0, smartDeliveryCost: 4200, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 5243501558.21, canUseWallet: {…}, totalAmount: 4212, existingCustomer: true, …}
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.1, dutiesRate: 0, subtotalAmount: 11, vatAmount: 1, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 11, totalTaxAmount: 1, finalShippingCost: 4200, regularShippingCost: 0, smartDeliveryCost: 4200, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 5243501558.21, canUseWallet: {…}, totalAmount: 4212, existingCustomer: true, …}
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.1, dutiesRate: 0, subtotalAmount: 11, vatAmount: 1, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 11, totalTaxAmount: 1, finalShippingCost: 4200, regularShippingCost: 0, smartDeliveryCost: 4200, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 5243501558.21, canUseWallet: {…}, totalAmount: 4212, existingCustomer: true, …}
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.1, dutiesRate: 0, subtotalAmount: 11, vatAmount: 1, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 11, totalTaxAmount: 1, finalShippingCost: 4200, regularShippingCost: 0, smartDeliveryCost: 4200, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 5243501558.21, canUseWallet: {…}, totalAmount: 4212, existingCustomer: true, …}
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.1, dutiesRate: 0, subtotalAmount: 11, vatAmount: 1, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 11, totalTaxAmount: 1, finalShippingCost: 4200, regularShippingCost: 0, smartDeliveryCost: 4200, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 5243501558.21, canUseWallet: {…}, totalAmount: 4212, existingCustomer: true, …}
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.1, dutiesRate: 0, subtotalAmount: 11, vatAmount: 1, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 11, totalTaxAmount: 1, finalShippingCost: 4200, regularShippingCost: 0, smartDeliveryCost: 4200, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 5243501558.21, canUseWallet: {…}, totalAmount: 4212, existingCustomer: true, …}
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.1, dutiesRate: 0, subtotalAmount: 11, vatAmount: 1, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 11, totalTaxAmount: 1, finalShippingCost: 4200, regularShippingCost: 0, smartDeliveryCost: 4200, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 5243501558.21, canUseWallet: {…}, totalAmount: 4212, existingCustomer: true, …}
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.1, dutiesRate: 0, subtotalAmount: 11, vatAmount: 1, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 11, totalTaxAmount: 1, finalShippingCost: 4200, regularShippingCost: 0, smartDeliveryCost: 4200, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 5243501558.21, canUseWallet: {…}, totalAmount: 4212, existingCustomer: true, …}
+bilingual-purchase-form.tsx:2399 🔘 [BUTTON DEBUG] Submit button clicked - drag protection active
+bilingual-purchase-form.tsx:2400 🔘 [BUTTON DEBUG] Mutation pending: false
+bilingual-purchase-form.tsx:2401 🔘 [BUTTON DEBUG] Form valid: false
+bilingual-purchase-form.tsx:2402 🔘 [BUTTON DEBUG] Form errors: {}
+bilingual-purchase-form.tsx:2403 🔘 [BUTTON DEBUG] Selected shipping method: 32
+bilingual-purchase-form.tsx:2404 🔘 [BUTTON DEBUG] Payment method: wallet_partial
+bilingual-purchase-form.tsx:2408 🔘 [BUTTON DEBUG] Forcing form submission via handleSubmit
+bilingual-purchase-form.tsx:1327 🚀 [SUBMIT DEBUG] onSubmit function called
+bilingual-purchase-form.tsx:1328 🚀 [SUBMIT DEBUG] Form data received: {customerName: 'ABAS ABASI', phone: '09124955173', address: 'NAGwer Road, Qaryataq Village', city: 'کربلا', country: 'Iraq', …}
+bilingual-purchase-form.tsx:1329 🚀 [SUBMIT DEBUG] Selected shipping method: 32
+bilingual-purchase-form.tsx:1330 🚀 [SUBMIT DEBUG] Payment method: wallet_partial
+bilingual-purchase-form.tsx:1331 🚀 [SUBMIT DEBUG] Form validation state: {defaultValues: {…}, …}
+bilingual-purchase-form.tsx:1332 🚀 [SUBMIT DEBUG] Form errors: {}
+bilingual-purchase-form.tsx:1333 🚀 [SUBMIT DEBUG] Mutation pending before submit: false
+bilingual-purchase-form.tsx:1400 🚚 [DELIVERY LOGIC] Active delivery information: {activeAddress: 'NAGwer Road, Qaryataq Village', activeCity: 'کربلا', activeProvince: 'کربلا', activePostalCode: '196891375', activePhone: '09124955173', …}
+bilingual-purchase-form.tsx:1406 🔍 [PAYMENT ANALYSIS] Before conversion: {paymentMethod: 'wallet_partial', walletAmount: 4211, totalAmount: 4212, walletBalance: 5243501558.21, canUseWallet: {…}, …}
+bilingual-purchase-form.tsx:1445 🚀 [ORDER SUBMIT] Submitting order with complete data: {endpoint: '/api/customers/orders', originalPaymentMethod: 'wallet_partial', finalPaymentMethod: 'wallet_partial', totalAmount: 4212, walletBalance: 5243501558.21, …}
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.1, dutiesRate: 0, subtotalAmount: 11, vatAmount: 1, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 11, totalTaxAmount: 1, finalShippingCost: 4200, regularShippingCost: 0, smartDeliveryCost: 4200, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 5243501558.21, canUseWallet: {…}, totalAmount: 4212, existingCustomer: true, …}
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.1, dutiesRate: 0, subtotalAmount: 11, vatAmount: 1, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 11, totalTaxAmount: 1, finalShippingCost: 4200, regularShippingCost: 0, smartDeliveryCost: 4200, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 5243501558.21, canUseWallet: {…}, totalAmount: 4212, existingCustomer: true, …}
+queryClient.ts:54  POST https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/orders?t=1754499487157 500 (Internal Server Error)
+apiRequest @ queryClient.ts:54
+mutationFn @ bilingual-purchase-form.tsx:1166
+fn @ @tanstack_react-query.js?v=c5579bcf:1189
+run @ @tanstack_react-query.js?v=c5579bcf:494
+start @ @tanstack_react-query.js?v=c5579bcf:536
+execute @ @tanstack_react-query.js?v=c5579bcf:1225
+await in execute
+mutate @ @tanstack_react-query.js?v=c5579bcf:2630
+(anonymous) @ @tanstack_react-query.js?v=c5579bcf:3295
+onSubmit @ bilingual-purchase-form.tsx:1461
+(anonymous) @ chunk-4BFJKWC4.js?v=c5579bcf:1465
+await in (anonymous)
+onClick @ bilingual-purchase-form.tsx:2409
+callCallback2 @ chunk-RPCDYKBN.js?v=c5579bcf:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=c5579bcf:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=c5579bcf:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=c5579bcf:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=c5579bcf:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=c5579bcf:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=c5579bcf:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=c5579bcf:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=c5579bcf:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=c5579bcf:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=c5579bcf:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=c5579bcf:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=c5579bcf:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=c5579bcf:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=c5579bcf:5449
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 6 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:240 🌟 [RATINGS DEBUG] Current products: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+shop.tsx:241 🌟 [RATINGS DEBUG] Products with ratings: (3) [{…}, {…}, {…}]
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.1, dutiesRate: 0, subtotalAmount: 11, vatAmount: 1, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 11, totalTaxAmount: 1, finalShippingCost: 4200, regularShippingCost: 0, smartDeliveryCost: 4200, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 5243501558.21, canUseWallet: {…}, totalAmount: 4212, existingCustomer: true, …}

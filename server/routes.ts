@@ -14433,7 +14433,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             paymentStatus: "paid",
             paymentMethod: 'wallet_full',
             walletAmountUsed: walletAmountUsed,
-            crmCustomerId: finalCrmCustomerId,
+            crmCustomerId: finalCustomerId,
           }
         });
       }
