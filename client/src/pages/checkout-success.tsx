@@ -49,7 +49,7 @@ export default function CheckoutSuccess() {
 
   // Clear cart function - comprehensive approach
   const clearCartCompletely = async () => {
-    console.log('🧹 [CHECKOUT SUCCESS] Clearing cart completely after successful payment');
+    console.log('🧹 [CHECKOUT SUCCESS] Clearing cart completely after successful payment for order:', orderId);
     
     try {
       // Clear localStorage immediately
@@ -58,21 +58,29 @@ export default function CheckoutSuccess() {
       console.log('✅ [CART CLEAR] Cleared localStorage cart and wallet data');
       
       // Clear persistent cart from database
-      await fetch('/api/cart/clear', { 
+      const response = await fetch('/api/cart/clear', { 
         method: 'POST',
         body: JSON.stringify({}), 
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include'  // Include session cookies
       });
-      console.log('✅ [CART CLEAR] Database cart cleared');
+      
+      const result = await response.json();
+      console.log('✅ [CART CLEAR] Database cart clear response:', result);
       
       // Force cart state refresh through query invalidation
       queryClient.invalidateQueries({ queryKey: ['/api/customers/persistent-cart'] });
       queryClient.invalidateQueries({ queryKey: ['/api/cart'] });
       console.log('✅ [CART CLEAR] Query cache invalidated');
       
+      // Show toast notification
+      toast({
+        title: "سبد خرید پاک شد",
+        description: "کالاهای سبد خرید با موفقیت پاک شدند",
+      });
+      
     } catch (error) {
-      console.warn('⚠️ [CART CLEAR] Error clearing cart:', error);
+      console.error('❌ [CART CLEAR] Error clearing cart:', error);
       // Continue anyway since localStorage is cleared
     }
   };
@@ -81,7 +89,9 @@ export default function CheckoutSuccess() {
 
   // Clear cart automatically when page loads
   useEffect(() => {
+    console.log('🧹 [CHECKOUT SUCCESS] useEffect triggered with orderId:', orderId);
     if (orderId) {
+      console.log('🧹 [CHECKOUT SUCCESS] Starting cart clearing process...');
       clearCartCompletely();
     }
   }, [orderId]);

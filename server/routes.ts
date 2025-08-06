@@ -13800,6 +13800,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`🏪 [WAREHOUSE DIRECT] Full wallet payment completed - sending order ${orderNumber} directly to warehouse`);
         console.log(`💰 [PAYMENT COMPLETE] Wallet: ${walletAmountUsed} IQD, Remaining: ${remainingAmount} IQD`);
         
+        // Clear customer cart after successful full wallet payment
+        console.log('🧹 [FULL WALLET] Clearing cart after successful full wallet payment');
+        try {
+          await cartStorage.clearCart(customerId);
+          console.log('✅ [FULL WALLET] Cart cleared successfully');
+        } catch (cartError) {
+          console.warn('⚠️ [FULL WALLET] Failed to clear cart:', cartError);
+          // Continue with payment success even if cart clearing fails
+        }
+        
         return res.json({
           success: true,
           message: 'سفارش با موفقیت ثبت شد - ارسال به انبار',
