@@ -273,8 +273,15 @@ export class BankGatewayRouter {
     // Check if test mode is enabled
     const isTestMode = config.testMode === true || gateway.test_mode === true;
     
-    // Use correct URLs for Shaparak (sandbox for test mode)
-    const baseUrl = isTestMode ? 'https://sandbox.sep.shaparak.ir/onlinepg/onlinepg' : 'https://sep.shaparak.ir/onlinepg/onlinepg';
+    // Use correct official Shaparak SEP URLs with multiple fallbacks
+    const baseUrls = isTestMode ? [
+      'https://sep.shaparak.ir/onlinepg/onlinepg',
+      'https://sep.shaparak.ir/payment.aspx',
+      'https://sep.shaparak.ir/MerchantHandler'
+    ] : [
+      'https://sep.shaparak.ir/onlinepg/onlinepg',
+      'https://sep.shaparak.ir/payment.aspx'
+    ];
     
     // Include merchant credentials - use test credentials in test mode
     const merchantId = isTestMode ? 'test_merchant_shaparak' : (config.merchantId || config.terminalId || 'test_merchant');
@@ -283,12 +290,16 @@ export class BankGatewayRouter {
     // Convert amount to whole number for Iraqi Dinar (IQD doesn't use decimals)
     const formattedAmount = Math.round(parseFloat(request.amount.toString())); // Convert to whole number for IQD
     
-    // Shaparak SEP standard parameters with proper test mode handling
+    // Shaparak SEP standard parameters following official format
     const callbackUrl = isTestMode ? 'https://momtazchem.com/payment/test-callback' : (request.returnUrl || 'https://momtazchem.com/payment/callback');
-    const paymentUrl = `${baseUrl}?Amount=${formattedAmount}&MerchantId=${merchantId}&Token=${transactionId}&ResNum=${transactionId}&RedirectURL=${callbackUrl}`;
+    
+    // Use primary URL format - onlinepg/onlinepg is the standard endpoint
+    const baseUrl = baseUrls[0];
+    const paymentUrl = `${baseUrl}?Amount=${formattedAmount}&ResNum=${transactionId}&MID=${merchantId}&RedirectURL=${encodeURIComponent(callbackUrl)}`;
     
     console.log(`💳 [SHAPARAK SEP] Payment URL created: ${paymentUrl} for amount: ${request.amount} ${request.currency || 'IQD'} (Formatted: ${formattedAmount}) (Test Mode: ${isTestMode})`);
     console.log(`🔗 [SHAPARAK SEP] Final Payment URL: ${paymentUrl}`);
+    console.log(`🔄 [SHAPARAK SEP] Alternative URLs available: ${baseUrls.slice(1).join(', ')}`);
     
     return {
       success: true,
