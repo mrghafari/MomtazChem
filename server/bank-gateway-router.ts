@@ -187,10 +187,11 @@ export class BankGatewayRouter {
     const config = gateway.config;
     const transactionId = `TXN_${Date.now()}_${request.orderId}`;
     
-    // شبیه‌سازی ایجاد لینک پرداخت زرین‌پال با مبلغ
-    const paymentUrl = `https://sandbox.zarinpal.com/pg/StartPay/${transactionId}?amount=${request.amount}&currency=${request.currency || 'IQD'}`;
+    // شبیه‌سازی ایجاد لینک پرداخت زرین‌پال با مبلغ (عدد صحیح برای دینار عراقی)
+    const formattedAmount = Math.round(parseFloat(request.amount.toString())); // Convert to whole number for IQD
+    const paymentUrl = `https://sandbox.zarinpal.com/pg/StartPay/${transactionId}?amount=${formattedAmount}&currency=${request.currency || 'IQD'}`;
     
-    console.log(`💳 [ZARINPAL] Payment URL created: ${paymentUrl} for amount: ${request.amount} ${request.currency || 'IQD'}`);
+    console.log(`💳 [ZARINPAL] Payment URL created: ${paymentUrl} for amount: ${formattedAmount} ${request.currency || 'IQD'} (rounded from ${request.amount})`);
     
     return {
       success: true,
@@ -203,9 +204,10 @@ export class BankGatewayRouter {
   // پیاده‌سازی درگاه آی‌دی‌پی
   private async createIdpayPayment(gateway: PaymentGateway, request: BankPaymentRequest) {
     const transactionId = `IDPAY_${Date.now()}_${request.orderId}`;
-    const paymentUrl = `https://idpay.ir/p/${transactionId}?amount=${request.amount}&currency=${request.currency || 'IQD'}`;
+    const formattedAmount = Math.round(parseFloat(request.amount.toString())); // Convert to whole number for IQD
+    const paymentUrl = `https://idpay.ir/p/${transactionId}?amount=${formattedAmount}&currency=${request.currency || 'IQD'}`;
     
-    console.log(`💳 [IDPAY] Payment URL created: ${paymentUrl} for amount: ${request.amount} ${request.currency || 'IQD'}`);
+    console.log(`💳 [IDPAY] Payment URL created: ${paymentUrl} for amount: ${formattedAmount} ${request.currency || 'IQD'} (rounded from ${request.amount})`);
     
     return {
       success: true,
@@ -218,9 +220,10 @@ export class BankGatewayRouter {
   // پیاده‌سازی درگاه پارسیان
   private async createParsianPayment(gateway: PaymentGateway, request: BankPaymentRequest) {
     const transactionId = `PARSIAN_${Date.now()}_${request.orderId}`;
-    const paymentUrl = `https://pec.shaparak.ir/NewIPGServices/Payment/${transactionId}?amount=${request.amount}&currency=${request.currency || 'IQD'}`;
+    const formattedAmount = Math.round(parseFloat(request.amount.toString())); // Convert to whole number for IQD
+    const paymentUrl = `https://pec.shaparak.ir/NewIPGServices/Payment/${transactionId}?amount=${formattedAmount}&currency=${request.currency || 'IQD'}`;
     
-    console.log(`💳 [PARSIAN] Payment URL created: ${paymentUrl} for amount: ${request.amount} ${request.currency || 'IQD'}`);
+    console.log(`💳 [PARSIAN] Payment URL created: ${paymentUrl} for amount: ${formattedAmount} ${request.currency || 'IQD'} (rounded from ${request.amount})`);
     
     return {
       success: true,
@@ -233,9 +236,10 @@ export class BankGatewayRouter {
   // پیاده‌سازی درگاه ملت
   private async createMellatPayment(gateway: PaymentGateway, request: BankPaymentRequest) {
     const transactionId = `MELLAT_${Date.now()}_${request.orderId}`;
-    const paymentUrl = `https://bpm.shaparak.ir/pgwchannel/startpay.mellat?RefId=${transactionId}&Amount=${request.amount}&Currency=${request.currency || 'IQD'}`;
+    const formattedAmount = Math.round(parseFloat(request.amount.toString())); // Convert to whole number for IQD
+    const paymentUrl = `https://bpm.shaparak.ir/pgwchannel/startpay.mellat?RefId=${transactionId}&Amount=${formattedAmount}&Currency=${request.currency || 'IQD'}`;
     
-    console.log(`💳 [MELLAT] Payment URL created: ${paymentUrl} for amount: ${request.amount} ${request.currency || 'IQD'}`);
+    console.log(`💳 [MELLAT] Payment URL created: ${paymentUrl} for amount: ${formattedAmount} ${request.currency || 'IQD'} (rounded from ${request.amount})`);
     
     return {
       success: true,
@@ -248,9 +252,10 @@ export class BankGatewayRouter {
   // پیاده‌سازی درگاه سامان/شاپرک
   private async createSamanPayment(gateway: PaymentGateway, request: BankPaymentRequest) {
     const transactionId = `SAMAN_${Date.now()}_${request.orderId}`;
-    const paymentUrl = `https://sep.shaparak.ir/Payment.aspx?Token=${transactionId}&Amount=${request.amount}&Currency=${request.currency || 'IQD'}`;
+    const formattedAmount = Math.round(parseFloat(request.amount.toString())); // Convert to whole number for IQD
+    const paymentUrl = `https://sep.shaparak.ir/Payment.aspx?Token=${transactionId}&Amount=${formattedAmount}&Currency=${request.currency || 'IQD'}`;
     
-    console.log(`💳 [SAMAN] Payment URL created: ${paymentUrl} for amount: ${request.amount} ${request.currency || 'IQD'}`);
+    console.log(`💳 [SAMAN] Payment URL created: ${paymentUrl} for amount: ${formattedAmount} ${request.currency || 'IQD'} (rounded from ${request.amount})`);
     
     return {
       success: true,
@@ -275,8 +280,8 @@ export class BankGatewayRouter {
     const merchantId = isTestMode ? 'test_merchant_shaparak' : (config.merchantId || config.terminalId || 'test_merchant');
     const apiKey = isTestMode ? 'test_api_key_shaparak' : (config.apiKey || config.password || 'test_api_key');
     
-    // Convert amount to correct format for Iraqi Dinar (no conversion needed for IQD)
-    const formattedAmount = parseFloat(request.amount.toString()); // Keep original amount for IQD
+    // Convert amount to whole number for Iraqi Dinar (IQD doesn't use decimals)
+    const formattedAmount = Math.round(parseFloat(request.amount.toString())); // Convert to whole number for IQD
     
     // Shaparak SEP standard parameters with proper test mode handling
     const callbackUrl = isTestMode ? 'https://momtazchem.com/payment/test-callback' : (request.returnUrl || 'https://momtazchem.com/payment/callback');
@@ -296,9 +301,10 @@ export class BankGatewayRouter {
   // پیاده‌سازی درگاه مرکز پرداخت عراق
   private async createIraqPaymentCenterPayment(gateway: PaymentGateway, request: BankPaymentRequest) {
     const transactionId = `IPC_${Date.now()}_${request.orderId}`;
-    const paymentUrl = `https://payment.cbi.iq/gateway/pay/${transactionId}?amount=${request.amount}&currency=${request.currency || 'IQD'}`;
+    const formattedAmount = Math.round(parseFloat(request.amount.toString())); // Convert to whole number for IQD
+    const paymentUrl = `https://payment.cbi.iq/gateway/pay/${transactionId}?amount=${formattedAmount}&currency=${request.currency || 'IQD'}`;
     
-    console.log(`💳 [IRAQ PAYMENT CENTER] Payment URL created: ${paymentUrl} for amount: ${request.amount} ${request.currency || 'IQD'}`);
+    console.log(`💳 [IRAQ PAYMENT CENTER] Payment URL created: ${paymentUrl} for amount: ${formattedAmount} ${request.currency || 'IQD'} (rounded from ${request.amount})`);
     
     return {
       success: true,

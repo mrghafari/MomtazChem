@@ -14417,12 +14417,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (orderData.paymentMethod === 'wallet_partial' && remainingAmount > 0) {
         console.log(`🔄 [HYBRID PAYMENT] Wallet partial payment detected - wallet: ${walletAmountUsed}, remaining: ${remainingAmount}`);
         
-        // هدایت پرداخت به درگاه بانکی فعال
+        // هدایت پرداخت به درگاه بانکی فعال - تبدیل مبلغ به عدد صحیح برای دینار عراقی
         const { bankGatewayRouter } = await import('./bank-gateway-router');
+        const { formatIQDAmount } = await import('./currency-utils');
+        const formattedRemainingAmount = formatIQDAmount(remainingAmount); // Convert to whole number for IQD
+        
+        console.log(`💰 [BANK PAYMENT] Sending amount to gateway: ${formattedRemainingAmount} IQD (rounded from ${remainingAmount})`);
+        
         const routingResult = await bankGatewayRouter.routePayment({
           orderId: order.id,
           customerId: finalCustomerId,
-          amount: remainingAmount,
+          amount: formattedRemainingAmount,
           currency: 'IQD',
           returnUrl: `${req.protocol}://${req.get('host')}/payment/success`,
           cancelUrl: `${req.protocol}://${req.get('host')}/payment/cancel`
@@ -14438,7 +14443,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             totalAmount: totalAmount,
             walletAmountUsed: walletAmountUsed,
             walletAmountDeducted: walletAmountUsed,
-            remainingAmount: remainingAmount,
+            remainingAmount: formattedRemainingAmount,
             requiresBankPayment: true,
             paymentGateway: routingResult.gateway,
             paymentUrl: routingResult.paymentUrl,
