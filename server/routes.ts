@@ -37934,8 +37934,8 @@ momtazchem.com
       console.log(`🧹 [CART CLEAR] Clearing both cart session and persistent cart for customer: ${actualCustomerId}`);
       
       // Clear both cart session and persistent cart
-      await cartStorage.clearCartSession(actualCustomerId);
-      await storage.clearPersistentCart(actualCustomerId);
+      await cartStorage.clearCart(actualCustomerId);
+      await customerStorage.clearCart(actualCustomerId);
       
       console.log(`✅ [CART CLEAR] Both cart session and persistent cart cleared successfully for customer: ${actualCustomerId}`);
       
@@ -44484,6 +44484,39 @@ momtazchem.com
     } catch (error) {
       console.error('❌ [RECOVER ORDER] Failed:', error);
       res.status(500).json({ error: 'Failed to mark order as recovered' });
+    }
+  });
+
+  // Direct customer cart clearing endpoint for admin access  
+  app.post("/api/customers/:customerId/clear-cart", async (req, res) => {
+    try {
+      const customerId = parseInt(req.params.customerId);
+      
+      if (isNaN(customerId)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid customer ID" 
+        });
+      }
+
+      console.log(`🧹 [ADMIN CART CLEAR] Clearing cart for customer ${customerId}`);
+      
+      // Clear both cart systems
+      await cartStorage.clearCart(customerId);
+      await customerStorage.clearCart(customerId);
+      
+      console.log(`✅ [ADMIN CART CLEAR] Cart cleared successfully for customer ${customerId}`);
+      
+      res.json({ 
+        success: true, 
+        message: `Cart cleared successfully for customer ${customerId}` 
+      });
+    } catch (error) {
+      console.error('❌ [ADMIN CART CLEAR] Error clearing cart:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to clear cart" 
+      });
     }
   });
 

@@ -975,6 +975,26 @@ export class CustomerStorage implements ICustomerStorage {
       return newSettings;
     }
   }
+
+  // Clear customer's persistent cart
+  async clearCart(customerId: number): Promise<void> {
+    console.log(`🧹 [PERSISTENT CART] Clearing cart for customer ${customerId}`);
+    
+    try {
+      await customerDb
+        .update(customers)
+        .set({
+          persistentCart: null,
+          cartLastUpdated: new Date()
+        })
+        .where(eq(customers.id, customerId));
+      
+      console.log(`✅ [PERSISTENT CART] Cart cleared successfully for customer ${customerId}`);
+    } catch (error) {
+      console.error(`❌ [PERSISTENT CART] Failed to clear cart for customer ${customerId}:`, error);
+      throw error;
+    }
+  }
 }
 
 export const customerStorage = new CustomerStorage();
