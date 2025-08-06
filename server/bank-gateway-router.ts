@@ -87,6 +87,7 @@ export class BankGatewayRouter {
     message: string;
   }> {
     console.log(`🏦 [PAYMENT ROUTING] Starting payment routing for order ${paymentRequest.orderId}`);
+    console.log(`💰 [PAYMENT ROUTING] Payment Details - Amount: ${paymentRequest.amount} ${paymentRequest.currency}, Customer: ${paymentRequest.customerId}`);
     
     try {
       // انتخاب درگاه فعال
@@ -275,6 +276,7 @@ export class BankGatewayRouter {
     const paymentUrl = `${baseUrl}/Payment.aspx?Token=${transactionId}&Amount=${request.amount}&Currency=${request.currency || 'IQD'}&MerchantId=${merchantId}&ApiKey=${apiKey}`;
     
     console.log(`💳 [SHAPARAK SEP] Payment URL created: ${paymentUrl} for amount: ${request.amount} ${request.currency || 'IQD'} (Test Mode: ${isTestMode})`);
+    console.log(`🔗 [SHAPARAK SEP] Final Payment URL: ${paymentUrl}`);
     
     return {
       success: true,
