@@ -289,29 +289,8 @@ const LogisticsManagement = () => {
     };
   }, [isOrderDetailsDialogOpen, handleCloseOrderDetails]);
   
-  // State for vehicle editing (moved here before useEffect)
+  // State for vehicle editing 
   const [editingVehicle, setEditingVehicle] = useState<any>(null);
-
-  // Effect to handle custom vehicle type for editing
-  React.useEffect(() => {
-    if (editingVehicle) {
-      const standardTypes = [
-        'کامیون سنگین', 'کامیون متوسط', 'کامیون سبک', 'وانت سبک', 'وانت متوسط',
-        'ون سبک', 'ون متوسط', 'اتوبوس مسافربری', 'اتوبوس شهری', 'مینی‌بوس',
-        'تریلر', 'نیم‌تریلر', 'کشنده', 'کامیون کمپرسی', 'کامیون یخچالی',
-        'تانکر', 'کامیون جرثقیل', 'یدک‌کش', 'آمبولانس', 'ماشین آتش‌نشانی',
-        'تاکسی', 'خودرو سواری', 'موتورسیکلت', 'دوچرخه', 'اسکوتر'
-      ];
-      const isCustomType = !standardTypes.includes(editingVehicle.vehicleType);
-      if (isCustomType) {
-        setShowCustomEditInput(true);
-        setCustomEditVehicleType(editingVehicle.vehicleType);
-      } else {
-        setShowCustomEditInput(false);
-        setCustomEditVehicleType('');
-      }
-    }
-  }, [editingVehicle]);
 
   // Ready vehicles API integration
   const { data: readyVehiclesData, isLoading: loadingReadyVehicles } = useQuery({
@@ -325,7 +304,24 @@ const LogisticsManagement = () => {
     enabled: activeTab === 'ready-vehicles'
   });
 
-  const readyVehicles = readyVehiclesData?.data || [];
+  const readyVehicles = (readyVehiclesData as any)?.data || [];
+
+  // Effect to handle custom vehicle type for editing - uses dynamic vehicle templates
+  React.useEffect(() => {
+    if (editingVehicle && vehicleTemplatesData) {
+      // Get current vehicle template names from database
+      const templateNames = ((vehicleTemplatesData as any)?.data || []).map((template: any) => template.name);
+      const isCustomType = !templateNames.includes(editingVehicle.vehicleType);
+      
+      if (isCustomType) {
+        setShowCustomEditInput(true);
+        setCustomEditVehicleType(editingVehicle.vehicleType);
+      } else {
+        setShowCustomEditInput(false);
+        setCustomEditVehicleType('');
+      }
+    }
+  }, [editingVehicle, vehicleTemplatesData]);
 
   // Create ready vehicle mutation
   const createReadyVehicleMutation = useMutation({
