@@ -7355,6 +7355,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         console.log(`✅ [GATEWAY WEBHOOK] Order ${orderId} payment confirmed via gateway`);
 
+        // Clear cart after confirmed bank payment
+        try {
+          const order = await db
+            .select({ customerId: customerOrders.customerId })
+            .from(customerOrders)
+            .where(eq(customerOrders.id, parseInt(orderId)))
+            .limit(1);
+          
+          if (order.length > 0) {
+            await cartStorage.clearCart(order[0].customerId);
+            console.log(`🧹 [GATEWAY WEBHOOK] Cart cleared for customer ${order[0].customerId} after confirmed payment`);
+          }
+        } catch (cartError) {
+          console.warn(`⚠️ [GATEWAY WEBHOOK] Failed to clear cart for order ${orderId}:`, cartError);
+        }
+
         // Trigger automatic financial approval
         try {
           await orderManagementStorage.processAutomaticBankPaymentApproval(parseInt(orderId));

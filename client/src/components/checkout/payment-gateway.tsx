@@ -168,7 +168,8 @@ const PaymentGateway = ({
           return;
         }
         
-        console.log('🏦 [BANK REDIRECT] Now redirecting to bank gateway for remaining:', remainingAmount);
+        console.log('🏦 [BANK REDIRECT] Wallet deducted successfully, keeping cart for bank payment completion');
+        console.log('🛒 [CART PRESERVATION] Keeping cart items until bank payment is completed');
         
         // Step 2: Update form data for bank gateway
         setFormData((prev: any) => ({
@@ -181,41 +182,20 @@ const PaymentGateway = ({
         // Reset processing state before triggering bank redirect
         setIsProcessing(false);
         
-        // Immediate redirect to bank gateway after wallet deduction
-        console.log('🚀 [BANK REDIRECT] Immediate redirect after wallet deduction for amount:', remainingAmount);
+        // Show user message about next step instead of auto-redirect
+        console.log('💡 [HYBRID PAYMENT] Wallet portion completed, user needs to complete bank payment');
         
-        // Use the existing active gateway to process bank payment
-        if (activeGateway && activeGateway.config) {
-          console.log('🏦 [BANK REDIRECT] Using active gateway:', activeGateway.name);
-          
-          try {
-            // Create payment request for remaining amount
-            const paymentData = {
-              amount: remainingAmount,
-              orderId,
-              currency: 'IQD',
-              description: `Payment for Order ${orderId} - Remaining Amount`,
-              returnUrl: `${window.location.origin}/payment/success?orderId=${orderId}`,
-              cancelUrl: `${window.location.origin}/payment/failed?orderId=${orderId}`
-            };
-            
-            // Build payment URL based on gateway config
-            const baseUrl = activeGateway.config.apiBaseUrl || activeGateway.config.webhookUrl;
-            const paymentUrl = `${baseUrl}?amount=${remainingAmount}&orderId=${orderId}&merchantId=${activeGateway.config.merchantId || 'default'}`;
-            
-            console.log('🚀 [BANK REDIRECT] Redirecting to:', paymentUrl);
-            
-            // Immediate redirect to payment gateway
-            window.location.href = paymentUrl;
-            
-          } catch (error) {
-            console.error('❌ [BANK REDIRECT] Failed to redirect:', error);
-            onPaymentError('خطا در هدایت به درگاه بانک');
-          }
-        } else {
-          console.error('❌ [BANK REDIRECT] No active gateway available');
-          onPaymentError('درگاه پرداخت در دسترس نیست');
-        }
+        // Instead of auto-redirect, show user the bank payment options
+        onPaymentSuccess({
+          method: 'wallet_partial',
+          transactionId: walletResponse.transactionId,
+          amount: walletAmount,
+          walletDeducted: walletAmount,
+          bankPaid: 0,
+          remainingAmount: remainingAmount,
+          requiresBankPayment: true,
+          message: `کیف پول: ${walletAmount} IQD پرداخت شد. مبلغ باقی‌مانده: ${remainingAmount} IQD از طریق بانک پرداخت شود.`
+        });
       } else {
         throw new Error(walletResponse.message || 'Wallet deduction failed');
       }

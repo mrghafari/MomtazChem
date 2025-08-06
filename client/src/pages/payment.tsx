@@ -194,53 +194,72 @@ export default function Payment() {
     setPaymentData(paymentResult);
     setPaymentProcessed(true);
     
-    // IMMEDIATE CART CLEARING - Multiple approaches for reliability
-    console.log('🧹 [CART CLEAR] Clearing cart after successful payment');
+    // Only clear cart for confirmed complete payments (not pending bank payments)
+    const isCompletePayment = paymentResult.method === 'wallet_full' || 
+                              (paymentResult.method === 'online_payment' && paymentResult.confirmed === true) ||
+                              (paymentResult.method !== 'wallet_partial' && paymentResult.method !== 'online_payment' && !paymentResult.requiresBankPayment);
     
-    // Clear localStorage immediately
-    localStorage.removeItem('cart');
-    localStorage.removeItem(`wallet_amount_${orderId}`);
-    console.log('🧹 [CART CLEAR] Cleared localStorage cart and wallet data');
-    
-    // Clear persistent cart from database
-    fetch('/api/cart/clear', { 
-      method: 'POST',
-      body: JSON.stringify({}), 
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include'  // Include session cookies
-    })
-      .then(response => response.json())
-      .then(data => {
-        console.log('✅ [CART CLEAR] Database cart cleared:', data);
+    if (isCompletePayment) {
+      // IMMEDIATE CART CLEARING - Multiple approaches for reliability
+      console.log('🧹 [CART CLEAR] Clearing cart after complete payment');
+      
+      // Clear localStorage immediately
+      localStorage.removeItem('cart');
+      localStorage.removeItem(`wallet_amount_${orderId}`);
+      console.log('🧹 [CART CLEAR] Cleared localStorage cart and wallet data');
+      
+      // Clear persistent cart from database
+      fetch('/api/cart/clear', { 
+        method: 'POST',
+        body: JSON.stringify({}), 
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include'  // Include session cookies
       })
-      .catch(err => {
-        console.warn('⚠️ [CART CLEAR] Failed to clear database cart:', err);
-      });
-    
-    // Clear cart using mutation
-    clearCartMutation.mutate();
-    
-    // Force cart state update through query invalidation
-    queryClient.invalidateQueries({ queryKey: ['/api/customers/persistent-cart'] });
-    queryClient.invalidateQueries({ queryKey: ['/api/cart'] });
+        .then(response => response.json())
+        .then(data => {
+          console.log('✅ [CART CLEAR] Database cart cleared:', data);
+        })
+        .catch(err => {
+          console.warn('⚠️ [CART CLEAR] Failed to clear database cart:', err);
+        });
+      
+      // Clear cart using mutation
+      clearCartMutation.mutate();
+      
+      // Force cart state update through query invalidation
+      queryClient.invalidateQueries({ queryKey: ['/api/customers/persistent-cart'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/cart'] });
+      
+    } else {
+      console.log('🛒 [CART PRESERVATION] Keeping cart for partial payment - bank payment still required');
+    }
     
     // Clear localStorage for this order
     localStorage.removeItem(`wallet_amount_${orderId}`);
     console.log('🧹 [CLEANUP] Removed localStorage data for order:', orderId);
     
-    // Immediate success notification
-    toast({
-      title: "پرداخت موفق",
-      description: "پرداخت شما با موفقیت انجام شد. در حال تولید فاکتور...",
-    });
+    // Success notification based on payment type
+    if (paymentResult.requiresBankPayment) {
+      toast({
+        title: "کسر کیف پول موفق",
+        description: paymentResult.message || "بخش کیف پول پرداخت شد. لطفاً پرداخت بانکی را نیز تکمیل کنید.",
+      });
+    } else {
+      toast({
+        title: "پرداخت موفق",
+        description: "پرداخت شما با موفقیت انجام شد. در حال تولید فاکتور...",
+      });
+    }
     
-    // Update order with payment information and automatically generate invoice
+    // Update order with payment information
+    const paymentStatus = paymentResult.requiresBankPayment ? 'partial' : 'paid';
+    
     updatePaymentMutation.mutate({
-      paymentStatus: 'paid',
+      paymentStatus: paymentStatus,
       paymentMethod: paymentResult.method,
       transactionId: paymentResult.transactionId,
       paymentData: paymentResult,
-      autoComplete: true // Flag to indicate this should auto-complete
+      autoComplete: !paymentResult.requiresBankPayment // Only auto-complete for full payments
     });
   };
 
