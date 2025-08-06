@@ -1207,12 +1207,16 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       });
       
       // PRIORITY 1: Check for hybrid payment (wallet partial + bank required)
-      if (requiresBankPayment && response.redirectUrl && remainingAmount > 0) {
+      if (requiresBankPayment && remainingAmount > 0) {
         console.log('🔄 [HYBRID PAYMENT] Wallet partial payment + bank required');
-        console.log('🔄 [HYBRID PAYMENT] Redirecting to bank gateway:', response.redirectUrl);
+        
+        // Construct redirect URL if not provided by server
+        const orderNumber = response.orderNumber || response.orderId;
+        const redirectUrl = response.redirectUrl || response.paymentGatewayUrl || `/payment/${orderNumber}?amount=${remainingAmount}&wallet=${walletDeducted}&method=online_payment`;
+        
+        console.log('🔄 [HYBRID PAYMENT] Redirecting to bank gateway:', redirectUrl);
         
         // Save wallet amount to localStorage for payment page persistence
-        const orderNumber = response.orderNumber || response.orderId;
         if (orderNumber && walletAmount > 0) {
           localStorage.setItem(`wallet_amount_${orderNumber}`, walletAmount.toString());
           console.log('💾 [LOCALSTORAGE] Wallet amount saved for order:', orderNumber, '→', walletAmount);
@@ -1229,8 +1233,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         
         // Force redirect to hybrid payment page
         setTimeout(() => {
-          console.log('🔄 [REDIRECT] Going to:', response.redirectUrl);
-          window.location.href = response.redirectUrl;
+          console.log('🔄 [REDIRECT] Going to:', redirectUrl);
+          window.location.href = redirectUrl;
         }, 2000);
         return;
       }
