@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ShoppingCart, Plus, Minus, Filter, Search, Grid, List, Star, User, LogOut, X, ChevronDown, Eye, Brain, Sparkles, Wallet, FileText, Download, AlertTriangle, Package, MessageSquare, ZoomIn, Shield, Flame } from "lucide-react";
+import { ShoppingCart, Plus, Minus, Filter, Search, Grid, List, Star, User, LogOut, X, ChevronDown, ChevronLeft, ChevronRight, Eye, Brain, Sparkles, Wallet, FileText, Download, AlertTriangle, Package, MessageSquare, ZoomIn, Shield, Flame } from "lucide-react";
 import { useLocation } from "wouter";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCustomerAuth } from "@/hooks/useCustomerAuth";
@@ -112,6 +112,8 @@ const Shop = () => {
     }
   };
   const [selectedImageForZoom, setSelectedImageForZoom] = useState<string | null>(null);
+  const [selectedProductForZoom, setSelectedProductForZoom] = useState<any>(null);
+  const [zoomedImageIndex, setZoomedImageIndex] = useState<number>(0);
   const [currentImageIndexes, setCurrentImageIndexes] = useState<{ [key: number]: number }>({});
   const [currentPage, setCurrentPage] = useState(0);
   const itemsPerPage = 12;
@@ -313,6 +315,42 @@ const Shop = () => {
   useEffect(() => {
     checkCustomerAuth();
   }, []);
+
+  // Keyboard navigation for zoom modal
+  useEffect(() => {
+    if (selectedImageForZoom && selectedProductForZoom) {
+      const handleKeyDown = (e: KeyboardEvent) => {
+        const images = Array.isArray(selectedProductForZoom.imageUrls) && selectedProductForZoom.imageUrls.length > 0 
+          ? selectedProductForZoom.imageUrls 
+          : (selectedProductForZoom.imageUrl ? [selectedProductForZoom.imageUrl] : []);
+        
+        switch (e.key) {
+          case 'Escape':
+            setSelectedImageForZoom(null);
+            setSelectedProductForZoom(null);
+            setZoomedImageIndex(0);
+            break;
+          case 'ArrowLeft':
+            if (images.length > 1) {
+              const newIndex = zoomedImageIndex > 0 ? zoomedImageIndex - 1 : images.length - 1;
+              setZoomedImageIndex(newIndex);
+              setSelectedImageForZoom(images[newIndex]);
+            }
+            break;
+          case 'ArrowRight':
+            if (images.length > 1) {
+              const newIndex = zoomedImageIndex < images.length - 1 ? zoomedImageIndex + 1 : 0;
+              setZoomedImageIndex(newIndex);
+              setSelectedImageForZoom(images[newIndex]);
+            }
+            break;
+        }
+      };
+      
+      document.addEventListener('keydown', handleKeyDown);
+      return () => document.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [selectedImageForZoom, selectedProductForZoom, zoomedImageIndex]);
 
   // Initialize display stock from actual database values (not affected by cart)
   useEffect(() => {
@@ -1130,6 +1168,8 @@ const Shop = () => {
                                     e.stopPropagation();
                                     console.log('Image clicked:', currentImage);
                                     setSelectedImageForZoom(currentImage);
+                                    setSelectedProductForZoom(product);
+                                    setZoomedImageIndex(currentIndex);
                                   }}
                                 >
                                   <img 
@@ -1560,6 +1600,8 @@ const Shop = () => {
                                     e.stopPropagation();
                                     console.log('List image clicked:', currentImage);
                                     setSelectedImageForZoom(currentImage);
+                                    setSelectedProductForZoom(product);
+                                    setZoomedImageIndex(currentIndex);
                                   }}
                                 >
                                   <img 
@@ -2102,28 +2144,102 @@ const Shop = () => {
       )}
 
       {/* Image Zoom Modal */}
-      {selectedImageForZoom && (
+      {selectedImageForZoom && selectedProductForZoom && (
         <div 
           className="fixed inset-0 z-50 bg-black bg-opacity-80 flex items-center justify-center p-4"
-          onClick={() => setSelectedImageForZoom(null)}
+          onClick={() => {
+            setSelectedImageForZoom(null);
+            setSelectedProductForZoom(null);
+            setZoomedImageIndex(0);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') {
+              setSelectedImageForZoom(null);
+              setSelectedProductForZoom(null);
+              setZoomedImageIndex(0);
+            }
+          }}
         >
           <div 
             className="relative max-w-6xl max-h-[90vh] w-full h-full flex items-center justify-center"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Close button */}
             <Button
               variant="ghost"
               size="sm"
               className="absolute top-4 right-4 z-10 bg-white/20 hover:bg-white/30 text-white rounded-full p-2"
-              onClick={() => setSelectedImageForZoom(null)}
+              onClick={() => {
+                setSelectedImageForZoom(null);
+                setSelectedProductForZoom(null);
+                setZoomedImageIndex(0);
+              }}
             >
               <X className="w-6 h-6" />
             </Button>
+
+            {(() => {
+              const images = Array.isArray(selectedProductForZoom.imageUrls) && selectedProductForZoom.imageUrls.length > 0 
+                ? selectedProductForZoom.imageUrls 
+                : (selectedProductForZoom.imageUrl ? [selectedProductForZoom.imageUrl] : []);
+              
+              const currentZoomImage = images[zoomedImageIndex] || selectedImageForZoom;
+
+              return (
+                <>
+                  {/* Navigation buttons */}
+                  {images.length > 1 && (
+                    <>
+                      {/* Previous button */}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 bg-white/20 hover:bg-white/30 text-white rounded-full p-3"
+                        onClick={() => {
+                          const newIndex = zoomedImageIndex > 0 ? zoomedImageIndex - 1 : images.length - 1;
+                          setZoomedImageIndex(newIndex);
+                          setSelectedImageForZoom(images[newIndex]);
+                        }}
+                      >
+                        <ChevronLeft className="w-8 h-8" />
+                      </Button>
+                      
+                      {/* Next button */}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 bg-white/20 hover:bg-white/30 text-white rounded-full p-3"
+                        onClick={() => {
+                          const newIndex = zoomedImageIndex < images.length - 1 ? zoomedImageIndex + 1 : 0;
+                          setZoomedImageIndex(newIndex);
+                          setSelectedImageForZoom(images[newIndex]);
+                        }}
+                      >
+                        <ChevronRight className="w-8 h-8" />
+                      </Button>
+                    </>
+                  )}
+
+                  {/* Image counter */}
+                  {images.length > 1 && (
+                    <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10 bg-black/60 text-white px-3 py-1 rounded-full text-sm font-medium">
+                      {zoomedImageIndex + 1} / {images.length}
+                    </div>
+                  )}
+
+                  {/* Product name */}
+                  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-10 bg-black/60 text-white px-4 py-2 rounded-lg text-sm font-medium max-w-md text-center">
+                    {selectedProductForZoom.name}
+                  </div>
+                </>
+              );
+            })()}
+
             <div className="relative overflow-hidden rounded-lg bg-white p-2">
               <div className="relative">
                 <img
                   src={selectedImageForZoom}
-                  alt="Product Image"
+                  alt={selectedProductForZoom.name}
                   className="max-w-full max-h-[80vh] object-contain block cursor-crosshair"
                   onMouseMove={(e) => {
                     const img = e.target as HTMLImageElement;
@@ -2183,6 +2299,29 @@ const Shop = () => {
                 id="zoom-result"
               />
             </div>
+
+            {(() => {
+              const images = Array.isArray(selectedProductForZoom.imageUrls) && selectedProductForZoom.imageUrls.length > 0 
+                ? selectedProductForZoom.imageUrls 
+                : (selectedProductForZoom.imageUrl ? [selectedProductForZoom.imageUrl] : []);
+
+              return images.length > 1 ? (
+                <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-10 flex space-x-2">
+                  {images.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        setZoomedImageIndex(index);
+                        setSelectedImageForZoom(images[index]);
+                      }}
+                      className={`w-3 h-3 rounded-full transition-colors ${
+                        index === zoomedImageIndex ? 'bg-white' : 'bg-white/50 hover:bg-white/80'
+                      }`}
+                    />
+                  ))}
+                </div>
+              ) : null;
+            })()}
           </div>
         </div>
       )}
