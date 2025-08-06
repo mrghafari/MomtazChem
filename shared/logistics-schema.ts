@@ -292,9 +292,6 @@ export type InsertDeliveryVerificationCode = z.infer<typeof insertDeliveryVerifi
 export type LogisticsAnalytics = typeof logisticsAnalytics.$inferSelect;
 export type InsertLogisticsAnalytics = z.infer<typeof insertLogisticsAnalyticsSchema>;
 
-export type ReadyVehicle = typeof readyVehicles.$inferSelect;
-export type InsertReadyVehicle = z.infer<typeof insertReadyVehicleSchema>;
-
 // =============================================================================
 // CONSTANTS
 // =============================================================================

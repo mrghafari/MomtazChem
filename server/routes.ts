@@ -45,7 +45,39 @@ import { deliveryVerificationStorage } from "./delivery-verification-storage";
 import { gpsDeliveryStorage } from "./gps-delivery-storage";
 import { gpsDeliveryConfirmations } from "@shared/gps-delivery-schema";
 
-import { vehicleTemplates, vehicleSelectionHistory, insertVehicleTemplateSchema, insertVehicleSelectionHistorySchema, internationalCountries, internationalCities, internationalShippingRates, insertInternationalCountrySchema, insertInternationalCitySchema, insertInternationalShippingRateSchema, deliveryVerificationCodes, readyVehicles } from "@shared/logistics-schema";
+import { 
+  vehicleTemplates, 
+  vehicleSelectionHistory, 
+  insertVehicleTemplateSchema, 
+  insertVehicleSelectionHistorySchema, 
+  internationalCountries, 
+  internationalCities, 
+  internationalShippingRates, 
+  insertInternationalCountrySchema, 
+  insertInternationalCitySchema, 
+  insertInternationalShippingRateSchema, 
+  deliveryVerificationCodes, 
+  readyVehicles,
+  transportationCompanies,
+  deliveryVehicles,
+  deliveryPersonnel,
+  deliveryRoutes,
+  logisticsAnalytics,
+  insertTransportationCompanySchema,
+  insertDeliveryVehicleSchema,
+  insertDeliveryPersonnelSchema,
+  insertDeliveryRouteSchema,
+  insertDeliveryVerificationCodeSchema,
+  type TransportationCompany,
+  type DeliveryVehicle,
+  type DeliveryPersonnel,
+  type DeliveryRoute,
+  type DeliveryVerificationCode,
+  VEHICLE_TYPES,
+  DELIVERY_STATUS,
+  ROUTE_STATUS,
+  SMS_STATUS
+} from "@shared/logistics-schema";
 import { 
   companyInformation, 
   correspondence, 
@@ -90,22 +122,6 @@ import {
 } from "@shared/cart-schema";
 
 import { logisticsStorage } from "./logistics-storage";
-import { 
-  transportationCompanies,
-  deliveryVehicles,
-  deliveryPersonnel,
-  deliveryRoutes,
-  deliveryVerificationCodes,
-  logisticsAnalytics,
-  insertTransportationCompanySchema,
-  insertDeliveryVehicleSchema,
-  insertDeliveryPersonnelSchema,
-  insertDeliveryRouteSchema,
-  insertDeliveryVerificationCodeSchema,
-  type TransportationCompany,
-  type DeliveryVehicle,
-  type DeliveryPersonnel,
-} from "@shared/logistics-schema";
 
 // Marketing schema imports
 import { 
@@ -119,16 +135,7 @@ import {
   insertMarketIntelligenceSchema
 } from "@shared/marketing-schema";
 
-import {
-  type DeliveryRoute,
-  type DeliveryVerificationCode,
-  VEHICLE_TYPES,
-  DELIVERY_STATUS,
-  ROUTE_STATUS,
-  SMS_STATUS
-} from "@shared/logistics-schema";
 import { 
-  gpsDeliveryConfirmations,
   gpsDeliveryAnalytics,
   insertGpsDeliveryConfirmationSchema,
   insertGpsDeliveryAnalyticsSchema,

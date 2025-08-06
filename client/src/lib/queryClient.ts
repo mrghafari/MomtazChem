@@ -118,12 +118,6 @@ export const queryClient = new QueryClient({
       },
       gcTime: 0, // Don't cache queries at all
       retry: false,
-      onError: (error: any) => {
-        // Suppress 401 auth errors globally - they're expected 
-        if (!error.message?.includes('401:') && !error.message?.includes('احراز هویت نشده')) {
-          console.error('Query error:', error);
-        }
-      },
     },
     mutations: {
       retry: false,
