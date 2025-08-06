@@ -13328,15 +13328,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Check if hybrid payment is required (wallet partially used + remaining amount)
-      // Fix: Use remaining amount directly, don't subtract wallet usage twice
-      const remainingAmountToPay = Math.round(parseFloat(remainingAmount || totalAmount));
+      // CRITICAL FIX: Use the actual remaining amount from bilingual form submission
+      const remainingAmountToPay = Math.round(parseFloat(remainingAmount || (totalAmount - actualWalletUsed)));
       
       // Critical fix: For full wallet payments, completely bypass bank payment logic
       const isFullWalletPayment = finalPaymentMethod === 'wallet_full';
       const isPartialWalletPayment = finalPaymentMethod === 'wallet_partial';
       
-      // Enhanced logic: No bank payment required for full wallet payments
-      const requiresBankPayment = !isFullWalletPayment && remainingAmountToPay > 0;
+      // Enhanced logic: No bank payment required for full wallet payments or when remaining = 0
+      const requiresBankPayment = !isFullWalletPayment && remainingAmountToPay > 0.01;
       
       console.log('🔍 [PAYMENT LOGIC DEBUG] Payment decision logic:', {
         actualWalletUsed,
@@ -13352,7 +13352,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isPartialWalletPayment,
         walletPaymentComplete: isFullWalletPayment && actualWalletUsed > 0,
         shouldRedirectToBank: remainingAmountToPay > 0.01 && !isFullWalletPayment,
-        isZeroRemaining: remainingAmountToPay <= 0.01
+        isZeroRemaining: remainingAmountToPay <= 0.01,
+        calculationMethod: remainingAmount ? 'from_form_data' : 'calculated_difference'
       });
       
       if (isFullWalletPayment) {
@@ -13594,9 +13595,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             
             console.log(`✅ Wallet payment processed: ${walletAmountUsed} IQD deducted, transaction ID: ${transaction.id}`);
             
-            // CRITICAL: Recalculate remainingAmount after successful wallet deduction
-            remainingAmount = Math.max(0, totalAmount - walletAmountUsed);
-            console.log(`🔢 [RECALCULATION] Remaining after wallet deduction: ${totalAmount} - ${walletAmountUsed} = ${remainingAmount}`);
+            // CRITICAL: Use frontend remainingAmount to avoid double calculations
+            const frontendRemainingAmount = parseFloat(orderData.remainingAmount || '0');
+            remainingAmount = frontendRemainingAmount;
+            console.log(`🔢 [AMOUNT DEBUG] Using frontend remaining amount: ${frontendRemainingAmount}, Wallet used: ${walletAmountUsed}, Total: ${totalAmount}`);
             
             // CRITICAL FIX: Check if remainingAmount is 0 to send directly to warehouse
             if (remainingAmount <= 0.01) {
