@@ -51,16 +51,19 @@ const PaymentGateway = ({
     staleTime: 0 // Always fetch fresh data
   });
 
-  // ✅ SIMPLE PAYMENT: Use only cart-based amount from props
-  const finalAmount = totalAmount; // Only cart subtotal, no additional calculations
-  const calculatedWalletAmount = initialWalletAmount;
-  const calculatedRemainingAmount = totalAmount - initialWalletAmount;
+  // Use calculation data from bilingual form if available
+  const tempData = (tempCalcData as any)?.data;
+  const finalAmount = tempData?.finalAmount || totalAmount;
+  const calculatedWalletAmount = tempData?.walletAmountUsed || initialWalletAmount;
+  const calculatedRemainingAmount = tempData?.remainingAmount || totalAmount;
 
-  console.log('✅ [SIMPLE PAYMENT GATEWAY] Cart-only calculation:', {
-    cartTotal: totalAmount,
+  console.log('💾 [PAYMENT GATEWAY] Using calculation data:', {
+    tempCalcData: tempData,
     finalAmount,
-    walletAmount: calculatedWalletAmount,
-    remainingAmount: calculatedRemainingAmount
+    calculatedWalletAmount,
+    calculatedRemainingAmount,
+    originalTotalAmount: totalAmount,
+    paymentMethod: tempData?.paymentMethod || paymentMethod
   });
 
   // Handle wallet-only payment (when remaining balance is 0)
@@ -342,15 +345,18 @@ const PaymentGateway = ({
       console.log('🔍 [PAYMENT GATEWAY] Gateway config:', gatewayConfig);
       console.log('🔍 [PAYMENT GATEWAY] Form data:', formData);
       
-      // ✅ SIMPLE: ALWAYS use finalAmount (cart total only) for Bank Saman
-      const amountForGateway = finalAmount; // Only cart subtotal, no additional calculations
-      const walletAmount = calculatedWalletAmount || 0;
+      // 🚨 CRITICAL: ALWAYS use finalAmount for gateway (per user requirement)
+      // For hybrid payments, wallet is deducted separately, bank still gets finalAmount
+      const amountForGateway = finalAmount;
+      const walletAmount = formData.walletAmount || calculatedWalletAmount || 0;
       
-      console.log('✅ [SIMPLE PAYMENT] Sending to Bank Saman:', {
-        cartTotal: totalAmount,
-        amountForGateway,
+      console.log('💰 [PAYMENT GATEWAY] Payment breakdown:', {
+        finalAmount,
+        totalAmount,
         walletAmount,
-        calculationNote: 'فقط قیمت کالاهای سبد خرید'
+        amountForGateway,
+        isHybrid: formData.paymentMethod === 'wallet_partial',
+        note: 'Bank gateway ALWAYS receives finalAmount per user requirement'
       });
       
       if (gatewayConfig && gatewayConfig.apiBaseUrl) {

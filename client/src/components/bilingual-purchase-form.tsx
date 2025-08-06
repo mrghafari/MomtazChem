@@ -862,42 +862,20 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     });
   }, [isLoadingShippingRates, shippingRatesError, shippingRatesData]);
 
-  // ✅ VAT CALCULATION: Calculate tax based on cart subtotal using existing vatData
-  const vatAmount = useMemo(() => {
-    if (!vatData?.vatEnabled || !subtotalAmount) return 0;
-    const vatRate = parseFloat(vatData.vatRate || '0') / 100; // Convert percentage to decimal
-    return Math.round((subtotalAmount * vatRate) * 100) / 100;
-  }, [vatData, subtotalAmount]);
+  // Calculate VAT and duties amounts (only on product subtotal, not shipping)
+  const vatRate = vatData?.vatEnabled ? parseFloat(vatData.vatRate || '0') : 0;
+  const dutiesRate = vatData?.dutiesEnabled ? parseFloat(vatData.dutiesRate || '0') : 0;
   
-  const dutiesAmount = useMemo(() => {
-    if (!vatData?.dutiesEnabled || !subtotalAmount) return 0;
-    const dutiesRate = parseFloat(vatData.dutiesRate || '0') / 100; // Convert percentage to decimal
-    return Math.round((subtotalAmount * dutiesRate) * 100) / 100;
-  }, [vatData, subtotalAmount]);
-  
+  const vatAmount = vatData?.vatEnabled ? subtotalAmount * vatRate : 0;
+  const dutiesAmount = vatData?.dutiesEnabled ? subtotalAmount * dutiesRate : 0;
   const totalTaxAmount = vatAmount + dutiesAmount;
   
-  // ✅ NO SMART DELIVERY: Removed all delivery cost calculations
-  
-  // ✅ CART + TAX CALCULATION: Cart subtotal + VAT + duties as requested by user
-  const totalAmount = subtotalAmount + totalTaxAmount;
-  
-  // ✅ WEIGHT CALCULATION: Calculate total weight from cart and products
-  const totalWeight = useMemo(() => {
-    if (!cart || Object.keys(cart).length === 0) return 0;
-    
-    return Object.entries(cart).reduce((total: number, [productIdStr, quantity]) => {
-      const productId = parseInt(productIdStr);
-      const product = products.find(p => p.id === productId);
-      if (!product) return total;
-      
-      const weight = parseFloat(product.weight || product.netWeight || '0');
-      return total + (weight * quantity);
-    }, 0);
-  }, [cart, products]);
-
-  // ✅ NO SHIPPING COST CALCULATION: Only cart products
-  const finalShippingCost = 0;
+  // Smart delivery cost calculation state
+  const [smartDeliveryCost, setSmartDeliveryCost] = useState<number>(0);
+  const [smartDeliveryLoading, setSmartDeliveryLoading] = useState<boolean>(false);
+  const [smartDeliveryError, setSmartDeliveryError] = useState<string>('');
+  const [optimalVehicle, setOptimalVehicle] = useState<any>(null);
+  const [alternativeVehicles, setAlternativeVehicles] = useState<any[]>([]);
 
   // Auto-select smart vehicle when shipping methods load
   useEffect(() => {
@@ -913,21 +891,45 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     }
   }, [shippingRatesData, selectedShippingMethod]);
 
-  // ✅ SIMPLE CALCULATION DEBUG: Cart total with weight
-  console.log('💰 [SIMPLE PURCHASE] Cart calculation with weight:', {
+  console.log('💰 [PURCHASE FORM] Tax calculation:', {
+    vatData,
+    vatRate,
+    dutiesRate,
     subtotalAmount,
-    totalAmount,
-    totalWeight: `${totalWeight} kg`,
-    cartItems: Object.keys(cart).length,
-    cart: cart,
-    'Note': 'قیمت کالاها + وزن محاسبه شده'
+    vatAmount,
+    dutiesAmount,
+    totalTaxAmount
   });
   
-  // ✅ SIMPLE DEBUG: Only cart total
-  console.log('💰 [SIMPLE CALCULATION] Cart total only:', {
+  // Calculate total weight of all products in cart
+  const totalWeight = Object.entries(cart).reduce((sum, [productId, quantity]) => {
+    const product = products.find(p => p.id === parseInt(productId));
+    if (product) {
+      // Get weight from product data (use different weight fields as fallback)
+      const productWeight = parseFloat(product.weight || product.weightKg || product.weight_kg || '0');
+      return sum + (productWeight * quantity);
+    }
+    return sum;
+  }, 0);
+
+  // Calculate shipping cost - prioritize smart delivery over regular shipping
+  const finalShippingCost = selectedShippingMethod && (shippingRatesData?.find((rate: any) => rate.id === selectedShippingMethod)?.deliveryMethod === 'smart_vehicle' || shippingRatesData?.find((rate: any) => rate.id === selectedShippingMethod)?.delivery_method === 'smart_vehicle')
+    ? (optimalVehicle ? optimalVehicle.totalCost : smartDeliveryCost)
+    : shippingCost;
+  
+  // Calculate total amount (subtotal + VAT + duties + final shipping cost - no double counting)
+  const totalAmount = subtotalAmount + totalTaxAmount + finalShippingCost;
+  
+  // Debug total calculation
+  console.log('💰 [TOTAL CALCULATION] Breakdown:', {
     subtotalAmount,
+    totalTaxAmount,
+    finalShippingCost,
+    regularShippingCost: shippingCost,
+    smartDeliveryCost: smartDeliveryCost,
+    optimalVehicleCost: optimalVehicle?.totalCost,
     totalAmount,
-    'Simple formula': `Cart products total = ${totalAmount} IQD`
+    'Components': `${subtotalAmount} + ${totalTaxAmount} + ${finalShippingCost} = ${totalAmount}`
   });
 
   // Calculate wallet payment amounts
@@ -1007,82 +1009,131 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     }
   };
 
-  // Smart vehicle selection state
-  const [smartVehicleData, setSmartVehicleData] = useState<any>(null);
-  const [isCalculatingVehicle, setIsCalculatingVehicle] = useState(false);
+  // Calculate smart delivery cost
+  const calculateSmartDeliveryCost = async (destinationCity: string, destinationProvince: string) => {
+    if (!destinationCity || totalWeight <= 0) {
+      console.log('🚚 [SMART DELIVERY] Skipping calculation - missing city or zero weight');
+      return;
+    }
 
-  // Calculate smart vehicle selection when cart changes or address is set
-  useEffect(() => {
-    const calculateSmartVehicle = async () => {
-      if (!cart || Object.keys(cart).length === 0) {
-        setSmartVehicleData(null);
-        return;
-      }
+    setSmartDeliveryLoading(true);
+    setSmartDeliveryError('');
+    
+    try {
+      console.log('🚚 [SMART DELIVERY] Calculating cost for:', {
+        weight: totalWeight,
+        city: destinationCity,
+        province: destinationProvince,
+        cartItems: Object.keys(cart).length
+      });
 
-      // Only calculate if we have destination city
-      const destinationCity = form.watch('city') || (showSecondAddress && secondCity);
-      if (!destinationCity) {
-        setSmartVehicleData(null);
-        return;
-      }
+      const response = await fetch('/api/calculate-delivery-cost', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          weight: totalWeight,
+          destinationCity: destinationCity,
+          destinationProvince: destinationProvince,
+          cart: cart,
+          useSecondaryAddress: showSecondAddress && secondAddress.trim().length > 0,
+          secondaryAddress: showSecondAddress ? {
+            address: secondAddress,
+            city: secondCity,
+            province: secondProvince,
+            postalCode: secondPostalCode
+          } : null
+        })
+      });
 
-      setIsCalculatingVehicle(true);
+      const data = await response.json();
       
-      try {
-        console.log('🚛 [SMART VEHICLE] Calculating optimal vehicle selection...', {
-          cart,
-          destinationCity,
-          totalWeight
-        });
-
-        const response = await fetch('/api/calculate-delivery-cost', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          credentials: 'include',
-          body: JSON.stringify({
-            cart,
-            destinationCity: destinationCity,
-            destinationProvince: form.watch('city') || (showSecondAddress && secondProvince),
-            products: products.filter(p => cart[p.id] > 0)
-          })
-        });
-
-        if (response.ok) {
-          const result = await response.json();
-          console.log('🚛 [SMART VEHICLE] API response:', result);
+      console.log('🚚 [SMART DELIVERY] API response:', data);
+      console.log('🚚 [SMART DELIVERY] Response details:', {
+        success: data.success,
+        hasData: !!data.data,
+        hasOptimalVehicle: !!(data.data?.optimalVehicle),
+        optimalVehicle: data.data?.optimalVehicle
+      });
+      
+      if (data.success && data.data) {
+        // Handle standard vehicle selection response format from database templates
+        const { optimalVehicle, alternatives } = data.data;
+        
+        // Check if optimalVehicle exists and has required properties
+        if (optimalVehicle && optimalVehicle.totalCost !== undefined) {
+          setOptimalVehicle(optimalVehicle);
+          setAlternativeVehicles(alternatives || []);
+          setSmartDeliveryCost(optimalVehicle.totalCost);
           
-          if (result.success && result.optimalVehicle) {
-            setSmartVehicleData({
-              optimal: result.optimalVehicle,
-              alternatives: result.alternatives || [],
-              totalWeight: result.totalWeight || totalWeight,
-              distance: result.distance || 0,
-              routeType: result.routeType || 'urban',
-              containsFlammable: result.containsFlammable || false
-            });
-            console.log('✅ [SMART VEHICLE] Vehicle selection completed:', result.optimalVehicle);
-          } else {
-            console.log('❌ [SMART VEHICLE] No optimal vehicle found');
-            setSmartVehicleData(null);
-          }
+          console.log('✅ [SMART DELIVERY] Cost calculated:', {
+            vehicle: optimalVehicle.vehicleName,
+            cost: optimalVehicle.totalCost,
+            estimatedTime: optimalVehicle.estimatedTime
+          });
         } else {
-          console.log('❌ [SMART VEHICLE] API request failed');
-          setSmartVehicleData(null);
+          console.error('❌ [SMART DELIVERY] Invalid optimalVehicle data:', optimalVehicle);
+          throw new Error('داده‌های وسیله نقلیه بهینه دریافت نشد');
         }
-      } catch (error) {
-        console.error('❌ [SMART VEHICLE] Calculation error:', error);
-        setSmartVehicleData(null);
-      } finally {
-        setIsCalculatingVehicle(false);
+      } else {
+        throw new Error(data.message || 'محاسبه هزینه ارسال ناموفق بود');
       }
-    };
+    } catch (error) {
+      console.error('❌ [SMART DELIVERY] Calculation error:', error);
+      setSmartDeliveryError((error as any)?.message || 'خطا در محاسبه هزینه ارسال');
+      setSmartDeliveryCost(0);
+      setOptimalVehicle(null);
+      setAlternativeVehicles([]);
+    } finally {
+      setSmartDeliveryLoading(false);
+    }
+  };
 
-    // Debounce the calculation
-    const timeoutId = setTimeout(calculateSmartVehicle, 1000);
-    return () => clearTimeout(timeoutId);
-  }, [cart, totalWeight, form.watch('city'), secondCity, showSecondAddress, products]);
+  // Watch for changes in destination to recalculate delivery cost
+  useEffect(() => {
+    // Determine final destination city and province
+    const finalDestinationCity = showSecondAddress && secondCity.trim() ? 
+      secondCity : 
+      (crmCustomerData?.cityRegion || crmCustomerData?.city || customerData?.customer?.cityRegion || customerData?.customer?.city || form.watch('city'));
+    
+    const finalDestinationProvince = showSecondAddress && secondProvince.trim() ? 
+      secondProvince : 
+      (crmCustomerData?.province || customerData?.customer?.province);
+
+    console.log('🚚 [DELIVERY CALCULATION] Final destination determined:', {
+      showSecondAddress,
+      secondCity,
+      secondProvince,
+      crmCityRegion: crmCustomerData?.cityRegion,
+      crmCity: crmCustomerData?.city,
+      crmProvince: crmCustomerData?.province,
+      customerCityRegion: customerData?.customer?.cityRegion,
+      customerCity: customerData?.customer?.city,
+      customerProvince: customerData?.customer?.province,
+      formCity: form.watch('city'),
+      finalDestinationCity,
+      finalDestinationProvince,
+      totalWeight
+    });
+
+    if (finalDestinationCity && finalDestinationProvince && totalWeight > 0) {
+      const debounceTimer = setTimeout(() => {
+        calculateSmartDeliveryCost(finalDestinationCity, finalDestinationProvince);
+      }, 1000); // 1 second debounce
+      
+      return () => clearTimeout(debounceTimer);
+    } else {
+      console.log('🚚 [DELIVERY CALCULATION] Missing required data for calculation:', {
+        hasCity: !!finalDestinationCity,
+        hasProvince: !!finalDestinationProvince,
+        hasWeight: totalWeight > 0,
+        cityValue: finalDestinationCity,
+        provinceValue: finalDestinationProvince
+      });
+    }
+  }, [showSecondAddress, secondCity, secondProvince, form.watch('city'), totalWeight, cart, crmCustomerData?.cityRegion, crmCustomerData?.province, customerData?.customer?.cityRegion, customerData?.customer?.province]);
 
 
 
@@ -1260,7 +1311,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         onOrderComplete();
       }
       // Handle bank transfer - redirect to payment gateway  
-      else if (response.paymentMethod === 'bank_transfer' || paymentMethod === 'online_payment') {
+      else if (response.paymentMethod === 'bank_transfer' || finalPaymentMethod === 'bank_transfer') {
         toast({
           title: "انتقال به درگاه بانک",
           description: "در حال هدایت شما به درگاه پرداخت بانکی..."
@@ -1342,19 +1393,18 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       isUsingRecipientMobile: !!(showRecipientMobile && recipientMobile.trim()),
     };
 
-    // ✅ SIMPLE ORDER DATA: Only cart-based calculations
     let orderData = {
       ...data,
       cart,
-      totalAmount, // This is only subtotalAmount (cart products total)
-      subtotalAmount, // Same as totalAmount - cart products cost
-      shippingCost: 0, // No shipping cost calculation
-      vatAmount: 0, // No tax calculation
+      totalAmount,
+      subtotalAmount,
+      shippingCost: finalShippingCost,
+      vatAmount: totalTaxAmount,
       selectedShippingMethod,
       currency: 'IQD',
       paymentMethod,
-      walletAmountUsed: Math.round(walletAmount),
-      remainingAmount: Math.round(Math.max(0, totalAmount - walletAmount)),
+      walletAmountUsed: Math.round(walletAmount), // Use actual wallet amount in integer format
+      remainingAmount: Math.round(Math.max(0, totalAmount - walletAmount)), // Calculate remaining in integer format
       
       // Enhanced delivery information
       secondDeliveryAddress: showSecondAddress ? secondAddress : null,
@@ -1431,27 +1481,26 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       orderData
     });
 
-    // ✅ SIMPLE TEMP CALCULATION: Only cart-based data for payment gateway
+    // Store temporary calculation data for payment gateway
     const tempCalculationData = {
-      finalAmount: totalAmount, // Only cart subtotal amount to send to Bank Saman
-      subtotalAmount, // Same as finalAmount - only cart products
-      shippingCost: 0, // No shipping cost
-      totalTaxAmount: 0, // No tax
+      finalAmount: totalAmount,
+      subtotalAmount,
+      shippingCost: finalShippingCost,
+      totalTaxAmount,
       walletAmountUsed: orderData.walletAmountUsed || 0,
       remainingAmount: orderData.remainingAmount || totalAmount,
       paymentMethod: finalPaymentMethod,
       cartData: cart,
       deliveryAddress: data.address,
       phone: data.phone,
-      notes: data.notes,
-      calculationBreakdown: `فقط قیمت کالاهای سبد خرید: ${totalAmount} IQD`
+      notes: data.notes
     };
 
     console.log('💾 [TEMP CALCULATION] Storing calculation data for payment:', tempCalculationData);
 
     // Store calculation data before submitting order
     try {
-      await apiRequest('POST', '/api/cart/temp-order-data', tempCalculationData, {});
+      await apiRequest('POST', '/api/cart/temp-order-data', tempCalculationData);
       console.log('✅ [TEMP CALCULATION] Successfully stored calculation data');
     } catch (error) {
       console.error('❌ [TEMP CALCULATION] Failed to store calculation data:', error);
@@ -1608,7 +1657,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
               {/* VAT */}
               {vatData?.vatEnabled && vatAmount > 0 && (
                 <div className="flex justify-between text-sm">
-                  <span>مالیات بر ارزش افزوده ({(vatData?.vatRate * 100 || 0).toFixed(0)}%)</span>
+                  <span>مالیات بر ارزش افزوده ({(vatRate * 100).toFixed(0)}%)</span>
                   <span>{formatCurrency(vatAmount)}</span>
                 </div>
               )}
@@ -1616,7 +1665,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
               {/* Duties */}
               {vatData?.dutiesEnabled && dutiesAmount > 0 && (
                 <div className="flex justify-between text-sm">
-                  <span>عوارض بر ارزش افزوده ({(vatData?.dutiesRate * 100 || 0).toFixed(0)}%)</span>
+                  <span>عوارض بر ارزش افزوده ({(dutiesRate * 100).toFixed(0)}%)</span>
                   <span>{formatCurrency(dutiesAmount)}</span>
                 </div>
               )}
@@ -1691,19 +1740,50 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                         {(() => {
                           const selectedRate = shippingRatesData.find((rate: any) => rate.id === selectedShippingMethod);
                           
-                          // ✅ NO SMART VEHICLE: Simple delivery method display
+                          // Handle smart_vehicle display
                           if (selectedRate && (selectedRate.deliveryMethod === 'smart_vehicle' || selectedRate.delivery_method === 'smart_vehicle')) {
                             return (
                               <div className="space-y-2">
                                 <div className="flex justify-between items-center text-sm">
-                                  <span className="text-emerald-700 font-medium">🚚 روش تحویل:</span>
+                                  <span className="text-emerald-700 font-medium">🚚 انتخاب هوشمند خودرو:</span>
                                   <div className="text-right">
-                                    <div className="font-bold text-emerald-800">خودرو هوشمند</div>
-                                    <div className="text-xs text-emerald-600">رایگان</div>
+                                    {optimalVehicle ? (
+                                      <div>
+                                        <div className="font-bold text-emerald-800">
+                                          {optimalVehicle.vehicleType === 'multiple' 
+                                            ? `${optimalVehicle.totalVehicles} خودرو` 
+                                            : optimalVehicle.vehicleName}
+                                        </div>
+                                        <div className="text-xs text-emerald-600">{formatCurrency(optimalVehicle.totalCost)}</div>
+                                      </div>
+                                    ) : smartDeliveryLoading ? (
+                                      <span className="font-bold text-emerald-800">در حال محاسبه...</span>
+                                    ) : (
+                                      <span className="font-bold text-orange-600">در انتظار آدرس مقصد...</span>
+                                    )}
                                   </div>
                                 </div>
                                 <div className="text-xs text-emerald-600 bg-emerald-50 p-2 rounded border border-emerald-200">
-                                  ✓ تحویل با خودرو مناسب - بدون هزینه اضافی
+                                  ✓ سیستم بهترین خودرو را بر اساس وزن، مقصد و کمترین هزینه انتخاب می‌کند
+                                  {optimalVehicle && (
+                                    <div className="mt-1 font-medium">
+                                      {optimalVehicle.vehicleType === 'multiple' ? (
+                                        <div>
+                                          راه‌حل انتخابی: {optimalVehicle.vehicleName}
+                                          <div className="text-xs mt-1 space-y-1">
+                                            {optimalVehicle.vehicles?.map((vehicle: any, index: number) => (
+                                              <div key={index} className="flex justify-between">
+                                                <span>خودرو {index + 1}: {vehicle.vehicleName}</span>
+                                                <span>{vehicle.weight} کیلو</span>
+                                              </div>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      ) : (
+                                        <span>خودرو انتخابی: {optimalVehicle.vehicleName} - {optimalVehicle.vehicleType}</span>
+                                      )}
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                             );
@@ -1781,9 +1861,15 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                     {(() => {
                       const selectedRate = shippingRatesData?.find((rate: any) => rate.id === selectedShippingMethod);
                       
-                      // ✅ NO SMART VEHICLE COST: Always show free shipping
+                      // Handle smart vehicle cost
                       if (selectedRate && (selectedRate.deliveryMethod === 'smart_vehicle' || selectedRate.delivery_method === 'smart_vehicle')) {
-                        return <span className="text-emerald-600 font-bold">رایگان</span>;
+                        if (smartDeliveryLoading) {
+                          return <span className="text-emerald-600">در حال محاسبه...</span>;
+                        }
+                        if (finalShippingCost > 0) {
+                          return <span className="text-emerald-600 font-bold">{formatCurrency(finalShippingCost)}</span>;
+                        }
+                        return <span className="text-gray-500">در انتظار آدرس</span>;
                       }
                       
                       // Handle self pickup cost
@@ -1797,94 +1883,6 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                 </div>
               )}
               
-              {/* Weight Display */}
-              {totalWeight > 0 && (
-                <div className="flex justify-between text-sm text-blue-600">
-                  <span>⚖️ وزن کل سبد خرید:</span>
-                  <span className="font-medium">{totalWeight.toFixed(2)} کیلوگرم</span>
-                </div>
-              )}
-
-              {/* VAT and Tax Display */}
-              {vatAmount > 0 && (
-                <div className="flex justify-between text-sm text-green-600">
-                  <span>💰 مالیات بر ارزش افزوده ({vatData?.vatRate}%):</span>
-                  <span className="font-medium">{vatAmount.toLocaleString()} IQD</span>
-                </div>
-              )}
-              
-              {dutiesAmount > 0 && (
-                <div className="flex justify-between text-sm text-green-600">
-                  <span>📊 عوارض ({vatData?.dutiesRate}%):</span>
-                  <span className="font-medium">{dutiesAmount.toLocaleString()} IQD</span>
-                </div>
-              )}
-              
-              {totalTaxAmount > 0 && (
-                <div className="flex justify-between text-sm text-red-600 font-semibold">
-                  <span>🧮 مجموع مالیات:</span>
-                  <span>{totalTaxAmount.toLocaleString()} IQD</span>
-                </div>
-              )}
-
-              {/* Smart Vehicle Selection Display */}
-              {(smartVehicleData || isCalculatingVehicle) && (
-                <div className="border-t pt-3 mt-3">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-sm font-medium text-purple-600">🚛 انتخاب هوشمند وسیله حمل:</span>
-                  </div>
-                  
-                  {isCalculatingVehicle ? (
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
-                      <div className="animate-spin w-4 h-4 border-2 border-purple-600 border-t-transparent rounded-full"></div>
-                      <span>در حال محاسبه بهترین وسیله حمل...</span>
-                    </div>
-                  ) : smartVehicleData?.optimal ? (
-                    <div className="space-y-2">
-                      <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3">
-                        <div className="flex justify-between items-start mb-2">
-                          <span className="text-sm font-medium text-purple-700">
-                            {smartVehicleData.optimal.vehicleName}
-                          </span>
-                          <span className="text-sm font-bold text-purple-600">
-                            {smartVehicleData.optimal.totalCost?.toLocaleString()} IQD
-                          </span>
-                        </div>
-                        
-                        <div className="grid grid-cols-2 gap-2 text-xs text-purple-600">
-                          <div>نوع: {smartVehicleData.optimal.vehicleType}</div>
-                          <div>مسیر: {smartVehicleData.routeType}</div>
-                          <div>حداکثر وزن: {smartVehicleData.optimal.maxWeight} kg</div>
-                          <div>زمان تقریبی: {smartVehicleData.optimal.estimatedTime} ساعت</div>
-                        </div>
-                        
-                        {smartVehicleData.containsFlammable && (
-                          <div className="mt-2 text-xs text-red-600 bg-red-50 p-2 rounded">
-                            🔥 مواد آتش‌زا: این وسیله مجاز برای حمل مواد آتش‌زا است
-                          </div>
-                        )}
-                        
-                        {smartVehicleData.optimal.totalVehicles > 1 && (
-                          <div className="mt-2 text-xs text-orange-600 bg-orange-50 p-2 rounded">
-                            📦 راه‌حل چند وسیله‌ای: {smartVehicleData.optimal.totalVehicles} وسیله نقلیه
-                          </div>
-                        )}
-                      </div>
-                      
-                      {smartVehicleData.alternatives?.length > 0 && (
-                        <div className="text-xs text-gray-500">
-                          + {smartVehicleData.alternatives.length} گزینه جایگزین در دسترس
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="text-sm text-gray-500">
-                      آدرس تحویل را وارد کنید تا بهترین وسیله حمل محاسبه شود
-                    </div>
-                  )}
-                </div>
-              )}
-
               {/* Final Amount */}
               <div className="flex justify-between font-bold text-lg border-t pt-2 bg-yellow-300 px-2 py-2 rounded-lg">
                 <span>Final Amount</span>
@@ -2229,7 +2227,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                             <Select 
                               onValueChange={(value) => {
                                 // Find the selected province object to get Arabic name
-                                const selectedProvince = provinces?.find((p: any) => 
+                                const selectedProvince = provinces?.data?.find((p: any) => 
                                   p.nameEnglish === value || p.name === value
                                 );
                                 
@@ -2250,7 +2248,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                               }} 
                               value={
                                 // Find the province with matching Arabic name to show English value
-                                provinces?.find((province: any) => 
+                                provinces?.data?.find((province: any) => 
                                   (province.nameArabic || province.name) === secondProvince
                                 )?.nameEnglish || secondProvince
                               }
@@ -2264,7 +2262,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                                 } />
                               </SelectTrigger>
                               <SelectContent>
-                                {provinces && Array.isArray(provinces) && provinces.map((province: any) => (
+                                {provinces?.data && Array.isArray(provinces.data) && provinces.data.map((province: any) => (
                                   <SelectItem key={province.id} value={province.nameEnglish || province.name}>
                                     {province.nameEnglish} / {province.nameArabic || province.name}
                                   </SelectItem>

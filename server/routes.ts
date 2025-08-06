@@ -25831,48 +25831,6 @@ ${message ? `Additional Requirements:\n${message}` : ''}
   // ============================================================================
 
   // Public endpoint for tax settings (no authentication required for checkout)
-  // VAT Settings API endpoint for bilingual-purchase-form
-  app.get('/api/admin/vat-settings', async (req, res) => {
-    try {
-      console.log('💰 [VAT API] Fetching VAT settings...');
-      
-      const result = await db.execute(sql`
-        SELECT vat_enabled, vat_rate 
-        FROM vat_settings 
-        WHERE is_active = true 
-        LIMIT 1
-      `);
-        
-      if (result.rows && result.rows.length > 0) {
-        const vatConfig = result.rows[0] as any;
-        console.log('💰 [VAT API] VAT settings found:', vatConfig);
-        
-        res.json({
-          success: true,
-          vatEnabled: vatConfig.vat_enabled,
-          vatRate: vatConfig.vat_rate,
-          dutiesEnabled: false, // not implemented yet
-          dutiesRate: '0'
-        });
-      } else {
-        console.log('💰 [VAT API] No VAT settings found, returning defaults');
-        res.json({
-          success: true,
-          vatEnabled: false,
-          vatRate: '0',
-          dutiesEnabled: false,
-          dutiesRate: '0'
-        });
-      }
-    } catch (error) {
-      console.error('💰 [VAT API] Error fetching VAT settings:', error);
-      res.status(500).json({
-        success: false,
-        message: 'خطا در دریافت تنظیمات مالیات'
-      });
-    }
-  });
-
   app.get('/api/tax-settings', async (req, res) => {
     try {
       const taxSettingsList = await db
