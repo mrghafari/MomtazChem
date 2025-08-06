@@ -1064,8 +1064,7 @@ function FinanceOrders() {
             <tr>
               <th>نام محصول</th>
               <th>تعداد</th>
-              <th>قیمت واحد</th>
-              <th>قیمت کل</th>
+              <th>وزن (کیلوگرم)</th>
             </tr>
           </thead>
           <tbody>
@@ -1073,14 +1072,12 @@ function FinanceOrders() {
               <tr>
                 <td>${item.productName}</td>
                 <td>${item.quantity}</td>
-                <td>${Math.floor(parseFloat(item.unitPrice || 0)).toLocaleString()} ${orderDetails.currency}</td>
-                <td>${Math.floor(parseFloat(item.totalPrice || 0)).toLocaleString()} ${orderDetails.currency}</td>
+                <td>${item.weight || 'نامشخص'}</td>
               </tr>
             `).join('') || ''}
             <tr class="total-row">
               <td colspan="2">جمع کل اقلام:</td>
-              <td>${orderDetails.items?.length || 0} قلم</td>
-              <td>${Math.floor(parseFloat(orderDetails.totalAmount || 0)).toLocaleString()} ${orderDetails.currency}</td>
+              <td>${orderDetails.items?.length || 0} عدد</td>
             </tr>
           </tbody>
         </table>
