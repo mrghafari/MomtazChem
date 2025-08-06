@@ -4,7 +4,6 @@ import { useLocation } from "wouter";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { usePersistentCart } from "@/hooks/usePersistentCart";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -20,7 +19,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertShowcaseProductSchema, type ShowcaseProduct, type InsertShowcaseProduct } from "@shared/showcase-schema";
 import { z } from "zod";
-import { Plus, Edit, Trash2, Package, DollarSign, Beaker, Droplet, LogOut, User, Upload, Image, FileText, X, AlertTriangle, CheckCircle, AlertCircle, XCircle, TrendingUp, TrendingDown, BarChart3, QrCode, Mail, Search, Database, Factory, BookOpen, ArrowLeft, Wheat, Eye, EyeOff, HelpCircle, Info, Tag, Lock, RefreshCw, Sparkles, Flame, ShoppingCart, Minus } from "lucide-react";
+import { Plus, Edit, Trash2, Package, DollarSign, Beaker, Droplet, LogOut, User, Upload, Image, FileText, X, AlertTriangle, CheckCircle, AlertCircle, XCircle, TrendingUp, TrendingDown, BarChart3, QrCode, Mail, Search, Database, Factory, BookOpen, ArrowLeft, Wheat, Eye, EyeOff, HelpCircle, Info, Tag, Lock, RefreshCw, Sparkles, Flame } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import JsBarcode from "jsbarcode";
 import VisualBarcode from "@/components/ui/visual-barcode";
@@ -164,23 +163,10 @@ export default function ProductsPage() {
   const [deletingProduct, setDeletingProduct] = useState<ShowcaseProduct | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
-  const [showCartDetails, setShowCartDetails] = useState(false);
   const [, setLocation] = useLocation();
   const { user, isLoading: authLoading, isAuthenticated, logout } = useAuth();
   const { t, language, direction } = useLanguage();
   const { toast } = useToast();
-  
-  // Persistent cart hook
-  const { 
-    cart, 
-    addToCart, 
-    updateQuantity, 
-    removeFromCart, 
-    itemCount, 
-    totalValue, 
-    isAdding, 
-    syncCartWithServer 
-  } = usePersistentCart();
   const barcodeCanvasRef = useRef<HTMLCanvasElement>(null);
 
   // Fetch categories from API
@@ -965,13 +951,6 @@ export default function ProductsPage() {
     return () => clearTimeout(timer);
   }, [form.watch("barcode"), dialogOpen]); // Added dialogOpen dependency
 
-  // Sync local cart with server when user logs in
-  useEffect(() => {
-    if (!authLoading && isAuthenticated) {
-      syncCartWithServer();
-    }
-  }, [authLoading, isAuthenticated, syncCartWithServer]);
-
   // Redirect if not authenticated
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -1009,34 +988,6 @@ export default function ProductsPage() {
             </div>
           </div>
           <div className="flex items-center gap-4">
-            {/* Shopping Cart Badge - Only show for customers */}
-            {!isAuthenticated || user?.role === 'customer' ? (
-              <div className="relative">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowCartDetails(!showCartDetails)}
-                  className="border-blue-300 text-blue-600 hover:bg-blue-50 relative"
-                  title={`سبد خرید - ${itemCount} محصول`}
-                >
-                  <ShoppingCart className="w-4 h-4 mr-2" />
-                  سبد خرید
-                  {itemCount > 0 && (
-                    <Badge 
-                      variant="destructive" 
-                      className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center text-xs p-0 min-w-[20px]"
-                    >
-                      {itemCount}
-                    </Badge>
-                  )}
-                </Button>
-                {totalValue > 0 && (
-                  <div className="absolute -bottom-8 left-0 text-xs text-green-600 whitespace-nowrap">
-                    {totalValue.toLocaleString()} IQD
-                  </div>
-                )}
-              </div>
-            ) : null}
             <div className="flex items-center gap-2 text-gray-600">
               <User className="w-4 h-4" />
               <span className="text-sm">{user?.username}</span>
@@ -1054,127 +1005,6 @@ export default function ProductsPage() {
             </Button>
           </div>
         </div>
-
-        {/* Cart Details Dropdown */}
-        {showCartDetails && (!isAuthenticated || user?.role === 'customer') && (
-          <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-blue-800 flex items-center gap-2">
-                <ShoppingCart className="w-5 h-5" />
-                سبد خرید مداوم
-              </h3>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowCartDetails(false)}
-                className="text-blue-600 hover:bg-blue-100"
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
-            
-            {itemCount === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <ShoppingCart className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                <p>سبد خرید شما خالی است</p>
-                <p className="text-sm mt-1">محصولات مورد نظر خود را اضافه کنید</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {/* Cart summary */}
-                <div className="flex items-center justify-between bg-white rounded-lg p-3 border">
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary">{itemCount} محصول</Badge>
-                    {totalValue > 0 && (
-                      <span className="text-green-600 font-semibold">
-                        {totalValue.toLocaleString()} IQD
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => clearCart()}
-                      className="text-red-600 border-red-300 hover:bg-red-50"
-                    >
-                      <Trash2 className="w-4 h-4 mr-1" />
-                      پاک کردن سبد
-                    </Button>
-                  </div>
-                </div>
-                
-                {/* Cart items for authenticated users */}
-                {isAuthenticated && (
-                  <div className="space-y-2 max-h-60 overflow-y-auto">
-                    {cartItems.map((item) => (
-                      <div key={item.id} className="bg-white rounded-lg p-3 border flex items-center justify-between">
-                        <div className="flex-1">
-                          <h4 className="font-medium text-gray-900">{item.productName}</h4>
-                          {item.productTechnicalName && (
-                            <p className="text-sm text-blue-600">{item.productTechnicalName}</p>
-                          )}
-                          <div className="flex items-center gap-2 mt-1">
-                            <span className="text-sm text-gray-600">کمیت:</span>
-                            <div className="flex items-center gap-1">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => updateQuantity(item.productId, item.quantity - 1)}
-                                className="h-6 w-6 p-0 hover:bg-gray-100"
-                              >
-                                <Minus className="w-3 h-3" />
-                              </Button>
-                              <span className="w-8 text-center text-sm font-medium">{item.quantity}</span>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => updateQuantity(item.productId, item.quantity + 1)}
-                                className="h-6 w-6 p-0 hover:bg-gray-100"
-                              >
-                                <Plus className="w-3 h-3" />
-                              </Button>
-                            </div>
-                            {item.unitPrice && (
-                              <span className="text-sm text-green-600 ml-2">
-                                {(parseFloat(item.unitPrice) * item.quantity).toLocaleString()} IQD
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeFromCart(item.productId)}
-                          className="text-red-600 hover:bg-red-50 ml-2"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                
-                {/* Local cart info for non-authenticated users */}
-                {!isAuthenticated && (
-                  <div className="bg-white rounded-lg p-3 border">
-                    <p className="text-center text-gray-600">
-                      برای مشاهده جزئیات سبد خرید و ذخیره مداوم، لطفاً وارد شوید
-                    </p>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setLocation("/admin/login")}
-                      className="w-full mt-2"
-                    >
-                      ورود به حساب کاربری
-                    </Button>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
 
         {/* Search Section */}
         <div className="mb-6">
@@ -1485,19 +1315,6 @@ export default function ProductsPage() {
                             <Package className="w-4 h-4" />
                           </Button>
                         )}
-                        {/* Add to Cart Button - Only show for customers */}
-                        {!isAuthenticated || user?.role === 'customer' ? (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => addToCart(product.id, 1, parseFloat(product.unitPrice || '0'))}
-                            disabled={isAdding || !product.stockQuantity || product.stockQuantity <= 0}
-                            className="h-8 w-8 p-0 hover:bg-green-50 hover:text-green-600"
-                            title={product.stockQuantity && product.stockQuantity > 0 ? "افزودن به سبد خرید" : "موجودی تمام شده"}
-                          >
-                            <Plus className="w-4 h-4" />
-                          </Button>
-                        ) : null}
                         <Button
                           variant="ghost"
                           size="sm"
