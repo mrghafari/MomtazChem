@@ -3895,7 +3895,18 @@ const LogisticsManagement = () => {
                     <Label htmlFor="edit-vehicleType">نوع خودرو *</Label>
                     <Select 
                       name="vehicleType" 
-                      value={showCustomEditInput ? 'سایر' : selectedReadyVehicle.vehicleTemplateName || selectedReadyVehicle.vehicleType}
+                      value={(() => {
+                        if (showCustomEditInput) return 'سایر';
+                        
+                        // Try to find the template that matches current vehicle
+                        const vehicleTemplates = (vehicleTemplatesData as any)?.data || [];
+                        const matchingTemplate = vehicleTemplates.find((template: any) => 
+                          template.name === selectedReadyVehicle.vehicleType || 
+                          template.name === selectedReadyVehicle.vehicleTemplateName
+                        );
+                        
+                        return matchingTemplate ? matchingTemplate.name : 'سایر';
+                      })()}
                       onValueChange={(value) => {
                         if (value === 'سایر') {
                           setShowCustomEditInput(true);
@@ -4451,7 +4462,9 @@ const LogisticsManagement = () => {
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-gray-600">نوع تسویه حساب:</span>
-                        <PaymentMethodBadge method={selectedOrder.paymentMethod} />
+                        <Badge variant="outline" className="text-xs">
+                          {selectedOrder.paymentMethod || 'نامشخص'}
+                        </Badge>
                       </div>
                     </div>
                   </div>
