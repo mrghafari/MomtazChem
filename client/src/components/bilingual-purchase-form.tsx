@@ -862,16 +862,25 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     });
   }, [isLoadingShippingRates, shippingRatesError, shippingRatesData]);
 
-  // ✅ NO TAX CALCULATION: Only cart products without any taxes
-  const vatAmount = 0;
-  const dutiesAmount = 0;
-  const totalTaxAmount = 0;
+  // ✅ VAT CALCULATION: Calculate tax based on cart subtotal using existing vatData
+  const vatAmount = useMemo(() => {
+    if (!vatData?.vatEnabled || !subtotalAmount) return 0;
+    const vatRate = parseFloat(vatData.vatRate || '0') / 100; // Convert percentage to decimal
+    return Math.round((subtotalAmount * vatRate) * 100) / 100;
+  }, [vatData, subtotalAmount]);
+  
+  const dutiesAmount = useMemo(() => {
+    if (!vatData?.dutiesEnabled || !subtotalAmount) return 0;
+    const dutiesRate = parseFloat(vatData.dutiesRate || '0') / 100; // Convert percentage to decimal
+    return Math.round((subtotalAmount * dutiesRate) * 100) / 100;
+  }, [vatData, subtotalAmount]);
+  
+  const totalTaxAmount = vatAmount + dutiesAmount;
   
   // ✅ NO SMART DELIVERY: Removed all delivery cost calculations
   
-  // ✅ SIMPLE CALCULATION: Only use cart-based subtotal as total amount
-  // No additional shipping, tax, or other calculations - only cart products
-  const totalAmount = subtotalAmount;
+  // ✅ CART + TAX CALCULATION: Cart subtotal + VAT + duties as requested by user
+  const totalAmount = subtotalAmount + totalTaxAmount;
   
   // ✅ WEIGHT CALCULATION: Calculate total weight from cart and products
   const totalWeight = useMemo(() => {
@@ -1720,6 +1729,28 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                 <div className="flex justify-between text-sm text-blue-600">
                   <span>⚖️ وزن کل سبد خرید:</span>
                   <span className="font-medium">{totalWeight.toFixed(2)} کیلوگرم</span>
+                </div>
+              )}
+
+              {/* VAT and Tax Display */}
+              {vatAmount > 0 && (
+                <div className="flex justify-between text-sm text-green-600">
+                  <span>💰 مالیات بر ارزش افزوده ({vatData?.vatRate}%):</span>
+                  <span className="font-medium">{vatAmount.toLocaleString()} IQD</span>
+                </div>
+              )}
+              
+              {dutiesAmount > 0 && (
+                <div className="flex justify-between text-sm text-green-600">
+                  <span>📊 عوارض ({vatData?.dutiesRate}%):</span>
+                  <span className="font-medium">{dutiesAmount.toLocaleString()} IQD</span>
+                </div>
+              )}
+              
+              {totalTaxAmount > 0 && (
+                <div className="flex justify-between text-sm text-red-600 font-semibold">
+                  <span>🧮 مجموع مالیات:</span>
+                  <span>{totalTaxAmount.toLocaleString()} IQD</span>
                 </div>
               )}
 
