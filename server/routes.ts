@@ -13240,6 +13240,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Clear customer's persistent cart
+  app.delete("/api/customers/persistent-cart/clear", requireCustomerAuth, async (req, res) => {
+    try {
+      const customerId = (req.session as any).customerId;
+      console.log('🛒 [PERSISTENT CART CLEAR] Clearing cart for customer:', customerId);
+      
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        DELETE FROM persistent_carts 
+        WHERE customer_id = $1
+      `, [customerId]);
+      
+      console.log(`✅ [PERSISTENT CART CLEAR] Deleted ${result.rowCount} cart records for customer ${customerId}`);
+      
+      res.json({
+        success: true,
+        message: 'سبد خرید پاک شد'
+      });
+    } catch (error) {
+      console.error('Error clearing persistent cart:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در پاک کردن سبد خرید'
+      });
+    }
+  });
+
   // Update customer profile
   app.patch("/api/customers/:id", async (req, res) => {
     try {
@@ -38082,10 +38109,21 @@ momtazchem.com
         return res.status(401).json({ success: false, message: "Customer not authenticated" });
       }
       
+      // Handle double-encoded JSON strings  
+      let parsedCartData = cartData;
+      if (typeof cartData === 'string') {
+        try {
+          parsedCartData = JSON.parse(cartData);
+        } catch (parseError) {
+          console.error('Cart data JSON parsing error:', parseError);
+          parsedCartData = cartData; // Keep original if parsing fails
+        }
+      }
+
       const sessionData = {
         customerId: session.customerId,
         sessionId,
-        cartData,
+        cartData: parsedCartData,
         itemCount,
         totalValue: parseFloat(totalValue) || 0
       };
@@ -38118,30 +38156,7 @@ momtazchem.com
   // ABANDONED CART MANAGEMENT API
   // =============================================================================
 
-  // Track cart session activity
-  app.post("/api/cart/session", async (req, res) => {
-    try {
-      const customerId = (req.session as any)?.customerId;
-      if (!customerId) {
-        return res.status(401).json({ success: false, message: "Authentication required" });
-      }
-
-      const { sessionId, cartData, itemCount, totalValue } = req.body;
-      
-      const cartSessionId = await cartStorage.createOrUpdateCartSession({
-        customerId,
-        sessionId,
-        cartData,
-        itemCount,
-        totalValue
-      });
-
-      res.json({ success: true, cartSessionId });
-    } catch (error) {
-      console.error("Error tracking cart session:", error);
-      res.status(500).json({ success: false, message: "Failed to track cart session" });
-    }
-  });
+  // Track cart session activity (duplicate endpoint removed - merged with above)
 
   // Get abandoned cart settings
   app.get("/api/admin/abandoned-cart/settings", requireAuth, async (req, res) => {
