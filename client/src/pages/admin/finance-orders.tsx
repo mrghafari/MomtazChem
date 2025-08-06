@@ -774,12 +774,18 @@ function FinanceOrders() {
     enabled: true
   });
 
-  // Print function for order details
+  // Print function for order details - Enhanced to match screen display
   const handlePrintOrder = () => {
     if (!orderDetails) return;
 
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
+
+    // Calculate total amount from items
+    const itemsTotal = orderDetails.items?.reduce((sum: number, item: any) => {
+      const itemTotal = parseFloat(item.price || 0) * parseInt(item.quantity || 0);
+      return sum + (isNaN(itemTotal) ? 0 : itemTotal);
+    }, 0) || 0;
 
     const printContent = `
     <!DOCTYPE html>
@@ -794,303 +800,296 @@ function FinanceOrders() {
           direction: rtl; 
           font-size: 14px;
           line-height: 1.6;
+          background: white;
         }
         .header { 
           text-align: center; 
-          border-bottom: 2px solid #2563eb; 
-          padding-bottom: 10px; 
-          margin-bottom: 20px; 
+          border-bottom: 3px solid #2563eb; 
+          padding-bottom: 15px; 
+          margin-bottom: 25px; 
+          background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+          border-radius: 10px;
+          padding: 20px;
         }
         .company-name { 
-          font-size: 24px; 
+          font-size: 28px; 
           font-weight: bold; 
           color: #2563eb; 
-          margin-bottom: 5px;
-        }
-        .section { 
-          margin-bottom: 15px; 
-          border: 1px solid #e5e7eb; 
-          border-radius: 8px; 
-          padding: 12px;
-        }
-        .section-title { 
-          font-weight: bold; 
-          font-size: 16px; 
-          color: #374151; 
           margin-bottom: 8px;
-          border-bottom: 1px solid #e5e7eb;
-          padding-bottom: 4px;
+          text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        .order-title {
+          font-size: 20px;
+          color: #1f2937;
+          margin-bottom: 5px;
+          font-weight: 600;
+        }
+        .card { 
+          margin-bottom: 20px; 
+          border: 1px solid #e5e7eb; 
+          border-radius: 12px; 
+          padding: 20px;
+          background: white;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .card-header { 
+          font-weight: bold; 
+          font-size: 18px; 
+          color: #1f2937; 
+          margin-bottom: 15px;
+          border-bottom: 2px solid #f3f4f6;
+          padding-bottom: 8px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .card-header::before {
+          content: "●";
+          color: #2563eb;
+          font-size: 12px;
         }
         .info-grid { 
           display: grid; 
-          grid-template-columns: 1fr 1fr; 
-          gap: 10px; 
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+          gap: 15px; 
         }
         .info-item { 
           display: flex; 
-          justify-content: space-between; 
-          padding: 4px 0;
+          flex-direction: column;
+          padding: 10px;
+          background: #f8fafc;
+          border-radius: 8px;
+          border-left: 4px solid #2563eb;
         }
         .label { 
           font-weight: 600; 
           color: #6b7280; 
+          font-size: 12px;
+          margin-bottom: 4px;
+          text-transform: uppercase;
         }
         .value { 
-          color: #374151; 
+          color: #1f2937; 
+          font-weight: 500;
+          font-size: 14px;
+        }
+        .address-section {
+          background: #f0f9ff;
+          padding: 15px;
+          border-radius: 10px;
+          margin-top: 10px;
+          border: 1px solid #bfdbfe;
         }
         .items-table { 
           width: 100%; 
           border-collapse: collapse; 
-          margin-top: 10px;
-        }
-        .items-table th, .items-table td { 
-          border: 1px solid #d1d5db; 
-          padding: 8px; 
-          text-align: right; 
+          margin-top: 15px;
+          background: white;
+          border-radius: 8px;
+          overflow: hidden;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .items-table th { 
-          background-color: #f3f4f6; 
+          background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); 
+          color: white;
           font-weight: bold; 
+          padding: 12px 8px;
+          text-align: center;
+          font-size: 13px;
+          text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+        .items-table td { 
+          border: 1px solid #e5e7eb; 
+          padding: 10px 8px; 
+          text-align: center;
+          font-size: 13px;
+        }
+        .items-table tbody tr:nth-child(even) {
+          background: #f8fafc;
+        }
+        .items-table tbody tr:hover {
+          background: #e0f2fe;
+        }
+        .total-section { 
+          background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%); 
+          padding: 15px;
+          border-radius: 10px;
+          margin-top: 15px;
+          border: 2px solid #f59e0b;
         }
         .total-row { 
-          background-color: #fef3c7; 
-          font-weight: bold; 
+          font-weight: bold;
+          font-size: 16px;
+          color: #92400e;
         }
         .status-badge {
-          padding: 4px 8px;
-          border-radius: 4px;
+          padding: 6px 12px;
+          border-radius: 20px;
           font-size: 12px;
           font-weight: bold;
+          display: inline-block;
         }
-        .status-confirmed { background-color: #dcfce7; color: #166534; }
-        .status-pending { background-color: #fef3c7; color: #92400e; }
-        .status-rejected { background-color: #fecaca; color: #dc2626; }
+        .status-confirmed { 
+          background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); 
+          color: #166534; 
+          border: 1px solid #16a34a;
+        }
+        .status-pending { 
+          background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); 
+          color: #92400e; 
+          border: 1px solid #f59e0b;
+        }
+        .status-rejected { 
+          background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%); 
+          color: #dc2626; 
+          border: 1px solid #ef4444;
+        }
         @media print {
           @page { 
-            margin: 1.5cm; 
+            margin: 1cm; 
             size: A4;
           }
           body { 
             margin: 0; 
             padding: 0;
-            width: 100%;
-            box-sizing: border-box;
-            direction: rtl;
-            font-family: 'Noto Sans Arabic', sans-serif;
-            overflow-x: hidden;
+            font-size: 12px;
           }
-          .container {
-            padding: 0;
-            margin: 0;
-            margin-left: 3cm;
-            width: calc(100% - 3cm);
-            max-width: calc(100% - 3cm);
-            box-sizing: border-box;
-            overflow-x: hidden;
-          }
-          .header {
-            text-align: center;
-            margin-bottom: 20px;
-            padding: 10px;
-            box-sizing: border-box;
-          }
-          .section {
-            margin-bottom: 15px;
-            padding: 10px;
-            box-sizing: border-box;
+          .card {
             page-break-inside: avoid;
-          }
-          .info-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 5px;
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            width: 100%;
-            max-width: 100%;
-          }
-          .info-item {
-            margin: 0;
-            padding: 3px;
-            box-sizing: border-box;
-            min-width: 0;
-            word-wrap: break-word;
-            overflow: hidden;
-            font-size: 11px;
-          }
-          .items-table {
-            width: 100%;
-            margin: 0;
-            box-sizing: border-box;
-            table-layout: fixed;
-            border-collapse: collapse;
-            font-size: 10px;
-          }
-          .items-table th,
-          .items-table td {
-            padding: 3px;
-            font-size: 10px;
-            word-wrap: break-word;
-            box-sizing: border-box;
+            box-shadow: none;
             border: 1px solid #ccc;
-            overflow: hidden;
-            text-overflow: ellipsis;
           }
-          .items-table th:first-child,
-          .items-table td:first-child {
-            width: 65% !important;
-            min-width: 65% !important;
-            max-width: 65% !important;
+          .items-table th {
+            background: #f3f4f6 !important;
+            color: #1f2937 !important;
+            -webkit-print-color-adjust: exact;
           }
-          .items-table th:nth-child(2),
-          .items-table td:nth-child(2) {
-            width: 15% !important;
-            min-width: 15% !important;
-            max-width: 15% !important;
-          }
-          .items-table th:nth-child(3),
-          .items-table td:nth-child(3) {
-            width: 20% !important;
-            min-width: 20% !important;
-            max-width: 20% !important;
-          }
-          .no-print { display: none !important; }
-          * {
-            box-sizing: border-box !important;
+          .status-badge,
+          .total-section,
+          .header {
+            -webkit-print-color-adjust: exact;
           }
         }
       </style>
     </head>
     <body>
-      <div class="container">
-        <div class="header">
+      <div class="header">
         <img src="/attached_assets/Logo_1753245273579.jpeg" alt="شرکت ممتاز شیمی" style="max-width: 120px; max-height: 80px; margin-bottom: 15px;" onerror="this.style.display='none'">
-        <div class="company-name">ممتاز شیمی</div>
-        <div>جزئیات سفارش ${orderDetails.orderNumber}</div>
-        <div style="font-size: 12px; color: #6b7280;">تاریخ چاپ: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' })}</div>
+        <div class="company-name">شرکت ممتاز شیمی</div>
+        <div class="order-title">جزئیات سفارش ${orderDetails.orderNumber}</div>
+        <div style="font-size: 12px; color: #6b7280;">تاریخ چاپ: ${new Date().toLocaleDateString('fa-IR')}</div>
       </div>
 
-      <div class="section">
-        <div class="section-title">اطلاعات سفارش</div>
+      <!-- Customer Information Card -->
+      <div class="card">
+        <div class="card-header">اطلاعات مشتری و آدرس تحویل</div>
         <div class="info-grid">
           <div class="info-item">
-            <span class="label">شماره سفارش:</span>
-            <span class="value">${orderDetails.orderNumber}</span>
+            <span class="label">نام مشتری</span>
+            <span class="value">${orderDetails.customer?.firstName || ''} ${orderDetails.customer?.lastName || ''}</span>
           </div>
           <div class="info-item">
-            <span class="label">تاریخ ثبت:</span>
-            <span class="value">${formatDateSafe(orderDetails.createdAt, 'fa-IR')}</span>
+            <span class="label">ایمیل</span>
+            <span class="value">${orderDetails.customer?.email || 'نامشخص'}</span>
           </div>
           <div class="info-item">
-            <span class="label">وضعیت:</span>
-            <span class="value status-badge ${orderDetails.status === 'confirmed' ? 'status-confirmed' : 
-                                              orderDetails.status === 'pending' ? 'status-pending' : 'status-rejected'}">
-              ${orderDetails.status === 'confirmed' ? 'تایید شده' : 
-                orderDetails.status === 'pending' ? 'در انتظار' : 
-                orderDetails.status === 'rejected' ? 'رد شده' : orderDetails.status}
+            <span class="label">تلفن</span>
+            <span class="value">${orderDetails.customer?.phone || 'نامشخص'}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">وضعیت سفارش</span>
+            <span class="value">
+              <span class="status-badge ${orderDetails.currentStatus === 'warehouse_pending' ? 'status-pending' : 
+                                          orderDetails.currentStatus === 'delivered' ? 'status-confirmed' : 'status-pending'}">
+                ${orderDetails.currentStatus === 'warehouse_pending' ? 'در انتظار انبار' : 
+                  orderDetails.currentStatus === 'delivered' ? 'تحویل شده' : 
+                  orderDetails.currentStatus || 'نامشخص'}
+              </span>
             </span>
           </div>
+        </div>
+        ${orderDetails.customer?.address ? `
+        <div class="address-section">
+          <div class="label" style="margin-bottom: 8px;">آدرس کامل تحویل</div>
+          <div class="value" style="font-size: 15px; line-height: 1.4;">
+            <strong>${orderDetails.customer.address}</strong><br>
+            <span style="color: #6b7280;">${orderDetails.customer.city || ''} - ${orderDetails.customer.province || ''}</span>
+          </div>
+        </div>` : ''}
+        <div style="margin-top: 15px;">
           <div class="info-item">
-            <span class="label">روش پرداخت:</span>
-            <span class="value">${(() => {
+            <span class="label">تاریخ سفارش</span>
+            <span class="value">${formatDateSafe(orderDetails.createdAt, 'fa-IR')}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order Items Card -->
+      <div class="card">
+        <div class="card-header">اقلام سفارش (${orderDetails.items?.length || 0} قلم)</div>
+        <table class="items-table">
+          <thead>
+            <tr>
+              <th style="width: 8%;">#</th>
+              <th style="width: 45%;">نام محصول</th>
+              <th style="width: 12%;">تعداد</th>
+              <th style="width: 18%;">قیمت واحد (${orderDetails.currency || 'IQD'})</th>
+              <th style="width: 17%;">قیمت کل (${orderDetails.currency || 'IQD'})</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${orderDetails.items?.map((item: any, index: number) => {
+              const unitPrice = parseFloat(item.price || 0);
+              const quantity = parseInt(item.quantity || 0);
+              const totalPrice = unitPrice * quantity;
+              return `
+              <tr>
+                <td style="font-weight: bold; color: #2563eb;">${index + 1}</td>
+                <td style="text-align: right; font-weight: 500;">${item.productName || 'نام محصول نامشخص'}</td>
+                <td><strong>${quantity}</strong></td>
+                <td>${unitPrice.toLocaleString('fa-IR')}</td>
+                <td style="font-weight: bold; color: #059669;">${totalPrice.toLocaleString('fa-IR')}</td>
+              </tr>`;
+            }).join('') || '<tr><td colspan="5">هیچ آیتمی یافت نشد</td></tr>'}
+          </tbody>
+        </table>
+
+        <div class="total-section">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 16px; font-weight: bold;">مبلغ کل سفارش:</span>
+            <span style="font-size: 18px; font-weight: bold; color: #dc2626;">
+              ${itemsTotal.toLocaleString('fa-IR')} ${orderDetails.currency || 'IQD'}
+            </span>
+          </div>
+          <div style="margin-top: 8px; font-size: 14px; color: #92400e;">
+            <strong>روش پرداخت:</strong> ${(() => {
               switch (orderDetails.paymentMethod) {
                 case 'wallet_full': return 'کیف پول کامل';
-                case 'wallet_partial': return 'پرداخت ترکیبی';
+                case 'wallet_partial': return 'پرداخت ترکیبی (کیف پول + نقد)';
                 case 'bank_transfer': return 'واریز بانکی';
                 case 'bank_transfer_grace': return 'واریز بانکی (مهلت‌دار)';
                 case 'online_payment': return 'درگاه آنلاین';
-                case 'digital_wallet': return 'کیف پول دیجیتال';
-                case 'iraqi_bank_gateway': return 'درگاه بانکی عراقی';
-                case 'hybrid': return 'ترکیبی';
                 case 'cash': return 'نقدی';
                 case 'credit': return 'اعتباری';
                 default: return orderDetails.paymentMethod || 'نامشخص';
               }
-            })()}</span>
+            })()}
           </div>
         </div>
-      </div>
-
-      <div class="section">
-        <div class="section-title">اطلاعات مشتری</div>
-        <div class="info-grid">
-          <div class="info-item">
-            <span class="label">نام:</span>
-            <span class="value">${orderDetails.customer?.firstName || ''} ${orderDetails.customer?.lastName || ''}</span>
-          </div>
-          <div class="info-item">
-            <span class="label">ایمیل:</span>
-            <span class="value">${orderDetails.customer?.email || 'نامشخص'}</span>
-          </div>
-          <div class="info-item">
-            <span class="label">تلفن:</span>
-            <span class="value">${orderDetails.customer?.phone || 'نامشخص'}</span>
-          </div>
-        </div>
-      </div>
-
-      ${orderDetails.shippingAddress ? `
-      <div class="section">
-        <div class="section-title">آدرس تحویل</div>
-        <div class="info-grid">
-          <div class="info-item">
-            <span class="label">نام گیرنده:</span>
-            <span class="value">${orderDetails.shippingAddress.name || 'نامشخص'}</span>
-          </div>
-          <div class="info-item">
-            <span class="label">تلفن:</span>
-            <span class="value">${orderDetails.shippingAddress.phone || 'نامشخص'}</span>
-          </div>
-          <div class="info-item" style="grid-column: 1 / -1;">
-            <span class="label">آدرس:</span>
-            <span class="value">${orderDetails.shippingAddress.address || 'نامشخص'}</span>
-          </div>
-          <div class="info-item">
-            <span class="label">شهر:</span>
-            <span class="value">${orderDetails.shippingAddress.city || 'نامشخص'}</span>
-          </div>
-          <div class="info-item">
-            <span class="label">کد پستی:</span>
-            <span class="value">${orderDetails.shippingAddress.postalCode || 'نامشخص'}</span>
-          </div>
-        </div>
-      </div>` : ''}
-
-      <div class="section">
-        <div class="section-title">اقلام سفارش</div>
-        <table class="items-table">
-          <thead>
-            <tr>
-              <th>نام محصول</th>
-              <th>تعداد</th>
-              <th>وزن (کیلوگرم)</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${orderDetails.items?.map((item: any) => `
-              <tr>
-                <td>${item.productName}</td>
-                <td>${item.quantity}</td>
-                <td>${item.weight || 'نامشخص'}</td>
-              </tr>
-            `).join('') || ''}
-            <tr class="total-row">
-              <td colspan="2">جمع کل اقلام:</td>
-              <td>${orderDetails.items?.length || 0} عدد</td>
-            </tr>
-          </tbody>
-        </table>
       </div>
 
       ${orderDetails.deliveryNotes ? `
-      <div class="section">
-        <div class="section-title">یادداشت تحویل</div>
-        <div class="value">${orderDetails.deliveryNotes}</div>
+      <div class="card">
+        <div class="card-header">یادداشت تحویل</div>
+        <div style="background: #f0f9ff; padding: 15px; border-radius: 8px; border-left: 4px solid #2563eb;">
+          <div class="value" style="line-height: 1.6; font-size: 14px;">${orderDetails.deliveryNotes}</div>
+        </div>
       </div>` : ''}
 
-        <div style="margin-top: 30px; text-align: center; font-size: 12px; color: #6b7280;">
-          این سند توسط سیستم مدیریت ممتاز شیمی تولید شده است
+      <div style="margin-top: 40px; text-align: center; padding: 15px; border-top: 2px solid #e5e7eb;">
+        <div style="font-size: 12px; color: #6b7280; line-height: 1.4;">
+          <strong>این سند توسط سیستم مدیریت ممتاز شیمی تولید شده است</strong><br>
+          تاریخ چاپ: ${new Date().toLocaleString('fa-IR')} | شماره سفارش: ${orderDetails.orderNumber}
         </div>
       </div>
     </body>
