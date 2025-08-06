@@ -985,14 +985,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .from(orderItems)
         .where(eq(orderItems.orderId, orderId));
 
-      // Calculate subtotal from items
-      const subtotal = itemsResult.reduce((sum, item) => {
+      // Calculate subtotal from items - IQD whole numbers only
+      const subtotal = Math.round(itemsResult.reduce((sum, item) => {
         return sum + (parseFloat(item.quantity.toString()) * parseFloat(item.unitPrice));
-      }, 0);
+      }, 0));
       
-      // Use frozen tax amounts stored in order (prevents changes if tax settings are updated)
-      const storedVatAmount = parseFloat(order.vatAmount || '0');
-      const storedSurchargeAmount = parseFloat(order.surchargeAmount || '0');
+      // Use frozen tax amounts stored in order (prevents changes if tax settings are updated) - whole numbers
+      const storedVatAmount = Math.round(parseFloat(order.vatAmount || '0'));
+      const storedSurchargeAmount = Math.round(parseFloat(order.surchargeAmount || '0'));
       
       console.log('📄 [PROFORMA] Using frozen tax amounts from order:', {
         orderId: order.id,
@@ -1015,14 +1015,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         items: itemsResult.map(item => ({
           name: item.productName,
           quantity: item.quantity,
-          unitPrice: parseFloat(item.unitPrice),
-          total: parseFloat(item.totalPrice || '0'),
+          unitPrice: Math.round(parseFloat(item.unitPrice)),
+          total: Math.round(parseFloat(item.totalPrice || '0')),
         })),
         subtotal: subtotal,
         vatAmount: storedVatAmount, // Use frozen amount from order creation
         dutiesAmount: storedSurchargeAmount, // Use frozen amount from order creation
-        shippingCost: parseFloat(order.shippingCost || '0'),
-        total: subtotal + storedVatAmount + storedSurchargeAmount + parseFloat(order.shippingCost || '0'),
+        shippingCost: Math.round(parseFloat(order.shippingCost || '0')),
+        total: Math.round(subtotal + storedVatAmount + storedSurchargeAmount + parseFloat(order.shippingCost || '0')),
         currency: order.currency || 'IQD',
         paymentStatus: 'در انتظار پرداخت', // برای پیش فاکتور
         notes: 'این پیش فاکتور است و پس از پرداخت و تأیید مالی، فاکتور نهایی صادر خواهد شد.'
@@ -1144,14 +1144,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .from(orderItems)
         .where(eq(orderItems.orderId, orderId));
 
-      // Calculate subtotal from items
-      const subtotal = itemsResult.reduce((sum, item) => {
+      // Calculate subtotal from items - IQD whole numbers only  
+      const subtotal = Math.round(itemsResult.reduce((sum, item) => {
         return sum + (parseFloat(item.quantity.toString()) * parseFloat(item.unitPrice));
-      }, 0);
+      }, 0));
       
-      // Use frozen tax amounts stored in order (prevents changes if tax settings are updated)
-      const storedVatAmount = parseFloat(order.vatAmount || '0');
-      const storedSurchargeAmount = parseFloat(order.surchargeAmount || '0');
+      // Use frozen tax amounts stored in order (prevents changes if tax settings are updated) - whole numbers
+      const storedVatAmount = Math.round(parseFloat(order.vatAmount || '0'));
+      const storedSurchargeAmount = Math.round(parseFloat(order.surchargeAmount || '0'));
       
       console.log('📄 [FINAL INVOICE] Using frozen tax amounts from order:', {
         orderId: order.id,
@@ -1174,14 +1174,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         items: itemsResult.map(item => ({
           name: item.productName,
           quantity: item.quantity,
-          unitPrice: parseFloat(item.unitPrice),
-          total: parseFloat(item.totalPrice || '0'),
+          unitPrice: Math.round(parseFloat(item.unitPrice)),
+          total: Math.round(parseFloat(item.totalPrice || '0')),
         })),
         subtotal: subtotal,
         vatAmount: storedVatAmount, // Use frozen amount from order creation
         dutiesAmount: storedSurchargeAmount, // Use frozen amount from order creation
-        shippingCost: parseFloat(order.shippingCost || '0'),
-        total: subtotal + storedVatAmount + storedSurchargeAmount + parseFloat(order.shippingCost || '0'),
+        shippingCost: Math.round(parseFloat(order.shippingCost || '0')),
+        total: Math.round(subtotal + storedVatAmount + storedSurchargeAmount + parseFloat(order.shippingCost || '0')),
         currency: order.currency || 'IQD',
         paymentStatus: 'پرداخت شده', // برای فاکتور نهایی
         notes: 'این فاکتور نهایی است و پس از تأیید مالی و آماده‌سازی در انبار صادر شده است.'
@@ -13609,13 +13609,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const customerId = (req.session as any)?.customerId;
       const crmCustomerId = (req.session as any)?.crmCustomerId;
-      const { items, customerInfo, recipientInfo, totalAmount, shippingCost, notes, shippingMethod, paymentMethod, walletAmountUsed, remainingAmount } = req.body;
+      const { items, customerInfo, recipientInfo, totalAmount, shippingCost, notes, shippingMethod, paymentMethod, walletAmountUsed, remainingAmount, vatAmount, dutiesAmount } = req.body;
       
       console.log('🛒 [ORDER DEBUG] Order data received:', {
         paymentMethod,
         walletAmountUsed,
         remainingAmount,
         totalAmount,
+        vatAmount,
+        dutiesAmount,
         customerId,
         crmCustomerId
       });
@@ -13754,16 +13756,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         finalPaymentMethod
       });
 
-      // Create order in customer orders table
+      // Create order in customer orders table - store VAT amounts as whole numbers for IQD
       const orderData = {
         orderNumber,
         customerId: customerId || null,
-        totalAmount: totalAmount.toString(),
-        shippingCost: (shippingCost || 0).toString(),
+        totalAmount: Math.round(totalAmount).toString(),
+        shippingCost: Math.round(shippingCost || 0).toString(),
+        vatAmount: Math.round(vatAmount || 0).toString(), // Store frozen VAT amount from frontend calculation
+        surchargeAmount: Math.round(dutiesAmount || 0).toString(), // Store frozen duties amount from frontend calculation
         status: 'pending' as const,
         paymentStatus: finalPaymentStatus,
         paymentMethod: finalPaymentMethod,
-        walletAmountUsed: actualWalletUsed.toString(),
+        walletAmountUsed: Math.round(actualWalletUsed).toString(),
         shippingAddress: {
           address: finalCustomerInfo.address,
           city: finalCustomerInfo.city,
@@ -13787,9 +13791,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const order = await customerStorage.createOrder(orderData);
 
-      // Create order items and update stock
+      // Create order items and update stock - IQD whole numbers only
       for (const item of items) {
-        const unitPrice = parseFloat(item.unitPrice || item.price || '0') || 0;
+        const unitPrice = Math.round(parseFloat(item.unitPrice || item.price || '0') || 0);
         const quantity = parseInt(item.quantity || '1') || 1;
         
         await customerStorage.createOrderItem({
@@ -13798,7 +13802,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           productName: item.productName || 'Unknown Product',
           quantity: String(quantity),
           unitPrice: String(unitPrice),
-          totalPrice: String(quantity * unitPrice),
+          totalPrice: String(Math.round(quantity * unitPrice)),
           productSku: item.productSku || '',
         });
 

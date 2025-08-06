@@ -717,9 +717,9 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
 
 
-  // Calculate discounted price based on quantity
+  // Calculate discounted price based on quantity - IQD whole numbers only
   const getDiscountedPrice = (product: any, quantity: number) => {
-    const basePrice = parseFloat(product.price || '0');
+    const basePrice = Math.round(parseFloat(product.price || '0'));
     
     // Check if product has quantity discounts
     let discounts = product.quantityDiscounts;
@@ -744,7 +744,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         const discount = sortedDiscounts[0];
         // Handle both discount formats: decimal (0.1) and percentage (10)
         const discountValue = discount.discount || (parseFloat(discount.discountPercent || discount.discount_percent || 0) / 100);
-        const discountedPrice = basePrice * (1 - discountValue);
+        const discountedPrice = Math.round(basePrice * (1 - discountValue));
         console.log(`BilingualForm Product ${product.name}: quantity=${quantity}, basePrice=${basePrice}, discount=${discountValue}, discountedPrice=${discountedPrice}`);
         return discountedPrice;
       }
@@ -757,15 +757,15 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
 
 
-  // Calculate subtotal with discounts
-  const subtotalAmount = Object.entries(cart).reduce((sum, [productId, quantity]) => {
+  // Calculate subtotal with discounts - IQD whole numbers only
+  const subtotalAmount = Math.round(Object.entries(cart).reduce((sum, [productId, quantity]) => {
     const product = products.find(p => p.id === parseInt(productId));
     if (product && product.price) {
       const discountedPrice = getDiscountedPrice(product, quantity);
       return sum + (discountedPrice * quantity);
     }
     return sum;
-  }, 0);
+  }, 0));
 
   // Auto-select first shipping method when data loads
   useEffect(() => {
@@ -787,7 +787,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     console.log('🚚 Shipping cost calculation:', { 
       selectedShippingMethod, 
       hasShippingData: !!shippingRatesData, 
-      subtotalAmount: subtotalAmount.toFixed(2)
+      subtotalAmount: subtotalAmount
     });
     
     if (selectedShippingMethod && shippingRatesData && shippingRatesData.length > 0) {
@@ -803,9 +803,9 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
           return;
         }
         
-        // Parse threshold carefully for regular shipping methods
-        const freeShippingThreshold = parseFloat(selectedRate.freeShippingThreshold || '0');
-        const basePrice = parseFloat(selectedRate.basePrice || '0');
+        // Parse threshold carefully for regular shipping methods - IQD whole numbers
+        const freeShippingThreshold = Math.round(parseFloat(selectedRate.freeShippingThreshold || '0'));
+        const basePrice = Math.round(parseFloat(selectedRate.basePrice || '0'));
         
         console.log('💰 Free shipping check:', {
           threshold: freeShippingThreshold,
@@ -845,8 +845,9 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const vatRate = vatData?.vatEnabled ? parseFloat(vatData.vatRate || '0') : 0;
   const dutiesRate = vatData?.dutiesEnabled ? parseFloat(vatData.dutiesRate || '0') : 0;
   
-  const vatAmount = vatData?.vatEnabled ? subtotalAmount * vatRate : 0;
-  const dutiesAmount = vatData?.dutiesEnabled ? subtotalAmount * dutiesRate : 0;
+  // Calculate taxes and round to whole numbers for IQD
+  const vatAmount = vatData?.vatEnabled ? Math.round(subtotalAmount * vatRate) : 0;
+  const dutiesAmount = vatData?.dutiesEnabled ? Math.round(subtotalAmount * dutiesRate) : 0;
   const totalTaxAmount = vatAmount + dutiesAmount;
   
   // Smart delivery cost calculation state
@@ -896,8 +897,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     ? (optimalVehicle ? optimalVehicle.totalCost : smartDeliveryCost)
     : shippingCost;
   
-  // Calculate total amount (subtotal + VAT + duties + final shipping cost - no double counting)
-  const totalAmount = subtotalAmount + totalTaxAmount + finalShippingCost;
+  // Calculate total amount (subtotal + VAT + duties + final shipping cost - no double counting) - IQD whole numbers
+  const totalAmount = Math.round(subtotalAmount + totalTaxAmount + finalShippingCost);
   
   // Debug total calculation
   console.log('💰 [TOTAL CALCULATION] Breakdown:', {
@@ -1282,7 +1283,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         onOrderComplete();
       }
       // Handle bank transfer - redirect to payment gateway  
-      else if (response.paymentMethod === 'bank_transfer' || paymentMethod === 'bank_transfer') {
+      else if (response.paymentMethod === 'bank_transfer' || (paymentMethod !== 'wallet_full' && paymentMethod !== 'wallet_partial' && paymentMethod !== 'wallet_combined' && paymentMethod !== 'online_payment')) {
         toast({
           title: "انتقال به درگاه بانک",
           description: "در حال هدایت شما به درگاه پرداخت بانکی..."
@@ -1363,7 +1364,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       totalAmount,
       subtotalAmount,
       shippingCost: finalShippingCost,
-      vatAmount: totalTaxAmount,
+      vatAmount: vatAmount,
+      dutiesAmount: dutiesAmount,
       selectedShippingMethod,
       currency: 'IQD',
       paymentMethod,
@@ -1491,9 +1493,9 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                 const product = products.find(p => p.id === parseInt(productId));
                 if (!product) return null;
                 
-                const basePrice = parseFloat(product.price || '0');
+                const basePrice = Math.round(parseFloat(product.price || '0'));
                 const discountedPrice = getDiscountedPrice(product, quantity);
-                const itemTotal = discountedPrice * quantity;
+                const itemTotal = Math.round(discountedPrice * quantity);
                 
                 return (
                   <div key={productId} className="bg-white dark:bg-gray-800 p-3 rounded-lg border">

@@ -798,7 +798,7 @@ export class DatabaseStorage implements IStorage {
           customerId,
           productId,
           quantity,
-          unitPrice: unitPrice || "0.00",
+          unitPrice: unitPrice || "0",
           addedAt: new Date(),
           updatedAt: new Date(),
           isActive: true
