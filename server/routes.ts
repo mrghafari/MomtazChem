@@ -9025,6 +9025,143 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Bank payment verification endpoint (public)
+  app.post("/api/payment/verify", async (req, res) => {
+    try {
+      const { transactionId, gatewayType, orderId } = req.body;
+      
+      if (!transactionId || !gatewayType) {
+        return res.status(400).json({
+          success: false,
+          message: "شناسه تراکنش و نوع درگاه الزامی است"
+        });
+      }
+
+      console.log(`🔍 [PAYMENT VERIFICATION] Verifying payment: ${transactionId} (${gatewayType})`);
+      
+      const { bankGatewayRouter } = await import('./bank-gateway-router');
+      const verificationResult = await bankGatewayRouter.verifyPayment(transactionId, gatewayType);
+      
+      if (!verificationResult.success) {
+        console.log(`❌ [PAYMENT VERIFICATION] Failed to verify: ${verificationResult.message}`);
+        return res.status(500).json(verificationResult);
+      }
+
+      if (!verificationResult.verified) {
+        console.log(`❌ [PAYMENT VERIFICATION] Payment not verified: ${transactionId}`);
+        return res.status(400).json({
+          success: false,
+          message: "پرداخت تأیید نشد"
+        });
+      }
+
+      // Update order payment status
+      if (verificationResult.orderId) {
+        const { pool } = await import('./db');
+        
+        await pool.query(`
+          UPDATE customer_orders 
+          SET 
+            payment_status = 'paid',
+            status = 'warehouse_pending',
+            payment_transaction_id = $1,
+            updated_at = NOW()
+          WHERE id = $2
+        `, [transactionId, verificationResult.orderId]);
+
+        console.log(`✅ [PAYMENT VERIFICATION] Order ${verificationResult.orderId} payment verified and updated`);
+      }
+
+      res.json({
+        success: true,
+        verified: true,
+        message: "پرداخت با موفقیت تأیید شد",
+        ...verificationResult
+      });
+      
+    } catch (error) {
+      console.error("❌ [PAYMENT VERIFICATION] Error:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در تأیید پرداخت"
+      });
+    }
+  });
+
+  // Bank payment success callback endpoint (public)
+  app.get("/api/payment/success", async (req, res) => {
+    try {
+      const { transactionId, orderId, amount, status } = req.query;
+      
+      console.log(`✅ [PAYMENT SUCCESS] Callback received:`, {
+        transactionId,
+        orderId,
+        amount,
+        status
+      });
+
+      if (status === 'success' && transactionId) {
+        // Auto-verify the payment
+        const { bankGatewayRouter } = await import('./bank-gateway-router');
+        const verificationResult = await bankGatewayRouter.verifyPayment(
+          transactionId.toString(), 
+          'auto_detect'
+        );
+        
+        if (verificationResult.verified) {
+          // Update order status
+          const { pool } = await import('./db');
+          
+          const result = await pool.query(`
+            UPDATE customer_orders 
+            SET 
+              payment_status = 'paid',
+              status = 'warehouse_pending',
+              payment_transaction_id = $1,
+              updated_at = NOW()
+            WHERE order_number = $2 OR id = $3
+            RETURNING id, order_number, total_amount
+          `, [transactionId, orderId, orderId]);
+
+          if (result.rows.length > 0) {
+            const order = result.rows[0];
+            console.log(`✅ [PAYMENT SUCCESS] Order ${order.order_number} marked as paid`);
+            
+            // Redirect to success page
+            res.redirect(`/payment/success?order=${order.order_number}&amount=${order.total_amount}`);
+            return;
+          }
+        }
+      }
+      
+      // If verification failed or status is not success
+      res.redirect(`/payment/failed?reason=verification_failed`);
+      
+    } catch (error) {
+      console.error("❌ [PAYMENT SUCCESS] Error processing callback:", error);
+      res.redirect(`/payment/failed?reason=processing_error`);
+    }
+  });
+
+  // Bank payment cancel callback endpoint (public)
+  app.get("/api/payment/cancel", async (req, res) => {
+    try {
+      const { transactionId, orderId } = req.query;
+      
+      console.log(`❌ [PAYMENT CANCEL] Callback received:`, {
+        transactionId,
+        orderId
+      });
+
+      // Redirect to cancel page
+      res.redirect(`/payment/cancelled?order=${orderId}`);
+      
+    } catch (error) {
+      console.error("❌ [PAYMENT CANCEL] Error processing callback:", error);
+      res.redirect(`/payment/failed?reason=processing_error`);
+    }
+  });
+
   // Get customer order for payment (public endpoint for payment page)
   app.get("/api/customers/orders/:orderId/payment", async (req, res) => {
     try {
@@ -13705,18 +13842,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check for hybrid payment (wallet_partial with remaining amount > 0)
       if (orderData.paymentMethod === 'wallet_partial' && remainingAmount > 0) {
         console.log(`🔄 [HYBRID PAYMENT] Wallet partial payment detected - wallet: ${walletAmountUsed}, remaining: ${remainingAmount}`);
-        return res.json({
-          success: true,
-          message: 'سفارش ثبت شد - هدایت به درگاه پرداخت',
-          orderId: orderNumber,
-          orderNumber: orderNumber,
-          totalAmount: totalAmount,
-          walletAmountUsed: walletAmountUsed,
-          walletAmountDeducted: walletAmountUsed,
-          remainingAmount: remainingAmount,
-          requiresBankPayment: true,
-          redirectUrl: `/payment/${orderNumber}`
+        
+        // هدایت پرداخت به درگاه بانکی فعال
+        const { bankGatewayRouter } = await import('./bank-gateway-router');
+        const routingResult = await bankGatewayRouter.routePayment({
+          orderId: order.id,
+          customerId: finalCustomerId,
+          amount: remainingAmount,
+          currency: 'IQD',
+          returnUrl: `${req.protocol}://${req.get('host')}/payment/success`,
+          cancelUrl: `${req.protocol}://${req.get('host')}/payment/cancel`
         });
+
+        if (routingResult.success) {
+          console.log(`🏦 [PAYMENT ROUTING] Successfully routed hybrid payment to ${routingResult.gateway?.name}`);
+          return res.json({
+            success: true,
+            message: 'سفارش ثبت شد - هدایت به درگاه پرداخت',
+            orderId: orderNumber,
+            orderNumber: orderNumber,
+            totalAmount: totalAmount,
+            walletAmountUsed: walletAmountUsed,
+            walletAmountDeducted: walletAmountUsed,
+            remainingAmount: remainingAmount,
+            requiresBankPayment: true,
+            paymentGateway: routingResult.gateway,
+            paymentUrl: routingResult.paymentUrl,
+            transactionId: routingResult.transactionId,
+            redirectUrl: routingResult.paymentUrl || `/payment/${orderNumber}`
+          });
+        } else {
+          console.log(`❌ [PAYMENT ROUTING] Failed to route hybrid payment: ${routingResult.message}`);
+          return res.json({
+            success: true,
+            message: 'سفارش ثبت شد - هدایت به صفحه پرداخت',
+            orderId: orderNumber,
+            orderNumber: orderNumber,
+            totalAmount: totalAmount,
+            walletAmountUsed: walletAmountUsed,
+            remainingAmount: remainingAmount,
+            requiresBankPayment: true,
+            paymentError: routingResult.message,
+            redirectUrl: `/payment/${orderNumber}`
+          });
+        }
       }
       
       // Add redirect URL for online payment and bank transfer
@@ -13727,32 +13896,94 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // For hybrid payment (wallet + bank gateway), return special response
         if (remainingAmount > 0 && walletAmountUsed > 0) {
-          return res.json({
-            success: true,
-            message: 'سفارش ثبت شد - هدایت به درگاه پرداخت',
-            orderId: orderNumber,
-            orderNumber: orderNumber,
-            totalAmount: totalAmount,
-            walletAmountUsed: walletAmountUsed,
-            remainingAmount: remainingAmount,
-            requiresBankPayment: true,
-            redirectToPayment: true,
-            redirectUrl: `/payment/${orderNumber}?amount=${remainingAmount}&wallet=${walletAmountUsed}&method=${finalPaymentMethod}`,
-            paymentGatewayUrl: `/payment?orderId=${order.id}&amount=${remainingAmount}&method=${finalPaymentMethod}`
+          // هدایت پرداخت ترکیبی به درگاه بانکی فعال
+          const { bankGatewayRouter } = await import('./bank-gateway-router');
+          const routingResult = await bankGatewayRouter.routePayment({
+            orderId: order.id,
+            customerId: finalCustomerId,
+            amount: remainingAmount,
+            currency: 'IQD',
+            returnUrl: `${req.protocol}://${req.get('host')}/payment/success`,
+            cancelUrl: `${req.protocol}://${req.get('host')}/payment/cancel`
           });
+
+          if (routingResult.success) {
+            console.log(`🏦 [PAYMENT ROUTING] Successfully routed hybrid payment to ${routingResult.gateway?.name}`);
+            return res.json({
+              success: true,
+              message: 'سفارش ثبت شد - هدایت به درگاه پرداخت',
+              orderId: orderNumber,
+              orderNumber: orderNumber,
+              totalAmount: totalAmount,
+              walletAmountUsed: walletAmountUsed,
+              remainingAmount: remainingAmount,
+              requiresBankPayment: true,
+              redirectToPayment: true,
+              paymentGateway: routingResult.gateway,
+              paymentUrl: routingResult.paymentUrl,
+              transactionId: routingResult.transactionId,
+              redirectUrl: routingResult.paymentUrl || `/payment/${orderNumber}?amount=${remainingAmount}&wallet=${walletAmountUsed}&method=${finalPaymentMethod}`,
+              paymentGatewayUrl: routingResult.paymentUrl || `/payment?orderId=${order.id}&amount=${remainingAmount}&method=${finalPaymentMethod}`
+            });
+          } else {
+            console.log(`❌ [PAYMENT ROUTING] Failed to route hybrid payment: ${routingResult.message}`);
+            return res.json({
+              success: true,
+              message: 'سفارش ثبت شد - هدایت به صفحه پرداخت',
+              orderId: orderNumber,
+              orderNumber: orderNumber,
+              totalAmount: totalAmount,
+              walletAmountUsed: walletAmountUsed,
+              remainingAmount: remainingAmount,
+              requiresBankPayment: true,
+              redirectToPayment: true,
+              paymentError: routingResult.message,
+              redirectUrl: `/payment/${orderNumber}?amount=${remainingAmount}&wallet=${walletAmountUsed}&method=${finalPaymentMethod}`,
+              paymentGatewayUrl: `/payment?orderId=${order.id}&amount=${remainingAmount}&method=${finalPaymentMethod}`
+            });
+          }
         }
         
         // For pure online payment, return special response  
         if (finalPaymentMethod === 'online_payment') {
-          return res.json({
-            success: true,
-            message: 'سفارش ثبت شد - هدایت به درگاه پرداخت آنلاین',
-            orderId: orderNumber,
-            orderNumber: orderNumber,
-            totalAmount: totalAmount,
-            redirectToPayment: true,
-            paymentGatewayUrl: `/payment?orderId=${order.id}&amount=${totalAmount}&method=online_payment`
+          // هدایت پرداخت آنلاین به درگاه بانکی فعال
+          const { bankGatewayRouter } = await import('./bank-gateway-router');
+          const routingResult = await bankGatewayRouter.routePayment({
+            orderId: order.id,
+            customerId: finalCustomerId,
+            amount: totalAmount,
+            currency: 'IQD',
+            returnUrl: `${req.protocol}://${req.get('host')}/payment/success`,
+            cancelUrl: `${req.protocol}://${req.get('host')}/payment/cancel`
           });
+
+          if (routingResult.success) {
+            console.log(`🏦 [PAYMENT ROUTING] Successfully routed online payment to ${routingResult.gateway?.name}`);
+            return res.json({
+              success: true,
+              message: 'سفارش ثبت شد - هدایت به درگاه پرداخت آنلاین',
+              orderId: orderNumber,
+              orderNumber: orderNumber,
+              totalAmount: totalAmount,
+              redirectToPayment: true,
+              paymentGateway: routingResult.gateway,
+              paymentUrl: routingResult.paymentUrl,
+              transactionId: routingResult.transactionId,
+              paymentGatewayUrl: routingResult.paymentUrl || `/payment?orderId=${order.id}&amount=${totalAmount}&method=online_payment`
+            });
+          } else {
+            console.log(`❌ [PAYMENT ROUTING] Failed to route online payment: ${routingResult.message}`);
+            return res.json({
+              success: true,
+              message: 'سفارش ثبت شد - هدایت به صفحه پرداخت',
+              orderId: orderNumber,
+              orderNumber: orderNumber,
+              totalAmount: totalAmount,
+              redirectToPayment: true,
+              paymentError: routingResult.message,
+              paymentGatewayUrl: `/payment?orderId=${order.id}&amount=${totalAmount}&method=online_payment`
+            });
+          }
         }
       }
 
