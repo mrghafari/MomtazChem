@@ -90,23 +90,34 @@ export class ShowcaseStorage implements IShowcaseStorage {
   }
 
   async createShowcaseProduct(product: InsertShowcaseProduct): Promise<ShowcaseProduct> {
+    const productData = {
+      ...product,
+      unitPrice: product.unitPrice ? product.unitPrice.toString() : "0.00"
+    };
+    
     const [newProduct] = await showcaseDb
       .insert(showcaseProducts)
-      .values(product)
+      .values(productData)
       .returning();
     return newProduct;
   }
 
   async updateShowcaseProduct(id: number, productUpdate: Partial<InsertShowcaseProduct>): Promise<ShowcaseProduct> {
+    const updateData = {
+      ...productUpdate,
+      updatedAt: new Date(),
+      ...(productUpdate.unitPrice !== undefined && { unitPrice: productUpdate.unitPrice.toString() })
+    };
+    
     const [updatedProduct] = await showcaseDb
       .update(showcaseProducts)
-      .set({ ...productUpdate, updatedAt: new Date() })
+      .set(updateData)
       .where(eq(showcaseProducts.id, id))
       .returning();
     
-    // Auto-sync to shop if syncWithShop is enabled and imageUrl was updated
-    if (updatedProduct && updatedProduct.syncWithShop && productUpdate.imageUrl) {
-      console.log(`🖼️ Image updated for ${updatedProduct.name}, syncing to shop...`);
+    // Auto-sync to shop if syncWithShop is enabled and any image was updated
+    if (updatedProduct && updatedProduct.syncWithShop && (productUpdate.imageUrl || productUpdate.imageUrls)) {
+      console.log(`🖼️ Images updated for ${updatedProduct.name}, syncing to shop...`);
       await this.syncProductToShop(updatedProduct);
     }
     

@@ -35,7 +35,8 @@ export const showcaseProducts = pgTable("showcase_products", {
   description: text("description").notNull(),
   shortDescription: text("short_description"),
   priceRange: text("price_range"), // "25-30 USD per liter" for display only
-  imageUrl: text("image_url"),
+  imageUrl: text("image_url"), // Legacy single image - kept for backward compatibility
+  imageUrls: json("image_urls"), // Array of multiple product images (up to 3) - supports JPG, PNG, GIF
   pdfCatalogUrl: text("pdf_catalog_url"),
   specifications: json("specifications"), // Technical specifications for display
   features: json("features"), // Product features array

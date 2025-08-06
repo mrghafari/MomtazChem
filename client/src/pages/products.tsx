@@ -48,6 +48,8 @@ const formSchema = insertShowcaseProductSchema.extend({
   features: z.string().optional(),
   applications: z.string().optional(),
   tags: z.string().optional(), // Tags as comma-separated string
+  // Multiple images support (up to 3 images including GIF)
+  imageUrls: z.array(z.string()).max(3).optional(),
   // Variant fields
   isVariant: z.boolean().default(false),
   parentProductId: z.number().optional(),
@@ -152,10 +154,12 @@ export default function ProductsPage() {
   const [selectedVisibilityFilter, setSelectedVisibilityFilter] = useState<string>("all");
   const [editingProduct, setEditingProduct] = useState<ShowcaseProduct | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null); // Legacy single image preview
+  const [imagePreviews, setImagePreviews] = useState<(string | null)[]>([null, null, null]); // Multiple image previews
   const [catalogPreview, setCatalogPreview] = useState<string | null>(null);
   const [msdsPreview, setMsdsPreview] = useState<string | null>(null);
-  const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false); // Legacy single image upload
+  const [uploadingImages, setUploadingImages] = useState<boolean[]>([false, false, false]); // Multiple image uploads
   const [uploadingCatalog, setUploadingCatalog] = useState(false);
   const [uploadingMsds, setUploadingMsds] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -307,6 +311,7 @@ export default function ProductsPage() {
       setRefreshKey(prev => prev + 1); // Force component re-render
       setDialogOpen(false);
       setImagePreview(null);
+      setImagePreviews([null, null, null]); // Reset multiple image previews
       setCatalogPreview(null);
       setMsdsPreview(null);
       form.reset();
@@ -503,7 +508,8 @@ export default function ProductsPage() {
       category: "",
       shortDescription: "",
       priceRange: "",
-      imageUrl: "",
+      imageUrl: "", // Legacy single image field
+      imageUrls: [], // Multiple images array
       specifications: "",
       features: "",
       applications: "",
@@ -712,6 +718,88 @@ export default function ProductsPage() {
     }
   };
 
+  // Multiple image upload handler (supports up to 3 images including GIF)
+  const handleMultipleImageUpload = async (file: File, index: number) => {
+    if (!file || index < 0 || index > 2) return;
+
+    // Validate file size (2MB max)
+    if (file.size > 2 * 1024 * 1024) {
+      toast({
+        title: "File Too Large",
+        description: "Image must be less than 2MB. Please compress or resize the image.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file format - now includes GIF support
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+    if (!allowedTypes.includes(file.type)) {
+      toast({
+        title: "Invalid Format", 
+        description: "Only JPEG, PNG, and GIF images are allowed.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Set uploading state for specific index
+    const newUploadingImages = [...uploadingImages];
+    newUploadingImages[index] = true;
+    setUploadingImages(newUploadingImages);
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Upload failed');
+      }
+
+      const { url } = await response.json();
+      
+      // Update image previews
+      const newPreviews = [...imagePreviews];
+      newPreviews[index] = url;
+      setImagePreviews(newPreviews);
+      
+      // Update form imageUrls array
+      const currentUrls = form.getValues('imageUrls') || [];
+      const newUrls = [...currentUrls];
+      newUrls[index] = url;
+      // Remove empty strings and update form
+      form.setValue('imageUrls', newUrls.filter(url => url));
+      
+      // Update legacy imageUrl field with first image for backward compatibility
+      if (index === 0) {
+        form.setValue('imageUrl', url);
+        setImagePreview(url);
+      }
+      
+      toast({
+        title: "موفقیت",
+        description: `تصویر ${index + 1} با موفقیت آپلود شد`,
+      });
+    } catch (error) {
+      toast({
+        title: "خطای آپلود",
+        description: error instanceof Error ? error.message : "آپلود تصویر ناموفق بود",
+        variant: "destructive",
+      });
+    } finally {
+      // Reset uploading state
+      const newUploadingImages = [...uploadingImages];
+      newUploadingImages[index] = false;
+      setUploadingImages(newUploadingImages);
+    }
+  };
+
   const handleCatalogUpload = async (file: File) => {
     if (!file) return;
 
@@ -791,6 +879,7 @@ export default function ProductsPage() {
   const openCreateDialog = () => {
     setEditingProduct(null);
     setImagePreview(null);
+    setImagePreviews([null, null, null]); // Reset multiple image previews
     setCatalogPreview(null);
     setMsdsPreview(null);
     setManualBarcodeEntered(false); // Reset manual barcode flag
@@ -803,6 +892,13 @@ export default function ProductsPage() {
     setValidationErrors({}); // Clear validation errors
     setManualBarcodeEntered(false); // Reset manual barcode flag
     setImagePreview(product.imageUrl || null);
+    // Set multiple image previews from existing imageUrls
+    const existingImageUrls = Array.isArray(product.imageUrls) ? product.imageUrls : (product.imageUrl ? [product.imageUrl] : []);
+    const newPreviews: (string | null)[] = [null, null, null];
+    existingImageUrls.forEach((url: string, index: number) => {
+      if (index < 3) newPreviews[index] = url;
+    });
+    setImagePreviews(newPreviews);
     setCatalogPreview(product.pdfCatalogUrl || null);
     setMsdsPreview(product.msdsUrl || null);
     form.reset({
@@ -827,7 +923,8 @@ export default function ProductsPage() {
       netWeight: Number(product.netWeight) || 0,
       grossWeight: Number(product.grossWeight) || 0,
       batchNumber: product.batchNumber || "",
-      imageUrl: product.imageUrl || "",
+      imageUrl: product.imageUrl || "", // Legacy single image field
+      imageUrls: Array.isArray(product.imageUrls) ? product.imageUrls : (product.imageUrl ? [product.imageUrl] : []), // Multiple images array
       pdfCatalogUrl: product.pdfCatalogUrl || "",
       msdsUrl: product.msdsUrl || "",
       msdsFileName: product.msdsFileName || "",
@@ -2413,87 +2510,115 @@ export default function ProductsPage() {
                     مدیریت فایل‌ها و اسناد
                   </h3>
                   
-                  {/* آپلود تصویر محصول */}
+                  {/* آپلود تصاویر محصول (حداکثر 3 تصویر) */}
                   <div className="space-y-4">
                     <div className="space-y-3">
                       <FormLabel className="text-sm font-medium flex items-center gap-2">
                         <Image className="h-4 w-4" />
-                        تصویر محصول
+                        تصاویر محصول (حداکثر 3 تصویر)
                         <Tooltip>
                           <TooltipTrigger>
                             <HelpCircle className="h-3 w-3 text-gray-400" />
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>تصویر اصلی محصول برای نمایش در کاردکس و فروشگاه. حداکثر حجم: 2MB</p>
+                            <p>حداکثر 3 تصویر از محصول برای نمایش در کاردکس و فروشگاه. پشتیبانی از JPG, PNG, GIF - حداکثر 2MB</p>
                           </TooltipContent>
                         </Tooltip>
                       </FormLabel>
                       
-                      <div className="grid grid-cols-2 gap-4">
-                        {/* آپلود تصویر */}
-                        <div className="space-y-2">
-                          <div className="relative border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-                            {imagePreview ? (
-                              <div className="relative">
-                                <img 
-                                  src={imagePreview} 
-                                  alt="پیش‌نمای تصویر" 
-                                  className="w-full h-32 object-cover rounded-lg"
-                                />
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  size="sm"
-                                  className="absolute top-2 right-2 h-6 w-6 p-0"
-                                  onClick={() => {
-                                    setImagePreview(null);
-                                    form.setValue('imageUrl', '');
+                      <div className="space-y-4">
+                        {/* آپلود تصاویر */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          {[0, 1, 2].map((index) => (
+                            <div key={index} className="space-y-2">
+                              <div className="text-xs text-gray-500 text-center font-medium">تصویر {index + 1}</div>
+                              <div className="relative border-2 border-dashed border-gray-300 rounded-lg p-3 text-center min-h-[140px] flex flex-col justify-center">
+                                {imagePreviews[index] ? (
+                                  <div className="relative">
+                                    <img 
+                                      src={imagePreviews[index]} 
+                                      alt={`پیش‌نمای تصویر ${index + 1}`} 
+                                      className="w-full h-20 object-cover rounded-lg"
+                                    />
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      size="sm"
+                                      className="absolute -top-2 -right-2 h-6 w-6 p-0 bg-white shadow-md"
+                                      onClick={() => {
+                                        const newPreviews = [...imagePreviews];
+                                        newPreviews[index] = null;
+                                        setImagePreviews(newPreviews);
+                                        
+                                        const currentUrls = form.getValues('imageUrls') || [];
+                                        const newUrls = [...currentUrls];
+                                        newUrls[index] = '';
+                                        form.setValue('imageUrls', newUrls.filter(url => url));
+                                      }}
+                                    >
+                                      <X className="h-3 w-3" />
+                                    </Button>
+                                  </div>
+                                ) : (
+                                  <div className="py-2">
+                                    <Image className="mx-auto h-8 w-8 text-gray-400" />
+                                    <p className="mt-1 text-xs text-gray-600">انتخاب تصویر</p>
+                                    <p className="text-xs text-gray-500">JPG, PNG, GIF</p>
+                                  </div>
+                                )}
+                                <input
+                                  type="file"
+                                  accept="image/jpeg,image/jpg,image/png,image/gif"
+                                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) handleMultipleImageUpload(file, index);
                                   }}
-                                >
-                                  <X className="h-3 w-3" />
-                                </Button>
+                                />
                               </div>
-                            ) : (
-                              <div className="py-4">
-                                <Image className="mx-auto h-12 w-12 text-gray-400" />
-                                <p className="mt-2 text-sm text-gray-600">کلیک کنید تا تصویر انتخاب کنید</p>
-                                <p className="text-xs text-gray-500">JPG, PNG, WebP - حداکثر 2MB</p>
-                              </div>
-                            )}
-                            <input
-                              type="file"
-                              accept="image/jpeg,image/jpg,image/png,image/webp"
-                              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) handleImageUpload(file);
-                              }}
-                            />
-                          </div>
-                          {uploadingImage && (
-                            <div className="flex items-center justify-center text-sm text-blue-600">
-                              <RefreshCw className="h-4 w-4 animate-spin mr-2" />
-                              در حال آپلود...
+                              {uploadingImages[index] && (
+                                <div className="flex items-center justify-center text-xs text-blue-600">
+                                  <RefreshCw className="h-3 w-3 animate-spin mr-1" />
+                                  آپلود...
+                                </div>
+                              )}
                             </div>
-                          )}
+                          ))}
                         </div>
 
-                        {/* نمایش تصویر فعلی */}
+                        {/* نمایش URLs تصاویر */}
                         <div className="space-y-2">
+                          <FormField
+                            control={form.control}
+                            name="imageUrls"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-sm text-gray-600">URLs تصاویر</FormLabel>
+                                <FormControl>
+                                  <div className="space-y-1">
+                                    {(field.value || []).map((url: string, index: number) => (
+                                      <Input 
+                                        key={index}
+                                        placeholder={`URL تصویر ${index + 1}`}
+                                        className="h-8 text-xs"
+                                        value={url || ''}
+                                        readOnly
+                                      />
+                                    ))}
+                                  </div>
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          
+                          {/* Backward compatibility with single imageUrl */}
                           <FormField
                             control={form.control}
                             name="imageUrl"
                             render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="text-sm text-gray-600">URL تصویر</FormLabel>
+                              <FormItem className="hidden">
                                 <FormControl>
-                                  <Input 
-                                    placeholder="https://..." 
-                                    className="h-9 text-sm"
-                                    {...field}
-                                    value={field.value || ''}
-                                    readOnly
-                                  />
+                                  <Input {...field} />
                                 </FormControl>
                               </FormItem>
                             )}

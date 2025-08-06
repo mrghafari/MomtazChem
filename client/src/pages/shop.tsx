@@ -1111,31 +1111,49 @@ const Shop = () => {
                     {viewMode === "grid" ? (
                       <>
                         <div className="aspect-square bg-gray-100 rounded-t-lg overflow-hidden relative group cursor-pointer">
-                          {product.imageUrl ? (
-                            <div 
-                              className="relative w-full h-full cursor-pointer"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                console.log('Image clicked:', product.imageUrl);
-                                setSelectedImageForZoom(product.imageUrl);
-                              }}
-                            >
-                              <img 
-                                src={product.imageUrl} 
-                                alt={product.name}
-                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110 pointer-events-none"
-                              />
-                              {/* Zoom overlay on hover */}
-                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center pointer-events-none">
-                                <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-gray-400">
-                              No Image
-                            </div>
-                          )}
+                          {(() => {
+                            // Use multiple images if available, fallback to legacy single image
+                            const images = Array.isArray(product.imageUrls) && product.imageUrls.length > 0 
+                              ? product.imageUrls 
+                              : (product.imageUrl ? [product.imageUrl] : []);
+                            
+                            if (images.length > 0) {
+                              const primaryImage = images[0];
+                              return (
+                                <div 
+                                  className="relative w-full h-full cursor-pointer"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    console.log('Image clicked:', primaryImage);
+                                    setSelectedImageForZoom(primaryImage);
+                                  }}
+                                >
+                                  <img 
+                                    src={primaryImage} 
+                                    alt={product.name}
+                                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110 pointer-events-none"
+                                  />
+                                  {/* Multiple images indicator */}
+                                  {images.length > 1 && (
+                                    <div className="absolute top-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded-full">
+                                      +{images.length - 1}
+                                    </div>
+                                  )}
+                                  {/* Zoom overlay on hover */}
+                                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center pointer-events-none">
+                                    <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                  </div>
+                                </div>
+                              );
+                            } else {
+                              return (
+                                <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                  No Image
+                                </div>
+                              );
+                            }
+                          })()}
                           
                           {/* Star Rating Display - Bottom Left Corner - Grid View - Always Show */}
                           <div className="absolute bottom-2 left-2">
@@ -1470,31 +1488,49 @@ const Shop = () => {
                     ) : (
                       <div className="flex">
                         <div className="w-48 h-48 bg-gray-100 flex-shrink-0 relative group cursor-pointer">
-                          {product.imageUrl ? (
-                            <div 
-                              className="relative w-full h-full overflow-hidden cursor-pointer"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                console.log('List image clicked:', product.imageUrl);
-                                setSelectedImageForZoom(product.imageUrl);
-                              }}
-                            >
-                              <img 
-                                src={product.imageUrl} 
-                                alt={product.name}
-                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110 pointer-events-none"
-                              />
-                              {/* Zoom overlay on hover */}
-                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center pointer-events-none">
-                                <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-gray-400">
-                              No Image
-                            </div>
-                          )}
+                          {(() => {
+                            // Use multiple images if available, fallback to legacy single image
+                            const images = Array.isArray(product.imageUrls) && product.imageUrls.length > 0 
+                              ? product.imageUrls 
+                              : (product.imageUrl ? [product.imageUrl] : []);
+                            
+                            if (images.length > 0) {
+                              const primaryImage = images[0];
+                              return (
+                                <div 
+                                  className="relative w-full h-full overflow-hidden cursor-pointer"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    console.log('List image clicked:', primaryImage);
+                                    setSelectedImageForZoom(primaryImage);
+                                  }}
+                                >
+                                  <img 
+                                    src={primaryImage} 
+                                    alt={product.name}
+                                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110 pointer-events-none"
+                                  />
+                                  {/* Multiple images indicator */}
+                                  {images.length > 1 && (
+                                    <div className="absolute top-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded-full">
+                                      +{images.length - 1}
+                                    </div>
+                                  )}
+                                  {/* Zoom overlay on hover */}
+                                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center pointer-events-none">
+                                    <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                  </div>
+                                </div>
+                              );
+                            } else {
+                              return (
+                                <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                  No Image
+                                </div>
+                              );
+                            }
+                          })()}
                           
                           {/* Star Rating - Bottom Left Corner - List View - Always Show */}
                           <div className="absolute bottom-2 left-2">
