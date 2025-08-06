@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { apiRequest, queryClient } from '@/lib/queryClient';
-import { useAuth } from './useAuth';
+import { useCustomerAuth } from './useCustomerAuth';
 
 interface CartItem {
   productId: number;
@@ -9,7 +9,7 @@ interface CartItem {
 }
 
 export function usePersistentCart() {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user } = useCustomerAuth();
   const [localCart, setLocalCart] = useState<{[key: number]: number}>({});
   const [isLoading, setIsLoading] = useState(false);
 
@@ -57,7 +57,10 @@ export function usePersistentCart() {
             method: 'GET'
           });
           if (response.success) {
-            setLocalCart(response.cart);
+            // پشتیبانی از هر دو فرمت response
+            const cartData = response.data?.cartData || response.cart || {};
+            console.log('🛒 بارگذاری سبد از database:', cartData);
+            setLocalCart(cartData);
             // پاک کردن localStorage پس از همگام‌سازی موفق
             localStorage.removeItem('cart');
           }
@@ -155,6 +158,8 @@ export function usePersistentCart() {
 
   // پاک کردن کامل سبد
   const clearCart = async () => {
+    console.log('🗑️ پاک کردن سبد خرید..., authenticated:', isAuthenticated);
+    
     if (isAuthenticated) {
       try {
         await apiRequest('/api/customers/persistent-cart/clear', {
@@ -162,12 +167,15 @@ export function usePersistentCart() {
         });
         console.log('✅ سبد خرید از دیتابیس پاک شد');
       } catch (error) {
-        console.error('خطا در پاک کردن سبد از دیتابیس:', error);
+        console.error('❌ خطا در پاک کردن سبد از دیتابیس:', error);
       }
+    } else {
+      console.log('🔄 کاربر authenticated نیست، فقط localStorage پاک می‌شود');
     }
 
     setLocalCart({});
     localStorage.removeItem('cart');
+    console.log('✅ سبد محلی پاک شد');
   };
 
   // دریافت تعداد کل آیتم‌ها در سبد
