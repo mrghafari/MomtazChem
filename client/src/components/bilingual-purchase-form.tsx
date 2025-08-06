@@ -862,20 +862,12 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     });
   }, [isLoadingShippingRates, shippingRatesError, shippingRatesData]);
 
-  // Calculate VAT and duties amounts (only on product subtotal, not shipping)
-  const vatRate = vatData?.vatEnabled ? parseFloat(vatData.vatRate || '0') : 0;
-  const dutiesRate = vatData?.dutiesEnabled ? parseFloat(vatData.dutiesRate || '0') : 0;
+  // ✅ NO TAX CALCULATION: Only cart products without any taxes
+  const vatAmount = 0;
+  const dutiesAmount = 0;
+  const totalTaxAmount = 0;
   
-  const vatAmount = vatData?.vatEnabled ? subtotalAmount * vatRate : 0;
-  const dutiesAmount = vatData?.dutiesEnabled ? subtotalAmount * dutiesRate : 0;
-  const totalTaxAmount = vatAmount + dutiesAmount;
-  
-  // Smart delivery cost calculation state
-  const [smartDeliveryCost, setSmartDeliveryCost] = useState<number>(0);
-  const [smartDeliveryLoading, setSmartDeliveryLoading] = useState<boolean>(false);
-  const [smartDeliveryError, setSmartDeliveryError] = useState<string>('');
-  const [optimalVehicle, setOptimalVehicle] = useState<any>(null);
-  const [alternativeVehicles, setAlternativeVehicles] = useState<any[]>([]);
+  // ✅ NO SMART DELIVERY: Removed all delivery cost calculations
 
   // Auto-select smart vehicle when shipping methods load
   useEffect(() => {
@@ -891,45 +883,27 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     }
   }, [shippingRatesData, selectedShippingMethod]);
 
-  console.log('💰 [PURCHASE FORM] Tax calculation:', {
-    vatData,
-    vatRate,
-    dutiesRate,
+  // ✅ NO TAX DEBUG: Only cart calculation
+  console.log('💰 [SIMPLE PURCHASE] Cart only calculation:', {
     subtotalAmount,
-    vatAmount,
-    dutiesAmount,
-    totalTaxAmount
+    totalAmount
   });
   
-  // Calculate total weight of all products in cart
-  const totalWeight = Object.entries(cart).reduce((sum, [productId, quantity]) => {
-    const product = products.find(p => p.id === parseInt(productId));
-    if (product) {
-      // Get weight from product data (use different weight fields as fallback)
-      const productWeight = parseFloat(product.weight || product.weightKg || product.weight_kg || '0');
-      return sum + (productWeight * quantity);
-    }
-    return sum;
-  }, 0);
+  // ✅ NO WEIGHT CALCULATION: Not needed for simple cart-only payment
+  const totalWeight = 0;
 
-  // Calculate shipping cost - prioritize smart delivery over regular shipping
-  const finalShippingCost = selectedShippingMethod && (shippingRatesData?.find((rate: any) => rate.id === selectedShippingMethod)?.deliveryMethod === 'smart_vehicle' || shippingRatesData?.find((rate: any) => rate.id === selectedShippingMethod)?.delivery_method === 'smart_vehicle')
-    ? (optimalVehicle ? optimalVehicle.totalCost : smartDeliveryCost)
-    : shippingCost;
+  // ✅ NO SHIPPING COST CALCULATION: Only cart products
+  const finalShippingCost = 0;
   
-  // Calculate total amount (subtotal + VAT + duties + final shipping cost - no double counting)
-  const totalAmount = subtotalAmount + totalTaxAmount + finalShippingCost;
+  // ✅ SIMPLE CALCULATION: Only use cart-based subtotal as total amount
+  // No additional shipping, tax, or other calculations - only cart products
+  const totalAmount = subtotalAmount;
   
-  // Debug total calculation
-  console.log('💰 [TOTAL CALCULATION] Breakdown:', {
+  // ✅ SIMPLE DEBUG: Only cart total
+  console.log('💰 [SIMPLE CALCULATION] Cart total only:', {
     subtotalAmount,
-    totalTaxAmount,
-    finalShippingCost,
-    regularShippingCost: shippingCost,
-    smartDeliveryCost: smartDeliveryCost,
-    optimalVehicleCost: optimalVehicle?.totalCost,
     totalAmount,
-    'Components': `${subtotalAmount} + ${totalTaxAmount} + ${finalShippingCost} = ${totalAmount}`
+    'Simple formula': `Cart products total = ${totalAmount} IQD`
   });
 
   // Calculate wallet payment amounts
@@ -1009,131 +983,9 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     }
   };
 
-  // Calculate smart delivery cost
-  const calculateSmartDeliveryCost = async (destinationCity: string, destinationProvince: string) => {
-    if (!destinationCity || totalWeight <= 0) {
-      console.log('🚚 [SMART DELIVERY] Skipping calculation - missing city or zero weight');
-      return;
-    }
+  // ✅ NO SMART DELIVERY: Removed calculateSmartDeliveryCost function
 
-    setSmartDeliveryLoading(true);
-    setSmartDeliveryError('');
-    
-    try {
-      console.log('🚚 [SMART DELIVERY] Calculating cost for:', {
-        weight: totalWeight,
-        city: destinationCity,
-        province: destinationProvince,
-        cartItems: Object.keys(cart).length
-      });
-
-      const response = await fetch('/api/calculate-delivery-cost', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          weight: totalWeight,
-          destinationCity: destinationCity,
-          destinationProvince: destinationProvince,
-          cart: cart,
-          useSecondaryAddress: showSecondAddress && secondAddress.trim().length > 0,
-          secondaryAddress: showSecondAddress ? {
-            address: secondAddress,
-            city: secondCity,
-            province: secondProvince,
-            postalCode: secondPostalCode
-          } : null
-        })
-      });
-
-      const data = await response.json();
-      
-      console.log('🚚 [SMART DELIVERY] API response:', data);
-      console.log('🚚 [SMART DELIVERY] Response details:', {
-        success: data.success,
-        hasData: !!data.data,
-        hasOptimalVehicle: !!(data.data?.optimalVehicle),
-        optimalVehicle: data.data?.optimalVehicle
-      });
-      
-      if (data.success && data.data) {
-        // Handle standard vehicle selection response format from database templates
-        const { optimalVehicle, alternatives } = data.data;
-        
-        // Check if optimalVehicle exists and has required properties
-        if (optimalVehicle && optimalVehicle.totalCost !== undefined) {
-          setOptimalVehicle(optimalVehicle);
-          setAlternativeVehicles(alternatives || []);
-          setSmartDeliveryCost(optimalVehicle.totalCost);
-          
-          console.log('✅ [SMART DELIVERY] Cost calculated:', {
-            vehicle: optimalVehicle.vehicleName,
-            cost: optimalVehicle.totalCost,
-            estimatedTime: optimalVehicle.estimatedTime
-          });
-        } else {
-          console.error('❌ [SMART DELIVERY] Invalid optimalVehicle data:', optimalVehicle);
-          throw new Error('داده‌های وسیله نقلیه بهینه دریافت نشد');
-        }
-      } else {
-        throw new Error(data.message || 'محاسبه هزینه ارسال ناموفق بود');
-      }
-    } catch (error) {
-      console.error('❌ [SMART DELIVERY] Calculation error:', error);
-      setSmartDeliveryError((error as any)?.message || 'خطا در محاسبه هزینه ارسال');
-      setSmartDeliveryCost(0);
-      setOptimalVehicle(null);
-      setAlternativeVehicles([]);
-    } finally {
-      setSmartDeliveryLoading(false);
-    }
-  };
-
-  // Watch for changes in destination to recalculate delivery cost
-  useEffect(() => {
-    // Determine final destination city and province
-    const finalDestinationCity = showSecondAddress && secondCity.trim() ? 
-      secondCity : 
-      (crmCustomerData?.cityRegion || crmCustomerData?.city || customerData?.customer?.cityRegion || customerData?.customer?.city || form.watch('city'));
-    
-    const finalDestinationProvince = showSecondAddress && secondProvince.trim() ? 
-      secondProvince : 
-      (crmCustomerData?.province || customerData?.customer?.province);
-
-    console.log('🚚 [DELIVERY CALCULATION] Final destination determined:', {
-      showSecondAddress,
-      secondCity,
-      secondProvince,
-      crmCityRegion: crmCustomerData?.cityRegion,
-      crmCity: crmCustomerData?.city,
-      crmProvince: crmCustomerData?.province,
-      customerCityRegion: customerData?.customer?.cityRegion,
-      customerCity: customerData?.customer?.city,
-      customerProvince: customerData?.customer?.province,
-      formCity: form.watch('city'),
-      finalDestinationCity,
-      finalDestinationProvince,
-      totalWeight
-    });
-
-    if (finalDestinationCity && finalDestinationProvince && totalWeight > 0) {
-      const debounceTimer = setTimeout(() => {
-        calculateSmartDeliveryCost(finalDestinationCity, finalDestinationProvince);
-      }, 1000); // 1 second debounce
-      
-      return () => clearTimeout(debounceTimer);
-    } else {
-      console.log('🚚 [DELIVERY CALCULATION] Missing required data for calculation:', {
-        hasCity: !!finalDestinationCity,
-        hasProvince: !!finalDestinationProvince,
-        hasWeight: totalWeight > 0,
-        cityValue: finalDestinationCity,
-        provinceValue: finalDestinationProvince
-      });
-    }
-  }, [showSecondAddress, secondCity, secondProvince, form.watch('city'), totalWeight, cart, crmCustomerData?.cityRegion, crmCustomerData?.province, customerData?.customer?.cityRegion, customerData?.customer?.province]);
+  // ✅ NO DELIVERY CALCULATION: Removed all delivery cost calculation useEffect
 
 
 
@@ -1393,18 +1245,19 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       isUsingRecipientMobile: !!(showRecipientMobile && recipientMobile.trim()),
     };
 
+    // ✅ SIMPLE ORDER DATA: Only cart-based calculations
     let orderData = {
       ...data,
       cart,
-      totalAmount,
-      subtotalAmount,
-      shippingCost: finalShippingCost,
-      vatAmount: totalTaxAmount,
+      totalAmount, // This is only subtotalAmount (cart products total)
+      subtotalAmount, // Same as totalAmount - cart products cost
+      shippingCost: 0, // No shipping cost calculation
+      vatAmount: 0, // No tax calculation
       selectedShippingMethod,
       currency: 'IQD',
       paymentMethod,
-      walletAmountUsed: Math.round(walletAmount), // Use actual wallet amount in integer format
-      remainingAmount: Math.round(Math.max(0, totalAmount - walletAmount)), // Calculate remaining in integer format
+      walletAmountUsed: Math.round(walletAmount),
+      remainingAmount: Math.round(Math.max(0, totalAmount - walletAmount)),
       
       // Enhanced delivery information
       secondDeliveryAddress: showSecondAddress ? secondAddress : null,
@@ -1481,19 +1334,20 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       orderData
     });
 
-    // Store temporary calculation data for payment gateway
+    // ✅ SIMPLE TEMP CALCULATION: Only cart-based data for payment gateway
     const tempCalculationData = {
-      finalAmount: totalAmount,
-      subtotalAmount,
-      shippingCost: finalShippingCost,
-      totalTaxAmount,
+      finalAmount: totalAmount, // Only cart subtotal amount to send to Bank Saman
+      subtotalAmount, // Same as finalAmount - only cart products
+      shippingCost: 0, // No shipping cost
+      totalTaxAmount: 0, // No tax
       walletAmountUsed: orderData.walletAmountUsed || 0,
       remainingAmount: orderData.remainingAmount || totalAmount,
       paymentMethod: finalPaymentMethod,
       cartData: cart,
       deliveryAddress: data.address,
       phone: data.phone,
-      notes: data.notes
+      notes: data.notes,
+      calculationBreakdown: `فقط قیمت کالاهای سبد خرید: ${totalAmount} IQD`
     };
 
     console.log('💾 [TEMP CALCULATION] Storing calculation data for payment:', tempCalculationData);
