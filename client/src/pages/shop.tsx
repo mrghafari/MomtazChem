@@ -881,6 +881,52 @@ const Shop = () => {
     }, 0);
   };
 
+  // Clear cart function - clears both local state and localStorage
+  const clearCart = async () => {
+    console.log('🧹 [CART CLEAR] Clearing cart from frontend');
+    
+    try {
+      // Clear local state first
+      setCart({});
+      
+      // Clear localStorage and sessionStorage
+      localStorage.removeItem('momtazchem_user_cart');
+      localStorage.removeItem('momtazchem_guest_cart');
+      sessionStorage.removeItem('momtazchem_guest_cart');
+      
+      // If customer is logged in, clear persistent cart from backend
+      if (customer && customer.id) {
+        console.log('🧹 [CART CLEAR] Clearing persistent cart from backend for customer:', customer.id);
+        
+        await fetch('/api/customers/persistent-cart/clear', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        });
+        
+        console.log('✅ [CART CLEAR] Backend persistent cart cleared');
+      }
+      
+      console.log('✅ [CART CLEAR] Cart cleared from frontend and browser storage');
+      
+      // Update UI
+      toast({
+        title: direction === 'rtl' ? "سبد خرید پاک شد" : "Cart cleared",
+        description: direction === 'rtl' ? "سبد خرید شما با موفقیت پاک شد" : "Your cart has been cleared successfully",
+      });
+      
+    } catch (error) {
+      console.error('❌ [CART CLEAR] Error clearing cart:', error);
+      toast({
+        title: direction === 'rtl' ? "خطا در پاک کردن سبد" : "Error clearing cart",
+        description: direction === 'rtl' ? "مشکلی در پاک کردن سبد خرید پیش آمد" : "There was an issue clearing your cart",
+        variant: "destructive"
+      });
+    }
+  };
+
   // Pre-checkout handlers
   const handleCartClick = () => {
     console.log('Cart clicked, total items:', getTotalItems());
@@ -1070,7 +1116,7 @@ const Shop = () => {
               )}
 
               {/* Cart Summary */}
-              <div className="relative">
+              <div className="relative flex items-center gap-2">
                 <Button 
                   variant="outline" 
                   className="flex items-center gap-2"
@@ -1092,6 +1138,19 @@ const Shop = () => {
                     </div>
                   )}
                 </Button>
+                
+                {/* Test Clear Cart Button */}
+                {getTotalItems() > 0 && (
+                  <Button 
+                    variant="destructive" 
+                    size="sm"
+                    onClick={clearCart}
+                    className="flex items-center gap-1"
+                  >
+                    <X className="w-4 h-4" />
+                    Clear
+                  </Button>
+                )}
               </div>
             </div>
           </div>

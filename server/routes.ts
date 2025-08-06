@@ -12688,6 +12688,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Clear customer's persistent cart
+  app.delete("/api/customers/persistent-cart/clear", requireCustomerAuth, async (req, res) => {
+    try {
+      const customerId = (req.session as any).customerId;
+      
+      console.log('🧹 [PERSISTENT CART] Clearing cart for customer:', customerId);
+      
+      const { pool } = await import('./db');
+      
+      // Clear cart from database
+      await pool.query(`
+        DELETE FROM persistent_carts 
+        WHERE customer_id = $1
+      `, [customerId]);
+      
+      console.log('✅ [PERSISTENT CART] Cart cleared successfully for customer:', customerId);
+      
+      res.json({
+        success: true,
+        message: 'سبد خرید با موفقیت پاک شد'
+      });
+    } catch (error) {
+      console.error('❌ [PERSISTENT CART] Error clearing cart:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در پاک کردن سبد خرید'
+      });
+    }
+  });
+
   // Update customer profile
   app.patch("/api/customers/:id", async (req, res) => {
     try {
