@@ -17118,6 +17118,44 @@ Momtaz Chemical Technical Team`,
     }
   });
 
+  // Get product batches for display
+  app.get("/api/products/:name/batches/display", async (req, res) => {
+    try {
+      const productName = decodeURIComponent(req.params.name);
+      const batches = await shopStorage.getProductBatchesByName(productName);
+      
+      if (!batches || batches.length === 0) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "No batches found for product" 
+        });
+      }
+      
+      // Return batch display information
+      const batchInfo = {
+        productName,
+        totalStock: batches.reduce((sum, batch) => sum + (batch.stockQuantity || 0), 0),
+        batches: batches.map(batch => ({
+          id: batch.id,
+          batchNumber: batch.batchNumber || `Batch-${batch.id}`,
+          stockQuantity: batch.stockQuantity || 0,
+          price: batch.price || 0,
+          expiryDate: batch.expiryDate,
+          lastUpdated: batch.updatedAt
+        })),
+        lastKardexUpdate: new Date().toISOString()
+      };
+      
+      res.json({ success: true, data: batchInfo });
+    } catch (error: any) {
+      console.error("Error fetching product batches:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to fetch product batches" 
+      });
+    }
+  });
+
   app.get("/api/shop/categories", async (req, res) => {
     try {
       const categories = await shopStorage.getShopCategories();

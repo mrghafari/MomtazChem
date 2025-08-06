@@ -245,6 +245,17 @@ export class ShopStorage implements IShopStorage {
       .orderBy(shopProducts.name);
   }
 
+  async getProductBatchesByName(productName: string): Promise<ShopProduct[]> {
+    return await shopDb
+      .select()
+      .from(shopProducts)
+      .where(and(
+        eq(shopProducts.name, productName),
+        eq(shopProducts.isActive, true)
+      ))
+      .orderBy(shopProducts.createdAt);
+  }
+
   async getShopProducts(): Promise<ShopProduct[]> {
     // Group products by name to merge different batches into single entries
     const products = await shopDb
