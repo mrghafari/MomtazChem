@@ -13513,11 +13513,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // RESPECT CUSTOMER'S PAYMENT CHOICE - NO AUTO-SUBSTITUTION
       // If customer explicitly chose online_payment, NEVER use wallet instead
       if (orderData.paymentMethod === 'online_payment') {
-        finalPaymentStatus = "pending";
-        finalPaymentMethod = "online_payment";
-        walletAmountUsed = 0;
-        remainingAmount = totalAmount;
-        console.log("✅ [CUSTOMER CHOICE] Online payment selected - NO wallet substitution allowed");
+        walletAmountUsed = orderData.walletAmountUsed || 0; // CRITICAL FIX: Preserve wallet amount from client
+        remainingAmount = orderData.remainingAmount || totalAmount; // CRITICAL FIX: Preserve remaining amount from client
+        console.log("✅ [CUSTOMER CHOICE] Online payment selected - but may include wallet portion");
+        console.log("✅ [ONLINE + WALLET] Wallet amount:", walletAmountUsed, "Remaining:", remainingAmount);
+        
+        // Process wallet portion if there is one (hybrid payment scenario)
+        if (walletAmountUsed > 0) {
+          try {
+            const transaction = await walletStorage.debitWallet(
+              finalCustomerId,
+              walletAmountUsed,
+              `پرداخت ترکیبی سفارش ${orderNumber}`,
+              'order',
+              undefined, // reference ID will be set after order creation
+              undefined  // no admin processing this
+            );
+            
+            console.log(`✅ [HYBRID] Wallet portion processed: ${walletAmountUsed} IQD deducted, transaction ID: ${transaction.id}`);
+            
+            // Set payment status based on remaining amount
+            if (remainingAmount <= 0.01) {
+              finalPaymentStatus = "paid"; // Fully paid by wallet
+              finalPaymentMethod = "wallet_full";
+              console.log('🏪 [HYBRID → FULL WALLET] Remaining amount is 0, changing to wallet_full');
+            } else {
+              finalPaymentStatus = "partial"; // Partially paid by wallet, needs bank
+              finalPaymentMethod = "online_payment"; // Keep as online payment for bank redirect
+              console.log('🏦 [HYBRID] Partial wallet payment, remaining for bank gateway');
+            }
+          } catch (walletError) {
+            console.log(`❌ Hybrid wallet payment failed:`, walletError);
+            return res.status(400).json({
+              success: false,
+              message: "موجودی کیف پول کافی نیست یا خطا در پردازش"
+            });
+          }
+        } else {
+          // Pure online payment, no wallet
+          finalPaymentStatus = "pending";
+          finalPaymentMethod = "online_payment";
+          console.log("🏦 [PURE ONLINE] No wallet amount, pure online payment");
+        }
       }
       // If customer explicitly chose bank_transfer, NEVER use wallet instead
       else if (orderData.paymentMethod === 'bank_transfer') {
@@ -13862,9 +13899,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Check for hybrid payment (wallet_partial with remaining amount > 0)
-      if (orderData.paymentMethod === 'wallet_partial' && remainingAmount > 0) {
-        console.log(`🔄 [HYBRID PAYMENT] Wallet partial payment detected - wallet: ${walletAmountUsed}, remaining: ${remainingAmount}`);
+      // CRITICAL: Check for hybrid payment first (wallet_partial with remaining amount > 0)
+      if ((orderData.paymentMethod === 'wallet_partial' || finalPaymentMethod === 'online_payment') && remainingAmount > 0 && walletAmountUsed > 0) {
+        console.log(`🔄 [HYBRID PAYMENT] Detected: wallet_partial with remaining amount`);
+        console.log(`🔄 [HYBRID PAYMENT] Wallet used: ${walletAmountUsed} IQD, Remaining: ${remainingAmount} IQD`);
+        console.log(`🔄 [HYBRID PAYMENT] Payment method: ${orderData.paymentMethod} → ${finalPaymentMethod}`);
+        
         return res.json({
           success: true,
           message: 'سفارش ثبت شد - هدایت به درگاه پرداخت',
@@ -13875,41 +13915,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
           walletAmountDeducted: walletAmountUsed,
           remainingAmount: remainingAmount,
           requiresBankPayment: true,
-          redirectUrl: `/payment/${orderNumber}`
+          redirectToPayment: true,
+          redirectUrl: `/payment/${orderNumber}?amount=${remainingAmount}&wallet=${walletAmountUsed}&method=${finalPaymentMethod}`,
+          paymentGatewayUrl: `/payment?orderId=${order.id}&amount=${remainingAmount}&method=${finalPaymentMethod}`
         });
       }
       
-      // Add redirect URL for online payment and bank transfer
+      // Add redirect URL for pure online payment and bank transfer
       if (finalPaymentMethod === 'online_payment' || finalPaymentMethod === 'bank_transfer') {
         responseData.redirectToPayment = true;
         responseData.paymentGatewayUrl = `/payment?orderId=${order.id}&amount=${remainingAmount > 0 ? remainingAmount : totalAmount}&method=${finalPaymentMethod}`;
         console.log(`✅ Order ${orderNumber} created - redirecting to payment gateway for ${remainingAmount > 0 ? remainingAmount : totalAmount} IQD (method: ${finalPaymentMethod})`);
+        console.log(`💰 [PURE ONLINE] No wallet amount used: ${walletAmountUsed} IQD`);
         
-        // For hybrid payment (wallet + bank gateway), return special response
-        if (remainingAmount > 0 && walletAmountUsed > 0) {
-          return res.json({
-            success: true,
-            message: 'سفارش ثبت شد - هدایت به درگاه پرداخت',
-            orderId: orderNumber,
-            orderNumber: orderNumber,
-            totalAmount: totalAmount,
-            walletAmountUsed: walletAmountUsed,
-            remainingAmount: remainingAmount,
-            requiresBankPayment: true,
-            redirectToPayment: true,
-            redirectUrl: `/payment/${orderNumber}?amount=${remainingAmount}&wallet=${walletAmountUsed}&method=${finalPaymentMethod}`,
-            paymentGatewayUrl: `/payment?orderId=${order.id}&amount=${remainingAmount}&method=${finalPaymentMethod}`
-          });
-        }
+        // For pure online payment (no wallet usage), return standard response
         
-        // For pure online payment, return special response  
-        if (finalPaymentMethod === 'online_payment') {
+        // For pure online payment (no wallet usage), return standard response  
+        if (finalPaymentMethod === 'online_payment' && walletAmountUsed === 0) {
+          console.log(`🏦 [PURE ONLINE] No wallet amount used, pure online payment`);
           return res.json({
             success: true,
             message: 'سفارش ثبت شد - هدایت به درگاه پرداخت آنلاین',
             orderId: orderNumber,
             orderNumber: orderNumber,
             totalAmount: totalAmount,
+            walletAmountUsed: 0,
+            remainingAmount: totalAmount,
             redirectToPayment: true,
             paymentGatewayUrl: `/payment?orderId=${order.id}&amount=${totalAmount}&method=online_payment`
           });
