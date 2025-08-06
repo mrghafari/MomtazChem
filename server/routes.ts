@@ -478,25 +478,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const { pool } = await import('./db');
       
-      // Get order details from customer_orders table using order_number
-      const result = await pool.query(`
-        SELECT 
-          co.id,
-          co.order_number as "orderNumber",
-          co.total_amount as "totalAmount",
-          co.shipping_cost as "shippingAmount",
-          co.vat_amount as "vatAmount",
-          co.vat_rate as "vatRate",
-          co.surcharge_amount as "surchargeAmount",
-          co.surcharge_rate as "surchargeRate",
-          co.payment_method as "paymentMethod",
-          co.payment_status as "paymentStatus",
-          co.status,
-          co.customer_id as "customerId",
-          co.created_at as "createdAt"
-        FROM customer_orders co
-        WHERE co.order_number = $1
-      `, [orderNumber]);
+      // Get order details from customer_orders table using order_number OR id
+      // Support both string order numbers (M2511XXX) and numeric IDs (192)
+      const isNumericId = /^\d+$/.test(orderNumber);
+      let result;
+      
+      if (isNumericId) {
+        console.log(`🔍 [PAYMENT DETAILS] Searching by numeric ID: ${orderNumber}`);
+        result = await pool.query(`
+          SELECT 
+            co.id,
+            co.order_number as "orderNumber",
+            co.total_amount as "totalAmount",
+            co.shipping_cost as "shippingAmount",
+            co.vat_amount as "vatAmount",
+            co.vat_rate as "vatRate",
+            co.surcharge_amount as "surchargeAmount",
+            co.surcharge_rate as "surchargeRate",
+            co.payment_method as "paymentMethod",
+            co.payment_status as "paymentStatus",
+            co.status,
+            co.customer_id as "customerId",
+            co.created_at as "createdAt"
+          FROM customer_orders co
+          WHERE co.id = $1
+        `, [parseInt(orderNumber)]);
+      } else {
+        console.log(`🔍 [PAYMENT DETAILS] Searching by order number: ${orderNumber}`);
+        result = await pool.query(`
+          SELECT 
+            co.id,
+            co.order_number as "orderNumber",
+            co.total_amount as "totalAmount",
+            co.shipping_cost as "shippingAmount",
+            co.vat_amount as "vatAmount",
+            co.vat_rate as "vatRate",
+            co.surcharge_amount as "surchargeAmount",
+            co.surcharge_rate as "surchargeRate",
+            co.payment_method as "paymentMethod",
+            co.payment_status as "paymentStatus",
+            co.status,
+            co.customer_id as "customerId",
+            co.created_at as "createdAt"
+          FROM customer_orders co
+          WHERE co.order_number = $1
+        `, [orderNumber]);
+      }
 
       if (result.rows.length === 0) {
         console.log(`❌ [PAYMENT DETAILS] Order not found: ${orderNumber}`);
