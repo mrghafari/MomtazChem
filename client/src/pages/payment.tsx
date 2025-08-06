@@ -85,21 +85,6 @@ export default function Payment() {
     }
   }, [orderId, activeGateway, gatewayLoading, orderData, orderLoading, walletAmount]);
 
-  // Clear cart mutation
-  const clearCartMutation = useMutation({
-    mutationFn: async () => {
-      return apiRequest('/api/cart/clear', {
-        method: 'POST'
-      });
-    },
-    onSuccess: () => {
-      console.log('✅ [CART CLEAR] Server cart cleared successfully');
-    },
-    onError: (error) => {
-      console.error('❌ [CART CLEAR] Failed to clear server cart:', error);
-    }
-  });
-
   // Update payment status mutation
   const updatePaymentMutation = useMutation({
     mutationFn: async (paymentData: any) => {
@@ -111,14 +96,6 @@ export default function Payment() {
     },
     onSuccess: (response, variables) => {
       console.log('✅ [PAYMENT UPDATE] Payment update successful:', response);
-      
-      // CRITICAL: Clear all cart data immediately after successful payment
-      console.log('🧹 [CART CLEANUP] Clearing all cart data after successful payment');
-      localStorage.removeItem('cart');
-      localStorage.removeItem(`wallet_amount_${orderId}`);
-      
-      // Clear cart from server
-      clearCartMutation.mutate();
       
       toast({
         title: "پرداخت تایید شد",
@@ -194,72 +171,29 @@ export default function Payment() {
     setPaymentData(paymentResult);
     setPaymentProcessed(true);
     
-    // Only clear cart for confirmed complete payments (not pending bank payments)
-    const isCompletePayment = paymentResult.method === 'wallet_full' || 
-                              (paymentResult.method === 'online_payment' && paymentResult.confirmed === true) ||
-                              (paymentResult.method !== 'wallet_partial' && paymentResult.method !== 'online_payment' && !paymentResult.requiresBankPayment);
-    
-    if (isCompletePayment) {
-      // IMMEDIATE CART CLEARING - Multiple approaches for reliability
-      console.log('🧹 [CART CLEAR] Clearing cart after complete payment');
-      
-      // Clear localStorage immediately
-      localStorage.removeItem('cart');
-      localStorage.removeItem(`wallet_amount_${orderId}`);
-      console.log('🧹 [CART CLEAR] Cleared localStorage cart and wallet data');
-      
-      // Clear persistent cart from database
-      fetch('/api/cart/clear', { 
-        method: 'POST',
-        body: JSON.stringify({}), 
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include'  // Include session cookies
-      })
-        .then(response => response.json())
-        .then(data => {
-          console.log('✅ [CART CLEAR] Database cart cleared:', data);
-        })
-        .catch(err => {
-          console.warn('⚠️ [CART CLEAR] Failed to clear database cart:', err);
-        });
-      
-      // Clear cart using mutation
-      clearCartMutation.mutate();
-      
-      // Force cart state update through query invalidation
-      queryClient.invalidateQueries({ queryKey: ['/api/customers/persistent-cart'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/cart'] });
-      
-    } else {
-      console.log('🛒 [CART PRESERVATION] Keeping cart for partial payment - bank payment still required');
-    }
+    // Clear cart after successful payment
+    console.log('🧹 [CART CLEAR] Clearing cart after successful payment');
+    apiRequest('/api/cart/clear', { method: 'POST' })
+      .then(() => console.log('✅ [CART CLEAR] Cart cleared successfully'))
+      .catch(err => console.warn('⚠️ [CART CLEAR] Failed to clear cart:', err));
     
     // Clear localStorage for this order
     localStorage.removeItem(`wallet_amount_${orderId}`);
     console.log('🧹 [CLEANUP] Removed localStorage data for order:', orderId);
     
-    // Success notification based on payment type
-    if (paymentResult.requiresBankPayment) {
-      toast({
-        title: "کسر کیف پول موفق",
-        description: paymentResult.message || "بخش کیف پول پرداخت شد. لطفاً پرداخت بانکی را نیز تکمیل کنید.",
-      });
-    } else {
-      toast({
-        title: "پرداخت موفق",
-        description: "پرداخت شما با موفقیت انجام شد. در حال تولید فاکتور...",
-      });
-    }
+    // Immediate success notification
+    toast({
+      title: "پرداخت موفق",
+      description: "پرداخت شما با موفقیت انجام شد. در حال تولید فاکتور...",
+    });
     
-    // Update order with payment information
-    const paymentStatus = paymentResult.requiresBankPayment ? 'partial' : 'paid';
-    
+    // Update order with payment information and automatically generate invoice
     updatePaymentMutation.mutate({
-      paymentStatus: paymentStatus,
+      paymentStatus: 'paid',
       paymentMethod: paymentResult.method,
       transactionId: paymentResult.transactionId,
       paymentData: paymentResult,
-      autoComplete: !paymentResult.requiresBankPayment // Only auto-complete for full payments
+      autoComplete: true // Flag to indicate this should auto-complete
     });
   };
 

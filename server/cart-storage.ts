@@ -143,19 +143,6 @@ export class CartStorage {
       .where(eq(cartSessions.customerId, customerId));
   }
 
-  // Clear customer's persistent cart - alias for compatibility
-  async clearCart(customerId: number): Promise<void> {
-    console.log(`🧹 [CART STORAGE] Clearing cart session for customer ${customerId}`);
-    
-    try {
-      await this.clearCartSession(customerId);
-      console.log(`✅ [CART STORAGE] Cart session cleared successfully for customer ${customerId}`);
-    } catch (error) {
-      console.error(`❌ [CART STORAGE] Failed to clear cart session for customer ${customerId}:`, error);
-      throw error;
-    }
-  }
-
   async getAbandonedCartsByCustomer(customerId: number): Promise<CartSession[]> {
     try {
       console.log(`🛒 [DEBUG] Getting abandoned carts for customer ${customerId}`);

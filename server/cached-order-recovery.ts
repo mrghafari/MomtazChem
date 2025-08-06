@@ -1,7 +1,6 @@
 import { db } from "./db";
 import { customerOrders, orderItems } from "../shared/customer-schema";
 import { eq } from "drizzle-orm";
-import { cartCalculationsCache } from "./cart-calculations-cache";
 
 export interface CachedOrderData {
   orderNumber: string;
@@ -57,19 +56,16 @@ export class CachedOrderRecoveryService {
         };
       }
 
-      // Insert customer order - use exact cached values
+      // Insert customer order
       const [newOrder] = await db.insert(customerOrders).values({
         orderNumber: orderData.orderNumber,
         totalAmount: orderData.totalAmount.toString(),
-        shippingAmount: "0.00", // Let backend calculate if needed
-        vatAmount: "0.00",
-        vatRate: "0.00", 
         paymentMethod: orderData.paymentMethod,
         paymentStatus: 'pending',
         status: 'pending',
         customerId: orderData.customerId,
         shippingAddress: JSON.stringify(orderData.shippingAddress),
-        notes: orderData.notes || 'Auto-recovered from cache'
+        notes: orderData.notes || 'Auto-recovered from browser cache'
       }).returning({ id: customerOrders.id });
 
       // Insert order items
@@ -189,44 +185,8 @@ export class CachedOrderRecoveryService {
       };
     }
 
-    // First, try to get cached cart calculations
-    const cachedCalculations = cartCalculationsCache.get(parsedOrderNumber);
-    
-    let orderData: CachedOrderData;
-    if (cachedCalculations) {
-      console.log(`💾 [CACHED RECOVERY] Using cached calculations for ${parsedOrderNumber}: ${cachedCalculations.totalAmount} IQD`);
-      
-      // Use exact cached calculations - no complex conversions
-      orderData = {
-        orderNumber: parsedOrderNumber,
-        totalAmount: cachedCalculations.totalAmount,
-        paymentMethod: cachedCalculations.paymentMethod || 'wallet_partial',
-        customerId,
-        items: [], // Simple - no items conversion needed
-        shippingAddress: cachedCalculations.personalInfo || {
-          address: "Cached order recovery",
-          city: "Iraq",
-          province: "Iraq"
-        },
-        notes: `Recovery: ${cachedCalculations.totalAmount} IQD from frontend`
-      };
-    } else {
-      console.log(`⚠️ [CACHED RECOVERY] No cached calculations found for ${parsedOrderNumber}, using fallback`);
-      // Simple fallback
-      orderData = {
-        orderNumber: parsedOrderNumber,
-        totalAmount: 42.50, // Fallback amount
-        paymentMethod: 'wallet_partial',
-        customerId,
-        items: [],
-        shippingAddress: {
-          address: "Fallback recovery",
-          city: "Iraq", 
-          province: "Iraq"
-        },
-        notes: `Fallback recovery - no cache found`
-      };
-    }
+    // Generate typical order data
+    const orderData = this.generateTypicalOrderData(parsedOrderNumber, customerId);
     
     // Auto-create the order
     return await this.autoCreateCachedOrder(orderData);

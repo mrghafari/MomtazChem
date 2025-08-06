@@ -78,7 +78,6 @@ import {
   TICKET_CATEGORIES
 } from "@shared/ticketing-schema";
 import { cartStorage } from "./cart-storage";
-import { cartCalculationsCache } from "./cart-calculations-cache";
 import { 
   cartSessions, 
   abandonedCartSettings, 
@@ -7355,22 +7354,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         console.log(`✅ [GATEWAY WEBHOOK] Order ${orderId} payment confirmed via gateway`);
 
-        // Clear cart after confirmed bank payment
-        try {
-          const order = await db
-            .select({ customerId: customerOrders.customerId })
-            .from(customerOrders)
-            .where(eq(customerOrders.id, parseInt(orderId)))
-            .limit(1);
-          
-          if (order.length > 0) {
-            await cartStorage.clearCart(order[0].customerId);
-            console.log(`🧹 [GATEWAY WEBHOOK] Cart cleared for customer ${order[0].customerId} after confirmed payment`);
-          }
-        } catch (cartError) {
-          console.warn(`⚠️ [GATEWAY WEBHOOK] Failed to clear cart for order ${orderId}:`, cartError);
-        }
-
         // Trigger automatic financial approval
         try {
           await orderManagementStorage.processAutomaticBankPaymentApproval(parseInt(orderId));
@@ -12705,36 +12688,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Clear customer's persistent cart
-  app.delete("/api/customers/persistent-cart/clear", requireCustomerAuth, async (req, res) => {
-    try {
-      const customerId = (req.session as any).customerId;
-      
-      console.log('🧹 [PERSISTENT CART] Clearing cart for customer:', customerId);
-      
-      const { pool } = await import('./db');
-      
-      // Clear cart from database
-      await pool.query(`
-        DELETE FROM persistent_carts 
-        WHERE customer_id = $1
-      `, [customerId]);
-      
-      console.log('✅ [PERSISTENT CART] Cart cleared successfully for customer:', customerId);
-      
-      res.json({
-        success: true,
-        message: 'سبد خرید با موفقیت پاک شد'
-      });
-    } catch (error) {
-      console.error('❌ [PERSISTENT CART] Error clearing cart:', error);
-      res.status(500).json({
-        success: false,
-        message: 'خطا در پاک کردن سبد خرید'
-      });
-    }
-  });
-
   // Update customer profile
   app.patch("/api/customers/:id", async (req, res) => {
     try {
@@ -13191,14 +13144,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      // Handle direct wallet_full payment method from frontend
-      if (paymentMethod === 'wallet_full') {
-        finalPaymentMethod = 'wallet_full';
-        console.log('✅ [BACKEND PASSTHROUGH] wallet_full payment method preserved', {
-          walletUsage, totalAmount, remaining
-        });
-      }
-      
       console.log('💰 [WALLET DEBUG] Processing wallet payment:', {
         originalPaymentMethod: paymentMethod,
         finalPaymentMethod,
@@ -13345,24 +13290,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Check if hybrid payment is required (wallet partially used + remaining amount)
-      // CRITICAL FIX: Calculate remaining amount based on actual order total and actual wallet used
-      const correctOrderTotal = parseFloat(totalAmount);
-      const correctRemainingAmount = correctOrderTotal - actualWalletUsed;
-      const remainingAmountToPay = Math.max(0, correctRemainingAmount);
+      // Fix: Use remaining amount directly, don't subtract wallet usage twice
+      const remainingAmountToPay = Math.round(parseFloat(remainingAmount || totalAmount));
       
       // Critical fix: For full wallet payments, completely bypass bank payment logic
       const isFullWalletPayment = finalPaymentMethod === 'wallet_full';
       const isPartialWalletPayment = finalPaymentMethod === 'wallet_partial';
       
-      // Enhanced logic: No bank payment required for full wallet payments or when remaining = 0
-      const requiresBankPayment = !isFullWalletPayment && remainingAmountToPay > 0.01;
+      // Enhanced logic: No bank payment required for full wallet payments
+      const requiresBankPayment = !isFullWalletPayment && remainingAmountToPay > 0;
       
       console.log('🔍 [PAYMENT LOGIC DEBUG] Payment decision logic:', {
         actualWalletUsed,
         remainingAmountToPay,
-        originalRemainingAmountFromForm: remainingAmount,
-        correctOrderTotal,
-        correctRemainingAmount,
+        originalRemainingAmount: remainingAmount,
         totalAmount,
         requiresBankPayment,
         paymentMethod: finalPaymentMethod,
@@ -13373,8 +13314,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isPartialWalletPayment,
         walletPaymentComplete: isFullWalletPayment && actualWalletUsed > 0,
         shouldRedirectToBank: remainingAmountToPay > 0.01 && !isFullWalletPayment,
-        isZeroRemaining: remainingAmountToPay <= 0.01,
-        calculationMethod: 'fixed_calculation_backend'
+        isZeroRemaining: remainingAmountToPay <= 0.01
       });
       
       if (isFullWalletPayment) {
@@ -13479,7 +13419,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Calculate items subtotal from products and quantities
       let itemsSubtotal = 0;
       
-      // Handle both items array and cart object formats
       if (orderData.items && orderData.items.length > 0) {
         for (const item of orderData.items) {
           const product = await db.select().from(showcaseProducts).where(eq(showcaseProducts.id, item.productId)).limit(1);
@@ -13495,75 +13434,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
       }
-      // Handle cart object format (e.g., {"470": 1, "478": 2})
-      else if (orderData.cart && typeof orderData.cart === 'object') {
-        for (const [productIdStr, quantity] of Object.entries(orderData.cart)) {
-          const productId = parseInt(productIdStr);
-          // Try shop_products table first (most products are there)
-          const shopProduct = await shopStorage.getShopProductById(productId);
-          if (shopProduct) {
-            console.log(`🔍 [CART SHOP PRODUCT DEBUG] Raw product data for ID ${productId}:`, JSON.stringify(shopProduct, null, 2));
-            console.log(`🔍 [CART SHOP PRICE DEBUG] Checking price fields: price=${shopProduct.price}, unitPrice=${shopProduct.unitPrice}`);
-            const productPrice = parseFloat(shopProduct.unitPrice?.toString() || shopProduct.price?.toString() || '0') || 0;
-            const quantityNum = parseInt(quantity as string) || 1;
-            itemsSubtotal += productPrice * quantityNum;
-            console.log(`🛒 [CART SHOP PRODUCT CALC] ${shopProduct.name}: ${productPrice} × ${quantityNum} = ${productPrice * quantityNum} IQD`);
-          } else {
-            // Fallback to showcase_products table
-            const product = await db.select().from(showcaseProducts).where(eq(showcaseProducts.id, productId)).limit(1);
-            if (product.length > 0) {
-              console.log(`🔍 [CART SHOWCASE PRODUCT DEBUG] Raw product data for ID ${productId}:`, JSON.stringify(product[0], null, 2));
-              console.log(`🔍 [CART SHOWCASE PRICE DEBUG] Checking price fields: unitPrice=${product[0].unitPrice}, unit_price=${product[0].unit_price}`);
-              const productPrice = parseFloat(product[0].unitPrice?.toString() || '0') || 0;
-              const quantityNum = parseInt(quantity as string) || 1;
-              itemsSubtotal += productPrice * quantityNum;
-              console.log(`🛒 [CART SHOWCASE PRODUCT CALC] ${product[0].name}: ${productPrice} × ${quantityNum} = ${productPrice * quantityNum} IQD`);
-            } else {
-              console.log(`❌ [CART PRODUCT NOT FOUND] Product ID ${productId} not found in shop_products or showcase_products tables`);
-            }
-          }
-        }
-      }
       
-      console.log(`💰 [CART VERIFICATION] Backend verified cart subtotal: ${itemsSubtotal} IQD (for inventory validation only)`);
+      console.log(`💰 [SUBTOTAL] Calculated items subtotal: ${itemsSubtotal} IQD`);
+      const shippingAmount = orderData.shippingCost || 0;
       
-      // Create order with proper customer linking FIRST
+      // Get current tax rates from tax_settings table and freeze them for this order
+      const taxCalculation = await calculateOrderTaxes(itemsSubtotal);
+      const totalAmount = itemsSubtotal + shippingAmount + taxCalculation.vatAmount + taxCalculation.dutiesAmount;
+      
+      console.log('💰 [ORDER TAX] Tax calculation for order:', {
+        itemsSubtotal,
+        shippingAmount,
+        vatRate: taxCalculation.vatRate,
+        vatAmount: taxCalculation.vatAmount,
+        surchargeRate: taxCalculation.dutiesRate,
+        surchargeAmount: taxCalculation.dutiesAmount,
+        totalAmount
+      });
+
+      // Create order with proper customer linking
       let finalCustomerId = customerId;
       if (!customerId && crmCustomerId) {
         // Link to CRM customer if available
         finalCustomerId = crmCustomerId;
       }
-
-      // استفاده مطلق از محاسبات کارت خرید - بدون هیچ محاسبه اضافی
-      const totalAmount = parseFloat(orderData.totalAmount?.toString() || '0') || 0;
-      const shippingAmount = parseFloat(orderData.shippingCost?.toString() || '0') || 0;
-      const vatAmount = parseFloat(orderData.vatAmount?.toString() || '0') || 0;
-      const dutiesAmount = parseFloat(orderData.dutiesAmount?.toString() || '0') || 0;
-      const subtotalAmount = parseFloat(orderData.subtotalAmount?.toString() || '0') || 0;
-      
-      // Store cart calculations in temporary cache for payment processing
-      cartCalculationsCache.store(orderNumber, {
-        orderId: orderNumber,
-        customerId: finalCustomerId,
-        subtotalAmount,
-        shippingCost: shippingAmount,
-        vatAmount,
-        dutiesAmount,
-        totalAmount,
-        cart: orderData.cart,
-        personalInfo: orderData.personalInfo,
-        paymentMethod: orderData.paymentMethod,
-        notes: orderData.notes
-      });
-      
-      console.log('🛒 [CART CALCULATIONS] Using EXACT cart calculations - no backend modifications:', {
-        'Cart Subtotal': subtotalAmount,
-        'Cart Shipping': shippingAmount,
-        'Cart VAT': vatAmount,
-        'Cart Duties': dutiesAmount,
-        'Cart Total': totalAmount,
-        'Stored in cache': orderNumber
-      });
 
       if (!finalCustomerId) {
         return res.status(401).json({
@@ -13581,48 +13475,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // RESPECT CUSTOMER'S PAYMENT CHOICE - NO AUTO-SUBSTITUTION
       // If customer explicitly chose online_payment, NEVER use wallet instead
       if (orderData.paymentMethod === 'online_payment') {
-        walletAmountUsed = orderData.walletAmountUsed || 0; // CRITICAL FIX: Preserve wallet amount from client
-        remainingAmount = orderData.remainingAmount || totalAmount; // CRITICAL FIX: Preserve remaining amount from client
-        console.log("✅ [CUSTOMER CHOICE] Online payment selected - but may include wallet portion");
-        console.log("✅ [ONLINE + WALLET] Wallet amount:", walletAmountUsed, "Remaining:", remainingAmount);
-        
-        // Process wallet portion if there is one (hybrid payment scenario)
-        if (walletAmountUsed > 0) {
-          try {
-            const transaction = await walletStorage.debitWallet(
-              finalCustomerId,
-              walletAmountUsed,
-              `پرداخت ترکیبی سفارش ${orderNumber}`,
-              'order',
-              undefined, // reference ID will be set after order creation
-              undefined  // no admin processing this
-            );
-            
-            console.log(`✅ [HYBRID] Wallet portion processed: ${walletAmountUsed} IQD deducted, transaction ID: ${transaction.id}`);
-            
-            // Set payment status based on remaining amount
-            if (remainingAmount <= 0.01) {
-              finalPaymentStatus = "paid"; // Fully paid by wallet
-              finalPaymentMethod = "wallet_full";
-              console.log('🏪 [HYBRID → FULL WALLET] Remaining amount is 0, changing to wallet_full');
-            } else {
-              finalPaymentStatus = "partial"; // Partially paid by wallet, needs bank
-              finalPaymentMethod = "online_payment"; // Keep as online payment for bank redirect
-              console.log('🏦 [HYBRID] Partial wallet payment, remaining for bank gateway');
-            }
-          } catch (walletError) {
-            console.log(`❌ Hybrid wallet payment failed:`, walletError);
-            return res.status(400).json({
-              success: false,
-              message: "موجودی کیف پول کافی نیست یا خطا در پردازش"
-            });
-          }
-        } else {
-          // Pure online payment, no wallet
-          finalPaymentStatus = "pending";
-          finalPaymentMethod = "online_payment";
-          console.log("🏦 [PURE ONLINE] No wallet amount, pure online payment");
-        }
+        finalPaymentStatus = "pending";
+        finalPaymentMethod = "online_payment";
+        walletAmountUsed = 0;
+        remainingAmount = totalAmount;
+        console.log("✅ [CUSTOMER CHOICE] Online payment selected - NO wallet substitution allowed");
       }
       // If customer explicitly chose bank_transfer, NEVER use wallet instead
       else if (orderData.paymentMethod === 'bank_transfer') {
@@ -13640,12 +13497,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log('💰 [BILINGUAL WALLET DEBUG] Processing wallet payment:', {
           walletAmountUsed,
           remainingAmount,
-          totalAmount,
           finalCustomerId,
           paymentMethod: orderData.paymentMethod,
-          'Bank payment required?': remainingAmount > 0,
-          'Frontend sent remainingAmount': orderData.remainingAmount,
-          'Frontend sent walletAmountUsed': orderData.walletAmountUsed
+          'Bank payment required?': remainingAmount > 0
         });
         
         if (walletAmountUsed > 0) {
@@ -13661,11 +13515,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
             );
             
             console.log(`✅ Wallet payment processed: ${walletAmountUsed} IQD deducted, transaction ID: ${transaction.id}`);
-            
-            // CRITICAL: Use frontend remainingAmount to avoid double calculations
-            const frontendRemainingAmount = parseFloat(orderData.remainingAmount || '0');
-            remainingAmount = frontendRemainingAmount;
-            console.log(`🔢 [AMOUNT DEBUG] Using frontend remaining amount: ${frontendRemainingAmount}, Wallet used: ${walletAmountUsed}, Total: ${totalAmount}`);
             
             // CRITICAL FIX: Check if remainingAmount is 0 to send directly to warehouse
             if (remainingAmount <= 0.01) {
@@ -13712,25 +13561,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         currency: orderData.currency || "IQD",
         notes: orderData.notes || "",
         
-        // Store frozen tax values from frontend calculations
-        vatRate: vatAmount > 0 ? "5" : "0", // Approximate rate based on amount
-        vatAmount: vatAmount.toString(),
-        surchargeRate: dutiesAmount > 0 ? "3" : "0", // Approximate rate based on amount
-        surchargeAmount: dutiesAmount.toString(),
+        // Store frozen tax rates at order creation time
+        vatRate: taxCalculation.vatRate.toString(),
+        vatAmount: taxCalculation.vatAmount.toString(),
+        surchargeRate: taxCalculation.dutiesRate.toString(),
+        surchargeAmount: taxCalculation.dutiesAmount.toString(),
         
         billingAddress: JSON.stringify({
-          name: `${orderData.personalInfo?.firstName} ${orderData.personalInfo?.lastName}`,
-          phone: orderData.personalInfo?.phone,
-          address: orderData.personalInfo?.address,
-          city: orderData.personalInfo?.city,
-          postalCode: orderData.personalInfo?.postalCode,
+          name: customerInfo.name,
+          phone: customerInfo.phone,
+          address: customerInfo.address,
+          city: customerInfo.city,
+          postalCode: customerInfo.postalCode,
         }),
         shippingAddress: JSON.stringify({
-          name: `${orderData.personalInfo?.firstName} ${orderData.personalInfo?.lastName}`,
-          phone: orderData.personalInfo?.phone,
-          address: orderData.personalInfo?.address,
-          city: orderData.personalInfo?.city,
-          postalCode: orderData.personalInfo?.postalCode,
+          name: customerInfo.name,
+          phone: customerInfo.phone,
+          address: customerInfo.address,
+          city: customerInfo.city,
+          postalCode: customerInfo.postalCode,
           gpsLatitude: orderData.gpsLatitude,
           gpsLongitude: orderData.gpsLongitude,
         }),
@@ -13942,26 +13791,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         orderId: order.id,
         orderNumber: order.orderNumber,
         paymentMethod: finalPaymentMethod,
-        totalAmount: totalAmount,
+        totalAmount: remainingAmount > 0 ? remainingAmount : totalAmount,
         walletAmountUsed: walletAmountUsed,
-        remainingAmount: remainingAmount,
-        requiresBankPayment: remainingAmount > 0 && walletAmountUsed > 0,
       };
 
       // CRITICAL FIX: Check for full wallet payment first (remainingAmount = 0)
       if (finalPaymentStatus === "paid" && remainingAmount <= 0.01) {
         console.log(`🏪 [WAREHOUSE DIRECT] Full wallet payment completed - sending order ${orderNumber} directly to warehouse`);
         console.log(`💰 [PAYMENT COMPLETE] Wallet: ${walletAmountUsed} IQD, Remaining: ${remainingAmount} IQD`);
-        
-        // Clear customer cart after successful full wallet payment
-        console.log('🧹 [FULL WALLET] Clearing cart after successful full wallet payment');
-        try {
-          await cartStorage.clearCart(customerId);
-          console.log('✅ [FULL WALLET] Cart cleared successfully');
-        } catch (cartError) {
-          console.warn('⚠️ [FULL WALLET] Failed to clear cart:', cartError);
-          // Continue with payment success even if cart clearing fails
-        }
         
         return res.json({
           success: true,
@@ -13977,12 +13814,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // CRITICAL: Check for hybrid payment first (wallet_partial with remaining amount > 0)
-      if ((orderData.paymentMethod === 'wallet_partial' || finalPaymentMethod === 'online_payment') && remainingAmount > 0 && walletAmountUsed > 0) {
-        console.log(`🔄 [HYBRID PAYMENT] Detected: wallet_partial with remaining amount`);
-        console.log(`🔄 [HYBRID PAYMENT] Wallet used: ${walletAmountUsed} IQD, Remaining: ${remainingAmount} IQD`);
-        console.log(`🔄 [HYBRID PAYMENT] Payment method: ${orderData.paymentMethod} → ${finalPaymentMethod}`);
-        
+      // Check for hybrid payment (wallet_partial with remaining amount > 0)
+      if (orderData.paymentMethod === 'wallet_partial' && remainingAmount > 0) {
+        console.log(`🔄 [HYBRID PAYMENT] Wallet partial payment detected - wallet: ${walletAmountUsed}, remaining: ${remainingAmount}`);
         return res.json({
           success: true,
           message: 'سفارش ثبت شد - هدایت به درگاه پرداخت',
@@ -13993,32 +13827,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
           walletAmountDeducted: walletAmountUsed,
           remainingAmount: remainingAmount,
           requiresBankPayment: true,
-          redirectToPayment: true,
-          redirectUrl: `/payment/${orderNumber}?amount=${remainingAmount}&wallet=${walletAmountUsed}&method=${finalPaymentMethod}`,
-          paymentGatewayUrl: `/payment?orderId=${order.id}&amount=${remainingAmount}&method=${finalPaymentMethod}`
+          redirectUrl: `/payment/${orderNumber}`
         });
       }
       
-      // Add redirect URL for pure online payment and bank transfer
+      // Add redirect URL for online payment and bank transfer
       if (finalPaymentMethod === 'online_payment' || finalPaymentMethod === 'bank_transfer') {
         responseData.redirectToPayment = true;
         responseData.paymentGatewayUrl = `/payment?orderId=${order.id}&amount=${remainingAmount > 0 ? remainingAmount : totalAmount}&method=${finalPaymentMethod}`;
         console.log(`✅ Order ${orderNumber} created - redirecting to payment gateway for ${remainingAmount > 0 ? remainingAmount : totalAmount} IQD (method: ${finalPaymentMethod})`);
-        console.log(`💰 [PURE ONLINE] No wallet amount used: ${walletAmountUsed} IQD`);
         
-        // For pure online payment (no wallet usage), return standard response
+        // For hybrid payment (wallet + bank gateway), return special response
+        if (remainingAmount > 0 && walletAmountUsed > 0) {
+          return res.json({
+            success: true,
+            message: 'سفارش ثبت شد - هدایت به درگاه پرداخت',
+            orderId: orderNumber,
+            orderNumber: orderNumber,
+            totalAmount: totalAmount,
+            walletAmountUsed: walletAmountUsed,
+            remainingAmount: remainingAmount,
+            requiresBankPayment: true,
+            redirectToPayment: true,
+            redirectUrl: `/payment/${orderNumber}?amount=${remainingAmount}&wallet=${walletAmountUsed}&method=${finalPaymentMethod}`,
+            paymentGatewayUrl: `/payment?orderId=${order.id}&amount=${remainingAmount}&method=${finalPaymentMethod}`
+          });
+        }
         
-        // For pure online payment (no wallet usage), return standard response  
-        if (finalPaymentMethod === 'online_payment' && walletAmountUsed === 0) {
-          console.log(`🏦 [PURE ONLINE] No wallet amount used, pure online payment`);
+        // For pure online payment, return special response  
+        if (finalPaymentMethod === 'online_payment') {
           return res.json({
             success: true,
             message: 'سفارش ثبت شد - هدایت به درگاه پرداخت آنلاین',
             orderId: orderNumber,
             orderNumber: orderNumber,
             totalAmount: totalAmount,
-            walletAmountUsed: 0,
-            remainingAmount: totalAmount,
             redirectToPayment: true,
             paymentGatewayUrl: `/payment?orderId=${order.id}&amount=${totalAmount}&method=online_payment`
           });
@@ -14204,44 +14047,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({
         success: false,
         message: "خطا در دریافت سفارشات"
-      });
-    }
-  });
-
-  // Get cart calculations from cache for payment processing
-  app.get('/api/customers/orders/:orderNumber/cart-calculations', async (req, res) => {
-    try {
-      const { orderNumber } = req.params;
-      
-      // Retrieve cached cart calculations
-      const calculations = cartCalculationsCache.get(orderNumber);
-      
-      if (!calculations) {
-        return res.status(404).json({
-          success: false,
-          message: "Cart calculations not found or expired"
-        });
-      }
-      
-      console.log(`🛒 [CART CACHE] Retrieved calculations for payment: ${orderNumber} = ${calculations.totalAmount} IQD`);
-      
-      res.json({
-        success: true,
-        data: {
-          subtotal: calculations.subtotalAmount,
-          shippingCost: calculations.shippingCost,
-          vatAmount: calculations.vatAmount,
-          dutiesAmount: calculations.dutiesAmount,
-          totalAmount: calculations.totalAmount,
-          cart: calculations.cart,
-          paymentMethod: calculations.paymentMethod
-        }
-      });
-    } catch (error) {
-      console.error("❌ Error retrieving cart calculations:", error);
-      res.status(500).json({
-        success: false,
-        message: "Failed to retrieve cart calculations"
       });
     }
   });
@@ -17963,16 +17768,7 @@ Momtaz Chemical Technical Team`,
         return res.status(404).json({ success: false, message: "Order not found" });
       }
       
-      console.log('✅ [PAYMENT ENDPOINT] Order found:', { id: orderId, orderNumber: order.orderNumber, customerId: order.customerId });
-
-      // CRITICAL SECURITY CHECK: Verify customer ownership to prevent order mix-ups
-      if (req.session?.customerId && req.session.customerId !== order.customerId) {
-        console.log(`🚨 [SECURITY] Customer ID mismatch! Session: ${req.session.customerId}, Order: ${order.customerId}`);
-        return res.status(403).json({ 
-          success: false, 
-          message: "Access denied: Order belongs to different customer" 
-        });
-      }
+      console.log('✅ [PAYMENT ENDPOINT] Order found:', { id: orderId, orderNumber: order.orderNumber });
 
       // Update order with payment information and auto-complete for successful payments
       const updatedOrder = await customerStorage.updateOrder(orderId, {
@@ -17984,35 +17780,6 @@ Momtaz Chemical Technical Team`,
       });
       
       console.log(`✅ [PAYMENT UPDATE] Order ${orderId} automatically completed after successful payment`);
-
-      // Critical: Update order_management table for financial system integration
-      try {
-        const [orderManagementRecord] = await db
-          .select()
-          .from(orderManagement)
-          .where(eq(orderManagement.customerOrderId, orderId));
-          
-        if (orderManagementRecord) {
-          await db
-            .update(orderManagement)
-            .set({
-              paymentMethod: paymentMethod,
-              walletAmountUsed: paymentData?.walletDeducted ? parseFloat(paymentData.walletDeducted.toString()) : 0,
-              bankAmountPaid: paymentData?.bankPaid ? parseFloat(paymentData.bankPaid.toString()) : 0,
-              currentStatus: paymentStatus === 'paid' ? 'financial_approved' : orderManagementRecord.currentStatus,
-              // Mark as protected status to prevent sync service from overriding
-              isProtectedStatus: paymentStatus === 'paid' ? true : orderManagementRecord.isProtectedStatus
-            })
-            .where(eq(orderManagement.customerOrderId, orderId));
-          
-          console.log(`✅ [ORDER MANAGEMENT] Updated order management record for order ${orderId}`);
-        } else {
-          console.log(`⚠️ [ORDER MANAGEMENT] No order management record found for order ${orderId}`);
-        }
-      } catch (orderMgmtError) {
-        console.error(`❌ [ORDER MANAGEMENT] Failed to update order management:`, orderMgmtError);
-        // Don't fail payment update if order management update fails
-      }
 
       // Trigger automatic synchronization after payment update
       try {
@@ -18035,14 +17802,6 @@ Momtaz Chemical Technical Team`,
           });
         } catch (crmError) {
           console.warn("Failed to log payment activity to CRM:", crmError);
-        }
-      }
-
-      // Clear cart calculations from cache after successful payment
-      if (paymentStatus === 'paid') {
-        const cleared = cartCalculationsCache.clear(order.orderNumber);
-        if (cleared) {
-          console.log(`🗑️ [CART CACHE] Cleared calculations for successful payment: ${order.orderNumber}`);
         }
       }
 
@@ -26795,9 +26554,6 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         LEFT JOIN crm_customers c ON co.customer_id = c.id
         LEFT JOIN payment_receipts pr ON pr.customer_order_id = co.id
         WHERE om.current_status IN (
-          'pending',
-          'financial_approved',
-          'financial_rejected',
           'pending_payment',
           'payment_uploaded', 
           'financial_reviewing',
@@ -31099,16 +30855,6 @@ momtazchem.com
 
       // Get new balance
       const newBalance = await walletStorage.getWalletBalance(customerId);
-
-      // Clear customer cart after successful wallet payment
-      console.log('🧹 [WALLET COMPLETE] Clearing cart after successful payment');
-      try {
-        await cartStorage.clearCart(customerId);
-        console.log('✅ [WALLET COMPLETE] Cart cleared successfully');
-      } catch (cartError) {
-        console.warn('⚠️ [WALLET COMPLETE] Failed to clear cart:', cartError);
-        // Continue with payment success even if cart clearing fails
-      }
 
       res.json({
         success: true,
@@ -38104,33 +37850,14 @@ momtazchem.com
   // Clear cart after successful payment
   app.post("/api/cart/clear", async (req, res) => {
     try {
-      console.log(`🔐 [CART CLEAR AUTH] Session details:`, {
-        sessionExists: !!req.session,
-        sessionId: req.sessionID,
-        customerId: (req.session as any)?.customerId,
-        adminId: (req.session as any)?.adminId,
-        isAuthenticated: req.isAuthenticated ? req.isAuthenticated() : false,
-        sessionData: req.session
-      });
-
-      // Support both customer-only session and hybrid admin+customer session
       const customerId = (req.session as any)?.customerId;
-      const { customerId: requestCustomerId } = req.body; // Allow passing customerId in request body
-
-      const actualCustomerId = customerId || requestCustomerId;
-      
-      if (!actualCustomerId) {
-        console.log(`❌ [CART CLEAR] No customer ID found in session or request body`);
-        return res.status(401).json({ success: false, message: "Authentication required - no customer ID" });
+      if (!customerId) {
+        return res.status(401).json({ success: false, message: "Authentication required" });
       }
 
-      console.log(`🧹 [CART CLEAR] Clearing both cart session and persistent cart for customer: ${actualCustomerId}`);
-      
-      // Clear both cart session and persistent cart
-      await cartStorage.clearCart(actualCustomerId);
-      await customerStorage.clearCart(actualCustomerId);
-      
-      console.log(`✅ [CART CLEAR] Both cart session and persistent cart cleared successfully for customer: ${actualCustomerId}`);
+      console.log(`🧹 [CART CLEAR] Clearing cart for customer: ${customerId}`);
+      await cartStorage.clearCartSession(customerId);
+      console.log(`✅ [CART CLEAR] Cart cleared successfully for customer: ${customerId}`);
       
       res.json({ success: true, message: "Cart cleared successfully" });
     } catch (error) {
@@ -44677,39 +44404,6 @@ momtazchem.com
     } catch (error) {
       console.error('❌ [RECOVER ORDER] Failed:', error);
       res.status(500).json({ error: 'Failed to mark order as recovered' });
-    }
-  });
-
-  // Direct customer cart clearing endpoint for admin access  
-  app.post("/api/customers/:customerId/clear-cart", async (req, res) => {
-    try {
-      const customerId = parseInt(req.params.customerId);
-      
-      if (isNaN(customerId)) {
-        return res.status(400).json({ 
-          success: false, 
-          message: "Invalid customer ID" 
-        });
-      }
-
-      console.log(`🧹 [ADMIN CART CLEAR] Clearing cart for customer ${customerId}`);
-      
-      // Clear both cart systems
-      await cartStorage.clearCart(customerId);
-      await customerStorage.clearCart(customerId);
-      
-      console.log(`✅ [ADMIN CART CLEAR] Cart cleared successfully for customer ${customerId}`);
-      
-      res.json({ 
-        success: true, 
-        message: `Cart cleared successfully for customer ${customerId}` 
-      });
-    } catch (error) {
-      console.error('❌ [ADMIN CART CLEAR] Error clearing cart:', error);
-      res.status(500).json({ 
-        success: false, 
-        message: "Failed to clear cart" 
-      });
     }
   });
 

@@ -152,8 +152,7 @@ export class SyncService {
       );
 
       // Skip sync for warehouse intermediate status (warehouse_verified) and final statuses
-      // CRITICAL: Also protect financial_approved to prevent successful payment rollback
-      const protectedStatuses = ['financial_approved', 'warehouse_verified', 'warehouse_approved', 'logistics_assigned', 'logistics_processing', 'logistics_dispatched', 'delivered', 'cancelled'];
+      const protectedStatuses = ['warehouse_verified', 'warehouse_approved', 'logistics_assigned', 'logistics_processing', 'logistics_dispatched', 'delivered', 'cancelled'];
       
       if (expectedManagementStatus !== record.managementStatus && !protectedStatuses.includes(record.managementStatus)) {
         mismatchCount++;
@@ -247,10 +246,10 @@ export class SyncService {
     }
     
     // اولویت سوم: وضعیت‌های پرداخت
-    if (customerStatus === 'pending' || customerStatus === 'completed') {
+    if (customerStatus === 'pending') {
       if (paymentStatus === 'paid') {
-        // CRITICAL FIX: پرداخت کامل شده - باید financial_approved باشد
-        return 'financial_approved';
+        // پرداخت انجام شده ولی هنوز تایید نشده - نیاز به تایید مالی ندارد
+        return 'warehouse_pending';
       } else if (paymentStatus === 'receipt_uploaded') {
         // فیش آپلود شده - نیاز به بررسی مالی
         return 'pending';

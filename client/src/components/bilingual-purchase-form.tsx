@@ -1191,19 +1191,15 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       console.log('🎯 [ORDER SUCCESS] Response type:', typeof response);
       console.log('🎯 [ORDER SUCCESS] Response keys:', Object.keys(response || {}));
       
-      // CRITICAL: Use cart calculations instead of backend response
-      const cartTotalAmount = subtotalAmount + totalTaxAmount + finalShippingCost;
-      const actualWalletUsed = paymentMethod === 'wallet_partial' ? walletAmount : 
-                               paymentMethod === 'wallet_full' ? cartTotalAmount : 0;
-      const correctRemainingAmount = Math.max(0, cartTotalAmount - actualWalletUsed);
+      // CRITICAL: Check if hybrid payment (wallet + bank) is required
+      const remainingAmount = parseFloat(response.remainingAmount || 0);
+      const walletDeducted = parseFloat(response.walletAmountDeducted || 0);
       const requiresBankPayment = response.requiresBankPayment === true;
       
-      console.log('💳 [HYBRID PAYMENT DEBUG] Cart-based calculations:', {
+      console.log('💳 [HYBRID PAYMENT DEBUG] Response analysis:', {
         paymentMethod,
-        cartTotalAmount,
-        actualWalletUsed,
-        correctRemainingAmount,
-        walletAmount,
+        remainingAmount,
+        walletDeducted,
         requiresBankPayment,
         responseKeys: Object.keys(response),
         redirectUrl: response.redirectUrl,
@@ -1211,45 +1207,37 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       });
       
       // PRIORITY 1: Check for hybrid payment (wallet partial + bank required)
-      if (requiresBankPayment && correctRemainingAmount > 0) {
+      if (requiresBankPayment && response.redirectUrl && remainingAmount > 0) {
         console.log('🔄 [HYBRID PAYMENT] Wallet partial payment + bank required');
-        
-        // Construct redirect URL with correct cart-based calculations
-        const orderNumber = response.orderNumber || response.orderId;
-        const redirectUrl = response.redirectUrl || response.paymentGatewayUrl || `/payment/${orderNumber}?amount=${correctRemainingAmount}&wallet=${actualWalletUsed}&method=wallet_partial`;
-        
-        console.log('🔄 [HYBRID PAYMENT] Redirecting to bank gateway:', redirectUrl);
+        console.log('🔄 [HYBRID PAYMENT] Redirecting to bank gateway:', response.redirectUrl);
         
         // Save wallet amount to localStorage for payment page persistence
+        const orderNumber = response.orderNumber || response.orderId;
         if (orderNumber && walletAmount > 0) {
           localStorage.setItem(`wallet_amount_${orderNumber}`, walletAmount.toString());
           console.log('💾 [LOCALSTORAGE] Wallet amount saved for order:', orderNumber, '→', walletAmount);
         }
         
-        // CRITICAL FIX: Clear cart for hybrid payments since order was successfully created
-        console.log('🛒 [HYBRID PAYMENT] Clearing cart since order was successfully created');
-        onOrderComplete(); // This clears the cart
-        
         toast({
           title: "پرداخت ترکیبی انجام شد",
-          description: `${actualWalletUsed?.toLocaleString()} IQD از کیف پول کسر شد. هدایت به درگاه بانکی برای پرداخت ${correctRemainingAmount?.toLocaleString()} IQD باقیمانده...`,
+          description: `${walletDeducted?.toLocaleString()} IQD از کیف پول کسر شد. هدایت به درگاه بانکی برای پرداخت ${remainingAmount?.toLocaleString()} IQD باقیمانده...`,
         });
         
         // Force redirect to hybrid payment page
         setTimeout(() => {
-          console.log('🔄 [REDIRECT] Going to:', redirectUrl);
-          window.location.href = redirectUrl;
+          console.log('🔄 [REDIRECT] Going to:', response.redirectUrl);
+          window.location.href = response.redirectUrl;
         }, 2000);
         return;
       }
       
       // PRIORITY 2: Full wallet payment completion
-      if (correctRemainingAmount === 0 && actualWalletUsed > 0) {
+      if (remainingAmount === 0 && walletDeducted > 0) {
         console.log('✅ [FULL WALLET PAYMENT] Order fully paid by wallet');
         
         toast({
           title: "سفارش ثبت شد",
-          description: `سفارش شما با موفقیت ثبت شد و کاملاً از کیف پول پرداخت شد. مبلغ کسرشده: ${actualWalletUsed?.toLocaleString()} IQD`,
+          description: `سفارش شما با موفقیت ثبت شد و کاملاً از کیف پول پرداخت شد. مبلغ کسرشده: ${walletDeducted?.toLocaleString()} IQD`,
         });
         
         setTimeout(() => {
@@ -1269,10 +1257,6 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
           console.log('💾 [LOCALSTORAGE] Wallet amount saved for online payment order:', orderNumber, '→', walletAmount);
         }
         
-        // Clear cart since order was successfully created
-        console.log('🛒 [ONLINE PAYMENT] Clearing cart since order was successfully created');
-        onOrderComplete();
-        
         toast({
           title: "انتقال به درگاه بانکی",
           description: "در حال انتقال شما به درگاه پرداخت بانکی..."
@@ -1286,10 +1270,6 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       }
       // Check if payment gateway redirect is needed (legacy)
       else if (response.redirectToPayment && response.paymentGatewayUrl) {
-        // Clear cart since order was successfully created
-        console.log('🛒 [LEGACY PAYMENT] Clearing cart since order was successfully created');
-        onOrderComplete();
-        
         toast({
           title: "انتقال به درگاه پرداخت",
           description: "در حال انتقال شما به درگاه پرداخت..."

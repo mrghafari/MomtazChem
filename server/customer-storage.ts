@@ -27,7 +27,6 @@ import {
   type EmailTemplate,
   type InsertEmailTemplate,
 } from "@shared/customer-schema";
-import { persistentCarts } from "@shared/persistent-cart-schema";
 import { customerDb } from "./customer-db";
 import { eq, desc, and, or, ilike, count, sql, sum, ne } from "drizzle-orm";
 import bcrypt from "bcryptjs";
@@ -974,21 +973,6 @@ export class CustomerStorage implements ICustomerStorage {
         .returning();
       
       return newSettings;
-    }
-  }
-
-  // Clear customer's persistent cart - using persistent_carts table
-  async clearCart(customerId: number): Promise<void> {
-    console.log(`🧹 [PERSISTENT CART] Clearing cart for customer ${customerId}`);
-    
-    try {
-      // Use raw SQL to clear persistent cart for now
-      await customerDb.execute(sql`DELETE FROM persistent_carts WHERE customer_id = ${customerId}`);
-      
-      console.log(`✅ [PERSISTENT CART] Cart cleared successfully for customer ${customerId}`);
-    } catch (error) {
-      console.error(`❌ [PERSISTENT CART] Failed to clear cart for customer ${customerId}:`, error);
-      throw error;
     }
   }
 }

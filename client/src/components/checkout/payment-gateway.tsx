@@ -64,24 +64,10 @@ const PaymentGateway = ({
         // Clear cart after successful payment
         console.log('🧹 [CART CLEAR] Clearing cart after successful wallet payment');
         try {
-          // Use fetch with credentials to ensure session is included
-          const cartResponse = await fetch('/api/cart/clear', { 
-            method: 'POST',
-            body: JSON.stringify({}), 
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include'  // Include session cookies
-          });
-          
-          const cartResult = await cartResponse.json();
-          console.log('✅ [CART CLEAR] Database cart cleared:', cartResult);
-          
-          // Also clear localStorage cart immediately
-          localStorage.removeItem('cart');
-          console.log('🧹 [CART CLEAR] Cleared localStorage cart');
+          await apiRequest('/api/cart/clear', { method: 'POST' });
+          console.log('✅ [CART CLEAR] Cart cleared successfully');
         } catch (cartError) {
           console.warn('⚠️ [CART CLEAR] Failed to clear cart:', cartError);
-          // Force clear localStorage even if database clear fails
-          localStorage.removeItem('cart');
         }
         
         onPaymentSuccess({
@@ -138,25 +124,6 @@ const PaymentGateway = ({
         // Double-check: If remaining amount is actually 0, complete as wallet-only
         if (remainingAmount <= 0) {
           console.log('💰 [HYBRID PAYMENT] Remaining amount is 0 after deduction - completing as wallet-only');
-          
-          // Clear cart after successful wallet-only payment
-          console.log('🧹 [CART CLEAR] Clearing cart after successful wallet-only payment');
-          try {
-            const customerId = localStorage.getItem('customerId');
-            await apiRequest('/api/cart/clear', { 
-              method: 'POST',
-              body: { customerId: customerId ? parseInt(customerId) : undefined }
-            });
-            
-            // Also clear localStorage cart immediately
-            localStorage.removeItem('cart');
-            console.log('🧹 [CART CLEAR] Cleared localStorage cart');
-            
-            console.log('✅ [CART CLEAR] Cart cleared successfully');
-          } catch (cartError) {
-            console.warn('⚠️ [CART CLEAR] Failed to clear cart:', cartError);
-          }
-          
           setIsProcessing(false);
           onPaymentSuccess({
             method: 'wallet_full',
@@ -168,8 +135,7 @@ const PaymentGateway = ({
           return;
         }
         
-        console.log('🏦 [BANK REDIRECT] Wallet deducted successfully, keeping cart for bank payment completion');
-        console.log('🛒 [CART PRESERVATION] Keeping cart items until bank payment is completed');
+        console.log('🏦 [BANK REDIRECT] Now redirecting to bank gateway for remaining:', remainingAmount);
         
         // Step 2: Update form data for bank gateway
         setFormData((prev: any) => ({
@@ -182,20 +148,11 @@ const PaymentGateway = ({
         // Reset processing state before triggering bank redirect
         setIsProcessing(false);
         
-        // Show user message about next step instead of auto-redirect
-        console.log('💡 [HYBRID PAYMENT] Wallet portion completed, user needs to complete bank payment');
-        
-        // Instead of auto-redirect, show user the bank payment options
-        onPaymentSuccess({
-          method: 'wallet_partial',
-          transactionId: walletResponse.transactionId,
-          amount: walletAmount,
-          walletDeducted: walletAmount,
-          bankPaid: 0,
-          remainingAmount: remainingAmount,
-          requiresBankPayment: true,
-          message: `کیف پول: ${walletAmount} IQD پرداخت شد. مبلغ باقی‌مانده: ${remainingAmount} IQD از طریق بانک پرداخت شود.`
-        });
+        // Small delay to ensure state is updated, then trigger bank gateway redirect
+        setTimeout(() => {
+          console.log('🚀 [BANK REDIRECT] Triggering handleOnlinePayment after wallet deduction');
+          handleOnlinePayment();
+        }, 100);
       } else {
         throw new Error(walletResponse.message || 'Wallet deduction failed');
       }
@@ -221,22 +178,26 @@ const PaymentGateway = ({
       console.log('🔄 [AUTO REDIRECT] Triggering auto-redirect for online payment');
       console.log('🔄 [AUTO REDIRECT] Gateway config:', activeGateway.config);
       
-      console.log('🚀 [AUTO REDIRECT] Immediate execution of handleOnlinePayment');
-      try {
-        handleOnlinePayment();
-      } catch (error) {
-        console.error('❌ [AUTO REDIRECT] Error during auto redirect:', error);
-      }
+      setTimeout(() => {
+        console.log('🚀 [AUTO REDIRECT] Executing handleOnlinePayment now');
+        try {
+          handleOnlinePayment();
+        } catch (error) {
+          console.error('❌ [AUTO REDIRECT] Error during auto redirect:', error);
+        }
+      }, 2000);
     } else if (paymentMethod === 'wallet_partial' && activeGateway && !isProcessing && hasRemainingAmount) {
       console.log('🔄 [AUTO REDIRECT] Triggering auto-redirect for wallet_partial with remaining amount:', formData?.remainingAmount);
       console.log('🔄 [AUTO REDIRECT] Gateway config:', activeGateway.config);
       
-      console.log('🚀 [AUTO REDIRECT] Immediate execution for remaining amount');
-      try {
-        handleOnlinePayment();
-      } catch (error) {
-        console.error('❌ [AUTO REDIRECT] Error during auto redirect:', error);
-      }
+      setTimeout(() => {
+        console.log('🚀 [AUTO REDIRECT] Executing handleOnlinePayment for remaining amount');
+        try {
+          handleOnlinePayment();
+        } catch (error) {
+          console.error('❌ [AUTO REDIRECT] Error during auto redirect:', error);
+        }
+      }, 2000);
     } else if (paymentMethod === 'wallet_partial' && !hasRemainingAmount) {
       console.log('💰 [AUTO REDIRECT] wallet_partial with 0 remaining - no bank redirect needed');
     }
