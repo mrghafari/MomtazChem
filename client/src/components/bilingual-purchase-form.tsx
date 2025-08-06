@@ -960,7 +960,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const formatCurrency = (amount: number, currency = 'IQD') => {
     const formattedAmount = formatIQDAmount(amount);
     if (currency === 'IQD') {
-      return `${formattedAmount} د.ع`;
+      return `${formattedAmount} IQD`;
     }
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -1859,7 +1859,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                     <RadioGroupItem value="wallet_combined" id="wallet_combined" />
                     <Label htmlFor="wallet_combined" className="flex items-center gap-2 cursor-pointer">
                       <Wallet className="w-4 h-4 text-green-600" />
-                      <span className="font-semibold">استفاده از کیف پول (حداکثر {formatIQDAmount(Math.min(walletBalance, totalAmount))} د.ع)</span>
+                      <span className="font-semibold">استفاده از کیف پول (حداکثر {formatIQDAmount(Math.min(walletBalance, totalAmount))} IQD)</span>
                     </Label>
                   </div>
                 )}
@@ -1897,7 +1897,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
               {paymentMethod === 'wallet_partial' && (
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="walletAmount">مبلغ از والت (حداکثر {formatIQDAmount(Math.min(walletBalance, totalAmount))} د.ع)</Label>
+                    <Label htmlFor="walletAmount">مبلغ از والت (حداکثر {formatIQDAmount(Math.min(walletBalance, totalAmount))} IQD)</Label>
                     <Input
                       id="walletAmount"
                       type="number"

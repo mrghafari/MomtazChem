@@ -15,7 +15,7 @@ export const CURRENCY_CONFIGS: Record<string, CurrencyConfig> = {
     currency: 'IQD',
     hasDecimals: false,
     decimalPlaces: 0,
-    symbol: 'د.ع'
+    symbol: 'IQD'
   },
   'USD': {
     currency: 'USD',

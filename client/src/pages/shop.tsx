@@ -29,6 +29,7 @@ import VisualBarcode from "@/components/ui/visual-barcode";
 import ProductRating from "@/components/ProductRating";
 import StarRating from "@/components/StarRating";
 import { ProductSpecsModal } from "@/components/ProductSpecsModal";
+import { formatIQDAmount } from "@/lib/currency-utils";
 
 const Shop = () => {
   const { toast } = useMultilingualToast();
@@ -1362,7 +1363,7 @@ const Shop = () => {
                           <div className="flex items-center justify-between mb-3">
                             <div>
                               <span className="text-2xl font-bold text-green-600">
-                                {product.price && !isNaN(parseFloat(product.price)) ? parseFloat(product.price).toFixed(2) : '0.00'}
+                                {product.price && !isNaN(parseFloat(product.price)) ? formatIQDAmount(parseFloat(product.price)) : '0 IQD'}
                               </span>
                               <span className="text-sm text-gray-500 ml-1">
                                 / {product.priceUnit || 'unit'}
@@ -1795,7 +1796,7 @@ const Shop = () => {
                               <div className="flex items-center gap-4 mb-4">
                                 <div>
                                   <span className="text-2xl font-bold text-green-600">
-                                    {product.price && !isNaN(parseFloat(product.price)) ? parseFloat(product.price).toFixed(2) : '0.00'}
+                                    {product.price && !isNaN(parseFloat(product.price)) ? formatIQDAmount(parseFloat(product.price)) : '0 IQD'}
                                   </span>
                                   <span className="text-sm text-gray-500 ml-1">
                                     / {product.priceUnit || 'unit'}
