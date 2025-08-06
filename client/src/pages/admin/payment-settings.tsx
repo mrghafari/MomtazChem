@@ -115,64 +115,76 @@ const PaymentSettings = () => {
     },
   });
 
-  // Test Configuration mutation
+  // Test configuration mutation
   const testConfigMutation = useMutation({
-    mutationFn: async (gatewayId: number) => {
-      return apiRequest(`/api/payment/gateways/${gatewayId}/test-config`, { method: 'POST' });
+    mutationFn: async (id: number) => {
+      const response = await apiRequest(`/api/payment/gateways/${id}/test-config`, {
+        method: 'POST'
+      });
+      return response;
     },
     onSuccess: (data) => {
       toast({
-        title: "آزمایش پیکربندی موفق",
-        description: "تمامی تنظیمات درگاه پرداخت معتبر است.",
+        title: data.success ? "Test Passed" : "Test Issues Found",
+        description: data.message || "Configuration test completed",
+        variant: data.success ? "default" : "destructive",
       });
     },
-    onError: (error: any) => {
+    onError: () => {
       toast({
-        title: "خطا در آزمایش پیکربندی",
-        description: error.message || "پیکربندی درگاه نامعتبر است.",
+        title: "Error",
+        description: "Failed to test gateway configuration",
         variant: "destructive",
       });
-    },
+    }
   });
 
-  // Test Connection mutation
+  // Test connection mutation
   const testConnectionMutation = useMutation({
-    mutationFn: async (gatewayId: number) => {
-      return apiRequest(`/api/payment/gateways/${gatewayId}/test-connection`, { method: 'POST' });
+    mutationFn: async (id: number) => {
+      const response = await apiRequest(`/api/payment/gateways/${id}/test-connection`, {
+        method: 'POST'
+      });
+      return response;
     },
     onSuccess: (data) => {
       toast({
-        title: "آزمایش اتصال موفق",
-        description: "اتصال به درگاه پرداخت برقرار است.",
+        title: data.success ? "Connection OK" : "Connection Issues",
+        description: data.message || "Connection test completed",
+        variant: data.success ? "default" : "destructive",
       });
     },
-    onError: (error: any) => {
+    onError: () => {
       toast({
-        title: "خطا در آزمایش اتصال",
-        description: error.message || "عدم اتصال به درگاه پرداخت.",
+        title: "Error",
+        description: "Failed to test gateway connection",
         variant: "destructive",
       });
-    },
+    }
   });
 
-  // Validate Config mutation
+  // Validate configuration mutation
   const validateConfigMutation = useMutation({
-    mutationFn: async (gatewayId: number) => {
-      return apiRequest(`/api/payment/gateways/${gatewayId}/validate-config`, { method: 'POST' });
+    mutationFn: async (id: number) => {
+      const response = await apiRequest(`/api/payment/gateways/${id}/validate-config`, {
+        method: 'POST'
+      });
+      return response;
     },
     onSuccess: (data) => {
       toast({
-        title: "اعتبارسنجی پیکربندی موفق",
-        description: "تمامی پارامترهای پیکربندی معتبر است.",
+        title: data.success ? "Valid Configuration" : "Configuration Issues",
+        description: data.message || "Configuration validation completed",
+        variant: data.success ? "default" : "destructive",
       });
     },
-    onError: (error: any) => {
+    onError: () => {
       toast({
-        title: "خطا در اعتبارسنجی",
-        description: error.message || "پارامترهای پیکربندی نامعتبر است.",
+        title: "Error",
+        description: "Failed to validate gateway configuration",
         variant: "destructive",
       });
-    },
+    }
   });
 
   const toggleSecretVisibility = (field: string) => {
@@ -902,7 +914,7 @@ const PaymentSettings = () => {
                         </span>
                       </div>
                       
-                      <div className="flex space-x-2">
+                      <div className="flex space-x-1">
                         <Button
                           variant={gateway.enabled ? "destructive" : "default"}
                           size="sm"
@@ -911,6 +923,37 @@ const PaymentSettings = () => {
                         >
                           {gateway.enabled ? 'غیرفعال' : 'فعال'}
                         </Button>
+                        
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => testConfigMutation.mutate(gateway.id)}
+                          disabled={testConfigMutation.isPending}
+                          title="آزمایش پیکربندی"
+                        >
+                          <TestTube className="w-4 h-4" />
+                        </Button>
+                        
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => testConnectionMutation.mutate(gateway.id)}
+                          disabled={testConnectionMutation.isPending}
+                          title="آزمایش اتصال"
+                        >
+                          <Wifi className="w-4 h-4" />
+                        </Button>
+                        
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => validateConfigMutation.mutate(gateway.id)}
+                          disabled={validateConfigMutation.isPending}
+                          title="اعتبارسنجی"
+                        >
+                          <Shield className="w-4 h-4" />
+                        </Button>
+                        
                         <Button
                           variant="outline"
                           size="sm"

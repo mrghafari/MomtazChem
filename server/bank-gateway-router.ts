@@ -261,16 +261,26 @@ export class BankGatewayRouter {
 
   // پیاده‌سازی درگاه شاپرک (SEP)
   private async createSepPayment(gateway: PaymentGateway, request: BankPaymentRequest) {
+    const config = gateway.config;
     const transactionId = `SEP_${Date.now()}_${request.orderId}`;
-    const paymentUrl = `https://sep.shaparak.ir/Payment.aspx?Token=${transactionId}&Amount=${request.amount}&Currency=${request.currency || 'IQD'}`;
     
-    console.log(`💳 [SHAPARAK SEP] Payment URL created: ${paymentUrl} for amount: ${request.amount} ${request.currency || 'IQD'}`);
+    // Check if test mode is enabled
+    const isTestMode = config.testMode === true;
+    const baseUrl = isTestMode ? 'https://sep.shaparak.ir/sandbox' : 'https://sep.shaparak.ir';
+    
+    // Include merchant credentials if available
+    const merchantId = config.merchantId || 'test_merchant';
+    const apiKey = config.apiKey || 'test_api_key';
+    
+    const paymentUrl = `${baseUrl}/Payment.aspx?Token=${transactionId}&Amount=${request.amount}&Currency=${request.currency || 'IQD'}&MerchantId=${merchantId}&ApiKey=${apiKey}`;
+    
+    console.log(`💳 [SHAPARAK SEP] Payment URL created: ${paymentUrl} for amount: ${request.amount} ${request.currency || 'IQD'} (Test Mode: ${isTestMode})`);
     
     return {
       success: true,
       paymentUrl,
       transactionId,
-      message: 'لینک پرداخت شاپرک ایجاد شد'
+      message: isTestMode ? 'لینک پرداخت شاپرک تست ایجاد شد' : 'لینک پرداخت شاپرک ایجاد شد'
     };
   }
 
