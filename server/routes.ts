@@ -4862,7 +4862,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const decodedProductName = decodeURIComponent(productName);
       
       const { FIFOBatchManager } = await import('./fifo-batch-manager');
-      const batches = await FIFOBatchManager.getBatchesFIFO(decodedProductName);
+      const result = await FIFOBatchManager.getBatchInfoFIFO(decodedProductName);
+      
+      if (!result.success) {
+        return res.status(404).json(result);
+      }
+      
+      const batches = result.data?.allBatches || [];
       
       res.json({
         success: true,
@@ -4876,6 +4882,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({
         success: false,
         message: "خطا در دریافت لیست بچ‌های محصول",
+        error: error?.message || 'خطای نامشخص'
+      });
+    }
+  });
+
+  // Get batch information for display (simplified version of list for UI)
+  app.get("/api/products/:productName/batches/display", async (req, res) => {
+    try {
+      const { productName } = req.params;
+      const decodedProductName = decodeURIComponent(productName);
+      
+      const { FIFOBatchManager } = await import('./fifo-batch-manager');
+      const result = await FIFOBatchManager.getBatchInfoFIFO(decodedProductName);
+      
+      if (!result.success) {
+        return res.status(404).json(result);
+      }
+      
+      res.json({
+        success: true,
+        productName: decodedProductName,
+        batches: result.data?.allBatches || [],
+        count: result.data?.batchCount || 0,
+        totalStock: Number(result.data?.totalStock) || 0,
+        batchInfo: result.data
+      });
+      
+    } catch (error: any) {
+      console.error("Error fetching batch display info:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت اطلاعات نمایش بچ‌ها",
         error: error?.message || 'خطای نامشخص'
       });
     }

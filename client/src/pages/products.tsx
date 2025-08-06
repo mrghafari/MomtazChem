@@ -433,7 +433,7 @@ export default function ProductsPage() {
 
   // AI SKU Generation Mutation
   const generateSKUMutation = useMutation({
-    mutationFn: (productData: any) => apiRequest("/api/products/generate-sku", "POST", productData),
+    mutationFn: (productData: any) => apiRequest("/api/products/generate-sku", { method: "POST", body: productData }),
     onSuccess: (result) => {
       form.setValue("sku", result.data.sku);
       toast({
@@ -793,10 +793,10 @@ export default function ProductsPage() {
       description: product.description || "",
       category: product.category,
       shortDescription: product.shortDescription || "",
-      features: Array.isArray(product.features) ? product.features.join('\n') : (product.features || ""),
-      applications: Array.isArray(product.applications) ? product.applications.join('\n') : (product.applications || ""),
-      specifications: typeof product.specifications === 'object' && product.specifications !== null ? JSON.stringify(product.specifications, null, 2) : (product.specifications || ""),
-      tags: Array.isArray(product.tags) ? product.tags.join(', ') : (product.tags || ""),
+      features: Array.isArray(product.features) ? product.features.join('\n') : String(product.features || ""),
+      applications: Array.isArray(product.applications) ? product.applications.join('\n') : String(product.applications || ""),
+      specifications: typeof product.specifications === 'object' && product.specifications !== null ? JSON.stringify(product.specifications, null, 2) : String(product.specifications || ""),
+      tags: Array.isArray(product.tags) ? product.tags.join(', ') : String(product.tags || ""),
       barcode: product.barcode || "",
       sku: product.sku || "",
       stockQuantity: Number(product.stockQuantity) ?? 0,
@@ -815,9 +815,9 @@ export default function ProductsPage() {
       msdsUrl: product.msdsUrl || "",
       msdsFileName: product.msdsFileName || "",
       showMsdsToCustomers: product.showMsdsToCustomers || false,
-      catalogFileName: product.catalogFileName || "",
+      catalogFileName: (product as any).catalogFileName || "",
       showCatalogToCustomers: product.showCatalogToCustomers || false,
-      syncWithShop: product.syncWithShop !== undefined ? product.syncWithShop : true,
+      syncWithShop: product.syncWithShop !== null && product.syncWithShop !== undefined ? product.syncWithShop : true,
       showWhenOutOfStock: product.showWhenOutOfStock ?? false,
       isNonChemical: product.isNonChemical ?? false,
       isFlammable: product.isFlammable ?? false,
@@ -1228,7 +1228,10 @@ export default function ProductsPage() {
                             className="w-16 h-16 object-cover rounded-lg border border-gray-200 shadow-sm"
                             onError={(e) => {
                               e.currentTarget.style.display = 'none';
-                              e.currentTarget.nextElementSibling.style.display = 'flex';
+                              const nextElement = e.currentTarget.nextElementSibling as HTMLElement;
+                              if (nextElement) {
+                                nextElement.style.display = 'flex';
+                              }
                             }}
                           />
                         ) : null}
@@ -1390,16 +1393,16 @@ export default function ProductsPage() {
                             <div 
                               className={`h-2 rounded-full transition-all duration-300 ${
                                 getStockLevelIndicator(
-                                  product.stockQuantity, 
-                                  product.minStockLevel || 0, 
-                                  product.maxStockLevel || 1000
+                                  Number(product.stockQuantity) || 0, 
+                                  Number(product.minStockLevel) || 0, 
+                                  Number(product.maxStockLevel) || 1000
                                 ).color
                               }`}
                               style={{ 
                                 width: `${Math.min(100, getStockLevelIndicator(
-                                  product.stockQuantity, 
-                                  product.minStockLevel || 0, 
-                                  product.maxStockLevel || 1000
+                                  Number(product.stockQuantity) || 0, 
+                                  Number(product.minStockLevel) || 0, 
+                                  Number(product.maxStockLevel) || 1000
                                 ).width)}%` 
                               }}
                             />
@@ -1410,13 +1413,13 @@ export default function ProductsPage() {
                       {/* Product Weight Information */}
                       {(product.netWeight || product.grossWeight || (product.weight && parseFloat(product.weight) > 0)) && (
                         <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
-                          {product.netWeight && product.netWeight > 0 && (
+                          {product.netWeight && Number(product.netWeight) > 0 && (
                             <div className="flex items-center gap-1">
                               <span className="font-medium">وزن خالص:</span>
                               <span>{Number(product.netWeight).toFixed(1)} {product.weightUnit || 'kg'}</span>
                             </div>
                           )}
-                          {product.grossWeight && product.grossWeight > 0 && (
+                          {product.grossWeight && Number(product.grossWeight) > 0 && (
                             <div className="flex items-center gap-1">
                               <span className="font-medium">وزن ناخالص:</span>
                               <span>{Number(product.grossWeight).toFixed(1)} {product.weightUnit || 'kg'}</span>
@@ -1509,7 +1512,7 @@ export default function ProductsPage() {
                             <div 
                               className="bg-green-500 rounded-full p-1.5 shadow-lg border-2 border-white cursor-pointer hover:bg-green-600 transition-colors" 
                               title="کلیک برای باز کردن کاتالوگ"
-                              onClick={() => window.open(product.pdfCatalogUrl, '_blank')}
+                              onClick={() => product.pdfCatalogUrl && window.open(product.pdfCatalogUrl, '_blank')}
                             >
                               <Eye className="w-3 h-3 text-white" />
                             </div>
@@ -1520,7 +1523,7 @@ export default function ProductsPage() {
                             <div 
                               className="bg-blue-500 rounded-full p-1.5 shadow-lg border-2 border-white cursor-pointer hover:bg-blue-600 transition-colors" 
                               title="کلیک برای باز کردن MSDS"
-                              onClick={() => window.open(product.msdsUrl, '_blank')}
+                              onClick={() => product.msdsUrl && window.open(product.msdsUrl, '_blank')}
                             >
                               <FileText className="w-3 h-3 text-white" />
                             </div>
@@ -1769,6 +1772,7 @@ export default function ProductsPage() {
                                 placeholder="کد محصول" 
                                 className={`h-9 ${(editingProduct || field.value) ? "bg-gray-50 text-gray-500" : ""} ${validationErrors.sku ? "border-red-500 focus:border-red-500" : ""}`}
                                 {...field}
+                                value={field.value || ""}
                                 readOnly={!!(editingProduct || field.value)}
                               />
                               {!editingProduct && !field.value && (
@@ -1913,6 +1917,7 @@ export default function ProductsPage() {
                               placeholder="بارکد 13 رقمی" 
                               className={`h-9 ${(editingProduct || field.value) ? "bg-gray-50 text-gray-500" : ""} ${validationErrors.barcode ? "border-red-500 focus:border-red-500" : ""}`}
                               {...field}
+                              value={field.value || ""}
                               readOnly={!!(editingProduct || field.value)}
                               onChange={(e) => {
                                 // Detect manual input
