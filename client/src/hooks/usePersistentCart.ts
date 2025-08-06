@@ -13,6 +13,7 @@ export function usePersistentCart() {
   const [localCart, setLocalCart] = useState<{[key: number]: number}>({});
   const [isLoading, setIsLoading] = useState(false);
   const [previousAuth, setPreviousAuth] = useState<boolean>(false);
+  const [cartLoaded, setCartLoaded] = useState<boolean>(false);
 
   // Clear cart when user logs out
   useEffect(() => {
@@ -20,6 +21,7 @@ export function usePersistentCart() {
     if (previousAuth && !isAuthenticated) {
       console.log('🔐 User logged out, clearing cart');
       setLocalCart({});
+      setCartLoaded(false);
       localStorage.removeItem('cart');
     }
     
@@ -44,8 +46,9 @@ export function usePersistentCart() {
   // Load persistent cart from database when user logs in
   useEffect(() => {
     const loadPersistentCart = async () => {
-      if (isAuthenticated && user && user.id) {
+      if (isAuthenticated && user && user.id && !cartLoaded) {
         setIsLoading(true);
+        setCartLoaded(true);
         try {
           console.log('🛒 Loading persistent cart for customer:', user.id);
           
@@ -83,10 +86,13 @@ export function usePersistentCart() {
     };
 
     // Load cart whenever user authentication state changes or user data becomes available
-    if (isAuthenticated && user && user.id) {
-      loadPersistentCart();
+    if (isAuthenticated && user && user.id && !cartLoaded) {
+      // Add a small delay to ensure authentication is fully settled
+      setTimeout(() => {
+        loadPersistentCart();
+      }, 100);
     }
-  }, [isAuthenticated, user?.id]);
+  }, [isAuthenticated, user?.id, cartLoaded]);
 
   // ذخیره سبد محلی در localStorage
   const saveLocalCart = (cart: {[key: number]: number}) => {
