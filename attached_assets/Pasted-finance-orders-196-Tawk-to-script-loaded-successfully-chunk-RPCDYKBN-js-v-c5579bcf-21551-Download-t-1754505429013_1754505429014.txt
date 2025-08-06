@@ -1,0 +1,278 @@
+finance-orders:196 Tawk.to script loaded successfully
+chunk-RPCDYKBN.js?v=c5579bcf:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+queryClient.ts:81  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+(anonymous) @ queryClient.ts:81
+fetchFn @ @tanstack_react-query.js?v=c5579bcf:840
+run @ @tanstack_react-query.js?v=c5579bcf:494
+start @ @tanstack_react-query.js?v=c5579bcf:536
+fetch @ @tanstack_react-query.js?v=c5579bcf:926
+executeFetch_fn @ @tanstack_react-query.js?v=c5579bcf:2211
+onSubscribe @ @tanstack_react-query.js?v=c5579bcf:1898
+subscribe @ @tanstack_react-query.js?v=c5579bcf:24
+(anonymous) @ @tanstack_react-query.js?v=c5579bcf:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=c5579bcf:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=c5579bcf:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=c5579bcf:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=c5579bcf:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=c5579bcf:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=c5579bcf:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=c5579bcf:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=c5579bcf:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=c5579bcf:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=c5579bcf:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=c5579bcf:19432
+commitRoot @ chunk-RPCDYKBN.js?v=c5579bcf:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=c5579bcf:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=c5579bcf:18718
+workLoop @ chunk-RPCDYKBN.js?v=c5579bcf:197
+flushWork @ chunk-RPCDYKBN.js?v=c5579bcf:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=c5579bcf:384
+useAuth.ts:30  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 401 (Unauthorized)
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=c5579bcf:840
+run @ @tanstack_react-query.js?v=c5579bcf:494
+start @ @tanstack_react-query.js?v=c5579bcf:536
+fetch @ @tanstack_react-query.js?v=c5579bcf:926
+executeFetch_fn @ @tanstack_react-query.js?v=c5579bcf:2211
+onSubscribe @ @tanstack_react-query.js?v=c5579bcf:1898
+subscribe @ @tanstack_react-query.js?v=c5579bcf:24
+(anonymous) @ @tanstack_react-query.js?v=c5579bcf:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=c5579bcf:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=c5579bcf:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=c5579bcf:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=c5579bcf:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=c5579bcf:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=c5579bcf:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=c5579bcf:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=c5579bcf:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=c5579bcf:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=c5579bcf:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=c5579bcf:19432
+commitRoot @ chunk-RPCDYKBN.js?v=c5579bcf:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=c5579bcf:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=c5579bcf:18718
+workLoop @ chunk-RPCDYKBN.js?v=c5579bcf:197
+flushWork @ chunk-RPCDYKBN.js?v=c5579bcf:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=c5579bcf:384
+queryClient.ts:81  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/company-information 401 (Unauthorized)
+(anonymous) @ queryClient.ts:81
+fetchFn @ @tanstack_react-query.js?v=c5579bcf:840
+run @ @tanstack_react-query.js?v=c5579bcf:494
+start @ @tanstack_react-query.js?v=c5579bcf:536
+fetch @ @tanstack_react-query.js?v=c5579bcf:926
+executeFetch_fn @ @tanstack_react-query.js?v=c5579bcf:2211
+onSubscribe @ @tanstack_react-query.js?v=c5579bcf:1898
+subscribe @ @tanstack_react-query.js?v=c5579bcf:24
+(anonymous) @ @tanstack_react-query.js?v=c5579bcf:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=c5579bcf:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=c5579bcf:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=c5579bcf:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=c5579bcf:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=c5579bcf:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=c5579bcf:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=c5579bcf:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=c5579bcf:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=c5579bcf:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=c5579bcf:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=c5579bcf:19432
+commitRoot @ chunk-RPCDYKBN.js?v=c5579bcf:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=c5579bcf:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=c5579bcf:18718
+workLoop @ chunk-RPCDYKBN.js?v=c5579bcf:197
+flushWork @ chunk-RPCDYKBN.js?v=c5579bcf:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=c5579bcf:384
+finance-orders.tsx:191 🔍 [APPROVED ORDERS] Raw response: (20) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+useOrderNotifications.ts:40 The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio
+createBeep @ useOrderNotifications.ts:40
+(anonymous) @ useOrderNotifications.ts:82
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=c5579bcf:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=c5579bcf:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=c5579bcf:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=c5579bcf:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=c5579bcf:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=c5579bcf:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=c5579bcf:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=c5579bcf:19416
+commitRoot @ chunk-RPCDYKBN.js?v=c5579bcf:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=c5579bcf:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=c5579bcf:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=c5579bcf:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=c5579bcf:555
+flush @ @tanstack_react-query.js?v=c5579bcf:569
+batch @ @tanstack_react-query.js?v=c5579bcf:587
+dispatch_fn @ @tanstack_react-query.js?v=c5579bcf:996
+setData @ @tanstack_react-query.js?v=c5579bcf:696
+onSuccess @ @tanstack_react-query.js?v=c5579bcf:897
+resolve @ @tanstack_react-query.js?v=c5579bcf:456
+Promise.then
+run @ @tanstack_react-query.js?v=c5579bcf:498
+start @ @tanstack_react-query.js?v=c5579bcf:536
+fetch @ @tanstack_react-query.js?v=c5579bcf:926
+executeFetch_fn @ @tanstack_react-query.js?v=c5579bcf:2211
+onSubscribe @ @tanstack_react-query.js?v=c5579bcf:1898
+subscribe @ @tanstack_react-query.js?v=c5579bcf:24
+(anonymous) @ @tanstack_react-query.js?v=c5579bcf:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=c5579bcf:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=c5579bcf:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=c5579bcf:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=c5579bcf:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=c5579bcf:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=c5579bcf:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=c5579bcf:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=c5579bcf:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=c5579bcf:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=c5579bcf:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=c5579bcf:19432
+commitRoot @ chunk-RPCDYKBN.js?v=c5579bcf:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=c5579bcf:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=c5579bcf:18718
+workLoop @ chunk-RPCDYKBN.js?v=c5579bcf:197
+flushWork @ chunk-RPCDYKBN.js?v=c5579bcf:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=c5579bcf:384
+useOrderNotifications.ts:99 🔔 [FINANCIAL] نوتیفیکیشن: 55 سفارش جدید دریافت شد
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:117574)
+    at t.value (twk-chunk-common.js:2:150658)
+    at p.updateUUID (twk-chunk-common.js:2:202310)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:124589)
+    at twk-chunk-common.js:2:123900
+value @ twk-chunk-common.js:2
+updateUUID @ twk-chunk-common.js:2
+(anonymous) @ twk-vendor.js:2
+p.dispatch @ twk-vendor.js:2
+dispatch @ twk-vendor.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+Promise.then
+value @ twk-chunk-common.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+56d7 @ twk-chunk-common.js:2
+a @ twk-runtime.js:1
+r @ twk-runtime.js:1
+t @ twk-runtime.js:1
+(anonymous) @ twk-runtime.js:1
+(anonymous) @ twk-runtime.js:1
+finance-orders:168 Tawk.to Live Chat loaded successfully
+queryClient.ts:81  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+(anonymous) @ queryClient.ts:81
+fetchFn @ @tanstack_react-query.js?v=c5579bcf:840
+run @ @tanstack_react-query.js?v=c5579bcf:494
+start @ @tanstack_react-query.js?v=c5579bcf:536
+fetch @ @tanstack_react-query.js?v=c5579bcf:926
+executeFetch_fn @ @tanstack_react-query.js?v=c5579bcf:2211
+fetch @ @tanstack_react-query.js?v=c5579bcf:2011
+refetch @ @tanstack_react-query.js?v=c5579bcf:2001
+onFocus @ @tanstack_react-query.js?v=c5579bcf:749
+(anonymous) @ @tanstack_react-query.js?v=c5579bcf:1112
+(anonymous) @ @tanstack_react-query.js?v=c5579bcf:1111
+batch @ @tanstack_react-query.js?v=c5579bcf:583
+onFocus @ @tanstack_react-query.js?v=c5579bcf:1110
+(anonymous) @ @tanstack_react-query.js?v=c5579bcf:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=c5579bcf:313
+onFocus @ @tanstack_react-query.js?v=c5579bcf:312
+(anonymous) @ @tanstack_react-query.js?v=c5579bcf:299
+listener @ @tanstack_react-query.js?v=c5579bcf:270
+finance-orders.tsx:191 🔍 [APPROVED ORDERS] Raw response: (20) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+useAuth.ts:30  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 401 (Unauthorized)
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=c5579bcf:840
+run @ @tanstack_react-query.js?v=c5579bcf:494
+start @ @tanstack_react-query.js?v=c5579bcf:536
+fetch @ @tanstack_react-query.js?v=c5579bcf:926
+executeFetch_fn @ @tanstack_react-query.js?v=c5579bcf:2211
+fetch @ @tanstack_react-query.js?v=c5579bcf:2011
+refetch @ @tanstack_react-query.js?v=c5579bcf:2001
+onFocus @ @tanstack_react-query.js?v=c5579bcf:749
+(anonymous) @ @tanstack_react-query.js?v=c5579bcf:1112
+(anonymous) @ @tanstack_react-query.js?v=c5579bcf:1111
+batch @ @tanstack_react-query.js?v=c5579bcf:583
+onFocus @ @tanstack_react-query.js?v=c5579bcf:1110
+(anonymous) @ @tanstack_react-query.js?v=c5579bcf:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=c5579bcf:313
+onFocus @ @tanstack_react-query.js?v=c5579bcf:312
+(anonymous) @ @tanstack_react-query.js?v=c5579bcf:299
+listener @ @tanstack_react-query.js?v=c5579bcf:270
+finance-orders.tsx:370  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/orders/find-by-number/M2511258 401 (Unauthorized)
+fetchOrderDetails @ finance-orders.tsx:370
+onClick @ finance-orders.tsx:2952
+callCallback2 @ chunk-RPCDYKBN.js?v=c5579bcf:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=c5579bcf:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=c5579bcf:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=c5579bcf:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=c5579bcf:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=c5579bcf:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=c5579bcf:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=c5579bcf:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=c5579bcf:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=c5579bcf:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=c5579bcf:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=c5579bcf:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=c5579bcf:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=c5579bcf:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=c5579bcf:5449
+finance-orders.tsx:404 Error fetching order details: Error: Failed to find order
+    at fetchOrderDetails (finance-orders.tsx:375:15)
+fetchOrderDetails @ finance-orders.tsx:404
+await in fetchOrderDetails
+onClick @ finance-orders.tsx:2952
+callCallback2 @ chunk-RPCDYKBN.js?v=c5579bcf:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=c5579bcf:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=c5579bcf:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=c5579bcf:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=c5579bcf:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=c5579bcf:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=c5579bcf:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=c5579bcf:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=c5579bcf:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=c5579bcf:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=c5579bcf:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=c5579bcf:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=c5579bcf:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=c5579bcf:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=c5579bcf:5449
+finance-orders.tsx:370  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/orders/find-by-number/M2511266 401 (Unauthorized)
+fetchOrderDetails @ finance-orders.tsx:370
+onClick @ finance-orders.tsx:2952
+callCallback2 @ chunk-RPCDYKBN.js?v=c5579bcf:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=c5579bcf:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=c5579bcf:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=c5579bcf:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=c5579bcf:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=c5579bcf:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=c5579bcf:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=c5579bcf:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=c5579bcf:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=c5579bcf:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=c5579bcf:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=c5579bcf:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=c5579bcf:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=c5579bcf:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=c5579bcf:5449
+finance-orders.tsx:404 Error fetching order details: Error: Failed to find order
+    at fetchOrderDetails (finance-orders.tsx:375:15)
+fetchOrderDetails @ finance-orders.tsx:404
+await in fetchOrderDetails
+onClick @ finance-orders.tsx:2952
+callCallback2 @ chunk-RPCDYKBN.js?v=c5579bcf:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=c5579bcf:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=c5579bcf:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=c5579bcf:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=c5579bcf:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=c5579bcf:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=c5579bcf:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=c5579bcf:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=c5579bcf:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=c5579bcf:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=c5579bcf:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=c5579bcf:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=c5579bcf:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=c5579bcf:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=c5579bcf:5449

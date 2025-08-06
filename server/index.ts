@@ -116,8 +116,8 @@ const generalSessionMiddleware = session({
 const unifiedSessionMiddleware = session({
   secret: process.env.SESSION_SECRET || "momtazchem-unified-secret-key",
   store: adminSessionStore, // Use admin store for all sessions
-  resave: false,
-  saveUninitialized: false,
+  resave: true, // Force save sessions to prevent loss
+  saveUninitialized: true, // Save new sessions to ensure they persist
   rolling: true,
   cookie: {
     secure: false,

@@ -166,6 +166,55 @@ function FinanceOrders() {
   const [orderDetails, setOrderDetails] = useState<any>(null);
   const [orderDocuments, setOrderDocuments] = useState<any[]>([]);
 
+  // Check admin authentication
+  const { data: adminUser, isLoading: isCheckingAuth, error: authError } = useQuery({
+    queryKey: ['/api/admin/me'],
+    queryFn: () => fetch('/api/admin/me', { credentials: 'include' }).then(res => res.json()),
+    retry: false,
+    staleTime: 0,
+  });
+
+  // If not authenticated, show login prompt
+  if (isCheckingAuth) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <Clock className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p>بررسی احراز هویت...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!adminUser || !adminUser.success) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Card className="w-full max-w-md mx-4">
+          <CardHeader>
+            <CardTitle className="text-center text-red-600">
+              دسترسی محدود
+            </CardTitle>
+            <CardDescription className="text-center">
+              برای دسترسی به بخش مالی، ابتدا وارد حساب مدیریت شوید
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="text-center space-y-4">
+            <AlertTriangle className="h-12 w-12 text-red-500 mx-auto" />
+            <p className="text-sm text-gray-600">
+              شما با حساب مشتری وارد شده‌اید. لطفاً از حساب مدیریت استفاده کنید.
+            </p>
+            <Button 
+              onClick={() => window.location.href = '/admin-login'} 
+              className="w-full"
+            >
+              ورود به حساب مدیریت
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   // Enable audio notifications for new orders
   const { orderCount } = useOrderNotifications({
     department: 'financial',
