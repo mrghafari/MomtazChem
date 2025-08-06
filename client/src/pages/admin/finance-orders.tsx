@@ -2357,26 +2357,40 @@ function FinanceOrders() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-3">
+                    <div className="overflow-x-auto">
                       {orderDetails.items && orderDetails.items.length > 0 ? (
-                        orderDetails.items.map((item: any, index: number) => (
-                          <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                            <div className="flex items-center gap-3">
-                              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                                <span className="text-blue-600 font-bold">{Math.floor(parseFloat(item.quantity || 0))}</span>
-                              </div>
-                              <div>
-                                <p className="font-medium">{item.productName}</p>
-                                <p className="text-sm text-gray-600">قیمت واحد: {Math.floor(parseFloat(item.unitPrice || 0)).toLocaleString()} {orderDetails.currency}</p>
-                              </div>
-                            </div>
-                            <div className="text-left">
-                              <p className="font-bold text-green-600">
-                                {Math.floor(parseFloat(item.totalPrice || 0)).toLocaleString()} {orderDetails.currency}
-                              </p>
-                            </div>
-                          </div>
-                        ))
+                        <table className="w-full border-collapse border border-gray-300 bg-white">
+                          <thead>
+                            <tr className="bg-gray-100">
+                              <th className="border border-gray-300 px-3 py-2 text-center font-semibold text-sm w-12">#</th>
+                              <th className="border border-gray-300 px-3 py-2 text-right font-semibold text-sm">نام محصول</th>
+                              <th className="border border-gray-300 px-3 py-2 text-center font-semibold text-sm w-20">تعداد</th>
+                              <th className="border border-gray-300 px-3 py-2 text-center font-semibold text-sm w-28">قیمت واحد</th>
+                              <th className="border border-gray-300 px-3 py-2 text-center font-semibold text-sm w-32">قیمت کل</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {orderDetails.items.map((item: any, index: number) => (
+                              <tr key={index} className="hover:bg-gray-50">
+                                <td className="border border-gray-300 px-3 py-2 text-center text-sm font-medium text-blue-600">
+                                  {index + 1}
+                                </td>
+                                <td className="border border-gray-300 px-3 py-2 text-right text-sm font-medium">
+                                  {item.productName}
+                                </td>
+                                <td className="border border-gray-300 px-3 py-2 text-center text-sm font-bold text-blue-600">
+                                  {Math.floor(parseFloat(item.quantity || 0))}
+                                </td>
+                                <td className="border border-gray-300 px-3 py-2 text-center text-sm text-gray-700">
+                                  {Math.floor(parseFloat(item.unitPrice || 0)).toLocaleString()} {orderDetails.currency}
+                                </td>
+                                <td className="border border-gray-300 px-3 py-2 text-center text-sm font-bold text-green-600">
+                                  {Math.floor(parseFloat(item.totalPrice || 0)).toLocaleString()} {orderDetails.currency}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
                       ) : (
                         <div className="text-center py-8 bg-red-50 rounded-lg border border-red-200">
                           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
