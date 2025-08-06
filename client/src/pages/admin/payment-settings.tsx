@@ -443,53 +443,7 @@ const PaymentSettings = () => {
           </div>
         </div>
 
-        {/* Operational Test Buttons */}
-        <div className="space-y-4 bg-orange-50 dark:bg-orange-900/20 p-4 rounded-lg border">
-          <h3 className="text-lg font-semibold flex items-center gap-2">
-            <TestTube className="h-5 w-5" />
-            عملیات آزمایش و اعتبارسنجی (Operational Testing)
-          </h3>
-          <p className="text-sm text-muted-foreground">
-            استفاده از این دکمه‌ها برای آزمایش و اعتبارسنجی تنظیمات درگاه پرداخت
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Button
-              onClick={() => selectedGateway?.id && testConfigMutation.mutate(selectedGateway.id)}
-              disabled={testConfigMutation.isPending || !selectedGateway?.id}
-              className="w-full"
-              variant="outline"
-            >
-              <Shield className="w-4 h-4 mr-2" />
-              {testConfigMutation.isPending ? "در حال آزمایش..." : "Test & Validate Configuration"}
-            </Button>
 
-            <Button
-              onClick={() => selectedGateway?.id && testConnectionMutation.mutate(selectedGateway.id)}
-              disabled={testConnectionMutation.isPending || !selectedGateway?.id}
-              className="w-full"
-              variant="outline"
-            >
-              <Wifi className="w-4 h-4 mr-2" />
-              {testConnectionMutation.isPending ? "در حال اتصال..." : "Test Connection"}
-            </Button>
-
-            <Button
-              onClick={() => selectedGateway?.id && validateConfigMutation.mutate(selectedGateway.id)}
-              disabled={validateConfigMutation.isPending || !selectedGateway?.id}
-              className="w-full"
-              variant="outline"
-            >
-              <TestTube className="w-4 h-4 mr-2" />
-              {validateConfigMutation.isPending ? "در حال اعتبارسنجی..." : "Validate Config"}
-            </Button>
-          </div>
-          
-          <div className="text-xs text-muted-foreground space-y-1">
-            <p><strong>Test & Validate Configuration:</strong> آزمایش کامل تنظیمات درگاه و API</p>
-            <p><strong>Test Connection:</strong> بررسی وضعیت اتصال به سرور درگاه</p>
-            <p><strong>Validate Config:</strong> اعتبارسنجی پارامترهای ورودی</p>
-          </div>
-        </div>
 
         {/* Iraqi Bank Configuration */}
         {selectedGateway.type === 'iraqi_bank' && (
