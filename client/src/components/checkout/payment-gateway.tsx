@@ -182,8 +182,40 @@ const PaymentGateway = ({
         setIsProcessing(false);
         
         // Immediate redirect to bank gateway after wallet deduction
-        console.log('🚀 [BANK REDIRECT] Immediate redirect after wallet deduction');
-        handleOnlinePayment();
+        console.log('🚀 [BANK REDIRECT] Immediate redirect after wallet deduction for amount:', remainingAmount);
+        
+        // Use the existing active gateway to process bank payment
+        if (activeGateway && activeGateway.config) {
+          console.log('🏦 [BANK REDIRECT] Using active gateway:', activeGateway.name);
+          
+          try {
+            // Create payment request for remaining amount
+            const paymentData = {
+              amount: remainingAmount,
+              orderId,
+              currency: 'IQD',
+              description: `Payment for Order ${orderId} - Remaining Amount`,
+              returnUrl: `${window.location.origin}/payment/success?orderId=${orderId}`,
+              cancelUrl: `${window.location.origin}/payment/failed?orderId=${orderId}`
+            };
+            
+            // Build payment URL based on gateway config
+            const baseUrl = activeGateway.config.apiBaseUrl || activeGateway.config.webhookUrl;
+            const paymentUrl = `${baseUrl}?amount=${remainingAmount}&orderId=${orderId}&merchantId=${activeGateway.config.merchantId || 'default'}`;
+            
+            console.log('🚀 [BANK REDIRECT] Redirecting to:', paymentUrl);
+            
+            // Immediate redirect to payment gateway
+            window.location.href = paymentUrl;
+            
+          } catch (error) {
+            console.error('❌ [BANK REDIRECT] Failed to redirect:', error);
+            onPaymentError('خطا در هدایت به درگاه بانک');
+          }
+        } else {
+          console.error('❌ [BANK REDIRECT] No active gateway available');
+          onPaymentError('درگاه پرداخت در دسترس نیست');
+        }
       } else {
         throw new Error(walletResponse.message || 'Wallet deduction failed');
       }
