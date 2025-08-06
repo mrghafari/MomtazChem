@@ -13733,14 +13733,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
               finalPaymentStatus = "partial"; // Partially paid by wallet
               console.log('💰 [PAYMENT STATUS] Set to PARTIAL - wallet_partial conversion applied');
             }
-          } catch (walletError) {
-            console.log(`❌ Wallet payment failed:`, walletError);
-            return res.status(400).json({
-              success: false,
-              message: "موجودی کیف پول کافی نیست یا خطا در پردازش"
-            });
+
+          } catch (error) {
+            console.error('❌ [WALLET ERROR] Failed to process wallet payment:', error);
+            // Don't fail the order if wallet payment fails - set to pending
+            finalPaymentStatus = "pending";
+            finalPaymentMethod = "bank_transfer";
+            actualWalletUsed = 0;
           }
-        }
+      }
+      
+      console.log('💰 [WALLET DEBUG] Final wallet processing result:', {
+        actualWalletUsed,
+        finalPaymentStatus,
+        finalPaymentMethod
+      });
 
       // Create order in customer orders table
       const orderData = {
@@ -13842,8 +13849,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Check if hybrid payment is required (wallet partially used + remaining amount)
-      // Fix: Use remaining amount directly, don't subtract wallet usage twice
-      const remainingAmountToPay = Math.round(parseFloat(remainingAmount || totalAmount));
+      // CRITICAL FIX: Use the frontend's calculated remaining amount if provided, otherwise calculate
+      let remainingAmountToPay;
+      if (remainingAmount !== undefined && remainingAmount !== null) {
+        // Frontend provided exact remaining amount - use it directly
+        remainingAmountToPay = parseFloat(remainingAmount);
+        console.log('💡 [REMAINING AMOUNT] Using frontend calculated value:', {
+          frontendRemaining: remainingAmount,
+          parsedValue: remainingAmountToPay
+        });
+      } else {
+        // Fallback: calculate remaining amount
+        remainingAmountToPay = Math.max(0, totalAmount - actualWalletUsed);
+        console.log('🔢 [REMAINING AMOUNT] Backend calculated value:', {
+          totalAmount,
+          actualWalletUsed,
+          calculatedRemaining: remainingAmountToPay
+        });
+      }
       
       // Critical fix: For full wallet payments, completely bypass bank payment logic
       const isFullWalletPayment = finalPaymentMethod === 'wallet_full';
@@ -13851,7 +13874,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Enhanced logic: For hybrid payments, check if wallet usage equals or exceeds total amount
       const walletCoversFullAmount = actualWalletUsed >= totalAmount;
-      const requiresBankPayment = !isFullWalletPayment && !walletCoversFullAmount && remainingAmountToPay > 0;
+      // CRITICAL FIX: Check remaining amount is greater than a tiny threshold (0.01 to handle rounding)
+      const hasSignificantRemainingAmount = remainingAmountToPay > 0.01;
+      const requiresBankPayment = !isFullWalletPayment && !walletCoversFullAmount && hasSignificantRemainingAmount;
       
       console.log('🔍 [PAYMENT LOGIC DEBUG] Payment decision logic:', {
         actualWalletUsed,
@@ -13866,9 +13891,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isFullWalletPayment,
         isPartialWalletPayment,
         walletCoversFullAmount,
+        hasSignificantRemainingAmount,
         walletPaymentComplete: isFullWalletPayment && actualWalletUsed > 0,
         shouldRedirectToBank: requiresBankPayment,
-        isZeroRemaining: remainingAmountToPay <= 0.01
+        isZeroRemaining: remainingAmountToPay <= 0.01,
+        frontendSentZeroRemaining: remainingAmount === 0 || remainingAmount === '0'
       });
       
       if (isFullWalletPayment || walletCoversFullAmount) {
