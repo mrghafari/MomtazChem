@@ -148,18 +148,18 @@ export class SyncService {
     let mismatchCount = 0;
 
     for (const record of mismatches) {
+      // IMPORTANT: Check if order has been manually approved before determining expected status
+      const isManuallyApproved = record.financialReviewedAt !== null;
+      const isWarehouseProcessed = record.warehouseProcessedAt !== null;
+      
       const expectedManagementStatus = this.determineManagementStatus(
         record.customerStatus, 
-        record.customerPaymentStatus
+        record.customerPaymentStatus,
+        isManuallyApproved
       );
 
       // Skip sync for warehouse intermediate status (warehouse_verified) and final statuses
       const protectedStatuses = ['warehouse_verified', 'warehouse_approved', 'logistics_assigned', 'logistics_processing', 'logistics_dispatched', 'delivered', 'cancelled'];
-      
-      // IMPORTANT: Skip sync for manually approved orders (especially partial payments)
-      // If an order has been financially reviewed, preserve its approved status regardless of payment_status
-      const isManuallyApproved = record.financialReviewedAt !== null;
-      const isWarehouseProcessed = record.warehouseProcessedAt !== null;
       
       if (expectedManagementStatus !== record.managementStatus && 
           !protectedStatuses.includes(record.managementStatus) &&
@@ -231,8 +231,9 @@ export class SyncService {
   /**
    * تعیین وضعیت مناسب برای order_management بر اساس customer_orders
    * FIXED VERSION - منطق صحیح نقشه‌برداری وضعیت‌ها با پشتیبانی از دو مرحله انبار
+   * ENHANCED - پشتیبانی از پرداخت‌های جزئی تایید شده دستی
    */
-  private determineManagementStatus(customerStatus: string, paymentStatus: string): string {
+  private determineManagementStatus(customerStatus: string, paymentStatus: string, isManuallyApproved?: boolean): string {
     // console.log(`🔄 [STATUS MAPPING] Customer: ${customerStatus}, Payment: ${paymentStatus}`); // Reduced logging
     
     // اولویت اول: وضعیت‌های نهایی
@@ -269,10 +270,19 @@ export class SyncService {
         return 'pending';
       } else if (paymentStatus === 'rejected') {
         return 'financial_rejected';
+      } else if (paymentStatus === 'partial' && isManuallyApproved) {
+        // پرداخت جزئی که به صورت دستی تایید شده - باید به انبار برود
+        return 'warehouse_pending';
       } else {
-        // پرداخت انجام نشده
+        // پرداخت انجام نشده یا جزئی بدون تایید
         return 'pending';
       }
+    }
+    
+    // ویژه: سفارشات warehouse_ready که از pending آمده‌اند
+    if (customerStatus === 'warehouse_ready' && paymentStatus === 'paid' && isManuallyApproved) {
+      // این سفارشات که قبلاً تایید مالی شده‌اند نباید برگردانده شوند
+      return 'warehouse_pending';
     }
     
     // console.log(`⚠️ [STATUS MAPPING] Unmapped status combination: ${customerStatus}/${paymentStatus} - defaulting to pending`); // Reduced logging
@@ -303,13 +313,17 @@ export class SyncService {
       }
 
       if (managementOrder) {
+        // بررسی آیا سفارش به صورت دستی تایید شده
+        const isManuallyApproved = managementOrder.financialReviewedAt !== null;
+        
         // همگام‌سازی وضعیت
         const expectedStatus = this.determineManagementStatus(
           customerOrder.status,
-          customerOrder.paymentStatus
+          customerOrder.paymentStatus,
+          isManuallyApproved
         );
 
-        if (expectedStatus !== managementOrder.currentStatus) {
+        if (expectedStatus !== managementOrder.currentStatus && !isManuallyApproved) {
           await this.orderManagementStorage.updateOrderStatus(
             managementOrder.id,
             expectedStatus as any,
@@ -317,6 +331,8 @@ export class SyncService {
             'financial' as any,
             'Manual sync correction'
           );
+        } else if (isManuallyApproved) {
+          console.log(`🔒 [MANUAL-SYNC] Skipping manually approved order ${customerOrder.orderNumber}`);
         }
       }
 

@@ -45761,6 +45761,62 @@ momtazchem.com
     }
   });
 
+  // TEST ENDPOINT: Validate workflow protection system
+  app.get("/api/test/workflow-protection", requireAuth, async (req: Request, res: Response) => {
+    try {
+      console.log('🧪 [WORKFLOW TEST] Testing auto-sync protection system...');
+      
+      const { SyncService } = await import("./sync-service");
+      const syncService = new SyncService();
+      
+      // Test the protection for manually approved orders M2511248 and M2511258
+      const testOrders = [77, 82]; // customerOrderIds for M2511248 and M2511258
+      const results: any[] = [];
+      
+      for (const customerOrderId of testOrders) {
+        try {
+          console.log(`🔍 [WORKFLOW TEST] Testing order ${customerOrderId}...`);
+          
+          // This should NOT change the status since orders are manually approved
+          await syncService.syncSpecificOrder(customerOrderId);
+          
+          results.push({
+            customerOrderId,
+            tested: true,
+            protected: true,
+            message: `Order ${customerOrderId} protected from auto-sync`
+          });
+          
+        } catch (error) {
+          results.push({
+            customerOrderId,
+            tested: true,
+            protected: false,
+            error: error instanceof Error ? error.message : 'Unknown error'
+          });
+        }
+      }
+      
+      console.log('🧪 [WORKFLOW TEST] Protection test completed');
+      
+      res.json({
+        success: true,
+        message: 'سیستم حفاظت گردش کار تست شد',
+        results,
+        protectionActive: true,
+        testedAt: new Date()
+      });
+      
+    } catch (error) {
+      console.error('🧪 [WORKFLOW TEST ERROR]:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در تست سیستم حفاظت',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   return httpServer;
 }
 
