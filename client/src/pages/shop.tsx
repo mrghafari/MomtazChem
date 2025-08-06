@@ -449,6 +449,10 @@ const Shop = () => {
       if (response.ok) {
         setCustomer(null);
         setWalletBalance(0);
+        
+        // پاک کردن سبد خرید هنگام logout
+        clearCartPersistent();
+        
         toast({
           title: "خروج موفق",
           description: "با موفقیت از حساب کاربری خارج شدید",
@@ -1900,7 +1904,7 @@ const Shop = () => {
             products={currentProducts}
             existingCustomer={customer}
             onOrderComplete={async () => {
-              setCart({});
+              clearCartPersistent();
               setShowCheckout(false);
               // Force refresh of products data from server
               await queryClient.invalidateQueries({ queryKey: ['/api/products'] });
@@ -1916,19 +1920,13 @@ const Shop = () => {
             onClose={() => setShowCheckout(false)}
             onUpdateQuantity={(productId, newQuantity) => {
               if (newQuantity <= 0) {
-                const { [productId]: removed, ...newCart } = cart;
-                setCart(newCart);
-                localStorage.setItem('momtazchem_cart', JSON.stringify(newCart));
+                removeFromCartPersistent(productId);
               } else {
-                const newCart = { ...cart, [productId]: newQuantity };
-                setCart(newCart);
-                localStorage.setItem('momtazchem_cart', JSON.stringify(newCart));
+                updateCartQuantity(productId, newQuantity);
               }
             }}
             onRemoveItem={(productId) => {
-              const { [productId]: removed, ...newCart } = cart;
-              setCart(newCart);
-              localStorage.setItem('momtazchem_cart', JSON.stringify(newCart));
+              removeFromCartPersistent(productId);
             }}
           />
         </div>

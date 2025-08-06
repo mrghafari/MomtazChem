@@ -16,6 +16,14 @@ export function usePersistentCart() {
   // بارگذاری سبد خرید از localStorage برای کاربران غیر وارد شده
   useEffect(() => {
     if (!isAuthenticated) {
+      // اگر کاربر از authenticated به unauthenticated تغییر کرد، سبد را خالی کن
+      if (Object.keys(localCart).length > 0) {
+        console.log('🔐 کاربر logout شد، سبد خالی می‌شود');
+        setLocalCart({});
+        localStorage.removeItem('cart');
+        return;
+      }
+      
       const savedCart = localStorage.getItem('cart');
       if (savedCart) {
         try {
@@ -45,7 +53,9 @@ export function usePersistentCart() {
           }
           
           // سپس سبد بروزرسانی شده را بارگذاری کنیم
-          const response = await apiRequest('/api/customers/persistent-cart');
+          const response = await apiRequest('/api/customers/persistent-cart', {
+            method: 'GET'
+          });
           if (response.success) {
             setLocalCart(response.cart);
             // پاک کردن localStorage پس از همگام‌سازی موفق
