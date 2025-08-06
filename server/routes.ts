@@ -4136,25 +4136,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { persistentCarts } = await import('../shared/persistent-cart-schema');
       const { eq } = await import('drizzle-orm');
       
-      // Get customer-specific cart items
-      const cartItems = await db
-        .select({
-          productId: persistentCarts.productId,
-          quantity: persistentCarts.quantity,
-          unitPrice: persistentCarts.unitPrice,
-          addedAt: persistentCarts.addedAt
-        })
-        .from(persistentCarts)
-        .where(eq(persistentCarts.customerId, req.session.customerId));
+      // Get customer-specific cart items using sql template
+      const { sql } = await import('drizzle-orm');
+      const cartItems = await db.execute(sql`
+        SELECT id, customer_id, product_id, quantity, unit_price, added_at, updated_at
+        FROM persistent_carts 
+        WHERE customer_id = ${req.session.customerId}
+      `);
 
       // Convert to cart format {productId: quantity}
       const cart: {[key: number]: number} = {};
-      cartItems.forEach(item => {
-        cart[item.productId] = item.quantity;
-      });
+      if (cartItems && cartItems.rows) {
+        cartItems.rows.forEach((item: any) => {
+          cart[item.product_id] = item.quantity;
+        });
+      }
 
       console.log('🛒 [CART API] Customer', req.session.customerId, 'cart loaded:', cart);
-      res.json({ success: true, cart, items: cartItems });
+      res.json({ success: true, cart, items: cartItems.rows || [] });
     } catch (error) {
       console.error('Error loading customer cart:', error);
       res.status(500).json({ success: false, message: 'Failed to load cart' });
@@ -4174,22 +4173,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { persistentCarts } = await import('../shared/persistent-cart-schema');
       const { eq, and } = await import('drizzle-orm');
       
-      // First, clear existing cart for this customer
-      await db
-        .delete(persistentCarts)
-        .where(eq(persistentCarts.customerId, req.session.customerId));
+      // First, clear existing cart for this customer using raw SQL
+      const { sql } = await import('drizzle-orm');
+      await db.execute(sql`DELETE FROM persistent_carts WHERE customer_id = ${req.session.customerId}`);
 
-      // Insert new cart items
+      // Insert new cart items using raw SQL
       if (cart && Object.keys(cart).length > 0) {
-        const cartEntries = Object.entries(cart).map(([productId, quantity]) => ({
-          customerId: req.session.customerId,
-          productId: parseInt(productId),
-          quantity: quantity as number,
-          addedAt: new Date(),
-          updatedAt: new Date()
-        }));
-
-        await db.insert(persistentCarts).values(cartEntries);
+        const cartEntries = Object.entries(cart);
+        for (const [productId, quantity] of cartEntries) {
+          await db.execute(sql`
+            INSERT INTO persistent_carts (customer_id, product_id, quantity, added_at, updated_at)
+            VALUES (${req.session.customerId}, ${parseInt(productId)}, ${quantity as number}, NOW(), NOW())
+            ON CONFLICT (customer_id, product_id) 
+            DO UPDATE SET quantity = ${quantity as number}, updated_at = NOW()
+          `);
+        }
         console.log('🛒 [CART API] Customer', req.session.customerId, 'cart saved:', cartEntries.length, 'items');
       } else {
         console.log('🛒 [CART API] Customer', req.session.customerId, 'cart cleared (empty)');
@@ -4209,12 +4207,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
-      const { persistentCarts } = await import('../shared/persistent-cart-schema');
-      const { eq } = await import('drizzle-orm');
-      
-      await db
-        .delete(persistentCarts)
-        .where(eq(persistentCarts.customerId, req.session.customerId));
+      const { sql } = await import('drizzle-orm');
+      await db.execute(sql`DELETE FROM persistent_carts WHERE customer_id = ${req.session.customerId}`);
 
       console.log('🛒 [CART API] Customer', req.session.customerId, 'cart cleared');
       res.json({ success: true, message: 'Cart cleared successfully' });
