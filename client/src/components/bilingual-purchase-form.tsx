@@ -1007,9 +1007,82 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     }
   };
 
-  // ✅ NO SMART DELIVERY: Removed calculateSmartDeliveryCost function
+  // Smart vehicle selection state
+  const [smartVehicleData, setSmartVehicleData] = useState<any>(null);
+  const [isCalculatingVehicle, setIsCalculatingVehicle] = useState(false);
 
-  // ✅ NO DELIVERY CALCULATION: Removed all delivery cost calculation useEffect
+  // Calculate smart vehicle selection when cart changes or address is set
+  useEffect(() => {
+    const calculateSmartVehicle = async () => {
+      if (!cart || Object.keys(cart).length === 0) {
+        setSmartVehicleData(null);
+        return;
+      }
+
+      // Only calculate if we have destination city
+      const destinationCity = form.watch('city') || (showSecondAddress && secondCity);
+      if (!destinationCity) {
+        setSmartVehicleData(null);
+        return;
+      }
+
+      setIsCalculatingVehicle(true);
+      
+      try {
+        console.log('🚛 [SMART VEHICLE] Calculating optimal vehicle selection...', {
+          cart,
+          destinationCity,
+          totalWeight
+        });
+
+        const response = await fetch('/api/calculate-delivery-cost', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            cart,
+            destinationCity: destinationCity,
+            destinationProvince: form.watch('city') || (showSecondAddress && secondProvince),
+            products: products.filter(p => cart[p.id] > 0)
+          })
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          console.log('🚛 [SMART VEHICLE] API response:', result);
+          
+          if (result.success && result.optimalVehicle) {
+            setSmartVehicleData({
+              optimal: result.optimalVehicle,
+              alternatives: result.alternatives || [],
+              totalWeight: result.totalWeight || totalWeight,
+              distance: result.distance || 0,
+              routeType: result.routeType || 'urban',
+              containsFlammable: result.containsFlammable || false
+            });
+            console.log('✅ [SMART VEHICLE] Vehicle selection completed:', result.optimalVehicle);
+          } else {
+            console.log('❌ [SMART VEHICLE] No optimal vehicle found');
+            setSmartVehicleData(null);
+          }
+        } else {
+          console.log('❌ [SMART VEHICLE] API request failed');
+          setSmartVehicleData(null);
+        }
+      } catch (error) {
+        console.error('❌ [SMART VEHICLE] Calculation error:', error);
+        setSmartVehicleData(null);
+      } finally {
+        setIsCalculatingVehicle(false);
+      }
+    };
+
+    // Debounce the calculation
+    const timeoutId = setTimeout(calculateSmartVehicle, 1000);
+    return () => clearTimeout(timeoutId);
+  }, [cart, totalWeight, form.watch('city'), secondCity, showSecondAddress, products]);
 
 
 
@@ -1751,6 +1824,64 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                 <div className="flex justify-between text-sm text-red-600 font-semibold">
                   <span>🧮 مجموع مالیات:</span>
                   <span>{totalTaxAmount.toLocaleString()} IQD</span>
+                </div>
+              )}
+
+              {/* Smart Vehicle Selection Display */}
+              {(smartVehicleData || isCalculatingVehicle) && (
+                <div className="border-t pt-3 mt-3">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-sm font-medium text-purple-600">🚛 انتخاب هوشمند وسیله حمل:</span>
+                  </div>
+                  
+                  {isCalculatingVehicle ? (
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <div className="animate-spin w-4 h-4 border-2 border-purple-600 border-t-transparent rounded-full"></div>
+                      <span>در حال محاسبه بهترین وسیله حمل...</span>
+                    </div>
+                  ) : smartVehicleData?.optimal ? (
+                    <div className="space-y-2">
+                      <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3">
+                        <div className="flex justify-between items-start mb-2">
+                          <span className="text-sm font-medium text-purple-700">
+                            {smartVehicleData.optimal.vehicleName}
+                          </span>
+                          <span className="text-sm font-bold text-purple-600">
+                            {smartVehicleData.optimal.totalCost?.toLocaleString()} IQD
+                          </span>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-2 text-xs text-purple-600">
+                          <div>نوع: {smartVehicleData.optimal.vehicleType}</div>
+                          <div>مسیر: {smartVehicleData.routeType}</div>
+                          <div>حداکثر وزن: {smartVehicleData.optimal.maxWeight} kg</div>
+                          <div>زمان تقریبی: {smartVehicleData.optimal.estimatedTime} ساعت</div>
+                        </div>
+                        
+                        {smartVehicleData.containsFlammable && (
+                          <div className="mt-2 text-xs text-red-600 bg-red-50 p-2 rounded">
+                            🔥 مواد آتش‌زا: این وسیله مجاز برای حمل مواد آتش‌زا است
+                          </div>
+                        )}
+                        
+                        {smartVehicleData.optimal.totalVehicles > 1 && (
+                          <div className="mt-2 text-xs text-orange-600 bg-orange-50 p-2 rounded">
+                            📦 راه‌حل چند وسیله‌ای: {smartVehicleData.optimal.totalVehicles} وسیله نقلیه
+                          </div>
+                        )}
+                      </div>
+                      
+                      {smartVehicleData.alternatives?.length > 0 && (
+                        <div className="text-xs text-gray-500">
+                          + {smartVehicleData.alternatives.length} گزینه جایگزین در دسترس
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-sm text-gray-500">
+                      آدرس تحویل را وارد کنید تا بهترین وسیله حمل محاسبه شود
+                    </div>
+                  )}
                 </div>
               )}
 
