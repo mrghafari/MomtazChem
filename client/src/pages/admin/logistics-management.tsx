@@ -3869,12 +3869,10 @@ const LogisticsManagement = () => {
               <form onSubmit={handleUpdateReadyVehicle} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="edit-vehicleType">نوع الگوی خودرو *</Label>
+                    <Label htmlFor="edit-vehicleType">الگوی خودرو *</Label>
                     <Select 
                       name="vehicleType" 
                       value={(() => {
-                        if (showCustomEditInput) return 'سایر';
-                        
                         // Try to find the template that matches current vehicle
                         const vehicleTemplates = (vehicleTemplatesData as any)?.data || [];
                         const matchingTemplate = vehicleTemplates.find((template: any) => 
@@ -3882,21 +3880,15 @@ const LogisticsManagement = () => {
                           template.name === selectedReadyVehicle.vehicleTemplateName
                         );
                         
-                        return matchingTemplate ? matchingTemplate.name : 'سایر';
+                        return matchingTemplate ? matchingTemplate.name : selectedReadyVehicle.vehicleType;
                       })()}
                       onValueChange={(value) => {
-                        if (value === 'سایر') {
-                          setShowCustomEditInput(true);
-                          setCustomEditVehicleType(selectedReadyVehicle.vehicleType);
-                        } else {
-                          setShowCustomEditInput(false);
-                          setCustomEditVehicleType('');
-                        }
+                        // No special handling needed - directly use selected template value
                       }}
                       required
                     >
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder="انتخاب نوع الگوی خودرو" />
+                        <SelectValue placeholder="انتخاب الگوی خودرو" />
                       </SelectTrigger>
                       <SelectContent>
                         {(vehicleTemplatesData as any)?.data?.map((template: any) => (
@@ -3904,22 +3896,8 @@ const LogisticsManagement = () => {
                             {template.name}
                           </SelectItem>
                         ))}
-                        <SelectItem value="سایر">سایر (نوع دلخواه)</SelectItem>
                       </SelectContent>
                     </Select>
-                    {/* Custom vehicle type input for edit */}
-                    {showCustomEditInput && (
-                      <div className="mt-2">
-                        <Input
-                          name="customEditVehicleType"
-                          value={customEditVehicleType}
-                          onChange={(e) => setCustomEditVehicleType(e.target.value)}
-                          placeholder="نوع خودرو را ویرایش کنید..."
-                          required={showCustomEditInput}
-                          className="w-full"
-                        />
-                      </div>
-                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="edit-licensePlate">شماره خودرو *</Label>
