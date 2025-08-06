@@ -1273,7 +1273,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         onOrderComplete();
       }
       // Handle bank transfer - redirect to payment gateway  
-      else if (response.paymentMethod === 'bank_transfer' || finalPaymentMethod === 'bank_transfer') {
+      else if (response.paymentMethod === 'bank_transfer' || paymentMethod === 'bank_transfer') {
         toast({
           title: "انتقال به درگاه بانک",
           description: "در حال هدایت شما به درگاه پرداخت بانکی..."
@@ -1442,10 +1442,10 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50">
+    <div className="fixed inset-0 bg-black/30 z-40 pointer-events-none">
       <Card 
         ref={formRef}
-        className={`w-full max-w-2xl max-h-[90vh] overflow-y-auto ${isRTL ? 'rtl' : 'ltr'} absolute cursor-move ${isDragging ? 'select-none' : ''}`}
+        className={`w-full max-w-2xl max-h-[90vh] overflow-y-auto ${isRTL ? 'rtl' : 'ltr'} absolute cursor-move ${isDragging ? 'select-none' : ''} pointer-events-auto z-50`}
         style={{
           left: position.x === 0 && position.y === 0 ? '50%' : `${position.x}px`,
           top: position.x === 0 && position.y === 0 ? '50%' : `${position.y}px`,
@@ -2136,7 +2136,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                             <Select 
                               onValueChange={(value) => {
                                 // Find the selected province object to get Arabic name
-                                const selectedProvince = provinces?.data?.find((p: any) => 
+                                const selectedProvince = (provinces as any)?.data?.find((p: any) => 
                                   p.nameEnglish === value || p.name === value
                                 );
                                 
@@ -2157,7 +2157,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                               }} 
                               value={
                                 // Find the province with matching Arabic name to show English value
-                                provinces?.data?.find((province: any) => 
+                                (provinces as any)?.data?.find((province: any) => 
                                   (province.nameArabic || province.name) === secondProvince
                                 )?.nameEnglish || secondProvince
                               }
@@ -2171,7 +2171,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                                 } />
                               </SelectTrigger>
                               <SelectContent>
-                                {provinces?.data && Array.isArray(provinces.data) && provinces.data.map((province: any) => (
+                                {(provinces as any)?.data && Array.isArray((provinces as any).data) && (provinces as any).data.map((province: any) => (
                                   <SelectItem key={province.id} value={province.nameEnglish || province.name}>
                                     {province.nameEnglish} / {province.nameArabic || province.name}
                                   </SelectItem>
