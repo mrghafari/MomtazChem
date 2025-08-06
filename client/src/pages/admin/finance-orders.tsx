@@ -867,7 +867,7 @@ function FinanceOrders() {
         .status-rejected { background-color: #fecaca; color: #dc2626; }
         @media print {
           @page { 
-            margin: 0.5in; 
+            margin: 1cm; 
             size: A4;
           }
           body { 
@@ -875,22 +875,25 @@ function FinanceOrders() {
             padding: 0;
             max-width: 100%;
             box-sizing: border-box;
+            direction: rtl;
+            font-family: 'Noto Sans Arabic', sans-serif;
           }
           .container {
-            padding: 10px;
+            padding: 0;
             margin: 0 auto;
-            max-width: 100%;
+            max-width: calc(100% - 2cm);
+            width: calc(100% - 2cm);
             box-sizing: border-box;
           }
           .header {
             text-align: center;
             margin-bottom: 20px;
-            padding: 0 10px;
+            padding: 10px;
             box-sizing: border-box;
           }
           .section {
             margin-bottom: 15px;
-            padding: 0 5px;
+            padding: 10px;
             box-sizing: border-box;
             page-break-inside: avoid;
           }
