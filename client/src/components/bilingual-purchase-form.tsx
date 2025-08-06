@@ -16,6 +16,7 @@ import { MapPin, Globe, X, ShoppingCart, Plus, Minus, Trash2, Wallet, CreditCard
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { formatIQDAmount, displayCurrencyAmountWithSymbol } from "@/lib/currency-utils";
 
 // Language types
 type Language = 'en' | 'ar';
@@ -955,13 +956,17 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
 
 
-  // Format currency in IQD by default
+  // Format currency in IQD by default - whole numbers only for IQD
   const formatCurrency = (amount: number, currency = 'IQD') => {
+    const formattedAmount = formatIQDAmount(amount);
+    if (currency === 'IQD') {
+      return `${formattedAmount} د.ع`;
+    }
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: currency,
-      minimumFractionDigits: 2
-    }).format(amount);
+      minimumFractionDigits: currency === 'IQD' ? 0 : 2
+    }).format(formattedAmount);
   };
 
   // GPS location handler
@@ -1854,7 +1859,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                     <RadioGroupItem value="wallet_combined" id="wallet_combined" />
                     <Label htmlFor="wallet_combined" className="flex items-center gap-2 cursor-pointer">
                       <Wallet className="w-4 h-4 text-green-600" />
-                      <span className="font-semibold">استفاده از کیف پول (حداکثر {Math.min(walletBalance, totalAmount).toLocaleString()} IQD)</span>
+                      <span className="font-semibold">استفاده از کیف پول (حداکثر {formatIQDAmount(Math.min(walletBalance, totalAmount))} د.ع)</span>
                     </Label>
                   </div>
                 )}
@@ -1892,7 +1897,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
               {paymentMethod === 'wallet_partial' && (
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="walletAmount">مبلغ از والت (حداکثر {Math.min(walletBalance, totalAmount).toLocaleString()} IQD)</Label>
+                    <Label htmlFor="walletAmount">مبلغ از والت (حداکثر {formatIQDAmount(Math.min(walletBalance, totalAmount))} د.ع)</Label>
                     <Input
                       id="walletAmount"
                       type="number"
@@ -1916,7 +1921,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                           {/* Final Amount Row */}
                           <tr className="border-b">
                             <td className="px-4 py-3 text-right font-medium bg-gray-50">Final Amount</td>
-                            <td className="px-4 py-3 text-center font-bold">{totalAmount.toLocaleString()}</td>
+                            <td className="px-4 py-3 text-center font-bold">{formatIQDAmount(totalAmount)}</td>
                             <td className="px-4 py-3 bg-gray-50"></td>
                             <td className="px-4 py-3 bg-gray-50"></td>
                           </tr>
@@ -1924,15 +1929,15 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                           {/* Wallet Payment Row */}
                           <tr className="border-b">
                             <td className="px-4 py-3 text-right">مبلغ پرداخت از کیف پول</td>
-                            <td className="px-4 py-3 text-center font-medium">{walletAmount.toLocaleString()}</td>
+                            <td className="px-4 py-3 text-center font-medium">{formatIQDAmount(walletAmount)}</td>
                             <td className="px-4 py-3 text-right font-medium bg-blue-50">محدودیت کیف پول</td>
-                            <td className="px-4 py-3 text-center font-medium bg-blue-50 text-blue-700">{walletBalance.toLocaleString()}</td>
+                            <td className="px-4 py-3 text-center font-medium bg-blue-50 text-blue-700">{formatIQDAmount(walletBalance)}</td>
                           </tr>
                           
                           {/* Bank Payment Row */}
                           <tr>
                             <td className="px-4 py-3 text-right">پرداخت کارت بانکی</td>
-                            <td className="px-4 py-3 text-center font-medium text-orange-600">{(totalAmount - walletAmount).toLocaleString()}</td>
+                            <td className="px-4 py-3 text-center font-medium text-orange-600">{formatIQDAmount(totalAmount - walletAmount)}</td>
                             <td className="px-4 py-3 bg-gray-50"></td>
                             <td className="px-4 py-3 bg-gray-50"></td>
                           </tr>

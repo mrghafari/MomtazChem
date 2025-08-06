@@ -13674,21 +13674,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let actualWalletUsed = 0;
       let finalPaymentMethod = paymentMethod || "bank_transfer";
       
+      // Import currency utilities for IQD formatting
+      const { formatIQDAmount, currencyAmountsEqual } = await import('./currency-utils');
+
       // Process wallet payment if walletAmountUsed is provided (for all payment methods including hybrid)
-      const walletUsage = parseFloat(walletAmountUsed || 0);
-      const remaining = parseFloat(remainingAmount || totalAmount);
+      // Convert all amounts to whole numbers for IQD
+      const walletUsage = formatIQDAmount(walletAmountUsed || 0);
+      const remaining = formatIQDAmount(remainingAmount || totalAmount);
+      const formattedTotalAmount = formatIQDAmount(totalAmount);
       
       // Smart conversion for wallet_combined payment method
       if (paymentMethod === 'wallet_combined') {
-        if (walletUsage >= totalAmount && remaining <= 0.01) {
+        if (walletUsage >= formattedTotalAmount && remaining <= 1) {
           finalPaymentMethod = 'wallet_full';
           console.log('🔄 [BACKEND CONVERSION] wallet_combined → wallet_full (sufficient balance)', {
-            walletUsage, totalAmount, remaining
+            walletUsage, formattedTotalAmount, remaining
           });
         } else if (walletUsage > 0) {
           finalPaymentMethod = 'wallet_partial';
           console.log('🔄 [BACKEND CONVERSION] wallet_combined → wallet_partial (insufficient balance)', {
-            walletUsage, totalAmount, remaining
+            walletUsage, formattedTotalAmount, remaining
           });
         } else {
           finalPaymentMethod = 'bank_transfer';
@@ -13701,7 +13706,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         finalPaymentMethod,
         walletUsage,
         remaining,
-        totalAmount,
+        totalAmount: formattedTotalAmount,
         finalCrmCustomerId,
         customerId,
         conversionApplied: paymentMethod === 'wallet_combined'
@@ -13725,8 +13730,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.log(`✅ Wallet payment processed: ${walletUsage} IQD deducted, transaction ID: ${transaction.id}`);
             actualWalletUsed = walletUsage;
             
-            // Enhanced payment status logic based on conversion
-            if (finalPaymentMethod === 'wallet_full' || remaining <= 0.01) {
+            // Enhanced payment status logic based on conversion (using whole numbers for IQD)
+            if (finalPaymentMethod === 'wallet_full' || remaining <= 1) {
               finalPaymentStatus = "paid"; // Fully paid by wallet
               console.log('💰 [PAYMENT STATUS] Set to PAID - wallet_full conversion applied');
             } else {
@@ -13852,17 +13857,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // CRITICAL FIX: Use the frontend's calculated remaining amount if provided, otherwise calculate
       let remainingAmountToPay;
       if (remainingAmount !== undefined && remainingAmount !== null) {
-        // Frontend provided exact remaining amount - use it directly
-        remainingAmountToPay = parseFloat(remainingAmount);
+        // Frontend provided exact remaining amount - use it directly (format as whole number for IQD)
+        remainingAmountToPay = formatIQDAmount(remainingAmount);
         console.log('💡 [REMAINING AMOUNT] Using frontend calculated value:', {
           frontendRemaining: remainingAmount,
           parsedValue: remainingAmountToPay
         });
       } else {
-        // Fallback: calculate remaining amount
-        remainingAmountToPay = Math.max(0, totalAmount - actualWalletUsed);
+        // Fallback: calculate remaining amount (format as whole number for IQD)
+        remainingAmountToPay = formatIQDAmount(Math.max(0, formattedTotalAmount - actualWalletUsed));
         console.log('🔢 [REMAINING AMOUNT] Backend calculated value:', {
-          totalAmount,
+          totalAmount: formattedTotalAmount,
           actualWalletUsed,
           calculatedRemaining: remainingAmountToPay
         });
@@ -13872,17 +13877,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const isFullWalletPayment = finalPaymentMethod === 'wallet_full';
       const isPartialWalletPayment = finalPaymentMethod === 'wallet_partial';
       
-      // Enhanced logic: For hybrid payments, check if wallet usage equals or exceeds total amount
-      const walletCoversFullAmount = actualWalletUsed >= totalAmount;
-      // CRITICAL FIX: Check remaining amount is greater than a tiny threshold (0.01 to handle rounding)
-      const hasSignificantRemainingAmount = remainingAmountToPay > 0.01;
+      // Enhanced logic: For hybrid payments, check if wallet usage equals or exceeds total amount (using formatted amounts)
+      const walletCoversFullAmount = actualWalletUsed >= formattedTotalAmount;
+      // CRITICAL FIX: Check remaining amount is greater than 1 (whole number for IQD)
+      const hasSignificantRemainingAmount = remainingAmountToPay > 1;
       const requiresBankPayment = !isFullWalletPayment && !walletCoversFullAmount && hasSignificantRemainingAmount;
       
       console.log('🔍 [PAYMENT LOGIC DEBUG] Payment decision logic:', {
         actualWalletUsed,
         remainingAmountToPay,
         originalRemainingAmount: remainingAmount,
-        totalAmount,
+        totalAmount: formattedTotalAmount,
         requiresBankPayment,
         paymentMethod: finalPaymentMethod,
         walletUsedString: walletAmountUsed,
@@ -13894,7 +13899,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         hasSignificantRemainingAmount,
         walletPaymentComplete: isFullWalletPayment && actualWalletUsed > 0,
         shouldRedirectToBank: requiresBankPayment,
-        isZeroRemaining: remainingAmountToPay <= 0.01,
+        isZeroRemaining: remainingAmountToPay <= 1,
         frontendSentZeroRemaining: remainingAmount === 0 || remainingAmount === '0'
       });
       
@@ -13903,7 +13908,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           isFullWalletPayment,
           walletCoversFullAmount,
           actualWalletUsed,
-          totalAmount
+          totalAmount: formattedTotalAmount
         });
         finalPaymentStatus = "paid";
       }
