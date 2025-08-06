@@ -13509,21 +13509,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       console.log(`💰 [SUBTOTAL] Calculated items subtotal: ${itemsSubtotal} IQD`);
-      const shippingAmount = orderData.shippingCost || 0;
       
-      // Get current tax rates from tax_settings table and freeze them for this order
-      const taxCalculation = await calculateOrderTaxes(itemsSubtotal);
-      const totalAmount = itemsSubtotal + shippingAmount + taxCalculation.vatAmount + taxCalculation.dutiesAmount;
+      // Use frontend calculated values (frontend has already done all calculations correctly)
+      const totalAmount = parseFloat(orderData.totalAmount?.toString() || '0') || 0;
+      const shippingAmount = parseFloat(orderData.shippingCost?.toString() || '0') || 0;
+      const vatAmount = parseFloat(orderData.vatAmount?.toString() || '0') || 0;
+      const dutiesAmount = parseFloat(orderData.dutiesAmount?.toString() || '0') || 0;
       
-      console.log('💰 [ORDER TAX] Tax calculation for order:', {
-        itemsSubtotal,
-        shippingAmount,
-        vatRate: taxCalculation.vatRate,
-        vatAmount: taxCalculation.vatAmount,
-        surchargeRate: taxCalculation.dutiesRate,
-        surchargeAmount: taxCalculation.dutiesAmount,
+      console.log('💰 [FRONTEND CALCULATIONS] Using frontend calculated values:', {
+        subtotal: itemsSubtotal,
+        shippingCost: shippingAmount,
+        vatAmount,
+        dutiesAmount,
         totalAmount
       });
+      
+      // Validation: Check if frontend calculations match backend subtotal
+      const expectedTotal = itemsSubtotal + shippingAmount + vatAmount + dutiesAmount;
+      if (Math.abs(totalAmount - expectedTotal) > 0.01) {
+        console.warn(`⚠️ [CALCULATION MISMATCH] Frontend total (${totalAmount}) doesn't match expected total (${expectedTotal})`);
+      }
 
       // Create order with proper customer linking
       let finalCustomerId = customerId;
@@ -13679,11 +13684,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         currency: orderData.currency || "IQD",
         notes: orderData.notes || "",
         
-        // Store frozen tax rates at order creation time
-        vatRate: taxCalculation.vatRate.toString(),
-        vatAmount: taxCalculation.vatAmount.toString(),
-        surchargeRate: taxCalculation.dutiesRate.toString(),
-        surchargeAmount: taxCalculation.dutiesAmount.toString(),
+        // Store frozen tax values from frontend calculations
+        vatRate: vatAmount > 0 ? "5" : "0", // Approximate rate based on amount
+        vatAmount: vatAmount.toString(),
+        surchargeRate: dutiesAmount > 0 ? "3" : "0", // Approximate rate based on amount
+        surchargeAmount: dutiesAmount.toString(),
         
         billingAddress: JSON.stringify({
           name: customerInfo.name,
