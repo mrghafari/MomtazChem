@@ -4501,71 +4501,30 @@ const LogisticsManagement = () => {
             </DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={handleEditReadyVehicle} className="space-y-6">
+          <form onSubmit={handleUpdateReadyVehicle} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Vehicle Type */}
               <div className="space-y-2">
-                <Label htmlFor="edit-vehicleType">نوع خودرو *</Label>
-                <div className="space-y-2">
-                  <select
-                    id="edit-vehicleType"
-                    name="vehicleType"
-                    required
-                    value={editingVehicle?.vehicleType === 'سایر' ? 'سایر' : editingVehicle?.vehicleType || ''}
-                    onChange={(e) => {
-                      const showCustom = e.target.value === 'سایر';
-                      setShowCustomEditInput(showCustom);
-                      if (!showCustom) {
-                        setCustomEditVehicleType('');
-                      }
-                    }}
-                    className="w-full p-2 border border-blue-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="">انتخاب کنید...</option>
-                    <option value="کامیون سنگین">کامیون سنگین</option>
-                    <option value="کامیون متوسط">کامیون متوسط</option>
-                    <option value="کامیون سبک">کامیون سبک</option>
-                    <option value="وانت سبک">وانت سبک</option>
-                    <option value="وانت متوسط">وانت متوسط</option>
-                    <option value="ون سبک">ون سبک</option>
-                    <option value="ون متوسط">ون متوسط</option>
-                    <option value="اتوبوس مسافربری">اتوبوس مسافربری</option>
-                    <option value="اتوبوس شهری">اتوبوس شهری</option>
-                    <option value="مینی‌بوس">مینی‌بوس</option>
-                    <option value="تریلر">تریلر</option>
-                    <option value="نیم‌تریلر">نیم‌تریلر</option>
-                    <option value="کشنده">کشنده</option>
-                    <option value="کامیون کمپرسی">کامیون کمپرسی</option>
-                    <option value="کامیون یخچالی">کامیون یخچالی</option>
-                    <option value="تانکر">تانکر</option>
-                    <option value="کامیون جرثقیل">کامیون جرثقیل</option>
-                    <option value="یدک‌کش">یدک‌کش</option>
-                    <option value="آمبولانس">آمبولانس</option>
-                    <option value="ماشین آتش‌نشانی">ماشین آتش‌نشانی</option>
-                    <option value="تاکسی">تاکسی</option>
-                    <option value="خودرو سواری">خودرو سواری</option>
-                    <option value="موتورسیکلت">موتورسیکلت</option>
-                    <option value="دوچرخه">دوچرخه</option>
-                    <option value="اسکوتر">اسکوتر</option>
-                    <option value="سایر">➕ سایر (نوع دلخواه)</option>
-                  </select>
-                  
-                  {/* Custom vehicle type input for edit */}
-                  {showCustomEditInput && (
-                    <div className="mt-2">
-                      <input
-                        type="text"
-                        name="customVehicleType"
-                        value={customEditVehicleType}
-                        onChange={(e) => setCustomEditVehicleType(e.target.value)}
-                        placeholder="نوع خودرو جدید را وارد کنید..."
-                        required
-                        className="w-full p-2 border border-blue-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-blue-50"
-                      />
-                      <p className="text-xs text-blue-600 mt-1">💡 مثال: کامیون اسکانیا، اتوبوس مدرسه، ون سوخت‌رسانی</p>
-                    </div>
-                  )}
-                </div>
+                <Label htmlFor="edit-vehicleType">الگوی خودرو *</Label>
+                <Select 
+                  name="vehicleType" 
+                  value={selectedEditVehicleType}
+                  onValueChange={(value) => {
+                    setSelectedEditVehicleType(value);
+                  }}
+                  required
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="انتخاب الگوی خودرو" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(vehicleTemplatesData as any)?.data?.map((template: any) => (
+                      <SelectItem key={template.id} value={template.name}>
+                        {template.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* License Plate */}
@@ -4575,7 +4534,7 @@ const LogisticsManagement = () => {
                   id="edit-licensePlate" 
                   name="licensePlate" 
                   required 
-                  defaultValue={editingVehicle?.licensePlate}
+                  defaultValue={selectedReadyVehicle?.licensePlate}
                   placeholder="مثال: 12ج345678"
                   className="font-mono"
                 />
@@ -4588,7 +4547,7 @@ const LogisticsManagement = () => {
                   id="edit-driverName" 
                   name="driverName" 
                   required 
-                  defaultValue={editingVehicle?.driverName}
+                  defaultValue={selectedReadyVehicle?.driverName}
                   placeholder="نام و نام خانوادگی راننده"
                 />
               </div>
@@ -4600,7 +4559,7 @@ const LogisticsManagement = () => {
                   id="edit-driverMobile" 
                   name="driverMobile" 
                   required 
-                  defaultValue={editingVehicle?.driverMobile}
+                  defaultValue={selectedReadyVehicle?.driverMobile}
                   placeholder="مثال: 07501234567"
                 />
               </div>
@@ -4614,7 +4573,7 @@ const LogisticsManagement = () => {
                   type="number" 
                   min="1" 
                   required 
-                  defaultValue={editingVehicle?.loadCapacity}
+                  defaultValue={selectedReadyVehicle?.loadCapacity}
                   placeholder="مثال: 5000"
                 />
               </div>
@@ -4625,7 +4584,7 @@ const LogisticsManagement = () => {
                 <Input 
                   id="edit-currentLocation" 
                   name="currentLocation" 
-                  defaultValue={editingVehicle?.currentLocation}
+                  defaultValue={selectedReadyVehicle?.currentLocation}
                   placeholder="مثال: بغداد - منطقه المنصور"
                 />
               </div>
@@ -4642,7 +4601,7 @@ const LogisticsManagement = () => {
                     type="checkbox"
                     id="edit-isAvailable"
                     name="isAvailable"
-                    defaultChecked={editingVehicle?.isAvailable}
+                    defaultChecked={selectedReadyVehicle?.isAvailable}
                     value="true"
                     className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500"
                   />
@@ -4657,7 +4616,7 @@ const LogisticsManagement = () => {
                     type="checkbox"
                     id="edit-supportsFlammable"
                     name="supportsFlammable"
-                    defaultChecked={editingVehicle?.supportsFlammable}
+                    defaultChecked={selectedReadyVehicle?.supportsFlammable}
                     value="true"
                     className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
                   />
@@ -4672,7 +4631,7 @@ const LogisticsManagement = () => {
                     type="checkbox"
                     id="edit-notAllowedFlammable"
                     name="notAllowedFlammable"
-                    defaultChecked={editingVehicle?.notAllowedFlammable}
+                    defaultChecked={selectedReadyVehicle?.notAllowedFlammable}
                     value="true"
                     className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded focus:ring-red-500"
                   />
@@ -4690,7 +4649,7 @@ const LogisticsManagement = () => {
                 id="edit-notes"
                 name="notes"
                 rows={3}
-                defaultValue={editingVehicle?.notes}
+                defaultValue={selectedReadyVehicle?.notes}
                 placeholder="یادداشت‌های اضافی در مورد خودرو یا راننده..."
                 className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
