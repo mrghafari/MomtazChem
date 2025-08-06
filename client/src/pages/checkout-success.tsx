@@ -47,6 +47,43 @@ export default function CheckoutSuccess() {
   const [showLanguagePrompt, setShowLanguagePrompt] = useState(true);
   const [selectedLanguage, setSelectedLanguage] = useState<'ar' | 'en' | null>(null);
 
+  // Clear cart function - comprehensive approach
+  const clearCartCompletely = async () => {
+    console.log('🧹 [CHECKOUT SUCCESS] Clearing cart completely after successful payment');
+    
+    try {
+      // Clear localStorage immediately
+      localStorage.removeItem('cart');
+      localStorage.removeItem(`wallet_amount_${orderId}`);
+      console.log('✅ [CART CLEAR] Cleared localStorage cart and wallet data');
+      
+      // Clear persistent cart from database
+      await fetch('/api/cart/clear', { 
+        method: 'POST',
+        body: JSON.stringify({}), 
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include'  // Include session cookies
+      });
+      console.log('✅ [CART CLEAR] Database cart cleared');
+      
+      // Force cart state refresh through query invalidation
+      queryClient.invalidateQueries({ queryKey: ['/api/customers/persistent-cart'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/cart'] });
+      console.log('✅ [CART CLEAR] Query cache invalidated');
+      
+    } catch (error) {
+      console.warn('⚠️ [CART CLEAR] Error clearing cart:', error);
+      // Continue anyway since localStorage is cleared
+    }
+  };
+
+  // Clear cart automatically when page loads
+  useEffect(() => {
+    if (orderId) {
+      clearCartCompletely();
+    }
+  }, [orderId]);
+
   const orderId = params?.orderId || null;
 
   // Fetch order details
@@ -248,7 +285,10 @@ export default function CheckoutSuccess() {
             <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
             <h2 className="text-xl font-semibold mb-2">خطا در صفحه</h2>
             <p className="text-gray-600 mb-4">شناسه سفارش یافت نشد</p>
-            <Button onClick={() => setLocation('/shop')}>
+            <Button onClick={async () => {
+              await clearCartCompletely();
+              setLocation('/shop');
+            }}>
               بازگشت به فروشگاه
             </Button>
           </CardContent>
@@ -278,7 +318,10 @@ export default function CheckoutSuccess() {
             <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
             <h2 className="text-xl font-semibold mb-2">خطا در بارگذاری سفارش</h2>
             <p className="text-gray-600 mb-4">امکان بارگذاری اطلاعات سفارش وجود ندارد</p>
-            <Button onClick={() => setLocation('/shop')}>
+            <Button onClick={async () => {
+              await clearCartCompletely();
+              setLocation('/shop');
+            }}>
               بازگشت به فروشگاه
             </Button>
           </CardContent>
@@ -474,7 +517,11 @@ export default function CheckoutSuccess() {
       {/* Action Buttons */}
       <div className="flex gap-3">
         <Button 
-          onClick={() => setLocation('/shop')}
+          onClick={async () => {
+            // Ensure cart is clear before going to shop
+            await clearCartCompletely();
+            setLocation('/shop');
+          }}
           variant="outline"
           className="flex-1"
         >
