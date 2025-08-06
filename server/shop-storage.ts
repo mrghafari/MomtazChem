@@ -262,11 +262,11 @@ export class ShopStorage implements IShopStorage {
         isActive: sql<boolean>`BOOL_OR(${shopProducts.isActive})`,
         isFeatured: sql<boolean>`BOOL_OR(${shopProducts.isFeatured})`,
         showWhenOutOfStock: sql<boolean>`BOOL_OR(${shopProducts.showWhenOutOfStock})`,
-        imageUrls: sql<string[]>`MIN(${shopProducts.imageUrls})`,
-        tags: sql<string[]>`MIN(${shopProducts.tags})`,
-        specifications: sql<any>`MIN(${shopProducts.specifications})`,
-        features: sql<string[]>`MIN(${shopProducts.features})`,
-        applications: sql<string[]>`MIN(${shopProducts.applications})`,
+        imageUrls: sql<string[]>`(array_agg(${shopProducts.imageUrls}))[1]`,
+        tags: sql<string[]>`(array_agg(${shopProducts.tags}))[1]`,
+        specifications: sql<any>`(array_agg(${shopProducts.specifications}))[1]`,
+        features: sql<string[]>`(array_agg(${shopProducts.features}))[1]`,
+        applications: sql<string[]>`(array_agg(${shopProducts.applications}))[1]`,
         weight: sql<number>`MIN(${shopProducts.weight})`,
         weightUnit: sql<string>`MIN(${shopProducts.weightUnit})`,
         sku: sql<string>`MIN(${shopProducts.sku})`,
@@ -558,11 +558,11 @@ export class ShopStorage implements IShopStorage {
         isActive: sql<boolean>`BOOL_OR(${shopProducts.isActive})`,
         isFeatured: sql<boolean>`BOOL_OR(${shopProducts.isFeatured})`,
         showWhenOutOfStock: sql<boolean>`BOOL_OR(${shopProducts.showWhenOutOfStock})`,
-        imageUrls: sql<string[]>`MIN(${shopProducts.imageUrls})`,
-        tags: sql<string[]>`MIN(${shopProducts.tags})`,
-        specifications: sql<any>`MIN(${shopProducts.specifications})`,
-        features: sql<string[]>`MIN(${shopProducts.features})`,
-        applications: sql<string[]>`MIN(${shopProducts.applications})`,
+        imageUrls: sql<string[]>`(array_agg(${shopProducts.imageUrls}))[1]`,
+        tags: sql<string[]>`(array_agg(${shopProducts.tags}))[1]`,
+        specifications: sql<any>`(array_agg(${shopProducts.specifications}))[1]`,
+        features: sql<string[]>`(array_agg(${shopProducts.features}))[1]`,
+        applications: sql<string[]>`(array_agg(${shopProducts.applications}))[1]`,
         weight: sql<number>`MIN(${shopProducts.weight})`,
         weightUnit: sql<string>`MIN(${shopProducts.weightUnit})`,
         sku: sql<string>`MIN(${shopProducts.sku})`,
@@ -573,18 +573,21 @@ export class ShopStorage implements IShopStorage {
       .where(and(...whereConditions))
       .groupBy(shopProducts.name); // Group by product name to merge batches
 
-    // Apply ordering
+    // Apply ordering and execute query
+    let orderedQuery;
     if (sortBy === 'relevance') {
-      baseQuery = baseQuery.orderBy(sql`BOOL_OR(${shopProducts.isFeatured}) DESC`, sql`MIN(${shopProducts.name}) ASC`);
+      orderedQuery = baseQuery.orderBy(sql`BOOL_OR(${shopProducts.isFeatured}) DESC`, sql`MIN(${shopProducts.name}) ASC`);
     } else if (sortBy === 'name') {
-      baseQuery = baseQuery.orderBy(sortOrder === 'asc' ? sql`MIN(${shopProducts.name}) ASC` : sql`MIN(${shopProducts.name}) DESC`);
+      orderedQuery = baseQuery.orderBy(sortOrder === 'asc' ? sql`MIN(${shopProducts.name}) ASC` : sql`MIN(${shopProducts.name}) DESC`);
     } else if (sortBy === 'price') {
-      baseQuery = baseQuery.orderBy(sortOrder === 'asc' ? sql`MIN(${shopProducts.price}) ASC` : sql`MIN(${shopProducts.price}) DESC`);
+      orderedQuery = baseQuery.orderBy(sortOrder === 'asc' ? sql`MIN(${shopProducts.price}) ASC` : sql`MIN(${shopProducts.price}) DESC`);
     } else if (sortBy === 'created') {
-      baseQuery = baseQuery.orderBy(sortOrder === 'asc' ? sql`MIN(${shopProducts.createdAt}) ASC` : sql`MIN(${shopProducts.createdAt}) DESC`);
+      orderedQuery = baseQuery.orderBy(sortOrder === 'asc' ? sql`MIN(${shopProducts.createdAt}) ASC` : sql`MIN(${shopProducts.createdAt}) DESC`);
+    } else {
+      orderedQuery = baseQuery.orderBy(sql`MIN(${shopProducts.name}) ASC`);
     }
 
-    const products = await baseQuery
+    const products = await orderedQuery
       .limit(limit)
       .offset(offset);
 
