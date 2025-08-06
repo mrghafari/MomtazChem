@@ -1654,19 +1654,33 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
             
             {/* Cart Summary */}
             <div className="border-t mt-3 pt-3 space-y-2">
+              {/* Subtotal - Base product cost */}
+              <div className="flex justify-between text-sm">
+                <span>مجموع محصولات</span>
+                <span className="font-medium">{formatCurrency(subtotalAmount)}</span>
+              </div>
+              
               {/* VAT */}
               {vatData?.vatEnabled && vatAmount > 0 && (
-                <div className="flex justify-between text-sm">
-                  <span>مالیات بر ارزش افزوده ({(vatRate * 100).toFixed(0)}%)</span>
-                  <span>{formatCurrency(vatAmount)}</span>
+                <div className="flex justify-between text-sm text-orange-600">
+                  <span>🏛️ مالیات بر ارزش افزوده ({(vatRate * 100).toFixed(1)}%)</span>
+                  <span className="font-medium">+{formatCurrency(vatAmount)}</span>
                 </div>
               )}
               
               {/* Duties */}
               {vatData?.dutiesEnabled && dutiesAmount > 0 && (
-                <div className="flex justify-between text-sm">
-                  <span>عوارض بر ارزش افزوده ({(dutiesRate * 100).toFixed(0)}%)</span>
-                  <span>{formatCurrency(dutiesAmount)}</span>
+                <div className="flex justify-between text-sm text-red-600">
+                  <span>📋 عوارض گمرکی ({(dutiesRate * 100).toFixed(1)}%)</span>
+                  <span className="font-medium">+{formatCurrency(dutiesAmount)}</span>
+                </div>
+              )}
+              
+              {/* Total Tax Summary */}
+              {totalTaxAmount > 0 && (
+                <div className="flex justify-between text-sm bg-gray-50 dark:bg-gray-800 px-2 py-1 rounded border">
+                  <span className="font-medium">مجموع مالیات و عوارض</span>
+                  <span className="font-semibold text-gray-700 dark:text-gray-300">{formatCurrency(totalTaxAmount)}</span>
                 </div>
               )}
               
@@ -1884,9 +1898,14 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
               )}
               
               {/* Final Amount */}
-              <div className="flex justify-between font-bold text-lg border-t pt-2 bg-yellow-300 px-2 py-2 rounded-lg">
-                <span>Final Amount</span>
-                <span className="text-gray-900">{formatCurrency(totalAmount)}</span>
+              <div className="border-t pt-2 space-y-1">
+                <div className="flex justify-between font-bold text-lg bg-yellow-300 px-3 py-2 rounded-lg">
+                  <span className="text-gray-900">Final Amount (مبلغ نهایی)</span>
+                  <span className="text-gray-900">{formatCurrency(totalAmount)}</span>
+                </div>
+                <div className="text-xs text-center text-gray-600 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
+                  💰 محاسبه: {formatCurrency(subtotalAmount)} + {formatCurrency(totalTaxAmount)} + {formatCurrency(finalShippingCost)} = {formatCurrency(totalAmount)}
+                </div>
               </div>
             </div>
           </div>
