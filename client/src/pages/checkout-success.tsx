@@ -46,6 +46,7 @@ export default function CheckoutSuccess() {
   const [showOfficialPrompt, setShowOfficialPrompt] = useState(true);
   const [showLanguagePrompt, setShowLanguagePrompt] = useState(true);
   const [selectedLanguage, setSelectedLanguage] = useState<'ar' | 'en' | null>(null);
+  const [invoiceGenerationStep, setInvoiceGenerationStep] = useState<'language' | 'official' | 'generating' | 'complete'>('language');
 
   // Clear cart function - comprehensive approach
   const clearCartCompletely = async () => {
@@ -107,22 +108,32 @@ export default function CheckoutSuccess() {
     queryKey: ['/api/invoices/order', orderId],
     queryFn: async () => {
       const response = await apiRequest(`/api/invoices/customer/0`); // This will be updated with proper customer ID
-      const invoices = response.data?.filter((inv: Invoice) => inv.id === orderId) || [];
+      const invoices = response.data?.filter((inv: Invoice) => 
+        inv.id === parseInt(orderId as string, 10)
+      ) || [];
       return invoices[0] || null;
     },
     enabled: !!orderId,
   });
 
-  // Generate invoice mutation
+  // Generate invoice mutation with language support
   const generateInvoiceMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (params: { language?: 'ar' | 'en'; isOfficial?: boolean }) => {
       return apiRequest(`/api/invoices/generate/${orderId}`, {
         method: 'POST',
+        body: {
+          language: params.language || 'ar',
+          isOfficial: params.isOfficial || false
+        },
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
     },
     onSuccess: (data) => {
+      setInvoiceGenerationStep('complete');
       toast({
-        title: "فاکتور صادر شد",
+        title: selectedLanguage === 'en' ? "Invoice Generated" : "فاکتور صادر شد",
         description: "فاکتور شما با موفقیت تولید شد",
       });
       refetchInvoice();
@@ -164,8 +175,8 @@ export default function CheckoutSuccess() {
 
   // Auto-generate invoice when component loads
   useEffect(() => {
-    if (orderId && orderData?.paymentStatus === 'paid' && !invoiceData && !generateInvoiceMutation.isPending) {
-      generateInvoiceMutation.mutate();
+    if (orderId && (orderData as any)?.paymentStatus === 'paid' && !invoiceData && !generateInvoiceMutation.isPending) {
+      generateInvoiceMutation.mutate({ language: 'ar' });
     }
   }, [orderId, orderData, invoiceData]);
 
@@ -320,7 +331,7 @@ export default function CheckoutSuccess() {
     );
   }
 
-  if (!orderData || !orderData.success) {
+  if (!orderData || !(orderData as any).success) {
     return (
       <div className="container mx-auto px-4 py-8">
         <Card>
@@ -340,7 +351,7 @@ export default function CheckoutSuccess() {
     );
   }
 
-  const order: Order = orderData.order;
+  const order: Order = (orderData as any).order;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl" dir="rtl">
@@ -395,15 +406,61 @@ export default function CheckoutSuccess() {
         </CardContent>
       </Card>
 
+      {/* Language Selection for Invoice */}
+      {invoiceGenerationStep === 'language' && showLanguagePrompt && (
+        <Card className="mb-6 border-blue-200 bg-blue-50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-blue-800">
+              <FileText className="w-5 h-5" />
+              اختر لغة الفاتورة / Choose the Invoice Language
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <p className="text-blue-700 text-center">
+                الرجاء اختيار لغة الفاتورة المطلوبة / Please select your preferred invoice language
+              </p>
+              <div className="grid grid-cols-2 gap-4">
+                <Button
+                  onClick={() => {
+                    setSelectedLanguage('ar');
+                    setInvoiceGenerationStep('generating');
+                    generateInvoiceMutation.mutate({ language: 'ar' });
+                  }}
+                  className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700"
+                  size="lg"
+                >
+                  <span className="text-lg">🇮🇶</span>
+                  العربية / Arabic
+                </Button>
+                <Button
+                  onClick={() => {
+                    setSelectedLanguage('en');
+                    setInvoiceGenerationStep('generating');
+                    generateInvoiceMutation.mutate({ language: 'en' });
+                  }}
+                  className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700"
+                  size="lg"
+                >
+                  <span className="text-lg">🇺🇸</span>
+                  English / إنجليزية
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Invoice Section */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="w-5 h-5" />
-            فاکتور
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+      {(invoiceGenerationStep === 'generating' || invoiceGenerationStep === 'complete') && (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5" />
+              {selectedLanguage === 'en' ? 'Invoice' : 'فاکتور'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
           {generateInvoiceMutation.isPending ? (
             <div className="text-center p-4">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
@@ -514,7 +571,7 @@ export default function CheckoutSuccess() {
               <AlertCircle className="w-8 h-8 text-orange-500 mx-auto mb-2" />
               <p className="text-gray-600 mb-3">فاکتور هنوز تولید نشده</p>
               <Button 
-                onClick={() => generateInvoiceMutation.mutate()}
+                onClick={() => generateInvoiceMutation.mutate({ language: 'ar' })}
                 disabled={generateInvoiceMutation.isPending}
               >
                 تولید فاکتور
@@ -522,7 +579,8 @@ export default function CheckoutSuccess() {
             </div>
           )}
         </CardContent>
-      </Card>
+        </Card>
+      )}
 
       {/* Action Buttons */}
       <div className="flex gap-3">
@@ -545,60 +603,7 @@ export default function CheckoutSuccess() {
         </Button>
       </div>
 
-      {/* Language Selection Modal */}
-      {showLanguagePrompt && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <Card className="w-full max-w-md mx-4">
-            <CardHeader>
-              <CardTitle className="text-center">Select Invoice Language</CardTitle>
-              <p className="text-sm text-gray-600 text-center">
-                اختر لغة الفاتورة / Choose the invoice language
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <Button
-                  onClick={() => {
-                    setSelectedLanguage('ar');
-                    setShowLanguagePrompt(false);
-                    if (invoiceData?.id) {
-                      requestOfficialMutation.mutate({ invoiceId: invoiceData.id, language: 'ar' });
-                    }
-                  }}
-                  variant={selectedLanguage === 'ar' ? 'default' : 'outline'}
-                  className="h-16 flex flex-col items-center justify-center"
-                >
-                  <span className="text-lg">العربية</span>
-                  <span className="text-sm text-gray-600">Arabic</span>
-                </Button>
-                <Button
-                  onClick={() => {
-                    setSelectedLanguage('en');
-                    setShowLanguagePrompt(false);
-                    if (invoiceData?.id) {
-                      requestOfficialMutation.mutate({ invoiceId: invoiceData.id, language: 'en' });
-                    }
-                  }}
-                  variant={selectedLanguage === 'en' ? 'default' : 'outline'}
-                  className="h-16 flex flex-col items-center justify-center"
-                >
-                  <span className="text-lg">English</span>
-                  <span className="text-sm text-gray-600">الإنجليزية</span>
-                </Button>
-              </div>
-              <div className="text-center">
-                <Button 
-                  variant="ghost"
-                  onClick={() => setShowLanguagePrompt(false)}
-                  className="text-sm"
-                >
-                  إلغاء / Cancel
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+
     </div>
   );
 }
