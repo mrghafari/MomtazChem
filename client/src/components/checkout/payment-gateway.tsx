@@ -52,17 +52,18 @@ const PaymentGateway = ({
   });
 
   // Use calculation data from bilingual form if available
-  const finalAmount = tempCalcData?.data?.finalAmount || totalAmount;
-  const calculatedWalletAmount = tempCalcData?.data?.walletAmountUsed || initialWalletAmount;
-  const calculatedRemainingAmount = tempCalcData?.data?.remainingAmount || totalAmount;
+  const tempData = (tempCalcData as any)?.data;
+  const finalAmount = tempData?.finalAmount || totalAmount;
+  const calculatedWalletAmount = tempData?.walletAmountUsed || initialWalletAmount;
+  const calculatedRemainingAmount = tempData?.remainingAmount || totalAmount;
 
   console.log('💾 [PAYMENT GATEWAY] Using calculation data:', {
-    tempCalcData: tempCalcData?.data,
+    tempCalcData: tempData,
     finalAmount,
     calculatedWalletAmount,
     calculatedRemainingAmount,
     originalTotalAmount: totalAmount,
-    paymentMethod: tempCalcData?.data?.paymentMethod || paymentMethod
+    paymentMethod: tempData?.paymentMethod || paymentMethod
   });
 
   // Handle wallet-only payment (when remaining balance is 0)
@@ -96,8 +97,8 @@ const PaymentGateway = ({
         onPaymentSuccess({
           method: 'wallet_full',
           transactionId: response.transactionId,
-          amount: totalAmount,
-          walletDeducted: totalAmount,
+          amount: finalAmount,
+          walletDeducted: finalAmount,
           bankPaid: 0
         });
       } else {
@@ -344,11 +345,12 @@ const PaymentGateway = ({
       console.log('🔍 [PAYMENT GATEWAY] Gateway config:', gatewayConfig);
       console.log('🔍 [PAYMENT GATEWAY] Form data:', formData);
       
-      // Determine amount for gateway - use remainingAmount if hybrid, otherwise totalAmount
-      const amountForGateway = formData.remainingAmount || totalAmount;
-      const walletAmount = formData.walletAmount || 0;
+      // Determine amount for gateway - use remainingAmount if hybrid, otherwise finalAmount
+      const amountForGateway = formData.remainingAmount || calculatedRemainingAmount || finalAmount;
+      const walletAmount = formData.walletAmount || calculatedWalletAmount || 0;
       
       console.log('💰 [PAYMENT GATEWAY] Payment breakdown:', {
+        finalAmount,
         totalAmount,
         walletAmount,
         amountForGateway,
@@ -393,7 +395,7 @@ const PaymentGateway = ({
       
       console.log('💰 [WALLET PAYMENT] Processing wallet payment:', {
         orderId,
-        totalAmount,
+        finalAmount,
         paymentMethod
       });
       
@@ -401,7 +403,7 @@ const PaymentGateway = ({
         method: 'POST',
         body: {
           orderId,
-          totalAmount,
+          totalAmount: finalAmount,
           paymentMethod: 'wallet_full'
         }
       });
@@ -412,7 +414,7 @@ const PaymentGateway = ({
         const paymentData = {
           method: 'wallet_full',
           transactionId: response.transactionId,
-          amount: totalAmount,
+          amount: finalAmount,
           orderId,
           newWalletBalance: response.newWalletBalance,
           amountDeducted: response.amountDeducted,
@@ -452,7 +454,7 @@ const PaymentGateway = ({
     const paymentData = {
       method: paymentMethod,
       transactionId,
-      amount: totalAmount,
+      amount: finalAmount,
       orderId,
       timestamp: new Date().toISOString(),
       ...formData

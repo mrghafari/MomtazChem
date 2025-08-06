@@ -294,7 +294,7 @@ export default function Payment() {
               Order Number: #{order.orderNumber}
             </p>
             <p className="text-lg font-semibold text-green-600 mb-6">
-              Amount Paid: {formatCurrency(order.totalAmount)}
+              Amount Paid: {formatCurrency((tempCalcData as any)?.data?.finalAmount || order.totalAmount)}
             </p>
             {paymentData && (
               <div className="bg-gray-50 p-4 rounded-lg mb-6">
@@ -352,11 +352,11 @@ export default function Payment() {
             ) : activeGateway ? (
               <PaymentGateway
                 paymentMethod={order.paymentMethod}
-                totalAmount={tempCalcData?.data?.finalAmount || parseFloat(order.totalAmount)}
+                totalAmount={(tempCalcData as any)?.data?.finalAmount || parseFloat(order.totalAmount)}
                 orderId={order.orderNumber}
                 onPaymentSuccess={handlePaymentSuccess}
                 onPaymentError={handlePaymentError}
-                walletAmount={tempCalcData?.data?.walletAmountUsed || walletAmount}
+                walletAmount={(tempCalcData as any)?.data?.walletAmountUsed || walletAmount}
                 activeGateway={activeGateway}
               />
             ) : (
@@ -414,7 +414,7 @@ export default function Payment() {
                   )}
                   <div className="border-t pt-2 flex justify-between font-bold text-lg">
                     <span>Total</span>
-                    <span>{formatCurrency(order.totalAmount)}</span>
+                    <span>{formatCurrency((tempCalcData as any)?.data?.finalAmount || order.totalAmount)}</span>
                   </div>
                 </div>
 
