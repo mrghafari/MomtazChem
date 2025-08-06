@@ -1496,6 +1496,23 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                       {/* Product Info */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
+                          {/* Small product image */}
+                          <div className="w-8 h-8 rounded border overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-gray-700">
+                            {product.imageUrl ? (
+                              <img 
+                                src={product.imageUrl} 
+                                alt={product.name}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  const img = e.target as HTMLImageElement;
+                                  img.style.display = 'none';
+                                  img.parentElement!.innerHTML = '<div class="w-full h-full flex items-center justify-center text-xs text-muted-foreground">📦</div>';
+                                }}
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">📦</div>
+                            )}
+                          </div>
                           <h4 className="font-medium text-sm truncate">{product.name}</h4>
                         </div>
                         <p className="text-xs text-muted-foreground">{product.category}</p>
