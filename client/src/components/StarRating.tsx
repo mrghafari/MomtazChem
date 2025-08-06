@@ -25,7 +25,7 @@ export default function StarRating({
   const [hoverRating, setHoverRating] = React.useState(0);
   
   const sizeClasses = {
-    sm: 'w-4 h-4',
+    sm: 'w-3 h-3',
     md: 'w-5 h-5',
     lg: 'w-6 h-6'
   };
@@ -41,8 +41,10 @@ export default function StarRating({
   
   const getStarColor = (starIndex: number) => {
     const currentRating = interactive ? (hoverRating || rating) : rating;
-    if (starIndex <= currentRating) {
+    if (starIndex <= Math.floor(currentRating)) {
       return 'fill-yellow-400 text-yellow-400';
+    } else if (starIndex <= Math.ceil(currentRating) && currentRating > 0) {
+      return 'fill-yellow-200 text-yellow-200';
     }
     return 'fill-gray-200 text-gray-200';
   };

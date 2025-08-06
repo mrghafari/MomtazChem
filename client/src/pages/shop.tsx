@@ -1236,43 +1236,31 @@ const Shop = () => {
                               }}
                             >
                               <div className="flex items-center gap-1">
-                                <div className="flex">
-                                  {[1,2,3,4,5].map((starNum) => {
-                                    // Show loading state with pulse animation
-                                    if (statsLoading) {
-                                      return (
-                                        <Star 
-                                          key={starNum}
-                                          className="w-3 h-3 fill-gray-300 text-gray-300 animate-pulse"
-                                        />
-                                      );
-                                    }
-                                    
-                                    const stats = productStatsData?.[product.id];
-                                    const hasReviews = stats && stats.totalReviews > 0;
-                                    const rating = hasReviews ? stats.averageRating : 0;
-                                    
-                                    return (
+                                {statsLoading ? (
+                                  <div className="flex">
+                                    {[1,2,3,4,5].map((starNum) => (
                                       <Star 
                                         key={starNum}
-                                        className={`w-3 h-3 ${
-                                          hasReviews 
-                                            ? (starNum <= Math.floor(rating) 
-                                                ? 'fill-yellow-400 text-yellow-400' 
-                                                : starNum <= Math.ceil(rating)
-                                                ? 'fill-yellow-200 text-yellow-200'
-                                                : 'fill-gray-200 text-gray-200')
-                                            : 'fill-gray-200 text-gray-200 hover:fill-yellow-300'
-                                        }`}
+                                        className="w-3 h-3 fill-gray-300 text-gray-300 animate-pulse"
                                       />
-                                    );
-                                  })}
-                                </div>
-                                <span className="text-xs text-gray-600">
-                                  {statsLoading ? '...' : (productStatsData?.[product.id]?.totalReviews > 0 
-                                    ? productStatsData[product.id].averageRating.toFixed(1)
-                                    : 'نظر')}
-                                </span>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <>
+                                    <StarRating 
+                                      rating={productStatsData?.[product.id]?.averageRating || 0}
+                                      size="sm"
+                                      maxStars={5}
+                                      showNumber={false}
+                                      className="text-yellow-400"
+                                    />
+                                    <span className="text-xs text-gray-600 ml-1">
+                                      {productStatsData?.[product.id]?.totalReviews > 0 
+                                        ? productStatsData[product.id].averageRating.toFixed(1)
+                                        : 'نظر'}
+                                    </span>
+                                  </>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -1668,43 +1656,31 @@ const Shop = () => {
                               }}
                             >
                               <div className="flex items-center gap-1">
-                                <div className="flex">
-                                  {[1,2,3,4,5].map((starNum) => {
-                                    // Show loading state with pulse animation
-                                    if (statsLoading) {
-                                      return (
-                                        <Star 
-                                          key={starNum}
-                                          className="w-3 h-3 fill-gray-300 text-gray-300 animate-pulse"
-                                        />
-                                      );
-                                    }
-                                    
-                                    const stats = productStatsData?.[product.id];
-                                    const hasReviews = stats && stats.totalReviews > 0;
-                                    const rating = hasReviews ? stats.averageRating : 0;
-                                    
-                                    return (
+                                {statsLoading ? (
+                                  <div className="flex">
+                                    {[1,2,3,4,5].map((starNum) => (
                                       <Star 
                                         key={starNum}
-                                        className={`w-3 h-3 ${
-                                          hasReviews 
-                                            ? (starNum <= Math.floor(rating) 
-                                                ? 'fill-yellow-400 text-yellow-400' 
-                                                : starNum <= Math.ceil(rating)
-                                                ? 'fill-yellow-200 text-yellow-200'
-                                                : 'fill-gray-200 text-gray-200')
-                                            : 'fill-gray-200 text-gray-200 hover:fill-yellow-300'
-                                        }`}
+                                        className="w-3 h-3 fill-gray-300 text-gray-300 animate-pulse"
                                       />
-                                    );
-                                  })}
-                                </div>
-                                <span className="text-xs text-gray-600">
-                                  {statsLoading ? '...' : (productStatsData?.[product.id]?.totalReviews > 0 
-                                    ? productStatsData[product.id].averageRating.toFixed(1)
-                                    : 'نظر')}
-                                </span>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <>
+                                    <StarRating 
+                                      rating={productStatsData?.[product.id]?.averageRating || 0}
+                                      size="sm"
+                                      maxStars={5}
+                                      showNumber={false}
+                                      className="text-yellow-400"
+                                    />
+                                    <span className="text-xs text-gray-600 ml-1">
+                                      {productStatsData?.[product.id]?.totalReviews > 0 
+                                        ? productStatsData[product.id].averageRating.toFixed(1)
+                                        : 'نظر'}
+                                    </span>
+                                  </>
+                                )}
                               </div>
                             </div>
                           </div>
