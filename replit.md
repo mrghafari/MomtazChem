@@ -105,6 +105,14 @@ The system is built on a robust full-stack architecture. Features include compre
 - **USER CONTROL:** Administrators can enable/disable random products per category via content management
 - **REAL-TIME FILTERING:** API endpoint respects both content management settings and documentation requirements
 
+**FIFO Batch Management System Implementation (August 2025):**
+- **CORRECTED TERMINOLOGY:** Fixed card 402 text from "سیستم LIFO - جدیدترین بچ با موجودی" to "سیستم FIFO - قدیمی‌ترین بچ با موجودی"
+- **FIFO METHODOLOGY:** System correctly implements First In, First Out for inventory management showing oldest batches first
+- **API ENDPOINTS:** Fixed `/api/products/:productName/batches/display` with proper FIFOBatchManager integration
+- **ERROR HANDLING:** Added URI decoding protection for product names with special characters (%)
+- **TYPESCRIPT RESOLUTION:** Resolved 16 TypeScript errors in products.tsx including null value handling
+- **BATCH DISPLAY:** Proper FIFO ordering shows oldest inventory batches as priority for sales
+
 ### System Design Choices
 The architecture emphasizes modularity and scalability. Core architectural patterns include a RESTful API design for backend-frontend communication, ensuring clear separation of concerns. Data integrity is maintained through transactional operations for critical processes like order creation and inventory updates. The system employs a prevention-first approach to avoid data inconsistencies. A unified vehicle selection algorithm prioritizes cost-efficiency and safety compliance, particularly for hazardous materials. Inventory management strictly adheres to FIFO (First-In, First-Out) principles. A comprehensive email and SMS automation system leverages templates and intelligent routing. The system is designed for continuous integration and deployment, with a focus on performance optimization through database indexing, caching, and asset optimization.
 
