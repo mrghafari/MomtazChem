@@ -266,16 +266,23 @@ export class BankGatewayRouter {
     const transactionId = `SEP_${Date.now()}_${request.orderId}`;
     
     // Check if test mode is enabled
-    const isTestMode = config.testMode === true;
-    const baseUrl = isTestMode ? 'https://sep.shaparak.ir/sandbox' : 'https://sep.shaparak.ir';
+    const isTestMode = config.testMode === true || gateway.test_mode === true;
     
-    // Include merchant credentials if available
-    const merchantId = config.merchantId || 'test_merchant';
-    const apiKey = config.apiKey || 'test_api_key';
+    // Use correct URLs for Shaparak (sandbox for test mode)
+    const baseUrl = isTestMode ? 'https://sandbox.sep.shaparak.ir/onlinepg/onlinepg' : 'https://sep.shaparak.ir/onlinepg/onlinepg';
     
-    const paymentUrl = `${baseUrl}/Payment.aspx?Token=${transactionId}&Amount=${request.amount}&Currency=${request.currency || 'IQD'}&MerchantId=${merchantId}&ApiKey=${apiKey}`;
+    // Include merchant credentials - use test credentials in test mode
+    const merchantId = isTestMode ? 'test_merchant_shaparak' : (config.merchantId || config.terminalId || 'test_merchant');
+    const apiKey = isTestMode ? 'test_api_key_shaparak' : (config.apiKey || config.password || 'test_api_key');
     
-    console.log(`💳 [SHAPARAK SEP] Payment URL created: ${paymentUrl} for amount: ${request.amount} ${request.currency || 'IQD'} (Test Mode: ${isTestMode})`);
+    // Convert amount to correct format for Iraqi Dinar (no conversion needed for IQD)
+    const formattedAmount = parseFloat(request.amount.toString()); // Keep original amount for IQD
+    
+    // Shaparak SEP standard parameters with proper test mode handling
+    const callbackUrl = isTestMode ? 'https://momtazchem.com/payment/test-callback' : (request.returnUrl || 'https://momtazchem.com/payment/callback');
+    const paymentUrl = `${baseUrl}?Amount=${formattedAmount}&MerchantId=${merchantId}&Token=${transactionId}&ResNum=${transactionId}&RedirectURL=${callbackUrl}`;
+    
+    console.log(`💳 [SHAPARAK SEP] Payment URL created: ${paymentUrl} for amount: ${request.amount} ${request.currency || 'IQD'} (Formatted: ${formattedAmount}) (Test Mode: ${isTestMode})`);
     console.log(`🔗 [SHAPARAK SEP] Final Payment URL: ${paymentUrl}`);
     
     return {
