@@ -13885,7 +13885,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const walletCoversFullAmount = actualWalletUsed >= formattedTotalAmount;
       // CRITICAL FIX: Check remaining amount is greater than 1 (whole number for IQD)
       const hasSignificantRemainingAmount = remainingAmountToPay > 1;
-      const requiresBankPayment = !isFullWalletPayment && !walletCoversFullAmount && hasSignificantRemainingAmount;
+      
+      // FIXED: If wallet covers full amount OR payment method is wallet_full, don't require bank payment
+      const requiresBankPayment = !isFullWalletPayment && !walletCoversFullAmount && hasSignificantRemainingAmount && remainingAmountToPay > 0;
       
       console.log('🔍 [PAYMENT LOGIC DEBUG] Payment decision logic:', {
         actualWalletUsed,
@@ -13907,14 +13909,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
         frontendSentZeroRemaining: remainingAmount === 0 || remainingAmount === '0'
       });
       
-      if (isFullWalletPayment || walletCoversFullAmount) {
+      // If wallet covers full amount, mark as paid and don't require bank payment
+      if (isFullWalletPayment || walletCoversFullAmount || remainingAmountToPay <= 1) {
         console.log('✅ [FULL WALLET] Payment covers full amount - order complete without bank gateway', {
           isFullWalletPayment,
           walletCoversFullAmount,
           actualWalletUsed,
-          totalAmount: formattedTotalAmount
+          totalAmount: formattedTotalAmount,
+          remainingAmountToPay
         });
         finalPaymentStatus = "paid";
+        
+        // Return success response immediately for full wallet payments
+        return res.json({
+          success: true,
+          message: "سفارش با کیف پول به طور کامل پرداخت شد",
+          paymentMethod: 'wallet_full',
+          order: {
+            id: order.id,
+            orderNumber: order.orderNumber,
+            totalAmount: order.totalAmount,
+            status: order.status,
+            paymentStatus: "paid",
+            paymentMethod: 'wallet_full',
+            walletAmountUsed: actualWalletUsed,
+            crmCustomerId: finalCrmCustomerId,
+          }
+        });
       }
       
       if (requiresBankPayment) {

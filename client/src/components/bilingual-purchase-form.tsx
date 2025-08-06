@@ -1240,6 +1240,17 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         }, 1500);
         return;
       }
+      // Handle full wallet payments - check both response method and actual amounts
+      else if (response.paymentMethod === 'wallet_full' || 
+          (walletAmount >= totalAmount && actualWalletUsed > 0) ||
+          (response.order?.paymentMethod === 'wallet_full') ||
+          (response.order?.paymentStatus === 'paid' && response.order?.walletAmountUsed > 0)) {
+        toast({
+          title: "✅ پرداخت با کیف پول موفق",
+          description: `سفارش شما به مبلغ ${formatCurrency(totalAmount)} به طور کامل با کیف پول پرداخت شد`
+        });
+        onOrderComplete();
+      }
       // Check if payment gateway redirect is needed (legacy)
       else if (response.redirectToPayment && response.paymentGatewayUrl) {
         toast({
