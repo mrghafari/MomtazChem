@@ -1138,19 +1138,6 @@ const Shop = () => {
                     </div>
                   )}
                 </Button>
-                
-                {/* Test Clear Cart Button */}
-                {getTotalItems() > 0 && (
-                  <Button 
-                    variant="destructive" 
-                    size="sm"
-                    onClick={clearCart}
-                    className="flex items-center gap-1"
-                  >
-                    <X className="w-4 h-4" />
-                    Clear
-                  </Button>
-                )}
               </div>
             </div>
           </div>

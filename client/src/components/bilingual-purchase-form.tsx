@@ -1218,6 +1218,10 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
           console.log('💾 [LOCALSTORAGE] Wallet amount saved for order:', orderNumber, '→', walletAmount);
         }
         
+        // CRITICAL FIX: Clear cart for hybrid payments since order was successfully created
+        console.log('🛒 [HYBRID PAYMENT] Clearing cart since order was successfully created');
+        onOrderComplete(); // This clears the cart
+        
         toast({
           title: "پرداخت ترکیبی انجام شد",
           description: `${walletDeducted?.toLocaleString()} IQD از کیف پول کسر شد. هدایت به درگاه بانکی برای پرداخت ${remainingAmount?.toLocaleString()} IQD باقیمانده...`,
@@ -1257,6 +1261,10 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
           console.log('💾 [LOCALSTORAGE] Wallet amount saved for online payment order:', orderNumber, '→', walletAmount);
         }
         
+        // Clear cart since order was successfully created
+        console.log('🛒 [ONLINE PAYMENT] Clearing cart since order was successfully created');
+        onOrderComplete();
+        
         toast({
           title: "انتقال به درگاه بانکی",
           description: "در حال انتقال شما به درگاه پرداخت بانکی..."
@@ -1270,6 +1278,10 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       }
       // Check if payment gateway redirect is needed (legacy)
       else if (response.redirectToPayment && response.paymentGatewayUrl) {
+        // Clear cart since order was successfully created
+        console.log('🛒 [LEGACY PAYMENT] Clearing cart since order was successfully created');
+        onOrderComplete();
+        
         toast({
           title: "انتقال به درگاه پرداخت",
           description: "در حال انتقال شما به درگاه پرداخت..."
