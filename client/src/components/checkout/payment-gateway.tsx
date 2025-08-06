@@ -345,8 +345,9 @@ const PaymentGateway = ({
       console.log('🔍 [PAYMENT GATEWAY] Gateway config:', gatewayConfig);
       console.log('🔍 [PAYMENT GATEWAY] Form data:', formData);
       
-      // Determine amount for gateway - use remainingAmount if hybrid, otherwise finalAmount
-      const amountForGateway = formData.remainingAmount || calculatedRemainingAmount || finalAmount;
+      // 🚨 CRITICAL: ALWAYS use finalAmount for gateway (per user requirement)
+      // For hybrid payments, wallet is deducted separately, bank still gets finalAmount
+      const amountForGateway = finalAmount;
       const walletAmount = formData.walletAmount || calculatedWalletAmount || 0;
       
       console.log('💰 [PAYMENT GATEWAY] Payment breakdown:', {
@@ -354,7 +355,8 @@ const PaymentGateway = ({
         totalAmount,
         walletAmount,
         amountForGateway,
-        isHybrid: formData.paymentMethod === 'wallet_partial'
+        isHybrid: formData.paymentMethod === 'wallet_partial',
+        note: 'Bank gateway ALWAYS receives finalAmount per user requirement'
       });
       
       if (gatewayConfig && gatewayConfig.apiBaseUrl) {

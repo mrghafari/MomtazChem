@@ -11,6 +11,9 @@ Preferred communication style: Simple, everyday language.
 - TypeScript diagnostics resolved for payment gateway
 - Auto-redirect functionality for wallet_partial payments implemented
 - Cart persistence across failed payments working correctly
+- CRITICAL FIX: Payment gateway now ALWAYS sends finalAmount to bank (August 6, 2025)
+- Fixed payment-gateway.tsx to use finalAmount instead of remainingAmount for all bank transactions
+- Persian/Farsi client requirement implemented: Final Amount IQD 1,025.00 is critical data for all payments
 
 **Critical Security Requirements:**
 - Extreme vigilance in wallet transaction processing
