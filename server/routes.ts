@@ -13849,8 +13849,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const isFullWalletPayment = finalPaymentMethod === 'wallet_full';
       const isPartialWalletPayment = finalPaymentMethod === 'wallet_partial';
       
-      // Enhanced logic: No bank payment required for full wallet payments
-      const requiresBankPayment = !isFullWalletPayment && remainingAmountToPay > 0;
+      // Enhanced logic: For hybrid payments, check if wallet usage equals or exceeds total amount
+      const walletCoversFullAmount = actualWalletUsed >= totalAmount;
+      const requiresBankPayment = !isFullWalletPayment && !walletCoversFullAmount && remainingAmountToPay > 0;
       
       console.log('🔍 [PAYMENT LOGIC DEBUG] Payment decision logic:', {
         actualWalletUsed,
@@ -13864,13 +13865,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         paymentMethodFromRequest: paymentMethod,
         isFullWalletPayment,
         isPartialWalletPayment,
+        walletCoversFullAmount,
         walletPaymentComplete: isFullWalletPayment && actualWalletUsed > 0,
-        shouldRedirectToBank: remainingAmountToPay > 0.01 && !isFullWalletPayment,
+        shouldRedirectToBank: requiresBankPayment,
         isZeroRemaining: remainingAmountToPay <= 0.01
       });
       
-      if (isFullWalletPayment) {
-        console.log('✅ [FULL WALLET] Payment method is wallet_full - order complete without bank gateway');
+      if (isFullWalletPayment || walletCoversFullAmount) {
+        console.log('✅ [FULL WALLET] Payment covers full amount - order complete without bank gateway', {
+          isFullWalletPayment,
+          walletCoversFullAmount,
+          actualWalletUsed,
+          totalAmount
+        });
         finalPaymentStatus = "paid";
       }
       
@@ -45628,6 +45635,67 @@ momtazchem.com
         success: false,
         message: "خطا در همگام‌سازی کاردکس",
         error: error.message
+      });
+    }
+  });
+
+  // Test payment gateway endpoint for debugging payment amounts
+  app.post("/api/test-payment-gateway", async (req, res) => {
+    try {
+      const { amount, currency = 'IQD', orderId = 'TEST_ORDER', customerInfo } = req.body;
+      
+      console.log('🧪 [TEST PAYMENT] Creating test payment request:', {
+        amount,
+        currency,
+        orderId,
+        customerInfo
+      });
+
+      // Import bank gateway router
+      const { BankGatewayRouter } = await import('./bank-gateway-router');
+      const router = new BankGatewayRouter();
+
+      // Create test payment request
+      const testRequest = {
+        orderId: orderId,
+        amount: parseFloat(amount),
+        currency: currency,
+        customerInfo: {
+          name: customerInfo?.name || 'تست پرداخت',
+          phone: customerInfo?.phone || '+964750000000',
+          email: customerInfo?.email || 'test@momtazchem.com'
+        },
+        returnUrl: 'https://momtazchem.com/payment/test-callback'
+      };
+
+      // Route to active gateway
+      const result = await router.routePayment(testRequest);
+      
+      console.log('🧪 [TEST PAYMENT] Payment routing result:', result);
+
+      if (result.success) {
+        res.json({
+          success: true,
+          paymentUrl: result.paymentUrl,
+          transactionId: result.transactionId,
+          gateway: result.gateway || 'Test Gateway',
+          amount: testRequest.amount,
+          currency: testRequest.currency,
+          message: 'تست پرداخت با موفقیت ایجاد شد'
+        });
+      } else {
+        res.status(400).json({
+          success: false,
+          message: result.message || 'خطا در ایجاد تست پرداخت'
+        });
+      }
+
+    } catch (error) {
+      console.error('🧪 [TEST PAYMENT ERROR]:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در سرویس تست پرداخت',
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   });

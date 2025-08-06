@@ -20,6 +20,7 @@ import PaymentOptionsPage from "@/pages/payment-options";
 import ShopAdmin from "@/pages/shop-admin";
 import InvoiceManagement from "@/pages/admin/invoice-management";
 import PaymentSettings from "@/pages/admin/payment-settings";
+import PaymentTestPage from "@/pages/PaymentTestPage";
 import AdminPage from "@/pages/admin";
 import AdminLogin from "@/pages/admin-login";
 import AdminUsers from "@/pages/admin-users";
@@ -192,6 +193,7 @@ function Router() {
           <Route path="/admin/template-numbering-system" component={TemplateNumberingSystem} />
           <Route path="/admin/invoice-management" component={InvoiceManagement} />
           <Route path="/admin/payment-settings" component={PaymentSettings} />
+          <Route path="/test-payment" component={PaymentTestPage} />
           <Route path="/admin/wallet-management" component={WalletManagement} />
           <Route path="/admin/wallet-correction" component={WalletCorrection} />
           <Route path="/admin/inquiries" component={Dashboard} />
