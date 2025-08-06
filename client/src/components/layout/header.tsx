@@ -33,7 +33,18 @@ export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { t, direction } = useLanguage();
   const { customer, isAuthenticated, logout } = useCustomer();
+  
+  // Only check admin auth when in admin routes
+  const isInAdminRoute = location.startsWith('/admin');
   const { isAuthenticated: isAdminAuthenticated, logout: adminLogout } = useAuth();
+
+  // Fetch admin user info for role display (only in admin routes)
+  const { data: adminUser } = useQuery({
+    queryKey: ['/api/admin/me'],
+    enabled: isAdminAuthenticated && isInAdminRoute,
+    retry: false,
+    staleTime: 30000, // 30 seconds
+  });
 
   // Fetch wallet balance for authenticated customers
   const { data: walletData, isError, error } = useQuery({
@@ -44,13 +55,7 @@ export default function Header() {
     refetchOnWindowFocus: true,
   });
 
-  // Fetch admin user info for role display
-  const { data: adminUser } = useQuery({
-    queryKey: ['/api/admin/me'],
-    enabled: isAdminAuthenticated,
-    retry: false,
-    staleTime: 30000, // 30 seconds
-  });
+  // Removed duplicate admin user query
 
   const rawBalance = walletData?.balance || walletData?.data?.wallet?.balance || walletData?.wallet?.balance || "0";
   const walletBalance = typeof rawBalance === 'string' ? parseFloat(rawBalance) : rawBalance;

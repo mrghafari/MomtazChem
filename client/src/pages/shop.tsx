@@ -35,7 +35,7 @@ const Shop = () => {
   const { toast } = useMultilingualToast();
   const { t, direction } = useLanguage();
   const queryClient = useQueryClient();
-  const { isAuthenticated: isAdminAuthenticated } = useCustomerAuth();
+  const { isAuthenticated, user: authenticatedCustomer, logout: customerLogout } = useCustomerAuth();
 
 
   const [, navigate] = useLocation();
@@ -63,7 +63,7 @@ const Shop = () => {
   const [displayStock, setDisplayStock] = useState<{[key: number]: number}>({});
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [customer, setCustomer] = useState<any>(null);
-  const [isLoadingCustomer, setIsLoadingCustomer] = useState(true);
+  const [isLoadingCustomer, setIsLoadingCustomer] = useState(false);
   const [walletBalance, setWalletBalance] = useState<number>(0);
 
   // Advanced search state
@@ -313,9 +313,17 @@ const Shop = () => {
   }, [cart, customer]);
 
   // Load customer info on component mount
+  // Use the hook customer data instead of manual API call
   useEffect(() => {
-    checkCustomerAuth();
-  }, []);
+    if (authenticatedCustomer) {
+      setCustomer(authenticatedCustomer);
+      fetchWalletBalance();
+      setIsLoadingCustomer(false);
+    } else if (!isAuthenticated && !isLoadingCustomer) {
+      setCustomer(null);
+      setIsLoadingCustomer(false);
+    }
+  }, [authenticatedCustomer, isAuthenticated]);
 
   // Keyboard navigation for zoom modal
   useEffect(() => {
@@ -389,39 +397,7 @@ const Shop = () => {
     }
   }, [customer, isLoadingCustomer]);
 
-  const checkCustomerAuth = async () => {
-    try {
-      const response = await fetch('/api/customers/me', {
-        credentials: 'include'
-      });
-      
-      if (response.ok) {
-        const result = await response.json();
-        if (result.success) {
-          setCustomer(result.customer);
-          // Fetch wallet balance
-          fetchWalletBalance();
-          
-          // 🛒 Cart will be synced by usePersistentCart hook
-        } else {
-          // User is not authenticated - cart will be handled by hook
-          setCustomer(null);
-        }
-      } else {
-        // User is not authenticated - cart will be handled by hook  
-        setCustomer(null);
-      }
-    } catch (error) {
-      // Suppress auth errors as they're expected for guest users
-      if (!error.message?.includes('401') && !error.message?.includes('احراز هویت نشده')) {
-        console.error('Error checking customer auth:', error);
-      }
-      // Handle as guest - cart will be handled by hook
-      setCustomer(null);
-    } finally {
-      setIsLoadingCustomer(false);
-    }
-  };
+  // Removed manual checkCustomerAuth - now using useCustomerAuth hook only
 
   const fetchWalletBalance = async () => {
     try {
@@ -487,25 +463,22 @@ const Shop = () => {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch('/api/customers/logout', {
-        method: 'POST',
-        credentials: 'include'
+      // Use the hook logout instead of manual API call
+      customerLogout();
+      
+      // Clear local state
+      setCustomer(null);
+      setWalletBalance(0);
+      
+      // Clear cart after logout
+      setTimeout(() => {
+        clearCartPersistent();
+      }, 500);
+      
+      toast({
+        title: "خروج موفق",
+        description: "با موفقیت از حساب کاربری خارج شدید",
       });
-
-      if (response.ok) {
-        setCustomer(null);
-        setWalletBalance(0);
-        
-        // پاک کردن سبد خرید هنگام logout - فقط وقتی کاربر واقعاً logout کرده
-        setTimeout(() => {
-          clearCartPersistent();
-        }, 500);
-        
-        toast({
-          title: "خروج موفق",
-          description: "با موفقیت از حساب کاربری خارج شدید",
-        });
-      }
     } catch (error) {
       console.error('Logout error:', error);
       toast({
