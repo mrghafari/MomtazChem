@@ -1070,6 +1070,25 @@ function FinanceOrders() {
     printWindow.document.write(printContent);
     printWindow.document.close();
     printWindow.focus();
+    
+    // اضافه کردن event listener برای بستن خودکار پنجره بعد از پرینت
+    printWindow.onbeforeunload = function() { 
+      return null; 
+    };
+    
+    printWindow.onafterprint = function() {
+      setTimeout(() => {
+        printWindow.close();
+      }, 500);
+    };
+    
+    // برای مرورگرهایی که onafterprint را پشتیبانی نمی‌کنند
+    setTimeout(() => {
+      if (printWindow && !printWindow.closed) {
+        printWindow.close();
+      }
+    }, 3000);
+    
     printWindow.print();
   };
 
