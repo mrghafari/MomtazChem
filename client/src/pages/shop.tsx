@@ -456,6 +456,12 @@ const Shop = () => {
     queryClient.invalidateQueries({ queryKey: ["/api/customers/me"] });
     queryClient.invalidateQueries({ queryKey: ["/api/customer/wallet"] });
     
+    // Force cart reload after login by invalidating persistent cart query
+    setTimeout(() => {
+      console.log('🔄 Triggering cart reload after login');
+      queryClient.invalidateQueries({ queryKey: ["/api/customers/persistent-cart"] });
+    }, 500);
+    
     toast({
       title: "خوش آمدید",
       description: `${customerData.firstName} ${customerData.lastName}`,

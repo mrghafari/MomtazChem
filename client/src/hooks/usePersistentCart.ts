@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useCustomerAuth } from './useCustomerAuth';
 
@@ -14,8 +14,17 @@ export function usePersistentCart() {
   const [isLoading, setIsLoading] = useState(false);
   const [previousAuth, setPreviousAuth] = useState<boolean>(false);
   const [cartLoaded, setCartLoaded] = useState<boolean>(false);
+  
+  // Add ref to track mount status
+  const mounted = useRef(true);
+  
+  useEffect(() => {
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
 
-  // Clear cart when user logs out
+  // Clear cart when user logs out and load guest cart
   useEffect(() => {
     // If user was authenticated but now isn't (logout detected)
     if (previousAuth && !isAuthenticated) {
@@ -38,6 +47,12 @@ export function usePersistentCart() {
           setLocalCart({});
         }
       }
+    }
+    
+    // If user just logged in, reset cart loaded flag to force reload
+    if (!previousAuth && isAuthenticated) {
+      console.log('🔐 User just logged in, resetting cart loaded flag');
+      setCartLoaded(false);
     }
     
     setPreviousAuth(isAuthenticated);
@@ -66,7 +81,7 @@ export function usePersistentCart() {
             method: 'GET'
           });
           
-          if (response.success) {
+          if (response.success && mounted.current) {
             // Handle different response formats
             const cartData = response.data?.cartData || response.cart || {};
             console.log('🛒 Loaded cart from database:', cartData);
@@ -80,7 +95,9 @@ export function usePersistentCart() {
           console.error('❌ Error loading persistent cart:', error);
           // Keep local cart if database load fails
         } finally {
-          setIsLoading(false);
+          if (mounted.current) {
+            setIsLoading(false);
+          }
         }
       }
     };
@@ -88,11 +105,13 @@ export function usePersistentCart() {
     // Load cart whenever user authentication state changes or user data becomes available
     if (isAuthenticated && user && user.id && !cartLoaded) {
       // Add a small delay to ensure authentication is fully settled
-      setTimeout(() => {
+      const timeoutId = setTimeout(() => {
         loadPersistentCart();
       }, 100);
+      
+      return () => clearTimeout(timeoutId);
     }
-  }, [isAuthenticated, user?.id, cartLoaded]);
+  }, [isAuthenticated, user?.id, cartLoaded, localCart]);
 
   // ذخیره سبد محلی در localStorage
   const saveLocalCart = (cart: {[key: number]: number}) => {
