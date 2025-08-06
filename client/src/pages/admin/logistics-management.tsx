@@ -310,7 +310,7 @@ const LogisticsManagement = () => {
     enabled: activeTab === 'ready-vehicles'
   });
 
-  const readyVehicles = readyVehiclesData || [];
+  const readyVehicles = readyVehiclesData?.data || [];
 
   // Create ready vehicle mutation
   const createReadyVehicleMutation = useMutation({

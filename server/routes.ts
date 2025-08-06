@@ -10446,50 +10446,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get ready vehicles for logistics assignment
-  app.get("/api/logistics/ready-vehicles", requireAuth, async (req, res) => {
-    try {
-      console.log(`🚛 [READY VEHICLES] Getting all ready vehicles for logistics assignment`);
-      
-      // Get all ready vehicles from ready_vehicles table
-      const readyVehicles = await db
-        .select()
-        .from(readyVehicles)
-        .where(eq(readyVehicles.isAvailable, true))
-        .orderBy(readyVehicles.vehicleType, readyVehicles.licensePlate);
-
-      console.log(`✅ [READY VEHICLES] Found ${readyVehicles.length} available vehicles`);
-      
-      // Format vehicles for frontend
-      const formattedVehicles = readyVehicles.map(vehicle => ({
-        id: vehicle.id,
-        vehicleType: vehicle.vehicleType,
-        licensePlate: vehicle.licensePlate || vehicle.plateNumber,
-        plateNumber: vehicle.licensePlate || vehicle.plateNumber,
-        driverName: vehicle.driverName,
-        driverMobile: vehicle.driverMobile,
-        loadCapacity: parseFloat(vehicle.loadCapacity?.toString() || '0'),
-        currentLocation: vehicle.currentLocation,
-        notes: vehicle.notes,
-        supportsFlammable: vehicle.supportsFlammable || false,
-        notAllowedFlammable: vehicle.notAllowedFlammable || false,
-        isAvailable: vehicle.isAvailable
-      }));
-
-      res.json({
-        success: true,
-        vehicles: formattedVehicles,
-        count: formattedVehicles.length
-      });
-
-    } catch (error) {
-      console.error('❌ [READY VEHICLES] Error getting ready vehicles:', error);
-      res.status(500).json({
-        success: false,
-        message: "خطا در دریافت خودروهای آماده"
-      });
-    }
-  });
 
   // =============================================================================
   // PROCEDURES MANAGEMENT ENDPOINTS
