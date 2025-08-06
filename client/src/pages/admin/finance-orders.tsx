@@ -866,13 +866,72 @@ function FinanceOrders() {
         .status-pending { background-color: #fef3c7; color: #92400e; }
         .status-rejected { background-color: #fecaca; color: #dc2626; }
         @media print {
-          body { margin: 0; }
+          @page { 
+            margin: 0.5in; 
+            size: A4;
+          }
+          body { 
+            margin: 0; 
+            padding: 0;
+            max-width: 100%;
+            box-sizing: border-box;
+          }
+          .container {
+            padding: 10px;
+            margin: 0 auto;
+            max-width: 100%;
+            box-sizing: border-box;
+          }
+          .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 0 10px;
+            box-sizing: border-box;
+          }
+          .section {
+            margin-bottom: 15px;
+            padding: 0 5px;
+            box-sizing: border-box;
+            page-break-inside: avoid;
+          }
+          .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+          }
+          .info-item {
+            margin: 0;
+            padding: 5px;
+            box-sizing: border-box;
+            min-width: 0;
+            word-wrap: break-word;
+          }
+          .items-table {
+            width: 100%;
+            margin: 0;
+            box-sizing: border-box;
+            table-layout: fixed;
+          }
+          .items-table th,
+          .items-table td {
+            padding: 4px;
+            font-size: 11px;
+            word-wrap: break-word;
+            box-sizing: border-box;
+          }
           .no-print { display: none !important; }
+          * {
+            box-sizing: border-box !important;
+          }
         }
       </style>
     </head>
     <body>
-      <div class="header">
+      <div class="container">
+        <div class="header">
         <img src="/attached_assets/Logo_1753245273579.jpeg" alt="شرکت ممتاز شیمی" style="max-width: 120px; max-height: 80px; margin-bottom: 15px;" onerror="this.style.display='none'">
         <div class="company-name">ممتاز شیمی</div>
         <div>جزئیات سفارش ${orderDetails.orderNumber}</div>
@@ -997,8 +1056,9 @@ function FinanceOrders() {
         <div class="value">${orderDetails.deliveryNotes}</div>
       </div>` : ''}
 
-      <div style="margin-top: 30px; text-align: center; font-size: 12px; color: #6b7280;">
-        این سند توسط سیستم مدیریت ممتاز شیمی تولید شده است
+        <div style="margin-top: 30px; text-align: center; font-size: 12px; color: #6b7280;">
+          این سند توسط سیستم مدیریت ممتاز شیمی تولید شده است
+        </div>
       </div>
     </body>
     </html>
