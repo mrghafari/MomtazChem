@@ -1375,7 +1375,9 @@ export default function ProductsPage() {
                             <span className="text-sm text-gray-600">کل موجودی: {productGroup.totalStock}</span>
                           </div>
                           <div className="space-y-1">
-                            {productGroup.batches.slice(0, 2).map((batch, index) => (
+                            {productGroup.batches
+                              .filter(batch => batch.stockQuantity > 0) // فقط batch های با موجودی
+                              .map((batch, index) => (
                               <div key={index} className={`flex justify-between items-center p-2 rounded text-xs ${
                                 batch.isActive ? 'bg-green-100 border border-green-300' : 'bg-gray-50'
                               }`}>
@@ -1384,17 +1386,17 @@ export default function ProductsPage() {
                                   <span>{batch.stockQuantity} واحد</span>
                                   {batch.isActive && (
                                     <Badge variant="secondary" className="text-xs bg-yellow-100 text-yellow-800">
-                                      فعال
+                                      در حال فروش
+                                    </Badge>
+                                  )}
+                                  {!batch.isActive && batch.stockQuantity > 0 && (
+                                    <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                                      در نوبت
                                     </Badge>
                                   )}
                                 </div>
                               </div>
                             ))}
-                            {productGroup.batches.length > 2 && (
-                              <div className="text-center text-xs text-gray-500">
-                                و {productGroup.batches.length - 2} بچ دیگر...
-                              </div>
-                            )}
                           </div>
                         </div>
                       )}
