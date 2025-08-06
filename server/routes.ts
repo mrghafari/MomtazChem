@@ -78,6 +78,7 @@ import {
   TICKET_CATEGORIES
 } from "@shared/ticketing-schema";
 import { cartStorage } from "./cart-storage";
+import { cartCalculationsCache } from "./cart-calculations-cache";
 import { 
   cartSessions, 
   abandonedCartSettings, 
@@ -13508,34 +13509,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      console.log(`💰 [SUBTOTAL] Calculated items subtotal: ${itemsSubtotal} IQD`);
+      console.log(`💰 [CART VERIFICATION] Backend verified cart subtotal: ${itemsSubtotal} IQD (for inventory validation only)`);
       
-      // Use frontend calculated values (frontend has already done all calculations correctly)
-      const totalAmount = parseFloat(orderData.totalAmount?.toString() || '0') || 0;
-      const shippingAmount = parseFloat(orderData.shippingCost?.toString() || '0') || 0;
-      const vatAmount = parseFloat(orderData.vatAmount?.toString() || '0') || 0;
-      const dutiesAmount = parseFloat(orderData.dutiesAmount?.toString() || '0') || 0;
-      
-      console.log('💰 [FRONTEND CALCULATIONS] Using frontend calculated values:', {
-        subtotal: itemsSubtotal,
-        shippingCost: shippingAmount,
-        vatAmount,
-        dutiesAmount,
-        totalAmount
-      });
-      
-      // Validation: Check if frontend calculations match backend subtotal
-      const expectedTotal = itemsSubtotal + shippingAmount + vatAmount + dutiesAmount;
-      if (Math.abs(totalAmount - expectedTotal) > 0.01) {
-        console.warn(`⚠️ [CALCULATION MISMATCH] Frontend total (${totalAmount}) doesn't match expected total (${expectedTotal})`);
-      }
-
-      // Create order with proper customer linking
+      // Create order with proper customer linking FIRST
       let finalCustomerId = customerId;
       if (!customerId && crmCustomerId) {
         // Link to CRM customer if available
         finalCustomerId = crmCustomerId;
       }
+
+      // استفاده مطلق از محاسبات کارت خرید - بدون هیچ محاسبه اضافی
+      const totalAmount = parseFloat(orderData.totalAmount?.toString() || '0') || 0;
+      const shippingAmount = parseFloat(orderData.shippingCost?.toString() || '0') || 0;
+      const vatAmount = parseFloat(orderData.vatAmount?.toString() || '0') || 0;
+      const dutiesAmount = parseFloat(orderData.dutiesAmount?.toString() || '0') || 0;
+      const subtotalAmount = parseFloat(orderData.subtotalAmount?.toString() || '0') || 0;
+      
+      // Store cart calculations in temporary cache for payment processing
+      cartCalculationsCache.store(orderNumber, {
+        orderId: orderNumber,
+        customerId: finalCustomerId,
+        subtotalAmount,
+        shippingCost: shippingAmount,
+        vatAmount,
+        dutiesAmount,
+        totalAmount,
+        cart: orderData.cart,
+        personalInfo: orderData.personalInfo,
+        paymentMethod: orderData.paymentMethod,
+        notes: orderData.notes
+      });
+      
+      console.log('🛒 [CART CALCULATIONS] Using EXACT cart calculations - no backend modifications:', {
+        'Cart Subtotal': subtotalAmount,
+        'Cart Shipping': shippingAmount,
+        'Cart VAT': vatAmount,
+        'Cart Duties': dutiesAmount,
+        'Cart Total': totalAmount,
+        'Stored in cache': orderNumber
+      });
 
       if (!finalCustomerId) {
         return res.status(401).json({
@@ -14176,6 +14188,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({
         success: false,
         message: "خطا در دریافت سفارشات"
+      });
+    }
+  });
+
+  // Get cart calculations from cache for payment processing
+  app.get('/api/customers/orders/:orderNumber/cart-calculations', async (req, res) => {
+    try {
+      const { orderNumber } = req.params;
+      
+      // Retrieve cached cart calculations
+      const calculations = cartCalculationsCache.get(orderNumber);
+      
+      if (!calculations) {
+        return res.status(404).json({
+          success: false,
+          message: "Cart calculations not found or expired"
+        });
+      }
+      
+      console.log(`🛒 [CART CACHE] Retrieved calculations for payment: ${orderNumber} = ${calculations.totalAmount} IQD`);
+      
+      res.json({
+        success: true,
+        data: {
+          subtotal: calculations.subtotalAmount,
+          shippingCost: calculations.shippingCost,
+          vatAmount: calculations.vatAmount,
+          dutiesAmount: calculations.dutiesAmount,
+          totalAmount: calculations.totalAmount,
+          cart: calculations.cart,
+          paymentMethod: calculations.paymentMethod
+        }
+      });
+    } catch (error) {
+      console.error("❌ Error retrieving cart calculations:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to retrieve cart calculations"
       });
     }
   });
@@ -17969,6 +18019,14 @@ Momtaz Chemical Technical Team`,
           });
         } catch (crmError) {
           console.warn("Failed to log payment activity to CRM:", crmError);
+        }
+      }
+
+      // Clear cart calculations from cache after successful payment
+      if (paymentStatus === 'paid') {
+        const cleared = cartCalculationsCache.clear(order.orderNumber);
+        if (cleared) {
+          console.log(`🗑️ [CART CACHE] Cleared calculations for successful payment: ${order.orderNumber}`);
         }
       }
 
