@@ -57,6 +57,14 @@ const PaymentGateway = ({
   const calculatedWalletAmount = tempData?.walletAmountUsed || initialWalletAmount;
   const calculatedRemainingAmount = tempData?.remainingAmount || totalAmount;
 
+  console.log('🔍 [PAYMENT GATEWAY DEBUG] Temp calc data response:', tempCalcData);
+  console.log('🔍 [PAYMENT GATEWAY DEBUG] Extracted temp data:', tempData);
+  console.log('🔍 [PAYMENT GATEWAY DEBUG] Final amount determination:', {
+    fromTempData: tempData?.finalAmount,
+    fromProps: totalAmount,
+    finalDecision: finalAmount
+  });
+
   console.log('💾 [PAYMENT GATEWAY] Using calculation data:', {
     tempCalcData: tempData,
     finalAmount,
