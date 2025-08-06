@@ -15,6 +15,7 @@ Preferred communication style: Simple, everyday language.
 - Fixed payment-gateway.tsx to use finalAmount instead of remainingAmount for all bank transactions
 - Persian/Farsi client requirement implemented: Final Amount IQD 1,025.00 is critical data for all payments
 - **CART ISOLATION SYSTEM COMPLETED (August 6, 2025):** Full customer cart isolation implemented with PostgreSQL persistence. Each customer has separate cart stored in `persistent_carts` table with complete isolation. Cart clears properly on logout while maintaining database persistence for recovery.
+- **KARDEX UPDATE ISSUE RESOLVED (August 6, 2025):** Fixed PostgreSQL JSON field aggregation by replacing MIN() functions with array_agg() for proper product batch grouping. Added API endpoint `/api/products/{name}/batches/display` and function `getProductBatchesByName` in shop-storage. Products with different batch numbers now correctly treated as single units with combined stock quantities. کاردکس اکنون کاملاً به‌روزرسانی می‌شود.
 
 **Critical Security Requirements:**
 - Extreme vigilance in wallet transaction processing
