@@ -139,6 +139,8 @@ export class SyncService {
         customerPaymentStatus: customerOrders.paymentStatus,
         managementId: orderManagement.id,
         managementStatus: orderManagement.currentStatus,
+        financialReviewedAt: orderManagement.financialReviewedAt,
+        warehouseProcessedAt: orderManagement.warehouseProcessedAt,
       })
       .from(customerOrders)
       .innerJoin(orderManagement, eq(customerOrders.id, orderManagement.customerOrderId));
@@ -154,7 +156,15 @@ export class SyncService {
       // Skip sync for warehouse intermediate status (warehouse_verified) and final statuses
       const protectedStatuses = ['warehouse_verified', 'warehouse_approved', 'logistics_assigned', 'logistics_processing', 'logistics_dispatched', 'delivered', 'cancelled'];
       
-      if (expectedManagementStatus !== record.managementStatus && !protectedStatuses.includes(record.managementStatus)) {
+      // IMPORTANT: Skip sync for manually approved orders (especially partial payments)
+      // If an order has been financially reviewed, preserve its approved status regardless of payment_status
+      const isManuallyApproved = record.financialReviewedAt !== null;
+      const isWarehouseProcessed = record.warehouseProcessedAt !== null;
+      
+      if (expectedManagementStatus !== record.managementStatus && 
+          !protectedStatuses.includes(record.managementStatus) &&
+          !isManuallyApproved && 
+          !isWarehouseProcessed) {
         mismatchCount++;
         console.log(`🔄 [AUTO-SYNC] Status mismatch found for ${record.orderNumber}: management(${record.managementStatus}) → expected(${expectedManagementStatus})`);
 
@@ -172,6 +182,10 @@ export class SyncService {
         }
       } else if (protectedStatuses.includes(record.managementStatus)) {
         console.log(`🔒 [AUTO-SYNC] Skipping protected status ${record.managementStatus} for order ${record.orderNumber}`);
+      } else if (isManuallyApproved) {
+        console.log(`🔒 [AUTO-SYNC] Skipping manually approved order ${record.orderNumber} (financial_reviewed_at: ${record.financialReviewedAt})`);
+      } else if (isWarehouseProcessed) {
+        console.log(`🔒 [AUTO-SYNC] Skipping warehouse processed order ${record.orderNumber} (warehouse_processed_at: ${record.warehouseProcessedAt})`);
       }
     }
 
