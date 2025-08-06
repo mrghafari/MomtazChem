@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Building2, CreditCard, Wallet, Settings, Plus, Edit, Trash2, CheckCircle, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { Building2, CreditCard, Wallet, Settings, Plus, Edit, Trash2, CheckCircle, AlertCircle, Eye, EyeOff, TestTube, Wifi, Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -110,6 +110,66 @@ const PaymentSettings = () => {
       toast({
         title: "Error",
         description: "Failed to delete payment gateway.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Test Configuration mutation
+  const testConfigMutation = useMutation({
+    mutationFn: async (gatewayId: number) => {
+      return apiRequest(`/api/payment/gateways/${gatewayId}/test-config`, { method: 'POST' });
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "آزمایش پیکربندی موفق",
+        description: "تمامی تنظیمات درگاه پرداخت معتبر است.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "خطا در آزمایش پیکربندی",
+        description: error.message || "پیکربندی درگاه نامعتبر است.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Test Connection mutation
+  const testConnectionMutation = useMutation({
+    mutationFn: async (gatewayId: number) => {
+      return apiRequest(`/api/payment/gateways/${gatewayId}/test-connection`, { method: 'POST' });
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "آزمایش اتصال موفق",
+        description: "اتصال به درگاه پرداخت برقرار است.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "خطا در آزمایش اتصال",
+        description: error.message || "عدم اتصال به درگاه پرداخت.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Validate Config mutation
+  const validateConfigMutation = useMutation({
+    mutationFn: async (gatewayId: number) => {
+      return apiRequest(`/api/payment/gateways/${gatewayId}/validate-config`, { method: 'POST' });
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "اعتبارسنجی پیکربندی موفق",
+        description: "تمامی پارامترهای پیکربندی معتبر است.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "خطا در اعتبارسنجی",
+        description: error.message || "پارامترهای پیکربندی نامعتبر است.",
         variant: "destructive",
       });
     },
@@ -380,6 +440,54 @@ const PaymentSettings = () => {
               placeholder="192.168.1.1&#10;10.0.0.1&#10;203.0.113.0/24"
               rows={3}
             />
+          </div>
+        </div>
+
+        {/* Operational Test Buttons */}
+        <div className="space-y-4 bg-orange-50 dark:bg-orange-900/20 p-4 rounded-lg border">
+          <h3 className="text-lg font-semibold flex items-center gap-2">
+            <TestTube className="h-5 w-5" />
+            عملیات آزمایش و اعتبارسنجی (Operational Testing)
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            استفاده از این دکمه‌ها برای آزمایش و اعتبارسنجی تنظیمات درگاه پرداخت
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Button
+              onClick={() => selectedGateway?.id && testConfigMutation.mutate(selectedGateway.id)}
+              disabled={testConfigMutation.isPending || !selectedGateway?.id}
+              className="w-full"
+              variant="outline"
+            >
+              <Shield className="w-4 h-4 mr-2" />
+              {testConfigMutation.isPending ? "در حال آزمایش..." : "Test & Validate Configuration"}
+            </Button>
+
+            <Button
+              onClick={() => selectedGateway?.id && testConnectionMutation.mutate(selectedGateway.id)}
+              disabled={testConnectionMutation.isPending || !selectedGateway?.id}
+              className="w-full"
+              variant="outline"
+            >
+              <Wifi className="w-4 h-4 mr-2" />
+              {testConnectionMutation.isPending ? "در حال اتصال..." : "Test Connection"}
+            </Button>
+
+            <Button
+              onClick={() => selectedGateway?.id && validateConfigMutation.mutate(selectedGateway.id)}
+              disabled={validateConfigMutation.isPending || !selectedGateway?.id}
+              className="w-full"
+              variant="outline"
+            >
+              <TestTube className="w-4 h-4 mr-2" />
+              {validateConfigMutation.isPending ? "در حال اعتبارسنجی..." : "Validate Config"}
+            </Button>
+          </div>
+          
+          <div className="text-xs text-muted-foreground space-y-1">
+            <p><strong>Test & Validate Configuration:</strong> آزمایش کامل تنظیمات درگاه و API</p>
+            <p><strong>Test Connection:</strong> بررسی وضعیت اتصال به سرور درگاه</p>
+            <p><strong>Validate Config:</strong> اعتبارسنجی پارامترهای ورودی</p>
           </div>
         </div>
 
