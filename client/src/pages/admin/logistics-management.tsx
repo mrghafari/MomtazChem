@@ -3721,13 +3721,6 @@ const LogisticsManagement = () => {
                     value={selectedVehicleType}
                     onValueChange={(value) => {
                       setSelectedVehicleType(value);
-                      if (value === 'سایر') {
-                        setShowCustomInput(true);
-                        setCustomVehicleType('');
-                      } else {
-                        setShowCustomInput(false);
-                        setCustomVehicleType('');
-                      }
                     }}
                     required
                   >
@@ -3740,21 +3733,9 @@ const LogisticsManagement = () => {
                           {template.name}
                         </SelectItem>
                       ))}
-                      <SelectItem value="سایر">سایر (نوع دلخواه)</SelectItem>
                     </SelectContent>
                   </Select>
-                  {showCustomInput && (
-                    <div className="mt-2">
-                      <Input 
-                        name="customVehicleType"
-                        value={customVehicleType}
-                        onChange={(e) => setCustomVehicleType(e.target.value)}
-                        placeholder="نوع خودروی مورد نظر را وارد کنید"
-                        required={showCustomInput}
-                        className="w-full"
-                      />
-                    </div>
-                  )}
+
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="licensePlate">شماره خودرو *</Label>
