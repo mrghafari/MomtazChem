@@ -186,10 +186,10 @@ export class BankGatewayRouter {
     const config = gateway.config;
     const transactionId = `TXN_${Date.now()}_${request.orderId}`;
     
-    // شبیه‌سازی ایجاد لینک پرداخت زرین‌پال
-    const paymentUrl = `https://sandbox.zarinpal.com/pg/StartPay/${transactionId}`;
+    // شبیه‌سازی ایجاد لینک پرداخت زرین‌پال با مبلغ
+    const paymentUrl = `https://sandbox.zarinpal.com/pg/StartPay/${transactionId}?amount=${request.amount}&currency=${request.currency || 'IQD'}`;
     
-    console.log(`💳 [ZARINPAL] Payment URL created: ${paymentUrl}`);
+    console.log(`💳 [ZARINPAL] Payment URL created: ${paymentUrl} for amount: ${request.amount} ${request.currency || 'IQD'}`);
     
     return {
       success: true,
@@ -202,9 +202,9 @@ export class BankGatewayRouter {
   // پیاده‌سازی درگاه آی‌دی‌پی
   private async createIdpayPayment(gateway: PaymentGateway, request: BankPaymentRequest) {
     const transactionId = `IDPAY_${Date.now()}_${request.orderId}`;
-    const paymentUrl = `https://idpay.ir/p/${transactionId}`;
+    const paymentUrl = `https://idpay.ir/p/${transactionId}?amount=${request.amount}&currency=${request.currency || 'IQD'}`;
     
-    console.log(`💳 [IDPAY] Payment URL created: ${paymentUrl}`);
+    console.log(`💳 [IDPAY] Payment URL created: ${paymentUrl} for amount: ${request.amount} ${request.currency || 'IQD'}`);
     
     return {
       success: true,
@@ -217,9 +217,9 @@ export class BankGatewayRouter {
   // پیاده‌سازی درگاه پارسیان
   private async createParsianPayment(gateway: PaymentGateway, request: BankPaymentRequest) {
     const transactionId = `PARSIAN_${Date.now()}_${request.orderId}`;
-    const paymentUrl = `https://pec.shaparak.ir/NewIPGServices/Payment/${transactionId}`;
+    const paymentUrl = `https://pec.shaparak.ir/NewIPGServices/Payment/${transactionId}?amount=${request.amount}&currency=${request.currency || 'IQD'}`;
     
-    console.log(`💳 [PARSIAN] Payment URL created: ${paymentUrl}`);
+    console.log(`💳 [PARSIAN] Payment URL created: ${paymentUrl} for amount: ${request.amount} ${request.currency || 'IQD'}`);
     
     return {
       success: true,
@@ -232,9 +232,9 @@ export class BankGatewayRouter {
   // پیاده‌سازی درگاه ملت
   private async createMellatPayment(gateway: PaymentGateway, request: BankPaymentRequest) {
     const transactionId = `MELLAT_${Date.now()}_${request.orderId}`;
-    const paymentUrl = `https://bpm.shaparak.ir/pgwchannel/startpay.mellat?RefId=${transactionId}`;
+    const paymentUrl = `https://bpm.shaparak.ir/pgwchannel/startpay.mellat?RefId=${transactionId}&Amount=${request.amount}&Currency=${request.currency || 'IQD'}`;
     
-    console.log(`💳 [MELLAT] Payment URL created: ${paymentUrl}`);
+    console.log(`💳 [MELLAT] Payment URL created: ${paymentUrl} for amount: ${request.amount} ${request.currency || 'IQD'}`);
     
     return {
       success: true,
@@ -247,9 +247,9 @@ export class BankGatewayRouter {
   // پیاده‌سازی درگاه سامان/شاپرک
   private async createSamanPayment(gateway: PaymentGateway, request: BankPaymentRequest) {
     const transactionId = `SAMAN_${Date.now()}_${request.orderId}`;
-    const paymentUrl = `https://sep.shaparak.ir/Payment.aspx?Token=${transactionId}`;
+    const paymentUrl = `https://sep.shaparak.ir/Payment.aspx?Token=${transactionId}&Amount=${request.amount}&Currency=${request.currency || 'IQD'}`;
     
-    console.log(`💳 [SAMAN] Payment URL created: ${paymentUrl}`);
+    console.log(`💳 [SAMAN] Payment URL created: ${paymentUrl} for amount: ${request.amount} ${request.currency || 'IQD'}`);
     
     return {
       success: true,
@@ -262,9 +262,9 @@ export class BankGatewayRouter {
   // پیاده‌سازی درگاه شاپرک (SEP)
   private async createSepPayment(gateway: PaymentGateway, request: BankPaymentRequest) {
     const transactionId = `SEP_${Date.now()}_${request.orderId}`;
-    const paymentUrl = `https://sep.shaparak.ir/Payment.aspx?Token=${transactionId}`;
+    const paymentUrl = `https://sep.shaparak.ir/Payment.aspx?Token=${transactionId}&Amount=${request.amount}&Currency=${request.currency || 'IQD'}`;
     
-    console.log(`💳 [SHAPARAK SEP] Payment URL created: ${paymentUrl}`);
+    console.log(`💳 [SHAPARAK SEP] Payment URL created: ${paymentUrl} for amount: ${request.amount} ${request.currency || 'IQD'}`);
     
     return {
       success: true,
@@ -277,9 +277,9 @@ export class BankGatewayRouter {
   // پیاده‌سازی درگاه مرکز پرداخت عراق
   private async createIraqPaymentCenterPayment(gateway: PaymentGateway, request: BankPaymentRequest) {
     const transactionId = `IPC_${Date.now()}_${request.orderId}`;
-    const paymentUrl = `https://payment.cbi.iq/gateway/pay/${transactionId}`;
+    const paymentUrl = `https://payment.cbi.iq/gateway/pay/${transactionId}?amount=${request.amount}&currency=${request.currency || 'IQD'}`;
     
-    console.log(`💳 [IRAQ PAYMENT CENTER] Payment URL created: ${paymentUrl}`);
+    console.log(`💳 [IRAQ PAYMENT CENTER] Payment URL created: ${paymentUrl} for amount: ${request.amount} ${request.currency || 'IQD'}`);
     
     return {
       success: true,
