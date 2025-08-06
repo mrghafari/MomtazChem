@@ -112,6 +112,7 @@ const Shop = () => {
     }
   };
   const [selectedImageForZoom, setSelectedImageForZoom] = useState<string | null>(null);
+  const [currentImageIndexes, setCurrentImageIndexes] = useState<{ [key: number]: number }>({});
   const [currentPage, setCurrentPage] = useState(0);
   const itemsPerPage = 12;
 
@@ -1118,27 +1119,80 @@ const Shop = () => {
                               : (product.imageUrl ? [product.imageUrl] : []);
                             
                             if (images.length > 0) {
-                              const primaryImage = images[0];
+                              const currentIndex = currentImageIndexes[product.id] || 0;
+                              const currentImage = images[currentIndex] || images[0];
+                              
                               return (
                                 <div 
                                   className="relative w-full h-full cursor-pointer"
                                   onClick={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
-                                    console.log('Image clicked:', primaryImage);
-                                    setSelectedImageForZoom(primaryImage);
+                                    console.log('Image clicked:', currentImage);
+                                    setSelectedImageForZoom(currentImage);
                                   }}
                                 >
                                   <img 
-                                    src={primaryImage} 
+                                    src={currentImage} 
                                     alt={product.name}
                                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110 pointer-events-none"
                                   />
-                                  {/* Multiple images indicator */}
+                                  {/* Multiple images carousel controls */}
                                   {images.length > 1 && (
-                                    <div className="absolute top-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded-full">
-                                      +{images.length - 1}
-                                    </div>
+                                    <>
+                                      {/* Previous/Next buttons */}
+                                      <button
+                                        onClick={(e) => {
+                                          e.preventDefault();
+                                          e.stopPropagation();
+                                          const newIndex = currentIndex > 0 ? currentIndex - 1 : images.length - 1;
+                                          setCurrentImageIndexes(prev => ({
+                                            ...prev,
+                                            [product.id]: newIndex
+                                          }));
+                                        }}
+                                        className="absolute left-1 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                      >
+                                        ‹
+                                      </button>
+                                      <button
+                                        onClick={(e) => {
+                                          e.preventDefault();
+                                          e.stopPropagation();
+                                          const newIndex = currentIndex < images.length - 1 ? currentIndex + 1 : 0;
+                                          setCurrentImageIndexes(prev => ({
+                                            ...prev,
+                                            [product.id]: newIndex
+                                          }));
+                                        }}
+                                        className="absolute right-1 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                      >
+                                        ›
+                                      </button>
+                                      {/* Image counter */}
+                                      <div className="absolute top-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded-full">
+                                        {currentIndex + 1}/{images.length}
+                                      </div>
+                                      {/* Image indicators */}
+                                      <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        {images.map((_, index) => (
+                                          <button
+                                            key={index}
+                                            onClick={(e) => {
+                                              e.preventDefault();
+                                              e.stopPropagation();
+                                              setCurrentImageIndexes(prev => ({
+                                                ...prev,
+                                                [product.id]: index
+                                              }));
+                                            }}
+                                            className={`w-2 h-2 rounded-full transition-colors ${
+                                              index === currentIndex ? 'bg-white' : 'bg-white/50'
+                                            }`}
+                                          />
+                                        ))}
+                                      </div>
+                                    </>
                                   )}
                                   {/* Zoom overlay on hover */}
                                   <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center pointer-events-none">
@@ -1495,27 +1549,80 @@ const Shop = () => {
                               : (product.imageUrl ? [product.imageUrl] : []);
                             
                             if (images.length > 0) {
-                              const primaryImage = images[0];
+                              const currentIndex = currentImageIndexes[product.id] || 0;
+                              const currentImage = images[currentIndex] || images[0];
+                              
                               return (
                                 <div 
                                   className="relative w-full h-full overflow-hidden cursor-pointer"
                                   onClick={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
-                                    console.log('List image clicked:', primaryImage);
-                                    setSelectedImageForZoom(primaryImage);
+                                    console.log('List image clicked:', currentImage);
+                                    setSelectedImageForZoom(currentImage);
                                   }}
                                 >
                                   <img 
-                                    src={primaryImage} 
+                                    src={currentImage} 
                                     alt={product.name}
                                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110 pointer-events-none"
                                   />
-                                  {/* Multiple images indicator */}
+                                  {/* Multiple images carousel controls */}
                                   {images.length > 1 && (
-                                    <div className="absolute top-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded-full">
-                                      +{images.length - 1}
-                                    </div>
+                                    <>
+                                      {/* Previous/Next buttons */}
+                                      <button
+                                        onClick={(e) => {
+                                          e.preventDefault();
+                                          e.stopPropagation();
+                                          const newIndex = currentIndex > 0 ? currentIndex - 1 : images.length - 1;
+                                          setCurrentImageIndexes(prev => ({
+                                            ...prev,
+                                            [product.id]: newIndex
+                                          }));
+                                        }}
+                                        className="absolute left-1 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                      >
+                                        ‹
+                                      </button>
+                                      <button
+                                        onClick={(e) => {
+                                          e.preventDefault();
+                                          e.stopPropagation();
+                                          const newIndex = currentIndex < images.length - 1 ? currentIndex + 1 : 0;
+                                          setCurrentImageIndexes(prev => ({
+                                            ...prev,
+                                            [product.id]: newIndex
+                                          }));
+                                        }}
+                                        className="absolute right-1 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                      >
+                                        ›
+                                      </button>
+                                      {/* Image counter */}
+                                      <div className="absolute top-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded-full">
+                                        {currentIndex + 1}/{images.length}
+                                      </div>
+                                      {/* Image indicators */}
+                                      <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        {images.map((_, index) => (
+                                          <button
+                                            key={index}
+                                            onClick={(e) => {
+                                              e.preventDefault();
+                                              e.stopPropagation();
+                                              setCurrentImageIndexes(prev => ({
+                                                ...prev,
+                                                [product.id]: index
+                                              }));
+                                            }}
+                                            className={`w-2 h-2 rounded-full transition-colors ${
+                                              index === currentIndex ? 'bg-white' : 'bg-white/50'
+                                            }`}
+                                          />
+                                        ))}
+                                      </div>
+                                    </>
                                   )}
                                   {/* Zoom overlay on hover */}
                                   <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center pointer-events-none">

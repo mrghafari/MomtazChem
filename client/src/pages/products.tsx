@@ -156,6 +156,7 @@ export default function ProductsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null); // Legacy single image preview
   const [imagePreviews, setImagePreviews] = useState<(string | null)[]>([null, null, null]); // Multiple image previews
+  const [primaryImageIndex, setPrimaryImageIndex] = useState<number>(0); // Track which image is primary
   const [catalogPreview, setCatalogPreview] = useState<string | null>(null);
   const [msdsPreview, setMsdsPreview] = useState<string | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false); // Legacy single image upload
@@ -776,8 +777,8 @@ export default function ProductsPage() {
       // Remove empty strings and update form
       form.setValue('imageUrls', newUrls.filter(url => url));
       
-      // Update legacy imageUrl field with first image for backward compatibility
-      if (index === 0) {
+      // Update legacy imageUrl field with primary image for backward compatibility
+      if (index === primaryImageIndex) {
         form.setValue('imageUrl', url);
         setImagePreview(url);
       }
@@ -880,6 +881,7 @@ export default function ProductsPage() {
     setEditingProduct(null);
     setImagePreview(null);
     setImagePreviews([null, null, null]); // Reset multiple image previews
+    setPrimaryImageIndex(0); // Reset primary image to first
     setCatalogPreview(null);
     setMsdsPreview(null);
     setManualBarcodeEntered(false); // Reset manual barcode flag
@@ -899,6 +901,9 @@ export default function ProductsPage() {
       if (index < 3) newPreviews[index] = url;
     });
     setImagePreviews(newPreviews);
+    // Set primary image index - default to first image if exists, otherwise 0
+    const primaryIndex = existingImageUrls.length > 0 ? 0 : 0;
+    setPrimaryImageIndex(primaryIndex);
     setCatalogPreview(product.pdfCatalogUrl || null);
     setMsdsPreview(product.msdsUrl || null);
     form.reset({
@@ -2528,6 +2533,9 @@ export default function ProductsPage() {
                       
                       <div className="space-y-4">
                         {/* آپلود تصاویر */}
+                        <div className="mb-2 text-sm text-gray-600">
+                          💡 انتخاب تصویر اصلی: دکمه دایره‌ای زیر هر تصویر را کلیک کنید تا آن تصویر به عنوان تصویر اصلی نمایش داده شود
+                        </div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           {[0, 1, 2].map((index) => (
                             <div key={index} className="space-y-2">
@@ -2538,8 +2546,34 @@ export default function ProductsPage() {
                                     <img 
                                       src={imagePreviews[index]} 
                                       alt={`پیش‌نمای تصویر ${index + 1}`} 
-                                      className="w-full h-20 object-cover rounded-lg"
+                                      className={`w-full h-20 object-cover rounded-lg transition-all ${
+                                        primaryImageIndex === index ? 'ring-2 ring-blue-500 ring-offset-2' : ''
+                                      }`}
                                     />
+                                    {/* Primary image indicator */}
+                                    {primaryImageIndex === index && (
+                                      <div className="absolute -top-1 -left-1 bg-blue-500 text-white text-xs px-1 py-0.5 rounded-full text-[10px] font-bold">
+                                        اصلی
+                                      </div>
+                                    )}
+                                    {/* Primary image selection radio button */}
+                                    <div className="absolute bottom-1 left-1">
+                                      <input
+                                        type="radio"
+                                        name="primaryImage"
+                                        checked={primaryImageIndex === index}
+                                        onChange={() => {
+                                          setPrimaryImageIndex(index);
+                                          // Update legacy imageUrl field with new primary image
+                                          const currentUrls = form.getValues('imageUrls') || [];
+                                          if (currentUrls[index]) {
+                                            form.setValue('imageUrl', currentUrls[index]);
+                                            setImagePreview(currentUrls[index]);
+                                          }
+                                        }}
+                                        className="w-3 h-3 text-blue-600 bg-white border-gray-300 focus:ring-blue-500 focus:ring-2"
+                                      />
+                                    </div>
                                     <Button
                                       type="button"
                                       variant="outline"
@@ -2554,6 +2588,21 @@ export default function ProductsPage() {
                                         const newUrls = [...currentUrls];
                                         newUrls[index] = '';
                                         form.setValue('imageUrls', newUrls.filter(url => url));
+                                        
+                                        // If removing the primary image, set first available image as primary
+                                        if (primaryImageIndex === index) {
+                                          const remainingImages = newUrls.filter((url, i) => i !== index && url);
+                                          if (remainingImages.length > 0) {
+                                            const newPrimaryIndex = newUrls.findIndex((url, i) => i !== index && url);
+                                            setPrimaryImageIndex(newPrimaryIndex);
+                                            form.setValue('imageUrl', newUrls[newPrimaryIndex]);
+                                            setImagePreview(newUrls[newPrimaryIndex]);
+                                          } else {
+                                            setPrimaryImageIndex(0);
+                                            form.setValue('imageUrl', '');
+                                            setImagePreview(null);
+                                          }
+                                        }
                                       }}
                                     >
                                       <X className="h-3 w-3" />
