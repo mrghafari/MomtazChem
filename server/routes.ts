@@ -14090,8 +14090,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       // Only process wallet payments when customer explicitly chose wallet options
       else if (orderData.paymentMethod === 'wallet_full' || orderData.paymentMethod === 'wallet_partial') {
-        walletAmountUsed = parseFloat(orderData.walletAmountUsed || 0);
-        remainingAmount = parseFloat(orderData.remainingAmount || totalAmount);
+        walletAmountUsed = Math.round(parseFloat(orderData.walletAmountUsed || 0));
+        remainingAmount = Math.round(parseFloat(orderData.remainingAmount || totalAmount));
         
         console.log('💰 [BILINGUAL WALLET DEBUG] Processing wallet payment:', {
           walletAmountUsed,
@@ -14116,7 +14116,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.log(`✅ Wallet payment processed: ${walletAmountUsed} IQD deducted, transaction ID: ${transaction.id}`);
             
             // CRITICAL FIX: Check if remainingAmount is 0 to send directly to warehouse
-            if (remainingAmount <= 0.01) {
+            if (Math.round(remainingAmount) <= 1) {
               finalPaymentStatus = "paid"; // Fully paid by wallet
               finalPaymentMethod = "wallet_full"; // Ensure correct method
               console.log('🏪 [WAREHOUSE DIRECT] Bank payment = 0, sending order directly to warehouse');
@@ -14155,8 +14155,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: "pending",
         paymentStatus: finalPaymentStatus,
         paymentMethod: finalPaymentMethod,
-        totalAmount: totalAmount.toString(),
-        shippingCost: shippingAmount.toString(),
+        totalAmount: Math.round(totalAmount).toString(),
+        shippingCost: Math.round(shippingAmount).toString(),
         currency: orderData.currency || "IQD",
         notes: orderData.notes || "",
         
@@ -14390,12 +14390,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         orderId: order.id,
         orderNumber: order.orderNumber,
         paymentMethod: finalPaymentMethod,
-        totalAmount: remainingAmount > 0 ? remainingAmount : totalAmount,
-        walletAmountUsed: walletAmountUsed,
+        totalAmount: Math.round(remainingAmount) > 0 ? Math.round(remainingAmount) : Math.round(totalAmount),
+        walletAmountUsed: Math.round(walletAmountUsed),
       };
 
       // CRITICAL FIX: Check for full wallet payment first (remainingAmount = 0)
-      if (finalPaymentStatus === "paid" && remainingAmount <= 0.01) {
+      if (finalPaymentStatus === "paid" && Math.round(remainingAmount) <= 1) {
         console.log(`🏪 [WAREHOUSE DIRECT] Full wallet payment completed - sending order ${orderNumber} directly to warehouse`);
         console.log(`💰 [PAYMENT COMPLETE] Wallet: ${walletAmountUsed} IQD, Remaining: ${remainingAmount} IQD`);
         
@@ -14404,8 +14404,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           message: 'سفارش با موفقیت ثبت شد - ارسال به انبار',
           orderId: order.id,
           orderNumber: orderNumber,
-          totalAmount: totalAmount,
-          walletAmountUsed: walletAmountUsed,
+          totalAmount: Math.round(totalAmount),
+          walletAmountUsed: Math.round(walletAmountUsed),
           remainingAmount: 0,
           paymentStatus: "paid",
           requiresBankPayment: false,
@@ -14418,10 +14418,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { formatIQDAmount } = await import('./currency-utils');
       
       // IMPORTANT: If wallet was successfully processed, recalculate the REAL remaining amount
-      let actualRemainingAmount = remainingAmount; // Default to original remaining amount
+      let actualRemainingAmount = Math.round(remainingAmount); // Default to original remaining amount (rounded)
       if (walletAmountUsed > 0) {
         // If wallet was used, the REAL remaining amount is total minus what was actually deducted
-        actualRemainingAmount = totalAmount - walletAmountUsed;
+        actualRemainingAmount = Math.round(totalAmount) - Math.round(walletAmountUsed);
       }
       
       const formattedRemainingForBank = formatIQDAmount(actualRemainingAmount);
@@ -14443,7 +14443,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             status: order.status,
             paymentStatus: "paid",
             paymentMethod: 'wallet_full',
-            walletAmountUsed: walletAmountUsed,
+            walletAmountUsed: Math.round(walletAmountUsed),
             crmCustomerId: finalCustomerId,
           }
         });
@@ -14474,9 +14474,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             message: 'سفارش ثبت شد - هدایت به درگاه پرداخت',
             orderId: orderNumber,
             orderNumber: orderNumber,
-            totalAmount: totalAmount,
-            walletAmountUsed: walletAmountUsed,
-            walletAmountDeducted: walletAmountUsed,
+            totalAmount: Math.round(totalAmount),
+            walletAmountUsed: Math.round(walletAmountUsed),
+            walletAmountDeducted: Math.round(walletAmountUsed),
             remainingAmount: formattedRemainingAmount,
             requiresBankPayment: true,
             paymentGateway: routingResult.gateway,
@@ -14491,9 +14491,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             message: 'سفارش ثبت شد - هدایت به صفحه پرداخت',
             orderId: orderNumber,
             orderNumber: orderNumber,
-            totalAmount: totalAmount,
-            walletAmountUsed: walletAmountUsed,
-            remainingAmount: remainingAmount,
+            totalAmount: Math.round(totalAmount),
+            walletAmountUsed: Math.round(walletAmountUsed),
+            remainingAmount: Math.round(remainingAmount),
             requiresBankPayment: true,
             paymentError: routingResult.message,
             redirectUrl: `/payment/${orderNumber}`
@@ -14504,8 +14504,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Add redirect URL for online payment and bank transfer
       if (finalPaymentMethod === 'online_payment' || finalPaymentMethod === 'bank_transfer') {
         responseData.redirectToPayment = true;
-        responseData.paymentGatewayUrl = `/payment?orderId=${order.id}&amount=${remainingAmount > 0 ? remainingAmount : totalAmount}&method=${finalPaymentMethod}`;
-        console.log(`✅ Order ${orderNumber} created - redirecting to payment gateway for ${remainingAmount > 0 ? remainingAmount : totalAmount} IQD (method: ${finalPaymentMethod})`);
+        responseData.paymentGatewayUrl = `/payment?orderId=${order.id}&amount=${Math.round(remainingAmount) > 0 ? Math.round(remainingAmount) : Math.round(totalAmount)}&method=${finalPaymentMethod}`;
+        console.log(`✅ Order ${orderNumber} created - redirecting to payment gateway for ${Math.round(remainingAmount) > 0 ? Math.round(remainingAmount) : Math.round(totalAmount)} IQD (method: ${finalPaymentMethod})`);
         
         // For hybrid payment (wallet + bank gateway), return special response
         if (remainingAmount > 0 && walletAmountUsed > 0) {
