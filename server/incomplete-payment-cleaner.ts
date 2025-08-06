@@ -503,13 +503,13 @@ export class IncompletePaymentCleaner {
     try {
       const { pool } = await import('./db');
       const result = await pool.query(`
-        SELECT name FROM crm_customers WHERE id = $1
+        SELECT CONCAT(COALESCE(first_name, ''), ' ', COALESCE(last_name, '')) as name FROM crm_customers WHERE id = $1
         UNION ALL
-        SELECT name FROM customers WHERE id = $1
+        SELECT CONCAT(COALESCE(first_name, ''), ' ', COALESCE(last_name, '')) as name FROM customers WHERE id = $1
         LIMIT 1
       `, [customerId]);
       
-      return result.rows[0]?.name || null;
+      return result.rows[0]?.name?.trim() || null;
     } catch (error) {
       console.error('Error getting customer name:', error);
       return null;
@@ -521,7 +521,7 @@ export class IncompletePaymentCleaner {
       const nodemailer = await import('nodemailer');
       
       // Use Zoho SMTP configuration
-      const transporter = nodemailer.default.createTransporter({
+      const transporter = nodemailer.createTransport({
         host: 'smtp.zoho.com',
         port: 587,
         secure: false,
