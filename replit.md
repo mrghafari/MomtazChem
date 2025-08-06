@@ -112,6 +112,16 @@ The system is built on a robust full-stack architecture. Features include compre
 - **ERROR HANDLING:** Added URI decoding protection for product names with special characters (%)
 - **TYPESCRIPT RESOLUTION:** Resolved 16 TypeScript errors in products.tsx including null value handling
 - **BATCH DISPLAY:** Proper FIFO ordering shows oldest inventory batches as priority for sales
+- **COMPLETE BATCH VISIBILITY:** Restored functionality to display ALL batches with inventory in kardex (not limited to first 2)
+
+**Persistent Customer Cart System Implementation (August 2025):**
+- **DATABASE SCHEMA:** Added `persistent_carts` table for storing customer cart data across sessions
+- **AUTHENTICATION INTEGRATION:** Cart automatically syncs when customer logs in/out
+- **DUAL STORAGE:** Local storage for guest users, database storage for authenticated customers
+- **API ENDPOINTS:** Complete CRUD operations: `/api/customers/persistent-cart/*` endpoints
+- **AUTOMATIC SYNC:** Local cart merges with database cart on login for seamless experience
+- **SESSION PERSISTENCE:** Customer cart preserved even after logout and login cycles
+- **CART MANAGEMENT:** Save, update, remove individual items and clear entire cart functionality
 
 ### System Design Choices
 The architecture emphasizes modularity and scalability. Core architectural patterns include a RESTful API design for backend-frontend communication, ensuring clear separation of concerns. Data integrity is maintained through transactional operations for critical processes like order creation and inventory updates. The system employs a prevention-first approach to avoid data inconsistencies. A unified vehicle selection algorithm prioritizes cost-efficiency and safety compliance, particularly for hazardous materials. Inventory management strictly adheres to FIFO (First-In, First-Out) principles. A comprehensive email and SMS automation system leverages templates and intelligent routing. The system is designed for continuous integration and deployment, with a focus on performance optimization through database indexing, caching, and asset optimization.
