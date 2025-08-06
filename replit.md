@@ -16,6 +16,7 @@ Preferred communication style: Simple, everyday language.
 - Checkout success page "order not found" error fixed
 - Auto-recovery system for lost orders implemented
 - Backend cart calculation bug FIXED (August 6, 2025) - now properly queries shop_products table instead of showcaseProducts for accurate pricing
+- Frontend calculation trust system implemented (August 6, 2025) - backend now uses precise frontend-calculated shipping costs, VAT, and duties instead of recalculating them, eliminating calculation discrepancies
 
 **Critical Security Requirements:**
 - Extreme vigilance in wallet transaction processing
