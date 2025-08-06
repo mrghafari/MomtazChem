@@ -946,13 +946,25 @@ function FinanceOrders() {
         }
         @media print {
           @page { 
-            margin: 1cm; 
+            margin: 1.5cm; 
             size: A4;
           }
           body { 
-            margin: 0; 
+            margin: 0 auto; 
             padding: 0;
             font-size: 12px;
+            width: 100%;
+            max-width: 210mm;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+          }
+          .print-container {
+            width: 100%;
+            max-width: 180mm;
+            margin: 0 auto;
+            padding: 0;
           }
           .card {
             page-break-inside: avoid;
@@ -973,11 +985,12 @@ function FinanceOrders() {
       </style>
     </head>
     <body>
-      <div class="header">
+      <div class="print-container">
+        <div class="header">
         <img src="/attached_assets/Logo_1753245273579.jpeg" alt="شرکت ممتاز شیمی" style="max-width: 120px; max-height: 80px; margin-bottom: 15px;" onerror="this.style.display='none'">
         <div class="company-name">شرکت ممتاز شیمی</div>
         <div class="order-title">جزئیات سفارش ${orderDetails.orderNumber}</div>
-        <div style="font-size: 12px; color: #6b7280;">تاریخ چاپ: ${new Date().toLocaleDateString('fa-IR')}</div>
+        <div style="font-size: 12px; color: #6b7280;">تاریخ چاپ: ${new Date().toLocaleDateString('en-US')}</div>
       </div>
 
       <!-- Customer Information Card -->
@@ -1019,7 +1032,7 @@ function FinanceOrders() {
         <div style="margin-top: 15px;">
           <div class="info-item">
             <span class="label">تاریخ سفارش</span>
-            <span class="value">${formatDateSafe(orderDetails.createdAt, 'fa-IR')}</span>
+            <span class="value">${formatDateSafe(orderDetails.createdAt, 'en-US')}</span>
           </div>
         </div>
       </div>
@@ -1047,8 +1060,8 @@ function FinanceOrders() {
                 <td style="font-weight: bold; color: #2563eb;">${index + 1}</td>
                 <td style="text-align: right; font-weight: 500;">${item.productName || 'نام محصول نامشخص'}</td>
                 <td><strong>${quantity}</strong></td>
-                <td>${unitPrice.toLocaleString('fa-IR')}</td>
-                <td style="font-weight: bold; color: #059669;">${totalPrice.toLocaleString('fa-IR')}</td>
+                <td>${unitPrice.toLocaleString('en-US')}</td>
+                <td style="font-weight: bold; color: #059669;">${totalPrice.toLocaleString('en-US')}</td>
               </tr>`;
             }).join('') || '<tr><td colspan="5">هیچ آیتمی یافت نشد</td></tr>'}
           </tbody>
@@ -1058,7 +1071,7 @@ function FinanceOrders() {
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <span style="font-size: 16px; font-weight: bold;">مبلغ کل سفارش:</span>
             <span style="font-size: 18px; font-weight: bold; color: #dc2626;">
-              ${itemsTotal.toLocaleString('fa-IR')} ${orderDetails.currency || 'IQD'}
+              ${itemsTotal.toLocaleString('en-US')} ${orderDetails.currency || 'IQD'}
             </span>
           </div>
           <div style="margin-top: 8px; font-size: 14px; color: #92400e;">
@@ -1089,8 +1102,9 @@ function FinanceOrders() {
       <div style="margin-top: 40px; text-align: center; padding: 15px; border-top: 2px solid #e5e7eb;">
         <div style="font-size: 12px; color: #6b7280; line-height: 1.4;">
           <strong>این سند توسط سیستم مدیریت ممتاز شیمی تولید شده است</strong><br>
-          تاریخ چاپ: ${new Date().toLocaleString('fa-IR')} | شماره سفارش: ${orderDetails.orderNumber}
+          تاریخ چاپ: ${new Date().toLocaleString('en-US')} | شماره سفارش: ${orderDetails.orderNumber}
         </div>
+      </div>
       </div>
     </body>
     </html>
@@ -1570,7 +1584,7 @@ function FinanceOrders() {
                                     </div>
                                     <div>
                                       <Label className="text-gray-600">تاریخ ایجاد:</Label>
-                                      <p className="font-medium">{new Date(order.createdAt).toLocaleDateString('fa-IR')}</p>
+                                      <p className="font-medium">{new Date(order.createdAt).toLocaleDateString('en-US')}</p>
                                     </div>
                                   </div>
 
@@ -1809,7 +1823,7 @@ function FinanceOrders() {
                                       </div>
                                       <div className="flex items-center gap-2 text-red-600">
                                         <Calendar className="h-4 w-4" />
-                                        <span>انقضا: {new Date(order.gracePeriodExpires).toLocaleDateString('fa-IR')}</span>
+                                        <span>انقضا: {new Date(order.gracePeriodExpires).toLocaleDateString('en-US')}</span>
                                       </div>
                                     </div>
                                   </CardContent>
@@ -1998,7 +2012,7 @@ function FinanceOrders() {
                               </div>
                               <div className="flex items-center gap-2 text-gray-600">
                                 <Calendar className="h-4 w-4" />
-                                <span>تاریخ: {formatDateSafe(order.created_at)}</span>
+                                <span>تاریخ: {formatDateSafe(order.created_at, 'en-US')}</span>
                               </div>
                               <div className="flex items-center gap-2 text-gray-600">
                                 <span className="font-medium">وضعیت پرداخت:</span>
@@ -2340,7 +2354,7 @@ function FinanceOrders() {
                       <div>
                         <Label className="text-sm font-medium text-gray-600">تاریخ سفارش</Label>
                         <p className="font-medium text-sm">
-                          {formatDateSafe(orderDetails.createdAt)}
+                          {formatDateSafe(orderDetails.createdAt, 'en-US')}
                         </p>
                       </div>
                     </div>
@@ -2537,7 +2551,7 @@ function FinanceOrders() {
                         <div>
                           <Label className="text-xs font-medium text-gray-600">آخرین بروزرسانی</Label>
                           <p className="font-medium text-sm">
-                            {formatDateSafe(orderDetails.updatedAt)}
+                            {formatDateSafe(orderDetails.updatedAt, 'en-US')}
                           </p>
                         </div>
                         <div>
@@ -2597,7 +2611,7 @@ function FinanceOrders() {
                                     {doc.description || doc.fileName || 'مدرک ارسالی'}
                                   </p>
                                   <p className="text-sm text-gray-500">
-                                    {formatDateSafe(doc.uploadedAt)} 
+                                    {formatDateSafe(doc.uploadedAt, 'en-US')} 
                                     {doc.fileName && ` • ${doc.fileName}`}
                                   </p>
                                 </div>
