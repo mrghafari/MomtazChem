@@ -4891,7 +4891,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/products/:productName/batches/display", async (req, res) => {
     try {
       const { productName } = req.params;
-      const decodedProductName = decodeURIComponent(productName);
+      let decodedProductName;
+      try {
+        decodedProductName = decodeURIComponent(productName);
+      } catch (error) {
+        console.error('❌ [BATCH-DISPLAY] Invalid product name encoding:', productName);
+        return res.status(400).json({
+          success: false,
+          message: 'نام محصول نامعتبر است'
+        });
+      }
       
       const { FIFOBatchManager } = await import('./fifo-batch-manager');
       const result = await FIFOBatchManager.getBatchInfoFIFO(decodedProductName);

@@ -1345,7 +1345,7 @@ export default function ProductsPage() {
                             </Badge>
                           </div>
                           <div className="text-xs text-green-600 mt-1">
-                            سیستم LIFO - جدیدترین بچ با موجودی
+                            سیستم FIFO - قدیمی‌ترین بچ با موجودی
                           </div>
                         </div>
                       )}
