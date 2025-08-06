@@ -939,33 +939,21 @@ function FinanceOrders() {
           }
           .items-table th:first-child,
           .items-table td:first-child {
-            width: 5% !important;
-            min-width: 5% !important;
-            max-width: 5% !important;
+            width: 65% !important;
+            min-width: 65% !important;
+            max-width: 65% !important;
           }
           .items-table th:nth-child(2),
           .items-table td:nth-child(2) {
-            width: 60% !important;
-            min-width: 60% !important;
-            max-width: 60% !important;
+            width: 15% !important;
+            min-width: 15% !important;
+            max-width: 15% !important;
           }
           .items-table th:nth-child(3),
           .items-table td:nth-child(3) {
-            width: 8% !important;
-            min-width: 8% !important;
-            max-width: 8% !important;
-          }
-          .items-table th:nth-child(4),
-          .items-table td:nth-child(4) {
-            width: 13% !important;
-            min-width: 13% !important;
-            max-width: 13% !important;
-          }
-          .items-table th:nth-child(5),
-          .items-table td:nth-child(5) {
-            width: 14% !important;
-            min-width: 14% !important;
-            max-width: 14% !important;
+            width: 20% !important;
+            min-width: 20% !important;
+            max-width: 20% !important;
           }
           .no-print { display: none !important; }
           * {
