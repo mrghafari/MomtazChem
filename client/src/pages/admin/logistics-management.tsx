@@ -3888,7 +3888,7 @@ const LogisticsManagement = () => {
               <form onSubmit={handleUpdateReadyVehicle} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="edit-vehicleType">نوع خودرو *</Label>
+                    <Label htmlFor="edit-vehicleType">نوع الگوی خودرو *</Label>
                     <Select 
                       name="vehicleType" 
                       value={(() => {
@@ -3915,7 +3915,7 @@ const LogisticsManagement = () => {
                       required
                     >
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder="انتخاب نوع خودرو" />
+                        <SelectValue placeholder="انتخاب نوع الگوی خودرو" />
                       </SelectTrigger>
                       <SelectContent>
                         {(vehicleTemplatesData as any)?.data?.map((template: any) => (
