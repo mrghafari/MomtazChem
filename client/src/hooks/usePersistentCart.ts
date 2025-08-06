@@ -24,7 +24,7 @@ export function usePersistentCart() {
     }
     
     // If user is not authenticated, load from localStorage (guest cart)
-    if (!isAuthenticated && !previousAuth) {
+    if (!isAuthenticated) {
       const savedCart = localStorage.getItem('cart');
       if (savedCart) {
         try {
@@ -39,7 +39,7 @@ export function usePersistentCart() {
     }
     
     setPreviousAuth(isAuthenticated);
-  }, [isAuthenticated, previousAuth]);
+  }, [isAuthenticated]);
 
   // Load persistent cart from database when user logs in
   useEffect(() => {
@@ -82,11 +82,11 @@ export function usePersistentCart() {
       }
     };
 
-    // Only load if user just authenticated (not on every render)
-    if (isAuthenticated && user && !previousAuth) {
+    // Load cart whenever user authentication state changes or user data becomes available
+    if (isAuthenticated && user && user.id) {
       loadPersistentCart();
     }
-  }, [isAuthenticated, user, previousAuth]);
+  }, [isAuthenticated, user?.id]);
 
   // ذخیره سبد محلی در localStorage
   const saveLocalCart = (cart: {[key: number]: number}) => {
