@@ -1156,6 +1156,8 @@ const Shop = () => {
                               ? product.imageUrls 
                               : (product.imageUrl ? [product.imageUrl] : []);
                             
+
+                            
                             if (images.length > 0) {
                               const currentIndex = currentImageIndexes[product.id] || 0;
                               const currentImage = images[currentIndex] || images[0];
@@ -1166,7 +1168,7 @@ const Shop = () => {
                                   onClick={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
-                                    console.log('Image clicked:', currentImage);
+
                                     setSelectedImageForZoom(currentImage);
                                     setSelectedProductForZoom(product);
                                     setZoomedImageIndex(currentIndex);
@@ -1598,7 +1600,7 @@ const Shop = () => {
                                   onClick={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
-                                    console.log('List image clicked:', currentImage);
+
                                     setSelectedImageForZoom(currentImage);
                                     setSelectedProductForZoom(product);
                                     setZoomedImageIndex(currentIndex);
