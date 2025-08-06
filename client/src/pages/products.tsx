@@ -498,11 +498,20 @@ export default function ProductsPage() {
       unitPrice: 0,
       currency: "IQD",
       isActive: true,
+      // Fields that caused controlled/uncontrolled warnings
+      technicalName: "",
+      weight: "",
+      stockUnit: "",
+      netWeight: 0,
+      grossWeight: 0,
+      weightUnit: "kg",
+      batchNumber: "",
+      tags: "",
       // Variant fields
       isVariant: false,
       parentProductId: undefined,
-      variantType: undefined,
-      variantValue: undefined,
+      variantType: "",
+      variantValue: "",
       // MSDS fields
       msdsUrl: "",
       msdsFileName: "",
@@ -518,11 +527,6 @@ export default function ProductsPage() {
       isNonChemical: false,
       // Flammable product flag
       isFlammable: false,
-      // Weight fields
-      netWeight: 0,
-      grossWeight: 0,
-      // Batch tracking
-      batchNumber: "",
       // New inventory addition fields
       inventoryAddition: 0,
       newBatchNumber: "",
