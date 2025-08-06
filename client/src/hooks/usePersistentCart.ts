@@ -54,7 +54,7 @@ export function usePersistentCart() {
             console.log('🔄 Syncing local cart to database:', localCart);
             await apiRequest('/api/customers/persistent-cart/sync', {
               method: 'POST',
-              body: JSON.stringify({ cartData: localCart }),
+              body: { cartData: localCart },
             });
           }
           
@@ -107,7 +107,7 @@ export function usePersistentCart() {
         console.log(`🛒 Saving product ${productId} to database for customer ${user.id}`);
         await apiRequest('/api/customers/persistent-cart/save', {
           method: 'POST',
-          body: JSON.stringify({ productId, quantity: newCart[productId], unitPrice }),
+          body: { productId, quantity: newCart[productId], unitPrice },
         });
         console.log(`✅ Product ${productId} saved to database`);
       } catch (error) {
@@ -135,7 +135,7 @@ export function usePersistentCart() {
         console.log(`🛒 Updating quantity for product ${productId} to ${quantity} for customer ${user.id}`);
         await apiRequest('/api/customers/persistent-cart/update', {
           method: 'PUT',
-          body: JSON.stringify({ productId, quantity }),
+          body: { productId, quantity },
         });
         console.log(`✅ Product ${productId} quantity updated`);
       } catch (error) {
@@ -158,7 +158,7 @@ export function usePersistentCart() {
         console.log(`🛒 Removing product ${productId} from database for customer ${user.id}`);
         await apiRequest('/api/customers/persistent-cart/remove', {
           method: 'DELETE',
-          body: JSON.stringify({ productId }),
+          body: { productId },
         });
         console.log(`✅ Product ${productId} removed from database`);
       } catch (error) {

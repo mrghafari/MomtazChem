@@ -13240,6 +13240,158 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Save product to customer's persistent cart
+  app.post("/api/customers/persistent-cart/save", requireCustomerAuth, async (req, res) => {
+    try {
+      const customerId = (req.session as any).customerId;
+      const { productId, quantity, unitPrice } = req.body;
+      
+      console.log('🛒 [PERSISTENT CART SAVE] Saving product for customer:', customerId, { productId, quantity });
+      
+      const { pool } = await import('./db');
+      
+      // Get current cart data
+      const result = await pool.query(`
+        SELECT cart_data FROM persistent_carts 
+        WHERE customer_id = $1
+      `, [customerId]);
+      
+      let cartData = {};
+      if (result.rows.length > 0) {
+        const existing = result.rows[0].cart_data;
+        cartData = typeof existing === 'string' ? JSON.parse(existing) : existing;
+      }
+      
+      // Update product quantity
+      cartData[productId] = quantity;
+      
+      // Upsert cart data
+      await pool.query(`
+        INSERT INTO persistent_carts (customer_id, cart_data, updated_at)
+        VALUES ($1, $2, NOW())
+        ON CONFLICT (customer_id)
+        DO UPDATE SET 
+          cart_data = $2,
+          updated_at = NOW()
+      `, [customerId, JSON.stringify(cartData)]);
+      
+      console.log('✅ [PERSISTENT CART SAVE] Product saved successfully');
+      
+      res.json({
+        success: true,
+        message: 'محصول به سبد اضافه شد'
+      });
+    } catch (error) {
+      console.error('❌ [PERSISTENT CART SAVE] Error saving product:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در اضافه کردن محصول'
+      });
+    }
+  });
+
+  // Update product quantity in customer's persistent cart
+  app.put("/api/customers/persistent-cart/update", requireCustomerAuth, async (req, res) => {
+    try {
+      const customerId = (req.session as any).customerId;
+      const { productId, quantity } = req.body;
+      
+      console.log('🛒 [PERSISTENT CART UPDATE] Updating product for customer:', customerId, { productId, quantity });
+      
+      const { pool } = await import('./db');
+      
+      // Get current cart data
+      const result = await pool.query(`
+        SELECT cart_data FROM persistent_carts 
+        WHERE customer_id = $1
+      `, [customerId]);
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'سبد خرید یافت نشد'
+        });
+      }
+      
+      const existing = result.rows[0].cart_data;
+      const cartData = typeof existing === 'string' ? JSON.parse(existing) : existing;
+      
+      // Update product quantity
+      cartData[productId] = quantity;
+      
+      // Update cart data
+      await pool.query(`
+        UPDATE persistent_carts 
+        SET cart_data = $1, updated_at = NOW()
+        WHERE customer_id = $2
+      `, [JSON.stringify(cartData), customerId]);
+      
+      console.log('✅ [PERSISTENT CART UPDATE] Product updated successfully');
+      
+      res.json({
+        success: true,
+        message: 'تعداد محصول بروزرسانی شد'
+      });
+    } catch (error) {
+      console.error('❌ [PERSISTENT CART UPDATE] Error updating product:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در بروزرسانی محصول'
+      });
+    }
+  });
+
+  // Remove product from customer's persistent cart
+  app.delete("/api/customers/persistent-cart/remove", requireCustomerAuth, async (req, res) => {
+    try {
+      const customerId = (req.session as any).customerId;
+      const { productId } = req.body;
+      
+      console.log('🛒 [PERSISTENT CART REMOVE] Removing product for customer:', customerId, { productId });
+      
+      const { pool } = await import('./db');
+      
+      // Get current cart data
+      const result = await pool.query(`
+        SELECT cart_data FROM persistent_carts 
+        WHERE customer_id = $1
+      `, [customerId]);
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'سبد خرید یافت نشد'
+        });
+      }
+      
+      const existing = result.rows[0].cart_data;
+      const cartData = typeof existing === 'string' ? JSON.parse(existing) : existing;
+      
+      // Remove product
+      delete cartData[productId];
+      
+      // Update cart data
+      await pool.query(`
+        UPDATE persistent_carts 
+        SET cart_data = $1, updated_at = NOW()
+        WHERE customer_id = $2
+      `, [JSON.stringify(cartData), customerId]);
+      
+      console.log('✅ [PERSISTENT CART REMOVE] Product removed successfully');
+      
+      res.json({
+        success: true,
+        message: 'محصول از سبد حذف شد'
+      });
+    } catch (error) {
+      console.error('❌ [PERSISTENT CART REMOVE] Error removing product:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در حذف محصول'
+      });
+    }
+  });
+
   // Clear customer's persistent cart
   app.delete("/api/customers/persistent-cart/clear", requireCustomerAuth, async (req, res) => {
     try {
