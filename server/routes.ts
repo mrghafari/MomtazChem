@@ -88,6 +88,7 @@ import {
   type AbandonedCartSettings,
   type AbandonedCartNotification
 } from "@shared/cart-schema";
+import { persistentCarts, insertPersistentCartSchema, type PersistentCart, type InsertPersistentCart } from "@shared/persistent-cart-schema";
 
 import { logisticsStorage } from "./logistics-storage";
 import { 
