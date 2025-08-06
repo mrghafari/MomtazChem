@@ -252,6 +252,7 @@ const LogisticsManagement = () => {
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [showCustomEditInput, setShowCustomEditInput] = useState(false);
   const [selectedVehicleType, setSelectedVehicleType] = useState('');
+  const [selectedEditVehicleType, setSelectedEditVehicleType] = useState('');
 
   // Handle showing order details
   const handleShowOrderDetails = (order: LogisticsOrder) => {
@@ -306,22 +307,21 @@ const LogisticsManagement = () => {
 
   const readyVehicles = (readyVehiclesData as any)?.data || [];
 
-  // Effect to handle custom vehicle type for editing - uses dynamic vehicle templates
+  // Effect to handle vehicle type selection for editing - uses dynamic vehicle templates
   React.useEffect(() => {
-    if (editingVehicle && vehicleTemplatesData) {
+    if (selectedReadyVehicle && vehicleTemplatesData) {
       // Get current vehicle template names from database
       const templateNames = ((vehicleTemplatesData as any)?.data || []).map((template: any) => template.name);
-      const isCustomType = !templateNames.includes(editingVehicle.vehicleType);
+      const matchingTemplate = templateNames.find(name => name === selectedReadyVehicle.vehicleType);
       
-      if (isCustomType) {
-        setShowCustomEditInput(true);
-        setCustomEditVehicleType(editingVehicle.vehicleType);
+      if (matchingTemplate) {
+        setSelectedEditVehicleType(matchingTemplate);
       } else {
-        setShowCustomEditInput(false);
-        setCustomEditVehicleType('');
+        // If no template matches, use first template as default
+        setSelectedEditVehicleType(templateNames[0] || '');
       }
     }
-  }, [editingVehicle, vehicleTemplatesData]);
+  }, [selectedReadyVehicle, vehicleTemplatesData]);
 
   // Create ready vehicle mutation
   const createReadyVehicleMutation = useMutation({
@@ -404,19 +404,15 @@ const LogisticsManagement = () => {
   };
 
   // Handle edit ready vehicle form submission
-  const handleEditReadyVehicle = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleUpdateReadyVehicle = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!selectedReadyVehicle) return;
 
     const formData = new FormData(e.currentTarget);
     
-    // Determine vehicle type based on selection
-    const selectedVehicleType = formData.get('vehicleType') as string;
-    const finalVehicleType = selectedVehicleType === 'سایر' ? customEditVehicleType : selectedVehicleType;
-    
     const vehicleData = {
       id: selectedReadyVehicle.id,
-      vehicleType: finalVehicleType,
+      vehicleType: selectedEditVehicleType, // Use the selected vehicle template directly
       licensePlate: formData.get('licensePlate') as string,
       driverName: formData.get('driverName') as string,
       driverMobile: formData.get('driverMobile') as string,
@@ -429,10 +425,6 @@ const LogisticsManagement = () => {
     };
 
     updateReadyVehicleMutation.mutate(vehicleData);
-    
-    // Reset custom input state
-    setShowCustomEditInput(false);
-    setCustomEditVehicleType('');
   };
 
   const [selectedCity, setSelectedCity] = useState<string>('');
@@ -3872,18 +3864,9 @@ const LogisticsManagement = () => {
                     <Label htmlFor="edit-vehicleType">الگوی خودرو *</Label>
                     <Select 
                       name="vehicleType" 
-                      value={(() => {
-                        // Try to find the template that matches current vehicle
-                        const vehicleTemplates = (vehicleTemplatesData as any)?.data || [];
-                        const matchingTemplate = vehicleTemplates.find((template: any) => 
-                          template.name === selectedReadyVehicle.vehicleType || 
-                          template.name === selectedReadyVehicle.vehicleTemplateName
-                        );
-                        
-                        return matchingTemplate ? matchingTemplate.name : selectedReadyVehicle.vehicleType;
-                      })()}
+                      value={selectedEditVehicleType}
                       onValueChange={(value) => {
-                        // No special handling needed - directly use selected template value
+                        setSelectedEditVehicleType(value);
                       }}
                       required
                     >
