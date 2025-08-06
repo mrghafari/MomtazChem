@@ -1347,7 +1347,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     }
   });
 
-  const onSubmit = (data: any) => {
+  const onSubmit = async (data: any) => {
     console.log('🚀 [SUBMIT DEBUG] onSubmit function called');
     console.log('🚀 [SUBMIT DEBUG] Form data received:', data);
     console.log('🚀 [SUBMIT DEBUG] Selected shipping method:', selectedShippingMethod);
@@ -1480,6 +1480,32 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       paymentConversionApplied: paymentMethod !== finalPaymentMethod,
       orderData
     });
+
+    // Store temporary calculation data for payment gateway
+    const tempCalculationData = {
+      finalAmount: totalAmount,
+      subtotalAmount,
+      shippingCost: finalShippingCost,
+      totalTaxAmount,
+      walletAmountUsed: orderData.walletAmountUsed || 0,
+      remainingAmount: orderData.remainingAmount || totalAmount,
+      paymentMethod: finalPaymentMethod,
+      cartData: cart,
+      deliveryAddress: data.address,
+      phone: data.phone,
+      notes: data.notes
+    };
+
+    console.log('💾 [TEMP CALCULATION] Storing calculation data for payment:', tempCalculationData);
+
+    // Store calculation data before submitting order
+    try {
+      await apiRequest('POST', '/api/cart/temp-order-data', tempCalculationData);
+      console.log('✅ [TEMP CALCULATION] Successfully stored calculation data');
+    } catch (error) {
+      console.error('❌ [TEMP CALCULATION] Failed to store calculation data:', error);
+      // Continue with order submission even if temp storage fails
+    }
 
     submitOrderMutation.mutate(orderData);
   };

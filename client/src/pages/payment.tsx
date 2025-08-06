@@ -55,6 +55,14 @@ export default function Payment() {
     enabled: !!orderId,
   });
 
+  // Fetch temporary calculation data from bilingual form
+  const { data: tempCalcData } = useQuery({
+    queryKey: ['/api/cart/temp-order-data'],
+    enabled: !!orderId,
+    retry: 1,
+    staleTime: 0 // Always fetch fresh data
+  });
+
   // Read wallet amount from localStorage
   useEffect(() => {
     if (orderId) {
@@ -344,11 +352,11 @@ export default function Payment() {
             ) : activeGateway ? (
               <PaymentGateway
                 paymentMethod={order.paymentMethod}
-                totalAmount={parseFloat(order.totalAmount)}
+                totalAmount={tempCalcData?.data?.finalAmount || parseFloat(order.totalAmount)}
                 orderId={order.orderNumber}
                 onPaymentSuccess={handlePaymentSuccess}
                 onPaymentError={handlePaymentError}
-                walletAmount={walletAmount}
+                walletAmount={tempCalcData?.data?.walletAmountUsed || walletAmount}
                 activeGateway={activeGateway}
               />
             ) : (

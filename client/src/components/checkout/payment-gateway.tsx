@@ -43,9 +43,32 @@ const PaymentGateway = ({
     enabled: paymentMethod === 'wallet_partial',
   });
 
+  // Fetch temporary calculation data from bilingual form
+  const { data: tempCalcData } = useQuery({
+    queryKey: ['/api/cart/temp-order-data'],
+    enabled: true,
+    retry: 1,
+    staleTime: 0 // Always fetch fresh data
+  });
+
+  // Use calculation data from bilingual form if available
+  const finalAmount = tempCalcData?.data?.finalAmount || totalAmount;
+  const calculatedWalletAmount = tempCalcData?.data?.walletAmountUsed || initialWalletAmount;
+  const calculatedRemainingAmount = tempCalcData?.data?.remainingAmount || totalAmount;
+
+  console.log('💾 [PAYMENT GATEWAY] Using calculation data:', {
+    tempCalcData: tempCalcData?.data,
+    finalAmount,
+    calculatedWalletAmount,
+    calculatedRemainingAmount,
+    originalTotalAmount: totalAmount,
+    paymentMethod: tempCalcData?.data?.paymentMethod || paymentMethod
+  });
+
   // Handle wallet-only payment (when remaining balance is 0)
   const handleWalletOnlyPayment = async () => {
     console.log('🔄 [WALLET ONLY] Processing wallet-only payment for order:', orderId);
+    console.log('🔄 [WALLET ONLY] Using final amount:', finalAmount);
     setIsProcessing(true);
     
     try {
@@ -53,7 +76,7 @@ const PaymentGateway = ({
         method: 'POST',
         body: {
           orderId: orderId,
-          totalAmount: totalAmount,
+          totalAmount: finalAmount, // Use final amount from calculation
           paymentMethod: 'wallet_full'
         }
       });
@@ -91,10 +114,15 @@ const PaymentGateway = ({
   // Handle hybrid payment (wallet + bank)
   const handleHybridPayment = async (walletAmount: number, remainingAmount: number) => {
     console.log('🔄 [HYBRID PAYMENT] Processing hybrid payment for order:', orderId);
-    console.log('🔄 [HYBRID PAYMENT] Wallet amount:', walletAmount, 'Remaining:', remainingAmount);
+    console.log('🔄 [HYBRID PAYMENT] Using calculated values - Wallet:', calculatedWalletAmount, 'Remaining:', calculatedRemainingAmount);
+    console.log('🔄 [HYBRID PAYMENT] Final amount:', finalAmount);
+    
+    // Use calculated values from bilingual form if available
+    const actualWalletAmount = calculatedWalletAmount || walletAmount;
+    const actualRemainingAmount = calculatedRemainingAmount || remainingAmount;
     
     // Critical check: If remaining amount is 0 or less, this is wallet-only payment
-    if (remainingAmount <= 0) {
+    if (actualRemainingAmount <= 0) {
       console.log('💰 [HYBRID PAYMENT] Remaining amount is 0 - processing as wallet-only payment');
       handleWalletOnlyPayment();
       return;
@@ -105,43 +133,43 @@ const PaymentGateway = ({
     setIsProcessing(true);
     
     try {
-      // Step 1: Immediately deduct from wallet
-      console.log('💰 [WALLET DEDUCTION] Deducting', walletAmount, 'from wallet for order:', orderId);
+      // Step 1: Immediately deduct from wallet using calculated values
+      console.log('💰 [WALLET DEDUCTION] Deducting', actualWalletAmount, 'from wallet for order:', orderId);
       
       const walletResponse = await apiRequest('/api/customers/wallet/hybrid-deduction', {
         method: 'POST',
         body: {
           orderId: orderId,
-          walletAmount: walletAmount,
-          remainingAmount: remainingAmount,
-          totalAmount: totalAmount
+          walletAmount: actualWalletAmount,
+          remainingAmount: actualRemainingAmount,
+          totalAmount: finalAmount // Use finalAmount from calculation
         }
       });
 
       if (walletResponse.success) {
-        console.log('✅ [WALLET DEDUCTION] Wallet successfully deducted:', walletAmount);
+        console.log('✅ [WALLET DEDUCTION] Wallet successfully deducted:', actualWalletAmount);
         
         // Double-check: If remaining amount is actually 0, complete as wallet-only
-        if (remainingAmount <= 0) {
+        if (actualRemainingAmount <= 0) {
           console.log('💰 [HYBRID PAYMENT] Remaining amount is 0 after deduction - completing as wallet-only');
           setIsProcessing(false);
           onPaymentSuccess({
             method: 'wallet_full',
             transactionId: walletResponse.transactionId,
-            amount: totalAmount,
-            walletDeducted: walletAmount,
+            amount: finalAmount,
+            walletDeducted: actualWalletAmount,
             bankPaid: 0
           });
           return;
         }
         
-        console.log('🏦 [BANK REDIRECT] Now redirecting to bank gateway for remaining:', remainingAmount);
+        console.log('🏦 [BANK REDIRECT] Now redirecting to bank gateway for remaining:', actualRemainingAmount);
         
-        // Step 2: Update form data for bank gateway
+        // Step 2: Update form data for bank gateway using calculated values
         setFormData((prev: any) => ({
           ...prev,
-          walletAmount,
-          remainingAmount,
+          walletAmount: actualWalletAmount,
+          remainingAmount: actualRemainingAmount,
           paymentMethod: 'wallet_partial'
         }));
         
@@ -798,13 +826,22 @@ const PaymentGateway = ({
   const renderWalletPartialPayment = () => {
     const currentBalance = (walletBalance as any)?.balance || 0;
     
-    // Try to restore wallet amount from localStorage if available, or use passed prop
+    // Prioritize temp calculation data over localStorage/props
     const savedWalletAmount = localStorage.getItem(`wallet_amount_${orderId}`);
-    const defaultWalletAmount = savedWalletAmount ? parseFloat(savedWalletAmount) : initialWalletAmount;
+    const priorityWalletAmount = calculatedWalletAmount || 
+                                 (savedWalletAmount ? parseFloat(savedWalletAmount) : initialWalletAmount);
     
-    // User specifies wallet amount - start with saved amount, prop value, or 0
-    const [walletAmount, setWalletAmount] = useState(defaultWalletAmount);
-    const remainingAmount = Math.max(0, totalAmount - walletAmount);
+    // Use calculation data from bilingual form if available
+    const [walletAmount, setWalletAmount] = useState(priorityWalletAmount);
+    const remainingAmount = Math.max(0, finalAmount - walletAmount);
+    
+    console.log('🔍 [WALLET PARTIAL] Using amounts:', {
+      finalAmount,
+      walletAmount,
+      remainingAmount,
+      calculatedWalletAmount,
+      calculatedRemainingAmount
+    });
     
     // Auto-execute appropriate payment based on remaining amount
     useEffect(() => {
@@ -841,12 +878,12 @@ const PaymentGateway = ({
 
     const handleWalletAmountChange = (value: string) => {
       const amount = parseFloat(value) || 0;
-      const maxWallet = Math.min(currentBalance, totalAmount);
-      const finalAmount = Math.min(Math.max(0, amount), maxWallet);
-      setWalletAmount(finalAmount);
+      const maxWallet = Math.min(currentBalance, finalAmount); // Use finalAmount instead of totalAmount
+      const finalWalletAmount = Math.min(Math.max(0, amount), maxWallet);
+      setWalletAmount(finalWalletAmount);
       
       // Save to localStorage for persistence across page loads
-      localStorage.setItem(`wallet_amount_${orderId}`, finalAmount.toString());
+      localStorage.setItem(`wallet_amount_${orderId}`, finalWalletAmount.toString());
     };
 
     return (
@@ -863,7 +900,7 @@ const PaymentGateway = ({
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span>مبلغ کل سفارش:</span>
-                <span className="font-semibold">{formatCurrency(totalAmount)}</span>
+                <span className="font-semibold">{formatCurrency(finalAmount)}</span>
               </div>
               <div className="flex justify-between">
                 <span>موجودی کیف پول:</span>
@@ -883,13 +920,13 @@ const PaymentGateway = ({
                 value={walletAmount}
                 onChange={(e) => handleWalletAmountChange(e.target.value)}
                 min="0"
-                max={Math.min(currentBalance, totalAmount)}
+                max={Math.min(currentBalance, finalAmount)}
                 step="0.01"
                 className="mt-1"
                 placeholder="مقدار از کیف پول"
               />
               <p className="text-xs text-gray-500 mt-1">
-                حداکثر: {formatCurrency(Math.min(currentBalance, totalAmount))}
+                حداکثر: {formatCurrency(Math.min(currentBalance, finalAmount))}
               </p>
             </div>
             

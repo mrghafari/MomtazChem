@@ -37893,6 +37893,88 @@ momtazchem.com
     }
   });
 
+  // Store temporary order calculation data before payment
+  app.post("/api/cart/temp-order-data", async (req, res) => {
+    try {
+      const customerId = (req.session as any)?.customerId;
+      if (!customerId) {
+        return res.status(401).json({ success: false, message: "احراز هویت مورد نیاز است" });
+      }
+
+      const { 
+        finalAmount, 
+        subtotalAmount, 
+        shippingCost, 
+        totalTaxAmount,
+        walletAmountUsed,
+        remainingAmount,
+        paymentMethod,
+        cartData,
+        deliveryAddress,
+        phone,
+        notes
+      } = req.body;
+
+      console.log(`💾 [TEMP ORDER DATA] Storing calculation data for customer: ${customerId}`);
+      console.log(`💾 [TEMP ORDER DATA] Final Amount: ${finalAmount}, Payment Method: ${paymentMethod}`);
+
+      // Store in session temporarily - more secure than database for temporary data
+      (req.session as any).tempOrderCalculations = {
+        customerId,
+        finalAmount,
+        subtotalAmount,
+        shippingCost,
+        totalTaxAmount,
+        walletAmountUsed,
+        remainingAmount,
+        paymentMethod,
+        cartData,
+        deliveryAddress,
+        phone,
+        notes,
+        timestamp: new Date().toISOString()
+      };
+
+      res.json({ 
+        success: true, 
+        message: "محاسبات سفارش موقتاً ذخیره شد",
+        data: { finalAmount, paymentMethod, remainingAmount }
+      });
+    } catch (error) {
+      console.error("❌ [TEMP ORDER DATA] Error storing temporary order data:", error);
+      res.status(500).json({ success: false, message: "خطا در ذخیره اطلاعات موقت" });
+    }
+  });
+
+  // Retrieve temporary order calculation data for payment
+  app.get("/api/cart/temp-order-data", async (req, res) => {
+    try {
+      const customerId = (req.session as any)?.customerId;
+      if (!customerId) {
+        return res.status(401).json({ success: false, message: "احراز هویت مورد نیاز است" });
+      }
+
+      const tempData = (req.session as any).tempOrderCalculations;
+      if (!tempData || tempData.customerId !== customerId) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "اطلاعات محاسبات موقت یافت نشد" 
+        });
+      }
+
+      console.log(`🔍 [TEMP ORDER DATA] Retrieved calculation data for customer: ${customerId}`);
+      console.log(`🔍 [TEMP ORDER DATA] Final Amount: ${tempData.finalAmount}`);
+
+      res.json({ 
+        success: true, 
+        data: tempData
+      });
+    } catch (error) {
+      console.error("❌ [TEMP ORDER DATA] Error retrieving temporary order data:", error);
+      res.status(500).json({ success: false, message: "خطا در بازیابی اطلاعات موقت" });
+    }
+  });
+
   // Generate invoice after successful payment
   app.post("/api/invoices", async (req, res) => {
     try {
