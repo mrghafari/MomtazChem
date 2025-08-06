@@ -13462,6 +13462,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Calculate items subtotal from products and quantities
       let itemsSubtotal = 0;
       
+      // Handle both items array and cart object formats
       if (orderData.items && orderData.items.length > 0) {
         for (const item of orderData.items) {
           const product = await db.select().from(showcaseProducts).where(eq(showcaseProducts.id, item.productId)).limit(1);
@@ -13474,6 +13475,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.log(`📦 [PRODUCT CALC] ${product[0].name}: ${productPrice} × ${quantity} = ${productPrice * quantity} IQD`);
           } else {
             console.log(`❌ [PRODUCT NOT FOUND] Product ID ${item.productId} not found in database`);
+          }
+        }
+      }
+      // Handle cart object format (e.g., {"470": 1, "478": 2})
+      else if (orderData.cart && typeof orderData.cart === 'object') {
+        for (const [productIdStr, quantity] of Object.entries(orderData.cart)) {
+          const productId = parseInt(productIdStr);
+          // Try shop_products table first (most products are there)
+          const shopProduct = await shopStorage.getShopProductById(productId);
+          if (shopProduct) {
+            console.log(`🔍 [CART SHOP PRODUCT DEBUG] Raw product data for ID ${productId}:`, JSON.stringify(shopProduct, null, 2));
+            console.log(`🔍 [CART SHOP PRICE DEBUG] Checking price fields: price=${shopProduct.price}, unitPrice=${shopProduct.unitPrice}`);
+            const productPrice = parseFloat(shopProduct.unitPrice?.toString() || shopProduct.price?.toString() || '0') || 0;
+            const quantityNum = parseInt(quantity as string) || 1;
+            itemsSubtotal += productPrice * quantityNum;
+            console.log(`🛒 [CART SHOP PRODUCT CALC] ${shopProduct.name}: ${productPrice} × ${quantityNum} = ${productPrice * quantityNum} IQD`);
+          } else {
+            // Fallback to showcase_products table
+            const product = await db.select().from(showcaseProducts).where(eq(showcaseProducts.id, productId)).limit(1);
+            if (product.length > 0) {
+              console.log(`🔍 [CART SHOWCASE PRODUCT DEBUG] Raw product data for ID ${productId}:`, JSON.stringify(product[0], null, 2));
+              console.log(`🔍 [CART SHOWCASE PRICE DEBUG] Checking price fields: unitPrice=${product[0].unitPrice}, unit_price=${product[0].unit_price}`);
+              const productPrice = parseFloat(product[0].unitPrice?.toString() || '0') || 0;
+              const quantityNum = parseInt(quantity as string) || 1;
+              itemsSubtotal += productPrice * quantityNum;
+              console.log(`🛒 [CART SHOWCASE PRODUCT CALC] ${product[0].name}: ${productPrice} × ${quantityNum} = ${productPrice * quantityNum} IQD`);
+            } else {
+              console.log(`❌ [CART PRODUCT NOT FOUND] Product ID ${productId} not found in shop_products or showcase_products tables`);
+            }
           }
         }
       }
@@ -13879,8 +13909,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         orderId: order.id,
         orderNumber: order.orderNumber,
         paymentMethod: finalPaymentMethod,
-        totalAmount: remainingAmount > 0 ? remainingAmount : totalAmount,
+        totalAmount: totalAmount,
         walletAmountUsed: walletAmountUsed,
+        remainingAmount: remainingAmount,
+        requiresBankPayment: remainingAmount > 0 && walletAmountUsed > 0,
       };
 
       // CRITICAL FIX: Check for full wallet payment first (remainingAmount = 0)

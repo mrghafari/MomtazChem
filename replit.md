@@ -15,6 +15,7 @@ Preferred communication style: Simple, everyday language.
 - Order management table synchronization after payments resolved
 - Checkout success page "order not found" error fixed
 - Auto-recovery system for lost orders implemented
+- Backend cart calculation bug FIXED (August 6, 2025) - now properly queries shop_products table instead of showcaseProducts for accurate pricing
 
 **Critical Security Requirements:**
 - Extreme vigilance in wallet transaction processing
