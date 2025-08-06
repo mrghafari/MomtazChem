@@ -13174,6 +13174,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
+      // Handle direct wallet_full payment method from frontend
+      if (paymentMethod === 'wallet_full') {
+        finalPaymentMethod = 'wallet_full';
+        console.log('✅ [BACKEND PASSTHROUGH] wallet_full payment method preserved', {
+          walletUsage, totalAmount, remaining
+        });
+      }
+      
       console.log('💰 [WALLET DEBUG] Processing wallet payment:', {
         originalPaymentMethod: paymentMethod,
         finalPaymentMethod,
