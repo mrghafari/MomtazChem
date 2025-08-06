@@ -18,6 +18,7 @@ Preferred communication style: Simple, everyday language.
 - Backend cart calculation bug FIXED (August 6, 2025) - now properly queries shop_products table instead of showcaseProducts for accurate pricing
 - Frontend calculation trust system implemented (August 6, 2025) - backend now uses precise frontend-calculated shipping costs, VAT, and duties instead of recalculating them, eliminating calculation discrepancies
 - **Cart Calculations Cache System COMPLETED (August 6, 2025)** - temporary storage for frontend calculations during payment processing with 30-minute auto-expiry and post-payment cleanup
+- **Auto-recovery system FIXED (August 6, 2025)** - now uses exact cached frontend calculations instead of generating incorrect fallback values, ensuring order amounts match frontend calculations perfectly
 
 **Critical Security Requirements:**
 - Extreme vigilance in wallet transaction processing
