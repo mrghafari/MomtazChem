@@ -14414,6 +14414,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Check for hybrid payment (wallet_partial with significant remaining amount > 1 IQD)
+      const { formatIQDAmount } = await import('./currency-utils');
       const formattedRemainingForBank = formatIQDAmount(remainingAmount);
       
       // Handle wallet_partial case where remaining amount rounds to 0 or 1 IQD (treated as complete)
@@ -14442,7 +14443,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // هدایت پرداخت به درگاه بانکی فعال - تبدیل مبلغ به عدد صحیح برای دینار عراقی
         const { bankGatewayRouter } = await import('./bank-gateway-router');
-        const { formatIQDAmount } = await import('./currency-utils');
         const formattedRemainingAmount = formatIQDAmount(remainingAmount); // Convert to whole number for IQD
         
         console.log(`💰 [BANK PAYMENT] Sending amount to gateway: ${formattedRemainingAmount} IQD (rounded from ${remainingAmount})`);
