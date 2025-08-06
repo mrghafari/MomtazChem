@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ShoppingCart, Plus, Minus, Filter, Search, Grid, List, Star, User, LogOut, X, ChevronDown, ChevronLeft, ChevronRight, Eye, Brain, Sparkles, Wallet, FileText, Download, AlertTriangle, Package, MessageSquare, ZoomIn, Shield, Flame } from "lucide-react";
+import { ShoppingCart, Plus, Minus, Filter, Search, Grid, List, Star, User, LogOut, X, ChevronDown, ChevronLeft, ChevronRight, Eye, Brain, Sparkles, Wallet, FileText, Download, AlertTriangle, Package, MessageSquare, ZoomIn, Flame } from "lucide-react";
 import { useLocation } from "wouter";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCustomerAuth } from "@/hooks/useCustomerAuth";
@@ -767,15 +767,7 @@ const Shop = () => {
             <div className="flex items-center gap-4">
               <h1 className="text-3xl font-bold text-gray-900">{t.shop.title}</h1>
               
-              {/* Admin Status Badge */}
-              {isAdminAuthenticated && (
-                <div className="flex items-center gap-2 bg-red-100 dark:bg-red-900/30 px-3 py-1 rounded-full border border-red-200 dark:border-red-800">
-                  <Shield className="h-4 w-4 text-red-600 dark:text-red-400" />
-                  <span className="text-sm font-medium text-red-700 dark:text-red-300">
-                    {direction === 'rtl' ? 'مدیر' : 'Admin'}
-                  </span>
-                </div>
-              )}
+              {/* Admin status removed - shop is customer-only */}
               
               {/* AI Recommendations Button - Left - Controlled by Content Management */}
               {aiFeaturesEnabled && (
