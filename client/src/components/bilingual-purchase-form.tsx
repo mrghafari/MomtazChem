@@ -262,7 +262,11 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
   // Drag handlers
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if (!formRef.current || e.target instanceof HTMLElement && e.target.closest('.no-drag')) {
+    if (!formRef.current) return;
+    
+    // Allow dragging except on interactive elements
+    const target = e.target as HTMLElement;
+    if (target.closest('input, button, select, textarea, [role="button"], [contenteditable="true"], .no-drag')) {
       return;
     }
     
@@ -1442,10 +1446,10 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
 
   return (
-    <div className="fixed inset-0 bg-black/30 z-40 pointer-events-none">
+    <div className="fixed inset-0 bg-black/20 z-40 pointer-events-none">
       <Card 
         ref={formRef}
-        className={`w-full max-w-2xl max-h-[90vh] overflow-y-auto ${isRTL ? 'rtl' : 'ltr'} absolute cursor-move ${isDragging ? 'select-none' : ''} pointer-events-auto z-50`}
+        className={`w-full max-w-2xl max-h-[90vh] overflow-y-auto ${isRTL ? 'rtl' : 'ltr'} absolute cursor-move ${isDragging ? 'select-none' : ''} pointer-events-auto z-50 shadow-2xl`}
         style={{
           left: position.x === 0 && position.y === 0 ? '50%' : `${position.x}px`,
           top: position.x === 0 && position.y === 0 ? '50%' : `${position.y}px`,
@@ -1454,25 +1458,25 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         onMouseDown={handleMouseDown}
       >
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 cursor-move">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 cursor-move">
             <Move className="w-4 h-4 text-muted-foreground" />
             <ShoppingCart className="w-5 h-5" />
-            <CardTitle className="text-lg">{t.purchaseOrder}</CardTitle>
+            <CardTitle className="text-lg cursor-move">{t.purchaseOrder}</CardTitle>
           </div>
           <Button
             variant="ghost"
             size="sm"
             onClick={onClose}
-            className="no-drag"
+            className="hover:bg-destructive/10"
             onMouseDown={(e) => e.stopPropagation()}
           >
             <X className="w-4 h-4" />
           </Button>
         </CardHeader>
 
-        <CardContent className="space-y-4 no-drag">
+        <CardContent className="space-y-4">
           {/* Cart Management */}
-          <div className="bg-muted p-3 rounded-lg no-drag">
+          <div className="bg-muted p-3 rounded-lg">
             <h3 className="font-medium mb-3 flex items-center gap-2">
               <ShoppingCart className="w-4 h-4" />
               {t.cartManagement}
@@ -1509,7 +1513,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                           size="sm"
                           variant="outline"
                           onClick={() => onUpdateQuantity && onUpdateQuantity(product.id, quantity - 1)}
-                          className="h-7 w-7 p-0 no-drag"
+                          className="h-7 w-7 p-0"
                           title={t.decreaseQuantity}
                           disabled={quantity <= 1}
                         >
@@ -1525,7 +1529,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                             if (quantity >= (product.stockQuantity || 0)) return;
                             onUpdateQuantity && onUpdateQuantity(product.id, quantity + 1);
                           }}
-                          className="h-7 w-7 p-0 no-drag"
+                          className="h-7 w-7 p-0"
                           title={t.increaseQuantity}
                           disabled={!product.inStock || (product.stockQuantity || 0) <= 0 || quantity >= (product.stockQuantity || 0)}
                         >
@@ -1535,7 +1539,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                           size="sm"
                           variant="ghost"
                           onClick={() => onRemoveItem && onRemoveItem(product.id)}
-                          className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 no-drag"
+                          className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
                           title={t.removeItem}
                         >
                           <Trash2 className="w-3 h-3" />
