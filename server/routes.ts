@@ -44865,6 +44865,32 @@ momtazchem.com
     }
   });
 
+  // Immediate Kardex Sync Endpoint
+  app.post("/api/kardex/sync", requireAuth, async (req, res) => {
+    try {
+      console.log("🔄 [INSTANT-SYNC] Instant kardex synchronization requested");
+      
+      const { KardexSyncMaster } = await import('./kardex-sync-master');
+      const syncResult = await KardexSyncMaster.smartSyncShopFromKardex();
+      
+      console.log("✅ [INSTANT-SYNC] Sync completed:", syncResult);
+      
+      res.json({
+        success: true,
+        message: "همگام‌سازی کاردکس با موفقیت انجام شد",
+        result: syncResult
+      });
+      
+    } catch (error) {
+      console.error("❌ [INSTANT-SYNC] Sync failed:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در همگام‌سازی کاردکس",
+        error: error.message
+      });
+    }
+  });
+
   return httpServer;
 }
 

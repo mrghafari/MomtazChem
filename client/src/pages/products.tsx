@@ -285,12 +285,23 @@ export default function ProductsPage() {
     return Array.from(barcodeMap.values());
   };
 
+  // Immediate Kardex sync function
+  const triggerKardexSync = async () => {
+    try {
+      console.log("🔄 [INSTANT-SYNC] Triggering immediate kardex synchronization...");
+      await apiRequest("/api/kardex/sync", { method: "POST" });
+      console.log("✅ [INSTANT-SYNC] Kardex synchronization completed");
+    } catch (error) {
+      console.log("⚠️ [INSTANT-SYNC] Kardex sync failed:", error);
+    }
+  };
+
   const { mutate: createProduct } = useMutation({
     mutationFn: (data: any) => {
       setIsSubmitting(true);
       return apiRequest("/api/products", { method: "POST", body: data });
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       setIsSubmitting(false);
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       setRefreshKey(prev => prev + 1); // Force component re-render
@@ -303,6 +314,8 @@ export default function ProductsPage() {
         title: "Success",
         description: "Product created successfully",
       });
+      // Immediate kardex sync after product creation
+      await triggerKardexSync();
       // Immediate refresh to show changes
       window.location.reload();
     },
@@ -321,7 +334,7 @@ export default function ProductsPage() {
       setIsSubmitting(true);
       return apiRequest(`/api/products/${id}`, { method: "PUT", body: data });
     },
-    onSuccess: (result) => {
+    onSuccess: async (result) => {
       console.log('✅ [DEBUG] Update mutation successful, result:', result);
       setIsSubmitting(false);
       
@@ -337,6 +350,8 @@ export default function ProductsPage() {
         title: "موفقیت",
         description: "محصول با موفقیت بروزرسانی شد",
       });
+      // Immediate kardex sync after product update
+      await triggerKardexSync();
       // Immediate refresh to show changes
       window.location.reload();
     },
@@ -365,7 +380,7 @@ export default function ProductsPage() {
       console.log(`🗑️ [DELETE] Starting delete for product ID: ${id}`);
       return apiRequest(`/api/products/${id}`, { method: "DELETE" });
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       console.log(`✅ [DELETE] Product deleted successfully`);
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       setRefreshKey(prev => prev + 1); // Force component re-render
@@ -374,6 +389,8 @@ export default function ProductsPage() {
         title: "موفقیت",
         description: "محصول با موفقیت حذف شد و از فروشگاه نیز حذف شد",
       });
+      // Immediate kardex sync after product deletion
+      await triggerKardexSync();
       // Immediate refresh to show changes
       window.location.reload();
     },
