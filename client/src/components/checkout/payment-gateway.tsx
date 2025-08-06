@@ -181,11 +181,9 @@ const PaymentGateway = ({
         // Reset processing state before triggering bank redirect
         setIsProcessing(false);
         
-        // Small delay to ensure state is updated, then trigger bank gateway redirect
-        setTimeout(() => {
-          console.log('🚀 [BANK REDIRECT] Triggering handleOnlinePayment after wallet deduction');
-          handleOnlinePayment();
-        }, 100);
+        // Immediate redirect to bank gateway after wallet deduction
+        console.log('🚀 [BANK REDIRECT] Immediate redirect after wallet deduction');
+        handleOnlinePayment();
       } else {
         throw new Error(walletResponse.message || 'Wallet deduction failed');
       }
@@ -211,26 +209,22 @@ const PaymentGateway = ({
       console.log('🔄 [AUTO REDIRECT] Triggering auto-redirect for online payment');
       console.log('🔄 [AUTO REDIRECT] Gateway config:', activeGateway.config);
       
-      setTimeout(() => {
-        console.log('🚀 [AUTO REDIRECT] Executing handleOnlinePayment now');
-        try {
-          handleOnlinePayment();
-        } catch (error) {
-          console.error('❌ [AUTO REDIRECT] Error during auto redirect:', error);
-        }
-      }, 2000);
+      console.log('🚀 [AUTO REDIRECT] Immediate execution of handleOnlinePayment');
+      try {
+        handleOnlinePayment();
+      } catch (error) {
+        console.error('❌ [AUTO REDIRECT] Error during auto redirect:', error);
+      }
     } else if (paymentMethod === 'wallet_partial' && activeGateway && !isProcessing && hasRemainingAmount) {
       console.log('🔄 [AUTO REDIRECT] Triggering auto-redirect for wallet_partial with remaining amount:', formData?.remainingAmount);
       console.log('🔄 [AUTO REDIRECT] Gateway config:', activeGateway.config);
       
-      setTimeout(() => {
-        console.log('🚀 [AUTO REDIRECT] Executing handleOnlinePayment for remaining amount');
-        try {
-          handleOnlinePayment();
-        } catch (error) {
-          console.error('❌ [AUTO REDIRECT] Error during auto redirect:', error);
-        }
-      }, 2000);
+      console.log('🚀 [AUTO REDIRECT] Immediate execution for remaining amount');
+      try {
+        handleOnlinePayment();
+      } catch (error) {
+        console.error('❌ [AUTO REDIRECT] Error during auto redirect:', error);
+      }
     } else if (paymentMethod === 'wallet_partial' && !hasRemainingAmount) {
       console.log('💰 [AUTO REDIRECT] wallet_partial with 0 remaining - no bank redirect needed');
     }
