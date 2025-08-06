@@ -14414,12 +14414,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Check for hybrid payment (wallet_partial with significant remaining amount > 1 IQD)
+      // CRITICAL: Use the actual calculated remainingAmount from wallet processing, not from frontend
       const { formatIQDAmount } = await import('./currency-utils');
-      const formattedRemainingForBank = formatIQDAmount(remainingAmount);
+      
+      // IMPORTANT: If wallet was successfully processed, recalculate the REAL remaining amount
+      let actualRemainingAmount = remainingAmount; // Default to original remaining amount
+      if (walletAmountUsed > 0) {
+        // If wallet was used, the REAL remaining amount is total minus what was actually deducted
+        actualRemainingAmount = totalAmount - walletAmountUsed;
+      }
+      
+      const formattedRemainingForBank = formatIQDAmount(actualRemainingAmount);
+      
+      console.log(`🔍 [PAYMENT DEBUG] Total: ${totalAmount}, Wallet Used: ${walletAmountUsed}, Original Remaining: ${remainingAmount}, Actual Remaining: ${actualRemainingAmount}, Formatted: ${formattedRemainingForBank}`);
       
       // Handle wallet_partial case where remaining amount rounds to 0 or 1 IQD (treated as complete)
       if (orderData.paymentMethod === 'wallet_partial' && formattedRemainingForBank <= 1) {
-        console.log(`✅ [WALLET COMPLETE] Wallet partial payment covers full amount - remaining ${remainingAmount} rounds to ${formattedRemainingForBank} IQD`);
+        console.log(`✅ [WALLET COMPLETE] Wallet partial payment covers full amount - remaining ${actualRemainingAmount} rounds to ${formattedRemainingForBank} IQD`);
         
         return res.json({
           success: true,
@@ -14439,13 +14450,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       if (orderData.paymentMethod === 'wallet_partial' && formattedRemainingForBank > 1) {
-        console.log(`🔄 [HYBRID PAYMENT] Wallet partial payment detected - wallet: ${walletAmountUsed}, remaining: ${remainingAmount}, formatted: ${formattedRemainingForBank}`);
+        console.log(`🔄 [HYBRID PAYMENT] Wallet partial payment detected - wallet: ${walletAmountUsed}, remaining: ${actualRemainingAmount}, formatted: ${formattedRemainingForBank}`);
         
         // هدایت پرداخت به درگاه بانکی فعال - تبدیل مبلغ به عدد صحیح برای دینار عراقی
         const { bankGatewayRouter } = await import('./bank-gateway-router');
-        const formattedRemainingAmount = formatIQDAmount(remainingAmount); // Convert to whole number for IQD
+        const formattedRemainingAmount = formatIQDAmount(actualRemainingAmount); // Convert to whole number for IQD
         
-        console.log(`💰 [BANK PAYMENT] Sending amount to gateway: ${formattedRemainingAmount} IQD (rounded from ${remainingAmount})`);
+        console.log(`💰 [BANK PAYMENT] Sending amount to gateway: ${formattedRemainingAmount} IQD (rounded from ${actualRemainingAmount})`);
         
         const routingResult = await bankGatewayRouter.routePayment({
           orderId: order.id,
