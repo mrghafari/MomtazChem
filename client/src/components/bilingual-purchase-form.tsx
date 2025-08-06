@@ -873,8 +873,16 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   // No additional shipping, tax, or other calculations - only cart products
   const totalAmount = subtotalAmount;
   
-  // ✅ NO WEIGHT CALCULATION: Not needed for simple cart-only payment
-  const totalWeight = 0;
+  // ✅ WEIGHT CALCULATION: Calculate total weight from sessionCart
+  const totalWeight = useMemo(() => {
+    if (!sessionCart || sessionCart.length === 0) return 0;
+    
+    return sessionCart.reduce((total: number, item: any) => {
+      const weight = parseFloat(item.weight || '0');
+      const quantity = item.quantity || 1;
+      return total + (weight * quantity);
+    }, 0);
+  }, [sessionCart]);
 
   // ✅ NO SHIPPING COST CALCULATION: Only cart products
   const finalShippingCost = 0;
@@ -893,11 +901,13 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     }
   }, [shippingRatesData, selectedShippingMethod]);
 
-  // ✅ SIMPLE CALCULATION DEBUG: Cart total only
-  console.log('💰 [SIMPLE PURCHASE] Cart only calculation:', {
+  // ✅ SIMPLE CALCULATION DEBUG: Cart total with weight
+  console.log('💰 [SIMPLE PURCHASE] Cart calculation with weight:', {
     subtotalAmount,
     totalAmount,
-    'Note': 'فقط قیمت کالاهای سبد خرید'
+    totalWeight: `${totalWeight} kg`,
+    cartLength: sessionCart?.length || 0,
+    'Note': 'قیمت کالاها + وزن محاسبه شده'
   });
   
   // ✅ SIMPLE DEBUG: Only cart total
@@ -1701,6 +1711,14 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                 </div>
               )}
               
+              {/* Weight Display */}
+              {totalWeight > 0 && (
+                <div className="flex justify-between text-sm text-blue-600">
+                  <span>⚖️ وزن کل سبد خرید:</span>
+                  <span className="font-medium">{totalWeight.toFixed(2)} کیلوگرم</span>
+                </div>
+              )}
+
               {/* Final Amount */}
               <div className="flex justify-between font-bold text-lg border-t pt-2 bg-yellow-300 px-2 py-2 rounded-lg">
                 <span>Final Amount</span>
