@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { MapPin, Globe, X, ShoppingCart, Plus, Minus, Trash2, Wallet, CreditCard, Upload, Clock, Flame } from "lucide-react";
+import { MapPin, Globe, X, ShoppingCart, Plus, Minus, Trash2, Wallet, CreditCard, Upload, Clock, Flame, Move } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -251,11 +251,64 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const [selectedShippingMethod, setSelectedShippingMethod] = useState<number | null>(null);
   const [shippingCost, setShippingCost] = useState<number>(0);
   
-  // Form reference for static positioning
+  // Form reference for static positioning and dragging
   const formRef = useRef<HTMLDivElement>(null);
+  
+  // Draggable states
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const dragRef = useRef<HTMLDivElement>(null);
+
+  // Drag handlers
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (!formRef.current || e.target instanceof HTMLElement && e.target.closest('.no-drag')) {
+      return;
+    }
+    
+    setIsDragging(true);
+    const rect = formRef.current.getBoundingClientRect();
+    setDragOffset({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    });
+    e.preventDefault();
+  }, []);
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!isDragging || !formRef.current) return;
+    
+    const newX = e.clientX - dragOffset.x;
+    const newY = e.clientY - dragOffset.y;
+    
+    // Prevent dragging outside viewport bounds
+    const maxX = window.innerWidth - formRef.current.offsetWidth;
+    const maxY = window.innerHeight - formRef.current.offsetHeight;
+    
+    const boundedX = Math.max(0, Math.min(newX, maxX));
+    const boundedY = Math.max(0, Math.min(newY, maxY));
+    
+    setPosition({ x: boundedX, y: boundedY });
+  }, [isDragging, dragOffset]);
+
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
+  // Add mouse event listeners
+  useEffect(() => {
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [isDragging, handleMouseMove, handleMouseUp]);
 
   
-
 
 
 
@@ -1389,13 +1442,20 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center p-4 bg-black/50 z-50">
+    <div className="fixed inset-0 bg-black/50 z-50">
       <Card 
         ref={formRef}
-        className={`w-full max-w-2xl max-h-[90vh] overflow-y-auto ${isRTL ? 'rtl' : 'ltr'}`}
+        className={`w-full max-w-2xl max-h-[90vh] overflow-y-auto ${isRTL ? 'rtl' : 'ltr'} absolute cursor-move ${isDragging ? 'select-none' : ''}`}
+        style={{
+          left: position.x === 0 && position.y === 0 ? '50%' : `${position.x}px`,
+          top: position.x === 0 && position.y === 0 ? '50%' : `${position.y}px`,
+          transform: position.x === 0 && position.y === 0 ? 'translate(-50%, -50%)' : 'none',
+        }}
+        onMouseDown={handleMouseDown}
       >
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 cursor-move">
           <div className="flex items-center gap-2">
+            <Move className="w-4 h-4 text-muted-foreground" />
             <ShoppingCart className="w-5 h-5" />
             <CardTitle className="text-lg">{t.purchaseOrder}</CardTitle>
           </div>
@@ -1404,14 +1464,15 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
             size="sm"
             onClick={onClose}
             className="no-drag"
+            onMouseDown={(e) => e.stopPropagation()}
           >
             <X className="w-4 h-4" />
           </Button>
         </CardHeader>
 
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 no-drag">
           {/* Cart Management */}
-          <div className="bg-muted p-3 rounded-lg">
+          <div className="bg-muted p-3 rounded-lg no-drag">
             <h3 className="font-medium mb-3 flex items-center gap-2">
               <ShoppingCart className="w-4 h-4" />
               {t.cartManagement}
@@ -1448,7 +1509,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                           size="sm"
                           variant="outline"
                           onClick={() => onUpdateQuantity && onUpdateQuantity(product.id, quantity - 1)}
-                          className="h-7 w-7 p-0"
+                          className="h-7 w-7 p-0 no-drag"
                           title={t.decreaseQuantity}
                           disabled={quantity <= 1}
                         >
@@ -1464,7 +1525,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                             if (quantity >= (product.stockQuantity || 0)) return;
                             onUpdateQuantity && onUpdateQuantity(product.id, quantity + 1);
                           }}
-                          className="h-7 w-7 p-0"
+                          className="h-7 w-7 p-0 no-drag"
                           title={t.increaseQuantity}
                           disabled={!product.inStock || (product.stockQuantity || 0) <= 0 || quantity >= (product.stockQuantity || 0)}
                         >
@@ -1474,7 +1535,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                           size="sm"
                           variant="ghost"
                           onClick={() => onRemoveItem && onRemoveItem(product.id)}
-                          className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                          className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 no-drag"
                           title={t.removeItem}
                         >
                           <Trash2 className="w-3 h-3" />
