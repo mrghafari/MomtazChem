@@ -1595,50 +1595,19 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                         {(() => {
                           const selectedRate = shippingRatesData.find((rate: any) => rate.id === selectedShippingMethod);
                           
-                          // Handle smart_vehicle display
+                          // ✅ NO SMART VEHICLE: Simple delivery method display
                           if (selectedRate && (selectedRate.deliveryMethod === 'smart_vehicle' || selectedRate.delivery_method === 'smart_vehicle')) {
                             return (
                               <div className="space-y-2">
                                 <div className="flex justify-between items-center text-sm">
-                                  <span className="text-emerald-700 font-medium">🚚 انتخاب هوشمند خودرو:</span>
+                                  <span className="text-emerald-700 font-medium">🚚 روش تحویل:</span>
                                   <div className="text-right">
-                                    {optimalVehicle ? (
-                                      <div>
-                                        <div className="font-bold text-emerald-800">
-                                          {optimalVehicle.vehicleType === 'multiple' 
-                                            ? `${optimalVehicle.totalVehicles} خودرو` 
-                                            : optimalVehicle.vehicleName}
-                                        </div>
-                                        <div className="text-xs text-emerald-600">{formatCurrency(optimalVehicle.totalCost)}</div>
-                                      </div>
-                                    ) : smartDeliveryLoading ? (
-                                      <span className="font-bold text-emerald-800">در حال محاسبه...</span>
-                                    ) : (
-                                      <span className="font-bold text-orange-600">در انتظار آدرس مقصد...</span>
-                                    )}
+                                    <div className="font-bold text-emerald-800">خودرو هوشمند</div>
+                                    <div className="text-xs text-emerald-600">رایگان</div>
                                   </div>
                                 </div>
                                 <div className="text-xs text-emerald-600 bg-emerald-50 p-2 rounded border border-emerald-200">
-                                  ✓ سیستم بهترین خودرو را بر اساس وزن، مقصد و کمترین هزینه انتخاب می‌کند
-                                  {optimalVehicle && (
-                                    <div className="mt-1 font-medium">
-                                      {optimalVehicle.vehicleType === 'multiple' ? (
-                                        <div>
-                                          راه‌حل انتخابی: {optimalVehicle.vehicleName}
-                                          <div className="text-xs mt-1 space-y-1">
-                                            {optimalVehicle.vehicles?.map((vehicle: any, index: number) => (
-                                              <div key={index} className="flex justify-between">
-                                                <span>خودرو {index + 1}: {vehicle.vehicleName}</span>
-                                                <span>{vehicle.weight} کیلو</span>
-                                              </div>
-                                            ))}
-                                          </div>
-                                        </div>
-                                      ) : (
-                                        <span>خودرو انتخابی: {optimalVehicle.vehicleName} - {optimalVehicle.vehicleType}</span>
-                                      )}
-                                    </div>
-                                  )}
+                                  ✓ تحویل با خودرو مناسب - بدون هزینه اضافی
                                 </div>
                               </div>
                             );
@@ -1716,15 +1685,9 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                     {(() => {
                       const selectedRate = shippingRatesData?.find((rate: any) => rate.id === selectedShippingMethod);
                       
-                      // Handle smart vehicle cost
+                      // ✅ NO SMART VEHICLE COST: Always show free shipping
                       if (selectedRate && (selectedRate.deliveryMethod === 'smart_vehicle' || selectedRate.delivery_method === 'smart_vehicle')) {
-                        if (smartDeliveryLoading) {
-                          return <span className="text-emerald-600">در حال محاسبه...</span>;
-                        }
-                        if (finalShippingCost > 0) {
-                          return <span className="text-emerald-600 font-bold">{formatCurrency(finalShippingCost)}</span>;
-                        }
-                        return <span className="text-gray-500">در انتظار آدرس</span>;
+                        return <span className="text-emerald-600 font-bold">رایگان</span>;
                       }
                       
                       // Handle self pickup cost
