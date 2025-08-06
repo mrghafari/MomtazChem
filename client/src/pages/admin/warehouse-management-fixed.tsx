@@ -115,7 +115,60 @@ const WarehouseManagementFixed: React.FC = () => {
           .status-approved { background-color: #d4edda; border-color: #c3e6cb; }
           .status-pending { background-color: #f8f9fa; border-color: #dee2e6; }
           .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #666; }
-          @media print { body { margin: 0; } }
+          @media print { 
+            body { 
+              margin: 0; 
+              padding: 15mm 10mm 15mm 10mm; 
+              box-sizing: border-box;
+              font-size: 12pt;
+              line-height: 1.4;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+            .header { 
+              margin-bottom: 15mm; 
+              page-break-after: avoid;
+            }
+            .section { 
+              margin-bottom: 8mm; 
+              page-break-inside: avoid;
+            }
+            .info-grid { 
+              grid-template-columns: 1fr 1fr; 
+              gap: 5mm;
+            }
+            .info-item { 
+              padding: 3mm; 
+              margin-bottom: 2mm;
+            }
+            .items-table { 
+              page-break-inside: avoid;
+              margin-top: 5mm;
+            }
+            .items-table th, .items-table td { 
+              padding: 2mm; 
+              font-size: 10pt;
+            }
+            .summary-box { 
+              padding: 5mm; 
+              margin-top: 5mm;
+            }
+            .status-grid { 
+              grid-template-columns: 1fr 1fr 1fr; 
+              gap: 3mm;
+            }
+            .status-item { 
+              padding: 3mm;
+            }
+            .footer { 
+              margin-top: 10mm; 
+              page-break-inside: avoid;
+            }
+            @page {
+              margin: 15mm 10mm 15mm 10mm;
+              size: A4;
+            }
+          }
         </style>
       </head>
       <body>
