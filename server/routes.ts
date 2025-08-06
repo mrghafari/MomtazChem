@@ -27342,6 +27342,7 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         LEFT JOIN crm_customers c ON co.customer_id = c.id
         LEFT JOIN payment_receipts pr ON pr.customer_order_id = co.id
         WHERE om.current_status IN (
+          'pending',
           'pending_payment',
           'payment_uploaded', 
           'financial_reviewing',
