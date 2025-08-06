@@ -13328,8 +13328,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Check if hybrid payment is required (wallet partially used + remaining amount)
-      // CRITICAL FIX: Use the actual remaining amount from bilingual form submission
-      const remainingAmountToPay = Math.round(parseFloat(remainingAmount || (totalAmount - actualWalletUsed)));
+      // CRITICAL FIX: Calculate remaining amount based on actual order total and actual wallet used
+      const correctOrderTotal = parseFloat(totalAmount);
+      const correctRemainingAmount = correctOrderTotal - actualWalletUsed;
+      const remainingAmountToPay = Math.max(0, correctRemainingAmount);
       
       // Critical fix: For full wallet payments, completely bypass bank payment logic
       const isFullWalletPayment = finalPaymentMethod === 'wallet_full';
@@ -13341,7 +13343,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('🔍 [PAYMENT LOGIC DEBUG] Payment decision logic:', {
         actualWalletUsed,
         remainingAmountToPay,
-        originalRemainingAmount: remainingAmount,
+        originalRemainingAmountFromForm: remainingAmount,
+        correctOrderTotal,
+        correctRemainingAmount,
         totalAmount,
         requiresBankPayment,
         paymentMethod: finalPaymentMethod,
@@ -13353,7 +13357,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         walletPaymentComplete: isFullWalletPayment && actualWalletUsed > 0,
         shouldRedirectToBank: remainingAmountToPay > 0.01 && !isFullWalletPayment,
         isZeroRemaining: remainingAmountToPay <= 0.01,
-        calculationMethod: remainingAmount ? 'from_form_data' : 'calculated_difference'
+        calculationMethod: 'fixed_calculation_backend'
       });
       
       if (isFullWalletPayment) {

@@ -1191,15 +1191,19 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       console.log('🎯 [ORDER SUCCESS] Response type:', typeof response);
       console.log('🎯 [ORDER SUCCESS] Response keys:', Object.keys(response || {}));
       
-      // CRITICAL: Check if hybrid payment (wallet + bank) is required
-      const remainingAmount = parseFloat(response.remainingAmount || 0);
-      const walletDeducted = parseFloat(response.walletAmountDeducted || 0);
+      // CRITICAL: Use cart calculations instead of backend response
+      const cartTotalAmount = subtotalAmount + totalTaxAmount + finalShippingCost;
+      const actualWalletUsed = paymentMethod === 'wallet_partial' ? walletAmount : 
+                               paymentMethod === 'wallet_full' ? cartTotalAmount : 0;
+      const correctRemainingAmount = Math.max(0, cartTotalAmount - actualWalletUsed);
       const requiresBankPayment = response.requiresBankPayment === true;
       
-      console.log('💳 [HYBRID PAYMENT DEBUG] Response analysis:', {
+      console.log('💳 [HYBRID PAYMENT DEBUG] Cart-based calculations:', {
         paymentMethod,
-        remainingAmount,
-        walletDeducted,
+        cartTotalAmount,
+        actualWalletUsed,
+        correctRemainingAmount,
+        walletAmount,
         requiresBankPayment,
         responseKeys: Object.keys(response),
         redirectUrl: response.redirectUrl,
@@ -1207,12 +1211,12 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       });
       
       // PRIORITY 1: Check for hybrid payment (wallet partial + bank required)
-      if (requiresBankPayment && remainingAmount > 0) {
+      if (requiresBankPayment && correctRemainingAmount > 0) {
         console.log('🔄 [HYBRID PAYMENT] Wallet partial payment + bank required');
         
-        // Construct redirect URL if not provided by server
+        // Construct redirect URL with correct cart-based calculations
         const orderNumber = response.orderNumber || response.orderId;
-        const redirectUrl = response.redirectUrl || response.paymentGatewayUrl || `/payment/${orderNumber}?amount=${remainingAmount}&wallet=${walletDeducted}&method=online_payment`;
+        const redirectUrl = response.redirectUrl || response.paymentGatewayUrl || `/payment/${orderNumber}?amount=${correctRemainingAmount}&wallet=${actualWalletUsed}&method=wallet_partial`;
         
         console.log('🔄 [HYBRID PAYMENT] Redirecting to bank gateway:', redirectUrl);
         
@@ -1228,7 +1232,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         
         toast({
           title: "پرداخت ترکیبی انجام شد",
-          description: `${walletDeducted?.toLocaleString()} IQD از کیف پول کسر شد. هدایت به درگاه بانکی برای پرداخت ${remainingAmount?.toLocaleString()} IQD باقیمانده...`,
+          description: `${actualWalletUsed?.toLocaleString()} IQD از کیف پول کسر شد. هدایت به درگاه بانکی برای پرداخت ${correctRemainingAmount?.toLocaleString()} IQD باقیمانده...`,
         });
         
         // Force redirect to hybrid payment page
@@ -1240,12 +1244,12 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       }
       
       // PRIORITY 2: Full wallet payment completion
-      if (remainingAmount === 0 && walletDeducted > 0) {
+      if (correctRemainingAmount === 0 && actualWalletUsed > 0) {
         console.log('✅ [FULL WALLET PAYMENT] Order fully paid by wallet');
         
         toast({
           title: "سفارش ثبت شد",
-          description: `سفارش شما با موفقیت ثبت شد و کاملاً از کیف پول پرداخت شد. مبلغ کسرشده: ${walletDeducted?.toLocaleString()} IQD`,
+          description: `سفارش شما با موفقیت ثبت شد و کاملاً از کیف پول پرداخت شد. مبلغ کسرشده: ${actualWalletUsed?.toLocaleString()} IQD`,
         });
         
         setTimeout(() => {
