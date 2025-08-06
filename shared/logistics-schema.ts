@@ -449,8 +449,8 @@ export const freightRates = pgTable("freight_rates", {
 export const readyVehicles = pgTable("ready_vehicles", {
   id: serial("id").primaryKey(),
   
-  // Vehicle information
-  vehicleType: text("vehicle_type").notNull(), // Type of vehicle (truck, van, motorcycle, etc.)
+  // Vehicle template reference
+  vehicleTemplateId: integer("vehicle_template_id").references(() => vehicleTemplates.id).notNull(), // Reference to vehicle template
   licensePlate: varchar("license_plate", { length: 20 }).notNull().unique(), // Vehicle license plate
   
   // Driver information
@@ -476,7 +476,7 @@ export const readyVehicles = pgTable("ready_vehicles", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 }, (table) => [
   index("ready_vehicles_available_idx").on(table.isAvailable),
-  index("ready_vehicles_type_idx").on(table.vehicleType),
+  index("ready_vehicles_template_idx").on(table.vehicleTemplateId),
   index("ready_vehicles_plate_idx").on(table.licensePlate),
 ]);
 

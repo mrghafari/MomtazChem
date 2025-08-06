@@ -31275,17 +31275,39 @@ momtazchem.com
   // Get all ready vehicles
   app.get('/api/logistics/ready-vehicles', requireAuth, async (req, res) => {
     try {
-      const { readyVehicles } = await import('../shared/logistics-schema');
+      const { readyVehicles, vehicleTemplates } = await import('../shared/logistics-schema');
       
       const vehicles = await db
-        .select()
+        .select({
+          id: readyVehicles.id,
+          vehicleTemplateId: readyVehicles.vehicleTemplateId,
+          licensePlate: readyVehicles.licensePlate,
+          driverName: readyVehicles.driverName,
+          driverMobile: readyVehicles.driverMobile,
+          loadCapacity: readyVehicles.loadCapacity,
+          isAvailable: readyVehicles.isAvailable,
+          currentLocation: readyVehicles.currentLocation,
+          notes: readyVehicles.notes,
+          supportsFlammable: readyVehicles.supportsFlammable,
+          notAllowedFlammable: readyVehicles.notAllowedFlammable,
+          createdAt: readyVehicles.createdAt,
+          updatedAt: readyVehicles.updatedAt,
+          // Vehicle template info
+          vehicleTemplateName: vehicleTemplates.name,
+          vehicleTemplateNameEn: vehicleTemplates.nameEn,
+          vehicleType: vehicleTemplates.vehicleType
+        })
         .from(readyVehicles)
+        .innerJoin(vehicleTemplates, eq(readyVehicles.vehicleTemplateId, vehicleTemplates.id))
         .orderBy(readyVehicles.createdAt);
 
       // Map database fields to frontend expected format
       const mappedVehicles = vehicles.map(vehicle => ({
         id: vehicle.id,
-        vehicleType: vehicle.vehicleType,
+        vehicleTemplateId: vehicle.vehicleTemplateId,
+        vehicleType: vehicle.vehicleTemplateName, // For backward compatibility
+        vehicleTemplateName: vehicle.vehicleTemplateName,
+        vehicleTemplateNameEn: vehicle.vehicleTemplateNameEn,
         licensePlate: vehicle.licensePlate,
         driverName: vehicle.driverName,
         driverMobile: vehicle.driverMobile,
@@ -31312,7 +31334,7 @@ momtazchem.com
       const { readyVehicles } = await import('../shared/logistics-schema');
       
       const vehicleData = {
-        vehicleType: req.body.vehicleType,
+        vehicleTemplateId: req.body.vehicleTemplateId,
         licensePlate: req.body.licensePlate,
         driverName: req.body.driverName,
         driverMobile: req.body.driverMobile,
