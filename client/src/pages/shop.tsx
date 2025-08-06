@@ -34,7 +34,7 @@ const Shop = () => {
   const { toast } = useMultilingualToast();
   const { t, direction } = useLanguage();
   const queryClient = useQueryClient();
-  const { isAuthenticated: isAdminAuthenticated } = useAuth();
+  const { isAuthenticated: isAdminAuthenticated } = useCustomerAuth();
 
 
   const [, navigate] = useLocation();
