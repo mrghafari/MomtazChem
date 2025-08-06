@@ -10,31 +10,14 @@ import { apiRequest } from "@/lib/queryClient";
 import PaymentGateway from "@/components/checkout/payment-gateway";
 
 export default function Payment() {
-  console.log('🚀 [PAYMENT COMPONENT] Payment component starting to load...');
-  
   const [, params] = useRoute('/payment/:orderId');
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [paymentProcessed, setPaymentProcessed] = useState(false);
   const [paymentData, setPaymentData] = useState<any>(null);
-  const [walletAmount, setWalletAmount] = useState<number>(0);
 
-  console.log('🚀 [PAYMENT COMPONENT] useRoute params:', params);
-  
-  // Also try URL params directly
-  const urlParams = new URLSearchParams(window.location.search);
-  const orderIdFromUrl = urlParams.get('orderId');
-  const orderIdFromPath = params?.orderId;
-  
-  console.log('🚀 [PAYMENT COMPONENT] URL Params orderId:', orderIdFromUrl);
-  console.log('🚀 [PAYMENT COMPONENT] Path Params orderId:', orderIdFromPath);
-  
-  // Keep orderId as string since orderNumber is a string (like "M123456")
-  const orderId = orderIdFromPath || orderIdFromUrl;
-  
-  console.log('🚀 [PAYMENT COMPONENT] Final Order ID:', orderId);
-  console.log('🚀 [PAYMENT COMPONENT] Window location:', window.location.href);
+  const orderId = params?.orderId ? parseInt(params.orderId) : null;
 
   // Fetch order details
   const { data: orderData, isLoading: orderLoading, error: orderError } = useQuery({
@@ -55,28 +38,6 @@ export default function Payment() {
     enabled: !!orderId,
   });
 
-  // Fetch temporary calculation data from bilingual form
-  const { data: tempCalcData } = useQuery({
-    queryKey: ['/api/cart/temp-order-data'],
-    enabled: !!orderId,
-    retry: 1,
-    staleTime: 0 // Always fetch fresh data
-  });
-
-  // Read wallet amount from localStorage
-  useEffect(() => {
-    if (orderId) {
-      const savedWalletAmount = localStorage.getItem(`wallet_amount_${orderId}`);
-      if (savedWalletAmount) {
-        const amount = parseFloat(savedWalletAmount);
-        setWalletAmount(amount);
-        console.log('💾 [LOCALSTORAGE] Retrieved wallet amount for order', orderId, ':', amount);
-      } else {
-        console.log('💾 [LOCALSTORAGE] No wallet amount found for order', orderId);
-      }
-    }
-  }, [orderId]);
-
   // Debug active gateway data
   useEffect(() => {
     console.log('🔍 [PAYMENT PAGE DEBUG] Order ID:', orderId);
@@ -84,44 +45,27 @@ export default function Payment() {
     console.log('🔍 [PAYMENT PAGE DEBUG] Gateway loading:', gatewayLoading);
     console.log('🔍 [PAYMENT PAGE DEBUG] Order data:', orderData);
     console.log('🔍 [PAYMENT PAGE DEBUG] Order loading:', orderLoading);
-    console.log('🔍 [PAYMENT PAGE DEBUG] Wallet amount from localStorage:', walletAmount);
-    
-    if (orderData && activeGateway) {
-      const order = (orderData as any)?.order || orderData;
-      console.log('🔍 [PAYMENT PAGE DEBUG] Payment method from order:', (order as any)?.paymentMethod);
-      console.log('🔍 [PAYMENT PAGE DEBUG] Will auto-redirect?', (order as any)?.paymentMethod === 'online_payment');
-    }
-  }, [orderId, activeGateway, gatewayLoading, orderData, orderLoading, walletAmount]);
+  }, [orderId, activeGateway, gatewayLoading, orderData, orderLoading]);
 
   // Update payment status mutation
   const updatePaymentMutation = useMutation({
     mutationFn: async (paymentData: any) => {
-      console.log('💰 [PAYMENT UPDATE] Sending payment data:', paymentData);
-      return apiRequest(`/api/shop/orders/${orderId}/payment`, {
-        method: 'POST',
-        body: paymentData
-      });
+      return apiRequest(`/api/shop/orders/${orderId}/payment`, 'POST', paymentData);
     },
-    onSuccess: (response, variables) => {
-      console.log('✅ [PAYMENT UPDATE] Payment update successful:', response);
-      
+    onSuccess: () => {
       toast({
-        title: "پرداخت تایید شد",
-        description: "پرداخت شما ثبت شد و در حال تولید فاکتور است.",
+        title: "Payment Processed",
+        description: "Your payment has been processed successfully.",
       });
-      
       queryClient.invalidateQueries({ queryKey: ['/api/shop/orders'] });
-      queryClient.invalidateQueries({ queryKey: [`/api/customers/orders/${orderId}/payment`] });
       
-      // Auto-generate invoice after successful payment - no manual intervention needed
-      console.log('📄 [INVOICE] Auto-generating invoice...');
+      // Generate invoice after successful payment
       generateInvoiceMutation.mutate();
     },
-    onError: (error) => {
-      console.error('❌ [PAYMENT UPDATE] Payment update failed:', error);
+    onError: () => {
       toast({
-        title: "خطا در ثبت پرداخت",
-        description: "پرداخت انجام شد ولی ثبت آن با مشکل مواجه شد. با پشتیبانی تماس بگیرید.",
+        title: "Payment Update Failed",
+        description: "Failed to update payment status.",
         variant: "destructive",
       });
     },
@@ -130,78 +74,42 @@ export default function Payment() {
   // Generate invoice mutation
   const generateInvoiceMutation = useMutation({
     mutationFn: async () => {
-      console.log('📄 [INVOICE GENERATION] Starting invoice generation for order:', orderId);
-      return apiRequest('/api/invoices', {
-        method: 'POST',
-        body: {
-          orderId: orderId,
-          customerId: (orderData as any)?.customerId || (orderData as any)?.order?.customerId,
-          language: 'ar' // Default to Arabic, can be made configurable
-        }
+      return apiRequest('/api/invoices', 'POST', {
+        orderId: orderId,
+        customerId: orderData?.customerId,
+        language: 'ar' // Default to Arabic, can be made configurable
       });
     },
-    onSuccess: (response) => {
-      console.log('✅ [INVOICE GENERATION] Invoice generated successfully:', response);
-      
+    onSuccess: () => {
       toast({
-        title: "فاکتور ایجاد شد",
-        description: "فاکتور شما ایجاد شد و به ایمیل ارسال خواهد شد. در حال هدایت...",
+        title: "Invoice Generated",
+        description: "Your invoice has been generated and will be sent to your email.",
       });
       
-      // Clear any cached order data
-      queryClient.invalidateQueries({ queryKey: ['/api/shop/orders'] });
-      queryClient.invalidateQueries({ queryKey: [`/api/customers/orders/${orderId}/payment`] });
-      
-      // Immediate redirect to success page - fully automated
-      console.log('🚀 [REDIRECT] Auto-redirecting to success page in 1.5 seconds');
+      // Redirect to success page
       setTimeout(() => {
         setLocation(`/checkout/success/${orderId}`);
-      }, 1500); // Reduced delay for faster UX
+      }, 2000);
     },
-    onError: (error) => {
-      console.error('❌ [INVOICE GENERATION] Invoice generation failed:', error);
-      
+    onError: () => {
       toast({
-        title: "مشکل در ایجاد فاکتور",
-        description: "پرداخت موفق بود ولی فاکتور ایجاد نشد. با پشتیبانی تماس بگیرید.",
+        title: "Invoice Generation Failed",
+        description: "Payment successful but invoice generation failed. Please contact support.",
         variant: "destructive",
       });
-      
-      // Even if invoice fails, redirect to success page since payment was successful
-      setTimeout(() => {
-        setLocation(`/checkout/success/${orderId}`);
-      }, 3000);
     },
   });
 
   const handlePaymentSuccess = (paymentResult: any) => {
-    console.log('✅ [PAYMENT SUCCESS] Processing payment success:', paymentResult);
     setPaymentData(paymentResult);
     setPaymentProcessed(true);
     
-    // Clear cart after successful payment
-    console.log('🧹 [CART CLEAR] Clearing cart after successful payment');
-    apiRequest('/api/cart/clear', { method: 'POST' })
-      .then(() => console.log('✅ [CART CLEAR] Cart cleared successfully'))
-      .catch(err => console.warn('⚠️ [CART CLEAR] Failed to clear cart:', err));
-    
-    // Clear localStorage for this order
-    localStorage.removeItem(`wallet_amount_${orderId}`);
-    console.log('🧹 [CLEANUP] Removed localStorage data for order:', orderId);
-    
-    // Immediate success notification
-    toast({
-      title: "پرداخت موفق",
-      description: "پرداخت شما با موفقیت انجام شد. در حال تولید فاکتور...",
-    });
-    
-    // Update order with payment information and automatically generate invoice
+    // Update order with payment information
     updatePaymentMutation.mutate({
       paymentStatus: 'paid',
       paymentMethod: paymentResult.method,
       transactionId: paymentResult.transactionId,
-      paymentData: paymentResult,
-      autoComplete: true // Flag to indicate this should auto-complete
+      paymentData: paymentResult
     });
   };
 
@@ -250,10 +158,10 @@ export default function Payment() {
     );
   }
 
-  const order = (orderData as any)?.order || orderData;
+  const order = orderData?.order || orderData;
 
   // Skip payment for cash on delivery and company credit
-  if ((order as any).paymentMethod === 'cash_on_delivery' || (order as any).paymentMethod === 'company_credit') {
+  if (order.paymentMethod === 'cash_on_delivery' || order.paymentMethod === 'company_credit') {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Card className="w-full max-w-lg">
@@ -294,7 +202,7 @@ export default function Payment() {
               Order Number: #{order.orderNumber}
             </p>
             <p className="text-lg font-semibold text-green-600 mb-6">
-              Amount Paid: {formatCurrency((tempCalcData as any)?.data?.finalAmount || order.totalAmount)}
+              Amount Paid: {formatCurrency(order.totalAmount)}
             </p>
             {paymentData && (
               <div className="bg-gray-50 p-4 rounded-lg mb-6">
@@ -352,11 +260,10 @@ export default function Payment() {
             ) : activeGateway ? (
               <PaymentGateway
                 paymentMethod={order.paymentMethod}
-                totalAmount={(tempCalcData as any)?.data?.finalAmount || parseFloat(order.totalAmount)}
+                totalAmount={parseFloat(order.totalAmount)}
                 orderId={order.orderNumber}
                 onPaymentSuccess={handlePaymentSuccess}
                 onPaymentError={handlePaymentError}
-                walletAmount={(tempCalcData as any)?.data?.walletAmountUsed || walletAmount}
                 activeGateway={activeGateway}
               />
             ) : (
@@ -392,29 +299,19 @@ export default function Payment() {
                 <div className="border-t pt-4 space-y-2">
                   <div className="flex justify-between">
                     <span>Subtotal</span>
-                    <span>{formatCurrency(order.itemsSubtotal || order.totalAmount)}</span>
+                    <span>{formatCurrency(order.totalAmount - (order.totalAmount * 0.09) - 50)}</span>
                   </div>
-                  {order.shippingAmount > 0 && (
-                    <div className="flex justify-between">
-                      <span>Shipping</span>
-                      <span>{formatCurrency(order.shippingAmount)}</span>
-                    </div>
-                  )}
-                  {order.vatAmount > 0 && (
-                    <div className="flex justify-between">
-                      <span>Tax (VAT)</span>
-                      <span>{formatCurrency(order.vatAmount)}</span>
-                    </div>
-                  )}
-                  {order.dutiesAmount > 0 && (
-                    <div className="flex justify-between">
-                      <span>Duties</span>
-                      <span>{formatCurrency(order.dutiesAmount)}</span>
-                    </div>
-                  )}
+                  <div className="flex justify-between">
+                    <span>Shipping</span>
+                    <span>{formatCurrency(50)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Tax (9%)</span>
+                    <span>{formatCurrency(order.totalAmount * 0.09)}</span>
+                  </div>
                   <div className="border-t pt-2 flex justify-between font-bold text-lg">
                     <span>Total</span>
-                    <span>{formatCurrency((tempCalcData as any)?.data?.finalAmount || order.totalAmount)}</span>
+                    <span>{formatCurrency(order.totalAmount)}</span>
                   </div>
                 </div>
 

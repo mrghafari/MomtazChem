@@ -789,9 +789,9 @@ export default function ProductsPage() {
       description: product.description || "",
       category: product.category,
       shortDescription: product.shortDescription || "",
-      features: Array.isArray(product.features) ? product.features.join('\n') : (product.features as string || ""),
-      applications: Array.isArray(product.applications) ? product.applications.join('\n') : (product.applications as string || ""),
-      specifications: typeof product.specifications === 'object' && product.specifications !== null ? JSON.stringify(product.specifications, null, 2) : (product.specifications as string || ""),
+      features: Array.isArray(product.features) ? product.features.join('\n') : (product.features || ""),
+      applications: Array.isArray(product.applications) ? product.applications.join('\n') : (product.applications || ""),
+      specifications: typeof product.specifications === 'object' && product.specifications !== null ? JSON.stringify(product.specifications, null, 2) : (product.specifications || ""),
       tags: Array.isArray(product.tags) ? product.tags.join(', ') : (product.tags || ""),
       barcode: product.barcode || "",
       sku: product.sku || "",
@@ -811,8 +811,8 @@ export default function ProductsPage() {
       msdsUrl: product.msdsUrl || "",
       msdsFileName: product.msdsFileName || "",
       showMsdsToCustomers: product.showMsdsToCustomers || false,
-      catalogFileName: (product as any).catalogFileName || "",
-      showCatalogToCustomers: Boolean(product.showCatalogToCustomers),
+      catalogFileName: product.catalogFileName || "",
+      showCatalogToCustomers: product.showCatalogToCustomers || false,
       syncWithShop: product.syncWithShop !== undefined ? product.syncWithShop : true,
       showWhenOutOfStock: product.showWhenOutOfStock ?? false,
       isNonChemical: product.isNonChemical ?? false,
@@ -1224,8 +1224,7 @@ export default function ProductsPage() {
                             className="w-16 h-16 object-cover rounded-lg border border-gray-200 shadow-sm"
                             onError={(e) => {
                               e.currentTarget.style.display = 'none';
-                              const nextSibling = e.currentTarget.nextElementSibling as HTMLElement;
-                              if (nextSibling) nextSibling.style.display = 'flex';
+                              e.currentTarget.nextElementSibling.style.display = 'flex';
                             }}
                           />
                         ) : null}
@@ -1387,16 +1386,16 @@ export default function ProductsPage() {
                             <div 
                               className={`h-2 rounded-full transition-all duration-300 ${
                                 getStockLevelIndicator(
-                                  Number(product.stockQuantity) || 0, 
-                                  Number(product.minStockLevel) || 0, 
-                                  Number(product.maxStockLevel) || 1000
+                                  product.stockQuantity, 
+                                  product.minStockLevel || 0, 
+                                  product.maxStockLevel || 1000
                                 ).color
                               }`}
                               style={{ 
                                 width: `${Math.min(100, getStockLevelIndicator(
-                                  Number(product.stockQuantity) || 0, 
-                                  Number(product.minStockLevel) || 0, 
-                                  Number(product.maxStockLevel) || 1000
+                                  product.stockQuantity, 
+                                  product.minStockLevel || 0, 
+                                  product.maxStockLevel || 1000
                                 ).width)}%` 
                               }}
                             />
@@ -1766,7 +1765,6 @@ export default function ProductsPage() {
                                 placeholder="کد محصول" 
                                 className={`h-9 ${(editingProduct || field.value) ? "bg-gray-50 text-gray-500" : ""} ${validationErrors.sku ? "border-red-500 focus:border-red-500" : ""}`}
                                 {...field}
-                                value={field.value || ""}
                                 readOnly={!!(editingProduct || field.value)}
                               />
                               {!editingProduct && !field.value && (
@@ -1911,7 +1909,6 @@ export default function ProductsPage() {
                               placeholder="بارکد 13 رقمی" 
                               className={`h-9 ${(editingProduct || field.value) ? "bg-gray-50 text-gray-500" : ""} ${validationErrors.barcode ? "border-red-500 focus:border-red-500" : ""}`}
                               {...field}
-                              value={field.value || ""}
                               readOnly={!!(editingProduct || field.value)}
                               onChange={(e) => {
                                 // Detect manual input

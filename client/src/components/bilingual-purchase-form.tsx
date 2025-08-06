@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { MapPin, Globe, X, ShoppingCart, Plus, Minus, Trash2, Wallet, CreditCard, Upload, Clock, Flame, Move } from "lucide-react";
+import { MapPin, Globe, X, ShoppingCart, Plus, Minus, Trash2, Wallet, CreditCard, Upload, Clock, Flame } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -251,87 +251,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const [selectedShippingMethod, setSelectedShippingMethod] = useState<number | null>(null);
   const [shippingCost, setShippingCost] = useState<number>(0);
   
-  // Draggable cart state
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const [position, setPosition] = useState({ 
-    x: typeof window !== 'undefined' ? (window.innerWidth - 400) / 2 : 200, 
-    y: typeof window !== 'undefined' ? (window.innerHeight - 600) / 2 : 100 
-  });
-  const [isMinimized, setIsMinimized] = useState(false);
-  
   // Form reference for static positioning
   const formRef = useRef<HTMLDivElement>(null);
-
-  // Drag handlers
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (!formRef.current) return;
-    const rect = formRef.current.getBoundingClientRect();
-    setIsDragging(true);
-    setDragOffset({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top
-    });
-  };
-
-  const handleMouseMove = (e: MouseEvent) => {
-    if (!isDragging) return;
-    const newX = e.clientX - dragOffset.x;
-    const newY = e.clientY - dragOffset.y;
-    
-    // Keep cart within viewport bounds
-    const maxX = window.innerWidth - 400; // 400px is cart width
-    const maxY = window.innerHeight - 100;
-    
-    setPosition({
-      x: Math.max(0, Math.min(newX, maxX)),
-      y: Math.max(0, Math.min(newY, maxY))
-    });
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
-  // Center the cart on initial load
-  useEffect(() => {
-    const centerCart = () => {
-      const screenWidth = window.innerWidth;
-      const screenHeight = window.innerHeight;
-      const cartWidth = 400; // w-96 = 24rem = ~384px
-      const cartHeight = 600; // estimated height
-      
-      setPosition({
-        x: Math.max(0, (screenWidth - cartWidth) / 2),
-        y: Math.max(0, (screenHeight - cartHeight) / 2)
-      });
-    };
-
-    // Center on mount
-    centerCart();
-
-    // Also center on window resize if not dragged yet
-    const handleResize = () => {
-      if (!isDragging) {
-        centerCart();
-      }
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // Add global mouse listeners for drag
-  useEffect(() => {
-    if (isDragging) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-      return () => {
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
-      };
-    }
-  }, [isDragging, dragOffset]);
 
   
 
@@ -1191,71 +1112,59 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       console.log('🎯 [ORDER SUCCESS] Response type:', typeof response);
       console.log('🎯 [ORDER SUCCESS] Response keys:', Object.keys(response || {}));
       
-      // CRITICAL: Check if hybrid payment (wallet + bank) is required
+      // RESPECT CUSTOMER'S PAYMENT CHOICE - NO AUTO-SUBSTITUTION
+      // Only consider wallet payment if customer explicitly chose wallet methods
       const remainingAmount = parseFloat(response.remainingAmount || 0);
-      const walletDeducted = parseFloat(response.walletAmountDeducted || 0);
-      const requiresBankPayment = response.requiresBankPayment === true;
+      const customerChoseWallet = paymentMethod === 'wallet_full' || paymentMethod === 'wallet_partial' || paymentMethod === 'wallet_combined';
+      const isFullyPaidByWallet = remainingAmount === 0 && customerChoseWallet;
       
-      console.log('💳 [HYBRID PAYMENT DEBUG] Response analysis:', {
+      console.log('💳 [PAYMENT DECISION] RESPECTING CUSTOMER CHOICE:', {
         paymentMethod,
+        customerChoseWallet,
         remainingAmount,
-        walletDeducted,
-        requiresBankPayment,
-        responseKeys: Object.keys(response),
-        redirectUrl: response.redirectUrl,
-        fullResponse: response
+        isFullyPaidByWallet,
+        requiresBankPayment: response.requiresBankPayment,
+        paymentStatus: response.paymentStatus,
+        walletAmountDeducted: response.walletAmountDeducted,
+        'Decision': customerChoseWallet && isFullyPaidByWallet ? 'Complete order (wallet chosen)' : 'Respect customer payment method'
       });
       
-      // PRIORITY 1: Check for hybrid payment (wallet partial + bank required)
-      if (requiresBankPayment && response.redirectUrl && remainingAmount > 0) {
-        console.log('🔄 [HYBRID PAYMENT] Wallet partial payment + bank required');
-        console.log('🔄 [HYBRID PAYMENT] Redirecting to bank gateway:', response.redirectUrl);
-        
-        // Save wallet amount to localStorage for payment page persistence
-        const orderNumber = response.orderNumber || response.orderId;
-        if (orderNumber && walletAmount > 0) {
-          localStorage.setItem(`wallet_amount_${orderNumber}`, walletAmount.toString());
-          console.log('💾 [LOCALSTORAGE] Wallet amount saved for order:', orderNumber, '→', walletAmount);
-        }
-        
-        toast({
-          title: "پرداخت ترکیبی انجام شد",
-          description: `${walletDeducted?.toLocaleString()} IQD از کیف پول کسر شد. هدایت به درگاه بانکی برای پرداخت ${remainingAmount?.toLocaleString()} IQD باقیمانده...`,
-        });
-        
-        // Force redirect to hybrid payment page
-        setTimeout(() => {
-          console.log('🔄 [REDIRECT] Going to:', response.redirectUrl);
-          window.location.href = response.redirectUrl;
-        }, 2000);
-        return;
-      }
-      
-      // PRIORITY 2: Full wallet payment completion
-      if (remainingAmount === 0 && walletDeducted > 0) {
-        console.log('✅ [FULL WALLET PAYMENT] Order fully paid by wallet');
+      // Only auto-complete if customer EXPLICITLY chose wallet payment AND it's fully paid
+      if (isFullyPaidByWallet && customerChoseWallet) {
+        console.log('✅ [FULL WALLET PAYMENT] Order fully paid by wallet - completing without bank gateway');
         
         toast({
           title: "سفارش ثبت شد",
-          description: `سفارش شما با موفقیت ثبت شد و کاملاً از کیف پول پرداخت شد. مبلغ کسرشده: ${walletDeducted?.toLocaleString()} IQD`,
+          description: `سفارش شما با موفقیت ثبت شد و کاملاً از کیف پول پرداخت شد. شماره سفارش: ${response.orderNumber || response.order?.orderNumber || 'N/A'}`,
         });
         
+        // Complete the order without bank gateway
         setTimeout(() => {
           onOrderComplete();
           onClose();
         }, 1500);
         return;
       }
+      
+      // Check for hybrid payment redirect only if remaining amount > 0
+      if (response.requiresBankPayment && response.redirectUrl && remainingAmount > 0) {
+        console.log('🔄 [HYBRID PAYMENT] Redirecting to bank gateway:', response.redirectUrl);
+        console.log('🔄 [HYBRID PAYMENT] Wallet amount deducted:', response.walletAmountDeducted);
+        
+        toast({
+          title: "پرداخت ترکیبی",
+          description: `${response.walletAmountDeducted?.toLocaleString()} IQD از کیف پول کسر شد. هدایت به درگاه بانکی...`,
+        });
+        
+        // Force redirect to hybrid payment page
+        setTimeout(() => {
+          window.location.href = response.redirectUrl;
+        }, 1500);
+        return;
+      }
       // Handle online_payment method - redirect to bank gateway
       else if (paymentMethod === 'online_payment' && response.redirectToPayment && response.paymentGatewayUrl) {
         console.log('🏦 [ONLINE PAYMENT] Redirecting to bank gateway:', response.paymentGatewayUrl);
-        
-        // Save wallet amount to localStorage even for pure online payment (wallet_partial may still have amount)
-        const orderNumber = response.orderNumber || response.orderId;
-        if (orderNumber && walletAmount > 0) {
-          localStorage.setItem(`wallet_amount_${orderNumber}`, walletAmount.toString());
-          console.log('💾 [LOCALSTORAGE] Wallet amount saved for online payment order:', orderNumber, '→', walletAmount);
-        }
         
         toast({
           title: "انتقال به درگاه بانکی",
@@ -1325,13 +1234,6 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         return;
       }
       else {
-        // Save wallet amount to localStorage for any order that might use wallet later
-        const orderNumber = response.orderNumber || response.orderId;
-        if (orderNumber && walletAmount > 0) {
-          localStorage.setItem(`wallet_amount_${orderNumber}`, walletAmount.toString());
-          console.log('💾 [LOCALSTORAGE] Wallet amount saved for general order:', orderNumber, '→', walletAmount);
-        }
-        
         toast({
           title: t.orderSubmitted,
           description: "سفارش شما با موفقیت ثبت شد"
@@ -1347,7 +1249,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     }
   });
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = (data: any) => {
     console.log('🚀 [SUBMIT DEBUG] onSubmit function called');
     console.log('🚀 [SUBMIT DEBUG] Form data received:', data);
     console.log('🚀 [SUBMIT DEBUG] Selected shipping method:', selectedShippingMethod);
@@ -1481,86 +1383,32 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       orderData
     });
 
-    // Store temporary calculation data for payment gateway
-    const tempCalculationData = {
-      finalAmount: totalAmount,
-      subtotalAmount,
-      shippingCost: finalShippingCost,
-      totalTaxAmount,
-      walletAmountUsed: orderData.walletAmountUsed || 0,
-      remainingAmount: orderData.remainingAmount || totalAmount,
-      paymentMethod: finalPaymentMethod,
-      cartData: cart,
-      deliveryAddress: data.address,
-      phone: data.phone,
-      notes: data.notes
-    };
-
-    console.log('💾 [TEMP CALCULATION] Storing calculation data for payment:', tempCalculationData);
-
-    // Store calculation data before submitting order
-    try {
-      await apiRequest('POST', '/api/cart/temp-order-data', tempCalculationData);
-      console.log('✅ [TEMP CALCULATION] Successfully stored calculation data');
-    } catch (error) {
-      console.error('❌ [TEMP CALCULATION] Failed to store calculation data:', error);
-      // Continue with order submission even if temp storage fails
-    }
-
     submitOrderMutation.mutate(orderData);
   };
 
 
 
   return (
-    <div 
-      className="fixed w-96 z-50 shadow-2xl transition-all duration-200"
-      style={{
-        left: position.x,
-        top: position.y,
-        cursor: isDragging ? 'grabbing' : 'auto'
-      }}
-    >
+    <div className="fixed inset-0 flex items-center justify-center p-4 bg-black/50 z-50">
       <Card 
         ref={formRef}
-        className={`w-full ${isMinimized ? 'max-h-16' : 'max-h-[80vh]'} overflow-y-auto border-2 border-blue-200 transition-all duration-300 ${isRTL ? 'rtl' : 'ltr'}`}
-        style={{ 
-          background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
-          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
-        }}
+        className={`w-full max-w-2xl max-h-[90vh] overflow-y-auto ${isRTL ? 'rtl' : 'ltr'}`}
       >
-        <CardHeader 
-          className="flex flex-row items-center justify-between space-y-0 pb-4 cursor-grab active:cursor-grabbing bg-gradient-to-r from-blue-50 to-purple-50 rounded-t-lg"
-          onMouseDown={handleMouseDown}
-        >
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <div className="flex items-center gap-2">
-            <Move className="w-4 h-4 text-gray-400" />
-            <ShoppingCart className="w-5 h-5 text-blue-600" />
-            <CardTitle className="text-lg font-semibold text-gray-800">{t.purchaseOrder}</CardTitle>
+            <ShoppingCart className="w-5 h-5" />
+            <CardTitle className="text-lg">{t.purchaseOrder}</CardTitle>
           </div>
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsMinimized(!isMinimized)}
-              className="h-8 w-8 p-0 hover:bg-blue-100"
-              title={isMinimized ? "Expand" : "Minimize"}
-            >
-              {isMinimized ? <Plus className="w-3 h-3" /> : <Minus className="w-3 h-3" />}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-              className="h-8 w-8 p-0 hover:bg-red-100 text-red-600"
-              title="Close"
-            >
-              <X className="w-4 h-4" />
-            </Button>
-          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="no-drag"
+          >
+            <X className="w-4 h-4" />
+          </Button>
         </CardHeader>
 
-        {!isMinimized && (
         <CardContent className="space-y-4">
           {/* Cart Management */}
           <div className="bg-muted p-3 rounded-lg">
@@ -1654,33 +1502,19 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
             
             {/* Cart Summary */}
             <div className="border-t mt-3 pt-3 space-y-2">
-              {/* Subtotal - Base product cost */}
-              <div className="flex justify-between text-sm">
-                <span>مجموع محصولات</span>
-                <span className="font-medium">{formatCurrency(subtotalAmount)}</span>
-              </div>
-              
               {/* VAT */}
               {vatData?.vatEnabled && vatAmount > 0 && (
-                <div className="flex justify-between text-sm text-orange-600">
-                  <span>🏛️ مالیات بر ارزش افزوده ({(vatRate * 100).toFixed(1)}%)</span>
-                  <span className="font-medium">+{formatCurrency(vatAmount)}</span>
+                <div className="flex justify-between text-sm">
+                  <span>مالیات بر ارزش افزوده ({(vatRate * 100).toFixed(0)}%)</span>
+                  <span>{formatCurrency(vatAmount)}</span>
                 </div>
               )}
               
               {/* Duties */}
               {vatData?.dutiesEnabled && dutiesAmount > 0 && (
-                <div className="flex justify-between text-sm text-red-600">
-                  <span>📋 عوارض گمرکی ({(dutiesRate * 100).toFixed(1)}%)</span>
-                  <span className="font-medium">+{formatCurrency(dutiesAmount)}</span>
-                </div>
-              )}
-              
-              {/* Total Tax Summary */}
-              {totalTaxAmount > 0 && (
-                <div className="flex justify-between text-sm bg-gray-50 dark:bg-gray-800 px-2 py-1 rounded border">
-                  <span className="font-medium">مجموع مالیات و عوارض</span>
-                  <span className="font-semibold text-gray-700 dark:text-gray-300">{formatCurrency(totalTaxAmount)}</span>
+                <div className="flex justify-between text-sm">
+                  <span>عوارض بر ارزش افزوده ({(dutiesRate * 100).toFixed(0)}%)</span>
+                  <span>{formatCurrency(dutiesAmount)}</span>
                 </div>
               )}
               
@@ -1898,14 +1732,9 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
               )}
               
               {/* Final Amount */}
-              <div className="border-t pt-2 space-y-1">
-                <div className="flex justify-between font-bold text-lg bg-yellow-300 px-3 py-2 rounded-lg">
-                  <span className="text-gray-900">Final Amount (مبلغ نهایی)</span>
-                  <span className="text-gray-900">{formatCurrency(totalAmount)}</span>
-                </div>
-                <div className="text-xs text-center text-gray-600 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
-                  💰 محاسبه: {formatCurrency(subtotalAmount)} + {formatCurrency(totalTaxAmount)} + {formatCurrency(finalShippingCost)} = {formatCurrency(totalAmount)}
-                </div>
+              <div className="flex justify-between font-bold text-lg border-t pt-2 bg-yellow-300 px-2 py-2 rounded-lg">
+                <span>Final Amount</span>
+                <span className="text-gray-900">{formatCurrency(totalAmount)}</span>
               </div>
             </div>
           </div>
@@ -2488,7 +2317,6 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
             </Form>
           </div>
         </CardContent>
-        )}
       </Card>
     </div>
   );

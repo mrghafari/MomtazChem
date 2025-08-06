@@ -33,32 +33,6 @@ const Shop = () => {
   const { toast } = useMultilingualToast();
   const { t, direction } = useLanguage();
   const queryClient = useQueryClient();
-  
-  // Function to refresh product data when admin makes changes
-  const refreshProductData = () => {
-    queryClient.invalidateQueries({ queryKey: ["/api/shop/products"] });
-    queryClient.invalidateQueries({ queryKey: ['shopSearch'] });
-    queryClient.invalidateQueries({ queryKey: ["/api/shop/product-stats"] });
-    queryClient.invalidateQueries({ queryKey: ["/api/shop/discounts"] });
-    console.log('🔄 Product data refreshed');
-  };
-
-  // Auto-refresh products when page regains focus (admin made changes in another tab)
-  useEffect(() => {
-    const handleFocus = () => {
-      if (document.visibilityState === 'visible') {
-        refreshProductData();
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleFocus);
-    window.addEventListener('focus', handleFocus);
-    
-    return () => {
-      document.removeEventListener('visibilitychange', handleFocus);
-      window.removeEventListener('focus', handleFocus);
-    };
-  }, [queryClient]);
   const { isAuthenticated: isAdminAuthenticated } = useAuth();
 
 
@@ -67,8 +41,16 @@ const Shop = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [sortBy, setSortBy] = useState("name");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  // Initialize empty cart - will be loaded based on customer authentication
-  const [cart, setCart] = useState<{[key: number]: number}>({});
+  // Initialize cart from localStorage or sessionStorage based on auth status
+  const [cart, setCart] = useState<{[key: number]: number}>(() => {
+    // For guests, use sessionStorage (cleared on tab close/refresh if not logged in)
+    // For logged-in users, use localStorage (persistent)
+    const guestCart = sessionStorage.getItem('momtazchem_guest_cart');
+    const userCart = localStorage.getItem('momtazchem_user_cart');
+    
+    // Start with guest cart if available, will be migrated to user cart on login
+    return guestCart ? JSON.parse(guestCart) : (userCart ? JSON.parse(userCart) : {});
+  });
   const [showCheckout, setShowCheckout] = useState(false);
   const [showPreCheckout, setShowPreCheckout] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
@@ -170,18 +152,12 @@ const Shop = () => {
       const response = await fetch(`/api/shop/search?${params}`);
       if (!response.ok) throw new Error('Search failed');
       return response.json();
-    },
-    refetchOnWindowFocus: true,
-    staleTime: 60000, // 1 minute - auto-refresh when data changes
+    }
   });
 
   // Fetch all shop products for total count
   const { data: products = [] } = useQuery<ShopProduct[]>({
     queryKey: ["/api/shop/products"],
-    refetchOnWindowFocus: true,
-    refetchOnMount: true,
-    staleTime: 30000, // 30 seconds
-    cacheTime: 300000, // 5 minutes
   });
 
   // Fetch discount settings to get the highest discount percentage
@@ -193,7 +169,6 @@ const Shop = () => {
       return response.json();
     },
     staleTime: 2 * 60 * 1000, // 2 minutes
-    refetchOnWindowFocus: true,
   });
 
   // Calculate the highest discount percentage
@@ -221,7 +196,6 @@ const Shop = () => {
       return response.json();
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
-    refetchOnWindowFocus: true,
   });
 
   // Extract control states - only show if explicitly enabled (no fallback to true)
@@ -247,8 +221,6 @@ const Shop = () => {
   const { data: productStats, isLoading: statsLoading, error: statsError } = useQuery({
     queryKey: ["/api/shop/product-stats"],
     retry: false,
-    refetchOnWindowFocus: true,
-    staleTime: 60000, // 1 minute
   });
   
   // Extract the actual data from API response
@@ -369,21 +341,18 @@ const Shop = () => {
     }
   }, [currentProducts, displayStock, cart]);
 
-  // Handle cart isolation based on customer authentication
+  // Handle cart based on authentication status after customer state is known
   useEffect(() => {
-    if (customer?.id) {
-      // Authenticated user - load customer-specific cart
-      const customerCartKey = `momtazchem_cart_${customer.id}`;
-      const customerCart = localStorage.getItem(customerCartKey);
-      if (customerCart) {
-        console.log(`🛒 [CART ISOLATION] Loading customer ${customer.id} cart from localStorage`);
-        setCart(JSON.parse(customerCart));
+    if (customer) {
+      // Authenticated user - load from localStorage
+      const userCart = localStorage.getItem('momtazchem_user_cart');
+      if (userCart) {
+        setCart(JSON.parse(userCart));
       }
     } else if (customer === null && !isLoadingCustomer) {
       // Guest user confirmed - load guest cart if available
       const guestCart = sessionStorage.getItem('momtazchem_guest_cart');
       if (guestCart) {
-        console.log('🛒 [CART ISOLATION] Loading guest cart from sessionStorage');
         setCart(JSON.parse(guestCart));
       } else {
         setCart({});
@@ -391,8 +360,31 @@ const Shop = () => {
     }
   }, [customer, isLoadingCustomer]);
 
-  // Disabled: This was conflicting with database cart loading
-  // The persistent cart loading is now handled in loadPersistentCart function
+  // Force cart refresh on page load/navigation
+  useEffect(() => {
+    const refreshCart = () => {
+      if (customer) {
+        const userCart = localStorage.getItem('momtazchem_user_cart');
+        if (userCart) {
+          const cartData = JSON.parse(userCart);
+          setCart(cartData);
+        }
+      } else if (!isLoadingCustomer) {
+        const guestCart = sessionStorage.getItem('momtazchem_guest_cart');
+        if (guestCart) {
+          const cartData = JSON.parse(guestCart);
+          setCart(cartData);
+        }
+      }
+    };
+
+    // Refresh cart on window focus (navigation between tabs/pages)
+    window.addEventListener('focus', refreshCart);
+    
+    return () => {
+      window.removeEventListener('focus', refreshCart);
+    };
+  }, [customer, isLoadingCustomer]);
 
   const checkCustomerAuth = async () => {
     try {
@@ -449,49 +441,43 @@ const Shop = () => {
     }
   };
 
-  // 🛒 Load customer-specific cart with isolation
+  // 🛒 Load persistent cart from database and sync with local storage
   const loadPersistentCart = async () => {
-    if (!customer?.id) {
-      console.log('🛒 [CART ISOLATION] No customer ID, skipping cart load');
-      return;
-    }
-
     try {
-      console.log(`🛒 [CART ISOLATION] Loading cart for customer ${customer.id}...`);
+      console.log('🛒 [PERSISTENT CART] Loading cart from database...');
       
-      // Get current customer-specific local cart
-      const customerCartKey = `momtazchem_cart_${customer.id}`;
-      const localCart = localStorage.getItem(customerCartKey);
+      // Get current local cart (guest cart or existing user cart)
+      const localCart = localStorage.getItem('momtazchem_user_cart') || sessionStorage.getItem('momtazchem_guest_cart');
       const localCartData = localCart ? JSON.parse(localCart) : {};
       
-      // Load cart from database using new isolated API
-      const cartResponse = await fetch('/api/customers/cart', {
+      // Load cart from database
+      const cartResponse = await fetch('/api/customers/persistent-cart', {
         credentials: 'include'
       });
       
       if (cartResponse.ok) {
         const cartResult = await cartResponse.json();
-        if (cartResult.success && cartResult.cart) {
-          const databaseCart = cartResult.cart;
-          console.log(`🛒 [CART ISOLATION] Customer ${customer.id} database cart:`, databaseCart);
-          console.log(`🛒 [CART ISOLATION] Customer ${customer.id} local cart:`, localCartData);
+        if (cartResult.success) {
+          const databaseCart = cartResult.data?.cartData || {};
+          console.log('🛒 [PERSISTENT CART] Database cart:', databaseCart);
+          console.log('🛒 [PERSISTENT CART] Local cart:', localCartData);
           
           // If local cart has items, sync them to database
           if (Object.keys(localCartData).length > 0) {
-            console.log(`🔄 [CART ISOLATION] Syncing customer ${customer.id} local cart to database`);
-            const syncResponse = await fetch('/api/customers/cart', {
+            console.log('🔄 [PERSISTENT CART] Syncing local cart to database');
+            const syncResponse = await fetch('/api/customers/persistent-cart/sync', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               credentials: 'include',
-              body: JSON.stringify({ cart: localCartData })
+              body: JSON.stringify({ cartData: localCartData })
             });
             
             if (syncResponse.ok) {
               const syncResult = await syncResponse.json();
               if (syncResult.success) {
                 setCart(localCartData);
-                localStorage.setItem(customerCartKey, JSON.stringify(localCartData));
-                console.log(`✅ [CART ISOLATION] Customer ${customer.id} local cart synced to database`);
+                localStorage.setItem('momtazchem_user_cart', JSON.stringify(localCartData));
+                console.log('✅ [PERSISTENT CART] Local cart synced to database successfully');
                 return;
               }
             }
@@ -499,25 +485,22 @@ const Shop = () => {
           
           // Use database cart if sync failed or no local cart
           setCart(databaseCart);
-          localStorage.setItem(customerCartKey, JSON.stringify(databaseCart));
-          console.log(`✅ [CART ISOLATION] Customer ${customer.id} cart loaded from database`);
+          localStorage.setItem('momtazchem_user_cart', JSON.stringify(databaseCart));
+          console.log('✅ [PERSISTENT CART] Cart loaded from database');
         }
       } else {
-        console.log(`⚠️ [CART ISOLATION] Failed to load customer ${customer.id} cart from database, using local`);
+        console.log('⚠️ [PERSISTENT CART] Failed to load from database, using local cart');
         if (Object.keys(localCartData).length > 0) {
           setCart(localCartData);
-          localStorage.setItem(customerCartKey, JSON.stringify(localCartData));
+          localStorage.setItem('momtazchem_user_cart', JSON.stringify(localCartData));
         }
       }
     } catch (error) {
-      console.error(`❌ [CART ISOLATION] Error loading customer ${customer?.id} cart:`, error);
-      // Fallback to customer-specific local cart if available
-      if (customer?.id) {
-        const customerCartKey = `momtazchem_cart_${customer.id}`;
-        const localCart = localStorage.getItem(customerCartKey);
-        if (localCart) {
-          setCart(JSON.parse(localCart));
-        }
+      console.error('❌ [PERSISTENT CART] Error loading cart:', error);
+      // Fallback to local cart if available
+      const localCart = localStorage.getItem('momtazchem_user_cart');
+      if (localCart) {
+        setCart(JSON.parse(localCart));
       }
     }
   };
@@ -534,7 +517,7 @@ const Shop = () => {
     }
   };
 
-  const handleLoginSuccess = async (customerData: any) => {
+  const handleLoginSuccess = (customerData: any) => {
     console.log('🔐 [LOGIN] Starting handleLoginSuccess');
     console.log('🔐 [LOGIN] Customer data:', customerData);
     console.log('🔐 [LOGIN] Current cart state:', cart);
@@ -554,11 +537,6 @@ const Shop = () => {
       queryClient.invalidateQueries({ queryKey: ["/api/customers/me"] });
       queryClient.invalidateQueries({ queryKey: ["/api/customer/wallet"] });
       console.log('🔐 [LOGIN] Cache invalidated');
-      
-      // 🛒 Load persistent cart from database FIRST
-      console.log('🔐 [LOGIN] Loading persistent cart...');
-      await loadPersistentCart();
-      console.log('🔐 [LOGIN] Persistent cart loaded');
       
       // Check if user has items in cart before migration
       const hasCartItems = Object.keys(cart).length > 0;
@@ -611,66 +589,21 @@ const Shop = () => {
 
   const handleLogout = async () => {
     try {
-      const currentCustomerId = customer?.id;
-      console.log(`🔐 [LOGOUT] Starting logout for customer ${currentCustomerId}`);
-      
       const response = await fetch('/api/customers/logout', {
         method: 'POST',
         credentials: 'include'
       });
 
       if (response.ok) {
-        console.log(`🔐 [LOGOUT] Logout API successful for customer ${currentCustomerId}`);
-        
-        // 1. Clear cart state immediately
-        setCart({});
-        console.log('🛒 [LOGOUT] Cart state cleared');
-        
-        // 2. Clear customer-specific localStorage
-        if (currentCustomerId) {
-          const customerCartKey = `momtazchem_cart_${currentCustomerId}`;
-          localStorage.removeItem(customerCartKey);
-          console.log(`🛒 [LOGOUT] Removed customer ${currentCustomerId} cart from localStorage`);
-          
-          // Also clear any other customer-related localStorage items
-          Object.keys(localStorage).forEach(key => {
-            if (key.includes(`momtazchem_cart_${currentCustomerId}`)) {
-              localStorage.removeItem(key);
-              console.log(`🛒 [LOGOUT] Removed additional cart key: ${key}`);
-            }
-          });
-        }
-        
-        // 3. Clear all localStorage keys that might be customer-related
-        localStorage.removeItem('momtazchem_user_cart');
-        console.log('🛒 [LOGOUT] Cleared legacy user cart');
-        
-        // 4. Clear customer and wallet state
         setCustomer(null);
         setWalletBalance(0);
-        console.log('🔐 [LOGOUT] Customer state cleared');
-        
-        // 5. Update display stock to reflect empty cart
-        if (currentProducts?.length > 0) {
-          const resetStock: {[key: number]: number} = {};
-          currentProducts.forEach(product => {
-            resetStock[product.id] = product.stockQuantity || 0;
-          });
-          setDisplayStock(resetStock);
-          console.log('📦 [LOGOUT] Display stock reset');
-        }
-        
         toast({
           title: "خروج موفق",
           description: "با موفقیت از حساب کاربری خارج شدید",
         });
-        
-        console.log('🔐 [LOGOUT] Logout completed successfully');
-      } else {
-        console.error('🔐 [LOGOUT] Logout API failed:', response.status);
       }
     } catch (error) {
-      console.error('🔐 [LOGOUT] Error during logout:', error);
+      console.error('Logout error:', error);
       toast({
         title: "خطا",
         description: "خطا در خروج از حساب کاربری",
@@ -700,40 +633,30 @@ const Shop = () => {
       }
     });
 
-  // Save cart with customer isolation
+  // Save cart to appropriate storage based on authentication
   const saveCartToStorage = async (cartData: {[key: number]: number}) => {
-    console.log(`🛒 [CART ISOLATION] Called with cart data:`, cartData);
-    console.log(`🛒 [CART ISOLATION] Customer state: ${customer?.id ? `Customer ${customer.id}` : 'guest'}`);
-    
-    if (customer?.id) {
-      // Authenticated user - save to customer-specific localStorage AND database
-      const customerCartKey = `momtazchem_cart_${customer.id}`;
-      localStorage.setItem(customerCartKey, JSON.stringify(cartData));
-      console.log(`🛒 [CART ISOLATION] Customer ${customer.id} cart saved to localStorage`);
+    if (customer) {
+      // Authenticated user - save to localStorage AND database
+      localStorage.setItem('momtazchem_user_cart', JSON.stringify(cartData));
       
-      // 🛒 Save to database with customer isolation
+      // 🛒 Save to database asynchronously (don't block UI)
       try {
-        console.log(`🛒 [CART ISOLATION] Saving customer ${customer.id} cart to database:`, cartData);
-        const response = await fetch('/api/customers/cart', {
+        console.log('🛒 [PERSISTENT CART] Saving to database:', cartData);
+        await fetch('/api/customers/persistent-cart/sync', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
-          body: JSON.stringify({ cart: cartData })
+          body: JSON.stringify({ cartData })
         });
-        
-        if (response.ok) {
-          console.log(`✅ [CART ISOLATION] Customer ${customer.id} cart saved to database successfully`);
-        } else {
-          console.error(`❌ [CART ISOLATION] Customer ${customer.id} database save failed:`, response.status);
-        }
+        console.log('✅ [PERSISTENT CART] Saved to database successfully');
       } catch (error) {
-        console.error(`❌ [CART ISOLATION] Error saving customer ${customer.id} cart to database:`, error);
-        // Still keep in customer-specific localStorage even if database save fails
+        console.error('❌ [PERSISTENT CART] Error saving to database:', error);
+        // Still keep in localStorage even if database save fails
       }
     } else {
-      console.log('🛒 [CART ISOLATION] Guest user - using session storage only');
-      // Guest user - use session storage (temporary)
-      sessionStorage.setItem('momtazchem_guest_cart', JSON.stringify(cartData));
+      // Guest user - don't save to any persistent storage
+      // Cart will be lost on refresh as requested
+      // Only keep in memory during current session
     }
   };
 
@@ -1438,11 +1361,11 @@ const Shop = () => {
                               <img 
                                 src={product.imageUrl} 
                                 alt={product.name}
-                                className="w-full h-full object-cover transition-transform duration-100 group-hover:scale-105 pointer-events-none"
+                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110 pointer-events-none"
                               />
                               {/* Zoom overlay on hover */}
-                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-100 flex items-center justify-center pointer-events-none">
-                                <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-100" />
+                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center pointer-events-none">
+                                <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                               </div>
                             </div>
                           ) : (
@@ -1631,7 +1554,7 @@ const Shop = () => {
                                             return (
                                               <div
                                                 key={i}
-                                                className={`flex-1 h-1.5 rounded-full transition-all duration-100 ${
+                                                className={`flex-1 h-1.5 rounded-full transition-all duration-300 ${
                                                   isActive 
                                                     ? 'bg-yellow-400 shadow-lg shadow-yellow-400/50' 
                                                     : currentQty >= d.minQty 
@@ -1797,11 +1720,11 @@ const Shop = () => {
                               <img 
                                 src={product.imageUrl} 
                                 alt={product.name}
-                                className="w-full h-full object-cover transition-transform duration-100 group-hover:scale-105 pointer-events-none"
+                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110 pointer-events-none"
                               />
                               {/* Zoom overlay on hover */}
-                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-100 flex items-center justify-center pointer-events-none">
-                                <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-100" />
+                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center pointer-events-none">
+                                <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                               </div>
                             </div>
                           ) : (
@@ -1969,7 +1892,7 @@ const Shop = () => {
                                               return (
                                                 <div
                                                   key={i}
-                                                  className={`w-8 h-2 rounded-full transition-all duration-100 ${
+                                                  className={`w-8 h-2 rounded-full transition-all duration-300 ${
                                                     isActive 
                                                       ? 'bg-yellow-400 shadow-lg shadow-yellow-400/50' 
                                                       : currentQty >= d.minQty 

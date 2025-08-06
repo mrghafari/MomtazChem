@@ -43,6 +43,8 @@ import { generateEAN13Barcode, validateEAN13, parseEAN13Barcode, isMomtazchemBar
 import { generateSmartSKU, validateSKUUniqueness } from "./ai-sku-generator";
 import { deliveryVerificationStorage } from "./delivery-verification-storage";
 import { gpsDeliveryStorage } from "./gps-delivery-storage";
+import { gpsDeliveryConfirmations } from "@shared/gps-delivery-schema";
+
 import { vehicleTemplates, vehicleSelectionHistory, insertVehicleTemplateSchema, insertVehicleSelectionHistorySchema, internationalCountries, internationalCities, internationalShippingRates, insertInternationalCountrySchema, insertInternationalCitySchema, insertInternationalShippingRateSchema, deliveryVerificationCodes, readyVehicles } from "@shared/logistics-schema";
 import { 
   companyInformation, 
@@ -93,6 +95,7 @@ import {
   deliveryVehicles,
   deliveryPersonnel,
   deliveryRoutes,
+  deliveryVerificationCodes,
   logisticsAnalytics,
   insertTransportationCompanySchema,
   insertDeliveryVehicleSchema,
@@ -435,216 +438,6 @@ const requireCustomerAuth = (req: Request, res: Response, next: NextFunction) =>
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  
-  // *** CRITICAL PAYMENT ENDPOINT - MUST BE FIRST TO PREVENT CONFLICTS ***
-  // Get order payment details by order number for hybrid payment processing
-  // Accessible by both customers and admins  
-  app.get("/api/customers/orders/:orderNumber/payment", async (req, res) => {
-    console.log(`🚨🚨🚨 [PAYMENT ENDPOINT FIRST] DEFINITELY STARTED - Request received for order: ${req.params.orderNumber}`);
-    console.log(`🚨🚨🚨 [PAYMENT ENDPOINT FIRST] URL Path: ${req.path}`);
-    console.log(`🚨🚨🚨 [PAYMENT ENDPOINT FIRST] Method: ${req.method}`);
-    
-    try {
-      const { orderNumber } = req.params;
-      
-      console.log(`🔍 [PAYMENT DETAILS] Request for order ${orderNumber}`);
-      console.log(`🔍 [PAYMENT DETAILS] Session check:`, {
-        hasSession: !!req.session,
-        isAuthenticated: req.session?.isAuthenticated,
-        customerId: req.session?.customerId,
-        crmCustomerId: req.session?.crmCustomerId,
-        adminId: req.session?.adminId,
-        sessionID: req.sessionID
-      });
-      
-      // Check if user is authenticated (either as customer or admin)
-      const isCustomer = req.session?.customerId || req.session?.crmCustomerId;
-      const isAdmin = req.session?.adminId;
-      const isAuthenticated = req.session?.isAuthenticated;
-      
-      if (!isAuthenticated || (!isCustomer && !isAdmin)) {
-        console.log(`❌ [PAYMENT DETAILS] Authentication failed for order ${orderNumber}`);
-        console.log(`❌ [PAYMENT DETAILS] Session details:`, {
-          isCustomer: !!isCustomer,
-          isAdmin: !!isAdmin,
-          isAuthenticated,
-          sessionExists: !!req.session
-        });
-        return res.status(400).json({
-          success: false,
-          message: "FIRST ENDPOINT: شناسه سفارش نامعتبر است"
-        });
-      }
-      
-      const { pool } = await import('./db');
-      
-      // Get order details from customer_orders table using order_number OR id
-      // Support both string order numbers (M2511XXX) and numeric IDs (192)
-      const isNumericId = /^\d+$/.test(orderNumber);
-      let result;
-      
-      if (isNumericId) {
-        console.log(`🔍 [PAYMENT DETAILS] Searching by numeric ID: ${orderNumber}`);
-        result = await pool.query(`
-          SELECT 
-            co.id,
-            co.order_number as "orderNumber",
-            co.total_amount as "totalAmount",
-            co.shipping_cost as "shippingAmount",
-            co.vat_amount as "vatAmount",
-            co.vat_rate as "vatRate",
-            co.surcharge_amount as "surchargeAmount",
-            co.surcharge_rate as "surchargeRate",
-            co.payment_method as "paymentMethod",
-            co.payment_status as "paymentStatus",
-            co.status,
-            co.customer_id as "customerId",
-            co.created_at as "createdAt"
-          FROM customer_orders co
-          WHERE co.id = $1
-        `, [parseInt(orderNumber)]);
-      } else {
-        console.log(`🔍 [PAYMENT DETAILS] Searching by order number: ${orderNumber}`);
-        result = await pool.query(`
-          SELECT 
-            co.id,
-            co.order_number as "orderNumber",
-            co.total_amount as "totalAmount",
-            co.shipping_cost as "shippingAmount",
-            co.vat_amount as "vatAmount",
-            co.vat_rate as "vatRate",
-            co.surcharge_amount as "surchargeAmount",
-            co.surcharge_rate as "surchargeRate",
-            co.payment_method as "paymentMethod",
-            co.payment_status as "paymentStatus",
-            co.status,
-            co.customer_id as "customerId",
-            co.created_at as "createdAt"
-          FROM customer_orders co
-          WHERE co.order_number = $1
-        `, [orderNumber]);
-      }
-
-      if (result.rows.length === 0) {
-        console.log(`❌ [PAYMENT DETAILS] Order not found: ${orderNumber}`);
-        
-        // Attempt automatic cached order recovery
-        if (isCustomer && !isAdmin) {
-          const customerIdToRecover = req.session?.customerId || req.session?.crmCustomerId;
-          if (customerIdToRecover) {
-            console.log(`🔄 [CACHED RECOVERY] Attempting auto-recovery for order ${orderNumber} and customer ${customerIdToRecover}`);
-            
-            try {
-              const { cachedOrderRecovery } = await import('./cached-order-recovery');
-              const recoveryResult = await cachedOrderRecovery.attemptRecovery(orderNumber, customerIdToRecover);
-              
-              if (recoveryResult.success) {
-                console.log(`✅ [CACHED RECOVERY] Successfully recovered order ${orderNumber}`);
-                
-                // Re-query the order after recovery
-                const recoveredResult = await pool.query(`
-                  SELECT 
-                    co.id,
-                    co.order_number as "orderNumber",
-                    co.total_amount as "totalAmount",
-                    co.shipping_cost as "shippingAmount",
-                    co.vat_amount as "vatAmount",
-                    co.vat_rate as "vatRate",
-                    co.surcharge_amount as "surchargeAmount",
-                    co.surcharge_rate as "surchargeRate",
-                    co.payment_method as "paymentMethod",
-                    co.payment_status as "paymentStatus",
-                    co.status,
-                    co.customer_id as "customerId",
-                    co.created_at as "createdAt"
-                  FROM customer_orders co
-                  WHERE co.order_number = $1
-                `, [orderNumber]);
-                
-                if (recoveredResult.rows.length > 0) {
-                  const recoveredOrder = recoveredResult.rows[0];
-                  console.log(`✅ [CACHED RECOVERY] Order successfully recovered and returned:`, recoveredOrder);
-                  
-                  // Calculate itemsSubtotal for recovered order
-                  const recoveredItemsSubtotal = (
-                    parseFloat(recoveredOrder.totalAmount) - 
-                    parseFloat(recoveredOrder.shippingAmount || '0') - 
-                    parseFloat(recoveredOrder.vatAmount || '0') - 
-                    parseFloat(recoveredOrder.surchargeAmount || '0')
-                  ).toFixed(2);
-
-                  const enhancedRecoveredOrder = {
-                    ...recoveredOrder,
-                    itemsSubtotal: recoveredItemsSubtotal
-                  };
-                  
-                  return res.json({
-                    success: true,
-                    order: enhancedRecoveredOrder,
-                    recovered: true,
-                    message: recoveryResult.message
-                  });
-                }
-              } else {
-                console.log(`❌ [CACHED RECOVERY] Recovery failed: ${recoveryResult.message}`);
-              }
-            } catch (recoveryError) {
-              console.error(`❌ [CACHED RECOVERY] Recovery error:`, recoveryError);
-            }
-          }
-        }
-        
-        return res.status(404).json({
-          success: false,
-          message: "سفارش یافت نشد"
-        });
-      }
-
-      const order = result.rows[0];
-      console.log(`✅ [PAYMENT DETAILS] Order found:`, order);
-      
-      // If authenticated as customer, verify they own this order
-      if (isCustomer && !isAdmin) {
-        const customerIdToCheck = req.session?.customerId || req.session?.crmCustomerId;
-        if (order.customerId !== customerIdToCheck) {
-          console.log(`❌ [PAYMENT DETAILS] Customer ${customerIdToCheck} doesn't own order ${orderNumber} (belongs to ${order.customerId})`);
-          return res.status(403).json({
-            success: false,
-            message: "دسترسی غیرمجاز"
-          });
-        }
-      }
-
-      // Calculate itemsSubtotal: totalAmount - (shipping + vat + surcharge)
-      const itemsSubtotal = (
-        parseFloat(order.totalAmount) - 
-        parseFloat(order.shippingAmount || '0') - 
-        parseFloat(order.vatAmount || '0') - 
-        parseFloat(order.surchargeAmount || '0')
-      ).toFixed(2);
-
-      // Enhance order object with calculated fields
-      const enhancedOrder = {
-        ...order,
-        itemsSubtotal: itemsSubtotal
-      };
-
-      console.log(`✅ [PAYMENT DETAILS] Enhanced order with itemsSubtotal:`, enhancedOrder);
-
-      res.json({
-        success: true,
-        order: enhancedOrder
-      });
-
-    } catch (error) {
-      console.error('❌ [PAYMENT DETAILS] Error fetching order payment details:', error);
-      res.status(500).json({
-        success: false,
-        message: "خطا در دریافت اطلاعات پرداخت"
-      });
-    }
-  });
-
   // Initialize sync service at startup
   console.log('🔄 [SYNC SERVICE] Initializing automatic table synchronization system...');
   try {
@@ -4121,100 +3914,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: false,
         message: "خطا در دریافت واحد محصول از کاردکس"
       });
-    }
-  });
-
-  // ===== Customer Cart Isolation System =====
-  // Load persistent cart for authenticated customer (customer-specific isolation)
-  app.get('/api/customers/cart', async (req: any, res) => {
-    if (!req.session?.customerId) {
-      return res.status(401).json({ success: false, message: 'Customer not authenticated' });
-    }
-
-    try {
-      console.log('🛒 [CART API] Loading cart for customer:', req.session.customerId);
-      const { persistentCarts } = await import('../shared/persistent-cart-schema');
-      const { eq } = await import('drizzle-orm');
-      
-      // Get customer-specific cart items using sql template
-      const { sql } = await import('drizzle-orm');
-      const cartItems = await db.execute(sql`
-        SELECT id, customer_id, product_id, quantity, unit_price, added_at, updated_at
-        FROM persistent_carts 
-        WHERE customer_id = ${req.session.customerId}
-      `);
-
-      // Convert to cart format {productId: quantity}
-      const cart: {[key: number]: number} = {};
-      if (cartItems && cartItems.rows) {
-        cartItems.rows.forEach((item: any) => {
-          cart[item.product_id] = item.quantity;
-        });
-      }
-
-      console.log('🛒 [CART API] Customer', req.session.customerId, 'cart loaded:', cart);
-      res.json({ success: true, cart, items: cartItems.rows || [] });
-    } catch (error) {
-      console.error('Error loading customer cart:', error);
-      res.status(500).json({ success: false, message: 'Failed to load cart' });
-    }
-  });
-
-  // Save persistent cart for authenticated customer (customer-specific isolation)
-  app.post('/api/customers/cart', async (req: any, res) => {
-    if (!req.session?.customerId) {
-      return res.status(401).json({ success: false, message: 'Customer not authenticated' });
-    }
-
-    try {
-      const { cart } = req.body;
-      console.log('🛒 [CART API] Saving cart for customer:', req.session.customerId, 'cart:', cart);
-      
-      const { persistentCarts } = await import('../shared/persistent-cart-schema');
-      const { eq, and } = await import('drizzle-orm');
-      
-      // First, clear existing cart for this customer using raw SQL
-      const { sql } = await import('drizzle-orm');
-      await db.execute(sql`DELETE FROM persistent_carts WHERE customer_id = ${req.session.customerId}`);
-
-      // Insert new cart items using raw SQL
-      if (cart && Object.keys(cart).length > 0) {
-        const cartEntries = Object.entries(cart);
-        for (const [productId, quantity] of cartEntries) {
-          await db.execute(sql`
-            INSERT INTO persistent_carts (customer_id, product_id, quantity, added_at, updated_at)
-            VALUES (${req.session.customerId}, ${parseInt(productId)}, ${quantity as number}, NOW(), NOW())
-            ON CONFLICT (customer_id, product_id) 
-            DO UPDATE SET quantity = ${quantity as number}, updated_at = NOW()
-          `);
-        }
-        console.log('🛒 [CART API] Customer', req.session.customerId, 'cart saved:', cartEntries.length, 'items');
-      } else {
-        console.log('🛒 [CART API] Customer', req.session.customerId, 'cart cleared (empty)');
-      }
-
-      res.json({ success: true, message: 'Cart saved successfully' });
-    } catch (error) {
-      console.error('Error saving customer cart:', error);
-      res.status(500).json({ success: false, message: 'Failed to save cart' });
-    }
-  });
-
-  // Clear cart for authenticated customer
-  app.delete('/api/customers/cart', async (req: any, res) => {
-    if (!req.session?.customerId) {
-      return res.status(401).json({ success: false, message: 'Customer not authenticated' });
-    }
-
-    try {
-      const { sql } = await import('drizzle-orm');
-      await db.execute(sql`DELETE FROM persistent_carts WHERE customer_id = ${req.session.customerId}`);
-
-      console.log('🛒 [CART API] Customer', req.session.customerId, 'cart cleared');
-      res.json({ success: true, message: 'Cart cleared successfully' });
-    } catch (error) {
-      console.error('Error clearing customer cart:', error);
-      res.status(500).json({ success: false, message: 'Failed to clear cart' });
     }
   });
 
@@ -9241,10 +8940,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // REMOVED: Duplicate endpoint - using the one later in the file
+  // Get active payment gateway (public endpoint for frontend)
+  app.get("/api/payment/active-gateway", async (req, res) => {
+    try {
+      const { pool } = await import('./db');
+      
+      const result = await pool.query(`
+        SELECT 
+          id,
+          name,
+          type,
+          enabled,
+          config,
+          created_at as "createdAt",
+          updated_at as "updatedAt"
+        FROM payment_gateways
+        WHERE enabled = true
+        ORDER BY updated_at DESC
+        LIMIT 1
+      `);
 
-  // OLD ENDPOINT - DISABLED in favor of enhanced orderNumber endpoint below
-  /*app.get("/api/customers/orders/:orderId/payment", async (req, res) => {
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "هیچ درگاه پرداخت فعالی یافت نشد"
+        });
+      }
+
+      console.log("✅ [ACTIVE GATEWAY] Found:", result.rows[0]);
+      res.json(result.rows[0]);
+    } catch (error) {
+      console.error("❌ [ACTIVE GATEWAY] Error fetching active gateway:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت درگاه پرداخت فعال"
+      });
+    }
+  });
+
+  // Get customer order for payment (public endpoint for payment page)
+  app.get("/api/customers/orders/:orderId/payment", async (req, res) => {
     try {
       const orderId = parseInt(req.params.orderId);
       
@@ -9290,7 +9025,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: "خطا در دریافت اطلاعات سفارش"
       });
     }
-  });*/
+  });
 
   // Create new payment gateway
   app.post("/api/payment/gateways", requireAuth, async (req, res) => {
@@ -9494,8 +9229,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      console.log("✅ [ACTIVE GATEWAY] Found:", result.rows[0]);
-      res.json(result.rows[0]);
+      res.json({
+        success: true,
+        gateway: result.rows[0]
+      });
     } catch (error) {
       console.error("❌ [ACTIVE GATEWAY] Error:", error);
       res.status(500).json({
@@ -13537,26 +13274,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const orderNumber = await orderManagementStorage.generateOrderNumber();
       
       // Calculate order totals and taxes (using dynamic tax settings)
-      // Calculate items subtotal from products and quantities
-      let itemsSubtotal = 0;
-      
-      if (orderData.items && orderData.items.length > 0) {
-        for (const item of orderData.items) {
-          const product = await db.select().from(showcaseProducts).where(eq(showcaseProducts.id, item.productId)).limit(1);
-          if (product.length > 0) {
-            console.log(`🔍 [PRODUCT DEBUG] Raw product data for ID ${item.productId}:`, JSON.stringify(product[0], null, 2));
-            console.log(`🔍 [PRICE DEBUG] Checking price fields: unitPrice=${product[0].unitPrice}, unit_price=${product[0].unit_price}`);
-            const productPrice = parseFloat(product[0].unitPrice?.toString() || '0') || 0;
-            const quantity = parseInt(item.quantity) || 1;
-            itemsSubtotal += productPrice * quantity;
-            console.log(`📦 [PRODUCT CALC] ${product[0].name}: ${productPrice} × ${quantity} = ${productPrice * quantity} IQD`);
-          } else {
-            console.log(`❌ [PRODUCT NOT FOUND] Product ID ${item.productId} not found in database`);
-          }
-        }
-      }
-      
-      console.log(`💰 [SUBTOTAL] Calculated items subtotal: ${itemsSubtotal} IQD`);
+      // Note: orderData.totalAmount from frontend already includes all components
+      // We need to extract the actual item subtotal for proper VAT calculation
+      const itemsSubtotal = orderData.subtotalAmount || 0;
       const shippingAmount = orderData.shippingCost || 0;
       
       // Get current tax rates from tax_settings table and freeze them for this order
@@ -13611,7 +13331,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log("✅ [CUSTOMER CHOICE] Bank transfer selected - NO wallet substitution allowed");
       }
       // Only process wallet payments when customer explicitly chose wallet options
-      else if (orderData.paymentMethod === 'wallet_full' || orderData.paymentMethod === 'wallet_partial' || orderData.paymentMethod === 'wallet_combined') {
+      else if (orderData.paymentMethod === 'wallet_full' || orderData.paymentMethod === 'wallet_partial') {
         walletAmountUsed = parseFloat(orderData.walletAmountUsed || 0);
         remainingAmount = parseFloat(orderData.remainingAmount || totalAmount);
         
@@ -14307,110 +14027,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({
         success: false,
         message: "خطا در دریافت جزئیات سفارش"
-      });
-    }
-  });
-
-  // Get order payment details by order number for hybrid payment processing
-  // Accessible by both customers and admins
-  app.get("/api/customers/orders/:orderNumber/payment", async (req, res) => {
-    console.log(`🚨🚨🚨 [PAYMENT ENDPOINT v2] DEFINITELY STARTED - Request received for order: ${req.params.orderNumber}`);
-    console.log(`🚨🚨🚨 [PAYMENT ENDPOINT v2] URL Path: ${req.path}`);
-    console.log(`🚨🚨🚨 [PAYMENT ENDPOINT v2] Method: ${req.method}`);
-    
-    try {
-      const { orderNumber } = req.params;
-      
-      console.log(`🔍 [PAYMENT DETAILS] Request for order ${orderNumber}`);
-      console.log(`🔍 [PAYMENT DETAILS] Session check:`, {
-        hasSession: !!req.session,
-        isAuthenticated: req.session?.isAuthenticated,
-        customerId: req.session?.customerId,
-        crmCustomerId: req.session?.crmCustomerId,
-        adminId: req.session?.adminId,
-        sessionID: req.sessionID
-      });
-      
-      // Check if user is authenticated (either as customer or admin)
-      const isCustomer = req.session?.customerId || req.session?.crmCustomerId;
-      const isAdmin = req.session?.adminId;
-      const isAuthenticated = req.session?.isAuthenticated;
-      
-      if (!isAuthenticated || (!isCustomer && !isAdmin)) {
-        console.log(`❌ [PAYMENT DETAILS] Authentication failed for order ${orderNumber}`);
-        console.log(`❌ [PAYMENT DETAILS] Session details:`, {
-          isCustomer: !!isCustomer,
-          isAdmin: !!isAdmin,
-          isAuthenticated,
-          sessionExists: !!req.session
-        });
-        return res.status(400).json({
-          success: false,
-          message: "شناسه سفارش نامعتبر است"
-        });
-      }
-      
-      // If admin, get order without customer ID restriction
-      // If customer, only get their own orders
-      let customerId = null;
-      if (isCustomer) {
-        customerId = req.session?.customerId || req.session?.crmCustomerId;
-      }
-      
-      console.log(`🔍 [PAYMENT DETAILS] Fetching payment details for order ${orderNumber}, customer ${customerId}, admin: ${!!isAdmin}`);
-      
-      // Find order by orderNumber (admin can see all orders, customer only their own)
-      let orderResult;
-      if (isAdmin) {
-        // Admin can access any order
-        orderResult = await db
-          .select()
-          .from(customerOrders)
-          .where(eq(customerOrders.orderNumber, orderNumber));
-      } else {
-        // Customer can only access their own orders
-        orderResult = await db
-          .select()
-          .from(customerOrders)
-          .where(and(
-            eq(customerOrders.orderNumber, orderNumber),
-            eq(customerOrders.customerId, customerId)
-          ));
-      }
-        
-      console.log(`🔍 [PAYMENT DETAILS] Database query result: ${orderResult.length} orders found`);
-      
-      if (orderResult.length === 0) {
-        return res.status(404).json({
-          success: false,
-          message: "سفارش یافت نشد"
-        });
-      }
-      
-      const order = orderResult[0];
-      
-      console.log(`✅ [PAYMENT DETAILS] Found order ${orderNumber} with payment status: ${order.paymentStatus}`);
-      
-      res.json({
-        success: true,
-        order: {
-          id: order.id,
-          orderNumber: order.orderNumber,
-          totalAmount: order.totalAmount,
-          paymentStatus: order.paymentStatus,
-          paymentMethod: order.paymentMethod,
-          walletAmountUsed: order.walletAmountUsed,
-          remainingAmount: order.totalAmount - (order.walletAmountUsed || 0),
-          createdAt: order.createdAt,
-          customerId: order.customerId
-        }
-      });
-      
-    } catch (error) {
-      console.error('❌ [PAYMENT DETAILS] Error fetching payment details:', error);
-      res.status(500).json({
-        success: false,
-        message: "خطا در دریافت جزئیات پرداخت"
       });
     }
   });
@@ -17118,44 +16734,6 @@ Momtaz Chemical Technical Team`,
     }
   });
 
-  // Get product batches for display
-  app.get("/api/products/:name/batches/display", async (req, res) => {
-    try {
-      const productName = decodeURIComponent(req.params.name);
-      const batches = await shopStorage.getProductBatchesByName(productName);
-      
-      if (!batches || batches.length === 0) {
-        return res.status(404).json({ 
-          success: false, 
-          message: "No batches found for product" 
-        });
-      }
-      
-      // Return batch display information
-      const batchInfo = {
-        productName,
-        totalStock: batches.reduce((sum, batch) => sum + (batch.stockQuantity || 0), 0),
-        batches: batches.map(batch => ({
-          id: batch.id,
-          batchNumber: batch.batchNumber || `Batch-${batch.id}`,
-          stockQuantity: batch.stockQuantity || 0,
-          price: batch.price || 0,
-          expiryDate: batch.expiryDate,
-          lastUpdated: batch.updatedAt
-        })),
-        lastKardexUpdate: new Date().toISOString()
-      };
-      
-      res.json({ success: true, data: batchInfo });
-    } catch (error: any) {
-      console.error("Error fetching product batches:", error);
-      res.status(500).json({ 
-        success: false, 
-        message: "Failed to fetch product batches" 
-      });
-    }
-  });
-
   app.get("/api/shop/categories", async (req, res) => {
     try {
       const categories = await shopStorage.getShopCategories();
@@ -17901,44 +17479,25 @@ Momtaz Chemical Technical Team`,
   // Payment processing endpoints
   app.post("/api/shop/orders/:id/payment", async (req, res) => {
     try {
-      const orderParam = req.params.id;
-      console.log('🔍 [PAYMENT ENDPOINT] Received order parameter:', orderParam, typeof orderParam);
-      
-      // Try to parse as integer first, if fails use as string (order number)
-      let orderId;
-      let order;
-      
-      if (/^\d+$/.test(orderParam)) {
-        // It's a numeric ID
-        orderId = parseInt(orderParam);
-        order = await customerStorage.getOrderById(orderId);
-      } else {
-        // It's an order number (string like M2511420)
-        console.log('🔍 [PAYMENT ENDPOINT] Looking up order by number:', orderParam);
-        const orders = await customerStorage.getAllOrders();
-        order = orders.find(o => o.orderNumber === orderParam);
-        orderId = order?.id;
+      const orderId = parseInt(req.params.id);
+      if (isNaN(orderId)) {
+        return res.status(400).json({ success: false, message: "Invalid order ID" });
       }
 
       const { paymentStatus, paymentMethod, transactionId, paymentData } = req.body;
       
-      if (!order || !orderId) {
-        console.log('❌ [PAYMENT ENDPOINT] Order not found for:', orderParam);
+      // Get the order from customer_orders table
+      const order = await customerStorage.getOrderById(orderId);
+      if (!order) {
         return res.status(404).json({ success: false, message: "Order not found" });
       }
-      
-      console.log('✅ [PAYMENT ENDPOINT] Order found:', { id: orderId, orderNumber: order.orderNumber });
 
-      // Update order with payment information and auto-complete for successful payments
+      // Update order with payment information
       const updatedOrder = await customerStorage.updateOrder(orderId, {
-        status: paymentStatus === 'paid' ? 'completed' : order.status, // Auto-complete for paid orders
-        paymentStatus: paymentStatus,
-        paymentMethod: paymentMethod,
+        status: paymentStatus === 'paid' ? 'payment_confirmed' : order.status,
         notes: order.notes ? `${order.notes}\n\nPayment processed: ${paymentMethod}${transactionId ? ` (ID: ${transactionId})` : ''}` 
                : `Payment processed: ${paymentMethod}${transactionId ? ` (ID: ${transactionId})` : ''}`
       });
-      
-      console.log(`✅ [PAYMENT UPDATE] Order ${orderId} automatically completed after successful payment`);
 
       // Trigger automatic synchronization after payment update
       try {
@@ -30948,187 +30507,6 @@ momtazchem.com
     }
   });
 
-  // Complete wallet-only payment
-  app.post("/api/customers/wallet/complete-payment", async (req, res) => {
-    try {
-      // Prevent admin from accessing customer wallet data
-      if (req.session.adminId) {
-        return res.status(401).json({ success: false, message: "Admin authenticated - not a customer" });
-      }
-      
-      if (!req.session.customerId) {
-        return res.status(401).json({ success: false, message: "Customer authentication required" });
-      }
-
-      const customerId = req.session.customerId;
-      const { orderId, totalAmount, paymentMethod } = req.body;
-      
-      console.log('🔄 [WALLET COMPLETE] Processing wallet-only payment:', {
-        customerId,
-        orderId,
-        totalAmount,
-        paymentMethod
-      });
-
-      // Verify customer has sufficient wallet balance
-      const currentBalance = await walletStorage.getWalletBalance(customerId);
-      console.log('🔍 [WALLET COMPLETE] Current balance:', currentBalance);
-      
-      if (currentBalance < totalAmount) {
-        return res.status(400).json({
-          success: false,
-          message: `موجودی کیف پول (${currentBalance} IQD) برای پرداخت مبلغ ${totalAmount} IQD کافی نیست`
-        });
-      }
-
-      // Get order details to verify it exists and belongs to customer
-      const [order] = await customerDb
-        .select()
-        .from(customerOrders)
-        .where(and(
-          eq(customerOrders.orderNumber, orderId),
-          eq(customerOrders.customerId, customerId)
-        ));
-        
-      if (!order) {
-        return res.status(404).json({
-          success: false,
-          message: "سفارش یافت نشد"
-        });
-      }
-
-      // Deduct amount from wallet
-      const description = `Payment for order ${orderId}`;
-      await walletStorage.debitWallet(customerId, totalAmount, description, 'order_payment');
-      console.log('💰 [WALLET COMPLETE] Wallet deducted successfully');
-
-      // Update order payment status
-      await customerDb
-        .update(customerOrders)
-        .set({ paymentStatus: 'completed' })
-        .where(eq(customerOrders.id, order.id));
-      console.log('✅ [WALLET COMPLETE] Order payment status updated to completed');
-
-      // Generate transaction ID
-      const transactionId = `WAL-${Date.now()}-${Math.random().toString(36).substr(2, 8).toUpperCase()}`;
-
-      // Get new balance
-      const newBalance = await walletStorage.getWalletBalance(customerId);
-
-      res.json({
-        success: true,
-        message: "پرداخت از کیف پول با موفقیت انجام شد",
-        transactionId: transactionId,
-        newWalletBalance: newBalance,
-        amountDeducted: totalAmount
-      });
-
-    } catch (error) {
-      console.error("[WALLET COMPLETE] Error:", error);
-      res.status(500).json({
-        success: false,
-        message: "خطا در پردازش پرداخت از کیف پول"
-      });
-    }
-  });
-
-  // Hybrid payment: Immediate wallet deduction
-  app.post("/api/customers/wallet/hybrid-deduction", async (req, res) => {
-    try {
-      // Prevent admin from accessing customer wallet data
-      if (req.session.adminId) {
-        return res.status(401).json({ success: false, message: "Admin authenticated - not a customer" });
-      }
-      
-      if (!req.session.customerId) {
-        return res.status(401).json({ success: false, message: "Customer authentication required" });
-      }
-
-      const customerId = req.session.customerId;
-      const { orderId, walletAmount, remainingAmount, totalAmount } = req.body;
-      
-      console.log('🔄 [HYBRID DEDUCTION] Processing hybrid wallet deduction:', {
-        customerId,
-        orderId,
-        walletAmount,
-        remainingAmount,
-        totalAmount
-      });
-
-      // Verify inputs
-      if (!orderId || !walletAmount || walletAmount <= 0) {
-        return res.status(400).json({
-          success: false,
-          message: "اطلاعات پرداخت نامعتبر است"
-        });
-      }
-
-      // Verify customer has sufficient wallet balance
-      const currentBalance = await walletStorage.getWalletBalance(customerId);
-      console.log('🔍 [HYBRID DEDUCTION] Current balance:', currentBalance);
-      
-      if (currentBalance < walletAmount) {
-        return res.status(400).json({
-          success: false,
-          message: `موجودی کیف پول (${currentBalance} IQD) برای کسر مبلغ ${walletAmount} IQD کافی نیست`
-        });
-      }
-
-      // Get order details to verify it exists and belongs to customer
-      const [order] = await customerDb
-        .select()
-        .from(customerOrders)
-        .where(and(
-          eq(customerOrders.orderNumber, orderId),
-          eq(customerOrders.customerId, customerId)
-        ));
-        
-      if (!order) {
-        return res.status(404).json({
-          success: false,
-          message: "سفارش یافت نشد"
-        });
-      }
-
-      // Immediately deduct wallet amount
-      const description = `Partial payment for order ${orderId} (${walletAmount} IQD from wallet)`;
-      await walletStorage.debitWallet(customerId, walletAmount, description, 'hybrid_payment');
-      console.log('💰 [HYBRID DEDUCTION] Wallet deducted successfully:', walletAmount);
-
-      // Update order payment status to 'partial' since bank payment is still pending
-      await customerDb
-        .update(customerOrders)
-        .set({ 
-          paymentStatus: 'partial',
-          paymentMethod: 'wallet_partial'
-        })
-        .where(eq(customerOrders.id, order.id));
-      console.log('✅ [HYBRID DEDUCTION] Order payment status updated to partial');
-
-      // Generate transaction ID for wallet portion
-      const transactionId = `HYB-${Date.now()}-${Math.random().toString(36).substr(2, 8).toUpperCase()}`;
-
-      // Get new balance
-      const newBalance = await walletStorage.getWalletBalance(customerId);
-
-      res.json({
-        success: true,
-        message: "بخش کیف پول پرداخت شد. در حال هدایت به درگاه بانکی...",
-        transactionId: transactionId,
-        newWalletBalance: newBalance,
-        walletAmountDeducted: walletAmount,
-        remainingBankAmount: remainingAmount
-      });
-
-    } catch (error) {
-      console.error("[HYBRID DEDUCTION] Error:", error);
-      res.status(500).json({
-        success: false,
-        message: "خطا در کسر از کیف پول"
-      });
-    }
-  });
-
   // Get wallet recharge information/status
   app.get('/api/customer/wallet/recharge', async (req, res) => {
     try {
@@ -38003,141 +37381,6 @@ momtazchem.com
     } catch (error) {
       console.error("Error completing cart session:", error);
       res.status(500).json({ success: false, message: "Failed to complete cart session" });
-    }
-  });
-
-  // Clear cart after successful payment
-  app.post("/api/cart/clear", async (req, res) => {
-    try {
-      const customerId = (req.session as any)?.customerId;
-      if (!customerId) {
-        return res.status(401).json({ success: false, message: "Authentication required" });
-      }
-
-      console.log(`🧹 [CART CLEAR] Clearing cart for customer: ${customerId}`);
-      await cartStorage.clearCartSession(customerId);
-      console.log(`✅ [CART CLEAR] Cart cleared successfully for customer: ${customerId}`);
-      
-      res.json({ success: true, message: "Cart cleared successfully" });
-    } catch (error) {
-      console.error("❌ [CART CLEAR] Error clearing cart:", error);
-      res.status(500).json({ success: false, message: "Failed to clear cart" });
-    }
-  });
-
-  // Store temporary order calculation data before payment
-  app.post("/api/cart/temp-order-data", async (req, res) => {
-    try {
-      const customerId = (req.session as any)?.customerId;
-      if (!customerId) {
-        return res.status(401).json({ success: false, message: "احراز هویت مورد نیاز است" });
-      }
-
-      const { 
-        finalAmount, 
-        subtotalAmount, 
-        shippingCost, 
-        totalTaxAmount,
-        walletAmountUsed,
-        remainingAmount,
-        paymentMethod,
-        cartData,
-        deliveryAddress,
-        phone,
-        notes
-      } = req.body;
-
-      console.log(`💾 [TEMP ORDER DATA] Storing calculation data for customer: ${customerId}`);
-      console.log(`💾 [TEMP ORDER DATA] Final Amount: ${finalAmount}, Payment Method: ${paymentMethod}`);
-
-      // Store in session temporarily - more secure than database for temporary data
-      (req.session as any).tempOrderCalculations = {
-        customerId,
-        finalAmount,
-        subtotalAmount,
-        shippingCost,
-        totalTaxAmount,
-        walletAmountUsed,
-        remainingAmount,
-        paymentMethod,
-        cartData,
-        deliveryAddress,
-        phone,
-        notes,
-        timestamp: new Date().toISOString()
-      };
-
-      res.json({ 
-        success: true, 
-        message: "محاسبات سفارش موقتاً ذخیره شد",
-        data: { finalAmount, paymentMethod, remainingAmount }
-      });
-    } catch (error) {
-      console.error("❌ [TEMP ORDER DATA] Error storing temporary order data:", error);
-      res.status(500).json({ success: false, message: "خطا در ذخیره اطلاعات موقت" });
-    }
-  });
-
-  // Retrieve temporary order calculation data for payment
-  app.get("/api/cart/temp-order-data", async (req, res) => {
-    try {
-      const customerId = (req.session as any)?.customerId;
-      if (!customerId) {
-        return res.status(401).json({ success: false, message: "احراز هویت مورد نیاز است" });
-      }
-
-      const tempData = (req.session as any).tempOrderCalculations;
-      if (!tempData || tempData.customerId !== customerId) {
-        return res.status(404).json({ 
-          success: false, 
-          message: "اطلاعات محاسبات موقت یافت نشد" 
-        });
-      }
-
-      console.log(`🔍 [TEMP ORDER DATA] Retrieved calculation data for customer: ${customerId}`);
-      console.log(`🔍 [TEMP ORDER DATA] Final Amount: ${tempData.finalAmount}`);
-
-      res.json({ 
-        success: true, 
-        data: tempData
-      });
-    } catch (error) {
-      console.error("❌ [TEMP ORDER DATA] Error retrieving temporary order data:", error);
-      res.status(500).json({ success: false, message: "خطا در بازیابی اطلاعات موقت" });
-    }
-  });
-
-  // Generate invoice after successful payment
-  app.post("/api/invoices", async (req, res) => {
-    try {
-      const { orderId, customerId, language = 'ar' } = req.body;
-
-      if (!orderId) {
-        return res.status(400).json({ success: false, message: "Order ID is required" });
-      }
-
-      console.log(`📄 [INVOICE] Generating invoice for order: ${orderId}, customer: ${customerId}`);
-
-      // For now, just return success to prevent 404 error
-      // TODO: Implement actual invoice generation logic
-      const invoiceData = {
-        invoiceId: `INV-${orderId}-${Date.now()}`,
-        orderId: orderId,
-        customerId: customerId,
-        status: 'generated',
-        createdAt: new Date().toISOString()
-      };
-
-      console.log(`✅ [INVOICE] Invoice generated successfully:`, invoiceData);
-      res.json({ 
-        success: true, 
-        data: invoiceData,
-        message: "Invoice generated successfully" 
-      });
-
-    } catch (error) {
-      console.error("❌ [INVOICE] Error generating invoice:", error);
-      res.status(500).json({ success: false, message: "Failed to generate invoice" });
     }
   });
 
@@ -45369,6 +44612,211 @@ momtazchem.com
   // شروع سیستم تایید خودکار
   autoApprovalService.start();
   console.log("🤖 [SYSTEM] Auto-approval service started for bank transfers and payment uploads");
+
+  // =============================================================================
+  // PERSISTENT CART MANAGEMENT API ENDPOINTS
+  // =============================================================================
+  
+  // Get customer's persistent cart
+  app.get("/api/customers/persistent-cart", async (req, res) => {
+    try {
+      if (!req.session.isAuthenticated || !req.session.customerId) {
+        return res.status(401).json({
+          success: false,
+          message: "احراز هویت مشتری مورد نیاز است"
+        });
+      }
+
+      const customerId = req.session.customerId;
+      console.log(`🛒 [PERSISTENT CART] Loading cart for customer ${customerId}`);
+      
+      const cartItems = await storage.getPersistentCart(customerId);
+      
+      // تبدیل به فرمت مناسب برای frontend
+      const cart: {[key: number]: number} = {};
+      cartItems.forEach(item => {
+        cart[item.productId] = item.quantity;
+      });
+      
+      console.log(`🛒 [PERSISTENT CART] Found ${cartItems.length} items in cart for customer ${customerId}`);
+      
+      res.json({
+        success: true,
+        cart,
+        items: cartItems
+      });
+
+    } catch (error) {
+      console.error('❌ [PERSISTENT CART] Error loading cart:', error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در بارگذاری سبد خرید"
+      });
+    }
+  });
+
+  // Save cart item to database
+  app.post("/api/customers/persistent-cart/save", async (req, res) => {
+    try {
+      if (!req.session.isAuthenticated || !req.session.customerId) {
+        return res.status(401).json({
+          success: false,
+          message: "احراز هویت مشتری مورد نیاز است"
+        });
+      }
+
+      const customerId = req.session.customerId;
+      const { productId, quantity, unitPrice } = req.body;
+      
+      console.log(`🛒 [PERSISTENT CART] Saving item for customer ${customerId}: product ${productId}, quantity ${quantity}`);
+      
+      const savedItem = await storage.savePersistentCart(customerId, productId, quantity, unitPrice);
+      
+      res.json({
+        success: true,
+        message: "آیتم در سبد خرید ذخیره شد",
+        item: savedItem
+      });
+
+    } catch (error) {
+      console.error('❌ [PERSISTENT CART] Error saving cart item:', error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در ذخیره سبد خرید"
+      });
+    }
+  });
+
+  // Update cart item quantity
+  app.put("/api/customers/persistent-cart/update", async (req, res) => {
+    try {
+      if (!req.session.isAuthenticated || !req.session.customerId) {
+        return res.status(401).json({
+          success: false,
+          message: "احراز هویت مشتری مورد نیاز است"
+        });
+      }
+
+      const customerId = req.session.customerId;
+      const { productId, quantity } = req.body;
+      
+      console.log(`🛒 [PERSISTENT CART] Updating quantity for customer ${customerId}: product ${productId}, quantity ${quantity}`);
+      
+      await storage.updatePersistentCartQuantity(customerId, productId, quantity);
+      
+      res.json({
+        success: true,
+        message: "کمیت محصول بروزرسانی شد"
+      });
+
+    } catch (error) {
+      console.error('❌ [PERSISTENT CART] Error updating cart quantity:', error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در بروزرسانی کمیت"
+      });
+    }
+  });
+
+  // Remove item from cart
+  app.delete("/api/customers/persistent-cart/remove", async (req, res) => {
+    try {
+      if (!req.session.isAuthenticated || !req.session.customerId) {
+        return res.status(401).json({
+          success: false,
+          message: "احراز هویت مشتری مورد نیاز است"
+        });
+      }
+
+      const customerId = req.session.customerId;
+      const { productId } = req.body;
+      
+      console.log(`🛒 [PERSISTENT CART] Removing item for customer ${customerId}: product ${productId}`);
+      
+      await storage.removePersistentCartItem(customerId, productId);
+      
+      res.json({
+        success: true,
+        message: "محصول از سبد خرید حذف شد"
+      });
+
+    } catch (error) {
+      console.error('❌ [PERSISTENT CART] Error removing cart item:', error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در حذف محصول"
+      });
+    }
+  });
+
+  // Clear entire cart
+  app.delete("/api/customers/persistent-cart/clear", async (req, res) => {
+    try {
+      if (!req.session.isAuthenticated || !req.session.customerId) {
+        return res.status(401).json({
+          success: false,
+          message: "احراز هویت مشتری مورد نیاز است"
+        });
+      }
+
+      const customerId = req.session.customerId;
+      
+      console.log(`🛒 [PERSISTENT CART] Clearing cart for customer ${customerId}`);
+      
+      await storage.clearPersistentCart(customerId);
+      
+      res.json({
+        success: true,
+        message: "سبد خرید پاک شد"
+      });
+
+    } catch (error) {
+      console.error('❌ [PERSISTENT CART] Error clearing cart:', error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در پاک کردن سبد خرید"
+      });
+    }
+  });
+
+  // Sync local cart with database (called on login)
+  app.post("/api/customers/persistent-cart/sync", async (req, res) => {
+    try {
+      if (!req.session.isAuthenticated || !req.session.customerId) {
+        return res.status(401).json({
+          success: false,
+          message: "احراز هویت مشتری مورد نیاز است"
+        });
+      }
+
+      const customerId = req.session.customerId;
+      const { cartData } = req.body;
+      
+      console.log(`🔄 [PERSISTENT CART] Syncing local cart for customer ${customerId}:`, cartData);
+      
+      await storage.syncLocalCartToDatabase(customerId, cartData);
+      
+      // بازگردانی سبد خرید بروزرسانی شده
+      const updatedCartItems = await storage.getPersistentCart(customerId);
+      const updatedCart: {[key: number]: number} = {};
+      updatedCartItems.forEach(item => {
+        updatedCart[item.productId] = item.quantity;
+      });
+      
+      res.json({
+        success: true,
+        message: "سبد خرید همگام‌سازی شد",
+        cart: updatedCart
+      });
+
+    } catch (error) {
+      console.error('❌ [PERSISTENT CART] Error syncing cart:', error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در همگام‌سازی سبد خرید"
+      });
+    }
+  });
 
   return httpServer;
 }

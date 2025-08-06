@@ -245,45 +245,9 @@ export class ShopStorage implements IShopStorage {
       .orderBy(shopProducts.name);
   }
 
-  async getProductBatchesByName(productName: string): Promise<ShopProduct[]> {
-    return await shopDb
-      .select()
-      .from(shopProducts)
-      .where(and(
-        eq(shopProducts.name, productName),
-        eq(shopProducts.isActive, true)
-      ))
-      .orderBy(shopProducts.createdAt);
-  }
-
   async getShopProducts(): Promise<ShopProduct[]> {
-    // Group products by name to merge different batches into single entries
     const products = await shopDb
-      .select({
-        id: sql<number>`MIN(${shopProducts.id})`,
-        name: shopProducts.name,
-        barcode: sql<string>`MIN(${shopProducts.barcode})`,
-        category: sql<string>`MIN(${shopProducts.category})`,
-        description: sql<string>`MIN(${shopProducts.description})`,
-        shortDescription: sql<string>`MIN(${shopProducts.shortDescription})`,
-        price: sql<string>`MIN(${shopProducts.price})`,
-        priceUnit: sql<string>`MIN(${shopProducts.priceUnit})`,
-        stockQuantity: sql<number>`SUM(${shopProducts.stockQuantity})`, // Sum all batches
-        inStock: sql<boolean>`BOOL_OR(${shopProducts.inStock})`,
-        isActive: sql<boolean>`BOOL_OR(${shopProducts.isActive})`,
-        isFeatured: sql<boolean>`BOOL_OR(${shopProducts.isFeatured})`,
-        showWhenOutOfStock: sql<boolean>`BOOL_OR(${shopProducts.showWhenOutOfStock})`,
-        imageUrls: sql<string[]>`(array_agg(${shopProducts.imageUrls}))[1]`,
-        tags: sql<string[]>`(array_agg(${shopProducts.tags}))[1]`,
-        specifications: sql<any>`(array_agg(${shopProducts.specifications}))[1]`,
-        features: sql<string[]>`(array_agg(${shopProducts.features}))[1]`,
-        applications: sql<string[]>`(array_agg(${shopProducts.applications}))[1]`,
-        weight: sql<number>`MIN(${shopProducts.weight})`,
-        weightUnit: sql<string>`MIN(${shopProducts.weightUnit})`,
-        sku: sql<string>`MIN(${shopProducts.sku})`,
-        createdAt: sql<Date>`MIN(${shopProducts.createdAt})`,
-        updatedAt: sql<Date>`MAX(${shopProducts.updatedAt})`
-      })
+      .select()
       .from(shopProducts)
       .where(and(
         eq(shopProducts.isActive, true),
@@ -293,8 +257,7 @@ export class ShopStorage implements IShopStorage {
           eq(shopProducts.showWhenOutOfStock, true)
         )
       ))
-      .groupBy(shopProducts.name) // Group by name to merge batches
-      .orderBy(sql`MIN(${shopProducts.name})`);
+      .orderBy(shopProducts.name);
 
     // Get active discount settings
     const activeDiscounts = await shopDb
@@ -553,58 +516,25 @@ export class ShopStorage implements IShopStorage {
     }
 
     // Get filtered products with proper query building
-    // GROUP BY name to merge products with different batches into single entries
     let baseQuery = shopDb
-      .select({
-        id: sql<number>`MIN(${shopProducts.id})`, // Take the first ID
-        name: shopProducts.name,
-        barcode: sql<string>`MIN(${shopProducts.barcode})`, // Take the first barcode
-        category: sql<string>`MIN(${shopProducts.category})`,
-        description: sql<string>`MIN(${shopProducts.description})`,
-        shortDescription: sql<string>`MIN(${shopProducts.shortDescription})`,
-        price: sql<string>`MIN(${shopProducts.price})`,
-        priceUnit: sql<string>`MIN(${shopProducts.priceUnit})`,
-        stockQuantity: sql<number>`SUM(${shopProducts.stockQuantity})`, // Sum all batches' quantities
-        inStock: sql<boolean>`BOOL_OR(${shopProducts.inStock})`, // True if any batch is in stock
-        isActive: sql<boolean>`BOOL_OR(${shopProducts.isActive})`,
-        isFeatured: sql<boolean>`BOOL_OR(${shopProducts.isFeatured})`,
-        showWhenOutOfStock: sql<boolean>`BOOL_OR(${shopProducts.showWhenOutOfStock})`,
-        imageUrls: sql<string[]>`(array_agg(${shopProducts.imageUrls}))[1]`,
-        tags: sql<string[]>`(array_agg(${shopProducts.tags}))[1]`,
-        specifications: sql<any>`(array_agg(${shopProducts.specifications}))[1]`,
-        features: sql<string[]>`(array_agg(${shopProducts.features}))[1]`,
-        applications: sql<string[]>`(array_agg(${shopProducts.applications}))[1]`,
-        weight: sql<number>`MIN(${shopProducts.weight})`,
-        weightUnit: sql<string>`MIN(${shopProducts.weightUnit})`,
-        sku: sql<string>`MIN(${shopProducts.sku})`,
-        createdAt: sql<Date>`MIN(${shopProducts.createdAt})`,
-        updatedAt: sql<Date>`MAX(${shopProducts.updatedAt})`
-      })
+      .select()
       .from(shopProducts)
-      .where(and(...whereConditions))
-      .groupBy(shopProducts.name); // Group by product name to merge batches
+      .where(and(...whereConditions));
 
-    // Apply ordering and execute query
-    let orderedQuery;
+    // Apply ordering
     if (sortBy === 'relevance') {
-      orderedQuery = baseQuery.orderBy(sql`BOOL_OR(${shopProducts.isFeatured}) DESC`, sql`MIN(${shopProducts.name}) ASC`);
-    } else if (sortBy === 'name') {
-      orderedQuery = baseQuery.orderBy(sortOrder === 'asc' ? sql`MIN(${shopProducts.name}) ASC` : sql`MIN(${shopProducts.name}) DESC`);
-    } else if (sortBy === 'price') {
-      orderedQuery = baseQuery.orderBy(sortOrder === 'asc' ? sql`MIN(${shopProducts.price}) ASC` : sql`MIN(${shopProducts.price}) DESC`);
-    } else if (sortBy === 'created') {
-      orderedQuery = baseQuery.orderBy(sortOrder === 'asc' ? sql`MIN(${shopProducts.createdAt}) ASC` : sql`MIN(${shopProducts.createdAt}) DESC`);
+      baseQuery = baseQuery.orderBy(desc(shopProducts.isFeatured), asc(shopProducts.name));
     } else {
-      orderedQuery = baseQuery.orderBy(sql`MIN(${shopProducts.name}) ASC`);
+      baseQuery = baseQuery.orderBy(orderByClause);
     }
 
-    const products = await orderedQuery
+    const products = await baseQuery
       .limit(limit)
       .offset(offset);
 
-    // Get total count of unique products (by name)
+    // Get total count
     const [totalResult] = await shopDb
-      .select({ count: sql<number>`COUNT(DISTINCT ${shopProducts.name})` })
+      .select({ count: count() })
       .from(shopProducts)
       .where(and(...whereConditions));
 

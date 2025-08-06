@@ -18,7 +18,6 @@ interface PaymentGatewayProps {
   onPaymentSuccess: (paymentData: any) => void;
   onPaymentError: (error: string) => void;
   activeGateway?: any;
-  walletAmount?: number;
 }
 
 const PaymentGateway = ({ 
@@ -27,8 +26,7 @@ const PaymentGateway = ({
   orderId, 
   onPaymentSuccess, 
   onPaymentError,
-  activeGateway,
-  walletAmount: initialWalletAmount = 0
+  activeGateway 
 }: PaymentGatewayProps) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [formData, setFormData] = useState<any>({});
@@ -37,162 +35,6 @@ const PaymentGateway = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
-  // Fetch wallet balance for hybrid payment calculations
-  const { data: walletBalance } = useQuery({
-    queryKey: ['/api/customers/wallet/balance'],
-    enabled: paymentMethod === 'wallet_partial',
-  });
-
-  // Fetch temporary calculation data from bilingual form
-  const { data: tempCalcData } = useQuery({
-    queryKey: ['/api/cart/temp-order-data'],
-    enabled: true,
-    retry: 1,
-    staleTime: 0 // Always fetch fresh data
-  });
-
-  // Use calculation data from bilingual form if available
-  const tempData = (tempCalcData as any)?.data;
-  const finalAmount = tempData?.finalAmount || totalAmount;
-  const calculatedWalletAmount = tempData?.walletAmountUsed || initialWalletAmount;
-  const calculatedRemainingAmount = tempData?.remainingAmount || totalAmount;
-
-  console.log('💾 [PAYMENT GATEWAY] Using calculation data:', {
-    tempCalcData: tempData,
-    finalAmount,
-    calculatedWalletAmount,
-    calculatedRemainingAmount,
-    originalTotalAmount: totalAmount,
-    paymentMethod: tempData?.paymentMethod || paymentMethod
-  });
-
-  // Handle wallet-only payment (when remaining balance is 0)
-  const handleWalletOnlyPayment = async () => {
-    console.log('🔄 [WALLET ONLY] Processing wallet-only payment for order:', orderId);
-    console.log('🔄 [WALLET ONLY] Using final amount:', finalAmount);
-    setIsProcessing(true);
-    
-    try {
-      const response = await apiRequest('/api/customers/wallet/complete-payment', {
-        method: 'POST',
-        body: {
-          orderId: orderId,
-          totalAmount: finalAmount, // Use final amount from calculation
-          paymentMethod: 'wallet_full'
-        }
-      });
-
-      if (response.success) {
-        console.log('✅ [WALLET ONLY] Payment completed successfully');
-        
-        // Clear cart after successful payment
-        console.log('🧹 [CART CLEAR] Clearing cart after successful wallet payment');
-        try {
-          await apiRequest('/api/cart/clear', { method: 'POST' });
-          console.log('✅ [CART CLEAR] Cart cleared successfully');
-        } catch (cartError) {
-          console.warn('⚠️ [CART CLEAR] Failed to clear cart:', cartError);
-        }
-        
-        onPaymentSuccess({
-          method: 'wallet_full',
-          transactionId: response.transactionId,
-          amount: finalAmount,
-          walletDeducted: finalAmount,
-          bankPaid: 0
-        });
-      } else {
-        throw new Error(response.message || 'Wallet payment failed');
-      }
-    } catch (error) {
-      console.error('❌ [WALLET ONLY] Payment failed:', error);
-      onPaymentError('پرداخت از کیف پول با خطا مواجه شد');
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  // Handle hybrid payment (wallet + bank)
-  const handleHybridPayment = async (walletAmount: number, remainingAmount: number) => {
-    console.log('🔄 [HYBRID PAYMENT] Processing hybrid payment for order:', orderId);
-    console.log('🔄 [HYBRID PAYMENT] Using calculated values - Wallet:', calculatedWalletAmount, 'Remaining:', calculatedRemainingAmount);
-    console.log('🔄 [HYBRID PAYMENT] Final amount:', finalAmount);
-    
-    // Use calculated values from bilingual form if available
-    const actualWalletAmount = calculatedWalletAmount || walletAmount;
-    const actualRemainingAmount = calculatedRemainingAmount || remainingAmount;
-    
-    // Critical check: If remaining amount is 0 or less, this is wallet-only payment
-    if (actualRemainingAmount <= 0) {
-      console.log('💰 [HYBRID PAYMENT] Remaining amount is 0 - processing as wallet-only payment');
-      handleWalletOnlyPayment();
-      return;
-    }
-    
-    console.log('🏦 [HYBRID PAYMENT] Starting wallet deduction first, then bank redirect');
-    
-    setIsProcessing(true);
-    
-    try {
-      // Step 1: Immediately deduct from wallet using calculated values
-      console.log('💰 [WALLET DEDUCTION] Deducting', actualWalletAmount, 'from wallet for order:', orderId);
-      
-      const walletResponse = await apiRequest('/api/customers/wallet/hybrid-deduction', {
-        method: 'POST',
-        body: {
-          orderId: orderId,
-          walletAmount: actualWalletAmount,
-          remainingAmount: actualRemainingAmount,
-          totalAmount: finalAmount // Use finalAmount from calculation
-        }
-      });
-
-      if (walletResponse.success) {
-        console.log('✅ [WALLET DEDUCTION] Wallet successfully deducted:', actualWalletAmount);
-        
-        // Double-check: If remaining amount is actually 0, complete as wallet-only
-        if (actualRemainingAmount <= 0) {
-          console.log('💰 [HYBRID PAYMENT] Remaining amount is 0 after deduction - completing as wallet-only');
-          setIsProcessing(false);
-          onPaymentSuccess({
-            method: 'wallet_full',
-            transactionId: walletResponse.transactionId,
-            amount: finalAmount,
-            walletDeducted: actualWalletAmount,
-            bankPaid: 0
-          });
-          return;
-        }
-        
-        console.log('🏦 [BANK REDIRECT] Now redirecting to bank gateway for remaining:', actualRemainingAmount);
-        
-        // Step 2: Update form data for bank gateway using calculated values
-        setFormData((prev: any) => ({
-          ...prev,
-          walletAmount: actualWalletAmount,
-          remainingAmount: actualRemainingAmount,
-          paymentMethod: 'wallet_partial'
-        }));
-        
-        // Reset processing state before triggering bank redirect
-        setIsProcessing(false);
-        
-        // Small delay to ensure state is updated, then trigger bank gateway redirect
-        setTimeout(() => {
-          console.log('🚀 [BANK REDIRECT] Triggering handleOnlinePayment after wallet deduction');
-          handleOnlinePayment();
-        }, 100);
-      } else {
-        throw new Error(walletResponse.message || 'Wallet deduction failed');
-      }
-      
-    } catch (error) {
-      console.error('❌ [HYBRID PAYMENT] Error during wallet deduction:', error);
-      onPaymentError('خطا در کسر از کیف پول. لطفاً دوباره تلاش کنید.');
-      setIsProcessing(false);
-    }
-  };
-
   // Auto-redirect for online payment method
   useEffect(() => {
     console.log('🔍 [AUTO REDIRECT DEBUG] Payment method:', paymentMethod);
@@ -200,37 +42,17 @@ const PaymentGateway = ({
     console.log('🔍 [AUTO REDIRECT DEBUG] Is processing:', isProcessing);
     console.log('🔍 [AUTO REDIRECT DEBUG] Gateway config:', activeGateway?.config);
     
-    // Check if we have remaining amount for wallet_partial payments
-    const hasRemainingAmount = formData?.remainingAmount > 0;
-    
     if (paymentMethod === 'online_payment' && activeGateway && !isProcessing) {
       console.log('🔄 [AUTO REDIRECT] Triggering auto-redirect for online payment');
       console.log('🔄 [AUTO REDIRECT] Gateway config:', activeGateway.config);
+      console.log('🔄 [AUTO REDIRECT] API Base URL:', activeGateway.config?.apiBaseUrl);
       
+      // Small delay to ensure everything is loaded
       setTimeout(() => {
-        console.log('🚀 [AUTO REDIRECT] Executing handleOnlinePayment now');
-        try {
-          handleOnlinePayment();
-        } catch (error) {
-          console.error('❌ [AUTO REDIRECT] Error during auto redirect:', error);
-        }
-      }, 2000);
-    } else if (paymentMethod === 'wallet_partial' && activeGateway && !isProcessing && hasRemainingAmount) {
-      console.log('🔄 [AUTO REDIRECT] Triggering auto-redirect for wallet_partial with remaining amount:', formData?.remainingAmount);
-      console.log('🔄 [AUTO REDIRECT] Gateway config:', activeGateway.config);
-      
-      setTimeout(() => {
-        console.log('🚀 [AUTO REDIRECT] Executing handleOnlinePayment for remaining amount');
-        try {
-          handleOnlinePayment();
-        } catch (error) {
-          console.error('❌ [AUTO REDIRECT] Error during auto redirect:', error);
-        }
-      }, 2000);
-    } else if (paymentMethod === 'wallet_partial' && !hasRemainingAmount) {
-      console.log('💰 [AUTO REDIRECT] wallet_partial with 0 remaining - no bank redirect needed');
+        handleOnlinePayment();
+      }, 1000);
     }
-  }, [paymentMethod, activeGateway, isProcessing, formData?.remainingAmount]);
+  }, [paymentMethod, activeGateway, isProcessing]);
 
   // Fetch company banking information for dynamic banking details
   const { data: companyInfo, isLoading: isLoadingCompanyInfo } = useQuery({
@@ -329,13 +151,10 @@ const PaymentGateway = ({
   };
 
   const handleOnlinePayment = async () => {
-    console.log('🚀 [HANDLE ONLINE PAYMENT] Function called');
     if (!activeGateway) {
-      console.error('❌ [HANDLE ONLINE PAYMENT] No active gateway found');
       onPaymentError('هیچ درگاه پرداخت فعالی موجود نیست');
       return;
     }
-    console.log('✅ [HANDLE ONLINE PAYMENT] Active gateway exists:', activeGateway);
 
     setIsProcessing(true);
     
@@ -343,21 +162,6 @@ const PaymentGateway = ({
       // Get gateway config and build redirect URL
       const gatewayConfig = activeGateway.config;
       console.log('🔍 [PAYMENT GATEWAY] Gateway config:', gatewayConfig);
-      console.log('🔍 [PAYMENT GATEWAY] Form data:', formData);
-      
-      // 🚨 CRITICAL: ALWAYS use finalAmount for gateway (per user requirement)
-      // For hybrid payments, wallet is deducted separately, bank still gets finalAmount
-      const amountForGateway = finalAmount;
-      const walletAmount = formData.walletAmount || calculatedWalletAmount || 0;
-      
-      console.log('💰 [PAYMENT GATEWAY] Payment breakdown:', {
-        finalAmount,
-        totalAmount,
-        walletAmount,
-        amountForGateway,
-        isHybrid: formData.paymentMethod === 'wallet_partial',
-        note: 'Bank gateway ALWAYS receives finalAmount per user requirement'
-      });
       
       if (gatewayConfig && gatewayConfig.apiBaseUrl) {
         // Build payment URL with proper parameters for Shaparak
@@ -367,12 +171,10 @@ const PaymentGateway = ({
         
         const paymentUrl = `${baseUrl}?` +
           `merchantId=${encodeURIComponent(merchantId)}&` +
-          `amount=${amountForGateway}&` +
+          `amount=${totalAmount}&` +
           `currency=IQD&` +
           `reference=${encodeURIComponent(paymentReference)}&` +
           `orderNumber=${encodeURIComponent(orderId)}&` +
-          `walletAmount=${walletAmount}&` +
-          `paymentMethod=${encodeURIComponent(formData.paymentMethod || 'online_payment')}&` +
           `returnUrl=${encodeURIComponent(window.location.origin + '/payment-callback')}&` +
           `cancelUrl=${encodeURIComponent(window.location.origin + '/payment-cancelled')}`;
         
@@ -391,58 +193,9 @@ const PaymentGateway = ({
     }
   };
 
-  const handleWalletPayment = async () => {
-    try {
-      setIsProcessing(true);
-      
-      console.log('💰 [WALLET PAYMENT] Processing wallet payment:', {
-        orderId,
-        finalAmount,
-        paymentMethod
-      });
-      
-      const response = await apiRequest('/api/customers/wallet/complete-payment', {
-        method: 'POST',
-        body: {
-          orderId,
-          totalAmount: finalAmount,
-          paymentMethod: 'wallet_full'
-        }
-      });
-      
-      console.log('💰 [WALLET PAYMENT] Response:', response);
-      
-      if (response.success) {
-        const paymentData = {
-          method: 'wallet_full',
-          transactionId: response.transactionId,
-          amount: finalAmount,
-          orderId,
-          newWalletBalance: response.newWalletBalance,
-          amountDeducted: response.amountDeducted,
-          timestamp: new Date().toISOString()
-        };
-        
-        setIsProcessing(false);
-        onPaymentSuccess(paymentData);
-      } else {
-        throw new Error(response.message || 'خطا در پردازش پرداخت از کیف پول');
-      }
-    } catch (error: any) {
-      console.error('💰 [WALLET PAYMENT] Error:', error);
-      setIsProcessing(false);
-      onPaymentError(error.message || 'خطا در پردازش پرداخت از کیف پول');
-    }
-  };
-
   const simulatePaymentProcessing = async () => {
     if (paymentMethod === 'online_payment') {
       await handleOnlinePayment();
-      return;
-    }
-
-    if (paymentMethod === 'wallet_full' || paymentMethod === 'wallet_partial') {
-      await handleWalletPayment();
       return;
     }
 
@@ -456,7 +209,7 @@ const PaymentGateway = ({
     const paymentData = {
       method: paymentMethod,
       transactionId,
-      amount: finalAmount,
+      amount: totalAmount,
       orderId,
       timestamp: new Date().toISOString(),
       ...formData
@@ -827,190 +580,6 @@ const PaymentGateway = ({
     </Card>
   );
 
-  const renderWalletPartialPayment = () => {
-    const currentBalance = (walletBalance as any)?.balance || 0;
-    
-    // Prioritize temp calculation data over localStorage/props
-    const savedWalletAmount = localStorage.getItem(`wallet_amount_${orderId}`);
-    const priorityWalletAmount = calculatedWalletAmount || 
-                                 (savedWalletAmount ? parseFloat(savedWalletAmount) : initialWalletAmount);
-    
-    // Use calculation data from bilingual form if available
-    const [walletAmount, setWalletAmount] = useState(priorityWalletAmount);
-    const remainingAmount = Math.max(0, finalAmount - walletAmount);
-    
-    console.log('🔍 [WALLET PARTIAL] Using amounts:', {
-      finalAmount,
-      walletAmount,
-      remainingAmount,
-      calculatedWalletAmount,
-      calculatedRemainingAmount
-    });
-    
-    // Auto-execute appropriate payment based on remaining amount
-    useEffect(() => {
-      if (walletAmount > 0 && !isProcessing) {
-        if (remainingAmount === 0) {
-          console.log('🚀 [AUTO WALLET] Executing automatic wallet-only payment');
-          console.log('🚀 [AUTO WALLET] Wallet amount:', walletAmount, 'Remaining:', remainingAmount);
-          
-          // Small delay to ensure UI is stable
-          const timer = setTimeout(() => {
-            handleWalletOnlyPayment();
-          }, 500);
-          
-          return () => clearTimeout(timer);
-        } else if (remainingAmount > 0 && activeGateway) {
-          console.log('🚀 [AUTO HYBRID] Executing automatic hybrid payment');
-          console.log('🚀 [AUTO HYBRID] Wallet amount:', walletAmount, 'Remaining:', remainingAmount);
-          console.log('🚀 [AUTO HYBRID] Will redirect to:', activeGateway.name);
-          
-          // Small delay to ensure UI is stable
-          const timer = setTimeout(() => {
-            handleHybridPayment(walletAmount, remainingAmount);
-          }, 500);
-          
-          return () => clearTimeout(timer);
-        }
-      }
-    }, [remainingAmount, walletAmount, isProcessing, activeGateway]);
-    
-    console.log('🔍 [WALLET PARTIAL DEBUG] Current balance:', currentBalance);
-    console.log('🔍 [WALLET PARTIAL DEBUG] Total amount:', totalAmount);
-    console.log('🔍 [WALLET PARTIAL DEBUG] User wallet amount:', walletAmount);
-    console.log('🔍 [WALLET PARTIAL DEBUG] Remaining amount:', remainingAmount);
-
-    const handleWalletAmountChange = (value: string) => {
-      const amount = parseFloat(value) || 0;
-      const maxWallet = Math.min(currentBalance, finalAmount); // Use finalAmount instead of totalAmount
-      const finalWalletAmount = Math.min(Math.max(0, amount), maxWallet);
-      setWalletAmount(finalWalletAmount);
-      
-      // Save to localStorage for persistence across page loads
-      localStorage.setItem(`wallet_amount_${orderId}`, finalWalletAmount.toString());
-    };
-
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Wallet className="w-5 h-5 mr-2" />
-            پرداخت ترکیبی - Hybrid Payment
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="bg-blue-50 p-4 rounded-lg">
-            <h4 className="font-semibold text-blue-900 mb-3">جزئیات پرداخت ترکیبی</h4>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span>مبلغ کل سفارش:</span>
-                <span className="font-semibold">{formatCurrency(finalAmount)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>موجودی کیف پول:</span>
-                <span className="font-semibold text-green-600">{formatCurrency(currentBalance)}</span>
-              </div>
-            </div>
-          </div>
-          
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="walletAmount" className="text-sm font-medium">
-                مقدار کسری از کیف پول (IQD)
-              </Label>
-              <Input
-                id="walletAmount"
-                type="number"
-                value={walletAmount}
-                onChange={(e) => handleWalletAmountChange(e.target.value)}
-                min="0"
-                max={Math.min(currentBalance, finalAmount)}
-                step="0.01"
-                className="mt-1"
-                placeholder="مقدار از کیف پول"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                حداکثر: {formatCurrency(Math.min(currentBalance, finalAmount))}
-              </p>
-            </div>
-            
-            <div className="bg-gray-50 p-3 rounded-lg space-y-1 text-sm">
-              <div className="flex justify-between">
-                <span>از کیف پول:</span>
-                <span className="font-semibold text-blue-600">{formatCurrency(walletAmount)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>مانده برای بانک:</span>
-                <span className="font-semibold text-red-600">{formatCurrency(remainingAmount)}</span>
-              </div>
-            </div>
-          </div>
-          
-          {remainingAmount === 0 ? (
-            <div className="text-center space-y-4">
-              <div className="bg-green-50 p-4 rounded-lg">
-                <CheckCircle className="w-12 h-12 text-green-600 mx-auto mb-2" />
-                <h4 className="font-semibold text-green-900 mb-2">پرداخت از کیف پول</h4>
-                <p className="text-sm text-green-800">
-                  پرداخت کامل از کیف پول انجام خواهد شد.
-                </p>
-              </div>
-              
-              <Button 
-                onClick={handleWalletOnlyPayment}
-                disabled={isProcessing}
-                size="lg"
-                className="w-full bg-green-600 hover:bg-green-700"
-              >
-                {isProcessing ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    در حال پردازش...
-                  </>
-                ) : (
-                  <>
-                    <Wallet className="w-5 h-5 mr-2" />
-                    پرداخت از کیف پول ({formatCurrency(walletAmount)})
-                  </>
-                )}
-              </Button>
-            </div>
-          ) : (
-            <div className="text-center space-y-4">
-              <div className="bg-amber-50 p-4 rounded-lg">
-                <AlertCircle className="w-12 h-12 text-amber-600 mx-auto mb-2" />
-                <h4 className="font-semibold text-amber-900 mb-2">پرداخت ترکیبی</h4>
-                <p className="text-sm text-amber-800">
-                  {formatCurrency(walletAmount)} از کیف پول کسر و 
-                  {formatCurrency(remainingAmount)} از طریق بانک پرداخت خواهد شد.
-                </p>
-              </div>
-              
-              <Button 
-                onClick={() => handleHybridPayment(walletAmount, remainingAmount)}
-                disabled={isProcessing || walletAmount <= 0}
-                size="lg"
-                className="w-full bg-blue-600 hover:bg-blue-700"
-              >
-                {isProcessing ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    در حال هدایت به درگاه پرداخت...
-                  </>
-                ) : (
-                  <>
-                    <CreditCard className="w-5 h-5 mr-2" />
-                    ادامه پرداخت ترکیبی
-                  </>
-                )}
-              </Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    );
-  };
-
   const renderPaymentMethod = () => {
     switch (paymentMethod) {
       case 'iraqi_bank':
@@ -1023,8 +592,6 @@ const PaymentGateway = ({
         return renderInternationalBankTransfer();
       case 'online_payment':
         return renderOnlinePayment();
-      case 'wallet_partial':
-        return renderWalletPartialPayment();
       default:
         return (
           <Card>
