@@ -2162,49 +2162,8 @@ const Shop = () => {
             }
           }}
         >
-          {/* Navigation buttons outside the image area */}
-          {(() => {
-            const images = Array.isArray(selectedProductForZoom.imageUrls) && selectedProductForZoom.imageUrls.length > 0 
-              ? selectedProductForZoom.imageUrls 
-              : (selectedProductForZoom.imageUrl ? [selectedProductForZoom.imageUrl] : []);
-            
-            return images.length > 1 ? (
-              <>
-                {/* Left navigation button */}
-                <Button
-                  variant="ghost"
-                  size="lg"
-                  className="absolute left-8 top-1/2 transform -translate-y-1/2 z-30 bg-white/90 hover:bg-white text-black rounded-full p-4 shadow-xl border-2 border-gray-200"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const newIndex = zoomedImageIndex > 0 ? zoomedImageIndex - 1 : images.length - 1;
-                    setZoomedImageIndex(newIndex);
-                    setSelectedImageForZoom(images[newIndex]);
-                  }}
-                >
-                  <ChevronLeft className="w-10 h-10" />
-                </Button>
-                
-                {/* Right navigation button */}
-                <Button
-                  variant="ghost"
-                  size="lg"
-                  className="absolute right-8 top-1/2 transform -translate-y-1/2 z-30 bg-white/90 hover:bg-white text-black rounded-full p-4 shadow-xl border-2 border-gray-200"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const newIndex = zoomedImageIndex < images.length - 1 ? zoomedImageIndex + 1 : 0;
-                    setZoomedImageIndex(newIndex);
-                    setSelectedImageForZoom(images[newIndex]);
-                  }}
-                >
-                  <ChevronRight className="w-10 h-10" />
-                </Button>
-              </>
-            ) : null;
-          })()}
-
           <div 
-            className="relative max-w-4xl max-h-[80vh] w-full h-full flex items-center justify-center mx-16"
+            className="relative max-w-6xl max-h-[90vh] w-full h-full flex items-center justify-center"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close button */}
@@ -2221,7 +2180,7 @@ const Shop = () => {
               <X className="w-6 h-6" />
             </Button>
 
-            {/* Image counter and product name */}
+            {/* Navigation buttons and info inside image area */}
             {(() => {
               const images = Array.isArray(selectedProductForZoom.imageUrls) && selectedProductForZoom.imageUrls.length > 0 
                 ? selectedProductForZoom.imageUrls 
@@ -2229,10 +2188,47 @@ const Shop = () => {
               
               return (
                 <>
+                  {/* Navigation buttons inside image */}
+                  {images.length > 1 && (
+                    <>
+                      {/* Left navigation button */}
+                      <Button
+                        variant="ghost"
+                        size="lg"
+                        className="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 bg-white/90 hover:bg-white text-black rounded-full p-3 shadow-xl border-2 border-gray-200"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const newIndex = zoomedImageIndex > 0 ? zoomedImageIndex - 1 : images.length - 1;
+                          setZoomedImageIndex(newIndex);
+                          setSelectedImageForZoom(images[newIndex]);
+                        }}
+                      >
+                        <ChevronLeft className="w-8 h-8" />
+                      </Button>
+                      
+                      {/* Right navigation button */}
+                      <Button
+                        variant="ghost"
+                        size="lg"
+                        className="absolute right-4 top-1/2 transform -translate-y-1/2 z-20 bg-white/90 hover:bg-white text-black rounded-full p-3 shadow-xl border-2 border-gray-200"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const newIndex = zoomedImageIndex < images.length - 1 ? zoomedImageIndex + 1 : 0;
+                          setZoomedImageIndex(newIndex);
+                          setSelectedImageForZoom(images[newIndex]);
+                        }}
+                      >
+                        <ChevronRight className="w-8 h-8" />
+                      </Button>
+                    </>
+                  )}
+
+                  {/* Image counter */}
                   <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10 bg-black/80 text-white px-4 py-2 rounded-lg text-sm font-medium">
                     {images.length > 1 ? `${zoomedImageIndex + 1} / ${images.length}` : 'تصویر واحد'}
                   </div>
 
+                  {/* Product name */}
                   <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-10 bg-black/80 text-white px-4 py-2 rounded-lg text-sm font-medium max-w-md text-center">
                     {selectedProductForZoom.name}
                   </div>
