@@ -882,8 +882,9 @@ function FinanceOrders() {
           .container {
             padding: 0;
             margin: 0;
-            width: 100%;
-            max-width: 100%;
+            margin-left: 3cm;
+            width: calc(100% - 3cm);
+            max-width: calc(100% - 3cm);
             box-sizing: border-box;
             overflow-x: hidden;
           }
