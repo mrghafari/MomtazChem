@@ -4,6 +4,7 @@ import { ShoppingCart, Plus, Minus, Filter, Search, Grid, List, Star, User, LogO
 import { useLocation } from "wouter";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
+import { usePersistentCart } from "@/hooks/usePersistentCart";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -41,16 +42,16 @@ const Shop = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [sortBy, setSortBy] = useState("name");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  // Initialize cart from localStorage or sessionStorage based on auth status
-  const [cart, setCart] = useState<{[key: number]: number}>(() => {
-    // For guests, use sessionStorage (cleared on tab close/refresh if not logged in)
-    // For logged-in users, use localStorage (persistent)
-    const guestCart = sessionStorage.getItem('momtazchem_guest_cart');
-    const userCart = localStorage.getItem('momtazchem_user_cart');
-    
-    // Start with guest cart if available, will be migrated to user cart on login
-    return guestCart ? JSON.parse(guestCart) : (userCart ? JSON.parse(userCart) : {});
-  });
+  // استفاده از hook سبد ماندگار جدید
+  const { 
+    cart, 
+    isLoading: isCartLoading, 
+    addToCart: addToCartPersistent, 
+    updateQuantity: updateCartQuantity, 
+    removeFromCart: removeFromCartPersistent, 
+    clearCart: clearCartPersistent, 
+    getTotalItems 
+  } = usePersistentCart();
   const [showCheckout, setShowCheckout] = useState(false);
   const [showPreCheckout, setShowPreCheckout] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
@@ -300,14 +301,10 @@ const Shop = () => {
     queryKey: ["/api/shop/categories"],
   });
 
-  // Sync cart changes with appropriate storage and track abandoned cart
+  // Track cart session for abandoned cart management
   useEffect(() => {
-    if (Object.keys(cart).length > 0 || customer !== null) {
-      saveCartToStorage(cart);
-      // Track cart session for abandoned cart management
-      if (customer && Object.keys(cart).length > 0) {
-        trackCartSession(cart);
-      }
+    if (customer && Object.keys(cart).length > 0) {
+      trackCartSession(cart);
     }
   }, [cart, customer]);
 
@@ -341,49 +338,15 @@ const Shop = () => {
     }
   }, [currentProducts, displayStock, cart]);
 
-  // Handle cart based on authentication status after customer state is known
+  // Handle customer authentication changes
   useEffect(() => {
-    if (customer) {
-      // Authenticated user - load from localStorage
-      const userCart = localStorage.getItem('momtazchem_user_cart');
-      if (userCart) {
-        setCart(JSON.parse(userCart));
-      }
+    if (customer && !isLoadingCustomer) {
+      // User just logged in - cart will be synced by hook
+      console.log('🔐 [AUTH] Customer authenticated, cart will be synced automatically');
     } else if (customer === null && !isLoadingCustomer) {
-      // Guest user confirmed - load guest cart if available
-      const guestCart = sessionStorage.getItem('momtazchem_guest_cart');
-      if (guestCart) {
-        setCart(JSON.parse(guestCart));
-      } else {
-        setCart({});
-      }
+      // User is confirmed guest
+      console.log('🔐 [AUTH] Guest user confirmed');
     }
-  }, [customer, isLoadingCustomer]);
-
-  // Force cart refresh on page load/navigation
-  useEffect(() => {
-    const refreshCart = () => {
-      if (customer) {
-        const userCart = localStorage.getItem('momtazchem_user_cart');
-        if (userCart) {
-          const cartData = JSON.parse(userCart);
-          setCart(cartData);
-        }
-      } else if (!isLoadingCustomer) {
-        const guestCart = sessionStorage.getItem('momtazchem_guest_cart');
-        if (guestCart) {
-          const cartData = JSON.parse(guestCart);
-          setCart(cartData);
-        }
-      }
-    };
-
-    // Refresh cart on window focus (navigation between tabs/pages)
-    window.addEventListener('focus', refreshCart);
-    
-    return () => {
-      window.removeEventListener('focus', refreshCart);
-    };
   }, [customer, isLoadingCustomer]);
 
   const checkCustomerAuth = async () => {
@@ -441,143 +404,33 @@ const Shop = () => {
     }
   };
 
-  // 🛒 Load persistent cart from database and sync with local storage
-  const loadPersistentCart = async () => {
-    try {
-      console.log('🛒 [PERSISTENT CART] Loading cart from database...');
-      
-      // Get current local cart (guest cart or existing user cart)
-      const localCart = localStorage.getItem('momtazchem_user_cart') || sessionStorage.getItem('momtazchem_guest_cart');
-      const localCartData = localCart ? JSON.parse(localCart) : {};
-      
-      // Load cart from database
-      const cartResponse = await fetch('/api/customers/persistent-cart', {
-        credentials: 'include'
-      });
-      
-      if (cartResponse.ok) {
-        const cartResult = await cartResponse.json();
-        if (cartResult.success) {
-          const databaseCart = cartResult.data?.cartData || {};
-          console.log('🛒 [PERSISTENT CART] Database cart:', databaseCart);
-          console.log('🛒 [PERSISTENT CART] Local cart:', localCartData);
-          
-          // If local cart has items, sync them to database
-          if (Object.keys(localCartData).length > 0) {
-            console.log('🔄 [PERSISTENT CART] Syncing local cart to database');
-            const syncResponse = await fetch('/api/customers/persistent-cart/sync', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              credentials: 'include',
-              body: JSON.stringify({ cartData: localCartData })
-            });
-            
-            if (syncResponse.ok) {
-              const syncResult = await syncResponse.json();
-              if (syncResult.success) {
-                setCart(localCartData);
-                localStorage.setItem('momtazchem_user_cart', JSON.stringify(localCartData));
-                console.log('✅ [PERSISTENT CART] Local cart synced to database successfully');
-                return;
-              }
-            }
-          }
-          
-          // Use database cart if sync failed or no local cart
-          setCart(databaseCart);
-          localStorage.setItem('momtazchem_user_cart', JSON.stringify(databaseCart));
-          console.log('✅ [PERSISTENT CART] Cart loaded from database');
-        }
-      } else {
-        console.log('⚠️ [PERSISTENT CART] Failed to load from database, using local cart');
-        if (Object.keys(localCartData).length > 0) {
-          setCart(localCartData);
-          localStorage.setItem('momtazchem_user_cart', JSON.stringify(localCartData));
-        }
-      }
-    } catch (error) {
-      console.error('❌ [PERSISTENT CART] Error loading cart:', error);
-      // Fallback to local cart if available
-      const localCart = localStorage.getItem('momtazchem_user_cart');
-      if (localCart) {
-        setCart(JSON.parse(localCart));
-      }
-    }
-  };
+  // Load persistent cart is now handled by usePersistentCart hook
 
-  const handleGuestCart = () => {
-    // Clear user cart data and use session cart only for guests
-    const guestCart = sessionStorage.getItem('momtazchem_guest_cart');
-    if (guestCart) {
-      setCart(JSON.parse(guestCart));
-    } else {
-      // Check if we have any cart data from user cart that needs to be cleared
-      setCart({});
-      localStorage.removeItem('momtazchem_user_cart');
-    }
-  };
+  // Guest cart handling is now managed by usePersistentCart hook
 
   const handleLoginSuccess = (customerData: any) => {
-    console.log('🔐 [LOGIN] Starting handleLoginSuccess');
-    console.log('🔐 [LOGIN] Customer data:', customerData);
-    console.log('🔐 [LOGIN] Current cart state:', cart);
-    
-    try {
-      setCustomer(customerData);
-      console.log('🔐 [LOGIN] Customer state set');
-      
-      fetchWalletBalance();
-      console.log('🔐 [LOGIN] Wallet balance fetch initiated');
-      
-      // Close auth modal
-      setShowAuth(false);
-      console.log('🔐 [LOGIN] Auth modal closed');
-      
-      // Invalidate cache to refresh header
-      queryClient.invalidateQueries({ queryKey: ["/api/customers/me"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/customer/wallet"] });
-      console.log('🔐 [LOGIN] Cache invalidated');
-      
-      // Check if user has items in cart before migration
-      const hasCartItems = Object.keys(cart).length > 0;
-      console.log('🔐 [LOGIN] Has cart items:', hasCartItems);
-      console.log('🔐 [LOGIN] Cart contents:', cart);
-      
-      // Migrate guest cart to user cart
-      migrateGuestCartToUser();
-      console.log('🔐 [LOGIN] Cart migration completed');
-      
-      toast({
-        title: "خوش آمدید",
-        description: `${customerData.firstName} ${customerData.lastName}`,
-      });
-      console.log('🔐 [LOGIN] Welcome toast shown');
-      
-      // Stay in shop after login - no redirect needed
-      console.log('🔐 [LOGIN] Staying in shop after successful login');
-      
-      console.log('🔐 [LOGIN] handleLoginSuccess completed successfully');
-    } catch (error) {
-      console.error('🔐 [LOGIN] Error in handleLoginSuccess:', error);
-    }
-  };
-
-  const handleRegisterSuccess = (customerData: any) => {
     setCustomer(customerData);
     fetchWalletBalance();
-    
-    // Close auth modal
     setShowAuth(false);
     
     // Invalidate cache to refresh header
     queryClient.invalidateQueries({ queryKey: ["/api/customers/me"] });
     queryClient.invalidateQueries({ queryKey: ["/api/customer/wallet"] });
     
-    // Check if user has items in cart before migration
-    const hasCartItems = Object.keys(cart).length > 0;
+    toast({
+      title: "خوش آمدید",
+      description: `${customerData.firstName} ${customerData.lastName}`,
+    });
+  };
+
+  const handleRegisterSuccess = (customerData: any) => {
+    setCustomer(customerData);
+    fetchWalletBalance();
+    setShowAuth(false);
     
-    // Migrate guest cart to user cart
-    migrateGuestCartToUser();
+    // Invalidate cache to refresh header
+    queryClient.invalidateQueries({ queryKey: ["/api/customers/me"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/customer/wallet"] });
     
     toast({
       title: "ثبت‌نام موفق",
@@ -633,32 +486,7 @@ const Shop = () => {
       }
     });
 
-  // Save cart to appropriate storage based on authentication
-  const saveCartToStorage = async (cartData: {[key: number]: number}) => {
-    if (customer) {
-      // Authenticated user - save to localStorage AND database
-      localStorage.setItem('momtazchem_user_cart', JSON.stringify(cartData));
-      
-      // 🛒 Save to database asynchronously (don't block UI)
-      try {
-        console.log('🛒 [PERSISTENT CART] Saving to database:', cartData);
-        await fetch('/api/customers/persistent-cart/sync', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ cartData })
-        });
-        console.log('✅ [PERSISTENT CART] Saved to database successfully');
-      } catch (error) {
-        console.error('❌ [PERSISTENT CART] Error saving to database:', error);
-        // Still keep in localStorage even if database save fails
-      }
-    } else {
-      // Guest user - don't save to any persistent storage
-      // Cart will be lost on refresh as requested
-      // Only keep in memory during current session
-    }
-  };
+  // Cart storage is now handled by usePersistentCart hook
 
   // Cart functions
   const getProductQuantity = (productId: number) => {
@@ -704,89 +532,21 @@ const Shop = () => {
 
   const addToCart = (productId: number) => {
     const targetQuantity = getProductQuantity(productId);
-    
-    // Find the product to get actual stock quantity
-    const product = currentProducts.find(p => p.id === productId);
-    if (!product) {
-      toast({
-        title: "خطا",
-        description: "محصول یافت نشد",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const currentQuantityInCart = cart[productId] || 0;
-    const newQuantityInCart = currentQuantityInCart + targetQuantity;
-    const actualStock = product.stockQuantity || 0;
-    
-    // First check: ensure product is in stock and has available quantity
-    if (!product.inStock || actualStock <= 0) {
-      toast({
-        title: "موجودی ناکافی",
-        description: "این محصول موجود نیست",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    // Second check: ensure target quantity is valid
-    if (targetQuantity <= 0) {
-      toast({
-        title: "خطا",
-        description: "تعداد محصول باید بیشتر از صفر باشد",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    // Third check: ensure total cart quantity doesn't exceed stock
-    if (newQuantityInCart > actualStock) {
-      toast({
-        title: "موجودی ناکافی",
-        description: `حداکثر ${actualStock} عدد از این محصول موجود است. شما قبلاً ${currentQuantityInCart} عدد در سبد خرید دارید.`,
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    const newCart = {
-      ...cart,
-      [productId]: newQuantityInCart
-    };
-    setCart(newCart);
-    saveCartToStorage(newCart);
-
-    // DO NOT update displayStock here - it should only reflect actual database values
-    // Display stock will be updated only after successful order submission
-
-    // Reset quantity for this product and show success message
+    addToCartPersistent(productId, targetQuantity);
     setProductQuantity(productId, 1);
-    toast({
-      title: "success",
-      description: "addedToCart",
-    });
   };
 
   const removeFromCart = (productId: number) => {
     const currentQuantityInCart = cart[productId] || 0;
     
-    const newCart = { ...cart };
-    if (newCart[productId] > 1) {
-      newCart[productId]--;
+    if (currentQuantityInCart > 1) {
+      updateCartQuantity(productId, currentQuantityInCart - 1);
     } else {
-      delete newCart[productId];
+      removeFromCartPersistent(productId);
     }
-    setCart(newCart);
-    saveCartToStorage(newCart);
-
-    // DO NOT update displayStock - it should only reflect actual database values
-    // Display stock will be updated only after successful order submission
   };
 
-  const getTotalItems = () => {
-    return Object.values(cart).reduce((sum, qty) => sum + qty, 0);
-  };
+  // Use getTotalItems from hook
 
   const getTotalPrice = () => {
     return Object.entries(cart).reduce((total, [productId, qty]) => {
