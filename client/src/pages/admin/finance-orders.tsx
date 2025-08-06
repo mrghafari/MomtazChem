@@ -943,11 +943,11 @@ function FinanceOrders() {
           }
           .items-table th:nth-child(2),
           .items-table td:nth-child(2) {
-            width: 45%;
+            width: 55%;
           }
           .items-table th:nth-child(3),
           .items-table td:nth-child(3) {
-            width: 15%;
+            width: 10%;
           }
           .items-table th:nth-child(4),
           .items-table td:nth-child(4) {
@@ -955,7 +955,7 @@ function FinanceOrders() {
           }
           .items-table th:nth-child(5),
           .items-table td:nth-child(5) {
-            width: 20%;
+            width: 15%;
           }
           .no-print { display: none !important; }
           * {
