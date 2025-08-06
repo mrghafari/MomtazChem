@@ -4124,6 +4124,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ===== Customer Cart Isolation System =====
+  // Load persistent cart for authenticated customer (customer-specific isolation)
+  app.get('/api/customers/cart', async (req: any, res) => {
+    if (!req.session?.customerId) {
+      return res.status(401).json({ success: false, message: 'Customer not authenticated' });
+    }
+
+    try {
+      console.log('🛒 [CART API] Loading cart for customer:', req.session.customerId);
+      const { persistentCarts } = await import('../shared/persistent-cart-schema');
+      const { eq } = await import('drizzle-orm');
+      
+      // Get customer-specific cart items
+      const cartItems = await db
+        .select({
+          productId: persistentCarts.productId,
+          quantity: persistentCarts.quantity,
+          unitPrice: persistentCarts.unitPrice,
+          addedAt: persistentCarts.addedAt
+        })
+        .from(persistentCarts)
+        .where(eq(persistentCarts.customerId, req.session.customerId));
+
+      // Convert to cart format {productId: quantity}
+      const cart: {[key: number]: number} = {};
+      cartItems.forEach(item => {
+        cart[item.productId] = item.quantity;
+      });
+
+      console.log('🛒 [CART API] Customer', req.session.customerId, 'cart loaded:', cart);
+      res.json({ success: true, cart, items: cartItems });
+    } catch (error) {
+      console.error('Error loading customer cart:', error);
+      res.status(500).json({ success: false, message: 'Failed to load cart' });
+    }
+  });
+
+  // Save persistent cart for authenticated customer (customer-specific isolation)
+  app.post('/api/customers/cart', async (req: any, res) => {
+    if (!req.session?.customerId) {
+      return res.status(401).json({ success: false, message: 'Customer not authenticated' });
+    }
+
+    try {
+      const { cart } = req.body;
+      console.log('🛒 [CART API] Saving cart for customer:', req.session.customerId, 'cart:', cart);
+      
+      const { persistentCarts } = await import('../shared/persistent-cart-schema');
+      const { eq, and } = await import('drizzle-orm');
+      
+      // First, clear existing cart for this customer
+      await db
+        .delete(persistentCarts)
+        .where(eq(persistentCarts.customerId, req.session.customerId));
+
+      // Insert new cart items
+      if (cart && Object.keys(cart).length > 0) {
+        const cartEntries = Object.entries(cart).map(([productId, quantity]) => ({
+          customerId: req.session.customerId,
+          productId: parseInt(productId),
+          quantity: quantity as number,
+          addedAt: new Date(),
+          updatedAt: new Date()
+        }));
+
+        await db.insert(persistentCarts).values(cartEntries);
+        console.log('🛒 [CART API] Customer', req.session.customerId, 'cart saved:', cartEntries.length, 'items');
+      } else {
+        console.log('🛒 [CART API] Customer', req.session.customerId, 'cart cleared (empty)');
+      }
+
+      res.json({ success: true, message: 'Cart saved successfully' });
+    } catch (error) {
+      console.error('Error saving customer cart:', error);
+      res.status(500).json({ success: false, message: 'Failed to save cart' });
+    }
+  });
+
+  // Clear cart for authenticated customer
+  app.delete('/api/customers/cart', async (req: any, res) => {
+    if (!req.session?.customerId) {
+      return res.status(401).json({ success: false, message: 'Customer not authenticated' });
+    }
+
+    try {
+      const { persistentCarts } = await import('../shared/persistent-cart-schema');
+      const { eq } = await import('drizzle-orm');
+      
+      await db
+        .delete(persistentCarts)
+        .where(eq(persistentCarts.customerId, req.session.customerId));
+
+      console.log('🛒 [CART API] Customer', req.session.customerId, 'cart cleared');
+      res.json({ success: true, message: 'Cart cleared successfully' });
+    } catch (error) {
+      console.error('Error clearing customer cart:', error);
+      res.status(500).json({ success: false, message: 'Failed to clear cart' });
+    }
+  });
+
   // Protected admin routes for product management (کاردکس)
   app.post("/api/products", requireAuth, async (req, res) => {
     try {

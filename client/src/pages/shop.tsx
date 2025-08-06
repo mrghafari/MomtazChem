@@ -41,16 +41,8 @@ const Shop = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [sortBy, setSortBy] = useState("name");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  // Initialize cart from localStorage or sessionStorage based on auth status
-  const [cart, setCart] = useState<{[key: number]: number}>(() => {
-    // For guests, use sessionStorage (cleared on tab close/refresh if not logged in)
-    // For logged-in users, use localStorage (persistent)
-    const guestCart = sessionStorage.getItem('momtazchem_guest_cart');
-    const userCart = localStorage.getItem('momtazchem_user_cart');
-    
-    // Start with guest cart if available, will be migrated to user cart on login
-    return guestCart ? JSON.parse(guestCart) : (userCart ? JSON.parse(userCart) : {});
-  });
+  // Initialize empty cart - will be loaded based on customer authentication
+  const [cart, setCart] = useState<{[key: number]: number}>({});
   const [showCheckout, setShowCheckout] = useState(false);
   const [showPreCheckout, setShowPreCheckout] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
@@ -341,18 +333,21 @@ const Shop = () => {
     }
   }, [currentProducts, displayStock, cart]);
 
-  // Handle cart based on authentication status after customer state is known
+  // Handle cart isolation based on customer authentication
   useEffect(() => {
-    if (customer) {
-      // Authenticated user - load from localStorage
-      const userCart = localStorage.getItem('momtazchem_user_cart');
-      if (userCart) {
-        setCart(JSON.parse(userCart));
+    if (customer?.id) {
+      // Authenticated user - load customer-specific cart
+      const customerCartKey = `momtazchem_cart_${customer.id}`;
+      const customerCart = localStorage.getItem(customerCartKey);
+      if (customerCart) {
+        console.log(`🛒 [CART ISOLATION] Loading customer ${customer.id} cart from localStorage`);
+        setCart(JSON.parse(customerCart));
       }
     } else if (customer === null && !isLoadingCustomer) {
       // Guest user confirmed - load guest cart if available
       const guestCart = sessionStorage.getItem('momtazchem_guest_cart');
       if (guestCart) {
+        console.log('🛒 [CART ISOLATION] Loading guest cart from sessionStorage');
         setCart(JSON.parse(guestCart));
       } else {
         setCart({});
@@ -418,43 +413,49 @@ const Shop = () => {
     }
   };
 
-  // 🛒 Load persistent cart from database and sync with local storage
+  // 🛒 Load customer-specific cart with isolation
   const loadPersistentCart = async () => {
+    if (!customer?.id) {
+      console.log('🛒 [CART ISOLATION] No customer ID, skipping cart load');
+      return;
+    }
+
     try {
-      console.log('🛒 [PERSISTENT CART] Loading cart from database...');
+      console.log(`🛒 [CART ISOLATION] Loading cart for customer ${customer.id}...`);
       
-      // Get current local cart (guest cart or existing user cart)
-      const localCart = localStorage.getItem('momtazchem_user_cart') || sessionStorage.getItem('momtazchem_guest_cart');
+      // Get current customer-specific local cart
+      const customerCartKey = `momtazchem_cart_${customer.id}`;
+      const localCart = localStorage.getItem(customerCartKey);
       const localCartData = localCart ? JSON.parse(localCart) : {};
       
-      // Load cart from database
-      const cartResponse = await fetch('/api/customers/persistent-cart', {
+      // Load cart from database using new isolated API
+      const cartResponse = await fetch('/api/customers/cart', {
         credentials: 'include'
       });
       
       if (cartResponse.ok) {
         const cartResult = await cartResponse.json();
-        if (cartResult.success) {
-          const databaseCart = cartResult.data?.cartData || {};
-          console.log('🛒 [PERSISTENT CART] Database cart:', databaseCart);
-          console.log('🛒 [PERSISTENT CART] Local cart:', localCartData);
+        if (cartResult.success && cartResult.cart) {
+          const databaseCart = cartResult.cart;
+          console.log(`🛒 [CART ISOLATION] Customer ${customer.id} database cart:`, databaseCart);
+          console.log(`🛒 [CART ISOLATION] Customer ${customer.id} local cart:`, localCartData);
           
           // If local cart has items, sync them to database
           if (Object.keys(localCartData).length > 0) {
-            console.log('🔄 [PERSISTENT CART] Syncing local cart to database');
-            const syncResponse = await fetch('/api/customers/persistent-cart/sync', {
+            console.log(`🔄 [CART ISOLATION] Syncing customer ${customer.id} local cart to database`);
+            const syncResponse = await fetch('/api/customers/cart', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               credentials: 'include',
-              body: JSON.stringify({ cartData: localCartData })
+              body: JSON.stringify({ cart: localCartData })
             });
             
             if (syncResponse.ok) {
               const syncResult = await syncResponse.json();
               if (syncResult.success) {
                 setCart(localCartData);
-                localStorage.setItem('momtazchem_user_cart', JSON.stringify(localCartData));
-                console.log('✅ [PERSISTENT CART] Local cart synced to database successfully');
+                localStorage.setItem(customerCartKey, JSON.stringify(localCartData));
+                console.log(`✅ [CART ISOLATION] Customer ${customer.id} local cart synced to database`);
                 return;
               }
             }
@@ -462,22 +463,25 @@ const Shop = () => {
           
           // Use database cart if sync failed or no local cart
           setCart(databaseCart);
-          localStorage.setItem('momtazchem_user_cart', JSON.stringify(databaseCart));
-          console.log('✅ [PERSISTENT CART] Cart loaded from database');
+          localStorage.setItem(customerCartKey, JSON.stringify(databaseCart));
+          console.log(`✅ [CART ISOLATION] Customer ${customer.id} cart loaded from database`);
         }
       } else {
-        console.log('⚠️ [PERSISTENT CART] Failed to load from database, using local cart');
+        console.log(`⚠️ [CART ISOLATION] Failed to load customer ${customer.id} cart from database, using local`);
         if (Object.keys(localCartData).length > 0) {
           setCart(localCartData);
-          localStorage.setItem('momtazchem_user_cart', JSON.stringify(localCartData));
+          localStorage.setItem(customerCartKey, JSON.stringify(localCartData));
         }
       }
     } catch (error) {
-      console.error('❌ [PERSISTENT CART] Error loading cart:', error);
-      // Fallback to local cart if available
-      const localCart = localStorage.getItem('momtazchem_user_cart');
-      if (localCart) {
-        setCart(JSON.parse(localCart));
+      console.error(`❌ [CART ISOLATION] Error loading customer ${customer?.id} cart:`, error);
+      // Fallback to customer-specific local cart if available
+      if (customer?.id) {
+        const customerCartKey = `momtazchem_cart_${customer.id}`;
+        const localCart = localStorage.getItem(customerCartKey);
+        if (localCart) {
+          setCart(JSON.parse(localCart));
+        }
       }
     }
   };
@@ -571,14 +575,25 @@ const Shop = () => {
 
   const handleLogout = async () => {
     try {
+      const currentCustomerId = customer?.id;
+      
       const response = await fetch('/api/customers/logout', {
         method: 'POST',
         credentials: 'include'
       });
 
       if (response.ok) {
+        // Clear customer-specific cart from localStorage on logout
+        if (currentCustomerId) {
+          const customerCartKey = `momtazchem_cart_${currentCustomerId}`;
+          localStorage.removeItem(customerCartKey);
+          console.log(`🛒 [CART ISOLATION] Cleared customer ${currentCustomerId} cart on logout`);
+        }
+        
         setCustomer(null);
         setWalletBalance(0);
+        setCart({}); // Clear cart state
+        
         toast({
           title: "خروج موفق",
           description: "با موفقیت از حساب کاربری خارج شدید",
@@ -615,40 +630,40 @@ const Shop = () => {
       }
     });
 
-  // Save cart to appropriate storage based on authentication
+  // Save cart with customer isolation
   const saveCartToStorage = async (cartData: {[key: number]: number}) => {
-    console.log('🛒 [SAVE CART] Called with cart data:', cartData);
-    console.log('🛒 [SAVE CART] Customer state:', customer ? 'logged in' : 'guest');
+    console.log(`🛒 [CART ISOLATION] Called with cart data:`, cartData);
+    console.log(`🛒 [CART ISOLATION] Customer state: ${customer?.id ? `Customer ${customer.id}` : 'guest'}`);
     
-    if (customer) {
-      // Authenticated user - save to localStorage AND database
-      localStorage.setItem('momtazchem_user_cart', JSON.stringify(cartData));
-      console.log('🛒 [SAVE CART] Saved to localStorage');
+    if (customer?.id) {
+      // Authenticated user - save to customer-specific localStorage AND database
+      const customerCartKey = `momtazchem_cart_${customer.id}`;
+      localStorage.setItem(customerCartKey, JSON.stringify(cartData));
+      console.log(`🛒 [CART ISOLATION] Customer ${customer.id} cart saved to localStorage`);
       
-      // 🛒 Save to database asynchronously (don't block UI)
+      // 🛒 Save to database with customer isolation
       try {
-        console.log('🛒 [PERSISTENT CART] Saving to database:', cartData);
-        const response = await fetch('/api/customers/persistent-cart/sync', {
+        console.log(`🛒 [CART ISOLATION] Saving customer ${customer.id} cart to database:`, cartData);
+        const response = await fetch('/api/customers/cart', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
-          body: JSON.stringify({ cartData })
+          body: JSON.stringify({ cart: cartData })
         });
         
         if (response.ok) {
-          console.log('✅ [PERSISTENT CART] Saved to database successfully');
+          console.log(`✅ [CART ISOLATION] Customer ${customer.id} cart saved to database successfully`);
         } else {
-          console.error('❌ [PERSISTENT CART] Database save failed:', response.status);
+          console.error(`❌ [CART ISOLATION] Customer ${customer.id} database save failed:`, response.status);
         }
       } catch (error) {
-        console.error('❌ [PERSISTENT CART] Error saving to database:', error);
-        // Still keep in localStorage even if database save fails
+        console.error(`❌ [CART ISOLATION] Error saving customer ${customer.id} cart to database:`, error);
+        // Still keep in customer-specific localStorage even if database save fails
       }
     } else {
-      console.log('🛒 [SAVE CART] Guest user - not saving to persistent storage');
-      // Guest user - don't save to any persistent storage
-      // Cart will be lost on refresh as requested
-      // Only keep in memory during current session
+      console.log('🛒 [CART ISOLATION] Guest user - using session storage only');
+      // Guest user - use session storage (temporary)
+      sessionStorage.setItem('momtazchem_guest_cart', JSON.stringify(cartData));
     }
   };
 
