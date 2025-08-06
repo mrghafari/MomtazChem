@@ -13572,9 +13572,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log('💰 [BILINGUAL WALLET DEBUG] Processing wallet payment:', {
           walletAmountUsed,
           remainingAmount,
+          totalAmount,
           finalCustomerId,
           paymentMethod: orderData.paymentMethod,
-          'Bank payment required?': remainingAmount > 0
+          'Bank payment required?': remainingAmount > 0,
+          'Frontend sent remainingAmount': orderData.remainingAmount,
+          'Frontend sent walletAmountUsed': orderData.walletAmountUsed
         });
         
         if (walletAmountUsed > 0) {
@@ -13590,6 +13593,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             );
             
             console.log(`✅ Wallet payment processed: ${walletAmountUsed} IQD deducted, transaction ID: ${transaction.id}`);
+            
+            // CRITICAL: Recalculate remainingAmount after successful wallet deduction
+            remainingAmount = Math.max(0, totalAmount - walletAmountUsed);
+            console.log(`🔢 [RECALCULATION] Remaining after wallet deduction: ${totalAmount} - ${walletAmountUsed} = ${remainingAmount}`);
             
             // CRITICAL FIX: Check if remainingAmount is 0 to send directly to warehouse
             if (remainingAmount <= 0.01) {
