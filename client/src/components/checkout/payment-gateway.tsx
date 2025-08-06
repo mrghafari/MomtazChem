@@ -353,10 +353,18 @@ const PaymentGateway = ({
       console.log('🔍 [PAYMENT GATEWAY] Gateway config:', gatewayConfig);
       console.log('🔍 [PAYMENT GATEWAY] Form data:', formData);
       
-      // 🚨 CRITICAL: ALWAYS use finalAmount for gateway (per user requirement)
+      // 🚨 CRITICAL: ALWAYS use finalAmount for gateway (per user requirement)  
       // For hybrid payments, wallet is deducted separately, bank still gets finalAmount
-      const amountForGateway = finalAmount;
+      // Use tempData if available, otherwise use totalAmount from props
+      const amountForGateway = tempData?.finalAmount || totalAmount;
       const walletAmount = formData.walletAmount || calculatedWalletAmount || 0;
+      
+      console.log('💰 [AMOUNT CALCULATION] Final decision:', {
+        tempDataFinalAmount: tempData?.finalAmount,
+        totalAmountFromProps: totalAmount,
+        finalDecision: amountForGateway,
+        source: tempData?.finalAmount ? 'temp-data' : 'props'
+      });
       
       console.log('💰 [PAYMENT GATEWAY] Payment breakdown:', {
         finalAmount,
@@ -364,8 +372,10 @@ const PaymentGateway = ({
         walletAmount,
         amountForGateway,
         isHybrid: formData.paymentMethod === 'wallet_partial',
-        note: 'Bank gateway ALWAYS receives finalAmount per user requirement'
+        note: 'Bank gateway ALWAYS receives complete finalAmount per Persian/Farsi client requirement'
       });
+      
+      console.log('🏦 [BANK GATEWAY] Sending amount to Bank Saman:', amountForGateway);
       
       if (gatewayConfig && gatewayConfig.apiBaseUrl) {
         // Build payment URL with proper parameters for Shaparak

@@ -12,10 +12,11 @@ Preferred communication style: Simple, everyday language.
 - Auto-redirect functionality for wallet_partial payments implemented
 - Cart persistence across failed payments working correctly
 - CRITICAL FIX: Payment gateway now ALWAYS sends finalAmount to bank (August 6, 2025)
-- Fixed payment-gateway.tsx to use finalAmount instead of remainingAmount for all bank transactions
+- Fixed payment-gateway.tsx to use finalAmount instead of remainingAmount for all bank transactions  
 - Persian/Farsi client requirement implemented: Final Amount is critical data for all payments
 - Final Amount = قیمت کالا - تخفیف + مالیات + کرایه حمل (exactly what customer pays)
 - Bank gateway ALWAYS receives Final Amount, never shipping cost or other partial amounts
+- Fixed session authentication for temp-order-data endpoint - properly matches customer sessions
 
 **Critical Security Requirements:**
 - Extreme vigilance in wallet transaction processing
