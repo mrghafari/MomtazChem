@@ -181,6 +181,7 @@ export function usePersistentCart() {
   const clearCart = async () => {
     console.log('🗑️ Clearing cart..., authenticated:', isAuthenticated);
     
+    // Wait a bit to ensure we're actually logged out
     if (isAuthenticated && user) {
       try {
         console.log(`🛒 Clearing cart in database for customer ${user.id}`);
@@ -189,13 +190,15 @@ export function usePersistentCart() {
         });
         console.log('✅ Cart cleared from database');
       } catch (error) {
-        console.error('❌ Error clearing cart from database:', error);
+        console.error('❌ Error clearing cart from database (user may already be logged out):', error);
+        // This is expected during logout, so we continue
       }
     } else {
       console.log('🔄 User not authenticated, clearing only localStorage');
     }
 
     setLocalCart({});
+    setCartLoaded(false); // Reset cart loaded flag
     localStorage.removeItem('cart');
     console.log('✅ Local cart cleared');
   };

@@ -490,8 +490,10 @@ const Shop = () => {
         setCustomer(null);
         setWalletBalance(0);
         
-        // پاک کردن سبد خرید هنگام logout
-        clearCartPersistent();
+        // پاک کردن سبد خرید هنگام logout - فقط وقتی کاربر واقعاً logout کرده
+        setTimeout(() => {
+          clearCartPersistent();
+        }, 500);
         
         toast({
           title: "خروج موفق",
