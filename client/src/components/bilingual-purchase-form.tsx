@@ -868,6 +868,16 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const totalTaxAmount = 0;
   
   // ✅ NO SMART DELIVERY: Removed all delivery cost calculations
+  
+  // ✅ SIMPLE CALCULATION: Only use cart-based subtotal as total amount
+  // No additional shipping, tax, or other calculations - only cart products
+  const totalAmount = subtotalAmount;
+  
+  // ✅ NO WEIGHT CALCULATION: Not needed for simple cart-only payment
+  const totalWeight = 0;
+
+  // ✅ NO SHIPPING COST CALCULATION: Only cart products
+  const finalShippingCost = 0;
 
   // Auto-select smart vehicle when shipping methods load
   useEffect(() => {
@@ -883,21 +893,12 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     }
   }, [shippingRatesData, selectedShippingMethod]);
 
-  // ✅ NO TAX DEBUG: Only cart calculation
+  // ✅ SIMPLE CALCULATION DEBUG: Cart total only
   console.log('💰 [SIMPLE PURCHASE] Cart only calculation:', {
     subtotalAmount,
-    totalAmount
+    totalAmount,
+    'Note': 'فقط قیمت کالاهای سبد خرید'
   });
-  
-  // ✅ NO WEIGHT CALCULATION: Not needed for simple cart-only payment
-  const totalWeight = 0;
-
-  // ✅ NO SHIPPING COST CALCULATION: Only cart products
-  const finalShippingCost = 0;
-  
-  // ✅ SIMPLE CALCULATION: Only use cart-based subtotal as total amount
-  // No additional shipping, tax, or other calculations - only cart products
-  const totalAmount = subtotalAmount;
   
   // ✅ SIMPLE DEBUG: Only cart total
   console.log('💰 [SIMPLE CALCULATION] Cart total only:', {
