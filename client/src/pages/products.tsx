@@ -781,6 +781,7 @@ export default function ProductsPage() {
       if (index === primaryImageIndex) {
         form.setValue('imageUrl', url);
         setImagePreview(url);
+        console.log('Set primary image URL:', url, 'at index:', index);
       }
       
       toast({
@@ -901,8 +902,12 @@ export default function ProductsPage() {
       if (index < 3) newPreviews[index] = url;
     });
     setImagePreviews(newPreviews);
-    // Set primary image index - default to first image if exists, otherwise 0
-    const primaryIndex = existingImageUrls.length > 0 ? 0 : 0;
+    // Set primary image index based on legacy imageUrl or default to 0
+    let primaryIndex = 0;
+    if (product.imageUrl && existingImageUrls.includes(product.imageUrl)) {
+      primaryIndex = existingImageUrls.indexOf(product.imageUrl);
+    }
+    console.log('Setting primary image index to:', primaryIndex, 'for product:', product.name);
     setPrimaryImageIndex(primaryIndex);
     setCatalogPreview(product.pdfCatalogUrl || null);
     setMsdsPreview(product.msdsUrl || null);
@@ -2533,8 +2538,14 @@ export default function ProductsPage() {
                       
                       <div className="space-y-4">
                         {/* آپلود تصاویر */}
-                        <div className="mb-2 text-sm text-gray-600">
-                          💡 انتخاب تصویر اصلی: دکمه دایره‌ای زیر هر تصویر را کلیک کنید تا آن تصویر به عنوان تصویر اصلی نمایش داده شود
+                        <div className="mb-3 p-2 bg-blue-50 rounded-lg border border-blue-200">
+                          <div className="flex items-center gap-2 text-sm text-blue-700">
+                            <div className="w-4 h-4 rounded-full border-2 border-blue-500 bg-blue-500 flex items-center justify-center">
+                              <div className="w-2 h-2 bg-white rounded-full"></div>
+                            </div>
+                            <span className="font-medium">انتخاب تصویر اصلی:</span>
+                            <span>روی دکمه دایره‌ای گوشه پایین چپ هر تصویر کلیک کنید (تصویر انتخاب شده: {primaryImageIndex + 1})</span>
+                          </div>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           {[0, 1, 2].map((index) => (
@@ -2557,12 +2568,13 @@ export default function ProductsPage() {
                                       </div>
                                     )}
                                     {/* Primary image selection radio button */}
-                                    <div className="absolute bottom-1 left-1">
-                                      <input
-                                        type="radio"
-                                        name="primaryImage"
-                                        checked={primaryImageIndex === index}
-                                        onChange={() => {
+                                    <div className="absolute bottom-1 left-1 z-10">
+                                      <button
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.preventDefault();
+                                          e.stopPropagation();
+                                          console.log('Primary button clicked for index:', index);
                                           setPrimaryImageIndex(index);
                                           // Update legacy imageUrl field with new primary image
                                           const currentUrls = form.getValues('imageUrls') || [];
@@ -2571,8 +2583,17 @@ export default function ProductsPage() {
                                             setImagePreview(currentUrls[index]);
                                           }
                                         }}
-                                        className="w-3 h-3 text-blue-600 bg-white border-gray-300 focus:ring-blue-500 focus:ring-2"
-                                      />
+                                        className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all hover:scale-110 cursor-pointer ${
+                                          primaryImageIndex === index 
+                                            ? 'bg-blue-500 border-blue-500 shadow-lg' 
+                                            : 'bg-white border-gray-400 hover:border-blue-400 shadow-md'
+                                        }`}
+                                        title={`انتخاب به عنوان تصویر اصلی ${primaryImageIndex === index ? '(انتخاب شده)' : ''}`}
+                                      >
+                                        {primaryImageIndex === index && (
+                                          <div className="w-2 h-2 bg-white rounded-full"></div>
+                                        )}
+                                      </button>
                                     </div>
                                     <Button
                                       type="button"
@@ -2667,7 +2688,7 @@ export default function ProductsPage() {
                             render={({ field }) => (
                               <FormItem className="hidden">
                                 <FormControl>
-                                  <Input {...field} />
+                                  <Input {...field} value={field.value || ''} />
                                 </FormControl>
                               </FormItem>
                             )}
