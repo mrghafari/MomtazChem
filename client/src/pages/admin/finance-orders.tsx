@@ -867,23 +867,25 @@ function FinanceOrders() {
         .status-rejected { background-color: #fecaca; color: #dc2626; }
         @media print {
           @page { 
-            margin: 1cm; 
+            margin: 1.5cm; 
             size: A4;
           }
           body { 
             margin: 0; 
             padding: 0;
-            max-width: 100%;
+            width: 100%;
             box-sizing: border-box;
             direction: rtl;
             font-family: 'Noto Sans Arabic', sans-serif;
+            overflow-x: hidden;
           }
           .container {
             padding: 0;
-            margin: 0 auto;
-            max-width: calc(100% - 2cm);
-            width: calc(100% - 2cm);
+            margin: 0;
+            width: 100%;
+            max-width: 100%;
             box-sizing: border-box;
+            overflow-x: hidden;
           }
           .header {
             text-align: center;
@@ -900,30 +902,59 @@ function FinanceOrders() {
           .info-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
+            gap: 5px;
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            width: 100%;
+            max-width: 100%;
           }
           .info-item {
             margin: 0;
-            padding: 5px;
+            padding: 3px;
             box-sizing: border-box;
             min-width: 0;
             word-wrap: break-word;
+            overflow: hidden;
+            font-size: 11px;
           }
           .items-table {
             width: 100%;
             margin: 0;
             box-sizing: border-box;
             table-layout: fixed;
+            border-collapse: collapse;
+            font-size: 10px;
           }
           .items-table th,
           .items-table td {
-            padding: 4px;
-            font-size: 11px;
+            padding: 3px;
+            font-size: 10px;
             word-wrap: break-word;
             box-sizing: border-box;
+            border: 1px solid #ccc;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+          .items-table th:first-child,
+          .items-table td:first-child {
+            width: 5%;
+          }
+          .items-table th:nth-child(2),
+          .items-table td:nth-child(2) {
+            width: 45%;
+          }
+          .items-table th:nth-child(3),
+          .items-table td:nth-child(3) {
+            width: 15%;
+          }
+          .items-table th:nth-child(4),
+          .items-table td:nth-child(4) {
+            width: 15%;
+          }
+          .items-table th:nth-child(5),
+          .items-table td:nth-child(5) {
+            width: 20%;
           }
           .no-print { display: none !important; }
           * {
