@@ -806,20 +806,33 @@ const PaymentGateway = ({
     const [walletAmount, setWalletAmount] = useState(defaultWalletAmount);
     const remainingAmount = Math.max(0, totalAmount - walletAmount);
     
-    // Auto-execute wallet-only payment when remaining is 0
+    // Auto-execute appropriate payment based on remaining amount
     useEffect(() => {
-      if (remainingAmount === 0 && walletAmount > 0 && !isProcessing) {
-        console.log('🚀 [AUTO WALLET] Executing automatic wallet-only payment');
-        console.log('🚀 [AUTO WALLET] Wallet amount:', walletAmount, 'Remaining:', remainingAmount);
-        
-        // Small delay to ensure UI is stable
-        const timer = setTimeout(() => {
-          handleWalletOnlyPayment();
-        }, 500);
-        
-        return () => clearTimeout(timer);
+      if (walletAmount > 0 && !isProcessing) {
+        if (remainingAmount === 0) {
+          console.log('🚀 [AUTO WALLET] Executing automatic wallet-only payment');
+          console.log('🚀 [AUTO WALLET] Wallet amount:', walletAmount, 'Remaining:', remainingAmount);
+          
+          // Small delay to ensure UI is stable
+          const timer = setTimeout(() => {
+            handleWalletOnlyPayment();
+          }, 500);
+          
+          return () => clearTimeout(timer);
+        } else if (remainingAmount > 0 && activeGateway) {
+          console.log('🚀 [AUTO HYBRID] Executing automatic hybrid payment');
+          console.log('🚀 [AUTO HYBRID] Wallet amount:', walletAmount, 'Remaining:', remainingAmount);
+          console.log('🚀 [AUTO HYBRID] Will redirect to:', activeGateway.name);
+          
+          // Small delay to ensure UI is stable
+          const timer = setTimeout(() => {
+            handleHybridPayment(walletAmount, remainingAmount);
+          }, 500);
+          
+          return () => clearTimeout(timer);
+        }
       }
-    }, [remainingAmount, walletAmount, isProcessing]);
+    }, [remainingAmount, walletAmount, isProcessing, activeGateway]);
     
     console.log('🔍 [WALLET PARTIAL DEBUG] Current balance:', currentBalance);
     console.log('🔍 [WALLET PARTIAL DEBUG] Total amount:', totalAmount);
