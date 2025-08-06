@@ -14413,9 +14413,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Check for hybrid payment (wallet_partial with remaining amount > 0)
-      if (orderData.paymentMethod === 'wallet_partial' && remainingAmount > 0) {
-        console.log(`🔄 [HYBRID PAYMENT] Wallet partial payment detected - wallet: ${walletAmountUsed}, remaining: ${remainingAmount}`);
+      // Check for hybrid payment (wallet_partial with significant remaining amount > 1 IQD)
+      const formattedRemainingForBank = formatIQDAmount(remainingAmount);
+      
+      // Handle wallet_partial case where remaining amount rounds to 0 or 1 IQD (treated as complete)
+      if (orderData.paymentMethod === 'wallet_partial' && formattedRemainingForBank <= 1) {
+        console.log(`✅ [WALLET COMPLETE] Wallet partial payment covers full amount - remaining ${remainingAmount} rounds to ${formattedRemainingForBank} IQD`);
+        
+        return res.json({
+          success: true,
+          message: "سفارش با کیف پول به طور کامل پرداخت شد",
+          paymentMethod: 'wallet_full',
+          order: {
+            id: order.id,
+            orderNumber: order.orderNumber,
+            totalAmount: order.totalAmount,
+            status: order.status,
+            paymentStatus: "paid",
+            paymentMethod: 'wallet_full',
+            walletAmountUsed: walletAmountUsed,
+            crmCustomerId: finalCrmCustomerId,
+          }
+        });
+      }
+      
+      if (orderData.paymentMethod === 'wallet_partial' && formattedRemainingForBank > 1) {
+        console.log(`🔄 [HYBRID PAYMENT] Wallet partial payment detected - wallet: ${walletAmountUsed}, remaining: ${remainingAmount}, formatted: ${formattedRemainingForBank}`);
         
         // هدایت پرداخت به درگاه بانکی فعال - تبدیل مبلغ به عدد صحیح برای دینار عراقی
         const { bankGatewayRouter } = await import('./bank-gateway-router');
