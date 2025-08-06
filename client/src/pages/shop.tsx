@@ -1236,7 +1236,7 @@ const Shop = () => {
                               }}
                             >
                               <div className="flex items-center gap-1">
-                                {statsLoading ? (
+                                {(!productStatsData || Object.keys(productStatsData).length === 0) ? (
                                   <div className="flex">
                                     {[1,2,3,4,5].map((starNum) => (
                                       <Star 
@@ -1656,7 +1656,7 @@ const Shop = () => {
                               }}
                             >
                               <div className="flex items-center gap-1">
-                                {statsLoading ? (
+                                {(!productStatsData || Object.keys(productStatsData).length === 0) ? (
                                   <div className="flex">
                                     {[1,2,3,4,5].map((starNum) => (
                                       <Star 
