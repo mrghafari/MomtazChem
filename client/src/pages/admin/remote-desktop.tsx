@@ -292,7 +292,66 @@ const RemoteDesktop: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="tools" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Video Conferencing Section */}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              🎥 سیستم‌های ویدیو کنفرانس
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <Card className="border-blue-200 bg-blue-50 dark:bg-blue-900/20">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
+                    <Monitor className="h-5 w-5" />
+                    Jitsi Meet
+                  </CardTitle>
+                  <CardDescription>
+                    سیستم ویدیو کنفرانس پیشرفته
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                    ویدیو، صدا، چت و اشتراک‌گذاری صفحه
+                  </p>
+                  <Button className="w-full" asChild>
+                    <a href="/jitsi" target="_blank">
+                      <Monitor className="h-4 w-4 mr-2" />
+                      ورود به Jitsi Meet
+                    </a>
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card className="border-green-200 bg-green-50 dark:bg-green-900/20">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-green-700 dark:text-green-300">
+                    <Users className="h-5 w-5" />
+                    WebRTC
+                  </CardTitle>
+                  <CardDescription>
+                    تماس ویدیویی مستقیم P2P
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                    ارتباط مستقیم با کیفیت بالا
+                  </p>
+                  <Button className="w-full" variant="outline" asChild>
+                    <a href="/webrtc" target="_blank">
+                      <Users className="h-4 w-4 mr-2" />
+                      ورود به WebRTC
+                    </a>
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          {/* Remote Desktop Tools Section */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              🖥️ ابزارهای ریموت دسکتاپ
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -405,6 +464,7 @@ const RemoteDesktop: React.FC = () => {
                 </Button>
               </CardContent>
             </Card>
+          </div>
           </div>
         </TabsContent>
 

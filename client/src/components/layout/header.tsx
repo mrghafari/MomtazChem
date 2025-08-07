@@ -95,8 +95,6 @@ export default function Header() {
     { href: '/services', label: t.services },
     { href: '/contact', label: t.contact },
     { href: '/shop', label: t.shop.title },
-    { href: '/jitsi', label: direction === 'rtl' ? '🎥 ویدیو کنفرانس' : '🎥 Video Conference' },
-    { href: '/webrtc', label: direction === 'rtl' ? '📞 WebRTC' : '📞 WebRTC' },
   ];
 
   const productCategories = [
