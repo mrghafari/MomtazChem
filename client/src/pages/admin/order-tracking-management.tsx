@@ -278,7 +278,6 @@ export default function OrderTrackingManagement() {
     refetch
   } = useInfiniteQuery({
     queryKey: ['tracking-orders-paginated'],
-    initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {
       const response = await fetch(`/api/orders/tracking/all?limit=100&offset=${pageParam}`, {
         credentials: 'include'
@@ -299,8 +298,8 @@ export default function OrderTrackingManagement() {
         pagination: data.pagination
       };
     },
-    getNextPageParam: (lastPage: any) => {
-      return lastPage?.pagination?.hasNextPage ? lastPage.pagination.nextOffset : undefined;
+    getNextPageParam: (lastPage) => {
+      return lastPage.pagination?.hasNextPage ? lastPage.pagination.nextOffset : undefined;
     },
     staleTime: 30000, // Cache for 30 seconds
     gcTime: 300000, // Keep cache for 5 minutes
@@ -312,7 +311,7 @@ export default function OrderTrackingManagement() {
   });
 
   // Flatten all pages into a single orders array
-  const orders = ordersData?.pages.flatMap((page: any) => page.orders) || [];
+  const orders = ordersData?.pages.flatMap(page => page.orders) || [];
   const totalCount = ordersData?.pages[0]?.pagination?.totalCount || 0;
 
   // 🔄 INFINITE SCROLL: Detect when user scrolls near bottom
@@ -811,7 +810,7 @@ export default function OrderTrackingManagement() {
                   {isLoadingStats ? (
                     <span className="animate-pulse">...</span>
                   ) : (
-(stats as any)?.pendingOrders || 0
+                    stats?.pendingOrders || 0
                   )}
                 </p>
               </div>
@@ -834,7 +833,7 @@ export default function OrderTrackingManagement() {
                   {isLoadingStats ? (
                     <span className="animate-pulse">...</span>
                   ) : (
-(stats as any)?.completedOrders || 0
+                    stats?.completedOrders || 0
                   )}
                 </p>
               </div>
@@ -857,7 +856,7 @@ export default function OrderTrackingManagement() {
                   {isLoadingStats ? (
                     <span className="animate-pulse">...</span>
                   ) : (
-`${((stats as any)?.totalRevenue || 0).toLocaleString()} IQD`
+                    `${(stats?.totalRevenue || 0).toLocaleString()} IQD`
                   )}
                 </p>
               </div>
@@ -880,7 +879,7 @@ export default function OrderTrackingManagement() {
                   {isLoadingStats ? (
                     <span className="animate-pulse">...</span>
                   ) : (
-`${((stats as any)?.averageOrderValue || 0).toLocaleString()} IQD`
+                    `${(stats?.averageOrderValue || 0).toLocaleString()} IQD`
                   )}
                 </p>
               </div>
@@ -903,7 +902,7 @@ export default function OrderTrackingManagement() {
                   {isLoadingStats ? (
                     <span className="animate-pulse">...</span>
                   ) : (
-(stats as any)?.todaysOrders || 0
+                    stats?.todaysOrders || 0
                   )}
                 </p>
               </div>
@@ -1134,7 +1133,6 @@ export default function OrderTrackingManagement() {
                           </DialogHeader>
                           
                           {selectedOrder && (
-                            <>
                             <div className="space-y-6">
                               {/* Customer Information */}
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1224,7 +1222,8 @@ export default function OrderTrackingManagement() {
                                 </CardContent>
                               </Card>
 
-                              {/* Customer Notes - Always displayed */}
+                              {/* Department Notes */}
+                              {/* یادداشت‌های مشتری - همیشه نمایش داده می‌شود */}
                               <div className="mb-6">
                                 <h4 className="text-lg font-semibold mb-4 text-blue-800">💬 یادداشت‌های مشتری</h4>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1259,9 +1258,9 @@ export default function OrderTrackingManagement() {
                                 </div>
                               </div>
 
-                              {/* Department Notes */}
+                              {/* یادداشت‌های بخش‌ها */}
                               <div>
-                                <h4 className="text-lg font-semibold mb-4 text-gray-800">🏢 Department Notes</h4>
+                                <h4 className="text-lg font-semibold mb-4 text-gray-800">🏢 یادداشت‌های بخش‌ها</h4>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                   <Card>
                                     <CardHeader>
@@ -1272,7 +1271,7 @@ export default function OrderTrackingManagement() {
                                     </CardHeader>
                                     <CardContent>
                                       <p className="text-sm text-gray-600">
-                                        {selectedOrder?.financialNotes || 'یادداشتی وجود ندارد'}
+                                        {selectedOrder.financialNotes || 'یادداشتی وجود ندارد'}
                                       </p>
                                     </CardContent>
                                   </Card>
@@ -1286,7 +1285,7 @@ export default function OrderTrackingManagement() {
                                     </CardHeader>
                                     <CardContent>
                                       <p className="text-sm text-gray-600">
-                                        {selectedOrder?.warehouseNotes || 'یادداشتی وجود ندارد'}
+                                        {selectedOrder.warehouseNotes || 'یادداشتی وجود ندارد'}
                                       </p>
                                     </CardContent>
                                   </Card>
@@ -1300,14 +1299,14 @@ export default function OrderTrackingManagement() {
                                     </CardHeader>
                                     <CardContent>
                                       <p className="text-sm text-gray-600">
-                                        {selectedOrder?.logisticsNotes || 'یادداشتی وجود ندارد'}
+                                        {selectedOrder.logisticsNotes || 'یادداشتی وجود ندارد'}
                                       </p>
                                     </CardContent>
                                   </Card>
                                 </div>
                               </div>
 
-                              {/* Timestamps */
+                              {/* Timestamps */}
                               <Card>
                                 <CardHeader>
                                   <CardTitle className="text-lg flex items-center gap-2">
@@ -1322,7 +1321,7 @@ export default function OrderTrackingManagement() {
                                       <strong className="text-green-800">زمان ثبت سفارش توسط مشتری:</strong>
                                     </div>
                                     <div className="text-green-700 text-sm">
-                                      {selectedOrder?.createdAt ? formatDate(selectedOrder.createdAt) : 'نامشخص'}
+                                      {formatDate(selectedOrder.createdAt)}
                                     </div>
                                     <div className="text-xs text-green-600 mt-1">
                                       (زمان دقیق submit کردن سفارش در صفحه checkout)
@@ -1334,13 +1333,12 @@ export default function OrderTrackingManagement() {
                                       <strong className="text-blue-800">آخرین بروزرسانی وضعیت:</strong>
                                     </div>
                                     <div className="text-blue-700 text-sm">
-                                      {selectedOrder?.updatedAt ? formatDate(selectedOrder.updatedAt) : 'نامشخص'}
+                                      {formatDate(selectedOrder.updatedAt)}
                                     </div>
                                   </div>
                                 </CardContent>
                               </Card>
                             </div>
-                            </>
                           )}
                         </DialogContent>
                       </Dialog>
