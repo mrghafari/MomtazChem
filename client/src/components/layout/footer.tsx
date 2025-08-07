@@ -105,20 +105,21 @@ const Footer = () => {
   });
 
   return (
-    <footer className="bg-gray-900 text-white py-16">
+    <footer className="bg-gray-900 text-white py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        {/* Main Footer Content */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
           
-          {/* Company Info */}
+          {/* Company Info - More Compact */}
           {footerSettings?.showCompanyInfo && (
-            <div className="lg:col-span-1">
-              <div className="flex items-center space-x-3 mb-4">
+            <div className="lg:col-span-2">
+              <div className="flex items-center space-x-3 mb-3">
                 <img 
                   src={company_logo} 
                   alt={`${footerSettings?.companyName || 'Momtazchem'} Logo`} 
-                  className="h-10 w-10 rounded-lg"
+                  className="h-8 w-8 rounded-lg"
                 />
-                <div className="text-2xl font-bold">
+                <div className="text-xl font-bold">
                   <span className="text-green-400">
                     {footerSettings?.companyName?.substring(0, 6) || 'Momtaz'}
                   </span>
@@ -129,24 +130,35 @@ const Footer = () => {
               </div>
               
               {footerSettings?.companyDescription && (
-                <p className="text-gray-400 mb-4 leading-relaxed">
+                <p className="text-gray-400 mb-3 text-sm leading-relaxed line-clamp-2">
                   {footerSettings.companyDescription}
                 </p>
               )}
               
-              <div className="text-gray-400 text-sm mb-6">
-                {footerSettings?.companyCodal && (
-                  <p className="mb-1">Codal pose: {footerSettings.companyCodal}</p>
+              {/* Contact Info - Inline */}
+              <div className="text-gray-400 text-xs mb-3 space-y-1">
+                {footerSettings?.companyEmail && (
+                  <div className="flex items-center space-x-2">
+                    <i className="fas fa-envelope text-xs"></i>
+                    <a href={`mailto:${footerSettings.companyEmail}`} className="hover:text-white">
+                      {footerSettings.companyEmail}
+                    </a>
+                  </div>
                 )}
-                {footerSettings?.companyAddress && (
-                  <p className="mb-1">{footerSettings.companyAddress}</p>
+                {footerSettings?.companyPhone && (
+                  <div className="flex items-center space-x-2">
+                    <i className="fas fa-phone text-xs"></i>
+                    <a href={`tel:${footerSettings.companyPhone}`} className="hover:text-white">
+                      {footerSettings.companyPhone}
+                    </a>
+                  </div>
                 )}
               </div>
 
-              {/* Social Media Icons */}
+              {/* Social Media Icons - Compact */}
               {footerSettings?.showSocialMedia && activeSocialMedia.length > 0 && (
-                <div className="flex space-x-4 flex-wrap">
-                  {activeSocialMedia.map((platform) => {
+                <div className="flex space-x-2 flex-wrap">
+                  {activeSocialMedia.slice(0, 6).map((platform) => {
                     const platformUrl = getSocialMediaUrl(platform.key);
                     
                     // Special handling for WeChat with QR Code
@@ -157,17 +169,17 @@ const Footer = () => {
                             href={platformUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-primary transition-colors duration-200"
+                            className="w-8 h-8 bg-gray-800 rounded-md flex items-center justify-center hover:bg-primary transition-colors duration-200"
                             title={platform.name}
                           >
-                            <i className={platform.icon}></i>
+                            <i className={`${platform.icon} text-sm`}></i>
                           </a>
                           {/* QR Code Popup on Hover */}
-                          <div className="absolute bottom-12 left-0 hidden group-hover:block bg-white p-2 rounded-lg shadow-lg z-10">
+                          <div className="absolute bottom-10 left-0 hidden group-hover:block bg-white p-2 rounded-lg shadow-lg z-10">
                             <img 
                               src={getSocialMediaUrl('wechat_qr')} 
                               alt="WeChat QR Code" 
-                              className="w-32 h-32"
+                              className="w-24 h-24"
                             />
                             <p className="text-xs text-gray-600 text-center mt-1">Scan for WeChat</p>
                           </div>
@@ -182,10 +194,10 @@ const Footer = () => {
                         href={platformUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-primary transition-colors duration-200"
+                        className="w-8 h-8 bg-gray-800 rounded-md flex items-center justify-center hover:bg-primary transition-colors duration-200"
                         title={platform.name}
                       >
-                        <i className={platform.icon}></i>
+                        <i className={`${platform.icon} text-sm`}></i>
                       </a>
                     );
                   })}
@@ -194,15 +206,15 @@ const Footer = () => {
             </div>
           )}
 
-          {/* Products Links */}
+          {/* Products Links - Compact */}
           {footerSettings?.showLinks && productLinks.length > 0 && (
             <div>
-              <h3 className="text-lg font-semibold mb-4">Products</h3>
-              <ul className="space-y-3">
-                {productLinks.map((link, index) => (
+              <h3 className="text-sm font-semibold mb-3">Products</h3>
+              <ul className="space-y-2">
+                {productLinks.slice(0, 4).map((link, index) => (
                   <li key={index}>
                     <Link href={link.href}>
-                      <span className="text-gray-400 hover:text-white transition-colors duration-200 cursor-pointer">
+                      <span className="text-gray-400 hover:text-white transition-colors duration-200 cursor-pointer text-sm">
                         {link.name}
                       </span>
                     </Link>
@@ -212,15 +224,15 @@ const Footer = () => {
             </div>
           )}
 
-          {/* Company Links */}
+          {/* Company Links - Compact */}
           {footerSettings?.showLinks && companyLinks.length > 0 && (
             <div>
-              <h3 className="text-lg font-semibold mb-4">Company</h3>
-              <ul className="space-y-3">
-                {companyLinks.map((link, index) => (
+              <h3 className="text-sm font-semibold mb-3">Company</h3>
+              <ul className="space-y-2">
+                {companyLinks.slice(0, 4).map((link, index) => (
                   <li key={index}>
                     <Link href={link.href}>
-                      <span className="text-gray-400 hover:text-white transition-colors duration-200 cursor-pointer">
+                      <span className="text-gray-400 hover:text-white transition-colors duration-200 cursor-pointer text-sm">
                         {link.name}
                       </span>
                     </Link>
@@ -230,99 +242,44 @@ const Footer = () => {
             </div>
           )}
 
-          {/* Support Links */}
+          {/* Support Links - Compact */}
           {footerSettings?.showLinks && supportLinks.length > 0 && (
             <div>
-              <h3 className="text-lg font-semibold mb-4">Support</h3>
-              <ul className="space-y-3">
-                {supportLinks.map((link, index) => (
+              <h3 className="text-sm font-semibold mb-3">Support</h3>
+              <ul className="space-y-2">
+                {supportLinks.slice(0, 4).map((link, index) => (
                   <li key={index}>
                     <Link href={link.href}>
-                      <span className="text-gray-400 hover:text-white transition-colors duration-200 cursor-pointer">
+                      <span className="text-gray-400 hover:text-white transition-colors duration-200 cursor-pointer text-sm">
                         {link.name}
                       </span>
                     </Link>
                   </li>
                 ))}
               </ul>
-            </div>
-          )}
-
-          {/* Contact Info */}
-          {footerSettings?.showCompanyInfo && (
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Contact Info</h3>
-              <div className="space-y-3 text-gray-400 text-sm">
-                {footerSettings?.companyEmail && (
-                  <div className="flex items-center space-x-2">
-                    <i className="fas fa-envelope w-4"></i>
-                    <a 
-                      href={`mailto:${footerSettings.companyEmail}`}
-                      className="hover:text-white transition-colors duration-200"
-                    >
-                      {footerSettings.companyEmail}
-                    </a>
-                  </div>
-                )}
-                
-                {footerSettings?.companyPhone && (
-                  <div className="flex items-center space-x-2">
-                    <i className="fas fa-phone w-4"></i>
-                    <a 
-                      href={`tel:${footerSettings.companyPhone}`}
-                      className="hover:text-white transition-colors duration-200"
-                    >
-                      {footerSettings.companyPhone}
-                    </a>
-                  </div>
-                )}
-                
-                {footerSettings?.whatsappUrl && (
-                  <div className="flex items-center space-x-2">
-                    <i className="fab fa-whatsapp w-4"></i>
-                    <a 
-                      href={footerSettings.whatsappUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:text-white transition-colors duration-200"
-                    >
-                      WhatsApp
-                    </a>
-                  </div>
-                )}
-                
-                {footerSettings?.companyAddress && (
-                  <div className="flex items-center space-x-2">
-                    <i className="fas fa-map-marker-alt w-4"></i>
-                    <span>{footerSettings.companyAddress}</span>
-                  </div>
-                )}
-              </div>
             </div>
           )}
         </div>
 
-        {/* Bottom Copyright and Legal Section */}
-        <div className="border-t border-gray-800 mt-12 pt-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center text-center md:text-left">
+        {/* Compact Bottom Section */}
+        <div className="border-t border-gray-800 mt-6 pt-4">
+          <div className="flex flex-col md:flex-row justify-between items-center text-center md:text-left gap-4">
             
             {/* Copyright */}
-            <div className="text-gray-400 text-sm">
+            <div className="text-gray-400 text-xs">
               {footerSettings?.copyrightText || '© 2025 Momtazchem. All rights reserved.'}
             </div>
             
             {/* Legal Links */}
             {footerSettings?.showLinks && legalLinks.length > 0 && (
-              <div className="text-center">
-                <div className="flex justify-center space-x-4 text-sm">
-                  {legalLinks.map((link, index) => (
-                    <Link key={index} href={link.href}>
-                      <span className="text-gray-400 hover:text-white transition-colors duration-200 cursor-pointer">
-                        {link.name}
-                      </span>
-                    </Link>
-                  ))}
-                </div>
+              <div className="flex space-x-4 text-xs">
+                {legalLinks.slice(0, 3).map((link, index) => (
+                  <Link key={index} href={link.href}>
+                    <span className="text-gray-400 hover:text-white transition-colors duration-200 cursor-pointer">
+                      {link.name}
+                    </span>
+                  </Link>
+                ))}
               </div>
             )}
             
