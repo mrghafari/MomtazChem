@@ -24,7 +24,8 @@ import {
   Timer,
   DollarSign,
   AlertTriangle,
-  RefreshCw
+  RefreshCw,
+  Printer
 } from 'lucide-react';
 import PaymentMethodBadge from '@/components/PaymentMethodBadge';
 
@@ -450,6 +451,234 @@ export default function OrderTrackingManagement() {
     return `${numericAmount.toLocaleString()} ${currency}`;
   };
 
+  // Print function for order details
+  const handlePrintOrder = () => {
+    if (!selectedOrder) return;
+    
+    const statusInfo = getStatusDisplay(selectedOrder);
+    
+    const printContent = `
+      <!DOCTYPE html>
+      <html dir="rtl" lang="fa">
+      <head>
+        <meta charset="UTF-8">
+        <title>جزئیات سفارش #{selectedOrder.customerOrderId}</title>
+        <style>
+          body { font-family: 'Tahoma', sans-serif; margin: 20px; direction: rtl; }
+          .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 20px; }
+          .company-logo { max-width: 150px; height: auto; margin-bottom: 10px; }
+          .company-name { font-size: 24px; font-weight: bold; color: #1a365d; }
+          .order-title { font-size: 18px; margin-top: 10px; }
+          .section { margin-bottom: 20px; }
+          .section-title { font-size: 16px; font-weight: bold; border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-bottom: 10px; }
+          .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+          .info-item { border: 1px solid #ddd; padding: 10px; border-radius: 4px; }
+          .info-label { font-weight: bold; color: #666; font-size: 12px; }
+          .info-value { margin-top: 5px; font-size: 14px; }
+          .notes-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 10px; }
+          .notes-item { padding: 10px; border-radius: 4px; text-align: right; border: 1px solid #ddd; background-color: #f8f9fa; }
+          .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #666; }
+          .status-badge { display: inline-block; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+          .payment-method { display: inline-block; padding: 2px 6px; background-color: #e5e7eb; border-radius: 4px; font-size: 11px; }
+          @media print { 
+            body { 
+              margin: 0; 
+              padding: 15mm 10mm 15mm 10mm; 
+              box-sizing: border-box;
+              font-size: 12pt;
+              line-height: 1.4;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+            .section { 
+              margin-bottom: 8mm; 
+              page-break-inside: avoid;
+            }
+            .info-grid { 
+              grid-template-columns: 1fr 1fr; 
+              gap: 5mm;
+            }
+            .notes-grid { 
+              grid-template-columns: 1fr 1fr 1fr; 
+              gap: 3mm;
+            }
+            .footer { 
+              margin-top: 10mm; 
+              page-break-inside: avoid;
+            }
+            @page {
+              margin: 15mm 10mm 15mm 10mm;
+              size: A4;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <img src="/uploads/Logo_1753245273579.jpeg" alt="لوگوی شرکت" class="company-logo" />
+          <div class="company-name">شرکت ممتاز شیمی</div>
+          <div class="order-title">جزئیات سفارش #{selectedOrder.customerOrderId}</div>
+          <div style="font-size: 12px; margin-top: 10px;">تاریخ چاپ: ${new Date().toLocaleDateString('en-GB')}</div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">اطلاعات مشتری</div>
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">نام مشتری</div>
+              <div class="info-value">${selectedOrder.customerName || 'نامشخص'}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">شماره تماس</div>
+              <div class="info-value">${selectedOrder.customerPhone || 'نامشخص'}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">ایمیل</div>
+              <div class="info-value">${selectedOrder.customerEmail || 'نامشخص'}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">مبلغ کل</div>
+              <div class="info-value" style="color: #059669; font-weight: bold;">${formatAmount(selectedOrder.totalAmount, selectedOrder.currency)}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">اطلاعات مالی و وضعیت</div>
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">روش پرداخت</div>
+              <div class="info-value payment-method">${selectedOrder.paymentMethod || 'نامشخص'}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">وضعیت فعلی</div>
+              <div class="info-value status-badge" style="background-color: #e5e7eb; color: #374151;">${statusInfo.label}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">بخش مسئول</div>
+              <div class="info-value">${statusInfo.department}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">کد تحویل</div>
+              <div class="info-value">${selectedOrder.deliveryCode || 'تخصیص نشده'}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">اطلاعات تحویل</div>
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">شماره رهگیری</div>
+              <div class="info-value">${selectedOrder.trackingNumber || 'تخصیص نشده'}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">تاریخ تحویل تخمینی</div>
+              <div class="info-value">${selectedOrder.estimatedDeliveryDate ? formatDate(selectedOrder.estimatedDeliveryDate) : 'تعیین نشده'}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">تاریخ تحویل واقعی</div>
+              <div class="info-value">${selectedOrder.actualDeliveryDate ? formatDate(selectedOrder.actualDeliveryDate) : 'تحویل نشده'}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">نام تحویل‌دهنده</div>
+              <div class="info-value">${selectedOrder.deliveryPersonName || 'تخصیص نشده'}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">تلفن تحویل‌دهنده</div>
+              <div class="info-value">${selectedOrder.deliveryPersonPhone || 'تخصیص نشده'}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">یادداشت‌های بخش‌ها</div>
+          <div class="notes-grid">
+            <div class="notes-item">
+              <div style="font-weight: bold; margin-bottom: 8px; border-bottom: 1px solid #d1d5db; padding-bottom: 4px;">📋 یادداشت‌های مالی</div>
+              <div style="font-size: 13px; line-height: 1.4;">${selectedOrder.financialNotes || 'یادداشتی وجود ندارد'}</div>
+            </div>
+            <div class="notes-item">
+              <div style="font-weight: bold; margin-bottom: 8px; border-bottom: 1px solid #d1d5db; padding-bottom: 4px;">📦 یادداشت‌های انبار</div>
+              <div style="font-size: 13px; line-height: 1.4;">${selectedOrder.warehouseNotes || 'یادداشتی وجود ندارد'}</div>
+            </div>
+            <div class="notes-item">
+              <div style="font-weight: bold; margin-bottom: 8px; border-bottom: 1px solid #d1d5db; padding-bottom: 4px;">🚛 یادداشت‌های لجستیک</div>
+              <div style="font-size: 13px; line-height: 1.4;">${selectedOrder.logisticsNotes || 'یادداشتی وجود ندارد'}</div>
+            </div>
+          </div>
+        </div>
+
+        ${statusInfo.isProblematic && statusInfo.explanation ? `
+          <div class="section">
+            <div class="section-title">⚠️ توضیحات مشکل</div>
+            <div style="background-color: #fef2f2; padding: 15px; border-radius: 8px; border: 1px solid #fecaca; color: #7f1d1d;">
+              ${statusInfo.explanation}
+            </div>
+          </div>
+        ` : ''}
+
+        <div class="section">
+          <div class="section-title">زمان‌های ثبت و بروزرسانی</div>
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">تاریخ ثبت سفارش</div>
+              <div class="info-value">${formatDate(selectedOrder.createdAt)}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">آخرین بروزرسانی</div>
+              <div class="info-value">${formatDate(selectedOrder.updatedAt)}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer">
+          <p>این سند توسط سیستم مدیریت سفارشات ممتاز شیمی تولید شده است</p>
+          <p>تاریخ و زمان چاپ: ${new Date().toLocaleString('en-GB', { 
+            year: 'numeric', 
+            month: '2-digit', 
+            day: '2-digit', 
+            hour: '2-digit', 
+            minute: '2-digit' 
+          })}</p>
+        </div>
+      </body>
+      </html>
+    `;
+
+    // Create a new window for printing
+    const printWindow = window.open('', '_blank', 'width=800,height=600');
+    if (printWindow) {
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+      
+      // Wait for content to load and then print
+      const handlePrint = () => {
+        setTimeout(() => {
+          printWindow.print();
+        }, 1000);
+      };
+      
+      if (printWindow.document.readyState === 'complete') {
+        handlePrint();
+      } else {
+        printWindow.onload = handlePrint;
+        setTimeout(handlePrint, 1500);
+      }
+    } else {
+      // Fallback: Use blob and object URL
+      const blob = new Blob([printContent], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const printWindow2 = window.open(url, '_blank');
+      if (printWindow2) {
+        setTimeout(() => {
+          printWindow2.print();
+          URL.revokeObjectURL(url);
+        }, 1500);
+      }
+    }
+  };
+
   // Debug information display
   console.log('🔍 [RENDER DEBUG] Component state:', {
     isLoading,
@@ -836,10 +1065,20 @@ export default function OrderTrackingManagement() {
                         </DialogTrigger>
                         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" dir="rtl">
                           <DialogHeader>
-                            <DialogTitle className="flex items-center gap-2">
-                              <Package className="w-5 h-5" />
-                              جزئیات سفارش #{selectedOrder?.customerOrderId}
-                            </DialogTitle>
+                            <div className="flex items-center justify-between">
+                              <DialogTitle className="flex items-center gap-2">
+                                <Package className="w-5 h-5" />
+                                جزئیات سفارش #{selectedOrder?.customerOrderId}
+                              </DialogTitle>
+                              <button
+                                onClick={handlePrintOrder}
+                                className="flex items-center gap-2 px-3 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+                                title="چاپ جزئیات سفارش"
+                              >
+                                <Printer className="w-4 h-4" />
+                                چاپ
+                              </button>
+                            </div>
                           </DialogHeader>
                           
                           {selectedOrder && (
