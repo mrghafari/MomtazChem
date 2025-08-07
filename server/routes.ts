@@ -41330,6 +41330,8 @@ momtazchem.com
           co.currency,
           co.status as customer_status,
           co.payment_method,
+          co.notes as customer_notes,
+          co.delivery_notes,
           co.created_at,
           co.updated_at,
           cc.first_name,
@@ -41394,6 +41396,10 @@ momtazchem.com
           actualDeliveryDate: row.actual_delivery_date,
           deliveryPersonName: row.delivery_person_name,
           deliveryPersonPhone: row.delivery_person_phone,
+          
+          // Customer notes (from original order)
+          customerNotes: row.customer_notes,
+          deliveryNotes: row.delivery_notes,
           
           // Department notes
           financialNotes: row.financial_notes,
