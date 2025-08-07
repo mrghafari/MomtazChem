@@ -298,7 +298,8 @@ export default function OrderTrackingManagement() {
         pagination: data.pagination
       };
     },
-    getNextPageParam: (lastPage) => {
+    initialPageParam: 0,
+    getNextPageParam: (lastPage: any) => {
       return lastPage.pagination?.hasNextPage ? lastPage.pagination.nextOffset : undefined;
     },
     staleTime: 30000, // Cache for 30 seconds
@@ -311,8 +312,8 @@ export default function OrderTrackingManagement() {
   });
 
   // Flatten all pages into a single orders array
-  const orders = ordersData?.pages.flatMap(page => page.orders) || [];
-  const totalCount = ordersData?.pages[0]?.pagination?.totalCount || 0;
+  const orders = ordersData?.pages.flatMap((page: any) => page.orders) || [];
+  const totalCount = (ordersData?.pages[0] as any)?.pagination?.totalCount || 0;
 
   // 🔄 INFINITE SCROLL: Detect when user scrolls near bottom
   const handleScroll = useCallback(() => {
@@ -810,7 +811,7 @@ export default function OrderTrackingManagement() {
                   {isLoadingStats ? (
                     <span className="animate-pulse">...</span>
                   ) : (
-                    stats?.pendingOrders || 0
+                    (stats as any)?.pendingOrders || 0
                   )}
                 </p>
               </div>
@@ -833,7 +834,7 @@ export default function OrderTrackingManagement() {
                   {isLoadingStats ? (
                     <span className="animate-pulse">...</span>
                   ) : (
-                    stats?.completedOrders || 0
+                    (stats as any)?.completedOrders || 0
                   )}
                 </p>
               </div>
@@ -856,7 +857,7 @@ export default function OrderTrackingManagement() {
                   {isLoadingStats ? (
                     <span className="animate-pulse">...</span>
                   ) : (
-                    `${(stats?.totalRevenue || 0).toLocaleString()} IQD`
+                    `${((stats as any)?.totalRevenue || 0).toLocaleString()} IQD`
                   )}
                 </p>
               </div>
@@ -879,7 +880,7 @@ export default function OrderTrackingManagement() {
                   {isLoadingStats ? (
                     <span className="animate-pulse">...</span>
                   ) : (
-                    `${(stats?.averageOrderValue || 0).toLocaleString()} IQD`
+                    `${((stats as any)?.averageOrderValue || 0).toLocaleString()} IQD`
                   )}
                 </p>
               </div>
@@ -902,7 +903,7 @@ export default function OrderTrackingManagement() {
                   {isLoadingStats ? (
                     <span className="animate-pulse">...</span>
                   ) : (
-                    stats?.todaysOrders || 0
+                    (stats as any)?.todaysOrders || 0
                   )}
                 </p>
               </div>
@@ -1133,7 +1134,6 @@ export default function OrderTrackingManagement() {
                           </DialogHeader>
                           
                           {selectedOrder && (
-                            <>
                             <div className="space-y-6">
                               {/* Customer Information */}
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
