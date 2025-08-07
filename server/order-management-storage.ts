@@ -533,7 +533,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
     }
   }
 
-  async getOrdersByDepartment(department: Department, statuses?: OrderStatus[]): Promise<any[]> {
+  async getOrdersByDepartment(department: Department, statuses?: OrderStatus[]): Promise<OrderManagement[]> {
     console.log('🔍 [DEPARTMENT] getOrdersByDepartment called with department:', department);
     
     let query = db.select({
@@ -969,7 +969,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
     }));
 
     // Calculate weight for orders that don't have it calculated yet (especially for warehouse and logistics)
-    if (departmentFilter === 'warehouse' || departmentFilter === 'logistics') {
+    if (department === 'warehouse' || department === 'logistics') {
       for (const order of transformedResults) {
         if (!order.totalWeight || order.totalWeight === '0.000') {
           await this.calculateAndUpdateOrderWeight(order.customerOrderId);
