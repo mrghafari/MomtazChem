@@ -944,7 +944,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Warehouse department orders endpoint
-  app.get("/api/order-management/warehouse", requireAuth, async (req, res) => {
+  app.get("/api/order-management/warehouse", requireDepartment(["admin", "warehouse"]), async (req, res) => {
     try {
       console.log("🏭 [WAREHOUSE] Fetching warehouse orders for department");
       
