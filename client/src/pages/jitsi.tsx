@@ -196,7 +196,8 @@ export default function JitsiMeetPage() {
                     SHOW_CHROME_EXTENSION_BANNER: false
                   }}
                   userInfo={{
-                    displayName: userName
+                    displayName: userName,
+                    email: "" // Optional field
                   }}
                   onApiReady={handleApiReady}
                   getIFrameRef={(iframeRef) => {
