@@ -997,7 +997,6 @@ const WarehouseManagement: React.FC = () => {
                         <th className="text-right p-4">وزن محموله</th>
                         <th className="text-right p-4">مبلغ</th>
                         <th className="text-right p-4">وضعیت</th>
-                        <th className="text-right p-4">تاریخ پردازش در انبار</th>
                         <th className="text-right p-4">تاریخ ایجاد</th>
                         <th className="text-center p-4">عملیات</th>
                       </tr>
@@ -1060,11 +1059,6 @@ const WarehouseManagement: React.FC = () => {
                             تاریخ
                           </div>
                         </th>
-                        <th className="text-right p-2">
-                          <div className="h-8 flex items-center text-gray-400 text-xs">
-                            تاریخ
-                          </div>
-                        </th>
                         <th className="text-center p-2">
                           <Button
                             variant="ghost"
@@ -1114,17 +1108,6 @@ const WarehouseManagement: React.FC = () => {
                           </td>
                           <td className="p-4">{formatCurrency(parseFloat(order.totalAmount) || 0)}</td>
                           <td className="p-4">{getStatusBadge(order.currentStatus || order.status)}</td>
-                          <td className="p-4">
-                            <div className="text-sm">
-                              {order.warehouseProcessedAt ? (
-                                <span className="text-green-600 font-medium print:text-black print:font-bold">
-                                  {formatDate(order.warehouseProcessedAt)}
-                                </span>
-                              ) : (
-                                <span className="text-gray-400">در انتظار پردازش</span>
-                              )}
-                            </div>
-                          </td>
                           <td className="p-4 print:font-bold print:text-black">{formatDate(order.createdAt)}</td>
                           <td className="p-4">
                             <div className="flex justify-center gap-2">

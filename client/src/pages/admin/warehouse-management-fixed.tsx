@@ -714,7 +714,6 @@ const WarehouseManagementFixed: React.FC = () => {
                           <th className="text-right p-4 font-semibold text-gray-700" style={{ width: '140px' }}>وزن محموله</th>
                           <th className="text-right p-4 font-semibold text-gray-700" style={{ width: '120px' }}>مبلغ کل</th>
                           <th className="text-right p-4 font-semibold text-gray-700" style={{ width: '120px' }}>وضعیت</th>
-                          <th className="text-right p-4 font-semibold text-gray-700" style={{ width: '140px' }}>تاریخ پردازش</th>
                           <th className="text-center p-4 font-semibold text-gray-700" style={{ width: '200px' }}>عملیات</th>
                         </tr>
                       </thead>
@@ -767,7 +766,6 @@ const WarehouseManagementFixed: React.FC = () => {
                             <td className="p-4" style={{ width: '120px' }}>{getStatusBadge(order.currentStatus || order.status)}</td>
                             <td className="p-4" style={{ width: '140px' }}>
                               <div className="text-sm text-gray-600 truncate">
-                                {order.warehouseProcessedAt ? new Date(order.warehouseProcessedAt).toLocaleDateString('en-GB') : 'پردازش نشده'}
                               </div>
                             </td>
                             <td className="p-4 text-center" style={{ width: '200px' }}>
