@@ -72,6 +72,8 @@ export default function WarehouseDepartment() {
 
   // Function to toggle row expansion and fetch order items
   const toggleOrderExpansion = async (orderId: number) => {
+    console.log('🔄 [WAREHOUSE] Toggling expansion for order:', orderId);
+    
     if (expandedOrders.has(orderId)) {
       // Collapse the row
       const newExpanded = new Set(expandedOrders);

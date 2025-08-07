@@ -1025,6 +1025,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Order tracking dashboard endpoint - Get all orders with their current status
+  app.get("/api/order-tracking/all-orders", requireDepartment(["admin", "finance", "warehouse", "logistics"]), async (req, res) => {
+    try {
+      console.log("📊 [ORDER TRACKING] Fetching all orders for tracking dashboard");
+      
+      // Get all orders with their management status
+      const ordersResult = await db
+        .select({
+          id: customerOrders.id,
+          orderNumber: customerOrders.orderNumber,
+          customerOrderId: customerOrders.customerOrderId,
+          totalAmount: customerOrders.totalAmount,
+          currency: customerOrders.currency,
+          paymentMethod: customerOrders.paymentMethod,
+          phone: customerOrders.phone,
+          city: customerOrders.city,
+          address: customerOrders.address,
+          status: customerOrders.status,
+          createdAt: customerOrders.createdAt,
+          customerId: customerOrders.customerId,
+          financialStatus: orderManagement.financialStatus,
+          warehouseStatus: orderManagement.warehouseStatus,
+          logisticsStatus: orderManagement.logisticsStatus,
+          currentStatus: orderManagement.currentStatus
+        })
+        .from(customerOrders)
+        .leftJoin(orderManagement, eq(customerOrders.id, orderManagement.orderId))
+        .orderBy(desc(customerOrders.createdAt));
+
+      console.log(`📊 [ORDER TRACKING] Found ${ordersResult.length} orders for tracking`);
+
+      // Get customer details for each order
+      const ordersWithCustomers = await Promise.all(
+        ordersResult.map(async (order) => {
+          try {
+            const customerResult = await customerStorage.getCustomer(order.customerId);
+            return {
+              ...order,
+              customer: customerResult ? {
+                firstName: customerResult.firstName,
+                lastName: customerResult.lastName,
+                email: customerResult.email
+              } : {
+                firstName: 'نامشخص',
+                lastName: '',
+                email: ''
+              }
+            };
+          } catch (error) {
+            console.error(`Error getting customer for order ${order.id}:`, error);
+            return {
+              ...order,
+              customer: {
+                firstName: 'نامشخص',
+                lastName: '',
+                email: ''
+              }
+            };
+          }
+        })
+      );
+
+      res.json({
+        success: true,
+        orders: ordersWithCustomers,
+        total: ordersWithCustomers.length
+      });
+      
+    } catch (error) {
+      console.error("📊 [ORDER TRACKING] Error fetching orders for tracking:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت سفارشات برای ردیابی",
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
   // ============================================
   // START: PDF Generation Routes
   // ============================================
