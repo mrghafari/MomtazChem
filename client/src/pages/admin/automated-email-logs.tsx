@@ -199,6 +199,24 @@ export default function AutomatedEmailLogsPage() {
         ku: "ناوەڕۆکی ئیمەیڵ",
         tr: "E-posta İçeriği"
       },
+      emailContentPreview: {
+        en: "Email Content Preview (As Customer Sees)",
+        ar: "معاينة محتوى البريد الإلكتروني (كما يراه العميل)",
+        ku: "پیشاندانی ناوەڕۆکی ئیمەیڵ (وەک کڕیار دەیبینێت)",
+        tr: "E-posta İçerik Önizlemesi (Müşterinin Gördüğü Gibi)"
+      },
+      showEmailContent: {
+        en: "Show Email Content",
+        ar: "إظهار محتوى البريد الإلكتروني",
+        ku: "پیشاندانی ناوەڕۆکی ئیمەیڵ",
+        tr: "E-posta İçeriğini Göster"
+      },
+      hideEmailContent: {
+        en: "Hide Email Content",
+        ar: "إخفاء محتوى البريد الإلكتروني",
+        ku: "شاردنەوەی ناوەڕۆکی ئیمەیڵ",
+        tr: "E-posta İçeriğini Gizle"
+      },
       noContentAvailable: {
         en: "Email content not available",
         ar: "محتوى البريد الإلكتروني غير متاح",
@@ -652,29 +670,52 @@ export default function AutomatedEmailLogsPage() {
                   <Separator />
 
                   <div>
-                    <label className="text-sm font-medium text-gray-700 mb-2 block">{getText('emailContent')}</label>
-                    <Textarea
-                      value={selectedLog.html_content || selectedLog.text_content || getText('noContentAvailable')}
-                      readOnly
-                      className="min-h-[200px] text-sm"
-                      style={{ direction: 'ltr' }}
-                    />
+                    <Button
+                      variant={showEmailContent ? "default" : "outline"}
+                      className="w-full mb-3"
+                      onClick={() => setShowEmailContent(!showEmailContent)}
+                    >
+                      <Eye className="w-4 h-4 mr-2" />
+                      {showEmailContent ? getText('hideEmailContent') : getText('showEmailContent')}
+                    </Button>
+                    
+                    {showEmailContent && (
+                      <div className="space-y-3">
+                        <label className="text-sm font-medium text-gray-700 mb-2 block">{getText('emailContentPreview')}</label>
+                        {selectedLog.html_content ? (
+                          <div 
+                            className="border rounded-lg p-4 bg-white min-h-[300px] max-h-[500px] overflow-y-auto"
+                            dangerouslySetInnerHTML={{ __html: selectedLog.html_content }}
+                            style={{ direction: 'ltr' }}
+                          />
+                        ) : (
+                          <Textarea
+                            value={selectedLog.text_content || getText('noContentAvailable')}
+                            readOnly
+                            className="min-h-[200px] text-sm"
+                            style={{ direction: 'ltr' }}
+                          />
+                        )}
+                      </div>
+                    )}
                   </div>
 
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => {
-                      navigator.clipboard.writeText(selectedLog.html_content || selectedLog.text_content || "");
-                      toast({
-                        title: getText('copied'),
-                        description: getText('contentCopied')
-                      });
-                    }}
-                  >
-                    <Download className="w-4 h-4 mr-2" />
-                    {getText('copyContent')}
-                  </Button>
+                  {showEmailContent && (
+                    <Button
+                      variant="outline"
+                      className="w-full mt-3"
+                      onClick={() => {
+                        navigator.clipboard.writeText(selectedLog.html_content || selectedLog.text_content || "");
+                        toast({
+                          title: getText('copied'),
+                          description: getText('contentCopied')
+                        });
+                      }}
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      {getText('copyContent')}
+                    </Button>
+                  )}
                 </div>
               ) : (
                 <div className="text-center py-8 text-gray-500">
