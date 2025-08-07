@@ -10,6 +10,9 @@ export interface Translation {
   shop: {
     title: string;
     lowStockWarning: string;
+    priceFilter: string;
+    minPrice: string;
+    maxPrice: string;
   };
   
   // Common actions
@@ -203,7 +206,7 @@ export interface Translation {
   totalReviews: string;
   noReviewsYet: string;
   noReviewsDesc: string;
-  specifications: string;
+  productSpecifications: string;
   reviewsAndRatings: string;
   customerFeedback: string;
   
@@ -285,7 +288,6 @@ export interface Translation {
   showMsdsToCustomers: string;
   basicInfo: string;
   pricingInventory: string;
-  specifications: string;
   documentsMedia: string;
   variantSettings: string;
   shopSettings: string;
@@ -304,7 +306,10 @@ export const translations: Record<Language, Translation> = {
     contact: 'Contact',
     shop: {
       title: 'Shop',
-      lowStockWarning: 'Only {count} items left!'
+      lowStockWarning: 'Only {count} items left!',
+      priceFilter: 'Price Filter',
+      minPrice: 'Min',
+      maxPrice: 'Max'
     },
     
     // Common actions
@@ -504,7 +509,7 @@ export const translations: Record<Language, Translation> = {
     totalReviews: 'Total Reviews',
     noReviewsYet: 'No Reviews Yet',
     noReviewsDesc: 'Be the first to review this product',
-    specifications: 'Specifications',
+    productSpecifications: 'Specifications',
     reviewsAndRatings: 'Reviews & Ratings',
     customerFeedback: 'Customer Feedback',
     
@@ -602,7 +607,10 @@ export const translations: Record<Language, Translation> = {
     contact: 'اتصل بنا',
     shop: {
       title: 'المتجر',
-      lowStockWarning: 'لم يتبق سوى {count} قطعة!'
+      lowStockWarning: 'لم يتبق سوى {count} قطعة!',
+      priceFilter: 'فلتر السعر',
+      minPrice: 'الحد الأدنى',
+      maxPrice: 'الحد الأقصى'
     },
     
     // Common actions
@@ -802,7 +810,7 @@ export const translations: Record<Language, Translation> = {
     totalReviews: 'إجمالي المراجعات',
     noReviewsYet: 'لا توجد مراجعات بعد',
     noReviewsDesc: 'كن أول من يراجع هذا المنتج',
-    specifications: 'المواصفات',
+    productSpecifications: 'المواصفات',
     reviewsAndRatings: 'المراجعات والتقييمات',
     customerFeedback: 'ملاحظات العملاء',
     
@@ -900,7 +908,10 @@ export const translations: Record<Language, Translation> = {
     contact: 'پەیوەندی',
     shop: {
       title: 'فرۆشگا',
-      lowStockWarning: 'تەنها {count} دانە ماوە!'
+      lowStockWarning: 'تەنها {count} دانە ماوە!',
+      priceFilter: 'فلتەری نرخ',
+      minPrice: 'کەمترین',
+      maxPrice: 'زۆرترین'
     },
     
     // Common actions
@@ -1100,7 +1111,7 @@ export const translations: Record<Language, Translation> = {
     totalReviews: 'کۆی نرخاندنەکان',
     noReviewsYet: 'هێشتا نرخاندنێک نییە',
     noReviewsDesc: 'یەکەم کەس بە کە نرخاندنی ئەم بەرهەمە بکات',
-    specifications: 'تایبەتمەندیەکان',
+    productSpecifications: 'تایبەتمەندیەکان',
     reviewsAndRatings: 'نرخاندن و پلەبەندی',
     customerFeedback: 'ڕاى کڕیاران',
     
@@ -1156,7 +1167,10 @@ export const translations: Record<Language, Translation> = {
     contact: 'İletişim',
     shop: {
       title: 'Mağaza',
-      lowStockWarning: 'Sadece {count} adet kaldı!'
+      lowStockWarning: 'Sadece {count} adet kaldı!',
+      priceFilter: 'Fiyat Filtresi',
+      minPrice: 'En Az',
+      maxPrice: 'En Çok'
     },
     
     // Common actions

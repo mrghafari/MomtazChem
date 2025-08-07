@@ -79,7 +79,7 @@ const RangeSlider = React.forwardRef<
         <span className="font-medium text-blue-600 dark:text-blue-400">
           {localValue[0].toLocaleString()} IQD
         </span>
-        <span className="text-gray-400">to</span>
+        <span className="text-gray-400">-</span>
         <span className="font-medium text-blue-600 dark:text-blue-400">
           {localValue[1].toLocaleString()} IQD
         </span>

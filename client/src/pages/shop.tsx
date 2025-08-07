@@ -1017,7 +1017,7 @@ const Shop = () => {
                   <>
                     <div>
                       <label className="text-sm font-medium text-gray-700 mb-3 block">
-                        فیلتر قیمت
+                        {t.shop?.priceFilter || "Price Filter"}
                       </label>
                       <div className="mt-2">
                         <RangeSlider
@@ -1030,8 +1030,8 @@ const Shop = () => {
                         />
                       </div>
                       <div className="flex justify-between text-xs text-gray-400 mt-3 border-t pt-2">
-                        <span>کمترین: {formatIQDAmount(typeof availableFilters.priceRange.min === 'string' ? parseFloat(availableFilters.priceRange.min) : availableFilters.priceRange.min)}</span>
-                        <span>بیشترین: {formatIQDAmount(typeof availableFilters.priceRange.max === 'string' ? parseFloat(availableFilters.priceRange.max) : availableFilters.priceRange.max)}</span>
+                        <span>{t.shop?.minPrice || "Min"}: {formatIQDAmount(typeof availableFilters.priceRange.min === 'string' ? parseFloat(availableFilters.priceRange.min) : availableFilters.priceRange.min)}</span>
+                        <span>{t.shop?.maxPrice || "Max"}: {formatIQDAmount(typeof availableFilters.priceRange.max === 'string' ? parseFloat(availableFilters.priceRange.max) : availableFilters.priceRange.max)}</span>
                       </div>
                     </div>
                     <Separator />
