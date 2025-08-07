@@ -46290,6 +46290,223 @@ momtazchem.com
   });
 
   // =============================================================================
+  // ORDER SYNCHRONIZATION DIAGNOSTIC ENDPOINTS
+  // =============================================================================
+  
+  // Diagnostic endpoint to check order synchronization status
+  app.get("/api/admin/sync/diagnostic", requireAuth, async (req: Request, res: Response) => {
+    try {
+      console.log('🔍 [SYNC DIAGNOSTIC] Starting order synchronization diagnostic...');
+      
+      const { pool } = await import('./db');
+      
+      // Check total orders in customer_orders
+      const customerOrdersResult = await pool.query(`
+        SELECT COUNT(*) as total_customer_orders
+        FROM customer_orders
+      `);
+      
+      // Check total orders in order_management  
+      const orderManagementResult = await pool.query(`
+        SELECT COUNT(*) as total_order_management
+        FROM order_management
+      `);
+      
+      // Check for missing order_management records (orphaned customer_orders)
+      const missingManagementResult = await pool.query(`
+        SELECT co.id, co.order_number, co.status, co.payment_status
+        FROM customer_orders co
+        LEFT JOIN order_management om ON co.id = om.customer_order_id
+        WHERE om.customer_order_id IS NULL
+        ORDER BY co.id DESC
+        LIMIT 10
+      `);
+      
+      // Check for missing customer_orders records (orphaned order_management)
+      const orphanedManagementResult = await pool.query(`
+        SELECT om.id, om.customer_order_id, om.current_status
+        FROM order_management om
+        LEFT JOIN customer_orders co ON om.customer_order_id = co.id
+        WHERE co.id IS NULL
+        ORDER BY om.id DESC
+        LIMIT 10
+      `);
+      
+      // Check status distribution in order_management
+      const statusDistributionResult = await pool.query(`
+        SELECT current_status, COUNT(*) as count
+        FROM order_management
+        GROUP BY current_status
+        ORDER BY count DESC
+      `);
+      
+      // Check recent orders by department
+      const financialOrdersResult = await pool.query(`
+        SELECT COUNT(*) as count
+        FROM order_management
+        WHERE current_status IN (
+          'pending', 'pending_payment', 'payment_uploaded', 
+          'financial_reviewing', 'financial_rejected',
+          'warehouse_pending', 'warehouse_processing', 'warehouse_approved'
+        )
+      `);
+      
+      const warehouseOrdersResult = await pool.query(`
+        SELECT COUNT(*) as count
+        FROM order_management
+        WHERE current_status IN (
+          'warehouse_pending', 'financial_approved', 'warehouse_notified',
+          'warehouse_processing', 'warehouse_verified', 'warehouse_rejected'
+        )
+      `);
+      
+      const logisticsOrdersResult = await pool.query(`
+        SELECT COUNT(*) as count
+        FROM order_management
+        WHERE current_status IN (
+          'warehouse_pending', 'warehouse_approved', 'logistics_assigned',
+          'logistics_processing', 'logistics_dispatched'
+        )
+      `);
+      
+      const diagnostic = {
+        summary: {
+          totalCustomerOrders: parseInt(customerOrdersResult.rows[0].total_customer_orders),
+          totalOrderManagement: parseInt(orderManagementResult.rows[0].total_order_management),
+          missingManagementRecords: missingManagementResult.rows.length,
+          orphanedManagementRecords: orphanedManagementResult.rows.length
+        },
+        departmentCounts: {
+          financial: parseInt(financialOrdersResult.rows[0].count),
+          warehouse: parseInt(warehouseOrdersResult.rows[0].count),
+          logistics: parseInt(logisticsOrdersResult.rows[0].count)
+        },
+        statusDistribution: statusDistributionResult.rows,
+        issues: {
+          missingManagementRecords: missingManagementResult.rows,
+          orphanedManagementRecords: orphanedManagementResult.rows
+        }
+      };
+      
+      console.log('🔍 [SYNC DIAGNOSTIC] Results:', diagnostic);
+      
+      res.json({
+        success: true,
+        diagnostic
+      });
+    } catch (error) {
+      console.error('🔍 [SYNC DIAGNOSTIC ERROR]:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در تشخیص همگام‌سازی',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+  
+  // Force synchronization for all orders
+  app.post("/api/admin/sync/force", requireAuth, async (req: Request, res: Response) => {
+    try {
+      console.log('🔄 [FORCE SYNC] Starting forced synchronization...');
+      
+      const { SyncService } = await import("./sync-service");
+      const syncService = new SyncService();
+      
+      // Force a full synchronization
+      await syncService.performFullSync();
+      
+      res.json({
+        success: true,
+        message: 'همگام‌سازی اجباری با موفقیت انجام شد'
+      });
+    } catch (error) {
+      console.error('🔄 [FORCE SYNC ERROR]:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در همگام‌سازی اجباری',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+  
+  // Manual order transfer between departments
+  app.post("/api/admin/sync/transfer-orders", requireAuth, async (req: Request, res: Response) => {
+    try {
+      console.log('🔄 [MANUAL TRANSFER] Starting manual order transfer...');
+      
+      const { pool } = await import('./db');
+      
+      // Transfer financial_approved orders to warehouse
+      const financialToWarehouse = await pool.query(`
+        UPDATE order_management 
+        SET current_status = 'warehouse_pending'
+        WHERE current_status = 'financial_approved'
+        AND financial_reviewed_at IS NOT NULL
+        RETURNING customer_order_id, current_status
+      `);
+      
+      // Transfer warehouse_approved orders to logistics
+      const warehouseToLogistics = await pool.query(`
+        UPDATE order_management 
+        SET current_status = 'logistics_assigned'
+        WHERE current_status = 'warehouse_approved'
+        AND warehouse_processed_at IS NOT NULL
+        RETURNING customer_order_id, current_status
+      `);
+      
+      console.log(`🔄 [MANUAL TRANSFER] Transferred ${financialToWarehouse.rows.length} orders from finance to warehouse`);
+      console.log(`🔄 [MANUAL TRANSFER] Transferred ${warehouseToLogistics.rows.length} orders from warehouse to logistics`);
+      
+      res.json({
+        success: true,
+        message: `انتقال دستی انجام شد: ${financialToWarehouse.rows.length} سفارش به انبار، ${warehouseToLogistics.rows.length} سفارش به لجستیک`,
+        transfers: {
+          financeToWarehouse: financialToWarehouse.rows.length,
+          warehouseToLogistics: warehouseToLogistics.rows.length
+        }
+      });
+    } catch (error) {
+      console.error('🔄 [MANUAL TRANSFER ERROR]:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در انتقال دستی سفارشات',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Check current order status distribution
+  app.get("/api/admin/orders/status-distribution", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { pool } = await import('./db');
+      
+      const result = await pool.query(`
+        SELECT 
+          current_status,
+          COUNT(*) as count,
+          COUNT(CASE WHEN financial_reviewed_at IS NOT NULL THEN 1 END) as financial_processed,
+          COUNT(CASE WHEN warehouse_processed_at IS NOT NULL THEN 1 END) as warehouse_processed,
+          COUNT(CASE WHEN logistics_processed_at IS NOT NULL THEN 1 END) as logistics_processed
+        FROM order_management
+        GROUP BY current_status
+        ORDER BY count DESC
+      `);
+      
+      res.json({
+        success: true,
+        distribution: result.rows
+      });
+    } catch (error) {
+      console.error('📊 [STATUS DISTRIBUTION ERROR]:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در دریافت توزیع وضعیت سفارشات',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // =============================================================================
   // WEBRTC ROUTES
   // =============================================================================
   

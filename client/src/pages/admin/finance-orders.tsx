@@ -166,7 +166,7 @@ function FinanceOrders() {
   const [orderDetails, setOrderDetails] = useState<any>(null);
   const [orderDocuments, setOrderDocuments] = useState<any[]>([]);
 
-  // Check admin authentication
+  // Check admin authentication - MOVED to top to avoid conditional hooks
   const { data: adminUser, isLoading: isCheckingAuth, error: authError } = useQuery({
     queryKey: ['/api/admin/me'],
     queryFn: () => fetch('/api/admin/me', { credentials: 'include' }).then(res => res.json()),
@@ -174,13 +174,40 @@ function FinanceOrders() {
     staleTime: 0,
   });
 
-  // Enable audio notifications for new orders - MOVED HERE to avoid conditional hook calls
+  // Enable audio notifications - ALWAYS call hooks unconditionally
   const { orderCount } = useOrderNotifications({
     department: 'financial',
-    enabled: adminUser?.success || false // Only enable if authenticated
+    enabled: Boolean(adminUser?.success) // Convert to boolean to avoid undefined
   });
 
-  // If not authenticated, show login prompt
+  // Get orders for financial review - MOVED to top
+  const { data: ordersResponse, isLoading, refetch } = useQuery({
+    queryKey: ['/api/financial/orders'],
+    queryFn: () => fetch('/api/financial/orders', { credentials: 'include' }).then(res => res.json()),
+    enabled: Boolean(adminUser?.success), // Only run if authenticated
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnWindowFocus: true,
+    refetchInterval: 30000,
+  });
+
+  // Fetch approved orders that have been transferred to warehouse - MOVED to top
+  const { data: approvedOrdersResponse, isLoading: isLoadingApproved, refetch: refetchApproved } = useQuery({
+    queryKey: ['/api/financial/approved-orders'],
+    queryFn: async () => {
+      const res = await fetch('/api/financial/approved-orders', { credentials: 'include' });
+      const data = await res.json();
+      console.log('🔍 [APPROVED ORDERS] Raw response:', data);
+      return data;
+    },
+    enabled: Boolean(adminUser?.success), // Only run if authenticated
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnWindowFocus: true,
+    refetchInterval: 30000,
+  });
+
+  // Early return for loading state - AFTER all hooks are called
   if (isCheckingAuth) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -192,6 +219,7 @@ function FinanceOrders() {
     );
   }
 
+  // Early return for unauthenticated state
   if (!adminUser || !adminUser.success) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -220,31 +248,6 @@ function FinanceOrders() {
       </div>
     );
   }
-
-  // Get orders for financial review  
-  const { data: ordersResponse, isLoading, refetch } = useQuery({
-    queryKey: ['/api/financial/orders'],
-    queryFn: () => fetch('/api/financial/orders', { credentials: 'include' }).then(res => res.json()),
-    staleTime: 0, // Always consider data stale
-    gcTime: 0, // Don't cache at all - always fresh (v5 syntax)
-    refetchOnWindowFocus: true, // Refetch when user comes back
-    refetchInterval: 30000, // Auto-refresh every 30 seconds
-  });
-
-  // Fetch approved orders that have been transferred to warehouse
-  const { data: approvedOrdersResponse, isLoading: isLoadingApproved, refetch: refetchApproved } = useQuery({
-    queryKey: ['/api/financial/approved-orders'],
-    queryFn: async () => {
-      const res = await fetch('/api/financial/approved-orders', { credentials: 'include' });
-      const data = await res.json();
-      console.log('🔍 [APPROVED ORDERS] Raw response:', data);
-      return data;
-    },
-    staleTime: 0, // Always consider data stale
-    gcTime: 0, // Don't cache at all - always fresh (v5 syntax)
-    refetchOnWindowFocus: true, // Refetch when user comes back
-    refetchInterval: 30000, // Auto-refresh every 30 seconds
-  });
 
   // Force refresh function that completely clears all finance cache
   const forceRefreshFinanceOrders = async () => {
