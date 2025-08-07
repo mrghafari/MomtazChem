@@ -98,12 +98,33 @@ const getStatusDisplay = (order: Order) => {
           explanation: 'فیش پرداخت آپلود شده و در انتظار تایید بخش مالی'
         };
       }
+    case 'finance_pending':
+      return {
+        label: 'در انتظار بررسی مالی',
+        department: 'مالی',
+        color: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+        explanation: 'فیش پرداخت آپلود شده و در انتظار تایید بخش مالی'
+      };
     case 'confirmed':
       return {
         label: 'در انتظار آماده‌سازی',
         department: 'انبار', 
         color: 'bg-blue-100 text-blue-800 border-blue-200',
         explanation: 'پرداخت تایید شده و در انتظار آماده‌سازی توسط انبار'
+      };
+    case 'warehouse_pending':
+      return {
+        label: 'در انتظار انبار',
+        department: 'انبار',
+        color: 'bg-blue-100 text-blue-800 border-blue-200',
+        explanation: 'پرداخت تایید شده و در انتظار پردازش توسط انبار'
+      };
+    case 'warehouse_approved':
+      return {
+        label: 'تایید انبار',
+        department: 'لجستیک',
+        color: 'bg-green-100 text-green-800 border-green-200',
+        explanation: 'سفارش توسط انبار تایید شده و آماده ارسال است'
       };
     case 'warehouse_ready':
       return {
@@ -194,10 +215,13 @@ const statusLabels: { [key: string]: string } = {
   'pending': 'در انتظار',
   'confirmed': 'تأیید شده', 
   'payment_uploaded': 'فیش بانکی آپلود شده',
+  'finance_pending': 'در انتظار بررسی مالی',
   'financial_reviewing': 'در حال بررسی مالی',
   'financial_approved': 'تأیید مالی',
   'financial_rejected': '💳 رد مالی', 
+  'warehouse_pending': 'در انتظار انبار',
   'warehouse_processing': 'در حال آماده‌سازی انبار',
+  'warehouse_approved': 'تایید انبار',
   'warehouse_ready': 'آماده انبار',
   'warehouse_rejected': '📦 رد انبار',
   'logistics_assigned': 'تحویل لجستیک',
