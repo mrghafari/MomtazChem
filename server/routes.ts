@@ -37,7 +37,7 @@ import { sql, eq, and, or, isNull, isNotNull, desc, gte } from "drizzle-orm";
 import { findCorruptedOrders, getDataIntegrityStats, validateOrderIntegrity, markCorruptedOrderAsDeleted } from './data-integrity-tools';
 import { z } from "zod";
 import * as schema from "@shared/schema";
-const { crmCustomers, iraqiProvinces, iraqiCities, abandonedOrders, contentItems } = schema;
+const { crmCustomers, iraqiProvinces, iraqiCities, abandonedOrders, contentItems, footerSettings } = schema;
 import { orderManagement, shippingRates, deliveryMethods, paymentReceipts } from "@shared/order-management-schema";
 import { generateEAN13Barcode, validateEAN13, parseEAN13Barcode, isMomtazchemBarcode } from "@shared/barcode-utils";
 import { generateSmartSKU, validateSKUUniqueness } from "./ai-sku-generator";
@@ -30746,6 +30746,148 @@ momtazchem.com
     } catch (error) {
       console.error('Error generating financial order PDF:', error);
       res.status(500).json({ success: false, message: 'Failed to generate PDF' });
+    }
+  });
+
+  // Footer Settings Management APIs
+  app.get('/api/admin/footer-settings', requireAuth, async (req, res) => {
+    try {
+      const { language = 'en' } = req.query;
+      
+      const [footerSetting] = await db
+        .select()
+        .from(footerSettings)
+        .where(eq(footerSettings.language, language as string))
+        .limit(1);
+      
+      if (!footerSetting) {
+        // Create default footer settings for this language
+        const defaultFooter = {
+          language: language as string,
+          companyName: 'Momtazchem',
+          companyDescription: 'Leading provider of advanced chemical solutions',
+          companyAddress: 'Gwer Road, Qaryataq Village, Erbil, Iraq',
+          companyPhone: '+964 750 353 3769',
+          companyEmail: 'info@momtazchem.com',
+          companyCodal: '44001',
+          productLinks: JSON.stringify([
+            { name: 'Fuel Additives', href: '/products/fuel-additives' },
+            { name: 'Water Treatment', href: '/products/water-treatment' },
+            { name: 'Paint & Thinner', href: '/products/paint-thinner' },
+            { name: 'Agricultural Fertilizers', href: '/products/agricultural-fertilizers' }
+          ]),
+          companyLinks: JSON.stringify([
+            { name: 'About Us', href: '/about' },
+            { name: 'Services', href: '/services' },
+            { name: 'Shop', href: '/shop' },
+            { name: 'Careers', href: '#careers' }
+          ]),
+          supportLinks: JSON.stringify([
+            { name: 'Contact', href: '/contact' },
+            { name: 'Technical Support', href: '#technical-support' },
+            { name: 'Documentation', href: '#documentation' },
+            { name: 'Safety Data Sheets', href: '#safety-data' }
+          ]),
+          copyrightText: '© 2025 Momtazchem. All rights reserved.',
+          showSocialMedia: true,
+          showCompanyInfo: true,
+          showLinks: true,
+        };
+        
+        const [newFooter] = await db
+          .insert(footerSettings)
+          .values(defaultFooter)
+          .returning();
+          
+        return res.json({ success: true, data: newFooter });
+      }
+      
+      res.json({ success: true, data: footerSetting });
+    } catch (error) {
+      console.error('Error fetching footer settings:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch footer settings' });
+    }
+  });
+
+  app.put('/api/admin/footer-settings/:id', requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updateData = req.body;
+      
+      // Parse JSON fields if they're strings
+      if (typeof updateData.productLinks === 'string') {
+        try {
+          JSON.parse(updateData.productLinks);
+        } catch {
+          return res.status(400).json({ success: false, message: 'Invalid product links format' });
+        }
+      }
+      
+      if (typeof updateData.companyLinks === 'string') {
+        try {
+          JSON.parse(updateData.companyLinks);
+        } catch {
+          return res.status(400).json({ success: false, message: 'Invalid company links format' });
+        }
+      }
+      
+      if (typeof updateData.supportLinks === 'string') {
+        try {
+          JSON.parse(updateData.supportLinks);
+        } catch {
+          return res.status(400).json({ success: false, message: 'Invalid support links format' });
+        }
+      }
+      
+      const [updatedFooter] = await db
+        .update(footerSettings)
+        .set({
+          ...updateData,
+          updatedAt: new Date()
+        })
+        .where(eq(footerSettings.id, parseInt(id)))
+        .returning();
+      
+      if (!updatedFooter) {
+        return res.status(404).json({ success: false, message: 'Footer settings not found' });
+      }
+      
+      res.json({ success: true, data: updatedFooter });
+    } catch (error) {
+      console.error('Error updating footer settings:', error);
+      res.status(500).json({ success: false, message: 'Failed to update footer settings' });
+    }
+  });
+
+  // Public API for footer settings (for frontend footer component)
+  app.get('/api/footer-settings', async (req, res) => {
+    try {
+      const { language = 'en' } = req.query;
+      
+      const [footerSetting] = await db
+        .select()
+        .from(footerSettings)
+        .where(eq(footerSettings.language, language as string))
+        .limit(1);
+      
+      if (!footerSetting) {
+        // Return default settings if none found
+        return res.json({
+          success: true,
+          data: {
+            companyName: 'Momtazchem',
+            companyDescription: 'Leading provider of advanced chemical solutions',
+            showSocialMedia: true,
+            showCompanyInfo: true,
+            showLinks: true
+          }
+        });
+      }
+      
+      res.json({ success: true, data: footerSetting });
+    } catch (error) {
+      console.error('Error fetching public footer settings:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch footer settings' });
     }
   });
 

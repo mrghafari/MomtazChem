@@ -41,6 +41,50 @@ export const themeSettings = pgTable("theme_settings", {
   updatedAt: timestamp("updated_at").defaultNow().notNull()
 });
 
+// Footer settings table for comprehensive footer management
+export const footerSettings = pgTable("footer_settings", {
+  id: serial("id").primaryKey(),
+  language: varchar("language", { length: 5 }).notNull().default("en"), // en, ar, ku, tr
+  
+  // Company Information
+  companyName: text("company_name").notNull().default("Momtazchem"),
+  companyDescription: text("company_description"),
+  companyAddress: text("company_address"),
+  companyPhone: varchar("company_phone", { length: 20 }),
+  companyEmail: varchar("company_email", { length: 100 }),
+  companyCodal: varchar("company_codal", { length: 20 }),
+  
+  // Social Media Links
+  facebookUrl: text("facebook_url"),
+  twitterUrl: text("twitter_url"),
+  linkedinUrl: text("linkedin_url"),
+  instagramUrl: text("instagram_url"),
+  youtubeUrl: text("youtube_url"),
+  telegramUrl: text("telegram_url"),
+  whatsappUrl: text("whatsapp_url"),
+  wechatUrl: text("wechat_url"),
+  wechatQr: text("wechat_qr"), // QR code image URL for WeChat
+  
+  // Footer Links (JSON format for flexibility)
+  productLinks: text("product_links"), // JSON array of {name, href}
+  companyLinks: text("company_links"), // JSON array of {name, href}
+  supportLinks: text("support_links"), // JSON array of {name, href}
+  legalLinks: text("legal_links"), // JSON array of {name, href}
+  
+  // Footer Content
+  copyrightText: text("copyright_text"),
+  additionalInfo: text("additional_info"),
+  
+  // Display Settings
+  showSocialMedia: boolean("show_social_media").default(true),
+  showCompanyInfo: boolean("show_company_info").default(true),
+  showLinks: boolean("show_links").default(true),
+  
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull()
+});
+
 // Zod schemas for validation
 export const insertContentItemSchema = createInsertSchema(contentItems).omit({
   id: true,
@@ -60,6 +104,12 @@ export const insertThemeSettingSchema = createInsertSchema(themeSettings).omit({
   updatedAt: true
 });
 
+export const insertFooterSettingSchema = createInsertSchema(footerSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true
+});
+
 // TypeScript types
 export type ContentItem = typeof contentItems.$inferSelect;
 export type InsertContentItem = z.infer<typeof insertContentItemSchema>;
@@ -69,6 +119,9 @@ export type InsertImageAsset = z.infer<typeof insertImageAssetSchema>;
 
 export type ThemeSetting = typeof themeSettings.$inferSelect;
 export type InsertThemeSetting = z.infer<typeof insertThemeSettingSchema>;
+
+export type FooterSetting = typeof footerSettings.$inferSelect;
+export type InsertFooterSetting = z.infer<typeof insertFooterSettingSchema>;
 
 // Content types enum
 export const ContentTypes = {
@@ -95,4 +148,16 @@ export const ContentSections = {
   NAVIGATION: "navigation",
   HERO: "hero",
   TESTIMONIALS: "testimonials"
+} as const;
+
+// Social Media Platforms
+export const SocialMediaPlatforms = {
+  FACEBOOK: "facebook",
+  TWITTER: "twitter", 
+  LINKEDIN: "linkedin",
+  INSTAGRAM: "instagram",
+  YOUTUBE: "youtube",
+  TELEGRAM: "telegram",
+  WHATSAPP: "whatsapp",
+  WECHAT: "wechat"
 } as const;

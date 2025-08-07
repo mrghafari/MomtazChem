@@ -3,241 +3,322 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useQuery } from "@tanstack/react-query";
 import company_logo from "@assets/company-logo.png";
 
+interface FooterSetting {
+  id: number;
+  language: string;
+  companyName: string;
+  companyDescription?: string;
+  companyAddress?: string;
+  companyPhone?: string;
+  companyEmail?: string;
+  companyCodal?: string;
+  facebookUrl?: string;
+  twitterUrl?: string;
+  linkedinUrl?: string;
+  instagramUrl?: string;
+  youtubeUrl?: string;
+  telegramUrl?: string;
+  whatsappUrl?: string;
+  wechatUrl?: string;
+  wechatQr?: string;
+  productLinks?: string;
+  companyLinks?: string;
+  supportLinks?: string;
+  legalLinks?: string;
+  copyrightText?: string;
+  additionalInfo?: string;
+  showSocialMedia: boolean;
+  showCompanyInfo: boolean;
+  showLinks: boolean;
+}
+
+interface LinkItem {
+  name: string;
+  href: string;
+}
+
 const Footer = () => {
   const { t, language } = useLanguage();
 
-  // Fetch social media links from content management (public endpoint)
-  const { data: socialMediaLinks } = useQuery({
-    queryKey: ['/api/content', language, 'social_media'],
+  // Fetch footer settings from the new footer management system
+  const { data: footerResponse } = useQuery({
+    queryKey: ['/api/footer-settings', language],
     queryFn: () => 
-      fetch(`/api/content?language=${language}&section=social_media`)
-        .then(res => res.json())
-        .then(data => data.success ? data.data : []),
+      fetch(`/api/footer-settings?language=${language}`)
+        .then(res => res.json()),
     staleTime: 1000 * 60 * 5, // 5 minutes
-    gcTime: 1000 * 60 * 10, // 10 minutes
+    gcTime: 1000 * 60 * 10, // 10 minutes,
   });
 
-  // Helper function to get social media URL
-  const getSocialMediaUrl = (platform: string): string => {
-    const link = socialMediaLinks?.find((item: any) => item.key === `${platform}_url`);
-    return link?.content || '#';
+  const footerSettings: FooterSetting | undefined = footerResponse?.data;
+
+  // Parse JSON links
+  const parseLinks = (linksJson?: string): LinkItem[] => {
+    if (!linksJson) return [];
+    try {
+      return JSON.parse(linksJson);
+    } catch {
+      return [];
+    }
   };
-  
-  const productLinks = [
-    { name: t.fuelAdditives, href: "/products/fuel-additives" },
-    { name: t.waterTreatment, href: "/products/water-treatment" },
-    { name: t.paintThinner, href: "/products/paint-thinner" },
-    { name: t.agriculturalFertilizers, href: "/products/agricultural-fertilizers" },
+
+  // Get parsed links
+  const productLinks = parseLinks(footerSettings?.productLinks);
+  const companyLinks = parseLinks(footerSettings?.companyLinks);
+  const supportLinks = parseLinks(footerSettings?.supportLinks);
+  const legalLinks = parseLinks(footerSettings?.legalLinks);
+
+  // Social media configuration
+  const socialMediaPlatforms = [
+    { key: 'linkedinUrl', icon: 'fab fa-linkedin', name: 'LinkedIn' },
+    { key: 'twitterUrl', icon: 'fab fa-twitter', name: 'Twitter' },
+    { key: 'facebookUrl', icon: 'fab fa-facebook', name: 'Facebook' },
+    { key: 'instagramUrl', icon: 'fab fa-instagram', name: 'Instagram' },
+    { key: 'youtubeUrl', icon: 'fab fa-youtube', name: 'YouTube' },
+    { key: 'telegramUrl', icon: 'fab fa-telegram', name: 'Telegram' },
+    { key: 'whatsappUrl', icon: 'fab fa-whatsapp', name: 'WhatsApp' },
+    { key: 'wechatUrl', icon: 'fab fa-weixin', name: 'WeChat' }
   ];
 
-  const companyLinks = [
-    { name: t.about, href: "/about" },
-    { name: t.services, href: "/services" },
-    { name: t.shop.title, href: "/shop" },
-    { name: "Careers", href: "#careers" },
-  ];
+  // Get social media URL
+  const getSocialMediaUrl = (key: string): string => {
+    return (footerSettings as any)?.[key] || '#';
+  };
 
-  const supportLinks = [
-    { name: t.contact, href: "/contact" },
-    { name: "Technical Support", href: "#technical-support" },
-    { name: "Documentation", href: "#documentation" },
-    { name: "Safety Data Sheets", href: "#safety-data" },
-  ];
+  // Filter active social media platforms
+  const activeSocialMedia = socialMediaPlatforms.filter(platform => 
+    getSocialMediaUrl(platform.key) && getSocialMediaUrl(platform.key) !== '#'
+  );
 
   return (
     <footer className="bg-gray-900 text-white py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          
           {/* Company Info */}
-          <div className="lg:col-span-1">
-            <div className="flex items-center space-x-3 mb-4">
-              <img 
-                src={company_logo} 
-                alt="Momtazchem Logo" 
-                className="h-10 w-10 rounded-lg"
-              />
-              <div className="text-2xl font-bold">
-                <span className="text-green-400">Momtaz</span>
-                <span className="text-white">chem</span>
+          {footerSettings?.showCompanyInfo && (
+            <div className="lg:col-span-1">
+              <div className="flex items-center space-x-3 mb-4">
+                <img 
+                  src={company_logo} 
+                  alt={`${footerSettings?.companyName || 'Momtazchem'} Logo`} 
+                  className="h-10 w-10 rounded-lg"
+                />
+                <div className="text-2xl font-bold">
+                  <span className="text-green-400">
+                    {footerSettings?.companyName?.substring(0, 6) || 'Momtaz'}
+                  </span>
+                  <span className="text-white">
+                    {footerSettings?.companyName?.substring(6) || 'chem'}
+                  </span>
+                </div>
               </div>
-            </div>
-            <p className="text-gray-400 mb-4 leading-relaxed">
-              Leading provider of advanced chemical solutions for fuel, water treatment, paint, and agricultural industries worldwide.
-            </p>
-            <div className="text-gray-400 text-sm mb-6">
-              <p className="mb-1">Codal pose: 44001</p>
-              <p className="mb-1">Gwer Road, Qaryataq Village</p>
-              <p>Erbil, Iraq</p>
-            </div>
-            <div className="flex space-x-4">
-              <a
-                href={getSocialMediaUrl('linkedin')}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-primary transition-colors duration-200"
-              >
-                <i className="fab fa-linkedin"></i>
-              </a>
-              <a
-                href={getSocialMediaUrl('twitter')}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-primary transition-colors duration-200"
-              >
-                <i className="fab fa-twitter"></i>
-              </a>
-              <a
-                href={getSocialMediaUrl('facebook')}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-primary transition-colors duration-200"
-              >
-                <i className="fab fa-facebook"></i>
-              </a>
-              <a
-                href={getSocialMediaUrl('instagram')}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-primary transition-colors duration-200"
-              >
-                <i className="fab fa-instagram"></i>
-              </a>
-              <a
-                href={getSocialMediaUrl('tiktok')}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-primary transition-colors duration-200"
-              >
-                <i className="fab fa-tiktok"></i>
-              </a>
-              <a
-                href={getSocialMediaUrl('whatsapp')}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-primary transition-colors duration-200"
-              >
-                <i className="fab fa-whatsapp"></i>
-              </a>
-            </div>
-          </div>
+              
+              {footerSettings?.companyDescription && (
+                <p className="text-gray-400 mb-4 leading-relaxed">
+                  {footerSettings.companyDescription}
+                </p>
+              )}
+              
+              <div className="text-gray-400 text-sm mb-6">
+                {footerSettings?.companyCodal && (
+                  <p className="mb-1">Codal pose: {footerSettings.companyCodal}</p>
+                )}
+                {footerSettings?.companyAddress && (
+                  <p className="mb-1">{footerSettings.companyAddress}</p>
+                )}
+              </div>
 
-          {/* Products */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Products</h3>
-            <ul className="space-y-3">
-              {productLinks.map((link) => (
-                <li key={link.name}>
-                  <Link href={link.href}>
-                    <span className="text-gray-400 hover:text-white transition-colors duration-200 cursor-pointer">
-                      {link.name}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+              {/* Social Media Icons */}
+              {footerSettings?.showSocialMedia && activeSocialMedia.length > 0 && (
+                <div className="flex space-x-4 flex-wrap">
+                  {activeSocialMedia.map((platform) => (
+                    <a
+                      key={platform.key}
+                      href={getSocialMediaUrl(platform.key)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-primary transition-colors duration-200"
+                      title={platform.name}
+                    >
+                      <i className={platform.icon}></i>
+                    </a>
+                  ))}
+                  
+                  {/* Special WeChat QR handling */}
+                  {footerSettings?.wechatQr && footerSettings?.wechatUrl && (
+                    <div className="relative group">
+                      <a
+                        href={footerSettings.wechatUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-primary transition-colors duration-200"
+                        title="WeChat"
+                      >
+                        <i className="fab fa-weixin"></i>
+                      </a>
+                      {/* QR Code Popup on Hover */}
+                      <div className="absolute bottom-12 left-0 hidden group-hover:block bg-white p-2 rounded-lg shadow-lg z-10">
+                        <img 
+                          src={footerSettings.wechatQr} 
+                          alt="WeChat QR Code" 
+                          className="w-32 h-32"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
-          {/* Company */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Company</h3>
-            <ul className="space-y-3">
-              {companyLinks.map((link) => (
-                <li key={link.name}>
-                  <Link href={link.href}>
-                    <span className="text-gray-400 hover:text-white transition-colors duration-200 cursor-pointer">
-                      {link.name}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {/* Products Links */}
+          {footerSettings?.showLinks && productLinks.length > 0 && (
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Products</h3>
+              <ul className="space-y-3">
+                {productLinks.map((link, index) => (
+                  <li key={index}>
+                    <Link href={link.href}>
+                      <span className="text-gray-400 hover:text-white transition-colors duration-200 cursor-pointer">
+                        {link.name}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
-          {/* Support */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Support</h3>
-            <ul className="space-y-3">
-              {supportLinks.map((link) => (
-                <li key={link.name}>
-                  <Link href={link.href}>
-                    <span className="text-gray-400 hover:text-white transition-colors duration-200 cursor-pointer">
-                      {link.name}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {/* Company Links */}
+          {footerSettings?.showLinks && companyLinks.length > 0 && (
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Company</h3>
+              <ul className="space-y-3">
+                {companyLinks.map((link, index) => (
+                  <li key={index}>
+                    <Link href={link.href}>
+                      <span className="text-gray-400 hover:text-white transition-colors duration-200 cursor-pointer">
+                        {link.name}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Support Links */}
+          {footerSettings?.showLinks && supportLinks.length > 0 && (
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Support</h3>
+              <ul className="space-y-3">
+                {supportLinks.map((link, index) => (
+                  <li key={index}>
+                    <Link href={link.href}>
+                      <span className="text-gray-400 hover:text-white transition-colors duration-200 cursor-pointer">
+                        {link.name}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           {/* Contact Info */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Contact Info</h3>
-            <div className="space-y-3 text-gray-400 text-sm">
-              <div className="flex items-center space-x-2">
-                <i className="fas fa-envelope w-4"></i>
-                <a 
-                  href="mailto:admin@momtazchem.com"
-                  className="hover:text-white transition-colors duration-200"
-                >
-                  admin@momtazchem.com
-                </a>
-              </div>
-              <div className="flex items-center space-x-2">
-                <i className="fas fa-phone w-4"></i>
-                <a 
-                  href="tel:+9647709996771"
-                  className="hover:text-white transition-colors duration-200"
-                >
-                  +9647709996771
-                </a>
-              </div>
-              <div className="flex items-center space-x-2">
-                <i className="fab fa-whatsapp w-4"></i>
-                <a 
-                  href="https://wa.me/9647709996771"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-white transition-colors duration-200"
-                >
-                  WhatsApp
-                </a>
-              </div>
-              <div className="flex items-center space-x-2">
-                <i className="fas fa-map-marker-alt w-4"></i>
-                <span>Erbil, Iraq</span>
+          {footerSettings?.showCompanyInfo && (
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Contact Info</h3>
+              <div className="space-y-3 text-gray-400 text-sm">
+                {footerSettings?.companyEmail && (
+                  <div className="flex items-center space-x-2">
+                    <i className="fas fa-envelope w-4"></i>
+                    <a 
+                      href={`mailto:${footerSettings.companyEmail}`}
+                      className="hover:text-white transition-colors duration-200"
+                    >
+                      {footerSettings.companyEmail}
+                    </a>
+                  </div>
+                )}
+                
+                {footerSettings?.companyPhone && (
+                  <div className="flex items-center space-x-2">
+                    <i className="fas fa-phone w-4"></i>
+                    <a 
+                      href={`tel:${footerSettings.companyPhone}`}
+                      className="hover:text-white transition-colors duration-200"
+                    >
+                      {footerSettings.companyPhone}
+                    </a>
+                  </div>
+                )}
+                
+                {footerSettings?.whatsappUrl && (
+                  <div className="flex items-center space-x-2">
+                    <i className="fab fa-whatsapp w-4"></i>
+                    <a 
+                      href={footerSettings.whatsappUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-white transition-colors duration-200"
+                    >
+                      WhatsApp
+                    </a>
+                  </div>
+                )}
+                
+                {footerSettings?.companyAddress && (
+                  <div className="flex items-center space-x-2">
+                    <i className="fas fa-map-marker-alt w-4"></i>
+                    <span>{footerSettings.companyAddress}</span>
+                  </div>
+                )}
               </div>
             </div>
-          </div>
+          )}
         </div>
 
+        {/* Bottom Copyright and Legal Section */}
         <div className="border-t border-gray-800 mt-12 pt-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center text-center md:text-left">
+            
+            {/* Copyright */}
             <div className="text-gray-400 text-sm">
-              © 2025 Momtazchem. All rights reserved.
+              {footerSettings?.copyrightText || '© 2025 Momtazchem. All rights reserved.'}
             </div>
             
-            <div className="text-gray-400 text-sm text-center">
-              Design by{" "}
-              <a 
-                href="https://wa.me/358411546489"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-green-400 hover:text-green-300 transition-colors duration-200 font-medium"
-              >
-                MRG
-              </a>
-            </div>
+            {/* Legal Links */}
+            {footerSettings?.showLinks && legalLinks.length > 0 && (
+              <div className="text-center">
+                <div className="flex justify-center space-x-4 text-sm">
+                  {legalLinks.map((link, index) => (
+                    <Link key={index} href={link.href}>
+                      <span className="text-gray-400 hover:text-white transition-colors duration-200 cursor-pointer">
+                        {link.name}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
             
-            <div className="flex justify-center md:justify-end space-x-6 text-sm">
-              <a href="#privacy" className="text-gray-400 hover:text-white transition-colors duration-200">
-                Privacy Policy
-              </a>
-              <a href="#terms" className="text-gray-400 hover:text-white transition-colors duration-200">
-                Terms of Service
-              </a>
-              <a href="#cookies" className="text-gray-400 hover:text-white transition-colors duration-200">
-                Cookie Policy
-              </a>
+            {/* Additional Info / Designer Credit */}
+            <div className="text-gray-400 text-sm text-center md:text-right">
+              {footerSettings?.additionalInfo || (
+                <>
+                  Design by{" "}
+                  <a 
+                    href="https://wa.me/358411546489"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-green-400 hover:text-green-300 transition-colors duration-200 font-medium"
+                  >
+                    Aras Mohsin
+                  </a>
+                </>
+              )}
             </div>
           </div>
         </div>
