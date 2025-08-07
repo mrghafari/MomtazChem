@@ -429,9 +429,12 @@ export class CustomerStorage implements ICustomerStorage {
         return 'warehouse_pending';
       } else if (paymentStatus === 'receipt_uploaded') {
         // فیش آپلود شده - نیاز به بررسی مالی
-        return 'pending';
+        return 'finance_pending';
       } else if (paymentStatus === 'rejected') {
         return 'financial_rejected';
+      } else if (paymentStatus === 'partial') {
+        // پرداخت جزئی - باید به بخش مالی برای بررسی ارسال شود
+        return 'finance_pending';
       } else {
         // پرداخت انجام نشده
         return 'pending';

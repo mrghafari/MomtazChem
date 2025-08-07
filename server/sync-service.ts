@@ -267,14 +267,17 @@ export class SyncService {
         return 'warehouse_pending';
       } else if (paymentStatus === 'receipt_uploaded') {
         // فیش آپلود شده - نیاز به بررسی مالی
-        return 'pending';
+        return 'finance_pending';
       } else if (paymentStatus === 'rejected') {
         return 'financial_rejected';
       } else if (paymentStatus === 'partial' && isManuallyApproved) {
         // پرداخت جزئی که به صورت دستی تایید شده - باید به انبار برود
         return 'warehouse_pending';
+      } else if (paymentStatus === 'partial') {
+        // پرداخت جزئی بدون تایید - باید به بخش مالی برای بررسی ارسال شود
+        return 'finance_pending';
       } else {
-        // پرداخت انجام نشده یا جزئی بدون تایید
+        // پرداخت انجام نشده
         return 'pending';
       }
     }

@@ -153,9 +153,12 @@ export class TransactionSync {
       if (paymentStatus === 'paid') {
         return 'warehouse_pending';
       } else if (paymentStatus === 'receipt_uploaded') {
-        return 'pending';
+        return 'finance_pending';
       } else if (paymentStatus === 'rejected') {
         return 'financial_rejected';
+      } else if (paymentStatus === 'partial') {
+        // پرداخت جزئی - باید به بخش مالی برای بررسی ارسال شود
+        return 'finance_pending';
       } else {
         return 'pending';
       }
