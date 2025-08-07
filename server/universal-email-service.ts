@@ -105,6 +105,32 @@ export class UniversalEmailService {
         finalCc = ccRecipients.map(r => r.email);
       }
       
+      // Always add global CC addresses from settings
+      try {
+        const { pool } = await import('./db');
+        const globalCcResult = await pool.query(`
+          SELECT setting_value 
+          FROM global_email_settings 
+          WHERE setting_key = 'default_cc_addresses' AND is_active = true
+        `);
+        
+        if (globalCcResult.rows.length > 0) {
+          const globalCcAddresses = JSON.parse(globalCcResult.rows[0].setting_value || '[]');
+          if (Array.isArray(globalCcAddresses)) {
+            // Add global CC addresses that aren't already in finalTo, finalCc, or finalBcc
+            const allExistingEmails = [...finalTo, ...finalCc, ...finalBcc];
+            for (const globalCc of globalCcAddresses) {
+              if (!allExistingEmails.includes(globalCc)) {
+                finalCc.push(globalCc);
+              }
+            }
+            console.log(`📧 [Universal Email] Added global CC addresses: ${globalCcAddresses.join(', ')}`);
+          }
+        }
+      } catch (globalCcError) {
+        console.warn(`⚠️ [Universal Email] Could not load global CC settings:`, globalCcError);
+      }
+      
       if (finalBcc.length === 0) {
         // Get BCC recipients from category configuration
         const bccRecipients = categorySettings.recipients.filter(r => r.recipientType === 'bcc' && r.isActive);

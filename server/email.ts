@@ -96,17 +96,36 @@ async function sendWithSettings(formData: ContactFormData, categorySettings: any
     .filter((r: any) => r.recipientType === 'bcc' && r.email.toLowerCase() !== smtp.fromEmail.toLowerCase())
     .map((r: any) => r.email);
   
-  // Add smart CC for monitoring (info@momtazchem.com) if not already present
-  // This is now managed by Universal Email Service configuration
-  const monitoringEmail = 'info@momtazchem.com';
-  const isMonitoringEmailPresent = 
-    smtp.fromEmail.toLowerCase() === monitoringEmail.toLowerCase() ||
-    toRecipients.some((email: string) => email.toLowerCase() === monitoringEmail.toLowerCase()) ||
-    ccRecipients.some((email: string) => email.toLowerCase() === monitoringEmail.toLowerCase()) ||
-    bccRecipients.some((email: string) => email.toLowerCase() === monitoringEmail.toLowerCase());
-  
-  if (!isMonitoringEmailPresent) {
-    ccRecipients.push(monitoringEmail);
+  // Add global CC addresses from settings
+  try {
+    const { pool } = await import('./db');
+    const globalCcResult = await pool.query(`
+      SELECT setting_value 
+      FROM global_email_settings 
+      WHERE setting_key = 'default_cc_addresses' AND is_active = true
+    `);
+    
+    if (globalCcResult.rows.length > 0) {
+      const globalCcAddresses = JSON.parse(globalCcResult.rows[0].setting_value || '[]');
+      if (Array.isArray(globalCcAddresses)) {
+        // Add global CC addresses that aren't already in any recipient list
+        const allExistingEmails = [smtp.fromEmail, ...toRecipients, ...ccRecipients, ...bccRecipients];
+        for (const globalCc of globalCcAddresses) {
+          if (!allExistingEmails.some(email => email.toLowerCase() === globalCc.toLowerCase())) {
+            ccRecipients.push(globalCc);
+          }
+        }
+        console.log(`Added global CC addresses: ${globalCcAddresses.join(', ')}`);
+      }
+    }
+  } catch (globalCcError) {
+    console.warn(`Could not load global CC settings:`, globalCcError);
+    // Fallback to info@momtazchem.com if global settings are not available
+    const fallbackEmail = 'info@momtazchem.com';
+    const allExistingEmails = [smtp.fromEmail, ...toRecipients, ...ccRecipients, ...bccRecipients];
+    if (!allExistingEmails.some(email => email.toLowerCase() === fallbackEmail.toLowerCase())) {
+      ccRecipients.push(fallbackEmail);
+    }
   }
   
   // Check if we have any recipients after filtering
@@ -238,10 +257,32 @@ async function sendWithCategoryEmailAssignment(formData: ContactFormData): Promi
       throw new Error('No admin SMTP configuration found for category email assignment');
     }
 
+    // Get global CC addresses from settings
+    let ccAddresses: string[] = [];
+    try {
+      const { pool } = await import('./db');
+      const globalCcResult = await pool.query(`
+        SELECT setting_value 
+        FROM global_email_settings 
+        WHERE setting_key = 'default_cc_addresses' AND is_active = true
+      `);
+      
+      if (globalCcResult.rows.length > 0) {
+        const globalCcAddresses = JSON.parse(globalCcResult.rows[0].setting_value || '[]');
+        if (Array.isArray(globalCcAddresses)) {
+          ccAddresses = globalCcAddresses;
+          console.log(`Using global CC addresses: ${ccAddresses.join(', ')}`);
+        }
+      }
+    } catch (globalCcError) {
+      console.warn(`Could not load global CC settings, using fallback:`, globalCcError);
+      ccAddresses = ['info@momtazchem.com']; // Fallback
+    }
+
     const mailOptions = {
       from: adminSettings.smtp.fromEmail,
       to: formData.categoryEmail,
-      cc: ['info@momtazchem.com'], // Always CC to main company email (now managed by Universal Email Service)
+      cc: ccAddresses,
       subject: `درخواست جدید از فرم تماس - ${formData.firstName} ${formData.lastName}`,
       html: `
         <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right;">
