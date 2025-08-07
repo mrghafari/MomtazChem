@@ -1250,7 +1250,7 @@ export default function OrderTrackingManagement() {
                                     </CardHeader>
                                     <CardContent>
                                       <p className="text-sm text-gray-700">
-                                        {selectedOrder?.deliveryNotes || 'نکته خاصی وجود ندارد'}
+                                        {selectedOrder.deliveryNotes || 'نکته خاصی وجود ندارد'}
                                         </p>
                                       </CardContent>
                                     </Card>
