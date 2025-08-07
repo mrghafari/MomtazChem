@@ -41780,6 +41780,100 @@ momtazchem.com
     }
   });
 
+  // Production Reset - SUPER ADMIN ONLY
+  app.post('/api/super-admin/reset-for-production', requireAuth, async (req: Request, res: Response) => {
+    try {
+      console.log('🗑️ [PRODUCTION RESET] Starting production reset process');
+      
+      const adminId = req.session?.adminId;
+      
+      // Require admin authentication (super admin only)
+      if (!adminId || adminId !== 15) {
+        console.log('❌ [PRODUCTION RESET] Access denied - super admin required');
+        return res.status(403).json({ 
+          success: false, 
+          message: "دسترسی محدود به سوپر ادمین" 
+        });
+      }
+
+      console.log(`🔐 [PRODUCTION RESET] Super admin ${adminId} authorized`);
+
+      // Tables to clear (test data)
+      const tablesToClear = [
+        'customer_orders',
+        'order_items', 
+        'order_management',
+        'wallet_transactions',
+        'wallet_recharge_requests',
+        'payment_receipts',
+        'delivery_verification_codes',
+        'gps_delivery_confirmations',
+        'vehicle_selection_history',
+        'email_logs',
+        'sms_logs',
+        'customers',
+        'customer_addresses',
+        'abandoned_orders'
+      ];
+
+      let totalRecordsDeleted = 0;
+      let tablesCleared = 0;
+
+      // Begin transaction
+      await customerPool.query('BEGIN');
+
+      try {
+        // Clear each table
+        for (const table of tablesToClear) {
+          try {
+            const result = await customerPool.query(`DELETE FROM ${table}`);
+            const deletedCount = result.rowCount || 0;
+            totalRecordsDeleted += deletedCount;
+            tablesCleared++;
+            console.log(`🗑️ [PRODUCTION RESET] Cleared ${table}: ${deletedCount} records`);
+          } catch (error) {
+            console.warn(`⚠️ [PRODUCTION RESET] Could not clear ${table}:`, error);
+            // Continue with other tables even if one fails
+          }
+        }
+
+        // Reset counters
+        try {
+          await customerPool.query('DELETE FROM counters');
+          console.log('🔄 [PRODUCTION RESET] Reset all counters');
+          tablesCleared++;
+        } catch (error) {
+          console.warn('⚠️ [PRODUCTION RESET] Could not reset counters:', error);
+        }
+
+        // Commit transaction
+        await customerPool.query('COMMIT');
+
+        console.log(`✅ [PRODUCTION RESET] Successfully cleared ${tablesCleared} tables and ${totalRecordsDeleted} records`);
+
+        res.json({
+          success: true,
+          message: 'سیستم با موفقیت برای محیط تولیدی پاک‌سازی شد',
+          tablesCleared,
+          recordsDeleted: totalRecordsDeleted,
+          resetBy: adminId,
+          resetAt: new Date().toISOString()
+        });
+
+      } catch (error) {
+        await customerPool.query('ROLLBACK');
+        throw error;
+      }
+
+    } catch (error: any) {
+      console.error('❌ [PRODUCTION RESET] Reset failed:', error);
+      res.status(500).json({
+        success: false,
+        message: error.message || 'خطا در پاک‌سازی تولیدی'
+      });
+    }
+  });
+
   // Get content settings - Public endpoint for category toggles (must be before catch-all)
   app.get('/api/public/content-settings', async (req, res) => {
     try {

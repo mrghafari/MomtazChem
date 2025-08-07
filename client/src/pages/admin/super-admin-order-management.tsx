@@ -24,7 +24,9 @@ import {
   CreditCard,
   Settings,
   Building2,
-  Wallet
+  Wallet,
+  Database,
+  XCircle
 } from "lucide-react";
 import {
   AlertDialog,
@@ -64,6 +66,7 @@ export default function SuperAdminOrderManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showProductionResetDialog, setShowProductionResetDialog] = useState(false);
   const [activeTab, setActiveTab] = useState('orders');
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -169,6 +172,42 @@ export default function SuperAdminOrderManagement() {
       toast({
         title: "خطا",
         description: "تغییر وضعیت درگاه با شکست مواجه شد.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Production reset mutation
+  const productionResetMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch('/api/super-admin/reset-for-production', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'خطا در پاک‌سازی تولیدی');
+      }
+      
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "پاک‌سازی موفق",
+        description: `${data.message} - ${data.tablesCleared} جدول پاک شد، ${data.recordsDeleted} رکورد حذف شد. کنتور سفارشات از ابتدا شروع خواهد شد.`,
+        variant: "default",
+      });
+      setShowProductionResetDialog(false);
+      queryClient.invalidateQueries({ queryKey: ['/api/super-admin/deletable-orders'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "خطا در پاک‌سازی",
+        description: error.message || "مشکلی در پاک‌سازی رخ داده است",
         variant: "destructive",
       });
     },
@@ -300,16 +339,29 @@ export default function SuperAdminOrderManagement() {
               </p>
             </div>
             
-            {/* Refresh Button */}
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={forceRefreshSuperAdminOrders}
-              className="flex items-center gap-1 bg-green-50 hover:bg-green-100 text-green-700 border-green-200"
-            >
-              <RefreshCw className="w-4 h-4" />
-              به‌روزرسانی قوی
-            </Button>
+            <div className="flex items-center gap-3">
+              {/* Production Reset Button */}
+              <Button 
+                variant="destructive" 
+                size="sm" 
+                onClick={() => setShowProductionResetDialog(true)}
+                className="flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white"
+              >
+                <Database className="w-4 h-4" />
+                پاک‌سازی تولیدی
+              </Button>
+              
+              {/* Refresh Button */}
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={forceRefreshSuperAdminOrders}
+                className="flex items-center gap-1 bg-green-50 hover:bg-green-100 text-green-700 border-green-200"
+              >
+                <RefreshCw className="w-4 h-4" />
+                به‌روزرسانی قوی
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -591,6 +643,85 @@ export default function SuperAdminOrderManagement() {
                 )}
               </AlertDialogAction>
               <AlertDialogCancel disabled={deleteOrderMutation.isPending}>
+                انصراف
+              </AlertDialogCancel>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Production Reset Confirmation Dialog */}
+        <AlertDialog open={showProductionResetDialog} onOpenChange={setShowProductionResetDialog}>
+          <AlertDialogContent className="max-w-lg">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+                <XCircle className="h-6 w-6" />
+                پاک‌سازی کامل برای محیط تولیدی
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-right space-y-4">
+                <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="font-bold text-red-800 mb-3">⚠️ هشدار خطرناک:</p>
+                  <p className="text-red-700 mb-2">
+                    این عملیات تمامی داده‌های تست را از سیستم پاک می‌کند و آن را برای محیط تولیدی آماده می‌کند:
+                  </p>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="space-y-2">
+                    <h4 className="font-bold text-gray-800">جداول پاک شونده:</h4>
+                    <ul className="list-disc list-inside text-gray-600 space-y-1">
+                      <li>تمام سفارشات تست</li>
+                      <li>مشتریان آزمایشی</li>
+                      <li>تراکنش‌های کیف پول</li>
+                      <li>رسیدهای پرداخت</li>
+                      <li>کدهای تحویل GPS</li>
+                    </ul>
+                  </div>
+                  <div className="space-y-2">
+                    <h4 className="font-bold text-gray-800">کنتورهای بازنشانی:</h4>
+                    <ul className="list-disc list-inside text-gray-600 space-y-1">
+                      <li>شماره سفارشات → M2500001</li>
+                      <li>شماره مشتریان → 1</li>
+                      <li>سایر کنتورها → صفر</li>
+                    </ul>
+                  </div>
+                </div>
+                
+                <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <p className="text-yellow-800 font-bold mb-2">🚨 توجه مهم:</p>
+                  <ul className="text-yellow-700 text-sm space-y-1">
+                    <li>• این عملیات غیرقابل بازگشت است</li>
+                    <li>• فقط قبل از راه‌اندازی رسمی استفاده کنید</li>
+                    <li>• سیستم آماده دریافت سفارشات واقعی می‌شود</li>
+                    <li>• پشتیبان‌گیری قبل از اجرا توصیه می‌شود</li>
+                  </ul>
+                </div>
+                
+                <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <p className="text-green-800 font-medium">
+                    ✅ پس از پاک‌سازی، سیستم کاملاً تمیز و آماده برای محیط تولیدی خواهد بود.
+                  </p>
+                </div>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="flex-row-reverse">
+              <AlertDialogAction
+                onClick={() => productionResetMutation.mutate()}
+                disabled={productionResetMutation.isPending}
+                className="bg-red-600 hover:bg-red-700 text-white"
+              >
+                {productionResetMutation.isPending ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 ml-2 animate-spin" />
+                    در حال پاک‌سازی...
+                  </>
+                ) : (
+                  <>
+                    <Database className="h-4 w-4 ml-2" />
+                    تائید - پاک‌سازی کامل
+                  </>
+                )}
+              </AlertDialogAction>
+              <AlertDialogCancel disabled={productionResetMutation.isPending}>
                 انصراف
               </AlertDialogCancel>
             </AlertDialogFooter>

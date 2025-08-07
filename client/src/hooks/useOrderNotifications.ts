@@ -6,9 +6,18 @@ interface NotificationHook {
   enabled: boolean;
 }
 
+interface AudioWithBeep extends HTMLAudioElement {
+  playBeep?: () => void;
+}
+
+interface OrdersResponse {
+  orders?: any[];
+  data?: any[];
+}
+
 export function useOrderNotifications({ department, enabled }: NotificationHook) {
   const previousCountRef = useRef<number | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioRef = useRef<AudioWithBeep | null>(null);
 
   // Initialize audio
   useEffect(() => {
@@ -52,12 +61,12 @@ export function useOrderNotifications({ department, enabled }: NotificationHook)
   }, [enabled]);
 
   // Query orders for the specific department
-  const { data: ordersResponse } = useQuery({
+  const { data: ordersResponse } = useQuery<OrdersResponse>({
     queryKey: department === 'financial' ? ['/api/financial/orders'] : 
               department === 'warehouse' ? ['/api/order-management/warehouse'] :
               ['/api/order-management/logistics'],
     enabled: enabled,
-    refetchInterval: 5000, // Check every 5 seconds
+    refetchInterval: enabled ? 5000 : false, // Only refetch if enabled
     staleTime: 0,
   });
 
