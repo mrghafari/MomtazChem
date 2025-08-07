@@ -54,6 +54,15 @@ export default function WarehouseDepartment() {
     retry: false
   });
 
+  // Fetch order items when processing an order
+  const { data: orderItemsResponse, isLoading: itemsLoading } = useQuery({
+    queryKey: [`/api/order-items/${processingOrder}`],
+    enabled: !!processingOrder,
+    retry: false
+  });
+
+  const orderItems = orderItemsResponse?.data || [];
+
   // Extract orders from response
   const orders = response?.orders || response || [];
   
@@ -330,8 +339,53 @@ export default function WarehouseDepartment() {
 
                   {/* Processing Section */}
                   {processingOrder === order.id ? (
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-4">
                       <h4 className="font-medium text-blue-900">پردازش سفارش</h4>
+                      
+                      {/* Order Items List */}
+                      <div className="bg-white rounded-lg p-4 border">
+                        <h5 className="font-medium mb-3 flex items-center gap-2">
+                          <Package className="w-4 h-4" />
+                          لیست کالاها و تعداد
+                        </h5>
+                        {itemsLoading ? (
+                          <div className="flex items-center justify-center py-4">
+                            <Loader className="w-5 h-5 animate-spin text-gray-500" />
+                            <span className="mr-2 text-gray-500">در حال بارگیری آیتم‌ها...</span>
+                          </div>
+                        ) : orderItems && orderItems.length > 0 ? (
+                          <div className="space-y-3">
+                            {orderItems.map((item: any, index: number) => (
+                              <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div className="flex items-center gap-3">
+                                  <Badge variant="outline" className="px-2 py-1">
+                                    آیتم {index + 1}
+                                  </Badge>
+                                  <div>
+                                    <p className="font-medium text-gray-900">{item.productName}</p>
+                                    <p className="text-sm text-gray-600">کد کالا: {item.productId || 'نامشخص'}</p>
+                                  </div>
+                                </div>
+                                <div className="text-left">
+                                  <p className="font-bold text-lg text-blue-600">{item.quantity} عدد</p>
+                                  <p className="text-sm text-gray-500">{item.unitPrice?.toLocaleString()} دینار</p>
+                                </div>
+                              </div>
+                            ))}
+                            <div className="mt-4 pt-3 border-t border-gray-200">
+                              <p className="text-sm text-gray-600">
+                                <span className="font-medium">مجموع آیتم‌ها:</span> {orderItems.length} قلم
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                <span className="font-medium">مجموع تعداد:</span> {orderItems.reduce((sum: number, item: any) => sum + item.quantity, 0)} عدد
+                              </p>
+                            </div>
+                          </div>
+                        ) : (
+                          <p className="text-gray-500 text-center py-4">هیچ آیتمی برای این سفارش یافت نشد</p>
+                        )}
+                      </div>
+
                       <div className="space-y-2">
                         <Label htmlFor="notes">یادداشت پردازش (اختیاری)</Label>
                         <Textarea

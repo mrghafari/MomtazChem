@@ -907,6 +907,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ============================================
+  // START: Order Items API
+  // ============================================
+
+  // Get order items for warehouse processing
+  app.get("/api/order-items/:orderId", requireAuth, async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      if (!orderId) {
+        return res.status(400).json({ success: false, message: 'شناسه سفارش نامعتبر است' });
+      }
+
+      // Get order items with product details
+      const itemsResult = await db
+        .select({
+          productId: orderItems.productId,
+          productName: orderItems.productName,
+          quantity: orderItems.quantity,
+          unitPrice: orderItems.unitPrice,
+          totalPrice: sql<string>`${orderItems.quantity} * ${orderItems.unitPrice}`,
+        })
+        .from(orderItems)
+        .where(eq(orderItems.orderId, orderId));
+
+      res.json({
+        success: true,
+        data: itemsResult
+      });
+    } catch (error) {
+      console.error('Error fetching order items:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در دریافت آیتم‌های سفارش'
+      });
+    }
+  });
+
+  // ============================================
   // START: PDF Generation Routes
   // ============================================
 
