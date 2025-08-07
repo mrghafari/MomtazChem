@@ -28312,7 +28312,6 @@ ${message ? `Additional Requirements:\n${message}` : ''}
 
         { id: 'content-management', name: 'Content Management', category: 'marketing', icon: 'Edit3' },
         { id: 'ticketing-system', name: 'Ticketing System', category: 'support', icon: 'Ticket' },
-        { id: 'finance-orders', name: 'Financial Orders', category: 'financial', icon: 'DollarSign' },
         { id: 'warehouse-orders', name: 'Warehouse Orders', category: 'operations', icon: 'Warehouse' }
       ];
 

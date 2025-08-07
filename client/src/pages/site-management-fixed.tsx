@@ -214,7 +214,7 @@ export default function SiteManagement() {
       id: "finance",
       label: "Finance",
       icon: DollarSign,
-      onClick: () => trackButtonClick("finance", () => setLocation("/admin/finance-orders")),
+      onClick: () => trackButtonClick("finance", () => setLocation("/admin/financial-workflow")),
       className: "border-green-300 text-green-600 hover:bg-green-50",
       moduleId: "finance"
     },
