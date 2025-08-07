@@ -41188,7 +41188,7 @@ momtazchem.com
         FROM customer_orders co
         LEFT JOIN crm_customers cc ON co.customer_id = cc.id
         LEFT JOIN order_management om ON co.id = om.customer_order_id
-        WHERE co.status NOT IN ('deleted', 'cancelled') OR co.status IS NULL
+        -- SHOW ALL ORDERS: No filtering by status - admin needs to see everything for complete management
         ORDER BY co.created_at DESC
       `);
       
@@ -44986,7 +44986,7 @@ momtazchem.com
         FROM customer_orders co
         LEFT JOIN crm_customers cc ON co.customer_id = cc.id
         LEFT JOIN order_management om ON co.id = om.customer_order_id
-        WHERE co.status NOT IN ('deleted', 'cancelled') OR co.status IS NULL
+        -- SHOW ALL ORDERS: No filtering by status for complete management statistics
       `);
 
       const stats = statsResult.rows[0];
