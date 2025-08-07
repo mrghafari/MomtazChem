@@ -41304,9 +41304,24 @@ momtazchem.com
   app.get('/api/orders/tracking/all', requireAuth, async (req, res) => {
     try {
       const startTime = Date.now();
-      console.log('🔍 [UNIFIED ORDER API] Starting comprehensive order tracking request...');
+      
+      // 📄 PAGINATION PARAMETERS
+      const limit = parseInt(req.query.limit as string) || 100; // Default 100 orders
+      const offset = parseInt(req.query.offset as string) || 0;
+      
+      console.log(`🔍 [PAGINATED ORDER API] Starting request with limit=${limit}, offset=${offset}...`);
 
-      // COMPREHENSIVE QUERY: Join all relevant tables to show complete order information
+      // Get total count first for pagination metadata
+      const countResult = await customerPool.query(`
+        SELECT COUNT(*) as total_count
+        FROM customer_orders co
+        LEFT JOIN crm_customers cc ON co.customer_id = cc.id
+        LEFT JOIN order_management om ON co.id = om.customer_order_id
+      `);
+      
+      const totalCount = parseInt(countResult.rows[0].total_count);
+
+      // PAGINATED QUERY: Join all relevant tables with LIMIT and OFFSET
       const result = await customerPool.query(`
         SELECT 
           co.id as customer_order_id,
@@ -41341,10 +41356,11 @@ momtazchem.com
         LEFT JOIN order_management om ON co.id = om.customer_order_id
         -- SHOW ALL ORDERS: No filtering by status - admin needs to see everything for complete management
         ORDER BY co.created_at DESC
-      `);
+        LIMIT $1 OFFSET $2
+      `, [limit, offset]);
       
       const queryTime = Date.now() - startTime;
-      console.log(`✅ [UNIFIED ORDER API] Query completed: ${queryTime}ms, found ${result.rows.length} total orders`);
+      console.log(`✅ [PAGINATED ORDER API] Query completed: ${queryTime}ms, found ${result.rows.length} orders (${totalCount} total)`);
       
       // Comprehensive mapping with all order information
       const orders = result.rows.map((row: any) => {
@@ -41396,14 +41412,29 @@ momtazchem.com
       });
 
       const totalTime = Date.now() - startTime;
-      console.log(`✅ [UNIFIED ORDER API] Total processing: ${totalTime}ms, returning ${orders.length} comprehensive orders`);
+      console.log(`✅ [PAGINATED ORDER API] Total processing: ${totalTime}ms, returning ${orders.length} orders of ${totalCount}`);
+      
+      // Calculate pagination metadata
+      const hasNextPage = (offset + limit) < totalCount;
+      const currentPage = Math.floor(offset / limit) + 1;
+      const totalPages = Math.ceil(totalCount / limit);
       
       res.json({
         success: true,
-        message: `Successfully retrieved ${orders.length} orders with complete information`,
+        message: `Successfully retrieved ${orders.length} orders (page ${currentPage} of ${totalPages})`,
         orders,
+        pagination: {
+          totalCount,
+          currentPage,
+          totalPages,
+          limit,
+          offset,
+          hasNextPage,
+          nextOffset: hasNextPage ? offset + limit : null
+        },
         stats: {
-          totalOrders: orders.length,
+          totalOrders: totalCount,
+          currentPageOrders: orders.length,
           managedOrders: orders.filter(o => o.managementId).length,
           pendingOrders: orders.filter(o => o.status === 'pending').length,
           processingTime: totalTime

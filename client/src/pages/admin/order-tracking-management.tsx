@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect, useCallback } from 'react';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -239,11 +239,20 @@ export default function OrderTrackingManagement() {
 
   // Manual refresh only - no automatic refresh intervals
 
-  // Fetch all orders for tracking - OPTIMIZED FOR PERFORMANCE
-  const { data: orders, isLoading, error, refetch } = useQuery({
-    queryKey: ['tracking-orders-optimized'],
-    queryFn: async () => {
-      const response = await fetch('/api/orders/tracking/all', {
+  // 📄 INFINITE SCROLL: Fetch orders with pagination (100 orders per page)
+  const {
+    data: ordersData,
+    isLoading,
+    isLoadingError,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    refetch
+  } = useInfiniteQuery({
+    queryKey: ['tracking-orders-paginated'],
+    queryFn: async ({ pageParam = 0 }) => {
+      const response = await fetch(`/api/orders/tracking/all?limit=100&offset=${pageParam}`, {
         credentials: 'include'
       });
       
@@ -251,13 +260,19 @@ export default function OrderTrackingManagement() {
         // If authentication fails, redirect to login
         if (response.status === 401) {
           window.location.href = '/admin/login';
-          return [];
+          return { orders: [], pagination: null };
         }
         throw new Error('Failed to fetch tracking orders');
       }
       
       const data = await response.json();
-      return data.orders as Order[];
+      return {
+        orders: data.orders as Order[],
+        pagination: data.pagination
+      };
+    },
+    getNextPageParam: (lastPage) => {
+      return lastPage.pagination?.hasNextPage ? lastPage.pagination.nextOffset : undefined;
     },
     staleTime: 30000, // Cache for 30 seconds
     gcTime: 300000, // Keep cache for 5 minutes
@@ -267,6 +282,27 @@ export default function OrderTrackingManagement() {
       return failureCount < 2;
     }
   });
+
+  // Flatten all pages into a single orders array
+  const orders = ordersData?.pages.flatMap(page => page.orders) || [];
+  const totalCount = ordersData?.pages[0]?.pagination?.totalCount || 0;
+
+  // 🔄 INFINITE SCROLL: Detect when user scrolls near bottom
+  const handleScroll = useCallback(() => {
+    if (
+      window.innerHeight + document.documentElement.scrollTop >=
+      document.documentElement.offsetHeight - 1000 && // Load more when 1000px from bottom
+      hasNextPage &&
+      !isFetchingNextPage
+    ) {
+      fetchNextPage();
+    }
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [handleScroll]);
 
   // Fetch order statistics - Manual refresh only
   const { data: stats, isLoading: isLoadingStats, refetch: refetchStats } = useQuery({
@@ -447,7 +483,7 @@ export default function OrderTrackingManagement() {
                   {isLoadingStats ? (
                     <span className="animate-pulse">...</span>
                   ) : (
-                    stats?.totalOrders || 0
+                    totalCount || 0
                   )}
                 </p>
               </div>
@@ -971,6 +1007,78 @@ export default function OrderTrackingManagement() {
               </p>
             </div>
           )}
+
+          {/* 📊 PAGINATION STATUS AND LOADING INDICATORS */}
+          <div className="mt-6 space-y-4">
+            {/* Loading Next Page Indicator */}
+            {isFetchingNextPage && (
+              <div className="flex items-center justify-center py-6 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="animate-spin inline-block w-6 h-6 border-[3px] border-current border-t-transparent text-blue-600 rounded-full mr-3" role="status" aria-label="loading"></div>
+                <span className="text-blue-800 font-medium">در حال بارگیری سفارشات بیشتر...</span>
+              </div>
+            )}
+
+            {/* Pagination Status */}
+            {orders.length > 0 && (
+              <div className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <Package className="w-4 h-4 text-gray-600" />
+                    <span className="text-sm text-gray-700">
+                      <strong className="text-gray-900">{orders.length}</strong> از <strong className="text-gray-900">{totalCount}</strong> سفارش بارگیری شده
+                    </span>
+                  </div>
+                  
+                  {/* Progress Bar */}
+                  <div className="w-32 bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                      style={{ width: `${Math.min((orders.length / totalCount) * 100, 100)}%` }}
+                    ></div>
+                  </div>
+                  
+                  <span className="text-xs text-gray-500">
+                    {Math.round((orders.length / totalCount) * 100)}%
+                  </span>
+                </div>
+
+                {/* Manual Load More Button (as backup) */}
+                {hasNextPage && !isFetchingNextPage && (
+                  <button
+                    onClick={() => fetchNextPage()}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    بارگیری بیشتر
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* End of List Indicator */}
+            {!hasNextPage && orders.length > 0 && !isLoading && (
+              <div className="text-center py-6 bg-green-50 border border-green-200 rounded-lg">
+                <CheckCircle className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                <span className="text-green-800 font-medium">
+                  همه سفارشات بارگیری شد ({orders.length} سفارش)
+                </span>
+                <p className="text-sm text-green-600 mt-1">
+                  برای مشاهده سفارشات جدید، صفحه را بازخوانی کنید
+                </p>
+              </div>
+            )}
+
+            {/* Auto-scroll Status (only show when actively loading) */}
+            {hasNextPage && orders.length > 50 && (
+              <div className="text-center py-3">
+                <p className="text-xs text-gray-500 flex items-center justify-center gap-2">
+                  <Activity className="w-3 h-3" />
+                  برای بارگیری خودکار سفارشات بیشتر، به پایین صفحه اسکرول کنید
+                </p>
+              </div>
+            )}
+          </div>
+
         </CardContent>
       </Card>
     </div>
