@@ -1223,41 +1223,40 @@ export default function OrderTrackingManagement() {
                               </Card>
 
                               {/* Department Notes */}
-                              {/* یادداشت‌های مشتری */}
-                              {(selectedOrder.customerNotes || selectedOrder.deliveryNotes) && (
-                                <div className="mb-6">
-                                  <h4 className="text-lg font-semibold mb-4 text-blue-800">💬 یادداشت‌های مشتری</h4>
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <Card className="bg-blue-50">
-                                      <CardHeader>
-                                        <CardTitle className="text-sm flex items-center gap-2">
-                                          <FileText className="w-4 h-4 text-blue-600" />
-                                          یادداشت سفارش
-                                        </CardTitle>
-                                      </CardHeader>
-                                      <CardContent>
-                                        <p className="text-sm text-gray-700">
-                                          {selectedOrder.customerNotes || 'یادداشتی وجود ندارد'}
-                                        </p>
-                                      </CardContent>
-                                    </Card>
+                              {/* یادداشت‌های مشتری - همیشه نمایش داده می‌شود */}
+                              <div className="mb-6">
+                                <h4 className="text-lg font-semibold mb-4 text-blue-800">💬 یادداشت‌های مشتری</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <Card className="bg-blue-50">
+                                    <CardHeader>
+                                      <CardTitle className="text-sm flex items-center gap-2">
+                                        <FileText className="w-4 h-4 text-blue-600" />
+                                        یادداشت سفارش
+                                      </CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                      <p className="text-sm text-gray-700">
+                                        {selectedOrder.customerNotes || 'یادداشتی وجود ندارد'}
+                                      </p>
+                                    </CardContent>
+                                  </Card>
 
-                                    <Card className="bg-green-50">
-                                      <CardHeader>
-                                        <CardTitle className="text-sm flex items-center gap-2">
-                                          <Truck className="w-4 h-4 text-green-600" />
-                                          نکات تحویل
-                                        </CardTitle>
-                                      </CardHeader>
-                                      <CardContent>
-                                        <p className="text-sm text-gray-700">
-                                          {selectedOrder.deliveryNotes || 'نکته خاصی وجود ندارد'}
+                                  <Card className="bg-green-50">
+                                    <CardHeader>
+                                      <CardTitle className="text-sm flex items-center gap-2">
+                                        <Truck className="w-4 h-4 text-green-600" />
+                                        نکات تحویل
+                                      </CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                      <p className="text-sm text-gray-700">
+                                        {selectedOrder.deliveryNotes || 'نکته خاصی وجود ندارد'}
                                         </p>
                                       </CardContent>
                                     </Card>
                                   </div>
                                 </div>
-                              )}
+                              </div>
 
                               {/* یادداشت‌های بخش‌ها */}
                               <div>
