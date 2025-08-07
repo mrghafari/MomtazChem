@@ -8156,56 +8156,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // REMOVED: Duplicate endpoint that was serving old cached data from orderManagementStorage
 
-  // Get order statistics for tracking dashboard
-  app.get("/api/order-management/statistics", requireAuth, async (req, res) => {
-    try {
-      const orders = await orderManagementStorage.getAllOrdersWithDetails();
-      
-      const totalOrders = orders.length;
-      const pendingOrders = orders.filter(order => 
-        ['pending', 'pending_payment', 'financial_review', 'warehouse_processing'].includes(order.status)
-      ).length;
-      const completedOrders = orders.filter(order => 
-        ['completed', 'delivered'].includes(order.status)
-      ).length;
-      
-      // Calculate total revenue (only completed orders)
-      const totalRevenue = orders
-        .filter(order => ['completed', 'delivered'].includes(order.status))
-        .reduce((sum, order) => {
-          const amount = typeof order.totalAmount === 'string' 
-            ? parseFloat(order.totalAmount) 
-            : order.totalAmount || 0;
-          return sum + amount;
-        }, 0);
-      
-      const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
-      
-      // Today's orders
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const todaysOrders = orders.filter(order => {
-        const orderDate = new Date(order.createdAt);
-        orderDate.setHours(0, 0, 0, 0);
-        return orderDate.getTime() === today.getTime();
-      }).length;
-
-      res.json({
-        totalOrders,
-        pendingOrders,
-        completedOrders,
-        totalRevenue,
-        averageOrderValue,
-        todaysOrders
-      });
-    } catch (error) {
-      console.error("Error fetching order statistics:", error);
-      res.status(500).json({ 
-        success: false, 
-        message: "Internal server error" 
-      });
-    }
-  });
+  // REMOVED: First duplicate statistics endpoint - consolidated below for consistency
 
   // Get financial orders (orders requiring financial review)
   app.get("/api/order-management/financial", requireAuth, async (req, res) => {
@@ -41362,47 +41313,7 @@ momtazchem.com
     }
   });
 
-  // Get order statistics for tracking dashboard
-  app.get('/api/order-management/statistics', requireAuth, async (req, res) => {
-    try {
-      const statsResult = await customerPool.query(`
-        SELECT 
-          COUNT(*) as total_orders,
-          COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending_orders,
-          COUNT(CASE WHEN status = 'financial_approved' THEN 1 END) as approved_orders,
-          COUNT(CASE WHEN status = 'logistics_approved' THEN 1 END) as in_delivery,
-          COUNT(CASE WHEN status = 'delivered' THEN 1 END) as delivered_orders,
-          COUNT(CASE WHEN status = 'cancelled' THEN 1 END) as cancelled_orders,
-          SUM(CASE WHEN status = 'delivered' THEN total_amount ELSE 0 END) as total_revenue,
-          AVG(total_amount) as average_order_value
-        FROM customer_orders
-        WHERE created_at >= CURRENT_DATE - INTERVAL '30 days'
-      `);
-
-      const stats = statsResult.rows[0];
-
-      res.json({
-        success: true,
-        statistics: {
-          totalOrders: parseInt(stats.total_orders) || 0,
-          pendingOrders: parseInt(stats.pending_orders) || 0,
-          approvedOrders: parseInt(stats.approved_orders) || 0,
-          inDelivery: parseInt(stats.in_delivery) || 0,
-          deliveredOrders: parseInt(stats.delivered_orders) || 0,
-          cancelledOrders: parseInt(stats.cancelled_orders) || 0,
-          totalRevenue: parseFloat(stats.total_revenue) || 0,
-          averageOrderValue: parseFloat(stats.average_order_value) || 0
-        }
-      });
-
-    } catch (error) {
-      console.error('Error fetching order statistics:', error);
-      res.status(500).json({ 
-        success: false, 
-        message: "خطا در دریافت آمار سفارشات" 
-      });
-    }
-  });
+  // REMOVED: First duplicate statistics endpoint - consolidated below for consistency
 
   console.log('✅ [ROUTE DEBUG] All order tracking endpoints registered BEFORE catch-all');
 
@@ -45058,44 +44969,47 @@ momtazchem.com
     }
   });
 
-  // Get order statistics for tracking dashboard
+  // UNIFIED ORDER STATISTICS - Same source as tracking API for consistency
   app.get('/api/order-management/statistics', requireAuth, async (req, res) => {
     try {
+      console.log('📊 [UNIFIED STATS] Fetching statistics using same query as tracking API...');
+      
+      // Use SAME query as tracking API to ensure consistency
       const statsResult = await customerPool.query(`
         SELECT 
           COUNT(*) as total_orders,
-          COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending_orders,
-          COUNT(CASE WHEN status = 'financial_approved' THEN 1 END) as approved_orders,
-          COUNT(CASE WHEN status = 'logistics_approved' THEN 1 END) as in_delivery,
-          COUNT(CASE WHEN status = 'delivered' THEN 1 END) as delivered_orders,
-          COUNT(CASE WHEN status = 'cancelled' THEN 1 END) as cancelled_orders,
-          SUM(CASE WHEN status = 'delivered' THEN total_amount ELSE 0 END) as total_revenue,
-          AVG(total_amount) as average_order_value
-        FROM order_management
-        WHERE created_at >= CURRENT_DATE - INTERVAL '30 days'
+          COUNT(CASE WHEN (om.current_status IS NULL OR om.current_status IN ('pending', 'payment_uploaded', 'financial_reviewing')) THEN 1 END) as pending_orders,
+          COUNT(CASE WHEN om.current_status IN ('delivered', 'completed') THEN 1 END) as completed_orders,
+          COUNT(CASE WHEN co.created_at >= CURRENT_DATE THEN 1 END) as todays_orders,
+          SUM(CASE WHEN om.current_status IN ('delivered', 'completed') THEN co.total_amount ELSE 0 END) as total_revenue,
+          AVG(co.total_amount) as average_order_value
+        FROM customer_orders co
+        LEFT JOIN crm_customers cc ON co.customer_id = cc.id
+        LEFT JOIN order_management om ON co.id = om.customer_order_id
+        WHERE co.status NOT IN ('deleted', 'cancelled') OR co.status IS NULL
       `);
 
       const stats = statsResult.rows[0];
+      
+      console.log('📊 [UNIFIED STATS] Raw statistics:', stats);
 
-      res.json({
-        success: true,
-        statistics: {
-          totalOrders: parseInt(stats.total_orders) || 0,
-          pendingOrders: parseInt(stats.pending_orders) || 0,
-          approvedOrders: parseInt(stats.approved_orders) || 0,
-          inDelivery: parseInt(stats.in_delivery) || 0,
-          deliveredOrders: parseInt(stats.delivered_orders) || 0,
-          cancelledOrders: parseInt(stats.cancelled_orders) || 0,
-          totalRevenue: parseFloat(stats.total_revenue) || 0,
-          averageOrderValue: parseFloat(stats.average_order_value) || 0
-        }
-      });
-
+      const result = {
+        totalOrders: parseInt(stats.total_orders) || 0,
+        pendingOrders: parseInt(stats.pending_orders) || 0,
+        completedOrders: parseInt(stats.completed_orders) || 0,
+        todaysOrders: parseInt(stats.todays_orders) || 0,
+        totalRevenue: parseFloat(stats.total_revenue) || 0,
+        averageOrderValue: parseFloat(stats.average_order_value) || 0
+      };
+      
+      console.log('✅ [UNIFIED STATS] Final statistics result:', result);
+      
+      res.json(result);
     } catch (error) {
-      console.error('Error fetching order statistics:', error);
-      res.status(500).json({ 
-        success: false, 
-        message: "خطا در دریافت آمار سفارشات" 
+      console.error('❌ [UNIFIED STATS] Error fetching order statistics:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Internal server error'
       });
     }
   });
