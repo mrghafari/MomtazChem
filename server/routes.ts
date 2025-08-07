@@ -950,24 +950,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Get all orders with their management status
       const ordersWithLocation = await db
-        .select({
-          id: customerOrders.id,
-          orderNumber: customerOrders.orderNumber,
-          customerOrderId: customerOrders.customerOrderId,
-          totalAmount: customerOrders.totalAmount,
-          currency: customerOrders.currency,
-          customerId: customerOrders.customerId,
-          status: customerOrders.status,
-          createdAt: customerOrders.createdAt,
-          updatedAt: customerOrders.updatedAt,
-          currentStatus: orderManagement.currentStatus,
-          financialStatus: orderManagement.financialStatus,
-          warehouseStatus: orderManagement.warehouseStatus,
-          logisticsStatus: orderManagement.logisticsStatus,
-          financialReviewedAt: orderManagement.financialReviewedAt,
-          warehouseReviewedAt: orderManagement.warehouseReviewedAt,
-          logisticsReviewedAt: orderManagement.logisticsReviewedAt
-        })
+        .select()
         .from(customerOrders)
         .leftJoin(orderManagement, eq(customerOrders.id, orderManagement.orderId))
         .orderBy(desc(customerOrders.createdAt))
@@ -975,7 +958,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Add customer details and determine current location
       const ordersWithDetails = await Promise.all(
-        ordersWithLocation.map(async (order) => {
+        ordersWithLocation.map(async (orderRow) => {
+          const order = orderRow.customer_orders;
+          const management = orderRow.order_management;
+          
           // Get customer info
           const customer = await customerStorage.getCustomer(order.customerId);
           
@@ -985,8 +971,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           let nextAction = 'بررسی مدارک پرداخت';
           let priority: 'high' | 'medium' | 'low' = 'medium';
           
-          if (order.currentStatus) {
-            switch (order.currentStatus) {
+          if (management?.currentStatus) {
+            switch (management.currentStatus) {
               case 'pending':
               case 'financial_pending':
                 currentDepartment = 'financial';
@@ -1002,23 +988,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 priority = 'medium';
                 break;
               case 'warehouse_approved':
-              case 'logistics_pending':
+              case 'logistics_assigned':
+              case 'logistics_processing':
                 currentDepartment = 'logistics';
                 currentLocation = 'لجستیک - آماده ارسال';
                 nextAction = 'انتساب راننده';
                 priority = 'high';
                 break;
-              case 'logistics_approved':
               case 'delivered':
                 currentDepartment = 'completed';
-                currentLocation = 'تحویل شده';
-                nextAction = 'تکمیل شده';
+                currentLocation = 'تکمیل شده - تحویل داده شده';
+                nextAction = 'هیچ اقدام لازم نیست';
                 priority = 'low';
                 break;
               case 'cancelled':
                 currentDepartment = 'cancelled';
                 currentLocation = 'لغو شده';
-                nextAction = 'هیچ اقدامی مورد نیاز نیست';
+                nextAction = 'هیچ اقدام لازم نیست';
                 priority = 'low';
                 break;
             }
