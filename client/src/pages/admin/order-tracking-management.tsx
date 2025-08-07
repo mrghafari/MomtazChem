@@ -462,7 +462,7 @@ export default function OrderTrackingManagement() {
       <html dir="rtl" lang="fa">
       <head>
         <meta charset="UTF-8">
-        <title>جزئیات سفارش #{selectedOrder.customerOrderId}</title>
+        <title>جزئیات سفارش ${selectedOrder.orderNumber || `#${selectedOrder.customerOrderId}`}</title>
         <style>
           body { font-family: 'Tahoma', sans-serif; margin: 15px; direction: rtl; font-size: 13px; }
           .header { text-align: center; border-bottom: 1px solid #333; padding-bottom: 12px; margin-bottom: 12px; }
@@ -552,7 +552,7 @@ export default function OrderTrackingManagement() {
         <div class="header">
           <img src="/uploads/Logo_1753245273579.jpeg" alt="لوگوی شرکت" class="company-logo" />
           <div class="company-name">شرکت ممتاز شیمی</div>
-          <div class="order-title">جزئیات سفارش #{selectedOrder.customerOrderId}</div>
+          <div class="order-title">جزئیات سفارش ${selectedOrder.orderNumber || `#${selectedOrder.customerOrderId}`}</div>
           <div style="font-size: 12px; margin-top: 10px;">تاریخ چاپ: ${new Date().toLocaleDateString('en-GB')}</div>
         </div>
 
@@ -1103,7 +1103,7 @@ export default function OrderTrackingManagement() {
                             <div className="flex items-center justify-between">
                               <DialogTitle className="flex items-center gap-2">
                                 <Package className="w-5 h-5" />
-                                جزئیات سفارش #{selectedOrder?.customerOrderId}
+                                جزئیات سفارش {selectedOrder?.orderNumber || `#${selectedOrder?.customerOrderId}`}
                               </DialogTitle>
                               <button
                                 onClick={handlePrintOrder}
