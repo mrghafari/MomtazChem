@@ -18,7 +18,9 @@ import {
   Truck,
   User,
   Calendar,
-  DollarSign
+  DollarSign,
+  ChevronDown,
+  ChevronRight
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -28,6 +30,8 @@ export default function WarehouseDepartment() {
   const [searchTerm, setSearchTerm] = useState("");
   const [processingOrder, setProcessingOrder] = useState<number | null>(null);
   const [processingNotes, setProcessingNotes] = useState("");
+  const [expandedOrders, setExpandedOrders] = useState<Set<number>>(new Set());
+  const [orderItemsCache, setOrderItemsCache] = useState<{[key: number]: any[]}>({});
   const { toast } = useToast();
 
   // Get refresh interval from global settings
@@ -61,10 +65,40 @@ export default function WarehouseDepartment() {
     retry: false
   });
 
-  const orderItems = orderItemsResponse?.data || [];
+  const processingOrderItems = (orderItemsResponse as any)?.data || [];
 
   // Extract orders from response
-  const orders = response?.orders || response || [];
+  const orders = (response as any)?.orders || [];
+
+  // Function to toggle row expansion and fetch order items
+  const toggleOrderExpansion = async (orderId: number) => {
+    if (expandedOrders.has(orderId)) {
+      // Collapse the row
+      const newExpanded = new Set(expandedOrders);
+      newExpanded.delete(orderId);
+      setExpandedOrders(newExpanded);
+    } else {
+      // Expand the row and fetch items if not already cached
+      const newExpanded = new Set(expandedOrders);
+      newExpanded.add(orderId);
+      setExpandedOrders(newExpanded);
+      
+      if (!orderItemsCache[orderId]) {
+        try {
+          const response = await fetch(`/api/order-items/${orderId}`);
+          if (response.ok) {
+            const data = await response.json();
+            setOrderItemsCache(prev => ({
+              ...prev,
+              [orderId]: data.data || []
+            }));
+          }
+        } catch (error) {
+          console.error('Error fetching order items:', error);
+        }
+      }
+    }
+  };
   
   // Add some debug logging to check the data structure
   console.log('Warehouse response:', response);
@@ -84,9 +118,12 @@ export default function WarehouseDepartment() {
   // Process order mutation
   const processOrderMutation = useMutation({
     mutationFn: async (orderId: number) => {
-      return apiRequest(`/api/order-management/warehouse/${orderId}/process`, "PATCH", {
-        status: "warehouse_approved",
-        notes: processingNotes
+      return apiRequest(`/api/order-management/warehouse/${orderId}/process`, {
+        method: "PATCH",
+        body: {
+          status: "warehouse_approved",
+          notes: processingNotes
+        }
       });
     },
     onSuccess: () => {
@@ -282,11 +319,21 @@ export default function WarehouseDepartment() {
             <div className="space-y-4">
               {filteredOrders.map((order: any) => (
                 <div key={order.id} className="border rounded-lg p-6 space-y-4">
-                  {/* Order Header */}
-                  <div className="flex items-start justify-between">
+                  {/* Order Header - Clickable */}
+                  <div 
+                    className="flex items-start justify-between cursor-pointer hover:bg-gray-50 -m-6 p-6 rounded-lg transition-colors"
+                    onClick={() => toggleOrderExpansion(order.id)}
+                  >
                     <div className="space-y-1">
                       <div className="flex items-center gap-3">
-                        <h3 className="font-semibold text-lg">سفارش {order.orderNumber}</h3>
+                        <div className="flex items-center gap-2">
+                          {expandedOrders.has(order.id) ? (
+                            <ChevronDown className="w-4 h-4 text-gray-600" />
+                          ) : (
+                            <ChevronRight className="w-4 h-4 text-gray-600" />
+                          )}
+                          <h3 className="font-semibold text-lg">سفارش {order.orderNumber}</h3>
+                        </div>
                         <Badge variant="secondary">
                           <Clock className="w-3 h-3 mr-1" />
                           در انتظار پردازش
@@ -309,21 +356,49 @@ export default function WarehouseDepartment() {
                     </div>
                   </div>
 
-                  {/* Order Items */}
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <h4 className="font-medium mb-3">محصولات سفارش:</h4>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between text-sm">
-                        <div className="flex items-center gap-2">
-                          <Package className="w-4 h-4 text-gray-400" />
-                          <span>جزئیات سفارش #{order.customerOrderId}</span>
+                  {/* Expandable Order Items */}
+                  {expandedOrders.has(order.id) && (
+                    <div className="bg-gray-50 rounded-lg p-4 border-t">
+                      <h4 className="font-medium mb-3 flex items-center gap-2">
+                        <Package className="w-4 h-4" />
+                        محصولات سفارش
+                      </h4>
+                      {orderItemsCache[order.id] ? (
+                        <div className="space-y-3">
+                          {orderItemsCache[order.id].map((item: any, index: number) => (
+                            <div key={index} className="flex items-center justify-between p-3 bg-white rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <Badge variant="outline" className="px-2 py-1">
+                                  آیتم {index + 1}
+                                </Badge>
+                                <div>
+                                  <p className="font-medium text-gray-900">{item.productName}</p>
+                                  <p className="text-sm text-gray-600">کد کالا: {item.productId || 'نامشخص'}</p>
+                                </div>
+                              </div>
+                              <div className="text-left">
+                                <p className="font-bold text-lg text-blue-600">{item.quantity} عدد</p>
+                                <p className="text-sm text-gray-500">{item.unitPrice?.toLocaleString()} دینار</p>
+                              </div>
+                            </div>
+                          ))}
+                          <div className="mt-4 pt-3 border-t border-gray-200">
+                            <p className="text-sm text-gray-600">
+                              <span className="font-medium">مجموع آیتم‌ها:</span> {orderItemsCache[order.id].length} قلم
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              <span className="font-medium">مجموع تعداد:</span> {orderItemsCache[order.id].reduce((sum: number, item: any) => sum + item.quantity, 0)} عدد
+                            </p>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-4">
-                          <span className="text-gray-600">مجموع: {formatCurrency(order.totalAmount)} {order.currency}</span>
+                      ) : (
+                        <div className="flex items-center justify-center py-4">
+                          <Loader className="w-5 h-5 animate-spin text-gray-500" />
+                          <span className="mr-2 text-gray-500">در حال بارگیری آیتم‌ها...</span>
                         </div>
-                      </div>
+                      )}
                     </div>
-                  </div>
+                  )}
 
                   {/* Customer Info */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
@@ -353,9 +428,9 @@ export default function WarehouseDepartment() {
                             <Loader className="w-5 h-5 animate-spin text-gray-500" />
                             <span className="mr-2 text-gray-500">در حال بارگیری آیتم‌ها...</span>
                           </div>
-                        ) : orderItems && orderItems.length > 0 ? (
+                        ) : processingOrderItems && processingOrderItems.length > 0 ? (
                           <div className="space-y-3">
-                            {orderItems.map((item: any, index: number) => (
+                            {processingOrderItems.map((item: any, index: number) => (
                               <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                 <div className="flex items-center gap-3">
                                   <Badge variant="outline" className="px-2 py-1">
@@ -374,10 +449,10 @@ export default function WarehouseDepartment() {
                             ))}
                             <div className="mt-4 pt-3 border-t border-gray-200">
                               <p className="text-sm text-gray-600">
-                                <span className="font-medium">مجموع آیتم‌ها:</span> {orderItems.length} قلم
+                                <span className="font-medium">مجموع آیتم‌ها:</span> {processingOrderItems.length} قلم
                               </p>
                               <p className="text-sm text-gray-600">
-                                <span className="font-medium">مجموع تعداد:</span> {orderItems.reduce((sum: number, item: any) => sum + item.quantity, 0)} عدد
+                                <span className="font-medium">مجموع تعداد:</span> {processingOrderItems.reduce((sum: number, item: any) => sum + item.quantity, 0)} عدد
                               </p>
                             </div>
                           </div>
