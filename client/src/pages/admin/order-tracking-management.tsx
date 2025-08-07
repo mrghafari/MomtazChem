@@ -298,8 +298,7 @@ export default function OrderTrackingManagement() {
         pagination: data.pagination
       };
     },
-    initialPageParam: 0,
-    getNextPageParam: (lastPage: any) => {
+    getNextPageParam: (lastPage) => {
       return lastPage.pagination?.hasNextPage ? lastPage.pagination.nextOffset : undefined;
     },
     staleTime: 30000, // Cache for 30 seconds
@@ -312,8 +311,8 @@ export default function OrderTrackingManagement() {
   });
 
   // Flatten all pages into a single orders array
-  const orders = ordersData?.pages.flatMap((page: any) => page.orders) || [];
-  const totalCount = (ordersData?.pages[0] as any)?.pagination?.totalCount || 0;
+  const orders = ordersData?.pages.flatMap(page => page.orders) || [];
+  const totalCount = ordersData?.pages[0]?.pagination?.totalCount || 0;
 
   // 🔄 INFINITE SCROLL: Detect when user scrolls near bottom
   const handleScroll = useCallback(() => {
@@ -811,7 +810,7 @@ export default function OrderTrackingManagement() {
                   {isLoadingStats ? (
                     <span className="animate-pulse">...</span>
                   ) : (
-                    (stats as any)?.pendingOrders || 0
+                    stats?.pendingOrders || 0
                   )}
                 </p>
               </div>
@@ -834,7 +833,7 @@ export default function OrderTrackingManagement() {
                   {isLoadingStats ? (
                     <span className="animate-pulse">...</span>
                   ) : (
-                    (stats as any)?.completedOrders || 0
+                    stats?.completedOrders || 0
                   )}
                 </p>
               </div>
@@ -857,7 +856,7 @@ export default function OrderTrackingManagement() {
                   {isLoadingStats ? (
                     <span className="animate-pulse">...</span>
                   ) : (
-                    `${((stats as any)?.totalRevenue || 0).toLocaleString()} IQD`
+                    `${(stats?.totalRevenue || 0).toLocaleString()} IQD`
                   )}
                 </p>
               </div>
@@ -880,7 +879,7 @@ export default function OrderTrackingManagement() {
                   {isLoadingStats ? (
                     <span className="animate-pulse">...</span>
                   ) : (
-                    `${((stats as any)?.averageOrderValue || 0).toLocaleString()} IQD`
+                    `${(stats?.averageOrderValue || 0).toLocaleString()} IQD`
                   )}
                 </p>
               </div>
@@ -903,7 +902,7 @@ export default function OrderTrackingManagement() {
                   {isLoadingStats ? (
                     <span className="animate-pulse">...</span>
                   ) : (
-                    (stats as any)?.todaysOrders || 0
+                    stats?.todaysOrders || 0
                   )}
                 </p>
               </div>
@@ -1259,8 +1258,9 @@ export default function OrderTrackingManagement() {
                                 </div>
                               </div>
 
+                              {/* یادداشت‌های بخش‌ها */}
                               <div>
-                                <h4 className="text-lg font-semibold mb-4 text-gray-800">🏢 Department Notes</h4>
+                                <h4 className="text-lg font-semibold mb-4 text-gray-800">🏢 یادداشت‌های بخش‌ها</h4>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                   <Card>
                                     <CardHeader>
