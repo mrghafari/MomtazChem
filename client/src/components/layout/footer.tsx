@@ -81,15 +81,15 @@ const Footer = () => {
 
   // Social media configuration
   const socialMediaPlatforms = [
-    { key: 'linkedin_url', icon: 'fab fa-linkedin', name: 'LinkedIn' },
-    { key: 'twitter_url', icon: 'fab fa-twitter', name: 'Twitter' },
     { key: 'facebook_url', icon: 'fab fa-facebook', name: 'Facebook' },
+    { key: 'twitter_url', icon: 'fab fa-twitter', name: 'Twitter' },
+    { key: 'linkedin_url', icon: 'fab fa-linkedin', name: 'LinkedIn' },
     { key: 'instagram_url', icon: 'fab fa-instagram', name: 'Instagram' },
     { key: 'youtube_url', icon: 'fab fa-youtube', name: 'YouTube' },
     { key: 'telegram_url', icon: 'fab fa-telegram', name: 'Telegram' },
     { key: 'whatsapp_url', icon: 'fab fa-whatsapp', name: 'WhatsApp' },
     { key: 'wechat_url', icon: 'fab fa-weixin', name: 'WeChat' },
-    { key: 'tiktok_url', icon: 'fab fa-tiktok', name: 'TikTok' }
+    { key: 'tiktok_url', icon: 'fab fa-brands fa-tiktok', name: 'TikTok' }
   ];
 
   // Get social media URL from content items
@@ -146,41 +146,49 @@ const Footer = () => {
               {/* Social Media Icons */}
               {footerSettings?.showSocialMedia && activeSocialMedia.length > 0 && (
                 <div className="flex space-x-4 flex-wrap">
-                  {activeSocialMedia.map((platform) => (
-                    <a
-                      key={platform.key}
-                      href={getSocialMediaUrl(platform.key)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-primary transition-colors duration-200"
-                      title={platform.name}
-                    >
-                      <i className={platform.icon}></i>
-                    </a>
-                  ))}
-                  
-                  {/* Special WeChat QR handling */}
-                  {footerSettings?.wechatQr && footerSettings?.wechatUrl && (
-                    <div className="relative group">
+                  {activeSocialMedia.map((platform) => {
+                    const platformUrl = getSocialMediaUrl(platform.key);
+                    
+                    // Special handling for WeChat with QR Code
+                    if (platform.key === 'wechat_url' && getSocialMediaUrl('wechat_qr')) {
+                      return (
+                        <div key={platform.key} className="relative group">
+                          <a
+                            href={platformUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-primary transition-colors duration-200"
+                            title={platform.name}
+                          >
+                            <i className={platform.icon}></i>
+                          </a>
+                          {/* QR Code Popup on Hover */}
+                          <div className="absolute bottom-12 left-0 hidden group-hover:block bg-white p-2 rounded-lg shadow-lg z-10">
+                            <img 
+                              src={getSocialMediaUrl('wechat_qr')} 
+                              alt="WeChat QR Code" 
+                              className="w-32 h-32"
+                            />
+                            <p className="text-xs text-gray-600 text-center mt-1">Scan for WeChat</p>
+                          </div>
+                        </div>
+                      );
+                    }
+                    
+                    // Regular social media icons
+                    return (
                       <a
-                        href={footerSettings.wechatUrl}
+                        key={platform.key}
+                        href={platformUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-primary transition-colors duration-200"
-                        title="WeChat"
+                        title={platform.name}
                       >
-                        <i className="fab fa-weixin"></i>
+                        <i className={platform.icon}></i>
                       </a>
-                      {/* QR Code Popup on Hover */}
-                      <div className="absolute bottom-12 left-0 hidden group-hover:block bg-white p-2 rounded-lg shadow-lg z-10">
-                        <img 
-                          src={footerSettings.wechatQr} 
-                          alt="WeChat QR Code" 
-                          className="w-32 h-32"
-                        />
-                      </div>
-                    </div>
-                  )}
+                    );
+                  })}
                 </div>
               )}
             </div>
