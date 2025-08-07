@@ -17817,6 +17817,7 @@ Momtaz Chemical Technical Team`,
       const mappedProducts = products.map(product => ({
         ...product,
         imageUrl: product.imageUrls && product.imageUrls.length > 0 ? product.imageUrls[0] : null,
+        imageUrls: product.imageUrls || [], // Include the full array of images
         unitPrice: product.price,
         currency: (product.priceUnit === 'IQD' || !product.priceUnit || product.priceUnit === 'unit') ? 'IQD' : product.priceUnit,
         weight: product.weight,
@@ -17856,6 +17857,7 @@ Momtaz Chemical Technical Team`,
       const mappedProduct = {
         ...product,
         imageUrl: product.imageUrls && product.imageUrls.length > 0 ? product.imageUrls[0] : null,
+        imageUrls: product.imageUrls || [], // Include the full array of images
         unitPrice: product.price,
         currency: (product.priceUnit === 'IQD' || !product.priceUnit || product.priceUnit === 'unit') ? 'IQD' : product.priceUnit,
         weight: product.weight,
@@ -17953,6 +17955,7 @@ Momtaz Chemical Technical Team`,
       const mappedProducts = searchResults.products.map(product => ({
         ...product,
         imageUrl: product.imageUrls && product.imageUrls.length > 0 ? product.imageUrls[0] : null,
+        imageUrls: product.imageUrls || [], // Include the full array of images
         unitPrice: product.price,
         currency: (product.priceUnit === 'IQD' || !product.priceUnit || product.priceUnit === 'unit') ? 'IQD' : product.priceUnit,
         weight: product.weight,
