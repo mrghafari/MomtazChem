@@ -276,6 +276,7 @@ function Router() {
           
           {/* Department-specific routes */}
           <Route path="/financial" component={FinancialDepartment} />
+          <Route path="/admin/finance-orders" component={FinancialDepartment} />
 
           <Route path="/warehouse" component={WarehouseManagementFixed} />
 
