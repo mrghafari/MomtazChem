@@ -30493,11 +30493,25 @@ momtazchem.com
                     body {
                         padding: 0;
                         margin: 0;
+                        margin-right: 4cm;
                         font-size: 12px;
                     }
                     
                     .header {
                         border-bottom: 3px solid #000 !important;
+                        margin-right: 4cm;
+                    }
+                    
+                    .invoice-details {
+                        margin-right: 4cm;
+                    }
+                    
+                    table {
+                        margin-right: 4cm;
+                    }
+                    
+                    .footer {
+                        margin-right: 4cm;
                     }
                     
                     th {

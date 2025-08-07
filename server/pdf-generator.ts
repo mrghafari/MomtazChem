@@ -60,7 +60,7 @@ export async function generatePDF(htmlContent: string, filename: string): Promis
         top: '10mm',
         right: '10mm',
         bottom: '10mm',
-        left: '10mm'
+        left: '50mm'
       },
       preferCSSPageSize: true
     });
