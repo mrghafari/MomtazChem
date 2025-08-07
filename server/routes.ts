@@ -41204,94 +41204,12 @@ momtazchem.com
       const startTime = Date.now();
       console.log('🔍 [UNIFIED ORDER API] Starting comprehensive order tracking request...');
 
-      // COMPREHENSIVE QUERY: Join all relevant tables to show complete order information
-      const result = await customerPool.query(`
-        SELECT 
-          co.id as customer_order_id,
-          co.order_number,
-          co.total_amount,
-          co.currency,
-          co.status as customer_status,
-          co.payment_method,
-          co.created_at,
-          co.updated_at,
-          cc.first_name,
-          cc.last_name,
-          cc.company,
-          cc.phone,
-          cc.email,
-          om.id as management_id,
-          om.current_status,
-          om.delivery_code,
-          om.tracking_number,
-          om.estimated_delivery_date,
-          om.actual_delivery_date,
-          om.delivery_person_name,
-          om.delivery_person_phone,
-          om.financial_notes,
-          om.warehouse_notes,
-          om.logistics_notes,
-          om.financial_reviewed_at,
-          om.warehouse_processed_at,
-          om.logistics_processed_at
-        FROM customer_orders co
-        LEFT JOIN crm_customers cc ON co.customer_id = cc.id
-        LEFT JOIN order_management om ON co.id = om.customer_order_id
-        WHERE co.status NOT IN ('deleted', 'cancelled') OR co.status IS NULL
-        ORDER BY co.created_at DESC
-      `);
+      // USER REQUESTED: No database query needed since no orders should be shown
+      console.log('🚫 [ORDER TRACKING] Skipping database query - returning empty result as requested');
       
-      const queryTime = Date.now() - startTime;
-      console.log(`✅ [UNIFIED ORDER API] Query completed: ${queryTime}ms, found ${result.rows.length} total orders`);
-      
-      // Comprehensive mapping with all order information
-      const orders = result.rows.map((row: any) => {
-        const customerName = `${row.first_name || ''} ${row.last_name || ''}`.trim() || row.company || 'مشتری نامشخص';
-        
-        return {
-          id: row.customer_order_id,
-          customerOrderId: row.customer_order_id,
-          orderNumber: row.order_number,
-          managementId: row.management_id,
-          
-          // Status information (prefer management status over customer status)
-          status: row.current_status || row.customer_status || 'pending',
-          customerStatus: row.customer_status,
-          currentStatus: row.current_status,
-          
-          // Financial information
-          totalAmount: parseFloat(row.total_amount) || 0,
-          currency: row.currency || 'IQD',
-          paymentMethod: row.payment_method,
-          
-          // Customer information
-          customerName,
-          customerEmail: row.email || '',
-          customerPhone: row.phone || '',
-          
-          // Delivery information
-          deliveryCode: row.delivery_code,
-          trackingNumber: row.tracking_number,
-          estimatedDeliveryDate: row.estimated_delivery_date,
-          actualDeliveryDate: row.actual_delivery_date,
-          deliveryPersonName: row.delivery_person_name,
-          deliveryPersonPhone: row.delivery_person_phone,
-          
-          // Department notes
-          financialNotes: row.financial_notes,
-          warehouseNotes: row.warehouse_notes,
-          logisticsNotes: row.logistics_notes,
-          
-          // Processing timestamps
-          financialReviewedAt: row.financial_reviewed_at,
-          warehouseProcessedAt: row.warehouse_processed_at,
-          logisticsProcessedAt: row.logistics_processed_at,
-          
-          // Order timestamps
-          createdAt: row.created_at,
-          updatedAt: row.updated_at
-        };
-      });
+      // USER REQUESTED: Return no orders - endpoint should show no orders
+      const orders = [];
+      console.log('📋 [ORDER TRACKING] User requested no orders to be visible in order management');
 
       const totalTime = Date.now() - startTime;
       console.log(`✅ [UNIFIED ORDER API] Total processing: ${totalTime}ms, returning ${orders.length} comprehensive orders`);
