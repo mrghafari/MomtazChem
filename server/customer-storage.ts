@@ -383,7 +383,9 @@ export class CustomerStorage implements ICustomerStorage {
           // Update existing management record status based on new customer order status
           const newManagementStatus = this.determineManagementStatus(
             orderUpdate.status || currentOrder.status,
-            orderUpdate.paymentStatus || currentOrder.paymentStatus
+            orderUpdate.paymentStatus || currentOrder.paymentStatus,
+            undefined,
+            currentOrder.paymentMethod || undefined
           );
           
           if (newManagementStatus !== managementOrder.currentStatus) {
@@ -411,7 +413,8 @@ export class CustomerStorage implements ICustomerStorage {
   }
   
   // Helper function to determine correct management status - SYNCHRONIZED VERSION
-  private determineManagementStatus(customerStatus: string, paymentStatus: string): string {
+  // 💰 WALLET SUPPORT: Now supports wallet-paid orders that bypass financial department
+  private determineManagementStatus(customerStatus: string, paymentStatus: string, isManuallyApproved?: boolean, paymentMethod?: string): string {
     // اولویت اول: وضعیت‌های نهایی
     if (customerStatus === 'delivered') return 'delivered';
     if (customerStatus === 'cancelled' || customerStatus === 'deleted') return 'cancelled';
@@ -433,7 +436,8 @@ export class CustomerStorage implements ICustomerStorage {
     // اولویت سوم: وضعیت‌های پرداخت
     if (customerStatus === 'pending') {
       if (paymentStatus === 'paid') {
-        // پرداخت انجام شده ولی هنوز تایید نشده - نیاز به تایید مالی ندارد
+        // 💰 WALLET LOGIC: سفارشات wallet_full خودکار تایید مالی محسوب می‌شوند
+        console.log(`💰 [STATUS MAPPING] Paid order (${paymentMethod}) moving to warehouse`);
         return 'warehouse_pending';
       } else if (paymentStatus === 'receipt_uploaded') {
         // فیش آپلود شده - نیاز به بررسی مالی

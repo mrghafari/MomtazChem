@@ -1886,7 +1886,9 @@ export class OrderManagementStorage implements IOrderManagementStorage {
         
         // Status info
         currentStatus: orderManagement.currentStatus,
-        financialApproved: orderManagement.financialReviewedAt ? true : false,
+        // 💰 WALLET LOGIC: سفارشات wallet-paid که کاملاً پرداخت شده‌اند نیاز به تایید مالی ندارند
+        financialApproved: orderManagement.financialReviewedAt ? true : 
+          (customerOrder.paymentMethod === 'wallet_full' && customerOrder.paymentStatus === 'paid') ? true : false,
         warehouseProcessed: orderManagement.warehouseProcessedAt ? true : false,
         logisticsProcessed: orderManagement.logisticsProcessedAt ? true : false
       };

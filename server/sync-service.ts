@@ -138,6 +138,7 @@ export class SyncService {
         orderNumber: customerOrders.orderNumber,
         customerStatus: customerOrders.status,
         customerPaymentStatus: customerOrders.paymentStatus,
+        customerPaymentMethod: customerOrders.paymentMethod,
         managementId: orderManagement.id,
         managementStatus: orderManagement.currentStatus,
         financialReviewedAt: orderManagement.financialReviewedAt,
@@ -157,7 +158,8 @@ export class SyncService {
       const expectedManagementStatus = this.determineManagementStatus(
         record.customerStatus, 
         record.customerPaymentStatus,
-        isManuallyApproved
+        isManuallyApproved,
+        record.customerPaymentMethod || undefined
       );
 
       // 🚨 CRITICAL: وضعیت‌های محافظت شده - هیچ سفارشی نباید خودکار از انبار خارج شود
@@ -294,8 +296,9 @@ export class SyncService {
    * تعیین وضعیت مناسب برای order_management بر اساس customer_orders
    * ENHANCED VERSION - منطق بهبود یافته با پیشگیری از regression
    * CRITICAL FIX - منطق صحیح برای manually approved partial payments
+   * WALLET SUPPORT - پشتیبانی از سفارشات کیف پول
    */
-  private determineManagementStatus(customerStatus: string, paymentStatus: string, isManuallyApproved?: boolean): string {
+  private determineManagementStatus(customerStatus: string, paymentStatus: string, isManuallyApproved?: boolean, paymentMethod?: string): string {
     // console.log(`🔄 [STATUS MAPPING] Customer: ${customerStatus}, Payment: ${paymentStatus}`); // Reduced logging
     
     // اولویت اول: وضعیت‌های نهایی
@@ -326,7 +329,9 @@ export class SyncService {
     // اولویت سوم: وضعیت‌های پرداخت - منطق بهبود یافته
     if (customerStatus === 'pending') {
       if (paymentStatus === 'paid') {
-        // پرداخت کامل انجام شده - مستقیماً به انبار
+        // 💰 WALLET LOGIC: پرداخت کامل انجام شده - مستقیماً به انبار
+        // سفارشات wallet_full خودکار تایید مالی محسوب می‌شوند
+        console.log(`💰 [STATUS MAPPING] Paid order (${paymentMethod}) moving to warehouse`);
         return 'warehouse_pending';
       } else if (paymentStatus === 'receipt_uploaded') {
         // فیش آپلود شده - نیاز به بررسی مالی
@@ -391,7 +396,8 @@ export class SyncService {
         const expectedStatus = this.determineManagementStatus(
           customerOrder.status,
           customerOrder.paymentStatus,
-          isManuallyApproved
+          isManuallyApproved,
+          customerOrder.paymentMethod || undefined
         );
 
         if (expectedStatus !== managementOrder.currentStatus && !isManuallyApproved) {
