@@ -5711,11 +5711,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      // Return HTML directly for better compatibility and user control
-      console.log('🏷️  [CUSTOM LABELS] Generating HTML for custom labels');
-      res.setHeader('Content-Type', 'text/html; charset=utf-8');
-      res.setHeader('Content-Disposition', 'attachment; filename="Custom_Product_Labels.html"');
-      res.send(labelHTML);
+      // Generate PDF using Puppeteer for direct download
+      console.log('🏷️  [CUSTOM LABELS] Generating PDF for custom labels');
+      try {
+        const browser = await puppeteer.launch({
+          headless: true,
+          args: ['--no-sandbox', '--disable-setuid-sandbox']
+        });
+        
+        const page = await browser.newPage();
+        await page.setContent(labelHTML, { waitUntil: 'networkidle0' });
+        
+        const pdfBuffer = await page.pdf({
+          format: 'A4',
+          printBackground: true,
+          margin: {
+            top: '10mm',
+            right: '10mm',
+            bottom: '10mm',
+            left: '10mm'
+          }
+        });
+        
+        await browser.close();
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="Custom_Product_Labels_${new Date().toISOString().split('T')[0]}.pdf"`);
+        res.send(pdfBuffer);
+      } catch (pdfError) {
+        console.log('PDF generation failed, falling back to HTML:', pdfError.message);
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.setHeader('Content-Disposition', 'attachment; filename="Custom_Product_Labels.html"');
+        res.send(labelHTML);
+      }
 
       console.log(`✅ [CUSTOM LABELS] Generated custom labels for ${products.length} products`);
     } catch (error) {
@@ -5752,9 +5780,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // For roll printer, return HTML directly for better compatibility
       if (labelSize === 'roll') {
         console.log('🏷️  [LABELS] Generating HTML for roll printer');
-        res.setHeader('Content-Type', 'text/html; charset=utf-8');
-        res.setHeader('Content-Disposition', 'inline; filename="Roll_Labels.html"');
-        return res.send(labelHTML);
+        // Generate PDF for roll printer too
+        try {
+          const browser = await puppeteer.launch({
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+          });
+          
+          const page = await browser.newPage();
+          await page.setContent(labelHTML, { waitUntil: 'networkidle0' });
+          
+          const pdfBuffer = await page.pdf({
+            format: 'A4',
+            printBackground: true,
+            margin: {
+              top: '5mm',
+              right: '5mm', 
+              bottom: '5mm',
+              left: '5mm'
+            }
+          });
+          
+          await browser.close();
+
+          res.setHeader('Content-Type', 'application/pdf');
+          res.setHeader('Content-Disposition', `attachment; filename="Roll_Labels_${new Date().toISOString().split('T')[0]}.pdf"`);
+          return res.send(pdfBuffer);
+        } catch (pdfError) {
+          console.log('PDF generation failed for roll printer, falling back to HTML:', pdfError.message);
+          res.setHeader('Content-Type', 'text/html; charset=utf-8');
+          res.setHeader('Content-Disposition', 'inline; filename="Roll_Labels.html"');
+          return res.send(labelHTML);
+        }
       }
 
       // For other sizes, generate PDF using Puppeteer
@@ -30634,10 +30691,10 @@ momtazchem.com
         format: 'A4',
         printBackground: true,
         margin: {
-          top: '20mm',
-          right: '15mm',
-          bottom: '20mm',
-          left: '15mm'
+          top: '10mm',
+          right: '10mm',
+          bottom: '10mm',
+          left: '100mm'
         }
       });
       
@@ -30653,6 +30710,42 @@ momtazchem.com
     } catch (error) {
       console.error('Error generating invoice PDF:', error);
       res.status(500).json({ success: false, message: 'Failed to generate invoice PDF' });
+    }
+  });
+
+  // Financial order print endpoint
+  app.post('/api/financial/print-order', requireAuth, async (req, res) => {
+    try {
+      const { htmlContent, filename } = req.body;
+      
+      const browser = await puppeteer.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+      });
+      
+      const page = await browser.newPage();
+      await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+      
+      const pdfBuffer = await page.pdf({
+        format: 'A4',
+        printBackground: true,
+        margin: {
+          top: '10mm',
+          right: '10mm',
+          bottom: '10mm',
+          left: '100mm'
+        }
+      });
+      
+      await browser.close();
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename || 'financial-order.pdf'}"`);
+      res.send(pdfBuffer);
+      
+    } catch (error) {
+      console.error('Error generating financial order PDF:', error);
+      res.status(500).json({ success: false, message: 'Failed to generate PDF' });
     }
   });
 

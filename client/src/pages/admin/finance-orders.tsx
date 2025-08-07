@@ -775,13 +775,10 @@ function FinanceOrders() {
   });
 
   // Print function for order details - Enhanced to match screen display
-  const handlePrintOrder = () => {
+  const handlePrintOrder = async () => {
     if (!orderDetails) return;
 
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
-
-    // Calculate total amount from items
+    // Send print content to server for PDF generation
     const itemsTotal = orderDetails.items?.reduce((sum: number, item: any) => {
       const itemTotal = parseFloat(item.price || 0) * parseInt(item.quantity || 0);
       return sum + (isNaN(itemTotal) ? 0 : itemTotal);
@@ -1110,29 +1107,40 @@ function FinanceOrders() {
     </html>
     `;
 
-    printWindow.document.write(printContent);
-    printWindow.document.close();
-    printWindow.focus();
-    
-    // اضافه کردن event listener برای بستن خودکار پنجره بعد از پرینت
-    printWindow.onbeforeunload = function() { 
-      return null; 
-    };
-    
-    printWindow.onafterprint = function() {
-      setTimeout(() => {
-        printWindow.close();
-      }, 500);
-    };
-    
-    // برای مرورگرهایی که onafterprint را پشتیبانی نمی‌کنند
-    setTimeout(() => {
-      if (printWindow && !printWindow.closed) {
-        printWindow.close();
+    // Send to server for PDF generation and download
+    try {
+      const response = await fetch('/api/financial/print-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          htmlContent: printContent,
+          filename: `order-${orderDetails.orderNumber}.pdf`
+        })
+      });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `order-${orderDetails.orderNumber}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } else {
+        throw new Error('Failed to generate PDF');
       }
-    }, 3000);
-    
-    printWindow.print();
+    } catch (error) {
+      console.error('PDF generation failed:', error);
+      toast({
+        title: "خطا در تولید PDF",
+        description: "نتوانستیم فایل PDF را تولید کنیم. لطفاً مجدداً تلاش کنید.",
+        variant: "destructive",
+      });
+    }
   };
 
   // Handle accept order from order details modal
@@ -1370,7 +1378,7 @@ function FinanceOrders() {
                           <div className="flex items-center gap-2 text-sm text-blue-700">
                             <CheckCircle className="h-4 w-4" />
                             <span className="font-medium">
-                              <PaymentMethodBadge paymentMethod={order.paymentMethod} size="sm" />
+                              <PaymentMethodBadge paymentMethod={order.paymentMethod} />
                               - نیاز به تایید دستی مالی
                             </span>
                           </div>
@@ -3003,7 +3011,7 @@ function OrderCard({ order, onOrderSelect, readOnly = false, fetchOrderDetails }
               )}
               <div className="flex justify-between items-center text-xs">
                 <span className="text-gray-600">پرداخت:</span>
-                <PaymentMethodBadge paymentMethod={order.paymentMethod} size="xs" />
+                <PaymentMethodBadge paymentMethod={order.paymentMethod} />
               </div>
             </div>
           </div>
