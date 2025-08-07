@@ -35251,7 +35251,51 @@ momtazchem.com
     }
   });
 
-  // Warehouse Department - Get orders approved by finance (NO AUTHENTICATION)
+  // Warehouse Department - Get orders approved by finance
+  app.get("/api/warehouse/orders", async (req: Request, res: Response) => {
+    try {
+      console.log('📦 [WAREHOUSE] Getting warehouse orders...');
+      
+      // Use the getOrdersByDepartment method to get warehouse orders
+      const orders = await orderManagementStorage.getOrdersByDepartment('warehouse');
+      
+      console.log('📦 [WAREHOUSE] Retrieved', orders.length, 'orders for warehouse');
+      
+      // Transform orders to include shipping cost for frontend
+      const transformedOrders = orders.map((order: any) => ({
+        id: order.id,
+        customerOrderId: order.customerOrderId,
+        customerName: `${order.customerFirstName || ''} ${order.customerLastName || ''}`.trim(),
+        customerEmail: order.customerEmail,
+        customerPhone: order.customerPhone,
+        customerAddress: order.shippingAddress ? 
+          (typeof order.shippingAddress === 'string' ? 
+            order.shippingAddress : 
+            JSON.stringify(order.shippingAddress)) : 
+          'آدرس نامشخص',
+        orderTotal: order.totalAmount || 0,
+        shippingCost: order.shippingCost || 0, // Include shipping cost
+        currentStatus: order.currentStatus,
+        warehouseNotes: order.warehouseNotes,
+        warehouseProcessedAt: order.warehouseProcessedAt,
+        financialReviewedAt: order.financialReviewedAt,
+        financialNotes: order.financialNotes,
+        orderDate: order.createdAt,
+        orderItems: order.orderItems || []
+      }));
+      
+      res.json(transformedOrders);
+    } catch (error) {
+      console.error('📦 [WAREHOUSE] Error fetching orders:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در دریافت سفارشات انبار",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Warehouse Department - Get orders approved by finance (NO AUTHENTICATION - Legacy)
   app.get("/api/warehouse/orders-noauth", async (req: Request, res: Response) => {
     try {
       console.log('📦 [WAREHOUSE-NOAUTH] Getting warehouse orders...');

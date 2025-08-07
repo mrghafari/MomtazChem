@@ -28,6 +28,7 @@ interface Order {
   customerPhone: string;
   customerAddress: string;
   orderTotal: number;
+  shippingCost?: number;
   currentStatus: string;
   warehouseNotes?: string;
   warehouseProcessedAt?: string;
@@ -295,7 +296,7 @@ export default function WarehouseOrders() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     <div>
                       <p className="text-sm text-gray-600">آدرس تحویل</p>
                       <p className="font-medium">{order.customerAddress}</p>
@@ -304,6 +305,12 @@ export default function WarehouseOrders() {
                       <p className="text-sm text-gray-600">تلفن مشتری</p>
                       <p className="font-medium">{order.customerPhone}</p>
                     </div>
+                    {order.shippingCost && order.shippingCost > 0 && (
+                      <div>
+                        <p className="text-sm text-gray-600">هزینه حمل</p>
+                        <p className="font-medium text-blue-600">{formatCurrency(order.shippingCost, 'IQD')}</p>
+                      </div>
+                    )}
                   </div>
 
                   {/* Financial Notes */}
@@ -377,6 +384,12 @@ export default function WarehouseOrders() {
                     <span className="text-gray-600">مبلغ کل:</span>
                     <span className="font-medium mr-2">{formatCurrency(selectedOrder.orderTotal, 'IQD')}</span>
                   </div>
+                  {selectedOrder.shippingCost && selectedOrder.shippingCost > 0 && (
+                    <div>
+                      <span className="text-gray-600">هزینه حمل:</span>
+                      <span className="font-medium mr-2 text-blue-600">{formatCurrency(selectedOrder.shippingCost, 'IQD')}</span>
+                    </div>
+                  )}
                   <div className="col-span-2">
                     <span className="text-gray-600">آدرس تحویل:</span>
                     <span className="font-medium mr-2">{selectedOrder.customerAddress}</span>
