@@ -1,0 +1,87 @@
+webrtc:196 Tawk.to script loaded successfully
+chunk-RPCDYKBN.js?v=9a303653:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+api/webrtc/rooms:1  Failed to load resource: the server responded with a status of 404 (Not Found)
+useWebRTC.ts:53 🔌 Connected to WebRTC server
+128x128:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:117574)
+    at t.value (twk-chunk-common.js:2:150658)
+    at p.updateUUID (twk-chunk-common.js:2:202310)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:124589)
+    at twk-chunk-common.js:2:123900
+value @ twk-chunk-common.js:2
+about:blank:1 [Intervention] Slow network is detected. See https://www.chromestatus.com/feature/5636954674692096 for more details. Fallback font will be used while loading: https://embed.tawk.to/_s/v4/assets/fonts/tawk-font-icon-3.woff?55755728=
+webrtc:168 Tawk.to Live Chat loaded successfully
+about:blank:1 [Intervention] Slow network is detected. See https://www.chromestatus.com/feature/5636954674692096 for more details. Fallback font will be used while loading: https://embed.tawk.to/_s/v4/assets/fonts/tawk-font-icon-3.woff?55755728=
+api/webrtc/rooms:1  Failed to load resource: the server responded with a status of 404 (Not Found)
+api/webrtc/rooms:1  Failed to load resource: the server responded with a status of 404 (Not Found)
+api/webrtc/rooms:1  Failed to load resource: the server responded with a status of 404 (Not Found)
+api/webrtc/rooms:1  Failed to load resource: the server responded with a status of 404 (Not Found)
+api/webrtc/rooms:1  Failed to load resource: the server responded with a status of 400 (Bad Request)
+api/webrtc/rooms:1  Failed to load resource: the server responded with a status of 404 (Not Found)
+api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+api/webrtc/rooms:1  Failed to load resource: the server responded with a status of 404 (Not Found)
+queryClient.ts:81  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/webrtc/rooms 404 (Not Found)
+(anonymous) @ queryClient.ts:81
+fetchFn @ @tanstack_react-query.js?v=9a303653:840
+run @ @tanstack_react-query.js?v=9a303653:494
+start @ @tanstack_react-query.js?v=9a303653:536
+fetch @ @tanstack_react-query.js?v=9a303653:926
+executeFetch_fn @ @tanstack_react-query.js?v=9a303653:2211
+(anonymous) @ @tanstack_react-query.js?v=9a303653:2245
+queryClient.ts:54  POST https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/webrtc/rooms 400 (Bad Request)
+apiRequest @ queryClient.ts:54
+mutationFn @ webrtc.tsx:66
+fn @ @tanstack_react-query.js?v=9a303653:1189
+run @ @tanstack_react-query.js?v=9a303653:494
+start @ @tanstack_react-query.js?v=9a303653:536
+execute @ @tanstack_react-query.js?v=9a303653:1225
+await in execute
+mutate @ @tanstack_react-query.js?v=9a303653:2630
+(anonymous) @ @tanstack_react-query.js?v=9a303653:3295
+handleCreateRoom @ webrtc.tsx:101
+callCallback2 @ chunk-RPCDYKBN.js?v=9a303653:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=9a303653:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=9a303653:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=9a303653:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=9a303653:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=9a303653:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=9a303653:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=9a303653:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=9a303653:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=9a303653:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=9a303653:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=9a303653:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=9a303653:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=9a303653:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=9a303653:5449
+queryClient.ts:81  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/webrtc/rooms 404 (Not Found)
+(anonymous) @ queryClient.ts:81
+fetchFn @ @tanstack_react-query.js?v=9a303653:840
+run @ @tanstack_react-query.js?v=9a303653:494
+start @ @tanstack_react-query.js?v=9a303653:536
+fetch @ @tanstack_react-query.js?v=9a303653:926
+executeFetch_fn @ @tanstack_react-query.js?v=9a303653:2211
+(anonymous) @ @tanstack_react-query.js?v=9a303653:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=9a303653:2243
+updateTimers_fn @ @tanstack_react-query.js?v=9a303653:2250
+onQueryUpdate @ @tanstack_react-query.js?v=9a303653:2206
+(anonymous) @ @tanstack_react-query.js?v=9a303653:998
+(anonymous) @ @tanstack_react-query.js?v=9a303653:997
+batch @ @tanstack_react-query.js?v=9a303653:583
+dispatch_fn @ @tanstack_react-query.js?v=9a303653:996
+onError @ @tanstack_react-query.js?v=9a303653:861
+reject @ @tanstack_react-query.js?v=9a303653:465
+(anonymous) @ @tanstack_react-query.js?v=9a303653:508
+Promise.catch
+run @ @tanstack_react-query.js?v=9a303653:498
+start @ @tanstack_react-query.js?v=9a303653:536
+fetch @ @tanstack_react-query.js?v=9a303653:926
+executeFetch_fn @ @tanstack_react-query.js?v=9a303653:2211
+(anonymous) @ @tanstack_react-query.js?v=9a303653:2245

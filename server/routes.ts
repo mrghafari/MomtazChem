@@ -1,7 +1,5 @@
 import express, { type Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
-import webrtcRoutes from "./webrtc-routes";
-import { setupWebRTCSocket } from "./webrtc-socket";
 import bcrypt from "bcryptjs";
 import multer from "multer";
 import path from "path";
@@ -40,8 +38,7 @@ import { findCorruptedOrders, getDataIntegrityStats, validateOrderIntegrity, mar
 import { z } from "zod";
 import * as schema from "@shared/schema";
 const { crmCustomers, iraqiProvinces, iraqiCities, abandonedOrders, contentItems, footerSettings } = schema;
-import webrtcRoutes from "./webrtc-routes";
-import { setupWebRTCSocket } from "./webrtc-socket";
+import { webrtcRooms, roomParticipants, chatMessages } from "@shared/webrtc-schema";
 import { orderManagement, shippingRates, deliveryMethods, paymentReceipts } from "@shared/order-management-schema";
 import { generateEAN13Barcode, validateEAN13, parseEAN13Barcode, isMomtazchemBarcode } from "@shared/barcode-utils";
 import { generateSmartSKU, validateSKUUniqueness } from "./ai-sku-generator";
@@ -46296,11 +46293,85 @@ momtazchem.com
   // WEBRTC ROUTES
   // =============================================================================
   
-  // Use WebRTC routes
-  app.use("/api/webrtc", webrtcRoutes);
+  // WebRTC Rooms Management
+  app.get("/api/webrtc/rooms", async (req: Request, res: Response) => {
+    try {
+      console.log("📋 [WebRTC] Getting rooms list");
+      const roomsResult = await db.select().from(webrtcRooms)
+        .where(eq(webrtcRooms.isActive, true))
+        .orderBy(desc(webrtcRooms.createdAt));
 
-  // Setup WebRTC Socket
-  setupWebRTCSocket(httpServer);
+      const roomsWithCounts = await Promise.all(
+        roomsResult.map(async (room) => {
+          const participantsResult = await db.select().from(roomParticipants)
+            .where(and(
+              eq(roomParticipants.roomId, room.id),
+              isNull(roomParticipants.leftAt)
+            ));
+          
+          return {
+            ...room,
+            participantCount: participantsResult.length
+          };
+        })
+      );
+
+      console.log(`📋 [WebRTC] Found ${roomsWithCounts.length} active rooms`);
+      res.json({
+        success: true,
+        data: roomsWithCounts
+      });
+    } catch (error) {
+      console.error("❌ [WebRTC] Get rooms error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to get rooms"
+      });
+    }
+  });
+
+  app.post("/api/webrtc/rooms", async (req: Request, res: Response) => {
+    try {
+      console.log("🏗️ [WebRTC] Creating new room:", req.body);
+      const { name, description, maxParticipants, createdBy } = req.body;
+      
+      const roomId = `room_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const room = {
+        id: roomId,
+        name,
+        description: description || "",
+        createdBy,
+        maxParticipants: maxParticipants || 10,
+        isActive: true,
+        settings: {},
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+
+      await db.insert(webrtcRooms).values(room);
+      
+      console.log("✅ [WebRTC] Room created:", roomId);
+      res.json({
+        success: true,
+        data: room
+      });
+    } catch (error) {
+      console.error("❌ [WebRTC] Create room error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to create room"
+      });
+    }
+  });
+
+  // Test route to verify routing works
+  app.get("/api/webrtc/test", (req: Request, res: Response) => {
+    console.log("🧪 [WebRTC] Test route called");
+    res.json({ success: true, message: "WebRTC routing works!" });
+  });
+
+  // WebRTC Socket will be setup in index.ts
+  console.log("🔌 [WebRTC] Routes initialized");
 
   return httpServer;
 }
