@@ -73,6 +73,7 @@ import PaintThinner from "@/pages/products/paint-thinner";
 import AgriculturalFertilizers from "@/pages/products/agricultural-fertilizers";
 import OtherProducts from "@/pages/products/other";
 import PaintSolvents from "@/pages/paint-solvents";
+import WebRTC from "@/pages/webrtc";
 import IndustrialChemicals from "@/pages/industrial-chemicals";
 import CommercialGoods from "@/pages/commercial-goods";
 import TechnicalEquipment from "@/pages/technical-equipment";
@@ -307,6 +308,7 @@ function Router() {
           <Route path="/product-reviews/:id" component={ProductReviews} />
           <Route path="/quote" component={QuotePage} />
           <Route path="/documentation" component={DocumentationPage} />
+          <Route path="/webrtc" component={WebRTC} />
           <Route component={NotFound} />
         </Switch>
       </main>

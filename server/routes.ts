@@ -1,5 +1,7 @@
 import express, { type Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
+import webrtcRoutes from "./webrtc-routes";
+import { setupWebRTCSocket } from "./webrtc-socket";
 import bcrypt from "bcryptjs";
 import multer from "multer";
 import path from "path";
@@ -38,6 +40,8 @@ import { findCorruptedOrders, getDataIntegrityStats, validateOrderIntegrity, mar
 import { z } from "zod";
 import * as schema from "@shared/schema";
 const { crmCustomers, iraqiProvinces, iraqiCities, abandonedOrders, contentItems, footerSettings } = schema;
+import webrtcRoutes from "./webrtc-routes";
+import { setupWebRTCSocket } from "./webrtc-socket";
 import { orderManagement, shippingRates, deliveryMethods, paymentReceipts } from "@shared/order-management-schema";
 import { generateEAN13Barcode, validateEAN13, parseEAN13Barcode, isMomtazchemBarcode } from "@shared/barcode-utils";
 import { generateSmartSKU, validateSKUUniqueness } from "./ai-sku-generator";
@@ -46287,6 +46291,16 @@ momtazchem.com
       });
     }
   });
+
+  // =============================================================================
+  // WEBRTC ROUTES
+  // =============================================================================
+  
+  // Use WebRTC routes
+  app.use("/api/webrtc", webrtcRoutes);
+
+  // Setup WebRTC Socket
+  setupWebRTCSocket(httpServer);
 
   return httpServer;
 }
