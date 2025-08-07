@@ -63,13 +63,12 @@ function mapProductInterestToCategory(productInterest: string): string {
     'water-treatment': 'water-treatment',
     'fuel-additives': 'fuel-additives',
     'paint-solvents': 'paint-thinner',
-
-    'agricultural-fertilizers': 'agricultural-fertilizers',
-    'industrial-chemicals': 'admin',
     'paint-thinner': 'paint-thinner',
-    'technical-equipment': 'admin',
-    'commercial-goods': 'admin',
-    'custom-solutions': 'orders', // Custom solutions go to Sales department
+    'agricultural-fertilizers': 'agricultural-fertilizers',
+    'industrial-chemicals': 'sales', // Route to sales department
+    'technical-equipment': 'sales', // Route to sales department
+    'commercial-goods': 'sales', // Route to sales department
+    'custom-solutions': 'sales', // Custom solutions go to Sales department
   };
   
   return mapping[productInterest] || 'admin'; // Default to admin if no match

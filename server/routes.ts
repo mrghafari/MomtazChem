@@ -3594,8 +3594,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'agricultural-fertilizers': 'agricultural-fertilizers',
         'industrial-chemicals': 'industrial-chemicals',
         'paint-thinner': 'paint-thinner',
-        'technical-equipment': 'technical-equipment',
+        'technical-equipment': 'sales', // Route to sales department
         'commercial-goods': 'commercial-goods',
+        'custom-solutions': 'sales', // Route to sales department
         'other-products': 'orders'
       };
 

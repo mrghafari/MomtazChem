@@ -247,16 +247,14 @@ const Contact = () => {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="water-treatment">Water Treatment</SelectItem>
-                            <SelectItem value="fuel-additives">Fuel Additives</SelectItem>
-                            <SelectItem value="paint-solvents">Paint & Solvents</SelectItem>
-
-                            <SelectItem value="agricultural-fertilizers">Agricultural Fertilizers</SelectItem>
-                            <SelectItem value="industrial-chemicals">Industrial Chemicals</SelectItem>
-                            <SelectItem value="paint-thinner">Paint Thinner</SelectItem>
-                            <SelectItem value="technical-equipment">Technical Equipment</SelectItem>
-                            <SelectItem value="commercial-goods">Commercial Goods</SelectItem>
-                            <SelectItem value="custom-solutions">Custom Solutions</SelectItem>
+                            <SelectItem value="water-treatment">Water Treatment - پکیج تصفیه آب</SelectItem>
+                            <SelectItem value="fuel-additives">Fuel Additives - مکمل‌های سوخت</SelectItem>
+                            <SelectItem value="paint-thinner">Paint & Thinner - رنگ و تینر</SelectItem>
+                            <SelectItem value="agricultural-fertilizers">Agricultural Fertilizers - کودهای کشاورزی</SelectItem>
+                            <SelectItem value="industrial-chemicals">Industrial Chemicals - مواد شیمیایی صنعتی</SelectItem>
+                            <SelectItem value="technical-equipment">Technical Equipment - تجهیزات فنی</SelectItem>
+                            <SelectItem value="commercial-goods">Commercial Goods - کالاهای تجاری</SelectItem>
+                            <SelectItem value="custom-solutions">Custom Solutions - راه‌حل‌های سفارشی</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
