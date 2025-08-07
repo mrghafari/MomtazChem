@@ -5476,12 +5476,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           body { 
             margin: 0; 
-            padding: 10mm; 
+            padding: 8mm; 
             font-family: Arial, sans-serif;
+            font-size: 10px;
             background: white;
             color: black;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
+            max-width: 100%;
+            overflow-wrap: break-word;
           }
           
           .labels-container {
@@ -5494,15 +5497,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           @page {
             size: A4;
-            margin: 10mm;
+            margin: 8mm;
           }
           
           @media print {
             body { 
               margin: 0; 
-              padding: 10mm;
+              padding: 5mm;
+              font-size: 9px;
               -webkit-print-color-adjust: exact;
               print-color-adjust: exact;
+              max-width: 100%;
             }
             
             .no-print { 

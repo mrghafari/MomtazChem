@@ -49,21 +49,28 @@ export async function generateCustomerPDFHTML(
     
     body {
       font-family: 'Noto Sans Arabic', 'Tahoma', 'Arial Unicode MS', sans-serif;
-      line-height: 1.6;
+      line-height: 1.4;
       color: #333;
       background: #fff;
       direction: rtl;
-      padding: 20px;
-      font-size: 14px;
+      padding: 15px;
+      font-size: 12px;
+      max-width: 100%;
+      overflow-wrap: break-word;
     }
     
     @media print {
       body {
-        padding: 0;
-        font-size: 12px;
+        padding: 5mm;
+        font-size: 10px;
+        line-height: 1.3;
       }
       .no-print {
         display: none;
+      }
+      * {
+        max-width: 100% !important;
+        word-wrap: break-word !important;
       }
     }
     
@@ -75,23 +82,23 @@ export async function generateCustomerPDFHTML(
     }
     
     .company-name {
-      font-size: 24px;
+      font-size: 18px;
       font-weight: bold;
       color: #2563eb;
       margin-bottom: 5px;
     }
     
     .company-name-en {
-      font-size: 18px;
+      font-size: 14px;
       color: #666;
       direction: ltr;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
     
     .report-title {
-      font-size: 20px;
+      font-size: 16px;
       font-weight: bold;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
     
     .report-date {
@@ -100,20 +107,22 @@ export async function generateCustomerPDFHTML(
     }
     
     .section {
-      margin-bottom: 25px;
-      padding: 15px;
+      margin-bottom: 15px;
+      padding: 10px;
       border: 1px solid #e5e7eb;
-      border-radius: 8px;
+      border-radius: 6px;
       page-break-inside: avoid;
+      max-width: 100%;
     }
     
     .section-title {
-      font-size: 16px;
+      font-size: 14px;
       font-weight: bold;
       color: #2563eb;
-      margin-bottom: 15px;
-      padding-bottom: 8px;
-      border-bottom: 2px solid #e5e7eb;
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #e5e7eb;
+      word-wrap: break-word;
     }
     
     .info-grid {
@@ -144,14 +153,17 @@ export async function generateCustomerPDFHTML(
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 15px;
-      font-size: 12px;
+      margin-top: 10px;
+      font-size: 10px;
+      max-width: 100%;
     }
     
     th, td {
       border: 1px solid #e5e7eb;
-      padding: 8px;
+      padding: 6px;
       text-align: center;
+      word-wrap: break-word;
+      max-width: 150px;
     }
     
     th {
