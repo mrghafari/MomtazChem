@@ -298,16 +298,18 @@ export class OrderManagementStorage implements IOrderManagementStorage {
           const phoneSource = customerData.recipientMobile ? 'recipient mobile' : 'customer phone';
           
           // Generate delivery code
-          const deliveryCode = await this.generateDeliveryCode(currentOrder.id, targetPhone);
+          const deliveryCode = targetPhone ? await this.generateDeliveryCode(currentOrder.id, targetPhone) : 'NO_PHONE';
           
           // Send SMS using template 3 to target phone
-          await this.sendDeliveryCodeSms(
-            targetPhone, 
-            deliveryCode, 
-            customerData.customerOrderId,
-            customerName || 'مشتری عزیز',
-            orderNumber
-          );
+          if (targetPhone) {
+            await this.sendDeliveryCodeSms(
+              targetPhone, 
+              deliveryCode, 
+              customerData.customerOrderId,
+              customerName || 'مشتری عزیز',
+              orderNumber
+            );
+          }
           
           console.log(`✅ [AUTO SMS TEMPLATE 3] Delivery code ${deliveryCode} sent to ${phoneSource}: ${targetPhone} for order ${orderNumber}`);
         } else {
@@ -504,12 +506,12 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       console.log('🏋️ [WEIGHT] Calculating weight for customer order:', customerOrderId);
       
       const items = await db.select({
-        itemId: orderItems.itemId,
+        itemId: orderItems.id,
         quantity: orderItems.quantity,
         productWeight: shopProducts.weight // وزن از جدول shop_products
       })
       .from(orderItems)
-      .leftJoin(shopProducts, eq(orderItems.itemId, shopProducts.id))
+      .leftJoin(shopProducts, eq(orderItems.id, shopProducts.id))
       .where(eq(orderItems.orderId, customerOrderId));
       
       let totalWeight = 0;
