@@ -46370,8 +46370,10 @@ momtazchem.com
     res.json({ success: true, message: "WebRTC routing works!" });
   });
 
-  // WebRTC Socket will be setup in index.ts
-  console.log("🔌 [WebRTC] Routes initialized");
+  // Initialize WebRTC Socket
+  const { setupWebRTCSocket } = await import("./webrtc-socket");
+  setupWebRTCSocket(httpServer);
+  console.log("🔌 [WebRTC] Routes and Socket initialized");
 
   return httpServer;
 }
