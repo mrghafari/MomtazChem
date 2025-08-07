@@ -1273,9 +1273,9 @@ const Shop = () => {
                             </div>
                           </div>
                           
-                          {/* Flammable Product Badge - Top Right */}
+                          {/* Flammable Product Badge - Top Left */}
                           {product.isFlammable && (
-                            <Badge variant="outline" className="absolute top-2 right-2 bg-orange-100 text-orange-800 border-orange-300 flex items-center gap-1">
+                            <Badge variant="outline" className="absolute top-2 left-2 bg-orange-100 text-orange-800 border-orange-300 flex items-center gap-1">
                               <Flame className="w-3 h-3" />
                               آتش‌زا
                             </Badge>
@@ -1693,9 +1693,9 @@ const Shop = () => {
                             </div>
                           </div>
                           
-                          {/* Flammable Product Badge - Top Right - List View */}
+                          {/* Flammable Product Badge - Top Left - List View */}
                           {product.isFlammable && (
-                            <Badge variant="outline" className="absolute top-2 right-2 bg-orange-100 text-orange-800 border-orange-300 flex items-center gap-1">
+                            <Badge variant="outline" className="absolute top-2 left-2 bg-orange-100 text-orange-800 border-orange-300 flex items-center gap-1">
                               <Flame className="w-3 h-3" />
                               آتش‌زا
                             </Badge>
