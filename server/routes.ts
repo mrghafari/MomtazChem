@@ -29107,6 +29107,83 @@ ${message ? `Additional Requirements:\n${message}` : ''}
     }
   });
 
+  // Global Email Settings API Routes
+  
+  // Get global email settings
+  app.get('/api/admin/email/global-settings', requireAuth, async (req, res) => {
+    try {
+      console.log("📧 [GLOBAL SETTINGS] Fetching global email settings");
+      
+      const { pool } = await import('./db');
+      const result = await pool.query(`
+        SELECT setting_key, setting_value, description
+        FROM global_email_settings 
+        WHERE is_active = true
+      `);
+      
+      console.log("📧 [GLOBAL SETTINGS] Found settings:", result.rows);
+      
+      // Convert to object format for easier frontend use
+      const settingsObj = result.rows.reduce((acc, setting) => {
+        acc[setting.setting_key] = setting.setting_value;
+        return acc;
+      }, {} as Record<string, string | null>);
+
+      res.json({
+        success: true,
+        settings: settingsObj
+      });
+    } catch (error) {
+      console.error("Error fetching global email settings:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch global email settings"
+      });
+    }
+  });
+
+  // Update global email setting
+  app.post('/api/admin/email/global-settings', requireAuth, async (req, res) => {
+    try {
+      const { settingKey, settingValue, description } = req.body;
+      
+      if (!settingKey) {
+        return res.status(400).json({
+          success: false,
+          message: "Setting key is required"
+        });
+      }
+
+      console.log("📧 [GLOBAL SETTINGS] Updating setting:", { settingKey, settingValue, description });
+
+      const { pool } = await import('./db');
+      
+      // Use UPSERT with ON CONFLICT
+      await pool.query(`
+        INSERT INTO global_email_settings (setting_key, setting_value, description, is_active, created_at, updated_at)
+        VALUES ($1, $2, $3, true, NOW(), NOW())
+        ON CONFLICT (setting_key)
+        DO UPDATE SET 
+          setting_value = EXCLUDED.setting_value,
+          description = EXCLUDED.description,
+          updated_at = NOW()
+      `, [settingKey, settingValue, description]);
+
+      console.log("📧 [GLOBAL SETTINGS] Setting updated successfully");
+
+      res.json({
+        success: true,
+        message: "Setting updated successfully"
+      });
+    } catch (error) {
+      console.error("Error updating global email setting:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to update setting"
+      });
+    }
+  });
+
   // Send verification code
   app.post('/api/super-admin/send-verification', requireAuth, async (req, res) => {
     try {

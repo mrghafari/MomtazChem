@@ -106,6 +106,11 @@ export default function AdvancedEmailSettingsPage() {
   const [isValidating, setIsValidating] = useState(false);
   const [validationResult, setValidationResult] = useState<any>(null);
   
+  // Global email settings state
+  const [globalSettings, setGlobalSettings] = useState<{[key: string]: string}>({});
+  const [ccAddresses, setCcAddresses] = useState<string[]>([]);
+  const [newCcAddress, setNewCcAddress] = useState('');
+  
 
 
   // Check authentication
@@ -149,6 +154,83 @@ export default function AdvancedEmailSettingsPage() {
     queryKey: ["/api/admin/email/category-assignments"],
     queryFn: () => fetch("/api/admin/email/category-assignments").then(res => res.json())
   });
+
+  // Load global email settings
+  const { data: globalSettingsData } = useQuery({
+    queryKey: ["/api/admin/email/global-settings"],
+    queryFn: async () => {
+      const response = await fetch("/api/admin/email/global-settings");
+      return response.json();
+    }
+  });
+
+  // Initialize global settings when data loads
+  useEffect(() => {
+    if (globalSettingsData?.success && globalSettingsData.settings) {
+      setGlobalSettings(globalSettingsData.settings);
+      
+      // Parse CC addresses if they exist
+      const ccAddressesString = globalSettingsData.settings.default_cc_addresses;
+      if (ccAddressesString) {
+        try {
+          const parsed = JSON.parse(ccAddressesString);
+          setCcAddresses(Array.isArray(parsed) ? parsed : []);
+        } catch {
+          setCcAddresses([]);
+        }
+      }
+    }
+  }, [globalSettingsData]);
+
+  // Update global email settings mutation
+  const updateGlobalSettingMutation = useMutation({
+    mutationFn: (data: { settingKey: string; settingValue: string; description?: string }) =>
+      fetch("/api/admin/email/global-settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      }).then(res => res.json()),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/email/global-settings"] });
+      toast({ title: "Global setting updated successfully" });
+    },
+    onError: () => {
+      toast({ title: "Failed to update global setting", variant: "destructive" });
+    }
+  });
+
+  // Helper functions for CC address management
+  const addCcAddress = () => {
+    if (!newCcAddress.trim()) return;
+    
+    if (!newCcAddress.includes('@')) {
+      toast({ title: "Please enter a valid email address", variant: "destructive" });
+      return;
+    }
+
+    const updatedAddresses = [...ccAddresses, newCcAddress.trim()];
+    setCcAddresses(updatedAddresses);
+    setNewCcAddress('');
+    
+    // Update in database
+    updateGlobalSettingMutation.mutate({
+      settingKey: 'default_cc_addresses',
+      settingValue: JSON.stringify(updatedAddresses),
+      description: 'Default CC email addresses for all outgoing emails'
+    });
+  };
+
+  const removeCcAddress = (index: number) => {
+    const updatedAddresses = ccAddresses.filter((_, i) => i !== index);
+    setCcAddresses(updatedAddresses);
+    
+    // Update in database
+    updateGlobalSettingMutation.mutate({
+      settingKey: 'default_cc_addresses',
+      settingValue: JSON.stringify(updatedAddresses),
+      description: 'Default CC email addresses for all outgoing emails'
+    });
+  };
 
   // Save SMTP settings
   const saveSmtpMutation = useMutation({
@@ -1355,12 +1437,48 @@ export default function AdvancedEmailSettingsPage() {
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="border rounded-lg p-4">
-                          <h4 className="font-medium mb-2">Current CC Email</h4>
+                          <h4 className="font-medium mb-2">CC Email Addresses</h4>
                           <p className="text-sm text-gray-600 mb-3">
-                            This email receives a copy of every outgoing email
+                            These emails receive a copy of every outgoing email
                           </p>
-                          <div className="bg-gray-50 p-3 rounded border text-center">
-                            <code className="font-mono text-sm">info@momtazchem.com</code>
+                          
+                          {/* Display current CC addresses */}
+                          <div className="space-y-2 mb-4">
+                            {ccAddresses.length > 0 ? (
+                              ccAddresses.map((address, index) => (
+                                <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded border">
+                                  <code className="font-mono text-sm">{address}</code>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => removeCcAddress(index)}
+                                    className="text-red-500 hover:text-red-700"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              ))
+                            ) : (
+                              <div className="bg-gray-50 p-3 rounded border text-center text-gray-500">
+                                No CC addresses configured
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Add new CC address */}
+                          <div className="flex gap-2">
+                            <Input
+                              placeholder="Enter email address"
+                              value={newCcAddress}
+                              onChange={(e) => setNewCcAddress(e.target.value)}
+                              onKeyPress={(e) => e.key === 'Enter' && addCcAddress()}
+                            />
+                            <Button 
+                              onClick={addCcAddress}
+                              disabled={!newCcAddress.trim() || updateGlobalSettingMutation.isPending}
+                            >
+                              <Plus className="w-4 h-4" />
+                            </Button>
                           </div>
                         </div>
                         

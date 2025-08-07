@@ -111,6 +111,17 @@ export const emailLogs = pgTable("email_logs", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Global Email Settings Table - for system-wide email configurations
+export const globalEmailSettings = pgTable("global_email_settings", {
+  id: serial("id").primaryKey(),
+  settingKey: text("setting_key").notNull().unique(), // default_cc_addresses, default_bcc_addresses, auto_reply_enabled, etc.
+  settingValue: text("setting_value"), // JSON string for complex values
+  description: text("description"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Customer Communications Table - for direct communication with customers per category
 export const customerCommunications = pgTable("customer_communications", {
   id: serial("id").primaryKey(),
@@ -181,6 +192,12 @@ export const insertCustomerCommunicationSchema = createInsertSchema(customerComm
   updatedAt: true,
 });
 
+export const insertGlobalEmailSettingSchema = createInsertSchema(globalEmailSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export const insertCategoryEmailAssignmentSchema = createInsertSchema(categoryEmailAssignments).omit({
   id: true,
   createdAt: true,
@@ -196,6 +213,10 @@ export const insertAutomaticEmailLogSchema = createInsertSchema(automaticEmailLo
 // Add types for automatic email logs
 export type AutomaticEmailLog = typeof automaticEmailLogs.$inferSelect;
 export type InsertAutomaticEmailLog = z.infer<typeof insertAutomaticEmailLogSchema>;
+
+// Add types for global email settings
+export type GlobalEmailSetting = typeof globalEmailSettings.$inferSelect;
+export type InsertGlobalEmailSetting = z.infer<typeof insertGlobalEmailSettingSchema>;
 
 // Validation schemas with additional rules
 export const smtpConfigSchema = z.object({
