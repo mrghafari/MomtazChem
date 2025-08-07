@@ -105,6 +105,8 @@ export default function AdvancedEmailSettingsPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
   const [validationResult, setValidationResult] = useState<any>(null);
+  const [globalCCEmail, setGlobalCCEmail] = useState<string>("info@momtazchem.com");
+  const [isEditingCC, setIsEditingCC] = useState(false);
   
 
 
@@ -143,6 +145,30 @@ export default function AdvancedEmailSettingsPage() {
       return data;
     }
   });
+
+  // Load Global CC Email
+  const { data: globalCCData } = useQuery({
+    queryKey: ["/api/admin/email/global-cc"],
+    queryFn: async () => {
+      const response = await fetch("/api/admin/email/global-cc");
+      const data = await response.json();
+      return data;
+    }
+  });
+
+  // Update global CC email state when data loads
+  useEffect(() => {
+    if (globalCCData?.ccEmail) {
+      setGlobalCCEmail(globalCCData.ccEmail);
+    }
+  }, [globalCCData]);
+
+  // Update global CC email state when data loads
+  useEffect(() => {
+    if (globalCCData?.ccEmail) {
+      setGlobalCCEmail(globalCCData.ccEmail);
+    }
+  }, [globalCCData]);
 
   // Load category email assignments
   const { data: categoryAssignmentsData = [], refetch: refetchCategoryAssignments } = useQuery({
@@ -325,6 +351,27 @@ export default function AdvancedEmailSettingsPage() {
     onError: (error: any) => {
       console.error("Failed to save recipients:", error);
       toast({ title: "Failed to save recipients", variant: "destructive" });
+    }
+  });
+
+  // Save Global CC Email mutation
+  const saveGlobalCCMutation = useMutation({
+    mutationFn: async (ccEmail: string) => {
+      const response = await fetch('/api/admin/email/global-cc', {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ccEmail })
+      });
+      if (!response.ok) throw new Error('Failed to save Global CC email');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/email/global-cc"] });
+      setIsEditingCC(false);
+      toast({ title: "Global CC Email updated successfully" });
+    },
+    onError: () => {
+      toast({ title: "Failed to update Global CC Email", variant: "destructive" });
     }
   });
 
@@ -1185,9 +1232,57 @@ export default function AdvancedEmailSettingsPage() {
                             </div>
                           </div>
                         </div>
-                        <p className="text-xs text-green-600 mt-2">
-                          ✓ Smart CC: info@momtazchem.com is automatically added as CC for monitoring unless already present as TO, CC, or BCC
-                        </p>
+                        {/* Global CC Email Configuration */}
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-4 mt-3">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <Mail className="w-4 h-4 text-green-600" />
+                              <span className="font-medium text-green-900">Current CC Email</span>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setIsEditingCC(!isEditingCC)}
+                              className="text-green-700 hover:text-green-900"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                          </div>
+                          {isEditingCC ? (
+                            <div className="flex items-center gap-2">
+                              <Input
+                                value={globalCCEmail}
+                                onChange={(e) => setGlobalCCEmail(e.target.value)}
+                                placeholder="Enter CC email address"
+                                className="flex-1"
+                              />
+                              <Button
+                                size="sm"
+                                onClick={() => saveGlobalCCMutation.mutate(globalCCEmail)}
+                                disabled={saveGlobalCCMutation.isPending || !globalCCEmail.includes('@')}
+                              >
+                                <Check className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setIsEditingCC(false)}
+                              >
+                                <X className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-between">
+                              <span className="text-green-700 font-mono">{globalCCEmail}</span>
+                              <Badge variant="secondary" className="text-xs bg-green-100 text-green-800">
+                                Auto CC
+                              </Badge>
+                            </div>
+                          )}
+                          <p className="text-xs text-green-600 mt-2">
+                            This email receives a copy of every outgoing email (unless already present as TO, CC, or BCC)
+                          </p>
+                        </div>
                       </div>
                     )}
 
