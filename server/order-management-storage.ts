@@ -519,7 +519,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       for (const item of items) {
         const weight = parseFloat(item.productWeight || '0');
         const quantity = item.quantity;
-        const itemTotalWeight = weight * parseFloat(quantity.toString());
+        const itemTotalWeight = weight * quantity;
         
         console.log(`🏋️ [WEIGHT] Item ${item.itemId}: ${weight}kg x ${quantity} = ${itemTotalWeight}kg`);
         totalWeight += itemTotalWeight;
@@ -779,7 +779,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
     }
 
     // Determine initial status based on payment method
-    let initialStatus: OrderStatus = 'pending_payment';
+    let initialStatus: OrderStatus = 'pending';
     
     // For wallet payments that are already paid, set to payment_uploaded for immediate financial review
     if ((customerOrder.paymentMethod === 'wallet_full' || customerOrder.paymentMethod === 'wallet_partial') 
@@ -968,15 +968,17 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       } : null
     }));
 
-    // Calculate weight for orders that don't have it calculated yet
-    for (const order of transformedResults) {
-      if (!order.totalWeight || order.totalWeight === '0.000') {
-        await this.calculateAndUpdateOrderWeight(order.customerOrderId);
-        // Update the order object with calculated weight
-        const calculatedWeight = await this.calculateOrderWeight(order.customerOrderId);
-        if (calculatedWeight > 0) {
-          order.totalWeight = calculatedWeight.toFixed(3);
-          order.weightUnit = 'kg';
+    // Calculate weight for orders that don't have it calculated yet (especially for warehouse and logistics)
+    if (departmentFilter === 'warehouse' || departmentFilter === 'logistics') {
+      for (const order of transformedResults) {
+        if (!order.totalWeight || order.totalWeight === '0.000') {
+          await this.calculateAndUpdateOrderWeight(order.customerOrderId);
+          // Update the order object with calculated weight
+          const calculatedWeight = await this.calculateOrderWeight(order.customerOrderId);
+          if (calculatedWeight > 0) {
+            order.totalWeight = calculatedWeight.toFixed(3);
+            order.weightUnit = 'kg';
+          }
         }
       }
     }
@@ -1604,6 +1606,82 @@ export class OrderManagementStorage implements IOrderManagementStorage {
     }
   }
 
+  async calculateOrderWeight(customerOrderId: number): Promise<number> {
+    try {
+      console.log(`🔍 [WEIGHT] Calculating weight for order ${customerOrderId}`);
+      
+      // Get order items and join with both shop_products and showcase_products to get weight
+      const items = await db
+        .select({
+          productId: orderItems.productId,
+          productName: orderItems.productName,
+          quantity: orderItems.quantity,
+          shopGrossWeight: shopProducts.grossWeight,
+          shopNetWeight: shopProducts.netWeight,
+          shopWeight: shopProducts.weight,
+          shopBarcode: shopProducts.barcode
+        })
+        .from(orderItems)
+        .leftJoin(shopProducts, eq(orderItems.productId, shopProducts.id))
+        .where(eq(orderItems.orderId, customerOrderId));
+
+      console.log(`📊 [WEIGHT] Found ${items.length} items for order ${customerOrderId}`);
+
+      // Calculate total weight using gross weight (وزن ناخالص) for logistics calculations
+      let totalWeight = 0;
+      
+      for (const item of items) {
+        let productWeight = 0;
+        const quantity = parseFloat(item.quantity?.toString() || '1');
+        
+        console.log(`🏷️ [WEIGHT] Processing item: ${item.productName} (ID: ${item.productId}) x${quantity}`);
+        
+        // First try to get weight from shop_products
+        if (item.shopGrossWeight) {
+          productWeight = parseFloat(item.shopGrossWeight.toString());
+          console.log(`⚖️ [WEIGHT] Using shop gross weight: ${productWeight} kg`);
+        } else if (item.shopWeight) {
+          productWeight = parseFloat(item.shopWeight.toString());
+          console.log(`⚖️ [WEIGHT] Using shop legacy weight: ${productWeight} kg`);
+        } else if (item.shopBarcode) {
+          // If no weight in shop, try to get from showcase_products by barcode
+          console.log(`🔍 [WEIGHT] No weight in shop, searching Kardex by barcode: ${item.shopBarcode}`);
+          
+          const { showcaseProducts } = await import('../shared/showcase-schema');
+          const showcaseWeight = await db
+            .select({
+              grossWeight: showcaseProducts.grossWeight,
+              netWeight: showcaseProducts.netWeight,
+              weight: showcaseProducts.weight
+            })
+            .from(showcaseProducts)
+            .where(eq(showcaseProducts.barcode, item.shopBarcode))
+            .limit(1);
+
+          if (showcaseWeight.length > 0 && showcaseWeight[0].grossWeight) {
+            productWeight = parseFloat(showcaseWeight[0].grossWeight.toString());
+            console.log(`⚖️ [WEIGHT] Using Kardex gross weight: ${productWeight} kg`);
+          } else if (showcaseWeight.length > 0 && showcaseWeight[0].weight) {
+            productWeight = parseFloat(showcaseWeight[0].weight.toString());
+            console.log(`⚖️ [WEIGHT] Using Kardex legacy weight: ${productWeight} kg`);
+          }
+        }
+        
+        const itemTotalWeight = productWeight * quantity;
+        totalWeight += itemTotalWeight;
+        
+        console.log(`📦 [WEIGHT] Item total: ${productWeight} kg x ${quantity} = ${itemTotalWeight} kg`);
+      }
+
+      const finalWeight = Math.round(totalWeight * 100) / 100; // Round to 2 decimal places
+      console.log(`🎯 [WEIGHT] Final calculated weight for order ${customerOrderId}: ${finalWeight} kg`);
+      
+      return finalWeight;
+    } catch (error) {
+      console.error(`❌ [WEIGHT] Error calculating weight for order ${customerOrderId}:`, error);
+      return 0;
+    }
+  }
 
   async updateOrderWeight(customerOrderId: number, weight: number): Promise<void> {
     try {
