@@ -1016,8 +1016,8 @@ const Shop = () => {
                 {availableFilters?.priceRange && (
                   <>
                     <div>
-                      <label className="text-sm font-medium text-gray-700 mb-2 block">
-                        Price Range: {priceRange[0]} - {priceRange[1]} IQD
+                      <label className="text-sm font-medium text-gray-700 mb-3 block">
+                        فیلتر قیمت
                       </label>
                       <div className="mt-2">
                         <RangeSlider
@@ -1025,13 +1025,13 @@ const Shop = () => {
                           onValueChange={handlePriceRangeChange}
                           max={typeof availableFilters.priceRange.max === 'string' ? parseFloat(availableFilters.priceRange.max) : availableFilters.priceRange.max}
                           min={typeof availableFilters.priceRange.min === 'string' ? parseFloat(availableFilters.priceRange.min) : availableFilters.priceRange.min}
-                          step={5}
+                          step={100}
                           className="w-full"
                         />
                       </div>
-                      <div className="flex justify-between text-xs text-gray-500 mt-1">
-                        <span>{typeof availableFilters.priceRange.min === 'string' ? parseFloat(availableFilters.priceRange.min) : availableFilters.priceRange.min} IQD</span>
-                        <span>{typeof availableFilters.priceRange.max === 'string' ? parseFloat(availableFilters.priceRange.max) : availableFilters.priceRange.max} IQD</span>
+                      <div className="flex justify-between text-xs text-gray-400 mt-3 border-t pt-2">
+                        <span>کمترین: {formatIQDAmount(typeof availableFilters.priceRange.min === 'string' ? parseFloat(availableFilters.priceRange.min) : availableFilters.priceRange.min)}</span>
+                        <span>بیشترین: {formatIQDAmount(typeof availableFilters.priceRange.max === 'string' ? parseFloat(availableFilters.priceRange.max) : availableFilters.priceRange.max)}</span>
                       </div>
                     </div>
                     <Separator />
