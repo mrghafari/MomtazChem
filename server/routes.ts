@@ -46491,6 +46491,43 @@ momtazchem.com
     res.json({ success: true, message: "WebRTC routing works!" });
   });
 
+  // Test endpoint to verify ALL orders are being returned (public for testing)
+  app.get('/api/test/order-count', async (req, res) => {
+    try {
+      console.log('🔍 [TEST ORDER COUNT] Checking order counts in database...');
+      
+      const result = await customerPool.query(`SELECT COUNT(*) as total_orders FROM customer_orders`);
+      
+      const trackingResult = await customerPool.query(`
+        SELECT 
+          COUNT(*) as tracking_orders,
+          COUNT(CASE WHEN co.status = 'deleted' THEN 1 END) as deleted_orders,
+          COUNT(CASE WHEN co.status = 'cancelled' THEN 1 END) as cancelled_orders,
+          MIN(co.order_number) as first_order_number,
+          MAX(co.order_number) as last_order_number
+        FROM customer_orders co
+        LEFT JOIN order_management om ON co.id = om.customer_order_id
+      `);
+      
+      const data = {
+        totalOrdersInDatabase: parseInt(result.rows[0].total_orders),
+        trackingOrdersCount: parseInt(trackingResult.rows[0].tracking_orders),
+        deletedOrders: parseInt(trackingResult.rows[0].deleted_orders || 0),
+        cancelledOrders: parseInt(trackingResult.rows[0].cancelled_orders || 0),
+        firstOrderNumber: trackingResult.rows[0].first_order_number,
+        lastOrderNumber: trackingResult.rows[0].last_order_number,
+        shouldShowAllOrders: true,
+        message: 'ALL orders should be visible now (including deleted/cancelled)'
+      };
+      
+      console.log('✅ [TEST ORDER COUNT] Results:', data);
+      res.json({ success: true, data });
+    } catch (error) {
+      console.error('❌ [TEST ORDER COUNT] Error:', error);
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
   // Initialize WebRTC Socket
   const { setupWebRTCSocket } = await import("./webrtc-socket");
   setupWebRTCSocket(httpServer);
