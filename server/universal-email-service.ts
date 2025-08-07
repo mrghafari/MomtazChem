@@ -105,30 +105,40 @@ export class UniversalEmailService {
         finalCc = ccRecipients.map(r => r.email);
       }
       
-      // Always add global CC addresses from settings
+      // Always add global email addresses from settings (CC or BCC based on configuration)
       try {
         const { pool } = await import('./db');
-        const globalCcResult = await pool.query(`
-          SELECT setting_value 
+        const globalSettingsResult = await pool.query(`
+          SELECT setting_key, setting_value 
           FROM global_email_settings 
-          WHERE setting_key = 'default_cc_addresses' AND is_active = true
+          WHERE setting_key IN ('default_cc_addresses', 'default_recipient_type') AND is_active = true
         `);
         
-        if (globalCcResult.rows.length > 0) {
-          const globalCcAddresses = JSON.parse(globalCcResult.rows[0].setting_value || '[]');
-          if (Array.isArray(globalCcAddresses)) {
-            // Add global CC addresses that aren't already in finalTo, finalCc, or finalBcc
-            const allExistingEmails = [...finalTo, ...finalCc, ...finalBcc];
-            for (const globalCc of globalCcAddresses) {
-              if (!allExistingEmails.includes(globalCc)) {
-                finalCc.push(globalCc);
-              }
-            }
-            console.log(`📧 [Universal Email] Added global CC addresses: ${globalCcAddresses.join(', ')}`);
+        let globalAddresses: string[] = [];
+        let recipientType = 'cc'; // default to CC
+        
+        for (const row of globalSettingsResult.rows) {
+          if (row.setting_key === 'default_cc_addresses') {
+            globalAddresses = JSON.parse(row.setting_value || '[]');
+          } else if (row.setting_key === 'default_recipient_type') {
+            recipientType = row.setting_value || 'cc';
           }
         }
-      } catch (globalCcError) {
-        console.warn(`⚠️ [Universal Email] Could not load global CC settings:`, globalCcError);
+        
+        if (Array.isArray(globalAddresses) && globalAddresses.length > 0) {
+          const allExistingEmails = [...finalTo, ...finalCc, ...finalBcc];
+          const newAddresses = globalAddresses.filter(addr => !allExistingEmails.includes(addr));
+          
+          if (recipientType === 'bcc') {
+            finalBcc.push(...newAddresses);
+            console.log(`📧 [Universal Email] Added global BCC addresses: ${newAddresses.join(', ')}`);
+          } else {
+            finalCc.push(...newAddresses);
+            console.log(`📧 [Universal Email] Added global CC addresses: ${newAddresses.join(', ')}`);
+          }
+        }
+      } catch (globalSettingsError) {
+        console.warn(`⚠️ [Universal Email] Could not load global email settings:`, globalSettingsError);
       }
       
       if (finalBcc.length === 0) {

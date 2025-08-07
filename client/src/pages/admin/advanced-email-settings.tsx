@@ -110,6 +110,7 @@ export default function AdvancedEmailSettingsPage() {
   const [globalSettings, setGlobalSettings] = useState<{[key: string]: string}>({});
   const [ccAddresses, setCcAddresses] = useState<string[]>([]);
   const [newCcAddress, setNewCcAddress] = useState('');
+  const [recipientType, setRecipientType] = useState<'cc' | 'bcc'>('cc');
   
 
 
@@ -179,6 +180,12 @@ export default function AdvancedEmailSettingsPage() {
           setCcAddresses([]);
         }
       }
+      
+      // Set recipient type if it exists
+      const recipientTypeString = globalSettingsData.settings.default_recipient_type;
+      if (recipientTypeString) {
+        setRecipientType(recipientTypeString as 'cc' | 'bcc');
+      }
     }
   }, [globalSettingsData]);
 
@@ -199,7 +206,7 @@ export default function AdvancedEmailSettingsPage() {
     }
   });
 
-  // Helper functions for CC address management
+  // Helper functions for email address management
   const addCcAddress = () => {
     if (!newCcAddress.trim()) return;
     
@@ -216,7 +223,19 @@ export default function AdvancedEmailSettingsPage() {
     updateGlobalSettingMutation.mutate({
       settingKey: 'default_cc_addresses',
       settingValue: JSON.stringify(updatedAddresses),
-      description: 'Default CC email addresses for all outgoing emails'
+      description: `Default ${recipientType.toUpperCase()} email addresses for all outgoing emails`
+    });
+  };
+
+  // Update recipient type
+  const updateRecipientType = (newType: 'cc' | 'bcc') => {
+    setRecipientType(newType);
+    
+    // Update in database
+    updateGlobalSettingMutation.mutate({
+      settingKey: 'default_recipient_type',
+      settingValue: newType,
+      description: 'Recipient type for global email addresses (cc or bcc)'
     });
   };
 
@@ -228,7 +247,7 @@ export default function AdvancedEmailSettingsPage() {
     updateGlobalSettingMutation.mutate({
       settingKey: 'default_cc_addresses',
       settingValue: JSON.stringify(updatedAddresses),
-      description: 'Default CC email addresses for all outgoing emails'
+      description: `Default ${recipientType.toUpperCase()} email addresses for all outgoing emails`
     });
   };
 
@@ -1438,9 +1457,20 @@ export default function AdvancedEmailSettingsPage() {
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="border rounded-lg p-4">
-                          <h4 className="font-medium mb-2">CC Email Addresses</h4>
+                          <div className="flex items-center justify-between mb-2">
+                            <h4 className="font-medium">{recipientType.toUpperCase()} Email Addresses</h4>
+                            <Select value={recipientType} onValueChange={updateRecipientType}>
+                              <SelectTrigger className="w-20">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="cc">CC</SelectItem>
+                                <SelectItem value="bcc">BCC</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
                           <p className="text-sm text-gray-600 mb-3">
-                            These emails receive a copy of every outgoing email
+                            These emails receive a {recipientType === 'cc' ? 'copy' : 'blind copy'} of every outgoing email
                           </p>
                           
                           {/* Display current CC addresses */}

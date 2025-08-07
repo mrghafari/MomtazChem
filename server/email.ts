@@ -257,25 +257,39 @@ async function sendWithCategoryEmailAssignment(formData: ContactFormData): Promi
       throw new Error('No admin SMTP configuration found for category email assignment');
     }
 
-    // Get global CC addresses from settings
+    // Get global email addresses from settings (CC or BCC based on configuration)
     let ccAddresses: string[] = [];
+    let bccAddresses: string[] = [];
     try {
       const { pool } = await import('./db');
-      const globalCcResult = await pool.query(`
-        SELECT setting_value 
+      const globalSettingsResult = await pool.query(`
+        SELECT setting_key, setting_value 
         FROM global_email_settings 
-        WHERE setting_key = 'default_cc_addresses' AND is_active = true
+        WHERE setting_key IN ('default_cc_addresses', 'default_recipient_type') AND is_active = true
       `);
       
-      if (globalCcResult.rows.length > 0) {
-        const globalCcAddresses = JSON.parse(globalCcResult.rows[0].setting_value || '[]');
-        if (Array.isArray(globalCcAddresses)) {
-          ccAddresses = globalCcAddresses;
+      let globalAddresses: string[] = [];
+      let recipientType = 'cc'; // default to CC
+      
+      for (const row of globalSettingsResult.rows) {
+        if (row.setting_key === 'default_cc_addresses') {
+          globalAddresses = JSON.parse(row.setting_value || '[]');
+        } else if (row.setting_key === 'default_recipient_type') {
+          recipientType = row.setting_value || 'cc';
+        }
+      }
+      
+      if (Array.isArray(globalAddresses)) {
+        if (recipientType === 'bcc') {
+          bccAddresses = globalAddresses;
+          console.log(`Using global BCC addresses: ${bccAddresses.join(', ')}`);
+        } else {
+          ccAddresses = globalAddresses;
           console.log(`Using global CC addresses: ${ccAddresses.join(', ')}`);
         }
       }
-    } catch (globalCcError) {
-      console.warn(`Could not load global CC settings, using fallback:`, globalCcError);
+    } catch (globalSettingsError) {
+      console.warn(`Could not load global email settings, using fallback:`, globalSettingsError);
       ccAddresses = ['info@momtazchem.com']; // Fallback
     }
 
@@ -283,6 +297,7 @@ async function sendWithCategoryEmailAssignment(formData: ContactFormData): Promi
       from: adminSettings.smtp.fromEmail,
       to: formData.categoryEmail,
       cc: ccAddresses,
+      bcc: bccAddresses,
       subject: `درخواست جدید از فرم تماس - ${formData.firstName} ${formData.lastName}`,
       html: `
         <div style="font-family: Arial, sans-serif; direction: rtl; text-align: right;">
@@ -323,7 +338,7 @@ ${formData.message}
     // Log the email
     await emailStorage.logEmail({
       categoryId: adminSettings.category.id,
-      toEmail: formData.categoryEmail!,
+      toEmail: `TO: ${formData.categoryEmail} | CC: ${ccAddresses.join(', ')} | BCC: ${bccAddresses.join(', ')}`,
       fromEmail: adminSettings.smtp.fromEmail,
       subject: mailOptions.subject,
       status: 'sent',
