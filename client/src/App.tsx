@@ -89,7 +89,6 @@ import WidgetRecommendations from "@/pages/widget-recommendations";
 import AbandonedCartManagement from "@/pages/abandoned-cart-management";
 import FinancialDepartment from "@/pages/financial-department";
 import WarehouseDepartment from "@/pages/warehouse-department";
-import OrderTrackingDashboard from "@/pages/order-tracking-dashboard";
 import LogisticsDepartment from "@/pages/logistics-department";
 import FinanceOrders from "@/pages/admin/finance-orders";
 import LogisticsSimple from "@/pages/logistics-simple";
@@ -228,7 +227,6 @@ function Router() {
           <Route path="/admin/order-management" component={OrderTrackingManagement} />
           <Route path="/admin/order-tracking" component={OrderTrackingManagement} />
           <Route path="/admin/order-tracking-management" component={OrderTrackingManagement} />
-          <Route path="/admin/order-tracking-dashboard" component={OrderTrackingDashboard} />
           <Route path="/admin/abandoned-cart-management" component={AbandonedCartManagement} />
           <Route path="/site-management" component={SiteManagementFixed} />
           <Route path="/admin/site-management" component={SiteManagementFixed} />
@@ -285,8 +283,6 @@ function Router() {
           <Route path="/financial" component={FinancialDepartment} />
           <Route path="/financial/login" component={FinancialLogin} />
           <Route path="/warehouse" component={WarehouseManagementFixed} />
-          <Route path="/warehouse-department" component={WarehouseDepartment} />
-          <Route path="/admin/warehouse-department" component={WarehouseDepartment} />
           <Route path="/warehouse/login" component={WarehouseLogin} />
           <Route path="/logistics-department" component={LogisticsDepartment} />
           <Route path="/logistics-full" component={LogisticsDepartment} />
