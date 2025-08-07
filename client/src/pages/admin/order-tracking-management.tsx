@@ -1173,33 +1173,28 @@ export default function OrderTrackingManagement() {
                                       )}
                                     </div>
                                     <div><strong>وضعیت فعلی:</strong> 
-                                      {(() => {
-                                        const statusInfo = getStatusDisplay(selectedOrder);
-                                        return (
-                                          <div className="space-y-2 mt-2">
-                                            <div className="inline-flex items-center gap-2">
-                                              <div className={`px-3 py-1 rounded-full text-sm font-medium border ${statusInfo.color}`}>
-                                                {statusInfo.label}
-                                              </div>
-                                              <div className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-700">
-                                                {statusInfo.department}
+                                      <div className="space-y-2 mt-2">
+                                        <div className="inline-flex items-center gap-2">
+                                          <div className={`px-3 py-1 rounded-full text-sm font-medium border ${getStatusDisplay(selectedOrder).color}`}>
+                                            {getStatusDisplay(selectedOrder).label}
+                                          </div>
+                                          <div className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-700">
+                                            {getStatusDisplay(selectedOrder).department}
+                                          </div>
+                                        </div>
+                                        {/* Show detailed explanation for failed/problematic orders in dialog */}
+                                        {getStatusDisplay(selectedOrder).isProblematic && getStatusDisplay(selectedOrder).explanation && (
+                                          <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                                            <div className="flex items-start gap-2">
+                                              <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0 text-red-600" />
+                                              <div>
+                                                <div className="text-sm font-medium text-red-800 mb-1">توضیحات مشکل:</div>
+                                                <div className="text-sm text-red-700">{getStatusDisplay(selectedOrder).explanation}</div>
                                               </div>
                                             </div>
-                                            {/* Show detailed explanation for failed/problematic orders in dialog */}
-                                            {statusInfo.isProblematic && statusInfo.explanation && (
-                                              <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
-                                                <div className="flex items-start gap-2">
-                                                  <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0 text-red-600" />
-                                                  <div>
-                                                    <div className="text-sm font-medium text-red-800 mb-1">توضیحات مشکل:</div>
-                                                    <div className="text-sm text-red-700">{statusInfo.explanation}</div>
-                                                  </div>
-                                                </div>
-                                              </div>
-                                            )}
                                           </div>
-                                        );
-                                      })()}
+                                        )}
+                                      </div>
                                     </div>
                                   </CardContent>
                                 </Card>
@@ -1251,14 +1246,13 @@ export default function OrderTrackingManagement() {
                                     <CardContent>
                                       <p className="text-sm text-gray-700">
                                         {selectedOrder.deliveryNotes || 'نکته خاصی وجود ندارد'}
-                                        </p>
+                                      </p>
                                       </CardContent>
                                     </Card>
                                   </div>
                                 </div>
                               </div>
 
-                              {/* Department Notes */}
                               <div>
                                 <h4 className="text-lg font-semibold mb-4 text-gray-800">🏢 Department Notes</h4>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
