@@ -750,7 +750,7 @@ export default function ContentManagement() {
                           
                           // Use admin authenticated data if available, fallback to public data
                           const adminItem = contentItems?.find((item: ContentItem) => item.key === `random_display_${selectedCategory}`);
-                          const publicItem = publicContentItems?.find((item: ContentItem) => item.key === `random_display_${selectedCategory}`);
+                          const publicItem = Array.isArray(publicContentItems) ? publicContentItems.find((item: ContentItem) => item.key === `random_display_${selectedCategory}`) : null;
                           const isChecked = adminItem?.isActive || publicItem?.isActive || false;
                           
                           console.log('🎛️ [TOGGLE STATE] Random display switch:', { 
@@ -792,7 +792,7 @@ export default function ContentManagement() {
                       <Select
                         value={(() => {
                           const adminItem = contentItems?.find((item: ContentItem) => item.key === `max_display_${selectedCategory}`);
-                          const publicItem = publicContentItems?.find((item: ContentItem) => item.key === `max_display_${selectedCategory}`);
+                          const publicItem = Array.isArray(publicContentItems) ? publicContentItems.find((item: ContentItem) => item.key === `max_display_${selectedCategory}`) : null;
                           return adminItem?.content || publicItem?.content || '3';
                         })()}
                         onValueChange={(value) => {
