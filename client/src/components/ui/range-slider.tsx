@@ -24,8 +24,10 @@ const RangeSlider = React.forwardRef<
 
   const handleValueChange = (newValue: number[]) => {
     if (newValue.length === 2) {
-      setLocalValue([newValue[0], newValue[1]]);
-      // Auto-save removed per user request - manual save required
+      const typedValue: [number, number] = [newValue[0], newValue[1]];
+      setLocalValue(typedValue);
+      // Call the onValueChange callback to update parent component
+      onValueChange(typedValue);
     }
   };
 
