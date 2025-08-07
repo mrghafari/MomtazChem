@@ -943,6 +943,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Warehouse department orders endpoint
+  app.get("/api/order-management/warehouse", requireAuth, async (req, res) => {
+    try {
+      console.log("🏭 [WAREHOUSE] Fetching warehouse orders for department");
+      
+      // Get orders that are financially approved and ready for warehouse processing
+      const ordersResult = await db
+        .select({
+          id: customerOrders.id,
+          orderNumber: customerOrders.orderNumber,
+          customerOrderId: customerOrders.customerOrderId,
+          totalAmount: customerOrders.totalAmount,
+          currency: customerOrders.currency,
+          paymentMethod: customerOrders.paymentMethod,
+          phone: customerOrders.phone,
+          city: customerOrders.city,
+          address: customerOrders.address,
+          status: customerOrders.status,
+          createdAt: customerOrders.createdAt,
+          customerId: customerOrders.customerId,
+          financialStatus: orderManagement.financialStatus,
+          warehouseStatus: orderManagement.warehouseStatus
+        })
+        .from(customerOrders)
+        .leftJoin(orderManagement, eq(customerOrders.id, orderManagement.orderId))
+        .where(
+          and(
+            eq(orderManagement.financialStatus, 'approved'),
+            or(
+              isNull(orderManagement.warehouseStatus),
+              eq(orderManagement.warehouseStatus, 'pending')
+            )
+          )
+        )
+        .orderBy(desc(customerOrders.createdAt));
+
+      console.log(`🏭 [WAREHOUSE] Found ${ordersResult.length} orders ready for warehouse processing`);
+
+      // Get customer details for each order
+      const ordersWithCustomers = await Promise.all(
+        ordersResult.map(async (order) => {
+          try {
+            const customerResult = await customerStorage.getCustomer(order.customerId);
+            return {
+              ...order,
+              customer: customerResult ? {
+                firstName: customerResult.firstName,
+                lastName: customerResult.lastName
+              } : {
+                firstName: 'نامشخص',
+                lastName: ''
+              }
+            };
+          } catch (error) {
+            console.error(`Error getting customer for order ${order.id}:`, error);
+            return {
+              ...order,
+              customer: {
+                firstName: 'نامشخص',
+                lastName: ''
+              }
+            };
+          }
+        })
+      );
+
+      res.json({
+        success: true,
+        orders: ordersWithCustomers,
+        total: ordersWithCustomers.length
+      });
+      
+    } catch (error) {
+      console.error("🏭 [WAREHOUSE] Error fetching warehouse orders:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت سفارشات انبار",
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
   // ============================================
   // START: PDF Generation Routes
   // ============================================

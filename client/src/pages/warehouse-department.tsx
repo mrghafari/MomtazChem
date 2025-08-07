@@ -106,6 +106,10 @@ export default function WarehouseDepartment() {
   console.log('Warehouse error:', error);
   console.log('Warehouse isLoading:', isLoading);
 
+  // Debug expanded orders state
+  console.log('Expanded orders:', Array.from(expandedOrders));
+  console.log('Order items cache:', orderItemsCache);
+
   // Filter orders based on search
   const filteredOrders = Array.isArray(orders) ? orders.filter((order: any) =>
     order.customer?.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
