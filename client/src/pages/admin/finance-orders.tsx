@@ -174,6 +174,12 @@ function FinanceOrders() {
     staleTime: 0,
   });
 
+  // Enable audio notifications for new orders - MOVED HERE to avoid conditional hook calls
+  const { orderCount } = useOrderNotifications({
+    department: 'financial',
+    enabled: adminUser?.success || false // Only enable if authenticated
+  });
+
   // If not authenticated, show login prompt
   if (isCheckingAuth) {
     return (
@@ -214,12 +220,6 @@ function FinanceOrders() {
       </div>
     );
   }
-
-  // Enable audio notifications for new orders
-  const { orderCount } = useOrderNotifications({
-    department: 'financial',
-    enabled: true
-  });
 
   // Get orders for financial review  
   const { data: ordersResponse, isLoading, refetch } = useQuery({
