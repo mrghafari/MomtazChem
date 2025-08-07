@@ -167,23 +167,31 @@ export class CustomerStorage implements ICustomerStorage {
 
   // Customer orders
   async createOrder(orderData: InsertCustomerOrder): Promise<CustomerOrder> {
-    // Import order management storage to use new numbering system
+    // 🔒 SEQUENTIAL ORDER CREATION: Use transaction-safe approach to prevent gaps in numbering
     const { OrderManagementStorage } = await import('./order-management-storage');
     const orderManagementStorage = new OrderManagementStorage();
     
-    // Generate M[YY][NNNNN] order number (e.g., M2511111, M2511112)
-    const orderNumber = await orderManagementStorage.generateOrderNumber();
+    console.log('✅ [SEQUENTIAL] Creating order with gap-free sequential numbering...');
     
-    // 🔒 CRITICAL: Use transaction to ensure BOTH customer_orders AND order_management are created together
-    // This prevents the exact problem we just fixed where orders exist without management records
+    // Use transaction-safe order creation to ensure sequential numbering without gaps
+    let order: any;
+    let orderNumber: string;
     
-    const [order] = await customerDb
-      .insert(customerOrders)
-      .values({
-        ...orderData,
-        orderNumber,
-      })
-      .returning();
+    await customerDb.transaction(async (tx) => {
+      // Generate sequential order number within transaction
+      orderNumber = await orderManagementStorage.generateOrderNumberInTransaction(tx);
+      
+      // Create order with the generated number within same transaction
+      [order] = await tx
+        .insert(customerOrders)
+        .values({
+          ...orderData,
+          orderNumber,
+        })
+        .returning();
+      
+      console.log(`✅ [SEQUENTIAL] Order ${orderNumber} created successfully in transaction`);
+    });
     
     // 🚨 MANDATORY: Add customer order to order management system - MUST NOT FAIL
     try {
@@ -386,7 +394,7 @@ export class CustomerStorage implements ICustomerStorage {
               managementOrder.id, 
               newManagementStatus as any, 
               1, // system user
-              'system', // system department
+              'financial', // use financial department for system updates
               `Auto-sync from customer order update`
             );
           }

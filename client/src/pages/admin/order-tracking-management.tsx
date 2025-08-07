@@ -74,7 +74,7 @@ interface OrderStats {
   todaysOrders: number;
 }
 
-// Enhanced status display with department information
+// Enhanced status display with detailed explanations for failed/deleted orders
 const getStatusDisplay = (order: Order) => {
   const status = order.status;
   const paymentReceiptUrl = order.paymentReceiptUrl;
@@ -86,65 +86,128 @@ const getStatusDisplay = (order: Order) => {
         return {
           label: 'در انتظار پرداخت',
           department: 'مشتری',
-          color: 'bg-red-100 text-red-800 border-red-200'
+          color: 'bg-red-100 text-red-800 border-red-200',
+          explanation: 'مشتری هنوز فیش پرداخت را آپلود نکرده است'
         };
       } else {
         return {
           label: 'در انتظار بررسی مالی',
           department: 'مالی',
-          color: 'bg-yellow-100 text-yellow-800 border-yellow-200'
+          color: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+          explanation: 'فیش پرداخت آپلود شده و در انتظار تایید بخش مالی'
         };
       }
     case 'confirmed':
       return {
         label: 'در انتظار آماده‌سازی',
         department: 'انبار', 
-        color: 'bg-blue-100 text-blue-800 border-blue-200'
+        color: 'bg-blue-100 text-blue-800 border-blue-200',
+        explanation: 'پرداخت تایید شده و در انتظار آماده‌سازی توسط انبار'
       };
     case 'warehouse_ready':
       return {
         label: 'در انتظار تحویل',
         department: 'لجستیک',
-        color: 'bg-purple-100 text-purple-800 border-purple-200'
+        color: 'bg-purple-100 text-purple-800 border-purple-200',
+        explanation: 'سفارش آماده شده و در انتظار ارسال توسط لجستیک'
       };
     case 'delivered':
       return {
         label: 'تحویل شده',
         department: 'تکمیل',
-        color: 'bg-green-100 text-green-800 border-green-200'
+        color: 'bg-green-100 text-green-800 border-green-200',
+        explanation: 'سفارش با موفقیت به مشتری تحویل داده شده'
       };
+    
+    // FAILED & DELETED ORDERS WITH DETAILED EXPLANATIONS
     case 'deleted':
+      return {
+        label: '❌ حذف شده',
+        department: 'مدیریت',
+        color: 'bg-red-200 text-red-900 border-red-300',
+        explanation: 'سفارش توسط مدیریت حذف شده است (ممکن است به دلیل مشکل در پردازش، درخواست مشتری یا مشکل فنی)',
+        isProblematic: true
+      };
     case 'cancelled':
       return {
-        label: 'لغو شده',
-        department: 'حذف',
-        color: 'bg-gray-100 text-gray-800 border-gray-200'
+        label: '🚫 لغو شده',
+        department: 'لغو',
+        color: 'bg-orange-200 text-orange-900 border-orange-300',
+        explanation: 'سفارش لغو شده است (ممکن است توسط مشتری، مدیریت یا به دلیل عدم پرداخت)',
+        isProblematic: true
       };
+    case 'financial_rejected':
+      return {
+        label: '💳 رد مالی',
+        department: 'مالی',
+        color: 'bg-red-200 text-red-900 border-red-300',
+        explanation: 'فیش پرداخت توسط بخش مالی رد شده است (ممکن است نامعتبر، ناکافی یا قابل تشخیص نباشد)',
+        isProblematic: true
+      };
+    case 'payment_failed':
+      return {
+        label: '❌ پرداخت ناموفق',
+        department: 'پرداخت',
+        color: 'bg-red-200 text-red-900 border-red-300',
+        explanation: 'پرداخت آنلاین با شکست مواجه شده است (ممکن است به دلیل مشکل بانکی، عدم موجودی یا خطای فنی)',
+        isProblematic: true
+      };
+    case 'expired':
+      return {
+        label: '⏰ منقضی شده',
+        department: 'سیستم',
+        color: 'bg-gray-200 text-gray-900 border-gray-300',
+        explanation: 'سفارش به دلیل عدم پرداخت در زمان مقرر منقضی شده است',
+        isProblematic: true
+      };
+    case 'warehouse_rejected':
+      return {
+        label: '📦 رد انبار',
+        department: 'انبار',
+        color: 'bg-red-200 text-red-900 border-red-300',
+        explanation: 'سفارش توسط انبار رد شده است (ممکن است به دلیل عدم موجودی، مشکل در محصول یا خرابی)',
+        isProblematic: true
+      };
+    case 'logistics_failed':
+      return {
+        label: '🚛 شکست ارسال',
+        department: 'لجستیک',
+        color: 'bg-red-200 text-red-900 border-red-300',
+        explanation: 'ارسال سفارش با مشکل مواجه شده است (ممکن است به دلیل آدرس نامعتبر، عدم دسترسی یا مشکل حمل‌ونقل)',
+        isProblematic: true
+      };
+    
     default:
       return {
-        label: status,
-        department: 'نامشخص',
-        color: 'bg-gray-100 text-gray-800 border-gray-200'
+        label: status || 'نامشخص',
+        department: 'نامعتبر',
+        color: 'bg-gray-100 text-gray-800 border-gray-200',
+        explanation: `وضعیت نامشخص یا جدید: ${status}. نیاز به بررسی توسط مدیریت فنی`,
+        isProblematic: true
       };
   }
 };
 
-// Simple status labels for backward compatibility
+// Comprehensive status labels including failed/problematic orders
 const statusLabels: { [key: string]: string } = {
   'pending': 'در انتظار',
   'confirmed': 'تأیید شده', 
   'payment_uploaded': 'فیش بانکی آپلود شده',
   'financial_reviewing': 'در حال بررسی مالی',
   'financial_approved': 'تأیید مالی',
-  'financial_rejected': 'رد مالی', 
+  'financial_rejected': '💳 رد مالی', 
   'warehouse_processing': 'در حال آماده‌سازی انبار',
   'warehouse_ready': 'آماده انبار',
+  'warehouse_rejected': '📦 رد انبار',
   'logistics_assigned': 'تحویل لجستیک',
+  'logistics_failed': '🚛 شکست ارسال',
   'in_transit': 'در راه',
   'delivered': 'تحویل داده شده',
   'completed': 'تکمیل شده',
-  'cancelled': 'لغو شده',
-  'deleted': 'حذف شده'
+  'cancelled': '🚫 لغو شده',
+  'deleted': '❌ حذف شده',
+  'payment_failed': '❌ پرداخت ناموفق',
+  'expired': '⏰ منقضی شده'
 };
 
 // Department labels
@@ -266,8 +329,15 @@ export default function OrderTrackingManagement() {
       order.customerOrderId?.toString().includes(searchTerm) ||
       order.deliveryCode?.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesStatus = selectedStatus === 'all' || 
-      order.status === selectedStatus;
+    // Enhanced status filtering including problematic orders
+    let matchesStatus = true;
+    if (selectedStatus === 'problematic') {
+      // Filter for problematic/failed orders only
+      const statusInfo = getStatusDisplay(order);
+      matchesStatus = statusInfo.isProblematic === true;
+    } else if (selectedStatus !== 'all') {
+      matchesStatus = order.status === selectedStatus;
+    }
     
     return matchesSearch && matchesStatus;
   }).sort((a, b) => {
@@ -390,7 +460,15 @@ export default function OrderTrackingManagement() {
               🚀 سیستم پیگیری سفارشات (جایگزین ماژول مدیریت سفارشات)
             </h1>
             <p className="text-orange-700 dark:text-orange-300 mt-1">
-              نمایش مکان دقیق هر سفارش و فرآیندهای انجام شده - پیگیری کامل ۴۶ سفارش
+              {(() => {
+                const problematicCount = orders?.filter(order => {
+                  const statusInfo = getStatusDisplay(order);
+                  return statusInfo.isProblematic;
+                }).length || 0;
+                
+                return `نمایش مکان دقیق هر سفارش و فرآیندهای انجام شده - پیگیری کامل ${orders?.length || 0} سفارش` +
+                       (problematicCount > 0 ? ` (${problematicCount} مشکل‌دار نیاز به توجه فوری)` : ' (همه سفارشات در وضعیت عادی)');
+              })()}
             </p>
           </div>
         </div>
@@ -570,6 +648,60 @@ export default function OrderTrackingManagement() {
         </div>
       </div>
 
+      {/* Problematic Orders Alert Section */}
+      {(() => {
+        const problematicOrders = filteredOrders.filter(order => {
+          const statusInfo = getStatusDisplay(order);
+          return statusInfo.isProblematic;
+        });
+        
+        if (problematicOrders.length > 0) {
+          return (
+            <Card className="border-red-200 bg-red-50">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-red-800">
+                  <AlertTriangle className="w-5 h-5" />
+                  سفارشات مشکل‌دار و شکست خورده ({problematicOrders.length})
+                </CardTitle>
+                <CardDescription className="text-red-700">
+                  سفارشاتی که نیاز به توجه و بررسی فوری دارند
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {problematicOrders.slice(0, 5).map(order => {
+                    const statusInfo = getStatusDisplay(order);
+                    return (
+                      <div key={order.id} className="flex items-center justify-between p-3 bg-white border border-red-200 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <div className={`px-2 py-1 rounded text-xs font-medium ${statusInfo.color}`}>
+                            {statusInfo.label}
+                          </div>
+                          <div>
+                            <div className="font-medium">#{order.orderNumber || order.customerOrderId}</div>
+                            <div className="text-sm text-gray-600">{order.customerName}</div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-sm font-medium">{formatAmount(order.totalAmount, order.currency || 'IQD')}</div>
+                          <div className="text-xs text-gray-500">{formatDate(order.createdAt)}</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {problematicOrders.length > 5 && (
+                    <div className="text-center text-sm text-red-600 py-2">
+                      و {problematicOrders.length - 5} سفارش مشکل‌دار دیگر...
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          );
+        }
+        return null;
+      })()}
+
       {/* Search and Filter */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
@@ -587,12 +719,18 @@ export default function OrderTrackingManagement() {
           className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="all">همه وضعیت‌ها</option>
+          <option value="problematic" className="text-red-600 font-medium">🚨 فقط مشکل‌دار و شکست خورده</option>
           <option value="pending">در انتظار</option>
           <option value="confirmed">تأیید شده</option>
           <option value="financial_approved">تأیید مالی</option>
           <option value="delivered">تحویل شده</option>
           <option value="completed">تکمیل شده</option>
           <option value="cancelled">لغو شده</option>
+          <option value="deleted">حذف شده</option>
+          <option value="financial_rejected">رد مالی</option>
+          <option value="payment_failed">پرداخت ناموفق</option>
+          <option value="warehouse_rejected">رد انبار</option>
+          <option value="expired">منقضی شده</option>
         </select>
       </div>
 
@@ -651,12 +789,12 @@ export default function OrderTrackingManagement() {
                       )}
                     </button>
                   </th>
-                  <th className="text-right p-4 font-semibold" style={{ width: '100px' }}>
+                  <th className="text-right p-4 font-semibold" style={{ width: '200px' }}>
                     <button 
                       onClick={() => handleSort('status')}
                       className="flex items-center justify-end w-full hover:text-blue-600 transition-colors"
                     >
-                      وضعیت / بخش
+                      وضعیت / توضیحات مشکلات
                       {sortField === 'status' && (
                         <span className="mr-1">
                           {sortDirection === 'asc' ? '↑' : '↓'}
@@ -700,7 +838,7 @@ export default function OrderTrackingManagement() {
                         {formatAmount(order.totalAmount, order.currency || 'IQD')}
                       </div>
                     </td>
-                    <td className="p-4 text-right" style={{ width: '100px' }}>
+                    <td className="p-4 text-right" style={{ width: '200px' }}>
                       {(() => {
                         const statusInfo = getStatusDisplay(order);
                         return (
@@ -711,6 +849,15 @@ export default function OrderTrackingManagement() {
                             <div className="text-xs text-gray-600 text-center">
                               {statusInfo.department}
                             </div>
+                            {/* Show detailed explanation for failed/problematic orders */}
+                            {statusInfo.isProblematic && statusInfo.explanation && (
+                              <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-xs text-red-800">
+                                <div className="flex items-start gap-1">
+                                  <AlertTriangle className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                                  <span className="leading-tight">{statusInfo.explanation}</span>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         );
                       })()}
@@ -782,13 +929,27 @@ export default function OrderTrackingManagement() {
                                       {(() => {
                                         const statusInfo = getStatusDisplay(selectedOrder);
                                         return (
-                                          <div className="inline-flex items-center gap-2 mr-2">
-                                            <div className={`px-3 py-1 rounded-full text-sm font-medium border ${statusInfo.color}`}>
-                                              {statusInfo.label}
+                                          <div className="space-y-2 mt-2">
+                                            <div className="inline-flex items-center gap-2">
+                                              <div className={`px-3 py-1 rounded-full text-sm font-medium border ${statusInfo.color}`}>
+                                                {statusInfo.label}
+                                              </div>
+                                              <div className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-700">
+                                                {statusInfo.department}
+                                              </div>
                                             </div>
-                                            <div className="px-2 py-1 bg-gray-100 rounded text-xs text-gray-700">
-                                              {statusInfo.department}
-                                            </div>
+                                            {/* Show detailed explanation for failed/problematic orders in dialog */}
+                                            {statusInfo.isProblematic && statusInfo.explanation && (
+                                              <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                                                <div className="flex items-start gap-2">
+                                                  <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0 text-red-600" />
+                                                  <div>
+                                                    <div className="text-sm font-medium text-red-800 mb-1">توضیحات مشکل:</div>
+                                                    <div className="text-sm text-red-700">{statusInfo.explanation}</div>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            )}
                                           </div>
                                         );
                                       })()}

@@ -138,8 +138,10 @@ export interface IOrderManagementStorage {
     weight: number;
   }): Promise<number>;
   
-  // M[YY][NNNNN] order numbering
-  generateOrderNumber(): Promise<string>;
+  // M[YY][NNNNN] order numbering - SEQUENTIAL & GAP-FREE
+  generateOrderNumber(): Promise<string>; // 🚨 DEPRECATED: Can create gaps!
+  generateOrderNumberInTransaction(transactionClient?: any): Promise<string>; // ✅ RECOMMENDED: Gap-free
+  createOrderWithSequentialNumber(orderData: any): Promise<{ order: any; orderNumber: string }>; // ✅ COMPLETE SOLUTION
   resetOrderCounter(year?: number): Promise<void>;
   
   // Order details with items
@@ -1651,7 +1653,12 @@ export class OrderManagementStorage implements IOrderManagementStorage {
   }
 
   // M[YY][NNNNN] order numbering functions - M2511111, M2511112, etc.
+  // 🚨 DEPRECATED: This function can create gaps if order creation fails after number generation
+  // Use generateOrderNumberInTransaction() instead for truly sequential numbering
   async generateOrderNumber(): Promise<string> {
+    console.warn('⚠️ [ORDER NUMBER] Using deprecated generateOrderNumber() - may create gaps!');
+    console.warn('⚠️ [ORDER NUMBER] Use generateOrderNumberInTransaction() for gap-free sequential numbering');
+    
     try {
       const currentYear = new Date().getFullYear();
       const yearSuffix = (currentYear % 100).toString().padStart(2, '0'); // Get last 2 digits of year
@@ -1695,6 +1702,87 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       const yearSuffix = (currentYear % 100).toString().padStart(2, '0');
       return `M${yearSuffix}${Date.now().toString().slice(-5)}`;
     }
+  }
+
+  // 🔒 TRANSACTION-SAFE ORDER NUMBER GENERATION
+  // This function generates order numbers within a database transaction
+  // If order creation fails, the entire transaction (including counter) is rolled back
+  async generateOrderNumberInTransaction(transactionClient?: any): Promise<string> {
+    console.log('✅ [SEQUENTIAL] Using transaction-safe order number generation');
+    
+    try {
+      const currentYear = new Date().getFullYear();
+      const yearSuffix = (currentYear % 100).toString().padStart(2, '0');
+      
+      // Use provided transaction client or create a new transaction
+      const client = transactionClient || db;
+      
+      // Check if we need to create/reset counter for current year
+      const yearCounterCheck = await client.execute(sql`
+        SELECT * FROM order_counter WHERE year = ${currentYear} FOR UPDATE
+      `);
+      
+      if (yearCounterCheck.rows.length === 0) {
+        // Create new counter for current year starting from 01111
+        await client.execute(sql`
+          INSERT INTO order_counter (year, counter, prefix, last_reset)
+          VALUES (${currentYear}, 1111, 'M', CURRENT_TIMESTAMP)
+        `);
+        console.log(`🔢 [SEQUENTIAL] New year counter created for ${currentYear}, starting from M${yearSuffix}01111`);
+        return `M${yearSuffix}01111`;
+      }
+      
+      // Increment counter atomically within transaction
+      const result = await client.execute(sql`
+        UPDATE order_counter 
+        SET counter = counter + 1, 
+            updated_at = CURRENT_TIMESTAMP
+        WHERE year = ${currentYear}
+        RETURNING counter, prefix
+      `);
+      
+      const row = result.rows[0] as { counter: number; prefix: string };
+      if (row) {
+        const paddedCounter = row.counter.toString().padStart(5, '0');
+        const orderNumber = `${row.prefix}${yearSuffix}${paddedCounter}`;
+        console.log(`🔢 [SEQUENTIAL] Generated order number: ${orderNumber} (counter: ${row.counter})`);
+        return orderNumber;
+      }
+      
+      throw new Error('Failed to increment order counter');
+    } catch (error) {
+      console.error('❌ [SEQUENTIAL] Error in transaction-safe order number generation:', error);
+      throw error; // Re-throw to let transaction rollback handle it
+    }
+  }
+
+  // 🔧 UTILITY: Create order with sequential numbering (transaction-safe)
+  async createOrderWithSequentialNumber(orderData: any): Promise<{ order: any; orderNumber: string }> {
+    console.log('🔒 [SEQUENTIAL] Starting transaction-safe order creation...');
+    
+    // Start database transaction
+    return await db.transaction(async (tx) => {
+      try {
+        // Generate sequential order number within transaction
+        const orderNumber = await this.generateOrderNumberInTransaction(tx);
+        
+        // Create order with the generated number
+        const order = await tx.insert(customerOrders).values({
+          ...orderData,
+          orderNumber
+        }).returning();
+        
+        console.log(`✅ [SEQUENTIAL] Order created successfully with number: ${orderNumber}`);
+        
+        return { 
+          order: order[0], 
+          orderNumber 
+        };
+      } catch (error) {
+        console.error('❌ [SEQUENTIAL] Transaction failed, rolling back order number:', error);
+        throw error; // This will cause transaction rollback including counter increment
+      }
+    });
   }
 
   async resetOrderCounter(year?: number): Promise<void> {

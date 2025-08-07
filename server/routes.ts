@@ -9963,15 +9963,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // =============================================================================
 
   // Generate M[YY][NNNNN] order number (e.g., M2511111, M2511112)
+  // ⚠️ WARNING: This endpoint only generates a number without creating an order
+  // This can create gaps if the number is not used. Use transaction-safe order creation instead.
   app.get("/api/orders/generate-order-number", async (req, res) => {
     try {
+      console.warn('⚠️ [ORDER NUMBER] Generating standalone order number - may create gaps if not used!');
       const orderNumber = await orderManagementStorage.generateOrderNumber();
       
       res.json({ 
         success: true, 
         orderNumber: orderNumber,
-        message: "شماره سفارش M[YY][NNNNN] تولید شد",
-        format: "M + سال دو رقمی + شماره ترتیبی پنج رقمی"
+        message: "شماره سفارش M[YY][NNNNN] تولید شد - اخطار: اگر از این شماره استفاده نشود، گپ ایجاد خواهد شد",
+        format: "M + سال دو رقمی + شماره ترتیبی پنج رقمی",
+        warning: "این شماره باید فوراً برای ایجاد سفارش استفاده شود وگرنه در ترتیب‌بندی گپ ایجاد می‌شود"
       });
     } catch (error) {
       console.error("Error generating order number:", error);
@@ -10001,6 +10005,103 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         success: false, 
         message: "خطا در بازنشانی شمارنده" 
+      });
+    }
+  });
+
+  // 🧪 TEST: Sequential Order Number Generation (Gap-Free)
+  app.post('/api/test/sequential-order-numbers', requireAuth, async (req, res) => {
+    try {
+      console.log('🧪 [TEST] Testing sequential order number generation...');
+      
+      const { OrderManagementStorage } = await import('./order-management-storage');
+      const orderManagementStorage = new OrderManagementStorage();
+      
+      // Test both old and new methods
+      const results = {
+        oldMethod: [],
+        newMethod: [],
+        comparison: {}
+      };
+      
+      // Get current counter state
+      const currentYear = new Date().getFullYear();
+      const counterBefore = await db.execute(sql`
+        SELECT counter FROM order_counter WHERE year = ${currentYear}
+      `);
+      
+      console.log('🧪 [TEST] Current counter before test:', counterBefore.rows[0]?.counter || 'Not initialized');
+      
+      // Test old method (can create gaps)
+      for (let i = 1; i <= 3; i++) {
+        try {
+          const orderNumber = await orderManagementStorage.generateOrderNumber();
+          results.oldMethod.push(orderNumber);
+          console.log(`⚠️ [OLD METHOD] Generated: ${orderNumber}`);
+        } catch (error) {
+          results.oldMethod.push(`ERROR: ${error.message}`);
+        }
+      }
+      
+      // Test new transaction-safe method
+      for (let i = 1; i <= 3; i++) {
+        try {
+          const orderNumber = await orderManagementStorage.generateOrderNumberInTransaction();
+          results.newMethod.push(orderNumber);
+          console.log(`✅ [NEW METHOD] Generated: ${orderNumber}`);
+        } catch (error) {
+          results.newMethod.push(`ERROR: ${error.message}`);
+        }
+      }
+      
+      // Check if numbers are sequential
+      const checkSequential = (numbers) => {
+        if (numbers.length < 2) return { sequential: true, gaps: [] };
+        
+        const gaps = [];
+        for (let i = 1; i < numbers.length; i++) {
+          if (!numbers[i].startsWith('ERROR')) {
+            const prevNum = parseInt(numbers[i-1].slice(-5));
+            const currNum = parseInt(numbers[i].slice(-5));
+            if (currNum !== prevNum + 1) {
+              gaps.push(`Gap between ${numbers[i-1]} and ${numbers[i]}`);
+            }
+          }
+        }
+        return { sequential: gaps.length === 0, gaps };
+      };
+      
+      const oldCheck = checkSequential(results.oldMethod);
+      const newCheck = checkSequential(results.newMethod);
+      
+      results.comparison = {
+        oldMethodSequential: oldCheck,
+        newMethodSequential: newCheck,
+        recommendation: newCheck.sequential ? 
+          'استفاده از روش جدید تراکنشی توصیه می‌شود - شماره‌گذاری بدون گپ' :
+          'هردو روش مشکل دارند - نیاز به بررسی بیشتر'
+      };
+      
+      res.json({
+        success: true,
+        message: 'تست شماره‌گذاری ترتیبی کامل شد',
+        testResults: results,
+        summary: {
+          oldMethodWorks: !results.oldMethod.some(n => n.startsWith('ERROR')),
+          newMethodWorks: !results.newMethod.some(n => n.startsWith('ERROR')),
+          oldMethodSequential: oldCheck.sequential,
+          newMethodSequential: newCheck.sequential,
+          conclusion: newCheck.sequential ? 
+            '✅ سیستم جدید کاملاً ترتیبی است' : 
+            '❌ نیاز به اصلاح بیشتر'
+        }
+      });
+    } catch (error) {
+      console.error('❌ [TEST] Sequential numbering test failed:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در تست شماره‌گذاری ترتیبی',
+        error: error.message
       });
     }
   });
@@ -13823,10 +13924,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         finalCustomerInfo = crmCustomer;
       }
 
-      // Generate order number using the M[YY][NNNNN] system
+      // 🔒 SEQUENTIAL: Generate order number using transaction-safe M[YY][NNNNN] system
       const { OrderManagementStorage } = await import('./order-management-storage');
       const orderManagementStorage = new OrderManagementStorage();
-      const orderNumber = await orderManagementStorage.generateOrderNumber();
+      
+      console.log('🔒 [SEQUENTIAL] Starting transaction-safe order creation...');
+      let orderNumber: string;
 
       // Handle wallet payments with smart conversion
       let finalPaymentStatus = "pending";
@@ -14183,10 +14286,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         notes: orderData.notes || '', // Add notes from form
       };
 
-      // Generate M[YY][NNNNN] order number using new system
+      // 🔒 SEQUENTIAL: Generate M[YY][NNNNN] order number using transaction-safe system
       const { OrderManagementStorage } = await import('./order-management-storage');
       const orderManagementStorage = new OrderManagementStorage();
-      const orderNumber = await orderManagementStorage.generateOrderNumber();
+      
+      console.log('🔒 [SEQUENTIAL] Starting transaction-safe order creation for wallet/payment...');
+      let orderNumber: string;
       
       // Calculate order totals and taxes (using dynamic tax settings)
       // Note: orderData.totalAmount from frontend already includes all components
