@@ -1427,11 +1427,12 @@ export default function AdvancedEmailSettingsPage() {
                       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                         <div className="flex items-center gap-2 mb-2">
                           <CheckCircle className="w-5 h-5 text-blue-600" />
-                          <span className="font-medium text-blue-900">Centralized CC Active</span>
+                          <span className="font-medium text-blue-900">Configurable CC System Active</span>
                         </div>
                         <p className="text-blue-700 text-sm">
                           All emails (contact forms, product inquiries, password resets, quote requests) 
-                          automatically CC <strong>info@momtazchem.com</strong> for comprehensive monitoring.
+                          automatically CC the configured email addresses below for comprehensive monitoring. 
+                          You can add or remove CC addresses as needed.
                         </p>
                       </div>
                       
