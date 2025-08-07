@@ -1145,9 +1145,9 @@ export default function OrderTrackingManagement() {
                                     </CardTitle>
                                   </CardHeader>
                                   <CardContent className="space-y-2">
-                                    <div><strong>نام:</strong> {selectedOrder?.customerName || 'نامشخص'}</div>
-                                    <div><strong>ایمیل:</strong> {selectedOrder?.customerEmail || 'نامشخص'}</div>
-                                    <div><strong>تلفن:</strong> {selectedOrder?.customerPhone || 'نامشخص'}</div>
+                                    <div><strong>نام:</strong> {selectedOrder.customerName || 'نامشخص'}</div>
+                                    <div><strong>ایمیل:</strong> {selectedOrder.customerEmail || 'نامشخص'}</div>
+                                    <div><strong>تلفن:</strong> {selectedOrder.customerPhone || 'نامشخص'}</div>
                                   </CardContent>
                                 </Card>
 
@@ -1159,12 +1159,12 @@ export default function OrderTrackingManagement() {
                                     </CardTitle>
                                   </CardHeader>
                                   <CardContent className="space-y-2">
-                                    <div><strong>مبلغ کل:</strong> {formatAmount(selectedOrder?.totalAmount, selectedOrder?.currency)}</div>
+                                    <div><strong>مبلغ کل:</strong> {formatAmount(selectedOrder.totalAmount, selectedOrder.currency)}</div>
                                     <div className="flex items-center gap-2">
                                       <strong>روش پرداخت:</strong>
-                                      {selectedOrder?.paymentMethod ? (
+                                      {selectedOrder.paymentMethod ? (
                                         <PaymentMethodBadge 
-                                          paymentMethod={selectedOrder?.paymentMethod}
+                                          paymentMethod={selectedOrder.paymentMethod}
                                           showIcon={true}
                                           className="text-xs"
                                         />
@@ -1214,12 +1214,12 @@ export default function OrderTrackingManagement() {
                                   </CardTitle>
                                 </CardHeader>
                                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                  <div><strong>کد تحویل:</strong> {selectedOrder?.deliveryCode || 'تخصیص نشده'}</div>
-                                  <div><strong>شماره رهگیری:</strong> {selectedOrder?.trackingNumber || 'تخصیص نشده'}</div>
-                                  <div><strong>تاریخ تحویل تخمینی:</strong> {selectedOrder?.estimatedDeliveryDate ? formatDate(selectedOrder.estimatedDeliveryDate) : 'تعیین نشده'}</div>
-                                  <div><strong>تاریخ تحویل واقعی:</strong> {selectedOrder?.actualDeliveryDate ? formatDate(selectedOrder.actualDeliveryDate) : 'تحویل نشده'}</div>
-                                  <div><strong>نام تحویل‌دهنده:</strong> {selectedOrder?.deliveryPersonName || 'تخصیص نشده'}</div>
-                                  <div><strong>تلفن تحویل‌دهنده:</strong> {selectedOrder?.deliveryPersonPhone || 'تخصیص نشده'}</div>
+                                  <div><strong>کد تحویل:</strong> {selectedOrder.deliveryCode || 'تخصیص نشده'}</div>
+                                  <div><strong>شماره رهگیری:</strong> {selectedOrder.trackingNumber || 'تخصیص نشده'}</div>
+                                  <div><strong>تاریخ تحویل تخمینی:</strong> {selectedOrder.estimatedDeliveryDate ? formatDate(selectedOrder.estimatedDeliveryDate) : 'تعیین نشده'}</div>
+                                  <div><strong>تاریخ تحویل واقعی:</strong> {selectedOrder.actualDeliveryDate ? formatDate(selectedOrder.actualDeliveryDate) : 'تحویل نشده'}</div>
+                                  <div><strong>نام تحویل‌دهنده:</strong> {selectedOrder.deliveryPersonName || 'تخصیص نشده'}</div>
+                                  <div><strong>تلفن تحویل‌دهنده:</strong> {selectedOrder.deliveryPersonPhone || 'تخصیص نشده'}</div>
                                 </CardContent>
                               </Card>
 
@@ -1236,7 +1236,7 @@ export default function OrderTrackingManagement() {
                                     </CardHeader>
                                     <CardContent>
                                       <p className="text-sm text-gray-700">
-                                        {selectedOrder?.customerNotes || 'یادداشتی وجود ندارد'}
+                                        {selectedOrder.customerNotes || 'یادداشتی وجود ندارد'}
                                       </p>
                                     </CardContent>
                                   </Card>
@@ -1250,7 +1250,7 @@ export default function OrderTrackingManagement() {
                                     </CardHeader>
                                     <CardContent>
                                       <p className="text-sm text-gray-700">
-                                        {selectedOrder?.deliveryNotes || 'نکته خاصی وجود ندارد'}
+                                        {selectedOrder.deliveryNotes || 'نکته خاصی وجود ندارد'}
                                         </p>
                                       </CardContent>
                                     </Card>
@@ -1258,6 +1258,7 @@ export default function OrderTrackingManagement() {
                                 </div>
                               </div>
 
+                              {/* Department Notes */}
                               <div>
                                 <h4 className="text-lg font-semibold mb-4 text-gray-800">🏢 Department Notes</h4>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -1320,7 +1321,7 @@ export default function OrderTrackingManagement() {
                                       <strong className="text-green-800">زمان ثبت سفارش توسط مشتری:</strong>
                                     </div>
                                     <div className="text-green-700 text-sm">
-                                      {selectedOrder?.createdAt ? formatDate(selectedOrder?.createdAt) : 'نامشخص'}
+                                      {selectedOrder?.createdAt ? formatDate(selectedOrder.createdAt) : 'نامشخص'}
                                     </div>
                                     <div className="text-xs text-green-600 mt-1">
                                       (زمان دقیق submit کردن سفارش در صفحه checkout)
