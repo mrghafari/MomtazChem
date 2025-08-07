@@ -326,6 +326,56 @@ export class OrderManagementStorage implements IOrderManagementStorage {
     
     const updatedOrder = updatedResult[0];
     
+    // 🚨 CRITICAL FIX: همگام‌سازی customer_orders با order_management
+    // برای جلوگیری از گیر کردن سفارشات در چرخه بی‌نهایت sync
+    const customerOrderUpdateData: Partial<any> = {};
+    let shouldUpdateCustomerOrder = false;
+
+    // تعیین وضعیت مناسب برای customer_orders بر اساس management status
+    if (newStatus === orderStatuses.WAREHOUSE_PENDING || newStatus === 'warehouse_pending') {
+      // سفارش از مالی به انبار منتقل شده
+      customerOrderUpdateData.status = 'confirmed';
+      shouldUpdateCustomerOrder = true;
+      console.log('🔄 [SYNC FIX] Financial→Warehouse: Updating customer_orders.status to "confirmed"');
+    } else if (newStatus === orderStatuses.WAREHOUSE_APPROVED || newStatus === 'warehouse_approved') {
+      // سفارش از انبار تایید شده
+      customerOrderUpdateData.status = 'warehouse_ready';
+      shouldUpdateCustomerOrder = true;
+      console.log('🔄 [SYNC FIX] Warehouse approved: Updating customer_orders.status to "warehouse_ready"');
+    } else if (newStatus === orderStatuses.LOGISTICS_DISPATCHED || newStatus === 'logistics_dispatched') {
+      // سفارش ارسال شده
+      customerOrderUpdateData.status = 'shipped';
+      shouldUpdateCustomerOrder = true;
+      console.log('🔄 [SYNC FIX] Logistics dispatched: Updating customer_orders.status to "shipped"');
+    } else if (newStatus === orderStatuses.COMPLETED || newStatus === 'completed') {
+      // سفارش تکمیل شده
+      customerOrderUpdateData.status = 'delivered';
+      shouldUpdateCustomerOrder = true;
+      console.log('🔄 [SYNC FIX] Order completed: Updating customer_orders.status to "delivered"');
+    } else if (newStatus === orderStatuses.FINANCIAL_REJECTED || newStatus === 'financial_rejected') {
+      // سفارش رد شده
+      customerOrderUpdateData.status = 'cancelled';
+      customerOrderUpdateData.paymentStatus = 'rejected';
+      shouldUpdateCustomerOrder = true;
+      console.log('🔄 [SYNC FIX] Financial rejected: Updating customer_orders.status to "cancelled"');
+    }
+
+    // به‌روزرسانی customer_orders در صورت نیاز
+    if (shouldUpdateCustomerOrder) {
+      customerOrderUpdateData.updatedAt = new Date();
+      
+      await db
+        .update(customerOrders)
+        .set(customerOrderUpdateData)
+        .where(eq(customerOrders.id, currentOrder.customerOrderId));
+      
+      console.log('✅ [SYNC FIX] customer_orders updated to prevent infinite sync loops:', {
+        customerOrderId: currentOrder.customerOrderId,
+        newStatus: customerOrderUpdateData.status,
+        paymentStatus: customerOrderUpdateData.paymentStatus
+      });
+    }
+    
     console.log('✅ [ORDER STATUS] Order updated successfully:', { 
       id: updatedOrder.id, 
       customerOrderId: updatedOrder.customerOrderId, 
