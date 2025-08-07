@@ -1134,6 +1134,7 @@ export default function OrderTrackingManagement() {
                           </DialogHeader>
                           
                           {selectedOrder && (
+                            <>
                             <div className="space-y-6">
                               {/* Customer Information */}
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1339,6 +1340,7 @@ export default function OrderTrackingManagement() {
                                 </CardContent>
                               </Card>
                             </div>
+                            </>
                           )}
                         </DialogContent>
                       </Dialog>
