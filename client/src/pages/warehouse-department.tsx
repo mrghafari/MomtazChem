@@ -292,34 +292,25 @@ export default function WarehouseDepartment() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {error || response === null ? (
-            <div className="flex flex-col items-center justify-center py-12 space-y-4">
-              <AlertCircle className="w-12 h-12 text-red-500" />
-              <h3 className="text-lg font-semibold text-gray-900">نیاز به احراز هویت</h3>
-              <p className="text-gray-600 text-center max-w-md">
-                برای دسترسی به واحد انبار، لطفاً وارد حساب ادمین شوید. 
-                کاربر: admin@momtazchem.com
-              </p>
-              <div className="flex gap-3">
-                <Button 
-                  onClick={() => window.location.href = '/admin/login'}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  ورود به حساب ادمین
-                </Button>
-                <Button 
-                  onClick={() => refetch()}
-                  variant="outline"
-                  className="border-gray-300"
-                >
-                  تلاش مجدد
-                </Button>
-              </div>
-            </div>
-          ) : isLoading ? (
+          {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <Loader className="w-6 h-6 animate-spin text-gray-500" />
               <span className="ml-2 text-gray-500">در حال بارگیری سفارشات...</span>
+            </div>
+          ) : error ? (
+            <div className="flex flex-col items-center justify-center py-12 space-y-4">
+              <AlertCircle className="w-12 h-12 text-red-500" />
+              <h3 className="text-lg font-semibold text-gray-900">خطا در بارگیری اطلاعات</h3>
+              <p className="text-gray-600 text-center max-w-md">
+                {error instanceof Error ? error.message : 'خطای ناشناخته‌ای رخ داد'}
+              </p>
+              <Button 
+                onClick={() => refetch()}
+                variant="outline"
+                className="border-gray-300"
+              >
+                تلاش مجدد
+              </Button>
             </div>
           ) : filteredOrders.length > 0 ? (
             <div className="space-y-4">

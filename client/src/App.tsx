@@ -286,6 +286,7 @@ function Router() {
           <Route path="/financial/login" component={FinancialLogin} />
           <Route path="/warehouse" component={WarehouseManagementFixed} />
           <Route path="/warehouse-department" component={WarehouseDepartment} />
+          <Route path="/admin/warehouse-department" component={WarehouseDepartment} />
           <Route path="/warehouse/login" component={WarehouseLogin} />
           <Route path="/logistics-department" component={LogisticsDepartment} />
           <Route path="/logistics-full" component={LogisticsDepartment} />
