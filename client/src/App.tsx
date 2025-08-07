@@ -60,7 +60,7 @@ import CustomerWallet from "@/pages/customer-wallet";
 import WalletManagement from "@/pages/admin/wallet-management";
 import ProductVariants from "@/pages/admin/product-variants";
 import SalesAnalytics from "@/pages/sales-analytics";
-import FinancialWorkflowDashboard from "@/pages/admin/financial-workflow-dashboard";
+
 import Products from "@/pages/products";
 import ProductsPage from "@/pages/products";
 import BatchManagement from "@/pages/batch-management";
@@ -239,7 +239,7 @@ function Router() {
           <Route path="/admin/logistics-orders" component={LogisticsOrders} />
           <Route path="/admin/logistics-management" component={LogisticsManagement} />
           <Route path="/admin/delivered-orders" component={DeliveredOrders} />
-          <Route path="/admin/financial-workflow" component={FinancialWorkflowDashboard} />
+
           <Route path="/payment-options" component={PaymentOptions} />
           <Route path="/admin/global-refresh-settings" component={GlobalRefreshSettings} />
 
