@@ -262,12 +262,19 @@ const Shop = () => {
     setCurrentPage(0);
   };
 
+  // Handler for immediate visual feedback while dragging
   const handlePriceRangeChange = (value: [number, number]) => {
-    // Ensure proper range handling with immediate display update
     if (Array.isArray(value) && value.length === 2 && !isNaN(value[0]) && !isNaN(value[1])) {
-      // Update display immediately
+      // Only update display immediately, don't trigger API call
       setPriceRange(value);
-      // Update filters and trigger API call
+    }
+  };
+
+  // Handler for applying filter when user releases slider
+  const handlePriceRangeCommit = (value: [number, number]) => {
+    if (Array.isArray(value) && value.length === 2 && !isNaN(value[0]) && !isNaN(value[1])) {
+      // Update display and apply filter
+      setPriceRange(value);
       setFilters(prev => ({ ...prev, priceMin: value[0], priceMax: value[1] }));
       setCurrentPage(0);
     }
@@ -1023,6 +1030,7 @@ const Shop = () => {
                         <RangeSlider
                           value={priceRange}
                           onValueChange={handlePriceRangeChange}
+                          onValueCommit={handlePriceRangeCommit}
                           max={typeof availableFilters.priceRange.max === 'string' ? parseFloat(availableFilters.priceRange.max) : availableFilters.priceRange.max}
                           min={typeof availableFilters.priceRange.min === 'string' ? parseFloat(availableFilters.priceRange.min) : availableFilters.priceRange.min}
                           step={100}
