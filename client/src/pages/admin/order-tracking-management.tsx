@@ -1253,6 +1253,7 @@ export default function OrderTrackingManagement() {
                                 </div>
                               </div>
 
+                              {/* Department Notes */}
                               <div>
                                 <h4 className="text-lg font-semibold mb-4 text-gray-800">🏢 Department Notes</h4>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
