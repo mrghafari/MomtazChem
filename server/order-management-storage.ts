@@ -518,7 +518,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       
       for (const item of items) {
         const weight = parseFloat(item.productWeight || '0');
-        const quantity = item.quantity;
+        const quantity = parseFloat(item.quantity || '1');
         const itemTotalWeight = weight * quantity;
         
         console.log(`🏋️ [WEIGHT] Item ${item.itemId}: ${weight}kg x ${quantity} = ${itemTotalWeight}kg`);
@@ -1606,22 +1606,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
     }
   }
 
-  async calculateOrderWeight(customerOrderId: number): Promise<number> {
-    try {
-      console.log(`🔍 [WEIGHT] Calculating weight for order ${customerOrderId}`);
-      
-      // Get order items and join with both shop_products and showcase_products to get weight
-      const items = await db
-        .select({
-          productId: orderItems.productId,
-          productName: orderItems.productName,
-          quantity: orderItems.quantity,
-          shopGrossWeight: shopProducts.grossWeight,
-          shopNetWeight: shopProducts.netWeight,
-          shopWeight: shopProducts.weight,
-          shopBarcode: shopProducts.barcode
-        })
-        .from(orderItems)
+  // Duplicate function removed - using the implementation at line 504
         .leftJoin(shopProducts, eq(orderItems.productId, shopProducts.id))
         .where(eq(orderItems.orderId, customerOrderId));
 
