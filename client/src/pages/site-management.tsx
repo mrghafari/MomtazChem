@@ -112,7 +112,7 @@ export default function SiteManagement() {
     'wallet-management': 'wallet-management',
     'payment-settings': 'payment-settings',
     'accounting-management': 'accounting',
-    'financial-workflow': 'order-management',
+    'finance-orders': 'order-management',
     'financial-department': 'finance',
     'geography-analytics': 'geography-analytics',
     'warehouse-orders': 'order-management',
@@ -173,7 +173,7 @@ export default function SiteManagement() {
       id: "order-management",
       label: "Order Management",
       icon: Truck,
-      onClick: () => trackButtonClick("order-management", () => setLocation("/admin/financial-workflow")),
+      onClick: () => trackButtonClick("order-management", () => setLocation("/admin/finance-orders")),
       className: "border-orange-300 text-orange-600 hover:bg-orange-50",
       moduleId: "order_management"
     },
@@ -316,10 +316,10 @@ export default function SiteManagement() {
       moduleId: "accounting"
     },
     {
-      id: "financial-workflow",
-      label: "Financial Workflow",
+      id: "finance-orders",
+      label: "Financial Orders",
       icon: DollarSign,
-      onClick: () => trackButtonClick("financial-workflow", () => setLocation("/admin/financial-workflow")),
+      onClick: () => trackButtonClick("finance-orders", () => setLocation("/admin/finance-orders")),
       className: "border-blue-300 text-blue-600 hover:bg-blue-50",
       moduleId: "order_management"
     },

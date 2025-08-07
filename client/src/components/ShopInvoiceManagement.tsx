@@ -387,8 +387,9 @@ export default function ShopInvoiceManagement() {
     const methods: Record<string, string> = {
       'bank_transfer': 'انتقال بانکی',
       'wallet_full': 'کیف پول کامل',
+      'wallet_partial': 'پرداخت ترکیبی',
+      'wallet': 'کیف پول دیجیتال', 
       'wallet_partial': 'کیف پول + سایر',
-      'wallet': 'کیف پول دیجیتال',
       'cash_on_delivery': 'پرداخت در محل',
       'credit_card': 'کارت اعتباری'
     };

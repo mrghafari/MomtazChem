@@ -206,6 +206,7 @@ export interface Translation {
   totalReviews: string;
   noReviewsYet: string;
   noReviewsDesc: string;
+  productSpecifications: string;
   reviewsAndRatings: string;
   customerFeedback: string;
   
@@ -508,6 +509,7 @@ export const translations: Record<Language, Translation> = {
     totalReviews: 'Total Reviews',
     noReviewsYet: 'No Reviews Yet',
     noReviewsDesc: 'Be the first to review this product',
+    productSpecifications: 'Specifications',
     reviewsAndRatings: 'Reviews & Ratings',
     customerFeedback: 'Customer Feedback',
     
@@ -808,6 +810,7 @@ export const translations: Record<Language, Translation> = {
     totalReviews: 'إجمالي المراجعات',
     noReviewsYet: 'لا توجد مراجعات بعد',
     noReviewsDesc: 'كن أول من يراجع هذا المنتج',
+    productSpecifications: 'المواصفات',
     reviewsAndRatings: 'المراجعات والتقييمات',
     customerFeedback: 'ملاحظات العملاء',
     

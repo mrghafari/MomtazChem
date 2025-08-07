@@ -60,7 +60,7 @@ import CustomerWallet from "@/pages/customer-wallet";
 import WalletManagement from "@/pages/admin/wallet-management";
 import ProductVariants from "@/pages/admin/product-variants";
 import SalesAnalytics from "@/pages/sales-analytics";
-
+import FinancialWorkflowDashboard from "@/pages/admin/financial-workflow-dashboard";
 import Products from "@/pages/products";
 import ProductsPage from "@/pages/products";
 import BatchManagement from "@/pages/batch-management";
@@ -88,9 +88,11 @@ import AbandonedCartManagement from "@/pages/abandoned-cart-management";
 import FinancialDepartment from "@/pages/financial-department";
 import WarehouseDepartment from "@/pages/warehouse-department";
 import LogisticsDepartment from "@/pages/logistics-department";
-
+import FinanceOrders from "@/pages/admin/finance-orders";
 import LogisticsSimple from "@/pages/logistics-simple";
-
+import FinancialLogin from "@/pages/financial-login";
+import WarehouseLogin from "@/pages/warehouse-login";
+import LogisticsLogin from "@/pages/logistics-login";
 import TicketingSystemFixed from "@/pages/admin/ticketing-system-fixed";
 
 import SuperAdminSettings from "@/pages/super-admin-settings";
@@ -235,11 +237,12 @@ function Router() {
           <Route path="/documentation" component={DocumentationPage} />
           
           {/* New Department Order Management Pages */}
+          <Route path="/admin/finance-orders" component={FinanceOrders} />
           <Route path="/admin/warehouse-orders" component={WarehouseOrders} />
           <Route path="/admin/logistics-orders" component={LogisticsOrders} />
           <Route path="/admin/logistics-management" component={LogisticsManagement} />
           <Route path="/admin/delivered-orders" component={DeliveredOrders} />
-
+          <Route path="/admin/financial-workflow" component={FinancialWorkflowDashboard} />
           <Route path="/payment-options" component={PaymentOptions} />
           <Route path="/admin/global-refresh-settings" component={GlobalRefreshSettings} />
 
@@ -276,14 +279,13 @@ function Router() {
           
           {/* Department-specific routes */}
           <Route path="/financial" component={FinancialDepartment} />
-          <Route path="/admin/finance-orders" component={FinancialDepartment} />
-
+          <Route path="/financial/login" component={FinancialLogin} />
           <Route path="/warehouse" component={WarehouseManagementFixed} />
-
+          <Route path="/warehouse/login" component={WarehouseLogin} />
           <Route path="/logistics-department" component={LogisticsDepartment} />
           <Route path="/logistics-full" component={LogisticsDepartment} />
           <Route path="/logistics" component={LogisticsSimple} />
-
+          <Route path="/logistics/login" component={LogisticsLogin} />
           <Route path="/test-logistics" component={TestLogistics} />
 
           <Route path="/super-admin/settings" component={SuperAdminSettings} />

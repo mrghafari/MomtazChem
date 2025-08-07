@@ -271,7 +271,7 @@ const ManagementDashboard = () => {
                       description="مشاهده گزارشات فروش و درآمد"
                       icon={<BarChart3 className="w-5 h-5 text-white" />}
                       color="bg-orange-500"
-                      onClick={() => setLocation("/admin/financial-workflow")}
+                      onClick={() => setLocation("/admin/finance-orders")}
                     />
                     <QuickActionWidget
                       title="تنظیمات ایمیل"

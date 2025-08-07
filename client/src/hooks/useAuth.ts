@@ -20,43 +20,28 @@ export function useAuth() {
   };
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["/api/auth/check"],
+    queryKey: ["/api/admin/me"],
     retry: 1,
     staleTime: 5000, // Cache for 5 seconds to avoid excessive requests
     refetchOnWindowFocus: true,
     refetchInterval: getAuthRefreshInterval(), // Use global refresh settings for auth
     queryFn: async () => {
       try {
-        // First try admin authentication
-        const adminResponse = await fetch("/api/admin/me", {
+        const response = await fetch("/api/admin/me", {
           credentials: "include",
         });
         
-        if (adminResponse.ok) {
-          const adminResult = await adminResponse.json();
-          if (adminResult.success) {
-            return { ...adminResult, userType: 'admin' };
-          }
+        if (response.status === 401) {
+          return { success: false, message: "Not authenticated" };
         }
         
-        // If admin fails, try customer authentication
-        const customerResponse = await fetch("/api/customers/me", {
-          credentials: "include",
-        });
-        
-        if (customerResponse.ok) {
-          const customerResult = await customerResponse.json();
-          if (customerResult.success) {
-            return { 
-              success: true, 
-              user: customerResult.customer, 
-              userType: 'customer' 
-            };
-          }
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
         }
         
-        // Neither authentication worked
-        return { success: false, message: "Not authenticated" };
+        const result = await response.json();
+        console.log("Auth check result:", result);
+        return result;
       } catch (error) {
         console.error("Auth check failed:", error);
         return { success: false, message: "Authentication check failed" };
@@ -65,31 +50,23 @@ export function useAuth() {
   });
 
   const logout = useMutation({
-    mutationFn: () => {
-      const userType = (data as any)?.userType || 'admin';
-      const logoutEndpoint = userType === 'customer' ? "/api/customers/logout" : "/api/admin/logout";
-      return apiRequest(logoutEndpoint, { method: "POST" });
-    },
+    mutationFn: () => apiRequest("/api/admin/logout", { method: "POST" }),
     onSuccess: () => {
       queryClient.clear();
-      const userType = (data as any)?.userType || 'admin';
-      const loginPath = userType === 'customer' ? "/customer/login" : "/admin/login";
-      // Wait a bit and redirect to appropriate login page
+      // Wait a bit and redirect to login page
       setTimeout(() => {
-        window.location.href = loginPath;
+        window.location.href = "/admin/login";
       }, 200);
     },
   });
 
   const user = (data as any)?.success ? (data as any).user : null;
   const isAuthenticated = !!((data as any)?.success && (data as any)?.user);
-  const userType = (data as any)?.userType || null;
 
   return {
     user,
     isLoading,
     isAuthenticated,
-    userType,
     logout: logout.mutate,
     isLoggingOut: logout.isPending,
   };
