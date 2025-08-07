@@ -174,13 +174,13 @@ function FinanceOrders() {
     staleTime: 0,
   });
 
-  // Enable audio notifications for new orders - MOVED HERE to avoid conditional hook calls
+  // Enable audio notifications for new orders - Always call hooks at top level
   const { orderCount } = useOrderNotifications({
     department: 'financial',
     enabled: adminUser?.success || false // Only enable if authenticated
   });
 
-  // If not authenticated, show login prompt
+  // If not authenticated, show loading or login prompt AFTER all hooks
   if (isCheckingAuth) {
     return (
       <div className="flex items-center justify-center min-h-screen">
