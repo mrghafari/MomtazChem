@@ -23797,6 +23797,51 @@ ${message ? `Additional Requirements:\n${message}` : ''}
   // ORDER MANAGEMENT API ROUTES (3-Department System)
   // =============================================================================
 
+  // UNIFIED ORDER STATISTICS - Same source as tracking API for consistency (MOVED BEFORE DEPARTMENT ROUTE)
+  app.get('/api/order-management/statistics', requireAuth, async (req, res) => {
+    try {
+      console.log('📊 [UNIFIED STATS] Fetching statistics using same query as tracking API...');
+      
+      // Use SAME query as tracking API to ensure consistency
+      const statsResult = await customerPool.query(`
+        SELECT 
+          COUNT(*) as total_orders,
+          COUNT(CASE WHEN (om.current_status IS NULL OR om.current_status IN ('pending', 'payment_uploaded', 'financial_reviewing')) THEN 1 END) as pending_orders,
+          COUNT(CASE WHEN om.current_status IN ('delivered', 'completed') THEN 1 END) as completed_orders,
+          COUNT(CASE WHEN co.created_at >= CURRENT_DATE THEN 1 END) as todays_orders,
+          SUM(CASE WHEN om.current_status IN ('delivered', 'completed') THEN co.total_amount ELSE 0 END) as total_revenue,
+          AVG(co.total_amount) as average_order_value
+        FROM customer_orders co
+        LEFT JOIN crm_customers cc ON co.customer_id = cc.id
+        LEFT JOIN order_management om ON co.id = om.customer_order_id
+        -- SHOW ALL ORDERS: No filtering by status for complete management statistics
+      `);
+
+      const stats = statsResult.rows[0];
+      
+      console.log('📊 [UNIFIED STATS] Raw statistics:', stats);
+
+      const result = {
+        totalOrders: parseInt(stats.total_orders) || 0,
+        pendingOrders: parseInt(stats.pending_orders) || 0,
+        completedOrders: parseInt(stats.completed_orders) || 0,
+        todaysOrders: parseInt(stats.todays_orders) || 0,
+        totalRevenue: parseFloat(stats.total_revenue) || 0,
+        averageOrderValue: parseFloat(stats.average_order_value) || 0
+      };
+      
+      console.log('✅ [UNIFIED STATS] Final statistics result:', result);
+      
+      res.json(result);
+    } catch (error) {
+      console.error('❌ [UNIFIED STATS] Error fetching order statistics:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Internal server error'
+      });
+    }
+  });
+
   // Get orders for specific department (respects workflow sequence)
   app.get('/api/order-management/:department', async (req, res) => {
     try {
@@ -35322,6 +35367,7 @@ momtazchem.com
       const transformedOrders = orders.map((order: any) => ({
         id: order.id,
         customerOrderId: order.customerOrderId,
+        orderNumber: order.orderNumber, // 🔢 FIXED: Include M[YY][NNNNN] format order number
         customerName: `${order.customerFirstName || ''} ${order.customerLastName || ''}`.trim(),
         customerEmail: order.customerEmail,
         customerPhone: order.customerPhone,
@@ -45074,50 +45120,6 @@ momtazchem.com
     }
   });
 
-  // UNIFIED ORDER STATISTICS - Same source as tracking API for consistency
-  app.get('/api/order-management/statistics', requireAuth, async (req, res) => {
-    try {
-      console.log('📊 [UNIFIED STATS] Fetching statistics using same query as tracking API...');
-      
-      // Use SAME query as tracking API to ensure consistency
-      const statsResult = await customerPool.query(`
-        SELECT 
-          COUNT(*) as total_orders,
-          COUNT(CASE WHEN (om.current_status IS NULL OR om.current_status IN ('pending', 'payment_uploaded', 'financial_reviewing')) THEN 1 END) as pending_orders,
-          COUNT(CASE WHEN om.current_status IN ('delivered', 'completed') THEN 1 END) as completed_orders,
-          COUNT(CASE WHEN co.created_at >= CURRENT_DATE THEN 1 END) as todays_orders,
-          SUM(CASE WHEN om.current_status IN ('delivered', 'completed') THEN co.total_amount ELSE 0 END) as total_revenue,
-          AVG(co.total_amount) as average_order_value
-        FROM customer_orders co
-        LEFT JOIN crm_customers cc ON co.customer_id = cc.id
-        LEFT JOIN order_management om ON co.id = om.customer_order_id
-        -- SHOW ALL ORDERS: No filtering by status for complete management statistics
-      `);
-
-      const stats = statsResult.rows[0];
-      
-      console.log('📊 [UNIFIED STATS] Raw statistics:', stats);
-
-      const result = {
-        totalOrders: parseInt(stats.total_orders) || 0,
-        pendingOrders: parseInt(stats.pending_orders) || 0,
-        completedOrders: parseInt(stats.completed_orders) || 0,
-        todaysOrders: parseInt(stats.todays_orders) || 0,
-        totalRevenue: parseFloat(stats.total_revenue) || 0,
-        averageOrderValue: parseFloat(stats.average_order_value) || 0
-      };
-      
-      console.log('✅ [UNIFIED STATS] Final statistics result:', result);
-      
-      res.json(result);
-    } catch (error) {
-      console.error('❌ [UNIFIED STATS] Error fetching order statistics:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Internal server error'
-      });
-    }
-  });
 
   // Get order details by ID (view-only)
   app.get('/api/orders/tracking/:orderId/details', requireAuth, async (req, res) => {
