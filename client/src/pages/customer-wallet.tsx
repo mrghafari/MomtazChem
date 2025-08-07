@@ -34,6 +34,8 @@ interface WalletSummary {
     description: string;
     status: string;
     createdAt: string;
+    referenceType?: string;
+    referenceId?: number;
   }>;
   pendingRecharges: Array<{
     id: number;
@@ -658,6 +660,12 @@ export default function CustomerWallet() {
                           {getTransactionIcon(transaction.transactionType)}
                           <div className={isRTL ? 'text-right' : 'text-left'}>
                             <p className="font-medium">{transaction.description}</p>
+                            {/* Display order number when transaction is related to an order */}
+                            {transaction.referenceType === 'order' && transaction.referenceId && (
+                              <p className="text-sm font-medium text-blue-600">
+                                {language === 'en' ? 'Order #' : 'سفارش #'}{transaction.referenceId}
+                              </p>
+                            )}
                             <p className="text-sm text-gray-500">
                               {new Date(transaction.createdAt).toLocaleDateString(language === 'en' ? 'en-US' : 'ar-SA')}
                             </p>
