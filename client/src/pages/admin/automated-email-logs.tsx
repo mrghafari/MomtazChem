@@ -157,11 +157,23 @@ export default function AutomatedEmailLogsPage() {
         ku: "وردەکارییەکانی ئیمەیڵ",
         tr: "E-posta Detayları"
       },
+      sender: {
+        en: "Sender",
+        ar: "المرسل",
+        ku: "ناردەر",
+        tr: "Gönderen"
+      },
       recipient: {
         en: "Recipient",
         ar: "المستلم",
         ku: "وەرگر",
         tr: "Alıcı"
+      },
+      recipients: {
+        en: "Email Recipients",
+        ar: "مستلمو البريد الإلكتروني",
+        ku: "وەرگرانی ئیمەیڵ",
+        tr: "E-posta Alıcıları"
       },
       subject: {
         en: "Subject",
@@ -249,7 +261,7 @@ export default function AutomatedEmailLogsPage() {
       }
     };
     
-    return texts[key]?.[language] || texts[key]?.en || key;
+    return (texts as any)[key]?.[language] || (texts as any)[key]?.en || key;
   };
 
   // Check authentication
@@ -274,7 +286,7 @@ export default function AutomatedEmailLogsPage() {
     refetchInterval: 30000, // Auto-refresh every 30 seconds
   });
 
-  const emailLogs: EmailLog[] = emailLogsResponse?.logs || [];
+  const emailLogs: EmailLog[] = (emailLogsResponse as any)?.logs || [];
 
   // Filter logs based on search and filters
   const filteredLogs = emailLogs.filter((log) => {
@@ -290,7 +302,7 @@ export default function AutomatedEmailLogsPage() {
   });
 
   // Get unique categories for filter
-  const categories = [...new Set(emailLogs.map(log => log.email_type).filter(Boolean))];
+  const categories = Array.from(new Set(emailLogs.map(log => log.email_type).filter(Boolean)));
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -333,7 +345,7 @@ export default function AutomatedEmailLogsPage() {
           tr: "Beklemede"
         }
       };
-      return labels[status]?.[language] || labels[status]?.en || status;
+      return (labels as any)[status]?.[language] || (labels as any)[status]?.en || status;
     };
 
     return (
@@ -629,8 +641,31 @@ export default function AutomatedEmailLogsPage() {
               {selectedLog ? (
                 <div className="space-y-4">
                   <div>
-                    <label className="text-sm font-medium text-gray-700">{getText('recipient')}</label>
-                    <p className="text-sm bg-gray-50 p-2 rounded mt-1">{selectedLog.recipient_email}</p>
+                    <label className="text-sm font-medium text-gray-700">{getText('sender')}</label>
+                    <p className="text-sm bg-blue-50 p-2 rounded mt-1 text-blue-800">
+                      <strong>FROM:</strong> {selectedLog.sender_name || selectedLog.sender_email} &lt;{selectedLog.sender_email}&gt;
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">{getText('recipients')}</label>
+                    <div className="space-y-2 mt-1">
+                      <p className="text-sm bg-green-50 p-2 rounded text-green-800">
+                        <strong>TO:</strong> {selectedLog.recipient_name ? `${selectedLog.recipient_name} <${selectedLog.recipient_email}>` : selectedLog.recipient_email}
+                      </p>
+                      <p className="text-sm bg-yellow-50 p-2 rounded text-yellow-800">
+                        <strong>CC:</strong> info@momtazchem.com (automatic archive)
+                      </p>
+                      {selectedLog.category_key && selectedLog.category_key !== 'admin' && (
+                        <p className="text-sm bg-orange-50 p-2 rounded text-orange-800">
+                          <strong>BCC:</strong> {selectedLog.sender_email !== 'info@momtazchem.com' ? 'info@momtazchem.com (monitoring)' : 'No additional BCC'}
+                        </p>
+                      )}
+                      <p className="text-xs text-gray-500 italic">
+                        * All automated emails include CC to info@momtazchem.com for archival purposes
+                        {selectedLog.category_key && selectedLog.category_key !== 'admin' && ' and monitoring'}
+                      </p>
+                    </div>
                   </div>
 
                   <div>
