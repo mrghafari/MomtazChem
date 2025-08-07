@@ -796,52 +796,55 @@ function FinanceOrders() {
       <style>
         body { 
           font-family: 'Segoe UI', Tahoma, Arial, sans-serif; 
-          margin: 20px; 
+          margin: 10px; 
           direction: rtl; 
-          font-size: 14px;
-          line-height: 1.6;
+          font-size: 12px;
+          line-height: 1.4;
           background: white;
+          max-width: 100%;
+          overflow-wrap: break-word;
         }
         .header { 
           text-align: center; 
-          border-bottom: 3px solid #2563eb; 
-          padding-bottom: 15px; 
-          margin-bottom: 25px; 
+          border-bottom: 2px solid #2563eb; 
+          padding-bottom: 10px; 
+          margin-bottom: 15px; 
           background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-          border-radius: 10px;
-          padding: 20px;
+          border-radius: 8px;
+          padding: 12px;
         }
         .company-name { 
-          font-size: 28px; 
+          font-size: 20px; 
           font-weight: bold; 
           color: #2563eb; 
-          margin-bottom: 8px;
+          margin-bottom: 6px;
           text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
         .order-title {
-          font-size: 20px;
+          font-size: 16px;
           color: #1f2937;
-          margin-bottom: 5px;
+          margin-bottom: 4px;
           font-weight: 600;
         }
         .card { 
-          margin-bottom: 20px; 
+          margin-bottom: 12px; 
           border: 1px solid #e5e7eb; 
-          border-radius: 12px; 
-          padding: 20px;
+          border-radius: 6px; 
+          padding: 12px;
           background: white;
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+          max-width: 100%;
         }
         .card-header { 
           font-weight: bold; 
-          font-size: 18px; 
+          font-size: 14px; 
           color: #1f2937; 
-          margin-bottom: 15px;
-          border-bottom: 2px solid #f3f4f6;
-          padding-bottom: 8px;
+          margin-bottom: 10px;
+          border-bottom: 1px solid #f3f4f6;
+          padding-bottom: 6px;
           display: flex;
           align-items: center;
-          gap: 8px;
+          gap: 6px;
         }
         .card-header::before {
           content: "●";
@@ -850,28 +853,31 @@ function FinanceOrders() {
         }
         .info-grid { 
           display: grid; 
-          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
-          gap: 15px; 
+          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); 
+          gap: 8px; 
         }
         .info-item { 
           display: flex; 
           flex-direction: column;
-          padding: 10px;
+          padding: 8px;
           background: #f8fafc;
-          border-radius: 8px;
-          border-left: 4px solid #2563eb;
+          border-radius: 6px;
+          border-left: 3px solid #2563eb;
+          max-width: 100%;
+          word-wrap: break-word;
         }
         .label { 
           font-weight: 600; 
           color: #6b7280; 
-          font-size: 12px;
-          margin-bottom: 4px;
+          font-size: 10px;
+          margin-bottom: 3px;
           text-transform: uppercase;
         }
         .value { 
           color: #1f2937; 
           font-weight: 500;
-          font-size: 14px;
+          font-size: 11px;
+          word-wrap: break-word;
         }
         .address-section {
           background: #f0f9ff;
@@ -883,26 +889,30 @@ function FinanceOrders() {
         .items-table { 
           width: 100%; 
           border-collapse: collapse; 
-          margin-top: 15px;
+          margin-top: 10px;
           background: white;
-          border-radius: 8px;
+          border-radius: 6px;
           overflow: hidden;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+          max-width: 100%;
         }
         .items-table th { 
           background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); 
           color: white;
           font-weight: bold; 
-          padding: 12px 8px;
+          padding: 6px 4px;
           text-align: center;
-          font-size: 13px;
+          font-size: 10px;
           text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+          word-wrap: break-word;
         }
         .items-table td { 
           border: 1px solid #e5e7eb; 
-          padding: 10px 8px; 
+          padding: 6px 4px; 
           text-align: center;
-          font-size: 13px;
+          font-size: 10px;
+          word-wrap: break-word;
+          max-width: 100px;
         }
         .items-table tbody tr:nth-child(even) {
           background: #f8fafc;
@@ -912,14 +922,15 @@ function FinanceOrders() {
         }
         .total-section { 
           background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%); 
-          padding: 15px;
-          border-radius: 10px;
-          margin-top: 15px;
-          border: 2px solid #f59e0b;
+          padding: 10px;
+          border-radius: 6px;
+          margin-top: 10px;
+          border: 1px solid #f59e0b;
+          max-width: 100%;
         }
         .total-row { 
           font-weight: bold;
-          font-size: 16px;
+          font-size: 12px;
           color: #92400e;
         }
         .status-badge {
@@ -946,25 +957,27 @@ function FinanceOrders() {
         }
         @media print {
           @page { 
-            margin: 1.5cm; 
+            margin: 8mm; 
             size: A4;
           }
           body { 
             margin: 0 auto; 
             padding: 0;
-            font-size: 12px;
+            font-size: 10px;
             width: 100%;
-            max-width: 210mm;
+            max-width: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: flex-start;
+            overflow-wrap: break-word;
           }
           .print-container {
             width: 100%;
-            max-width: 180mm;
+            max-width: 100%;
             margin: 0 auto;
-            padding: 0;
+            padding: 5mm;
+            overflow-wrap: break-word;
           }
           .card {
             page-break-inside: avoid;
