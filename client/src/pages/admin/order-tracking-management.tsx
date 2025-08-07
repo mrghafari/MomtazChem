@@ -1339,6 +1339,7 @@ export default function OrderTrackingManagement() {
                                 </CardContent>
                               </Card>
                             </div>
+                            </>
                           )}
                         </DialogContent>
                       </Dialog>
