@@ -50,7 +50,18 @@ const Footer = () => {
     gcTime: 1000 * 60 * 10, // 10 minutes,
   });
 
+  // Fetch social media links from content management system
+  const { data: socialMediaResponse } = useQuery({
+    queryKey: ['/api/public/content-settings', language, 'social_media'],
+    queryFn: () => 
+      fetch(`/api/public/content-settings?language=${language}&section=social_media`)
+        .then(res => res.json()),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    gcTime: 1000 * 60 * 10, // 10 minutes,
+  });
+
   const footerSettings: FooterSetting | undefined = footerResponse?.data;
+  const socialMediaItems = socialMediaResponse?.data || [];
 
   // Parse JSON links
   const parseLinks = (linksJson?: string): LinkItem[] => {
@@ -70,25 +81,28 @@ const Footer = () => {
 
   // Social media configuration
   const socialMediaPlatforms = [
-    { key: 'linkedinUrl', icon: 'fab fa-linkedin', name: 'LinkedIn' },
-    { key: 'twitterUrl', icon: 'fab fa-twitter', name: 'Twitter' },
-    { key: 'facebookUrl', icon: 'fab fa-facebook', name: 'Facebook' },
-    { key: 'instagramUrl', icon: 'fab fa-instagram', name: 'Instagram' },
-    { key: 'youtubeUrl', icon: 'fab fa-youtube', name: 'YouTube' },
-    { key: 'telegramUrl', icon: 'fab fa-telegram', name: 'Telegram' },
-    { key: 'whatsappUrl', icon: 'fab fa-whatsapp', name: 'WhatsApp' },
-    { key: 'wechatUrl', icon: 'fab fa-weixin', name: 'WeChat' }
+    { key: 'linkedin_url', icon: 'fab fa-linkedin', name: 'LinkedIn' },
+    { key: 'twitter_url', icon: 'fab fa-twitter', name: 'Twitter' },
+    { key: 'facebook_url', icon: 'fab fa-facebook', name: 'Facebook' },
+    { key: 'instagram_url', icon: 'fab fa-instagram', name: 'Instagram' },
+    { key: 'youtube_url', icon: 'fab fa-youtube', name: 'YouTube' },
+    { key: 'telegram_url', icon: 'fab fa-telegram', name: 'Telegram' },
+    { key: 'whatsapp_url', icon: 'fab fa-whatsapp', name: 'WhatsApp' },
+    { key: 'wechat_url', icon: 'fab fa-weixin', name: 'WeChat' },
+    { key: 'tiktok_url', icon: 'fab fa-tiktok', name: 'TikTok' }
   ];
 
-  // Get social media URL
+  // Get social media URL from content items
   const getSocialMediaUrl = (key: string): string => {
-    return (footerSettings as any)?.[key] || '#';
+    const socialItem = socialMediaItems.find((item: any) => item.key === key && item.isActive);
+    return socialItem?.content || '';
   };
 
   // Filter active social media platforms
-  const activeSocialMedia = socialMediaPlatforms.filter(platform => 
-    getSocialMediaUrl(platform.key) && getSocialMediaUrl(platform.key) !== '#'
-  );
+  const activeSocialMedia = socialMediaPlatforms.filter(platform => {
+    const url = getSocialMediaUrl(platform.key);
+    return url && url !== '' && url !== '#';
+  });
 
   return (
     <footer className="bg-gray-900 text-white py-16">
