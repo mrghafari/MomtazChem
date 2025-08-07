@@ -1223,7 +1223,6 @@ export default function OrderTrackingManagement() {
                                 </CardContent>
                               </Card>
 
-                              {/* Department Notes */}
                               {/* Customer Notes - Always displayed */}
                               <div className="mb-6">
                                 <h4 className="text-lg font-semibold mb-4 text-blue-800">💬 یادداشت‌های مشتری</h4>
@@ -1259,6 +1258,7 @@ export default function OrderTrackingManagement() {
                                 </div>
                               </div>
 
+                              {/* Department Notes */}
                               <div>
                                 <h4 className="text-lg font-semibold mb-4 text-gray-800">🏢 Department Notes</h4>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -1306,7 +1306,7 @@ export default function OrderTrackingManagement() {
                                 </div>
                               </div>
 
-                              {/* Timestamps */}
+                              {/* Timestamps */
                               <Card>
                                 <CardHeader>
                                   <CardTitle className="text-lg flex items-center gap-2">
