@@ -210,7 +210,7 @@ function FinanceOrders() {
               شما با حساب مشتری وارد شده‌اید. لطفاً از حساب مدیریت استفاده کنید.
             </p>
             <Button 
-              onClick={() => window.location.href = '/admin-login'} 
+              onClick={() => window.location.href = '/admin/login'} 
               className="w-full"
             >
               ورود به حساب مدیریت
