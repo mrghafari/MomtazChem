@@ -464,50 +464,85 @@ export default function OrderTrackingManagement() {
         <meta charset="UTF-8">
         <title>جزئیات سفارش #{selectedOrder.customerOrderId}</title>
         <style>
-          body { font-family: 'Tahoma', sans-serif; margin: 20px; direction: rtl; }
-          .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 20px; }
-          .company-logo { max-width: 150px; height: auto; margin-bottom: 10px; }
-          .company-name { font-size: 24px; font-weight: bold; color: #1a365d; }
-          .order-title { font-size: 18px; margin-top: 10px; }
-          .section { margin-bottom: 20px; }
-          .section-title { font-size: 16px; font-weight: bold; border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-bottom: 10px; }
-          .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
-          .info-item { border: 1px solid #ddd; padding: 10px; border-radius: 4px; }
-          .info-label { font-weight: bold; color: #666; font-size: 12px; }
-          .info-value { margin-top: 5px; font-size: 14px; }
-          .notes-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 10px; }
-          .notes-item { padding: 10px; border-radius: 4px; text-align: right; border: 1px solid #ddd; background-color: #f8f9fa; }
-          .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #666; }
-          .status-badge { display: inline-block; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; }
-          .payment-method { display: inline-block; padding: 2px 6px; background-color: #e5e7eb; border-radius: 4px; font-size: 11px; }
+          body { font-family: 'Tahoma', sans-serif; margin: 15px; direction: rtl; font-size: 13px; }
+          .header { text-align: center; border-bottom: 1px solid #333; padding-bottom: 12px; margin-bottom: 12px; }
+          .company-logo { max-width: 100px; height: auto; margin-bottom: 6px; }
+          .company-name { font-size: 18px; font-weight: bold; color: #1a365d; }
+          .order-title { font-size: 14px; margin-top: 6px; }
+          .section { margin-bottom: 12px; }
+          .section-title { font-size: 14px; font-weight: bold; border-bottom: 1px solid #ccc; padding-bottom: 3px; margin-bottom: 6px; }
+          .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+          .info-item { border: 1px solid #ddd; padding: 6px; border-radius: 3px; }
+          .info-label { font-weight: bold; color: #666; font-size: 10px; }
+          .info-value { margin-top: 3px; font-size: 12px; }
+          .notes-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-top: 6px; }
+          .notes-item { padding: 6px; border-radius: 3px; text-align: right; border: 1px solid #ddd; background-color: #f8f9fa; }
+          .footer { margin-top: 15px; text-align: center; font-size: 10px; color: #666; }
+          .status-badge { display: inline-block; padding: 2px 6px; border-radius: 8px; font-size: 10px; font-weight: bold; }
+          .payment-method { display: inline-block; padding: 1px 4px; background-color: #e5e7eb; border-radius: 3px; font-size: 10px; }
           @media print { 
             body { 
               margin: 0; 
-              padding: 15mm 10mm 15mm 10mm; 
+              padding: 8mm 6mm 8mm 6mm; 
               box-sizing: border-box;
-              font-size: 12pt;
-              line-height: 1.4;
+              font-size: 9pt;
+              line-height: 1.2;
               -webkit-print-color-adjust: exact;
               print-color-adjust: exact;
             }
+            .header { 
+              margin-bottom: 6mm; 
+              padding-bottom: 4mm;
+              page-break-after: avoid;
+            }
+            .company-logo { max-width: 60px; margin-bottom: 2mm; }
+            .company-name { font-size: 14pt; }
+            .order-title { font-size: 11pt; margin-top: 2mm; }
             .section { 
-              margin-bottom: 8mm; 
+              margin-bottom: 4mm; 
               page-break-inside: avoid;
+            }
+            .section-title { 
+              font-size: 11pt; 
+              margin-bottom: 2mm; 
+              padding-bottom: 1mm;
             }
             .info-grid { 
               grid-template-columns: 1fr 1fr; 
-              gap: 5mm;
+              gap: 2mm;
+              margin-bottom: 2mm;
             }
+            .info-item { 
+              padding: 2mm; 
+              border: 0.5pt solid #ddd;
+            }
+            .info-label { font-size: 8pt; }
+            .info-value { font-size: 9pt; margin-top: 1mm; }
             .notes-grid { 
               grid-template-columns: 1fr 1fr 1fr; 
-              gap: 3mm;
+              gap: 2mm;
+              margin-top: 2mm;
+            }
+            .notes-item { 
+              padding: 2mm; 
+              border: 0.5pt solid #ddd;
+              font-size: 8pt;
             }
             .footer { 
-              margin-top: 10mm; 
+              margin-top: 4mm; 
               page-break-inside: avoid;
+              font-size: 8pt;
+            }
+            .status-badge { 
+              font-size: 8pt; 
+              padding: 1mm 2mm;
+            }
+            .payment-method { 
+              font-size: 8pt; 
+              padding: 0.5mm 1mm;
             }
             @page {
-              margin: 15mm 10mm 15mm 10mm;
+              margin: 8mm 6mm 8mm 6mm;
               size: A4;
             }
           }
