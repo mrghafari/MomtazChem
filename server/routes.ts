@@ -41786,6 +41786,7 @@ momtazchem.com
       console.log('🗑️ [PRODUCTION RESET] Starting production reset process');
       
       const adminId = req.session?.adminId;
+      const { preserveCustomers = false } = req.body; // گزینه حفظ مشتریان
       
       // Require admin authentication (super admin only)
       if (!adminId || adminId !== 15) {
@@ -41797,9 +41798,10 @@ momtazchem.com
       }
 
       console.log(`🔐 [PRODUCTION RESET] Super admin ${adminId} authorized`);
+      console.log(`📋 [PRODUCTION RESET] Customer preservation option: ${preserveCustomers ? 'ENABLED (customers will be preserved)' : 'DISABLED (customers will be deleted)'}`);
 
-      // Tables to clear (test data)
-      const tablesToClear = [
+      // Tables to clear (always cleared)
+      const alwaysClearTables = [
         'customer_orders',
         'order_items', 
         'order_management',
@@ -41811,10 +41813,16 @@ momtazchem.com
         'vehicle_selection_history',
         'email_logs',
         'sms_logs',
-        'customers',
-        'customer_addresses',
         'abandoned_orders'
       ];
+
+      // Tables to clear only if preserveCustomers is false
+      const customerTables = [
+        'customers',
+        'customer_addresses'
+      ];
+
+      const tablesToClear = preserveCustomers ? alwaysClearTables : [...alwaysClearTables, ...customerTables];
 
       let totalRecordsDeleted = 0;
       let tablesCleared = 0;
@@ -41851,11 +41859,16 @@ momtazchem.com
 
         console.log(`✅ [PRODUCTION RESET] Successfully cleared ${tablesCleared} tables and ${totalRecordsDeleted} records`);
 
+        const resultMessage = preserveCustomers 
+          ? 'سیستم با موفقیت پاک‌سازی شد (اطلاعات مشتریان حفظ شد)'
+          : 'سیستم با موفقیت برای محیط تولیدی پاک‌سازی شد';
+        
         res.json({
           success: true,
-          message: 'سیستم با موفقیت برای محیط تولیدی پاک‌سازی شد',
+          message: resultMessage,
           tablesCleared,
           recordsDeleted: totalRecordsDeleted,
+          preserveCustomers,
           resetBy: adminId,
           resetAt: new Date().toISOString()
         });

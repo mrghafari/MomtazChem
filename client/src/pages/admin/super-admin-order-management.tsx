@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import PaymentMethodBadge from '@/components/PaymentMethodBadge';
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -67,6 +68,7 @@ export default function SuperAdminOrderManagement() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showProductionResetDialog, setShowProductionResetDialog] = useState(false);
+  const [preserveCustomers, setPreserveCustomers] = useState(false);
   const [activeTab, setActiveTab] = useState('orders');
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -186,6 +188,9 @@ export default function SuperAdminOrderManagement() {
         headers: {
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          preserveCustomers
+        }),
       });
       
       if (!response.ok) {
@@ -670,7 +675,9 @@ export default function SuperAdminOrderManagement() {
                     <h4 className="font-bold text-gray-800">جداول پاک شونده:</h4>
                     <ul className="list-disc list-inside text-gray-600 space-y-1">
                       <li>تمام سفارشات تست</li>
-                      <li>مشتریان آزمایشی</li>
+                      <li className={preserveCustomers ? "text-gray-400 line-through" : ""}>
+                        مشتریان آزمایشی {preserveCustomers && "(حفظ می‌شود)"}
+                      </li>
                       <li>تراکنش‌های کیف پول</li>
                       <li>رسیدهای پرداخت</li>
                       <li>کدهای تحویل GPS</li>
@@ -680,7 +687,9 @@ export default function SuperAdminOrderManagement() {
                     <h4 className="font-bold text-gray-800">کنتورهای بازنشانی:</h4>
                     <ul className="list-disc list-inside text-gray-600 space-y-1">
                       <li>شماره سفارشات → M2500001</li>
-                      <li>شماره مشتریان → 1</li>
+                      <li className={preserveCustomers ? "text-gray-400 line-through" : ""}>
+                        شماره مشتریان → {preserveCustomers ? "تغییر نمی‌کند" : "1"}
+                      </li>
                       <li>سایر کنتورها → صفر</li>
                     </ul>
                   </div>
@@ -700,6 +709,26 @@ export default function SuperAdminOrderManagement() {
                   <p className="text-green-800 font-medium">
                     ✅ پس از پاک‌سازی، سیستم کاملاً تمیز و آماده برای محیط تولیدی خواهد بود.
                   </p>
+                </div>
+
+                {/* Customer Preservation Option */}
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="flex items-center space-x-3 space-x-reverse">
+                    <Checkbox
+                      id="preserve-customers"
+                      checked={preserveCustomers}
+                      onCheckedChange={(checked) => setPreserveCustomers(checked === true)}
+                      className="h-5 w-5"
+                    />
+                    <div className="flex-1">
+                      <Label htmlFor="preserve-customers" className="text-blue-800 font-medium cursor-pointer">
+                        حفظ اطلاعات مشتریان موجود
+                      </Label>
+                      <p className="text-blue-600 text-sm mt-1">
+                        در صورت فعال بودن، اطلاعات مشتریان و آدرس‌های آن‌ها پاک نمی‌شوند. فقط سفارشات و تراکنش‌ها حذف می‌شوند.
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </AlertDialogDescription>
             </AlertDialogHeader>
