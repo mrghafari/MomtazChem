@@ -1606,67 +1606,6 @@ export class OrderManagementStorage implements IOrderManagementStorage {
     }
   }
 
-  // Duplicate function removed - using the implementation at line 504
-        .leftJoin(shopProducts, eq(orderItems.productId, shopProducts.id))
-        .where(eq(orderItems.orderId, customerOrderId));
-
-      console.log(`📊 [WEIGHT] Found ${items.length} items for order ${customerOrderId}`);
-
-      // Calculate total weight using gross weight (وزن ناخالص) for logistics calculations
-      let totalWeight = 0;
-      
-      for (const item of items) {
-        let productWeight = 0;
-        const quantity = parseFloat(item.quantity?.toString() || '1');
-        
-        console.log(`🏷️ [WEIGHT] Processing item: ${item.productName} (ID: ${item.productId}) x${quantity}`);
-        
-        // First try to get weight from shop_products
-        if (item.shopGrossWeight) {
-          productWeight = parseFloat(item.shopGrossWeight.toString());
-          console.log(`⚖️ [WEIGHT] Using shop gross weight: ${productWeight} kg`);
-        } else if (item.shopWeight) {
-          productWeight = parseFloat(item.shopWeight.toString());
-          console.log(`⚖️ [WEIGHT] Using shop legacy weight: ${productWeight} kg`);
-        } else if (item.shopBarcode) {
-          // If no weight in shop, try to get from showcase_products by barcode
-          console.log(`🔍 [WEIGHT] No weight in shop, searching Kardex by barcode: ${item.shopBarcode}`);
-          
-          const { showcaseProducts } = await import('../shared/showcase-schema');
-          const showcaseWeight = await db
-            .select({
-              grossWeight: showcaseProducts.grossWeight,
-              netWeight: showcaseProducts.netWeight,
-              weight: showcaseProducts.weight
-            })
-            .from(showcaseProducts)
-            .where(eq(showcaseProducts.barcode, item.shopBarcode))
-            .limit(1);
-
-          if (showcaseWeight.length > 0 && showcaseWeight[0].grossWeight) {
-            productWeight = parseFloat(showcaseWeight[0].grossWeight.toString());
-            console.log(`⚖️ [WEIGHT] Using Kardex gross weight: ${productWeight} kg`);
-          } else if (showcaseWeight.length > 0 && showcaseWeight[0].weight) {
-            productWeight = parseFloat(showcaseWeight[0].weight.toString());
-            console.log(`⚖️ [WEIGHT] Using Kardex legacy weight: ${productWeight} kg`);
-          }
-        }
-        
-        const itemTotalWeight = productWeight * quantity;
-        totalWeight += itemTotalWeight;
-        
-        console.log(`📦 [WEIGHT] Item total: ${productWeight} kg x ${quantity} = ${itemTotalWeight} kg`);
-      }
-
-      const finalWeight = Math.round(totalWeight * 100) / 100; // Round to 2 decimal places
-      console.log(`🎯 [WEIGHT] Final calculated weight for order ${customerOrderId}: ${finalWeight} kg`);
-      
-      return finalWeight;
-    } catch (error) {
-      console.error(`❌ [WEIGHT] Error calculating weight for order ${customerOrderId}:`, error);
-      return 0;
-    }
-  }
 
   async updateOrderWeight(customerOrderId: number, weight: number): Promise<void> {
     try {
