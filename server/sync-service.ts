@@ -160,23 +160,26 @@ export class SyncService {
         isManuallyApproved
       );
 
-      // 🚨 CRITICAL: وضعیت‌های نهایی و پردازش شده که نباید regression داشته باشند
+      // 🚨 CRITICAL: وضعیت‌های محافظت شده - هیچ سفارشی نباید خودکار از انبار خارج شود
       const finalStatuses = ['delivered', 'cancelled', 'completed'];
-      const progressedStatuses = ['logistics_assigned', 'logistics_processing', 'logistics_dispatched'];
+      const warehouseProtectedStatuses = ['warehouse_pending', 'warehouse_processing', 'warehouse_verified', 'warehouse_approved'];
+      const logisticsProtectedStatuses = ['logistics_assigned', 'logistics_processing', 'logistics_dispatched'];
       
       // بررسی آیا تغییر وضعیت regression است (برگشت به مرحله قبلی)
       const isRegression = this.isStatusRegression(record.managementStatus, expectedManagementStatus);
       
-      // شرایط برای تصحیح وضعیت:
+      // شرایط برای تصحیح وضعیت - محافظت کامل از انبار:
       const shouldSync = expectedManagementStatus !== record.managementStatus &&
         !finalStatuses.includes(record.managementStatus) && // جلوگیری از تغییر وضعیت‌های نهایی
+        !warehouseProtectedStatuses.includes(record.managementStatus) && // 🚨 جلوگیری از خروج خودکار از انبار
+        !logisticsProtectedStatuses.includes(record.managementStatus) && // جلوگیری از تغییر لجستیک
         !isRegression && // جلوگیری از regression
         (
-          // اجازه همگام‌سازی برای:
+          // اجازه همگام‌سازی فقط برای:
           !isManuallyApproved || // سفارشات غیر تایید شده دستی
           (
             isManuallyApproved && 
-            record.managementStatus === 'finance_pending' && // فقط اگر هنوز در finance_pending گیر کرده
+            record.managementStatus === 'finance_pending' && // فقط اگر در finance_pending گیر کرده
             expectedManagementStatus === 'warehouse_pending' // و باید به warehouse برود
           )
         );
@@ -202,6 +205,10 @@ export class SyncService {
         // توضیح دلیل عدم همگام‌سازی
         if (finalStatuses.includes(record.managementStatus)) {
           console.log(`🔒 [AUTO-SYNC] Skipping final status ${record.managementStatus} for order ${record.orderNumber}`);
+        } else if (warehouseProtectedStatuses.includes(record.managementStatus)) {
+          console.log(`🏭 [AUTO-SYNC] WAREHOUSE PROTECTION: Order ${record.orderNumber} stays in warehouse (${record.managementStatus}) - no automatic exit`);
+        } else if (logisticsProtectedStatuses.includes(record.managementStatus)) {
+          console.log(`🚛 [AUTO-SYNC] LOGISTICS PROTECTION: Order ${record.orderNumber} stays in logistics (${record.managementStatus})`);
         } else if (isRegression) {
           console.log(`🚫 [AUTO-SYNC] Preventing regression for order ${record.orderNumber}: ${record.managementStatus} → ${expectedManagementStatus}`);
         } else if (isManuallyApproved && record.managementStatus !== 'finance_pending') {
@@ -297,9 +304,10 @@ export class SyncService {
     
     // اولویت دوم: وضعیت‌های در حال پردازش
     if (customerStatus === 'warehouse_ready') {
-      // سفارش آماده انبار یعنی انبار آن را تایید کرده است
-      // پس باید در وضعیت warehouse_approved باشد نه warehouse_pending
-      return 'warehouse_approved';
+      // 🚨 CRITICAL: سفارشات نباید خودکار از انبار خارج شوند
+      // فقط کارشناس انبار می‌تواند تصمیم بگیرد که سفارش آماده تحویل به لجستیک است
+      // خودکار به warehouse_approved منتقل نمی‌کنیم
+      return 'warehouse_pending'; // در انبار باقی می‌ماند تا تایید دستی
     }
     
     // IMPORTANT: حفظ وضعیت‌های دو مرحله‌ای انبار
