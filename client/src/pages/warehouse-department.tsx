@@ -304,13 +304,21 @@ export default function WarehouseDepartment() {
               <p className="text-gray-600 text-center max-w-md">
                 {error instanceof Error ? error.message : 'خطای ناشناخته‌ای رخ داد'}
               </p>
-              <Button 
-                onClick={() => refetch()}
-                variant="outline"
-                className="border-gray-300"
-              >
-                تلاش مجدد
-              </Button>
+              <div className="flex gap-3">
+                <Button 
+                  onClick={() => window.location.href = '/admin/login'}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  ورود به حساب ادمین
+                </Button>
+                <Button 
+                  onClick={() => refetch()}
+                  variant="outline"
+                  className="border-gray-300"
+                >
+                  تلاش مجدد
+                </Button>
+              </div>
             </div>
           ) : filteredOrders.length > 0 ? (
             <div className="space-y-4">
