@@ -57,6 +57,12 @@ export default function WarehouseOrders() {
     queryFn: () => fetch('/api/warehouse/orders', { credentials: 'include' }).then(res => res.json())
   });
 
+  // Get company information for logo in print
+  const { data: companyInfo } = useQuery({
+    queryKey: ['/api/admin/company-information'],
+    queryFn: () => fetch('/api/admin/company-information', { credentials: 'include' }).then(res => res.json())
+  });
+
   // Auto-refresh controlled by global settings
   useEffect(() => {
     if (orders && orders.length >= 0) { // Start auto-refresh after successful data load
@@ -176,6 +182,129 @@ export default function WarehouseOrders() {
       orderId: selectedOrder.customerOrderId, 
       notes: warehouseNotes 
     });
+  };
+
+  const handlePrintOrder = () => {
+    if (!selectedOrder) return;
+    
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+    
+    const logoHtml = companyInfo?.data?.logoUrl ? 
+      `<img src="${companyInfo.data.logoUrl}" alt="Company Logo" style="max-height: 80px; margin-bottom: 20px;">` : '';
+    
+    const printContent = `
+      <!DOCTYPE html>
+      <html dir="rtl">
+      <head>
+        <meta charset="UTF-8">
+        <title>جزئیات سفارش #${selectedOrder.customerOrderId}</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 20px; direction: rtl; }
+          .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 20px; }
+          .logo { text-align: center; margin-bottom: 20px; }
+          .order-info { margin-bottom: 20px; }
+          .order-info h3 { margin-bottom: 10px; color: #333; }
+          .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+          .info-item { padding: 5px 0; }
+          .info-label { font-weight: bold; color: #666; }
+          .items-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+          .items-table th, .items-table td { border: 1px solid #ddd; padding: 12px; text-align: right; }
+          .items-table th { background-color: #f5f5f5; }
+          .total { margin-top: 20px; text-align: left; font-size: 18px; font-weight: bold; }
+          .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #666; }
+          @media print { body { margin: 0; } }
+        </style>
+      </head>
+      <body>
+        <div class="logo">
+          ${logoHtml}
+        </div>
+        <div class="header">
+          <h2>جزئیات سفارش انبار</h2>
+          <p>شماره سفارش: #${selectedOrder.customerOrderId}</p>
+        </div>
+        
+        <div class="order-info">
+          <h3>اطلاعات مشتری</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">نام مشتری:</span> ${selectedOrder.customerName}
+            </div>
+            <div class="info-item">
+              <span class="info-label">تلفن:</span> ${selectedOrder.customerPhone}
+            </div>
+            <div class="info-item">
+              <span class="info-label">ایمیل:</span> ${selectedOrder.customerEmail}
+            </div>
+            <div class="info-item">
+              <span class="info-label">تاریخ سفارش:</span> ${new Date(selectedOrder.orderDate).toLocaleDateString('fa-IR')}
+            </div>
+          </div>
+          <div class="info-item">
+            <span class="info-label">آدرس تحویل:</span><br>
+            ${selectedOrder.customerAddress}
+          </div>
+        </div>
+
+        <div class="order-info">
+          <h3>آیتم‌های سفارش</h3>
+          <table class="items-table">
+            <thead>
+              <tr>
+                <th>نام محصول</th>
+                <th>کد محصول</th>
+                <th>تعداد</th>
+                <th>قیمت واحد</th>
+                <th>قیمت کل</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${selectedOrder.orderItems.map(item => `
+                <tr>
+                  <td>${item.productName}</td>
+                  <td>${item.productSku}</td>
+                  <td>${item.quantity}</td>
+                  <td>${formatCurrency(item.unitPrice, 'IQD')}</td>
+                  <td>${formatCurrency(item.totalPrice, 'IQD')}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="total">
+          <div style="border-top: 2px solid #333; padding-top: 15px;">
+            <div>مبلغ کل سفارش: ${formatCurrency(selectedOrder.orderTotal, 'IQD')}</div>
+            ${selectedOrder.shippingCost && selectedOrder.shippingCost > 0 ? 
+              `<div>هزینه حمل: ${formatCurrency(selectedOrder.shippingCost, 'IQD')}</div>
+               <div style="margin-top: 10px; font-size: 20px; color: #2563eb;">
+                 مبلغ نهایی: ${formatCurrency(selectedOrder.orderTotal + selectedOrder.shippingCost, 'IQD')}
+               </div>` : ''
+            }
+          </div>
+        </div>
+
+        ${warehouseNotes ? `
+          <div class="order-info">
+            <h3>یادداشت انبار</h3>
+            <p>${warehouseNotes}</p>
+          </div>
+        ` : ''}
+
+        <div class="footer">
+          <p>تاریخ چاپ: ${new Date().toLocaleDateString('fa-IR')} - ${new Date().toLocaleTimeString('fa-IR')}</p>
+          <p>واحد انبار - سیستم مدیریت سفارشات</p>
+        </div>
+      </body>
+      </html>
+    `;
+    
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
   };
 
   if (isLoading) {
@@ -424,7 +553,15 @@ export default function WarehouseOrders() {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex gap-4">
+              <div className="flex gap-3">
+                <Button 
+                  onClick={handlePrintOrder}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  <FileText className="h-4 w-4 mr-2" />
+                  چاپ جزئیات
+                </Button>
                 <Button 
                   onClick={handleApprove}
                   disabled={approveMutation.isPending}
