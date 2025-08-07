@@ -434,41 +434,6 @@ export default function OrderTrackingManagement() {
 
   return (
     <div className="space-y-6 p-6" dir="rtl">
-      <div className="bg-gradient-to-r from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 p-6 rounded-lg border border-orange-200 dark:border-orange-800">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="flex items-center justify-center w-12 h-12 bg-orange-500 text-white rounded-full">
-            <Package className="w-6 h-6" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              🚀 سیستم پیگیری سفارشات (جایگزین ماژول مدیریت سفارشات)
-            </h1>
-            <p className="text-orange-700 dark:text-orange-300 mt-1">
-              {(() => {
-                const problematicCount = orders?.filter(order => {
-                  const statusInfo = getStatusDisplay(order);
-                  return statusInfo.isProblematic;
-                }).length || 0;
-                
-                return `نمایش مکان دقیق هر سفارش و فرآیندهای انجام شده - پیگیری کامل ${orders?.length || 0} سفارش` +
-                       (problematicCount > 0 ? ` (${problematicCount} مشکل‌دار نیاز به توجه فوری)` : ' (همه سفارشات در وضعیت عادی)');
-              })()}
-            </p>
-          </div>
-        </div>
-        
-        <div className="bg-green-100 dark:bg-green-900/20 border border-green-300 dark:border-green-700 rounded-lg p-4 mt-4">
-          <div className="flex items-center gap-2">
-            <CheckCircle className="w-5 h-5 text-green-600" />
-            <p className="text-green-800 dark:text-green-200 font-medium">
-              ✅ تغییرات با موفقیت اعمال شد: محتویات ماژول مدیریت سفارشات حذف و با سیستم پیگیری جایگزین شده است
-            </p>
-          </div>
-          <p className="text-green-700 dark:text-green-300 text-sm mt-2">
-            این صفحه اکنون به‌جای ماژول سنتی مدیریت سفارشات، سیستم جامع پیگیری را نمایش می‌دهد که مکان دقیق و وضعیت هر سفارش را نشان می‌دهد.
-          </p>
-        </div>
-      </div>
 
       {/* UPDATED Statistics Cards with Real-time Data */}
       <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
