@@ -288,9 +288,14 @@ const Footer = () => {
               {footerSettings?.additionalInfo || (
                 <>
                   Design by{" "}
-                  <span className="text-green-400 font-medium">
+                  <a 
+                    href="https://wa.me/358411546489" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-green-400 font-medium hover:text-green-300 transition-colors duration-200"
+                  >
                     MRG
-                  </span>
+                  </a>
                 </>
               )}
             </div>
