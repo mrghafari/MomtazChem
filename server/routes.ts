@@ -943,122 +943,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Order location tracking endpoint
-  app.get("/api/orders/locations", requireAuth, async (req, res) => {
+  // Warehouse department orders endpoint - using working authentication pattern
+  app.get("/api/order-management/warehouse", requireAuth, async (req, res) => {
     try {
-      console.log("📍 [ORDER LOCATION] Fetching order locations...");
+      console.log("🏭 [WAREHOUSE] Fetching warehouse orders for department");
       
-      // Get all orders with their management status
-      const ordersWithLocation = await db
-        .select()
+      // Get orders that are financially approved and ready for warehouse processing
+      const ordersResult = await db
+        .select({
+          id: customerOrders.id,
+          orderNumber: customerOrders.orderNumber,
+          customerOrderId: customerOrders.customerOrderId,
+          totalAmount: customerOrders.totalAmount,
+          currency: customerOrders.currency,
+          paymentMethod: customerOrders.paymentMethod,
+          phone: customerOrders.phone,
+          city: customerOrders.city,
+          address: customerOrders.address,
+          status: customerOrders.status,
+          createdAt: customerOrders.createdAt,
+          customerId: customerOrders.customerId,
+          financialStatus: orderManagement.financialStatus,
+          warehouseStatus: orderManagement.warehouseStatus
+        })
         .from(customerOrders)
         .leftJoin(orderManagement, eq(customerOrders.id, orderManagement.orderId))
-        .orderBy(desc(customerOrders.createdAt))
-        .limit(100);
-
-      // Add customer details and determine current location
-      const ordersWithDetails = await Promise.all(
-        ordersWithLocation.map(async (orderRow) => {
-          const order = orderRow.customer_orders;
-          const management = orderRow.order_management;
-          
-          // Get customer info
-          const customer = await customerStorage.getCustomer(order.customerId);
-          
-          // Determine current department and location
-          let currentDepartment = 'financial';
-          let currentLocation = 'بخش مالی - در انتظار بررسی';
-          let nextAction = 'بررسی مدارک پرداخت';
-          let priority: 'high' | 'medium' | 'low' = 'medium';
-          
-          if (management?.currentStatus) {
-            switch (management.currentStatus) {
-              case 'pending':
-              case 'financial_pending':
-                currentDepartment = 'financial';
-                currentLocation = 'بخش مالی - در انتظار تأیید';
-                nextAction = 'بررسی مدارک پرداخت';
-                priority = 'high';
-                break;
-              case 'financial_approved':
-              case 'warehouse_pending':
-                currentDepartment = 'warehouse';
-                currentLocation = 'انبار - در انتظار آماده‌سازی';
-                nextAction = 'بسته‌بندی محصولات';
-                priority = 'medium';
-                break;
-              case 'warehouse_approved':
-              case 'logistics_assigned':
-              case 'logistics_processing':
-                currentDepartment = 'logistics';
-                currentLocation = 'لجستیک - آماده ارسال';
-                nextAction = 'انتساب راننده';
-                priority = 'high';
-                break;
-              case 'delivered':
-                currentDepartment = 'completed';
-                currentLocation = 'تکمیل شده - تحویل داده شده';
-                nextAction = 'هیچ اقدام لازم نیست';
-                priority = 'low';
-                break;
-              case 'cancelled':
-                currentDepartment = 'cancelled';
-                currentLocation = 'لغو شده';
-                nextAction = 'هیچ اقدام لازم نیست';
-                priority = 'low';
-                break;
-            }
-          }
-
-          return {
-            id: order.id,
-            orderNumber: order.orderNumber,
-            customerName: customer ? `${customer.firstName} ${customer.lastName}` : 'نامشخص',
-            totalAmount: order.totalAmount,
-            currency: order.currency,
-            currentDepartment,
-            status: order.currentStatus || 'pending',
-            currentLocation,
-            lastUpdate: order.updatedAt || order.createdAt,
-            nextAction,
-            priority
-          };
-        })
-      );
-
-      console.log(`📍 [ORDER LOCATION] Found ${ordersWithDetails.length} orders`);
-      
-      res.json({
-        success: true,
-        orders: ordersWithDetails,
-        total: ordersWithDetails.length
-      });
-      
-    } catch (error) {
-      console.error("📍 [ORDER LOCATION] Error:", error);
-      res.status(500).json({
-        success: false,
-        message: "خطا در دریافت مکان سفارشات",
-        error: error instanceof Error ? error.message : String(error)
-      });
-    }
-  });
-
-  // Warehouse department orders endpoint - simplified for testing
-  app.get("/api/order-management/warehouse", requireAuth, async (req, res) => {
-    console.log("🏭 [WAREHOUSE] Starting warehouse endpoint...");
-    
-    try {
-      // Simple test response first
-      res.json({
-        success: true,
-        message: "Warehouse endpoint working",
-        orders: [],
-        total: 0
-      });
-      
-      console.log("🏭 [WAREHOUSE] Response sent successfully");
-      return;
+        .where(
+          and(
+            eq(orderManagement.financialStatus, 'approved'),
+            or(
+              isNull(orderManagement.warehouseStatus),
+              eq(orderManagement.warehouseStatus, 'pending')
+            )
+          )
+        )
+        .orderBy(desc(customerOrders.createdAt));
 
       console.log(`🏭 [WAREHOUSE] Found ${ordersResult.length} orders ready for warehouse processing`);
 

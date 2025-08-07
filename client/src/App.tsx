@@ -90,7 +90,6 @@ import AbandonedCartManagement from "@/pages/abandoned-cart-management";
 import FinancialDepartment from "@/pages/financial-department";
 import WarehouseDepartment from "@/pages/warehouse-department";
 import OrderTrackingDashboard from "@/pages/order-tracking-dashboard";
-import OrderLocationTracker from "@/pages/order-location-tracker";
 import LogisticsDepartment from "@/pages/logistics-department";
 import FinanceOrders from "@/pages/admin/finance-orders";
 import LogisticsSimple from "@/pages/logistics-simple";
@@ -230,7 +229,6 @@ function Router() {
           <Route path="/admin/order-tracking" component={OrderTrackingManagement} />
           <Route path="/admin/order-tracking-management" component={OrderTrackingManagement} />
           <Route path="/admin/order-tracking-dashboard" component={OrderTrackingDashboard} />
-          <Route path="/admin/order-location-tracker" component={OrderLocationTracker} />
           <Route path="/admin/abandoned-cart-management" component={AbandonedCartManagement} />
           <Route path="/site-management" component={SiteManagementFixed} />
           <Route path="/admin/site-management" component={SiteManagementFixed} />
