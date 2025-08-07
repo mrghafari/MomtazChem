@@ -23710,8 +23710,18 @@ ${message ? `Additional Requirements:\n${message}` : ''}
   // Financial department authentication check
   app.get('/api/financial/auth/me', async (req: Request, res: Response) => {
     try {
+      console.log('🔐 [FINANCIAL AUTH] Checking financial authentication...');
+      console.log('🔐 [FINANCIAL AUTH] Session:', {
+        exists: !!req.session,
+        isAuthenticated: req.session?.isAuthenticated,
+        adminId: req.session?.adminId,
+        customerId: req.session?.customerId,
+        sessionID: req.session?.id
+      });
+
       // Check if user has admin session first
       if (req.session?.isAuthenticated && req.session?.adminId) {
+        console.log('✅ [FINANCIAL AUTH] Admin session found, granting financial access');
         // Return admin user as financial user
         const adminUser = {
           id: req.session.adminId,
@@ -23723,18 +23733,10 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         return res.json({ success: true, user: adminUser });
       }
 
-      // For now, return a default financial user for testing
-      // In production, this would check actual financial department authentication
-      const defaultFinancialUser = {
-        id: 1,
-        username: 'financial_admin',
-        email: 'financial@momtazchem.com',
-        department: 'financial'
-      };
-      
-      res.json({ success: true, user: defaultFinancialUser });
+      console.log('❌ [FINANCIAL AUTH] No valid admin session found');
+      res.status(401).json({ success: false, message: 'احراز هویت مالی نشده - لطفاً وارد شوید' });
     } catch (error) {
-      console.error('Error in financial auth check:', error);
+      console.error('❌ [FINANCIAL AUTH] Error in financial auth check:', error);
       res.status(401).json({ success: false, message: 'احراز هویت مالی نشده' });
     }
   });

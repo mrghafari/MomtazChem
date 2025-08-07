@@ -87,20 +87,25 @@ export default function FinancialDepartment() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await fetch('/api/financial/auth/me');
-        if (response.ok) {
-          const userData = await response.json();
-          if (userData.success && userData.user.department === 'financial') {
-            setUser(userData.user);
-          } else {
-            setLocation('/financial/login');
+        const response = await fetch('/api/financial/auth/me', {
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
           }
+        });
+        
+        const userData = await response.json();
+        console.log('Auth check result:', userData);
+        
+        if (response.ok && userData.success && userData.user.department === 'financial') {
+          setUser(userData.user);
         } else {
-          setLocation('/financial/login');
+          console.log('Auth check failed:', userData);
+          window.location.href = '/admin/login';
         }
       } catch (error) {
         console.error('Auth check failed:', error);
-        setLocation('/financial/login');
+        window.location.href = '/admin/login';
       }
     };
 
