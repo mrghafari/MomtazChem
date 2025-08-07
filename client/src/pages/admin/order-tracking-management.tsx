@@ -23,7 +23,8 @@ import {
   Activity,
   Timer,
   DollarSign,
-  AlertTriangle
+  AlertTriangle,
+  RefreshCw
 } from 'lucide-react';
 import PaymentMethodBadge from '@/components/PaymentMethodBadge';
 
@@ -236,25 +237,10 @@ export default function OrderTrackingManagement() {
   const [sortField, setSortField] = useState<keyof Order | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
-  // Get refresh interval from global settings
-  const getOrderTrackingRefreshInterval = () => {
-    const globalSettings = localStorage.getItem('global-refresh-settings');
-    if (globalSettings) {
-      const settings = JSON.parse(globalSettings);
-      const crmSettings = settings.departments.crm;
-      
-      if (crmSettings?.autoRefresh) {
-        const refreshInterval = settings.syncEnabled 
-          ? settings.globalInterval 
-          : crmSettings.interval;
-        return refreshInterval * 1000; // Convert seconds to milliseconds
-      }
-    }
-    return 600000; // Default 10 minutes if no settings found
-  };
+  // Manual refresh only - no automatic refresh intervals
 
   // Fetch all orders for tracking - OPTIMIZED FOR PERFORMANCE
-  const { data: orders, isLoading, error } = useQuery({
+  const { data: orders, isLoading, error, refetch } = useQuery({
     queryKey: ['tracking-orders-optimized'],
     queryFn: async () => {
       const response = await fetch('/api/orders/tracking/all', {
@@ -273,7 +259,6 @@ export default function OrderTrackingManagement() {
       const data = await response.json();
       return data.orders as Order[];
     },
-    refetchInterval: getOrderTrackingRefreshInterval(), // Use configured interval
     staleTime: 30000, // Cache for 30 seconds
     gcTime: 300000, // Keep cache for 5 minutes
     retry: (failureCount, error) => {
@@ -283,7 +268,7 @@ export default function OrderTrackingManagement() {
     }
   });
 
-  // Fetch order statistics - UPDATED to automatically refresh
+  // Fetch order statistics - Manual refresh only
   const { data: stats, isLoading: isLoadingStats, refetch: refetchStats } = useQuery({
     queryKey: ['order-management-statistics-updated'],
     queryFn: async () => {
@@ -302,10 +287,9 @@ export default function OrderTrackingManagement() {
         throw new Error('Failed to fetch order statistics');
       }
       const data = await response.json();
-      console.log('📊 [STATS UPDATED] Fresh statistics loaded:', data);
+      console.log('📊 [STATS] Statistics loaded:', data);
       return data as OrderStats;
     },
-    refetchInterval: 30000, // Refresh every 30 seconds for real-time stats
     staleTime: 10000, // Consider data stale after 10 seconds
     gcTime: 60000, // Keep cache for 1 minute
     retry: 2
@@ -632,7 +616,7 @@ export default function OrderTrackingManagement() {
         <div className="flex items-center gap-2">
           <Activity className="w-4 h-4 text-blue-600" />
           <span className="text-sm text-blue-800 font-medium">
-            آمارها به‌روزرسانی خودکار هر 30 ثانیه
+            آمارها - بروزرسانی دستی
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -648,59 +632,6 @@ export default function OrderTrackingManagement() {
         </div>
       </div>
 
-      {/* Problematic Orders Alert Section */}
-      {(() => {
-        const problematicOrders = filteredOrders.filter(order => {
-          const statusInfo = getStatusDisplay(order);
-          return statusInfo.isProblematic;
-        });
-        
-        if (problematicOrders.length > 0) {
-          return (
-            <Card className="border-red-200 bg-red-50">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-red-800">
-                  <AlertTriangle className="w-5 h-5" />
-                  سفارشات مشکل‌دار و شکست خورده ({problematicOrders.length})
-                </CardTitle>
-                <CardDescription className="text-red-700">
-                  سفارشاتی که نیاز به توجه و بررسی فوری دارند
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {problematicOrders.slice(0, 5).map(order => {
-                    const statusInfo = getStatusDisplay(order);
-                    return (
-                      <div key={order.id} className="flex items-center justify-between p-3 bg-white border border-red-200 rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <div className={`px-2 py-1 rounded text-xs font-medium ${statusInfo.color}`}>
-                            {statusInfo.label}
-                          </div>
-                          <div>
-                            <div className="font-medium">#{order.orderNumber || order.customerOrderId}</div>
-                            <div className="text-sm text-gray-600">{order.customerName}</div>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-sm font-medium">{formatAmount(order.totalAmount, order.currency || 'IQD')}</div>
-                          <div className="text-xs text-gray-500">{formatDate(order.createdAt)}</div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                  {problematicOrders.length > 5 && (
-                    <div className="text-center text-sm text-red-600 py-2">
-                      و {problematicOrders.length - 5} سفارش مشکل‌دار دیگر...
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          );
-        }
-        return null;
-      })()}
 
       {/* Search and Filter */}
       <div className="flex flex-col sm:flex-row gap-4">
