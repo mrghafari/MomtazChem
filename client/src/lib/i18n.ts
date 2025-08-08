@@ -113,6 +113,19 @@ export interface Translation {
   requestSubmitted: string;
   requestPendingApproval: string;
   
+  // Wallet Management (Admin)
+  walletHolders: string;
+  walletManagement: string;
+  changeAmount: string;
+  reason: string;
+  apply: string;
+  modifyBalance: string;
+  addSubtractAmount: string;
+  reasonForChange: string;
+  allWalletHolders: string;
+  noWalletsFound: string;
+  syncWallet: string;
+  
   // Customer Profile
   welcomeCustomer: string;
   customerProfile: string;
@@ -415,6 +428,19 @@ export const translations: Record<Language, Translation> = {
     totalDeposits: 'Total deposits',
     requestSubmitted: 'Your wallet recharge request has been submitted successfully and is pending approval.',
     requestPendingApproval: 'Request pending approval',
+    
+    // Wallet Management (Admin)
+    walletHolders: 'Wallet Holders',
+    walletManagement: 'Wallet Management',
+    changeAmount: 'Change Amount',
+    reason: 'Reason',
+    apply: 'Apply',
+    modifyBalance: 'Modify Balance',
+    addSubtractAmount: 'Add/Subtract Amount',
+    reasonForChange: 'Reason for Change',
+    allWalletHolders: 'All customers who have wallets',
+    noWalletsFound: 'No wallets found',
+    syncWallet: 'Sync Wallet',
     
     // Customer Profile
     welcomeCustomer: 'Welcome',

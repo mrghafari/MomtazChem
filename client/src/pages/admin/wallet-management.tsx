@@ -14,6 +14,7 @@ import { ArrowLeft, Wallet, CheckCircle, XCircle, Clock, Eye, Users, DollarSign,
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface WalletRechargeRequest {
   id: number;
@@ -61,6 +62,7 @@ export default function WalletManagement() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [selectedRequest, setSelectedRequest] = useState<WalletRechargeRequest | null>(null);
   const [customerBalances, setCustomerBalances] = useState<{[key: number]: number}>({});
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
@@ -263,8 +265,8 @@ export default function WalletManagement() {
   const handleInlineModification = (customerId: number, amount: string, reason: string) => {
     if (!amount || !reason) {
       toast({
-        title: "خطا",
-        description: "لطفاً مبلغ و دلیل را وارد کنید",
+        title: "Error",
+        description: "Please enter amount and reason",
         variant: "destructive"
       });
       return;
@@ -321,8 +323,8 @@ export default function WalletManagement() {
       apiRequest('/api/admin/wallet/modify-balance', { method: 'POST', body: data }),
     onSuccess: (data) => {
       toast({ 
-        title: "موفق", 
-        description: data.message || "تغییر مقدار کیف پول با موفقیت انجام شد" 
+        title: "Success", 
+        description: data.message || "Wallet balance modified successfully" 
       });
       setIsModifyDialogOpen(false);
       resetCustomerForm();
@@ -330,8 +332,8 @@ export default function WalletManagement() {
     },
     onError: (error: any) => {
       toast({ 
-        title: "خطا", 
-        description: error?.message || "خطا در تغییر مقدار کیف پول", 
+        title: "Error", 
+        description: error?.message || "Error modifying wallet balance", 
         variant: "destructive" 
       });
     }
@@ -495,7 +497,7 @@ export default function WalletManagement() {
           <TabsList>
             <TabsTrigger value="pending">Pending Requests</TabsTrigger>
             <TabsTrigger value="all">All Requests</TabsTrigger>
-            <TabsTrigger value="wallet-holders">دارندگان کیف پول</TabsTrigger>
+            <TabsTrigger value="wallet-holders">{t.walletHolders}</TabsTrigger>
           </TabsList>
 
           {/* Pending Requests Tab */}
@@ -706,9 +708,9 @@ export default function WalletManagement() {
           <TabsContent value="wallet-holders" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>مدیریت دارندگان کیف پول</CardTitle>
+                <CardTitle>{t.walletManagement}</CardTitle>
                 <CardDescription>
-                  تمام مشتریانی که کیف پول دارند و امکان تغییر مقدار آن
+                  {t.allWalletHolders}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -720,14 +722,14 @@ export default function WalletManagement() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>نام مشتری</TableHead>
-                        <TableHead>ایمیل</TableHead>
-                        <TableHead>موجودی فعلی</TableHead>
-                        <TableHead>آخرین فعالیت</TableHead>
-                        <TableHead>وضعیت</TableHead>
-                        <TableHead>مقدار تغییر</TableHead>
-                        <TableHead>دلیل</TableHead>
-                        <TableHead>عملیات</TableHead>
+                        <TableHead>{t.customerName}</TableHead>
+                        <TableHead>{t.email}</TableHead>
+                        <TableHead>{t.currentBalance}</TableHead>
+                        <TableHead>{t.lastActivity}</TableHead>
+                        <TableHead>{t.status}</TableHead>
+                        <TableHead>{t.changeAmount}</TableHead>
+                        <TableHead>{t.reason}</TableHead>
+                        <TableHead>Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -743,18 +745,18 @@ export default function WalletManagement() {
                           <TableCell>
                             {holder.lastActivityDate 
                               ? formatDate(holder.lastActivityDate.toString())
-                              : 'هیچ فعالیتی'
+                              : t.noActivity
                             }
                           </TableCell>
                           <TableCell>
                             <Badge variant={holder.isActive ? "default" : "secondary"}>
-                              {holder.isActive ? "فعال" : "غیرفعال"}
+                              {holder.isActive ? t.active : t.inactive}
                             </Badge>
                           </TableCell>
                           <TableCell>
                             <Input
                               type="number"
-                              placeholder="+/- مقدار"
+                              placeholder={t.addSubtractAmount}
                               value={inlineModifications[holder.customerId]?.amount || ''}
                               onChange={(e) => updateInlineModification(holder.customerId, 'amount', e.target.value)}
                               className="w-24"
@@ -762,7 +764,7 @@ export default function WalletManagement() {
                           </TableCell>
                           <TableCell>
                             <Input
-                              placeholder="دلیل تغییر"
+                              placeholder={t.reasonForChange}
                               value={inlineModifications[holder.customerId]?.reason || ''}
                               onChange={(e) => updateInlineModification(holder.customerId, 'reason', e.target.value)}
                               className="w-32"
@@ -775,7 +777,7 @@ export default function WalletManagement() {
                                 size="sm"
                                 onClick={() => syncWalletMutation.mutate(holder.customerId)}
                                 disabled={syncWalletMutation.isPending}
-                                title="همگام‌سازی کیف پول"
+                                title={t.syncWallet}
                               >
                                 <RefreshCw className={`w-4 h-4 mr-1 ${syncWalletMutation.isPending ? 'animate-spin' : ''}`} />
                                 Sync
@@ -796,7 +798,7 @@ export default function WalletManagement() {
                                 className="bg-blue-600 hover:bg-blue-700"
                               >
                                 <CreditCard className="w-4 h-4 mr-1" />
-                                اعمال
+                                {t.apply}
                               </Button>
                             </div>
                           </TableCell>
@@ -805,7 +807,7 @@ export default function WalletManagement() {
                       {walletHoldersData?.data?.length === 0 && (
                         <TableRow>
                           <TableCell colSpan={8} className="text-center py-8 text-gray-500">
-                            هیچ کیف پولی یافت نشد
+                            {t.noWalletsFound}
                           </TableCell>
                         </TableRow>
                       )}
