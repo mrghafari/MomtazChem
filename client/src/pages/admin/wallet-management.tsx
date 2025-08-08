@@ -47,6 +47,16 @@ interface WalletStats {
   totalProcessed: number;
 }
 
+interface WalletHolder {
+  customerId: number;
+  customerName: string;
+  customerEmail: string;
+  walletId: number;
+  balance: number;
+  lastActivityDate: Date | null;
+  isActive: boolean;
+}
+
 export default function WalletManagement() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -68,6 +78,9 @@ export default function WalletManagement() {
   const [modifyAmount, setModifyAmount] = useState("");
   const [modifyReason, setModifyReason] = useState("");
   const [modificationType, setModificationType] = useState<'credit' | 'debit' | 'set_balance'>('credit');
+  
+  // Inline modification states for wallet holders
+  const [inlineModifications, setInlineModifications] = useState<{[key: number]: {amount: string, reason: string}}>({});
 
   // Check if user is super admin (id = 1)
   const isSuperAdmin = user?.id === 1;
@@ -104,6 +117,12 @@ export default function WalletManagement() {
   // Fetch all recharge requests
   const { data: allRequestsData, isLoading: allLoading } = useQuery<{ success: boolean; data: WalletRechargeRequest[] }>({
     queryKey: ['/api/wallet/recharge-requests'],
+    refetchInterval: getRefreshInterval()
+  });
+  
+  // Fetch all wallet holders
+  const { data: walletHoldersData, isLoading: holdersLoading } = useQuery<{ success: boolean; data: WalletHolder[] }>({
+    queryKey: ['/api/admin/wallet/holders'],
     refetchInterval: getRefreshInterval()
   });
 
@@ -238,6 +257,42 @@ export default function WalletManagement() {
     setModifyAmount("");
     setModifyReason("");
     setModificationType('credit');
+  };
+  
+  // Handle inline balance modification
+  const handleInlineModification = (customerId: number, amount: string, reason: string) => {
+    if (!amount || !reason) {
+      toast({
+        title: "خطا",
+        description: "لطفاً مبلغ و دلیل را وارد کنید",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    modifyBalanceMutation.mutate({
+      customerId,
+      amount,
+      reason,
+      modificationType: parseFloat(amount) >= 0 ? 'credit' : 'debit'
+    });
+    
+    // Clear the inline modification fields
+    setInlineModifications(prev => ({
+      ...prev,
+      [customerId]: { amount: '', reason: '' }
+    }));
+  };
+  
+  // Update inline modification fields
+  const updateInlineModification = (customerId: number, field: 'amount' | 'reason', value: string) => {
+    setInlineModifications(prev => ({
+      ...prev,
+      [customerId]: {
+        ...prev[customerId],
+        [field]: value
+      }
+    }));
   };
 
   // Force wallet sync mutation
@@ -440,6 +495,7 @@ export default function WalletManagement() {
           <TabsList>
             <TabsTrigger value="pending">Pending Requests</TabsTrigger>
             <TabsTrigger value="all">All Requests</TabsTrigger>
+            <TabsTrigger value="wallet-holders">دارندگان کیف پول</TabsTrigger>
           </TabsList>
 
           {/* Pending Requests Tab */}
@@ -636,6 +692,120 @@ export default function WalletManagement() {
                         <TableRow>
                           <TableCell colSpan={7} className="text-center py-8 text-gray-500">
                             No requests found
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Wallet Holders Tab */}
+          <TabsContent value="wallet-holders" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>مدیریت دارندگان کیف پول</CardTitle>
+                <CardDescription>
+                  تمام مشتریانی که کیف پول دارند و امکان تغییر مقدار آن
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {holdersLoading ? (
+                  <div className="flex justify-center py-8">
+                    <RefreshCw className="w-6 h-6 animate-spin" />
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>نام مشتری</TableHead>
+                        <TableHead>ایمیل</TableHead>
+                        <TableHead>موجودی فعلی</TableHead>
+                        <TableHead>آخرین فعالیت</TableHead>
+                        <TableHead>وضعیت</TableHead>
+                        <TableHead>مقدار تغییر</TableHead>
+                        <TableHead>دلیل</TableHead>
+                        <TableHead>عملیات</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {walletHoldersData?.data?.map((holder) => (
+                        <TableRow key={holder.customerId}>
+                          <TableCell className="font-medium">{holder.customerName}</TableCell>
+                          <TableCell>{holder.customerEmail}</TableCell>
+                          <TableCell>
+                            <div className="font-medium text-green-600">
+                              {formatCurrency(holder.balance, 'IQD')}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {holder.lastActivityDate 
+                              ? formatDate(holder.lastActivityDate.toString())
+                              : 'هیچ فعالیتی'
+                            }
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={holder.isActive ? "default" : "secondary"}>
+                              {holder.isActive ? "فعال" : "غیرفعال"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Input
+                              type="number"
+                              placeholder="+/- مقدار"
+                              value={inlineModifications[holder.customerId]?.amount || ''}
+                              onChange={(e) => updateInlineModification(holder.customerId, 'amount', e.target.value)}
+                              className="w-24"
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Input
+                              placeholder="دلیل تغییر"
+                              value={inlineModifications[holder.customerId]?.reason || ''}
+                              onChange={(e) => updateInlineModification(holder.customerId, 'reason', e.target.value)}
+                              className="w-32"
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => syncWalletMutation.mutate(holder.customerId)}
+                                disabled={syncWalletMutation.isPending}
+                                title="همگام‌سازی کیف پول"
+                              >
+                                <RefreshCw className={`w-4 h-4 mr-1 ${syncWalletMutation.isPending ? 'animate-spin' : ''}`} />
+                                Sync
+                              </Button>
+                              <Button
+                                variant="default"
+                                size="sm"
+                                onClick={() => handleInlineModification(
+                                  holder.customerId,
+                                  inlineModifications[holder.customerId]?.amount || '',
+                                  inlineModifications[holder.customerId]?.reason || ''
+                                )}
+                                disabled={
+                                  modifyBalanceMutation.isPending ||
+                                  !inlineModifications[holder.customerId]?.amount ||
+                                  !inlineModifications[holder.customerId]?.reason
+                                }
+                                className="bg-blue-600 hover:bg-blue-700"
+                              >
+                                <CreditCard className="w-4 h-4 mr-1" />
+                                اعمال
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                      {walletHoldersData?.data?.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={8} className="text-center py-8 text-gray-500">
+                            هیچ کیف پولی یافت نشد
                           </TableCell>
                         </TableRow>
                       )}

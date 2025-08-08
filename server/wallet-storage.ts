@@ -1,5 +1,6 @@
 import { customerDb } from "./customer-db";
 import { 
+  customers,
   customerWallets, 
   walletTransactions, 
   walletRechargeRequests,
@@ -54,6 +55,17 @@ export interface IWalletStorage {
     totalSpent: number;
     totalRecharged: number;
   }>;
+  
+  // Get all wallet holders with their details
+  getAllWalletHolders(): Promise<Array<{
+    customerId: number;
+    customerName: string;
+    customerEmail: string;
+    walletId: number;
+    balance: number;
+    lastActivityDate: Date | null;
+    isActive: boolean;
+  }>>;
 }
 
 export class WalletStorage implements IWalletStorage {
@@ -401,6 +413,42 @@ export class WalletStorage implements IWalletStorage {
       totalSpent: parseFloat(spentResult?.total || "0"),
       totalRecharged: parseFloat(rechargedResult?.total || "0")
     };
+  }
+  
+  async getAllWalletHolders(): Promise<Array<{
+    customerId: number;
+    customerName: string;
+    customerEmail: string;
+    walletId: number;
+    balance: number;
+    lastActivityDate: Date | null;
+    isActive: boolean;
+  }>> {
+    const walletHolders = await customerDb
+      .select({
+        customerId: customerWallets.customerId,
+        customerName: customers.firstName,
+        customerEmail: customers.email,
+        walletId: customerWallets.id,
+        balance: customerWallets.balance,
+        lastActivityDate: customerWallets.lastActivityDate,
+        isActive: customerWallets.status,
+        firstName: customers.firstName,
+        lastName: customers.lastName
+      })
+      .from(customerWallets)
+      .innerJoin(customers, eq(customerWallets.customerId, customers.id))
+      .orderBy(desc(customerWallets.balance));
+      
+    return walletHolders.map(holder => ({
+      customerId: holder.customerId,
+      customerName: `${holder.firstName || ''} ${holder.lastName || ''}`.trim(),
+      customerEmail: holder.customerEmail,
+      walletId: holder.walletId,
+      balance: parseFloat(holder.balance),
+      lastActivityDate: holder.lastActivityDate,
+      isActive: holder.isActive === 'active'
+    }));
   }
 }
 

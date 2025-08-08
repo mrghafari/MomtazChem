@@ -32200,6 +32200,17 @@ momtazchem.com
     }
   });
 
+  // Get all wallet holders (admin)
+  app.get('/api/admin/wallet/holders', requireAuth, async (req, res) => {
+    try {
+      const walletHolders = await walletStorage.getAllWalletHolders();
+      res.json({ success: true, data: walletHolders });
+    } catch (error) {
+      console.error('Error fetching wallet holders:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch wallet holders' });
+    }
+  });
+
   // Get pending recharge requests (admin)
   app.get('/api/admin/wallet/recharge-requests/pending', requireAuth, async (req, res) => {
     try {
