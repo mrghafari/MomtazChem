@@ -266,44 +266,6 @@ function FinanceOrders() {
   };
 
 
-  // Query for orphaned orders (orders in customer_orders but missing from order_management)
-  const { data: orphanedOrders, isLoading: orphanedLoading, error: orphanedError } = useQuery({
-    queryKey: ['/api/financial/orphaned-orders'],
-    queryFn: () => fetch('/api/financial/orphaned-orders', { credentials: 'include' }).then(res => {
-      if (!res.ok) {
-        throw new Error('Failed to fetch orphaned orders');
-      }
-      return res.json();
-    }),
-    enabled: Boolean(adminUser?.success), // Always enabled when authenticated
-    refetchInterval: 30000, // Refresh every 30 seconds
-    retry: 3,
-    retryDelay: 1000
-  });
-
-  // Mutation to repair orphaned orders
-  const repairOrphanedOrderMutation = useMutation({
-    mutationFn: async (customerOrderId: number) => {
-      return apiRequest(`/api/financial/orphaned-orders/${customerOrderId}/repair`, {
-        method: 'POST',
-        body: {}
-      });
-    },
-    onSuccess: () => {
-      toast({
-        title: "تعمیر موفق",
-        description: "سفارش یتیم با موفقیت تعمیر شد و به سیستم مدیریت اضافه شد",
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/financial/orphaned-orders'] });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "خطا در تعمیر",
-        description: error.message || "امکان تعمیر سفارش یتیم وجود ندارد",
-        variant: "destructive",
-      });
-    }
-  });
 
 
 
