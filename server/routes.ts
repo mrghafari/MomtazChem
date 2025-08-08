@@ -9153,27 +9153,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
         );
         
         if (verificationResult.verified) {
-          // Update order status
           const { pool } = await import('./db');
           
-          const result = await pool.query(`
-            UPDATE customer_orders 
-            SET 
-              payment_status = 'paid',
-              status = 'warehouse_pending',
-              payment_transaction_id = $1,
-              updated_at = NOW()
-            WHERE order_number = $2 OR id = $3
-            RETURNING id, order_number, total_amount
-          `, [transactionId, orderId, orderId]);
-
-          if (result.rows.length > 0) {
-            const order = result.rows[0];
-            console.log(`✅ [PAYMENT SUCCESS] Order ${order.order_number} marked as paid`);
+          // 🚨 CRITICAL: Check if this is a hybrid order that needs order number assignment
+          console.log('🔍 [8-METHOD LOGIC] Checking if order needs order number assignment...');
+          
+          const orderCheck = await pool.query(`
+            SELECT 
+              id, 
+              order_number, 
+              total_amount, 
+              payment_method, 
+              payment_status,
+              customer_id,
+              wallet_amount_used::DECIMAL
+            FROM customer_orders 
+            WHERE order_number = $1 OR id = $2
+          `, [orderId, orderId]);
+          
+          if (orderCheck.rows.length > 0) {
+            const order = orderCheck.rows[0];
+            const isHybridOrder = order.payment_method === 'wallet_partial';
+            const hasWalletPayment = parseFloat(order.wallet_amount_used || '0') > 0;
             
-            // Redirect to success page
-            res.redirect(`/payment/success?order=${order.order_number}&amount=${order.total_amount}`);
-            return;
+            console.log(`🔍 [8-METHOD CHECK] Order ${order.order_number}:`, {
+              paymentMethod: order.payment_method,
+              isHybrid: isHybridOrder,
+              hasWalletPayment,
+              walletAmount: order.wallet_amount_used,
+              currentStatus: order.payment_status
+            });
+            
+            // For hybrid orders, verify both wallet and bank payments are successful
+            if (isHybridOrder && hasWalletPayment) {
+              console.log('🏦✅ [HYBRID SUCCESS] Both wallet and bank payments completed for hybrid order');
+              console.log('📋 [8-METHOD LOGIC] Hybrid order now qualifies for warehouse transfer');
+              
+              // Update order status for successful hybrid payment
+              const result = await pool.query(`
+                UPDATE customer_orders 
+                SET 
+                  payment_status = 'paid',
+                  status = 'warehouse_pending',
+                  payment_transaction_id = $1,
+                  updated_at = NOW()
+                WHERE id = $2
+                RETURNING id, order_number, total_amount
+              `, [transactionId, order.id]);
+              
+              if (result.rows.length > 0) {
+                const updatedOrder = result.rows[0];
+                console.log(`✅ [HYBRID COMPLETE] Hybrid order ${updatedOrder.order_number} marked as fully paid`);
+                
+                // Redirect to success page
+                res.redirect(`/payment/success?order=${updatedOrder.order_number}&amount=${updatedOrder.total_amount}`);
+                return;
+              }
+            } else if (!isHybridOrder) {
+              // Regular (non-hybrid) order processing
+              console.log('💳 [REGULAR ORDER] Processing non-hybrid bank payment');
+              
+              const result = await pool.query(`
+                UPDATE customer_orders 
+                SET 
+                  payment_status = 'paid',
+                  status = 'warehouse_pending',
+                  payment_transaction_id = $1,
+                  updated_at = NOW()
+                WHERE id = $2
+                RETURNING id, order_number, total_amount
+              `, [transactionId, order.id]);
+
+              if (result.rows.length > 0) {
+                const updatedOrder = result.rows[0];
+                console.log(`✅ [PAYMENT SUCCESS] Order ${updatedOrder.order_number} marked as paid`);
+                
+                // Redirect to success page
+                res.redirect(`/payment/success?order=${updatedOrder.order_number}&amount=${updatedOrder.total_amount}`);
+                return;
+              }
+            } else {
+              console.log('❌ [HYBRID INCOMPLETE] Hybrid order missing wallet payment - bank success alone insufficient');
+              res.redirect(`/payment/failed?reason=hybrid_incomplete&order=${order.order_number}`);
+              return;
+            }
           }
         }
       }
@@ -14308,16 +14371,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         notes: orderData.notes || '', // Add notes from form
       };
 
-      // 🔒 SEQUENTIAL: Generate M[YY][NNNNN] order number using transaction-safe system
+      // 🔒 SEQUENTIAL: Prepare order number generation (will be done after payment validation)
       const { OrderManagementStorage } = await import('./order-management-storage');
       const orderManagementStorage = new OrderManagementStorage();
       
-      console.log('🔒 [SEQUENTIAL] Starting transaction-safe order creation for wallet/payment...');
-      let orderNumber: string;
-      
-      // Generate order number using BULLETPROOF method with retry logic for absolute uniqueness
-      orderNumber = await orderManagementStorage.generateUniqueOrderNumberWithRetry();
-      console.log('🔢 [ORDER NUMBER] Generated bulletproof unique order number:', orderNumber);
+      console.log('🔒 [SEQUENTIAL] Starting payment validation before order number assignment...');
+      let orderNumber: string | null = null; // Will be assigned only after successful payment validation
       
       // Calculate order totals and taxes (using dynamic tax settings)
       // Note: orderData.totalAmount from frontend already includes all components
@@ -14362,6 +14421,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // RESPECT CUSTOMER'S PAYMENT CHOICE - NO AUTO-SUBSTITUTION
       // If customer explicitly chose online_payment, NEVER use wallet instead
       if (orderData.paymentMethod === 'online_payment') {
+        // Non-hybrid payment: assign order number immediately
+        orderNumber = await orderManagementStorage.generateUniqueOrderNumberWithRetry();
+        console.log('🔢 [ORDER NUMBER] Online payment - order number assigned:', orderNumber);
+        
         finalPaymentStatus = "pending";
         finalPaymentMethod = "online_payment";
         walletAmountUsed = 0;
@@ -14370,6 +14433,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       // If customer explicitly chose bank_transfer, NEVER use wallet instead
       else if (orderData.paymentMethod === 'bank_transfer') {
+        // Non-hybrid payment: assign order number immediately
+        orderNumber = await orderManagementStorage.generateUniqueOrderNumberWithRetry();
+        console.log('🔢 [ORDER NUMBER] Bank transfer - order number assigned:', orderNumber);
+        
         finalPaymentStatus = "pending";
         finalPaymentMethod = "bank_transfer";
         walletAmountUsed = 0;
@@ -14391,11 +14458,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         if (walletAmountUsed > 0) {
           try {
+            // For hybrid orders, defer order number generation until both parts succeed
+            // For now, use temporary description without order number
+            const tempDescription = orderData.paymentMethod === 'wallet_partial' 
+              ? 'پرداخت بخش کیف پولی سفارش ترکیبی - در انتظار تایید بانکی'
+              : 'پرداخت کامل از کیف پول دیجیتال';
+            
             // Use walletStorage.debitWallet which handles all the logic
             const transaction = await walletStorage.debitWallet(
               finalCustomerId,
               walletAmountUsed,
-              `پرداخت سفارش ${orderNumber}`,
+              tempDescription,
               'order',
               undefined, // reference ID will be set after order creation
               undefined  // no admin processing this
@@ -14403,15 +14476,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
             
             console.log(`✅ Wallet payment processed: ${walletAmountUsed} IQD deducted, transaction ID: ${transaction.id}`);
             
-            // CRITICAL FIX: Check if remainingAmount is 0 to send directly to warehouse
+            // CRITICAL FIX: Apply 8-method logic for order number assignment
             if (Math.round(remainingAmount) <= 1) {
+              // Full wallet payment - assign order number immediately
+              orderNumber = await orderManagementStorage.generateUniqueOrderNumberWithRetry();
+              console.log('🔢 [ORDER NUMBER] Full wallet payment - order number assigned:', orderNumber);
+              
               finalPaymentStatus = "paid"; // Fully paid by wallet
               finalPaymentMethod = "wallet_full"; // Ensure correct method
-              console.log('🏪 [WAREHOUSE DIRECT] Bank payment = 0, sending order directly to warehouse');
+              console.log('🏪 [WAREHOUSE DIRECT] Full wallet payment completed, order gets number immediately');
             } else {
+              // Hybrid payment - DO NOT assign order number yet
               finalPaymentStatus = "partial"; // Partially paid by wallet
               finalPaymentMethod = "wallet_partial"; // Requires bank payment
-              console.log('🏦 [BANK REQUIRED] Bank payment > 0, will require bank gateway');
+              console.log('🏦 [HYBRID PENDING] Wallet portion successful, but waiting for bank success before assigning order number');
+              console.log('⚠️ [8-METHOD LOGIC] Order will get number ONLY if bank payment also succeeds');
             }
           } catch (walletError) {
             console.log(`❌ Wallet payment failed:`, walletError);
@@ -14425,6 +14504,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Handle bank receipt method
       else if (orderData.paymentMethod === 'bank_receipt') {
+        // Non-hybrid payment: assign order number immediately
+        orderNumber = await orderManagementStorage.generateUniqueOrderNumberWithRetry();
+        console.log('🔢 [ORDER NUMBER] Bank receipt - order number assigned:', orderNumber);
+        
         finalPaymentStatus = "pending";
         finalPaymentMethod = "bank_receipt";
         console.log("✅ Bank receipt method selected - customer will upload receipt");
@@ -14432,11 +14515,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Handle bank transfer with grace period method
       else if (orderData.paymentMethod === 'bank_transfer_grace') {
+        // Non-hybrid payment: assign order number immediately
+        orderNumber = await orderManagementStorage.generateUniqueOrderNumberWithRetry();
+        console.log('🔢 [ORDER NUMBER] Bank transfer grace - order number assigned:', orderNumber);
+        
         finalPaymentStatus = "grace_period";
         finalPaymentMethod = "bank_transfer_grace";
         console.log("✅ Bank transfer with grace period method selected - 3-day grace period activated");
       }
 
+      // 🚨 CRITICAL: Only create order if we have an order number (8-method logic)
+      if (!orderNumber) {
+        console.log('❌ [8-METHOD LOGIC] Hybrid order failed - no order number assigned, cannot create order');
+        return res.status(400).json({
+          success: false,
+          message: "سفارش ترکیبی ناتمام - منتظر تکمیل پرداخت بانکی",
+          requiresBankPayment: true,
+          walletAmountUsed,
+          remainingAmount: Math.round(remainingAmount)
+        });
+      }
+      
       const order = await customerStorage.createOrder({
         customerId: finalCustomerId,
         orderNumber,
