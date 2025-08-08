@@ -14414,84 +14414,99 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Handle payment method processing
       let finalPaymentStatus = "pending";
-      let walletAmountUsed = 0;
-      let remainingAmount = totalAmount;
+      let walletAmountUsed = Math.round(parseFloat(orderData.walletAmountUsed || 0));
+      let remainingAmount = Math.round(parseFloat(orderData.remainingAmount || totalAmount));
       let finalPaymentMethod = orderData.paymentMethod || "traditional";
+      
+      console.log(`💰 [PAYMENT INIT] Initial values:`, {
+        walletAmountUsed,
+        remainingAmount,
+        totalAmount,
+        paymentMethod: finalPaymentMethod
+      });
 
-      // RESPECT CUSTOMER'S PAYMENT CHOICE - NO AUTO-SUBSTITUTION
-      // If customer explicitly chose online_payment, NEVER use wallet instead
+      // 🚨 6-METHOD ORDERING LOGIC IMPLEMENTATION
+      // Method 3: Online Payment (online_payment)
       if (orderData.paymentMethod === 'online_payment') {
-        // Non-hybrid payment: assign order number immediately
         orderNumber = await orderManagementStorage.generateUniqueOrderNumberWithRetry();
-        console.log('🔢 [ORDER NUMBER] Online payment - order number assigned:', orderNumber);
+        console.log('🔢 [METHOD 3] Online payment - order number assigned:', orderNumber);
         
         finalPaymentStatus = "pending";
         finalPaymentMethod = "online_payment";
         walletAmountUsed = 0;
         remainingAmount = totalAmount;
-        console.log("✅ [CUSTOMER CHOICE] Online payment selected - NO wallet substitution allowed");
+        console.log("✅ [METHOD 3] Online payment gateway selected");
       }
-      // If customer explicitly chose bank_transfer, NEVER use wallet instead
-      else if (orderData.paymentMethod === 'bank_transfer') {
-        // Non-hybrid payment: assign order number immediately
+      // Method 6: Bank Gateway Payment (bank_gateway)
+      else if (orderData.paymentMethod === 'bank_gateway') {
         orderNumber = await orderManagementStorage.generateUniqueOrderNumberWithRetry();
-        console.log('🔢 [ORDER NUMBER] Bank transfer - order number assigned:', orderNumber);
+        console.log('🔢 [METHOD 6] Bank gateway - order number assigned:', orderNumber);
         
         finalPaymentStatus = "pending";
-        finalPaymentMethod = "bank_transfer";
+        finalPaymentMethod = "bank_gateway";
         walletAmountUsed = 0;
         remainingAmount = totalAmount;
-        console.log("✅ [CUSTOMER CHOICE] Bank transfer selected - NO wallet substitution allowed");
+        console.log("✅ [METHOD 6] Direct bank gateway integration selected");
       }
-      // Only process wallet payments when customer explicitly chose wallet options
+      // Method 1: Full Wallet Payment (wallet_full)
+      // Method 2: Hybrid Payment (wallet_partial)
+      // Method 4: Hybrid → Full Wallet Conversion
       else if (orderData.paymentMethod === 'wallet_full' || orderData.paymentMethod === 'wallet_partial') {
         walletAmountUsed = Math.round(parseFloat(orderData.walletAmountUsed || 0));
         remainingAmount = Math.round(parseFloat(orderData.remainingAmount || totalAmount));
         
-        console.log('💰 [BILINGUAL WALLET DEBUG] Processing wallet payment:', {
+        console.log('💰 [6-METHOD WALLET] Processing wallet payment:', {
           walletAmountUsed,
           remainingAmount,
           finalCustomerId,
           paymentMethod: orderData.paymentMethod,
-          'Bank payment required?': remainingAmount > 0
+          'Method': remainingAmount <= 1 ? 'METHOD 1 or 4' : 'METHOD 2'
         });
         
         if (walletAmountUsed > 0) {
           try {
-            // For hybrid orders, defer order number generation until both parts succeed
-            // For now, use temporary description without order number
-            const tempDescription = orderData.paymentMethod === 'wallet_partial' 
-              ? 'پرداخت بخش کیف پولی سفارش ترکیبی - در انتظار تایید بانکی'
-              : 'پرداخت کامل از کیف پول دیجیتال';
+            // 🚨 CRITICAL: Update remainingAmount after wallet processing
+            remainingAmount = Math.round(remainingAmount - walletAmountUsed);
+            console.log(`💰 [WALLET CALCULATION] Amount after wallet deduction: ${remainingAmount}`);
             
-            // Use walletStorage.debitWallet which handles all the logic
+            // Process wallet deduction
+            const tempDescription = remainingAmount <= 1 
+              ? 'پرداخت کامل از کیف پول دیجیتال'
+              : 'پرداخت بخش کیف پولی سفارش ترکیبی - در انتظار تایید بانکی';
+            
             const transaction = await walletStorage.debitWallet(
               finalCustomerId,
               walletAmountUsed,
               tempDescription,
               'order',
-              undefined, // reference ID will be set after order creation
-              undefined  // no admin processing this
+              undefined,
+              undefined
             );
             
             console.log(`✅ Wallet payment processed: ${walletAmountUsed} IQD deducted, transaction ID: ${transaction.id}`);
+            console.log(`💰 [REMAINING AMOUNT] After wallet: ${remainingAmount} IQD`);
             
-            // CRITICAL FIX: Apply 8-method logic for order number assignment
+            // Apply 6-method logic for order number assignment
             if (Math.round(remainingAmount) <= 1) {
-              // Full wallet payment - assign order number immediately
+              // METHOD 1: Full Wallet Payment OR METHOD 4: Hybrid → Full Wallet Conversion
               orderNumber = await orderManagementStorage.generateUniqueOrderNumberWithRetry();
-              console.log('🔢 [ORDER NUMBER] Full wallet payment - order number assigned:', orderNumber);
               
-              finalPaymentStatus = "paid"; // Fully paid by wallet
-              finalPaymentMethod = "wallet_full"; // Ensure correct method
-              console.log('🏪 [WAREHOUSE DIRECT] Full wallet payment completed, order gets number immediately');
+              if (orderData.paymentMethod === 'wallet_partial') {
+                console.log('🔢 [METHOD 4] Hybrid → Full wallet conversion - order number assigned:', orderNumber);
+                finalPaymentMethod = "wallet_full"; // Convert to full wallet
+              } else {
+                console.log('🔢 [METHOD 1] Full wallet payment - order number assigned:', orderNumber);
+                finalPaymentMethod = "wallet_full";
+              }
+              
+              finalPaymentStatus = "paid";
+              console.log('🏪 [WAREHOUSE DIRECT] Full wallet payment completed');
             } else {
-              // 🚨 HYBRID PAYMENT: Do NOT assign order number - this BLOCKS order creation
-              finalPaymentStatus = "partial"; // Partially paid by wallet
-              finalPaymentMethod = "wallet_partial"; // Requires bank payment
-              console.log('🏦 [HYBRID BLOCK] Wallet portion successful, but NO order number assigned');
-              console.log('⚠️ [8-METHOD LOGIC] Hybrid order creation will be BLOCKED until bank payment succeeds');
-              // orderNumber remains null - this will trigger validation failure
+              // METHOD 2: Hybrid Payment - DO NOT assign order number
+              finalPaymentStatus = "partial";
+              finalPaymentMethod = "wallet_partial";
+              console.log('🏦 [METHOD 2] Hybrid payment - wallet portion successful, awaiting bank payment');
+              console.log('⚠️ [6-METHOD LOGIC] Hybrid order creation BLOCKED until bank payment succeeds');
             }
           } catch (walletError) {
             console.log(`❌ Wallet payment failed:`, walletError);
@@ -14501,8 +14516,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             });
           }
         } else if (orderData.paymentMethod === 'wallet_partial') {
-          // 🚨 CRITICAL: wallet_partial with walletAmountUsed = 0 should be blocked
-          console.log('❌ [HYBRID BLOCK] wallet_partial order with no wallet amount - blocking');
+          console.log('❌ [METHOD 2 BLOCK] wallet_partial order with no wallet amount - blocking');
           return res.status(400).json({
             success: false,
             message: "سفارش ترکیبی بدون مبلغ کیف پول - درخواست نامعتبر",
@@ -14511,56 +14525,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      // Handle bank receipt method
-      else if (orderData.paymentMethod === 'bank_receipt') {
-        // Non-hybrid payment: assign order number immediately
-        orderNumber = await orderManagementStorage.generateUniqueOrderNumberWithRetry();
-        console.log('🔢 [ORDER NUMBER] Bank receipt - order number assigned:', orderNumber);
-        
-        finalPaymentStatus = "pending";
-        finalPaymentMethod = "bank_receipt";
-        console.log("✅ Bank receipt method selected - customer will upload receipt");
-      }
-      
-      // Handle bank transfer with grace period method
+      // Method 5: Bank Transfer with Grace Period (bank_transfer_grace)
       else if (orderData.paymentMethod === 'bank_transfer_grace') {
-        // Non-hybrid payment: assign order number immediately
         orderNumber = await orderManagementStorage.generateUniqueOrderNumberWithRetry();
-        console.log('🔢 [ORDER NUMBER] Bank transfer grace - order number assigned:', orderNumber);
+        console.log('🔢 [METHOD 5] Bank transfer grace - order number assigned:', orderNumber);
         
         finalPaymentStatus = "grace_period";
         finalPaymentMethod = "bank_transfer_grace";
-        console.log("✅ Bank transfer with grace period method selected - 3-day grace period activated");
+        console.log("✅ [METHOD 5] Bank transfer with 3-day grace period activated");
+      }
+      // 🚨 UNSUPPORTED PAYMENT METHOD
+      else {
+        console.log('❌ [6-METHOD ERROR] Unsupported payment method:', orderData.paymentMethod);
+        return res.status(400).json({
+          success: false,
+          message: `روش پرداخت پشتیبانی نمی‌شود: ${orderData.paymentMethod}`,
+          supportedMethods: ['wallet_full', 'wallet_partial', 'online_payment', 'bank_gateway', 'bank_transfer_grace']
+        });
       }
 
-      // 🚨 CRITICAL: Comprehensive 8-method logic validation
-      console.log('🔍 [8-METHOD VALIDATION] Final validation before order creation:', {
+      // 🚨 CRITICAL: 6-Method Logic Validation
+      console.log('🔍 [6-METHOD VALIDATION] Final validation before order creation:', {
         orderNumber,
         paymentMethod: finalPaymentMethod,
         paymentStatus: finalPaymentStatus,
         remainingAmount,
-        walletAmountUsed
+        walletAmountUsed,
+        method: finalPaymentMethod === 'wallet_full' ? 'METHOD 1/4' : 
+               finalPaymentMethod === 'wallet_partial' ? 'METHOD 2' :
+               finalPaymentMethod === 'online_payment' ? 'METHOD 3' :
+               finalPaymentMethod === 'bank_transfer_grace' ? 'METHOD 5' :
+               finalPaymentMethod === 'bank_gateway' ? 'METHOD 6' : 'UNKNOWN'
       });
       
-      // Rule 1: Hybrid orders (wallet_partial) must NEVER get order numbers unless both parts succeed
-      if (finalPaymentMethod === 'wallet_partial' || orderData.paymentMethod === 'wallet_partial') {
-        console.log('🚨 [HYBRID BLOCK] Detected hybrid order - applying strict validation');
+      // Rule 1: METHOD 2 (Hybrid orders) must NEVER get order numbers unless both parts succeed
+      if (finalPaymentMethod === 'wallet_partial') {
+        console.log('🚨 [METHOD 2 BLOCK] Detected hybrid order - applying strict validation');
         if (finalPaymentStatus !== 'paid') {
-          console.log('❌ [HYBRID BLOCK] Hybrid order not fully paid - blocking order creation');
+          console.log('❌ [METHOD 2 BLOCK] Hybrid order not fully paid - blocking order creation');
           return res.status(400).json({
             success: false,
             message: "سفارش ترکیبی ناتمام - منتظر تکمیل پرداخت بانکی",
             requiresBankPayment: true,
             walletAmountUsed,
             remainingAmount: Math.round(remainingAmount),
-            blockReason: "hybrid_incomplete"
+            blockReason: "method2_incomplete"
           });
         }
       }
       
-      // Rule 2: All orders must have order numbers (no exceptions)
+      // Rule 2: All valid methods must have order numbers (no exceptions)
       if (!orderNumber) {
-        console.log('❌ [8-METHOD LOGIC] No order number assigned - cannot create order');
+        console.log('❌ [6-METHOD LOGIC] No order number assigned - cannot create order');
         return res.status(400).json({
           success: false,
           message: "خطا در تولید شماره سفارش - لطفاً دوباره تلاش کنید",
@@ -14571,7 +14587,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      console.log('✅ [8-METHOD VALIDATION] Order validated - proceeding with creation');
+      console.log('✅ [6-METHOD VALIDATION] Order validated - proceeding with creation');
       
       const order = await customerStorage.createOrder({
         customerId: finalCustomerId,

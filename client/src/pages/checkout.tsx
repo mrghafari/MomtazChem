@@ -834,14 +834,14 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   // Auto-enable wallet usage when wallet payment method is selected
   useEffect(() => {
     const paymentMethod = form.watch('paymentMethod');
-    if (paymentMethod === 'wallet_combined') {
+    if (paymentMethod === 'wallet_partial') {
       setUseWallet(true);
       // Always suggest full payment amount if wallet has sufficient balance
       const suggestedAmount = Math.min(walletBalance, beforeWalletTotal);
       setWalletAmountToUse(suggestedAmount);
       
       console.log('💰 [WALLET AUTO-SETUP]:', {
-        paymentMethod: 'wallet_combined',
+        paymentMethod: 'wallet_partial',
         walletBalance,
         beforeWalletTotal,
         suggestedAmount,
