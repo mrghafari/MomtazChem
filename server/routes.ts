@@ -23977,6 +23977,12 @@ ${message ? `Additional Requirements:\n${message}` : ''}
       if (isTemporaryOrder) {
         console.log(`🔄 [FINANCE] Converting temporary order ${orderId} to regular order`);
         
+        // 🆕 Generate order number for the approved grace period order
+        const { OrderManagementStorage } = await import('./order-management-storage');
+        const orderManagementStorage = new OrderManagementStorage();
+        const newOrderNumber = await orderManagementStorage.generateOrderNumberInTransaction();
+        console.log(`🔢 [FINANCE] Generated order number ${newOrderNumber} for approved grace period order`);
+        
         // Clear grace period fields and unlock the order
         await pool.query(`
           UPDATE order_management 
@@ -23986,19 +23992,21 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           WHERE id = $1
         `, [orderManagementId]);
 
-        // Update customer order status to 'confirmed' (regular order status)
+        // Update customer order status to 'confirmed' and assign order number
         await pool.query(`
           UPDATE customer_orders 
           SET status = 'confirmed',
-              payment_status = 'paid'
+              payment_status = 'paid',
+              order_number = $2
           WHERE id = $1
-        `, [orderData.customer_order_id]);
+        `, [orderData.customer_order_id, newOrderNumber]);
 
-        console.log(`✅ [FINANCE] Order ${orderManagementId} (Customer Order ${orderData.customer_order_id}) converted from temporary to regular order and moved to warehouse`);
+        console.log(`✅ [FINANCE] Order ${orderManagementId} (Customer Order ${orderData.customer_order_id}) converted from temporary to regular order with number ${newOrderNumber} and moved to warehouse`);
         res.json({ 
           success: true, 
           order: updatedOrder, 
-          message: 'سفارش موقت تایید شد و آماده بررسی انبار است' + walletTransactionMessage,
+          orderNumber: newOrderNumber,
+          message: `سفارش موقت تایید شد و شماره ${newOrderNumber} دریافت کرد. آماده بررسی انبار است` + walletTransactionMessage,
           walletTransaction: walletTransactionMessage.length > 0
         });
       } else {
