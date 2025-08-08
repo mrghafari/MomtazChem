@@ -66,6 +66,10 @@ const PaymentSettings = () => {
   // Fetch payment method settings
   const { data: paymentMethods = [], isLoading: isLoadingMethods } = useQuery<PaymentMethodSettings[]>({
     queryKey: ['/api/payment/method-settings'],
+    queryFn: async () => {
+      const response = await apiRequest('/api/payment/method-settings');
+      return response.data || [];
+    },
   });
 
   // Create/Update gateway mutation
