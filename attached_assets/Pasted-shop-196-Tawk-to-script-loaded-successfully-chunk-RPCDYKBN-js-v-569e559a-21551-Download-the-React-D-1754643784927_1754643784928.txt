@@ -1,0 +1,1080 @@
+shop:196 Tawk.to script loaded successfully
+chunk-RPCDYKBN.js?v=569e559a:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: undefined
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: false AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {}
+shop.tsx:403 🔐 [AUTH] Guest user confirmed
+useAuth.ts:30  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 403 (Forbidden)
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=569e559a:840
+run @ @tanstack_react-query.js?v=569e559a:494
+start @ @tanstack_react-query.js?v=569e559a:536
+fetch @ @tanstack_react-query.js?v=569e559a:926
+executeFetch_fn @ @tanstack_react-query.js?v=569e559a:2211
+onSubscribe @ @tanstack_react-query.js?v=569e559a:1898
+subscribe @ @tanstack_react-query.js?v=569e559a:24
+(anonymous) @ @tanstack_react-query.js?v=569e559a:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=569e559a:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=569e559a:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=569e559a:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=569e559a:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=569e559a:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=569e559a:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=569e559a:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=569e559a:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=569e559a:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=569e559a:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=569e559a:19432
+commitRoot @ chunk-RPCDYKBN.js?v=569e559a:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=569e559a:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=569e559a:18718
+workLoop @ chunk-RPCDYKBN.js?v=569e559a:197
+flushWork @ chunk-RPCDYKBN.js?v=569e559a:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=569e559a:384
+useAuth.ts:46 Auth check failed: Error: HTTP 403
+    at queryFn (useAuth.ts:39:17)
+queryFn @ useAuth.ts:46
+await in queryFn
+fetchFn @ @tanstack_react-query.js?v=569e559a:840
+run @ @tanstack_react-query.js?v=569e559a:494
+start @ @tanstack_react-query.js?v=569e559a:536
+fetch @ @tanstack_react-query.js?v=569e559a:926
+executeFetch_fn @ @tanstack_react-query.js?v=569e559a:2211
+onSubscribe @ @tanstack_react-query.js?v=569e559a:1898
+subscribe @ @tanstack_react-query.js?v=569e559a:24
+(anonymous) @ @tanstack_react-query.js?v=569e559a:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=569e559a:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=569e559a:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=569e559a:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=569e559a:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=569e559a:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=569e559a:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=569e559a:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=569e559a:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=569e559a:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=569e559a:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=569e559a:19432
+commitRoot @ chunk-RPCDYKBN.js?v=569e559a:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=569e559a:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=569e559a:18718
+workLoop @ chunk-RPCDYKBN.js?v=569e559a:197
+flushWork @ chunk-RPCDYKBN.js?v=569e559a:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=569e559a:384
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 7 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 470: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:240 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:241 🌟 [RATINGS DEBUG] Products with ratings: (3) [{…}, {…}, {…}]
+usePersistentCart.ts:54 🔐 User just logged in, resetting cart loaded flag
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 7 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 470: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:240 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:241 🌟 [RATINGS DEBUG] Products with ratings: (3) [{…}, {…}, {…}]
+shop.tsx:400 🔐 [AUTH] Customer authenticated, cart will be synced automatically
+usePersistentCart.ts:68 🛒 Loading persistent cart for customer: 94
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 7 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 470: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:240 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:241 🌟 [RATINGS DEBUG] Products with ratings: (3) [{…}, {…}, {…}]
+usePersistentCart.ts:87 🛒 Loaded cart from database: {473: 22}
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 7 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 470: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:240 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:241 🌟 [RATINGS DEBUG] Products with ratings: (3) [{…}, {…}, {…}]
+shop.tsx:620 Shop Product Paint Thinner PT-300: quantity=22, basePrice=11.01, discount=0.05, discountedPrice=10.459499999999998
+shop.tsx:620 Shop Product Paint Thinner PT-300: quantity=22, basePrice=11.01, discount=0.05, discountedPrice=10.459499999999998
+shop.tsx:620 Shop Product Paint Thinner PT-300: quantity=22, basePrice=11.01, discount=0.05, discountedPrice=10.459499999999998
+via.placeholder.com/128x128?text=WeChat+QR:1  GET https://via.placeholder.com/128x128?text=WeChat+QR net::ERR_NAME_NOT_RESOLVED
+Image
+commitMount @ chunk-RPCDYKBN.js?v=569e559a:8412
+commitLayoutEffectOnFiber @ chunk-RPCDYKBN.js?v=569e559a:17102
+commitLayoutMountEffects_complete @ chunk-RPCDYKBN.js?v=569e559a:17980
+commitLayoutEffects_begin @ chunk-RPCDYKBN.js?v=569e559a:17969
+commitLayoutEffects @ chunk-RPCDYKBN.js?v=569e559a:17920
+commitRootImpl @ chunk-RPCDYKBN.js?v=569e559a:19353
+commitRoot @ chunk-RPCDYKBN.js?v=569e559a:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=569e559a:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=569e559a:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=569e559a:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=569e559a:555
+flush @ @tanstack_react-query.js?v=569e559a:569
+batch @ @tanstack_react-query.js?v=569e559a:587
+dispatch_fn @ @tanstack_react-query.js?v=569e559a:996
+setData @ @tanstack_react-query.js?v=569e559a:696
+onSuccess @ @tanstack_react-query.js?v=569e559a:897
+resolve @ @tanstack_react-query.js?v=569e559a:456
+Promise.then
+run @ @tanstack_react-query.js?v=569e559a:498
+start @ @tanstack_react-query.js?v=569e559a:536
+fetch @ @tanstack_react-query.js?v=569e559a:926
+executeFetch_fn @ @tanstack_react-query.js?v=569e559a:2211
+onSubscribe @ @tanstack_react-query.js?v=569e559a:1898
+subscribe @ @tanstack_react-query.js?v=569e559a:24
+(anonymous) @ @tanstack_react-query.js?v=569e559a:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=569e559a:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=569e559a:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=569e559a:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=569e559a:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=569e559a:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=569e559a:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=569e559a:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=569e559a:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=569e559a:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=569e559a:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=569e559a:19432
+commitRoot @ chunk-RPCDYKBN.js?v=569e559a:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=569e559a:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=569e559a:18718
+workLoop @ chunk-RPCDYKBN.js?v=569e559a:197
+flushWork @ chunk-RPCDYKBN.js?v=569e559a:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=569e559a:384
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:117574)
+    at t.value (twk-chunk-common.js:2:150658)
+    at p.updateUUID (twk-chunk-common.js:2:202310)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:124589)
+    at twk-chunk-common.js:2:123900
+value @ twk-chunk-common.js:2
+updateUUID @ twk-chunk-common.js:2
+(anonymous) @ twk-vendor.js:2
+p.dispatch @ twk-vendor.js:2
+dispatch @ twk-vendor.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+Promise.then
+value @ twk-chunk-common.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+56d7 @ twk-chunk-common.js:2
+a @ twk-runtime.js:1
+r @ twk-runtime.js:1
+t @ twk-runtime.js:1
+(anonymous) @ twk-runtime.js:1
+(anonymous) @ twk-runtime.js:1
+shop:168 Tawk.to Live Chat loaded successfully
+useAuth.ts:30  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 403 (Forbidden)
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=569e559a:840
+run @ @tanstack_react-query.js?v=569e559a:494
+start @ @tanstack_react-query.js?v=569e559a:536
+fetch @ @tanstack_react-query.js?v=569e559a:926
+executeFetch_fn @ @tanstack_react-query.js?v=569e559a:2211
+fetch @ @tanstack_react-query.js?v=569e559a:2011
+refetch @ @tanstack_react-query.js?v=569e559a:2001
+onFocus @ @tanstack_react-query.js?v=569e559a:749
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1112
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1111
+batch @ @tanstack_react-query.js?v=569e559a:583
+onFocus @ @tanstack_react-query.js?v=569e559a:1110
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=569e559a:313
+onFocus @ @tanstack_react-query.js?v=569e559a:312
+(anonymous) @ @tanstack_react-query.js?v=569e559a:299
+listener @ @tanstack_react-query.js?v=569e559a:270
+useAuth.ts:46 Auth check failed: Error: HTTP 403
+    at queryFn (useAuth.ts:39:17)
+queryFn @ useAuth.ts:46
+await in queryFn
+fetchFn @ @tanstack_react-query.js?v=569e559a:840
+run @ @tanstack_react-query.js?v=569e559a:494
+start @ @tanstack_react-query.js?v=569e559a:536
+fetch @ @tanstack_react-query.js?v=569e559a:926
+executeFetch_fn @ @tanstack_react-query.js?v=569e559a:2211
+fetch @ @tanstack_react-query.js?v=569e559a:2011
+refetch @ @tanstack_react-query.js?v=569e559a:2001
+onFocus @ @tanstack_react-query.js?v=569e559a:749
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1112
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1111
+batch @ @tanstack_react-query.js?v=569e559a:583
+onFocus @ @tanstack_react-query.js?v=569e559a:1110
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=569e559a:313
+onFocus @ @tanstack_react-query.js?v=569e559a:312
+(anonymous) @ @tanstack_react-query.js?v=569e559a:299
+listener @ @tanstack_react-query.js?v=569e559a:270
+chunk-RPCDYKBN.js?v=569e559a:521 Warning: validateDOMNesting(...): <div> cannot appear as a descendant of <p>.
+    at div
+    at Badge (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ui/badge.tsx:35:18)
+    at p
+    at div
+    at _c9 (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ui/card.tsx:114:12)
+    at div
+    at _c (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ui/card.tsx:20:11)
+    at div
+    at div
+    at div
+    at CustomerWallet (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/customer-wallet.tsx:37:21)
+    at Route (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=569e559a:265:16)
+    at Switch (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=569e559a:321:17)
+    at main
+    at div
+    at Router
+    at Provider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=569e559a:38:15)
+    at TooltipProvider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=569e559a:65:5)
+    at LanguageProvider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/contexts/LanguageContext.tsx:21:36)
+    at QueryClientProvider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=569e559a:2805:3)
+    at App
+printWarning @ chunk-RPCDYKBN.js?v=569e559a:521
+error @ chunk-RPCDYKBN.js?v=569e559a:505
+validateDOMNesting @ chunk-RPCDYKBN.js?v=569e559a:8256
+createInstance @ chunk-RPCDYKBN.js?v=569e559a:8328
+completeWork @ chunk-RPCDYKBN.js?v=569e559a:16290
+completeUnitOfWork @ chunk-RPCDYKBN.js?v=569e559a:19224
+performUnitOfWork @ chunk-RPCDYKBN.js?v=569e559a:19206
+workLoopSync @ chunk-RPCDYKBN.js?v=569e559a:19137
+renderRootSync @ chunk-RPCDYKBN.js?v=569e559a:19116
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=569e559a:18874
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=569e559a:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=569e559a:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=569e559a:555
+flush @ @tanstack_react-query.js?v=569e559a:569
+batch @ @tanstack_react-query.js?v=569e559a:587
+dispatch_fn @ @tanstack_react-query.js?v=569e559a:996
+setData @ @tanstack_react-query.js?v=569e559a:696
+onSuccess @ @tanstack_react-query.js?v=569e559a:897
+resolve @ @tanstack_react-query.js?v=569e559a:456
+Promise.then
+run @ @tanstack_react-query.js?v=569e559a:498
+start @ @tanstack_react-query.js?v=569e559a:536
+fetch @ @tanstack_react-query.js?v=569e559a:926
+executeFetch_fn @ @tanstack_react-query.js?v=569e559a:2211
+onSubscribe @ @tanstack_react-query.js?v=569e559a:1898
+subscribe @ @tanstack_react-query.js?v=569e559a:24
+(anonymous) @ @tanstack_react-query.js?v=569e559a:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=569e559a:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=569e559a:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=569e559a:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=569e559a:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=569e559a:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=569e559a:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=569e559a:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=569e559a:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=569e559a:19416
+commitRoot @ chunk-RPCDYKBN.js?v=569e559a:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=569e559a:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=569e559a:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=569e559a:18627
+useAuth.ts:30  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 403 (Forbidden)
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=569e559a:840
+run @ @tanstack_react-query.js?v=569e559a:494
+start @ @tanstack_react-query.js?v=569e559a:536
+fetch @ @tanstack_react-query.js?v=569e559a:926
+executeFetch_fn @ @tanstack_react-query.js?v=569e559a:2211
+(anonymous) @ @tanstack_react-query.js?v=569e559a:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=569e559a:2243
+updateTimers_fn @ @tanstack_react-query.js?v=569e559a:2250
+onQueryUpdate @ @tanstack_react-query.js?v=569e559a:2206
+(anonymous) @ @tanstack_react-query.js?v=569e559a:998
+(anonymous) @ @tanstack_react-query.js?v=569e559a:997
+batch @ @tanstack_react-query.js?v=569e559a:583
+dispatch_fn @ @tanstack_react-query.js?v=569e559a:996
+setData @ @tanstack_react-query.js?v=569e559a:696
+onSuccess @ @tanstack_react-query.js?v=569e559a:897
+resolve @ @tanstack_react-query.js?v=569e559a:456
+Promise.then
+run @ @tanstack_react-query.js?v=569e559a:498
+start @ @tanstack_react-query.js?v=569e559a:536
+fetch @ @tanstack_react-query.js?v=569e559a:926
+executeFetch_fn @ @tanstack_react-query.js?v=569e559a:2211
+fetch @ @tanstack_react-query.js?v=569e559a:2011
+refetch @ @tanstack_react-query.js?v=569e559a:2001
+onFocus @ @tanstack_react-query.js?v=569e559a:749
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1112
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1111
+batch @ @tanstack_react-query.js?v=569e559a:583
+onFocus @ @tanstack_react-query.js?v=569e559a:1110
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=569e559a:313
+onFocus @ @tanstack_react-query.js?v=569e559a:312
+(anonymous) @ @tanstack_react-query.js?v=569e559a:299
+listener @ @tanstack_react-query.js?v=569e559a:270
+useAuth.ts:46 Auth check failed: Error: HTTP 403
+    at queryFn (useAuth.ts:39:17)
+queryFn @ useAuth.ts:46
+await in queryFn
+fetchFn @ @tanstack_react-query.js?v=569e559a:840
+run @ @tanstack_react-query.js?v=569e559a:494
+start @ @tanstack_react-query.js?v=569e559a:536
+fetch @ @tanstack_react-query.js?v=569e559a:926
+executeFetch_fn @ @tanstack_react-query.js?v=569e559a:2211
+(anonymous) @ @tanstack_react-query.js?v=569e559a:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=569e559a:2243
+updateTimers_fn @ @tanstack_react-query.js?v=569e559a:2250
+onQueryUpdate @ @tanstack_react-query.js?v=569e559a:2206
+(anonymous) @ @tanstack_react-query.js?v=569e559a:998
+(anonymous) @ @tanstack_react-query.js?v=569e559a:997
+batch @ @tanstack_react-query.js?v=569e559a:583
+dispatch_fn @ @tanstack_react-query.js?v=569e559a:996
+setData @ @tanstack_react-query.js?v=569e559a:696
+onSuccess @ @tanstack_react-query.js?v=569e559a:897
+resolve @ @tanstack_react-query.js?v=569e559a:456
+Promise.then
+run @ @tanstack_react-query.js?v=569e559a:498
+start @ @tanstack_react-query.js?v=569e559a:536
+fetch @ @tanstack_react-query.js?v=569e559a:926
+executeFetch_fn @ @tanstack_react-query.js?v=569e559a:2211
+fetch @ @tanstack_react-query.js?v=569e559a:2011
+refetch @ @tanstack_react-query.js?v=569e559a:2001
+onFocus @ @tanstack_react-query.js?v=569e559a:749
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1112
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1111
+batch @ @tanstack_react-query.js?v=569e559a:583
+onFocus @ @tanstack_react-query.js?v=569e559a:1110
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=569e559a:313
+onFocus @ @tanstack_react-query.js?v=569e559a:312
+(anonymous) @ @tanstack_react-query.js?v=569e559a:299
+listener @ @tanstack_react-query.js?v=569e559a:270
+useAuth.ts:30  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 403 (Forbidden)
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=569e559a:840
+run @ @tanstack_react-query.js?v=569e559a:494
+start @ @tanstack_react-query.js?v=569e559a:536
+fetch @ @tanstack_react-query.js?v=569e559a:926
+executeFetch_fn @ @tanstack_react-query.js?v=569e559a:2211
+(anonymous) @ @tanstack_react-query.js?v=569e559a:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=569e559a:2243
+updateTimers_fn @ @tanstack_react-query.js?v=569e559a:2250
+onQueryUpdate @ @tanstack_react-query.js?v=569e559a:2206
+(anonymous) @ @tanstack_react-query.js?v=569e559a:998
+(anonymous) @ @tanstack_react-query.js?v=569e559a:997
+batch @ @tanstack_react-query.js?v=569e559a:583
+dispatch_fn @ @tanstack_react-query.js?v=569e559a:996
+setData @ @tanstack_react-query.js?v=569e559a:696
+onSuccess @ @tanstack_react-query.js?v=569e559a:897
+resolve @ @tanstack_react-query.js?v=569e559a:456
+Promise.then
+run @ @tanstack_react-query.js?v=569e559a:498
+start @ @tanstack_react-query.js?v=569e559a:536
+fetch @ @tanstack_react-query.js?v=569e559a:926
+executeFetch_fn @ @tanstack_react-query.js?v=569e559a:2211
+(anonymous) @ @tanstack_react-query.js?v=569e559a:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=569e559a:2243
+updateTimers_fn @ @tanstack_react-query.js?v=569e559a:2250
+onQueryUpdate @ @tanstack_react-query.js?v=569e559a:2206
+(anonymous) @ @tanstack_react-query.js?v=569e559a:998
+(anonymous) @ @tanstack_react-query.js?v=569e559a:997
+batch @ @tanstack_react-query.js?v=569e559a:583
+dispatch_fn @ @tanstack_react-query.js?v=569e559a:996
+setData @ @tanstack_react-query.js?v=569e559a:696
+onSuccess @ @tanstack_react-query.js?v=569e559a:897
+resolve @ @tanstack_react-query.js?v=569e559a:456
+Promise.then
+run @ @tanstack_react-query.js?v=569e559a:498
+start @ @tanstack_react-query.js?v=569e559a:536
+fetch @ @tanstack_react-query.js?v=569e559a:926
+executeFetch_fn @ @tanstack_react-query.js?v=569e559a:2211
+fetch @ @tanstack_react-query.js?v=569e559a:2011
+refetch @ @tanstack_react-query.js?v=569e559a:2001
+onFocus @ @tanstack_react-query.js?v=569e559a:749
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1112
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1111
+batch @ @tanstack_react-query.js?v=569e559a:583
+onFocus @ @tanstack_react-query.js?v=569e559a:1110
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=569e559a:313
+onFocus @ @tanstack_react-query.js?v=569e559a:312
+(anonymous) @ @tanstack_react-query.js?v=569e559a:299
+listener @ @tanstack_react-query.js?v=569e559a:270
+useAuth.ts:46 Auth check failed: Error: HTTP 403
+    at queryFn (useAuth.ts:39:17)
+queryFn @ useAuth.ts:46
+await in queryFn
+fetchFn @ @tanstack_react-query.js?v=569e559a:840
+run @ @tanstack_react-query.js?v=569e559a:494
+start @ @tanstack_react-query.js?v=569e559a:536
+fetch @ @tanstack_react-query.js?v=569e559a:926
+executeFetch_fn @ @tanstack_react-query.js?v=569e559a:2211
+(anonymous) @ @tanstack_react-query.js?v=569e559a:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=569e559a:2243
+updateTimers_fn @ @tanstack_react-query.js?v=569e559a:2250
+onQueryUpdate @ @tanstack_react-query.js?v=569e559a:2206
+(anonymous) @ @tanstack_react-query.js?v=569e559a:998
+(anonymous) @ @tanstack_react-query.js?v=569e559a:997
+batch @ @tanstack_react-query.js?v=569e559a:583
+dispatch_fn @ @tanstack_react-query.js?v=569e559a:996
+setData @ @tanstack_react-query.js?v=569e559a:696
+onSuccess @ @tanstack_react-query.js?v=569e559a:897
+resolve @ @tanstack_react-query.js?v=569e559a:456
+Promise.then
+run @ @tanstack_react-query.js?v=569e559a:498
+start @ @tanstack_react-query.js?v=569e559a:536
+fetch @ @tanstack_react-query.js?v=569e559a:926
+executeFetch_fn @ @tanstack_react-query.js?v=569e559a:2211
+(anonymous) @ @tanstack_react-query.js?v=569e559a:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=569e559a:2243
+updateTimers_fn @ @tanstack_react-query.js?v=569e559a:2250
+onQueryUpdate @ @tanstack_react-query.js?v=569e559a:2206
+(anonymous) @ @tanstack_react-query.js?v=569e559a:998
+(anonymous) @ @tanstack_react-query.js?v=569e559a:997
+batch @ @tanstack_react-query.js?v=569e559a:583
+dispatch_fn @ @tanstack_react-query.js?v=569e559a:996
+setData @ @tanstack_react-query.js?v=569e559a:696
+onSuccess @ @tanstack_react-query.js?v=569e559a:897
+resolve @ @tanstack_react-query.js?v=569e559a:456
+Promise.then
+run @ @tanstack_react-query.js?v=569e559a:498
+start @ @tanstack_react-query.js?v=569e559a:536
+fetch @ @tanstack_react-query.js?v=569e559a:926
+executeFetch_fn @ @tanstack_react-query.js?v=569e559a:2211
+fetch @ @tanstack_react-query.js?v=569e559a:2011
+refetch @ @tanstack_react-query.js?v=569e559a:2001
+onFocus @ @tanstack_react-query.js?v=569e559a:749
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1112
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1111
+batch @ @tanstack_react-query.js?v=569e559a:583
+onFocus @ @tanstack_react-query.js?v=569e559a:1110
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=569e559a:313
+onFocus @ @tanstack_react-query.js?v=569e559a:312
+(anonymous) @ @tanstack_react-query.js?v=569e559a:299
+listener @ @tanstack_react-query.js?v=569e559a:270
+useAuth.ts:30  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 403 (Forbidden)
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=569e559a:840
+run @ @tanstack_react-query.js?v=569e559a:494
+start @ @tanstack_react-query.js?v=569e559a:536
+fetch @ @tanstack_react-query.js?v=569e559a:926
+executeFetch_fn @ @tanstack_react-query.js?v=569e559a:2211
+fetch @ @tanstack_react-query.js?v=569e559a:2011
+refetch @ @tanstack_react-query.js?v=569e559a:2001
+onFocus @ @tanstack_react-query.js?v=569e559a:749
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1112
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1111
+batch @ @tanstack_react-query.js?v=569e559a:583
+onFocus @ @tanstack_react-query.js?v=569e559a:1110
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=569e559a:313
+onFocus @ @tanstack_react-query.js?v=569e559a:312
+(anonymous) @ @tanstack_react-query.js?v=569e559a:299
+listener @ @tanstack_react-query.js?v=569e559a:270
+useAuth.ts:46 Auth check failed: Error: HTTP 403
+    at queryFn (useAuth.ts:39:17)
+queryFn @ useAuth.ts:46
+await in queryFn
+fetchFn @ @tanstack_react-query.js?v=569e559a:840
+run @ @tanstack_react-query.js?v=569e559a:494
+start @ @tanstack_react-query.js?v=569e559a:536
+fetch @ @tanstack_react-query.js?v=569e559a:926
+executeFetch_fn @ @tanstack_react-query.js?v=569e559a:2211
+fetch @ @tanstack_react-query.js?v=569e559a:2011
+refetch @ @tanstack_react-query.js?v=569e559a:2001
+onFocus @ @tanstack_react-query.js?v=569e559a:749
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1112
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1111
+batch @ @tanstack_react-query.js?v=569e559a:583
+onFocus @ @tanstack_react-query.js?v=569e559a:1110
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=569e559a:313
+onFocus @ @tanstack_react-query.js?v=569e559a:312
+(anonymous) @ @tanstack_react-query.js?v=569e559a:299
+listener @ @tanstack_react-query.js?v=569e559a:270
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: undefined
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: false AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {}
+usePersistentCart.ts:54 🔐 User just logged in, resetting cart loaded flag
+shop.tsx:403 🔐 [AUTH] Guest user confirmed
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: undefined
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: false AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {}
+shop.tsx:400 🔐 [AUTH] Customer authenticated, cart will be synced automatically
+usePersistentCart.ts:68 🛒 Loading persistent cart for customer: 94
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: undefined
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: false AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {}
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: undefined
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: false AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {}
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: undefined
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: false AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 7 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 470: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 7 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 470: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 7 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 470: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 7 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 470: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 7 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 470: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:240 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:241 🌟 [RATINGS DEBUG] Products with ratings: (3) [{…}, {…}, {…}]
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 7 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 470: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:240 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:241 🌟 [RATINGS DEBUG] Products with ratings: (3) [{…}, {…}, {…}]
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 7 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 470: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:240 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:241 🌟 [RATINGS DEBUG] Products with ratings: (3) [{…}, {…}, {…}]
+usePersistentCart.ts:87 🛒 Loaded cart from database: {473: 22}
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 7 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 470: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:240 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:241 🌟 [RATINGS DEBUG] Products with ratings: (3) [{…}, {…}, {…}]
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 7 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 470: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:240 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:241 🌟 [RATINGS DEBUG] Products with ratings: (3) [{…}, {…}, {…}]
+shop.tsx:620 Shop Product Paint Thinner PT-300: quantity=22, basePrice=11.01, discount=0.05, discountedPrice=10.459499999999998
+shop.tsx:620 Shop Product Paint Thinner PT-300: quantity=22, basePrice=11.01, discount=0.05, discountedPrice=10.459499999999998
+shop.tsx:620 Shop Product Paint Thinner PT-300: quantity=22, basePrice=11.01, discount=0.05, discountedPrice=10.459499999999998
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 7 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 470: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:240 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:241 🌟 [RATINGS DEBUG] Products with ratings: (3) [{…}, {…}, {…}]
+shop.tsx:620 Shop Product Paint Thinner PT-300: quantity=22, basePrice=11.01, discount=0.05, discountedPrice=10.459499999999998
+shop.tsx:620 Shop Product Paint Thinner PT-300: quantity=22, basePrice=11.01, discount=0.05, discountedPrice=10.459499999999998
+shop.tsx:620 Shop Product Paint Thinner PT-300: quantity=22, basePrice=11.01, discount=0.05, discountedPrice=10.459499999999998
+shop.tsx:685 Cart clicked, total items: 22
+shop.tsx:686 Customer: {id: 94, firstName: 'Omid', lastName: 'Mohammad', email: 'water@momtazchem.com', company: 'Momtazchem Chemical Solutions', …}
+shop.tsx:693 User is logged in, showing checkout
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 7 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 470: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:240 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:241 🌟 [RATINGS DEBUG] Products with ratings: (3) [{…}, {…}, {…}]
+shop.tsx:620 Shop Product Paint Thinner PT-300: quantity=22, basePrice=11.01, discount=0.05, discountedPrice=10.459499999999998
+shop.tsx:620 Shop Product Paint Thinner PT-300: quantity=22, basePrice=11.01, discount=0.05, discountedPrice=10.459499999999998
+shop.tsx:620 Shop Product Paint Thinner PT-300: quantity=22, basePrice=11.01, discount=0.05, discountedPrice=10.459499999999998
+bilingual-purchase-form.tsx:377 💳 [WALLET QUERY] Enabled check: {existingCustomer: true, customerDataSuccess: true, enabled: true}
+bilingual-purchase-form.tsx:490 🔥 [BILINGUAL FORM] Cart flammable check result: {containsFlammableProducts: false, cartItems: 1, totalQuantity: 22}
+bilingual-purchase-form.tsx:748 BilingualForm Product Paint Thinner PT-300: quantity=22, basePrice=11, discount=0.05, discountedPrice=10
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: undefined, vatRate: 0, dutiesRate: 0, subtotalAmount: 220, vatAmount: 0, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 220, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: undefined, walletBalance: 0, canUseWallet: false, totalAmount: 220, existingCustomer: true, …}
+bilingual-purchase-form.tsx:748 BilingualForm Product Paint Thinner PT-300: quantity=22, basePrice=11, discount=0.05, discountedPrice=10
+bilingual-purchase-form.tsx:503 🚚 [BILINGUAL FORM] ===== SHIPPING RATES QUERY STARTED =====
+bilingual-purchase-form.tsx:505 🚚 [BILINGUAL FORM] Fetching shipping rates with flammable filtering... {containsFlammableProducts: false, cartProducts: Array(1)}
+bilingual-purchase-form.tsx:595 === BilingualPurchaseForm Address Debug ===
+bilingual-purchase-form.tsx:596 existingCustomer from parent: {id: 94, firstName: 'Omid', lastName: 'Mohammad', email: 'water@momtazchem.com', company: 'Momtazchem Chemical Solutions', …}
+bilingual-purchase-form.tsx:597 customerData from API: {success: true, customer: {…}}
+bilingual-purchase-form.tsx:598 crmCustomerData from API: undefined
+bilingual-purchase-form.tsx:599 isLoadingCustomer: false
+bilingual-purchase-form.tsx:610 Using existingCustomer from parent
+bilingual-purchase-form.tsx:617 Customer object found: {id: 94, firstName: 'Omid', lastName: 'Mohammad', email: 'water@momtazchem.com', company: 'Momtazchem Chemical Solutions', …}
+bilingual-purchase-form.tsx:618 Customer firstName: Omid
+bilingual-purchase-form.tsx:619 Customer lastName: Mohammad
+bilingual-purchase-form.tsx:620 Customer phone: +9647503533769
+bilingual-purchase-form.tsx:621 Customer address: NAGwer Road, Qaryataq Village, Erbil, Iraq
+bilingual-purchase-form.tsx:622 Customer secondaryAddress: NAGwer Road, Qaryataq Village, Erbil, Iraq
+bilingual-purchase-form.tsx:623 Customer city: 
+bilingual-purchase-form.tsx:624 Customer country: Iraq
+bilingual-purchase-form.tsx:625 Customer postalCode: 44001
+bilingual-purchase-form.tsx:628 Full name constructed: Omid Mohammad
+bilingual-purchase-form.tsx:652 🏠 [ADDRESS DEBUG] Enhanced address mapping result: {originalCustomer: {…}, mappedAddress: 'NAGwer Road, Qaryataq Village, Erbil, Iraq', mappedCity: 'Erbil', mappedProvince: 'Erbil', addressSources: {…}, …}
+bilingual-purchase-form.tsx:693 Form data to reset: {customerName: 'Omid Mohammad', phone: '+9647503533769', address: 'NAGwer Road, Qaryataq Village, Erbil, Iraq', city: 'Erbil', country: 'Iraq', …}
+bilingual-purchase-form.tsx:695 Form reset completed
+bilingual-purchase-form.tsx:699 === End BilingualPurchaseForm Debug ===
+bilingual-purchase-form.tsx:772 🚚 [AUTO-SELECT DEBUG] useEffect triggered: {shippingRatesLength: undefined, selectedShippingMethod: null, hasShippingData: false}
+bilingual-purchase-form.tsx:787 🚚 Shipping cost calculation: {selectedShippingMethod: null, hasShippingData: false, subtotalAmount: 220}
+bilingual-purchase-form.tsx:829 🔄 No shipping method selected or no data, resetting cost
+bilingual-purchase-form.tsx:836 Shipping rates state: {isLoadingShippingRates: true, shippingRatesError: null, dataLength: 0, data: undefined}
+bilingual-purchase-form.tsx:1089 🚚 [DELIVERY CALCULATION] Final destination determined: {showSecondAddress: false, secondCity: '', secondProvince: '', crmCityRegion: undefined, crmCity: undefined, …}
+bilingual-purchase-form.tsx:748 BilingualForm Product Paint Thinner PT-300: quantity=22, basePrice=11, discount=0.05, discountedPrice=10
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: undefined, vatRate: 0, dutiesRate: 0, subtotalAmount: 220, vatAmount: 0, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 220, totalTaxAmount: 0, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: undefined, walletBalance: 0, canUseWallet: false, totalAmount: 220, existingCustomer: true, …}
+bilingual-purchase-form.tsx:748 BilingualForm Product Paint Thinner PT-300: quantity=22, basePrice=11, discount=0.05, discountedPrice=10
+bilingual-purchase-form.tsx:1089 🚚 [DELIVERY CALCULATION] Final destination determined: {showSecondAddress: false, secondCity: '', secondProvince: '', crmCityRegion: undefined, crmCity: undefined, …}
+bilingual-purchase-form.tsx:434 💰 [VAT] Tax settings API response: {success: true, data: Array(1)}
+bilingual-purchase-form.tsx:748 BilingualForm Product Paint Thinner PT-300: quantity=22, basePrice=11, discount=0.05, discountedPrice=10
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.1, dutiesRate: 0, subtotalAmount: 220, vatAmount: 22, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 220, totalTaxAmount: 22, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: undefined, walletBalance: 0, canUseWallet: false, totalAmount: 242, existingCustomer: true, …}
+bilingual-purchase-form.tsx:748 BilingualForm Product Paint Thinner PT-300: quantity=22, basePrice=11, discount=0.05, discountedPrice=10
+bilingual-purchase-form.tsx:359 CRM Customer API response: {success: true, data: {…}}
+bilingual-purchase-form.tsx:521 📦 [BILINGUAL FORM] Raw shipping rates API response: {success: true, data: Array(2)}
+bilingual-purchase-form.tsx:556 ✅ [BILINGUAL FORM] Successfully loaded shipping rates: 2 methods
+bilingual-purchase-form.tsx:557 🚚 [BILINGUAL FORM] Shipping rates details: (2) [{…}, {…}]
+bilingual-purchase-form.tsx:748 BilingualForm Product Paint Thinner PT-300: quantity=22, basePrice=11, discount=0.05, discountedPrice=10
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.1, dutiesRate: 0, subtotalAmount: 220, vatAmount: 22, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 220, totalTaxAmount: 22, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: undefined, walletBalance: 0, canUseWallet: false, totalAmount: 242, existingCustomer: true, …}
+bilingual-purchase-form.tsx:748 BilingualForm Product Paint Thinner PT-300: quantity=22, basePrice=11, discount=0.05, discountedPrice=10
+bilingual-purchase-form.tsx:595 === BilingualPurchaseForm Address Debug ===
+bilingual-purchase-form.tsx:596 existingCustomer from parent: {id: 94, firstName: 'Omid', lastName: 'Mohammad', email: 'water@momtazchem.com', company: 'Momtazchem Chemical Solutions', …}
+bilingual-purchase-form.tsx:597 customerData from API: {success: true, customer: {…}}
+bilingual-purchase-form.tsx:598 crmCustomerData from API: {id: 94, email: 'water@momtazchem.com', passwordHash: '$2b$10$FcMjfQMzXbFiUzB/dhYUfOfvR2mnNTjPFxIIt/S1qGD.6xkBmsNOW', firstName: 'Omid', lastName: 'Mohammad', …}
+bilingual-purchase-form.tsx:599 isLoadingCustomer: false
+bilingual-purchase-form.tsx:607 Using CRM customer data (most complete)
+bilingual-purchase-form.tsx:617 Customer object found: {id: 94, email: 'water@momtazchem.com', passwordHash: '$2b$10$FcMjfQMzXbFiUzB/dhYUfOfvR2mnNTjPFxIIt/S1qGD.6xkBmsNOW', firstName: 'Omid', lastName: 'Mohammad', …}
+bilingual-purchase-form.tsx:618 Customer firstName: Omid
+bilingual-purchase-form.tsx:619 Customer lastName: Mohammad
+bilingual-purchase-form.tsx:620 Customer phone: +9647503533769
+bilingual-purchase-form.tsx:621 Customer address: NAGwer Road, Qaryataq Village, Erbil, Iraq
+bilingual-purchase-form.tsx:622 Customer secondaryAddress: NAGwer Road, Qaryataq Village, Erbil, Iraq
+bilingual-purchase-form.tsx:623 Customer city: undefined
+bilingual-purchase-form.tsx:624 Customer country: Iraq
+bilingual-purchase-form.tsx:625 Customer postalCode: 44001
+bilingual-purchase-form.tsx:628 Full name constructed: Omid Mohammad
+bilingual-purchase-form.tsx:652 🏠 [ADDRESS DEBUG] Enhanced address mapping result: {originalCustomer: {…}, mappedAddress: 'NAGwer Road, Qaryataq Village, Erbil, Iraq', mappedCity: 'Erbil', mappedProvince: 'Erbil', addressSources: {…}, …}
+bilingual-purchase-form.tsx:693 Form data to reset: {customerName: 'Omid Mohammad', phone: '+9647503533769', address: 'NAGwer Road, Qaryataq Village, Erbil, Iraq', city: 'Erbil', country: 'Iraq', …}
+bilingual-purchase-form.tsx:695 Form reset completed
+bilingual-purchase-form.tsx:699 === End BilingualPurchaseForm Debug ===
+bilingual-purchase-form.tsx:772 🚚 [AUTO-SELECT DEBUG] useEffect triggered: {shippingRatesLength: 2, selectedShippingMethod: null, hasShippingData: true}
+bilingual-purchase-form.tsx:780 🚚 [AUTO-SELECT] Auto-selecting first shipping method: 33 undefined
+bilingual-purchase-form.tsx:787 🚚 Shipping cost calculation: {selectedShippingMethod: null, hasShippingData: true, subtotalAmount: 220}
+bilingual-purchase-form.tsx:829 🔄 No shipping method selected or no data, resetting cost
+bilingual-purchase-form.tsx:836 Shipping rates state: {isLoadingShippingRates: false, shippingRatesError: null, dataLength: 2, data: Array(2)}
+bilingual-purchase-form.tsx:868 🚚 [AUTO SELECT] Auto-selecting smart vehicle method: 32
+bilingual-purchase-form.tsx:1089 🚚 [DELIVERY CALCULATION] Final destination determined: {showSecondAddress: false, secondCity: '', secondProvince: '', crmCityRegion: 'Erbil', crmCity: undefined, …}
+bilingual-purchase-form.tsx:748 BilingualForm Product Paint Thinner PT-300: quantity=22, basePrice=11, discount=0.05, discountedPrice=10
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.1, dutiesRate: 0, subtotalAmount: 220, vatAmount: 22, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 220, totalTaxAmount: 22, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: undefined, walletBalance: 0, canUseWallet: false, totalAmount: 242, existingCustomer: true, …}
+bilingual-purchase-form.tsx:748 BilingualForm Product Paint Thinner PT-300: quantity=22, basePrice=11, discount=0.05, discountedPrice=10
+bilingual-purchase-form.tsx:772 🚚 [AUTO-SELECT DEBUG] useEffect triggered: {shippingRatesLength: 2, selectedShippingMethod: 32, hasShippingData: true}
+bilingual-purchase-form.tsx:787 🚚 Shipping cost calculation: {selectedShippingMethod: 32, hasShippingData: true, subtotalAmount: 220}
+bilingual-purchase-form.tsx:795 📦 Selected shipping rate: {id: 32, deliveryMethod: 'smart_vehicle', transportationType: 'smart', cityName: null, provinceName: null, …}
+bilingual-purchase-form.tsx:801 ✅ SPECIAL DELIVERY METHOD: Zero cost for smart_vehicle
+bilingual-purchase-form.tsx:748 BilingualForm Product Paint Thinner PT-300: quantity=22, basePrice=11, discount=0.05, discountedPrice=10
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.1, dutiesRate: 0, subtotalAmount: 220, vatAmount: 22, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 220, totalTaxAmount: 22, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 1243850.67, canUseWallet: {…}, totalAmount: 242, existingCustomer: true, …}
+bilingual-purchase-form.tsx:748 BilingualForm Product Paint Thinner PT-300: quantity=22, basePrice=11, discount=0.05, discountedPrice=10
+bilingual-purchase-form.tsx:748 BilingualForm Product Paint Thinner PT-300: quantity=22, basePrice=11, discount=0.05, discountedPrice=10
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.1, dutiesRate: 0, subtotalAmount: 220, vatAmount: 22, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 220, totalTaxAmount: 22, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 1243850.67, canUseWallet: {…}, totalAmount: 242, existingCustomer: true, …}
+bilingual-purchase-form.tsx:748 BilingualForm Product Paint Thinner PT-300: quantity=22, basePrice=11, discount=0.05, discountedPrice=10
+bilingual-purchase-form.tsx:1007 🚚 [SMART DELIVERY] Calculating cost for: {weight: 242.22, city: 'Erbil', province: 'Erbil', cartItems: 1}
+bilingual-purchase-form.tsx:748 BilingualForm Product Paint Thinner PT-300: quantity=22, basePrice=11, discount=0.05, discountedPrice=10
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.1, dutiesRate: 0, subtotalAmount: 220, vatAmount: 22, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 220, totalTaxAmount: 22, finalShippingCost: 0, regularShippingCost: 0, smartDeliveryCost: 0, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 1243850.67, canUseWallet: {…}, totalAmount: 242, existingCustomer: true, …}
+bilingual-purchase-form.tsx:748 BilingualForm Product Paint Thinner PT-300: quantity=22, basePrice=11, discount=0.05, discountedPrice=10
+bilingual-purchase-form.tsx:1037 🚚 [SMART DELIVERY] API response: {success: true, data: {…}}
+bilingual-purchase-form.tsx:1038 🚚 [SMART DELIVERY] Response details: {success: true, hasData: true, hasOptimalVehicle: true, optimalVehicle: {…}}
+bilingual-purchase-form.tsx:1055 ✅ [SMART DELIVERY] Cost calculated: {vehicle: 'تانکر', cost: 10000, estimatedTime: 0}
+bilingual-purchase-form.tsx:748 BilingualForm Product Paint Thinner PT-300: quantity=22, basePrice=11, discount=0.05, discountedPrice=10
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.1, dutiesRate: 0, subtotalAmount: 220, vatAmount: 22, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 220, totalTaxAmount: 22, finalShippingCost: 10000, regularShippingCost: 0, smartDeliveryCost: 10000, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 1243850.67, canUseWallet: {…}, totalAmount: 10242, existingCustomer: true, …}
+bilingual-purchase-form.tsx:748 BilingualForm Product Paint Thinner PT-300: quantity=22, basePrice=11, discount=0.05, discountedPrice=10
+bilingual-purchase-form.tsx:748 BilingualForm Product Paint Thinner PT-300: quantity=22, basePrice=11, discount=0.05, discountedPrice=10
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.1, dutiesRate: 0, subtotalAmount: 220, vatAmount: 22, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 220, totalTaxAmount: 22, finalShippingCost: 10000, regularShippingCost: 0, smartDeliveryCost: 10000, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 1243850.67, canUseWallet: {…}, totalAmount: 10242, existingCustomer: true, …}
+bilingual-purchase-form.tsx:748 BilingualForm Product Paint Thinner PT-300: quantity=22, basePrice=11, discount=0.05, discountedPrice=10
+bilingual-purchase-form.tsx:748 BilingualForm Product Paint Thinner PT-300: quantity=22, basePrice=11, discount=0.05, discountedPrice=10
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.1, dutiesRate: 0, subtotalAmount: 220, vatAmount: 22, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 220, totalTaxAmount: 22, finalShippingCost: 10000, regularShippingCost: 0, smartDeliveryCost: 10000, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 1243850.67, canUseWallet: {…}, totalAmount: 10242, existingCustomer: true, …}
+bilingual-purchase-form.tsx:748 BilingualForm Product Paint Thinner PT-300: quantity=22, basePrice=11, discount=0.05, discountedPrice=10
+bilingual-purchase-form.tsx:748 BilingualForm Product Paint Thinner PT-300: quantity=22, basePrice=11, discount=0.05, discountedPrice=10
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.1, dutiesRate: 0, subtotalAmount: 220, vatAmount: 22, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 220, totalTaxAmount: 22, finalShippingCost: 10000, regularShippingCost: 0, smartDeliveryCost: 10000, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 1243850.67, canUseWallet: {…}, totalAmount: 10242, existingCustomer: true, …}
+bilingual-purchase-form.tsx:748 BilingualForm Product Paint Thinner PT-300: quantity=22, basePrice=11, discount=0.05, discountedPrice=10
+bilingual-purchase-form.tsx:748 BilingualForm Product Paint Thinner PT-300: quantity=22, basePrice=11, discount=0.05, discountedPrice=10
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.1, dutiesRate: 0, subtotalAmount: 220, vatAmount: 22, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 220, totalTaxAmount: 22, finalShippingCost: 10000, regularShippingCost: 0, smartDeliveryCost: 10000, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 1243850.67, canUseWallet: {…}, totalAmount: 10242, existingCustomer: true, …}
+bilingual-purchase-form.tsx:748 BilingualForm Product Paint Thinner PT-300: quantity=22, basePrice=11, discount=0.05, discountedPrice=10
+bilingual-purchase-form.tsx:748 BilingualForm Product Paint Thinner PT-300: quantity=22, basePrice=11, discount=0.05, discountedPrice=10
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.1, dutiesRate: 0, subtotalAmount: 220, vatAmount: 22, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 220, totalTaxAmount: 22, finalShippingCost: 10000, regularShippingCost: 0, smartDeliveryCost: 10000, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 1243850.67, canUseWallet: {…}, totalAmount: 10242, existingCustomer: true, …}
+bilingual-purchase-form.tsx:748 BilingualForm Product Paint Thinner PT-300: quantity=22, basePrice=11, discount=0.05, discountedPrice=10
+bilingual-purchase-form.tsx:2424 🔘 [BUTTON DEBUG] Submit button clicked - drag protection active
+bilingual-purchase-form.tsx:2425 🔘 [BUTTON DEBUG] Mutation pending: false
+bilingual-purchase-form.tsx:2426 🔘 [BUTTON DEBUG] Form valid: false
+bilingual-purchase-form.tsx:2427 🔘 [BUTTON DEBUG] Form errors: {}
+bilingual-purchase-form.tsx:2428 🔘 [BUTTON DEBUG] Selected shipping method: 32
+bilingual-purchase-form.tsx:2429 🔘 [BUTTON DEBUG] Payment method: bank_transfer_grace
+bilingual-purchase-form.tsx:2433 🔘 [BUTTON DEBUG] Forcing form submission via handleSubmit
+bilingual-purchase-form.tsx:1352 🚀 [SUBMIT DEBUG] onSubmit function called
+bilingual-purchase-form.tsx:1353 🚀 [SUBMIT DEBUG] Form data received: {customerName: 'Omid Mohammad', phone: '+9647503533769', address: 'NAGwer Road, Qaryataq Village, Erbil, Iraq', city: 'Erbil', country: 'Iraq', …}
+bilingual-purchase-form.tsx:1354 🚀 [SUBMIT DEBUG] Selected shipping method: 32
+bilingual-purchase-form.tsx:1355 🚀 [SUBMIT DEBUG] Payment method: bank_transfer_grace
+bilingual-purchase-form.tsx:1356 🚀 [SUBMIT DEBUG] Form validation state: {defaultValues: {…}, …}
+bilingual-purchase-form.tsx:1357 🚀 [SUBMIT DEBUG] Form errors: {}
+bilingual-purchase-form.tsx:1358 🚀 [SUBMIT DEBUG] Mutation pending before submit: false
+bilingual-purchase-form.tsx:1425 🚚 [DELIVERY LOGIC] Active delivery information: {activeAddress: 'NAGwer Road, Qaryataq Village, Erbil, Iraq', activeCity: 'Erbil', activeProvince: 'Erbil', activePostalCode: '44001', activePhone: '+9647503533769', …}
+bilingual-purchase-form.tsx:1431 🔍 [PAYMENT ANALYSIS] Before conversion: {paymentMethod: 'bank_transfer_grace', walletAmount: 0, totalAmount: 10242, walletBalance: 1243850.67, canUseWallet: {…}, …}
+bilingual-purchase-form.tsx:1470 🚀 [ORDER SUBMIT] Submitting order with complete data: {endpoint: '/api/customers/orders', originalPaymentMethod: 'bank_transfer_grace', finalPaymentMethod: 'bank_transfer_grace', totalAmount: 10242, walletBalance: 1243850.67, …}
+bilingual-purchase-form.tsx:748 BilingualForm Product Paint Thinner PT-300: quantity=22, basePrice=11, discount=0.05, discountedPrice=10
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.1, dutiesRate: 0, subtotalAmount: 220, vatAmount: 22, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 220, totalTaxAmount: 22, finalShippingCost: 10000, regularShippingCost: 0, smartDeliveryCost: 10000, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 1243850.67, canUseWallet: {…}, totalAmount: 10242, existingCustomer: true, …}
+bilingual-purchase-form.tsx:748 BilingualForm Product Paint Thinner PT-300: quantity=22, basePrice=11, discount=0.05, discountedPrice=10
+bilingual-purchase-form.tsx:748 BilingualForm Product Paint Thinner PT-300: quantity=22, basePrice=11, discount=0.05, discountedPrice=10
+bilingual-purchase-form.tsx:874 💰 [PURCHASE FORM] Tax calculation: {vatData: {…}, vatRate: 0.1, dutiesRate: 0, subtotalAmount: 220, vatAmount: 22, …}
+bilingual-purchase-form.tsx:904 💰 [TOTAL CALCULATION] Breakdown: {subtotalAmount: 220, totalTaxAmount: 22, finalShippingCost: 10000, regularShippingCost: 0, smartDeliveryCost: 10000, …}
+bilingual-purchase-form.tsx:940 💳 [WALLET DEBUG] Complete wallet analysis: {walletData: {…}, walletBalance: 1243850.67, canUseWallet: {…}, totalAmount: 10242, existingCustomer: true, …}
+bilingual-purchase-form.tsx:748 BilingualForm Product Paint Thinner PT-300: quantity=22, basePrice=11, discount=0.05, discountedPrice=10
+bilingual-purchase-form.tsx:1127 🚀 [ORDER CREATION] Creating order with payment method: bank_transfer_grace
+bilingual-purchase-form.tsx:1176 🎯 [ORDER SUCCESS] Order response received: {success: true, message: 'Order created successfully', orderId: 189, orderNumber: null, paymentMethod: 'bank_transfer_grace', …}
+bilingual-purchase-form.tsx:1177 🎯 [ORDER SUCCESS] Response type: object
+bilingual-purchase-form.tsx:1178 🎯 [ORDER SUCCESS] Response keys: (7) ['success', 'message', 'orderId', 'orderNumber', 'paymentMethod', 'totalAmount', 'walletAmountUsed']
+bilingual-purchase-form.tsx:1186 💳 [PAYMENT DECISION] RESPECTING CUSTOMER CHOICE: {paymentMethod: 'bank_transfer_grace', customerChoseWallet: false, remainingAmount: 0, isFullyPaidByWallet: false, requiresBankPayment: undefined, …}
+usePersistentCart.ts:201 🗑️ Clearing cart..., authenticated: true
+usePersistentCart.ts:206 🛒 Clearing cart in database for customer 94
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 7 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 470: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:240 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:241 🌟 [RATINGS DEBUG] Products with ratings: (3) [{…}, {…}, {…}]
+shop.tsx:620 Shop Product Paint Thinner PT-300: quantity=22, basePrice=11.01, discount=0.05, discountedPrice=10.459499999999998
+shop.tsx:620 Shop Product Paint Thinner PT-300: quantity=22, basePrice=11.01, discount=0.05, discountedPrice=10.459499999999998
+shop.tsx:620 Shop Product Paint Thinner PT-300: quantity=22, basePrice=11.01, discount=0.05, discountedPrice=10.459499999999998
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 7 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 470: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:240 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:241 🌟 [RATINGS DEBUG] Products with ratings: (3) [{…}, {…}, {…}]
+shop.tsx:620 Shop Product Paint Thinner PT-300: quantity=22, basePrice=11.01, discount=0.05, discountedPrice=10.459499999999998
+shop.tsx:620 Shop Product Paint Thinner PT-300: quantity=22, basePrice=11.01, discount=0.05, discountedPrice=10.459499999999998
+shop.tsx:620 Shop Product Paint Thinner PT-300: quantity=22, basePrice=11.01, discount=0.05, discountedPrice=10.459499999999998
+usePersistentCart.ts:210 ✅ Cart cleared from database
+usePersistentCart.ts:222 ✅ Local cart cleared
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 7 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 470: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:240 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:241 🌟 [RATINGS DEBUG] Products with ratings: (3) [{…}, {…}, {…}]
+usePersistentCart.ts:68 🛒 Loading persistent cart for customer: 94
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 7 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 470: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:240 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:241 🌟 [RATINGS DEBUG] Products with ratings: (3) [{…}, {…}, {…}]
+usePersistentCart.ts:87 🛒 Loaded cart from database: {}
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: {success: true, data: {…}}
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 7 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: {1: {…}, 25: {…}, 470: {…}, 472: {…}, 474: {…}, 475: {…}, 477: {…}}
+shop.tsx:240 🌟 [RATINGS DEBUG] Current products: (5) [{…}, {…}, {…}, {…}, {…}]
+shop.tsx:241 🌟 [RATINGS DEBUG] Products with ratings: (3) [{…}, {…}, {…}]
+useAuth.ts:30  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 403 (Forbidden)
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=569e559a:840
+run @ @tanstack_react-query.js?v=569e559a:494
+start @ @tanstack_react-query.js?v=569e559a:536
+fetch @ @tanstack_react-query.js?v=569e559a:926
+executeFetch_fn @ @tanstack_react-query.js?v=569e559a:2211
+(anonymous) @ @tanstack_react-query.js?v=569e559a:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=569e559a:2243
+updateTimers_fn @ @tanstack_react-query.js?v=569e559a:2250
+onQueryUpdate @ @tanstack_react-query.js?v=569e559a:2206
+(anonymous) @ @tanstack_react-query.js?v=569e559a:998
+(anonymous) @ @tanstack_react-query.js?v=569e559a:997
+batch @ @tanstack_react-query.js?v=569e559a:583
+dispatch_fn @ @tanstack_react-query.js?v=569e559a:996
+setData @ @tanstack_react-query.js?v=569e559a:696
+onSuccess @ @tanstack_react-query.js?v=569e559a:897
+resolve @ @tanstack_react-query.js?v=569e559a:456
+Promise.then
+run @ @tanstack_react-query.js?v=569e559a:498
+start @ @tanstack_react-query.js?v=569e559a:536
+fetch @ @tanstack_react-query.js?v=569e559a:926
+executeFetch_fn @ @tanstack_react-query.js?v=569e559a:2211
+fetch @ @tanstack_react-query.js?v=569e559a:2011
+refetch @ @tanstack_react-query.js?v=569e559a:2001
+onFocus @ @tanstack_react-query.js?v=569e559a:749
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1112
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1111
+batch @ @tanstack_react-query.js?v=569e559a:583
+onFocus @ @tanstack_react-query.js?v=569e559a:1110
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=569e559a:313
+onFocus @ @tanstack_react-query.js?v=569e559a:312
+(anonymous) @ @tanstack_react-query.js?v=569e559a:299
+listener @ @tanstack_react-query.js?v=569e559a:270
+useAuth.ts:46 Auth check failed: Error: HTTP 403
+    at queryFn (useAuth.ts:39:17)
+queryFn @ useAuth.ts:46
+await in queryFn
+fetchFn @ @tanstack_react-query.js?v=569e559a:840
+run @ @tanstack_react-query.js?v=569e559a:494
+start @ @tanstack_react-query.js?v=569e559a:536
+fetch @ @tanstack_react-query.js?v=569e559a:926
+executeFetch_fn @ @tanstack_react-query.js?v=569e559a:2211
+(anonymous) @ @tanstack_react-query.js?v=569e559a:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=569e559a:2243
+updateTimers_fn @ @tanstack_react-query.js?v=569e559a:2250
+onQueryUpdate @ @tanstack_react-query.js?v=569e559a:2206
+(anonymous) @ @tanstack_react-query.js?v=569e559a:998
+(anonymous) @ @tanstack_react-query.js?v=569e559a:997
+batch @ @tanstack_react-query.js?v=569e559a:583
+dispatch_fn @ @tanstack_react-query.js?v=569e559a:996
+setData @ @tanstack_react-query.js?v=569e559a:696
+onSuccess @ @tanstack_react-query.js?v=569e559a:897
+resolve @ @tanstack_react-query.js?v=569e559a:456
+Promise.then
+run @ @tanstack_react-query.js?v=569e559a:498
+start @ @tanstack_react-query.js?v=569e559a:536
+fetch @ @tanstack_react-query.js?v=569e559a:926
+executeFetch_fn @ @tanstack_react-query.js?v=569e559a:2211
+fetch @ @tanstack_react-query.js?v=569e559a:2011
+refetch @ @tanstack_react-query.js?v=569e559a:2001
+onFocus @ @tanstack_react-query.js?v=569e559a:749
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1112
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1111
+batch @ @tanstack_react-query.js?v=569e559a:583
+onFocus @ @tanstack_react-query.js?v=569e559a:1110
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=569e559a:313
+onFocus @ @tanstack_react-query.js?v=569e559a:312
+(anonymous) @ @tanstack_react-query.js?v=569e559a:299
+listener @ @tanstack_react-query.js?v=569e559a:270
+useAuth.ts:30  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 403 (Forbidden)
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=569e559a:840
+run @ @tanstack_react-query.js?v=569e559a:494
+start @ @tanstack_react-query.js?v=569e559a:536
+fetch @ @tanstack_react-query.js?v=569e559a:926
+executeFetch_fn @ @tanstack_react-query.js?v=569e559a:2211
+fetch @ @tanstack_react-query.js?v=569e559a:2011
+refetch @ @tanstack_react-query.js?v=569e559a:2001
+onFocus @ @tanstack_react-query.js?v=569e559a:749
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1112
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1111
+batch @ @tanstack_react-query.js?v=569e559a:583
+onFocus @ @tanstack_react-query.js?v=569e559a:1110
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=569e559a:313
+onFocus @ @tanstack_react-query.js?v=569e559a:312
+(anonymous) @ @tanstack_react-query.js?v=569e559a:299
+listener @ @tanstack_react-query.js?v=569e559a:270
+useAuth.ts:46 Auth check failed: Error: HTTP 403
+    at queryFn (useAuth.ts:39:17)
+queryFn @ useAuth.ts:46
+await in queryFn
+fetchFn @ @tanstack_react-query.js?v=569e559a:840
+run @ @tanstack_react-query.js?v=569e559a:494
+start @ @tanstack_react-query.js?v=569e559a:536
+fetch @ @tanstack_react-query.js?v=569e559a:926
+executeFetch_fn @ @tanstack_react-query.js?v=569e559a:2211
+fetch @ @tanstack_react-query.js?v=569e559a:2011
+refetch @ @tanstack_react-query.js?v=569e559a:2001
+onFocus @ @tanstack_react-query.js?v=569e559a:749
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1112
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1111
+batch @ @tanstack_react-query.js?v=569e559a:583
+onFocus @ @tanstack_react-query.js?v=569e559a:1110
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=569e559a:313
+onFocus @ @tanstack_react-query.js?v=569e559a:312
+(anonymous) @ @tanstack_react-query.js?v=569e559a:299
+listener @ @tanstack_react-query.js?v=569e559a:270
+bank-receipt-upload.tsx:26 🔍 [URL DEBUG] paramOrderId: null
+bank-receipt-upload.tsx:27 🔍 [URL DEBUG] window.location: https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/customer/bank-receipt-upload/null
+bank-receipt-upload.tsx:29 🔍 [URL DEBUG] Setting orderId from param: null
+bank-receipt-upload.tsx:42 🔍 [URL DEBUG] Final orderId state will be: null
+bank-receipt-upload.tsx:49 🔍 [ORDER DEBUG] Fetching orders for orderId: null
+bank-receipt-upload.tsx:51 🔍 [ORDER DEBUG] Orders response: {success: true, orders: Array(2), totalOrders: 4, hiddenOrders: 2, abandonedOrders: Array(0), …}
+bank-receipt-upload.tsx:53 🔍 [ORDER DEBUG] Available orders: (2) [{…}, {…}]
+bank-receipt-upload.tsx:55 🔍 [ORDER DEBUG] Found order: undefined
+@tanstack_react-query.js?v=569e559a:889 Query data cannot be undefined. Please make sure to return a value other than undefined from your query function. Affected query key: ["/api/customers/orders","null"]
+onSuccess @ @tanstack_react-query.js?v=569e559a:889
+resolve @ @tanstack_react-query.js?v=569e559a:456
+Promise.then
+run @ @tanstack_react-query.js?v=569e559a:498
+start @ @tanstack_react-query.js?v=569e559a:536
+fetch @ @tanstack_react-query.js?v=569e559a:926
+executeFetch_fn @ @tanstack_react-query.js?v=569e559a:2211
+setOptions @ @tanstack_react-query.js?v=569e559a:1955
+(anonymous) @ @tanstack_react-query.js?v=569e559a:3032
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=569e559a:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=569e559a:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=569e559a:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=569e559a:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=569e559a:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=569e559a:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=569e559a:19447
+(anonymous) @ chunk-RPCDYKBN.js?v=569e559a:19328
+workLoop @ chunk-RPCDYKBN.js?v=569e559a:197
+flushWork @ chunk-RPCDYKBN.js?v=569e559a:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=569e559a:384
+useAuth.ts:30  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/admin/me 403 (Forbidden)
+queryFn @ useAuth.ts:30
+fetchFn @ @tanstack_react-query.js?v=569e559a:840
+run @ @tanstack_react-query.js?v=569e559a:494
+start @ @tanstack_react-query.js?v=569e559a:536
+fetch @ @tanstack_react-query.js?v=569e559a:926
+executeFetch_fn @ @tanstack_react-query.js?v=569e559a:2211
+(anonymous) @ @tanstack_react-query.js?v=569e559a:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=569e559a:2243
+updateTimers_fn @ @tanstack_react-query.js?v=569e559a:2250
+onQueryUpdate @ @tanstack_react-query.js?v=569e559a:2206
+(anonymous) @ @tanstack_react-query.js?v=569e559a:998
+(anonymous) @ @tanstack_react-query.js?v=569e559a:997
+batch @ @tanstack_react-query.js?v=569e559a:583
+dispatch_fn @ @tanstack_react-query.js?v=569e559a:996
+setData @ @tanstack_react-query.js?v=569e559a:696
+onSuccess @ @tanstack_react-query.js?v=569e559a:897
+resolve @ @tanstack_react-query.js?v=569e559a:456
+Promise.then
+run @ @tanstack_react-query.js?v=569e559a:498
+start @ @tanstack_react-query.js?v=569e559a:536
+fetch @ @tanstack_react-query.js?v=569e559a:926
+executeFetch_fn @ @tanstack_react-query.js?v=569e559a:2211
+fetch @ @tanstack_react-query.js?v=569e559a:2011
+refetch @ @tanstack_react-query.js?v=569e559a:2001
+onFocus @ @tanstack_react-query.js?v=569e559a:749
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1112
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1111
+batch @ @tanstack_react-query.js?v=569e559a:583
+onFocus @ @tanstack_react-query.js?v=569e559a:1110
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=569e559a:313
+onFocus @ @tanstack_react-query.js?v=569e559a:312
+(anonymous) @ @tanstack_react-query.js?v=569e559a:299
+listener @ @tanstack_react-query.js?v=569e559a:270
+useAuth.ts:46 Auth check failed: Error: HTTP 403
+    at queryFn (useAuth.ts:39:17)
+queryFn @ useAuth.ts:46
+await in queryFn
+fetchFn @ @tanstack_react-query.js?v=569e559a:840
+run @ @tanstack_react-query.js?v=569e559a:494
+start @ @tanstack_react-query.js?v=569e559a:536
+fetch @ @tanstack_react-query.js?v=569e559a:926
+executeFetch_fn @ @tanstack_react-query.js?v=569e559a:2211
+(anonymous) @ @tanstack_react-query.js?v=569e559a:2245
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=569e559a:2243
+updateTimers_fn @ @tanstack_react-query.js?v=569e559a:2250
+onQueryUpdate @ @tanstack_react-query.js?v=569e559a:2206
+(anonymous) @ @tanstack_react-query.js?v=569e559a:998
+(anonymous) @ @tanstack_react-query.js?v=569e559a:997
+batch @ @tanstack_react-query.js?v=569e559a:583
+dispatch_fn @ @tanstack_react-query.js?v=569e559a:996
+setData @ @tanstack_react-query.js?v=569e559a:696
+onSuccess @ @tanstack_react-query.js?v=569e559a:897
+resolve @ @tanstack_react-query.js?v=569e559a:456
+Promise.then
+run @ @tanstack_react-query.js?v=569e559a:498
+start @ @tanstack_react-query.js?v=569e559a:536
+fetch @ @tanstack_react-query.js?v=569e559a:926
+executeFetch_fn @ @tanstack_react-query.js?v=569e559a:2211
+fetch @ @tanstack_react-query.js?v=569e559a:2011
+refetch @ @tanstack_react-query.js?v=569e559a:2001
+onFocus @ @tanstack_react-query.js?v=569e559a:749
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1112
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1111
+batch @ @tanstack_react-query.js?v=569e559a:583
+onFocus @ @tanstack_react-query.js?v=569e559a:1110
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=569e559a:313
+onFocus @ @tanstack_react-query.js?v=569e559a:312
+(anonymous) @ @tanstack_react-query.js?v=569e559a:299
+listener @ @tanstack_react-query.js?v=569e559a:270
+bank-receipt-upload.tsx:106  POST https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/payment/upload-receipt 404 (Not Found)
+(anonymous) @ bank-receipt-upload.tsx:106
+mutationFn @ bank-receipt-upload.tsx:82
+fn @ @tanstack_react-query.js?v=569e559a:1189
+run @ @tanstack_react-query.js?v=569e559a:494
+start @ @tanstack_react-query.js?v=569e559a:536
+execute @ @tanstack_react-query.js?v=569e559a:1225
+await in execute
+mutate @ @tanstack_react-query.js?v=569e559a:2630
+(anonymous) @ @tanstack_react-query.js?v=569e559a:3295
+handleUpload @ bank-receipt-upload.tsx:198
+callCallback2 @ chunk-RPCDYKBN.js?v=569e559a:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=569e559a:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=569e559a:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=569e559a:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=569e559a:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=569e559a:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=569e559a:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=569e559a:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=569e559a:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=569e559a:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=569e559a:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=569e559a:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=569e559a:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=569e559a:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=569e559a:5449
+bank-receipt-upload.tsx:106  POST https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/payment/upload-receipt 404 (Not Found)
+(anonymous) @ bank-receipt-upload.tsx:106
+mutationFn @ bank-receipt-upload.tsx:82
+fn @ @tanstack_react-query.js?v=569e559a:1189
+run @ @tanstack_react-query.js?v=569e559a:494
+start @ @tanstack_react-query.js?v=569e559a:536
+execute @ @tanstack_react-query.js?v=569e559a:1225
+await in execute
+mutate @ @tanstack_react-query.js?v=569e559a:2630
+(anonymous) @ @tanstack_react-query.js?v=569e559a:3295
+handleUpload @ bank-receipt-upload.tsx:198
+callCallback2 @ chunk-RPCDYKBN.js?v=569e559a:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=569e559a:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=569e559a:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=569e559a:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=569e559a:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=569e559a:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=569e559a:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=569e559a:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=569e559a:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=569e559a:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=569e559a:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=569e559a:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=569e559a:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=569e559a:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=569e559a:5449
