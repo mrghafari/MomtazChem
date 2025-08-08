@@ -7324,6 +7324,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // Check if payment is successful
+      const isPaymentSuccessful = paymentStatus === 'paid' || 
+                                paymentStatus === 'confirmed' || 
+                                paymentStatus === 'successful' ||
+                                paymentStatus === 'success';
+
+      // Handle successful payments by assigning order numbers and sending to warehouse
+      if (isPaymentSuccessful) {
+        console.log(`✅ [PAYMENT CALLBACK] Payment successful - processing order ${orderId || orderNumber}`);
+        
+        try {
+          // Try to find order by ID or order number
+          let targetOrderId = orderId;
+          if (!targetOrderId && orderNumber) {
+            const orderResult = await db
+              .select({ id: customerOrders.id })
+              .from(customerOrders)
+              .where(eq(customerOrders.orderNumber, orderNumber))
+              .limit(1);
+            
+            if (orderResult.length > 0) {
+              targetOrderId = orderResult[0].id;
+            }
+          }
+          
+          if (targetOrderId) {
+            // Update payment status and confirm order
+            await db
+              .update(customerOrders)
+              .set({
+                paymentStatus: 'paid',
+                status: 'confirmed',
+                updatedAt: new Date()
+              })
+              .where(eq(customerOrders.id, parseInt(targetOrderId)));
+
+            // Auto-assign order number and send to warehouse for confirmed bank payments
+            try {
+              const { paymentWorkflow } = await import('./payment-workflow');
+              const assignedOrderNumber = await paymentWorkflow.assignOrderNumberAfterPaymentSuccess(parseInt(targetOrderId));
+              console.log(`🎉 [PAYMENT CALLBACK] Order ${targetOrderId} assigned number ${assignedOrderNumber} and sent to warehouse`);
+              
+              return res.json({
+                success: true,
+                message: "پرداخت تأیید شد و سفارش به انبار ارسال شد",
+                orderNumber: assignedOrderNumber,
+                orderConfirmed: true
+              });
+            } catch (assignmentError) {
+              console.error(`❌ [PAYMENT CALLBACK] Order number assignment failed for order ${targetOrderId}:`, assignmentError);
+            }
+          } else {
+            console.log(`⚠️ [PAYMENT CALLBACK] Order not found for confirmation: ${orderId || orderNumber}`);
+          }
+        } catch (successError) {
+          console.error(`❌ [PAYMENT CALLBACK] Failed to process successful payment ${orderId || orderNumber}:`, successError);
+        }
+      }
+
       // Handle failed/cancelled payments by immediately deleting temporary orders
       const isPaymentFailed = paymentStatus === 'failed' || 
                              paymentStatus === 'cancelled' || 
@@ -15362,15 +15421,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (finalPaymentMethod === 'wallet') {
         console.log(`💰 [PURE_WALLET] Processing pure wallet payment for ${totalAmount} IQD`);
         
+        // 🔢 [AUTO ORDER NUMBER] Assign order number for confirmed wallet payment
+        if (!order.orderNumber) {
+          try {
+            const newOrderNumber = await orderManagementStorage.generateOrderNumberInTransaction();
+            await customerStorage.updateOrderNumber(order.id, newOrderNumber);
+            order.orderNumber = newOrderNumber;
+            console.log(`🔢 [WALLET PAYMENT] Auto-assigned order number: ${newOrderNumber}`);
+          } catch (error) {
+            console.error('❌ Error auto-assigning order number for wallet payment:', error);
+          }
+        }
+        
+        // 🏭 [AUTO WAREHOUSE] Send confirmed wallet payment directly to warehouse
+        try {
+          await customerStorage.updateOrderStatus(order.id, 'warehouse_pending');
+          console.log(`🏭 [WALLET PAYMENT] Order ${order.orderNumber} sent directly to warehouse`);
+        } catch (error) {
+          console.error('❌ Error sending wallet payment to warehouse:', error);
+        }
+        
         return res.json({
           success: true,
-          message: "سفارش با کیف پول به طور کامل پرداخت شد",
+          message: "سفارش با کیف پول به طور کامل پرداخت شد و به انبار ارسال شد",
           paymentMethod: 'wallet_full',
           order: {
             id: order.id,
             orderNumber: order.orderNumber,
             totalAmount: order.totalAmount,
-            status: order.status,
+            status: 'warehouse_pending',
             paymentStatus: "paid",
             paymentMethod: 'wallet_full',
             walletAmountUsed: Math.round(walletAmountUsed),
@@ -15386,15 +15465,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // 💰 [FULL WALLET COVERAGE] If remaining amount is 0, treat as pure wallet payment
         if (remainingAmount <= 0) {
           console.log(`💰 [WALLET_PARTIAL → WALLET_FULL] Wallet covers full amount, no bank payment needed`);
+          
+          // 🔢 [AUTO ORDER NUMBER] Assign order number for confirmed full wallet payment
+          if (!order.orderNumber) {
+            try {
+              const newOrderNumber = await orderManagementStorage.generateOrderNumberInTransaction();
+              await customerStorage.updateOrderNumber(order.id, newOrderNumber);
+              order.orderNumber = newOrderNumber;
+              console.log(`🔢 [WALLET_FULL] Auto-assigned order number: ${newOrderNumber}`);
+            } catch (error) {
+              console.error('❌ Error auto-assigning order number for full wallet payment:', error);
+            }
+          }
+          
+          // 🏭 [AUTO WAREHOUSE] Send confirmed full wallet payment directly to warehouse
+          try {
+            await customerStorage.updateOrderStatus(order.id, 'warehouse_pending');
+            console.log(`🏭 [WALLET_FULL] Order ${order.orderNumber} sent directly to warehouse`);
+          } catch (error) {
+            console.error('❌ Error sending full wallet payment to warehouse:', error);
+          }
+          
           return res.json({
             success: true,
-            message: "سفارش با کیف پول به طور کامل پرداخت شد",
+            message: "سفارش با کیف پول به طور کامل پرداخت شد و به انبار ارسال شد",
             paymentMethod: 'wallet_full',
             order: {
               id: order.id,
               orderNumber: order.orderNumber,
               totalAmount: order.totalAmount,
-              status: order.status,
+              status: 'warehouse_pending',
               paymentStatus: "paid",
               paymentMethod: 'wallet_full',
               walletAmountUsed: Math.round(walletAmountUsed),
