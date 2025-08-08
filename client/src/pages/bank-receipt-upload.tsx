@@ -23,39 +23,44 @@ export default function BankReceiptUpload() {
 
   // Get orderId from URL parameters or query string
   useEffect(() => {
-    console.log('🔍 [URL DEBUG] paramOrderId:', paramOrderId);
-    console.log('🔍 [URL DEBUG] window.location:', window.location.href);
-    if (paramOrderId) {
-      console.log('🔍 [URL DEBUG] Setting orderId from param:', paramOrderId);
+    // Handle paramOrderId - convert "null" string to actual null
+    if (paramOrderId && paramOrderId !== 'null' && paramOrderId !== 'undefined') {
       setOrderId(paramOrderId);
     } else {
+      // Check query parameters as fallback
       const urlParams = new URLSearchParams(window.location.search);
       const queryOrderId = urlParams.get('orderId');
-      console.log('🔍 [URL DEBUG] Query orderId:', queryOrderId);
-      if (queryOrderId) {
-        console.log('🔍 [URL DEBUG] Setting orderId from query:', queryOrderId);
+      
+      if (queryOrderId && queryOrderId !== 'null' && queryOrderId !== 'undefined') {
         setOrderId(queryOrderId);
       } else {
-        console.log('🔍 [URL DEBUG] No order ID found in URL or query parameters');
+        // No valid order ID found, will look for pending orders
+        setOrderId(null);
       }
     }
-    console.log('🔍 [URL DEBUG] Final orderId state will be:', paramOrderId || new URLSearchParams(window.location.search).get('orderId'));
   }, [paramOrderId]);
 
   // Fetch order details
   const { data: order, isLoading: isLoadingOrder } = useQuery({
     queryKey: [`/api/customers/orders`, orderId],
     queryFn: async () => {
-      console.log('🔍 [ORDER DEBUG] Fetching orders for orderId:', orderId);
       const response = await apiRequest('/api/customers/orders', { method: 'GET' });
-      console.log('🔍 [ORDER DEBUG] Orders response:', response);
       const orders = response.orders || [];
-      console.log('🔍 [ORDER DEBUG] Available orders:', orders.map((o: any) => ({ id: o.id, orderNumber: o.orderNumber, totalAmount: o.totalAmount })));
-      const foundOrder = orders.find((o: any) => o.orderNumber === orderId || o.id.toString() === orderId);
-      console.log('🔍 [ORDER DEBUG] Found order:', foundOrder);
-      return foundOrder;
+      
+      if (orderId) {
+        // Look for specific order by number or ID
+        const foundOrder = orders.find((o: any) => o.orderNumber === orderId || o.id.toString() === orderId);
+        return foundOrder || null;
+      } else {
+        // Look for pending grace period orders if no orderId specified
+        const pendingOrder = orders.find((o: any) => 
+          o.paymentMethod === 'bank_transfer_grace' && 
+          o.paymentStatus === 'grace_period'
+        );
+        return pendingOrder || null;
+      }
     },
-    enabled: !!orderId,
+    enabled: true, // Always enabled since we want to fetch orders regardless
   });
 
   // Fetch company banking information from public endpoint
@@ -193,7 +198,10 @@ export default function BankReceiptUpload() {
     formData.append('receipt', selectedFile);
     formData.append('notes', notes);
     formData.append('receiptAmount', receiptAmount);
-    formData.append('orderId', orderId || '');
+    // Only append orderId if it's a valid value (not null/empty)
+    if (orderId && orderId.trim() !== '') {
+      formData.append('orderId', orderId);
+    }
 
     uploadMutation.mutate(formData);
   };
