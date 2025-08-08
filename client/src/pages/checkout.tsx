@@ -156,6 +156,14 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
     staleTime: 10 * 60 * 1000, // Cache for 10 minutes
   });
 
+  // Get payment method settings to determine enabled payment methods
+  const { data: paymentSettingsResponse } = useQuery<{success: boolean, data: any[]}>({
+    queryKey: ['/api/public/payment-methods'],
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+  });
+  
+  const paymentSettings = paymentSettingsResponse?.data || [];
+
   // Iraqi provinces and cities queries for secondary address dropdowns
   const { data: provincesData, isLoading: provincesLoading } = useQuery<{success: boolean, data: any[]}>({
     queryKey: ['/api/iraqi-provinces'],
@@ -1850,8 +1858,36 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                 <SelectValue placeholder="روش پرداخت را انتخاب کنید" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="bank_receipt">ارسال فیش واریزی بانکی (Bank Receipt Upload)</SelectItem>
-                                <SelectItem value="online_payment">پرداخت آنلاین (Online Payment)</SelectItem>
+                                {/* Dynamic payment methods based on admin settings */}
+                                {paymentSettings
+                                  .filter((setting: any) => setting.enabled)
+                                  .sort((a: any, b: any) => (b.priority || 0) - (a.priority || 0))
+                                  .map((setting: any) => {
+                                    // Special handling for wallet payment
+                                    if (setting.methodKey === 'wallet') {
+                                      if (!isUserLoggedIn || walletBalance <= 0) return null;
+                                      return (
+                                        <SelectItem key={setting.methodKey} value="wallet_combined">
+                                          {setting.methodName} - موجودی: {walletBalance.toLocaleString()} IQD
+                                        </SelectItem>
+                                      );
+                                    }
+                                    
+                                    // Regular payment methods
+                                    return (
+                                      <SelectItem key={setting.methodKey} value={setting.methodKey}>
+                                        {setting.methodName}
+                                      </SelectItem>
+                                    );
+                                  })}
+                                
+                                {/* Fallback for when no settings are loaded yet */}
+                                {paymentSettings.length === 0 && (
+                                  <>
+                                    <SelectItem value="bank_receipt">ارسال فیش واریزی بانکی</SelectItem>
+                                    <SelectItem value="online_payment">پرداخت آنلاین</SelectItem>
+                                  </>
+                                )}
                               </SelectContent>
                             </Select>
                           </FormControl>
@@ -1910,12 +1946,35 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                 <SelectValue placeholder="روش پرداخت را انتخاب کنید" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="bank_receipt">ارسال فیش واریزی بانکی (Bank Receipt Upload)</SelectItem>
-                                <SelectItem value="online_payment">پرداخت آنلاین (Online Payment)</SelectItem>
-                                <SelectItem value="cash_on_delivery">پرداخت نقدی هنگام تحویل (Cash on Delivery)</SelectItem>
-                                <SelectItem value="company_credit">حساب اعتباری شرکت (Company Credit)</SelectItem>
-                                {isUserLoggedIn && walletBalance > 0 && (
-                                  <SelectItem value="wallet_combined">استفاده از کیف پول (تعیین مبلغ دلخواه) - موجودی: {walletBalance.toLocaleString()} IQD</SelectItem>
+                                {/* Dynamic payment methods based on admin settings */}
+                                {paymentSettings
+                                  .filter((setting: any) => setting.enabled)
+                                  .sort((a: any, b: any) => (b.priority || 0) - (a.priority || 0))
+                                  .map((setting: any) => {
+                                    // Special handling for wallet payment
+                                    if (setting.methodKey === 'wallet') {
+                                      if (!isUserLoggedIn || walletBalance <= 0) return null;
+                                      return (
+                                        <SelectItem key={setting.methodKey} value="wallet_combined">
+                                          {setting.methodName} - موجودی: {walletBalance.toLocaleString()} IQD
+                                        </SelectItem>
+                                      );
+                                    }
+                                    
+                                    // Regular payment methods
+                                    return (
+                                      <SelectItem key={setting.methodKey} value={setting.methodKey}>
+                                        {setting.methodName}
+                                      </SelectItem>
+                                    );
+                                  })}
+                                
+                                {/* Fallback for when no settings are loaded yet */}
+                                {paymentSettings.length === 0 && (
+                                  <>
+                                    <SelectItem value="bank_receipt">ارسال فیش واریزی بانکی</SelectItem>
+                                    <SelectItem value="online_payment">پرداخت آنلاین</SelectItem>
+                                  </>
                                 )}
                               </SelectContent>
                             </Select>
