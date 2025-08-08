@@ -195,7 +195,7 @@ export default function WalletManagement() {
   // Force wallet sync mutation
   const syncWalletMutation = useMutation({
     mutationFn: (customerId: number) => 
-      apiRequest(`/api/wallet/force-sync/${customerId}`, 'POST', {}),
+      apiRequest(`/api/wallet/force-sync/${customerId}`, { method: 'POST', body: {} }),
     onSuccess: (data) => {
       toast({ 
         title: "همگام‌سازی موفق", 
