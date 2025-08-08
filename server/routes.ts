@@ -35548,7 +35548,7 @@ momtazchem.com
       const { eq } = await import("drizzle-orm");
       
       const customerOrderId = parseInt(req.params.orderId); // This is actually customerOrderId from frontend
-      const { notes } = req.body;
+      const { notes, receiptAmount } = req.body; // receiptAmount: مبلغ واریزی در فیش
       const adminId = req.session.adminId;
 
       console.log(`🔄 [FINANCE] Approving customer order ID: ${customerOrderId}`);
@@ -35616,6 +35616,77 @@ momtazchem.com
         .where(eq(customerOrders.id, customerOrderId));
 
       console.log(`✅ [FINANCE] Order ${customerOrderId} approved: management status = warehouse_pending, customer status = warehouse_ready, payment = paid`);
+
+      // 🏦 Handle wallet transactions for receipt amount differences
+      if (receiptAmount) {
+        const orderTotal = parseFloat(customerInfo.total);
+        const paidAmount = parseFloat(receiptAmount);
+        const difference = paidAmount - orderTotal;
+        
+        console.log(`💰 [WALLET] Receipt amount: ${paidAmount} IQD, Order total: ${orderTotal} IQD, Difference: ${difference} IQD`);
+        
+        if (difference !== 0) {
+          const { walletStorage } = await import('./wallet-storage');
+          const { walletTransactions } = await import('../shared/customer-schema');
+          
+          try {
+            if (difference > 0) {
+              // Credit excess to wallet
+              const creditResult = await walletStorage.creditWallet(customerInfo.customerName, difference, 
+                `اضافه پرداخت فیش بانکی سفارش ${orderNumber}`);
+              
+              console.log(`✅ [WALLET] Credited ${difference} IQD to customer wallet:`, creditResult);
+              
+              // Update financial notes with credit information
+              const updatedNotes = `${notes || ''} - مبلغ اضافی ${difference.toLocaleString()} دینار به والت مشتری واریز شد`.trim();
+              await db
+                .update(orderManagement)
+                .set({ financialNotes: updatedNotes })
+                .where(eq(orderManagement.customerOrderId, customerOrderId));
+                
+            } else {
+              // Debit shortage from wallet (negative difference)
+              const shortage = Math.abs(difference);
+              
+              // Check wallet balance first
+              const walletBalance = await walletStorage.getBalance(customerInfo.customerName);
+              
+              if (walletBalance >= shortage) {
+                const debitResult = await walletStorage.debitWallet(customerInfo.customerName, shortage, 
+                  `کسر کمبود پرداخت سفارش ${orderNumber}`);
+                
+                console.log(`✅ [WALLET] Debited ${shortage} IQD from customer wallet:`, debitResult);
+                
+                // Update financial notes with debit information
+                const updatedNotes = `${notes || ''} - کمبود ${shortage.toLocaleString()} دینار از والت مشتری کسر شد`.trim();
+                await db
+                  .update(orderManagement)
+                  .set({ financialNotes: updatedNotes })
+                  .where(eq(orderManagement.customerOrderId, customerOrderId));
+                  
+              } else {
+                console.log(`⚠️ [WALLET] Insufficient balance for shortage ${shortage} IQD, available: ${walletBalance} IQD`);
+                
+                // Update financial notes with insufficient balance information
+                const updatedNotes = `${notes || ''} - کمبود ${shortage.toLocaleString()} دینار - موجودی والت ناکافی (${walletBalance.toLocaleString()} دینار)`.trim();
+                await db
+                  .update(orderManagement)
+                  .set({ financialNotes: updatedNotes })
+                  .where(eq(orderManagement.customerOrderId, customerOrderId));
+              }
+            }
+          } catch (walletError) {
+            console.error('❌ [WALLET] Error processing wallet transaction:', walletError);
+            
+            // Update financial notes with error information
+            const updatedNotes = `${notes || ''} - خطا در پردازش والت: ${difference > 0 ? 'اعتبار' : 'کسر'} ${Math.abs(difference).toLocaleString()} دینار`.trim();
+            await db
+              .update(orderManagement)
+              .set({ financialNotes: updatedNotes })
+              .where(eq(orderManagement.customerOrderId, customerOrderId));
+          }
+        }
+      }
 
       // صدور خودکار فاکتور رسمی برای سفارشات wallet-paid پس از تایید مالی
       const [orderDetails] = await db
