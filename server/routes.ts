@@ -14436,32 +14436,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let remainingAmount = totalAmount;
       let finalPaymentMethod = orderData.paymentMethod || "traditional";
 
-      // RESPECT CUSTOMER'S PAYMENT CHOICE - NO AUTO-SUBSTITUTION
-      // If customer explicitly chose online_payment, TEST GATEWAY FIRST before creating order
-      if (orderData.paymentMethod === 'online_payment') {
-        console.log("🏦 [ONLINE PAYMENT] Testing gateway availability before order creation...");
+      // BANK PROTOCOLS DON'T ALLOW TESTING - REJECT BANK PAYMENTS IMMEDIATELY
+      // Block all payment methods that require bank routing since testing is not possible
+      const requiresBankRouting = ['online_payment', 'bank_transfer'].includes(orderData.paymentMethod) ||
+        (orderData.paymentMethod === 'wallet_partial' && parseFloat(orderData.remainingAmount || totalAmount) > 1);
+      
+      if (requiresBankRouting) {
+        console.log(`🚫 [BANK BLOCKED] Bank payment blocked for ${orderData.paymentMethod} - testing not allowed by bank protocols`);
         
-        // TEST: Try bank gateway routing BEFORE creating any order
-        const { bankGatewayRouter } = await import('./bank-gateway-router');
-        const testRoutingResult = await bankGatewayRouter.routePayment({
-          orderId: 0, // Test mode - no real order yet
-          customerId: finalCustomerId,
-          amount: totalAmount,
-          currency: 'IQD',
-          returnUrl: `${req.protocol}://${req.get('host')}/payment/success`,
-          cancelUrl: `${req.protocol}://${req.get('host')}/payment/cancel`
+        return res.status(400).json({
+          success: false,
+          message: `پرداخت بانکی به دلیل محدودیت‌های پروتکل بانکی امکان‌پذیر نیست. لطفاً از کیف پول استفاده کنید یا با پشتیبانی تماس بگیرید.`,
+          error: 'BANK_PAYMENT_PROTOCOL_RESTRICTED'
         });
-
-        if (!testRoutingResult.success) {
-          console.log(`❌ [ONLINE PAYMENT] Gateway test failed: ${testRoutingResult.message}`);
-          return res.status(400).json({
-            success: false,
-            message: `پرداخت آنلاین در حال حاضر امکان‌پذیر نیست: ${testRoutingResult.message}. لطفاً روش پرداخت دیگری انتخاب کنید.`,
-            error: 'ONLINE_PAYMENT_UNAVAILABLE'
-          });
-        }
-        
-        console.log(`✅ [ONLINE PAYMENT] Gateway test successful - proceeding with order creation`);
+      }
+      
+      // Set payment method and status based on customer choice
+      if (orderData.paymentMethod === 'online_payment') {
         finalPaymentStatus = "pending";
         finalPaymentMethod = "online_payment";
         walletAmountUsed = 0;
@@ -14852,51 +14843,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      if (orderData.paymentMethod === 'wallet_partial' && formattedRemainingForBank > 1) {
-        console.log(`🔄 [HYBRID PAYMENT] Wallet partial payment detected - wallet: ${walletAmountUsed}, remaining: ${actualRemainingAmount}, formatted: ${formattedRemainingForBank}`);
-        
-        // هدایت پرداخت به درگاه بانکی فعال - تبدیل مبلغ به عدد صحیح برای دینار عراقی
-        const { bankGatewayRouter } = await import('./bank-gateway-router');
-        const formattedRemainingAmount = formatIQDAmount(actualRemainingAmount); // Convert to whole number for IQD
-        
-        console.log(`💰 [BANK PAYMENT] Sending amount to gateway: ${formattedRemainingAmount} IQD (rounded from ${actualRemainingAmount})`);
-        
-        const routingResult = await bankGatewayRouter.routePayment({
-          orderId: order.id,
-          customerId: finalCustomerId,
-          amount: formattedRemainingAmount,
-          currency: 'IQD',
-          returnUrl: `${req.protocol}://${req.get('host')}/payment/success`,
-          cancelUrl: `${req.protocol}://${req.get('host')}/payment/cancel`
-        });
-
-        if (routingResult.success) {
-          console.log(`🏦 [PAYMENT ROUTING] Successfully routed hybrid payment to ${routingResult.gateway?.name}`);
-          return res.json({
-            success: true,
-            message: 'سفارش ثبت شد - هدایت به درگاه پرداخت',
-            orderId: orderNumber,
-            orderNumber: orderNumber,
-            totalAmount: Math.round(totalAmount),
-            walletAmountUsed: Math.round(walletAmountUsed),
-            walletAmountDeducted: Math.round(walletAmountUsed),
-            remainingAmount: formattedRemainingAmount,
-            requiresBankPayment: true,
-            paymentGateway: routingResult.gateway,
-            paymentUrl: routingResult.paymentUrl,
-            transactionId: routingResult.transactionId,
-            redirectUrl: routingResult.paymentUrl || `/payment/${orderNumber}`
-          });
-        } else {
-          console.log(`❌ [PAYMENT ROUTING] Failed to route hybrid payment: ${routingResult.message}`);
-          
-          // 🗑️ DELETE ORDER: If bank payment fails, delete the order immediately
-          console.log(`🗑️ [ORDER CLEANUP] Deleting order ${order.id} due to bank payment failure`);
-          try {
-            await customerStorage.deleteTemporaryOrder(order.id);
-            console.log(`✅ [ORDER CLEANUP] Order ${order.id} successfully deleted`);
-          } catch (deleteError) {
-            console.error(`❌ [ORDER CLEANUP] Failed to delete order ${order.id}:`, deleteError);
+      // 🚫 [WALLET_PARTIAL] Bank payments are blocked - this code is now unreachable
+      // (Kept for reference only - should never execute due to bank blocking above)
           }
           
           return res.status(400).json({
@@ -14963,52 +14911,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
         
-        // For pure online payment, return special response  
-        if (finalPaymentMethod === 'online_payment') {
-          // هدایت پرداخت آنلاین به درگاه بانکی فعال
-          const { bankGatewayRouter } = await import('./bank-gateway-router');
-          const routingResult = await bankGatewayRouter.routePayment({
-            orderId: order.id,
-            customerId: finalCustomerId,
-            amount: totalAmount,
-            currency: 'IQD',
-            returnUrl: `${req.protocol}://${req.get('host')}/payment/success`,
-            cancelUrl: `${req.protocol}://${req.get('host')}/payment/cancel`
-          });
-
-          if (routingResult.success) {
-            console.log(`🏦 [PAYMENT ROUTING] Successfully routed online payment to ${routingResult.gateway?.name}`);
-            return res.json({
-              success: true,
-              message: 'سفارش ثبت شد - هدایت به درگاه پرداخت آنلاین',
-              orderId: orderNumber,
-              orderNumber: orderNumber,
-              totalAmount: totalAmount,
-              redirectToPayment: true,
-              paymentGateway: routingResult.gateway,
-              paymentUrl: routingResult.paymentUrl,
-              transactionId: routingResult.transactionId,
-              paymentGatewayUrl: routingResult.paymentUrl || `/payment?orderId=${order.id}&amount=${totalAmount}&method=online_payment`
-            });
-          } else {
-            console.log(`❌ [PAYMENT ROUTING] Failed to route online payment: ${routingResult.message}`);
-            
-            // 🗑️ DELETE ORDER: If bank payment fails, delete the order immediately
-            console.log(`🗑️ [ORDER CLEANUP] Deleting order ${order.id} due to online payment failure`);
-            try {
-              await customerStorage.deleteTemporaryOrder(order.id);
-              console.log(`✅ [ORDER CLEANUP] Order ${order.id} successfully deleted`);
-            } catch (deleteError) {
-              console.error(`❌ [ORDER CLEANUP] Failed to delete order ${order.id}:`, deleteError);
-            }
-            
-            return res.status(400).json({
-              success: false,
-              message: `پرداخت ناموفق - درگاه بانکی در دسترس نیست: ${routingResult.message}`,
-              error: 'BANK_GATEWAY_FAILED'
-            });
-          }
-        }
+        // 🚫 [ONLINE_PAYMENT] Bank payments are blocked - this code is now unreachable
+        // (Kept for reference only - should never execute due to bank blocking above)
       }
 
       res.json(responseData);
