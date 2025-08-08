@@ -14300,7 +14300,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const orderManagementStorage = new OrderManagementStorage();
       
       console.log('🔒 [SEQUENTIAL] Starting transaction-safe order creation for wallet/payment...');
-      let orderNumber: string;
+      let orderNumber: string | null = null;
       
       // Calculate order totals and taxes (using dynamic tax settings)
       // Note: orderData.totalAmount from frontend already includes all components
@@ -14418,6 +14418,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         finalPaymentStatus = "grace_period";
         finalPaymentMethod = "bank_transfer_grace";
         console.log("✅ Bank transfer with grace period method selected - 3-day grace period activated");
+      }
+
+      // 🏦 BANK PAYMENT WORKFLOW: Only generate order numbers for non-bank payments
+      // Bank payments will get order numbers after successful payment verification
+      console.log(`🔍 [PAYMENT METHOD DEBUG] Original: ${orderData.paymentMethod}, Final: ${finalPaymentMethod}`);
+      const isBankPayment = ['bank_transfer', 'bank_gateway', 'bank', 'online_bank', 'gateway', 'online_payment', 'bank_receipt', 'bank_transfer_grace'].includes(finalPaymentMethod);
+      
+      if (!isBankPayment) {
+        // Generate order number for wallet payments and other non-bank methods
+        orderNumber = await orderManagementStorage.generateOrderNumberInTransaction();
+        console.log(`✅ [NON-BANK ORDER] Generated order number ${orderNumber} for ${finalPaymentMethod}`);
+      } else {
+        // Bank payments: no order number until payment verification
+        console.log(`🏦 [BANK ORDER] No order number assigned - waiting for payment verification (${finalPaymentMethod})`);
       }
 
       const order = await customerStorage.createOrder({
