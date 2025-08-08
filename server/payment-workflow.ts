@@ -370,6 +370,7 @@ export class PaymentWorkflowService {
   private getInitialManagementStatus(paymentMethod: string): string {
     switch (paymentMethod) {
       case 'bank_gateway':
+        return 'pending_payment'; // Bank payments wait for verification, then go directly to warehouse
       case 'wallet':
       case 'wallet_partial':
         return 'financial_reviewing';
@@ -396,7 +397,8 @@ export class PaymentWorkflowService {
   }
   
   private shouldAutoApprove(paymentMethod: string): boolean {
-    return ['bank_gateway', 'wallet', 'wallet_partial'].includes(paymentMethod);
+    // Bank payments don't use auto-approval - they go directly to warehouse after verification
+    return ['wallet', 'wallet_partial'].includes(paymentMethod);
   }
 
   // تخصیص شماره سفارش پس از تایید موفق پرداخت بانکی
@@ -422,20 +424,21 @@ export class PaymentWorkflowService {
           })
           .where(eq(customerOrders.id, customerOrderId));
         
-        // Update order management status
+        // Update order management status - send directly to warehouse after successful bank payment
         await tx
           .update(orderManagement)
           .set({
-            currentStatus: 'financial_reviewing',
-            paymentSourceLabel: 'پرداخت موفق بانکی',
-            financialReviewedAt: new Date()
+            currentStatus: 'warehouse_pending',
+            paymentSourceLabel: 'پرداخت موفق بانکی - ارسال مستقیم به انبار',
+            financialReviewedAt: new Date(),
+            warehouseQueuedAt: new Date()
           })
           .where(eq(orderManagement.customerOrderId, customerOrderId));
         
         return newOrderNumber;
       });
       
-      console.log(`✅ [PAYMENT SUCCESS] Order number ${orderNumber} assigned successfully`);
+      console.log(`✅ [PAYMENT SUCCESS] Order number ${orderNumber} assigned and sent directly to warehouse`);
       return orderNumber;
       
     } catch (error) {

@@ -7223,35 +7223,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Automatic bank payment approval endpoint
-  app.post("/api/admin/orders/auto-approve-bank-payment", requireAuth, async (req, res) => {
-    try {
-      const { customerOrderId } = req.body;
-      
-      if (!customerOrderId) {
-        return res.status(400).json({
-          success: false,
-          message: "شناسه سفارش مشتری الزامی است"
-        });
-      }
-
-      console.log(`🏦 [AUTO APPROVAL API] Processing automatic bank payment approval for order ${customerOrderId}`);
-      
-      await orderManagementStorage.processAutomaticBankPaymentApproval(customerOrderId);
-      
-      res.json({
-        success: true,
-        message: "تأیید اتوماتیک پرداخت درگاه بانکی با موفقیت انجام شد"
-      });
-      
-    } catch (error) {
-      console.error('❌ [AUTO APPROVAL API] Error processing automatic approval:', error);
-      res.status(500).json({
-        success: false,
-        message: "خطا در تأیید اتوماتیک پرداخت"
-      });
-    }
-  });
+  // REMOVED: Auto-approval endpoint - bank payments now go directly to warehouse after verification
 
   // Bank payment gateway webhook endpoint (for real-time payment confirmations)
   app.post("/api/payment/gateway/webhook", async (req, res) => {
@@ -7292,12 +7264,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         console.log(`✅ [GATEWAY WEBHOOK] Order ${orderId} payment confirmed via gateway`);
 
-        // Trigger automatic financial approval
+        // For bank payments: assign order number and send directly to warehouse
         try {
-          await orderManagementStorage.processAutomaticBankPaymentApproval(parseInt(orderId));
-          console.log(`🎉 [GATEWAY WEBHOOK] Order ${orderId} automatically approved and transferred to warehouse`);
-        } catch (approvalError) {
-          console.error(`❌ [GATEWAY WEBHOOK] Auto approval failed for order ${orderId}:`, approvalError);
+          const { paymentWorkflow } = await import('./payment-workflow');
+          const orderNumber = await paymentWorkflow.assignOrderNumberAfterPaymentSuccess(parseInt(orderId));
+          console.log(`🎉 [GATEWAY WEBHOOK] Order ${orderId} assigned number ${orderNumber} and sent directly to warehouse`);
+        } catch (assignmentError) {
+          console.error(`❌ [GATEWAY WEBHOOK] Order number assignment failed for order ${orderId}:`, assignmentError);
         }
       }
 
@@ -7349,11 +7322,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let processedCount = 0;
       for (const order of pendingBankOrders) {
         try {
-          await orderManagementStorage.processAutomaticBankPaymentApproval(order.id);
+          // For bank payments: assign order number and send directly to warehouse
+          const { paymentWorkflow } = await import('./payment-workflow');
+          const orderNumber = await paymentWorkflow.assignOrderNumberAfterPaymentSuccess(order.id);
           processedCount++;
-          console.log(`✅ [PROCESS PENDING] Auto-approved order ${order.orderNumber} (${processedCount}/${pendingBankOrders.length})`);
+          console.log(`✅ [PROCESS PENDING] Order ${order.orderNumber} assigned number ${orderNumber} and sent to warehouse (${processedCount}/${pendingBankOrders.length})`);
         } catch (error) {
-          console.error(`❌ [PROCESS PENDING] Failed to auto-approve order ${order.orderNumber}:`, error);
+          console.error(`❌ [PROCESS PENDING] Failed to process order ${order.orderNumber}:`, error);
         }
       }
 
@@ -13949,7 +13924,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const orderManagementStorage = new OrderManagementStorage();
       
       console.log('🔒 [SEQUENTIAL] Starting transaction-safe order creation...');
-      let orderNumber: string;
+      let orderNumber: string | null = null; // Will be null for bank payments initially
 
       // Handle wallet payments with smart conversion
       let finalPaymentStatus = "pending";
@@ -13983,6 +13958,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
+      // 🏦 BANK PAYMENT WORKFLOW: Only generate order numbers for non-bank payments
+      // Bank payments will get order numbers after successful payment verification
+      const isBankPayment = ['bank_transfer', 'bank_gateway'].includes(finalPaymentMethod);
+      
+      if (!isBankPayment) {
+        // Generate order number for wallet payments and other non-bank methods
+        orderNumber = await orderManagementStorage.generateOrderNumberInTransaction();
+        console.log(`✅ [NON-BANK ORDER] Generated order number ${orderNumber} for ${finalPaymentMethod}`);
+      } else {
+        // Bank payments: no order number until payment verification
+        console.log(`🏦 [BANK ORDER] No order number assigned - waiting for payment verification (${finalPaymentMethod})`);
+      }
+      
       console.log('💰 [WALLET DEBUG] Processing wallet payment:', {
         originalPaymentMethod: paymentMethod,
         finalPaymentMethod,
@@ -14003,7 +13991,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const transaction = await walletStorage.debitWallet(
               customerIdToUse,
               walletUsage,
-              `پرداخت سفارش ${orderNumber}`,
+              `پرداخت سفارش ${orderNumber || 'در انتظار تایید بانک'}`,
               'order',
               undefined, // reference ID will be set after order creation
               undefined  // no admin processing this
@@ -14038,7 +14026,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Create order in customer orders table - store VAT amounts as whole numbers for IQD
       const orderData = {
-        orderNumber,
+        orderNumber, // Will be null for bank payments initially
         customerId: customerId || null,
         totalAmount: Math.round(totalAmount).toString(),
         shippingCost: Math.round(shippingCost || 0).toString(),
