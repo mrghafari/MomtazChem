@@ -207,6 +207,95 @@ function FinanceOrders() {
     refetchInterval: 30000,
   });
 
+  // Orphan orders queries - MOVED to top to avoid conditional hooks
+  const { data: orphanStats } = useQuery({
+    queryKey: ['/api/orphan-orders/stats'],
+    enabled: Boolean(adminUser?.success) && activeTab === 'orphan'
+  });
+
+  const { data: activeOrders } = useQuery({
+    queryKey: ['/api/orphan-orders/active'],
+    enabled: Boolean(adminUser?.success) && activeTab === 'orphan'
+  });
+
+  const { data: notificationSettings, refetch: refetchSettings } = useQuery({
+    queryKey: ['/api/orphan-orders/notification-settings'],
+    enabled: Boolean(adminUser?.success) && activeTab === 'orphan'
+  });
+
+  const { data: templatesData, refetch: refetchTemplates } = useQuery({
+    queryKey: ['/api/orphan-orders/templates'],
+    enabled: Boolean(adminUser?.success) && activeTab === 'orphan'
+  });
+
+  const { data: schedulesData, refetch: refetchSchedules } = useQuery({
+    queryKey: ['/api/orphan-orders/schedules'],
+    enabled: Boolean(adminUser?.success) && activeTab === 'orphan'
+  });
+
+  // Query for orphaned orders (orders in customer_orders but missing from order_management)
+  const { data: orphanedOrders, isLoading: orphanedLoading, error: orphanedError } = useQuery({
+    queryKey: ['/api/financial/orphaned-orders'],
+    queryFn: () => fetch('/api/financial/orphaned-orders', { credentials: 'include' }).then(res => {
+      if (!res.ok) {
+        throw new Error('Failed to fetch orphaned orders');
+      }
+      return res.json();
+    }),
+    enabled: Boolean(adminUser?.success) && activeTab === 'orphaned',
+    refetchInterval: 30000, // Refresh every 30 seconds
+    retry: 3,
+    retryDelay: 1000
+  });
+
+  // Mutation to repair orphaned orders
+  const repairOrphanedOrderMutation = useMutation({
+    mutationFn: async (customerOrderId: number) => {
+      return apiRequest(`/api/financial/orphaned-orders/${customerOrderId}/repair`, {
+        method: 'POST',
+        body: {}
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "تعمیر موفق",
+        description: "سفارش یتیم با موفقیت تعمیر شد و به سیستم مدیریت اضافه شد",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/financial/orphaned-orders'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "خطا در تعمیر",
+        description: error.message || "امکان تعمیر سفارش یتیم وجود ندارد",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Send reminder mutation
+  const sendReminderMutation = useMutation({
+    mutationFn: async ({ orderId, type }: { orderId: number; type: string }) => {
+      return apiRequest(`/api/orphan-orders/${orderId}/send-reminder`, {
+        method: 'POST',
+        body: { type }
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "موفق",
+        description: "یادآور با موفقیت ارسال شد",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/orphan-orders/active'] });
+    },
+    onError: () => {
+      toast({
+        title: "خطا",
+        description: "خطا در ارسال یادآور",
+        variant: "destructive",
+      });
+    }
+  });
+
   // Early return for loading state - AFTER all hooks are called
   if (isCheckingAuth) {
     return (
@@ -265,96 +354,6 @@ function FinanceOrders() {
     });
   };
 
-  // Orphan orders queries
-  const { data: orphanStats } = useQuery({
-    queryKey: ['/api/orphan-orders/stats'],
-    enabled: activeTab === 'orphan'
-  });
-
-  const { data: activeOrders } = useQuery({
-    queryKey: ['/api/orphan-orders/active'],
-    enabled: activeTab === 'orphan'
-  });
-
-  const { data: notificationSettings, refetch: refetchSettings } = useQuery({
-    queryKey: ['/api/orphan-orders/notification-settings'],
-    enabled: activeTab === 'orphan'
-  });
-
-  const { data: templatesData, refetch: refetchTemplates } = useQuery({
-    queryKey: ['/api/orphan-orders/templates'],
-    enabled: activeTab === 'orphan'
-  });
-
-  const { data: schedulesData, refetch: refetchSchedules } = useQuery({
-    queryKey: ['/api/orphan-orders/schedules'],
-    enabled: activeTab === 'orphan'
-  });
-
-  // Query for orphaned orders (orders in customer_orders but missing from order_management)
-  const { data: orphanedOrders, isLoading: orphanedLoading, error: orphanedError } = useQuery({
-    queryKey: ['/api/financial/orphaned-orders'],
-    queryFn: () => fetch('/api/financial/orphaned-orders', { credentials: 'include' }).then(res => {
-      if (!res.ok) {
-        throw new Error('Failed to fetch orphaned orders');
-      }
-      return res.json();
-    }),
-    enabled: activeTab === 'orphaned',
-    refetchInterval: 30000, // Refresh every 30 seconds
-    retry: 3,
-    retryDelay: 1000
-  });
-
-  // Mutation to repair orphaned orders
-  const repairOrphanedOrderMutation = useMutation({
-    mutationFn: async (customerOrderId: number) => {
-      return apiRequest(`/api/financial/orphaned-orders/${customerOrderId}/repair`, {
-        method: 'POST',
-        body: {}
-      });
-    },
-    onSuccess: () => {
-      toast({
-        title: "تعمیر موفق",
-        description: "سفارش یتیم با موفقیت تعمیر شد و به سیستم مدیریت اضافه شد",
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/financial/orphaned-orders'] });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "خطا در تعمیر",
-        description: error.message || "امکان تعمیر سفارش یتیم وجود ندارد",
-        variant: "destructive",
-      });
-    }
-  });
-
-
-
-  // Send reminder mutation
-  const sendReminderMutation = useMutation({
-    mutationFn: async ({ orderId, type }: { orderId: number; type: string }) => {
-      return apiRequest(`/api/orphan-orders/${orderId}/send-reminder`, {
-        method: 'POST',
-        body: { type }
-      });
-    },
-    onSuccess: () => {
-      toast({
-        title: "موفق",
-        description: "یادآور با موفقیت ارسال شد",
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/orphan-orders/active'] });
-    },
-    onError: () => {
-      toast({
-        title: "خطا",
-        description: "خطا در ارسال یادآور",
-        variant: "destructive",
-      });
-    }
-  });
 
   const allOrders: OrderManagement[] = ordersResponse?.orders || [];
   // Handle both array and object response formats
