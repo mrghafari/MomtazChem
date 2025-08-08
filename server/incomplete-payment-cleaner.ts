@@ -50,7 +50,7 @@ export class IncompletePaymentCleaner {
   }
 
   async processFailedOnlinePayments(pool: any) {
-    // Find all pending/pending orders with their age (for orders that never reached bank gateway)
+    // Find all incomplete online payment orders - including orders without order_number (never reached callback)
     const result = await pool.query(`
       SELECT 
         co.id,
@@ -66,28 +66,36 @@ export class IncompletePaymentCleaner {
         om.id as management_id
       FROM customer_orders co
       LEFT JOIN order_management om ON co.id = om.customer_order_id
-      WHERE co.status = 'pending' 
-        AND co.payment_status = 'pending'
-        AND co.payment_method = 'online_payment'
-        AND (om.current_status = 'pending' OR om.current_status IS NULL)
+      WHERE (
+        -- Standard pending online payments
+        (co.status = 'pending' AND co.payment_status = 'pending' AND co.payment_method = 'online_payment')
+        OR
+        -- Orders created but never got order_number (failed to reach bank gateway)
+        (co.order_number IS NULL AND co.payment_method = 'online_payment' AND co.status IN ('pending', 'processing'))
+        OR  
+        -- Orders with failed payment status
+        (co.payment_status = 'failed' AND co.payment_method = 'online_payment')
+      )
+      AND (om.current_status = 'pending' OR om.current_status IS NULL OR om.current_status = 'pending_payment')
       ORDER BY co.created_at ASC
     `);
 
     const incompleteOrders = result.rows;
-    console.log(`🔍 [INCOMPLETE PAYMENT CLEANER] Found ${incompleteOrders.length} failed online payment orders`);
+    console.log(`🔍 [AGGRESSIVE CLEANUP] Found ${incompleteOrders.length} incomplete online payment orders (including orderless)`);
 
     for (const order of incompleteOrders) {
       const ageMinutes = parseFloat(order.age_minutes);
       const currentStage = order.notification_stage || 0;
 
-      if (ageMinutes >= 60 && currentStage < 3) {
-        // After 1 hour - delete the order completely
+      if (ageMinutes >= 10 && currentStage < 3) {
+        // After 10 minutes - delete the order completely (reduced from 60 minutes)
+        console.log(`🗑️ [AGGRESSIVE CLEANUP] Deleting failed online payment order ${order.id} after ${ageMinutes.toFixed(1)} minutes`);
         await this.deleteIncompleteOrder(order, 'online_payment');
-      } else if (ageMinutes >= 15 && currentStage < 2) {
-        // After 15 minutes - send second notification
+      } else if (ageMinutes >= 5 && currentStage < 2) {
+        // After 5 minutes - send second notification
         await this.sendNotification(order, 2, 'نهایی', 'online_payment');
-      } else if (ageMinutes >= 1 && currentStage < 1) {
-        // After 1 minute - send first notification
+      } else if (ageMinutes >= 2 && currentStage < 1) {
+        // After 2 minutes - send first notification
         await this.sendNotification(order, 1, 'اول', 'online_payment');
       }
     }
@@ -124,15 +132,15 @@ export class IncompletePaymentCleaner {
       const ageMinutes = parseFloat(order.age_minutes);
       const currentStage = order.notification_stage || 0;
 
-      if (ageMinutes >= 60) {
-        // After 1 hour - delete the orphan order completely
-        console.log(`🗑️ [ORPHAN CLEANER] Deleting orphan order ${order.id} after ${ageMinutes.toFixed(1)} minutes`);
+      if (ageMinutes >= 15) {
+        // After 15 minutes - delete the orphan order completely (reduced from 60 minutes)
+        console.log(`🗑️ [AGGRESSIVE ORPHAN CLEANUP] Deleting orphan order ${order.id} after ${ageMinutes.toFixed(1)} minutes`);
         await this.deleteIncompleteOrder(order, 'failed_bank_payment_orphan');
-      } else if (ageMinutes >= 30 && currentStage < 2) {
-        // After 30 minutes - send reminder (30 minutes left)
-        await this.sendNotification(order, 2, 'یادآوری نهایی - 30 دقیقه تا حذف', 'failed_bank_payment');
-      } else if (ageMinutes >= 10 && currentStage < 1) {
-        // After 10 minutes - first notification
+      } else if (ageMinutes >= 10 && currentStage < 2) {
+        // After 10 minutes - send reminder (5 minutes left)
+        await this.sendNotification(order, 2, 'یادآوری نهایی - 5 دقیقه تا حذف', 'failed_bank_payment');
+      } else if (ageMinutes >= 5 && currentStage < 1) {
+        // After 5 minutes - first notification
         await this.sendNotification(order, 1, 'پرداخت ناموفق - سفارش به زودی حذف خواهد شد', 'failed_bank_payment');
       }
     }
