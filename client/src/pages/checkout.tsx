@@ -2029,11 +2029,11 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                                 </div>
                                 {actualWalletUsage >= beforeWalletTotal ? (
                                   <div className="mt-1 text-green-700 font-medium">
-                                    ✓ سفارش کاملاً با کیف پول پرداخت می‌شود - درگاه بانکی باز نخواهد شد
+                                    ✓ سفارش کاملاً با کیف پول پرداخت می‌شود - هیچ پرداخت اضافی نیاز نیست
                                   </div>
                                 ) : (
                                   <div className="mt-1 text-blue-700 font-medium">
-                                    → مبلغ باقی‌مانده ({totalAmount.toLocaleString()} IQD) از طریق درگاه بانکی پرداخت خواهد شد
+                                    → مبلغ باقی‌مانده ({totalAmount.toLocaleString()} IQD) با روش انتخابی شما پرداخت خواهد شد
                                   </div>
                                 )}
                               </div>
@@ -2073,10 +2073,23 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                               <SelectValue placeholder="روش پرداخت را انتخاب کنید" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="bank_receipt">پرداخت بانکی - ارسال فیش واریزی</SelectItem>
-                              <SelectItem value="online_payment">پرداخت آنلاین</SelectItem>
-                              <SelectItem value="cash_on_delivery">پرداخت نقدی هنگام تحویل</SelectItem>
-                              <SelectItem value="company_credit">حساب اعتباری شرکت</SelectItem>
+                              {/* Dynamic secondary payment methods based on admin settings */}
+                              {paymentSettings
+                                .filter((setting: any) => setting.enabled && setting.methodKey !== 'wallet')
+                                .sort((a: any, b: any) => (b.priority || 0) - (a.priority || 0))
+                                .map((setting: any) => (
+                                  <SelectItem key={setting.methodKey} value={setting.methodKey}>
+                                    {setting.methodName}
+                                  </SelectItem>
+                                ))}
+                              
+                              {/* Fallback options if no settings are loaded */}
+                              {paymentSettings.length === 0 && (
+                                <>
+                                  <SelectItem value="bank_receipt">پرداخت بانکی - ارسال فیش واریزی</SelectItem>
+                                  <SelectItem value="online_payment">پرداخت آنلاین</SelectItem>
+                                </>
+                              )}
                             </SelectContent>
                           </Select>
                         </div>
