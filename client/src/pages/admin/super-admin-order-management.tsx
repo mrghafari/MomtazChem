@@ -73,7 +73,7 @@ export default function SuperAdminOrderManagement() {
   const [showProductionResetDialog, setShowProductionResetDialog] = useState(false);
   const [preserveCustomers, setPreserveCustomers] = useState(false);
   const [activeTab, setActiveTab] = useState('orders');
-  const [customerIdSearch, setCustomerIdSearch] = useState('');
+  const [customerEmailSearch, setCustomerEmailSearch] = useState('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -103,10 +103,10 @@ export default function SuperAdminOrderManagement() {
     });
   };
 
-  // Fetch customer orders by customer ID
+  // Fetch customer orders by email
   const { data: customerOrdersResponse, isLoading: customerOrdersLoading } = useQuery({
-    queryKey: ['/api/super-admin/customer-orders', customerIdSearch],
-    enabled: activeTab === 'customer-orders' && customerIdSearch.trim() !== '',
+    queryKey: ['/api/super-admin/customer-orders-by-email', customerEmailSearch],
+    enabled: activeTab === 'customer-orders' && customerEmailSearch.trim() !== '',
     retry: (failureCount, error) => {
       if (error.message.includes('401') || error.message.includes('403')) return false;
       return failureCount < 2;
@@ -161,7 +161,7 @@ export default function SuperAdminOrderManagement() {
       setShowDeleteDialog(false);
       setSelectedOrder(null);
       queryClient.invalidateQueries({ queryKey: ['/api/super-admin/deletable-orders'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/super-admin/customer-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/super-admin/customer-orders-by-email'] });
       refetch();
     },
     onError: (error: any) => {
@@ -224,7 +224,7 @@ export default function SuperAdminOrderManagement() {
       });
       setShowProductionResetDialog(false);
       queryClient.invalidateQueries({ queryKey: ['/api/super-admin/deletable-orders'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/super-admin/customer-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/super-admin/customer-orders-by-email'] });
     },
     onError: (error: any) => {
       toast({
@@ -551,33 +551,33 @@ export default function SuperAdminOrderManagement() {
               <CardContent className="space-y-4">
                 <div className="flex gap-4 items-end">
                   <div className="flex-1">
-                    <Label htmlFor="customer-search">شناسه مشتری (Customer ID)</Label>
+                    <Label htmlFor="customer-search">آدرس ایمیل مشتری</Label>
                     <Input
                       id="customer-search"
-                      value={customerIdSearch}
-                      onChange={(e) => setCustomerIdSearch(e.target.value)}
-                      placeholder="مثال: 123"
+                      value={customerEmailSearch}
+                      onChange={(e) => setCustomerEmailSearch(e.target.value)}
+                      placeholder="مثال: customer@example.com"
                       className="mt-1"
-                      type="number"
+                      type="email"
                     />
                   </div>
                   <Button
                     onClick={() => {
-                      if (customerIdSearch.trim()) {
-                        // The query will automatically fetch when customerIdSearch changes
+                      if (customerEmailSearch.trim()) {
+                        // The query will automatically fetch when customerEmailSearch changes
                       }
                     }}
                     variant="default"
-                    disabled={!customerIdSearch.trim()}
+                    disabled={!customerEmailSearch.trim()}
                     className="bg-blue-600 hover:bg-blue-700"
                   >
                     <Search className="h-4 w-4 ml-2" />
                     جستجو
                   </Button>
                 </div>
-                {customerIdSearch.trim() && (
+                {customerEmailSearch.trim() && (
                   <div className="text-sm text-blue-600">
-                    جستجو برای سفارشات مشتری با شناسه: {customerIdSearch}
+                    جستجو برای سفارشات مشتری با ایمیل: {customerEmailSearch}
                   </div>
                 )}
               </CardContent>
@@ -597,22 +597,22 @@ export default function SuperAdminOrderManagement() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {customerOrdersLoading && customerIdSearch.trim() ? (
+                {customerOrdersLoading && customerEmailSearch.trim() ? (
                   <div className="flex items-center justify-center py-12">
                     <RefreshCw className="h-8 w-8 animate-spin text-blue-500" />
                     <span className="mr-2 text-lg">در حال جستجو...</span>
                   </div>
-                ) : !customerIdSearch.trim() ? (
+                ) : !customerEmailSearch.trim() ? (
                   <div className="text-center py-12">
-                    <User className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-600 mb-2">شناسه مشتری را وارد کنید</h3>
-                    <p className="text-gray-500">برای جستجوی سفارشات، شناسه مشتری مورد نظر را در بالا وارد کنید</p>
+                    <Mail className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-600 mb-2">آدرس ایمیل مشتری را وارد کنید</h3>
+                    <p className="text-gray-500">برای جستجوی سفارشات، آدرس ایمیل مشتری مورد نظر را در بالا وارد کنید</p>
                   </div>
                 ) : customerOrders.length === 0 ? (
                   <div className="text-center py-12">
                     <Package className="h-16 w-16 text-gray-400 mx-auto mb-4" />
                     <h3 className="text-lg font-semibold text-gray-600 mb-2">سفارشی یافت نشد</h3>
-                    <p className="text-gray-500">هیچ سفارشی برای مشتری با شناسه {customerIdSearch} پیدا نشد</p>
+                    <p className="text-gray-500">هیچ سفارشی برای مشتری با ایمیل {customerEmailSearch} پیدا نشد</p>
                   </div>
                 ) : (
                   <div className="space-y-4">

@@ -47395,11 +47395,12 @@ momtazchem.com
     }
   });
 
-  // Get customer orders by customer ID for super admin deletion
-  app.get('/api/super-admin/customer-orders/:customerId', requireSuperAdmin, async (req: Request, res: Response) => {
+  // Get customer orders by email for super admin deletion
+  app.get('/api/super-admin/customer-orders-by-email/:email', requireSuperAdmin, async (req: Request, res: Response) => {
     try {
-      const { customerId } = req.params;
-      console.log(`🔍 [SUPER ADMIN] Fetching customer orders for customer: ${customerId}`);
+      const { email } = req.params;
+      const decodedEmail = decodeURIComponent(email);
+      console.log(`🔍 [SUPER ADMIN] Fetching customer orders for email: ${decodedEmail}`);
       
       const result = await customerPool.query(`
         SELECT 
@@ -47423,20 +47424,24 @@ momtazchem.com
         FROM customer_orders co
         LEFT JOIN customers c ON co.customer_id = c.id
         LEFT JOIN crm_customers crm ON co.customer_id = crm.id
-        WHERE co.customer_id = $1
+        WHERE (
+          co.guest_email = $1 
+          OR c.email = $1 
+          OR crm.email = $1
+        )
         ORDER BY co.created_at DESC
-      `, [customerId]);
+      `, [decodedEmail]);
       
-      console.log(`✅ [SUPER ADMIN] Found ${result.rows.length} orders for customer ${customerId}`);
+      console.log(`✅ [SUPER ADMIN] Found ${result.rows.length} orders for email ${decodedEmail}`);
 
       res.json({
         success: true,
         data: result.rows,
-        customerId: parseInt(customerId)
+        searchEmail: decodedEmail
       });
 
     } catch (error) {
-      console.error(`❌ [SUPER ADMIN] Failed to fetch customer orders for ${req.params.customerId}:`, error);
+      console.error(`❌ [SUPER ADMIN] Failed to fetch customer orders for ${req.params.email}:`, error);
       res.status(500).json({
         success: false,
         message: `خطا در دریافت سفارشات مشتری: ${error.message}`,
