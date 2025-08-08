@@ -106,6 +106,20 @@ export default function SuperAdminOrderManagement() {
   // Fetch customer orders by email
   const { data: customerOrdersResponse, isLoading: customerOrdersLoading } = useQuery({
     queryKey: ['/api/super-admin/customer-orders-by-email', customerEmailSearch],
+    queryFn: async () => {
+      if (!customerEmailSearch.trim()) return null;
+      const encodedEmail = encodeURIComponent(customerEmailSearch.trim());
+      const response = await fetch(`/api/super-admin/customer-orders-by-email/${encodedEmail}`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    },
     enabled: activeTab === 'customer-orders' && customerEmailSearch.trim() !== '',
     retry: (failureCount, error) => {
       if (error.message.includes('401') || error.message.includes('403')) return false;
