@@ -22,6 +22,7 @@ import InvoiceManagement from "@/pages/admin/invoice-management";
 import PaymentSettings from "@/pages/admin/payment-settings";
 import PaymentTestPage from "@/pages/PaymentTestPage";
 import AdminPage from "@/pages/admin";
+import AdminLogin from "@/pages/admin-login";
 import AdminUsers from "@/pages/admin-users";
 
 import BarcodeInventory from "@/pages/admin/barcode-inventory";
@@ -171,6 +172,7 @@ function Router() {
           <Route path="/shop-admin" component={ShopAdmin} />
           <Route path="/admin/shop" component={ShopAdmin} />
           <Route path="/admin" component={AdminPage} />
+          <Route path="/admin/login" component={AdminLogin} />
           <Route path="/admin/users" component={AdminUsers} />
 
           <Route path="/admin/barcode-inventory" component={BarcodeInventory} />
