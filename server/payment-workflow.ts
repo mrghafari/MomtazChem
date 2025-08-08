@@ -225,7 +225,7 @@ export class PaymentWorkflowService {
     const totalAmount = parseFloat(customerOrder.totalAmount);
     
     // برداشت از کیف پول
-    await this.deductFromWallet(orderData.customerId, totalAmount, customerOrder.orderNumber);
+    await this.deductFromWallet(orderData.customerId, totalAmount, customerOrder.orderNumber, customerOrder.id);
     
     // بروزرسانی وضعیت
     await db
@@ -251,7 +251,7 @@ export class PaymentWorkflowService {
     
     // برداشت از کیف پول
     if (walletAmount > 0) {
-      await this.deductFromWallet(orderData.customerId, walletAmount, customerOrder.orderNumber);
+      await this.deductFromWallet(orderData.customerId, walletAmount, customerOrder.orderNumber, customerOrder.id);
     }
     
     // بروزرسانی وضعیت
@@ -287,8 +287,8 @@ export class PaymentWorkflowService {
   }
   
   // 9. برداشت از کیف پول
-  private async deductFromWallet(customerId: number, amount: number, orderNumber: string) {
-    console.log(`💰 [WALLET DEDUCT] ${amount} IQD from customer ${customerId}`);
+  private async deductFromWallet(customerId: number, amount: number, orderNumber: string, customerOrderId: number) {
+    console.log(`💰 [WALLET DEDUCT] ${amount} IQD from customer ${customerId} for order ${customerOrderId}`);
     
     // بروزرسانی موجودی
     await db
@@ -312,7 +312,7 @@ export class PaymentWorkflowService {
         balanceAfter: sql`(SELECT balance FROM customer_wallets WHERE customer_id = ${customerId})`,
         description: `برداشت برای سفارش ${orderNumber}`,
         referenceType: 'order',
-        referenceId: parseInt(orderNumber.replace('M25', '')),
+        referenceId: customerOrderId,
         status: 'completed'
       });
   }
