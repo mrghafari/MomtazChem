@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ShoppingCart, Plus, Minus, Filter, Search, Grid, List, Star, User, LogOut, X, ChevronDown, ChevronLeft, ChevronRight, Eye, Brain, Sparkles, Wallet, FileText, Download, AlertTriangle, Package, MessageSquare, ZoomIn, Flame } from "lucide-react";
+import { ShoppingCart, Plus, Minus, Filter, Search, Grid, List, Star, User, LogOut, X, ChevronDown, ChevronLeft, ChevronRight, Eye, EyeOff, Brain, Sparkles, Wallet, FileText, Download, AlertTriangle, Package, MessageSquare, ZoomIn, Flame } from "lucide-react";
 import { useLocation } from "wouter";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCustomerAuth } from "@/hooks/useCustomerAuth";
@@ -65,6 +65,7 @@ const Shop = () => {
   const [customer, setCustomer] = useState<any>(null);
   const [isLoadingCustomer, setIsLoadingCustomer] = useState(false);
   const [walletBalance, setWalletBalance] = useState<number>(0);
+  const [showWalletBalance, setShowWalletBalance] = useState<boolean>(true);
 
   // Advanced search state
   const [debouncedQuery, setDebouncedQuery] = useState("");
@@ -838,17 +839,28 @@ const Shop = () => {
                   </Button>
                   
                   {/* Wallet Button */}
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => navigate('/customer/wallet')}
-                    className="flex items-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50"
-                  >
-                    <Wallet className="w-4 h-4" />
-                    <span className="text-sm">
-                      {walletBalance.toLocaleString()} IQD
-                    </span>
-                  </Button>
+                  <div className="flex items-center gap-1">
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => navigate('/customer/wallet')}
+                      className="flex items-center gap-2 text-green-600 hover:text-green-700 hover:bg-green-50"
+                    >
+                      <Wallet className="w-4 h-4" />
+                      <span className="text-sm">
+                        {showWalletBalance ? walletBalance.toLocaleString() : '••••••'} IQD
+                      </span>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowWalletBalance(!showWalletBalance)}
+                      className="p-1 h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50"
+                      title={showWalletBalance ? 'مخفی کردن موجودی کیف پول' : 'نمایش موجودی کیف پول'}
+                    >
+                      {showWalletBalance ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                    </Button>
+                  </div>
                   <Button 
                     variant="ghost" 
                     size="sm"
