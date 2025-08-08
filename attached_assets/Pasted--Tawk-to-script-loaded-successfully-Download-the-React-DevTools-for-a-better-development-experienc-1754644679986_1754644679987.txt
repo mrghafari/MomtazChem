@@ -1,0 +1,151 @@
+ Tawk.to script loaded successfully
+ Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+128x128:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+/api/admin/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ 🎛️ [FRONTEND CONTROLS] Loaded: undefined
+ 🎛️ [VISIBILITY] Discount Banner: false AI Features: false
+ 🌟 [RATINGS DEBUG] Product stats loaded: 0 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🔐 [AUTH] Guest user confirmed
+ 🎛️ [FRONTEND CONTROLS] Loaded: undefined
+ 🎛️ [VISIBILITY] Discount Banner: false AI Features: false
+ 🌟 [RATINGS DEBUG] Product stats loaded: 7 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🎛️ [FRONTEND CONTROLS] Loaded: undefined
+ 🎛️ [VISIBILITY] Discount Banner: false AI Features: false
+ 🌟 [RATINGS DEBUG] Product stats loaded: 7 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🎛️ [FRONTEND CONTROLS] Loaded: Object
+ 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+ 🌟 [RATINGS DEBUG] Product stats loaded: 7 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🎛️ [FRONTEND CONTROLS] Loaded: Object
+ 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+ 🌟 [RATINGS DEBUG] Product stats loaded: 7 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+ 🎛️ [FRONTEND CONTROLS] Loaded: Object
+ 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+ 🌟 [RATINGS DEBUG] Product stats loaded: 7 products with ratings
+ 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: Object
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 7 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:240 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:241 🌟 [RATINGS DEBUG] Products with ratings: Array(3)
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: Object
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 7 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:240 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:241 🌟 [RATINGS DEBUG] Products with ratings: Array(3)
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: Object
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 7 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:240 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:241 🌟 [RATINGS DEBUG] Products with ratings: Array(3)
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: Object
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 7 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:240 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:241 🌟 [RATINGS DEBUG] Products with ratings: Array(3)
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: Object
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 7 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:240 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:241 🌟 [RATINGS DEBUG] Products with ratings: Array(3)
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: Object
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 7 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:240 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:241 🌟 [RATINGS DEBUG] Products with ratings: Array(3)
+shop.tsx:400 🔐 [AUTH] Customer authenticated, cart will be synced automatically
+useCustomerAuth.ts:26 Customer auth check result: Object
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: Object
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 7 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:240 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:241 🌟 [RATINGS DEBUG] Products with ratings: Array(3)
+usePersistentCart.ts:54 🔐 User just logged in, resetting cart loaded flag
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: Object
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 7 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:240 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:241 🌟 [RATINGS DEBUG] Products with ratings: Array(3)
+shop.tsx:400 🔐 [AUTH] Customer authenticated, cart will be synced automatically
+usePersistentCart.ts:68 🛒 Loading persistent cart for customer: 94
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: Object
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 7 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:240 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:241 🌟 [RATINGS DEBUG] Products with ratings: Array(3)
+shop.tsx:444 🔄 Triggering cart reload after login
+usePersistentCart.ts:87 🛒 Loaded cart from database: Object
+shop.tsx:210 🎛️ [FRONTEND CONTROLS] Loaded: Object
+shop.tsx:211 🎛️ [VISIBILITY] Discount Banner: true AI Features: false
+shop.tsx:235 🌟 [RATINGS DEBUG] Product stats loaded: 7 products with ratings
+shop.tsx:236 🌟 [RATINGS DEBUG] Product stats data: Object
+shop.tsx:240 🌟 [RATINGS DEBUG] Current products: Array(5)
+shop.tsx:241 🌟 [RATINGS DEBUG] Products with ratings: Array(3)
+bank-receipt-upload.tsx:26 🔍 [URL DEBUG] paramOrderId: null
+bank-receipt-upload.tsx:27 🔍 [URL DEBUG] window.location: https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/customer/bank-receipt-upload/null
+bank-receipt-upload.tsx:29 🔍 [URL DEBUG] Setting orderId from param: null
+bank-receipt-upload.tsx:42 🔍 [URL DEBUG] Final orderId state will be: null
+bank-receipt-upload.tsx:49 🔍 [ORDER DEBUG] Fetching orders for orderId: null
+bank-receipt-upload.tsx:51 🔍 [ORDER DEBUG] Orders response: Object
+bank-receipt-upload.tsx:53 🔍 [ORDER DEBUG] Available orders: Array(2)
+bank-receipt-upload.tsx:55 🔍 [ORDER DEBUG] Found order: undefined
+@tanstack_react-query.js?v=569e559a:889 Query data cannot be undefined. Please make sure to return a value other than undefined from your query function. Affected query key: ["/api/customers/orders","null"]
+onSuccess @ @tanstack_react-query.js?v=569e559a:889
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:117574)
+    at t.value (twk-chunk-common.js:2:150658)
+    at p.updateUUID (twk-chunk-common.js:2:202310)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:124589)
+    at twk-chunk-common.js:2:123900
+value @ twk-chunk-common.js:2
+VM37235:23 Tawk.to Live Chat loaded successfully
+/api/payment/upload-receipt:1  Failed to load resource: the server responded with a status of 404 (Not Found)
+/api/admin/me:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+useAuth.ts:46 Auth check failed: Error: HTTP 403
+    at queryFn (useAuth.ts:39:17)
+queryFn @ useAuth.ts:46
+bank-receipt-upload.tsx:106  POST https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/payment/upload-receipt 404 (Not Found)
+(anonymous) @ bank-receipt-upload.tsx:106
+mutationFn @ bank-receipt-upload.tsx:82
+fn @ @tanstack_react-query.js?v=569e559a:1189
+run @ @tanstack_react-query.js?v=569e559a:494
+start @ @tanstack_react-query.js?v=569e559a:536
+execute @ @tanstack_react-query.js?v=569e559a:1225
+await in execute
+mutate @ @tanstack_react-query.js?v=569e559a:2630
+(anonymous) @ @tanstack_react-query.js?v=569e559a:3295
+handleUpload @ bank-receipt-upload.tsx:198
+callCallback2 @ chunk-RPCDYKBN.js?v=569e559a:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=569e559a:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=569e559a:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=569e559a:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=569e559a:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=569e559a:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=569e559a:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=569e559a:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=569e559a:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=569e559a:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=569e559a:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=569e559a:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=569e559a:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=569e559a:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=569e559a:5449
