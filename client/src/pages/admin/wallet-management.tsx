@@ -52,6 +52,7 @@ export default function WalletManagement() {
   const { toast } = useToast();
   const { user } = useAuth();
   const [selectedRequest, setSelectedRequest] = useState<WalletRechargeRequest | null>(null);
+  const [customerBalances, setCustomerBalances] = useState<{[key: number]: number}>({});
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
   const [isApprovalDialogOpen, setIsApprovalDialogOpen] = useState(false);
   const [adminNotes, setAdminNotes] = useState("");
@@ -172,12 +173,59 @@ export default function WalletManagement() {
     return () => clearTimeout(timeoutId);
   }, [modifyCustomerEmail]);
 
+  // Fetch customer balances when data loads
+  useEffect(() => {
+    if (pendingRequestsData?.data && pendingRequestsData.data.length > 0) {
+      const customerIds = pendingRequestsData.data.map(request => request.customerId);
+      const uniqueCustomerIds = [...new Set(customerIds)];
+      fetchCustomerBalances(uniqueCustomerIds);
+    }
+  }, [pendingRequestsData?.data]);
+
+  useEffect(() => {
+    if (allRequestsData?.data && allRequestsData.data.length > 0) {
+      const customerIds = allRequestsData.data.map(request => request.customerId);
+      const uniqueCustomerIds = [...new Set(customerIds)];
+      fetchCustomerBalances(uniqueCustomerIds);
+    }
+  }, [allRequestsData?.data]);
+
   // Handle customer selection
   const handleCustomerSelect = (customer: any) => {
     setSelectedCustomer(customer);
     setModifyCustomerId(customer.id);
     setModifyCustomerEmail(customer.email);
     setShowCustomerDropdown(false);
+  };
+
+  // Fetch customer wallet balances
+  const fetchCustomerBalances = async (customerIds: number[]) => {
+    try {
+      const balancePromises = customerIds.map(async (customerId) => {
+        try {
+          const response = await fetch(`/api/wallet/balance/${customerId}`, {
+            credentials: 'include'
+          });
+          if (response.ok) {
+            const result = await response.json();
+            return { customerId, balance: result.data.balance };
+          }
+          return { customerId, balance: 0 };
+        } catch (error) {
+          console.error(`Error fetching balance for customer ${customerId}:`, error);
+          return { customerId, balance: 0 };
+        }
+      });
+
+      const results = await Promise.all(balancePromises);
+      const balancesMap: {[key: number]: number} = {};
+      results.forEach(({ customerId, balance }) => {
+        balancesMap[customerId] = balance;
+      });
+      setCustomerBalances(balancesMap);
+    } catch (error) {
+      console.error('Error fetching customer balances:', error);
+    }
   };
 
   // Reset customer form
@@ -414,6 +462,7 @@ export default function WalletManagement() {
                       <TableRow>
                         <TableHead>Request #</TableHead>
                         <TableHead>Customer</TableHead>
+                        <TableHead>موجودی فعلی</TableHead>
                         <TableHead>Amount</TableHead>
                         <TableHead>Payment Method</TableHead>
                         <TableHead>Date</TableHead>
@@ -431,6 +480,13 @@ export default function WalletManagement() {
                                 {request.customer?.firstName || 'Unknown'} {request.customer?.lastName || 'Customer'}
                               </div>
                               <div className="text-sm text-gray-500">{request.customer?.email || 'No email'}</div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="font-medium text-blue-600">
+                              {customerBalances[request.customerId] !== undefined 
+                                ? formatCurrency(customerBalances[request.customerId], 'IQD')
+                                : <span className="text-gray-400">Loading...</span>}
                             </div>
                           </TableCell>
                           <TableCell>
@@ -517,6 +573,7 @@ export default function WalletManagement() {
                       <TableRow>
                         <TableHead>Request #</TableHead>
                         <TableHead>Customer</TableHead>
+                        <TableHead>موجودی فعلی</TableHead>
                         <TableHead>Amount</TableHead>
                         <TableHead>Payment Method</TableHead>
                         <TableHead>Date</TableHead>
@@ -534,6 +591,13 @@ export default function WalletManagement() {
                                 {request.customer?.firstName || 'Unknown'} {request.customer?.lastName || 'Customer'}
                               </div>
                               <div className="text-sm text-gray-500">{request.customer?.email || 'No email'}</div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="font-medium text-blue-600">
+                              {customerBalances[request.customerId] !== undefined 
+                                ? formatCurrency(customerBalances[request.customerId], 'IQD')
+                                : <span className="text-gray-400">Loading...</span>}
                             </div>
                           </TableCell>
                           <TableCell>

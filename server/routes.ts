@@ -32123,6 +32123,32 @@ momtazchem.com
     }
   });
 
+  // Get customer wallet balance by customer ID
+  app.get('/api/wallet/balance/:customerId', async (req, res) => {
+    try {
+      const customerId = parseInt(req.params.customerId);
+      if (isNaN(customerId)) {
+        return res.status(400).json({ success: false, message: 'Invalid customer ID' });
+      }
+      
+      const balance = await walletStorage.getWalletBalance(customerId);
+      const wallet = await walletStorage.getWalletByCustomerId(customerId);
+      
+      res.json({ 
+        success: true, 
+        data: {
+          customerId,
+          balance,
+          currency: wallet?.currency || 'IQD',
+          walletExists: !!wallet
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching customer wallet balance:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch wallet balance' });
+    }
+  });
+
   // Get pending recharge requests (alternative without auth)
   app.get('/api/wallet/recharge-requests/pending', async (req, res) => {
     try {
