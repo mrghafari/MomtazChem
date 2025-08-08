@@ -31671,17 +31671,42 @@ momtazchem.com
 
   // Financial order print endpoint
   app.post('/api/financial/print-order', requireAuth, async (req, res) => {
+    console.log('📄 [FINANCIAL PDF] Request received');
+    let browser;
+    
     try {
       const { htmlContent, filename } = req.body;
       
-      const browser = await puppeteer.launch({
+      if (!htmlContent) {
+        console.error('❌ [FINANCIAL PDF] Missing htmlContent in request');
+        return res.status(400).json({ success: false, message: 'HTML content is required' });
+      }
+      
+      console.log('📄 [FINANCIAL PDF] Launching Puppeteer browser...');
+      browser = await puppeteer.launch({
         headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        args: [
+          '--no-sandbox', 
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-accelerated-2d-canvas',
+          '--no-first-run',
+          '--no-zygote',
+          '--single-process',
+          '--disable-gpu'
+        ]
       });
       
+      console.log('📄 [FINANCIAL PDF] Creating new page...');
       const page = await browser.newPage();
-      await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
       
+      console.log('📄 [FINANCIAL PDF] Setting content...');
+      await page.setContent(htmlContent, { 
+        waitUntil: 'networkidle0',
+        timeout: 30000 
+      });
+      
+      console.log('📄 [FINANCIAL PDF] Generating PDF...');
       const pdfBuffer = await page.pdf({
         format: 'A4',
         printBackground: true,
@@ -31689,19 +31714,40 @@ momtazchem.com
           top: '10mm',
           right: '10mm',
           bottom: '10mm',
-          left: '100mm'
+          left: '10mm'
         }
       });
       
-      await browser.close();
-
+      console.log('📄 [FINANCIAL PDF] PDF generated successfully, size:', pdfBuffer.length, 'bytes');
+      
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', `attachment; filename="${filename || 'financial-order.pdf'}"`);
       res.send(pdfBuffer);
       
+      console.log('✅ [FINANCIAL PDF] PDF sent successfully');
+      
     } catch (error) {
-      console.error('Error generating financial order PDF:', error);
-      res.status(500).json({ success: false, message: 'Failed to generate PDF' });
+      console.error('❌ [FINANCIAL PDF] Error generating PDF:', error);
+      console.error('❌ [FINANCIAL PDF] Error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to generate PDF',
+        error: error.message 
+      });
+    } finally {
+      if (browser) {
+        try {
+          console.log('📄 [FINANCIAL PDF] Closing browser...');
+          await browser.close();
+          console.log('📄 [FINANCIAL PDF] Browser closed successfully');
+        } catch (closeError) {
+          console.error('❌ [FINANCIAL PDF] Error closing browser:', closeError);
+        }
+      }
     }
   });
 

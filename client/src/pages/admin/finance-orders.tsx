@@ -1053,6 +1053,7 @@ function FinanceOrders() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
           htmlContent: printContent,
           filename: `order-${orderDetails.orderNumber}.pdf`
