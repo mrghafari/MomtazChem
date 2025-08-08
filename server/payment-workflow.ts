@@ -214,6 +214,31 @@ export class PaymentWorkflowService {
     
     const totalAmount = parseFloat(customerOrder.totalAmount);
     
+    // ✅ CRITICAL: بررسی موجودی کیف پول قبل از برداشت
+    const [currentWallet] = await db
+      .select({ balance: customerWallets.balance })
+      .from(customerWallets)
+      .where(eq(customerWallets.customerId, orderData.customerId))
+      .limit(1);
+    
+    const currentBalance = parseFloat(currentWallet?.balance || "0");
+    
+    if (currentBalance < totalAmount) {
+      console.log(`❌ [WALLET] Insufficient balance for order ${customerOrder.orderNumber}:`, {
+        required: totalAmount,
+        available: currentBalance,
+        deficit: totalAmount - currentBalance
+      });
+      
+      throw new Error(`موجودی کیف پول کافی نیست. مورد نیاز: ${totalAmount.toLocaleString()} دینار، موجود: ${currentBalance.toLocaleString()} دینار`);
+    }
+    
+    console.log(`✅ [WALLET] Sufficient balance confirmed:`, {
+      required: totalAmount,
+      available: currentBalance,
+      remaining: currentBalance - totalAmount
+    });
+    
     // برداشت از کیف پول
     await this.deductFromWallet(orderData.customerId, totalAmount, customerOrder.orderNumber);
     
@@ -239,8 +264,33 @@ export class PaymentWorkflowService {
     const walletAmount = parseFloat(orderData.walletAmount || "0");
     const bankAmount = totalAmount - walletAmount;
     
-    // برداشت از کیف پول
+    // ✅ CRITICAL: بررسی موجودی کیف پول برای پرداخت ترکیبی
     if (walletAmount > 0) {
+      const [currentWallet] = await db
+        .select({ balance: customerWallets.balance })
+        .from(customerWallets)
+        .where(eq(customerWallets.customerId, orderData.customerId))
+        .limit(1);
+      
+      const currentBalance = parseFloat(currentWallet?.balance || "0");
+      
+      if (currentBalance < walletAmount) {
+        console.log(`❌ [PARTIAL WALLET] Insufficient balance for hybrid payment:`, {
+          walletRequired: walletAmount,
+          available: currentBalance,
+          deficit: walletAmount - currentBalance
+        });
+        
+        throw new Error(`موجودی کیف پول برای پرداخت ترکیبی کافی نیست. مورد نیاز: ${walletAmount.toLocaleString()} دینار، موجود: ${currentBalance.toLocaleString()} دینار`);
+      }
+      
+      console.log(`✅ [PARTIAL WALLET] Sufficient balance for wallet portion:`, {
+        walletRequired: walletAmount,
+        available: currentBalance,
+        bankAmount: bankAmount
+      });
+      
+      // برداشت از کیف پول
       await this.deductFromWallet(orderData.customerId, walletAmount, customerOrder.orderNumber);
     }
     
@@ -276,18 +326,49 @@ export class PaymentWorkflowService {
     this.scheduleGracePeriodReminders(customerOrder, orderMgmt);
   }
   
-  // 9. برداشت از کیف پول
+  // 9. برداشت از کیف پول با بررسی نهایی موجودی
   private async deductFromWallet(customerId: number, amount: number, orderNumber: string) {
     console.log(`💰 [WALLET DEDUCT] ${amount} IQD from customer ${customerId}`);
     
-    // بروزرسانی موجودی
-    await db
+    // 🔒 FINAL SAFETY CHECK: بررسی نهایی موجودی قبل از برداشت
+    const [wallet] = await db
+      .select({ balance: customerWallets.balance })
+      .from(customerWallets)
+      .where(eq(customerWallets.customerId, customerId))
+      .limit(1);
+    
+    const currentBalance = parseFloat(wallet?.balance || "0");
+    
+    if (currentBalance < amount) {
+      console.error(`🚨 [WALLET SAFETY] CRITICAL: Attempted overdraft prevented!`, {
+        customerId,
+        orderNumber,
+        attemptedDeduction: amount,
+        currentBalance,
+        deficit: amount - currentBalance
+      });
+      
+      throw new Error(`خطای امنیتی: تلاش برای برداشت بیش از موجودی کیف پول. موجود: ${currentBalance.toLocaleString()}, درخواستی: ${amount.toLocaleString()}`);
+    }
+    
+    // بروزرسانی موجودی با UPDATE امن
+    const updateResult = await db
       .update(customerWallets)
       .set({
         balance: sql`${customerWallets.balance} - ${amount}`,
         updatedAt: new Date()
       })
-      .where(eq(customerWallets.customerId, customerId));
+      .where(and(
+        eq(customerWallets.customerId, customerId),
+        gte(customerWallets.balance, amount.toString()) // شرط اضافی برای جلوگیری از منفی شدن
+      ))
+      .returning({ newBalance: customerWallets.balance });
+    
+    if (updateResult.length === 0) {
+      throw new Error(`خطا در بروزرسانی کیف پول: موجودی ناکافی یا مشکل در دیتابیس`);
+    }
+    
+    console.log(`✅ [WALLET DEDUCT] Successfully deducted ${amount} IQD, new balance: ${updateResult[0].newBalance}`);
     
     // ثبت تراکنش
     await db
