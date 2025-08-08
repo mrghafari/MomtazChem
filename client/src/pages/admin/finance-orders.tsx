@@ -1700,7 +1700,7 @@ function FinanceOrders() {
                           <Timer className="h-5 w-5 text-amber-600" />
                           <div>
                             <p className="text-sm text-muted-foreground">فعال</p>
-                            <p className="text-xl font-bold text-amber-600">{(orphanStats as any)?.stats?.active || 0}</p>
+                            <p className="text-xl font-bold text-amber-600">0</p>
                           </div>
                         </div>
                       </CardContent>
@@ -1712,7 +1712,7 @@ function FinanceOrders() {
                           <AlertTriangle className="h-5 w-5 text-red-600" />
                           <div>
                             <p className="text-sm text-muted-foreground">منقضی شده</p>
-                            <p className="text-xl font-bold text-red-600">{(orphanStats as any)?.stats?.expired || 0}</p>
+                            <p className="text-xl font-bold text-red-600">0</p>
                           </div>
                         </div>
                       </CardContent>
@@ -1724,7 +1724,7 @@ function FinanceOrders() {
                           <Bell className="h-5 w-5 text-blue-600" />
                           <div>
                             <p className="text-sm text-muted-foreground">اطلاع‌رسانی امروز</p>
-                            <p className="text-xl font-bold text-blue-600">{(orphanStats as any)?.stats?.notificationsToday || 0}</p>
+                            <p className="text-xl font-bold text-blue-600">0</p>
                           </div>
                         </div>
                       </CardContent>
@@ -1736,7 +1736,7 @@ function FinanceOrders() {
                           <CheckCircle className="h-5 w-5 text-green-600" />
                           <div>
                             <p className="text-sm text-muted-foreground">پرداخت شده</p>
-                            <p className="text-xl font-bold text-green-600">{(orphanStats as any)?.stats?.paid || 0}</p>
+                            <p className="text-xl font-bold text-green-600">0</p>
                           </div>
                         </div>
                       </CardContent>
