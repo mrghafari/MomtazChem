@@ -175,19 +175,49 @@ export class CustomerStorage implements ICustomerStorage {
     
     // Use transaction-safe order creation to ensure sequential numbering without gaps
     let order: any;
-    let orderNumber: string | null = orderData.orderNumber || null;
+    let orderNumber: string | null;
     
-    // 🏦 BANK PAYMENT WORKFLOW: Only generate order numbers for non-null orderNumber inputs
-    const shouldGenerateOrderNumber = orderNumber === null || orderNumber === undefined;
-    console.log(`🔍 [ORDER NUMBER DEBUG] Input orderNumber: ${orderData.orderNumber}, shouldGenerate: ${shouldGenerateOrderNumber}`);
+    // 🏦 BANK PAYMENT WORKFLOW: Handle order number generation correctly
+    // - If orderData.orderNumber is explicitly null/undefined → Bank payment, keep as null (no order number)
+    // - If orderData.orderNumber is provided → Use the provided order number
+    // - If orderData.orderNumber is not specified at all → Generate new order number (non-bank)
+    
+    const hasExplicitOrderNumber = 'orderNumber' in orderData;
+    const providedOrderNumber = orderData.orderNumber;
+    
+    console.log(`🔍 [ORDER NUMBER DEBUG] hasExplicitOrderNumber: ${hasExplicitOrderNumber}, providedOrderNumber: ${providedOrderNumber}`);
+    
+    if (hasExplicitOrderNumber && (providedOrderNumber === null || providedOrderNumber === undefined)) {
+      // Bank payment - explicitly set to null to prevent order number generation
+      orderNumber = null;
+      console.log(`🏦 [BANK ORDER] Explicit null order number - no order number will be assigned (bank payment)`);
+    } else if (hasExplicitOrderNumber && providedOrderNumber) {
+      // Order number explicitly provided - use it
+      orderNumber = providedOrderNumber;
+      console.log(`📝 [PROVIDED ORDER] Using provided order number: ${orderNumber}`);
+    } else {
+      // No order number specified - generate one (non-bank payment)
+      orderNumber = null; // Will be generated below
+      console.log(`🔢 [GENERATE ORDER] No order number specified - will generate new one`);
+    }
     
     await customerDb.transaction(async (tx) => {
-      // Only generate order number if not provided (null indicates bank payment)
-      if (shouldGenerateOrderNumber) {
-        orderNumber = await orderManagementStorage.generateOrderNumberInTransaction(tx);
-        console.log(`✅ [NON-BANK ORDER] Generated order number ${orderNumber}`);
+      // Simplified logic for order number generation:
+      // - If orderNumber is null and orderData.orderNumber was explicitly null → Bank payment, keep null
+      // - If orderNumber is null and orderData.orderNumber was not provided → Generate order number
+      // - If orderNumber has a value → Use the provided order number
+      
+      if (orderNumber === null) {
+        if (hasExplicitOrderNumber && (providedOrderNumber === null || providedOrderNumber === undefined)) {
+          // Bank payment: orderData.orderNumber was explicitly set to null/undefined
+          console.log(`🏦 [BANK ORDER] Order created without order number (will be assigned after payment verification)`);
+        } else {
+          // Non-bank payment: orderData.orderNumber was not provided, so generate one
+          orderNumber = await orderManagementStorage.generateOrderNumberInTransaction(tx);
+          console.log(`✅ [NON-BANK ORDER] Generated order number ${orderNumber}`);
+        }
       } else {
-        console.log(`🏦 [BANK ORDER] Using provided order number: ${orderNumber} (no generation needed)`);
+        console.log(`📝 [PROVIDED ORDER] Using order number: ${orderNumber}`);
       }
       
       // Create order with the final order number within same transaction
