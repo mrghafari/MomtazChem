@@ -15418,7 +15418,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // 💰 [PURE_WALLET] Handle pure wallet payment method FIRST (before bank routing)
-      if (finalPaymentMethod === 'wallet') {
+      if (finalPaymentMethod === 'wallet' || finalPaymentMethod === 'wallet_full') {
         console.log(`💰 [PURE_WALLET] Processing pure wallet payment for ${totalAmount} IQD`);
         
         // 🔢 [AUTO ORDER NUMBER] Assign order number for confirmed wallet payment
@@ -15436,6 +15436,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // 🏭 [AUTO WAREHOUSE] Send confirmed wallet payment directly to warehouse
         try {
           await customerStorage.updateOrderStatus(order.id, 'warehouse_pending');
+          
+          // Update payment status and method directly in database
+          await db
+            .update(customerOrders)
+            .set({
+              paymentStatus: 'paid',
+              paymentMethod: 'wallet_full',
+              updatedAt: new Date()
+            })
+            .where(eq(customerOrders.id, order.id));
+            
           console.log(`🏭 [WALLET PAYMENT] Order ${order.orderNumber} sent directly to warehouse`);
         } catch (error) {
           console.error('❌ Error sending wallet payment to warehouse:', error);
@@ -15481,6 +15492,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // 🏭 [AUTO WAREHOUSE] Send confirmed full wallet payment directly to warehouse
           try {
             await customerStorage.updateOrderStatus(order.id, 'warehouse_pending');
+            
+            // Update payment status and method directly in database
+            await db
+              .update(customerOrders)
+              .set({
+                paymentStatus: 'paid',
+                paymentMethod: 'wallet_full',
+                updatedAt: new Date()
+              })
+              .where(eq(customerOrders.id, order.id));
+              
             console.log(`🏭 [WALLET_FULL] Order ${order.orderNumber} sent directly to warehouse`);
           } catch (error) {
             console.error('❌ Error sending full wallet payment to warehouse:', error);

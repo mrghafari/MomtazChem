@@ -1,0 +1,208 @@
+ Tawk.to script loaded successfully
+ Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+ 
+value @ twk-chunk-common.js:2
+ Auth check result: Object
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+ Tawk.to Live Chat loaded successfully
+ 🔍 [DEBUG] Site Management component initialized
+ 🔍 [DEBUG] useEffect triggered, userPermissions: undefined
+ 🔍 [DEBUG] Site Management component initialized
+ 🔍 [DEBUG] useEffect triggered, userPermissions: Object
+ 🔍 [DEBUG] userPermissions modules: Array(34)
+ 🔍 [DEBUG] Full userPermissions response: Object
+ 🔍 [DEBUG] userPermissions.modules: Array(34)
+ 🔍 [DEBUG] userPermissions.permissions: Array(34)
+ 🔍 [DEBUG] Total allButtons count: 35
+ 🔍 [DEBUG] AI Settings exists in allButtons: true
+ 🔍 [DEBUG] Content Management exists in allButtons: true
+ 🔍 [DEBUG] allowedModules: Array(34)
+ 🔍 [DEBUG] kpi_dashboard in allowedModules? true
+ 🔍 [DEBUG] management_dashboard in allowedModules? true
+ 🔍 [DEBUG] finance in allowedModules? true
+ 🔍 [DEBUG] geography_analytics in allowedModules? true
+ 🔍 [DEBUG] ai_settings in allowedModules? true
+ 🔍 [DEBUG] content_management in allowedModules? true
+ 🔍 [CRITICAL] Missing button detection:
+ 🔍 [MISSING] order-tracking-view Order Management & Tracking - View Only moduleId: order_tracking
+ 🔍 [CRITICAL] Missing buttons count: 1
+ 🔍 [DEBUG] finance button found in allButtons? Object
+ 🔍 [DEBUG] geography_analytics button found in allButtons? Object
+ 🔍 [DEBUG] ai_settings button found in allButtons? Object
+ 🔍 [DEBUG] content_management button found in allButtons? Object
+ 🔍 [DEBUG] finance button in filtered? Object
+ 🔍 [DEBUG] geography_analytics button in filtered? Object
+ 🔍 [DEBUG] ai_settings button in filtered? Object
+ 🔍 [DEBUG] content_management button in filtered? Object
+ 🔍 [DEBUG] filtered buttons count: 34
+ 🔍 [DEBUG] First 5 filtered buttons: Array(5)
+ 🔍 [DEBUG] AI Control button in filtered: Object
+ 🔍 [DEBUG] Content Management button in filtered: Object
+ 🔍 [DEBUG] Site Management component initialized
+ 🔄 [FINAL ORDER] Orders after sorting: Array(0)
+ 🔄 [SORTING DEBUG] Order A: M2511155 ( 2511155 ) Order B: M2511153 ( 2511153 )
+ 🔄 [SORTING DEBUG] Sort result: 2 - older order first
+ 🔄 [SORTING DEBUG] Order A: M2511156 ( 2511156 ) Order B: M2511155 ( 2511155 )
+ 🔄 [SORTING DEBUG] Sort result: 1 - older order first
+ 🔄 [SORTING DEBUG] Order A: M2511157 ( 2511157 ) Order B: M2511155 ( 2511155 )
+ 🔄 [SORTING DEBUG] Sort result: 2 - older order first
+ 🔄 [SORTING DEBUG] Order A: M2511157 ( 2511157 ) Order B: M2511156 ( 2511156 )
+ 🔄 [SORTING DEBUG] Sort result: 1 - older order first
+ 🔄 [SORTING DEBUG] Order A: M2511158 ( 2511158 ) Order B: M2511156 ( 2511156 )
+ 🔄 [SORTING DEBUG] Sort result: 2 - older order first
+warehouse-management-fixed.tsx:474 🔄 [SORTING DEBUG] Order A: M2511158 ( 2511158 ) Order B: M2511157 ( 2511157 )
+warehouse-management-fixed.tsx:478 🔄 [SORTING DEBUG] Sort result: 1 - older order first
+warehouse-management-fixed.tsx:474 🔄 [SORTING DEBUG] Order A: M2511159 ( 2511159 ) Order B: M2511156 ( 2511156 )
+warehouse-management-fixed.tsx:478 🔄 [SORTING DEBUG] Sort result: 3 - older order first
+warehouse-management-fixed.tsx:474 🔄 [SORTING DEBUG] Order A: M2511159 ( 2511159 ) Order B: M2511158 ( 2511158 )
+warehouse-management-fixed.tsx:478 🔄 [SORTING DEBUG] Sort result: 1 - older order first
+warehouse-management-fixed.tsx:474 🔄 [SORTING DEBUG] Order A: M2511160 ( 2511160 ) Order B: M2511157 ( 2511157 )
+warehouse-management-fixed.tsx:478 🔄 [SORTING DEBUG] Sort result: 3 - older order first
+warehouse-management-fixed.tsx:474 🔄 [SORTING DEBUG] Order A: M2511160 ( 2511160 ) Order B: M2511159 ( 2511159 )
+warehouse-management-fixed.tsx:478 🔄 [SORTING DEBUG] Sort result: 1 - older order first
+warehouse-management-fixed.tsx:489 🔄 [FINAL ORDER] Orders after sorting: Array(7)
+warehouse-management-fixed.tsx:474 🔄 [SORTING DEBUG] Order A: M2511155 ( 2511155 ) Order B: M2511153 ( 2511153 )
+warehouse-management-fixed.tsx:478 🔄 [SORTING DEBUG] Sort result: 2 - older order first
+warehouse-management-fixed.tsx:474 🔄 [SORTING DEBUG] Order A: M2511156 ( 2511156 ) Order B: M2511155 ( 2511155 )
+warehouse-management-fixed.tsx:478 🔄 [SORTING DEBUG] Sort result: 1 - older order first
+warehouse-management-fixed.tsx:474 🔄 [SORTING DEBUG] Order A: M2511157 ( 2511157 ) Order B: M2511155 ( 2511155 )
+warehouse-management-fixed.tsx:478 🔄 [SORTING DEBUG] Sort result: 2 - older order first
+warehouse-management-fixed.tsx:474 🔄 [SORTING DEBUG] Order A: M2511157 ( 2511157 ) Order B: M2511156 ( 2511156 )
+warehouse-management-fixed.tsx:478 🔄 [SORTING DEBUG] Sort result: 1 - older order first
+warehouse-management-fixed.tsx:474 🔄 [SORTING DEBUG] Order A: M2511158 ( 2511158 ) Order B: M2511156 ( 2511156 )
+warehouse-management-fixed.tsx:478 🔄 [SORTING DEBUG] Sort result: 2 - older order first
+warehouse-management-fixed.tsx:474 🔄 [SORTING DEBUG] Order A: M2511158 ( 2511158 ) Order B: M2511157 ( 2511157 )
+warehouse-management-fixed.tsx:478 🔄 [SORTING DEBUG] Sort result: 1 - older order first
+warehouse-management-fixed.tsx:474 🔄 [SORTING DEBUG] Order A: M2511159 ( 2511159 ) Order B: M2511156 ( 2511156 )
+warehouse-management-fixed.tsx:478 🔄 [SORTING DEBUG] Sort result: 3 - older order first
+warehouse-management-fixed.tsx:474 🔄 [SORTING DEBUG] Order A: M2511159 ( 2511159 ) Order B: M2511158 ( 2511158 )
+warehouse-management-fixed.tsx:478 🔄 [SORTING DEBUG] Sort result: 1 - older order first
+warehouse-management-fixed.tsx:474 🔄 [SORTING DEBUG] Order A: M2511160 ( 2511160 ) Order B: M2511157 ( 2511157 )
+warehouse-management-fixed.tsx:478 🔄 [SORTING DEBUG] Sort result: 3 - older order first
+warehouse-management-fixed.tsx:474 🔄 [SORTING DEBUG] Order A: M2511160 ( 2511160 ) Order B: M2511159 ( 2511159 )
+warehouse-management-fixed.tsx:478 🔄 [SORTING DEBUG] Sort result: 1 - older order first
+warehouse-management-fixed.tsx:489 🔄 [FINAL ORDER] Orders after sorting: Array(7)
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+site-management-fixed.tsx:71 🔍 [DEBUG] useEffect triggered, userPermissions: undefined
+useAuth.ts:43 Auth check result: Object
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+site-management-fixed.tsx:71 🔍 [DEBUG] useEffect triggered, userPermissions: Object
+site-management-fixed.tsx:74 🔍 [DEBUG] userPermissions modules: Array(34)
+site-management-fixed.tsx:430 🔍 [DEBUG] Full userPermissions response: Object
+site-management-fixed.tsx:431 🔍 [DEBUG] userPermissions.modules: Array(34)
+site-management-fixed.tsx:432 🔍 [DEBUG] userPermissions.permissions: Array(34)
+site-management-fixed.tsx:437 🔍 [DEBUG] Total allButtons count: 35
+site-management-fixed.tsx:438 🔍 [DEBUG] AI Settings exists in allButtons: true
+site-management-fixed.tsx:439 🔍 [DEBUG] Content Management exists in allButtons: true
+site-management-fixed.tsx:441 🔍 [DEBUG] allowedModules: Array(34)
+site-management-fixed.tsx:442 🔍 [DEBUG] kpi_dashboard in allowedModules? true
+site-management-fixed.tsx:443 🔍 [DEBUG] management_dashboard in allowedModules? true
+site-management-fixed.tsx:444 🔍 [DEBUG] finance in allowedModules? true
+site-management-fixed.tsx:445 🔍 [DEBUG] geography_analytics in allowedModules? true
+site-management-fixed.tsx:446 🔍 [DEBUG] ai_settings in allowedModules? true
+site-management-fixed.tsx:447 🔍 [DEBUG] content_management in allowedModules? true
+site-management-fixed.tsx:453 🔍 [CRITICAL] Missing button detection:
+site-management-fixed.tsx:457 🔍 [MISSING] order-tracking-view Order Management & Tracking - View Only moduleId: order_tracking
+site-management-fixed.tsx:461 🔍 [CRITICAL] Missing buttons count: 1
+site-management-fixed.tsx:463 🔍 [DEBUG] finance button found in allButtons? Object
+site-management-fixed.tsx:464 🔍 [DEBUG] geography_analytics button found in allButtons? Object
+site-management-fixed.tsx:465 🔍 [DEBUG] ai_settings button found in allButtons? Object
+site-management-fixed.tsx:466 🔍 [DEBUG] content_management button found in allButtons? Object
+site-management-fixed.tsx:467 🔍 [DEBUG] finance button in filtered? Object
+site-management-fixed.tsx:468 🔍 [DEBUG] geography_analytics button in filtered? Object
+site-management-fixed.tsx:469 🔍 [DEBUG] ai_settings button in filtered? Object
+site-management-fixed.tsx:470 🔍 [DEBUG] content_management button in filtered? Object
+site-management-fixed.tsx:76 🔍 [DEBUG] filtered buttons count: 34
+site-management-fixed.tsx:77 🔍 [DEBUG] First 5 filtered buttons: Array(5)
+site-management-fixed.tsx:78 🔍 [DEBUG] AI Control button in filtered: Object
+site-management-fixed.tsx:79 🔍 [DEBUG] Content Management button in filtered: Object
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+finance-orders.tsx:200 🔍 [APPROVED ORDERS] Raw response: Array(10)
+useOrderNotifications.ts:108 🔔 [FINANCIAL] نوتیفیکیشن: 8 سفارش جدید دریافت شد
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+useAuth.ts:43 Auth check result: Object
+finance-orders.tsx:200 🔍 [APPROVED ORDERS] Raw response: Array(10)
+finance-orders.tsx:383 📋 [ORDER DETAILS] Order fetched: M2511161
+finance-orders.tsx:384 📋 [ORDER DETAILS] Items count: 1
+finance-orders.tsx:385 📋 [ORDER DETAILS] Items data: Array(1)
+chunk-4V2R5CKU.js?v=569e559a:341 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-4V2R5CKU.js?v=569e559a:341
+/api/financial/print-order:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+finance-orders.tsx:1076 PDF generation failed: Error: Failed to generate PDF
+    at handlePrintOrder (finance-orders.tsx:1073:15)
+handlePrintOrder @ finance-orders.tsx:1076
+/api/financial/print-order:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+finance-orders.tsx:1076 PDF generation failed: Error: Failed to generate PDF
+    at handlePrintOrder (finance-orders.tsx:1073:15)
+handlePrintOrder @ finance-orders.tsx:1076
+/api/financial/print-order:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+finance-orders.tsx:1076 PDF generation failed: Error: Failed to generate PDF
+    at handlePrintOrder (finance-orders.tsx:1073:15)
+handlePrintOrder @ finance-orders.tsx:1076
+useAuth.ts:43 Auth check result: Object
+finance-orders.tsx:200 🔍 [APPROVED ORDERS] Raw response: Array(10)
+finance-orders.tsx:383 📋 [ORDER DETAILS] Order fetched: M2511161
+finance-orders.tsx:384 📋 [ORDER DETAILS] Items count: 1
+finance-orders.tsx:385 📋 [ORDER DETAILS] Items data: [{…}]
+chunk-4V2R5CKU.js?v=569e559a:341 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-4V2R5CKU.js?v=569e559a:341
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=569e559a:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=569e559a:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=569e559a:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=569e559a:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=569e559a:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=569e559a:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=569e559a:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=569e559a:19416
+commitRoot @ chunk-RPCDYKBN.js?v=569e559a:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=569e559a:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=569e559a:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=569e559a:19432
+commitRoot @ chunk-RPCDYKBN.js?v=569e559a:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=569e559a:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=569e559a:18718
+workLoop @ chunk-RPCDYKBN.js?v=569e559a:197
+flushWork @ chunk-RPCDYKBN.js?v=569e559a:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=569e559a:384
+finance-orders.tsx:383 📋 [ORDER DETAILS] Order fetched: M2511161
+finance-orders.tsx:384 📋 [ORDER DETAILS] Items count: 1
+finance-orders.tsx:385 📋 [ORDER DETAILS] Items data: [{…}]
+finance-orders.tsx:1051  POST https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/financial/print-order 500 (Internal Server Error)
+handlePrintOrder @ finance-orders.tsx:1051
+callCallback2 @ chunk-RPCDYKBN.js?v=569e559a:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=569e559a:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=569e559a:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=569e559a:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=569e559a:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=569e559a:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=569e559a:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=569e559a:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=569e559a:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=569e559a:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=569e559a:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=569e559a:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=569e559a:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=569e559a:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=569e559a:5449
+finance-orders.tsx:1076 PDF generation failed: Error: Failed to generate PDF
+    at handlePrintOrder (finance-orders.tsx:1073:15)
+handlePrintOrder @ finance-orders.tsx:1076
+await in handlePrintOrder
+callCallback2 @ chunk-RPCDYKBN.js?v=569e559a:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=569e559a:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=569e559a:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=569e559a:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=569e559a:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=569e559a:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=569e559a:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=569e559a:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=569e559a:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=569e559a:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=569e559a:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=569e559a:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=569e559a:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=569e559a:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=569e559a:5449
+useAuth.ts:43 Auth check result: {success: true, user: {…}}
+finance-orders.tsx:200 🔍 [APPROVED ORDERS] Raw response: (10) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]

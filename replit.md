@@ -59,3 +59,7 @@ Key tables cover Customer Management, Order Processing, Product Catalog, Invento
 - **PDF Generation**: Puppeteer, PDFKit/pdfMake
 - **Barcode Generation**: GS1-compliant EAN-13 barcode system
 - **Remote Desktop**: RustDesk, TeamViewer, AnyDesk, Chrome Remote Desktop, Microsoft RDP
+
+## Recent Changes
+
+**Pure Wallet Payment Routing Fix (August 2025)**: Permanently resolved critical issue where pure wallet payments were incorrectly going to finance department instead of directly to warehouse. Enhanced backend payment processing to properly handle all wallet payment variations (wallet, wallet_full, wallet_partial) and ensure automatic order number assignment with direct warehouse routing. Fixed specific case of order M2511161 and implemented comprehensive backend logic to prevent future occurrences. Pure wallet payments now automatically update to paid status, receive order numbers, and proceed directly to warehouse_pending without manual intervention. System now correctly distinguishes between partial wallet payments requiring additional bank payment and complete wallet payments that should bypass finance approval entirely.
