@@ -925,7 +925,9 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const walletBalance = (walletData as any)?.data?.wallet ? parseFloat((walletData as any).data.wallet.balance) : 
                        (walletData as any)?.wallet ? parseFloat((walletData as any).wallet.balance) : 
                        (walletData as any)?.balance ? parseFloat((walletData as any).balance) : 0;
-  const canUseWallet = walletBalance > 0 && (existingCustomer || (customerData as any)?.success);
+  // Check if wallet is enabled in admin settings
+  const isWalletEnabledInSettings = availablePaymentMethods.some((method: any) => method.methodKey === 'wallet');
+  const canUseWallet = walletBalance > 0 && (existingCustomer || (customerData as any)?.success) && isWalletEnabledInSettings;
   const maxWalletAmount = Math.min(walletBalance, totalAmount);
   const remainingAfterWallet = totalAmount - (paymentMethod === 'wallet' ? totalAmount : 0);
   
@@ -1897,7 +1899,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                 })}
                 
                 {/* دوم: پرداخت از کیف پول (تمام یا بخش از آن) */}
-                {canUseWallet && (
+                {canUseWallet && isWalletEnabledInSettings && (
                   <div className="flex items-center space-x-2 space-x-reverse">
                     <RadioGroupItem value="wallet_combined" id="wallet_combined" />
                     <Label htmlFor="wallet_combined" className="flex items-center gap-2 cursor-pointer">
