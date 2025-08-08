@@ -62,8 +62,57 @@ export default function SuperAdminOrderManagement() {
   const [preserveCustomers, setPreserveCustomers] = useState(false);
   const [activeTab, setActiveTab] = useState('orders');
   const [customerEmailSearch, setCustomerEmailSearch] = useState('');
+  const [emailSuggestions, setEmailSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Email suggestions query for autocomplete
+  const { data: emailSuggestionsData } = useQuery({
+    queryKey: ['/api/super-admin/email-suggestions', customerEmailSearch],
+    queryFn: async () => {
+      if (!customerEmailSearch.trim() || customerEmailSearch.trim().length < 3) {
+        return { success: true, data: [] };
+      }
+      const response = await fetch(`/api/super-admin/email-suggestions?q=${encodeURIComponent(customerEmailSearch.trim())}`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    },
+    enabled: customerEmailSearch.trim().length >= 3,
+    staleTime: 5000, // Cache suggestions for 5 seconds
+  });
+
+  // Update suggestions when data changes
+  React.useEffect(() => {
+    if (emailSuggestionsData?.data) {
+      setEmailSuggestions(emailSuggestionsData.data);
+      setShowSuggestions(emailSuggestionsData.data.length > 0 && customerEmailSearch.trim().length >= 3);
+    } else {
+      setEmailSuggestions([]);
+      setShowSuggestions(false);
+    }
+  }, [emailSuggestionsData, customerEmailSearch]);
+
+  // Handle suggestion selection
+  const handleSuggestionSelect = (email: string) => {
+    setCustomerEmailSearch(email);
+    setShowSuggestions(false);
+  };
+
+  // Handle input change
+  const handleEmailInputChange = (value: string) => {
+    setCustomerEmailSearch(value);
+    if (value.trim().length < 3) {
+      setShowSuggestions(false);
+    }
+  };
 
   // Fetch deletable orders
   const { data: response, isLoading, refetch } = useQuery({
@@ -488,16 +537,46 @@ export default function SuperAdminOrderManagement() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex gap-4 items-end">
-                  <div className="flex-1">
+                  <div className="flex-1 relative">
                     <Label htmlFor="customer-search">آدرس ایمیل مشتری</Label>
                     <Input
                       id="customer-search"
                       value={customerEmailSearch}
-                      onChange={(e) => setCustomerEmailSearch(e.target.value)}
+                      onChange={(e) => handleEmailInputChange(e.target.value)}
                       placeholder="مثال: customer@example.com"
                       className="mt-1"
                       type="email"
+                      onFocus={() => {
+                        if (customerEmailSearch.trim().length >= 3 && emailSuggestions.length > 0) {
+                          setShowSuggestions(true);
+                        }
+                      }}
+                      onBlur={() => {
+                        // Delay hiding suggestions to allow clicks
+                        setTimeout(() => setShowSuggestions(false), 200);
+                      }}
                     />
+                    {showSuggestions && emailSuggestions.length > 0 && (
+                      <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-auto">
+                        {emailSuggestions.map((email, index) => (
+                          <div
+                            key={index}
+                            onClick={() => handleSuggestionSelect(email)}
+                            className="px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm border-b border-gray-100 dark:border-gray-600 last:border-b-0 transition-colors"
+                          >
+                            <div className="flex items-center gap-2">
+                              <Mail className="h-4 w-4 text-gray-400" />
+                              <span className="text-gray-900 dark:text-gray-100">{email}</span>
+                            </div>
+                          </div>
+                        ))}
+                        {customerEmailSearch.trim().length >= 3 && emailSuggestions.length === 0 && (
+                          <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
+                            هیچ ایمیل مشابهی یافت نشد
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                   <Button
                     onClick={() => {

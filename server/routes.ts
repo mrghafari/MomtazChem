@@ -47450,6 +47450,70 @@ momtazchem.com
     }
   });
 
+  // Get email suggestions for autocomplete (super admin interface)
+  app.get('/api/super-admin/email-suggestions', requireSuperAdmin, async (req: Request, res: Response) => {
+    try {
+      const query = req.query.q as string;
+      
+      if (!query || query.trim().length < 3) {
+        return res.json({
+          success: true,
+          data: []
+        });
+      }
+
+      const searchTerm = query.trim().toLowerCase();
+      console.log(`🔍 [EMAIL SUGGESTIONS] Searching for emails with query: ${searchTerm}`);
+
+      // Search across all customer email sources
+      const result = await customerPool.query(`
+        SELECT DISTINCT email 
+        FROM (
+          -- Guest orders
+          SELECT DISTINCT guest_email as email 
+          FROM customer_orders 
+          WHERE guest_email IS NOT NULL 
+            AND LOWER(guest_email) LIKE $1
+          
+          UNION
+          
+          -- Registered customers
+          SELECT DISTINCT email 
+          FROM customers 
+          WHERE email IS NOT NULL 
+            AND LOWER(email) LIKE $1
+          
+          UNION
+          
+          -- CRM customers
+          SELECT DISTINCT email 
+          FROM crm_customers 
+          WHERE email IS NOT NULL 
+            AND LOWER(email) LIKE $1
+        ) AS all_emails
+        WHERE email IS NOT NULL
+        ORDER BY email
+        LIMIT 10
+      `, [`%${searchTerm}%`]);
+      
+      const suggestions = result.rows.map(row => row.email).filter(email => email);
+      console.log(`✅ [EMAIL SUGGESTIONS] Found ${suggestions.length} suggestions`);
+
+      res.json({
+        success: true,
+        data: suggestions
+      });
+
+    } catch (error) {
+      console.error(`❌ [EMAIL SUGGESTIONS] Error:`, error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در دریافت پیشنهادات ایمیل',
+        error: error.message
+      });
+    }
+  });
+
   // Get orders that can be deleted (for super admin interface) - ENHANCED
   app.get('/api/super-admin/deletable-orders', requireSuperAdmin, async (req: Request, res: Response) => {
     try {
