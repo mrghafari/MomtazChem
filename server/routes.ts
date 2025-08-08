@@ -43372,10 +43372,10 @@ momtazchem.com
         );
         console.log(`💳 [DELETE] Removed ${paymentReceiptsResult.rowCount} payment receipts`);
 
-        // Delete from wallet_transactions table
+        // Delete from wallet_transactions table using reference_id
         const walletTransactionsResult = await customerPool.query(
-          'DELETE FROM wallet_transactions WHERE customer_order_id = $1',
-          [customerOrderId]
+          'DELETE FROM wallet_transactions WHERE reference_id = $1::text AND reference_type = $2',
+          [customerOrderId.toString(), 'order']
         );
         console.log(`💰 [DELETE] Removed ${walletTransactionsResult.rowCount} wallet transactions`);
 
@@ -43467,10 +43467,10 @@ momtazchem.com
         );
         console.log(`💳 [DELETE] Removed ${paymentReceiptsResult.rowCount} payment receipts`);
 
-        // Delete from wallet_transactions table
+        // Delete from wallet_transactions table using reference_id
         const walletTransactionsResult = await customerPool.query(
-          'DELETE FROM wallet_transactions WHERE reference_id = $1',
-          [customerOrderId]
+          'DELETE FROM wallet_transactions WHERE reference_id = $1::text AND reference_type = $2',
+          [customerOrderId.toString(), 'order']
         );
         console.log(`💰 [DELETE] Removed ${walletTransactionsResult.rowCount} wallet transactions`);
 

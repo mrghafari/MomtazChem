@@ -1,0 +1,393 @@
+admin:196 Tawk.to script loaded successfully
+chunk-RPCDYKBN.js?v=569e559a:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+queryClient.ts:81  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+(anonymous) @ queryClient.ts:81
+fetchFn @ @tanstack_react-query.js?v=569e559a:840
+run @ @tanstack_react-query.js?v=569e559a:494
+start @ @tanstack_react-query.js?v=569e559a:536
+fetch @ @tanstack_react-query.js?v=569e559a:926
+executeFetch_fn @ @tanstack_react-query.js?v=569e559a:2211
+onSubscribe @ @tanstack_react-query.js?v=569e559a:1898
+subscribe @ @tanstack_react-query.js?v=569e559a:24
+(anonymous) @ @tanstack_react-query.js?v=569e559a:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=569e559a:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=569e559a:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=569e559a:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=569e559a:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=569e559a:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=569e559a:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=569e559a:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=569e559a:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=569e559a:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=569e559a:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=569e559a:19432
+commitRoot @ chunk-RPCDYKBN.js?v=569e559a:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=569e559a:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=569e559a:18718
+workLoop @ chunk-RPCDYKBN.js?v=569e559a:197
+flushWork @ chunk-RPCDYKBN.js?v=569e559a:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=569e559a:384
+useAuth.ts:43 Auth check result: {success: true, user: {…}}
+via.placeholder.com/128x128?text=WeChat+QR:1  GET https://via.placeholder.com/128x128?text=WeChat+QR net::ERR_NAME_NOT_RESOLVED
+Image
+commitMount @ chunk-RPCDYKBN.js?v=569e559a:8412
+commitLayoutEffectOnFiber @ chunk-RPCDYKBN.js?v=569e559a:17102
+commitLayoutMountEffects_complete @ chunk-RPCDYKBN.js?v=569e559a:17980
+commitLayoutEffects_begin @ chunk-RPCDYKBN.js?v=569e559a:17969
+commitLayoutEffects @ chunk-RPCDYKBN.js?v=569e559a:17920
+commitRootImpl @ chunk-RPCDYKBN.js?v=569e559a:19353
+commitRoot @ chunk-RPCDYKBN.js?v=569e559a:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=569e559a:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=569e559a:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=569e559a:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=569e559a:555
+flush @ @tanstack_react-query.js?v=569e559a:569
+batch @ @tanstack_react-query.js?v=569e559a:587
+dispatch_fn @ @tanstack_react-query.js?v=569e559a:996
+setData @ @tanstack_react-query.js?v=569e559a:696
+onSuccess @ @tanstack_react-query.js?v=569e559a:897
+resolve @ @tanstack_react-query.js?v=569e559a:456
+Promise.then
+run @ @tanstack_react-query.js?v=569e559a:498
+start @ @tanstack_react-query.js?v=569e559a:536
+fetch @ @tanstack_react-query.js?v=569e559a:926
+executeFetch_fn @ @tanstack_react-query.js?v=569e559a:2211
+onSubscribe @ @tanstack_react-query.js?v=569e559a:1898
+subscribe @ @tanstack_react-query.js?v=569e559a:24
+(anonymous) @ @tanstack_react-query.js?v=569e559a:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=569e559a:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=569e559a:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=569e559a:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=569e559a:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=569e559a:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=569e559a:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=569e559a:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=569e559a:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=569e559a:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=569e559a:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=569e559a:19432
+commitRoot @ chunk-RPCDYKBN.js?v=569e559a:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=569e559a:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=569e559a:18718
+workLoop @ chunk-RPCDYKBN.js?v=569e559a:197
+flushWork @ chunk-RPCDYKBN.js?v=569e559a:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=569e559a:384
+twk-chunk-common.js:2  POST https://va.tawk.to/v1/session/start net::ERR_CONNECTION_CLOSED
+post @ twk-chunk-common.js:2
+value @ twk-chunk-common.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+h @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+l @ twk-chunk-common.js:2
+a @ twk-chunk-common.js:2
+Promise.then
+l @ twk-chunk-common.js:2
+a @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+value @ twk-chunk-common.js:2
+value @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+(anonymous) @ twk-chunk-common.js:2
+56d7 @ twk-chunk-common.js:2
+a @ twk-runtime.js:1
+r @ twk-runtime.js:1
+t @ twk-runtime.js:1
+(anonymous) @ twk-runtime.js:1
+(anonymous) @ twk-runtime.js:1
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+site-management-fixed.tsx:71 🔍 [DEBUG] useEffect triggered, userPermissions: undefined
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+site-management-fixed.tsx:71 🔍 [DEBUG] useEffect triggered, userPermissions: {success: true, permissions: Array(34), modules: Array(34), roles: Array(1), roleInfo: {…}}
+site-management-fixed.tsx:74 🔍 [DEBUG] userPermissions modules: (34) ['kpi_dashboard', 'management_dashboard', 'syncing_shop', 'shop_management', 'product_management', 'order_management', 'warehouse_management', 'logistics_management', 'inquiries', 'crm', 'barcode', 'email_settings', 'database_backup', 'seo', 'categories', 'sms', 'factory', 'user_management', 'procedures', 'payment_management', 'accounting_management', 'finance', 'wallet_management', 'geography_analytics', 'ai_settings', 'refresh_control', 'content_management', 'ticketing_system', 'remote_desktop', 'server_config', 'company_information', 'user_guide', 'marketing_module', 'order_management']
+site-management-fixed.tsx:430 🔍 [DEBUG] Full userPermissions response: {success: true, permissions: Array(34), modules: Array(34), roles: Array(1), roleInfo: {…}}
+site-management-fixed.tsx:431 🔍 [DEBUG] userPermissions.modules: (34) ['kpi_dashboard', 'management_dashboard', 'syncing_shop', 'shop_management', 'product_management', 'order_management', 'warehouse_management', 'logistics_management', 'inquiries', 'crm', 'barcode', 'email_settings', 'database_backup', 'seo', 'categories', 'sms', 'factory', 'user_management', 'procedures', 'payment_management', 'accounting_management', 'finance', 'wallet_management', 'geography_analytics', 'ai_settings', 'refresh_control', 'content_management', 'ticketing_system', 'remote_desktop', 'server_config', 'company_information', 'user_guide', 'marketing_module', 'order_management']
+site-management-fixed.tsx:432 🔍 [DEBUG] userPermissions.permissions: (34) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+site-management-fixed.tsx:437 🔍 [DEBUG] Total allButtons count: 35
+site-management-fixed.tsx:438 🔍 [DEBUG] AI Settings exists in allButtons: true
+site-management-fixed.tsx:439 🔍 [DEBUG] Content Management exists in allButtons: true
+site-management-fixed.tsx:441 🔍 [DEBUG] allowedModules: (34) ['kpi_dashboard', 'management_dashboard', 'syncing_shop', 'shop_management', 'product_management', 'order_management', 'warehouse_management', 'logistics_management', 'inquiries', 'crm', 'barcode', 'email_settings', 'database_backup', 'seo', 'categories', 'sms', 'factory', 'user_management', 'procedures', 'payment_management', 'accounting_management', 'finance', 'wallet_management', 'geography_analytics', 'ai_settings', 'refresh_control', 'content_management', 'ticketing_system', 'remote_desktop', 'server_config', 'company_information', 'user_guide', 'marketing_module', 'order_management']
+site-management-fixed.tsx:442 🔍 [DEBUG] kpi_dashboard in allowedModules? true
+site-management-fixed.tsx:443 🔍 [DEBUG] management_dashboard in allowedModules? true
+site-management-fixed.tsx:444 🔍 [DEBUG] finance in allowedModules? true
+site-management-fixed.tsx:445 🔍 [DEBUG] geography_analytics in allowedModules? true
+site-management-fixed.tsx:446 🔍 [DEBUG] ai_settings in allowedModules? true
+site-management-fixed.tsx:447 🔍 [DEBUG] content_management in allowedModules? true
+site-management-fixed.tsx:453 🔍 [CRITICAL] Missing button detection:
+site-management-fixed.tsx:457 🔍 [MISSING] order-tracking-view Order Management & Tracking - View Only moduleId: order_tracking
+site-management-fixed.tsx:461 🔍 [CRITICAL] Missing buttons count: 1
+site-management-fixed.tsx:463 🔍 [DEBUG] finance button found in allButtons? {id: 'finance', label: 'Finance', icon: {…}, className: 'border-green-300 text-green-600 hover:bg-green-50', onClick: ƒ, …}
+site-management-fixed.tsx:464 🔍 [DEBUG] geography_analytics button found in allButtons? {id: 'geography-analytics', label: 'Geography Analytics', icon: {…}, className: 'border-teal-300 text-teal-600 hover:bg-teal-50', onClick: ƒ, …}
+site-management-fixed.tsx:465 🔍 [DEBUG] ai_settings button found in allButtons? {id: 'ai-settings', label: 'AI Control', icon: {…}, className: 'border-purple-300 text-purple-600 hover:bg-purple-50', onClick: ƒ, …}
+site-management-fixed.tsx:466 🔍 [DEBUG] content_management button found in allButtons? {id: 'content-management', label: 'Content Management', icon: {…}, className: 'border-lime-300 text-lime-600 hover:bg-lime-50', onClick: ƒ, …}
+site-management-fixed.tsx:467 🔍 [DEBUG] finance button in filtered? {id: 'finance', label: 'Finance', icon: {…}, className: 'border-green-300 text-green-600 hover:bg-green-50', onClick: ƒ, …}
+site-management-fixed.tsx:468 🔍 [DEBUG] geography_analytics button in filtered? {id: 'geography-analytics', label: 'Geography Analytics', icon: {…}, className: 'border-teal-300 text-teal-600 hover:bg-teal-50', onClick: ƒ, …}
+site-management-fixed.tsx:469 🔍 [DEBUG] ai_settings button in filtered? {id: 'ai-settings', label: 'AI Control', icon: {…}, className: 'border-purple-300 text-purple-600 hover:bg-purple-50', onClick: ƒ, …}
+site-management-fixed.tsx:470 🔍 [DEBUG] content_management button in filtered? {id: 'content-management', label: 'Content Management', icon: {…}, className: 'border-lime-300 text-lime-600 hover:bg-lime-50', onClick: ƒ, …}
+site-management-fixed.tsx:76 🔍 [DEBUG] filtered buttons count: 34
+site-management-fixed.tsx:77 🔍 [DEBUG] First 5 filtered buttons: (5) [{…}, {…}, {…}, {…}, {…}]
+site-management-fixed.tsx:78 🔍 [DEBUG] AI Control button in filtered: {id: 'ai-settings', label: 'AI Control', icon: {…}, className: 'border-purple-300 text-purple-600 hover:bg-purple-50', onClick: ƒ, …}
+site-management-fixed.tsx:79 🔍 [DEBUG] Content Management button in filtered: {id: 'content-management', label: 'Content Management', icon: {…}, className: 'border-lime-300 text-lime-600 hover:bg-lime-50', onClick: ƒ, …}
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+super-admin-order-management.tsx:174 API Response: undefined
+super-admin-order-management.tsx:175 Orders array: []
+super-admin-order-management.tsx:174 API Response: undefined
+super-admin-order-management.tsx:175 Orders array: []
+super-admin-order-management.tsx:174 API Response: {success: true, data: Array(20), summary: {…}, message: '20 سفارش (0 کامل، 20 موقت) قابل حذف یافت شد'}
+super-admin-order-management.tsx:175 Orders array: (20) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+super-admin-order-management.tsx:174 API Response: {success: true, data: Array(20), summary: {…}, message: '20 سفارش (0 کامل، 20 موقت) قابل حذف یافت شد'}
+super-admin-order-management.tsx:175 Orders array: (20) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+super-admin-order-management.tsx:174 API Response: {success: true, data: Array(20), summary: {…}, message: '20 سفارش (0 کامل، 20 موقت) قابل حذف یافت شد'}
+super-admin-order-management.tsx:175 Orders array: (20) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+super-admin-order-management.tsx:174 API Response: {success: true, data: Array(20), summary: {…}, message: '20 سفارش (0 کامل، 20 موقت) قابل حذف یافت شد'}
+super-admin-order-management.tsx:175 Orders array: (20) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+super-admin-order-management.tsx:174 API Response: {success: true, data: Array(20), summary: {…}, message: '20 سفارش (0 کامل، 20 موقت) قابل حذف یافت شد'}
+super-admin-order-management.tsx:175 Orders array: (20) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+super-admin-order-management.tsx:174 API Response: {success: true, data: Array(20), summary: {…}, message: '20 سفارش (0 کامل، 20 موقت) قابل حذف یافت شد'}
+super-admin-order-management.tsx:175 Orders array: (20) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+super-admin-order-management.tsx:174 API Response: {success: true, data: Array(20), summary: {…}, message: '20 سفارش (0 کامل، 20 موقت) قابل حذف یافت شد'}
+super-admin-order-management.tsx:175 Orders array: (20) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+super-admin-order-management.tsx:174 API Response: {success: true, data: Array(20), summary: {…}, message: '20 سفارش (0 کامل، 20 موقت) قابل حذف یافت شد'}
+super-admin-order-management.tsx:175 Orders array: (20) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+super-admin-order-management.tsx:174 API Response: {success: true, data: Array(20), summary: {…}, message: '20 سفارش (0 کامل، 20 موقت) قابل حذف یافت شد'}
+super-admin-order-management.tsx:175 Orders array: (20) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+super-admin-order-management.tsx:174 API Response: {success: true, data: Array(20), summary: {…}, message: '20 سفارش (0 کامل، 20 موقت) قابل حذف یافت شد'}
+super-admin-order-management.tsx:175 Orders array: (20) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+super-admin-order-management.tsx:174 API Response: {success: true, data: Array(20), summary: {…}, message: '20 سفارش (0 کامل، 20 موقت) قابل حذف یافت شد'}
+super-admin-order-management.tsx:175 Orders array: (20) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+super-admin-order-management.tsx:174 API Response: {success: true, data: Array(20), summary: {…}, message: '20 سفارش (0 کامل، 20 موقت) قابل حذف یافت شد'}
+super-admin-order-management.tsx:175 Orders array: (20) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+super-admin-order-management.tsx:174 API Response: {success: true, data: Array(20), summary: {…}, message: '20 سفارش (0 کامل، 20 موقت) قابل حذف یافت شد'}
+super-admin-order-management.tsx:175 Orders array: (20) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+super-admin-order-management.tsx:174 API Response: {success: true, data: Array(20), summary: {…}, message: '20 سفارش (0 کامل، 20 موقت) قابل حذف یافت شد'}
+super-admin-order-management.tsx:175 Orders array: (20) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+super-admin-order-management.tsx:174 API Response: {success: true, data: Array(20), summary: {…}, message: '20 سفارش (0 کامل، 20 موقت) قابل حذف یافت شد'}
+super-admin-order-management.tsx:175 Orders array: (20) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+super-admin-order-management.tsx:174 API Response: {success: true, data: Array(20), summary: {…}, message: '20 سفارش (0 کامل، 20 موقت) قابل حذف یافت شد'}
+super-admin-order-management.tsx:175 Orders array: (20) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+super-admin-order-management.tsx:174 API Response: {success: true, data: Array(20), summary: {…}, message: '20 سفارش (0 کامل، 20 موقت) قابل حذف یافت شد'}
+super-admin-order-management.tsx:175 Orders array: (20) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+super-admin-order-management.tsx:174 API Response: {success: true, data: Array(20), summary: {…}, message: '20 سفارش (0 کامل، 20 موقت) قابل حذف یافت شد'}
+super-admin-order-management.tsx:175 Orders array: (20) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+super-admin-order-management.tsx:174 API Response: {success: true, data: Array(20), summary: {…}, message: '20 سفارش (0 کامل، 20 موقت) قابل حذف یافت شد'}
+super-admin-order-management.tsx:175 Orders array: (20) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+chunk-RPCDYKBN.js?v=569e559a:521 Warning: validateDOMNesting(...): <p> cannot appear as a descendant of <p>.
+    at p
+    at div
+    at p
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-Q6YJROYD.js?v=569e559a:42:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-4V2R5CKU.js?v=569e559a:285:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-alert-dialog.js?v=569e559a:133:11
+    at _c9 (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ui/alert-dialog.tsx:158:12)
+    at div
+    at AlertDialogHeader (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ui/alert-dialog.tsx:86:3)
+    at Slottable2 (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=569e559a:95:25)
+    at div
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-Q6YJROYD.js?v=569e559a:42:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-E3N2CGGM.js?v=569e559a:55:7
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=569e559a:79:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=569e559a:56:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-Q6YJROYD.js?v=569e559a:42:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-U4VVCSAF.js?v=569e559a:29:5
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-4V2R5CKU.js?v=569e559a:237:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-4V2R5CKU.js?v=569e559a:160:58
+    at Presence (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-7QZBBLXT.js?v=569e559a:24:11)
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-4V2R5CKU.js?v=569e559a:151:64
+    at Provider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=569e559a:38:15)
+    at Provider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=569e559a:17:13)
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-alert-dialog.js?v=569e559a:86:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=569e559a:79:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=569e559a:56:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-Q6YJROYD.js?v=569e559a:42:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-JK5G4SUN.js?v=569e559a:27:22
+    at Presence (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-7QZBBLXT.js?v=569e559a:24:11)
+    at Provider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=569e559a:38:15)
+    at DialogPortal (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-4V2R5CKU.js?v=569e559a:113:11)
+    at AlertDialogPortal (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-alert-dialog.js?v=569e559a:67:11)
+    at _c3 (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ui/alert-dialog.tsx:50:12)
+    at Provider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=569e559a:38:15)
+    at Dialog (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-4V2R5CKU.js?v=569e559a:54:5)
+    at AlertDialog (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-alert-dialog.js?v=569e559a:51:11)
+    at div
+    at div
+    at SuperAdminOrderManagement (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/admin/super-admin-order-management.tsx:55:39)
+    at Route (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=569e559a:265:16)
+    at Switch (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=569e559a:321:17)
+    at main
+    at div
+    at Router
+    at Provider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=569e559a:38:15)
+    at TooltipProvider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=569e559a:65:5)
+    at LanguageProvider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/contexts/LanguageContext.tsx:21:36)
+    at QueryClientProvider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=569e559a:2805:3)
+    at App
+printWarning @ chunk-RPCDYKBN.js?v=569e559a:521
+error @ chunk-RPCDYKBN.js?v=569e559a:505
+validateDOMNesting @ chunk-RPCDYKBN.js?v=569e559a:8256
+createInstance @ chunk-RPCDYKBN.js?v=569e559a:8328
+completeWork @ chunk-RPCDYKBN.js?v=569e559a:16290
+completeUnitOfWork @ chunk-RPCDYKBN.js?v=569e559a:19224
+performUnitOfWork @ chunk-RPCDYKBN.js?v=569e559a:19206
+workLoopSync @ chunk-RPCDYKBN.js?v=569e559a:19137
+renderRootSync @ chunk-RPCDYKBN.js?v=569e559a:19116
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=569e559a:18874
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=569e559a:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=569e559a:18627
+chunk-RPCDYKBN.js?v=569e559a:521 Warning: validateDOMNesting(...): <div> cannot appear as a descendant of <p>.
+    at div
+    at p
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-Q6YJROYD.js?v=569e559a:42:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-4V2R5CKU.js?v=569e559a:285:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-alert-dialog.js?v=569e559a:133:11
+    at _c9 (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ui/alert-dialog.tsx:158:12)
+    at div
+    at AlertDialogHeader (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ui/alert-dialog.tsx:86:3)
+    at Slottable2 (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=569e559a:95:25)
+    at div
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-Q6YJROYD.js?v=569e559a:42:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-E3N2CGGM.js?v=569e559a:55:7
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=569e559a:79:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=569e559a:56:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-Q6YJROYD.js?v=569e559a:42:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-U4VVCSAF.js?v=569e559a:29:5
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-4V2R5CKU.js?v=569e559a:237:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-4V2R5CKU.js?v=569e559a:160:58
+    at Presence (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-7QZBBLXT.js?v=569e559a:24:11)
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-4V2R5CKU.js?v=569e559a:151:64
+    at Provider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=569e559a:38:15)
+    at Provider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=569e559a:17:13)
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-alert-dialog.js?v=569e559a:86:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=569e559a:79:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=569e559a:56:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-Q6YJROYD.js?v=569e559a:42:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-JK5G4SUN.js?v=569e559a:27:22
+    at Presence (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-7QZBBLXT.js?v=569e559a:24:11)
+    at Provider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=569e559a:38:15)
+    at DialogPortal (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-4V2R5CKU.js?v=569e559a:113:11)
+    at AlertDialogPortal (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-alert-dialog.js?v=569e559a:67:11)
+    at _c3 (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ui/alert-dialog.tsx:50:12)
+    at Provider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=569e559a:38:15)
+    at Dialog (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-4V2R5CKU.js?v=569e559a:54:5)
+    at AlertDialog (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-alert-dialog.js?v=569e559a:51:11)
+    at div
+    at div
+    at SuperAdminOrderManagement (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/admin/super-admin-order-management.tsx:55:39)
+    at Route (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=569e559a:265:16)
+    at Switch (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=569e559a:321:17)
+    at main
+    at div
+    at Router
+    at Provider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=569e559a:38:15)
+    at TooltipProvider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=569e559a:65:5)
+    at LanguageProvider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/contexts/LanguageContext.tsx:21:36)
+    at QueryClientProvider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=569e559a:2805:3)
+    at App
+printWarning @ chunk-RPCDYKBN.js?v=569e559a:521
+error @ chunk-RPCDYKBN.js?v=569e559a:505
+validateDOMNesting @ chunk-RPCDYKBN.js?v=569e559a:8256
+createInstance @ chunk-RPCDYKBN.js?v=569e559a:8328
+completeWork @ chunk-RPCDYKBN.js?v=569e559a:16290
+completeUnitOfWork @ chunk-RPCDYKBN.js?v=569e559a:19224
+performUnitOfWork @ chunk-RPCDYKBN.js?v=569e559a:19206
+workLoopSync @ chunk-RPCDYKBN.js?v=569e559a:19137
+renderRootSync @ chunk-RPCDYKBN.js?v=569e559a:19116
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=569e559a:18874
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=569e559a:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=569e559a:18627
+chunk-RPCDYKBN.js?v=569e559a:521 Warning: validateDOMNesting(...): <ul> cannot appear as a descendant of <p>.
+    at ul
+    at p
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-Q6YJROYD.js?v=569e559a:42:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-4V2R5CKU.js?v=569e559a:285:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-alert-dialog.js?v=569e559a:133:11
+    at _c9 (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ui/alert-dialog.tsx:158:12)
+    at div
+    at AlertDialogHeader (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ui/alert-dialog.tsx:86:3)
+    at Slottable2 (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=569e559a:95:25)
+    at div
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-Q6YJROYD.js?v=569e559a:42:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-E3N2CGGM.js?v=569e559a:55:7
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=569e559a:79:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=569e559a:56:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-Q6YJROYD.js?v=569e559a:42:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-U4VVCSAF.js?v=569e559a:29:5
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-4V2R5CKU.js?v=569e559a:237:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-4V2R5CKU.js?v=569e559a:160:58
+    at Presence (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-7QZBBLXT.js?v=569e559a:24:11)
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-4V2R5CKU.js?v=569e559a:151:64
+    at Provider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=569e559a:38:15)
+    at Provider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=569e559a:17:13)
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-alert-dialog.js?v=569e559a:86:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=569e559a:79:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=569e559a:56:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-Q6YJROYD.js?v=569e559a:42:13
+    at https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-JK5G4SUN.js?v=569e559a:27:22
+    at Presence (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-7QZBBLXT.js?v=569e559a:24:11)
+    at Provider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=569e559a:38:15)
+    at DialogPortal (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-4V2R5CKU.js?v=569e559a:113:11)
+    at AlertDialogPortal (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-alert-dialog.js?v=569e559a:67:11)
+    at _c3 (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/components/ui/alert-dialog.tsx:50:12)
+    at Provider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=569e559a:38:15)
+    at Dialog (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-4V2R5CKU.js?v=569e559a:54:5)
+    at AlertDialog (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-alert-dialog.js?v=569e559a:51:11)
+    at div
+    at div
+    at SuperAdminOrderManagement (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/pages/admin/super-admin-order-management.tsx:55:39)
+    at Route (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=569e559a:265:16)
+    at Switch (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=569e559a:321:17)
+    at main
+    at div
+    at Router
+    at Provider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=569e559a:38:15)
+    at TooltipProvider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=569e559a:65:5)
+    at LanguageProvider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/src/contexts/LanguageContext.tsx:21:36)
+    at QueryClientProvider (https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=569e559a:2805:3)
+    at App
+printWarning @ chunk-RPCDYKBN.js?v=569e559a:521
+error @ chunk-RPCDYKBN.js?v=569e559a:505
+validateDOMNesting @ chunk-RPCDYKBN.js?v=569e559a:8256
+createInstance @ chunk-RPCDYKBN.js?v=569e559a:8328
+completeWork @ chunk-RPCDYKBN.js?v=569e559a:16290
+completeUnitOfWork @ chunk-RPCDYKBN.js?v=569e559a:19224
+performUnitOfWork @ chunk-RPCDYKBN.js?v=569e559a:19206
+workLoopSync @ chunk-RPCDYKBN.js?v=569e559a:19137
+renderRootSync @ chunk-RPCDYKBN.js?v=569e559a:19116
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=569e559a:18874
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=569e559a:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=569e559a:18627
+super-admin-order-management.tsx:174 API Response: {success: true, data: Array(20), summary: {…}, message: '20 سفارش (0 کامل، 20 موقت) قابل حذف یافت شد'}
+super-admin-order-management.tsx:175 Orders array: (20) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+super-admin-order-management.tsx:189 🗑️ [FRONTEND] Deleting order via: /api/super-admin/orders-by-id/191
+super-admin-order-management.tsx:191  DELETE https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/super-admin/orders-by-id/191 500 (Internal Server Error)
+mutationFn @ super-admin-order-management.tsx:191
+fn @ @tanstack_react-query.js?v=569e559a:1189
+run @ @tanstack_react-query.js?v=569e559a:494
+start @ @tanstack_react-query.js?v=569e559a:536
+execute @ @tanstack_react-query.js?v=569e559a:1225
+await in execute
+mutate @ @tanstack_react-query.js?v=569e559a:2630
+(anonymous) @ @tanstack_react-query.js?v=569e559a:3295
+handleConfirmDelete @ super-admin-order-management.tsx:309
+handleEvent @ chunk-2QGE5M3T.js?v=569e559a:11
+callCallback2 @ chunk-RPCDYKBN.js?v=569e559a:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=569e559a:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=569e559a:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=569e559a:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=569e559a:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=569e559a:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=569e559a:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=569e559a:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=569e559a:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=569e559a:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=569e559a:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=569e559a:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=569e559a:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=569e559a:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=569e559a:5449
+super-admin-order-management.tsx:174 API Response: {success: true, data: Array(20), summary: {…}, message: '20 سفارش (0 کامل، 20 موقت) قابل حذف یافت شد'}
+super-admin-order-management.tsx:175 Orders array: (20) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
