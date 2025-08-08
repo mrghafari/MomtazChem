@@ -271,7 +271,7 @@ export class BankGatewayRouter {
     const transactionId = `SEP_${Date.now()}_${request.orderId}`;
     
     // Check if test mode is enabled
-    const isTestMode = config.testMode === true || gateway.test_mode === true;
+    const isTestMode = config.testMode === true || config.test_mode === true;
     
     // Use correct official Shaparak SEP URLs with multiple fallbacks
     const baseUrls = isTestMode ? [

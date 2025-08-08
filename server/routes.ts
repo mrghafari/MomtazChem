@@ -15453,10 +15453,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           responseData.redirectToPayment = true;
           responseData.paymentGatewayUrl = `/payment?orderId=${order.id}&amount=${Math.round(remainingAmount) > 0 ? Math.round(remainingAmount) : Math.round(totalAmount)}&method=${finalPaymentMethod}`;
           console.log(`✅ Order ${orderNumber} created - redirecting to payment gateway for ${Math.round(remainingAmount) > 0 ? Math.round(remainingAmount) : Math.round(totalAmount)} IQD (method: ${finalPaymentMethod})`);
+          return res.json(responseData);
         }
       }
 
-      res.json(responseData);
+      // ❌ [FALLBACK ERROR] If we reach here, no payment method was handled properly
+      console.error(`❌ [PAYMENT ERROR] Unhandled payment method: ${finalPaymentMethod}, falling back to error response`);
+      return res.status(400).json({
+        success: false,
+        message: `روش پرداخت ${finalPaymentMethod} پشتیبانی نمی‌شود`,
+        error: 'UNSUPPORTED_PAYMENT_METHOD'
+      });
     } catch (error) {
       console.error("Error creating customer order:", error);
       res.status(500).json({
