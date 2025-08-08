@@ -10196,7 +10196,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all payment method settings
   app.get("/api/payment/method-settings", requireAuth, async (req, res) => {
     try {
-      const settings = await db.select().from(paymentMethodSettings).orderBy(schema.desc(paymentMethodSettings.priority), paymentMethodSettings.methodKey);
+      const settings = await db.select().from(paymentMethodSettings).orderBy(desc(paymentMethodSettings.priority), paymentMethodSettings.methodKey);
       
       // If no settings exist, initialize with defaults
       if (settings.length === 0) {
@@ -10236,7 +10236,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ];
         
         await db.insert(paymentMethodSettings).values(defaultSettings);
-        const newSettings = await db.select().from(paymentMethodSettings).orderBy(schema.desc(paymentMethodSettings.priority), paymentMethodSettings.methodKey);
+        const newSettings = await db.select().from(paymentMethodSettings).orderBy(desc(paymentMethodSettings.priority), paymentMethodSettings.methodKey);
         
         return res.json({
           success: true,
@@ -10304,7 +10304,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const enabledMethods = await db.select()
         .from(paymentMethodSettings)
         .where(eq(paymentMethodSettings.enabled, true))
-        .orderBy(schema.desc(paymentMethodSettings.priority), paymentMethodSettings.methodKey);
+        .orderBy(desc(paymentMethodSettings.priority), paymentMethodSettings.methodKey);
       
       res.json({
         success: true,

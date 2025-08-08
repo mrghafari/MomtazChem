@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Building2, CreditCard, Wallet, Settings, Plus, Edit, Trash2, CheckCircle, AlertCircle, Eye, EyeOff, TestTube, Wifi, Shield } from "lucide-react";
+import { Building2, CreditCard, Wallet, Settings, Plus, Edit, Trash2, CheckCircle, AlertCircle, Eye, EyeOff, TestTube, Wifi, Shield, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -36,6 +36,21 @@ interface PaymentGateway {
   updatedAt: string;
 }
 
+interface PaymentMethodSettings {
+  id: number;
+  methodKey: string;
+  methodName: string;
+  methodNameEn: string;
+  enabled: boolean;
+  priority: number;
+  description: string;
+  minAmount?: string;
+  maxAmount?: string;
+  config?: any;
+  createdAt: string;
+  updatedAt: string;
+}
+
 const PaymentSettings = () => {
   const [selectedGateway, setSelectedGateway] = useState<PaymentGateway | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -46,6 +61,11 @@ const PaymentSettings = () => {
   // Fetch payment gateways
   const { data: gateways = [], isLoading } = useQuery<PaymentGateway[]>({
     queryKey: ['/api/payment/gateways'],
+  });
+
+  // Fetch payment method settings
+  const { data: paymentMethods = [], isLoading: isLoadingMethods } = useQuery<PaymentMethodSettings[]>({
+    queryKey: ['/api/payment/method-settings'],
   });
 
   // Create/Update gateway mutation
@@ -185,6 +205,30 @@ const PaymentSettings = () => {
         variant: "destructive",
       });
     }
+  });
+
+  // Update payment method setting mutation
+  const updatePaymentMethodMutation = useMutation({
+    mutationFn: async ({ methodKey, enabled, priority }: { methodKey: string, enabled?: boolean, priority?: number }) => {
+      return apiRequest(`/api/payment/method-settings/${methodKey}`, {
+        method: 'PUT',
+        body: { enabled, priority }
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "تنظیمات به‌روزرسانی شد",
+        description: "تنظیمات روش پرداخت با موفقیت به‌روزرسانی شد.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/payment/method-settings'] });
+    },
+    onError: () => {
+      toast({
+        title: "خطا",
+        description: "خطا در به‌روزرسانی تنظیمات روش پرداخت.",
+        variant: "destructive",
+      });
+    },
   });
 
   const toggleSecretVisibility = (field: string) => {
@@ -828,12 +872,98 @@ const PaymentSettings = () => {
           <p className="text-gray-600">Configure payment methods and gateway settings for your e-commerce platform</p>
         </div>
 
-        <Tabs defaultValue="gateways" className="space-y-6">
+        <Tabs defaultValue="payment-methods" className="space-y-6">
           <TabsList>
+            <TabsTrigger value="payment-methods">روش‌های پرداخت</TabsTrigger>
             <TabsTrigger value="gateways">Payment Gateways</TabsTrigger>
             <TabsTrigger value="general">General Settings</TabsTrigger>
             <TabsTrigger value="notifications">Notifications</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="payment-methods" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CreditCard className="h-5 w-5" />
+                  تنظیمات روش‌های پرداخت در چک‌اوت
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  فعال یا غیرفعال کردن روش‌های پرداخت مختلف که مشتریان در صفحه چک‌اوت می‌بینند
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {isLoadingMethods ? (
+                  <div className="flex justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {paymentMethods && paymentMethods.map((method) => (
+                      <Card key={method.id} className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3">
+                              {method.methodKey === 'online_payment' && <CreditCard className="h-5 w-5 text-blue-600" />}
+                              {method.methodKey === 'wallet' && <Wallet className="h-5 w-5 text-green-600" />}
+                              {method.methodKey === 'bank_receipt' && <Building2 className="h-5 w-5 text-orange-600" />}
+                              {method.methodKey === 'bank_transfer_grace' && <Settings className="h-5 w-5 text-purple-600" />}
+                              <div>
+                                <h4 className="font-medium text-right">{method.methodName}</h4>
+                                <p className="text-sm text-muted-foreground text-right">{method.description}</p>
+                                <p className="text-xs text-muted-foreground text-left mt-1">{method.methodNameEn}</p>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2">
+                              <Badge variant={method.enabled ? "default" : "secondary"}>
+                                {method.enabled ? "فعال" : "غیرفعال"}
+                              </Badge>
+                              <span className="text-sm text-muted-foreground">اولویت: {method.priority}</span>
+                            </div>
+                            <Switch
+                              checked={method.enabled}
+                              onCheckedChange={(checked) => {
+                                updatePaymentMethodMutation.mutate({
+                                  methodKey: method.methodKey,
+                                  enabled: checked,
+                                  priority: method.priority
+                                });
+                              }}
+                              disabled={updatePaymentMethodMutation.isPending}
+                            />
+                          </div>
+                        </div>
+                        <div className="mt-3 p-3 bg-muted/50 rounded-lg">
+                          <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                              <span className="font-medium">کلید روش:</span>
+                              <span className="ml-2 font-mono text-xs bg-background px-2 py-1 rounded">
+                                {method.methodKey}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="font-medium">وضعیت:</span>
+                              <span className={`ml-2 ${method.enabled ? 'text-green-600' : 'text-gray-500'}`}>
+                                {method.enabled ? '✓ در دسترس مشتریان' : '✗ مخفی از مشتریان'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+                {(!paymentMethods || paymentMethods.length === 0) && !isLoadingMethods && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <CreditCard className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>هنوز روش پرداختی تنظیم نشده است.</p>
+                    <p className="text-sm mt-2">سیستم به صورت خودکار روش‌های پیش‌فرض را ایجاد خواهد کرد.</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           <TabsContent value="gateways" className="space-y-6">
             <div className="flex justify-between items-center">
