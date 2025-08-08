@@ -14404,13 +14404,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
             walletUsage, formattedTotalAmount, remaining
           });
         } else if (walletUsage > 0) {
-          finalPaymentMethod = 'wallet_partial';
-          console.log('🔄 [BACKEND CONVERSION] wallet_combined → wallet_partial (insufficient balance)', {
-            walletUsage, formattedTotalAmount, remaining
+          // Use the secondary payment method chosen by user for remaining amount
+          const { secondaryPaymentMethod } = req.body;
+          finalPaymentMethod = secondaryPaymentMethod || 'online_payment'; // Default to active gateway if not specified
+          console.log('🔄 [BACKEND CONVERSION] wallet_combined → user selected secondary method', {
+            walletUsage, formattedTotalAmount, remaining, 
+            secondaryPaymentMethod, finalPaymentMethod
           });
         } else {
-          finalPaymentMethod = 'bank_transfer';
-          console.log('🔄 [BACKEND CONVERSION] wallet_combined → bank_transfer (no wallet usage)');
+          // Use the secondary payment method chosen by user (no wallet usage)
+          const { secondaryPaymentMethod } = req.body;
+          finalPaymentMethod = secondaryPaymentMethod || 'online_payment';
+          console.log('🔄 [BACKEND CONVERSION] wallet_combined → user selected method (no wallet usage)', {
+            secondaryPaymentMethod, finalPaymentMethod
+          });
         }
       }
       

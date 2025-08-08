@@ -1093,6 +1093,7 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
           return data.paymentMethod;
         }
       })(),
+      secondaryPaymentMethod: secondaryPaymentMethod, // Send user's choice for remaining amount payment method
       walletAmountUsed: actualWalletUsage,
       remainingAmount: beforeWalletTotal - actualWalletUsage, // Fix: Send actual remaining amount after wallet deduction
     };
