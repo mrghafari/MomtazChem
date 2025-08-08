@@ -1458,5 +1458,29 @@ export const insertPaymentMethodSettingsSchema = createInsertSchema(paymentMetho
 export type InsertPaymentMethodSettings = z.infer<typeof insertPaymentMethodSettingsSchema>;
 export type PaymentMethodSettings = typeof paymentMethodSettings.$inferSelect;
 
+// General Payment Settings table for global payment configuration
+export const generalPaymentSettings = pgTable("general_payment_settings", {
+  id: serial("id").primaryKey(),
+  settingKey: text("setting_key").notNull().unique(), // 'default_currency', 'require_email_confirmation', 'send_receipts_automatically', etc.
+  settingValue: text("setting_value").notNull(), // The actual value
+  settingType: text("setting_type").notNull().default("string"), // 'string', 'boolean', 'number'
+  displayName: text("display_name").notNull(), // Display name in Persian/Arabic
+  displayNameEn: text("display_name_en"), // Display name in English
+  description: text("description"), // Description for admin panel
+  category: text("category").default("general"), // 'general', 'notifications', 'security', etc.
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertGeneralPaymentSettingsSchema = createInsertSchema(generalPaymentSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertGeneralPaymentSettings = z.infer<typeof insertGeneralPaymentSettingsSchema>;
+export type GeneralPaymentSettings = typeof generalPaymentSettings.$inferSelect;
+
 // Re-export marketing schema
 export * from './marketing-schema';

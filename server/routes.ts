@@ -10389,6 +10389,170 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // =============================================================================
+  // GENERAL PAYMENT SETTINGS ENDPOINTS
+  // =============================================================================
+
+  // Get all general payment settings
+  app.get("/api/payment/general-settings", requireAuth, async (req, res) => {
+    try {
+      console.log('📧 [GENERAL PAYMENT SETTINGS] Fetching general payment settings...');
+      
+      const settings = await db.select().from(schema.generalPaymentSettings).orderBy(schema.generalPaymentSettings.category, schema.generalPaymentSettings.settingKey);
+      
+      // If no settings exist, create default ones
+      if (settings.length === 0) {
+        console.log('📧 [GENERAL PAYMENT SETTINGS] No settings found, creating defaults...');
+        
+        const defaultSettings = [
+          {
+            settingKey: 'default_currency',
+            settingValue: 'IQD',
+            settingType: 'string',
+            displayName: 'واحد پول پیش‌فرض',
+            displayNameEn: 'Default Currency',
+            description: 'واحد پول پیش‌فرض برای تراکنش‌های پرداخت',
+            category: 'general'
+          },
+          {
+            settingKey: 'require_email_confirmation',
+            settingValue: 'true',
+            settingType: 'boolean',
+            displayName: 'نیاز به تأیید ایمیل برای پرداخت',
+            displayNameEn: 'Require Email Confirmation for Payments',
+            description: 'آیا تأیید ایمیل برای پرداخت‌ها الزامی باشد؟',
+            category: 'general'
+          },
+          {
+            settingKey: 'send_receipts_automatically',
+            settingValue: 'true',
+            settingType: 'boolean',
+            displayName: 'ارسال خودکار رسیدهای پرداخت',
+            displayNameEn: 'Send Payment Receipts Automatically',
+            description: 'آیا رسیدهای پرداخت به صورت خودکار ارسال شوند؟',
+            category: 'general'
+          },
+          {
+            settingKey: 'payment_timeout',
+            settingValue: '30',
+            settingType: 'number',
+            displayName: 'مهلت زمانی پرداخت (دقیقه)',
+            displayNameEn: 'Payment Timeout (minutes)',
+            description: 'مهلت زمانی برای تکمیل پرداخت به دقیقه',
+            category: 'general'
+          },
+          {
+            settingKey: 'enable_notifications',
+            settingValue: 'true',
+            settingType: 'boolean',
+            displayName: 'فعال‌سازی اعلان‌ها',
+            displayNameEn: 'Enable Notifications',
+            description: 'آیا اعلان‌های پرداخت فعال باشند؟',
+            category: 'notifications'
+          },
+          {
+            settingKey: 'notify_admins',
+            settingValue: 'true',
+            settingType: 'boolean',
+            displayName: 'اعلان به مدیران',
+            displayNameEn: 'Notify Admins',
+            description: 'آیا مدیران از پرداخت‌ها مطلع شوند؟',
+            category: 'notifications'
+          }
+        ];
+
+        await db.insert(schema.generalPaymentSettings).values(defaultSettings);
+        const newSettings = await db.select().from(schema.generalPaymentSettings).orderBy(schema.generalPaymentSettings.category, schema.generalPaymentSettings.settingKey);
+        
+        console.log('✅ [GENERAL PAYMENT SETTINGS] Default settings created successfully');
+        
+        res.json({
+          success: true,
+          settings: newSettings,
+          message: "تنظیمات پیش‌فرض پرداخت ایجاد شد"
+        });
+        return;
+      }
+      
+      console.log(`✅ [GENERAL PAYMENT SETTINGS] Successfully fetched ${settings.length} settings`);
+      
+      res.json({
+        success: true,
+        settings
+      });
+    } catch (error) {
+      console.error("❌ [GENERAL PAYMENT SETTINGS] Error fetching settings:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در بارگذاری تنظیمات عمومی پرداخت"
+      });
+    }
+  });
+
+  // Update a general payment setting
+  app.put("/api/payment/general-settings/:settingKey", requireAuth, async (req, res) => {
+    try {
+      const { settingKey } = req.params;
+      const { settingValue, displayName, description } = req.body;
+
+      console.log(`📧 [GENERAL PAYMENT SETTINGS] Updating setting: ${settingKey} = ${settingValue}`);
+
+      const result = await db.update(schema.generalPaymentSettings)
+        .set({
+          settingValue,
+          displayName: displayName || undefined,
+          description: description || undefined,
+          updatedAt: new Date()
+        })
+        .where(eq(schema.generalPaymentSettings.settingKey, settingKey))
+        .returning();
+
+      if (result.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "تنظیم مورد نظر یافت نشد"
+        });
+      }
+
+      console.log(`✅ [GENERAL PAYMENT SETTINGS] Setting ${settingKey} updated successfully`);
+      
+      res.json({
+        success: true,
+        setting: result[0],
+        message: "تنظیم با موفقیت بروزرسانی شد"
+      });
+    } catch (error) {
+      console.error("❌ [GENERAL PAYMENT SETTINGS] Error updating setting:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در بروزرسانی تنظیم"
+      });
+    }
+  });
+
+  // Get settings by category
+  app.get("/api/payment/general-settings/category/:category", requireAuth, async (req, res) => {
+    try {
+      const { category } = req.params;
+      
+      const settings = await db.select()
+        .from(schema.generalPaymentSettings)
+        .where(eq(schema.generalPaymentSettings.category, category))
+        .orderBy(schema.generalPaymentSettings.settingKey);
+
+      res.json({
+        success: true,
+        settings
+      });
+    } catch (error) {
+      console.error("❌ [GENERAL PAYMENT SETTINGS] Error fetching settings by category:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در بارگذاری تنظیمات دسته‌بندی"
+      });
+    }
+  });
+
+  // =============================================================================
   // M[YY][NNNNN] ORDER NUMBERING ENDPOINTS
   // =============================================================================
 

@@ -36,6 +36,20 @@ interface PaymentGateway {
   updatedAt: string;
 }
 
+interface GeneralPaymentSettings {
+  id: number;
+  settingKey: string;
+  settingValue: string;
+  settingType: 'string' | 'boolean' | 'number';
+  displayName: string;
+  displayNameEn?: string;
+  description?: string;
+  category: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 const PaymentSettings = () => {
   const [selectedGateway, setSelectedGateway] = useState<PaymentGateway | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -47,6 +61,27 @@ const PaymentSettings = () => {
   const { data: gateways = [], isLoading } = useQuery<PaymentGateway[]>({
     queryKey: ['/api/payment/gateways'],
   });
+
+  // Fetch general payment settings
+  const { data: generalSettings = [], isLoading: isLoadingGeneralSettings } = useQuery<GeneralPaymentSettings[]>({
+    queryKey: ['/api/payment/general-settings'],
+  });
+
+  // Get settings by category for easy access
+  const generalCategorySettings = generalSettings.filter(s => s.category === 'general');
+  const notificationCategorySettings = generalSettings.filter(s => s.category === 'notifications');
+
+  // Helper function to get setting value
+  const getSettingValue = (settingKey: string, defaultValue: string = '') => {
+    const setting = generalSettings.find(s => s.settingKey === settingKey);
+    return setting ? setting.settingValue : defaultValue;
+  };
+
+  // Helper function to get boolean setting value
+  const getBooleanSetting = (settingKey: string, defaultValue: boolean = false) => {
+    const value = getSettingValue(settingKey, defaultValue.toString());
+    return value === 'true';
+  };
 
   // Create/Update gateway mutation
   const saveGatewayMutation = useMutation({
@@ -186,6 +221,36 @@ const PaymentSettings = () => {
       });
     }
   });
+
+  // Update general payment setting mutation
+  const updateGeneralSettingMutation = useMutation({
+    mutationFn: async ({ settingKey, settingValue }: { settingKey: string; settingValue: string }) => {
+      return apiRequest(`/api/payment/general-settings/${settingKey}`, {
+        method: 'PUT',
+        body: { settingValue }
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "تنظیمات بروزرسانی شد",
+        description: "تنظیمات با موفقیت ذخیره شد.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/payment/general-settings'] });
+    },
+    onError: () => {
+      toast({
+        title: "خطا",
+        description: "خطا در بروزرسانی تنظیمات.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Helper function to update setting
+  const updateSetting = (settingKey: string, value: string | boolean) => {
+    const settingValue = typeof value === 'boolean' ? value.toString() : value;
+    updateGeneralSettingMutation.mutate({ settingKey, settingValue });
+  };
 
   const toggleSecretVisibility = (field: string) => {
     setShowSecrets(prev => ({
@@ -1012,73 +1077,175 @@ const PaymentSettings = () => {
           </TabsContent>
 
           <TabsContent value="general" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>General Payment Settings</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label>Default Currency</Label>
-                    <Select defaultValue="USD">
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="USD">US Dollar (USD)</SelectItem>
-                        <SelectItem value="IQD">Iraqi Dinar (IQD)</SelectItem>
-                        <SelectItem value="EUR">Euro (EUR)</SelectItem>
-                      </SelectContent>
-                    </Select>
+            {isLoadingGeneralSettings ? (
+              <Card>
+                <CardContent className="py-8">
+                  <div className="text-center">در حال بارگذاری تنظیمات...</div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card>
+                <CardHeader>
+                  <CardTitle>تنظیمات عمومی پرداخت</CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    تنظیمات کلی سیستم پرداخت را پیکربندی کنید
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label>واحد پول پیش‌فرض</Label>
+                      <Select
+                        value={getSettingValue('default_currency', 'IQD')}
+                        onValueChange={(value) => updateSetting('default_currency', value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="IQD">دینار عراق (IQD)</SelectItem>
+                          <SelectItem value="USD">دلار آمریکا (USD)</SelectItem>
+                          <SelectItem value="EUR">یورو (EUR)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>مهلت زمانی پرداخت (دقیقه)</Label>
+                      <Input
+                        type="number"
+                        value={getSettingValue('payment_timeout', '30')}
+                        min="5"
+                        max="120"
+                        onChange={(e) => updateSetting('payment_timeout', e.target.value)}
+                        onBlur={(e) => updateSetting('payment_timeout', e.target.value)}
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <Label>Payment Timeout (minutes)</Label>
-                    <Input type="number" defaultValue="30" min="5" max="120" />
+                  
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <Label>نیاز به تأیید ایمیل برای پرداخت</Label>
+                        <p className="text-sm text-muted-foreground">
+                          آیا تأیید ایمیل برای پرداخت‌ها الزامی باشد؟
+                        </p>
+                      </div>
+                      <Switch
+                        checked={getBooleanSetting('require_email_confirmation', true)}
+                        onCheckedChange={(checked) => updateSetting('require_email_confirmation', checked)}
+                      />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <Label>ارسال خودکار رسیدهای پرداخت</Label>
+                        <p className="text-sm text-muted-foreground">
+                          آیا رسیدهای پرداخت به صورت خودکار ارسال شوند؟
+                        </p>
+                      </div>
+                      <Switch
+                        checked={getBooleanSetting('send_receipts_automatically', true)}
+                        onCheckedChange={(checked) => updateSetting('send_receipts_automatically', checked)}
+                      />
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Switch defaultChecked />
-                  <Label>Require email confirmation for payments</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Switch defaultChecked />
-                  <Label>Send payment receipts automatically</Label>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="notifications" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Payment Notifications</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>Email notifications for successful payments</Label>
-                      <p className="text-sm text-gray-500">Send email to customer when payment is completed</p>
+            {isLoadingGeneralSettings ? (
+              <Card>
+                <CardContent className="py-8">
+                  <div className="text-center">در حال بارگذاری تنظیمات اعلان...</div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card>
+                <CardHeader>
+                  <CardTitle>اعلان‌های پرداخت</CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    تنظیمات اعلان‌های مربوط به پرداخت‌ها را پیکربندی کنید
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <Label>فعال‌سازی اعلان‌ها</Label>
+                        <p className="text-sm text-muted-foreground">
+                          آیا اعلان‌های پرداخت فعال باشند؟
+                        </p>
+                      </div>
+                      <Switch
+                        checked={getBooleanSetting('enable_notifications', true)}
+                        onCheckedChange={(checked) => updateSetting('enable_notifications', checked)}
+                      />
                     </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>SMS notifications for failed payments</Label>
-                      <p className="text-sm text-gray-500">Send SMS alert when payment fails</p>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <Label>اعلان به مدیران</Label>
+                        <p className="text-sm text-muted-foreground">
+                          آیا مدیران از پرداخت‌ها مطلع شوند؟
+                        </p>
+                      </div>
+                      <Switch
+                        checked={getBooleanSetting('notify_admins', true)}
+                        onCheckedChange={(checked) => updateSetting('notify_admins', checked)}
+                      />
                     </div>
-                    <Switch />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>Admin notifications for refunds</Label>
-                      <p className="text-sm text-gray-500">Notify admin when refund is requested</p>
+                    
+                    {/* Additional notification settings */}
+                    <div className="pt-4 border-t">
+                      <h4 className="text-sm font-medium mb-4">تنظیمات پیشرفته اعلان</h4>
+                      
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div className="space-y-1">
+                            <Label>اعلان ایمیل برای پرداخت‌های موفق</Label>
+                            <p className="text-sm text-muted-foreground">
+                              ارسال ایمیل به مشتری هنگام تکمیل پرداخت
+                            </p>
+                          </div>
+                          <Switch
+                            checked={getBooleanSetting('email_success_notifications', true)}
+                            onCheckedChange={(checked) => updateSetting('email_success_notifications', checked)}
+                          />
+                        </div>
+                        
+                        <div className="flex items-center justify-between">
+                          <div className="space-y-1">
+                            <Label>اعلان پیامک برای پرداخت‌های ناموفق</Label>
+                            <p className="text-sm text-muted-foreground">
+                              ارسال پیامک هشدار هنگام شکست پرداخت
+                            </p>
+                          </div>
+                          <Switch
+                            checked={getBooleanSetting('sms_failed_notifications', false)}
+                            onCheckedChange={(checked) => updateSetting('sms_failed_notifications', checked)}
+                          />
+                        </div>
+                        
+                        <div className="flex items-center justify-between">
+                          <div className="space-y-1">
+                            <Label>اعلان مدیر برای استرداد</Label>
+                            <p className="text-sm text-muted-foreground">
+                              اطلاع مدیر هنگام درخواست استرداد
+                            </p>
+                          </div>
+                          <Switch
+                            checked={getBooleanSetting('admin_refund_notifications', true)}
+                            onCheckedChange={(checked) => updateSetting('admin_refund_notifications', checked)}
+                          />
+                        </div>
+                      </div>
                     </div>
-                    <Switch defaultChecked />
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
         </Tabs>
       </div>
