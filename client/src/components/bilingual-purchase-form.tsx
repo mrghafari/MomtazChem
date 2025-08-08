@@ -1445,47 +1445,73 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
     console.log('🚚 [DELIVERY LOGIC] Active delivery information:', activeDeliveryInfo);
 
-    // Handle wallet payment calculations with smart wallet_combined conversion
+    // 🚨 6-METHOD LOGIC: Handle wallet payment calculations
     let finalPaymentMethod = paymentMethod;
     
-    // Convert wallet_combined to appropriate wallet type based on wallet amount vs total
-    console.log('🔍 [PAYMENT ANALYSIS] Before conversion:', {
+    console.log('✅ [6-METHOD] Payment analysis:', {
       paymentMethod,
-      walletAmount,
-      totalAmount,
       walletBalance,
-      canUseWallet,
-      comparison: `${walletAmount} >= ${totalAmount} = ${walletAmount >= totalAmount}`
+      totalAmount,
+      canFullyPayFromWallet: walletBalance >= totalAmount,
+      canPartiallyPayFromWallet: walletBalance > 0 && walletBalance < totalAmount
     });
     
+    // Method 1 vs Method 2 determination for wallet_partial selection
     if (paymentMethod === 'wallet_partial') {
-      if (walletAmount >= totalAmount) {
+      if (walletBalance >= totalAmount) {
+        // Customer has enough wallet balance for full payment - use Method 1
         finalPaymentMethod = 'wallet_full';
-        console.log('🔄 [PAYMENT CONVERSION] wallet_partial → wallet_full (sufficient balance)');
-      } else if (walletAmount > 0) {
+        console.log('💰 [METHOD 1] wallet_partial → wallet_full (sufficient wallet balance for full payment)');
+      } else if (walletBalance > 0) {
+        // Customer needs hybrid payment - use Method 2
         finalPaymentMethod = 'wallet_partial';
-        console.log('🔄 [PAYMENT CONVERSION] wallet_partial remains (insufficient balance)');
+        console.log('💰 [METHOD 2] wallet_partial → hybrid payment (wallet + bank supplement)');
+      } else {
+        // No wallet balance - redirect to online payment
+        finalPaymentMethod = 'online_payment';
+        console.log('🔄 [FALLBACK] No wallet balance - redirecting to online payment');
       }
     }
 
     orderData.paymentMethod = finalPaymentMethod;
 
+    // 💰 6-METHOD PAYMENT AMOUNT CALCULATIONS
     if (finalPaymentMethod === 'wallet_full') {
       orderData.walletAmountUsed = Math.round(totalAmount);
       orderData.remainingAmount = 0;
+      console.log('💰 [METHOD 1] Full wallet payment set:', {
+        walletAmountUsed: orderData.walletAmountUsed,
+        remainingAmount: orderData.remainingAmount
+      });
     } else if (finalPaymentMethod === 'wallet_partial') {
-      orderData.walletAmountUsed = Math.round(walletAmount);
-      orderData.remainingAmount = Math.round(Math.max(0, totalAmount - walletAmount));
+      // For hybrid payment, use maximum available wallet or specified amount
+      const walletAmountToUse = walletAmount > 0 ? Math.min(walletAmount, walletBalance) : walletBalance;
+      orderData.walletAmountUsed = Math.round(walletAmountToUse);
+      orderData.remainingAmount = Math.round(Math.max(0, totalAmount - walletAmountToUse));
+      console.log('💰 [METHOD 2] Hybrid payment set:', {
+        walletAmountUsed: orderData.walletAmountUsed,
+        remainingAmount: orderData.remainingAmount,
+        walletBalance
+      });
     } else if (finalPaymentMethod === 'online_payment') {
       orderData.walletAmountUsed = 0;
       orderData.remainingAmount = Math.round(totalAmount);
-    } else if (finalPaymentMethod === 'bank_receipt') {
-      orderData.walletAmountUsed = 0;
-      orderData.remainingAmount = Math.round(totalAmount);
+      console.log('🔗 [METHOD 3] Online payment set:', {
+        remainingAmount: orderData.remainingAmount
+      });
     } else if (finalPaymentMethod === 'bank_transfer_grace') {
       orderData.walletAmountUsed = 0;
       orderData.remainingAmount = Math.round(totalAmount);
       orderData.paymentGracePeriod = true; // Flag for 3-day grace period
+      console.log('🏦 [METHOD 5] Bank transfer with grace period set:', {
+        remainingAmount: orderData.remainingAmount
+      });
+    } else if (finalPaymentMethod === 'bank_gateway') {
+      orderData.walletAmountUsed = 0;
+      orderData.remainingAmount = Math.round(totalAmount);
+      console.log('🏦 [METHOD 6] Bank gateway payment set:', {
+        remainingAmount: orderData.remainingAmount
+      });
     }
 
     console.log('🚀 [ORDER SUBMIT] Submitting order with complete data:', {
@@ -1912,24 +1938,17 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                   </Label>
                 </div>
                 
-                {/* دوم: پرداخت از کیف پول (تمام یا بخش از آن) */}
-                {canUseWallet && (
-                  <div className="flex items-center space-x-2 space-x-reverse">
-                    <RadioGroupItem value="wallet_combined" id="wallet_combined" />
-                    <Label htmlFor="wallet_combined" className="flex items-center gap-2 cursor-pointer">
-                      <Wallet className="w-4 h-4 text-green-600" />
-                      <span className="font-semibold">استفاده از کیف پول (حداکثر {formatIQDAmount(Math.min(walletBalance, totalAmount))} IQD)</span>
-                    </Label>
-                  </div>
-                )}
-                
-                {/* اضافی: والت جزئی - فقط برای نمایش */}
+                {/* دوم: پرداخت ترکیبی (کیف پول + بانک) - Method 2 */}
                 {canUseWallet && (
                   <div className="flex items-center space-x-2 space-x-reverse">
                     <RadioGroupItem value="wallet_partial" id="wallet_partial" />
                     <Label htmlFor="wallet_partial" className="flex items-center gap-2 cursor-pointer">
-                      <Wallet className="w-4 h-4 text-orange-600" />
-                      پرداخت بخشی از والت + بانک
+                      <Wallet className="w-4 h-4 text-green-600" />
+                      <span className="font-semibold">
+                        پرداخت از کیف پول 
+                        {walletBalance >= totalAmount ? " (کامل)" : " (ترکیبی + بانک)"}
+                        - موجودی: {formatIQDAmount(walletBalance)} IQD
+                      </span>
                     </Label>
                   </div>
                 )}
