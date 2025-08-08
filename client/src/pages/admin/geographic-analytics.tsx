@@ -977,7 +977,7 @@ export default function GeographicAnalytics() {
                       <Target className="h-4 w-4 text-orange-600" />
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold text-orange-600">{gpsStats.averageAccuracy.toFixed(1)}m</div>
+                      <div className="text-2xl font-bold text-orange-600">{gpsStats.averageAccuracy?.toFixed(1) || '0.0'}m</div>
                     </CardContent>
                   </Card>
                   <Card>
