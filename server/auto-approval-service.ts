@@ -53,10 +53,11 @@ export class AutoApprovalService {
     try {
       console.log("🔍 [AUTO APPROVAL] Checking for orders ready for auto-approval...");
       
-      // فعال کردن تایید خودکار فقط برای سفارشات کیف پولی کامل پرداخت شده
+      // فعال کردن تایید خودکار برای سفارشات کیف پولی و درگاه بانکی
       await this.processWalletPaidOrders(); // فعال برای کیف پول
+      await this.processBankGatewayOrders(); // فعال برای درگاه بانکی
       
-      // غیرفعال برای سایر پرداخت‌ها
+      // غیرفعال برای انتقال بانکی
       // await this.processBankTransferOrders(); // DISABLED
       
       // یافتن سفارشات آماده برای تایید خودکار
@@ -96,28 +97,37 @@ export class AutoApprovalService {
     }
   }
 
-  // تایید خودکار یک سفارش - فقط کیف پول و نه انتقال به انبار
+  // تایید خودکار یک سفارش - کیف پول و درگاه بانکی مستقیم به انبار
   private async approveOrder(order: any) {
     try {
       console.log(`🤖 [AUTO APPROVAL] Processing order management ID: ${order.id}`);
 
-      // تایید خودکار فقط برای سفارشات کیف پولی فعال است
-      console.log(`🤖 [AUTO APPROVAL] Processing scheduled order ${order.id}`);
+      // تشخیص نوع پرداخت برای پیغام مناسب
+      let financialNotes = 'تایید خودکار - سفارش زمان‌بندی شده';
       
-      // برای سفارشات کیف پولی، تایید خودکار انجام می‌شود
+      if (order.paymentMethod?.includes('wallet') || order.paymentSourceLabel?.includes('کیف')) {
+        financialNotes = 'تایید خودکار - پرداخت کامل از کیف پول دیجیتال';
+        console.log(`💰 [AUTO APPROVAL] Wallet payment order ${order.id} - direct to warehouse`);
+      } else if (order.paymentMethod?.includes('bank_gateway') || order.paymentSourceLabel?.includes('بانک')) {
+        financialNotes = 'تایید خودکار - تراکنش درگاه بانکی موفق';
+        console.log(`🏦 [AUTO APPROVAL] Bank gateway payment order ${order.id} - direct to warehouse`);
+      }
+      
+      // تایید خودکار و انتقال مستقیم به انبار
       await db
         .update(orderManagement)
         .set({
           currentStatus: 'warehouse_pending',
           financialReviewerId: 0, // System auto-approval
           financialReviewedAt: new Date(),
-          financialNotes: 'تایید خودکار - سفارش زمان‌بندی شده',
+          financialNotes,
           autoApprovalExecutedAt: new Date(),
           updatedAt: new Date()
         })
         .where(eq(orderManagement.id, order.id));
 
       console.log(`✅ [AUTO APPROVAL] Order ${order.id} automatically approved and moved to warehouse`);
+      console.log(`💳 [AUTO APPROVAL] Payment method: ${order.paymentMethod}, Source: ${order.paymentSourceLabel}`);
 
     } catch (error) {
       console.error(`❌ [AUTO APPROVAL] Error approving order ${order.id}:`, error);
@@ -280,6 +290,83 @@ export class AutoApprovalService {
 
     } catch (error) {
       console.error(`❌ [WAREHOUSE TRANSFER] Error transferring order ${order.orderNumber}:`, error);
+    }
+  }
+
+  // پردازش سفارشات bank_gateway - فعال برای درگاه بانکی
+  private async processBankGatewayOrders() {
+    try {
+      console.log("🏦 [BANK GATEWAY AUTO] Checking bank gateway orders for auto-approval...");
+      
+      // یافتن تمام سفارشات درگاه بانکی در حال انتظار تایید مالی
+      const pendingBankGatewayOrders = await db
+        .select({
+          id: customerOrders.id,
+          orderNumber: customerOrders.orderNumber,
+          paymentStatus: customerOrders.paymentStatus,
+          totalAmount: customerOrders.totalAmount,
+          customerId: customerOrders.customerId,
+          managementId: orderManagement.id,
+          currentStatus: orderManagement.currentStatus,
+          paymentMethod: orderManagement.paymentMethod,
+          paymentSourceLabel: orderManagement.paymentSourceLabel
+        })
+        .from(customerOrders)
+        .innerJoin(orderManagement, eq(customerOrders.id, orderManagement.customerOrderId))
+        .where(
+          sql`
+            customer_orders.payment_status = 'paid' 
+            AND order_management.current_status = 'financial_reviewing'
+            AND (
+              order_management.payment_method LIKE '%bank_gateway%' 
+              OR order_management.payment_source_label LIKE '%بانک%'
+              OR order_management.payment_source_label LIKE '%درگاه%'
+            )
+          `
+        );
+
+      if (pendingBankGatewayOrders.length === 0) {
+        console.log("✅ [BANK GATEWAY AUTO] No pending bank gateway orders found");
+        return;
+      }
+
+      console.log(`🏦 [BANK GATEWAY AUTO] Found ${pendingBankGatewayOrders.length} bank gateway orders ready for auto-approval`);
+
+      // پردازش هر سفارش درگاه بانکی که تراکنش موفق داشته
+      for (const order of pendingBankGatewayOrders) {
+        await this.transferBankGatewayOrderToWarehouse(order);
+      }
+
+    } catch (error) {
+      console.error("❌ [BANK GATEWAY AUTO] Error processing bank gateway orders:", error);
+    }
+  }
+
+  // انتقال سفارش bank_gateway به warehouse - تراکنش موفق
+  private async transferBankGatewayOrderToWarehouse(order: any) {
+    try {
+      console.log(`🏦 [BANK GATEWAY AUTO] Processing successful bank gateway order ${order.orderNumber}`);
+
+      // تعیین نوع پرداخت برای یادداشت
+      const paymentNote = 'تایید خودکار - تراکنش درگاه بانکی موفق';
+
+      // به‌روزرسانی وضعیت در order_management - انتقال مستقیم به انبار
+      await db
+        .update(orderManagement)
+        .set({
+          currentStatus: 'warehouse_pending',
+          financialReviewerId: 0, // System auto-approval
+          financialReviewedAt: new Date(),
+          financialNotes: paymentNote,
+          updatedAt: new Date()
+        })
+        .where(eq(orderManagement.id, order.managementId));
+
+      console.log(`✅ [BANK GATEWAY AUTO] Order ${order.orderNumber} automatically approved and moved to warehouse`);
+      console.log(`🏦 [BANK GATEWAY AUTO] Payment: ${order.paymentSourceLabel || 'درگاه بانکی'} - Amount: ${order.totalAmount}`);
+
+    } catch (error) {
+      console.error(`❌ [BANK GATEWAY TRANSFER] Error transferring order ${order.orderNumber}:`, error);
     }
   }
 
