@@ -142,24 +142,36 @@ export class AutoApprovalService {
     try {
       console.log("💰 [WALLET AUTO] Checking wallet-paid orders (including hybrid payments)...");
       
-      // یافتن تمام سفارشات کامل پرداخت شده در حال انتظار
+      // یافتن تمام سفارشات کامل پرداخت شده در حال انتظار (شامل partial که کاملاً پرداخت شده‌اند)
       const pendingPaidOrders = await db
         .select({
           id: customerOrders.id,
           orderNumber: customerOrders.orderNumber,
           paymentStatus: customerOrders.paymentStatus,
+          paymentMethod: customerOrders.paymentMethod,
           totalAmount: customerOrders.totalAmount,
           customerId: customerOrders.customerId,
           managementId: orderManagement.id,
           currentStatus: orderManagement.currentStatus,
-          paymentMethod: orderManagement.paymentMethod,
+          paymentMethodMgmt: orderManagement.paymentMethod,
           paymentSourceLabel: orderManagement.paymentSourceLabel
         })
         .from(customerOrders)
         .innerJoin(orderManagement, eq(customerOrders.id, orderManagement.customerOrderId))
         .where(
           sql`
-            customer_orders.payment_status = 'paid' 
+            (
+              customer_orders.payment_status = 'paid' 
+              OR 
+              (
+                customer_orders.payment_status = 'partial' 
+                AND (
+                  customer_orders.payment_method LIKE '%wallet%'
+                  OR customer_orders.payment_method LIKE '%کیف%'
+                  OR customer_orders.payment_method LIKE '%ترکیبی%'
+                )
+              )
+            )
             AND order_management.current_status = 'pending'
           `
         );
