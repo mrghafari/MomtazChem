@@ -1,0 +1,41 @@
+payment-settings:196 Tawk.to script loaded successfully
+chunk-RPCDYKBN.js?v=569e559a:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+useAuth.ts:43 Auth check result: Object
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:117574)
+    at t.value (twk-chunk-common.js:2:150658)
+    at p.updateUUID (twk-chunk-common.js:2:202310)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:124589)
+    at twk-chunk-common.js:2:123900
+value @ twk-chunk-common.js:2
+128x128?text=WeChat+QR:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+payment-settings:168 Tawk.to Live Chat loaded successfully
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+useAuth.ts:43 Auth check result: Object
+payment-settings.tsx:960 🔄 [PAYMENT METHODS] Updating online_payment: {from: true, to: false, priority: 4}
+queryClient.ts:81  GET https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/customers/me 401 (Unauthorized)
+(anonymous) @ queryClient.ts:81
+fetchFn @ @tanstack_react-query.js?v=569e559a:840
+run @ @tanstack_react-query.js?v=569e559a:494
+start @ @tanstack_react-query.js?v=569e559a:536
+fetch @ @tanstack_react-query.js?v=569e559a:926
+executeFetch_fn @ @tanstack_react-query.js?v=569e559a:2211
+fetch @ @tanstack_react-query.js?v=569e559a:2011
+refetch @ @tanstack_react-query.js?v=569e559a:2001
+onFocus @ @tanstack_react-query.js?v=569e559a:749
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1112
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1111
+batch @ @tanstack_react-query.js?v=569e559a:583
+onFocus @ @tanstack_react-query.js?v=569e559a:1110
+(anonymous) @ @tanstack_react-query.js?v=569e559a:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=569e559a:313
+onFocus @ @tanstack_react-query.js?v=569e559a:312
+(anonymous) @ @tanstack_react-query.js?v=569e559a:299
+listener @ @tanstack_react-query.js?v=569e559a:270
+useAuth.ts:43 Auth check result: {success: true, user: {…}}
+payment-settings.tsx:960 🔄 [PAYMENT METHODS] Updating online_payment: {from: false, to: true, priority: 4}
