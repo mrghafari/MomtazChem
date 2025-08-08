@@ -219,9 +219,9 @@ const PaymentSettings = () => {
         { methodKey, enabled, priority }
       ];
 
-      // If disabling online_payment (bank) or wallet, also disable wallet_partial (combined payment)
+      // If disabling online_payment (bank) or wallet, also disable bank_receipt (combined payment)
       if (enabled === false && (methodKey === 'online_payment' || methodKey === 'wallet')) {
-        updateRequests.push({ methodKey: 'wallet_partial', enabled: false });
+        updateRequests.push({ methodKey: 'bank_receipt', enabled: false });
       }
 
       // Execute all update requests
@@ -254,7 +254,7 @@ const PaymentSettings = () => {
           }
           
           // Business logic: If disabling bank or wallet payment, also disable combined payment
-          if (enabled === false && (methodKey === 'online_payment' || methodKey === 'wallet') && method.methodKey === 'wallet_partial') {
+          if (enabled === false && (methodKey === 'online_payment' || methodKey === 'wallet') && method.methodKey === 'bank_receipt') {
             return { ...method, enabled: false };
           }
           
