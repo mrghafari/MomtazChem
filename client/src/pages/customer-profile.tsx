@@ -117,6 +117,8 @@ const CustomerProfile = () => {
     const status = order.status?.toLowerCase();
     const paymentStatus = order.paymentStatus?.toLowerCase();
     const paymentMethod = order.paymentMethod;
+    const managementStatus = order.managementStatus?.toLowerCase();
+    const hasFinancialReview = order.financialReviewedAt;
     
     // Check for bank transfer orders
     if (paymentMethod === 'واریز بانکی با مهلت 3 روزه' || paymentMethod === 'bank_transfer_grace') {
@@ -128,8 +130,20 @@ const CustomerProfile = () => {
       return 'completed';
     }
     
-    // Check for processing orders
-    if (status === 'processing' || status === 'shipped' || status === 'ready_for_delivery') {
+    // Check for wallet payments that have been financially reviewed
+    if ((paymentMethod === 'wallet_full' || paymentMethod === 'wallet_partial' || paymentMethod === 'wallet_combined') && hasFinancialReview) {
+      return 'processing';
+    }
+    
+    // Check for orders in warehouse or processing stages
+    if (status === 'processing' || status === 'shipped' || status === 'ready_for_delivery' || 
+        managementStatus === 'warehouse_pending' || managementStatus === 'warehouse_approved' || 
+        managementStatus === 'warehouse_ready') {
+      return 'processing';
+    }
+    
+    // Check for partial payments that have been approved
+    if (paymentStatus === 'partial' && hasFinancialReview) {
       return 'processing';
     }
     
@@ -366,10 +380,32 @@ const CustomerProfile = () => {
     }
   };
 
-  const getStatusLabel = (status: string, paymentStatus?: string) => {
+  const getStatusLabel = (status: string, paymentStatus?: string, order?: any) => {
     // اگر رسید آپلود شده باشد، نمایش "منتظر تأیید مالی"
     if (paymentStatus === 'receipt_uploaded') {
       return 'منتظر تأیید مالی';
+    }
+    
+    // Check for wallet payments and warehouse status for more accurate labels
+    const paymentMethod = order?.paymentMethod;
+    const managementStatus = order?.managementStatus?.toLowerCase();
+    const hasFinancialReview = order?.financialReviewedAt;
+    
+    // Special handling for wallet payments
+    if ((paymentMethod === 'wallet_full' || paymentMethod === 'wallet_partial' || paymentMethod === 'wallet_combined') && hasFinancialReview) {
+      if (managementStatus === 'warehouse_pending') {
+        return 'در حال پردازش - انبار';
+      }
+      if (managementStatus === 'warehouse_approved') {
+        return 'تایید شده - آماده ارسال';
+      }
+    }
+    
+    // Special handling for partial payments that are approved
+    if (paymentStatus === 'partial' && hasFinancialReview) {
+      if (managementStatus === 'warehouse_pending') {
+        return 'در حال پردازش - انبار';
+      }
     }
     
     switch (status) {
@@ -796,7 +832,7 @@ const CustomerProfile = () => {
                               );
                             })()}
                             <Badge className={getStatusColor(order.status, order.paymentStatus)}>
-                              {getStatusLabel(order.status, order.paymentStatus)}
+                              {getStatusLabel(order.status, order.paymentStatus, order)}
                             </Badge>
                             
                             {/* نمایش دلیل رد سفارش از بخش مالی */}
@@ -1171,7 +1207,7 @@ const CustomerProfile = () => {
                         );
                       })()}
                       <Badge className={getStatusColor(order.status, order.paymentStatus)}>
-                        {getStatusLabel(order.status, order.paymentStatus)}
+                        {getStatusLabel(order.status, order.paymentStatus, order)}
                       </Badge>
                     </div>
                   </div>
