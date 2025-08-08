@@ -210,14 +210,24 @@ export class IncompletePaymentCleaner {
         WHERE id = $2
       `, [stage, order.id]);
 
-      // Determine recipient email
+      // Determine recipient email and check if customer is online
       const recipientEmail = order.guest_email || await this.getCustomerEmail(order.customer_id);
       const recipientName = order.guest_name || await this.getCustomerName(order.customer_id);
+      const isCustomerOnline = await this.isCustomerOnline(order.customer_id);
 
       if (!recipientEmail) {
         console.log(`⚠️ [INCOMPLETE PAYMENT CLEANER] No email found for order ${order.order_number}`);
         return;
       }
+
+      // Check if customer is online - if online, just announce without SMS/Email
+      if (isCustomerOnline) {
+        console.log(`🌐 [ONLINE CUSTOMER] Customer ${order.customer_id} is online - announcing directly without SMS/Email`);
+        console.log(`📢 [ONLINE ANNOUNCEMENT] ${stageLabel} - Order ${order.order_number} notification for ${recipientName}`);
+        return;
+      }
+
+      console.log(`📡 [OFFLINE CUSTOMER] Customer ${order.customer_id} is offline - proceeding with full notification system`);
 
       // Prepare notification content based on stage and order type
       let subject: string;
@@ -227,38 +237,38 @@ export class IncompletePaymentCleaner {
       if (orderType === 'grace_period') {
         // Grace period order notifications
         if (stage === 1) {
-          subject = `سفارش ${order.order_number} - یادآوری مهلت پرداخت`;
-          message = `عزیز ${recipientName}، سفارش شما ${order.order_number} به مبلغ ${order.total_amount} ${order.currency} در مهلت سه روزه قرار دارد. لطفاً تا پایان مهلت پرداخت کنید.`;
+          subject = `Order ${order.order_number} - Payment Grace Period Reminder`;
+          message = `Dear ${recipientName}, your order ${order.order_number} of ${order.total_amount} ${order.currency} is in 3-day grace period. Please pay before deadline.`;
           urgency = 'normal';
         } else if (stage === 2) {
-          subject = `سفارش ${order.order_number} - یادآوری دوم (48 ساعت باقیمانده)`;
-          message = `عزیز ${recipientName}، 48 ساعت تا انقضای مهلت پرداخت سفارش ${order.order_number} به مبلغ ${order.total_amount} ${order.currency} باقی مانده است.`;
+          subject = `Order ${order.order_number} - Second Reminder (48 hours left)`;
+          message = `Dear ${recipientName}, 48 hours left until payment deadline for order ${order.order_number} of ${order.total_amount} ${order.currency}.`;
           urgency = 'medium';
         } else if (stage === 3) {
-          subject = `هشدار نهایی - سفارش ${order.order_number} (24 ساعت باقیمانده)`;
-          message = `عزیز ${recipientName}، این آخرین هشدار است! فقط 24 ساعت تا انقضای مهلت پرداخت سفارش ${order.order_number} به مبلغ ${order.total_amount} ${order.currency} باقی مانده است. در غیر این صورت سفارش حذف خواهد شد.`;
+          subject = `Final Warning - Order ${order.order_number} (24 hours left)`;
+          message = `Dear ${recipientName}, this is the final warning! Only 24 hours left until payment deadline for order ${order.order_number} of ${order.total_amount} ${order.currency}. Order will be deleted otherwise.`;
           urgency = 'high';
         }
       } else if (orderType === 'failed_bank_payment') {
         // Failed bank payment orphan notifications
         if (stage === 1) {
-          subject = `سفارش ناموفق - اطلاع‌رسانی`;
-          message = `عزیز ${recipientName}، پرداخت بانکی سفارش شما به مبلغ ${order.total_amount} ${order.currency} ناموفق بود. سفارش به مدت یک ساعت در سیستم باقی می‌ماند.`;
+          subject = `Failed Order - Notification`;
+          message = `Dear ${recipientName}, bank payment for your order of ${order.total_amount} ${order.currency} failed. Order will remain in system for one hour.`;
           urgency = 'normal';
         } else {
-          subject = `هشدار نهایی - حذف سفارش ناموفق`;
-          message = `عزیز ${recipientName}، سفارش ناموفق شما به مبلغ ${order.total_amount} ${order.currency} به زودی از سیستم حذف خواهد شد.`;
+          subject = `Final Warning - Failed Order Deletion`;
+          message = `Dear ${recipientName}, your failed order of ${order.total_amount} ${order.currency} will be deleted from system soon.`;
           urgency = 'high';
         }
       } else {
         // Online payment failure notifications
         if (stage === 1) {
-          subject = `سفارش ${order.order_number} - پرداخت ناتمام`;
-          message = `عزیز ${recipientName}، پرداخت سفارش شما به مبلغ ${order.total_amount} ${order.currency} ناتمام باقی مانده است. لطفاً در اسرع وقت پرداخت را تکمیل کنید.`;
+          subject = `Order ${order.order_number} - Incomplete Payment`;
+          message = `Dear ${recipientName}, your order ${order.order_number} payment of ${order.total_amount} ${order.currency} is incomplete. Please complete payment as soon as possible.`;
           urgency = 'normal';
         } else {
-          subject = `هشدار نهایی - سفارش ${order.order_number}`;
-          message = `عزیز ${recipientName}، این آخرین فرصت برای تکمیل پرداخت سفارش ${order.order_number} به مبلغ ${order.total_amount} ${order.currency} است. در صورت عدم پرداخت، سفارش حذف خواهد شد.`;
+          subject = `Final Warning - Order ${order.order_number}`;
+          message = `Dear ${recipientName}, this is the last chance to complete payment for order ${order.order_number} of ${order.total_amount} ${order.currency}. Order will be deleted if not paid.`;
           urgency = 'high';
         }
       }
@@ -282,7 +292,7 @@ export class IncompletePaymentCleaner {
         });
       }
 
-      console.log(`✅ [INCOMPLETE PAYMENT CLEANER] ${stageLabel} notification sent for order ${order.order_number}`);
+      console.log(`✅ [INCOMPLETE PAYMENT CLEANER] ${stageLabel} notification sent for order ${order.order_number} (offline customer)`);
 
     } catch (error) {
       console.error(`❌ [INCOMPLETE PAYMENT CLEANER] Error sending notification for order ${order.order_number}:`, error);
@@ -525,6 +535,33 @@ export class IncompletePaymentCleaner {
     } catch (error) {
       console.error('Error getting customer email:', error);
       return null;
+    }
+  }
+
+  private async isCustomerOnline(customerId: number | null): Promise<boolean> {
+    if (!customerId) return false;
+    
+    try {
+      const { pool } = await import('./db');
+      
+      // Check if customer has an active session in the last 5 minutes
+      const result = await pool.query(`
+        SELECT s.sess 
+        FROM security_sessions s 
+        WHERE s.sess::text LIKE '%"customerId":${customerId}%' 
+          AND s.sess::text LIKE '%"isAuthenticated":true%'
+          AND s.expire > NOW()
+          AND s.expire > NOW() - INTERVAL '5 minutes'
+        LIMIT 1
+      `);
+      
+      const isOnline = result.rows.length > 0;
+      console.log(`🔍 [ONLINE CHECK] Customer ${customerId} online status: ${isOnline}`);
+      
+      return isOnline;
+    } catch (error) {
+      console.error('Error checking customer online status:', error);
+      return false; // Default to offline if error
     }
   }
 
