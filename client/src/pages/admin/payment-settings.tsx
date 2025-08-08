@@ -874,7 +874,7 @@ const PaymentSettings = () => {
 
         <Tabs defaultValue="payment-methods" className="space-y-6">
           <TabsList>
-            <TabsTrigger value="payment-methods">روش‌های پرداخت</TabsTrigger>
+            <TabsTrigger value="payment-methods">Payment Methods</TabsTrigger>
             <TabsTrigger value="gateways">Payment Gateways</TabsTrigger>
             <TabsTrigger value="general">General Settings</TabsTrigger>
             <TabsTrigger value="notifications">Notifications</TabsTrigger>
@@ -885,10 +885,10 @@ const PaymentSettings = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <CreditCard className="h-5 w-5" />
-                  تنظیمات روش‌های پرداخت در چک‌اوت
+                  Checkout Payment Methods Settings
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  فعال یا غیرفعال کردن روش‌های پرداخت مختلف که مشتریان در صفحه چک‌اوت می‌بینند
+                  Enable or disable different payment methods that customers see during checkout
                 </p>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -908,18 +908,18 @@ const PaymentSettings = () => {
                               {method.methodKey === 'bank_receipt' && <Building2 className="h-5 w-5 text-orange-600" />}
                               {method.methodKey === 'bank_transfer_grace' && <Settings className="h-5 w-5 text-purple-600" />}
                               <div>
-                                <h4 className="font-medium text-right">{method.methodName}</h4>
-                                <p className="text-sm text-muted-foreground text-right">{method.description}</p>
-                                <p className="text-xs text-muted-foreground text-left mt-1">{method.methodNameEn}</p>
+                                <h4 className="font-medium">{method.methodNameEn}</h4>
+                                <p className="text-sm text-muted-foreground">{method.methodName}</p>
+                                <p className="text-xs text-muted-foreground mt-1">{method.description}</p>
                               </div>
                             </div>
                           </div>
                           <div className="flex items-center gap-4">
                             <div className="flex items-center gap-2">
                               <Badge variant={method.enabled ? "default" : "secondary"}>
-                                {method.enabled ? "فعال" : "غیرفعال"}
+                                {method.enabled ? "Enabled" : "Disabled"}
                               </Badge>
-                              <span className="text-sm text-muted-foreground">اولویت: {method.priority}</span>
+                              <span className="text-sm text-muted-foreground">Priority: {method.priority}</span>
                             </div>
                             <Switch
                               checked={method.enabled}
@@ -937,15 +937,15 @@ const PaymentSettings = () => {
                         <div className="mt-3 p-3 bg-muted/50 rounded-lg">
                           <div className="grid grid-cols-2 gap-4 text-sm">
                             <div>
-                              <span className="font-medium">کلید روش:</span>
+                              <span className="font-medium">Method Key:</span>
                               <span className="ml-2 font-mono text-xs bg-background px-2 py-1 rounded">
                                 {method.methodKey}
                               </span>
                             </div>
                             <div>
-                              <span className="font-medium">وضعیت:</span>
+                              <span className="font-medium">Status:</span>
                               <span className={`ml-2 ${method.enabled ? 'text-green-600' : 'text-gray-500'}`}>
-                                {method.enabled ? '✓ در دسترس مشتریان' : '✗ مخفی از مشتریان'}
+                                {method.enabled ? '✓ Available to customers' : '✗ Hidden from customers'}
                               </span>
                             </div>
                           </div>
@@ -957,8 +957,8 @@ const PaymentSettings = () => {
                 {(!paymentMethods || paymentMethods.length === 0) && !isLoadingMethods && (
                   <div className="text-center py-8 text-muted-foreground">
                     <CreditCard className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>هنوز روش پرداختی تنظیم نشده است.</p>
-                    <p className="text-sm mt-2">سیستم به صورت خودکار روش‌های پیش‌فرض را ایجاد خواهد کرد.</p>
+                    <p>No payment methods configured yet.</p>
+                    <p className="text-sm mt-2">System will automatically create default payment methods when first accessed by admin.</p>
                   </div>
                 )}
               </CardContent>
