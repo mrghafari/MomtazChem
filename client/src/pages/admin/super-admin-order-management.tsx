@@ -45,6 +45,7 @@ interface Order {
   orderNumber: string;
   customerName: string;
   customerEmail: string;
+  customerPhone?: string;
   totalAmount: string;
   currency: string;
   status: string;
@@ -112,7 +113,7 @@ export default function SuperAdminOrderManagement() {
   const gateways = Array.isArray(gatewaysResponse) ? gatewaysResponse : [];
 
   // Extract orders from response with proper error handling
-  const orders = Array.isArray(response?.data) ? response.data : [];
+  const orders: Order[] = Array.isArray((response as any)?.data) ? (response as any).data : [];
   
   // Debug logging
   console.log('API Response:', response);
@@ -219,14 +220,15 @@ export default function SuperAdminOrderManagement() {
   });
 
   // Filter orders based on search with null safety
-  const filteredOrders = (orders || []).filter(order => 
+  const filteredOrders = (orders || []).filter((order: Order) => 
     order?.orderNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     order?.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    order?.customerEmail?.toLowerCase().includes(searchTerm.toLowerCase())
+    order?.customerEmail?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    order?.customerPhone?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Check for authentication errors
-  const hasAuthError = response?.error?.message?.includes('401') || gatewaysResponse?.error?.message?.includes('401');
+  // Check for authentication errors  
+  const hasAuthError = (response as any)?.error?.message?.includes('401') || (gatewaysResponse as any)?.error?.message?.includes('401');
   
   if (hasAuthError) {
     return (
@@ -394,7 +396,7 @@ export default function SuperAdminOrderManagement() {
           <CardContent className="space-y-4">
             <div className="flex gap-4 items-center">
               <div className="flex-1">
-                <Label htmlFor="search">جستجو بر اساس شماره سفارش، نام مشتری یا ایمیل</Label>
+                <Label htmlFor="search">جستجو بر اساس شماره سفارش، نام مشتری، ایمیل یا تلفن</Label>
                 <Input
                   id="search"
                   value={searchTerm}
@@ -447,7 +449,7 @@ export default function SuperAdminOrderManagement() {
               </div>
             ) : (
               <div className="space-y-4">
-                {(filteredOrders || []).map((order) => (
+                {(filteredOrders || []).map((order: Order) => (
                   <div
                     key={order.id}
                     className="p-4 border rounded-lg bg-white hover:bg-gray-50 transition-colors"
@@ -466,6 +468,11 @@ export default function SuperAdminOrderManagement() {
                           <div className="flex items-center gap-2 mb-1">
                             <User className="h-4 w-4 text-green-500" />
                             <span className="font-medium">{order.customerName}</span>
+                            {order.customerPhone && (
+                              <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full ml-2">
+                                📱 {order.customerPhone}
+                              </span>
+                            )}
                           </div>
                           <div className="flex items-center gap-2 text-sm text-gray-600">
                             <Mail className="h-3 w-3" />
@@ -480,10 +487,6 @@ export default function SuperAdminOrderManagement() {
                           </div>
                           <PaymentMethodBadge 
                             paymentMethod={order.paymentMethod}
-                            totalAmount={order.totalAmount}
-                            currency={order.currency}
-                            size="sm"
-                            showAmount={false}
                           />
                         </div>
                         
