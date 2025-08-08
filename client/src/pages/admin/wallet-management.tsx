@@ -68,11 +68,6 @@ export default function WalletManagement() {
   const [modifyAmount, setModifyAmount] = useState("");
   const [modifyReason, setModifyReason] = useState("");
   const [modificationType, setModificationType] = useState<'credit' | 'debit' | 'set_balance'>('credit');
-  
-  // Inline modification states
-  const [inlineModificationAmounts, setInlineModificationAmounts] = useState<{[key: number]: string}>({});
-  const [inlineModificationReasons, setInlineModificationReasons] = useState<{[key: number]: string}>({});
-  const [processingInlineModifications, setProcessingInlineModifications] = useState<{[key: number]: boolean}>({});
 
   // Check if user is super admin (id = 1)
   const isSuperAdmin = user?.id === 1;
@@ -201,70 +196,6 @@ export default function WalletManagement() {
     setModifyCustomerId(customer.id);
     setModifyCustomerEmail(customer.email);
     setShowCustomerDropdown(false);
-  };
-
-  // Handle inline modification amount change
-  const handleInlineAmountChange = (customerId: number, amount: string) => {
-    setInlineModificationAmounts(prev => ({
-      ...prev,
-      [customerId]: amount
-    }));
-  };
-
-  // Handle inline modification reason change
-  const handleInlineReasonChange = (customerId: number, reason: string) => {
-    setInlineModificationReasons(prev => ({
-      ...prev,
-      [customerId]: reason
-    }));
-  };
-
-  // Handle inline wallet modification
-  const handleInlineModification = async (customerId: number) => {
-    const amount = inlineModificationAmounts[customerId];
-    const reason = inlineModificationReasons[customerId] || 'تغییر مستقیم از واسط مدیریت';
-    
-    if (!amount || amount === '0') {
-      toast({ 
-        title: "خطا", 
-        description: "لطفاً مقدار تغییر را وارد کنید", 
-        variant: "destructive" 
-      });
-      return;
-    }
-
-    setProcessingInlineModifications(prev => ({ ...prev, [customerId]: true }));
-    
-    try {
-      const numAmount = parseFloat(amount);
-      const modificationType = numAmount >= 0 ? 'credit' : 'debit';
-      const absoluteAmount = Math.abs(numAmount).toString();
-      
-      await modifyBalanceMutation.mutateAsync({
-        customerId,
-        amount: absoluteAmount,
-        reason,
-        modificationType
-      });
-      
-      // Clear the input fields after successful modification
-      setInlineModificationAmounts(prev => {
-        const newAmounts = { ...prev };
-        delete newAmounts[customerId];
-        return newAmounts;
-      });
-      
-      setInlineModificationReasons(prev => {
-        const newReasons = { ...prev };
-        delete newReasons[customerId];
-        return newReasons;
-      });
-      
-    } catch (error) {
-      console.error('Inline modification error:', error);
-    } finally {
-      setProcessingInlineModifications(prev => ({ ...prev, [customerId]: false }));
-    }
   };
 
   // Fetch customer wallet balances
@@ -678,54 +609,25 @@ export default function WalletManagement() {
                           <TableCell>{formatDate(request.createdAt)}</TableCell>
                           <TableCell>{getStatusBadge(request.status)}</TableCell>
                           <TableCell>
-                            <div className="flex flex-col gap-2 min-w-[250px]">
-                              {/* Wallet Modification Controls */}
-                              <div className="flex flex-col gap-1">
-                                <Input
-                                  type="number"
-                                  placeholder="مثال: +5000 یا -2000"
-                                  value={inlineModificationAmounts[request.customerId] || ''}
-                                  onChange={(e) => handleInlineAmountChange(request.customerId, e.target.value)}
-                                  className="h-8 text-sm"
-                                  disabled={processingInlineModifications[request.customerId]}
-                                />
-                                <Input
-                                  type="text"
-                                  placeholder="دلیل تغییر (اختیاری)"
-                                  value={inlineModificationReasons[request.customerId] || ''}
-                                  onChange={(e) => handleInlineReasonChange(request.customerId, e.target.value)}
-                                  className="h-7 text-xs"
-                                  disabled={processingInlineModifications[request.customerId]}
-                                />
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="h-7 text-xs bg-green-50 hover:bg-green-100 text-green-700 border-green-200"
-                                  onClick={() => handleInlineModification(request.customerId)}
-                                  disabled={processingInlineModifications[request.customerId] || !inlineModificationAmounts[request.customerId]}
-                                >
-                                  {processingInlineModifications[request.customerId] ? (
-                                    <RefreshCw className="w-3 h-3 animate-spin mr-1" />
-                                  ) : (
-                                    <CheckCircle className="w-3 h-3 mr-1" />
-                                  )}
-                                  تطبیق تغییر
-                                </Button>
-                              </div>
-                              {/* Sync Button */}
-                              <div className="flex gap-1">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => syncWalletMutation.mutate(request.customerId)}
-                                  disabled={syncWalletMutation.isPending}
-                                  title="همگام‌سازی کیف پول این مشتری"
-                                  className="h-7 text-xs"
-                                >
-                                  <RefreshCw className={`w-3 h-3 mr-1 ${syncWalletMutation.isPending ? 'animate-spin' : ''}`} />
-                                  Sync
-                                </Button>
-                              </div>
+                            <div className="flex gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleViewDetails(request)}
+                              >
+                                <Eye className="w-4 h-4 mr-1" />
+                                View
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => syncWalletMutation.mutate(request.customerId)}
+                                disabled={syncWalletMutation.isPending}
+                                title="همگام‌سازی کیف پول این مشتری"
+                              >
+                                <RefreshCw className={`w-4 h-4 mr-1 ${syncWalletMutation.isPending ? 'animate-spin' : ''}`} />
+                                Sync
+                              </Button>
                             </div>
                           </TableCell>
                         </TableRow>
