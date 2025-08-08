@@ -15293,26 +15293,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`🔍 [PAYMENT DEBUG] Total: ${totalAmount}, Wallet Used: ${walletAmountUsed}, Original Remaining: ${remainingAmount}, Actual Remaining: ${actualRemainingAmount}, Formatted: ${formattedRemainingForBank}`);
       
-      // 💰 [WALLET_FULL] Handle pure wallet payment method
-      if (orderData.paymentMethod === 'wallet') {
-        console.log(`💰 [WALLET_FULL] Processing pure wallet payment for ${totalAmount} IQD`);
-        
-        return res.json({
-          success: true,
-          message: "سفارش با کیف پول به طور کامل پرداخت شد",
-          paymentMethod: 'wallet_full',
-          order: {
-            id: order.id,
-            orderNumber: order.orderNumber,
-            totalAmount: order.totalAmount,
-            status: order.status,
-            paymentStatus: "paid",
-            paymentMethod: 'wallet_full',
-            walletAmountUsed: Math.round(walletAmountUsed),
-            crmCustomerId: finalCustomerId,
-          }
-        });
-      }
+
 
       // Handle wallet_partial case where remaining amount rounds to 0 or 1 IQD (treated as complete)
       if (orderData.paymentMethod === 'wallet_partial' && formattedRemainingForBank <= 1) {
@@ -15377,6 +15358,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
+      // 💰 [PURE_WALLET] Handle pure wallet payment method FIRST (before bank routing)
+      if (finalPaymentMethod === 'wallet') {
+        console.log(`💰 [PURE_WALLET] Processing pure wallet payment for ${totalAmount} IQD`);
+        
+        return res.json({
+          success: true,
+          message: "سفارش با کیف پول به طور کامل پرداخت شد",
+          paymentMethod: 'wallet_full',
+          order: {
+            id: order.id,
+            orderNumber: order.orderNumber,
+            totalAmount: order.totalAmount,
+            status: order.status,
+            paymentStatus: "paid",
+            paymentMethod: 'wallet_full',
+            walletAmountUsed: Math.round(walletAmountUsed),
+            crmCustomerId: finalCustomerId,
+          }
+        });
+      }
+
       // 🏦 [BANK_PAYMENTS] Route all bank-related payments to active gateway
       if (finalPaymentMethod === 'online_payment' || finalPaymentMethod === 'bank' || finalPaymentMethod === 'bank_transfer') {
         
