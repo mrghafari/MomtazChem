@@ -1456,21 +1456,15 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       canPartiallyPayFromWallet: walletBalance > 0 && walletBalance < totalAmount
     });
     
-    // Method 1 vs Method 2 determination for wallet_partial selection
-    if (paymentMethod === 'wallet_partial') {
-      if (walletBalance >= totalAmount) {
-        // Customer has enough wallet balance for full payment - use Method 1
-        finalPaymentMethod = 'wallet_full';
-        console.log('💰 [METHOD 1] wallet_partial → wallet_full (sufficient wallet balance for full payment)');
-      } else if (walletBalance > 0) {
-        // Customer needs hybrid payment - use Method 2
-        finalPaymentMethod = 'wallet_partial';
-        console.log('💰 [METHOD 2] wallet_partial → hybrid payment (wallet + bank supplement)');
-      } else {
-        // No wallet balance - redirect to online payment
-        finalPaymentMethod = 'online_payment';
-        console.log('🔄 [FALLBACK] No wallet balance - redirecting to online payment');
-      }
+    // 6-METHOD LOGIC: Handle direct method selection (no conversion needed)
+    if (paymentMethod === 'wallet_full') {
+      // Method 1: Direct full wallet payment
+      console.log('💰 [METHOD 1] Direct full wallet payment selected');
+      finalPaymentMethod = 'wallet_full';
+    } else if (paymentMethod === 'wallet_partial') {
+      // Method 2: Direct hybrid payment
+      console.log('💰 [METHOD 2] Direct hybrid payment selected');
+      finalPaymentMethod = 'wallet_partial';
     }
 
     orderData.paymentMethod = finalPaymentMethod;
@@ -1938,16 +1932,31 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                   </Label>
                 </div>
                 
-                {/* دوم: پرداخت ترکیبی (کیف پول + بانک) - Method 2 */}
-                {canUseWallet && (
+                {/* دوم: پرداخت کامل از کیف پول - Method 1 */}
+                {canUseWallet && walletBalance >= totalAmount && (
+                  <div className="flex items-center space-x-2 space-x-reverse">
+                    <RadioGroupItem value="wallet_full" id="wallet_full" />
+                    <Label htmlFor="wallet_full" className="flex items-center gap-2 cursor-pointer">
+                      <Wallet className="w-4 h-4 text-green-600" />
+                      <span className="font-semibold">
+                        پرداخت کامل از کیف پول ({formatIQDAmount(totalAmount)} IQD)
+                        <br />
+                        <span className="text-sm text-green-600">موجودی: {formatIQDAmount(walletBalance)} IQD</span>
+                      </span>
+                    </Label>
+                  </div>
+                )}
+                
+                {/* سوم: پرداخت ترکیبی (کیف پول + بانک) - Method 2 */}
+                {canUseWallet && walletBalance < totalAmount && walletBalance > 0 && (
                   <div className="flex items-center space-x-2 space-x-reverse">
                     <RadioGroupItem value="wallet_partial" id="wallet_partial" />
                     <Label htmlFor="wallet_partial" className="flex items-center gap-2 cursor-pointer">
-                      <Wallet className="w-4 h-4 text-green-600" />
+                      <Wallet className="w-4 h-4 text-orange-600" />
                       <span className="font-semibold">
-                        پرداخت از کیف پول 
-                        {walletBalance >= totalAmount ? " (کامل)" : " (ترکیبی + بانک)"}
-                        - موجودی: {formatIQDAmount(walletBalance)} IQD
+                        پرداخت ترکیبی (کیف پول + بانک)
+                        <br />
+                        <span className="text-sm text-orange-600">کیف پول: {formatIQDAmount(walletBalance)} IQD + بانک: {formatIQDAmount(totalAmount - walletBalance)} IQD</span>
                       </span>
                     </Label>
                   </div>
