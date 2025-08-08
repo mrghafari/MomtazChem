@@ -48,7 +48,6 @@ export const orderStatuses = {
 export const paymentMethods = {
   BANK_GATEWAY: 'bank_gateway',           // پرداخت از طریق درگاه بانکی
   WALLET: 'wallet',                       // پرداخت از کیف پول
-  WALLET_PARTIAL: 'wallet_partial',       // پرداخت ترکیبی کیف پول + بانک
   BANK_TRANSFER: 'bank_transfer',         // انتقال بانکی با آپلود فیش
   GRACE_PERIOD: 'grace_period'            // سفارش مهلت‌دار 3 روزه
 } as const;
@@ -57,7 +56,6 @@ export const paymentMethods = {
 export const paymentSources = {
   BANK_GATEWAY: 'از طریق درگاه بانکی',
   WALLET: 'از طریق کیف پول',
-  WALLET_PARTIAL: 'ترکیبی: کیف پول + بانک',
   BANK_TRANSFER: 'انتقال بانکی',
   GRACE_PERIOD: 'سفارش مهلت‌دار 3 روزه'
 } as const;
@@ -78,7 +76,7 @@ export const orderManagement = pgTable("order_management", {
   paymentReceiptUrl: text("payment_receipt_url"), // Uploaded payment receipt
   
   // Payment method and source tracking
-  paymentMethod: varchar("payment_method", { length: 50 }), // bank_gateway, wallet, wallet_partial, bank_transfer, grace_period
+  paymentMethod: varchar("payment_method", { length: 50 }), // bank_gateway, wallet, bank_transfer, grace_period
   paymentSourceLabel: text("payment_source_label"), // Display label for payment source
   walletAmountUsed: decimal("wallet_amount_used", { precision: 10, scale: 2 }).default("0.00"),
   bankAmountPaid: decimal("bank_amount_paid", { precision: 10, scale: 2 }).default("0.00"),

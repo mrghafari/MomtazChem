@@ -246,7 +246,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const { language, direction } = useLanguage();
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [locationData, setLocationData] = useState<{latitude: number, longitude: number} | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<'online_payment' | 'wallet_full' | 'wallet_partial' | 'bank_receipt' | 'bank_transfer_grace' | 'wallet_combined'>('online_payment');
+  const [paymentMethod, setPaymentMethod] = useState<'online_payment' | 'wallet' | 'bank_transfer_grace'>('online_payment');
 
   // Fetch available payment methods from admin settings (public endpoint)
   const { data: availablePaymentMethods = [] } = useQuery({
@@ -927,7 +927,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                        (walletData as any)?.balance ? parseFloat((walletData as any).balance) : 0;
   const canUseWallet = walletBalance > 0 && (existingCustomer || (customerData as any)?.success);
   const maxWalletAmount = Math.min(walletBalance, totalAmount);
-  const remainingAfterWallet = totalAmount - (paymentMethod === 'wallet_partial' ? walletAmount : (paymentMethod === 'wallet_full' ? totalAmount : 0));
+  const remainingAfterWallet = totalAmount - (paymentMethod === 'wallet' ? totalAmount : 0);
   
   // Auto-set wallet amount when wallet_combined is selected (after walletBalance is defined)
   useEffect(() => {
@@ -941,7 +941,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         maxUsage,
         autoSetValue: maxUsage
       });
-    } else if (paymentMethod !== 'wallet_partial') {
+    } else if (paymentMethod !== 'wallet') {
       setWalletAmount(0);
     }
   }, [paymentMethod, walletBalance, totalAmount]);
@@ -1189,7 +1189,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       // RESPECT CUSTOMER'S PAYMENT CHOICE - NO AUTO-SUBSTITUTION
       // Only consider wallet payment if customer explicitly chose wallet methods
       const remainingAmount = parseFloat(response.remainingAmount || 0);
-      const customerChoseWallet = paymentMethod === 'wallet_full' || paymentMethod === 'wallet_partial' || paymentMethod === 'wallet_combined';
+      const customerChoseWallet = paymentMethod === 'wallet';
       const isFullyPaidByWallet = remainingAmount === 0 && customerChoseWallet;
       
       console.log('💳 [PAYMENT DECISION] RESPECTING CUSTOMER CHOICE:', {
@@ -1220,22 +1220,6 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         return;
       }
       
-      // Check for hybrid payment redirect only if remaining amount > 0
-      if (response.requiresBankPayment && response.redirectUrl && remainingAmount > 0) {
-        console.log('🔄 [HYBRID PAYMENT] Redirecting to bank gateway:', response.redirectUrl);
-        console.log('🔄 [HYBRID PAYMENT] Wallet amount deducted:', response.walletAmountDeducted);
-        
-        toast({
-          title: "پرداخت ترکیبی",
-          description: `${response.walletAmountDeducted?.toLocaleString()} IQD از کیف پول کسر شد. هدایت به درگاه بانکی...`,
-        });
-        
-        // Force redirect to hybrid payment page
-        setTimeout(() => {
-          window.location.href = response.redirectUrl;
-        }, 1500);
-        return;
-      }
       // Handle online_payment method - redirect to bank gateway OR show failure message
       else if (paymentMethod === 'online_payment') {
         // Check for both paymentUrl (new) and paymentGatewayUrl (legacy) fields
@@ -1322,7 +1306,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         onOrderComplete();
       }
       // Handle bank transfer - redirect to payment gateway  
-      else if (response.paymentMethod === 'bank_transfer' || (paymentMethod !== 'wallet_full' && paymentMethod !== 'wallet_partial' && paymentMethod !== 'wallet_combined' && paymentMethod !== 'online_payment')) {
+      else if (response.paymentMethod === 'bank_transfer' || (paymentMethod !== 'wallet' && paymentMethod !== 'online_payment')) {
         toast({
           title: "انتقال به درگاه بانک",
           description: "در حال هدایت شما به درگاه پرداخت بانکی..."
@@ -1451,8 +1435,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         finalPaymentMethod = 'wallet_full';
         console.log('🔄 [PAYMENT CONVERSION] wallet_combined → wallet_full (sufficient balance)');
       } else if (walletAmount > 0) {
-        finalPaymentMethod = 'wallet_partial';
-        console.log('🔄 [PAYMENT CONVERSION] wallet_combined → wallet_partial (insufficient balance)');
+        finalPaymentMethod = 'wallet';
+        console.log('🔄 [PAYMENT CONVERSION] wallet_combined → wallet (insufficient balance)');
       }
     }
 
@@ -1461,7 +1445,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     if (finalPaymentMethod === 'wallet_full') {
       orderData.walletAmountUsed = Math.round(totalAmount);
       orderData.remainingAmount = 0;
-    } else if (finalPaymentMethod === 'wallet_partial') {
+    } else if (finalPaymentMethod === 'wallet') {
       orderData.walletAmountUsed = Math.round(walletAmount);
       orderData.remainingAmount = Math.round(Math.max(0, totalAmount - walletAmount));
     } else if (finalPaymentMethod === 'online_payment') {
@@ -1487,7 +1471,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       walletAmountInput: walletAmount,
       paymentMethodSelected: paymentMethod,
       finalPaymentMethodSent: finalPaymentMethod,
-      shouldUseWallet: finalPaymentMethod === 'wallet_full' || finalPaymentMethod === 'wallet_partial',
+      shouldUseWallet: finalPaymentMethod === 'wallet',
       paymentConversionApplied: paymentMethod !== finalPaymentMethod,
       orderData
     });
@@ -1923,16 +1907,6 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                   </div>
                 )}
                 
-                {/* اضافی: والت جزئی - فقط برای نمایش */}
-                {canUseWallet && (
-                  <div className="flex items-center space-x-2 space-x-reverse">
-                    <RadioGroupItem value="wallet_partial" id="wallet_partial" />
-                    <Label htmlFor="wallet_partial" className="flex items-center gap-2 cursor-pointer">
-                      <Wallet className="w-4 h-4 text-orange-600" />
-                      پرداخت بخشی از والت + بانک
-                    </Label>
-                  </div>
-                )}
                 
                 {/* Dynamic other payment methods */}
                 {availablePaymentMethods.map((method: any) => {
@@ -1970,7 +1944,6 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
               </RadioGroup>
 
               {/* Partial Payment Amount Input */}
-              {paymentMethod === 'wallet_partial' && (
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="walletAmount">مبلغ از والت (حداکثر {formatIQDAmount(Math.min(walletBalance, totalAmount))} IQD)</Label>
@@ -2025,7 +1998,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
               )}
 
               {/* Payment Summary */}
-              {(paymentMethod === 'wallet_full' || paymentMethod === 'wallet_partial') && (
+              {paymentMethod === 'wallet' && (
                 <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 border border-green-200 dark:border-green-800">
                   <div className="space-y-1 text-sm">
                     <div className="flex justify-between">

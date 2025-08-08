@@ -1078,7 +1078,6 @@ function FinanceOrders() {
             <strong>روش پرداخت:</strong> ${(() => {
               switch (orderDetails.paymentMethod) {
                 case 'wallet_full': return 'کیف پول کامل';
-                case 'wallet_partial': return 'پرداخت ترکیبی (کیف پول + نقد)';
                 case 'bank_transfer': return 'واریز بانکی';
                 case 'bank_transfer_grace': return 'واریز بانکی (مهلت‌دار)';
                 case 'online_payment': return 'درگاه آنلاین';
