@@ -67,7 +67,7 @@ const PaymentSettings = () => {
   const { data: paymentMethods = [], isLoading: isLoadingMethods } = useQuery<PaymentMethodSettings[]>({
     queryKey: ['/api/payment/method-settings'],
     queryFn: async () => {
-      const response = await apiRequest('/api/payment/method-settings');
+      const response = await apiRequest('/api/payment/method-settings', 'GET');
       return response.data || [];
     },
   });
@@ -220,20 +220,47 @@ const PaymentSettings = () => {
       });
       return response;
     },
-    onSuccess: () => {
-      toast({
-        title: "Settings Updated",
-        description: "Payment method settings have been successfully updated.",
+    onMutate: async ({ methodKey, enabled, priority }) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['/api/payment/method-settings'] });
+
+      // Snapshot the previous value
+      const previousPaymentMethods = queryClient.getQueryData(['/api/payment/method-settings']);
+
+      // Optimistically update to the new value
+      queryClient.setQueryData(['/api/payment/method-settings'], (old: PaymentMethodSettings[]) => {
+        if (!old) return old;
+        return old.map(method => 
+          method.methodKey === methodKey 
+            ? { ...method, enabled: enabled ?? method.enabled, priority: priority ?? method.priority }
+            : method
+        );
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/payment/method-settings'] });
+
+      // Return a context object with the snapshotted value
+      return { previousPaymentMethods };
     },
-    onError: (error) => {
+    onError: (error, variables, context) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      if (context?.previousPaymentMethods) {
+        queryClient.setQueryData(['/api/payment/method-settings'], context.previousPaymentMethods);
+      }
       console.error('Payment method update error:', error);
       toast({
         title: "Error",
         description: "Failed to update payment method settings.",
         variant: "destructive",
       });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Settings Updated",
+        description: "Payment method settings have been successfully updated.",
+      });
+      // Refetch to make sure we have the latest data
+      queryClient.invalidateQueries({ queryKey: ['/api/payment/method-settings'] });
+      // Also invalidate the public payment methods for customer-facing forms
+      queryClient.invalidateQueries({ queryKey: ['/api/public/payment-methods'] });
     },
   });
 
