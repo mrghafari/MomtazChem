@@ -186,7 +186,7 @@ export class AutoApprovalService {
           transactionType: sql`transaction_type`,
           description: sql`description`
         })
-        .from(sql`customer_wallet_transactions`)
+        .from(sql`wallet_transactions`)
         .where(
           sql`
             customer_id = ${order.customerId}
@@ -211,13 +211,19 @@ export class AutoApprovalService {
 
       console.log(`💰 [WALLET CHECK] Order ${order.orderNumber}: Wallet payment ${totalWalletPayment}/${orderTotal} (${coverage.toFixed(1)}%)`);
 
-      // 4. اگر کیف پول بیش از 95% سفارش را پوشش داده باشد
+      // 4. اگر کیف پول 99% یا بیشتر سفارش را پوشش داده باشد (تایید خودکار)
+      if (coverage >= 99) {
+        console.log(`✅ [WALLET CHECK] Order ${order.orderNumber}: Wallet covers ${coverage.toFixed(1)}% - GUARANTEED Auto-approval`);
+        return true;
+      }
+      
+      // 5. اگر کیف پول 95-99% پوشش دهد (تایید احتمالی)
       if (coverage >= 95) {
-        console.log(`✅ [WALLET CHECK] Order ${order.orderNumber}: Wallet covers ${coverage.toFixed(1)}% - Auto-approval eligible`);
+        console.log(`✅ [WALLET CHECK] Order ${order.orderNumber}: Wallet covers ${coverage.toFixed(1)}% - Conditional auto-approval`);
         return true;
       }
 
-      console.log(`❌ [WALLET CHECK] Order ${order.orderNumber}: Wallet coverage ${coverage.toFixed(1)}% insufficient`);
+      console.log(`❌ [WALLET CHECK] Order ${order.orderNumber}: Wallet coverage ${coverage.toFixed(1)}% insufficient (requires ≥99% for guaranteed approval)`);
       return false;
 
     } catch (error) {
