@@ -58,8 +58,8 @@ export default function ShopInvoiceManagement() {
     staleTime: 60000, // Cache for 1 minute
   });
 
-  const paidOrders: PaidOrder[] = ordersResponse?.data || [];
-  const stats: InvoiceStats = statsResponse?.data || {
+  const paidOrders: PaidOrder[] = ordersResponse || [];
+  const stats: InvoiceStats = statsResponse || {
     totalPaidOrders: 0,
     totalInvoiceAmount: 0,
     averageOrderValue: 0,

@@ -219,7 +219,6 @@ export interface Translation {
   totalReviews: string;
   noReviewsYet: string;
   noReviewsDesc: string;
-  productSpecifications: string;
   reviewsAndRatings: string;
   customerFeedback: string;
   
@@ -276,6 +275,12 @@ export interface Translation {
   productCategory: string;
   productSpecifications: string;
   productFeatures: string;
+  bankReference: string;
+  requestRecharge: string;
+  enterBankReference: string;
+  rechargeAmount: string;
+  bankReceipt: string;
+  rechargeHistory: string;
   productApplications: string;
   productTags: string;
   productImage: string;
@@ -414,6 +419,9 @@ export const translations: Record<Language, Translation> = {
     enterNotes: 'Enter notes (optional)',
     bankReference: 'Bank Reference Number',
     enterBankReference: 'Enter bank reference number',
+    rechargeAmount: 'Recharge Amount',
+    bankReceipt: 'Bank Receipt',
+    rechargeHistory: 'Recharge History',
     bankReceipt: 'Bank Receipt',
     uploadBankReceipt: 'Upload bank receipt (JPG, PNG, PDF)',
     bankReceiptRequired: 'Bank receipt is required for bank transfer',
@@ -590,7 +598,6 @@ export const translations: Record<Language, Translation> = {
     productDescription: 'Product Description',
     priceRange: 'Price Range',
     productCategory: 'Product Category',
-    productSpecifications: 'Product Specifications',
     productFeatures: 'Product Features',
     productApplications: 'Product Applications',
     productTags: 'Product Tags',
@@ -728,6 +735,9 @@ export const translations: Record<Language, Translation> = {
     enterNotes: 'أدخل ملاحظات (اختياري)',
     bankReference: 'رقم مرجع البنك',
     enterBankReference: 'أدخل رقم مرجع البنك',
+    rechargeAmount: 'مبلغ الشحن',
+    bankReceipt: 'إيصال بنكي',
+    rechargeHistory: 'تاريخ الشحن',
     bankReceipt: 'إيصال البنك',
     uploadBankReceipt: 'رفع إيصال البنك (JPG, PNG, PDF)',
     bankReceiptRequired: 'إيصال البنك مطلوب للتحويل البنكي',
@@ -891,7 +901,6 @@ export const translations: Record<Language, Translation> = {
     productDescription: 'وصف المنتج',
     priceRange: 'نطاق السعر',
     productCategory: 'فئة المنتج',
-    productSpecifications: 'مواصفات المنتج',
     productFeatures: 'ميزات المنتج',
     productApplications: 'تطبيقات المنتج',
     productTags: 'علامات المنتج',
@@ -1029,6 +1038,9 @@ export const translations: Record<Language, Translation> = {
     enterNotes: 'تێبینیەکان بنووسە (ئارەزووی)',
     bankReference: 'ژمارەی بانکی',
     enterBankReference: 'ژمارەی بانکی بنووسە',
+    rechargeAmount: 'بڕی پڕکردنەوە',
+    bankReceipt: 'وەسوڵی بانک',
+    rechargeHistory: 'مێژووی پڕکردنەوە',
     bankReceipt: 'وەصڵی بانک',
     uploadBankReceipt: 'وەصڵی بانک بار بکە (JPG, PNG, PDF)',
     bankReceiptRequired: 'وەصڵی بانک پێویستە بۆ گواستنەوەی بانکی',
@@ -1242,6 +1254,7 @@ export const translations: Record<Language, Translation> = {
     requestRecharge: 'Yeniden Yükleme Talep Et',
     rechargeAmount: 'Yeniden Yükleme Tutarı',
     rechargeHistory: 'Yeniden Yükleme Geçmişi',
+    bankReceipt: 'Banka Makbuzu',
     
     // Product categories
     waterTreatment: 'Su Arıtma',

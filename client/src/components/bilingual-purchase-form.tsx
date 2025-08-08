@@ -1552,7 +1552,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                           <h4 className="font-medium text-sm truncate flex items-center gap-1">
                             {product.name}
                             {product.isFlammable && (
-                              <Flame className="w-3 h-3 text-orange-500 flex-shrink-0" title="محصول آتش‌زا" />
+                              <Flame className="w-3 h-3 text-orange-500 flex-shrink-0" aria-label="محصول آتش‌زا" />
                             )}
                           </h4>
                         </div>
@@ -1944,6 +1944,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
               </RadioGroup>
 
               {/* Partial Payment Amount Input */}
+              {paymentMethod === 'wallet_combined' && (
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="walletAmount">مبلغ از والت (حداکثر {formatIQDAmount(Math.min(walletBalance, totalAmount))} IQD)</Label>
