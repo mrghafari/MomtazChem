@@ -9218,27 +9218,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
         );
         
         if (verificationResult.verified) {
-          // Update order status
           const { pool } = await import('./db');
           
-          const result = await pool.query(`
-            UPDATE customer_orders 
-            SET 
-              payment_status = 'paid',
-              status = 'warehouse_pending',
-              payment_transaction_id = $1,
-              updated_at = NOW()
-            WHERE order_number = $2 OR id = $3
-            RETURNING id, order_number, total_amount
-          `, [transactionId, orderId, orderId]);
+          // 🎯 Check if order has no order number (bank payment)
+          const orderCheck = await pool.query(`
+            SELECT id, order_number, total_amount, customer_id
+            FROM customer_orders 
+            WHERE id = $1
+          `, [orderId]);
 
-          if (result.rows.length > 0) {
-            const order = result.rows[0];
-            console.log(`✅ [PAYMENT SUCCESS] Order ${order.order_number} marked as paid`);
+          if (orderCheck.rows.length > 0) {
+            const order = orderCheck.rows[0];
             
-            // Redirect to success page
-            res.redirect(`/payment/success?order=${order.order_number}&amount=${order.total_amount}`);
-            return;
+            if (!order.order_number) {
+              // 🆕 ASSIGN ORDER NUMBER for successful bank payment
+              const { OrderManagementStorage } = await import('./order-management-storage');
+              const orderManagementStorage = new OrderManagementStorage();
+              const newOrderNumber = await orderManagementStorage.generateOrderNumberInTransaction();
+              
+              console.log(`🆕 [ORDER NUMBER ASSIGNMENT] Assigning ${newOrderNumber} to successful bank payment order ${orderId}`);
+              
+              // Update order with number and mark as warehouse-ready
+              await pool.query(`
+                UPDATE customer_orders 
+                SET 
+                  order_number = $1,
+                  payment_status = 'paid',
+                  status = 'warehouse_pending',
+                  payment_transaction_id = $2,
+                  updated_at = NOW()
+                WHERE id = $3
+              `, [newOrderNumber, transactionId, orderId]);
+              
+              console.log(`✅ [PAYMENT SUCCESS] Order ${orderId} → ${newOrderNumber} assigned and sent to warehouse`);
+              res.redirect(`/payment/success?order=${newOrderNumber}&amount=${order.total_amount}`);
+              return;
+            } else {
+              // Order already has number - just update payment status
+              await pool.query(`
+                UPDATE customer_orders 
+                SET 
+                  payment_status = 'paid',
+                  status = 'warehouse_pending',
+                  payment_transaction_id = $1,
+                  updated_at = NOW()
+                WHERE id = $2
+              `, [transactionId, orderId]);
+              
+              console.log(`✅ [PAYMENT SUCCESS] Order ${order.order_number} marked as paid`);
+              res.redirect(`/payment/success?order=${order.order_number}&amount=${order.total_amount}`);
+              return;
+            }
           }
         }
       }
@@ -9261,6 +9291,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
         transactionId,
         orderId
       });
+
+      if (orderId) {
+        const { pool } = await import('./db');
+        
+        // 🔍 Check if order has no order number (failed bank payment)
+        const orderCheck = await pool.query(`
+          SELECT id, order_number, customer_id
+          FROM customer_orders 
+          WHERE id = $1
+        `, [orderId]);
+
+        if (orderCheck.rows.length > 0) {
+          const order = orderCheck.rows[0];
+          
+          if (!order.order_number) {
+            // 🗑️ DELETE ORDER: Failed bank payment without order number
+            console.log(`🗑️ [PAYMENT CANCEL] Deleting failed bank payment order ${orderId} (no order number)`);
+            
+            try {
+              // Delete order items first
+              await pool.query(`DELETE FROM order_items WHERE order_id = $1`, [orderId]);
+              
+              // Delete order management record if exists
+              await pool.query(`DELETE FROM order_management WHERE customer_order_id = $1`, [orderId]);
+              
+              // Delete main order
+              await pool.query(`DELETE FROM customer_orders WHERE id = $1`, [orderId]);
+              
+              console.log(`✅ [ORDER CLEANUP] Failed bank payment order ${orderId} completely deleted from system`);
+              
+              // 📧 Send failure notification to customer
+              if (order.customer_id) {
+                try {
+                  const customerResult = await pool.query(`
+                    SELECT first_name, last_name, email, phone FROM crm_customers WHERE id = $1
+                    UNION ALL
+                    SELECT first_name, last_name, email, phone FROM customers WHERE id = $1
+                    LIMIT 1
+                  `, [order.customer_id]);
+                  
+                  if (customerResult.rows.length > 0) {
+                    const customer = customerResult.rows[0];
+                    const customerName = `${customer.first_name} ${customer.last_name}`.trim();
+                    
+                    console.log(`📧 [NOTIFICATION] Sending payment failure notification to ${customer.email}`);
+                    // Add SMS/Email notification here if needed
+                  }
+                } catch (notificationError) {
+                  console.error(`❌ [NOTIFICATION] Failed to send failure notification:`, notificationError);
+                }
+              }
+              
+            } catch (deleteError) {
+              console.error(`❌ [ORDER CLEANUP] Failed to delete order ${orderId}:`, deleteError);
+            }
+          } else {
+            console.log(`🔄 [PAYMENT CANCEL] Order ${order.order_number} already has order number - keeping for manual review`);
+          }
+        }
+      }
 
       // Redirect to cancel page
       res.redirect(`/payment/cancelled?order=${orderId}`);
@@ -14436,20 +14526,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let remainingAmount = totalAmount;
       let finalPaymentMethod = orderData.paymentMethod || "traditional";
 
-      // BANK PROTOCOLS DON'T ALLOW TESTING - REJECT BANK PAYMENTS IMMEDIATELY
-      // Block all payment methods that require bank routing since testing is not possible
-      const requiresBankRouting = ['online_payment', 'bank_transfer'].includes(orderData.paymentMethod) ||
-        (orderData.paymentMethod === 'wallet_partial' && parseFloat(orderData.remainingAmount || totalAmount) > 1);
-      
-      if (requiresBankRouting) {
-        console.log(`🚫 [BANK BLOCKED] Bank payment blocked for ${orderData.paymentMethod} - testing not allowed by bank protocols`);
-        
-        return res.status(400).json({
-          success: false,
-          message: `پرداخت بانکی به دلیل محدودیت‌های پروتکل بانکی امکان‌پذیر نیست. لطفاً از کیف پول استفاده کنید یا با پشتیبانی تماس بگیرید.`,
-          error: 'BANK_PAYMENT_PROTOCOL_RESTRICTED'
-        });
-      }
+      // BANK PAYMENT WORKFLOW: Create order first, then route to payment
+      // Success callback will assign order number and send to warehouse
+      // Failure callback will delete the orderless record
       
       // Set payment method and status based on customer choice
       if (orderData.paymentMethod === 'online_payment') {
@@ -14843,14 +14922,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // 🚫 [WALLET_PARTIAL] Bank payments are blocked - this code is now unreachable
-      // (Kept for reference only - should never execute due to bank blocking above)
-          }
+      // 🔄 [WALLET_PARTIAL] Route remaining amount to bank gateway after wallet deduction
+      if (orderData.paymentMethod === 'wallet_partial' && formattedRemainingForBank > 1) {
+        console.log(`🔄 [HYBRID PAYMENT] Routing remaining ${actualRemainingAmount} IQD to bank gateway...`);
+        
+        const { bankGatewayRouter } = await import('./bank-gateway-router');
+        const formattedRemainingAmount = formatIQDAmount(actualRemainingAmount);
+        
+        const routingResult = await bankGatewayRouter.routePayment({
+          orderId: order.id,
+          customerId: finalCustomerId,
+          amount: formattedRemainingAmount,
+          currency: 'IQD',
+          returnUrl: `${req.protocol}://${req.get('host')}/payment/success`,
+          cancelUrl: `${req.protocol}://${req.get('host')}/payment/cancel`
+        });
+
+        if (routingResult.success) {
+          console.log(`🏦 [PAYMENT ROUTING] Hybrid payment routed to ${routingResult.gateway?.name}`);
+          return res.json({
+            success: true,
+            message: 'سفارش ثبت شد - هدایت به درگاه پرداخت',
+            orderId: order.id,
+            orderNumber: null, // No order number until payment succeeds
+            totalAmount: Math.round(totalAmount),
+            walletAmountUsed: Math.round(walletAmountUsed),
+            remainingAmount: formattedRemainingAmount,
+            requiresBankPayment: true,
+            paymentUrl: routingResult.paymentUrl
+          });
+        } else {
+          // 🗑️ DELETE ORDER: Bank routing failed
+          console.log(`🗑️ [ORDER CLEANUP] Deleting order ${order.id} - bank routing failed`);
+          await customerStorage.deleteTemporaryOrder(order.id);
           
           return res.status(400).json({
             success: false,
-            message: `پرداخت ناموفق - درگاه بانکی در دسترس نیست: ${routingResult.message}`,
-            error: 'BANK_GATEWAY_FAILED'
+            message: `پرداخت ناموفق - مشکل در اتصال به درگاه بانکی`,
+            error: 'BANK_ROUTING_FAILED'
           });
         }
       }
@@ -14911,8 +15020,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
         
-        // 🚫 [ONLINE_PAYMENT] Bank payments are blocked - this code is now unreachable
-        // (Kept for reference only - should never execute due to bank blocking above)
+        // 🏦 [ONLINE_PAYMENT] Route full amount to bank gateway
+        if (finalPaymentMethod === 'online_payment') {
+          console.log(`🏦 [ONLINE_PAYMENT] Routing ${totalAmount} IQD to bank gateway...`);
+          
+          const { bankGatewayRouter } = await import('./bank-gateway-router');
+          const routingResult = await bankGatewayRouter.routePayment({
+            orderId: order.id,
+            customerId: finalCustomerId,
+            amount: totalAmount,
+            currency: 'IQD',
+            returnUrl: `${req.protocol}://${req.get('host')}/payment/success`,
+            cancelUrl: `${req.protocol}://${req.get('host')}/payment/cancel`
+          });
+
+          if (routingResult.success) {
+            console.log(`🏦 [PAYMENT ROUTING] Online payment routed to ${routingResult.gateway?.name}`);
+            return res.json({
+              success: true,
+              message: 'سفارش ثبت شد - هدایت به درگاه پرداخت',
+              orderId: order.id,
+              orderNumber: null, // No order number until payment succeeds
+              totalAmount: totalAmount,
+              requiresBankPayment: true,
+              paymentUrl: routingResult.paymentUrl
+            });
+          } else {
+            // 🗑️ DELETE ORDER: Bank routing failed
+            console.log(`🗑️ [ORDER CLEANUP] Deleting order ${order.id} - bank routing failed`);
+            await customerStorage.deleteTemporaryOrder(order.id);
+            
+            return res.status(400).json({
+              success: false,
+              message: `پرداخت ناموفق - مشکل در اتصال به درگاه بانکی`,
+              error: 'BANK_ROUTING_FAILED'
+            });
+          }
+        }
       }
 
       res.json(responseData);
