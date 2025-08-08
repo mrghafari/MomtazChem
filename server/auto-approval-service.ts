@@ -105,7 +105,10 @@ export class AutoApprovalService {
       // تشخیص نوع پرداخت برای پیغام مناسب
       let financialNotes = 'تایید خودکار - سفارش زمان‌بندی شده';
       
-      if (order.paymentMethod?.includes('wallet') || order.paymentSourceLabel?.includes('کیف')) {
+      if (order.paymentSourceLabel?.includes('ترکیبی به کیف پول کامل')) {
+        financialNotes = 'تایید خودکار - سفارش ترکیبی ارتقا یافته به پرداخت کامل کیف پول';
+        console.log(`🎯 [AUTO APPROVAL] Hybrid order upgraded to full wallet payment ${order.id} - direct to warehouse`);
+      } else if (order.paymentMethod?.includes('wallet') || order.paymentSourceLabel?.includes('کیف')) {
         financialNotes = 'تایید خودکار - پرداخت کامل از کیف پول دیجیتال';
         console.log(`💰 [AUTO APPROVAL] Wallet payment order ${order.id} - direct to warehouse`);
       } else if (order.paymentMethod?.includes('bank_gateway') || order.paymentSourceLabel?.includes('بانک')) {
@@ -205,7 +208,13 @@ export class AutoApprovalService {
         return false;
       }
 
-      // 1. اگر روش پرداخت مستقیماً کیف پول است
+      // 1. بررسی سفارش ترکیبی ارتقا یافته به کیف پول کامل  
+      if (order.paymentSourceLabel?.includes('ترکیبی به کیف پول کامل')) {
+        console.log(`🎯 [WALLET CHECK] Order ${order.orderNumber}: Hybrid order upgraded to full wallet payment - PRIORITY AUTO-APPROVAL`);
+        return true;
+      }
+      
+      // 2. اگر روش پرداخت مستقیماً کیف پول است
       if (
         order.paymentMethod?.includes('wallet') ||
         order.paymentSourceLabel?.includes('wallet') ||
@@ -268,10 +277,19 @@ export class AutoApprovalService {
     try {
       console.log(`💰 [WALLET AUTO] Processing wallet-covered order ${order.orderNumber}`);
 
-      // تعیین نوع پرداخت برای یادداشت
-      const paymentNote = order.paymentMethod?.includes('wallet') 
-        ? 'تایید خودکار - پرداخت کامل از کیف پول دیجیتال'
-        : 'تایید خودکار - پرداخت ترکیبی با پوشش کامل کیف پول';
+      // تعیین نوع پرداخت برای یادداشت با تشخیص ارتقا ترکیبی
+      let paymentNote = 'تایید خودکار - پرداخت کامل از کیف پول دیجیتال';
+      
+      if (order.paymentSourceLabel?.includes('ترکیبی به کیف پول کامل')) {
+        paymentNote = 'تایید خودکار - سفارش ترکیبی ارتقا یافته به پوشش 100% کیف پول';
+        console.log(`🎯 [WALLET AUTO] HYBRID UPGRADE: Order ${order.orderNumber} was hybrid but upgraded to full wallet coverage`);
+      } else if (order.paymentMethod?.includes('wallet')) {
+        paymentNote = 'تایید خودکار - پرداخت کامل از کیف پول دیجیتال';
+        console.log(`💰 [WALLET AUTO] DIRECT WALLET: Order ${order.orderNumber} direct wallet payment`);
+      } else {
+        paymentNote = 'تایید خودکار - پرداخت ترکیبی با پوشش کامل کیف پول';
+        console.log(`🔄 [WALLET AUTO] HYBRID COVERAGE: Order ${order.orderNumber} hybrid with full wallet coverage`);
+      }
 
       // به‌روزرسانی وضعیت در order_management - انتقال مستقیم به انبار
       await db

@@ -290,24 +290,68 @@ export class PaymentWorkflowService {
     this.scheduleAutoApproval(orderMgmt.id, 5);
   }
   
-  // 7. پردازش پرداخت ترکیبی
+  // 7. پردازش پرداخت ترکیبی - با تشخیص پوشش کامل کیف پول
   private async processPartialWalletPayment(customerOrder: any, orderMgmt: any, orderData: any) {
     console.log(`🔄 [PARTIAL] Processing hybrid payment for order ${customerOrder.orderNumber}`);
     
     const totalAmount = parseFloat(customerOrder.totalAmount);
-    const walletAmount = parseFloat(orderData.walletAmount || "0");
+    const requestedWalletAmount = parseFloat(orderData.walletAmount || "0");
+    
+    // ✅ ENHANCED: بررسی موجودی کیف پول برای تشخیص پوشش کامل
+    const [currentWallet] = await db
+      .select({ balance: customerWallets.balance })
+      .from(customerWallets)
+      .where(eq(customerWallets.customerId, orderData.customerId))
+      .limit(1);
+    
+    const currentBalance = parseFloat(currentWallet?.balance || "0");
+    
+    console.log(`💰 [PARTIAL] Wallet coverage analysis:`, {
+      totalAmount,
+      requestedWalletAmount,
+      currentBalance,
+      canCoverFull: currentBalance >= totalAmount
+    });
+    
+    // 🎯 KEY FEATURE: اگر کیف پول کاملاً پوشش می‌دهد، به wallet-only تبدیل شود
+    if (currentBalance >= totalAmount) {
+      console.log(`✅ [WALLET UPGRADE] Hybrid order can be fully covered by wallet - converting to wallet-only payment`);
+      console.log(`💰 [WALLET UPGRADE] Full coverage: ${totalAmount} <= ${currentBalance} (${((currentBalance/totalAmount)*100).toFixed(1)}% coverage)`);
+      
+      // برداشت کامل از کیف پول
+      await this.deductFromWallet(orderData.customerId, totalAmount, customerOrder.orderNumber);
+      
+      // بروزرسانی وضعیت به پرداخت کامل کیف پول
+      await db
+        .update(orderManagement)
+        .set({
+          currentStatus: 'financial_reviewing',
+          paymentMethod: 'wallet', // تغییر به کیف پول خالص
+          paymentSourceLabel: 'ترکیبی به کیف پول کامل - پوشش 100%',
+          walletAmountUsed: totalAmount.toString(),
+          bankAmountPaid: '0' // هیچ پرداخت بانکی نیاز نیست
+        })
+        .where(eq(orderManagement.id, orderMgmt.id));
+      
+      console.log(`✅ [WALLET UPGRADE] Order ${customerOrder.orderNumber} upgraded to full wallet payment - ready for auto-approval`);
+      
+      // زمان‌بندی تایید خودکار فوری (کیف پول کامل)
+      this.scheduleAutoApproval(orderMgmt.id, 5);
+      return;
+    }
+    
+    // ادامه فرآیند ترکیبی عادی (اگر کیف پول کامل پوشش نمی‌دهد)
+    const walletAmount = Math.min(requestedWalletAmount, currentBalance); // استفاده از حداکثر موجود
     const bankAmount = totalAmount - walletAmount;
     
-    // ✅ CRITICAL: بررسی موجودی کیف پول برای پرداخت ترکیبی
+    console.log(`🔄 [PARTIAL] Continuing with hybrid payment:`, {
+      walletAmount,
+      bankAmount,
+      coverage: ((walletAmount/totalAmount)*100).toFixed(1) + '%'
+    });
+    
+    // بررسی موجودی کافی برای قسمت کیف پول
     if (walletAmount > 0) {
-      const [currentWallet] = await db
-        .select({ balance: customerWallets.balance })
-        .from(customerWallets)
-        .where(eq(customerWallets.customerId, orderData.customerId))
-        .limit(1);
-      
-      const currentBalance = parseFloat(currentWallet?.balance || "0");
-      
       if (currentBalance < walletAmount) {
         console.log(`❌ [PARTIAL WALLET] Insufficient balance for hybrid payment:`, {
           walletRequired: walletAmount,
@@ -328,7 +372,7 @@ export class PaymentWorkflowService {
       await this.deductFromWallet(orderData.customerId, walletAmount, customerOrder.orderNumber);
     }
     
-    // بروزرسانی وضعیت
+    // بروزرسانی وضعیت ترکیبی عادی
     await db
       .update(orderManagement)
       .set({
