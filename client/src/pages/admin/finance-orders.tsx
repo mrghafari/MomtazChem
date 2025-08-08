@@ -275,7 +275,7 @@ function FinanceOrders() {
       }
       return res.json();
     }),
-    enabled: activeTab === 'orphaned',
+    enabled: Boolean(adminUser?.success), // Always enabled when authenticated
     refetchInterval: 30000, // Refresh every 30 seconds
     retry: 3,
     retryDelay: 1000
