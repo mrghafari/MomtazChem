@@ -235,6 +235,28 @@ export default function BankReceiptUpload() {
         </div>
       </div>
 
+      {/* Order ID Input - Now Optional */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>شناسه سفارش (اختیاری)</CardTitle>
+          <CardDescription>
+            اگر شناسه سفارش را می‌دانید وارد کنید، در غیر این صورت خالی بگذارید
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Input
+            type="text"
+            value={orderId || ''}
+            onChange={(e) => setOrderId(e.target.value)}
+            placeholder="مثل: M2511125 یا خالی بگذارید برای آخرین سفارش معلق"
+            className="text-center"
+          />
+          <p className="text-xs text-muted-foreground mt-2 text-center">
+            💡 اگر خالی بگذارید، سیستم آخرین سفارش مهلت‌دار شما را پیدا می‌کند
+          </p>
+        </CardContent>
+      </Card>
+
       {/* Order Summary */}
       {order && (
         <Card className="mb-6">
@@ -417,10 +439,10 @@ export default function BankReceiptUpload() {
                   <Label className="text-sm text-gray-600">مبلغ بدهی سفارش</Label>
                   <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 mt-1">
                     <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
-                      {isLoadingOrder ? 'در حال بارگذاری...' : orderId ? 'سفارش یافت نشد' : 'شناسه سفارش مشخص نیست'}
+                      {isLoadingOrder ? 'در حال بارگذاری...' : orderId ? 'سفارش یافت نشد' : 'سیستم آخرین سفارش معلق شما را پیدا خواهد کرد'}
                     </p>
                     <p className="text-xs text-gray-400 dark:text-gray-500 text-center">
-                      {orderId && `شناسه: ${orderId}`}
+                      {orderId ? `شناسه: ${orderId}` : 'برای آخرین سفارش مهلت‌دار شما'}
                     </p>
                   </div>
                 </div>

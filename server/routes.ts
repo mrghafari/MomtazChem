@@ -31807,10 +31807,12 @@ momtazchem.com
         });
       }
 
-      if (!orderId) {
-        return res.status(400).json({ 
+      // اگر شناسه سفارش ارائه نشده، سفارش معلق مشتری را پیدا کن
+      const customerId = (req.session as any)?.customerId;
+      if (!customerId) {
+        return res.status(401).json({ 
           success: false, 
-          message: 'شناسه سفارش ضروری است' 
+          message: 'احراز هویت مشتری مورد نیاز است' 
         });
       }
 
@@ -31831,25 +31833,50 @@ momtazchem.com
 
       // بررسی وجود سفارش در customer_orders
       let order;
-      if (orderId.startsWith('M') || orderId.startsWith('ORD-')) {
-        // Find order by order number
-        const [orderResult] = await customerDb
+      
+      if (orderId && orderId.trim() !== '') {
+        // اگر شناسه سفارش ارائه شده، سفارش مشخص را پیدا کن
+        if (orderId.startsWith('M') || orderId.startsWith('ORD-')) {
+          // Find order by order number
+          const [orderResult] = await customerDb
+            .select()
+            .from(customerOrders)
+            .where(eq(customerOrders.orderNumber, orderId));
+          order = orderResult;
+        } else {
+          // Find order by ID
+          const orderIdNum = parseInt(orderId);
+          if (!isNaN(orderIdNum)) {
+            order = await customerStorage.getOrderById(orderIdNum);
+          }
+        }
+      } else {
+        // اگر شناسه سفارش ارائه نشده، آخرین سفارش معلق مشتری را پیدا کن
+        console.log(`🔍 [RECEIPT UPLOAD] No order ID provided, finding pending order for customer ${customerId}`);
+        
+        const pendingOrders = await customerDb
           .select()
           .from(customerOrders)
-          .where(eq(customerOrders.orderNumber, orderId));
-        order = orderResult;
-      } else {
-        // Find order by ID
-        const orderIdNum = parseInt(orderId);
-        if (!isNaN(orderIdNum)) {
-          order = await customerStorage.getOrderById(orderIdNum);
+          .where(
+            and(
+              eq(customerOrders.customerId, customerId),
+              eq(customerOrders.paymentMethod, 'bank_transfer_grace'),
+              eq(customerOrders.paymentStatus, 'grace_period')
+            )
+          )
+          .orderBy(desc(customerOrders.createdAt))
+          .limit(1);
+          
+        if (pendingOrders.length > 0) {
+          order = pendingOrders[0];
+          console.log(`✅ [RECEIPT UPLOAD] Found pending grace period order ${order.id} for customer ${customerId}`);
         }
       }
       
       if (!order) {
         return res.status(404).json({ 
           success: false, 
-          message: 'سفارش یافت نشد' 
+          message: orderId ? 'سفارش یافت نشد' : 'هیچ سفارش معلقی برای آپلود فیش یافت نشد. لطفاً ابتدا سفارش ثبت کنید.'
         });
       }
 
