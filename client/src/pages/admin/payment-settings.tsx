@@ -67,7 +67,7 @@ const PaymentSettings = () => {
   const { data: paymentMethods = [], isLoading: isLoadingMethods } = useQuery<PaymentMethodSettings[]>({
     queryKey: ['/api/payment/method-settings'],
     queryFn: async () => {
-      const response = await apiRequest('/api/payment/method-settings', 'GET');
+      const response = await apiRequest('/api/payment/method-settings');
       return response.data || [];
     },
   });
@@ -957,6 +957,11 @@ const PaymentSettings = () => {
                             <Switch
                               checked={method.enabled}
                               onCheckedChange={(checked) => {
+                                console.log(`🔄 [PAYMENT METHODS] Updating ${method.methodKey}:`, {
+                                  from: method.enabled,
+                                  to: checked,
+                                  priority: method.priority
+                                });
                                 updatePaymentMethodMutation.mutate({
                                   methodKey: method.methodKey,
                                   enabled: checked,
