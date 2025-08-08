@@ -246,13 +246,13 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const { language, direction } = useLanguage();
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [locationData, setLocationData] = useState<{latitude: number, longitude: number} | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<'online_payment' | 'wallet' | 'wallet_full' | 'wallet_combined' | 'bank_transfer_grace' | 'bank_receipt'>('online_payment');
+  const [paymentMethod, setPaymentMethod] = useState<'online_payment' | 'wallet' | 'bank_transfer_grace'>('online_payment');
 
   // Fetch available payment methods from admin settings (public endpoint)
   const { data: availablePaymentMethods = [] } = useQuery({
     queryKey: ['/api/public/payment-methods'],
     queryFn: async () => {
-      const response = await apiRequest('/api/public/payment-methods', { method: 'GET' });
+      const response = await apiRequest('/api/public/payment-methods');
       return response.data || [];
     },
   });
@@ -1308,7 +1308,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         onOrderComplete();
       }
       // Handle bank transfer - redirect to payment gateway  
-      else if (response.paymentMethod === 'bank_transfer' || (paymentMethod === 'bank_transfer_grace')) {
+      else if (response.paymentMethod === 'bank_transfer' || (paymentMethod !== 'wallet' && paymentMethod !== 'online_payment')) {
         toast({
           title: "انتقال به درگاه بانک",
           description: "در حال هدایت شما به درگاه پرداخت بانکی..."
@@ -1420,7 +1420,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     console.log('🚚 [DELIVERY LOGIC] Active delivery information:', activeDeliveryInfo);
 
     // Handle wallet payment calculations with smart wallet_combined conversion
-    let finalPaymentMethod: 'online_payment' | 'wallet' | 'wallet_full' | 'bank_transfer_grace' | 'bank_receipt' = paymentMethod as any;
+    let finalPaymentMethod = paymentMethod;
     
     // Convert wallet_combined to appropriate wallet type based on wallet amount vs total
     console.log('🔍 [PAYMENT ANALYSIS] Before conversion:', {
@@ -1898,33 +1898,15 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                   return null;
                 })}
                 
-                {/* Wallet Payment Options */}
+                {/* دوم: پرداخت از کیف پول (تمام یا بخش از آن) */}
                 {canUseWallet && isWalletEnabledInSettings && (
-                  <>
-                    {/* Full wallet payment (if balance covers total amount) */}
-                    {walletBalance >= totalAmount && (
-                      <div className="flex items-center space-x-2 space-x-reverse">
-                        <RadioGroupItem value="wallet_full" id="wallet_full" />
-                        <Label htmlFor="wallet_full" className="flex items-center gap-2 cursor-pointer">
-                          <Wallet className="w-4 h-4 text-green-600" />
-                          <span className="font-semibold">پرداخت کامل از کیف پول ({formatIQDAmount(walletBalance)} IQD)</span>
-                          <Badge variant="outline" className="text-xs text-green-700">کامل</Badge>
-                        </Label>
-                      </div>
-                    )}
-                    
-                    {/* Combined payment (wallet + bank) */}
-                    {walletBalance > 0 && walletBalance < totalAmount && (
-                      <div className="flex items-center space-x-2 space-x-reverse">
-                        <RadioGroupItem value="wallet_combined" id="wallet_combined" />
-                        <Label htmlFor="wallet_combined" className="flex items-center gap-2 cursor-pointer">
-                          <Wallet className="w-4 h-4 text-orange-600" />
-                          <span className="font-semibold">پرداخت ترکیبی (کیف پول + کارت بانکی)</span>
-                          <Badge variant="outline" className="text-xs text-orange-700">{formatIQDAmount(walletBalance)} + بانک</Badge>
-                        </Label>
-                      </div>
-                    )}
-                  </>
+                  <div className="flex items-center space-x-2 space-x-reverse">
+                    <RadioGroupItem value="wallet_combined" id="wallet_combined" />
+                    <Label htmlFor="wallet_combined" className="flex items-center gap-2 cursor-pointer">
+                      <Wallet className="w-4 h-4 text-green-600" />
+                      <span className="font-semibold">استفاده از کیف پول (حداکثر {formatIQDAmount(Math.min(walletBalance, totalAmount))} IQD)</span>
+                    </Label>
+                  </div>
                 )}
                 
                 
@@ -2028,11 +2010,11 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                     </div>
                     <div className="flex justify-between text-green-600">
                       <span>پرداخت از والت:</span>
-                      <span>-{formatCurrency(paymentMethod === 'wallet_full' ? totalAmount : Math.min(walletBalance, totalAmount))}</span>
+                      <span>-{formatCurrency(paymentMethod === 'wallet_full' ? totalAmount : walletAmount)}</span>
                     </div>
                     <div className="flex justify-between font-medium border-t pt-1">
                       <span>مبلغ باقیمانده:</span>
-                      <span>{formatCurrency(paymentMethod === 'wallet_full' ? 0 : Math.max(0, totalAmount - Math.min(walletBalance, totalAmount)))}</span>
+                      <span>{formatCurrency(paymentMethod === 'wallet_full' ? 0 : totalAmount - walletAmount)}</span>
                     </div>
                   </div>
                 </div>
