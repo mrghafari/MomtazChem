@@ -160,6 +160,24 @@ const CustomerProfile = () => {
   const abandonedCarts = abandonedCartsData?.carts || [];
   const abandonedCartsCount = abandonedCarts.length;
 
+  // Define missing variables for order history section
+  const isLoadingHistory = ordersLoading;
+  const completeHistory = sortedOrders || [];
+  
+  // Filter history based on search term and selected filter
+  const filteredHistory = completeHistory.filter((order: any) => {
+    const matchesSearch = searchTerm === "" || 
+      order.orderNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.status?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.products?.some((product: any) => 
+        product.name?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    
+    const matchesFilter = selectedFilter === "all" || getOrderCategory(order) === selectedFilter;
+    
+    return matchesSearch && matchesFilter;
+  });
+
 
 
   const handleLogout = async () => {
@@ -1244,7 +1262,7 @@ const CustomerProfile = () => {
           </div>
         </DialogContent>
       </Dialog>
-
+      
       {/* CSV Export Modal */}
       <Dialog open={showCsvExport} onOpenChange={setShowCsvExport}>
         <DialogContent className="max-w-md">
