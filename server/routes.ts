@@ -14422,44 +14422,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log("✅ Bank transfer with grace period method selected - 3-day grace period activated");
       }
 
-      // 🏦 BANK PAYMENT WORKFLOW: Check bank gateway FIRST before creating any order
+      // 🏦 BANK PAYMENT WORKFLOW: Only generate order numbers for non-bank payments
+      // Bank payments will get order numbers after successful payment verification
       console.log(`🔍 [PAYMENT METHOD DEBUG] Original: ${orderData.paymentMethod}, Final: ${finalPaymentMethod}`);
-      const isBankPayment = ['bank_transfer', 'bank_gateway', 'bank', 'online_bank', 'gateway', 'online_payment', 'bank_receipt'].includes(finalPaymentMethod);
-      const requiresBankGateway = finalPaymentMethod === 'online_payment' || (finalPaymentMethod === 'wallet_partial' && remainingAmount > 1);
+      const isBankPayment = ['bank_transfer', 'bank_gateway', 'bank', 'online_bank', 'gateway', 'online_payment', 'bank_receipt', 'bank_transfer_grace'].includes(finalPaymentMethod);
       
-      // 🚫 PRE-VALIDATION: Check bank gateway availability BEFORE creating order
-      if (requiresBankGateway) {
-        console.log(`🔍 [PRE-VALIDATION] Bank payment detected - checking gateway availability before order creation`);
-        const { bankGatewayRouter } = await import('./bank-gateway-router');
-        
-        // Calculate amount for bank payment
-        const bankPaymentAmount = finalPaymentMethod === 'online_payment' ? totalAmount : remainingAmount;
-        const { formatIQDAmount } = await import('./currency-utils');
-        const formattedAmount = formatIQDAmount(bankPaymentAmount);
-        
-        // Test bank gateway availability (using orderId: 0 for pre-validation)
-        const routingResult = await bankGatewayRouter.routePayment({
-          orderId: 0, // Temporary ID for validation
-          customerId: finalCustomerId,
-          amount: formattedAmount,
-          currency: 'IQD',
-          returnUrl: `${req.protocol}://${req.get('host')}/payment/success`,
-          cancelUrl: `${req.protocol}://${req.get('host')}/payment/cancel`
-        });
-        
-        if (!routingResult.success) {
-          console.log(`❌ [PRE-VALIDATION] Bank gateway not available: ${routingResult.message}`);
-          return res.status(400).json({
-            success: false,
-            message: `درگاه پرداخت در دسترس نیست: ${routingResult.message}`,
-            error: 'BANK_GATEWAY_UNAVAILABLE'
-          });
-        }
-        
-        console.log(`✅ [PRE-VALIDATION] Bank gateway available: ${routingResult.gateway?.name}`);
-      }
-      
-      // Generate order numbers
       if (!isBankPayment) {
         // Generate order number for wallet payments and other non-bank methods
         orderNumber = await orderManagementStorage.generateOrderNumberInTransaction();
@@ -14772,11 +14739,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (orderData.paymentMethod === 'wallet_partial' && formattedRemainingForBank > 1) {
         console.log(`🔄 [HYBRID PAYMENT] Wallet partial payment detected - wallet: ${walletAmountUsed}, remaining: ${actualRemainingAmount}, formatted: ${formattedRemainingForBank}`);
         
-        // Bank gateway was already validated before order creation, now route the actual payment
+        // هدایت پرداخت به درگاه بانکی فعال - تبدیل مبلغ به عدد صحیح برای دینار عراقی
         const { bankGatewayRouter } = await import('./bank-gateway-router');
-        const formattedRemainingAmount = formatIQDAmount(actualRemainingAmount);
+        const formattedRemainingAmount = formatIQDAmount(actualRemainingAmount); // Convert to whole number for IQD
         
-        console.log(`💰 [BANK PAYMENT] Routing to gateway: ${formattedRemainingAmount} IQD (rounded from ${actualRemainingAmount})`);
+        console.log(`💰 [BANK PAYMENT] Sending amount to gateway: ${formattedRemainingAmount} IQD (rounded from ${actualRemainingAmount})`);
         
         const routingResult = await bankGatewayRouter.routePayment({
           orderId: order.id,
@@ -14787,23 +14754,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
           cancelUrl: `${req.protocol}://${req.get('host')}/payment/cancel`
         });
 
-        // Since gateway was pre-validated, this should always succeed
-        console.log(`🏦 [PAYMENT ROUTING] Routed hybrid payment to ${routingResult.gateway?.name}`);
-        return res.json({
-          success: true,
-          message: 'سفارش ثبت شد - هدایت به درگاه پرداخت',
-          orderId: orderNumber,
-          orderNumber: orderNumber,
-          totalAmount: Math.round(totalAmount),
-          walletAmountUsed: Math.round(walletAmountUsed),
-          walletAmountDeducted: Math.round(walletAmountUsed),
-          remainingAmount: formattedRemainingAmount,
-          requiresBankPayment: true,
-          paymentGateway: routingResult.gateway,
-          paymentUrl: routingResult.paymentUrl,
-          transactionId: routingResult.transactionId,
-          redirectUrl: routingResult.paymentUrl || `/payment/${orderNumber}`
-        });
+        if (routingResult.success) {
+          console.log(`🏦 [PAYMENT ROUTING] Successfully routed hybrid payment to ${routingResult.gateway?.name}`);
+          return res.json({
+            success: true,
+            message: 'سفارش ثبت شد - هدایت به درگاه پرداخت',
+            orderId: orderNumber,
+            orderNumber: orderNumber,
+            totalAmount: Math.round(totalAmount),
+            walletAmountUsed: Math.round(walletAmountUsed),
+            walletAmountDeducted: Math.round(walletAmountUsed),
+            remainingAmount: formattedRemainingAmount,
+            requiresBankPayment: true,
+            paymentGateway: routingResult.gateway,
+            paymentUrl: routingResult.paymentUrl,
+            transactionId: routingResult.transactionId,
+            redirectUrl: routingResult.paymentUrl || `/payment/${orderNumber}`
+          });
+        } else {
+          console.log(`❌ [PAYMENT ROUTING] Failed to route hybrid payment: ${routingResult.message}`);
+          
+          // 🗑️ DELETE ORDER: If bank payment fails, delete the order immediately
+          console.log(`🗑️ [ORDER CLEANUP] Deleting order ${order.id} due to bank payment failure`);
+          try {
+            await customerStorage.deleteTemporaryOrder(order.id);
+            console.log(`✅ [ORDER CLEANUP] Order ${order.id} successfully deleted`);
+          } catch (deleteError) {
+            console.error(`❌ [ORDER CLEANUP] Failed to delete order ${order.id}:`, deleteError);
+          }
+          
+          return res.status(400).json({
+            success: false,
+            message: `پرداخت ناموفق - درگاه بانکی در دسترس نیست: ${routingResult.message}`,
+            error: 'BANK_GATEWAY_FAILED'
+          });
+        }
             orderNumber: orderNumber,
             totalAmount: Math.round(totalAmount),
             walletAmountUsed: Math.round(walletAmountUsed),
@@ -14873,7 +14858,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // For pure online payment, return special response  
         if (finalPaymentMethod === 'online_payment') {
-          // Bank gateway was already validated before order creation, now route the actual payment
+          // هدایت پرداخت آنلاین به درگاه بانکی فعال
           const { bankGatewayRouter } = await import('./bank-gateway-router');
           const routingResult = await bankGatewayRouter.routePayment({
             orderId: order.id,
@@ -14884,20 +14869,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
             cancelUrl: `${req.protocol}://${req.get('host')}/payment/cancel`
           });
 
-          // Since gateway was pre-validated, this should always succeed
-          console.log(`🏦 [PAYMENT ROUTING] Routed online payment to ${routingResult.gateway?.name}`);
-          return res.json({
-            success: true,
-            message: 'سفارش ثبت شد - هدایت به درگاه پرداخت آنلاین',
-            orderId: orderNumber,
-            orderNumber: orderNumber,
-            totalAmount: totalAmount,
-            redirectToPayment: true,
-            paymentGateway: routingResult.gateway,
-            paymentUrl: routingResult.paymentUrl,
-            transactionId: routingResult.transactionId,
-            paymentGatewayUrl: routingResult.paymentUrl || `/payment?orderId=${order.id}&amount=${totalAmount}&method=online_payment`
-          });
+          if (routingResult.success) {
+            console.log(`🏦 [PAYMENT ROUTING] Successfully routed online payment to ${routingResult.gateway?.name}`);
+            return res.json({
+              success: true,
+              message: 'سفارش ثبت شد - هدایت به درگاه پرداخت آنلاین',
+              orderId: orderNumber,
+              orderNumber: orderNumber,
+              totalAmount: totalAmount,
+              redirectToPayment: true,
+              paymentGateway: routingResult.gateway,
+              paymentUrl: routingResult.paymentUrl,
+              transactionId: routingResult.transactionId,
+              paymentGatewayUrl: routingResult.paymentUrl || `/payment?orderId=${order.id}&amount=${totalAmount}&method=online_payment`
+            });
+          } else {
+            console.log(`❌ [PAYMENT ROUTING] Failed to route online payment: ${routingResult.message}`);
+            
+            // 🗑️ DELETE ORDER: If bank payment fails, delete the order immediately
+            console.log(`🗑️ [ORDER CLEANUP] Deleting order ${order.id} due to online payment failure`);
+            try {
+              await customerStorage.deleteTemporaryOrder(order.id);
+              console.log(`✅ [ORDER CLEANUP] Order ${order.id} successfully deleted`);
+            } catch (deleteError) {
+              console.error(`❌ [ORDER CLEANUP] Failed to delete order ${order.id}:`, deleteError);
+            }
+            
+            return res.status(400).json({
+              success: false,
+              message: `پرداخت ناموفق - درگاه بانکی در دسترس نیست: ${routingResult.message}`,
+              error: 'BANK_GATEWAY_FAILED'
+            });
+          }
         }
       }
 
