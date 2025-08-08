@@ -7272,6 +7272,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         } catch (assignmentError) {
           console.error(`❌ [GATEWAY WEBHOOK] Order number assignment failed for order ${orderId}:`, assignmentError);
         }
+      } else {
+        // Payment failed - delete the temporary order immediately
+        const isPaymentFailed = paymentStatus === 'failed' || 
+                               paymentStatus === 'cancelled' || 
+                               paymentStatus === 'error' ||
+                               paymentStatus === 'denied';
+                               
+        if (isPaymentFailed) {
+          console.log(`❌ [GATEWAY WEBHOOK] Payment failed for order ${orderId} - deleting temporary order`);
+          try {
+            await customerStorage.deleteTemporaryOrder(parseInt(orderId));
+            console.log(`✅ [GATEWAY WEBHOOK] Temporary order ${orderId} deleted after payment failure`);
+          } catch (deleteError) {
+            console.error(`❌ [GATEWAY WEBHOOK] Failed to delete order ${orderId}:`, deleteError);
+          }
+        }
       }
 
       res.json({
@@ -7284,6 +7300,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({
         success: false,
         message: "خطا در پردازش اطلاعات پرداخت"
+      });
+    }
+  });
+
+  // Payment callback endpoint for immediate failed payment handling
+  app.post("/api/payment/callback", async (req, res) => {
+    try {
+      const { orderId, orderNumber, paymentStatus, transactionId } = req.body;
+      
+      console.log(`🔄 [PAYMENT CALLBACK] Received payment callback:`, {
+        orderId,
+        orderNumber, 
+        paymentStatus,
+        transactionId
+      });
+
+      if (!orderId && !orderNumber) {
+        return res.status(400).json({
+          success: false,
+          message: "شناسه سفارش الزامی است"
+        });
+      }
+
+      // Handle failed/cancelled payments by immediately deleting temporary orders
+      const isPaymentFailed = paymentStatus === 'failed' || 
+                             paymentStatus === 'cancelled' || 
+                             paymentStatus === 'error' ||
+                             paymentStatus === 'denied' ||
+                             paymentStatus === 'abandoned';
+                             
+      if (isPaymentFailed) {
+        console.log(`❌ [PAYMENT CALLBACK] Payment failed/abandoned - deleting temporary order ${orderId || orderNumber}`);
+        
+        try {
+          // Try to find order by ID or order number
+          let targetOrderId = orderId;
+          if (!targetOrderId && orderNumber) {
+            const orderResult = await db
+              .select({ id: customerOrders.id })
+              .from(customerOrders)
+              .where(eq(customerOrders.orderNumber, orderNumber))
+              .limit(1);
+            
+            if (orderResult.length > 0) {
+              targetOrderId = orderResult[0].id;
+            }
+          }
+          
+          if (targetOrderId) {
+            await customerStorage.deleteTemporaryOrder(parseInt(targetOrderId));
+            console.log(`✅ [PAYMENT CALLBACK] Temporary order ${targetOrderId} deleted after payment failure`);
+            
+            return res.json({
+              success: true,
+              message: "سفارش موقت به دلیل عدم موفقیت پرداخت حذف شد",
+              orderDeleted: true
+            });
+          } else {
+            console.log(`⚠️ [PAYMENT CALLBACK] Order not found for deletion: ${orderId || orderNumber}`);
+          }
+        } catch (deleteError) {
+          console.error(`❌ [PAYMENT CALLBACK] Failed to delete order ${orderId || orderNumber}:`, deleteError);
+        }
+      }
+
+      res.json({
+        success: true,
+        message: "درخواست callback پردازش شد"
+      });
+      
+    } catch (error) {
+      console.error('❌ [PAYMENT CALLBACK] Error processing payment callback:', error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در پردازش callback پرداخت"
       });
     }
   });
@@ -14422,12 +14513,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log("✅ Bank transfer with grace period method selected - 3-day grace period activated");
       }
 
-      // 🏦 BANK PAYMENT WORKFLOW: Only generate order numbers for non-bank payments
-      // Bank payments will get order numbers after successful payment verification
+      // 🏦 PRE-VALIDATE BANK PAYMENTS: Check gateway availability before creating any order
+      // This prevents temporary orders from being created when bank routing will fail
       console.log(`🔍 [PAYMENT METHOD DEBUG] Original: ${orderData.paymentMethod}, Final: ${finalPaymentMethod}`);
-      const isBankPayment = ['bank_transfer', 'bank_gateway', 'bank', 'online_bank', 'gateway', 'online_payment', 'bank_receipt', 'bank_transfer_grace'].includes(finalPaymentMethod);
+      const isBankPayment = ['bank_transfer', 'bank_gateway', 'bank', 'online_bank', 'gateway', 'online_payment'].includes(finalPaymentMethod);
+      const isNonRoutedBankPayment = ['bank_receipt', 'bank_transfer_grace'].includes(finalPaymentMethod);
       
-      if (!isBankPayment) {
+      // PRE-VALIDATE: Check if bank gateway routing will work before creating order
+      if (isBankPayment) {
+        console.log(`🏦 [PRE-VALIDATION] Testing bank gateway availability for ${finalPaymentMethod}...`);
+        
+        const { bankGatewayRouter } = await import('./bank-gateway-router');
+        const testAmount = finalPaymentMethod === 'online_payment' ? totalAmount : 
+                          (orderData.paymentMethod === 'wallet_partial' ? remainingAmount : totalAmount);
+        
+        // Test bank gateway availability
+        const testGateway = await bankGatewayRouter.getActiveGateway();
+        if (!testGateway) {
+          console.log(`❌ [PRE-VALIDATION] No active gateway found for ${finalPaymentMethod}`);
+          return res.status(400).json({
+            success: false,
+            message: 'درگاه پرداخت آنلاین در حال حاضر در دسترس نیست. لطفاً از روش‌های پرداخت دیگر استفاده کنید.',
+            error: 'NO_ACTIVE_GATEWAY'
+          });
+        }
+        
+        console.log(`✅ [PRE-VALIDATION] Gateway ${testGateway.name} available for ${finalPaymentMethod}`);
+      }
+      
+      // Generate order numbers based on payment type
+      if (!isBankPayment && !isNonRoutedBankPayment) {
         // Generate order number for wallet payments and other non-bank methods
         orderNumber = await orderManagementStorage.generateOrderNumberInTransaction();
         console.log(`✅ [NON-BANK ORDER] Generated order number ${orderNumber} for ${finalPaymentMethod}`);
@@ -14787,15 +14902,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
             success: false,
             message: `پرداخت ناموفق - درگاه بانکی در دسترس نیست: ${routingResult.message}`,
             error: 'BANK_GATEWAY_FAILED'
-          });
-        }
-            orderNumber: orderNumber,
-            totalAmount: Math.round(totalAmount),
-            walletAmountUsed: Math.round(walletAmountUsed),
-            remainingAmount: Math.round(remainingAmount),
-            requiresBankPayment: true,
-            paymentError: routingResult.message,
-            redirectUrl: `/payment/${orderNumber}`
           });
         }
       }
@@ -42200,64 +42306,7 @@ momtazchem.com
     }
   });
 
-  // Get all orders available for deletion - SUPER ADMIN ONLY
-  app.get('/api/super-admin/deletable-orders', requireAuth, async (req: Request, res: Response) => {
-    try {
-      console.log('🔍 [SUPER ADMIN] Starting deletable orders request');
-      console.log('🔐 [SUPER ADMIN AUTH] Session details:', {
-        adminId: req.session?.adminId,
-        isAuthenticated: req.session?.isAuthenticated,
-        sessionID: req.sessionID
-      });
-
-      const adminId = req.session?.adminId;
-      
-      // Require admin authentication
-      if (!adminId) {
-        console.log('❌ [SUPER ADMIN AUTH] No admin authentication found');
-        return res.status(401).json({ 
-          success: false, 
-          message: "احراز هویت سوپر ادمین مورد نیاز است" 
-        });
-      }
-
-      console.log(`✅ [SUPER ADMIN AUTH] Access granted for admin ${adminId}`);
-      console.log(`🔍 [SUPER ADMIN] Fetching deletable orders for admin ${adminId}`);
-
-      // Get orders using direct SQL query to avoid schema issues
-      const result = await customerPool.query(`
-        SELECT 
-          id, 
-          order_number as "orderNumber", 
-          guest_name as "customerName", 
-          guest_email as "customerEmail", 
-          total_amount as "totalAmount", 
-          currency, 
-          status, 
-          payment_method as "paymentMethod", 
-          created_at as "createdAt", 
-          updated_at as "updatedAt"
-        FROM customer_orders 
-        ORDER BY created_at DESC 
-        LIMIT 100
-      `);
-      const orders = result.rows;
-      
-      console.log(`✅ [SUPER ADMIN] Found ${orders.length} orders for deletion interface`);
-
-      res.json({
-        success: true,
-        data: orders,
-        message: `${orders.length} سفارش قابل حذف یافت شد`
-      });
-    } catch (error) {
-      console.error('❌ [SUPER ADMIN] Failed to fetch deletable orders:', error);
-      res.status(500).json({
-        success: false,
-        message: 'خطا در دریافت لیست سفارشات قابل حذف'
-      });
-    }
-  });
+  // REMOVED: Duplicate endpoint - see improved version below
 
   // Production Reset - SUPER ADMIN ONLY
   app.post('/api/super-admin/reset-for-production', requireAuth, async (req: Request, res: Response) => {
@@ -46254,30 +46303,67 @@ momtazchem.com
     }
   });
 
-  // Get orders that can be deleted (for super admin interface)
+  // Get orders that can be deleted (for super admin interface) - ENHANCED
   app.get('/api/super-admin/deletable-orders', requireSuperAdmin, async (req: Request, res: Response) => {
     try {
-      const orders = await db
-        .select({
-          id: customerOrders.id,
-          orderNumber: customerOrders.orderNumber,
-          customerName: customerOrders.customerName,
-          customerEmail: customerOrders.customerEmail,
-          totalAmount: customerOrders.totalAmount,
-          currency: customerOrders.currency,
-          status: customerOrders.status,
-          paymentMethod: customerOrders.paymentMethod,
-          createdAt: customerOrders.createdAt,
-          updatedAt: customerOrders.updatedAt
-        })
-        .from(customerOrders)
-        .orderBy(desc(customerOrders.createdAt))
-        .limit(100);
+      console.log('🔍 [SUPER ADMIN] Starting enhanced deletable orders request');
+      
+      // Get orders with complete details only - filter out incomplete temporary orders
+      const result = await customerPool.query(`
+        SELECT 
+          co.id, 
+          co.order_number as "orderNumber", 
+          co.guest_name as "customerName", 
+          co.guest_email as "customerEmail", 
+          co.total_amount as "totalAmount", 
+          co.currency, 
+          co.status, 
+          co.payment_status as "paymentStatus",
+          co.payment_method as "paymentMethod", 
+          co.created_at as "createdAt", 
+          co.updated_at as "updatedAt",
+          co.customer_id as "customerId",
+          -- Get customer details if available
+          COALESCE(co.guest_name, c.first_name || ' ' || c.last_name, crm.first_name || ' ' || crm.last_name) as "fullCustomerName",
+          COALESCE(co.guest_email, c.email, crm.email) as "fullCustomerEmail"
+        FROM customer_orders co
+        LEFT JOIN customers c ON co.customer_id = c.id
+        LEFT JOIN crm_customers crm ON co.customer_id = crm.id
+        WHERE (
+          -- Include orders with order numbers (completed/confirmed orders)
+          co.order_number IS NOT NULL 
+          OR 
+          -- Include failed/incomplete orders that should be cleaned up
+          (co.order_number IS NULL AND (
+            co.status IN ('cancelled', 'failed', 'pending') 
+            OR co.payment_status IN ('failed', 'cancelled', 'pending')
+            OR co.created_at < NOW() - INTERVAL '1 hour'
+          ))
+        )
+        ORDER BY co.created_at DESC 
+        LIMIT 100
+      `);
+      
+      const allOrders = result.rows;
+      
+      // Separate orders by type for better presentation
+      const ordersWithNumbers = allOrders.filter(order => order.orderNumber);
+      const temporaryOrders = allOrders.filter(order => !order.orderNumber);
+      
+      console.log(`✅ [SUPER ADMIN] Found ${allOrders.length} total orders:`, {
+        withOrderNumbers: ordersWithNumbers.length,
+        temporaryOrders: temporaryOrders.length
+      });
 
       res.json({
         success: true,
-        data: orders,
-        message: `${orders.length} سفارش قابل حذف یافت شد`
+        data: allOrders,
+        summary: {
+          total: allOrders.length,
+          withOrderNumbers: ordersWithNumbers.length,
+          temporaryOrders: temporaryOrders.length
+        },
+        message: `${allOrders.length} سفارش (${ordersWithNumbers.length} کامل، ${temporaryOrders.length} موقت) قابل حذف یافت شد`
       });
     } catch (error) {
       console.error('❌ [SUPER ADMIN] Failed to fetch deletable orders:', error);
