@@ -265,31 +265,6 @@ function FinanceOrders() {
     });
   };
 
-  // Orphan orders queries
-  const { data: orphanStats } = useQuery({
-    queryKey: ['/api/orphan-orders/stats'],
-    enabled: activeTab === 'orphan'
-  });
-
-  const { data: activeOrders } = useQuery({
-    queryKey: ['/api/orphan-orders/active'],
-    enabled: activeTab === 'orphan'
-  });
-
-  const { data: notificationSettings, refetch: refetchSettings } = useQuery({
-    queryKey: ['/api/orphan-orders/notification-settings'],
-    enabled: activeTab === 'orphan'
-  });
-
-  const { data: templatesData, refetch: refetchTemplates } = useQuery({
-    queryKey: ['/api/orphan-orders/templates'],
-    enabled: activeTab === 'orphan'
-  });
-
-  const { data: schedulesData, refetch: refetchSchedules } = useQuery({
-    queryKey: ['/api/orphan-orders/schedules'],
-    enabled: activeTab === 'orphan'
-  });
 
   // Query for orphaned orders (orders in customer_orders but missing from order_management)
   const { data: orphanedOrders, isLoading: orphanedLoading, error: orphanedError } = useQuery({
