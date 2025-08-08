@@ -100,6 +100,8 @@ import {
 // SMS service will be imported dynamically when needed
 import { ticketingStorage } from "./ticketing-storage";
 import { autoApprovalService } from "./auto-approval-service";
+import { gracePeriodManagementService } from "./grace-period-management";
+import { financialReceiptReviewService } from "./financial-receipt-review";
 import { companyStorage } from "./company-storage";
 import { getLocalizedMessage, getLocalizedEmailSubject, generateSMSMessage } from "./multilingual-messages";
 import { supportTickets } from "../shared/ticketing-schema";
@@ -454,6 +456,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   } catch (error) {
     console.error('❌ [SYNC SERVICE] Failed to start sync service:', error);
   }
+
+  // Initialize grace period management service at startup
+  console.log('⏰ [GRACE PERIOD] Initializing 3-day grace period management system...');
+  try {
+    gracePeriodManagementService.start();
+    console.log('✅ [GRACE PERIOD] Grace period management service started successfully');
+  } catch (error) {
+    console.error('❌ [GRACE PERIOD] Failed to start grace period service:', error);
+  }
+
   console.log("🚀 REGISTERING ROUTES - Vehicle optimization endpoints loading...");
   
   // Import department auth functions
@@ -46663,6 +46675,176 @@ momtazchem.com
     } catch (error) {
       console.error('❌ [TEST ORDER COUNT] Error:', error);
       res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  // ==========================================
+  // GRACE PERIOD MANAGEMENT API ENDPOINTS
+  // ==========================================
+
+  // Get pending bank receipts for financial review
+  app.get('/api/admin/financial/pending-receipts', requireAuth, async (req, res) => {
+    try {
+      console.log('📄 [FINANCIAL REVIEW] Getting pending receipts for review...');
+      
+      const pendingReceipts = await financialReceiptReviewService.getPendingReceipts();
+      
+      console.log(`✅ [FINANCIAL REVIEW] Found ${pendingReceipts.length} pending receipts`);
+      res.json({
+        success: true,
+        data: pendingReceipts,
+        message: `یافت شد ${pendingReceipts.length} حواله در انتظار بررسی`
+      });
+    } catch (error) {
+      console.error('❌ [FINANCIAL REVIEW] Error getting pending receipts:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در دریافت حواله‌های در انتظار بررسی'
+      });
+    }
+  });
+
+  // Approve bank receipt (Financial department)
+  app.post('/api/admin/financial/approve-receipt', requireAuth, async (req, res) => {
+    try {
+      const { orderManagementId, approvalNotes, overpaidAmount } = req.body;
+      const reviewerId = req.session?.adminId || req.session?.customerId;
+
+      if (!orderManagementId || !reviewerId) {
+        return res.status(400).json({
+          success: false,
+          message: 'شناسه سفارش و بازبین مورد نیاز است'
+        });
+      }
+
+      console.log(`✅ [FINANCIAL APPROVE] Processing approval for order management ID: ${orderManagementId} by reviewer: ${reviewerId}`);
+
+      const result = await financialReceiptReviewService.approveReceipt(
+        orderManagementId, 
+        reviewerId, 
+        approvalNotes,
+        overpaidAmount ? parseFloat(overpaidAmount) : undefined
+      );
+
+      console.log(`✅ [FINANCIAL APPROVE] Approval successful:`, result);
+      res.json(result);
+    } catch (error) {
+      console.error('❌ [FINANCIAL APPROVE] Error approving receipt:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در تایید حواله'
+      });
+    }
+  });
+
+  // Reject bank receipt (Financial department)
+  app.post('/api/admin/financial/reject-receipt', requireAuth, async (req, res) => {
+    try {
+      const { orderManagementId, rejectionReason, rejectionCategory } = req.body;
+      const reviewerId = req.session?.adminId || req.session?.customerId;
+
+      if (!orderManagementId || !rejectionReason || !reviewerId) {
+        return res.status(400).json({
+          success: false,
+          message: 'شناسه سفارش، دلیل رد و بازبین مورد نیاز است'
+        });
+      }
+
+      console.log(`❌ [FINANCIAL REJECT] Processing rejection for order management ID: ${orderManagementId} by reviewer: ${reviewerId}`);
+
+      const result = await financialReceiptReviewService.rejectReceipt(
+        orderManagementId,
+        reviewerId,
+        rejectionReason,
+        rejectionCategory || 'other'
+      );
+
+      console.log(`❌ [FINANCIAL REJECT] Rejection successful:`, result);
+      res.json(result);
+    } catch (error) {
+      console.error('❌ [FINANCIAL REJECT] Error rejecting receipt:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در رد حواله'
+      });
+    }
+  });
+
+  // Get grace period service status
+  app.get('/api/admin/grace-period/status', requireAuth, async (req, res) => {
+    try {
+      const status = gracePeriodManagementService.getStatus();
+      
+      res.json({
+        success: true,
+        data: {
+          ...status,
+          message: status.isRunning ? 'سرویس مدیریت مهلت فعال است' : 'سرویس مدیریت مهلت غیرفعال است'
+        }
+      });
+    } catch (error) {
+      console.error('❌ [GRACE STATUS] Error getting service status:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در دریافت وضعیت سرویس'
+      });
+    }
+  });
+
+  // Manually trigger grace period processing
+  app.post('/api/admin/grace-period/process', requireAuth, async (req, res) => {
+    try {
+      console.log('🎯 [GRACE MANUAL] Manual grace period processing triggered');
+      
+      // Process grace period orders manually
+      await gracePeriodManagementService.processGracePeriodOrders();
+      
+      res.json({
+        success: true,
+        message: 'پردازش دستی مهلت سه روزه با موفقیت انجام شد'
+      });
+    } catch (error) {
+      console.error('❌ [GRACE MANUAL] Error in manual processing:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در پردازش دستی مهلت سه روزه'
+      });
+    }
+  });
+
+  // Start grace period management service
+  app.post('/api/admin/grace-period/start', requireAuth, async (req, res) => {
+    try {
+      gracePeriodManagementService.start();
+      
+      res.json({
+        success: true,
+        message: 'سرویس مدیریت مهلت سه روزه راه‌اندازی شد'
+      });
+    } catch (error) {
+      console.error('❌ [GRACE START] Error starting service:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در راه‌اندازی سرویس مدیریت مهلت'
+      });
+    }
+  });
+
+  // Stop grace period management service
+  app.post('/api/admin/grace-period/stop', requireAuth, async (req, res) => {
+    try {
+      gracePeriodManagementService.stop();
+      
+      res.json({
+        success: true,
+        message: 'سرویس مدیریت مهلت سه روزه متوقف شد'
+      });
+    } catch (error) {
+      console.error('❌ [GRACE STOP] Error stopping service:', error);
+      res.status(500).json({
+        success: false,
+        message: 'خطا در توقف سرویس مدیریت مهلت'
+      });
     }
   });
 
