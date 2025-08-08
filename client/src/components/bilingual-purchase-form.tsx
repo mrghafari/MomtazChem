@@ -246,7 +246,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const { language, direction } = useLanguage();
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [locationData, setLocationData] = useState<{latitude: number, longitude: number} | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<'online_payment' | 'wallet_full' | 'wallet_partial' | 'bank_receipt' | 'bank_transfer_grace' | 'wallet_combined'>('online_payment');
+  const [paymentMethod, setPaymentMethod] = useState<'online_payment' | 'wallet_full' | 'wallet_partial' | 'bank_transfer_grace' | 'bank_gateway'>('online_payment');
   const [walletAmount, setWalletAmount] = useState<number>(0);
   const [selectedReceiptFile, setSelectedReceiptFile] = useState<File | null>(null);
   const [selectedShippingMethod, setSelectedShippingMethod] = useState<number | null>(null);
@@ -920,12 +920,12 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const maxWalletAmount = Math.min(walletBalance, totalAmount);
   const remainingAfterWallet = totalAmount - (paymentMethod === 'wallet_partial' ? walletAmount : (paymentMethod === 'wallet_full' ? totalAmount : 0));
   
-  // Auto-set wallet amount when wallet_combined is selected (after walletBalance is defined)
+  // Auto-set wallet amount when wallet_partial is selected (6-method system)
   useEffect(() => {
-    if (paymentMethod === 'wallet_combined') {
+    if (paymentMethod === 'wallet_partial') {
       const maxUsage = Math.min(walletBalance, totalAmount);
       setWalletAmount(maxUsage);
-      console.log('🔄 [AUTO WALLET] wallet_combined selected - setting walletAmount:', {
+      console.log('🔄 [AUTO WALLET] wallet_partial selected - setting walletAmount:', {
         paymentMethod,
         walletBalance,
         totalAmount,
@@ -1178,7 +1178,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       // RESPECT CUSTOMER'S PAYMENT CHOICE - NO AUTO-SUBSTITUTION
       // Only consider wallet payment if customer explicitly chose wallet methods
       const remainingAmount = parseFloat(response.remainingAmount || 0);
-      const customerChoseWallet = paymentMethod === 'wallet_full' || paymentMethod === 'wallet_partial' || paymentMethod === 'wallet_combined';
+      const customerChoseWallet = paymentMethod === 'wallet_full' || paymentMethod === 'wallet_partial';
       const isFullyPaidByWallet = remainingAmount === 0 && customerChoseWallet;
       
       console.log('💳 [PAYMENT DECISION] RESPECTING CUSTOMER CHOICE:', {
@@ -1294,7 +1294,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         onOrderComplete();
       }
       // Handle bank transfer - redirect to payment gateway  
-      else if (response.paymentMethod === 'bank_transfer' || (paymentMethod !== 'wallet_full' && paymentMethod !== 'wallet_partial' && paymentMethod !== 'wallet_combined' && paymentMethod !== 'online_payment')) {
+      else if (response.paymentMethod === 'bank_transfer_grace' || (paymentMethod !== 'wallet_full' && paymentMethod !== 'wallet_partial' && paymentMethod !== 'online_payment' && paymentMethod !== 'bank_gateway')) {
         toast({
           title: "انتقال به درگاه بانک",
           description: "در حال هدایت شما به درگاه پرداخت بانکی..."
@@ -1458,13 +1458,13 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       comparison: `${walletAmount} >= ${totalAmount} = ${walletAmount >= totalAmount}`
     });
     
-    if (paymentMethod === 'wallet_combined') {
+    if (paymentMethod === 'wallet_partial') {
       if (walletAmount >= totalAmount) {
         finalPaymentMethod = 'wallet_full';
-        console.log('🔄 [PAYMENT CONVERSION] wallet_combined → wallet_full (sufficient balance)');
+        console.log('🔄 [PAYMENT CONVERSION] wallet_partial → wallet_full (sufficient balance)');
       } else if (walletAmount > 0) {
         finalPaymentMethod = 'wallet_partial';
-        console.log('🔄 [PAYMENT CONVERSION] wallet_combined → wallet_partial (insufficient balance)');
+        console.log('🔄 [PAYMENT CONVERSION] wallet_partial remains (insufficient balance)');
       }
     }
 
