@@ -1429,5 +1429,34 @@ export type ReviewHelpfulness = typeof reviewHelpfulness.$inferSelect;
 
 
 
+// =============================================================================
+// PAYMENT METHOD SETTINGS SCHEMA
+// =============================================================================
+
+// Payment Method Settings table for controlling which payment methods are enabled
+export const paymentMethodSettings = pgTable("payment_method_settings", {
+  id: serial("id").primaryKey(),
+  methodKey: text("method_key").notNull().unique(), // 'online_payment', 'wallet', 'bank_receipt', 'bank_transfer_grace'
+  methodName: text("method_name").notNull(), // Display name in Persian/Arabic
+  methodNameEn: text("method_name_en"), // Display name in English
+  enabled: boolean("enabled").default(true), // Whether this payment method is available
+  priority: integer("priority").default(0), // Display order (higher = first)
+  description: text("description"), // Description for admin panel
+  minAmount: decimal("min_amount", { precision: 10, scale: 2 }), // Minimum order amount for this method
+  maxAmount: decimal("max_amount", { precision: 10, scale: 2 }), // Maximum order amount for this method
+  config: json("config"), // Additional configuration options for each method
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertPaymentMethodSettingsSchema = createInsertSchema(paymentMethodSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertPaymentMethodSettings = z.infer<typeof insertPaymentMethodSettingsSchema>;
+export type PaymentMethodSettings = typeof paymentMethodSettings.$inferSelect;
+
 // Re-export marketing schema
 export * from './marketing-schema';

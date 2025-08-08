@@ -37,7 +37,7 @@ import { sql, eq, and, or, isNull, isNotNull, desc, gte, inArray } from "drizzle
 import { findCorruptedOrders, getDataIntegrityStats, validateOrderIntegrity, markCorruptedOrderAsDeleted } from './data-integrity-tools';
 import { z } from "zod";
 import * as schema from "@shared/schema";
-const { crmCustomers, iraqiProvinces, iraqiCities, abandonedOrders, contentItems, footerSettings } = schema;
+const { crmCustomers, iraqiProvinces, iraqiCities, abandonedOrders, contentItems, footerSettings, paymentMethodSettings } = schema;
 import { webrtcRooms, roomParticipants, chatMessages } from "@shared/webrtc-schema";
 import { orderManagement, shippingRates, deliveryMethods, paymentReceipts } from "@shared/order-management-schema";
 import { generateEAN13Barcode, validateEAN13, parseEAN13Barcode, isMomtazchemBarcode } from "@shared/barcode-utils";
@@ -10185,6 +10185,205 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({
         success: false,
         message: "خطا در اعتبارسنجی پیکربندی"
+      });
+    }
+  });
+
+  // =============================================================================
+  // PAYMENT METHOD SETTINGS ENDPOINTS
+  // =============================================================================
+
+  // Get all payment method settings
+  app.get("/api/payment/method-settings", requireAuth, async (req, res) => {
+    try {
+      const settings = await db.select().from(paymentMethodSettings).orderBy(schema.desc(paymentMethodSettings.priority), paymentMethodSettings.methodKey);
+      
+      // If no settings exist, initialize with defaults
+      if (settings.length === 0) {
+        const defaultSettings = [
+          {
+            methodKey: 'online_payment',
+            methodName: 'پرداخت آنلاین (کارت بانکی)',
+            methodNameEn: 'Online Payment (Bank Card)',
+            enabled: true,
+            priority: 4,
+            description: 'پرداخت مستقیم از طریق درگاه بانکی'
+          },
+          {
+            methodKey: 'wallet',
+            methodName: 'استفاده از کیف پول',
+            methodNameEn: 'Digital Wallet',
+            enabled: true,
+            priority: 3,
+            description: 'پرداخت از موجودی کیف پول دیجیتال'
+          },
+          {
+            methodKey: 'bank_receipt',
+            methodName: 'فیش بانکی',
+            methodNameEn: 'Bank Receipt',
+            enabled: true,
+            priority: 2,
+            description: 'آپلود فیش واریزی بانکی'
+          },
+          {
+            methodKey: 'bank_transfer_grace',
+            methodName: 'انتقال بانکی با مهلت 3 روزه',
+            methodNameEn: 'Bank Transfer with 3-Day Grace',
+            enabled: true,
+            priority: 1,
+            description: 'سفارش قفل شده با مهلت 3 روز برای واریز'
+          }
+        ];
+        
+        await db.insert(paymentMethodSettings).values(defaultSettings);
+        const newSettings = await db.select().from(paymentMethodSettings).orderBy(schema.desc(paymentMethodSettings.priority), paymentMethodSettings.methodKey);
+        
+        return res.json({
+          success: true,
+          data: newSettings,
+          message: "تنظیمات پیش‌فرض روش‌های پرداخت ایجاد شد"
+        });
+      }
+      
+      res.json({
+        success: true,
+        data: settings
+      });
+    } catch (error) {
+      console.error("❌ [PAYMENT METHOD SETTINGS] Error fetching settings:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت تنظیمات روش‌های پرداخت"
+      });
+    }
+  });
+
+  // Update payment method setting
+  app.put("/api/payment/method-settings/:methodKey", requireAuth, async (req, res) => {
+    try {
+      const { methodKey } = req.params;
+      const { enabled, priority, minAmount, maxAmount, config } = req.body;
+      
+      const updateData: any = {};
+      if (typeof enabled === 'boolean') updateData.enabled = enabled;
+      if (typeof priority === 'number') updateData.priority = priority;
+      if (minAmount !== undefined) updateData.minAmount = minAmount.toString();
+      if (maxAmount !== undefined) updateData.maxAmount = maxAmount.toString();
+      if (config !== undefined) updateData.config = config;
+      updateData.updatedAt = new Date();
+      
+      const result = await db.update(paymentMethodSettings)
+        .set(updateData)
+        .where(eq(paymentMethodSettings.methodKey, methodKey))
+        .returning();
+      
+      if (result.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "روش پرداخت یافت نشد"
+        });
+      }
+      
+      res.json({
+        success: true,
+        data: result[0],
+        message: "تنظیمات روش پرداخت به‌روزرسانی شد"
+      });
+    } catch (error) {
+      console.error("❌ [PAYMENT METHOD SETTINGS] Error updating setting:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در به‌روزرسانی تنظیمات روش پرداخت"
+      });
+    }
+  });
+
+  // Get enabled payment methods (public endpoint for checkout)
+  app.get("/api/payment/enabled-methods", async (req, res) => {
+    try {
+      const enabledMethods = await db.select()
+        .from(paymentMethodSettings)
+        .where(eq(paymentMethodSettings.enabled, true))
+        .orderBy(schema.desc(paymentMethodSettings.priority), paymentMethodSettings.methodKey);
+      
+      res.json({
+        success: true,
+        data: enabledMethods
+      });
+    } catch (error) {
+      console.error("❌ [PAYMENT METHOD SETTINGS] Error fetching enabled methods:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت روش‌های پرداخت فعال"
+      });
+    }
+  });
+
+  // Initialize default payment method settings
+  app.post("/api/payment/method-settings/initialize", requireAuth, async (req, res) => {
+    try {
+      // Check if settings already exist
+      const existingSettings = await db.select().from(paymentMethodSettings);
+      
+      if (existingSettings.length > 0) {
+        return res.json({
+          success: true,
+          message: "تنظیمات روش‌های پرداخت قبلاً وجود دارد",
+          data: existingSettings
+        });
+      }
+      
+      const defaultSettings = [
+        {
+          methodKey: 'online_payment',
+          methodName: 'پرداخت آنلاین (کارت بانکی)',
+          methodNameEn: 'Online Payment (Bank Card)',
+          enabled: true,
+          priority: 4,
+          description: 'پرداخت مستقیم از طریق درگاه بانکی',
+          config: { allowPartialPayment: false }
+        },
+        {
+          methodKey: 'wallet',
+          methodName: 'استفاده از کیف پول',
+          methodNameEn: 'Digital Wallet',
+          enabled: true,
+          priority: 3,
+          description: 'پرداخت از موجودی کیف پول دیجیتال',
+          config: { allowPartialPayment: true }
+        },
+        {
+          methodKey: 'bank_receipt',
+          methodName: 'فیش بانکی',
+          methodNameEn: 'Bank Receipt',
+          enabled: true,
+          priority: 2,
+          description: 'آپلود فیش واریزی بانکی',
+          config: { requiresManualApproval: true }
+        },
+        {
+          methodKey: 'bank_transfer_grace',
+          methodName: 'انتقال بانکی با مهلت 3 روزه',
+          methodNameEn: 'Bank Transfer with 3-Day Grace',
+          enabled: true,
+          priority: 1,
+          description: 'سفارش قفل شده با مهلت 3 روز برای واریز',
+          config: { gracePeriodDays: 3, requiresManualApproval: true }
+        }
+      ];
+      
+      const result = await db.insert(paymentMethodSettings).values(defaultSettings).returning();
+      
+      res.json({
+        success: true,
+        data: result,
+        message: "تنظیمات پیش‌فرض روش‌های پرداخت با موفقیت ایجاد شد"
+      });
+    } catch (error) {
+      console.error("❌ [PAYMENT METHOD SETTINGS] Error initializing settings:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در ایجاد تنظیمات پیش‌فرض روش‌های پرداخت"
       });
     }
   });
