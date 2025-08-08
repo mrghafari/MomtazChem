@@ -180,21 +180,26 @@ export class AutoApprovalService {
       }
 
       // 2. بررسی تراکنش‌های کیف پول برای این سفارش
-      const walletTransactions = await db
-        .select({
-          amount: sql`ABS(CAST(amount AS DECIMAL))`.as('amount'),
-          transactionType: sql`transaction_type`,
-          description: sql`description`
-        })
-        .from(sql`wallet_transactions`)
-        .where(
-          sql`
-            customer_id = ${order.customerId}
+      let walletTransactions = [];
+      try {
+        const query = `
+          SELECT 
+            ABS(CAST(amount AS DECIMAL)) as amount,
+            transaction_type,
+            description
+          FROM wallet_transactions 
+          WHERE customer_id = $1
             AND transaction_type = 'debit'
-            AND (description LIKE '%${order.orderNumber}%' OR description LIKE '%سفارش%')
-            AND created_at >= (SELECT created_at FROM customer_orders WHERE id = ${order.id})
-          `
-        );
+            AND (description LIKE $2 OR description LIKE '%سفارش%')
+            AND created_at >= (SELECT created_at FROM customer_orders WHERE id = $3)
+        `;
+        
+        const result = await db.execute(sql.raw(query, [order.customerId, `%${order.orderNumber}%`, order.id]));
+        walletTransactions = result.rows || [];
+      } catch (dbError) {
+        console.error(`❌ [WALLET CHECK] Database error for order ${order.orderNumber}:`, dbError);
+        return false;
+      }
 
       if (walletTransactions.length === 0) {
         console.log(`❌ [WALLET CHECK] Order ${order.orderNumber}: No wallet transactions found`);
@@ -203,10 +208,15 @@ export class AutoApprovalService {
 
       // 3. محاسبه مجموع پرداخت‌های کیف پول
       const totalWalletPayment = walletTransactions.reduce((sum, tx) => {
-        return sum + parseFloat(tx.amount as string);
+        const amount = parseFloat(tx.amount?.toString() || '0');
+        return sum + (isNaN(amount) ? 0 : amount);
       }, 0);
 
-      const orderTotal = parseFloat(order.totalAmount);
+      const orderTotal = parseFloat(order.totalAmount?.toString() || '0');
+      if (isNaN(orderTotal) || orderTotal <= 0) {
+        console.log(`❌ [WALLET CHECK] Order ${order.orderNumber}: Invalid order total amount`);
+        return false;
+      }
       const coverage = (totalWalletPayment / orderTotal) * 100;
 
       console.log(`💰 [WALLET CHECK] Order ${order.orderNumber}: Wallet payment ${totalWalletPayment}/${orderTotal} (${coverage.toFixed(1)}%)`);
@@ -227,7 +237,8 @@ export class AutoApprovalService {
       return false;
 
     } catch (error) {
-      console.error(`❌ [WALLET CHECK] Error checking wallet coverage for order ${order.orderNumber}:`, error);
+      console.error(`❌ [WALLET CHECK] Critical error checking wallet coverage for order ${order.orderNumber}:`, error);
+      // در صورت خطا، سفارش را به صورت دستی نگه می‌داریم
       return false;
     }
   }
