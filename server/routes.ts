@@ -33,7 +33,7 @@ import { sendContactEmail } from "./email";
 import TemplateProcessor from "./template-processor";
 import InventoryAlertService from "./inventory-alerts";
 import { db } from "./db";
-import { sql, eq, and, or, isNull, isNotNull, desc, gte } from "drizzle-orm";
+import { sql, eq, and, or, isNull, isNotNull, desc, gte, inArray } from "drizzle-orm";
 import { findCorruptedOrders, getDataIntegrityStats, validateOrderIntegrity, markCorruptedOrderAsDeleted } from './data-integrity-tools';
 import { z } from "zod";
 import * as schema from "@shared/schema";
@@ -35724,7 +35724,7 @@ momtazchem.com
       }
 
       // صدور خودکار فاکتور رسمی برای سفارشات wallet-paid پس از تایید مالی
-      const [orderDetails] = await db
+      const [invoiceOrderDetails] = await db
         .select({ 
           paymentMethod: customerOrders.paymentMethod,
           orderNumber: customerOrders.orderNumber 
@@ -35901,6 +35901,198 @@ momtazchem.com
     } catch (error) {
       console.error("Error transferring order to warehouse:", error);
       res.status(500).json({ success: false, message: "خطا در انتقال سفارش به انبار" });
+    }
+  });
+
+  // 🔧 CRITICAL FIX: Process missed wallet transactions for orders that bypassed financial approval
+  app.post("/api/finance/process-missed-wallet-transactions", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { customerStorage } = await import("./customer-storage");
+      
+      console.log(`🔍 [MISSED TRANSACTIONS] Searching for orders with unprocessed wallet differences...`);
+      
+      // Find orders that have receipt amount but haven't been processed for wallet differences
+      const ordersWithMissedTransactions = await db
+        .select({
+          orderManagementId: orderManagement.id,
+          customerOrderId: orderManagement.customerOrderId,
+          orderNumber: customerOrders.orderNumber,
+          customerId: customerOrders.customerId,
+          totalAmount: customerOrders.totalAmount,
+          receiptAmount: paymentReceipts.receiptAmount,
+          financialNotes: orderManagement.financialNotes,
+          currentStatus: orderManagement.currentStatus
+        })
+        .from(orderManagement)
+        .innerJoin(customerOrders, eq(orderManagement.customerOrderId, customerOrders.id))
+        .innerJoin(paymentReceipts, eq(paymentReceipts.customerOrderId, customerOrders.id))
+        .where(
+          and(
+            isNotNull(paymentReceipts.receiptAmount), // Has receipt amount
+            inArray(orderManagement.currentStatus, ['warehouse_pending', 'warehouse_processing', 'warehouse_verified']), // Already in warehouse
+            // Financial notes don't indicate wallet transaction was processed
+            eq(orderManagement.financialNotes, 'Auto-sync status correction - fixed stuck order')
+          )
+        );
+      
+      console.log(`📊 [MISSED TRANSACTIONS] Found ${ordersWithMissedTransactions.length} orders with potential missed wallet transactions`);
+      
+      let processedCount = 0;
+      let totalCredited = 0;
+      let totalDebited = 0;
+      const processedOrders = [];
+      
+      for (const orderData of ordersWithMissedTransactions) {
+        try {
+          const orderTotal = parseFloat(orderData.totalAmount);
+          const receiptAmount = parseFloat(orderData.receiptAmount);
+          const difference = receiptAmount - orderTotal;
+          
+          console.log(`💰 [PROCESSING] Order ${orderData.orderNumber}: Total=${orderTotal}, Receipt=${receiptAmount}, Difference=${difference}`);
+          
+          if (Math.abs(difference) > 0.01) { // Only process if there's a meaningful difference
+            if (difference > 0) {
+              // Customer overpaid - credit to wallet
+              await customerStorage.addWalletBalance(
+                orderData.customerId,
+                difference,
+                `تصحیح: اضافه پرداخت سفارش ${orderData.orderNumber} - معالجه بأثر رجعی`
+              );
+              
+              totalCredited += difference;
+              console.log(`✅ [CREDITED] ${difference} IQD credited to customer ${orderData.customerId} wallet for order ${orderData.orderNumber}`);
+              
+            } else {
+              // Customer underpaid - check wallet balance and debit if sufficient
+              const deficit = Math.abs(difference);
+              const walletBalance = await customerStorage.getWalletBalance(orderData.customerId);
+              
+              if (walletBalance >= deficit) {
+                await customerStorage.deductWalletBalance(
+                  orderData.customerId,
+                  deficit,
+                  `تصحیح: تکمیل پرداخت سفارش ${orderData.orderNumber} - معالجه بأثر رجعی`
+                );
+                
+                totalDebited += deficit;
+                console.log(`✅ [DEBITED] ${deficit} IQD debited from customer ${orderData.customerId} wallet for order ${orderData.orderNumber}`);
+              } else {
+                console.log(`⚠️ [INSUFFICIENT BALANCE] Customer ${orderData.customerId} wallet balance ${walletBalance} insufficient for deficit ${deficit} on order ${orderData.orderNumber}`);
+              }
+            }
+            
+            // Update financial notes to indicate the transaction was processed
+            const updatedNotes = `${orderData.financialNotes}\n\n🔧 تصحیح معالجة المحفظة بأثر رجعی: ${difference > 0 ? `+${difference}` : difference} دینار معالج`;
+            await db
+              .update(orderManagement)
+              .set({ financialNotes: updatedNotes })
+              .where(eq(orderManagement.id, orderData.orderManagementId));
+            
+            processedOrders.push({
+              orderNumber: orderData.orderNumber,
+              difference: difference,
+              action: difference > 0 ? 'credited' : 'debited',
+              amount: Math.abs(difference)
+            });
+            
+            processedCount++;
+          } else {
+            console.log(`ℹ️ [NO DIFFERENCE] Order ${orderData.orderNumber} has no meaningful amount difference`);
+          }
+        } catch (error) {
+          console.error(`❌ [ERROR] Failed to process wallet transaction for order ${orderData.orderNumber}:`, error);
+        }
+      }
+      
+      console.log(`✅ [SUMMARY] Processed ${processedCount} orders: ${totalCredited.toFixed(2)} IQD credited, ${totalDebited.toFixed(2)} IQD debited`);
+      
+      res.json({
+        success: true,
+        message: `معالجة ${processedCount} طلب بأثر رجعی - مجموع الإيداع: ${totalCredited.toFixed(2)} دينار، مجموع الخصم: ${totalDebited.toFixed(2)} دينار`,
+        processedCount: processedCount,
+        totalCredited: totalCredited,
+        totalDebited: totalDebited,
+        processedOrders: processedOrders
+      });
+      
+    } catch (error) {
+      console.error("Error processing missed wallet transactions:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا في معالجة المعاملات المحفظة المفقودة",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // 🔍 Get orders with potential missed wallet transactions
+  app.get("/api/finance/missed-wallet-transactions", requireAuth, async (req: Request, res: Response) => {
+    try {
+      console.log('🔍 [DEBUG] Starting missed wallet transactions check...');
+      
+      // Find orders that potentially have unprocessed wallet differences
+      const ordersWithPotentialIssues = await db
+        .select({
+          orderManagementId: orderManagement.id,
+          customerOrderId: orderManagement.customerOrderId,
+          orderNumber: customerOrders.orderNumber,
+          customerId: customerOrders.customerId,
+          totalAmount: customerOrders.totalAmount,
+          receiptAmount: paymentReceipts.receiptAmount,
+          financialNotes: orderManagement.financialNotes,
+          currentStatus: orderManagement.currentStatus,
+          createdAt: customerOrders.createdAt
+        })
+        .from(orderManagement)
+        .innerJoin(customerOrders, eq(orderManagement.customerOrderId, customerOrders.id))
+        .innerJoin(paymentReceipts, eq(paymentReceipts.customerOrderId, customerOrders.id))
+        .where(
+          and(
+            isNotNull(paymentReceipts.receiptAmount), // Has receipt amount
+            inArray(orderManagement.currentStatus, ['warehouse_pending', 'warehouse_processing', 'warehouse_verified']), // Already in warehouse
+            // Financial notes indicate auto-sync correction without wallet processing
+            eq(orderManagement.financialNotes, 'Auto-sync status correction - fixed stuck order')
+          )
+        )
+        .orderBy(customerOrders.createdAt);
+      
+      // Calculate differences for each order
+      const ordersWithDifferences = ordersWithPotentialIssues.map(order => {
+        const orderTotal = parseFloat(order.totalAmount);
+        const receiptAmount = parseFloat(order.receiptAmount);
+        const difference = receiptAmount - orderTotal;
+        
+        return {
+          ...order,
+          orderTotal,
+          receiptAmount,
+          difference,
+          hasDifference: Math.abs(difference) > 0.01,
+          transactionType: difference > 0 ? 'overpayment' : difference < 0 ? 'underpayment' : 'exact'
+        };
+      }).filter(order => order.hasDifference); // Only return orders with meaningful differences
+      
+      console.log(`🔍 [MISSED TRANSACTIONS] Found ${ordersWithDifferences.length} orders with unprocessed wallet differences`);
+      
+      res.json({
+        success: true,
+        orders: ordersWithDifferences,
+        summary: {
+          totalOrders: ordersWithDifferences.length,
+          overpayments: ordersWithDifferences.filter(o => o.difference > 0).length,
+          underpayments: ordersWithDifferences.filter(o => o.difference < 0).length,
+          totalOverpaid: ordersWithDifferences.filter(o => o.difference > 0).reduce((sum, o) => sum + o.difference, 0),
+          totalUnderpaid: Math.abs(ordersWithDifferences.filter(o => o.difference < 0).reduce((sum, o) => sum + o.difference, 0))
+        }
+      });
+      
+    } catch (error) {
+      console.error("Error fetching missed wallet transactions:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا في جلب المعاملات المحفظة المفقودة",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
     }
   });
 
