@@ -1556,7 +1556,12 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                               <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">📦</div>
                             )}
                           </div>
-                          <h4 className="font-medium text-sm truncate">{product.name}</h4>
+                          <h4 className="font-medium text-sm truncate flex items-center gap-1">
+                            {product.name}
+                            {product.isFlammable && (
+                              <Flame className="w-3 h-3 text-orange-500 flex-shrink-0" title="محصول آتش‌زا" />
+                            )}
+                          </h4>
                         </div>
                         <p className="text-xs text-muted-foreground">{product.category}</p>
                         <p className="text-sm font-medium mt-1">
