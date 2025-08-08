@@ -15379,6 +15379,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // 🔄 [WALLET_PARTIAL] Handle wallet_partial payment method (hybrid wallet + bank)
+      if (finalPaymentMethod === 'wallet_partial') {
+        console.log(`🔄 [WALLET_PARTIAL] Processing hybrid wallet payment - Wallet: ${walletAmountUsed} IQD, Bank: ${remainingAmount} IQD`);
+        
+        // 💰 [FULL WALLET COVERAGE] If remaining amount is 0, treat as pure wallet payment
+        if (remainingAmount <= 0) {
+          console.log(`💰 [WALLET_PARTIAL → WALLET_FULL] Wallet covers full amount, no bank payment needed`);
+          return res.json({
+            success: true,
+            message: "سفارش با کیف پول به طور کامل پرداخت شد",
+            paymentMethod: 'wallet_full',
+            order: {
+              id: order.id,
+              orderNumber: order.orderNumber,
+              totalAmount: order.totalAmount,
+              status: order.status,
+              paymentStatus: "paid",
+              paymentMethod: 'wallet_full',
+              walletAmountUsed: Math.round(walletAmountUsed),
+              crmCustomerId: finalCustomerId,
+            }
+          });
+        }
+        
+        // 🏦 [HYBRID PAYMENT] Route remaining amount to bank gateway
+        const { BankGatewayRouter } = await import('./bank-gateway-router');
+        const bankGatewayRouter = new BankGatewayRouter();
+        
+        const routingResult = await bankGatewayRouter.routePayment({
+          orderId: order.id,
+          customerId: finalCustomerId,
+          amount: remainingAmount,
+          currency: 'IQD',
+          returnUrl: `${req.protocol}://${req.get('host')}/payment/success`,
+          cancelUrl: `${req.protocol}://${req.get('host')}/payment/cancel`
+        });
+
+        if (routingResult.success) {
+          console.log(`🏦 [PAYMENT ROUTING] Wallet partial payment routed to ${routingResult.gateway?.name}`);
+          return res.json({
+            success: true,
+            message: "سفارش ثبت شد - هدایت به درگاه پرداخت",
+            orderId: order.id,
+            orderNumber: order.orderNumber,
+            totalAmount: Math.round(totalAmount),
+            walletAmountUsed: Math.round(walletAmountUsed),
+            remainingAmount: Math.round(remainingAmount),
+            requiresBankPayment: true,
+            paymentUrl: routingResult.paymentUrl,
+            redirectUrl: routingResult.paymentUrl
+          });
+        } else {
+          console.log(`❌ [PAYMENT ROUTING] Failed to route wallet partial payment: ${routingResult.message}`);
+          return res.status(400).json({
+            success: false,
+            message: `پرداخت ناموفق - مشکل در اتصال به درگاه بانکی`,
+            error: 'BANK_ROUTING_FAILED'
+          });
+        }
+      }
+
       // 🏦 [BANK_PAYMENTS] Route all bank-related payments to active gateway
       if (finalPaymentMethod === 'online_payment' || finalPaymentMethod === 'bank' || finalPaymentMethod === 'bank_transfer') {
         
