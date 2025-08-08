@@ -7304,6 +7304,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+
   // Payment callback endpoint for immediate failed payment handling
   app.post("/api/payment/callback", async (req, res) => {
     try {
@@ -14436,13 +14437,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let finalPaymentMethod = orderData.paymentMethod || "traditional";
 
       // RESPECT CUSTOMER'S PAYMENT CHOICE - NO AUTO-SUBSTITUTION
-      // If customer explicitly chose online_payment, NEVER use wallet instead
+      // If customer explicitly chose online_payment, TEST GATEWAY FIRST before creating order
       if (orderData.paymentMethod === 'online_payment') {
+        console.log("🏦 [ONLINE PAYMENT] Testing gateway availability before order creation...");
+        
+        // TEST: Try bank gateway routing BEFORE creating any order
+        const { bankGatewayRouter } = await import('./bank-gateway-router');
+        const testRoutingResult = await bankGatewayRouter.routePayment({
+          orderId: 0, // Test mode - no real order yet
+          customerId: finalCustomerId,
+          amount: totalAmount,
+          currency: 'IQD',
+          returnUrl: `${req.protocol}://${req.get('host')}/payment/success`,
+          cancelUrl: `${req.protocol}://${req.get('host')}/payment/cancel`
+        });
+
+        if (!testRoutingResult.success) {
+          console.log(`❌ [ONLINE PAYMENT] Gateway test failed: ${testRoutingResult.message}`);
+          return res.status(400).json({
+            success: false,
+            message: `پرداخت آنلاین در حال حاضر امکان‌پذیر نیست: ${testRoutingResult.message}. لطفاً روش پرداخت دیگری انتخاب کنید.`,
+            error: 'ONLINE_PAYMENT_UNAVAILABLE'
+          });
+        }
+        
+        console.log(`✅ [ONLINE PAYMENT] Gateway test successful - proceeding with order creation`);
         finalPaymentStatus = "pending";
         finalPaymentMethod = "online_payment";
         walletAmountUsed = 0;
         remainingAmount = totalAmount;
-        console.log("✅ [CUSTOMER CHOICE] Online payment selected - NO wallet substitution allowed");
+        console.log("✅ [CUSTOMER CHOICE] Online payment validated and selected");
       }
       // If customer explicitly chose bank_transfer, NEVER use wallet instead
       else if (orderData.paymentMethod === 'bank_transfer') {
@@ -14513,42 +14537,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log("✅ Bank transfer with grace period method selected - 3-day grace period activated");
       }
 
-      // 🏦 PRE-VALIDATE BANK PAYMENTS: Check gateway availability before creating any order
-      // This prevents temporary orders from being created when bank routing will fail
+      // 🔍 DETERMINE ORDER NUMBER ASSIGNMENT STRATEGY
       console.log(`🔍 [PAYMENT METHOD DEBUG] Original: ${orderData.paymentMethod}, Final: ${finalPaymentMethod}`);
-      const isBankPayment = ['bank_transfer', 'bank_gateway', 'bank', 'online_bank', 'gateway', 'online_payment'].includes(finalPaymentMethod);
+      const isBankPayment = ['bank_transfer', 'bank_gateway', 'bank', 'online_bank', 'gateway'].includes(finalPaymentMethod);
       const isNonRoutedBankPayment = ['bank_receipt', 'bank_transfer_grace'].includes(finalPaymentMethod);
       
-      // PRE-VALIDATE: Check if bank gateway routing will work before creating order
-      if (isBankPayment) {
-        console.log(`🏦 [PRE-VALIDATION] Testing bank gateway availability for ${finalPaymentMethod}...`);
-        
-        const { bankGatewayRouter } = await import('./bank-gateway-router');
-        const testAmount = finalPaymentMethod === 'online_payment' ? totalAmount : 
-                          (orderData.paymentMethod === 'wallet_partial' ? remainingAmount : totalAmount);
-        
-        // Test bank gateway availability
-        const testGateway = await bankGatewayRouter.getActiveGateway();
-        if (!testGateway) {
-          console.log(`❌ [PRE-VALIDATION] No active gateway found for ${finalPaymentMethod}`);
-          return res.status(400).json({
-            success: false,
-            message: 'درگاه پرداخت آنلاین در حال حاضر در دسترس نیست. لطفاً از روش‌های پرداخت دیگر استفاده کنید.',
-            error: 'NO_ACTIVE_GATEWAY'
-          });
-        }
-        
-        console.log(`✅ [PRE-VALIDATION] Gateway ${testGateway.name} available for ${finalPaymentMethod}`);
-      }
-      
       // Generate order numbers based on payment type
-      if (!isBankPayment && !isNonRoutedBankPayment) {
+      if (!isBankPayment && !isNonRoutedBankPayment && finalPaymentMethod !== 'online_payment') {
         // Generate order number for wallet payments and other non-bank methods
         orderNumber = await orderManagementStorage.generateOrderNumberInTransaction();
         console.log(`✅ [NON-BANK ORDER] Generated order number ${orderNumber} for ${finalPaymentMethod}`);
       } else {
-        // Bank payments: no order number until payment verification
-        console.log(`🏦 [BANK ORDER] No order number assigned - waiting for payment verification (${finalPaymentMethod})`);
+        // Bank payments and online payments: no order number until payment verification
+        console.log(`🏦 [BANK/ONLINE ORDER] No order number assigned - waiting for payment verification (${finalPaymentMethod})`);
       }
 
       const order = await customerStorage.createOrder({

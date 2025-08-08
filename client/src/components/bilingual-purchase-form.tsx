@@ -1124,6 +1124,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   // Submit order mutation
   const submitOrderMutation = useMutation({
     mutationFn: async (orderData: any) => {
+      console.log('🚀 [ORDER CREATION] Creating order with payment method:', orderData.paymentMethod);
+      
       // Handle bank receipt upload separately if file is selected
       if (paymentMethod === 'bank_receipt' && selectedReceiptFile) {
         // First create the order
@@ -1225,24 +1227,36 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         }, 1500);
         return;
       }
-      // Handle online_payment method - redirect to bank gateway
-      else if (paymentMethod === 'online_payment' && response.redirectToPayment && response.paymentGatewayUrl) {
-        console.log('🏦 [ONLINE PAYMENT] Redirecting to bank gateway:', response.paymentGatewayUrl);
-        
-        toast({
-          title: "انتقال به درگاه بانکی",
-          description: "در حال انتقال شما به درگاه پرداخت بانکی..."
-        });
-        
-        // Redirect to payment gateway
-        setTimeout(() => {
-          window.location.href = response.paymentGatewayUrl;
-        }, 1500);
-        return;
+      // Handle online_payment method - redirect to bank gateway OR show failure message
+      else if (paymentMethod === 'online_payment') {
+        if (response.redirectToPayment && response.paymentGatewayUrl) {
+          console.log('🏦 [ONLINE PAYMENT] Redirecting to bank gateway:', response.paymentGatewayUrl);
+          
+          toast({
+            title: "انتقال به درگاه بانکی",
+            description: "در حال انتقال شما به درگاه پرداخت بانکی..."
+          });
+          
+          // Redirect to payment gateway
+          setTimeout(() => {
+            window.location.href = response.paymentGatewayUrl;
+          }, 1500);
+          return;
+        } else if (response.error === 'ONLINE_PAYMENT_UNAVAILABLE') {
+          // Bank gateway unavailable - order was not created
+          console.log('❌ [ONLINE PAYMENT] Bank gateway unavailable - no order created');
+          
+          toast({
+            title: "پرداخت آنلاین غیرفعال",
+            description: response.message || "درگاه بانکی در حال حاضر در دسترس نیست. لطفاً روش پرداخت دیگری انتخاب کنید.",
+            variant: "destructive"
+          });
+          return;
+        }
       }
       // Handle full wallet payments - check both response method and actual amounts
       else if (response.paymentMethod === 'wallet_full' || 
-          (walletAmount >= totalAmount && actualWalletUsed > 0) ||
+          (walletAmount >= totalAmount && walletAmount > 0) ||
           (response.order?.paymentMethod === 'wallet_full') ||
           (response.order?.paymentStatus === 'paid' && response.order?.walletAmountUsed > 0)) {
         toast({
@@ -1315,9 +1329,15 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         onOrderComplete();
       }
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error('❌ [ORDER ERROR] Order submission failed:', error);
+      
+      // Show specific error message for bank payment failures
+      const errorMessage = error.message || t.orderError;
+      
       toast({
-        title: t.orderError,
+        title: 'خطا در ثبت سفارش',
+        description: errorMessage,
         variant: "destructive"
       });
     }
