@@ -243,10 +243,59 @@ export class IncompletePaymentCleaner {
       
       const { pool } = await import('./db');
       
-      // Start transaction for safe deletion
+      // Start transaction for safe deletion and refund
       await pool.query('BEGIN');
       
       try {
+        // Check if this order used wallet payment and needs refund
+        const orderQuery = await pool.query(`
+          SELECT payment_method, customer_id, order_number, total_amount
+          FROM customer_orders 
+          WHERE id = $1
+        `, [order.id]);
+        
+        const orderDetails = orderQuery.rows[0];
+        if (orderDetails && orderDetails.payment_method === 'wallet_partial') {
+          console.log(`💰 [WALLET REFUND] Order ${order.order_number} used partial wallet payment - processing refund`);
+          
+          try {
+            // Import wallet storage to process refund
+            const { WalletStorage } = await import('./wallet-storage');
+            const walletStorage = new WalletStorage();
+            
+            // Find wallet transactions for this order
+            const walletTransactions = await walletStorage.getTransactionsByReference('order', order.id);
+            console.log(`🔍 [WALLET REFUND] Found ${walletTransactions.length} wallet transactions for order ${order.id}`);
+            
+            // Find debit transactions (wallet deductions) for this order
+            const debitTransactions = walletTransactions.filter(t => t.transactionType === 'debit' && t.status === 'completed');
+            
+            if (debitTransactions.length > 0) {
+              // Calculate total amount to refund
+              const totalDebitAmount = debitTransactions.reduce((sum, t) => sum + parseFloat(t.amount), 0);
+              console.log(`💰 [WALLET REFUND] Refunding ${totalDebitAmount} IQD to customer ${orderDetails.customer_id}`);
+              
+              // Process wallet refund
+              await walletStorage.creditWallet(
+                orderDetails.customer_id,
+                totalDebitAmount,
+                `بازگشت وجه سفارش حذف شده ${order.order_number || 'بدون شماره'} - عدم موفقیت پرداخت بانکی`,
+                'cleanup_refund',
+                order.id
+              );
+              
+              console.log(`✅ [WALLET REFUND] Successfully refunded ${totalDebitAmount} IQD for deleted order ${order.order_number}`);
+            } else {
+              console.log(`ℹ️ [WALLET REFUND] No wallet debit transactions found for order ${order.order_number}`);
+            }
+          } catch (refundError) {
+            console.error(`❌ [WALLET REFUND] Error processing wallet refund for order ${order.order_number}:`, refundError);
+            // Continue with deletion even if refund fails to avoid orphaned orders
+          }
+        } else {
+          console.log(`ℹ️ [PAYMENT METHOD] Order ${order.order_number} payment method: ${orderDetails?.payment_method || 'unknown'} - no wallet refund needed`);
+        }
+
         // 1. Delete from order_management first (foreign key constraint)
         if (order.management_id) {
           await pool.query(`DELETE FROM order_management WHERE id = $1`, [order.management_id]);
