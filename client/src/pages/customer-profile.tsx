@@ -76,8 +76,11 @@ const CustomerProfile = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  // Search and filter states
+  // Purchase history modal states
+  const [showPurchaseHistory, setShowPurchaseHistory] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [completeHistory, setCompleteHistory] = useState<any[]>([]);
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
   
   // Main profile filter state
@@ -149,8 +152,8 @@ const CustomerProfile = () => {
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 
-  // Get all orders for status counting
-  const allOrdersForCounting = sortedOrders;
+  // Get all orders for status counting (including hidden ones)
+  const allOrdersForCounting = completeHistory.length > 0 ? completeHistory : sortedOrders;
   
   // Filter orders based on main profile filter
   const orders = mainProfileFilter === "all" ? sortedOrders : sortedOrders.filter(order => getOrderCategory(order) === mainProfileFilter);
@@ -160,25 +163,55 @@ const CustomerProfile = () => {
   const abandonedCarts = abandonedCartsData?.carts || [];
   const abandonedCartsCount = abandonedCarts.length;
 
-  // Define missing variables for order history section
-  const isLoadingHistory = ordersLoading;
-  const completeHistory = sortedOrders || [];
+  // Load complete purchase history
+  const loadCompleteHistory = async () => {
+    if (completeHistory.length > 0) return; // Already loaded
+    
+    setIsLoadingHistory(true);
+    try {
+      const response = await apiRequest('/api/customers/orders/complete-history', {
+        method: 'GET'
+      });
+      if (response.success) {
+        setCompleteHistory(response.orders || []);
+      }
+    } catch (error) {
+      console.error('Error loading purchase history:', error);
+      toast({
+        variant: "destructive",
+        title: "خطا",
+        description: "خطا در بارگیری سابقه خرید",
+      });
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  };
+
+  // Load complete history on component mount for accurate status counting
+  useEffect(() => {
+    if (customerData?.success) {
+      loadCompleteHistory();
+    }
+  }, [customerData?.success]);
+
+  // Filter history based on search and category filter
+  let filteredHistory = completeHistory;
   
-  // Filter history based on search term and selected filter
-  const filteredHistory = completeHistory.filter((order: any) => {
-    const matchesSearch = searchTerm === "" || 
+  // Apply category filter
+  if (selectedFilter !== "all") {
+    filteredHistory = filteredHistory.filter(order => getOrderCategory(order) === selectedFilter);
+  }
+  
+  // Apply search filter
+  if (searchTerm) {
+    filteredHistory = filteredHistory.filter(order => 
       order.orderNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       order.status?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.products?.some((product: any) => 
-        product.name?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    
-    const matchesFilter = selectedFilter === "all" || getOrderCategory(order) === selectedFilter;
-    
-    return matchesSearch && matchesFilter;
-  });
-
-
+      order.items?.some((item: any) => 
+        item.productName?.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    );
+  }
 
   const handleLogout = async () => {
     try {
@@ -487,7 +520,7 @@ const CustomerProfile = () => {
                   </CardTitle>
                   
                   {/* Order Status Indicators */}
-                  {orders.length > 0 && (
+                  {(orders.length > 0 || completeHistory.length > 0) && (
                     <div className="flex items-center gap-3 text-xs">
                       {(() => {
                         // Count all orders (including complete history) for accurate status display
@@ -942,6 +975,17 @@ const CustomerProfile = () => {
             {/* Purchase History and CSV Export Buttons */}
             {orders && orders.length > 0 && (
               <div className="mt-4 space-y-2">
+                <Button
+                  onClick={() => {
+                    setShowPurchaseHistory(true);
+                    loadCompleteHistory();
+                  }}
+                  variant="outline"
+                  className="w-full border-purple-200 text-purple-700 hover:bg-purple-50 hover:border-purple-300"
+                >
+                  <Clock className="w-4 h-4 mr-2" />
+                  مشاهده سابقه خرید کامل
+                </Button>
                 
                 <Button
                   onClick={() => setShowCsvExport(true)}
@@ -958,6 +1002,12 @@ const CustomerProfile = () => {
         </div>
       </div>
 
+      {/* Purchase History Modal */}
+      <Dialog open={showPurchaseHistory} onOpenChange={setShowPurchaseHistory}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-purple-700">سابقه خرید کامل</DialogTitle>
+          </DialogHeader>
           
           {/* Order Types Header with Filters */}
           <div className="mb-4 p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200">
@@ -1262,7 +1312,7 @@ const CustomerProfile = () => {
           </div>
         </DialogContent>
       </Dialog>
-      
+
       {/* CSV Export Modal */}
       <Dialog open={showCsvExport} onOpenChange={setShowCsvExport}>
         <DialogContent className="max-w-md">
