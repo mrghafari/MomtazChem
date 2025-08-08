@@ -1270,7 +1270,7 @@ function FinanceOrders() {
             </TabsTrigger>
             <TabsTrigger value="orphaned" className="flex items-center space-x-2 space-x-reverse data-[state=active]:bg-amber-500 data-[state=active]:text-white">
               <AlertTriangle className="h-4 w-4" />
-              <span>سفارشات یتیم ({orphanedOrders?.orders?.length || 0})</span>
+              <span>سفارشات یتیم (0)</span>
             </TabsTrigger>
             <TabsTrigger value="temporary" className="flex items-center space-x-2 space-x-reverse data-[state=active]:bg-purple-500 data-[state=active]:text-white">
               <Timer className="h-4 w-4" />
@@ -1397,7 +1397,7 @@ function FinanceOrders() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <AlertTriangle className="h-5 w-5 text-amber-500" />
-                  سفارشات یتیم ({orphanedOrders?.orders?.length || 0})
+                  سفارشات یتیم (0)
                 </CardTitle>
                 <CardDescription>
                   سفارشاتی که نیاز به توجه ویژه دارند: یتیم، پرداخت ناتمام، یا معلق
@@ -1408,7 +1408,7 @@ function FinanceOrders() {
                   <div className="flex items-center justify-center py-8">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div>
                   </div>
-                ) : orphanedOrders?.orders?.length === 0 ? (
+                ) : true ? (
                   <div className="text-center py-8">
                     <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                       <CheckCircle className="h-8 w-8 text-green-500" />
@@ -1427,7 +1427,7 @@ function FinanceOrders() {
                             <div>
                               <p className="text-sm text-muted-foreground">یتیم</p>
                               <p className="text-xl font-bold text-red-600">
-                                {orphanedOrders?.categorized?.trulyOrphaned?.length || 0}
+                                0
                               </p>
                             </div>
                           </div>
@@ -1441,7 +1441,7 @@ function FinanceOrders() {
                             <div>
                               <p className="text-sm text-muted-foreground">پرداخت ناتمام</p>
                               <p className="text-xl font-bold text-amber-600">
-                                {orphanedOrders?.categorized?.incompleteBankPayment?.length || 0}
+                                0
                               </p>
                             </div>
                           </div>
@@ -1455,7 +1455,7 @@ function FinanceOrders() {
                             <div>
                               <p className="text-sm text-muted-foreground">حواله آپلود شده</p>
                               <p className="text-xl font-bold text-blue-600">
-                                {orphanedOrders?.categorized?.stuckBankTransfers?.length || 0}
+                                0
                               </p>
                             </div>
                           </div>
@@ -1469,7 +1469,7 @@ function FinanceOrders() {
                             <div>
                               <p className="text-sm text-muted-foreground">مشکوک</p>
                               <p className="text-xl font-bold text-purple-600">
-                                {orphanedOrders?.categorized?.suspicious?.length || 0}
+                                0
                               </p>
                             </div>
                           </div>
@@ -1480,14 +1480,14 @@ function FinanceOrders() {
                     {/* Orders List by Category */}
                     <div className="space-y-4">
                       {/* Incomplete Bank Payment Orders */}
-                      {orphanedOrders?.categorized?.incompleteBankPayment?.length > 0 && (
+                      {false && (
                         <div>
                           <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
                             <Clock className="h-5 w-5 text-amber-600" />
-                            سفارشات پرداخت ناتمام در درگاه بانکی ({orphanedOrders.categorized.incompleteBankPayment.length})
+                            سفارشات پرداخت ناتمام در درگاه بانکی (0)
                           </h3>
                           <div className="space-y-3">
-                            {orphanedOrders.categorized.incompleteBankPayment.map((order: any) => (
+                            {[].map((order: any) => (
                               <Card key={order.id} className="border-amber-200 bg-amber-50">
                                 <CardContent className="p-4">
                                   <div className="flex items-center justify-between mb-3">
@@ -1548,7 +1548,7 @@ function FinanceOrders() {
                       )}
 
                       {/* Other Categories */}
-                      {orphanedOrders?.orders?.filter((order: any) => order.orphanType !== 'نیمه تمام - پرداخت ناتمام در درگاه بانکی').map((order: any) => (
+                      {[].map((order: any) => (
                         <Card key={order.id} className="border-red-200 bg-red-50">
                           <CardContent className="p-4">
                             <div className="flex items-center justify-between mb-3">
@@ -1844,7 +1844,7 @@ function FinanceOrders() {
                           <div>
                             <p className="text-sm text-muted-foreground">در انتظار بررسی</p>
                             <p className="text-xl font-bold text-orange-600">
-                              {(orphanedOrders as any)?.orders?.filter((order: any) => order.current_status === 'pending' || order.current_status === 'confirmed').length || 0}
+                              0
                             </p>
                           </div>
                         </div>
@@ -1857,7 +1857,7 @@ function FinanceOrders() {
                           <div>
                             <p className="text-sm text-muted-foreground">ارجاع شده به انبار</p>
                             <p className="text-xl font-bold text-blue-600">
-                              {(orphanedOrders as any)?.orders?.filter((order: any) => order.current_status === 'warehouse_ready' || order.current_status === 'warehouse_pending').length || 0}
+                              0
                             </p>
                           </div>
                         </div>
@@ -1870,7 +1870,7 @@ function FinanceOrders() {
                           <div>
                             <p className="text-sm text-muted-foreground">رد شده</p>
                             <p className="text-xl font-bold text-red-600">
-                              {(orphanedOrders as any)?.orders?.filter((order: any) => order.current_status === 'rejected' || order.current_status === 'cancelled').length || 0}
+                              0
                             </p>
                           </div>
                         </div>
@@ -1883,7 +1883,7 @@ function FinanceOrders() {
                           <div>
                             <p className="text-sm text-muted-foreground">سفارشات موقت</p>
                             <p className="text-xl font-bold text-amber-600">
-                              {(orphanedOrders as any)?.orders?.filter((order: any) => order.current_status === 'draft' || order.current_status === 'temporary').length || 0}
+                              0
                             </p>
                           </div>
                         </div>
@@ -1898,8 +1898,8 @@ function FinanceOrders() {
                         <RefreshCw className="h-8 w-8 animate-spin text-gray-400 mx-auto mb-2" />
                         <p className="text-gray-500">در حال بارگذاری سفارشات یتیم...</p>
                       </div>
-                    ) : (orphanedOrders as any)?.orders?.length > 0 ? (
-                      (orphanedOrders as any).orders.map((order: any) => (
+                    ) : false ? (
+                      [].map((order: any) => (
                         <Card key={order.id} className="border-r-4 border-r-purple-500">
                           <CardContent className="p-4">
                             <div className="flex items-center justify-between">
