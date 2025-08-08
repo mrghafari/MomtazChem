@@ -14406,7 +14406,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         } else if (walletUsage > 0) {
           // Use the secondary payment method chosen by user for remaining amount
           const { secondaryPaymentMethod } = req.body;
-          finalPaymentMethod = secondaryPaymentMethod || 'online_payment'; // Default to active gateway if not specified
+          
+          // Map frontend payment method to correct gateway type
+          if (secondaryPaymentMethod === 'online_payment') {
+            // Check active gateway type from database
+            const db = await import('./db');
+            const { eq } = await import('drizzle-orm');
+            const { paymentGateways } = await import('../shared/schema');
+            
+            const activeGateway = await db.default.query.paymentGateways.findFirst({
+              where: eq(paymentGateways.enabled, true)
+            });
+            
+            finalPaymentMethod = activeGateway?.type || 'sep'; // Default to Shaparak if no active gateway found
+            console.log('🔄 [GATEWAY MAPPING] Found active gateway:', { 
+              gatewayName: activeGateway?.name, 
+              gatewayType: activeGateway?.type,
+              finalPaymentMethod 
+            });
+          } else {
+            finalPaymentMethod = secondaryPaymentMethod || 'sep';
+          }
+          
           console.log('🔄 [BACKEND CONVERSION] wallet_combined → user selected secondary method', {
             walletUsage, formattedTotalAmount, remaining, 
             secondaryPaymentMethod, finalPaymentMethod
@@ -14414,7 +14435,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         } else {
           // Use the secondary payment method chosen by user (no wallet usage)
           const { secondaryPaymentMethod } = req.body;
-          finalPaymentMethod = secondaryPaymentMethod || 'online_payment';
+          
+          // Map frontend payment method to correct gateway type
+          if (secondaryPaymentMethod === 'online_payment') {
+            const db = await import('./db');
+            const { eq } = await import('drizzle-orm');
+            const { paymentGateways } = await import('../shared/schema');
+            
+            const activeGateway = await db.default.query.paymentGateways.findFirst({
+              where: eq(paymentGateways.enabled, true)
+            });
+            
+            finalPaymentMethod = activeGateway?.type || 'sep';
+            console.log('🔄 [GATEWAY MAPPING] Found active gateway for no-wallet payment:', { 
+              gatewayName: activeGateway?.name, 
+              gatewayType: activeGateway?.type,
+              finalPaymentMethod 
+            });
+          } else {
+            finalPaymentMethod = secondaryPaymentMethod || 'sep';
+          }
+          
           console.log('🔄 [BACKEND CONVERSION] wallet_combined → user selected method (no wallet usage)', {
             secondaryPaymentMethod, finalPaymentMethod
           });
@@ -14675,7 +14716,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (requiresBankPayment) {
         // Use the selected secondary payment method instead of generic finalPaymentMethod
         const { secondaryPaymentMethod } = req.body;
-        const actualPaymentMethod = secondaryPaymentMethod || 'online_payment'; // Default to active gateway
+        let actualPaymentMethod = secondaryPaymentMethod || 'online_payment';
+        
+        // Map frontend payment method to correct gateway type for redirect URL
+        if (actualPaymentMethod === 'online_payment') {
+          const db = await import('./db');
+          const { eq } = await import('drizzle-orm');
+          const { paymentGateways } = await import('../shared/schema');
+          
+          const activeGateway = await db.default.query.paymentGateways.findFirst({
+            where: eq(paymentGateways.enabled, true)
+          });
+          
+          actualPaymentMethod = activeGateway?.type || 'sep'; // Use actual gateway type for redirect
+          console.log('🔄 [REDIRECT MAPPING] Using active gateway type for URL:', { 
+            gatewayName: activeGateway?.name, 
+            gatewayType: activeGateway?.type,
+            actualPaymentMethod 
+          });
+        }
         
         console.log('💳 [PAYMENT REDIRECT] Using secondary payment method for remaining amount:', {
           secondaryPaymentMethod,
