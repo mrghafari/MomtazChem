@@ -885,14 +885,21 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
         console.log(`🔄 Wallet balance cache invalidated after ${actualWalletUsage} IQD payment`);
       }
       
-      // Check if payment processing is required
-      const requiresPayment = ['iraqi_bank', 'credit_card', 'bank_transfer', 'digital_wallet'].includes(paymentMethod);
+      // PRIORITY 1: Check if backend explicitly requires bank payment with specific redirect URL
+      if (data.requiresBankPayment && data.redirectUrl) {
+        console.log('💳 [PAYMENT REDIRECT] Using backend specified redirect URL:', data.redirectUrl);
+        setLocation(data.redirectUrl);
+        return;
+      }
+      
+      // PRIORITY 2: Check if payment processing is required based on payment method
+      const requiresPayment = ['iraqi_bank', 'credit_card', 'bank_transfer', 'digital_wallet', 'online_payment'].includes(paymentMethod);
       
       if (requiresPayment) {
         // Redirect to payment page for processing
         setLocation(`/payment/${orderId}`);
       } else {
-        // For cash on delivery and company credit, go directly to success
+        // For wallet payments and other completed methods, go directly to success
         setOrderNumber(orderId);
         setIsOrderComplete(true);
         onOrderComplete();

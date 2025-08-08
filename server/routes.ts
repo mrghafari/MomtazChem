@@ -14673,14 +14673,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       if (requiresBankPayment) {
-        // Hybrid payment response - redirect to bank gateway
+        // Use the selected secondary payment method instead of generic finalPaymentMethod
+        const { secondaryPaymentMethod } = req.body;
+        const actualPaymentMethod = secondaryPaymentMethod || 'online_payment'; // Default to active gateway
+        
+        console.log('💳 [PAYMENT REDIRECT] Using secondary payment method for remaining amount:', {
+          secondaryPaymentMethod,
+          actualPaymentMethod,
+          remainingAmountToPay,
+          orderId: order.id
+        });
+        
+        // Hybrid payment response - redirect to correct gateway
         res.json({
           success: true,
           message: "پرداخت با کیف پول انجام شد، لطفاً مابقی مبلغ را از طریق درگاه بانکی پرداخت کنید",
           requiresBankPayment: true,
           walletAmountDeducted: actualWalletUsed,
           remainingAmount: remainingAmountToPay,
-          redirectUrl: `/payment/${order.orderNumber}`,
+          redirectUrl: `/payment?orderId=${order.id}&amount=${remainingAmountToPay}&method=${actualPaymentMethod}`,
           order: {
             id: order.id,
             orderNumber: order.orderNumber,
