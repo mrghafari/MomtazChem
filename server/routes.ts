@@ -14486,11 +14486,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
               finalPaymentMethod = "wallet_full"; // Ensure correct method
               console.log('🏪 [WAREHOUSE DIRECT] Full wallet payment completed, order gets number immediately');
             } else {
-              // Hybrid payment - DO NOT assign order number yet
+              // 🚨 HYBRID PAYMENT: Do NOT assign order number - this BLOCKS order creation
               finalPaymentStatus = "partial"; // Partially paid by wallet
               finalPaymentMethod = "wallet_partial"; // Requires bank payment
-              console.log('🏦 [HYBRID PENDING] Wallet portion successful, but waiting for bank success before assigning order number');
-              console.log('⚠️ [8-METHOD LOGIC] Order will get number ONLY if bank payment also succeeds');
+              console.log('🏦 [HYBRID BLOCK] Wallet portion successful, but NO order number assigned');
+              console.log('⚠️ [8-METHOD LOGIC] Hybrid order creation will be BLOCKED until bank payment succeeds');
+              // orderNumber remains null - this will trigger validation failure
             }
           } catch (walletError) {
             console.log(`❌ Wallet payment failed:`, walletError);
@@ -14499,6 +14500,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
               message: "موجودی کیف پول کافی نیست یا خطا در پردازش"
             });
           }
+        } else if (orderData.paymentMethod === 'wallet_partial') {
+          // 🚨 CRITICAL: wallet_partial with walletAmountUsed = 0 should be blocked
+          console.log('❌ [HYBRID BLOCK] wallet_partial order with no wallet amount - blocking');
+          return res.status(400).json({
+            success: false,
+            message: "سفارش ترکیبی بدون مبلغ کیف پول - درخواست نامعتبر",
+            blockReason: "hybrid_no_wallet"
+          });
         }
       }
       
@@ -14524,17 +14533,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log("✅ Bank transfer with grace period method selected - 3-day grace period activated");
       }
 
-      // 🚨 CRITICAL: Only create order if we have an order number (8-method logic)
+      // 🚨 CRITICAL: Comprehensive 8-method logic validation
+      console.log('🔍 [8-METHOD VALIDATION] Final validation before order creation:', {
+        orderNumber,
+        paymentMethod: finalPaymentMethod,
+        paymentStatus: finalPaymentStatus,
+        remainingAmount,
+        walletAmountUsed
+      });
+      
+      // Rule 1: Hybrid orders (wallet_partial) must NEVER get order numbers unless both parts succeed
+      if (finalPaymentMethod === 'wallet_partial' || orderData.paymentMethod === 'wallet_partial') {
+        console.log('🚨 [HYBRID BLOCK] Detected hybrid order - applying strict validation');
+        if (finalPaymentStatus !== 'paid') {
+          console.log('❌ [HYBRID BLOCK] Hybrid order not fully paid - blocking order creation');
+          return res.status(400).json({
+            success: false,
+            message: "سفارش ترکیبی ناتمام - منتظر تکمیل پرداخت بانکی",
+            requiresBankPayment: true,
+            walletAmountUsed,
+            remainingAmount: Math.round(remainingAmount),
+            blockReason: "hybrid_incomplete"
+          });
+        }
+      }
+      
+      // Rule 2: All orders must have order numbers (no exceptions)
       if (!orderNumber) {
-        console.log('❌ [8-METHOD LOGIC] Hybrid order failed - no order number assigned, cannot create order');
+        console.log('❌ [8-METHOD LOGIC] No order number assigned - cannot create order');
         return res.status(400).json({
           success: false,
-          message: "سفارش ترکیبی ناتمام - منتظر تکمیل پرداخت بانکی",
-          requiresBankPayment: true,
+          message: "خطا در تولید شماره سفارش - لطفاً دوباره تلاش کنید",
+          requiresBankPayment: finalPaymentMethod === 'wallet_partial',
           walletAmountUsed,
-          remainingAmount: Math.round(remainingAmount)
+          remainingAmount: Math.round(remainingAmount),
+          blockReason: "no_order_number"
         });
       }
+      
+      console.log('✅ [8-METHOD VALIDATION] Order validated - proceeding with creation');
       
       const order = await customerStorage.createOrder({
         customerId: finalCustomerId,
