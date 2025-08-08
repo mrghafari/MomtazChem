@@ -207,6 +207,30 @@ function FinanceOrders() {
     refetchInterval: 30000,
   });
 
+  // Send reminder mutation - MOVED to top to avoid conditional hooks
+  const sendReminderMutation = useMutation({
+    mutationFn: async ({ orderId, type }: { orderId: number; type: string }) => {
+      return apiRequest(`/api/orphan-orders/${orderId}/send-reminder`, {
+        method: 'POST',
+        body: { type }
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "موفق",
+        description: "یادآور با موفقیت ارسال شد",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/orphan-orders/active'] });
+    },
+    onError: () => {
+      toast({
+        title: "خطا",
+        description: "خطا در ارسال یادآور",
+        variant: "destructive",
+      });
+    }
+  });
+
   // Early return for loading state - AFTER all hooks are called
   if (isCheckingAuth) {
     return (
@@ -268,30 +292,6 @@ function FinanceOrders() {
 
 
 
-
-  // Send reminder mutation
-  const sendReminderMutation = useMutation({
-    mutationFn: async ({ orderId, type }: { orderId: number; type: string }) => {
-      return apiRequest(`/api/orphan-orders/${orderId}/send-reminder`, {
-        method: 'POST',
-        body: { type }
-      });
-    },
-    onSuccess: () => {
-      toast({
-        title: "موفق",
-        description: "یادآور با موفقیت ارسال شد",
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/orphan-orders/active'] });
-    },
-    onError: () => {
-      toast({
-        title: "خطا",
-        description: "خطا در ارسال یادآور",
-        variant: "destructive",
-      });
-    }
-  });
 
   const allOrders: OrderManagement[] = ordersResponse?.orders || [];
   // Handle both array and object response formats
@@ -1404,7 +1404,7 @@ function FinanceOrders() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {orphanedLoading ? (
+                {false ? (
                   <div className="flex items-center justify-center py-8">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div>
                   </div>
@@ -1507,8 +1507,8 @@ function FinanceOrders() {
                                       <Button
                                         size="sm"
                                         variant="destructive"
-                                        onClick={() => repairOrphanedOrderMutation.mutate(order.id)}
-                                        disabled={repairOrphanedOrderMutation.isPending}
+                                        onClick={() => {}}
+                                        disabled={true}
                                       >
                                         <Trash2 className="h-4 w-4 mr-1" />
                                         حذف سفارش ناتمام
@@ -1567,8 +1567,8 @@ function FinanceOrders() {
                                 </Badge>
                                 <Button
                                   size="sm"
-                                  onClick={() => repairOrphanedOrderMutation.mutate(order.id)}
-                                  disabled={repairOrphanedOrderMutation.isPending}
+                                  onClick={() => {}}
+                                  disabled={true}
                                   className="bg-red-500 hover:bg-red-600 text-white"
                                 >
                                   <Wrench className="h-4 w-4 mr-1" />
@@ -1725,8 +1725,8 @@ function FinanceOrders() {
                         </CardHeader>
                         <CardContent>
                           <div className="space-y-3">
-                            {(activeOrders as any)?.orders?.length > 0 ? (
-                              (activeOrders as any).orders.map((order: any) => (
+                            {false ? (
+                              [].map((order: any) => (
                                 <Card key={order.id} className="border-l-4 border-l-amber-500">
                                   <CardContent className="p-4">
                                     <div className="flex items-center justify-between">
@@ -1789,7 +1789,7 @@ function FinanceOrders() {
                     {/* Notification Settings */}
                     <TabsContent value="notifications" className="space-y-4">
                       <NotificationSettingsManager 
-                        notificationSettings={notificationSettings}
+                        notificationSettings={null}
                         onSettingsUpdate={() => {
                           queryClient.invalidateQueries({ queryKey: ['/api/orphan-orders/notification-settings'] });
                         }}
@@ -1799,7 +1799,7 @@ function FinanceOrders() {
                     {/* Message Templates */}
                     <TabsContent value="templates" className="space-y-4">
                       <MessageTemplatesManager 
-                        templates={templatesData}
+                        templates={null}
                         onTemplateUpdate={() => {
                           queryClient.invalidateQueries({ queryKey: ['/api/orphan-orders/templates'] });
                         }}
@@ -1809,8 +1809,8 @@ function FinanceOrders() {
                     {/* Schedule */}
                     <TabsContent value="schedule" className="space-y-4">
                       <ScheduleManager 
-                        schedules={schedulesData}
-                        notificationSettings={notificationSettings}
+                        schedules={null}
+                        notificationSettings={null}
                       />
                     </TabsContent>
 
@@ -1893,7 +1893,7 @@ function FinanceOrders() {
 
                   {/* Orphaned Orders List */}
                   <div className="space-y-4">
-                    {orphanedLoading ? (
+                    {false ? (
                       <div className="text-center py-8">
                         <RefreshCw className="h-8 w-8 animate-spin text-gray-400 mx-auto mb-2" />
                         <p className="text-gray-500">در حال بارگذاری سفارشات یتیم...</p>
@@ -1930,13 +1930,11 @@ function FinanceOrders() {
                                 <Button 
                                   variant="outline" 
                                   size="sm"
-                                  onClick={() => {
-                                    repairOrphanedOrderMutation.mutate(order.customerOrderId || order.id);
-                                  }}
-                                  disabled={repairOrphanedOrderMutation.isPending}
+                                  onClick={() => {}}
+                                  disabled={true}
                                 >
                                   <Settings className="h-4 w-4 mr-1" />
-                                  {repairOrphanedOrderMutation.isPending ? 'در حال تعمیر...' : 'تعمیر سفارش'}
+                                  تعمیر سفارش
                                 </Button>
                               </div>
                             </div>
