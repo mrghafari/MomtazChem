@@ -214,27 +214,11 @@ const PaymentSettings = () => {
   // Update payment method setting mutation
   const updatePaymentMethodMutation = useMutation({
     mutationFn: async ({ methodKey, enabled, priority }: { methodKey: string, enabled?: boolean, priority?: number }) => {
-      // Business logic: If disabling bank payment or wallet payment, also disable combined payment
-      const updateRequests: Array<{ methodKey: string, enabled?: boolean, priority?: number }> = [
-        { methodKey, enabled, priority }
-      ];
-
-      // If disabling online_payment (bank) or wallet, also disable bank_receipt (combined payment)
-      if (enabled === false && (methodKey === 'online_payment' || methodKey === 'wallet')) {
-        updateRequests.push({ methodKey: 'bank_receipt', enabled: false });
-      }
-
-      // Execute all update requests
-      const responses = await Promise.all(
-        updateRequests.map(request => 
-          apiRequest(`/api/payment/method-settings/${request.methodKey}`, {
-            method: 'PUT',
-            body: { enabled: request.enabled, priority: request.priority }
-          })
-        )
-      );
-
-      return responses[0]; // Return the main response
+      const response = await apiRequest(`/api/payment/method-settings/${methodKey}`, {
+        method: 'PUT',
+        body: { enabled, priority }
+      });
+      return response;
     },
     onMutate: async ({ methodKey, enabled, priority }) => {
       // Cancel any outgoing refetches
@@ -246,20 +230,11 @@ const PaymentSettings = () => {
       // Optimistically update to the new value
       queryClient.setQueryData<PaymentMethodSettings[]>(['/api/payment/method-settings'], (old: PaymentMethodSettings[] | undefined) => {
         if (!old || !Array.isArray(old)) return old;
-        
-        return old.map(method => {
-          // Update the primary method
-          if (method.methodKey === methodKey) {
-            return { ...method, enabled: enabled ?? method.enabled, priority: priority ?? method.priority };
-          }
-          
-          // Business logic: If disabling bank or wallet payment, also disable combined payment
-          if (enabled === false && (methodKey === 'online_payment' || methodKey === 'wallet') && method.methodKey === 'bank_receipt') {
-            return { ...method, enabled: false };
-          }
-          
-          return method;
-        });
+        return old.map(method => 
+          method.methodKey === methodKey 
+            ? { ...method, enabled: enabled ?? method.enabled, priority: priority ?? method.priority }
+            : method
+        );
       });
 
       // Return a context object with the snapshotted value
