@@ -246,7 +246,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const { language, direction } = useLanguage();
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [locationData, setLocationData] = useState<{latitude: number, longitude: number} | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<'online_payment' | 'wallet' | 'bank_transfer_grace'>('online_payment');
+  const [paymentMethod, setPaymentMethod] = useState<'online_payment' | 'wallet' | 'wallet_full' | 'wallet_partial' | 'wallet_combined' | 'bank_transfer_grace' | 'bank_receipt'>('online_payment');
 
   // Fetch available payment methods from admin settings (public endpoint)
   const { data: availablePaymentMethods = [] } = useQuery({
@@ -1308,7 +1308,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         onOrderComplete();
       }
       // Handle bank transfer - redirect to payment gateway  
-      else if (response.paymentMethod === 'bank_transfer' || (paymentMethod !== 'wallet' && paymentMethod !== 'online_payment')) {
+      else if (response.paymentMethod === 'bank_transfer' || (paymentMethod !== 'wallet' && paymentMethod !== 'wallet_full' && paymentMethod !== 'wallet_partial' && paymentMethod !== 'online_payment' && paymentMethod !== 'bank_transfer_grace' && paymentMethod !== 'bank_receipt')) {
         toast({
           title: "انتقال به درگاه بانک",
           description: "در حال هدایت شما به درگاه پرداخت بانکی..."
@@ -1437,8 +1437,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         finalPaymentMethod = 'wallet_full';
         console.log('🔄 [PAYMENT CONVERSION] wallet_combined → wallet_full (sufficient balance)');
       } else if (walletAmount > 0) {
-        finalPaymentMethod = 'wallet';
-        console.log('🔄 [PAYMENT CONVERSION] wallet_combined → wallet (insufficient balance)');
+        finalPaymentMethod = 'wallet_partial';
+        console.log('🔄 [PAYMENT CONVERSION] wallet_combined → wallet_partial (hybrid payment)');
       }
     }
 
@@ -1447,7 +1447,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     if (finalPaymentMethod === 'wallet_full') {
       orderData.walletAmountUsed = Math.round(totalAmount);
       orderData.remainingAmount = 0;
-    } else if (finalPaymentMethod === 'wallet') {
+    } else if (finalPaymentMethod === 'wallet' || finalPaymentMethod === 'wallet_partial') {
       orderData.walletAmountUsed = Math.round(walletAmount);
       orderData.remainingAmount = Math.round(Math.max(0, totalAmount - walletAmount));
     } else if (finalPaymentMethod === 'online_payment') {
@@ -2001,7 +2001,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
               )}
 
               {/* Payment Summary */}
-              {paymentMethod === 'wallet' && (
+              {(paymentMethod === 'wallet' || paymentMethod === 'wallet_full' || paymentMethod === 'wallet_partial' || paymentMethod === 'wallet_combined') && (
                 <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 border border-green-200 dark:border-green-800">
                   <div className="space-y-1 text-sm">
                     <div className="flex justify-between">
@@ -2014,7 +2014,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                     </div>
                     <div className="flex justify-between font-medium border-t pt-1">
                       <span>مبلغ باقیمانده:</span>
-                      <span>{formatCurrency(paymentMethod === 'wallet_full' ? 0 : totalAmount - walletAmount)}</span>
+                      <span>{formatCurrency(paymentMethod === 'wallet_full' ? 0 : Math.max(0, totalAmount - walletAmount))}</span>
                     </div>
                   </div>
                 </div>
