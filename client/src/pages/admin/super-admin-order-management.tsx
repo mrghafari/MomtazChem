@@ -22,10 +22,6 @@ import {
   Mail,
   DollarSign,
   Package,
-  CreditCard,
-  Settings,
-  Building2,
-  Wallet,
   Database,
   XCircle
 } from "lucide-react";
@@ -56,15 +52,7 @@ interface Order {
   updatedAt: string;
 }
 
-interface PaymentGateway {
-  id: number;
-  name: string;
-  type: string;
-  enabled: boolean;
-  config: any;
-  createdAt: string;
-  updatedAt: string;
-}
+
 
 export default function SuperAdminOrderManagement() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -127,17 +115,7 @@ export default function SuperAdminOrderManagement() {
     }
   });
 
-  // Fetch payment gateways
-  const { data: gatewaysResponse, isLoading: gatewaysLoading } = useQuery({
-    queryKey: ['/api/payment/gateways'],
-    retry: (failureCount, error) => {
-      if (error.message.includes('401') || error.message.includes('403')) return false;
-      return failureCount < 2;
-    }
-  });
 
-  // Extract gateways with proper error handling
-  const gateways = Array.isArray(gatewaysResponse) ? gatewaysResponse : [];
 
   // Extract orders from response with proper error handling
   const orders: Order[] = Array.isArray((response as any)?.data) ? (response as any).data : [];
@@ -146,8 +124,6 @@ export default function SuperAdminOrderManagement() {
   // Debug logging
   console.log('API Response:', response);
   console.log('Orders array:', orders);
-  console.log('Gateways Response:', gatewaysResponse);
-  console.log('Gateways array:', gateways);
 
   // Delete order mutation
   const deleteOrderMutation = useMutation({
@@ -186,27 +162,6 @@ export default function SuperAdminOrderManagement() {
       });
       setShowDeleteDialog(false);
     }
-  });
-
-  // Toggle gateway status mutation
-  const toggleGatewayMutation = useMutation({
-    mutationFn: async (gatewayId: number) => {
-      return apiRequest(`/api/payment/gateways/${gatewayId}/toggle`, { method: 'PATCH' });
-    },
-    onSuccess: () => {
-      toast({
-        title: "وضعیت درگاه تغییر کرد",
-        description: "وضعیت درگاه پرداخت با موفقیت تغییر کرد. فقط یک درگاه می‌تواند فعال باشد.",
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/payment/gateways'] });
-    },
-    onError: () => {
-      toast({
-        title: "خطا",
-        description: "تغییر وضعیت درگاه با شکست مواجه شد.",
-        variant: "destructive",
-      });
-    },
   });
 
   // Production reset mutation
@@ -258,7 +213,7 @@ export default function SuperAdminOrderManagement() {
   );
 
   // Check for authentication errors  
-  const hasAuthError = (response as any)?.error?.message?.includes('401') || (gatewaysResponse as any)?.error?.message?.includes('401');
+  const hasAuthError = (response as any)?.error?.message?.includes('401');
   
   if (hasAuthError) {
     return (
@@ -323,35 +278,8 @@ export default function SuperAdminOrderManagement() {
     });
   };
 
-  const getGatewayIcon = (type: string) => {
-    switch (type) {
-      case 'iraqi_bank':
-        return <Building2 className="w-5 h-5" />;
-      case 'credit_card':
-        return <CreditCard className="w-5 h-5" />;
-      case 'digital_wallet':
-        return <Wallet className="w-5 h-5" />;
-      default:
-        return <Settings className="w-5 h-5" />;
-    }
-  };
 
-  const getGatewayTypeLabel = (type: string) => {
-    switch (type) {
-      case 'iraqi_bank':
-        return 'بانک عراقی';
-      case 'credit_card':
-        return 'کارت اعتباری';
-      case 'digital_wallet':
-        return 'کیف پول دیجیتال';
-      case 'bank_transfer':
-        return 'حواله بانکی';
-      default:
-        return type;
-    }
-  };
-
-  if (isLoading || gatewaysLoading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <RefreshCw className="h-8 w-8 animate-spin text-blue-500" />
@@ -372,7 +300,7 @@ export default function SuperAdminOrderManagement() {
               </h1>
               <p className="text-red-700 dark:text-red-300 mt-2 flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5" />
-                مدیریت کامل سیستم شامل سفارشات، درگاه‌های پرداخت و تنظیمات
+                مدیریت کامل سیستم شامل سفارشات و تنظیمات مدیریتی
               </p>
             </div>
             
@@ -403,7 +331,7 @@ export default function SuperAdminOrderManagement() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="orders" className="flex items-center gap-2">
               <Package className="h-4 w-4" />
               مدیریت سفارشات
@@ -411,10 +339,6 @@ export default function SuperAdminOrderManagement() {
             <TabsTrigger value="customer-orders" className="flex items-center gap-2">
               <User className="h-4 w-4" />
               سفارشات مشتری
-            </TabsTrigger>
-            <TabsTrigger value="gateways" className="flex items-center gap-2">
-              <CreditCard className="h-4 w-4" />
-              درگاه‌های پرداخت
             </TabsTrigger>
           </TabsList>
 
@@ -693,82 +617,7 @@ export default function SuperAdminOrderManagement() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="gateways" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl flex items-center gap-2">
-                  <CreditCard className="h-6 w-6 text-blue-600" />
-                  مدیریت درگاه‌های پرداخت
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-4">
-                  {(gateways || []).length === 0 ? (
-                    <div className="text-center py-12">
-                      <CreditCard className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold text-gray-600 mb-2">درگاه پرداختی یافت نشد</h3>
-                      <p className="text-gray-500">هیچ درگاه پرداختی در سیستم ثبت نشده است</p>
-                    </div>
-                  ) : (
-                    (gateways || []).map((gateway: PaymentGateway) => (
-                      <div key={gateway.id} className="p-4 border rounded-lg bg-white hover:bg-gray-50">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-2">
-                              {getGatewayIcon(gateway.type)}
-                              <div>
-                                <h3 className="font-semibold text-lg">{gateway.name}</h3>
-                                <p className="text-sm text-gray-600">{getGatewayTypeLabel(gateway.type)}</p>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center gap-4">
-                            <div className="text-right">
-                              <Badge 
-                                variant={gateway.enabled ? "default" : "secondary"}
-                                className={gateway.enabled ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}
-                              >
-                                {gateway.enabled ? 'فعال' : 'غیرفعال'}
-                              </Badge>
-                              <p className="text-xs text-gray-500 mt-1">
-                                {formatDate(gateway.updatedAt)}
-                              </p>
-                            </div>
-                            
-                            <Button
-                              onClick={() => toggleGatewayMutation.mutate(gateway.id)}
-                              disabled={toggleGatewayMutation.isPending}
-                              size="sm"
-                              variant={gateway.enabled ? "outline" : "default"}
-                            >
-                              {gateway.enabled ? 'غیرفعال کردن' : 'فعال کردن'}
-                            </Button>
-                          </div>
-                        </div>
-                        
-                        {gateway.config && (
-                          <div className="mt-4 p-3 bg-gray-50 rounded text-sm">
-                            <h4 className="font-medium mb-2">تنظیمات درگاه:</h4>
-                            <div className="grid grid-cols-2 gap-2 text-xs">
-                              {Object.entries(gateway.config).map(([key, value]) => (
-                                <div key={key} className="flex justify-between">
-                                  <span className="font-medium">{key}:</span>
-                                  <span className="text-gray-600">
-                                    {key.toLowerCase().includes('secret') ? '***' : String(value)}
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ))
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+
         </Tabs>
 
         {/* Delete Confirmation Dialog */}
