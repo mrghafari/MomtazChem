@@ -9306,45 +9306,99 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const order = orderCheck.rows[0];
           
           if (!order.order_number) {
-            // 🗑️ DELETE ORDER: Failed bank payment without order number
-            console.log(`🗑️ [PAYMENT CANCEL] Deleting failed bank payment order ${orderId} (no order number)`);
+            // 🗑️ IMMEDIATE DELETION: Failed bank payment should be deleted immediately
+            console.log(`🗑️ [PAYMENT CANCEL] Deleting failed bank payment order ${orderId} immediately`);
             
             try {
-              // Delete order items first
-              await pool.query(`DELETE FROM order_items WHERE order_id = $1`, [orderId]);
+              // Start transaction for safe deletion
+              await pool.query('BEGIN');
               
-              // Delete order management record if exists
-              await pool.query(`DELETE FROM order_management WHERE customer_order_id = $1`, [orderId]);
-              
-              // Delete main order
-              await pool.query(`DELETE FROM customer_orders WHERE id = $1`, [orderId]);
-              
-              console.log(`✅ [ORDER CLEANUP] Failed bank payment order ${orderId} completely deleted from system`);
-              
-              // 📧 Send failure notification to customer
-              if (order.customer_id) {
-                try {
-                  const customerResult = await pool.query(`
-                    SELECT first_name, last_name, email, phone FROM crm_customers WHERE id = $1
-                    UNION ALL
-                    SELECT first_name, last_name, email, phone FROM customers WHERE id = $1
-                    LIMIT 1
-                  `, [order.customer_id]);
-                  
-                  if (customerResult.rows.length > 0) {
-                    const customer = customerResult.rows[0];
-                    const customerName = `${customer.first_name} ${customer.last_name}`.trim();
+              try {
+                // 🛒 CREATE ABANDONED CART SESSION before deletion (for notifications)
+                if (order.customer_id) {
+                  try {
+                    console.log(`🛒 [ABANDONED CART] Creating abandoned cart session for failed payment order ${orderId}`);
                     
-                    console.log(`📧 [NOTIFICATION] Sending payment failure notification to ${customer.email}`);
-                    // Add SMS/Email notification here if needed
+                    // Get order items to recreate cart data
+                    const orderItems = await pool.query(`
+                      SELECT 
+                        oi.product_id,
+                        oi.quantity,
+                        oi.price,
+                        oi.total_amount,
+                        p.name as product_name
+                      FROM order_items oi
+                      LEFT JOIN shop_products p ON oi.product_id = p.id
+                      WHERE oi.order_id = $1
+                    `, [orderId]);
+                    
+                    if (orderItems.rows.length > 0) {
+                      // Convert order items to cart data format
+                      const cartData = {};
+                      let totalValue = 0;
+                      let itemCount = 0;
+                      
+                      for (const item of orderItems.rows) {
+                        cartData[item.product_id] = item.quantity;
+                        totalValue += parseFloat(item.total_amount || 0);
+                        itemCount += item.quantity;
+                      }
+                      
+                      // Create abandoned cart session using cart storage
+                      const { cartStorage } = await import('./cart-storage');
+                      const cartSessionId = await cartStorage.createOrUpdateCartSession({
+                        customerId: order.customer_id,
+                        sessionId: `failed_payment_${orderId}_${Date.now()}`,
+                        cartData: cartData,
+                        itemCount: itemCount,
+                        totalValue: totalValue
+                      });
+                      
+                      // Immediately mark as abandoned with special type for failed bank payment
+                      await cartStorage.markCartAsAbandonedWithNotification(cartSessionId);
+                      
+                      // Create special notification for failed bank payment
+                      await cartStorage.createNotification({
+                        cartSessionId: cartSessionId,
+                        customerId: order.customer_id,
+                        notificationType: 'failed_bank_payment',
+                        title: 'پرداخت بانکی ناموفق',
+                        message: `پرداخت بانکی سفارش شما ناموفق بود. محصولات انتخابی در سبد خرید شما نگهداری شده‌اند. برای تکمیل خرید کلیک کنید.`
+                      });
+                      
+                      console.log(`✅ [ABANDONED CART] Created abandoned cart session ${cartSessionId} for failed payment`);
+                    }
+                  } catch (cartError) {
+                    console.error(`❌ [ABANDONED CART] Failed to create abandoned cart session:`, cartError);
                   }
-                } catch (notificationError) {
-                  console.error(`❌ [NOTIFICATION] Failed to send failure notification:`, notificationError);
                 }
+                
+                // 1. Delete from order_management first (foreign key constraint)
+                await pool.query(`DELETE FROM order_management WHERE customer_order_id = $1`, [orderId]);
+                console.log(`🗑️ [IMMEDIATE DELETION] Deleted order_management for order ${orderId}`);
+
+                // 2. Delete from order_items
+                await pool.query(`DELETE FROM order_items WHERE order_id = $1`, [orderId]);
+                console.log(`🗑️ [IMMEDIATE DELETION] Deleted order_items for order ${orderId}`);
+
+                // 3. Delete from payment_receipts if any
+                await pool.query(`DELETE FROM payment_receipts WHERE customer_order_id = $1`, [orderId]);
+                console.log(`🗑️ [IMMEDIATE DELETION] Deleted payment_receipts for order ${orderId}`);
+
+                // 4. Finally delete the main customer_order
+                await pool.query(`DELETE FROM customer_orders WHERE id = $1`, [orderId]);
+                console.log(`🗑️ [IMMEDIATE DELETION] Deleted customer_order ${orderId}`);
+
+                await pool.query('COMMIT');
+                console.log(`✅ [IMMEDIATE DELETION] Successfully deleted failed bank payment order ${orderId}`);
+                
+              } catch (deleteError) {
+                await pool.query('ROLLBACK');
+                throw deleteError;
               }
               
             } catch (deleteError) {
-              console.error(`❌ [ORDER CLEANUP] Failed to delete order ${orderId}:`, deleteError);
+              console.error(`❌ [IMMEDIATE DELETION] Failed to delete order ${orderId}:`, deleteError);
             }
           } else {
             console.log(`🔄 [PAYMENT CANCEL] Order ${order.order_number} already has order number - keeping for manual review`);

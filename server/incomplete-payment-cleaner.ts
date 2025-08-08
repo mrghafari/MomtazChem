@@ -38,9 +38,10 @@ export class IncompletePaymentCleaner {
       
       const { pool } = await import('./db');
       
-      // Process both online payment failures and grace period expired orders
+      // Process online payment failures, grace period expired orders, and failed bank payment orphans
       await this.processFailedOnlinePayments(pool);
       await this.processExpiredGracePeriodOrders(pool);
+      await this.processFailedBankPaymentOrphans(pool);
 
       console.log(`✅ [INCOMPLETE PAYMENT CLEANER] Processing completed`);
     } catch (error) {
@@ -49,7 +50,7 @@ export class IncompletePaymentCleaner {
   }
 
   async processFailedOnlinePayments(pool: any) {
-    // Find all pending/pending orders with their age
+    // Find all pending/pending orders with their age (for orders that never reached bank gateway)
     const result = await pool.query(`
       SELECT 
         co.id,
@@ -68,7 +69,7 @@ export class IncompletePaymentCleaner {
       WHERE co.status = 'pending' 
         AND co.payment_status = 'pending'
         AND co.payment_method = 'online_payment'
-        AND om.current_status = 'pending'
+        AND (om.current_status = 'pending' OR om.current_status IS NULL)
       ORDER BY co.created_at ASC
     `);
 
@@ -88,6 +89,51 @@ export class IncompletePaymentCleaner {
       } else if (ageMinutes >= 1 && currentStage < 1) {
         // After 1 minute - send first notification
         await this.sendNotification(order, 1, 'اول', 'online_payment');
+      }
+    }
+  }
+
+  async processFailedBankPaymentOrphans(pool: any) {
+    // Find all payment_failed orders without order numbers (failed bank payments)
+    const result = await pool.query(`
+      SELECT 
+        co.id,
+        co.order_number,
+        co.customer_id,
+        co.guest_email,
+        co.guest_name,
+        co.total_amount,
+        co.currency,
+        co.created_at,
+        co.updated_at,
+        co.notification_stage,
+        EXTRACT(EPOCH FROM (NOW() - co.updated_at))/60 as age_minutes,
+        om.id as management_id
+      FROM customer_orders co
+      LEFT JOIN order_management om ON co.id = om.customer_order_id
+      WHERE co.status = 'payment_failed' 
+        AND co.payment_status = 'failed'
+        AND co.order_number IS NULL
+      ORDER BY co.updated_at ASC
+    `);
+
+    const orphanOrders = result.rows;
+    console.log(`🕐 [ORPHAN CLEANER] Found ${orphanOrders.length} failed bank payment orphan orders`);
+
+    for (const order of orphanOrders) {
+      const ageMinutes = parseFloat(order.age_minutes);
+      const currentStage = order.notification_stage || 0;
+
+      if (ageMinutes >= 60) {
+        // After 1 hour - delete the orphan order completely
+        console.log(`🗑️ [ORPHAN CLEANER] Deleting orphan order ${order.id} after ${ageMinutes.toFixed(1)} minutes`);
+        await this.deleteIncompleteOrder(order, 'failed_bank_payment_orphan');
+      } else if (ageMinutes >= 30 && currentStage < 2) {
+        // After 30 minutes - send reminder (30 minutes left)
+        await this.sendNotification(order, 2, 'یادآوری نهایی - 30 دقیقه تا حذف', 'failed_bank_payment');
+      } else if (ageMinutes >= 10 && currentStage < 1) {
+        // After 10 minutes - first notification
+        await this.sendNotification(order, 1, 'پرداخت ناموفق - سفارش به زودی حذف خواهد شد', 'failed_bank_payment');
       }
     }
   }
@@ -185,6 +231,17 @@ export class IncompletePaymentCleaner {
           message = `عزیز ${recipientName}، این آخرین هشدار است! فقط 24 ساعت تا انقضای مهلت پرداخت سفارش ${order.order_number} به مبلغ ${order.total_amount} ${order.currency} باقی مانده است. در غیر این صورت سفارش حذف خواهد شد.`;
           urgency = 'high';
         }
+      } else if (orderType === 'failed_bank_payment') {
+        // Failed bank payment orphan notifications
+        if (stage === 1) {
+          subject = `سفارش ناموفق - اطلاع‌رسانی`;
+          message = `عزیز ${recipientName}، پرداخت بانکی سفارش شما به مبلغ ${order.total_amount} ${order.currency} ناموفق بود. سفارش به مدت یک ساعت در سیستم باقی می‌ماند.`;
+          urgency = 'normal';
+        } else {
+          subject = `هشدار نهایی - حذف سفارش ناموفق`;
+          message = `عزیز ${recipientName}، سفارش ناموفق شما به مبلغ ${order.total_amount} ${order.currency} به زودی از سیستم حذف خواهد شد.`;
+          urgency = 'high';
+        }
       } else {
         // Online payment failure notifications
         if (stage === 1) {
@@ -240,6 +297,10 @@ export class IncompletePaymentCleaner {
         if (stage === 1) templateName = '#27 - یادآوری اول مهلت سه روزه';
         else if (stage === 2) templateName = '#28 - یادآوری دوم مهلت سه روزه (48 ساعت)';
         else if (stage === 3) templateName = '#29 - هشدار نهایی مهلت سه روزه (24 ساعت)';
+        else return;
+      } else if (orderType === 'failed_bank_payment') {
+        if (stage === 1) templateName = '#31 - اطلاع‌رسانی سفارش ناموفق بانکی';
+        else if (stage === 2) templateName = '#32 - هشدار نهایی حذف سفارش ناموفق';
         else return;
       } else {
         if (stage === 1) templateName = '#25 - اطلاع‌رسانی اول پرداخت ناتمام آنلاین';
@@ -298,6 +359,10 @@ export class IncompletePaymentCleaner {
         if (stage === 1) templateKey = 'GRACE_PERIOD_FIRST_REMINDER';
         else if (stage === 2) templateKey = 'GRACE_PERIOD_SECOND_REMINDER';
         else if (stage === 3) templateKey = 'GRACE_PERIOD_FINAL_WARNING';
+        else return;
+      } else if (orderType === 'failed_bank_payment') {
+        if (stage === 1) templateKey = 'FAILED_BANK_PAYMENT_FIRST';
+        else if (stage === 2) templateKey = 'FAILED_BANK_PAYMENT_FINAL';
         else return;
       } else {
         if (stage === 1) templateKey = 'INCOMPLETE_ONLINE_PAYMENT_FIRST';
