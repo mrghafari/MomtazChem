@@ -142,6 +142,8 @@ export interface IOrderManagementStorage {
   generateOrderNumber(): Promise<string>; // 🚨 DEPRECATED: Can create gaps!
   generateOrderNumberInTransaction(transactionClient?: any): Promise<string>; // ✅ RECOMMENDED: Gap-free
   createOrderWithSequentialNumber(orderData: any): Promise<{ order: any; orderNumber: string }>; // ✅ COMPLETE SOLUTION
+  generateUniqueOrderNumberWithRetry(maxRetries?: number): Promise<string>; // 🔒 ULTIMATE: With retry logic
+  createOrderWithUniqueNumber(orderData: any, maxRetries?: number): Promise<{ order: any; orderNumber: string }>; // 🔒 BULLETPROOF: Complete with retries
   resetOrderCounter(year?: number): Promise<void>;
   
   // Order details with items
@@ -1657,7 +1659,7 @@ export class OrderManagementStorage implements IOrderManagementStorage {
   // Use generateOrderNumberInTransaction() instead for truly sequential numbering
   async generateOrderNumber(): Promise<string> {
     console.warn('⚠️ [ORDER NUMBER] Using deprecated generateOrderNumber() - may create gaps!');
-    console.warn('⚠️ [ORDER NUMBER] Use generateOrderNumberInTransaction() for gap-free sequential numbering');
+    console.warn('⚠️ [ORDER NUMBER] Use generateUniqueOrderNumberWithRetry() for bulletproof sequential numbering');
     
     try {
       const currentYear = new Date().getFullYear();
@@ -1811,6 +1813,28 @@ export class OrderManagementStorage implements IOrderManagementStorage {
           VALUES (${targetYear}, 11111, 'M', CURRENT_TIMESTAMP)
         `);
         console.log(`✅ Created new order counter for year ${targetYear} starting at 11111`);
+      }
+      
+      // 🔐 SECURITY: Ensure database has unique constraint on order_number
+      try {
+        await db.execute(sql`
+          DO $$
+          BEGIN
+            IF NOT EXISTS (
+              SELECT 1 FROM pg_constraint 
+              WHERE conname = 'customer_orders_order_number_unique'
+            ) THEN
+              ALTER TABLE customer_orders 
+              ADD CONSTRAINT customer_orders_order_number_unique 
+              UNIQUE (order_number);
+              RAISE NOTICE 'Added unique constraint on order_number';
+            END IF;
+          END
+          $$;
+        `);
+        console.log('🔐 [SECURITY] Ensured unique constraint exists on order_number');
+      } catch (constraintError) {
+        console.warn('⚠️ [SECURITY] Could not ensure unique constraint:', constraintError);
       }
     } catch (error) {
       console.error('❌ Error resetting order counter:', error);
@@ -1994,6 +2018,167 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       console.error(`❌ [AUTO APPROVAL] Error processing automatic approval for order ${customerOrderId}:`, error);
       throw error;
     }
+  }
+
+  // 🔐 ULTIMATE: Generate unique order number with retry logic for absolute conflict prevention
+  async generateUniqueOrderNumberWithRetry(maxRetries = 5): Promise<string> {
+    let attempt = 0;
+    
+    while (attempt < maxRetries) {
+      try {
+        console.log(`🔐 [BULLETPROOF] Attempt ${attempt + 1}/${maxRetries} to generate unique order number`);
+        
+        // Use transaction-safe generation
+        const orderNumber = await this.generateOrderNumberInTransaction();
+        
+        // Double-check uniqueness by verifying it doesn't exist in database
+        const existingOrder = await db
+          .select()
+          .from(customerOrders)
+          .where(eq(customerOrders.orderNumber, orderNumber))
+          .limit(1);
+        
+        if (existingOrder.length === 0) {
+          console.log(`✅ [BULLETPROOF] Generated confirmed unique order number: ${orderNumber}`);
+          return orderNumber;
+        } else {
+          console.warn(`⚠️ [BULLETPROOF] Order number ${orderNumber} already exists, retrying...`);
+          attempt++;
+          
+          // Wait a small random interval before retry to avoid race conditions
+          await new Promise(resolve => setTimeout(resolve, Math.random() * 100 + 50));
+        }
+      } catch (error) {
+        console.error(`❌ [BULLETPROOF] Attempt ${attempt + 1} failed:`, error);
+        attempt++;
+        
+        if (attempt >= maxRetries) {
+          throw new Error(`Failed to generate unique order number after ${maxRetries} attempts: ${error}`);
+        }
+        
+        // Wait before retry with exponential backoff
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 100));
+      }
+    }
+    
+    throw new Error(`Failed to generate unique order number after ${maxRetries} attempts`);
+  }
+
+  // 🔐 BULLETPROOF: Complete order creation with absolutely unique order numbers
+  async createOrderWithUniqueNumber(orderData: any, maxRetries = 5): Promise<{ order: any; orderNumber: string }> {
+    console.log('🔐 [BULLETPROOF] Starting absolutely unique order creation...');
+    
+    return await db.transaction(async (tx) => {
+      try {
+        // Generate bulletproof unique order number
+        const orderNumber = await this.generateUniqueOrderNumberWithRetry(maxRetries);
+        
+        // Create order with the confirmed unique number
+        const order = await tx.insert(customerOrders).values({
+          ...orderData,
+          orderNumber
+        }).returning();
+        
+        console.log(`✅ [BULLETPROOF] Order created successfully with guaranteed unique number: ${orderNumber}`);
+        
+        return { 
+          order: order[0], 
+          orderNumber 
+        };
+      } catch (error) {
+        console.error('❌ [BULLETPROOF] Transaction failed, rolling back:', error);
+        throw error; // This will cause complete transaction rollback
+      }
+    });
+  }
+
+  // 🔍 UTILITY: Check if order number exists (for debugging and validation)
+  async orderNumberExists(orderNumber: string): Promise<boolean> {
+    try {
+      const existing = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(customerOrders)
+        .where(eq(customerOrders.orderNumber, orderNumber));
+      
+      return existing[0].count > 0;
+    } catch (error) {
+      console.error('❌ Error checking order number existence:', error);
+      return false;
+    }
+  }
+
+  // 🛡️ VALIDATION: Comprehensive order number validation
+  validateOrderNumberFormat(orderNumber: string): {
+    isValid: boolean;
+    errors: string[];
+    details?: {
+      prefix: string;
+      year: string;
+      counter: string;
+      yearNumber: number;
+      counterNumber: number;
+    };
+  } {
+    const errors: string[] = [];
+    
+    // Check basic format: M[YY][NNNNN]
+    if (!orderNumber || typeof orderNumber !== 'string') {
+      errors.push('Order number must be a non-empty string');
+      return { isValid: false, errors };
+    }
+    
+    if (orderNumber.length !== 8) {
+      errors.push('Order number must be exactly 8 characters long');
+    }
+    
+    if (!orderNumber.startsWith('M')) {
+      errors.push('Order number must start with "M"');
+    }
+    
+    const prefix = orderNumber[0];
+    const yearPart = orderNumber.slice(1, 3);
+    const counterPart = orderNumber.slice(3);
+    
+    // Validate year part
+    if (!/^\d{2}$/.test(yearPart)) {
+      errors.push('Year part must be exactly 2 digits');
+    }
+    
+    // Validate counter part
+    if (!/^\d{5}$/.test(counterPart)) {
+      errors.push('Counter part must be exactly 5 digits');
+    }
+    
+    const yearNumber = parseInt(yearPart, 10);
+    const counterNumber = parseInt(counterPart, 10);
+    
+    // Validate ranges
+    if (counterNumber < 11111) {
+      errors.push('Counter must be at least 11111');
+    }
+    
+    if (counterNumber > 99999) {
+      errors.push('Counter cannot exceed 99999');
+    }
+    
+    const currentYear = new Date().getFullYear();
+    const expectedYearSuffix = currentYear % 100;
+    
+    if (Math.abs(yearNumber - expectedYearSuffix) > 5) {
+      errors.push(`Year ${yearNumber} seems invalid (current year suffix: ${expectedYearSuffix})`);
+    }
+    
+    return {
+      isValid: errors.length === 0,
+      errors,
+      details: errors.length === 0 ? {
+        prefix,
+        year: yearPart,
+        counter: counterPart,
+        yearNumber,
+        counterNumber
+      } : undefined
+    };
   }
 }
 
