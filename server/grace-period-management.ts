@@ -4,7 +4,7 @@ import { eq, and, sql, isNull, ne, lt } from "drizzle-orm";
 import { customerOrders, orderItems } from "@shared/customer-schema";
 import { orderManagement, orderStatusHistory } from "@shared/order-management-schema";
 import { UniversalEmailService } from "./universal-email-service";
-import { simpleSmsStorage } from "./simple-sms-storage";
+import { smsStorage } from "./sms-storage";
 
 /**
  * خدمة إدارة الطلبات ذات المهلة الثلاثة أيام
@@ -388,7 +388,11 @@ export class GracePeriodManagementService {
 نتیجه ظرف 24 ساعت اعلام میشود.
 ممتاز شیمی`;
 
-        await simpleSmsStorage.sendSms(customer.phone, smsMessage, 'system');
+        await smsStorage.sendSMS({
+          to: customer.phone,
+          message: smsMessage,
+          urgency: 'normal'
+        });
         console.log(`📱 [RECEIPT CONFIRM] SMS confirmation sent to ${customer.phone}`);
       }
 
@@ -445,7 +449,11 @@ export class GracePeriodManagementService {
 لطفاً حواله را فوری آپلود کنید.
 ممتاز شیمی`;
 
-        await simpleSmsStorage.sendSms(customer.phone, smsMessage, 'urgent');
+        await smsStorage.sendSMS({
+          to: customer.phone,
+          message: smsMessage,
+          urgency: 'high'
+        });
         console.log(`📱 [URGENT REMINDER] Urgent SMS sent to ${customer.phone}`);
       }
 
@@ -488,7 +496,11 @@ export class GracePeriodManagementService {
 برای خرید مجدد تماس بگیرید.
 ممتاز شیمی`;
 
-        await simpleSmsStorage.sendSms(customer.phone, smsMessage, 'system');
+        await smsStorage.sendSMS({
+          to: customer.phone,
+          message: smsMessage,
+          urgency: 'normal'
+        });
         console.log(`📱 [FAILURE NOTIFY] Failure SMS sent to ${customer.phone}`);
       }
 

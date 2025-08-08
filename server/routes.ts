@@ -466,6 +466,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.error('❌ [GRACE PERIOD] Failed to start grace period service:', error);
   }
 
+  // Initialize order flow manager as safety net (respects 8 core ordering methods)
+  console.log('🚨 [ORDER FLOW] Initializing safety net for stuck orders...');
+  try {
+    const { orderFlowManager } = await import('./order-flow-manager');
+    orderFlowManager.start();
+    console.log('✅ [ORDER FLOW] Safety net activated - will only process truly stuck orders (24+ hours)');
+  } catch (error) {
+    console.error('❌ [ORDER FLOW] Failed to start order flow safety net:', error);
+  }
+
   console.log("🚀 REGISTERING ROUTES - Vehicle optimization endpoints loading...");
   
   // Import department auth functions
