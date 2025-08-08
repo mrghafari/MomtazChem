@@ -14617,7 +14617,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Don't fail the order if CRM capture fails
       }
 
-      // Create order_management record for financial department workflow
+      // Create order_management record for financial department workflow (with duplicate protection)
       try {
         let orderMgmtData = {
           customerOrderId: order.id,
@@ -14645,8 +14645,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log(`🕒 Grace period activated for order ${orderNumber} - expires: ${gracePeriodEnd.toISOString()}`);
         }
 
-        await orderManagementStorage.createOrderManagement(orderMgmtData);
-        console.log(`✅ Order management record created for order ${orderNumber}`);
+        // Check if order_management record already exists to prevent duplicate key errors
+        const existingOrderMgmt = await orderManagementStorage.getOrderManagementByCustomerOrderId(order.id);
+        
+        if (existingOrderMgmt) {
+          console.log(`⚠️ [ORDER MGMT] Record already exists for order ${orderNumber}, updating instead of creating`);
+          // Update existing record instead of creating new one
+          await orderManagementStorage.updateOrderManagement(existingOrderMgmt.id, orderMgmtData);
+          console.log(`✅ Order management record updated for order ${orderNumber}`);
+        } else {
+          // Create new record
+          await orderManagementStorage.createOrderManagement(orderMgmtData);
+          console.log(`✅ Order management record created for order ${orderNumber}`);
+        }
         
         // Trigger automatic synchronization after order creation
         try {
@@ -14657,8 +14668,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Don't fail order creation if sync fails
         }
       } catch (orderMgmtError) {
-        console.error("❌ Error creating order management record:", orderMgmtError);
-        // Don't fail the order if order management creation fails
+        console.error("❌ Error creating/updating order management record:", orderMgmtError);
+        // Log error but don't fail the entire order creation process
+        // The customer order was created successfully, this is just for internal management
+        console.log(`⚠️ [ORDER MGMT] Order ${orderNumber} created successfully despite management record issue`);
       }
 
       // Prepare response based on payment method
