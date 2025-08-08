@@ -176,8 +176,19 @@ export default function SuperAdminOrderManagement() {
 
   // Delete order mutation
   const deleteOrderMutation = useMutation({
-    mutationFn: async (orderNumber: string) => {
-      const response = await fetch(`/api/super-admin/orders/${orderNumber}`, {
+    mutationFn: async (order: { orderNumber: string | null; id: number }) => {
+      let endpoint: string;
+      
+      // Use different endpoints based on whether order has a number
+      if (order.orderNumber && order.orderNumber !== 'null') {
+        endpoint = `/api/super-admin/orders/${order.orderNumber}`;
+      } else {
+        endpoint = `/api/super-admin/orders-by-id/${order.id}`;
+      }
+      
+      console.log(`🗑️ [FRONTEND] Deleting order via: ${endpoint}`);
+      
+      const response = await fetch(endpoint, {
         method: 'DELETE',
         credentials: 'include',
         headers: {
@@ -295,7 +306,10 @@ export default function SuperAdminOrderManagement() {
 
   const handleConfirmDelete = () => {
     if (selectedOrder) {
-      deleteOrderMutation.mutate(selectedOrder.orderNumber);
+      deleteOrderMutation.mutate({
+        orderNumber: selectedOrder.orderNumber,
+        id: selectedOrder.id
+      });
     }
   };
 
@@ -711,7 +725,9 @@ export default function SuperAdminOrderManagement() {
                 <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
                   <p className="font-medium text-red-800 mb-2">⚠️ هشدار مهم:</p>
                   <p className="text-red-700">
-                    این عملیات سفارش <strong>{selectedOrder?.orderNumber}</strong> را به طور کامل از تمام بخش‌های سیستم حذف می‌کند:
+                    این عملیات سفارش <strong>
+                      {selectedOrder?.orderNumber || `شناسه: ${selectedOrder?.id}`}
+                    </strong> را به طور کامل از تمام بخش‌های سیستم حذف می‌کند:
                   </p>
                 </div>
                 

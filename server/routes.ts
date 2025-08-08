@@ -43314,6 +43314,104 @@ momtazchem.com
   // سیستم حذف کامل سفارشات توسط سوپر ادمین
   // =============================================================================
 
+  // Delete order by ID (for orders without order numbers) - SUPER ADMIN ONLY
+  app.delete('/api/super-admin/orders-by-id/:orderId', requireSuperAdmin, async (req: Request, res: Response) => {
+    const { orderId } = req.params;
+    const adminId = req.session?.adminId;
+
+    try {
+      console.log(`🗑️ [SUPER ADMIN] Starting complete order deletion by ID: ${orderId} by admin ${adminId}`);
+
+      // Validate orderId is a number
+      if (!/^\d+$/.test(orderId)) {
+        return res.status(400).json({
+          success: false,
+          message: 'شناسه سفارش نامعتبر است'
+        });
+      }
+
+      // Use direct SQL to bypass Drizzle schema issues
+      const orderQueryResult = await customerPool.query(
+        'SELECT id, order_number, guest_email FROM customer_orders WHERE id = $1',
+        [parseInt(orderId)]
+      );
+
+      if (orderQueryResult.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: `سفارش با شناسه ${orderId} یافت نشد`
+        });
+      }
+
+      const customerOrderId = orderQueryResult.rows[0].id;
+      const orderNumber = orderQueryResult.rows[0].order_number || 'بدون شماره';
+      const guestEmail = orderQueryResult.rows[0].guest_email;
+      
+      console.log(`📋 [DELETE] Found order ID: ${customerOrderId}, Order Number: ${orderNumber}, Email: ${guestEmail}`);
+
+      // Start SQL transaction
+      await customerPool.query('BEGIN');
+
+      try {
+        // Delete from related tables first
+        const orderItemsResult = await customerPool.query(
+          'DELETE FROM order_items WHERE order_id = $1',
+          [customerOrderId]
+        );
+        console.log(`🧾 [DELETE] Removed ${orderItemsResult.rowCount} order items`);
+
+        const orderMgmtResult = await customerPool.query(
+          'DELETE FROM order_management WHERE customer_order_id = $1',
+          [customerOrderId]
+        );
+        console.log(`📊 [DELETE] Removed ${orderMgmtResult.rowCount} order management records`);
+
+        const paymentReceiptsResult = await customerPool.query(
+          'DELETE FROM payment_receipts WHERE customer_order_id = $1',
+          [customerOrderId]
+        );
+        console.log(`💳 [DELETE] Removed ${paymentReceiptsResult.rowCount} payment receipts`);
+
+        // Delete from wallet_transactions table
+        const walletTransactionsResult = await customerPool.query(
+          'DELETE FROM wallet_transactions WHERE customer_order_id = $1',
+          [customerOrderId]
+        );
+        console.log(`💰 [DELETE] Removed ${walletTransactionsResult.rowCount} wallet transactions`);
+
+        // Delete the main order
+        const orderDeleteResult = await customerPool.query(
+          'DELETE FROM customer_orders WHERE id = $1',
+          [customerOrderId]
+        );
+        console.log(`🗑️ [DELETE] Removed customer order: ${orderDeleteResult.rowCount}`);
+
+        // Commit transaction
+        await customerPool.query('COMMIT');
+
+        console.log(`✅ [SUPER ADMIN] Order deletion completed successfully for ID: ${orderId}`);
+
+        res.json({
+          success: true,
+          message: `سفارش ${orderNumber} (ID: ${orderId}) با موفقیت حذف شد`,
+          deletedOrderId: customerOrderId,
+          orderNumber: orderNumber === 'بدون شماره' ? null : orderNumber
+        });
+
+      } catch (deleteError) {
+        await customerPool.query('ROLLBACK');
+        throw deleteError;
+      }
+
+    } catch (error: any) {
+      console.error(`❌ [SUPER ADMIN] Error deleting order by ID ${orderId}:`, error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در حذف سفارش"
+      });
+    }
+  });
+
   // Delete order completely from all systems - SUPER ADMIN ONLY
   app.delete('/api/super-admin/orders/:orderNumber', requireSuperAdmin, async (req: Request, res: Response) => {
     const { orderNumber } = req.params;
@@ -43321,6 +43419,14 @@ momtazchem.com
 
     try {
       console.log(`🗑️ [SUPER ADMIN] Starting complete order deletion for: ${orderNumber} by admin ${adminId}`);
+
+      // Reject null order numbers
+      if (orderNumber === 'null' || !orderNumber || orderNumber.trim() === '') {
+        return res.status(400).json({
+          success: false,
+          message: 'شماره سفارش نامعتبر است. برای حذف سفارشات بدون شماره از روش دیگری استفاده کنید.'
+        });
+      }
 
       // Use direct SQL to bypass Drizzle schema issues
       const orderQueryResult = await customerPool.query(
