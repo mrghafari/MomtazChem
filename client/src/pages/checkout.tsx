@@ -336,13 +336,11 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
     }, 100);
   }, [isUserLoggedIn, form]);
 
-  // Fetch wallet balance for logged in users with enhanced error handling
+  // Fetch wallet balance for logged in users
   const fetchWalletBalance = async () => {
     if (!isUserLoggedIn) return;
     
     try {
-      console.log('💳 [WALLET FETCH] Fetching current wallet balance...');
-      
       const response = await fetch('/api/customers/wallet/balance', {
         credentials: 'include'
       });
@@ -350,27 +348,11 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
       if (response.ok) {
         const result = await response.json();
         if (result.success) {
-          const newBalance = result.balance || 0;
-          const previousBalance = walletBalance;
-          setWalletBalance(newBalance);
-          
-          console.log('💰 [WALLET FETCH] Updated balance:', {
-            previous: previousBalance,
-            current: newBalance,
-            difference: newBalance - previousBalance
-          });
-          
-          // Update wallet amount to use if it exceeds new balance
-          if (walletAmountToUse > newBalance) {
-            setWalletAmountToUse(newBalance);
-            console.log('⚠️ [WALLET FETCH] Adjusted wallet amount to use:', newBalance);
-          }
+          setWalletBalance(result.balance || 0);
         }
-      } else {
-        console.error('💳 [WALLET FETCH] Failed to fetch wallet balance:', response.status);
       }
     } catch (error) {
-      console.error('💳 [WALLET FETCH] Error fetching wallet balance:', error);
+      console.error('Error fetching wallet balance:', error);
     }
   };
 
@@ -382,17 +364,6 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
     if (isUserLoggedIn) {
       fetchWalletBalance();
     }
-  }, [isUserLoggedIn]);
-  
-  // 🔄 Refresh wallet balance periodically to prevent stale data
-  useEffect(() => {
-    if (!isUserLoggedIn) return;
-    
-    const walletRefreshInterval = setInterval(() => {
-      fetchWalletBalance();
-    }, 30000); // Refresh every 30 seconds
-    
-    return () => clearInterval(walletRefreshInterval);
   }, [isUserLoggedIn]);
 
   // Set customer info from query data
@@ -834,14 +805,14 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   // Auto-enable wallet usage when wallet payment method is selected
   useEffect(() => {
     const paymentMethod = form.watch('paymentMethod');
-    if (paymentMethod === 'wallet_partial') {
+    if (paymentMethod === 'wallet_combined') {
       setUseWallet(true);
       // Always suggest full payment amount if wallet has sufficient balance
       const suggestedAmount = Math.min(walletBalance, beforeWalletTotal);
       setWalletAmountToUse(suggestedAmount);
       
       console.log('💰 [WALLET AUTO-SETUP]:', {
-        paymentMethod: 'wallet_partial',
+        paymentMethod: 'wallet_combined',
         walletBalance,
         beforeWalletTotal,
         suggestedAmount,
@@ -940,86 +911,11 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
         description: `Your order #${orderId} has been created.`,
       });
     },
-    onError: (error: any) => {
-      console.error('💳 [ORDER ERROR] Order creation failed:', error);
-      
-      let errorTitle = "Order Failed";
-      let errorMessage = "There was an error processing your order. Please try again.";
-      
-      // ✅ WALLET BALANCE ERROR HANDLING - Handle insufficient wallet balance
-      if (error?.message) {
-        const message = error.message;
-        
-        // 🏦 BANK GATEWAY TRANSACTION FAILURE HANDLING
-        if (message.includes('تراکنش بانکی ناموفق بود') || 
-            message.includes('تایید نهایی تراکنش بانکی ناموفق بود') ||
-            message.includes('Transaction failed') ||
-            message.includes('Payment failed')) {
-          errorTitle = "تراکنش بانکی ناموفق";
-          errorMessage = "تراکنش بانکی ناموفق بود. لطفاً مجدداً تلاش کنید یا از روش پرداخت دیگری استفاده کنید.";
-          
-          console.log('🏦 [BANK ERROR] Bank gateway transaction failed:', message);
-        }
-        // Check for Persian wallet insufficient messages
-        else if (message.includes('موجودی کیف پول کافی نیست') || 
-            message.includes('Insufficient wallet balance') ||
-            message.includes('ناکافی') ||
-            message.includes('insufficient')) {
-          errorTitle = "موجودی ناکافی";
-          errorMessage = message;
-          
-          // Refresh wallet balance to show current amount
-          fetchWalletBalance();
-          
-          console.log('💰 [WALLET ERROR] Insufficient wallet balance detected:', message);
-        }
-        // Check for security/overdraft errors
-        else if (message.includes('خطای امنیتی') || message.includes('overdraft')) {
-          errorTitle = "خطای امنیتی";
-          errorMessage = "تلاش برای برداشت بیش از موجودی کیف پول شناسایی شد. لطفاً صفحه را بازخوانی کنید.";
-          
-          // Refresh page to ensure fresh wallet data
-          setTimeout(() => {
-            window.location.reload();
-          }, 3000);
-        }
-        // Other wallet-related errors
-        else if (message.includes('wallet') || message.includes('کیف پول')) {
-          errorTitle = "خطای کیف پول";
-          errorMessage = message;
-          
-          // Refresh wallet balance
-          fetchWalletBalance();
-        }
-        // Other bank gateway related errors
-        else if (message.includes('bank_gateway') || message.includes('درگاه بانکی') || message.includes('بانک')) {
-          errorTitle = "خطای پرداخت بانکی";
-          errorMessage = message;
-          
-          console.log('🏦 [BANK ERROR] Bank gateway error detected:', message);
-        }
-        // Generic error messages
-        else {
-          errorMessage = message;
-        }
-      }
-      
-      // Show error toast
+    onError: () => {
       toast({
-        title: errorTitle,
-        description: errorMessage,
+        title: "Order Failed",
+        description: "There was an error processing your order. Please try again.",
         variant: "destructive",
-        duration: 5000, // Show longer for wallet errors
-      });
-      
-      // Log specific error details for debugging
-      console.log('💳 [ORDER ERROR] Details:', {
-        errorTitle,
-        errorMessage,
-        originalError: error,
-        walletBalance,
-        useWallet,
-        walletAmountToUse
       });
     },
   });

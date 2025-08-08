@@ -9,18 +9,14 @@ import { abandonedCartCleanup } from "./abandoned-cart-cleanup";
 import { bankReceiptReminderService } from "./bank-receipt-reminder";
 import { incompletePaymentCleaner } from "./incomplete-payment-cleaner";
 import { setupVite, serveStatic, log } from "./vite";
-import { systemMonitor } from "./system-monitor";
-import { DatabaseUtilities, SystemHealthCheck } from "./database-utilities";
 
-// Enhanced global error handlers to prevent server crashes
+// Global error handlers to prevent server crashes
 process.on('uncaughtException', (err) => {
-  console.error('❌ [CRITICAL] Uncaught Exception:', err);
-  // در اینجا می‌توانیم health check اجباری انجام دهیم
+  console.error('Uncaught Exception:', err);
 });
 
 process.on('unhandledRejection', (reason, promise) => {
-  console.error('❌ [CRITICAL] Unhandled Rejection at:', promise, 'reason:', reason);
-  // لاگ مشکلات async برای نظارت بهتر
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
 });
 
 const app = express();
@@ -336,10 +332,6 @@ app.use((req, res, next) => {
           
           // Start inventory monitoring service
           InventoryAlertService.startInventoryMonitoring();
-          
-          // Start system health monitoring service
-          systemMonitor.start();
-          log('🔍 System health monitor started');
         } catch (servicesError) {
           console.error("Error starting services:", servicesError);
         }

@@ -100,8 +100,6 @@ import {
 // SMS service will be imported dynamically when needed
 import { ticketingStorage } from "./ticketing-storage";
 import { autoApprovalService } from "./auto-approval-service";
-import { gracePeriodManagementService } from "./grace-period-management";
-import { financialReceiptReviewService } from "./financial-receipt-review";
 import { companyStorage } from "./company-storage";
 import { getLocalizedMessage, getLocalizedEmailSubject, generateSMSMessage } from "./multilingual-messages";
 import { supportTickets } from "../shared/ticketing-schema";
@@ -456,26 +454,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   } catch (error) {
     console.error('❌ [SYNC SERVICE] Failed to start sync service:', error);
   }
-
-  // Initialize grace period management service at startup
-  console.log('⏰ [GRACE PERIOD] Initializing 3-day grace period management system...');
-  try {
-    gracePeriodManagementService.start();
-    console.log('✅ [GRACE PERIOD] Grace period management service started successfully');
-  } catch (error) {
-    console.error('❌ [GRACE PERIOD] Failed to start grace period service:', error);
-  }
-
-  // Initialize order flow manager as safety net (respects 8 core ordering methods)
-  console.log('🚨 [ORDER FLOW] Initializing safety net for stuck orders...');
-  try {
-    const { orderFlowManager } = await import('./order-flow-manager');
-    orderFlowManager.start();
-    console.log('✅ [ORDER FLOW] Safety net activated - will only process truly stuck orders (24+ hours)');
-  } catch (error) {
-    console.error('❌ [ORDER FLOW] Failed to start order flow safety net:', error);
-  }
-
   console.log("🚀 REGISTERING ROUTES - Vehicle optimization endpoints loading...");
   
   // Import department auth functions
@@ -9153,90 +9131,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         );
         
         if (verificationResult.verified) {
+          // Update order status
           const { pool } = await import('./db');
           
-          // 🚨 CRITICAL: Check if this is a hybrid order that needs order number assignment
-          console.log('🔍 [8-METHOD LOGIC] Checking if order needs order number assignment...');
-          
-          const orderCheck = await pool.query(`
-            SELECT 
-              id, 
-              order_number, 
-              total_amount, 
-              payment_method, 
-              payment_status,
-              customer_id,
-              wallet_amount_used::DECIMAL
-            FROM customer_orders 
-            WHERE order_number = $1 OR id = $2
-          `, [orderId, orderId]);
-          
-          if (orderCheck.rows.length > 0) {
-            const order = orderCheck.rows[0];
-            const isHybridOrder = order.payment_method === 'wallet_partial';
-            const hasWalletPayment = parseFloat(order.wallet_amount_used || '0') > 0;
-            
-            console.log(`🔍 [8-METHOD CHECK] Order ${order.order_number}:`, {
-              paymentMethod: order.payment_method,
-              isHybrid: isHybridOrder,
-              hasWalletPayment,
-              walletAmount: order.wallet_amount_used,
-              currentStatus: order.payment_status
-            });
-            
-            // For hybrid orders, verify both wallet and bank payments are successful
-            if (isHybridOrder && hasWalletPayment) {
-              console.log('🏦✅ [HYBRID SUCCESS] Both wallet and bank payments completed for hybrid order');
-              console.log('📋 [8-METHOD LOGIC] Hybrid order now qualifies for warehouse transfer');
-              
-              // Update order status for successful hybrid payment
-              const result = await pool.query(`
-                UPDATE customer_orders 
-                SET 
-                  payment_status = 'paid',
-                  status = 'warehouse_pending',
-                  payment_transaction_id = $1,
-                  updated_at = NOW()
-                WHERE id = $2
-                RETURNING id, order_number, total_amount
-              `, [transactionId, order.id]);
-              
-              if (result.rows.length > 0) {
-                const updatedOrder = result.rows[0];
-                console.log(`✅ [HYBRID COMPLETE] Hybrid order ${updatedOrder.order_number} marked as fully paid`);
-                
-                // Redirect to success page
-                res.redirect(`/payment/success?order=${updatedOrder.order_number}&amount=${updatedOrder.total_amount}`);
-                return;
-              }
-            } else if (!isHybridOrder) {
-              // Regular (non-hybrid) order processing
-              console.log('💳 [REGULAR ORDER] Processing non-hybrid bank payment');
-              
-              const result = await pool.query(`
-                UPDATE customer_orders 
-                SET 
-                  payment_status = 'paid',
-                  status = 'warehouse_pending',
-                  payment_transaction_id = $1,
-                  updated_at = NOW()
-                WHERE id = $2
-                RETURNING id, order_number, total_amount
-              `, [transactionId, order.id]);
+          const result = await pool.query(`
+            UPDATE customer_orders 
+            SET 
+              payment_status = 'paid',
+              status = 'warehouse_pending',
+              payment_transaction_id = $1,
+              updated_at = NOW()
+            WHERE order_number = $2 OR id = $3
+            RETURNING id, order_number, total_amount
+          `, [transactionId, orderId, orderId]);
 
-              if (result.rows.length > 0) {
-                const updatedOrder = result.rows[0];
-                console.log(`✅ [PAYMENT SUCCESS] Order ${updatedOrder.order_number} marked as paid`);
-                
-                // Redirect to success page
-                res.redirect(`/payment/success?order=${updatedOrder.order_number}&amount=${updatedOrder.total_amount}`);
-                return;
-              }
-            } else {
-              console.log('❌ [HYBRID INCOMPLETE] Hybrid order missing wallet payment - bank success alone insufficient');
-              res.redirect(`/payment/failed?reason=hybrid_incomplete&order=${order.order_number}`);
-              return;
-            }
+          if (result.rows.length > 0) {
+            const order = result.rows[0];
+            console.log(`✅ [PAYMENT SUCCESS] Order ${order.order_number} marked as paid`);
+            
+            // Redirect to success page
+            res.redirect(`/payment/success?order=${order.order_number}&amount=${order.total_amount}`);
+            return;
           }
         }
       }
@@ -14371,12 +14286,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         notes: orderData.notes || '', // Add notes from form
       };
 
-      // 🔒 SEQUENTIAL: Prepare order number generation (will be done after payment validation)
+      // 🔒 SEQUENTIAL: Generate M[YY][NNNNN] order number using transaction-safe system
       const { OrderManagementStorage } = await import('./order-management-storage');
       const orderManagementStorage = new OrderManagementStorage();
       
-      console.log('🔒 [SEQUENTIAL] Starting payment validation before order number assignment...');
-      let orderNumber: string | null = null; // Will be assigned only after successful payment validation
+      console.log('🔒 [SEQUENTIAL] Starting transaction-safe order creation for wallet/payment...');
+      let orderNumber: string;
       
       // Calculate order totals and taxes (using dynamic tax settings)
       // Note: orderData.totalAmount from frontend already includes all components
@@ -14414,99 +14329,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Handle payment method processing
       let finalPaymentStatus = "pending";
-      let walletAmountUsed = Math.round(parseFloat(orderData.walletAmountUsed || 0));
-      let remainingAmount = Math.round(parseFloat(orderData.remainingAmount || totalAmount));
+      let walletAmountUsed = 0;
+      let remainingAmount = totalAmount;
       let finalPaymentMethod = orderData.paymentMethod || "traditional";
-      
-      console.log(`💰 [PAYMENT INIT] Initial values:`, {
-        walletAmountUsed,
-        remainingAmount,
-        totalAmount,
-        paymentMethod: finalPaymentMethod
-      });
 
-      // 🚨 6-METHOD ORDERING LOGIC IMPLEMENTATION
-      // Method 3: Online Payment (online_payment)
+      // RESPECT CUSTOMER'S PAYMENT CHOICE - NO AUTO-SUBSTITUTION
+      // If customer explicitly chose online_payment, NEVER use wallet instead
       if (orderData.paymentMethod === 'online_payment') {
-        orderNumber = await orderManagementStorage.generateUniqueOrderNumberWithRetry();
-        console.log('🔢 [METHOD 3] Online payment - order number assigned:', orderNumber);
-        
         finalPaymentStatus = "pending";
         finalPaymentMethod = "online_payment";
         walletAmountUsed = 0;
         remainingAmount = totalAmount;
-        console.log("✅ [METHOD 3] Online payment gateway selected");
+        console.log("✅ [CUSTOMER CHOICE] Online payment selected - NO wallet substitution allowed");
       }
-      // Method 6: Bank Gateway Payment (bank_gateway)
-      else if (orderData.paymentMethod === 'bank_gateway') {
-        orderNumber = await orderManagementStorage.generateUniqueOrderNumberWithRetry();
-        console.log('🔢 [METHOD 6] Bank gateway - order number assigned:', orderNumber);
-        
+      // If customer explicitly chose bank_transfer, NEVER use wallet instead
+      else if (orderData.paymentMethod === 'bank_transfer') {
         finalPaymentStatus = "pending";
-        finalPaymentMethod = "bank_gateway";
+        finalPaymentMethod = "bank_transfer";
         walletAmountUsed = 0;
         remainingAmount = totalAmount;
-        console.log("✅ [METHOD 6] Direct bank gateway integration selected");
+        console.log("✅ [CUSTOMER CHOICE] Bank transfer selected - NO wallet substitution allowed");
       }
-      // Method 1: Full Wallet Payment (wallet_full)
-      // Method 2: Hybrid Payment (wallet_partial)
-      // Method 4: Hybrid → Full Wallet Conversion
+      // Only process wallet payments when customer explicitly chose wallet options
       else if (orderData.paymentMethod === 'wallet_full' || orderData.paymentMethod === 'wallet_partial') {
         walletAmountUsed = Math.round(parseFloat(orderData.walletAmountUsed || 0));
         remainingAmount = Math.round(parseFloat(orderData.remainingAmount || totalAmount));
         
-        console.log('💰 [6-METHOD WALLET] Processing wallet payment:', {
+        console.log('💰 [BILINGUAL WALLET DEBUG] Processing wallet payment:', {
           walletAmountUsed,
           remainingAmount,
           finalCustomerId,
           paymentMethod: orderData.paymentMethod,
-          'Method': remainingAmount <= 1 ? 'METHOD 1 or 4' : 'METHOD 2'
+          'Bank payment required?': remainingAmount > 0
         });
         
         if (walletAmountUsed > 0) {
           try {
-            // 🚨 CRITICAL: Update remainingAmount after wallet processing
-            remainingAmount = Math.round(remainingAmount - walletAmountUsed);
-            console.log(`💰 [WALLET CALCULATION] Amount after wallet deduction: ${remainingAmount}`);
-            
-            // Process wallet deduction
-            const tempDescription = remainingAmount <= 1 
-              ? 'پرداخت کامل از کیف پول دیجیتال'
-              : 'پرداخت بخش کیف پولی سفارش ترکیبی - در انتظار تایید بانکی';
-            
+            // Use walletStorage.debitWallet which handles all the logic
             const transaction = await walletStorage.debitWallet(
               finalCustomerId,
               walletAmountUsed,
-              tempDescription,
+              `پرداخت سفارش ${orderNumber}`,
               'order',
-              undefined,
-              undefined
+              undefined, // reference ID will be set after order creation
+              undefined  // no admin processing this
             );
             
             console.log(`✅ Wallet payment processed: ${walletAmountUsed} IQD deducted, transaction ID: ${transaction.id}`);
-            console.log(`💰 [REMAINING AMOUNT] After wallet: ${remainingAmount} IQD`);
             
-            // Apply 6-method logic for order number assignment
+            // CRITICAL FIX: Check if remainingAmount is 0 to send directly to warehouse
             if (Math.round(remainingAmount) <= 1) {
-              // METHOD 1: Full Wallet Payment OR METHOD 4: Hybrid → Full Wallet Conversion
-              orderNumber = await orderManagementStorage.generateUniqueOrderNumberWithRetry();
-              
-              if (orderData.paymentMethod === 'wallet_partial') {
-                console.log('🔢 [METHOD 4] Hybrid → Full wallet conversion - order number assigned:', orderNumber);
-                finalPaymentMethod = "wallet_full"; // Convert to full wallet
-              } else {
-                console.log('🔢 [METHOD 1] Full wallet payment - order number assigned:', orderNumber);
-                finalPaymentMethod = "wallet_full";
-              }
-              
-              finalPaymentStatus = "paid";
-              console.log('🏪 [WAREHOUSE DIRECT] Full wallet payment completed');
+              finalPaymentStatus = "paid"; // Fully paid by wallet
+              finalPaymentMethod = "wallet_full"; // Ensure correct method
+              console.log('🏪 [WAREHOUSE DIRECT] Bank payment = 0, sending order directly to warehouse');
             } else {
-              // METHOD 2: Hybrid Payment - DO NOT assign order number
-              finalPaymentStatus = "partial";
-              finalPaymentMethod = "wallet_partial";
-              console.log('🏦 [METHOD 2] Hybrid payment - wallet portion successful, awaiting bank payment');
-              console.log('⚠️ [6-METHOD LOGIC] Hybrid order creation BLOCKED until bank payment succeeds');
+              finalPaymentStatus = "partial"; // Partially paid by wallet
+              finalPaymentMethod = "wallet_partial"; // Requires bank payment
+              console.log('🏦 [BANK REQUIRED] Bank payment > 0, will require bank gateway');
             }
           } catch (walletError) {
             console.log(`❌ Wallet payment failed:`, walletError);
@@ -14515,80 +14394,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
               message: "موجودی کیف پول کافی نیست یا خطا در پردازش"
             });
           }
-        } else if (orderData.paymentMethod === 'wallet_partial') {
-          console.log('❌ [METHOD 2 BLOCK] wallet_partial order with no wallet amount - blocking');
-          return res.status(400).json({
-            success: false,
-            message: "سفارش ترکیبی بدون مبلغ کیف پول - درخواست نامعتبر",
-            blockReason: "hybrid_no_wallet"
-          });
         }
       }
       
-      // Method 5: Bank Transfer with Grace Period (bank_transfer_grace)
+      // Handle bank receipt method
+      else if (orderData.paymentMethod === 'bank_receipt') {
+        finalPaymentStatus = "pending";
+        finalPaymentMethod = "bank_receipt";
+        console.log("✅ Bank receipt method selected - customer will upload receipt");
+      }
+      
+      // Handle bank transfer with grace period method
       else if (orderData.paymentMethod === 'bank_transfer_grace') {
-        orderNumber = await orderManagementStorage.generateUniqueOrderNumberWithRetry();
-        console.log('🔢 [METHOD 5] Bank transfer grace - order number assigned:', orderNumber);
-        
         finalPaymentStatus = "grace_period";
         finalPaymentMethod = "bank_transfer_grace";
-        console.log("✅ [METHOD 5] Bank transfer with 3-day grace period activated");
-      }
-      // 🚨 UNSUPPORTED PAYMENT METHOD
-      else {
-        console.log('❌ [6-METHOD ERROR] Unsupported payment method:', orderData.paymentMethod);
-        return res.status(400).json({
-          success: false,
-          message: `روش پرداخت پشتیبانی نمی‌شود: ${orderData.paymentMethod}`,
-          supportedMethods: ['wallet_full', 'wallet_partial', 'online_payment', 'bank_gateway', 'bank_transfer_grace']
-        });
+        console.log("✅ Bank transfer with grace period method selected - 3-day grace period activated");
       }
 
-      // 🚨 CRITICAL: 6-Method Logic Validation
-      console.log('🔍 [6-METHOD VALIDATION] Final validation before order creation:', {
-        orderNumber,
-        paymentMethod: finalPaymentMethod,
-        paymentStatus: finalPaymentStatus,
-        remainingAmount,
-        walletAmountUsed,
-        method: finalPaymentMethod === 'wallet_full' ? 'METHOD 1/4' : 
-               finalPaymentMethod === 'wallet_partial' ? 'METHOD 2' :
-               finalPaymentMethod === 'online_payment' ? 'METHOD 3' :
-               finalPaymentMethod === 'bank_transfer_grace' ? 'METHOD 5' :
-               finalPaymentMethod === 'bank_gateway' ? 'METHOD 6' : 'UNKNOWN'
-      });
-      
-      // Rule 1: METHOD 2 (Hybrid orders) must NEVER get order numbers unless both parts succeed
-      if (finalPaymentMethod === 'wallet_partial') {
-        console.log('🚨 [METHOD 2 BLOCK] Detected hybrid order - applying strict validation');
-        if (finalPaymentStatus !== 'paid') {
-          console.log('❌ [METHOD 2 BLOCK] Hybrid order not fully paid - blocking order creation');
-          return res.status(400).json({
-            success: false,
-            message: "سفارش ترکیبی ناتمام - منتظر تکمیل پرداخت بانکی",
-            requiresBankPayment: true,
-            walletAmountUsed,
-            remainingAmount: Math.round(remainingAmount),
-            blockReason: "method2_incomplete"
-          });
-        }
-      }
-      
-      // Rule 2: All valid methods must have order numbers (no exceptions)
-      if (!orderNumber) {
-        console.log('❌ [6-METHOD LOGIC] No order number assigned - cannot create order');
-        return res.status(400).json({
-          success: false,
-          message: "خطا در تولید شماره سفارش - لطفاً دوباره تلاش کنید",
-          requiresBankPayment: finalPaymentMethod === 'wallet_partial',
-          walletAmountUsed,
-          remainingAmount: Math.round(remainingAmount),
-          blockReason: "no_order_number"
-        });
-      }
-      
-      console.log('✅ [6-METHOD VALIDATION] Order validated - proceeding with creation');
-      
       const order = await customerStorage.createOrder({
         customerId: finalCustomerId,
         orderNumber,
@@ -14779,7 +14601,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Don't fail the order if CRM capture fails
       }
 
-      // Create order_management record for financial department workflow (with duplicate protection)
+      // Create order_management record for financial department workflow
       try {
         let orderMgmtData = {
           customerOrderId: order.id,
@@ -14807,19 +14629,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log(`🕒 Grace period activated for order ${orderNumber} - expires: ${gracePeriodEnd.toISOString()}`);
         }
 
-        // Check if order_management record already exists to prevent duplicate key errors
-        const existingOrderMgmt = await orderManagementStorage.getOrderManagementByCustomerOrderId(order.id);
-        
-        if (existingOrderMgmt) {
-          console.log(`⚠️ [ORDER MGMT] Record already exists for order ${orderNumber}, updating instead of creating`);
-          // Update existing record instead of creating new one
-          await orderManagementStorage.updateOrderManagement(existingOrderMgmt.id, orderMgmtData);
-          console.log(`✅ Order management record updated for order ${orderNumber}`);
-        } else {
-          // Create new record
-          await orderManagementStorage.createOrderManagement(orderMgmtData);
-          console.log(`✅ Order management record created for order ${orderNumber}`);
-        }
+        await orderManagementStorage.createOrderManagement(orderMgmtData);
+        console.log(`✅ Order management record created for order ${orderNumber}`);
         
         // Trigger automatic synchronization after order creation
         try {
@@ -14830,10 +14641,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Don't fail order creation if sync fails
         }
       } catch (orderMgmtError) {
-        console.error("❌ Error creating/updating order management record:", orderMgmtError);
-        // Log error but don't fail the entire order creation process
-        // The customer order was created successfully, this is just for internal management
-        console.log(`⚠️ [ORDER MGMT] Order ${orderNumber} created successfully despite management record issue`);
+        console.error("❌ Error creating order management record:", orderMgmtError);
+        // Don't fail the order if order management creation fails
       }
 
       // Prepare response based on payment method
@@ -46857,296 +46666,10 @@ momtazchem.com
     }
   });
 
-  // ==========================================
-  // GRACE PERIOD MANAGEMENT API ENDPOINTS
-  // ==========================================
-
-  // Get pending bank receipts for financial review
-  app.get('/api/admin/financial/pending-receipts', requireAuth, async (req, res) => {
-    try {
-      console.log('📄 [FINANCIAL REVIEW] Getting pending receipts for review...');
-      
-      const pendingReceipts = await financialReceiptReviewService.getPendingReceipts();
-      
-      console.log(`✅ [FINANCIAL REVIEW] Found ${pendingReceipts.length} pending receipts`);
-      res.json({
-        success: true,
-        data: pendingReceipts,
-        message: `یافت شد ${pendingReceipts.length} حواله در انتظار بررسی`
-      });
-    } catch (error) {
-      console.error('❌ [FINANCIAL REVIEW] Error getting pending receipts:', error);
-      res.status(500).json({
-        success: false,
-        message: 'خطا در دریافت حواله‌های در انتظار بررسی'
-      });
-    }
-  });
-
-  // Approve bank receipt (Financial department)
-  app.post('/api/admin/financial/approve-receipt', requireAuth, async (req, res) => {
-    try {
-      const { orderManagementId, approvalNotes, overpaidAmount } = req.body;
-      const reviewerId = req.session?.adminId || req.session?.customerId;
-
-      if (!orderManagementId || !reviewerId) {
-        return res.status(400).json({
-          success: false,
-          message: 'شناسه سفارش و بازبین مورد نیاز است'
-        });
-      }
-
-      console.log(`✅ [FINANCIAL APPROVE] Processing approval for order management ID: ${orderManagementId} by reviewer: ${reviewerId}`);
-
-      const result = await financialReceiptReviewService.approveReceipt(
-        orderManagementId, 
-        reviewerId, 
-        approvalNotes,
-        overpaidAmount ? parseFloat(overpaidAmount) : undefined
-      );
-
-      console.log(`✅ [FINANCIAL APPROVE] Approval successful:`, result);
-      res.json(result);
-    } catch (error) {
-      console.error('❌ [FINANCIAL APPROVE] Error approving receipt:', error);
-      res.status(500).json({
-        success: false,
-        message: 'خطا در تایید حواله'
-      });
-    }
-  });
-
-  // Reject bank receipt (Financial department)
-  app.post('/api/admin/financial/reject-receipt', requireAuth, async (req, res) => {
-    try {
-      const { orderManagementId, rejectionReason, rejectionCategory } = req.body;
-      const reviewerId = req.session?.adminId || req.session?.customerId;
-
-      if (!orderManagementId || !rejectionReason || !reviewerId) {
-        return res.status(400).json({
-          success: false,
-          message: 'شناسه سفارش، دلیل رد و بازبین مورد نیاز است'
-        });
-      }
-
-      console.log(`❌ [FINANCIAL REJECT] Processing rejection for order management ID: ${orderManagementId} by reviewer: ${reviewerId}`);
-
-      const result = await financialReceiptReviewService.rejectReceipt(
-        orderManagementId,
-        reviewerId,
-        rejectionReason,
-        rejectionCategory || 'other'
-      );
-
-      console.log(`❌ [FINANCIAL REJECT] Rejection successful:`, result);
-      res.json(result);
-    } catch (error) {
-      console.error('❌ [FINANCIAL REJECT] Error rejecting receipt:', error);
-      res.status(500).json({
-        success: false,
-        message: 'خطا در رد حواله'
-      });
-    }
-  });
-
-  // Get grace period service status
-  app.get('/api/admin/grace-period/status', requireAuth, async (req, res) => {
-    try {
-      const status = gracePeriodManagementService.getStatus();
-      
-      res.json({
-        success: true,
-        data: {
-          ...status,
-          message: status.isRunning ? 'سرویس مدیریت مهلت فعال است' : 'سرویس مدیریت مهلت غیرفعال است'
-        }
-      });
-    } catch (error) {
-      console.error('❌ [GRACE STATUS] Error getting service status:', error);
-      res.status(500).json({
-        success: false,
-        message: 'خطا در دریافت وضعیت سرویس'
-      });
-    }
-  });
-
-  // Manually trigger grace period processing
-  app.post('/api/admin/grace-period/process', requireAuth, async (req, res) => {
-    try {
-      console.log('🎯 [GRACE MANUAL] Manual grace period processing triggered');
-      
-      // Process grace period orders manually
-      await gracePeriodManagementService.processGracePeriodOrders();
-      
-      res.json({
-        success: true,
-        message: 'پردازش دستی مهلت سه روزه با موفقیت انجام شد'
-      });
-    } catch (error) {
-      console.error('❌ [GRACE MANUAL] Error in manual processing:', error);
-      res.status(500).json({
-        success: false,
-        message: 'خطا در پردازش دستی مهلت سه روزه'
-      });
-    }
-  });
-
-  // Start grace period management service
-  app.post('/api/admin/grace-period/start', requireAuth, async (req, res) => {
-    try {
-      gracePeriodManagementService.start();
-      
-      res.json({
-        success: true,
-        message: 'سرویس مدیریت مهلت سه روزه راه‌اندازی شد'
-      });
-    } catch (error) {
-      console.error('❌ [GRACE START] Error starting service:', error);
-      res.status(500).json({
-        success: false,
-        message: 'خطا در راه‌اندازی سرویس مدیریت مهلت'
-      });
-    }
-  });
-
-  // Stop grace period management service
-  app.post('/api/admin/grace-period/stop', requireAuth, async (req, res) => {
-    try {
-      gracePeriodManagementService.stop();
-      
-      res.json({
-        success: true,
-        message: 'سرویس مدیریت مهلت سه روزه متوقف شد'
-      });
-    } catch (error) {
-      console.error('❌ [GRACE STOP] Error stopping service:', error);
-      res.status(500).json({
-        success: false,
-        message: 'خطا در توقف سرویس مدیریت مهلت'
-      });
-    }
-  });
-
   // Initialize WebRTC Socket
   const { setupWebRTCSocket } = await import("./webrtc-socket");
   setupWebRTCSocket(httpServer);
   console.log("🔌 [WebRTC] Routes and Socket initialized");
-
-  // ============================================================================
-  // ORDER NUMBER SYSTEM MANAGEMENT & TESTING
-  // ============================================================================
-
-  // Test order number generation system
-  app.post('/api/admin/test/order-numbers', requireAuth, async (req, res) => {
-    try {
-      const { method = 'bulletproof', count = 1 } = req.body;
-      const results = [];
-      
-      console.log(`🧪 [TEST] Testing order number generation: ${method} method, ${count} numbers`);
-      
-      for (let i = 0; i < count; i++) {
-        try {
-          let orderNumber;
-          const startTime = Date.now();
-          
-          switch (method) {
-            case 'bulletproof':
-              orderNumber = await orderManagementStorage.generateUniqueOrderNumberWithRetry();
-              break;
-            case 'transaction':
-              orderNumber = await orderManagementStorage.generateOrderNumberInTransaction();
-              break;
-            case 'deprecated':
-              orderNumber = await orderManagementStorage.generateOrderNumber();
-              break;
-            default:
-              throw new Error(`Unknown method: ${method}`);
-          }
-          
-          const endTime = Date.now();
-          const duration = endTime - startTime;
-          
-          // Validate format
-          const validation = orderManagementStorage.validateOrderNumberFormat(orderNumber);
-          
-          // Check if exists
-          const exists = await orderManagementStorage.orderNumberExists(orderNumber);
-          
-          results.push({
-            attempt: i + 1,
-            orderNumber,
-            duration,
-            validation,
-            alreadyExists: exists,
-            status: validation.isValid && !exists ? 'success' : 'warning'
-          });
-          
-        } catch (error) {
-          results.push({
-            attempt: i + 1,
-            error: error instanceof Error ? error.message : 'Unknown error',
-            status: 'failed'
-          });
-        }
-      }
-      
-      res.json({
-        success: true,
-        method,
-        count,
-        results,
-        summary: {
-          successful: results.filter(r => r.status === 'success').length,
-          warnings: results.filter(r => r.status === 'warning').length,
-          failed: results.filter(r => r.status === 'failed').length,
-          averageDuration: results
-            .filter(r => r.duration)
-            .reduce((sum, r) => sum + r.duration!, 0) / results.filter(r => r.duration).length || 0
-        }
-      });
-      
-    } catch (error) {
-      console.error('❌ [TEST] Error testing order numbers:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Order number test failed',
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  });
-
-  // Perform order number system health check
-  app.get('/api/admin/order-numbers/health', requireAuth, async (req, res) => {
-    try {
-      console.log('🔍 [HEALTH] Performing order number system health check...');
-      
-      // Create the health check method since it doesn't exist yet
-      const healthCheck = {
-        status: 'healthy' as const,
-        checks: [
-          {
-            name: 'Order Number Generation',
-            status: 'pass' as const,
-            message: 'Bulletproof method implemented successfully'
-          }
-        ],
-        recommendations: [] as string[]
-      };
-      
-      res.json({
-        success: true,
-        healthCheck
-      });
-      
-    } catch (error) {
-      console.error('❌ [HEALTH] Error performing health check:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Health check failed',
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  });
 
   return httpServer;
 }

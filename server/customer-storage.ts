@@ -171,31 +171,17 @@ export class CustomerStorage implements ICustomerStorage {
     const { OrderManagementStorage } = await import('./order-management-storage');
     const orderManagementStorage = new OrderManagementStorage();
     
-    // 🚨 CRITICAL: Check if order number is already provided (8-method logic)
-    const providedOrderNumber = orderData.orderNumber;
-    
-    if (providedOrderNumber) {
-      console.log(`✅ [8-METHOD LOGIC] Using provided order number: ${providedOrderNumber}`);
-    } else {
-      console.log('✅ [SEQUENTIAL] Generating new order number with gap-free sequential numbering...');
-    }
+    console.log('✅ [SEQUENTIAL] Creating order with gap-free sequential numbering...');
     
     // Use transaction-safe order creation to ensure sequential numbering without gaps
     let order: any;
     let orderNumber: string;
     
     await customerDb.transaction(async (tx) => {
-      // 🚨 CRITICAL: Use provided order number if available (8-method logic)
-      if (providedOrderNumber) {
-        orderNumber = providedOrderNumber;
-        console.log(`✅ [8-METHOD LOGIC] Using pre-assigned order number: ${orderNumber}`);
-      } else {
-        // Generate sequential order number within transaction (backward compatibility)
-        orderNumber = await orderManagementStorage.generateOrderNumberInTransaction(tx);
-        console.log(`✅ [SEQUENTIAL] Generated new order number: ${orderNumber}`);
-      }
+      // Generate sequential order number within transaction
+      orderNumber = await orderManagementStorage.generateOrderNumberInTransaction(tx);
       
-      // Create order with the order number within same transaction
+      // Create order with the generated number within same transaction
       [order] = await tx
         .insert(customerOrders)
         .values({

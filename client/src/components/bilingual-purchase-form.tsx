@@ -246,7 +246,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const { language, direction } = useLanguage();
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [locationData, setLocationData] = useState<{latitude: number, longitude: number} | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<'online_payment' | 'wallet_full' | 'wallet_partial' | 'bank_transfer_grace' | 'bank_gateway'>('online_payment');
+  const [paymentMethod, setPaymentMethod] = useState<'online_payment' | 'wallet_full' | 'wallet_partial' | 'bank_receipt' | 'bank_transfer_grace' | 'wallet_combined'>('online_payment');
   const [walletAmount, setWalletAmount] = useState<number>(0);
   const [selectedReceiptFile, setSelectedReceiptFile] = useState<File | null>(null);
   const [selectedShippingMethod, setSelectedShippingMethod] = useState<number | null>(null);
@@ -920,12 +920,12 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const maxWalletAmount = Math.min(walletBalance, totalAmount);
   const remainingAfterWallet = totalAmount - (paymentMethod === 'wallet_partial' ? walletAmount : (paymentMethod === 'wallet_full' ? totalAmount : 0));
   
-  // Auto-set wallet amount when wallet_partial is selected (6-method system)
+  // Auto-set wallet amount when wallet_combined is selected (after walletBalance is defined)
   useEffect(() => {
-    if (paymentMethod === 'wallet_partial') {
+    if (paymentMethod === 'wallet_combined') {
       const maxUsage = Math.min(walletBalance, totalAmount);
       setWalletAmount(maxUsage);
-      console.log('🔄 [AUTO WALLET] wallet_partial selected - setting walletAmount:', {
+      console.log('🔄 [AUTO WALLET] wallet_combined selected - setting walletAmount:', {
         paymentMethod,
         walletBalance,
         totalAmount,
@@ -1178,7 +1178,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       // RESPECT CUSTOMER'S PAYMENT CHOICE - NO AUTO-SUBSTITUTION
       // Only consider wallet payment if customer explicitly chose wallet methods
       const remainingAmount = parseFloat(response.remainingAmount || 0);
-      const customerChoseWallet = paymentMethod === 'wallet_full' || paymentMethod === 'wallet_partial';
+      const customerChoseWallet = paymentMethod === 'wallet_full' || paymentMethod === 'wallet_partial' || paymentMethod === 'wallet_combined';
       const isFullyPaidByWallet = remainingAmount === 0 && customerChoseWallet;
       
       console.log('💳 [PAYMENT DECISION] RESPECTING CUSTOMER CHOICE:', {
@@ -1242,7 +1242,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       }
       // Handle full wallet payments - check both response method and actual amounts
       else if (response.paymentMethod === 'wallet_full' || 
-          (walletAmount >= totalAmount && walletAmount > 0) ||
+          (walletAmount >= totalAmount && actualWalletUsed > 0) ||
           (response.order?.paymentMethod === 'wallet_full') ||
           (response.order?.paymentStatus === 'paid' && response.order?.walletAmountUsed > 0)) {
         toast({
@@ -1294,7 +1294,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         onOrderComplete();
       }
       // Handle bank transfer - redirect to payment gateway  
-      else if (response.paymentMethod === 'bank_transfer_grace' || (paymentMethod !== 'wallet_full' && paymentMethod !== 'wallet_partial' && paymentMethod !== 'online_payment' && paymentMethod !== 'bank_gateway')) {
+      else if (response.paymentMethod === 'bank_transfer' || (paymentMethod !== 'wallet_full' && paymentMethod !== 'wallet_partial' && paymentMethod !== 'wallet_combined' && paymentMethod !== 'online_payment')) {
         toast({
           title: "انتقال به درگاه بانک",
           description: "در حال هدایت شما به درگاه پرداخت بانکی..."
@@ -1315,56 +1315,10 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         onOrderComplete();
       }
     },
-    onError: (error: any) => {
-      console.error('🚀 [BILINGUAL FORM ERROR] Order submission failed:', error);
-      
-      let errorTitle = t.orderError;
-      let errorMessage = "Failed to submit order. Please try again.";
-      
-      // Enhanced error handling for different payment failures
-      if (error?.message) {
-        const message = error.message;
-        
-        // 🏦 BANK GATEWAY TRANSACTION FAILURE HANDLING
-        if (message.includes('تراکنش بانکی ناموفق بود') || 
-            message.includes('تایید نهایی تراکنش بانکی ناموفق بود') ||
-            message.includes('Transaction failed') ||
-            message.includes('Payment failed')) {
-          errorTitle = language === 'ar' ? "تراکنش بانکی ناموفق" : "Bank Transaction Failed";
-          errorMessage = language === 'ar' ? 
-            "تراکنش بانکی ناموفق بود. لطفاً مجدداً تلاش کنید یا از روش پرداخت دیگری استفاده کنید." :
-            "Bank transaction failed. Please try again or use a different payment method.";
-          
-          console.log('🏦 [BILINGUAL FORM] Bank gateway transaction failed:', message);
-        }
-        // Wallet insufficient balance errors
-        else if (message.includes('موجودی کیف پول کافی نیست') || 
-                 message.includes('Insufficient wallet balance') ||
-                 message.includes('ناکافی') ||
-                 message.includes('insufficient')) {
-          errorTitle = language === 'ar' ? "موجودی ناکافی" : "Insufficient Balance";
-          errorMessage = message;
-          
-          console.log('💰 [BILINGUAL FORM] Wallet insufficient balance:', message);
-        }
-        // Other bank/payment related errors
-        else if (message.includes('bank_gateway') || message.includes('درگاه بانکی') || message.includes('بانک')) {
-          errorTitle = language === 'ar' ? "خطای پرداخت بانکی" : "Bank Payment Error";
-          errorMessage = message;
-          
-          console.log('🏦 [BILINGUAL FORM] Bank payment error:', message);
-        }
-        // Use the actual error message for other cases
-        else {
-          errorMessage = message;
-        }
-      }
-      
+    onError: () => {
       toast({
-        title: errorTitle,
-        description: errorMessage,
-        variant: "destructive",
-        duration: 5000
+        title: t.orderError,
+        variant: "destructive"
       });
     }
   });
@@ -1445,67 +1399,47 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
     console.log('🚚 [DELIVERY LOGIC] Active delivery information:', activeDeliveryInfo);
 
-    // 🚨 6-METHOD LOGIC: Handle wallet payment calculations
+    // Handle wallet payment calculations with smart wallet_combined conversion
     let finalPaymentMethod = paymentMethod;
     
-    console.log('✅ [6-METHOD] Payment analysis:', {
+    // Convert wallet_combined to appropriate wallet type based on wallet amount vs total
+    console.log('🔍 [PAYMENT ANALYSIS] Before conversion:', {
       paymentMethod,
-      walletBalance,
+      walletAmount,
       totalAmount,
-      canFullyPayFromWallet: walletBalance >= totalAmount,
-      canPartiallyPayFromWallet: walletBalance > 0 && walletBalance < totalAmount
+      walletBalance,
+      canUseWallet,
+      comparison: `${walletAmount} >= ${totalAmount} = ${walletAmount >= totalAmount}`
     });
     
-    // 6-METHOD LOGIC: Handle direct method selection (no conversion needed)
-    if (paymentMethod === 'wallet_full') {
-      // Method 1: Direct full wallet payment
-      console.log('💰 [METHOD 1] Direct full wallet payment selected');
-      finalPaymentMethod = 'wallet_full';
-    } else if (paymentMethod === 'wallet_partial') {
-      // Method 2: Direct hybrid payment
-      console.log('💰 [METHOD 2] Direct hybrid payment selected');
-      finalPaymentMethod = 'wallet_partial';
+    if (paymentMethod === 'wallet_combined') {
+      if (walletAmount >= totalAmount) {
+        finalPaymentMethod = 'wallet_full';
+        console.log('🔄 [PAYMENT CONVERSION] wallet_combined → wallet_full (sufficient balance)');
+      } else if (walletAmount > 0) {
+        finalPaymentMethod = 'wallet_partial';
+        console.log('🔄 [PAYMENT CONVERSION] wallet_combined → wallet_partial (insufficient balance)');
+      }
     }
 
     orderData.paymentMethod = finalPaymentMethod;
 
-    // 💰 6-METHOD PAYMENT AMOUNT CALCULATIONS
     if (finalPaymentMethod === 'wallet_full') {
       orderData.walletAmountUsed = Math.round(totalAmount);
       orderData.remainingAmount = 0;
-      console.log('💰 [METHOD 1] Full wallet payment set:', {
-        walletAmountUsed: orderData.walletAmountUsed,
-        remainingAmount: orderData.remainingAmount
-      });
     } else if (finalPaymentMethod === 'wallet_partial') {
-      // For hybrid payment, use maximum available wallet or specified amount
-      const walletAmountToUse = walletAmount > 0 ? Math.min(walletAmount, walletBalance) : walletBalance;
-      orderData.walletAmountUsed = Math.round(walletAmountToUse);
-      orderData.remainingAmount = Math.round(Math.max(0, totalAmount - walletAmountToUse));
-      console.log('💰 [METHOD 2] Hybrid payment set:', {
-        walletAmountUsed: orderData.walletAmountUsed,
-        remainingAmount: orderData.remainingAmount,
-        walletBalance
-      });
+      orderData.walletAmountUsed = Math.round(walletAmount);
+      orderData.remainingAmount = Math.round(Math.max(0, totalAmount - walletAmount));
     } else if (finalPaymentMethod === 'online_payment') {
       orderData.walletAmountUsed = 0;
       orderData.remainingAmount = Math.round(totalAmount);
-      console.log('🔗 [METHOD 3] Online payment set:', {
-        remainingAmount: orderData.remainingAmount
-      });
+    } else if (finalPaymentMethod === 'bank_receipt') {
+      orderData.walletAmountUsed = 0;
+      orderData.remainingAmount = Math.round(totalAmount);
     } else if (finalPaymentMethod === 'bank_transfer_grace') {
       orderData.walletAmountUsed = 0;
       orderData.remainingAmount = Math.round(totalAmount);
       orderData.paymentGracePeriod = true; // Flag for 3-day grace period
-      console.log('🏦 [METHOD 5] Bank transfer with grace period set:', {
-        remainingAmount: orderData.remainingAmount
-      });
-    } else if (finalPaymentMethod === 'bank_gateway') {
-      orderData.walletAmountUsed = 0;
-      orderData.remainingAmount = Math.round(totalAmount);
-      console.log('🏦 [METHOD 6] Bank gateway payment set:', {
-        remainingAmount: orderData.remainingAmount
-      });
     }
 
     console.log('🚀 [ORDER SUBMIT] Submitting order with complete data:', {
@@ -1932,32 +1866,24 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                   </Label>
                 </div>
                 
-                {/* دوم: پرداخت کامل از کیف پول - Method 1 */}
-                {canUseWallet && walletBalance >= totalAmount && (
+                {/* دوم: پرداخت از کیف پول (تمام یا بخش از آن) */}
+                {canUseWallet && (
                   <div className="flex items-center space-x-2 space-x-reverse">
-                    <RadioGroupItem value="wallet_full" id="wallet_full" />
-                    <Label htmlFor="wallet_full" className="flex items-center gap-2 cursor-pointer">
+                    <RadioGroupItem value="wallet_combined" id="wallet_combined" />
+                    <Label htmlFor="wallet_combined" className="flex items-center gap-2 cursor-pointer">
                       <Wallet className="w-4 h-4 text-green-600" />
-                      <span className="font-semibold">
-                        پرداخت کامل از کیف پول ({formatIQDAmount(totalAmount)} IQD)
-                        <br />
-                        <span className="text-sm text-green-600">موجودی: {formatIQDAmount(walletBalance)} IQD</span>
-                      </span>
+                      <span className="font-semibold">استفاده از کیف پول (حداکثر {formatIQDAmount(Math.min(walletBalance, totalAmount))} IQD)</span>
                     </Label>
                   </div>
                 )}
                 
-                {/* سوم: پرداخت ترکیبی (کیف پول + بانک) - Method 2 */}
-                {canUseWallet && walletBalance < totalAmount && walletBalance > 0 && (
+                {/* اضافی: والت جزئی - فقط برای نمایش */}
+                {canUseWallet && (
                   <div className="flex items-center space-x-2 space-x-reverse">
                     <RadioGroupItem value="wallet_partial" id="wallet_partial" />
                     <Label htmlFor="wallet_partial" className="flex items-center gap-2 cursor-pointer">
                       <Wallet className="w-4 h-4 text-orange-600" />
-                      <span className="font-semibold">
-                        پرداخت ترکیبی (کیف پول + بانک)
-                        <br />
-                        <span className="text-sm text-orange-600">کیف پول: {formatIQDAmount(walletBalance)} IQD + بانک: {formatIQDAmount(totalAmount - walletBalance)} IQD</span>
-                      </span>
+                      پرداخت بخشی از والت + بانک
                     </Label>
                   </div>
                 )}

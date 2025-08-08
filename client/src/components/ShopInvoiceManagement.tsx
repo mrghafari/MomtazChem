@@ -58,8 +58,8 @@ export default function ShopInvoiceManagement() {
     staleTime: 60000, // Cache for 1 minute
   });
 
-  const paidOrders: PaidOrder[] = (ordersResponse as any)?.data || [];
-  const stats: InvoiceStats = (statsResponse as any)?.data || {
+  const paidOrders: PaidOrder[] = ordersResponse?.data || [];
+  const stats: InvoiceStats = statsResponse?.data || {
     totalPaidOrders: 0,
     totalInvoiceAmount: 0,
     averageOrderValue: 0,
@@ -387,8 +387,9 @@ export default function ShopInvoiceManagement() {
     const methods: Record<string, string> = {
       'bank_transfer': 'انتقال بانکی',
       'wallet_full': 'کیف پول کامل',
+      'wallet_partial': 'پرداخت ترکیبی',
+      'wallet': 'کیف پول دیجیتال', 
       'wallet_partial': 'کیف پول + سایر',
-      'wallet': 'کیف پول دیجیتال',
       'cash_on_delivery': 'پرداخت در محل',
       'credit_card': 'کارت اعتباری'
     };

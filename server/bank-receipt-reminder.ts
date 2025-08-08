@@ -2,7 +2,6 @@ import { customerDb } from "./customer-db";
 import { customerOrders } from "@shared/customer-schema";
 import { eq, and, lt, sql, isNull } from "drizzle-orm";
 import { emailService } from "./email-service";
-import { UniversalEmailService } from "./universal-email-service";
 import { simpleSmsStorage } from "./simple-sms-storage";
 
 /**

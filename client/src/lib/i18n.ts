@@ -206,6 +206,7 @@ export interface Translation {
   totalReviews: string;
   noReviewsYet: string;
   noReviewsDesc: string;
+  productSpecifications: string;
   reviewsAndRatings: string;
   customerFeedback: string;
   
@@ -262,18 +263,6 @@ export interface Translation {
   productCategory: string;
   productSpecifications: string;
   productFeatures: string;
-  bankReference: string;
-  requestRecharge: string;
-  enterBankReference: string;
-  rechargeAmount: string;
-  bankReceipt: string;
-  rechargeHistory: string;
-  uploadBankReceipt: string;
-  walletBalance: string;
-  bankReceiptRequired: string;
-  requestRechargeButton: string;
-  bankReferenceRequired: string;
-  pendingApproval: string;
   productApplications: string;
   productTags: string;
   productImage: string;
@@ -575,7 +564,7 @@ export const translations: Record<Language, Translation> = {
     productDescription: 'Product Description',
     priceRange: 'Price Range',
     productCategory: 'Product Category',
-    productDetails: 'Product Specifications',
+    productSpecifications: 'Product Specifications',
     productFeatures: 'Product Features',
     productApplications: 'Product Applications',
     productTags: 'Product Tags',
@@ -606,6 +595,7 @@ export const translations: Record<Language, Translation> = {
     variantSettings: 'Variant Settings',
     shopSettings: 'Shop Settings',
     weightsAndBatch: 'Weights & Batch',
+    productDetails: 'Product Details',
   },
   
   ar: {
@@ -875,7 +865,7 @@ export const translations: Record<Language, Translation> = {
     productDescription: 'وصف المنتج',
     priceRange: 'نطاق السعر',
     productCategory: 'فئة المنتج',
-    productDetails: 'مواصفات المنتج',
+    productSpecifications: 'مواصفات المنتج',
     productFeatures: 'ميزات المنتج',
     productApplications: 'تطبيقات المنتج',
     productTags: 'علامات المنتج',
@@ -906,6 +896,7 @@ export const translations: Record<Language, Translation> = {
     variantSettings: 'إعدادات المتغيرات',
     shopSettings: 'إعدادات المتجر',
     weightsAndBatch: 'الأوزان والدفعة',
+    productDetails: 'تفاصيل المنتج',
   },
 
   ku: {
