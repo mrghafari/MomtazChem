@@ -24010,10 +24010,30 @@ ${message ? `Additional Requirements:\n${message}` : ''}
           walletTransaction: walletTransactionMessage.length > 0
         });
       } else {
+        // 🆕 Regular orders also need order numbers after financial approval
+        let orderNumber = orderData.order_number; // Use existing order number if available
+        
+        if (!orderNumber) {
+          console.log(`🔢 [FINANCE] Assigning order number to regular order ${orderData.customer_order_id}`);
+          const { OrderManagementStorage } = await import('./order-management-storage');
+          const orderManagementStorage = new OrderManagementStorage();
+          orderNumber = await orderManagementStorage.generateOrderNumberInTransaction();
+          
+          // Update customer order with new order number
+          await pool.query(`
+            UPDATE customer_orders 
+            SET order_number = $2
+            WHERE id = $1
+          `, [orderData.customer_order_id, orderNumber]);
+          
+          console.log(`✅ [FINANCE] Regular order ${orderManagementId} assigned order number ${orderNumber}`);
+        }
+        
         console.log(`✅ [FINANCE] Regular order ${orderManagementId} (Customer Order ${orderData.customer_order_id}) approved and moved to warehouse department`);
         res.json({ 
           success: true, 
           order: updatedOrder, 
+          orderNumber: orderNumber,
           message: 'پرداخت تایید شد و آماده بررسی انبار است' + walletTransactionMessage,
           walletTransaction: walletTransactionMessage.length > 0
         });
@@ -35574,12 +35594,23 @@ momtazchem.com
         })
         .where(eq(orderManagement.customerOrderId, customerOrderId));
 
+      // 🆕 Assign order number if not already assigned
+      let orderNumber = customerInfo?.orderNumber;
+      if (!orderNumber) {
+        console.log(`🔢 [FINANCE] Assigning order number to order ${customerOrderId}`);
+        const { OrderManagementStorage } = await import('./order-management-storage');
+        const orderManagementStorage = new OrderManagementStorage();
+        orderNumber = await orderManagementStorage.generateOrderNumberInTransaction();
+        console.log(`✅ [FINANCE] Generated order number ${orderNumber} for order ${customerOrderId}`);
+      }
+      
       // Also update customer order status to warehouse_ready and payment status to paid
       await db
         .update(customerOrders)
         .set({
           status: 'warehouse_ready',
           paymentStatus: 'paid',
+          orderNumber: orderNumber, // Ensure order number is set
           updatedAt: new Date()
         })
         .where(eq(customerOrders.id, customerOrderId));
@@ -35677,7 +35708,11 @@ momtazchem.com
         }
       }
 
-      res.json({ success: true, message: "پرداخت تایید شد و اطلاع‌رسانی ارسال شد" });
+      res.json({ 
+        success: true, 
+        message: "پرداخت تایید شد و اطلاع‌رسانی ارسال شد",
+        orderNumber: orderNumber 
+      });
     } catch (error) {
       console.error("Error approving finance order:", error);
       res.status(500).json({
