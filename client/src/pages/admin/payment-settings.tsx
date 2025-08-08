@@ -214,22 +214,24 @@ const PaymentSettings = () => {
   // Update payment method setting mutation
   const updatePaymentMethodMutation = useMutation({
     mutationFn: async ({ methodKey, enabled, priority }: { methodKey: string, enabled?: boolean, priority?: number }) => {
-      return apiRequest(`/api/payment/method-settings/${methodKey}`, {
+      const response = await apiRequest(`/api/payment/method-settings/${methodKey}`, {
         method: 'PUT',
         body: { enabled, priority }
       });
+      return response;
     },
     onSuccess: () => {
       toast({
-        title: "تنظیمات به‌روزرسانی شد",
-        description: "تنظیمات روش پرداخت با موفقیت به‌روزرسانی شد.",
+        title: "Settings Updated",
+        description: "Payment method settings have been successfully updated.",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/payment/method-settings'] });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Payment method update error:', error);
       toast({
-        title: "خطا",
-        description: "خطا در به‌روزرسانی تنظیمات روش پرداخت.",
+        title: "Error",
+        description: "Failed to update payment method settings.",
         variant: "destructive",
       });
     },
@@ -902,7 +904,7 @@ const PaymentSettings = () => {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {paymentMethods && paymentMethods.map((method) => (
+                    {paymentMethods && paymentMethods.map((method: PaymentMethodSettings) => (
                       <Card key={method.id} className="p-4">
                         <div className="flex items-center justify-between">
                           <div className="flex-1">
