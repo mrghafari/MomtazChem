@@ -2,6 +2,7 @@ import { db } from "./db";
 import { eq, lte, sql, and } from "drizzle-orm";
 import { orderManagement } from "../shared/order-management-schema";
 import { customerOrders } from "../shared/customer-schema";
+import { DatabaseUtilities, SystemHealthCheck } from "./database-utilities";
 
 // سرویس تایید خودکار - DISABLED (همه سفارشات نیاز به تایید دستی دارند)
 export class AutoApprovalService {
@@ -11,6 +12,9 @@ export class AutoApprovalService {
   start() {
     console.log("💰 [AUTO APPROVAL] Service ENABLED for wallet-paid orders only");
     
+    // اجرای health check در شروع
+    this.performInitialHealthCheck();
+    
     // بررسی هر دقیقه
     this.intervalId = setInterval(() => {
       this.processAutoApprovals();
@@ -18,6 +22,21 @@ export class AutoApprovalService {
 
     // اجرای فوری برای بررسی سفارشات موجود
     this.processAutoApprovals();
+  }
+
+  // health check اولیه
+  private async performInitialHealthCheck() {
+    try {
+      const healthCheck = await SystemHealthCheck.performFullCheck();
+      if (!healthCheck.healthy) {
+        console.log('⚠️ [AUTO APPROVAL] System health issues detected:', healthCheck.issues);
+        if (healthCheck.autoFixed.length > 0) {
+          console.log('🔧 [AUTO APPROVAL] Auto-fixed issues:', healthCheck.autoFixed);
+        }
+      }
+    } catch (error) {
+      console.error('❌ [AUTO APPROVAL] Health check failed:', error);
+    }
   }
 
   // توقف سرویس
@@ -166,9 +185,16 @@ export class AutoApprovalService {
     }
   }
 
-  // بررسی پوشش کامل سفارش توسط کیف پول (شامل پرداخت‌های ترکیبی)
+  // بررسی پوشش کامل سفارش توسط کیف پول (امن و بدون خطا)
   private async checkWalletCoverage(order: any): Promise<boolean> {
     try {
+      // اعتبارسنجی اطلاعات سفارش
+      const validation = DatabaseUtilities.validateOrder(order);
+      if (!validation.valid) {
+        console.log(`❌ [WALLET CHECK] Order validation failed: ${validation.errors.join(', ')}`);
+        return false;
+      }
+
       // 1. اگر روش پرداخت مستقیماً کیف پول است
       if (
         order.paymentMethod?.includes('wallet') ||
@@ -179,66 +205,50 @@ export class AutoApprovalService {
         return true;
       }
 
-      // 2. بررسی تراکنش‌های کیف پول برای این سفارش
-      let walletTransactions = [];
-      try {
-        const query = `
-          SELECT 
-            ABS(CAST(amount AS DECIMAL)) as amount,
-            transaction_type,
-            description
-          FROM wallet_transactions 
-          WHERE customer_id = $1
-            AND transaction_type = 'debit'
-            AND (description LIKE $2 OR description LIKE '%سفارش%')
-            AND created_at >= (SELECT created_at FROM customer_orders WHERE id = $3)
-        `;
-        
-        const result = await db.execute(sql.raw(query, [order.customerId, `%${order.orderNumber}%`, order.id]));
-        walletTransactions = result.rows || [];
-      } catch (dbError) {
-        console.error(`❌ [WALLET CHECK] Database error for order ${order.orderNumber}:`, dbError);
+      // 2. بررسی تراکنش‌های کیف پول با استفاده از utility امن
+      const transactionResult = await DatabaseUtilities.getWalletTransactions(order.orderNumber, order.customerId);
+      
+      if (!transactionResult.success) {
+        console.log(`❌ [WALLET CHECK] Order ${order.orderNumber}: Database error - ${transactionResult.error}`);
         return false;
       }
 
+      const walletTransactions = transactionResult.transactions || [];
       if (walletTransactions.length === 0) {
         console.log(`❌ [WALLET CHECK] Order ${order.orderNumber}: No wallet transactions found`);
         return false;
       }
 
-      // 3. محاسبه مجموع پرداخت‌های کیف پول
+      // 3. محاسبه امن مجموع پرداخت‌های کیف پول
       const totalWalletPayment = walletTransactions.reduce((sum, tx) => {
-        const amount = parseFloat(tx.amount?.toString() || '0');
-        return sum + (isNaN(amount) ? 0 : amount);
+        return sum + DatabaseUtilities.safeParseAmount(tx.amount);
       }, 0);
 
-      const orderTotal = parseFloat(order.totalAmount?.toString() || '0');
-      if (isNaN(orderTotal) || orderTotal <= 0) {
+      const orderTotal = DatabaseUtilities.safeParseAmount(order.totalAmount);
+      if (orderTotal <= 0) {
         console.log(`❌ [WALLET CHECK] Order ${order.orderNumber}: Invalid order total amount`);
         return false;
       }
+      
       const coverage = (totalWalletPayment / orderTotal) * 100;
-
       console.log(`💰 [WALLET CHECK] Order ${order.orderNumber}: Wallet payment ${totalWalletPayment}/${orderTotal} (${coverage.toFixed(1)}%)`);
 
-      // 4. اگر کیف پول 99% یا بیشتر سفارش را پوشش داده باشد (تایید خودکار)
+      // 4. بررسی پوشش کیف پول
       if (coverage >= 99) {
         console.log(`✅ [WALLET CHECK] Order ${order.orderNumber}: Wallet covers ${coverage.toFixed(1)}% - GUARANTEED Auto-approval`);
         return true;
       }
       
-      // 5. اگر کیف پول 95-99% پوشش دهد (تایید احتمالی)
       if (coverage >= 95) {
         console.log(`✅ [WALLET CHECK] Order ${order.orderNumber}: Wallet covers ${coverage.toFixed(1)}% - Conditional auto-approval`);
         return true;
       }
 
-      console.log(`❌ [WALLET CHECK] Order ${order.orderNumber}: Wallet coverage ${coverage.toFixed(1)}% insufficient (requires ≥99% for guaranteed approval)`);
+      console.log(`❌ [WALLET CHECK] Order ${order.orderNumber}: Wallet coverage ${coverage.toFixed(1)}% insufficient (requires ≥95%)`);
       return false;
 
     } catch (error) {
-      console.error(`❌ [WALLET CHECK] Critical error checking wallet coverage for order ${order.orderNumber}:`, error);
-      // در صورت خطا، سفارش را به صورت دستی نگه می‌داریم
+      console.error(`❌ [WALLET CHECK] Critical error for order ${order.orderNumber}:`, error);
       return false;
     }
   }
