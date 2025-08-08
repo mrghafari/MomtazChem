@@ -48,8 +48,6 @@ interface Order {
   actualDeliveryDate?: string;
   deliveryPersonName?: string;
   deliveryPersonPhone?: string;
-  customerNotes?: string;
-  deliveryNotes?: string;
   financialNotes?: string;
   warehouseNotes?: string;
   logisticsNotes?: string;
@@ -630,20 +628,6 @@ export default function OrderTrackingManagement() {
 
         <div class="section">
           <div class="section-title">یادداشت‌های بخش‌ها</div>
-          <div class="section">
-            <div class="section-title">یادداشت‌های مشتری</div>
-            <div class="notes-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 8px;">
-              <div class="notes-item">
-                <div style="font-weight: bold; margin-bottom: 8px; border-bottom: 1px solid #d1d5db; padding-bottom: 4px;">💬 یادداشت سفارش</div>
-                <div style="font-size: 13px; line-height: 1.4;">${selectedOrder.customerNotes || 'یادداشتی وجود ندارد'}</div>
-              </div>
-              <div class="notes-item">
-                <div style="font-weight: bold; margin-bottom: 8px; border-bottom: 1px solid #d1d5db; padding-bottom: 4px;">🚚 نکات تحویل</div>
-                <div style="font-size: 13px; line-height: 1.4;">${selectedOrder.deliveryNotes || 'نکته خاصی وجود ندارد'}</div>
-              </div>
-            </div>
-          </div>
-
           <div class="notes-grid">
             <div class="notes-item">
               <div style="font-weight: bold; margin-bottom: 8px; border-bottom: 1px solid #d1d5db; padding-bottom: 4px;">📋 یادداشت‌های مالی</div>
@@ -1223,87 +1207,48 @@ export default function OrderTrackingManagement() {
                               </Card>
 
                               {/* Department Notes */}
-                              <>
-                              {/* یادداشت‌های مشتری - همیشه نمایش داده می‌شود */}
-                              <div className="mb-6">
-                                <h4 className="text-lg font-semibold mb-4 text-blue-800">💬 یادداشت‌های مشتری</h4>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                  <Card className="bg-blue-50">
-                                    <CardHeader>
-                                      <CardTitle className="text-sm flex items-center gap-2">
-                                        <FileText className="w-4 h-4 text-blue-600" />
-                                        یادداشت سفارش
-                                      </CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                      <p className="text-sm text-gray-700">
-                                        {selectedOrder.customerNotes || 'یادداشتی وجود ندارد'}
-                                      </p>
-                                    </CardContent>
-                                  </Card>
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <Card>
+                                  <CardHeader>
+                                    <CardTitle className="text-sm flex items-center gap-2">
+                                      <FileText className="w-4 h-4" />
+                                      یادداشت‌های مالی
+                                    </CardTitle>
+                                  </CardHeader>
+                                  <CardContent>
+                                    <p className="text-sm text-gray-600">
+                                      {selectedOrder.financialNotes || 'یادداشتی وجود ندارد'}
+                                    </p>
+                                  </CardContent>
+                                </Card>
 
-                                  <Card className="bg-green-50">
-                                    <CardHeader>
-                                      <CardTitle className="text-sm flex items-center gap-2">
-                                        <Truck className="w-4 h-4 text-green-600" />
-                                        نکات تحویل
-                                      </CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                      <p className="text-sm text-gray-700">
-                                        {selectedOrder.deliveryNotes || 'نکته خاصی وجود ندارد'}
-                                        </p>
-                                      </CardContent>
-                                    </Card>
-                                  </div>
-                                </div>
-                              </div>
+                                <Card>
+                                  <CardHeader>
+                                    <CardTitle className="text-sm flex items-center gap-2">
+                                      <Package className="w-4 h-4" />
+                                      یادداشت‌های انبار
+                                    </CardTitle>
+                                  </CardHeader>
+                                  <CardContent>
+                                    <p className="text-sm text-gray-600">
+                                      {selectedOrder.warehouseNotes || 'یادداشتی وجود ندارد'}
+                                    </p>
+                                  </CardContent>
+                                </Card>
 
-                              <div>
-                                <h4 className="text-lg font-semibold mb-4 text-gray-800">🏢 Department Notes</h4>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                  <Card>
-                                    <CardHeader>
-                                      <CardTitle className="text-sm flex items-center gap-2">
-                                        <FileText className="w-4 h-4" />
-                                        یادداشت‌های مالی
-                                      </CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                      <p className="text-sm text-gray-600">
-                                        {selectedOrder.financialNotes || 'یادداشتی وجود ندارد'}
-                                      </p>
-                                    </CardContent>
-                                  </Card>
-
-                                  <Card>
-                                    <CardHeader>
-                                      <CardTitle className="text-sm flex items-center gap-2">
-                                        <Package className="w-4 h-4" />
-                                        یادداشت‌های انبار
-                                      </CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                      <p className="text-sm text-gray-600">
-                                        {selectedOrder.warehouseNotes || 'یادداشتی وجود ندارد'}
-                                      </p>
-                                    </CardContent>
-                                  </Card>
-
-                                  <Card>
-                                    <CardHeader>
-                                      <CardTitle className="text-sm flex items-center gap-2">
-                                        <Truck className="w-4 h-4" />
-                                        یادداشت‌های لجستیک
-                                      </CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                      <p className="text-sm text-gray-600">
-                                        {selectedOrder.logisticsNotes || 'یادداشتی وجود ندارد'}
-                                      </p>
-                                    </CardContent>
-                                  </Card>
-                                </div>
+                                <Card>
+                                  <CardHeader>
+                                    <CardTitle className="text-sm flex items-center gap-2">
+                                      <Truck className="w-4 h-4" />
+                                      یادداشت‌های لجستیک
+                                    </CardTitle>
+                                  </CardHeader>
+                                  <CardContent>
+                                    <p className="text-sm text-gray-600">
+                                      {selectedOrder.logisticsNotes || 'یادداشتی وجود ندارد'}
+                                    </p>
+                                  </CardContent>
+                                </Card>
                               </div>
 
                               {/* Timestamps */}
@@ -1338,7 +1283,6 @@ export default function OrderTrackingManagement() {
                                   </div>
                                 </CardContent>
                               </Card>
-                              </>
                             </div>
                           )}
                         </DialogContent>
