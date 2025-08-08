@@ -1315,10 +1315,56 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         onOrderComplete();
       }
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error('🚀 [BILINGUAL FORM ERROR] Order submission failed:', error);
+      
+      let errorTitle = t.orderError;
+      let errorMessage = "Failed to submit order. Please try again.";
+      
+      // Enhanced error handling for different payment failures
+      if (error?.message) {
+        const message = error.message;
+        
+        // 🏦 BANK GATEWAY TRANSACTION FAILURE HANDLING
+        if (message.includes('تراکنش بانکی ناموفق بود') || 
+            message.includes('تایید نهایی تراکنش بانکی ناموفق بود') ||
+            message.includes('Transaction failed') ||
+            message.includes('Payment failed')) {
+          errorTitle = language === 'ar' ? "تراکنش بانکی ناموفق" : "Bank Transaction Failed";
+          errorMessage = language === 'ar' ? 
+            "تراکنش بانکی ناموفق بود. لطفاً مجدداً تلاش کنید یا از روش پرداخت دیگری استفاده کنید." :
+            "Bank transaction failed. Please try again or use a different payment method.";
+          
+          console.log('🏦 [BILINGUAL FORM] Bank gateway transaction failed:', message);
+        }
+        // Wallet insufficient balance errors
+        else if (message.includes('موجودی کیف پول کافی نیست') || 
+                 message.includes('Insufficient wallet balance') ||
+                 message.includes('ناکافی') ||
+                 message.includes('insufficient')) {
+          errorTitle = language === 'ar' ? "موجودی ناکافی" : "Insufficient Balance";
+          errorMessage = message;
+          
+          console.log('💰 [BILINGUAL FORM] Wallet insufficient balance:', message);
+        }
+        // Other bank/payment related errors
+        else if (message.includes('bank_gateway') || message.includes('درگاه بانکی') || message.includes('بانک')) {
+          errorTitle = language === 'ar' ? "خطای پرداخت بانکی" : "Bank Payment Error";
+          errorMessage = message;
+          
+          console.log('🏦 [BILINGUAL FORM] Bank payment error:', message);
+        }
+        // Use the actual error message for other cases
+        else {
+          errorMessage = message;
+        }
+      }
+      
       toast({
-        title: t.orderError,
-        variant: "destructive"
+        title: errorTitle,
+        description: errorMessage,
+        variant: "destructive",
+        duration: 5000
       });
     }
   });

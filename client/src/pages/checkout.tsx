@@ -950,8 +950,18 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
       if (error?.message) {
         const message = error.message;
         
+        // 🏦 BANK GATEWAY TRANSACTION FAILURE HANDLING
+        if (message.includes('تراکنش بانکی ناموفق بود') || 
+            message.includes('تایید نهایی تراکنش بانکی ناموفق بود') ||
+            message.includes('Transaction failed') ||
+            message.includes('Payment failed')) {
+          errorTitle = "تراکنش بانکی ناموفق";
+          errorMessage = "تراکنش بانکی ناموفق بود. لطفاً مجدداً تلاش کنید یا از روش پرداخت دیگری استفاده کنید.";
+          
+          console.log('🏦 [BANK ERROR] Bank gateway transaction failed:', message);
+        }
         // Check for Persian wallet insufficient messages
-        if (message.includes('موجودی کیف پول کافی نیست') || 
+        else if (message.includes('موجودی کیف پول کافی نیست') || 
             message.includes('Insufficient wallet balance') ||
             message.includes('ناکافی') ||
             message.includes('insufficient')) {
@@ -980,6 +990,13 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
           
           // Refresh wallet balance
           fetchWalletBalance();
+        }
+        // Other bank gateway related errors
+        else if (message.includes('bank_gateway') || message.includes('درگاه بانکی') || message.includes('بانک')) {
+          errorTitle = "خطای پرداخت بانکی";
+          errorMessage = message;
+          
+          console.log('🏦 [BANK ERROR] Bank gateway error detected:', message);
         }
         // Generic error messages
         else {
