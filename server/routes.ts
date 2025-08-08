@@ -13960,7 +13960,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // 🏦 BANK PAYMENT WORKFLOW: Only generate order numbers for non-bank payments
       // Bank payments will get order numbers after successful payment verification
-      const isBankPayment = ['bank_transfer', 'bank_gateway'].includes(finalPaymentMethod);
+      console.log(`🔍 [PAYMENT METHOD DEBUG] Original: ${paymentMethod}, Final: ${finalPaymentMethod}`);
+      const isBankPayment = ['bank_transfer', 'bank_gateway', 'bank', 'online_bank', 'gateway', 'online_payment', 'bank_receipt'].includes(finalPaymentMethod);
       
       if (!isBankPayment) {
         // Generate order number for wallet payments and other non-bank methods
