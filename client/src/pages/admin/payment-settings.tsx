@@ -67,7 +67,7 @@ const PaymentSettings = () => {
   const { data: paymentMethods = [], isLoading: isLoadingMethods } = useQuery<PaymentMethodSettings[]>({
     queryKey: ['/api/payment/method-settings'],
     queryFn: async () => {
-      const response = await apiRequest('/api/payment/method-settings');
+      const response = await apiRequest('/api/payment/method-settings', { method: 'GET' });
       return response.data || [];
     },
   });
@@ -228,8 +228,8 @@ const PaymentSettings = () => {
       const previousPaymentMethods = queryClient.getQueryData(['/api/payment/method-settings']);
 
       // Optimistically update to the new value
-      queryClient.setQueryData(['/api/payment/method-settings'], (old: PaymentMethodSettings[]) => {
-        if (!old) return old;
+      queryClient.setQueryData<PaymentMethodSettings[]>(['/api/payment/method-settings'], (old: PaymentMethodSettings[] | undefined) => {
+        if (!old || !Array.isArray(old)) return old;
         return old.map(method => 
           method.methodKey === methodKey 
             ? { ...method, enabled: enabled ?? method.enabled, priority: priority ?? method.priority }
