@@ -46,6 +46,8 @@ interface Order {
   customerName: string;
   customerEmail: string;
   customerPhone?: string;
+  fullCustomerName?: string;
+  fullCustomerEmail?: string;
   totalAmount: string;
   currency: string;
   status: string;
@@ -71,6 +73,7 @@ export default function SuperAdminOrderManagement() {
   const [showProductionResetDialog, setShowProductionResetDialog] = useState(false);
   const [preserveCustomers, setPreserveCustomers] = useState(false);
   const [activeTab, setActiveTab] = useState('orders');
+  const [customerIdSearch, setCustomerIdSearch] = useState('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -100,6 +103,16 @@ export default function SuperAdminOrderManagement() {
     });
   };
 
+  // Fetch customer orders by customer ID
+  const { data: customerOrdersResponse, isLoading: customerOrdersLoading } = useQuery({
+    queryKey: ['/api/super-admin/customer-orders', customerIdSearch],
+    enabled: activeTab === 'customer-orders' && customerIdSearch.trim() !== '',
+    retry: (failureCount, error) => {
+      if (error.message.includes('401') || error.message.includes('403')) return false;
+      return failureCount < 2;
+    }
+  });
+
   // Fetch payment gateways
   const { data: gatewaysResponse, isLoading: gatewaysLoading } = useQuery({
     queryKey: ['/api/payment/gateways'],
@@ -114,6 +127,7 @@ export default function SuperAdminOrderManagement() {
 
   // Extract orders from response with proper error handling
   const orders: Order[] = Array.isArray((response as any)?.data) ? (response as any).data : [];
+  const customerOrders: Order[] = Array.isArray((customerOrdersResponse as any)?.data) ? (customerOrdersResponse as any).data : [];
   
   // Debug logging
   console.log('API Response:', response);
@@ -147,6 +161,7 @@ export default function SuperAdminOrderManagement() {
       setShowDeleteDialog(false);
       setSelectedOrder(null);
       queryClient.invalidateQueries({ queryKey: ['/api/super-admin/deletable-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/super-admin/customer-orders'] });
       refetch();
     },
     onError: (error: any) => {
@@ -209,6 +224,7 @@ export default function SuperAdminOrderManagement() {
       });
       setShowProductionResetDialog(false);
       queryClient.invalidateQueries({ queryKey: ['/api/super-admin/deletable-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/super-admin/customer-orders'] });
     },
     onError: (error: any) => {
       toast({
@@ -373,10 +389,14 @@ export default function SuperAdminOrderManagement() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="orders" className="flex items-center gap-2">
               <Package className="h-4 w-4" />
               مدیریت سفارشات
+            </TabsTrigger>
+            <TabsTrigger value="customer-orders" className="flex items-center gap-2">
+              <User className="h-4 w-4" />
+              سفارشات مشتری
             </TabsTrigger>
             <TabsTrigger value="gateways" className="flex items-center gap-2">
               <CreditCard className="h-4 w-4" />
@@ -517,6 +537,146 @@ export default function SuperAdminOrderManagement() {
           </CardContent>
         </Card>
 
+          </TabsContent>
+
+          <TabsContent value="customer-orders" className="space-y-6">
+            {/* Customer Search */}
+            <Card className="mb-6 border-blue-200 bg-blue-50/30">
+              <CardHeader>
+                <CardTitle className="text-xl flex items-center gap-2">
+                  <User className="h-6 w-6 text-blue-600" />
+                  جستجوی سفارشات مشتری
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex gap-4 items-end">
+                  <div className="flex-1">
+                    <Label htmlFor="customer-search">شناسه مشتری (Customer ID)</Label>
+                    <Input
+                      id="customer-search"
+                      value={customerIdSearch}
+                      onChange={(e) => setCustomerIdSearch(e.target.value)}
+                      placeholder="مثال: 123"
+                      className="mt-1"
+                      type="number"
+                    />
+                  </div>
+                  <Button
+                    onClick={() => {
+                      if (customerIdSearch.trim()) {
+                        // The query will automatically fetch when customerIdSearch changes
+                      }
+                    }}
+                    variant="default"
+                    disabled={!customerIdSearch.trim()}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    <Search className="h-4 w-4 ml-2" />
+                    جستجو
+                  </Button>
+                </div>
+                {customerIdSearch.trim() && (
+                  <div className="text-sm text-blue-600">
+                    جستجو برای سفارشات مشتری با شناسه: {customerIdSearch}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Customer Orders Results */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl flex items-center gap-2">
+                  <Package className="h-6 w-6 text-green-600" />
+                  سفارشات مشتری
+                  {customerOrders.length > 0 && (
+                    <Badge className="bg-green-100 text-green-800 ml-2">
+                      {customerOrders.length} سفارش
+                    </Badge>
+                  )}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {customerOrdersLoading && customerIdSearch.trim() ? (
+                  <div className="flex items-center justify-center py-12">
+                    <RefreshCw className="h-8 w-8 animate-spin text-blue-500" />
+                    <span className="mr-2 text-lg">در حال جستجو...</span>
+                  </div>
+                ) : !customerIdSearch.trim() ? (
+                  <div className="text-center py-12">
+                    <User className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-600 mb-2">شناسه مشتری را وارد کنید</h3>
+                    <p className="text-gray-500">برای جستجوی سفارشات، شناسه مشتری مورد نظر را در بالا وارد کنید</p>
+                  </div>
+                ) : customerOrders.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Package className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-600 mb-2">سفارشی یافت نشد</h3>
+                    <p className="text-gray-500">هیچ سفارشی برای مشتری با شناسه {customerIdSearch} پیدا نشد</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {customerOrders.map((order: Order) => (
+                      <div key={order.id} className="p-4 border rounded-lg bg-white hover:bg-gray-50">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <div>
+                              <div className="flex items-center gap-2 mb-2">
+                                <Package className="h-5 w-5 text-blue-500" />
+                                <span className="font-semibold text-lg text-blue-700">
+                                  {order.orderNumber || 'بدون شماره سفارش'}
+                                </span>
+                                {getStatusBadge(order.status)}
+                              </div>
+                              
+                              <div className="grid grid-cols-2 gap-4 text-sm">
+                                <div className="flex items-center gap-2">
+                                  <User className="h-4 w-4 text-green-500" />
+                                  <span>{order.customerName || order.fullCustomerName || 'نامشخص'}</span>
+                                </div>
+                                
+                                <div className="flex items-center gap-2">
+                                  <Mail className="h-4 w-4 text-blue-500" />
+                                  <span>{order.customerEmail || order.fullCustomerEmail || 'ایمیل نامشخص'}</span>
+                                </div>
+                                
+                                <div className="flex items-center gap-2">
+                                  <DollarSign className="h-4 w-4 text-yellow-500" />
+                                  <span>{formatAmount(order.totalAmount, order.currency)}</span>
+                                </div>
+                                
+                                <div className="flex items-center gap-2">
+                                  <Calendar className="h-4 w-4 text-purple-500" />
+                                  <span>{formatDate(order.createdAt)}</span>
+                                </div>
+                              </div>
+                              
+                              <div className="mt-2">
+                                <PaymentMethodBadge 
+                                  paymentMethod={order.paymentMethod}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="flex gap-2">
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handleDeleteClick(order)}
+                              disabled={deleteOrderMutation.isPending}
+                            >
+                              <Trash2 className="h-4 w-4 ml-2" />
+                              حذف سفارش
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="gateways" className="space-y-6">

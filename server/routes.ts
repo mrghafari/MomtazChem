@@ -47395,6 +47395,56 @@ momtazchem.com
     }
   });
 
+  // Get customer orders by customer ID for super admin deletion
+  app.get('/api/super-admin/customer-orders/:customerId', requireSuperAdmin, async (req: Request, res: Response) => {
+    try {
+      const { customerId } = req.params;
+      console.log(`🔍 [SUPER ADMIN] Fetching customer orders for customer: ${customerId}`);
+      
+      const result = await customerPool.query(`
+        SELECT 
+          co.id, 
+          co.order_number as "orderNumber", 
+          co.guest_name as "customerName", 
+          co.guest_email as "customerEmail", 
+          co.total_amount as "totalAmount", 
+          co.currency, 
+          co.status, 
+          co.payment_status as "paymentStatus",
+          co.payment_method as "paymentMethod", 
+          co.created_at as "createdAt", 
+          co.updated_at as "updatedAt",
+          co.customer_id as "customerId",
+          -- Get customer details
+          COALESCE(co.guest_name, c.first_name || ' ' || c.last_name, crm.first_name || ' ' || crm.last_name) as "fullCustomerName",
+          COALESCE(co.guest_email, c.email, crm.email) as "fullCustomerEmail",
+          c.phone as "customerPhone",
+          crm.phone as "crmCustomerPhone"
+        FROM customer_orders co
+        LEFT JOIN customers c ON co.customer_id = c.id
+        LEFT JOIN crm_customers crm ON co.customer_id = crm.id
+        WHERE co.customer_id = $1
+        ORDER BY co.created_at DESC
+      `, [customerId]);
+      
+      console.log(`✅ [SUPER ADMIN] Found ${result.rows.length} orders for customer ${customerId}`);
+
+      res.json({
+        success: true,
+        data: result.rows,
+        customerId: parseInt(customerId)
+      });
+
+    } catch (error) {
+      console.error(`❌ [SUPER ADMIN] Failed to fetch customer orders for ${req.params.customerId}:`, error);
+      res.status(500).json({
+        success: false,
+        message: `خطا در دریافت سفارشات مشتری: ${error.message}`,
+        error: error.message
+      });
+    }
+  });
+
   // Get orders that can be deleted (for super admin interface) - ENHANCED
   app.get('/api/super-admin/deletable-orders', requireSuperAdmin, async (req: Request, res: Response) => {
     try {
