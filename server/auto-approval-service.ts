@@ -328,13 +328,8 @@ export class AutoApprovalService {
           financialNotes: order.paymentMethod === 'bank_transfer_grace' 
             ? 'تایید خودکار حواله بانکی - مدارک بررسی و تایید شد'
             : 'تایید خودکار - مدارک پرداخت بررسی و تایید شد',
-          totalAmount: order.totalAmount?.toString() || '0',
-          currency: order.currency || 'IQD',
-          orderNumber: order.orderNumber,
-          customerFirstName: order.customerFirstName || '',
-          customerLastName: order.customerLastName || '',
-          customerEmail: order.customerEmail || '',
-          customerPhone: order.customerPhone || '',
+          paymentMethod: order.paymentMethod || 'wallet',
+          paymentSourceLabel: 'پرداخت کیف پول - تایید خودکار',
           createdAt: new Date(),
           updatedAt: new Date()
         });
