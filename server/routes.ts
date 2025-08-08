@@ -43374,8 +43374,8 @@ momtazchem.com
 
         // Delete from wallet_transactions table using reference_id
         const walletTransactionsResult = await customerPool.query(
-          'DELETE FROM wallet_transactions WHERE reference_id = $1::text AND reference_type = $2',
-          [customerOrderId.toString(), 'order']
+          'DELETE FROM wallet_transactions WHERE reference_id = $1 AND reference_type = $2',
+          [customerOrderId, 'order']
         );
         console.log(`💰 [DELETE] Removed ${walletTransactionsResult.rowCount} wallet transactions`);
 
@@ -43469,8 +43469,8 @@ momtazchem.com
 
         // Delete from wallet_transactions table using reference_id
         const walletTransactionsResult = await customerPool.query(
-          'DELETE FROM wallet_transactions WHERE reference_id = $1::text AND reference_type = $2',
-          [customerOrderId.toString(), 'order']
+          'DELETE FROM wallet_transactions WHERE reference_id = $1 AND reference_type = $2',
+          [customerOrderId, 'order']
         );
         console.log(`💰 [DELETE] Removed ${walletTransactionsResult.rowCount} wallet transactions`);
 
