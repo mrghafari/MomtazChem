@@ -14305,6 +14305,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('🔒 [SEQUENTIAL] Starting transaction-safe order creation for wallet/payment...');
       let orderNumber: string;
       
+      // Actually generate the order number
+      orderNumber = await orderManagementStorage.generateUniqueOrderNumber();
+      console.log('🔢 [ORDER NUMBER] Generated unique order number:', orderNumber);
+      
       // Calculate order totals and taxes (using dynamic tax settings)
       // Note: orderData.totalAmount from frontend already includes all components
       // We need to extract the actual item subtotal for proper VAT calculation
