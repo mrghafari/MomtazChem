@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست آپلود فیش بانکی</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+            direction: rtl;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .progress {
+            width: 100%;
+            height: 20px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: #007bff;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            display: none;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .file-info {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            border: 1px solid #e9ecef;
+        }
+        .debug-log {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 15px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 تست آپلود فیش بانکی</h1>
+        
+        <form id="uploadForm">
+            <div class="form-group">
+                <label for="orderId">شناسه سفارش:</label>
+                <input type="text" id="orderId" name="orderId" placeholder="مثل: M2511125 یا 184" value="184">
+            </div>
+            
+            <div class="form-group">
+                <label for="receiptAmount">مبلغ فیش (دینار عراقی):</label>
+                <input type="number" id="receiptAmount" name="receiptAmount" placeholder="مبلغ واریزی" value="1000">
+            </div>
+            
+            <div class="form-group">
+                <label for="receipt">فایل فیش بانکی:</label>
+                <input type="file" id="receipt" name="receipt" accept="image/*,application/pdf" required>
+                <div id="fileInfo" class="file-info" style="display: none;"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="notes">توضیحات:</label>
+                <textarea id="notes" name="notes" rows="3" placeholder="توضیحات اختیاری...">تست آپلود فیش بانکی</textarea>
+            </div>
+            
+            <div class="progress" id="progressContainer" style="display: none;">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            
+            <button type="submit" id="submitBtn">آپلود فیش بانکی</button>
+        </form>
+        
+        <div id="result" class="result"></div>
+        <div id="debugLog" class="debug-log" style="display: none;"></div>
+    </div>
+
+    <script>
+        let debugLog = [];
+        
+        function addLog(message) {
+            const timestamp = new Date().toLocaleTimeString('fa-IR');
+            debugLog.push(`[${timestamp}] ${message}`);
+            
+            const logContainer = document.getElementById('debugLog');
+            logContainer.style.display = 'block';
+            logContainer.innerHTML = debugLog.join('\n');
+            logContainer.scrollTop = logContainer.scrollHeight;
+            
+            console.log(message);
+        }
+        
+        function showResult(message, type) {
+            const result = document.getElementById('result');
+            result.className = `result ${type}`;
+            result.innerHTML = message;
+            result.style.display = 'block';
+        }
+        
+        // File selection handler
+        document.getElementById('receipt').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const fileInfo = document.getElementById('fileInfo');
+            
+            if (file) {
+                const sizeInMB = (file.size / 1024 / 1024).toFixed(2);
+                fileInfo.innerHTML = `
+                    <strong>فایل انتخاب شده:</strong><br>
+                    نام: ${file.name}<br>
+                    نوع: ${file.type}<br>
+                    حجم: ${sizeInMB} مگابایت
+                `;
+                fileInfo.style.display = 'block';
+                
+                addLog(`فایل انتخاب شد: ${file.name} (${sizeInMB} MB, ${file.type})`);
+                
+                // Validate file
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'application/pdf'];
+                if (!allowedTypes.includes(file.type)) {
+                    showResult('⚠️ فرمت فایل مجاز نیست. فقط JPG، PNG، WebP و PDF مجاز است.', 'error');
+                    return;
+                }
+                
+                if (file.size > 10 * 1024 * 1024) {
+                    showResult('⚠️ حجم فایل بیش از 10 مگابایت است.', 'error');
+                    return;
+                }
+                
+                showResult('✅ فایل مناسب است و آماده آپلود می‌باشد.', 'success');
+            } else {
+                fileInfo.style.display = 'none';
+            }
+        });
+        
+        // Form submission handler
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            addLog('شروع آپلود...');
+            
+            const formData = new FormData();
+            const fileInput = document.getElementById('receipt');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showResult('❌ لطفاً فایل را انتخاب کنید.', 'error');
+                addLog('خطا: فایل انتخاب نشده');
+                return;
+            }
+            
+            const orderId = document.getElementById('orderId').value;
+            const receiptAmount = document.getElementById('receiptAmount').value;
+            const notes = document.getElementById('notes').value;
+            
+            if (!orderId) {
+                showResult('❌ شناسه سفارش الزامی است.', 'error');
+                addLog('خطا: شناسه سفارش وارد نشده');
+                return;
+            }
+            
+            if (!receiptAmount || parseFloat(receiptAmount) <= 0) {
+                showResult('❌ مبلغ فیش الزامی است.', 'error');
+                addLog('خطا: مبلغ نامعتبر');
+                return;
+            }
+            
+            formData.append('receipt', file);
+            formData.append('orderId', orderId);
+            formData.append('receiptAmount', receiptAmount);
+            formData.append('notes', notes);
+            
+            addLog(`داده‌های فرم: orderId=${orderId}, amount=${receiptAmount}, file=${file.name}`);
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const progressContainer = document.getElementById('progressContainer');
+            const progressBar = document.getElementById('progressBar');
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'در حال آپلود...';
+            progressContainer.style.display = 'block';
+            
+            try {
+                const xhr = new XMLHttpRequest();
+                
+                // Track upload progress
+                xhr.upload.addEventListener('progress', function(e) {
+                    if (e.lengthComputable) {
+                        const percentComplete = (e.loaded / e.total) * 100;
+                        progressBar.style.width = percentComplete + '%';
+                        addLog(`پیشرفت آپلود: ${Math.round(percentComplete)}%`);
+                    }
+                });
+                
+                xhr.addEventListener('load', function() {
+                    addLog(`پاسخ سرور: HTTP ${xhr.status}`);
+                    addLog(`محتوای پاسخ: ${xhr.responseText}`);
+                    
+                    if (xhr.status === 200) {
+                        try {
+                            const response = JSON.parse(xhr.responseText);
+                            if (response.success) {
+                                showResult('✅ فیش بانکی با موفقیت آپلود شد!', 'success');
+                                addLog('آپلود موفق بود');
+                            } else {
+                                showResult(`❌ خطا: ${response.message}`, 'error');
+                                addLog(`خطا از سرور: ${response.message}`);
+                            }
+                        } catch (parseError) {
+                            showResult('❌ خطا در تجزیه پاسخ سرور', 'error');
+                            addLog(`خطا در تجزیه JSON: ${parseError.message}`);
+                        }
+                    } else {
+                        showResult(`❌ خطای سرور: ${xhr.status}`, 'error');
+                        addLog(`خطای HTTP: ${xhr.status}`);
+                    }
+                });
+                
+                xhr.addEventListener('error', function() {
+                    showResult('❌ خطا در ارتباط با سرور', 'error');
+                    addLog('خطای شبکه');
+                });
+                
+                xhr.addEventListener('timeout', function() {
+                    showResult('❌ زمان انتظار تمام شد', 'error');
+                    addLog('Timeout error');
+                });
+                
+                addLog('ارسال درخواست به /api/payment/upload-receipt');
+                xhr.open('POST', '/api/payment/upload-receipt');
+                xhr.timeout = 30000; // 30 seconds timeout
+                xhr.send(formData);
+                
+            } catch (error) {
+                showResult(`❌ خطای غیرمنتظره: ${error.message}`, 'error');
+                addLog(`خطای JavaScript: ${error.message}`);
+            } finally {
+                setTimeout(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'آپلود فیش بانکی';
+                    progressContainer.style.display = 'none';
+                    progressBar.style.width = '0%';
+                }, 2000);
+            }
+        });
+        
+        addLog('صفحه تست آپلود آماده شد');
+    </script>
+</body>
+</html>
