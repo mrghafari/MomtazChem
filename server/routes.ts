@@ -35587,23 +35587,8 @@ momtazchem.com
         .from(customerOrders)
         .where(eq(customerOrders.id, customerOrderId));
 
-      if (orderDetails && (
-        orderDetails.paymentMethod?.includes('wallet') || 
-        orderDetails.paymentMethod === 'wallet_full' || 
-        orderDetails.paymentMethod === 'wallet_partial'
-      )) {
-        // تبدیل خودکار پیش‌فاکتور به فاکتور رسمی برای سفارشات wallet-paid
-        await db
-          .update(customerOrders)
-          .set({
-            invoiceType: 'official_invoice',
-            invoiceConvertedAt: new Date(),
-            updatedAt: new Date()
-          })
-          .where(eq(customerOrders.id, customerOrderId));
-
-        console.log(`📄 [AUTO INVOICE] Order ${orderDetails.orderNumber} automatically converted from proforma to official invoice after financial approval`);
-      }
+      // NOTE: Proforma to final invoice conversion now happens when orders leave warehouse, not at financial approval
+      // This ensures proper business workflow compliance
 
       // Check for excess payment and credit to wallet if order is approved
       const [orderWithNotes] = await db
@@ -42266,12 +42251,9 @@ momtazchem.com
         order.paymentMethod === 'wallet_partial'
       );
       
-      if (!isWalletPaid) {
-        return res.status(400).json({
-          success: false,
-          message: "فقط سفارشات پرداخت شده از کیف پول قابل تبدیل به فاکتور هستند"
-        });
-      }
+      // BUSINESS RULE CHANGE: All orders can be converted to final invoice when they leave warehouse
+      // No longer restricted to wallet payments only
+      console.log(`📄 [MANUAL CONVERT] Manual conversion requested for order ${orderNumber} with payment method: ${order.paymentMethod}`);
       
       // Check if order has reached warehouse status
       const isWarehouseReady = ['warehouse_ready', 'warehouse_pending', 'warehouse_processing', 
@@ -46965,6 +46947,38 @@ momtazchem.com
         AND warehouse_processed_at IS NOT NULL
         RETURNING customer_order_id, current_status
       `);
+      
+      // AUTO-CONVERT PROFORMA TO FINAL INVOICE WHEN ORDERS LEAVE WAREHOUSE
+      // This implements the business rule: all orders convert to final invoice when leaving warehouse
+      if (warehouseToLogistics.rows.length > 0) {
+        console.log(`📄 [WAREHOUSE EXIT] Converting ${warehouseToLogistics.rows.length} orders from proforma to final invoice as they leave warehouse`);
+        
+        for (const row of warehouseToLogistics.rows) {
+          try {
+            // Convert proforma to final invoice for ALL orders leaving warehouse
+            await pool.query(`
+              UPDATE customer_orders 
+              SET 
+                invoice_type = 'official_invoice',
+                invoice_converted_at = NOW(),
+                updated_at = NOW()
+              WHERE id = $1
+              AND (invoice_type IS NULL OR invoice_type != 'official_invoice')
+            `, [row.customer_order_id]);
+            
+            // Get order number for logging
+            const orderInfo = await pool.query(`
+              SELECT order_number FROM customer_orders WHERE id = $1
+            `, [row.customer_order_id]);
+            
+            if (orderInfo.rows.length > 0) {
+              console.log(`✅ [INVOICE CONVERT] Order ${orderInfo.rows[0].order_number} converted from proforma to final invoice upon warehouse exit`);
+            }
+          } catch (error) {
+            console.error(`❌ [INVOICE CONVERT] Error converting order ${row.customer_order_id}:`, error);
+          }
+        }
+      }
       
       console.log(`🔄 [MANUAL TRANSFER] Transferred ${financialToWarehouse.rows.length} orders from finance to warehouse`);
       console.log(`🔄 [MANUAL TRANSFER] Transferred ${warehouseToLogistics.rows.length} orders from warehouse to logistics`);

@@ -154,10 +154,10 @@ export class InvoiceStorage implements IInvoiceStorage {
         throw new Error("این سفارش هنوز تایید مالی نگرفته است. فاکتور فقط برای سفارشات تایید شده مالی صادر می‌شود.");
       }
 
-      // Check payment status
-      if (customerOrder.paymentStatus !== 'paid') {
-        throw new Error("این سفارش هنوز پرداخت نشده است. فاکتور فقط برای سفارشات پرداخت شده صادر می‌شود.");
-      }
+      // BUSINESS RULE CHANGE: No longer require payment completion for invoice generation
+      // Invoices can be generated when orders leave warehouse, regardless of payment status
+      // This supports orders with grace periods and other business scenarios
+      console.log(`📄 [INVOICE GEN] Generating invoice for order ${customerOrder.orderNumber} with payment status: ${customerOrder.paymentStatus}`);
 
       // Generate invoice number
       const invoiceNumber = await this.generateInvoiceNumber();
@@ -193,10 +193,9 @@ export class InvoiceStorage implements IInvoiceStorage {
       throw new Error("سفارش یافت نشد");
     }
 
-    // For shop orders, check payment status
-    if (order.paymentStatus !== 'paid') {
-      throw new Error("این سفارش هنوز پرداخت نشده است. فاکتور فقط برای سفارشات پرداخت شده صادر می‌شود.");
-    }
+    // BUSINESS RULE CHANGE: No longer require payment completion for shop orders either
+    // This maintains consistency across all order types
+    console.log(`📄 [INVOICE GEN] Generating invoice for shop order ${order.id} with payment status: ${order.paymentStatus}`);
 
     // Get order items
     const items = await shopDb
