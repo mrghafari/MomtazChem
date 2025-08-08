@@ -42525,17 +42525,6 @@ momtazchem.com
     }
   });
 
-  // Catch-all for unmatched API routes - return JSON 404
-  app.all('/api/*', (req, res) => {
-    console.log(`❌ 404 - Unmatched API route: ${req.method} ${req.originalUrl}`);
-    res.status(404).json({
-      success: false,
-      message: 'API endpoint not found',
-      path: req.originalUrl,
-      method: req.method
-    });
-  });
-
   // Test sequential delivery code generation
   app.post("/api/test/sequential-code", async (req, res) => {
     try {
@@ -47154,6 +47143,17 @@ momtazchem.com
   const { setupWebRTCSocket } = await import("./webrtc-socket");
   setupWebRTCSocket(httpServer);
   console.log("🔌 [WebRTC] Routes and Socket initialized");
+
+  // Catch-all for unmatched API routes - return JSON 404 (must be last)
+  app.all('/api/*', (req, res) => {
+    console.log(`❌ 404 - Unmatched API route: ${req.method} ${req.originalUrl}`);
+    res.status(404).json({
+      success: false,
+      message: 'API endpoint not found',
+      path: req.originalUrl,
+      method: req.method
+    });
+  });
 
   return httpServer;
 }

@@ -1229,8 +1229,11 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
       }
       // Handle online_payment method - redirect to bank gateway OR show failure message
       else if (paymentMethod === 'online_payment') {
-        if (response.redirectToPayment && response.paymentGatewayUrl) {
-          console.log('🏦 [ONLINE PAYMENT] Redirecting to bank gateway:', response.paymentGatewayUrl);
+        // Check for both paymentUrl (new) and paymentGatewayUrl (legacy) fields
+        const gatewayUrl = response.paymentUrl || response.paymentGatewayUrl;
+        
+        if (response.requiresBankPayment && gatewayUrl) {
+          console.log('🏦 [ONLINE PAYMENT] Redirecting to bank gateway:', gatewayUrl);
           
           toast({
             title: "انتقال به درگاه بانکی",
@@ -1239,7 +1242,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
           
           // Redirect to payment gateway
           setTimeout(() => {
-            window.location.href = response.paymentGatewayUrl;
+            window.location.href = gatewayUrl;
           }, 1500);
           return;
         } else if (response.error === 'ONLINE_PAYMENT_UNAVAILABLE') {
@@ -1265,8 +1268,10 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         });
         onOrderComplete();
       }
-      // Check if payment gateway redirect is needed (legacy)
-      else if (response.redirectToPayment && response.paymentGatewayUrl) {
+      // Check if payment gateway redirect is needed (legacy or fallback)
+      else if ((response.redirectToPayment || response.requiresBankPayment) && (response.paymentUrl || response.paymentGatewayUrl)) {
+        const gatewayUrl = response.paymentUrl || response.paymentGatewayUrl;
+        
         toast({
           title: "انتقال به درگاه پرداخت",
           description: "در حال انتقال شما به درگاه پرداخت..."
@@ -1274,7 +1279,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
         
         // Redirect to payment gateway
         setTimeout(() => {
-          window.location.href = response.paymentGatewayUrl;
+          window.location.href = gatewayUrl;
         }, 1500);
         return;
       } 
