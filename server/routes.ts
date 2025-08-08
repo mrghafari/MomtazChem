@@ -15356,14 +15356,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      // Add redirect URL for online payment and bank transfer
-      if (finalPaymentMethod === 'online_payment' || finalPaymentMethod === 'bank_transfer') {
-        responseData.redirectToPayment = true;
-        responseData.paymentGatewayUrl = `/payment?orderId=${order.id}&amount=${Math.round(remainingAmount) > 0 ? Math.round(remainingAmount) : Math.round(totalAmount)}&method=${finalPaymentMethod}`;
-        console.log(`✅ Order ${orderNumber} created - redirecting to payment gateway for ${Math.round(remainingAmount) > 0 ? Math.round(remainingAmount) : Math.round(totalAmount)} IQD (method: ${finalPaymentMethod})`);
+      // 🏦 [BANK_PAYMENTS] Route all bank-related payments to active gateway
+      if (finalPaymentMethod === 'online_payment' || finalPaymentMethod === 'bank' || finalPaymentMethod === 'bank_transfer') {
         
         // For hybrid payment (wallet + bank gateway), return special response
         if (remainingAmount > 0 && walletAmountUsed > 0) {
+          console.log(`🔄 [HYBRID PAYMENT] Routing remaining ${remainingAmount} IQD to bank gateway...`);
           // هدایت پرداخت ترکیبی به درگاه بانکی فعال
           const { bankGatewayRouter } = await import('./bank-gateway-router');
           const routingResult = await bankGatewayRouter.routePayment({
@@ -15390,8 +15388,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               paymentGateway: routingResult.gateway,
               paymentUrl: routingResult.paymentUrl,
               transactionId: routingResult.transactionId,
-              redirectUrl: routingResult.paymentUrl || `/payment/${orderNumber}?amount=${remainingAmount}&wallet=${walletAmountUsed}&method=${finalPaymentMethod}`,
-              paymentGatewayUrl: routingResult.paymentUrl || `/payment?orderId=${order.id}&amount=${remainingAmount}&method=${finalPaymentMethod}`
+              redirectUrl: routingResult.paymentUrl
             });
           } else {
             console.log(`❌ [PAYMENT ROUTING] Failed to route hybrid payment: ${routingResult.message}`);
@@ -15406,34 +15403,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
               requiresBankPayment: true,
               redirectToPayment: true,
               paymentError: routingResult.message,
-              redirectUrl: `/payment/${orderNumber}?amount=${remainingAmount}&wallet=${walletAmountUsed}&method=${finalPaymentMethod}`,
-              paymentGatewayUrl: `/payment?orderId=${order.id}&amount=${remainingAmount}&method=${finalPaymentMethod}`
+              redirectUrl: `/payment/${orderNumber}?amount=${remainingAmount}&wallet=${walletAmountUsed}&method=${finalPaymentMethod}`
             });
           }
         }
         
-        // 🏦 [ONLINE_PAYMENT] Route full amount to bank gateway
-        if (finalPaymentMethod === 'online_payment') {
-          console.log(`🏦 [ONLINE_PAYMENT] Routing ${totalAmount} IQD to bank gateway...`);
+        // 🏦 [FULL_BANK_PAYMENT] Route full amount to bank gateway for all bank payment types
+        if (finalPaymentMethod === 'online_payment' || finalPaymentMethod === 'bank') {
+          const fullAmount = Math.round(remainingAmount) > 0 ? Math.round(remainingAmount) : Math.round(totalAmount);
+          console.log(`🏦 [BANK_PAYMENT] Routing ${fullAmount} IQD to bank gateway (method: ${finalPaymentMethod})...`);
           
           const { bankGatewayRouter } = await import('./bank-gateway-router');
           const routingResult = await bankGatewayRouter.routePayment({
             orderId: order.id,
             customerId: finalCustomerId,
-            amount: totalAmount,
+            amount: fullAmount,
             currency: 'IQD',
             returnUrl: `${req.protocol}://${req.get('host')}/payment/success`,
             cancelUrl: `${req.protocol}://${req.get('host')}/payment/cancel`
           });
 
           if (routingResult.success) {
-            console.log(`🏦 [PAYMENT ROUTING] Online payment routed to ${routingResult.gateway?.name}`);
+            console.log(`🏦 [PAYMENT ROUTING] Bank payment routed to ${routingResult.gateway?.name}`);
             return res.json({
               success: true,
               message: 'سفارش ثبت شد - هدایت به درگاه پرداخت',
               orderId: order.id,
               orderNumber: null, // No order number until payment succeeds
-              totalAmount: totalAmount,
+              totalAmount: Math.round(totalAmount),
+              walletAmountUsed: Math.round(walletAmountUsed),
               requiresBankPayment: true,
               paymentUrl: routingResult.paymentUrl
             });
@@ -15448,6 +15446,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
               error: 'BANK_ROUTING_FAILED'
             });
           }
+        }
+        
+        // 🏦 [BANK_TRANSFER] Fallback for bank_transfer (only if no routing above)
+        if (finalPaymentMethod === 'bank_transfer') {
+          responseData.redirectToPayment = true;
+          responseData.paymentGatewayUrl = `/payment?orderId=${order.id}&amount=${Math.round(remainingAmount) > 0 ? Math.round(remainingAmount) : Math.round(totalAmount)}&method=${finalPaymentMethod}`;
+          console.log(`✅ Order ${orderNumber} created - redirecting to payment gateway for ${Math.round(remainingAmount) > 0 ? Math.round(remainingAmount) : Math.round(totalAmount)} IQD (method: ${finalPaymentMethod})`);
         }
       }
 
