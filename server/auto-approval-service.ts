@@ -142,7 +142,7 @@ export class AutoApprovalService {
     try {
       console.log("💰 [WALLET AUTO] Checking wallet-paid orders (including hybrid payments)...");
       
-      // یافتن تمام سفارشات کامل پرداخت شده در حال انتظار (شامل partial که کاملاً پرداخت شده‌اند)
+      // یافتن سفارشات wallet-paid واقعی (فقط سفارشات که کاملاً پرداخت شده‌اند)
       const pendingPaidOrders = await db
         .select({
           id: customerOrders.id,
@@ -160,17 +160,10 @@ export class AutoApprovalService {
         .innerJoin(orderManagement, eq(customerOrders.id, orderManagement.customerOrderId))
         .where(
           sql`
-            (
-              customer_orders.payment_status = 'paid' 
-              OR 
-              (
-                customer_orders.payment_status = 'partial' 
-                AND (
-                  customer_orders.payment_method LIKE '%wallet%'
-                  OR customer_orders.payment_method LIKE '%کیف%'
-                  OR customer_orders.payment_method LIKE '%ترکیبی%'
-                )
-              )
+            customer_orders.payment_status = 'paid' 
+            AND (
+              customer_orders.payment_method LIKE '%wallet%'
+              OR customer_orders.payment_method LIKE '%کیف%'
             )
             AND order_management.current_status = 'pending'
           `
@@ -220,23 +213,25 @@ export class AutoApprovalService {
         return false;
       }
 
-      // 1. بررسی سفارش ترکیبی ارتقا یافته به کیف پول کامل  
-      if (order.paymentSourceLabel?.includes('ترکیبی به کیف پول کامل')) {
-        console.log(`🎯 [WALLET CHECK] Order ${order.orderNumber}: Hybrid order upgraded to full wallet payment - PRIORITY AUTO-APPROVAL`);
-        return true;
-      }
+      // ❌ CRITICAL FIX: هرگز بر اساس نام روش پرداخت تایید نکنید - همیشه تراکنش‌های واقعی را بررسی کنید
+      // NEVER approve based on payment method name alone - always verify actual transactions
       
-      // 2. اگر روش پرداخت مستقیماً کیف پول است
-      if (
-        order.paymentMethod?.includes('wallet') ||
-        order.paymentSourceLabel?.includes('wallet') ||
-        order.paymentSourceLabel?.includes('کیف')
-      ) {
-        console.log(`💰 [WALLET CHECK] Order ${order.orderNumber}: Direct wallet payment detected`);
-        return true;
+      console.log(`🔍 [WALLET CHECK] Order ${order.orderNumber}: Starting STRICT wallet verification...`);
+      console.log(`🔍 [WALLET CHECK] Payment method: ${order.paymentMethod}, Status: ${order.paymentStatus}`);
+      
+      // برای سفارشات ترکیبی (hybrid) - هر دو بخش باید موفق باشد
+      // For hybrid orders - BOTH parts must be successful
+      if (order.paymentMethod?.includes('partial') || order.paymentMethod?.includes('ترکیبی')) {
+        console.log(`🔄 [WALLET CHECK] Order ${order.orderNumber}: HYBRID ORDER detected - verifying both wallet AND bank portions`);
+        
+        // اگر payment_status = 'partial' یعنی یکی از بخش‌ها ناموفق بوده
+        if (order.paymentStatus === 'partial') {
+          console.log(`❌ [WALLET CHECK] Order ${order.orderNumber}: HYBRID FAILED - payment_status is 'partial', rejecting order`);
+          return false;
+        }
       }
 
-      // 2. بررسی تراکنش‌های کیف پول با استفاده از utility امن
+      // بررسی تراکنش‌های کیف پول با استفاده از utility امن
       const transactionResult = await DatabaseUtilities.getWalletTransactions(order.orderNumber, order.customerId);
       
       if (!transactionResult.success) {
@@ -246,11 +241,11 @@ export class AutoApprovalService {
 
       const walletTransactions = transactionResult.transactions || [];
       if (walletTransactions.length === 0) {
-        console.log(`❌ [WALLET CHECK] Order ${order.orderNumber}: No wallet transactions found`);
+        console.log(`❌ [WALLET CHECK] Order ${order.orderNumber}: NO WALLET TRANSACTIONS FOUND - cannot approve`);
         return false;
       }
 
-      // 3. محاسبه امن مجموع پرداخت‌های کیف پول
+      // محاسبه امن مجموع پرداخت‌های کیف پول
       const totalWalletPayment = walletTransactions.reduce((sum, tx) => {
         return sum + DatabaseUtilities.safeParseAmount(tx.amount);
       }, 0);
@@ -264,14 +259,14 @@ export class AutoApprovalService {
       const coverage = (totalWalletPayment / orderTotal) * 100;
       console.log(`💰 [WALLET CHECK] Order ${order.orderNumber}: Wallet payment ${totalWalletPayment}/${orderTotal} (${coverage.toFixed(1)}%)`);
 
-      // 4. بررسی پوشش کیف پول
+      // بررسی پوشش کیف پول - فقط با تراکنش‌های واقعی
       if (coverage >= 99) {
-        console.log(`✅ [WALLET CHECK] Order ${order.orderNumber}: Wallet covers ${coverage.toFixed(1)}% - GUARANTEED Auto-approval`);
+        console.log(`✅ [WALLET CHECK] Order ${order.orderNumber}: Wallet covers ${coverage.toFixed(1)}% with ACTUAL transactions - APPROVED`);
         return true;
       }
       
       if (coverage >= 95) {
-        console.log(`✅ [WALLET CHECK] Order ${order.orderNumber}: Wallet covers ${coverage.toFixed(1)}% - Conditional auto-approval`);
+        console.log(`✅ [WALLET CHECK] Order ${order.orderNumber}: Wallet covers ${coverage.toFixed(1)}% with ACTUAL transactions - APPROVED`);
         return true;
       }
 
