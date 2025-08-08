@@ -33216,6 +33216,79 @@ momtazchem.com
     }
   });
 
+  // DIAGNOSTIC ENDPOINT: Debug wallet discrepancy for specific customers
+  app.get('/api/debug/wallet-discrepancy/:customerId', async (req, res) => {
+    try {
+      const customerId = parseInt(req.params.customerId);
+      
+      console.log(`🔍 [WALLET DEBUG] Investigating wallet discrepancy for customer ${customerId}`);
+      
+      // 1. Direct database queries
+      const directWallet = await customerDb
+        .select()
+        .from(customerWallets)
+        .where(eq(customerWallets.customerId, customerId));
+      
+      const directTransactions = await customerDb
+        .select()
+        .from(walletTransactions)
+        .where(eq(walletTransactions.customerId, customerId))
+        .orderBy(desc(walletTransactions.createdAt))
+        .limit(10);
+      
+      const directRecharges = await customerDb
+        .select()
+        .from(walletRechargeRequests)
+        .where(eq(walletRechargeRequests.customerId, customerId))
+        .orderBy(desc(walletRechargeRequests.createdAt))
+        .limit(5);
+
+      // 2. Using wallet storage methods
+      const storageBalance = await walletStorage.getWalletBalance(customerId);
+      const storageSummary = await walletStorage.getCustomerWalletSummary(customerId);
+      
+      // 3. Customer details
+      const customer = await crmStorage.getCrmCustomerById(customerId);
+      
+      const diagnosticData = {
+        customerId,
+        customer,
+        timestamp: new Date().toISOString(),
+        directQueries: {
+          wallet: directWallet,
+          transactions: directTransactions,
+          recharges: directRecharges
+        },
+        storageResults: {
+          balance: storageBalance,
+          summary: storageSummary
+        },
+        analysis: {
+          hasWallet: directWallet.length > 0,
+          hasTransactions: directTransactions.length > 0,
+          hasRecharges: directRecharges.length > 0,
+          calculatedBalance: directWallet.length > 0 ? parseFloat(directWallet[0].balance) : 0
+        }
+      };
+      
+      console.log(`🔍 [WALLET DEBUG] Results:`, JSON.stringify(diagnosticData, null, 2));
+      
+      res.json({ 
+        success: true, 
+        message: 'Diagnostic data collected successfully',
+        data: diagnosticData
+      });
+      
+    } catch (error) {
+      console.error('🔍 [WALLET DEBUG] Error during diagnostic:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Diagnostic failed',
+        error: error.message 
+      });
+    }
+  });
+
   // =============================================================================
   // GEOGRAPHIC ANALYTICS API - TEST ENDPOINT
   // =============================================================================

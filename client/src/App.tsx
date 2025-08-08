@@ -127,6 +127,7 @@ import TemplateNumberingSystem from "@/pages/admin/template-numbering-system";
 
 import BankReceiptUpload from "@/pages/bank-receipt-upload";
 import WalletCorrection from "@/pages/admin/wallet-correction";
+import WalletDebugTest from "@/pages/wallet-debug-test";
 import TestLogistics from "@/pages/test-logistics";
 import KpiDashboard from "@/pages/kpi-dashboard";
 import ManagementDashboard from "@/pages/management-dashboard";
@@ -199,6 +200,7 @@ function Router() {
           <Route path="/test-payment" component={PaymentTestPage} />
           <Route path="/admin/wallet-management" component={WalletManagement} />
           <Route path="/admin/wallet-correction" component={WalletCorrection} />
+          <Route path="/wallet-debug-test" component={WalletDebugTest} />
           <Route path="/admin/inquiries" component={Dashboard} />
           <Route path="/admin/inquiry/:id" component={InquiryDetail} />
           <Route path="/forgot-password" component={ForgotPassword} />
