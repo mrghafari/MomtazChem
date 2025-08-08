@@ -121,14 +121,23 @@ export class PaymentWorkflowService {
     
     try {
       // ایجاد سفارش در customer_orders
+      // برای پرداخت بانکی، شماره سفارش تا تایید پرداخت تخصیص نمی‌یابد
+      const orderValues = {
+        ...orderData,
+        paymentMethod,
+        status: this.getInitialStatus(paymentMethod),
+        paymentStatus: this.getInitialPaymentStatus(paymentMethod)
+      };
+      
+      // فقط برای پرداخت بانکی، شماره سفارش را حذف کنیم
+      if (paymentMethod === 'bank_gateway') {
+        delete orderValues.orderNumber;
+        console.log(`🏦 [BANK ORDER] Created without order number - will be assigned after payment verification`);
+      }
+      
       const [customerOrder] = await db
         .insert(customerOrders)
-        .values({
-          ...orderData,
-          paymentMethod,
-          status: this.getInitialStatus(paymentMethod),
-          paymentStatus: this.getInitialPaymentStatus(paymentMethod)
-        })
+        .values(orderValues)
         .returning();
       
       // ایجاد رکورد در order_management
@@ -137,7 +146,8 @@ export class PaymentWorkflowService {
       // پردازش پرداخت بر اساس روش انتخابی
       await this.processPaymentMethod(customerOrder, managementData, paymentMethod, orderData);
       
-      console.log(`✅ [CREATE ORDER] Order ${customerOrder.orderNumber} created successfully`);
+      const orderIdentifier = customerOrder.orderNumber || `temp-${customerOrder.id}`;
+      console.log(`✅ [CREATE ORDER] Order ${orderIdentifier} created successfully`);
       return customerOrder;
       
     } catch (error) {
@@ -192,20 +202,20 @@ export class PaymentWorkflowService {
   
   // 5. پردازش پرداخت درگاه بانکی
   private async processBankGatewayPayment(customerOrder: any, orderMgmt: any) {
-    console.log(`🏦 [BANK GATEWAY] Processing payment for order ${customerOrder.orderNumber}`);
+    const orderIdentifier = customerOrder.orderNumber || `temp-${customerOrder.id}`;
+    console.log(`🏦 [BANK GATEWAY] Processing payment for order ${orderIdentifier}`);
     
-    // بروزرسانی وضعیت به financial_reviewing برای تایید 5 دقیقه‌ای
+    // بروزرسانی وضعیت به pending_payment تا تایید پرداخت
     await db
       .update(orderManagement)
       .set({
-        currentStatus: 'financial_reviewing',
-        paymentSourceLabel: 'پرداخت توسط بانک',
+        currentStatus: 'pending_payment',
+        paymentSourceLabel: 'در انتظار تایید پرداخت بانکی',
         bankAmountPaid: customerOrder.totalAmount
       })
       .where(eq(orderManagement.id, orderMgmt.id));
     
-    // زمان‌بندی تایید خودکار
-    this.scheduleAutoApproval(orderMgmt.id, 5);
+    console.log(`🔄 [BANK GATEWAY] Order ${orderIdentifier} pending payment verification`);
   }
   
   // 6. پردازش پرداخت کیف پول
@@ -388,7 +398,51 @@ export class PaymentWorkflowService {
   private shouldAutoApprove(paymentMethod: string): boolean {
     return ['bank_gateway', 'wallet', 'wallet_partial'].includes(paymentMethod);
   }
+
+  // تخصیص شماره سفارش پس از تایید موفق پرداخت بانکی
+  async assignOrderNumberAfterPaymentSuccess(customerOrderId: number): Promise<string> {
+    console.log(`🏦 [PAYMENT SUCCESS] Assigning order number for customer order ${customerOrderId}`);
+    
+    try {
+      // Generate new order number using transaction-safe method
+      const orderNumber = await db.transaction(async (tx) => {
+        // Import the order management storage to use its transaction-safe method
+        const { orderManagementStorage } = await import('./order-management-storage');
+        
+        // Generate order number within transaction
+        const newOrderNumber = await orderManagementStorage.generateOrderNumberInTransaction(tx);
+        
+        // Update customer order with the new order number
+        await tx
+          .update(customerOrders)
+          .set({ 
+            orderNumber: newOrderNumber,
+            status: 'confirmed',
+            paymentStatus: 'paid'
+          })
+          .where(eq(customerOrders.id, customerOrderId));
+        
+        // Update order management status
+        await tx
+          .update(orderManagement)
+          .set({
+            currentStatus: 'financial_reviewing',
+            paymentSourceLabel: 'پرداخت موفق بانکی',
+            financialReviewedAt: new Date()
+          })
+          .where(eq(orderManagement.customerOrderId, customerOrderId));
+        
+        return newOrderNumber;
+      });
+      
+      console.log(`✅ [PAYMENT SUCCESS] Order number ${orderNumber} assigned successfully`);
+      return orderNumber;
+      
+    } catch (error) {
+      console.error(`❌ [PAYMENT SUCCESS] Error assigning order number:`, error);
+      throw error;
+    }
+  }
 }
 
-// نمونه پیاده‌سازی
 export const paymentWorkflow = new PaymentWorkflowService();

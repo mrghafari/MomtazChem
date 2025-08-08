@@ -9077,21 +9077,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Update order payment status
+      // For online bank payments, assign order number after successful verification
       if (verificationResult.orderId) {
-        const { pool } = await import('./db');
+        const { paymentWorkflow } = await import('./payment-workflow');
         
-        await pool.query(`
-          UPDATE customer_orders 
-          SET 
-            payment_status = 'paid',
-            status = 'warehouse_pending',
-            payment_transaction_id = $1,
-            updated_at = NOW()
-          WHERE id = $2
-        `, [transactionId, verificationResult.orderId]);
-
-        console.log(`✅ [PAYMENT VERIFICATION] Order ${verificationResult.orderId} payment verified and updated`);
+        // Find order that needs order number assignment (bank gateway orders without order numbers)
+        const { pool } = await import('./db');
+        const orderResult = await pool.query(`
+          SELECT id, order_number, payment_method 
+          FROM customer_orders 
+          WHERE id = $1
+        `, [verificationResult.orderId]);
+        
+        if (orderResult.rows.length > 0) {
+          const order = orderResult.rows[0];
+          
+          // If this is a bank gateway payment without order number, assign one now
+          if (order.payment_method === 'bank_gateway' && !order.order_number) {
+            console.log(`🏦 [BANK VERIFICATION] Assigning order number for successful bank payment`);
+            const orderNumber = await paymentWorkflow.assignOrderNumberAfterPaymentSuccess(verificationResult.orderId);
+            console.log(`✅ [BANK VERIFICATION] Order number ${orderNumber} assigned after successful payment`);
+          } else {
+            // Regular order update for non-bank or orders that already have numbers
+            await pool.query(`
+              UPDATE customer_orders 
+              SET 
+                payment_status = 'paid',
+                status = 'confirmed',
+                payment_transaction_id = $1,
+                updated_at = NOW()
+              WHERE id = $2
+            `, [transactionId, verificationResult.orderId]);
+            
+            console.log(`✅ [PAYMENT VERIFICATION] Order ${verificationResult.orderId} payment verified and updated`);
+          }
+        }
       }
 
       res.json({
