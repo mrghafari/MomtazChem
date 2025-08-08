@@ -14743,25 +14743,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
           orderId: order.id
         });
         
-        // Hybrid payment response - redirect to correct gateway
-        res.json({
-          success: true,
-          message: "پرداخت با کیف پول انجام شد، لطفاً مابقی مبلغ را از طریق درگاه بانکی پرداخت کنید",
-          requiresBankPayment: true,
-          walletAmountDeducted: actualWalletUsed,
-          remainingAmount: remainingAmountToPay,
-          redirectUrl: `/payment?orderId=${order.id}&amount=${remainingAmountToPay}&method=${actualPaymentMethod}`,
-          order: {
-            id: order.id,
-            orderNumber: order.orderNumber,
-            totalAmount: order.totalAmount,
-            status: order.status,
-            paymentStatus: finalPaymentStatus,
-            paymentMethod: finalPaymentMethod,
-            walletAmountUsed: actualWalletUsed,
-            crmCustomerId: finalCrmCustomerId,
-          }
+        // 🏦 [WALLET_COMBINED] Route remaining amount to bank gateway (same as customers/orders)
+        console.log(`🏦 [WALLET_COMBINED] Routing remaining ${remainingAmountToPay} IQD to bank gateway...`);
+        
+        const { BankGatewayRouter } = await import('./bank-gateway-router');
+        const bankGatewayRouter = new BankGatewayRouter();
+        
+        const routingResult = await bankGatewayRouter.routePayment({
+          orderId: order.id,
+          customerId: finalCrmCustomerId || customerId,
+          amount: remainingAmountToPay,
+          currency: 'IQD',
+          returnUrl: `${req.protocol}://${req.get('host')}/payment/success`,
+          cancelUrl: `${req.protocol}://${req.get('host')}/payment/cancel`
         });
+
+        if (routingResult.success) {
+          console.log(`🏦 [PAYMENT ROUTING] Wallet combined payment routed to ${routingResult.gateway?.name}`);
+          return res.json({
+            success: true,
+            message: "پرداخت با کیف پول انجام شد، لطفاً مابقی مبلغ را از طریق درگاه بانکی پرداخت کنید",
+            requiresBankPayment: true,
+            walletAmountDeducted: actualWalletUsed,
+            remainingAmount: remainingAmountToPay,
+            redirectUrl: routingResult.paymentUrl,
+            paymentUrl: routingResult.paymentUrl,
+            transactionId: routingResult.transactionId,
+            order: {
+              id: order.id,
+              orderNumber: order.orderNumber,
+              totalAmount: order.totalAmount,
+              status: order.status,
+              paymentStatus: finalPaymentStatus,
+              paymentMethod: finalPaymentMethod,
+              walletAmountUsed: actualWalletUsed,
+              crmCustomerId: finalCrmCustomerId,
+            }
+          });
+        } else {
+          console.log(`❌ [PAYMENT ROUTING] Failed to route wallet combined payment: ${routingResult.message}`);
+          // Fallback to payment page redirect
+          return res.json({
+            success: true,
+            message: "پرداخت با کیف پول انجام شد، لطفاً مابقی مبلغ را از طریق درگاه بانکی پرداخت کنید",
+            requiresBankPayment: true,
+            walletAmountDeducted: actualWalletUsed,
+            remainingAmount: remainingAmountToPay,
+            redirectUrl: `/payment?orderId=${order.id}&amount=${remainingAmountToPay}&method=${actualPaymentMethod}`,
+            paymentError: routingResult.message,
+            order: {
+              id: order.id,
+              orderNumber: order.orderNumber,
+              totalAmount: order.totalAmount,
+              status: order.status,
+              paymentStatus: finalPaymentStatus,
+              paymentMethod: finalPaymentMethod,
+              walletAmountUsed: actualWalletUsed,
+              crmCustomerId: finalCrmCustomerId,
+            }
+          });
+        }
       } else {
         // Standard payment response
         res.json({
