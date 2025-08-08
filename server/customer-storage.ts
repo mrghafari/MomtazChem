@@ -175,13 +175,22 @@ export class CustomerStorage implements ICustomerStorage {
     
     // Use transaction-safe order creation to ensure sequential numbering without gaps
     let order: any;
-    let orderNumber: string;
+    let orderNumber: string | null = orderData.orderNumber || null;
+    
+    // 🏦 BANK PAYMENT WORKFLOW: Only generate order numbers for non-null orderNumber inputs
+    const shouldGenerateOrderNumber = orderNumber === null || orderNumber === undefined;
+    console.log(`🔍 [ORDER NUMBER DEBUG] Input orderNumber: ${orderData.orderNumber}, shouldGenerate: ${shouldGenerateOrderNumber}`);
     
     await customerDb.transaction(async (tx) => {
-      // Generate sequential order number within transaction
-      orderNumber = await orderManagementStorage.generateOrderNumberInTransaction(tx);
+      // Only generate order number if not provided (null indicates bank payment)
+      if (shouldGenerateOrderNumber) {
+        orderNumber = await orderManagementStorage.generateOrderNumberInTransaction(tx);
+        console.log(`✅ [NON-BANK ORDER] Generated order number ${orderNumber}`);
+      } else {
+        console.log(`🏦 [BANK ORDER] Using provided order number: ${orderNumber} (no generation needed)`);
+      }
       
-      // Create order with the generated number within same transaction
+      // Create order with the final order number within same transaction
       [order] = await tx
         .insert(customerOrders)
         .values({
