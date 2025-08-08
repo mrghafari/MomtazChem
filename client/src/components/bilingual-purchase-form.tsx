@@ -247,6 +247,15 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [locationData, setLocationData] = useState<{latitude: number, longitude: number} | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<'online_payment' | 'wallet_full' | 'wallet_partial' | 'bank_receipt' | 'bank_transfer_grace' | 'wallet_combined'>('online_payment');
+
+  // Fetch available payment methods from admin settings (public endpoint)
+  const { data: availablePaymentMethods = [] } = useQuery({
+    queryKey: ['/api/public/payment-methods'],
+    queryFn: async () => {
+      const response = await apiRequest('/api/public/payment-methods');
+      return response.data || [];
+    },
+  });
   const [walletAmount, setWalletAmount] = useState<number>(0);
   const [selectedReceiptFile, setSelectedReceiptFile] = useState<File | null>(null);
   const [selectedShippingMethod, setSelectedShippingMethod] = useState<number | null>(null);
@@ -1887,14 +1896,21 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
 
               {/* Payment Options */}
               <RadioGroup value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as any)} className="space-y-3">
-                {/* اولویت اول: پرداخت آنلاین */}
-                <div className="flex items-center space-x-2 space-x-reverse">
-                  <RadioGroupItem value="online_payment" id="online_payment" />
-                  <Label htmlFor="online_payment" className="flex items-center gap-2 cursor-pointer">
-                    <CreditCard className="w-4 h-4 text-blue-600" />
-                    <span className="font-semibold">پرداخت آنلاین (کارت بانکی)</span>
-                  </Label>
-                </div>
+                {/* Dynamic payment methods based on admin settings */}
+                {availablePaymentMethods.map((method: any) => {
+                  if (method.methodKey === 'online_payment') {
+                    return (
+                      <div key={method.methodKey} className="flex items-center space-x-2 space-x-reverse">
+                        <RadioGroupItem value="online_payment" id="online_payment" />
+                        <Label htmlFor="online_payment" className="flex items-center gap-2 cursor-pointer">
+                          <CreditCard className="w-4 h-4 text-blue-600" />
+                          <span className="font-semibold">{method.methodName}</span>
+                        </Label>
+                      </div>
+                    );
+                  }
+                  return null;
+                })}
                 
                 {/* دوم: پرداخت از کیف پول (تمام یا بخش از آن) */}
                 {canUseWallet && (
@@ -1918,20 +1934,37 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                   </div>
                 )}
                 
-                {/* چهارم: واریز بانکی با مهلت 3 روزه */}
-                <div className="flex items-center space-x-2 space-x-reverse">
-                  <RadioGroupItem 
-                    value="bank_transfer_grace" 
-                    id="bank_transfer_grace"
-                  />
-                  <Label htmlFor="bank_transfer_grace" className="flex items-center gap-2 cursor-pointer">
-                    <Clock className="w-4 h-4 text-amber-600" />
-                    واریز بانکی با مهلت 3 روزه
-                  </Label>
-                  <span className="text-xs text-amber-600 mr-2">
-                    برای ارسال حواله بانکی به پروفایل مراجعه کنید
-                  </span>
-                </div>
+                {/* Dynamic other payment methods */}
+                {availablePaymentMethods.map((method: any) => {
+                  if (method.methodKey === 'bank_transfer_grace') {
+                    return (
+                      <div key={method.methodKey} className="flex items-center space-x-2 space-x-reverse">
+                        <RadioGroupItem 
+                          value="bank_transfer_grace" 
+                          id="bank_transfer_grace"
+                        />
+                        <Label htmlFor="bank_transfer_grace" className="flex items-center gap-2 cursor-pointer">
+                          <Clock className="w-4 h-4 text-amber-600" />
+                          {method.methodName}
+                        </Label>
+                        <span className="text-xs text-amber-600 mr-2">
+                          {method.description}
+                        </span>
+                      </div>
+                    );
+                  } else if (method.methodKey === 'bank_receipt') {
+                    return (
+                      <div key={method.methodKey} className="flex items-center space-x-2 space-x-reverse">
+                        <RadioGroupItem value="bank_receipt" id="bank_receipt" />
+                        <Label htmlFor="bank_receipt" className="flex items-center gap-2 cursor-pointer">
+                          <Upload className="w-4 h-4 text-orange-600" />
+                          {method.methodName}
+                        </Label>
+                      </div>
+                    );
+                  }
+                  return null;
+                })}
 
 
               </RadioGroup>

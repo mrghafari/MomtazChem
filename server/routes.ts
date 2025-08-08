@@ -10319,6 +10319,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Public endpoint for customers to get enabled payment methods
+  app.get("/api/public/payment-methods", async (req, res) => {
+    try {
+      const enabledMethods = await db.select().from(paymentMethodSettings)
+        .where(eq(paymentMethodSettings.enabled, true))
+        .orderBy(desc(paymentMethodSettings.priority), paymentMethodSettings.methodKey);
+      
+      res.json({
+        success: true,
+        data: enabledMethods
+      });
+    } catch (error) {
+      console.error("❌ [PUBLIC PAYMENT METHODS] Error:", error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در دریافت روش‌های پرداخت",
+        error: error instanceof Error ? error.message : "نامشخص"
+      });
+    }
+  });
+
   // Initialize default payment method settings
   app.post("/api/payment/method-settings/initialize", requireAuth, async (req, res) => {
     try {
