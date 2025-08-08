@@ -23954,14 +23954,30 @@ ${message ? `Additional Requirements:\n${message}` : ''}
         }
       }
 
-      // When financial approves, move to warehouse_pending for warehouse approval
+      // 🚨 CRITICAL: Grace period orders need manual approval to go to warehouse
       const { orderStatuses } = await import('../shared/order-management-schema');
+      
+      // Check if this is a grace period order
+      const isGracePeriodOrder = orderData.payment_method === 'bank_transfer_grace' || isTemporaryOrder;
+      
+      let targetStatus, statusMessage;
+      if (isGracePeriodOrder) {
+        // Grace period orders stay in financial_approved - require manual warehouse transfer
+        targetStatus = 'financial_approved';
+        statusMessage = (notes || 'Grace period payment approved by financial department - awaiting manual warehouse transfer') + walletTransactionMessage;
+        console.log(`🏦 [GRACE PERIOD] Order ${orderData.customer_order_id} approved but staying in financial_approved - requires manual warehouse transfer`);
+      } else {
+        // Regular orders can go directly to warehouse
+        targetStatus = orderStatuses.WAREHOUSE_PENDING;
+        statusMessage = (notes || 'Payment approved by financial department - moving to warehouse') + walletTransactionMessage;
+      }
+      
       const updatedOrder = await orderManagementStorage.updateOrderStatus(
         orderManagementId, // Use correct order management ID
-        orderStatuses.WAREHOUSE_PENDING, // Use constant from schema
+        targetStatus,
         adminId, 
         'financial', 
-        (notes || 'Payment approved by financial department - moving to warehouse') + walletTransactionMessage
+        statusMessage
       );
       
       // Trigger automatic synchronization after financial approval
@@ -35583,11 +35599,28 @@ momtazchem.com
         .innerJoin(crmCustomers, eq(customerOrders.customerId, crmCustomers.id))
         .where(eq(orderManagement.customerOrderId, customerOrderId));
 
-      // Update order management status to warehouse_pending (approved by financial, ready for warehouse)
+      // 🚨 CRITICAL: Check if this is a grace period order
+      const [orderDetails] = await db
+        .select({
+          paymentMethod: customerOrders.paymentMethod,
+          gracePeriodStart: orderManagement.paymentGracePeriodStart
+        })
+        .from(orderManagement)
+        .innerJoin(customerOrders, eq(orderManagement.customerOrderId, customerOrders.id))
+        .where(eq(orderManagement.customerOrderId, customerOrderId));
+      
+      const isGracePeriodOrder = orderDetails?.paymentMethod === 'bank_transfer_grace' || orderDetails?.gracePeriodStart !== null;
+      
+      // Grace period orders stay in financial_approved, regular orders go to warehouse_pending
+      const targetStatus = isGracePeriodOrder ? 'financial_approved' : 'warehouse_pending';
+      
+      console.log(`🔍 [FINANCE] Order ${customerOrderId} payment method: ${orderDetails?.paymentMethod}, isGracePeriod: ${isGracePeriodOrder}, targetStatus: ${targetStatus}`);
+      
+      // Update order management status
       await db
         .update(orderManagement)
         .set({
-          currentStatus: 'warehouse_pending',
+          currentStatus: targetStatus,
           financialReviewerId: adminId,
           financialReviewedAt: new Date(),
           financialNotes: notes
@@ -35604,18 +35637,20 @@ momtazchem.com
         console.log(`✅ [FINANCE] Generated order number ${orderNumber} for order ${customerOrderId}`);
       }
       
-      // Also update customer order status to warehouse_ready and payment status to paid
+      // Update customer order based on whether it's grace period or regular
+      const customerStatus = isGracePeriodOrder ? 'financial_approved' : 'warehouse_ready';
+      
       await db
         .update(customerOrders)
         .set({
-          status: 'warehouse_ready',
+          status: customerStatus,
           paymentStatus: 'paid',
           orderNumber: orderNumber, // Ensure order number is set
           updatedAt: new Date()
         })
         .where(eq(customerOrders.id, customerOrderId));
 
-      console.log(`✅ [FINANCE] Order ${customerOrderId} approved: management status = warehouse_pending, customer status = warehouse_ready, payment = paid`);
+      console.log(`✅ [FINANCE] Order ${customerOrderId} approved: management status = ${targetStatus}, customer status = ${customerStatus}, payment = paid${isGracePeriodOrder ? ' (GRACE PERIOD - requires manual warehouse transfer)' : ''}`);
 
       // 🏦 Handle wallet transactions for receipt amount differences
       if (receiptAmount) {
@@ -35791,6 +35826,81 @@ momtazchem.com
         message: "خطا در تایید پرداخت",
         error: error instanceof Error ? error.message : 'Unknown error'
       });
+    }
+  });
+
+  // 🏪 NEW: Manual warehouse transfer for approved grace period orders
+  app.post("/api/finance/orders/:orderId/transfer-to-warehouse", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { db } = await import("./db");
+      const { orderManagement } = await import("../shared/order-management-schema");
+      const { customerOrders } = await import("../shared/customer-schema");
+      const { eq } = await import("drizzle-orm");
+      
+      const customerOrderId = parseInt(req.params.orderId);
+      const { notes } = req.body;
+      const adminId = req.session.adminId;
+
+      console.log(`🏪 [WAREHOUSE TRANSFER] Manual transfer request for customer order ID: ${customerOrderId}`);
+
+      // Verify the order is in financial_approved status
+      const [orderDetails] = await db
+        .select({
+          managementId: orderManagement.id,
+          currentStatus: orderManagement.currentStatus,
+          paymentMethod: customerOrders.paymentMethod,
+          orderNumber: customerOrders.orderNumber
+        })
+        .from(orderManagement)
+        .innerJoin(customerOrders, eq(orderManagement.customerOrderId, customerOrders.id))
+        .where(eq(orderManagement.customerOrderId, customerOrderId));
+
+      if (!orderDetails) {
+        return res.status(404).json({
+          success: false,
+          message: "سفارش یافت نشد"
+        });
+      }
+
+      // Check if order is eligible for manual warehouse transfer
+      if (orderDetails.currentStatus !== 'financial_approved') {
+        return res.status(400).json({
+          success: false,
+          message: `سفارش در وضعیت ${orderDetails.currentStatus} است - فقط سفارشات تایید شده مالی قابل انتقال به انبار هستند`
+        });
+      }
+
+      console.log(`✅ [WAREHOUSE TRANSFER] Order ${orderDetails.orderNumber} is eligible for warehouse transfer`);
+
+      // Update order management status to warehouse_pending
+      await db
+        .update(orderManagement)
+        .set({
+          currentStatus: 'warehouse_pending',
+          financialNotes: `${orderDetails.currentStatus || ''}\n\nانتقال دستی به انبار: ${notes || 'بدون یادداشت'}`.trim()
+        })
+        .where(eq(orderManagement.customerOrderId, customerOrderId));
+
+      // Update customer order status to warehouse_ready
+      await db
+        .update(customerOrders)
+        .set({
+          status: 'warehouse_ready',
+          updatedAt: new Date()
+        })
+        .where(eq(customerOrders.id, customerOrderId));
+
+      console.log(`🏪 [WAREHOUSE TRANSFER] Order ${orderDetails.orderNumber} successfully transferred to warehouse`);
+
+      res.json({
+        success: true,
+        message: `سفارش ${orderDetails.orderNumber} با موفقیت به انبار ارسال شد`,
+        orderNumber: orderDetails.orderNumber
+      });
+
+    } catch (error) {
+      console.error("Error transferring order to warehouse:", error);
+      res.status(500).json({ success: false, message: "خطا در انتقال سفارش به انبار" });
     }
   });
 
