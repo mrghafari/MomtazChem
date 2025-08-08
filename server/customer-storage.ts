@@ -605,19 +605,44 @@ export class CustomerStorage implements ICustomerStorage {
         throw new Error('Order not found');
       }
 
-      // Check if order is temporary (pending status or grace period)
-      if (order.status !== 'pending' && order.status !== 'payment_grace_period') {
+      // Check if order is temporary:
+      // 1. Orders without order numbers (bank payments waiting for verification)
+      // 2. Orders in pending/grace period status
+      // 3. Orders that haven't been paid yet
+      const isTemporaryOrder = (
+        order.orderNumber === null || // Bank payments without order numbers
+        order.orderNumber === undefined ||
+        order.status === 'pending' ||
+        order.status === 'payment_grace_period' ||
+        (order.paymentStatus === 'pending' && order.status === 'pending')
+      );
+      
+      if (!isTemporaryOrder) {
+        console.log(`❌ [DELETE CHECK] Order ${id} is not temporary:`, {
+          orderNumber: order.orderNumber,
+          status: order.status,
+          paymentStatus: order.paymentStatus
+        });
         throw new Error('فقط سفارشات موقت قابل حذف هستند');
       }
 
-      // CRITICAL: Never allow deletion if payment has been made or receipt uploaded
+      // CRITICAL: Never allow deletion if payment has been confirmed
       if (order.paymentStatus === 'paid' || order.paymentStatus === 'processing' || order.paymentStatus === 'confirmed') {
+        console.log(`❌ [DELETE CHECK] Order ${id} has confirmed payment:`, order.paymentStatus);
         throw new Error('سفارشات پرداخت شده قابل حذف نیستند');
       }
 
       if (order.receiptPath) {
+        console.log(`❌ [DELETE CHECK] Order ${id} has receipt uploaded`);
         throw new Error('سفارشاتی که رسید آپلود شده قابل حذف نیستند');
       }
+      
+      console.log(`✅ [DELETE CHECK] Order ${id} is eligible for deletion:`, {
+        orderNumber: order.orderNumber,
+        status: order.status,
+        paymentStatus: order.paymentStatus,
+        isTemporary: true
+      });
 
       // Get order items to release reservations
       const items = await this.getOrderItems(id);
