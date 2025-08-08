@@ -127,7 +127,7 @@ export default function CustomerWallet() {
   const { data: companyInfo, isLoading: isLoadingCompanyInfo } = useQuery({
     queryKey: ['/api/company/banking-info'],
     queryFn: async () => {
-      const response = await apiRequest('/api/company/banking-info');
+      const response = await apiRequest('/api/company/banking-info', { method: 'GET' });
       return response.data;
     },
   });
@@ -136,7 +136,7 @@ export default function CustomerWallet() {
   const syncWalletMutation = useMutation({
     mutationFn: async () => {
       if (!customer?.id) throw new Error('Customer not found');
-      return await apiRequest(`/api/wallet/force-sync/${customer.id}`, 'POST', {});
+      return await apiRequest(`/api/wallet/force-sync/${customer.id}`, { method: 'POST' });
     },
     onSuccess: (data) => {
       toast({
@@ -159,7 +159,7 @@ export default function CustomerWallet() {
   // Clear cache mutation
   const clearCacheMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest('/api/customer/clear-cache', 'POST', {});
+      const response = await apiRequest('/api/customer/clear-cache', { method: 'POST' });
       
       // Execute client-side cache clearing
       if (typeof window !== 'undefined') {
@@ -261,7 +261,7 @@ export default function CustomerWallet() {
       if (!rechargeForm.bankReference.trim()) {
         toast({
           title: t.inputError,
-          description: t.bankReferenceRequired,
+          description: "رقم المرجع البنكي مطلوب",
           variant: "destructive",
         });
         return;
@@ -270,7 +270,7 @@ export default function CustomerWallet() {
       if (!rechargeForm.bankReceipt) {
         toast({
           title: t.inputError,
-          description: t.bankReceiptRequired,
+          description: "إيصال البنك مطلوب",
           variant: "destructive",
         });
         return;
@@ -444,9 +444,9 @@ export default function CustomerWallet() {
               <div className="text-2xl font-bold text-green-600">
                 {wallet ? formatCurrency(wallet.balance, wallet.currency) : formatCurrency(0)}
               </div>
-              <p className="text-xs text-muted-foreground">
-                {t.status}: {wallet ? getStatusBadge(wallet.status) : getStatusBadge('active')}
-              </p>
+              <div className="text-xs text-muted-foreground flex items-center gap-2">
+                <span>{t.status}:</span> {wallet ? getStatusBadge(wallet.status) : getStatusBadge('active')}
+              </div>
             </CardContent>
           </Card>
 
@@ -648,17 +648,17 @@ export default function CustomerWallet() {
                           </Card>
 
                           <div>
-                            <Label htmlFor="bankReference">{t.bankReference} *</Label>
+                            <Label htmlFor="bankReference">رقم المرجع البنكي *</Label>
                             <Input
                               id="bankReference"
                               value={rechargeForm.bankReference}
                               onChange={(e) => setRechargeForm({...rechargeForm, bankReference: e.target.value})}
-                              placeholder={t.enterBankReference}
+                              placeholder="أدخل رقم المرجع البنكي"
                               required
                             />
                           </div>
                           <div>
-                            <Label htmlFor="bankReceipt">{t.bankReceipt} *</Label>
+                            <Label htmlFor="bankReceipt">إيصال البنك *</Label>
                             <Input
                               id="bankReceipt"
                               type="file"
@@ -667,7 +667,7 @@ export default function CustomerWallet() {
                               required
                             />
                             <p className="text-sm text-muted-foreground mt-1">
-                              {t.uploadBankReceipt}
+                              "رفع إيصال البنك"
                             </p>
                           </div>
                         </>
