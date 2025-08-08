@@ -7,9 +7,9 @@ import { customerOrders } from "../shared/customer-schema";
 export class AutoApprovalService {
   private intervalId: NodeJS.Timeout | null = null;
 
-  // شروع سرویس تایید خودکار - DISABLED
+  // شروع سرویس تایید خودکار - فعال برای کیف پول
   start() {
-    console.log("🚫 [AUTO APPROVAL] Service DISABLED - all orders require manual approval");
+    console.log("💰 [AUTO APPROVAL] Service ENABLED for wallet-paid orders only");
     
     // بررسی هر دقیقه
     this.intervalId = setInterval(() => {
@@ -34,11 +34,10 @@ export class AutoApprovalService {
     try {
       console.log("🔍 [AUTO APPROVAL] Checking for orders ready for auto-approval...");
       
-      // IMPORTANT: تمام پردازش‌های خودکار غیرفعال شده
-      console.log("🚫 [AUTO APPROVAL] ALL AUTO-PROCESSING DISABLED");
-      console.log("💡 [AUTO APPROVAL] All orders require manual financial department approval");
+      // فعال کردن تایید خودکار فقط برای سفارشات کیف پولی کامل پرداخت شده
+      await this.processWalletPaidOrders(); // فعال برای کیف پول
       
-      // await this.processWalletPaidOrders(); // DISABLED
+      // غیرفعال برای سایر پرداخت‌ها
       // await this.processBankTransferOrders(); // DISABLED
       
       // یافتن سفارشات آماده برای تایید خودکار
@@ -83,37 +82,174 @@ export class AutoApprovalService {
     try {
       console.log(`🤖 [AUTO APPROVAL] Processing order management ID: ${order.id}`);
 
-      // IMPORTANT: غیرفعال کردن تایید خودکار - همه سفارشات نیاز به تایید دستی دارند
-      console.log(`🚫 [AUTO APPROVAL] DISABLED - Order ${order.id} requires manual financial approval`);
-      console.log(`💡 [AUTO APPROVAL] All orders must be manually approved by financial department`);
-      return; // غیرفعال کردن کامل تایید خودکار
+      // تایید خودکار فقط برای سفارشات کیف پولی فعال است
+      console.log(`🤖 [AUTO APPROVAL] Processing scheduled order ${order.id}`);
+      
+      // برای سفارشات کیف پولی، تایید خودکار انجام می‌شود
+      await db
+        .update(orderManagement)
+        .set({
+          currentStatus: 'warehouse_pending',
+          financialReviewerId: 0, // System auto-approval
+          financialReviewedAt: new Date(),
+          financialNotes: 'تایید خودکار - سفارش زمان‌بندی شده',
+          autoApprovalExecutedAt: new Date(),
+          updatedAt: new Date()
+        })
+        .where(eq(orderManagement.id, order.id));
+
+      console.log(`✅ [AUTO APPROVAL] Order ${order.id} automatically approved and moved to warehouse`);
 
     } catch (error) {
       console.error(`❌ [AUTO APPROVAL] Error approving order ${order.id}:`, error);
     }
   }
 
-  // پردازش سفارشات wallet-paid - DISABLED
+  // پردازش سفارشات wallet-paid - شامل پرداخت‌های ترکیبی
   private async processWalletPaidOrders() {
     try {
-      console.log("💰 [WALLET AUTO] Checking wallet-paid orders...");
+      console.log("💰 [WALLET AUTO] Checking wallet-paid orders (including hybrid payments)...");
       
-      // IMPORTANT: غیرفعال کردن انتقال خودکار کیف پول
-      console.log("🚫 [WALLET AUTO] DISABLED - Wallet orders require manual financial approval");
-      console.log("💡 [WALLET AUTO] All wallet payments must be manually approved by financial department");
-      return; // غیرفعال کردن کامل انتقال خودکار کیف پول
+      // یافتن تمام سفارشات کامل پرداخت شده در حال انتظار
+      const pendingPaidOrders = await db
+        .select({
+          id: customerOrders.id,
+          orderNumber: customerOrders.orderNumber,
+          paymentStatus: customerOrders.paymentStatus,
+          totalAmount: customerOrders.totalAmount,
+          customerId: customerOrders.customerId,
+          managementId: orderManagement.id,
+          currentStatus: orderManagement.currentStatus,
+          paymentMethod: orderManagement.paymentMethod,
+          paymentSourceLabel: orderManagement.paymentSourceLabel
+        })
+        .from(customerOrders)
+        .innerJoin(orderManagement, eq(customerOrders.id, orderManagement.customerOrderId))
+        .where(
+          sql`
+            customer_orders.payment_status = 'paid' 
+            AND order_management.current_status = 'pending'
+          `
+        );
+
+      if (pendingPaidOrders.length === 0) {
+        console.log("✅ [WALLET AUTO] No pending paid orders found");
+        return;
+      }
+
+      console.log(`🔍 [WALLET AUTO] Found ${pendingPaidOrders.length} pending paid orders, checking wallet coverage...`);
+
+      // بررسی هر سفارش برای تایید پوشش کامل کیف پول
+      const walletCoveredOrders = [];
+      
+      for (const order of pendingPaidOrders) {
+        const isWalletCovered = await this.checkWalletCoverage(order);
+        if (isWalletCovered) {
+          walletCoveredOrders.push(order);
+        }
+      }
+
+      if (walletCoveredOrders.length === 0) {
+        console.log("✅ [WALLET AUTO] No wallet-covered orders found");
+        return;
+      }
+
+      console.log(`💰 [WALLET AUTO] Found ${walletCoveredOrders.length} wallet-covered orders ready for auto-approval`);
+
+      // پردازش هر سفارش که کامل از کیف پول پرداخت شده
+      for (const order of walletCoveredOrders) {
+        await this.transferWalletOrderToWarehouse(order);
+      }
 
     } catch (error) {
       console.error("❌ [WALLET AUTO] Error processing wallet-paid orders:", error);
     }
   }
 
-  // انتقال سفارش wallet-paid به warehouse - DISABLED
+  // بررسی پوشش کامل سفارش توسط کیف پول (شامل پرداخت‌های ترکیبی)
+  private async checkWalletCoverage(order: any): Promise<boolean> {
+    try {
+      // 1. اگر روش پرداخت مستقیماً کیف پول است
+      if (
+        order.paymentMethod?.includes('wallet') ||
+        order.paymentSourceLabel?.includes('wallet') ||
+        order.paymentSourceLabel?.includes('کیف')
+      ) {
+        console.log(`💰 [WALLET CHECK] Order ${order.orderNumber}: Direct wallet payment detected`);
+        return true;
+      }
+
+      // 2. بررسی تراکنش‌های کیف پول برای این سفارش
+      const walletTransactions = await db
+        .select({
+          amount: sql`ABS(CAST(amount AS DECIMAL))`.as('amount'),
+          transactionType: sql`transaction_type`,
+          description: sql`description`
+        })
+        .from(sql`customer_wallet_transactions`)
+        .where(
+          sql`
+            customer_id = ${order.customerId}
+            AND transaction_type = 'debit'
+            AND (description LIKE '%${order.orderNumber}%' OR description LIKE '%سفارش%')
+            AND created_at >= (SELECT created_at FROM customer_orders WHERE id = ${order.id})
+          `
+        );
+
+      if (walletTransactions.length === 0) {
+        console.log(`❌ [WALLET CHECK] Order ${order.orderNumber}: No wallet transactions found`);
+        return false;
+      }
+
+      // 3. محاسبه مجموع پرداخت‌های کیف پول
+      const totalWalletPayment = walletTransactions.reduce((sum, tx) => {
+        return sum + parseFloat(tx.amount as string);
+      }, 0);
+
+      const orderTotal = parseFloat(order.totalAmount);
+      const coverage = (totalWalletPayment / orderTotal) * 100;
+
+      console.log(`💰 [WALLET CHECK] Order ${order.orderNumber}: Wallet payment ${totalWalletPayment}/${orderTotal} (${coverage.toFixed(1)}%)`);
+
+      // 4. اگر کیف پول بیش از 95% سفارش را پوشش داده باشد
+      if (coverage >= 95) {
+        console.log(`✅ [WALLET CHECK] Order ${order.orderNumber}: Wallet covers ${coverage.toFixed(1)}% - Auto-approval eligible`);
+        return true;
+      }
+
+      console.log(`❌ [WALLET CHECK] Order ${order.orderNumber}: Wallet coverage ${coverage.toFixed(1)}% insufficient`);
+      return false;
+
+    } catch (error) {
+      console.error(`❌ [WALLET CHECK] Error checking wallet coverage for order ${order.orderNumber}:`, error);
+      return false;
+    }
+  }
+
+  // انتقال سفارش wallet-paid به warehouse - شامل پرداخت‌های ترکیبی
   private async transferWalletOrderToWarehouse(order: any) {
     try {
-      console.log(`🚫 [WAREHOUSE TRANSFER] DISABLED - Order ${order.orderNumber} requires manual approval`);
-      console.log(`💡 [WAREHOUSE TRANSFER] Financial department must manually approve all orders`);
-      return; // غیرفعال کردن کامل انتقال خودکار
+      console.log(`💰 [WALLET AUTO] Processing wallet-covered order ${order.orderNumber}`);
+
+      // تعیین نوع پرداخت برای یادداشت
+      const paymentNote = order.paymentMethod?.includes('wallet') 
+        ? 'تایید خودکار - پرداخت کامل از کیف پول دیجیتال'
+        : 'تایید خودکار - پرداخت ترکیبی با پوشش کامل کیف پول';
+
+      // به‌روزرسانی وضعیت در order_management - انتقال مستقیم به انبار
+      await db
+        .update(orderManagement)
+        .set({
+          currentStatus: 'warehouse_pending',
+          financialReviewerId: 0, // System auto-approval
+          financialReviewedAt: new Date(),
+          financialNotes: paymentNote,
+          updatedAt: new Date()
+        })
+        .where(eq(orderManagement.id, order.managementId));
+
+      console.log(`✅ [WALLET AUTO] Order ${order.orderNumber} automatically approved and moved to warehouse`);
+      console.log(`💰 [WALLET AUTO] Payment: ${order.paymentSourceLabel || 'کیف پول'} - Amount: ${order.totalAmount}`);
 
     } catch (error) {
       console.error(`❌ [WAREHOUSE TRANSFER] Error transferring order ${order.orderNumber}:`, error);
