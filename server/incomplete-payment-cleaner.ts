@@ -1,7 +1,6 @@
 import { db } from './db';
 import { eq, and, lt } from 'drizzle-orm';
 import * as schema from '../shared/schema';
-import { SMS_TEMPLATES, replaceSMSVariables, getSMSTemplate } from './sms-templates';
 
 export class IncompletePaymentCleaner {
   private static instance: IncompletePaymentCleaner;
@@ -93,10 +92,10 @@ export class IncompletePaymentCleaner {
         await this.deleteIncompleteOrder(order, 'online_payment');
       } else if (ageMinutes >= 5 && currentStage < 2) {
         // After 5 minutes - send second notification
-        await this.sendNotification(order, 2, 'نهایی', 'online_payment');
+        await this.sendNotification(order, 2, 'Final Warning', 'online_payment');
       } else if (ageMinutes >= 2 && currentStage < 1) {
         // After 2 minutes - send first notification
-        await this.sendNotification(order, 1, 'اول', 'online_payment');
+        await this.sendNotification(order, 1, 'First Warning', 'online_payment');
       }
     }
   }
@@ -138,10 +137,10 @@ export class IncompletePaymentCleaner {
         await this.deleteIncompleteOrder(order, 'failed_bank_payment_orphan');
       } else if (ageMinutes >= 10 && currentStage < 2) {
         // After 10 minutes - send reminder (5 minutes left)
-        await this.sendNotification(order, 2, 'یادآوری نهایی - 5 دقیقه تا حذف', 'failed_bank_payment');
+        await this.sendNotification(order, 2, 'Final reminder - 5 minutes until deletion', 'failed_bank_payment');
       } else if (ageMinutes >= 5 && currentStage < 1) {
         // After 5 minutes - first notification
-        await this.sendNotification(order, 1, 'پرداخت ناموفق - سفارش به زودی حذف خواهد شد', 'failed_bank_payment');
+        await this.sendNotification(order, 1, 'Failed bank payment - order will be deleted soon', 'failed_bank_payment');
       }
     }
   }
@@ -186,13 +185,13 @@ export class IncompletePaymentCleaner {
         await this.deleteIncompleteOrder(order, 'grace_period_expired');
       } else if (ageHours >= 48 && currentStage < 3) {
         // After 2 days - final warning (24 hours left)
-        await this.sendNotification(order, 3, 'هشدار نهایی - 24 ساعت باقیمانده', 'grace_period');
+        await this.sendNotification(order, 3, 'Final warning - 24 hours remaining', 'grace_period');
       } else if (ageHours >= 24 && currentStage < 2) {
         // After 1 day - second notification (48 hours left)
-        await this.sendNotification(order, 2, 'یادآوری دوم - 48 ساعت باقیمانده', 'grace_period');
+        await this.sendNotification(order, 2, 'Second reminder - 48 hours remaining', 'grace_period');
       } else if (ageHours >= 6 && currentStage < 1) {
         // After 6 hours - first notification
-        await this.sendNotification(order, 1, 'یادآوری اول - مهلت پرداخت', 'grace_period');
+        await this.sendNotification(order, 1, 'First reminder - payment deadline', 'grace_period');
       }
     }
   }
@@ -220,196 +219,26 @@ export class IncompletePaymentCleaner {
         return;
       }
 
-      // Check if customer is online - if online, just announce without SMS/Email
+      // Check if customer is online - if online, just announce, if offline, skip notifications and proceed to deletion
       if (isCustomerOnline) {
-        console.log(`🌐 [ONLINE CUSTOMER] Customer ${order.customer_id} is online - announcing directly without SMS/Email`);
-        console.log(`📢 [ONLINE ANNOUNCEMENT] ${stageLabel} - Order ${order.order_number} notification for ${recipientName}`);
+        console.log(`🌐 [ONLINE CUSTOMER] Customer ${order.customer_id} is online - announcing only`);
+        console.log(`📢 [ONLINE ANNOUNCEMENT] ${stageLabel} - Order ${order.order_number} for ${recipientName} (${order.total_amount} ${order.currency})`);
         return;
       }
 
-      console.log(`📡 [OFFLINE CUSTOMER] Customer ${order.customer_id} is offline - proceeding with full notification system`);
-
-      // Prepare notification content based on stage and order type
-      let subject: string;
-      let message: string;
-      let urgency: string;
-
-      if (orderType === 'grace_period') {
-        // Grace period order notifications
-        if (stage === 1) {
-          subject = `Order ${order.order_number} - Payment Grace Period Reminder`;
-          message = `Dear ${recipientName}, your order ${order.order_number} of ${order.total_amount} ${order.currency} is in 3-day grace period. Please pay before deadline.`;
-          urgency = 'normal';
-        } else if (stage === 2) {
-          subject = `Order ${order.order_number} - Second Reminder (48 hours left)`;
-          message = `Dear ${recipientName}, 48 hours left until payment deadline for order ${order.order_number} of ${order.total_amount} ${order.currency}.`;
-          urgency = 'medium';
-        } else if (stage === 3) {
-          subject = `Final Warning - Order ${order.order_number} (24 hours left)`;
-          message = `Dear ${recipientName}, this is the final warning! Only 24 hours left until payment deadline for order ${order.order_number} of ${order.total_amount} ${order.currency}. Order will be deleted otherwise.`;
-          urgency = 'high';
-        }
-      } else if (orderType === 'failed_bank_payment') {
-        // Failed bank payment orphan notifications
-        if (stage === 1) {
-          subject = `Failed Order - Notification`;
-          message = `Dear ${recipientName}, bank payment for your order of ${order.total_amount} ${order.currency} failed. Order will remain in system for one hour.`;
-          urgency = 'normal';
-        } else {
-          subject = `Final Warning - Failed Order Deletion`;
-          message = `Dear ${recipientName}, your failed order of ${order.total_amount} ${order.currency} will be deleted from system soon.`;
-          urgency = 'high';
-        }
-      } else {
-        // Online payment failure notifications
-        if (stage === 1) {
-          subject = `Order ${order.order_number} - Incomplete Payment`;
-          message = `Dear ${recipientName}, your order ${order.order_number} payment of ${order.total_amount} ${order.currency} is incomplete. Please complete payment as soon as possible.`;
-          urgency = 'normal';
-        } else {
-          subject = `Final Warning - Order ${order.order_number}`;
-          message = `Dear ${recipientName}, this is the last chance to complete payment for order ${order.order_number} of ${order.total_amount} ${order.currency}. Order will be deleted if not paid.`;
-          urgency = 'high';
-        }
-      }
-
-      // Send email notification using template
-      await this.sendEmailNotificationWithTemplate(recipientEmail, orderType, stage, {
-        ORDER_NUMBER: order.order_number,
-        CUSTOMER_NAME: recipientName,
-        AMOUNT: order.total_amount,
-        CURRENCY: order.currency
-      });
+      console.log(`📡 [OFFLINE CUSTOMER] Customer ${order.customer_id} is offline - no notifications needed, will proceed to deletion per schedule`);
       
-      // Send SMS if phone available
-      const recipientPhone = await this.getCustomerPhone(order.customer_id);
-      if (recipientPhone) {
-        await this.sendSMSNotificationWithTemplate(recipientPhone, orderType, stage, {
-          ORDER_NUMBER: order.order_number,
-          CUSTOMER_NAME: recipientName,
-          AMOUNT: order.total_amount,
-          CURRENCY: order.currency
-        });
-      }
-
-      console.log(`✅ [INCOMPLETE PAYMENT CLEANER] ${stageLabel} notification sent for order ${order.order_number} (offline customer)`);
+      // For offline customers, we don't send any notifications, just proceed to deletion schedule
+      return;
 
     } catch (error) {
-      console.error(`❌ [INCOMPLETE PAYMENT CLEANER] Error sending notification for order ${order.order_number}:`, error);
-    }
-  }
-
-  private async sendEmailNotificationWithTemplate(
-    recipientEmail: string, 
-    orderType: string, 
-    stage: number, 
-    variables: Record<string, string>
-  ) {
-    try {
-      const { pool } = await import('./db');
-      
-      // Determine template name based on order type and stage
-      let templateName: string;
-      
-      if (orderType === 'grace_period') {
-        if (stage === 1) templateName = '#27 - یادآوری اول مهلت سه روزه';
-        else if (stage === 2) templateName = '#28 - یادآوری دوم مهلت سه روزه (48 ساعت)';
-        else if (stage === 3) templateName = '#29 - هشدار نهایی مهلت سه روزه (24 ساعت)';
-        else return;
-      } else if (orderType === 'failed_bank_payment') {
-        if (stage === 1) templateName = '#31 - اطلاع‌رسانی سفارش ناموفق بانکی';
-        else if (stage === 2) templateName = '#32 - هشدار نهایی حذف سفارش ناموفق';
-        else return;
-      } else {
-        if (stage === 1) templateName = '#25 - اطلاع‌رسانی اول پرداخت ناتمام آنلاین';
-        else if (stage === 2) templateName = '#26 - هشدار نهایی پرداخت ناتمام آنلاین';
-        else return;
-      }
-      
-      // Get template from database
-      const templateResult = await pool.query(`
-        SELECT subject, html_content, text_content 
-        FROM email_templates 
-        WHERE name = $1 AND is_active = true
-      `, [templateName]);
-      
-      if (templateResult.rows.length === 0) {
-        console.log(`⚠️ [EMAIL] Template ${templateName} not found, using fallback`);
-        return this.sendEmailNotification(recipientEmail, 'سفارش ' + variables.ORDER_NUMBER, 'اطلاع‌رسانی سفارش');
-      }
-      
-      const template = templateResult.rows[0];
-      
-      // Replace variables in template
-      let subject = template.subject;
-      let htmlContent = template.html_content;
-      let textContent = template.text_content;
-      
-      for (const [key, value] of Object.entries(variables)) {
-        const placeholder = `{{${key}}}`;
-        subject = subject.replace(new RegExp(placeholder, 'g'), value);
-        htmlContent = htmlContent.replace(new RegExp(placeholder, 'g'), value);
-        if (textContent) {
-          textContent = textContent.replace(new RegExp(placeholder, 'g'), value);
-        }
-      }
-      
-      // Send email with template
-      await this.sendEmailNotification(recipientEmail, subject, htmlContent, textContent);
-      console.log(`✅ [EMAIL] Template ${templateName} sent successfully`);
-      
-    } catch (error) {
-      console.error('❌ [EMAIL] Error sending templated email:', error);
-    }
-  }
-
-  private async sendSMSNotificationWithTemplate(
-    recipientPhone: string, 
-    orderType: string, 
-    stage: number, 
-    variables: Record<string, string>
-  ) {
-    try {
-      // Determine SMS template based on order type and stage
-      let templateKey: keyof typeof SMS_TEMPLATES;
-      
-      if (orderType === 'grace_period') {
-        if (stage === 1) templateKey = 'GRACE_PERIOD_FIRST_REMINDER';
-        else if (stage === 2) templateKey = 'GRACE_PERIOD_SECOND_REMINDER';
-        else if (stage === 3) templateKey = 'GRACE_PERIOD_FINAL_WARNING';
-        else return;
-      } else if (orderType === 'failed_bank_payment') {
-        if (stage === 1) templateKey = 'FAILED_BANK_PAYMENT_FIRST';
-        else if (stage === 2) templateKey = 'FAILED_BANK_PAYMENT_FINAL';
-        else return;
-      } else {
-        if (stage === 1) templateKey = 'INCOMPLETE_ONLINE_PAYMENT_FIRST';
-        else if (stage === 2) templateKey = 'INCOMPLETE_ONLINE_PAYMENT_FINAL';
-        else return;
-      }
-      
-      // Get SMS template
-      const smsTemplate = getSMSTemplate(templateKey);
-      if (!smsTemplate) {
-        console.log(`⚠️ [SMS] Template ${templateKey} not found`);
-        return;
-      }
-      
-      // Replace variables in SMS template
-      const message = replaceSMSVariables(smsTemplate.template, variables);
-      
-      // Send SMS
-      await this.sendSMSNotification(recipientPhone, message);
-      console.log(`✅ [SMS] Template ${templateKey} sent successfully`);
-      
-    } catch (error) {
-      console.error('❌ [SMS] Error sending templated SMS:', error);
+      console.error(`❌ [INCOMPLETE PAYMENT CLEANER] Error processing notification for order ${order.order_number}:`, error);
     }
   }
 
   private async deleteIncompleteOrder(order: any, orderType: string = 'online_payment') {
     try {
-      const reason = orderType === 'grace_period_expired' ? 'after grace period expiry (3 days)' : 'after 1 hour';
+      const reason = orderType === 'grace_period_expired' ? 'after grace period expiry (3 days)' : 'after timeout';
       console.log(`🗑️ [INCOMPLETE PAYMENT CLEANER] Deleting incomplete order ${order.order_number} ${reason}`);
       
       const { pool } = await import('./db');
@@ -435,17 +264,8 @@ export class IncompletePaymentCleaner {
         await pool.query(`DELETE FROM customer_orders WHERE id = $1`, [order.id]);
         console.log(`🗑️ [INCOMPLETE PAYMENT CLEANER] Deleted customer_order ${order.order_number}`);
 
-        // Send final deletion notification using template
-        const recipientEmail = order.guest_email || await this.getCustomerEmail(order.customer_id);
-        const recipientName = order.guest_name || await this.getCustomerName(order.customer_id);
-        const recipientPhone = await this.getCustomerPhone(order.customer_id);
-        
-        if (recipientEmail) {
-          await this.sendDeletionNotification(recipientEmail, recipientPhone, {
-            ORDER_NUMBER: order.order_number,
-            CUSTOMER_NAME: recipientName || 'عزیز مشتری'
-          });
-        }
+        // Order deleted successfully - no notifications needed per user requirements
+        console.log(`🗑️ [CLEANUP] Order ${order.order_number} deleted successfully without notifications`);
 
         await pool.query('COMMIT');
         console.log(`✅ [INCOMPLETE PAYMENT CLEANER] Successfully deleted incomplete order ${order.order_number}`);
@@ -457,65 +277,6 @@ export class IncompletePaymentCleaner {
 
     } catch (error) {
       console.error(`❌ [INCOMPLETE PAYMENT CLEANER] Error deleting order ${order.order_number}:`, error);
-    }
-  }
-
-  private async sendDeletionNotification(
-    recipientEmail: string, 
-    recipientPhone: string | null, 
-    variables: Record<string, string>
-  ) {
-    try {
-      const { pool } = await import('./db');
-      
-      // Get deletion notification template from database
-      const templateResult = await pool.query(`
-        SELECT subject, html_content, text_content 
-        FROM email_templates 
-        WHERE name = '#30 - اطلاع‌رسانی حذف سفارش' AND is_active = true
-      `, []);
-      
-      if (templateResult.rows.length > 0) {
-        const template = templateResult.rows[0];
-        
-        // Replace variables in template
-        let subject = template.subject;
-        let htmlContent = template.html_content;
-        let textContent = template.text_content;
-        
-        for (const [key, value] of Object.entries(variables)) {
-          const placeholder = `{{${key}}}`;
-          subject = subject.replace(new RegExp(placeholder, 'g'), value);
-          htmlContent = htmlContent.replace(new RegExp(placeholder, 'g'), value);
-          if (textContent) {
-            textContent = textContent.replace(new RegExp(placeholder, 'g'), value);
-          }
-        }
-        
-        // Send email with template
-        await this.sendEmailNotification(recipientEmail, subject, htmlContent, textContent);
-        console.log(`✅ [EMAIL] Deletion notification sent successfully`);
-      } else {
-        // Fallback if template not found
-        await this.sendEmailNotification(
-          recipientEmail,
-          `سفارش ${variables.ORDER_NUMBER} حذف شد`,
-          `متأسفانه سفارش شما به علت عدم تکمیل پرداخت حذف گردید.`
-        );
-      }
-
-      // Send SMS notification if phone available
-      if (recipientPhone) {
-        const smsTemplate = getSMSTemplate('ORDER_DELETED_NOTIFICATION');
-        if (smsTemplate) {
-          const message = replaceSMSVariables(smsTemplate.template, variables);
-          await this.sendSMSNotification(recipientPhone, message);
-          console.log(`✅ [SMS] Deletion notification sent successfully`);
-        }
-      }
-      
-    } catch (error) {
-      console.error('❌ [NOTIFICATION] Error sending deletion notification:', error);
     }
   }
 
@@ -566,7 +327,7 @@ export class IncompletePaymentCleaner {
   }
 
   private async getCustomerName(customerId: number | null): Promise<string> {
-    if (!customerId) return 'مشتری عزیز';
+    if (!customerId) return 'Dear Customer';
     
     try {
       const { pool } = await import('./db');
@@ -581,91 +342,14 @@ export class IncompletePaymentCleaner {
       if (customer) {
         return `${customer.first_name} ${customer.last_name}`.trim();
       }
-      return 'مشتری عزیز';
+      return 'Dear Customer';
     } catch (error) {
       console.error('Error getting customer name:', error);
-      return 'مشتری عزیز';
+      return 'Dear Customer';
     }
   }
 
-  private async getCustomerPhone(customerId: number | null): Promise<string | null> {
-    if (!customerId) return null;
-    
-    try {
-      const { pool } = await import('./db');
-      const result = await pool.query(`
-        SELECT phone FROM crm_customers WHERE id = $1
-        UNION ALL
-        SELECT phone FROM customers WHERE id = $1
-        LIMIT 1
-      `, [customerId]);
-      
-      return result.rows[0]?.phone || null;
-    } catch (error) {
-      console.error('Error getting customer phone:', error);
-      return null;
-    }
-  }
-
-  private async getCustomerName(customerId: number | null): Promise<string | null> {
-    if (!customerId) return null;
-    
-    try {
-      const { pool } = await import('./db');
-      const result = await pool.query(`
-        SELECT name FROM crm_customers WHERE id = $1
-        UNION ALL
-        SELECT name FROM customers WHERE id = $1
-        LIMIT 1
-      `, [customerId]);
-      
-      return result.rows[0]?.name || null;
-    } catch (error) {
-      console.error('Error getting customer name:', error);
-      return null;
-    }
-  }
-
-  private async sendEmailNotification(to: string, subject: string, htmlMessage: string, textMessage?: string) {
-    try {
-      const nodemailer = await import('nodemailer');
-      
-      // Use Zoho SMTP configuration
-      const transporter = nodemailer.default.createTransporter({
-        host: 'smtp.zoho.com',
-        port: 587,
-        secure: false,
-        auth: {
-          user: process.env.ZOHO_EMAIL_USER || 'noreply@momtazchem.com',
-          pass: process.env.ZOHO_EMAIL_PASS || ''
-        }
-      });
-
-      await transporter.sendMail({
-        from: process.env.ZOHO_EMAIL_USER || 'noreply@momtazchem.com',
-        to: to,
-        subject: subject,
-        html: htmlMessage,
-        text: textMessage || htmlMessage.replace(/<[^>]*>/g, '') // Use provided text or strip HTML
-      });
-
-      console.log(`📧 [EMAIL] Notification sent to ${to}`);
-    } catch (error) {
-      console.error('❌ [EMAIL] Error sending email:', error);
-    }
-  }
-
-  private async sendSMSNotification(phone: string, message: string) {
-    try {
-      // SMS implementation would go here
-      // For now, just log it
-      console.log(`📱 [SMS] Would send to ${phone}: ${message}`);
-    } catch (error) {
-      console.error('❌ [SMS] Error sending SMS:', error);
-    }
-  }
-
-  stopService() {
+  async stopService() {
     if (this.cleanupTimer) {
       clearInterval(this.cleanupTimer);
       this.cleanupTimer = null;
@@ -675,4 +359,5 @@ export class IncompletePaymentCleaner {
   }
 }
 
+// Export singleton instance
 export const incompletePaymentCleaner = IncompletePaymentCleaner.getInstance();
