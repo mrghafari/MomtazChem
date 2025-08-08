@@ -33216,6 +33216,135 @@ momtazchem.com
     }
   });
 
+  // FORCE WALLET SYNC: Force refresh wallet data and clear inconsistencies
+  app.post('/api/wallet/force-sync/:customerId', async (req, res) => {
+    try {
+      const customerId = parseInt(req.params.customerId);
+      
+      console.log(`🔄 [WALLET SYNC] Force syncing wallet for customer ${customerId}`);
+      
+      // 1. Get current wallet state directly from database
+      const directWallet = await customerDb
+        .select()
+        .from(customerWallets)
+        .where(eq(customerWallets.customerId, customerId));
+      
+      // 2. Recalculate balance from all transactions
+      const allTransactions = await customerDb
+        .select()
+        .from(walletTransactions)
+        .where(eq(walletTransactions.customerId, customerId))
+        .orderBy(walletTransactions.createdAt);
+      
+      let calculatedBalance = 0;
+      for (const transaction of allTransactions) {
+        const amount = parseFloat(transaction.amount);
+        if (transaction.transactionType === 'credit') {
+          calculatedBalance += amount;
+        } else if (transaction.transactionType === 'debit') {
+          calculatedBalance -= amount;
+        }
+      }
+      
+      // 3. If no wallet exists but should have one, create it
+      let wallet;
+      if (directWallet.length === 0 && calculatedBalance !== 0) {
+        console.log(`🆕 [WALLET SYNC] Creating missing wallet for customer ${customerId}`);
+        wallet = await walletStorage.createWallet({
+          customerId,
+          balance: calculatedBalance.toString(),
+          currency: "IQD",
+          status: "active"
+        });
+      } else if (directWallet.length > 0) {
+        // 4. Update existing wallet balance if different
+        const currentBalance = parseFloat(directWallet[0].balance);
+        if (Math.abs(currentBalance - calculatedBalance) > 0.01) { // Allow for small rounding differences
+          console.log(`🔄 [WALLET SYNC] Updating balance from ${currentBalance} to ${calculatedBalance}`);
+          wallet = await walletStorage.updateWalletBalance(directWallet[0].id, calculatedBalance);
+        } else {
+          wallet = directWallet[0];
+        }
+      }
+      
+      // 5. Get fresh summary after sync
+      const freshSummary = await walletStorage.getCustomerWalletSummary(customerId);
+      
+      const syncResult = {
+        customerId,
+        timestamp: new Date().toISOString(),
+        beforeSync: {
+          walletExists: directWallet.length > 0,
+          walletBalance: directWallet.length > 0 ? parseFloat(directWallet[0].balance) : 0,
+          transactionCount: allTransactions.length
+        },
+        calculatedBalance,
+        afterSync: {
+          wallet,
+          summary: freshSummary
+        },
+        actions: {
+          walletCreated: directWallet.length === 0 && calculatedBalance !== 0,
+          balanceUpdated: directWallet.length > 0 && Math.abs(parseFloat(directWallet[0].balance) - calculatedBalance) > 0.01,
+          alreadyInSync: directWallet.length > 0 && Math.abs(parseFloat(directWallet[0].balance) - calculatedBalance) <= 0.01
+        }
+      };
+      
+      console.log(`✅ [WALLET SYNC] Sync completed:`, JSON.stringify(syncResult, null, 2));
+      
+      res.json({
+        success: true,
+        message: 'Wallet synchronization completed',
+        data: syncResult
+      });
+      
+    } catch (error) {
+      console.error('🔄 [WALLET SYNC] Error during sync:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Wallet synchronization failed',
+        error: error.message
+      });
+    }
+  });
+
+  // CLEAR CUSTOMER CACHE: Clear all cached data for customer
+  app.post('/api/customer/clear-cache', async (req, res) => {
+    try {
+      if (!req.session.customerId) {
+        return res.status(401).json({ success: false, message: "Customer authentication required" });
+      }
+      
+      const customerId = req.session.customerId;
+      console.log(`🧹 [CACHE CLEAR] Clearing cache for customer ${customerId}`);
+      
+      // Clear any server-side cache if exists
+      // Note: This is mostly for client-side cache clearing instruction
+      
+      res.json({
+        success: true,
+        message: 'Cache clear instruction sent',
+        data: {
+          customerId,
+          timestamp: new Date().toISOString(),
+          instructions: {
+            localStorage: 'localStorage.clear()',
+            sessionStorage: 'sessionStorage.clear()',
+            location: 'location.reload(true)'
+          }
+        }
+      });
+      
+    } catch (error) {
+      console.error('🧹 [CACHE CLEAR] Error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Cache clear failed',
+        error: error.message
+      });
+    }
+  });
+
   // DIAGNOSTIC ENDPOINT: Debug wallet discrepancy for specific customers
   app.get('/api/debug/wallet-discrepancy/:customerId', async (req, res) => {
     try {

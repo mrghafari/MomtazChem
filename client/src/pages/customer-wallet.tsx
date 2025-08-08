@@ -14,7 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Wallet, Plus, ArrowUpCircle, ArrowDownCircle, Clock, CheckCircle, XCircle, DollarSign, CreditCard, Banknote, Shield, Building2 } from "lucide-react";
+import { Wallet, Plus, ArrowUpCircle, ArrowDownCircle, Clock, CheckCircle, XCircle, DollarSign, CreditCard, Banknote, Shield, Building2, RefreshCw, Trash2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 interface WalletSummary {
@@ -130,6 +130,63 @@ export default function CustomerWallet() {
       const response = await apiRequest('/api/company/banking-info');
       return response.data;
     },
+  });
+
+  // Force wallet sync mutation
+  const syncWalletMutation = useMutation({
+    mutationFn: async () => {
+      if (!customer?.id) throw new Error('Customer not found');
+      return await apiRequest(`/api/wallet/force-sync/${customer.id}`, 'POST', {});
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "همگام‌سازی موفق",
+        description: "اطلاعات کیف پول با موفقیت همگام‌سازی شد",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/customer/wallet'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/customer/wallet/recharge-requests'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/customer/wallet/transactions'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "خطا در همگام‌سازی",
+        description: error.message || "خطا در همگام‌سازی اطلاعات کیف پول",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Clear cache mutation
+  const clearCacheMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest('/api/customer/clear-cache', 'POST', {});
+      
+      // Execute client-side cache clearing
+      if (typeof window !== 'undefined') {
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        // Force reload after small delay
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      }
+      
+      return response;
+    },
+    onSuccess: () => {
+      toast({
+        title: "پاکسازی حافظه موقت",
+        description: "حافظه موقت پاک شد، صفحه در حال بازگشایی...",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "خطا در پاکسازی",
+        description: error.message || "خطا در پاکسازی حافظه موقت",
+        variant: "destructive",
+      });
+    }
   });
 
   // Create recharge request mutation
@@ -433,6 +490,27 @@ export default function CustomerWallet() {
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-4">
+                {/* Sync & Cache Clear Buttons */}
+                <Button 
+                  variant="outline"
+                  onClick={() => syncWalletMutation.mutate()}
+                  disabled={syncWalletMutation.isPending}
+                  className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
+                >
+                  <RefreshCw className={`h-4 w-4 ${syncWalletMutation.isPending ? 'animate-spin' : ''}`} />
+                  {syncWalletMutation.isPending ? 'در حال همگام‌سازی...' : 'همگام‌سازی کیف پول'}
+                </Button>
+                
+                <Button 
+                  variant="outline"
+                  onClick={() => clearCacheMutation.mutate()}
+                  disabled={clearCacheMutation.isPending}
+                  className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
+                >
+                  <Trash2 className="h-4 w-4" />
+                  {clearCacheMutation.isPending ? 'در حال پاکسازی...' : 'پاکسازی حافظه موقت'}
+                </Button>
+
                 <Dialog open={isRechargeDialogOpen} onOpenChange={setIsRechargeDialogOpen}>
                   <DialogTrigger asChild>
                     <Button className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>

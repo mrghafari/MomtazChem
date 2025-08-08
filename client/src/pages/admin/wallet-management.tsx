@@ -192,6 +192,26 @@ export default function WalletManagement() {
     setModificationType('credit');
   };
 
+  // Force wallet sync mutation
+  const syncWalletMutation = useMutation({
+    mutationFn: (customerId: number) => 
+      apiRequest(`/api/wallet/force-sync/${customerId}`, 'POST', {}),
+    onSuccess: (data) => {
+      toast({ 
+        title: "همگام‌سازی موفق", 
+        description: "اطلاعات کیف پول با موفقیت همگام‌سازی شد" 
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/wallet'] });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: "خطا در همگام‌سازی", 
+        description: error?.message || "خطا در همگام‌سازی اطلاعات کیف پول", 
+        variant: "destructive" 
+      });
+    }
+  });
+
   // Modify wallet balance
   const modifyBalanceMutation = useMutation({
     mutationFn: (data: { customerId: number; amount: string; reason: string; modificationType: string }) => 
@@ -434,6 +454,16 @@ export default function WalletManagement() {
                               <Button
                                 variant="outline"
                                 size="sm"
+                                onClick={() => syncWalletMutation.mutate(request.customerId)}
+                                disabled={syncWalletMutation.isPending}
+                                title="همگام‌سازی کیف پول این مشتری"
+                              >
+                                <RefreshCw className={`w-4 h-4 mr-1 ${syncWalletMutation.isPending ? 'animate-spin' : ''}`} />
+                                Sync
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
                                 className="text-green-600 hover:text-green-700"
                                 onClick={() => handleApprove(request)}
                               >
@@ -515,14 +545,26 @@ export default function WalletManagement() {
                           <TableCell>{formatDate(request.createdAt)}</TableCell>
                           <TableCell>{getStatusBadge(request.status)}</TableCell>
                           <TableCell>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleViewDetails(request)}
-                            >
-                              <Eye className="w-4 h-4 mr-1" />
-                              View
-                            </Button>
+                            <div className="flex gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleViewDetails(request)}
+                              >
+                                <Eye className="w-4 h-4 mr-1" />
+                                View
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => syncWalletMutation.mutate(request.customerId)}
+                                disabled={syncWalletMutation.isPending}
+                                title="همگام‌سازی کیف پول این مشتری"
+                              >
+                                <RefreshCw className={`w-4 h-4 mr-1 ${syncWalletMutation.isPending ? 'animate-spin' : ''}`} />
+                                Sync
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))}
