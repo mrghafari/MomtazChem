@@ -2182,8 +2182,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                   return null;
                 })}
                 
-                {/* Wallet Combined Option - only show if customer has wallet balance */}
-                {customerData?.success && walletBalance > 0 && (
+                {/* Wallet Combined Option - show if customer is logged in, has wallet balance, but not enough for full payment */}
+                {customerData?.success && walletBalance > 0 && walletBalance < totalAmount && (
                   <div className="flex items-center space-x-2 space-x-reverse">
                     <RadioGroupItem value="wallet_combined" id="wallet_combined" />
                     <Label htmlFor="wallet_combined" className="flex items-center gap-2 cursor-pointer">
