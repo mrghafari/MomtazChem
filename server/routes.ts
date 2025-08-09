@@ -7687,7 +7687,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await pool.query(`
         SELECT id, reminder_hour, days_before, message_template, 
                message_subject, notification_method, is_active, priority,
-               created_at, updated_at
+               sms_template_id, email_template_id, created_at, updated_at
         FROM proforma_reminder_schedule
         ORDER BY days_before ASC, reminder_hour ASC
       `);
@@ -7732,8 +7732,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await pool.query(`
         INSERT INTO proforma_reminder_schedule (
           reminder_hour, days_before, message_template, message_subject,
-          notification_method, is_active, priority, updated_at
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
+          notification_method, is_active, priority, sms_template_id, email_template_id, updated_at
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())
         RETURNING *
       `, [
         reminderHour,
@@ -7742,7 +7742,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         messageSubject,
         notificationMethod || 'email',
         isActive !== false,
-        priority || 1
+        priority || 1,
+        smsTemplateId || null,
+        emailTemplateId || null
       ]);
 
       console.log(`✅ [PROFORMA REMINDERS] Created schedule ID: ${result.rows[0].id}`);
@@ -7772,7 +7774,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         messageSubject, 
         notificationMethod,
         isActive,
-        priority 
+        priority,
+        smsTemplateId,
+        emailTemplateId
       } = req.body;
 
       const { pool } = await import('./db');
@@ -7783,8 +7787,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         UPDATE proforma_reminder_schedule 
         SET reminder_hour = $1, days_before = $2, message_template = $3,
             message_subject = $4, notification_method = $5, is_active = $6,
-            priority = $7, updated_at = NOW()
-        WHERE id = $8
+            priority = $7, sms_template_id = $8, email_template_id = $9, updated_at = NOW()
+        WHERE id = $10
         RETURNING *
       `, [
         reminderHour,
@@ -7794,6 +7798,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         notificationMethod || 'email',
         isActive !== false,
         priority || 1,
+        smsTemplateId || null,
+        emailTemplateId || null,
         id
       ]);
 

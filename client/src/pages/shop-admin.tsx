@@ -65,6 +65,8 @@ export default function ShopAdmin() {
   const [proformaDeadlineDays, setProformaDeadlineDays] = useState("3");
   const [reminderDays, setReminderDays] = useState("1");
   const [reminderHour, setReminderHour] = useState("10");
+  const [smsTemplateId, setSmsTemplateId] = useState("");
+  const [emailTemplateId, setEmailTemplateId] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
@@ -212,7 +214,9 @@ export default function ShopAdmin() {
           messageSubject: `یادآوری پرداخت حواله - ${reminderDays === "0" ? "روز پایان مهلت" : `${reminderDays} روز مانده`}`,
           notificationMethod: "email",
           isActive: true,
-          priority: parseInt(reminderDays) + 1
+          priority: parseInt(reminderDays) + 1,
+          smsTemplateId: smsTemplateId || null,
+          emailTemplateId: emailTemplateId || null
         }
       });
     },
@@ -220,6 +224,8 @@ export default function ShopAdmin() {
       queryClient.invalidateQueries({ queryKey: ["/api/shop/proforma-reminders"] });
       setReminderDays("1");
       setReminderHour("10");
+      setSmsTemplateId("");
+      setEmailTemplateId("");
       toast({
         title: "موفق",
         description: "یادآوری جدید با موفقیت اضافه شد",
@@ -814,6 +820,28 @@ export default function ShopAdmin() {
                           className="w-16"
                         />
                       </div>
+                      <div className="flex items-center space-x-2 space-x-reverse">
+                        <Label htmlFor="sms-template">شماره قالب پیامک:</Label>
+                        <Input
+                          id="sms-template"
+                          type="text"
+                          value={smsTemplateId}
+                          onChange={(e) => setSmsTemplateId(e.target.value)}
+                          placeholder="مثال: 12345"
+                          className="w-24"
+                        />
+                      </div>
+                      <div className="flex items-center space-x-2 space-x-reverse">
+                        <Label htmlFor="email-template">شماره قالب ایمیل:</Label>
+                        <Input
+                          id="email-template"
+                          type="text"
+                          value={emailTemplateId}
+                          onChange={(e) => setEmailTemplateId(e.target.value)}
+                          placeholder="مثال: EM-001"
+                          className="w-24"
+                        />
+                      </div>
                       <Button 
                         size="sm" 
                         className="bg-blue-600 hover:bg-blue-700"
@@ -834,6 +862,16 @@ export default function ShopAdmin() {
                             </Badge>
                             <span className="text-sm">ساعت {schedule.reminder_hour}:00</span>
                             <span className="text-sm text-gray-600">{schedule.message_subject}</span>
+                            {(schedule.sms_template_id || schedule.email_template_id) && (
+                              <div className="flex items-center space-x-1 space-x-reverse text-xs text-blue-600">
+                                {schedule.sms_template_id && (
+                                  <span className="bg-blue-100 px-2 py-1 rounded">پیامک: {schedule.sms_template_id}</span>
+                                )}
+                                {schedule.email_template_id && (
+                                  <span className="bg-green-100 px-2 py-1 rounded">ایمیل: {schedule.email_template_id}</span>
+                                )}
+                              </div>
+                            )}
                           </div>
                           <Button 
                             size="sm" 

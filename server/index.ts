@@ -330,6 +330,16 @@ app.use((req, res, next) => {
           incompletePaymentCleaner.startService();
           log('🚮 Incomplete payment cleaner service started');
           
+          // Start proforma reminder service
+          import('./proforma-reminder-service').then(({ proformaReminderService }) => {
+            proformaReminderService.initializeLogTable();
+            // Process reminders every hour
+            setInterval(() => {
+              proformaReminderService.processReminders();
+            }, 60 * 60 * 1000);
+            log('📅 Proforma reminder service started');
+          });
+          
           // Start inventory monitoring service
           InventoryAlertService.startInventoryMonitoring();
         } catch (servicesError) {

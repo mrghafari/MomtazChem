@@ -447,6 +447,22 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     staleTime: 5 * 60 * 1000, // 5 minutes cache
   });
 
+  // Fetch proforma reminder schedules
+  const { data: reminderSchedules } = useQuery({
+    queryKey: ['/api/shop/proforma-reminders'],
+    queryFn: async () => {
+      try {
+        const response = await apiRequest('/api/shop/proforma-reminders', { method: 'GET' });
+        return response.data || [];
+      } catch (error) {
+        console.log('Error fetching reminder schedules:', error);
+        return [];
+      }
+    },
+    retry: false,
+    staleTime: 5 * 60 * 1000, // 5 minutes cache
+  });
+
   // Get dynamic proforma deadline from shop settings
   const proformaDeadlineDays = useMemo(() => {
     if (shopSettings && Array.isArray(shopSettings)) {
@@ -455,6 +471,39 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     }
     return 3; // fallback to 3 days
   }, [shopSettings]);
+
+  // Get reminder schedule info for display
+  const reminderInfo = useMemo(() => {
+    if (reminderSchedules && Array.isArray(reminderSchedules)) {
+      const sortedReminders = reminderSchedules
+        .filter(r => r.is_active)
+        .sort((a, b) => a.days_before - b.days_before);
+      
+      if (sortedReminders.length > 0) {
+        const reminderTexts = sortedReminders.map(r => {
+          let timeText = '';
+          if (r.days_before === 0) {
+            timeText = `روز پایان مهلت ساعت ${r.reminder_hour}:00`;
+          } else {
+            timeText = `${r.days_before} روز قبل ساعت ${r.reminder_hour}:00`;
+          }
+          
+          // Add template info if available
+          const templates = [];
+          if (r.sms_template_id) templates.push(`پیامک ${r.sms_template_id}`);
+          if (r.email_template_id) templates.push(`ایمیل ${r.email_template_id}`);
+          
+          if (templates.length > 0) {
+            timeText += ` (${templates.join(', ')})`;
+          }
+          
+          return timeText;
+        });
+        return reminderTexts.join(' و ');
+      }
+    }
+    return null;
+  }, [reminderSchedules]);
 
   // Fetch VAT settings from public endpoint
   const { data: vatData } = useQuery({
@@ -2005,7 +2054,14 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                         />
                         <Label htmlFor="bank_transfer_grace" className="flex items-center gap-2 cursor-pointer">
                           <Clock className="w-4 h-4 text-amber-600" />
-                          <span className="font-semibold">پرداخت به روش حواله با مهلت {proformaDeadlineDays} روزه</span>
+                          <div className="flex flex-col">
+                            <span className="font-semibold">پرداخت به روش حواله با مهلت {proformaDeadlineDays} روزه</span>
+                            {reminderInfo && (
+                              <span className="text-xs text-gray-500 mt-1">
+                                یادآوری: {reminderInfo}
+                              </span>
+                            )}
+                          </div>
                         </Label>
                       </div>
                     );
