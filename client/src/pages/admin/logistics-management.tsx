@@ -1501,7 +1501,7 @@ const LogisticsManagement = () => {
               direction: rtl; 
               text-align: right; 
               margin: 0;
-              padding: 15mm;
+              padding: 20mm 20mm 15mm 20mm; /* یکسان کردن حاشیه‌ها با print دوم */
               font-size: 14px;
               line-height: 1.4;
               color: #000;
@@ -1835,11 +1835,12 @@ const LogisticsManagement = () => {
     <html dir="rtl" lang="ar">
     <head>
       <meta charset="utf-8">
-      <title></title>
+      <title>Print</title>
       <style>
         body { 
           font-family: 'Segoe UI', Tahoma, Arial, sans-serif; 
-          margin: 20px; 
+          margin: 0;
+          padding: 20mm 20mm 15mm 20mm; /* حاشیه‌های یکسان */
           direction: rtl; 
           font-size: 14px;
           line-height: 1.6;
@@ -1917,8 +1918,17 @@ const LogisticsManagement = () => {
         @media print {
           body { margin: 0; }
           .no-print { display: none !important; }
-          @page { margin: 0.5in; }
+          @page { 
+            margin: 20mm 20mm 15mm 20mm; /* top right bottom left */
+            size: A4;
+          }
           title { display: none !important; }
+          
+          /* Hide browser headers and footers */
+          html::before, html::after,
+          body::before, body::after {
+            display: none !important;
+          }
         }
       </style>
     </head>
