@@ -248,11 +248,6 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const [locationData, setLocationData] = useState<{latitude: number, longitude: number} | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<'online_payment' | 'wallet' | 'wallet_full' | 'wallet_partial' | 'wallet_combined' | 'bank_transfer_grace' | 'bank_receipt'>('online_payment');
 
-  // Debug cart sync issue
-  console.log('🛒 [PURCHASE FORM] Cart received:', cart);
-  console.log('🛒 [PURCHASE FORM] Cart total items:', Object.values(cart).reduce((sum, qty) => sum + qty, 0));
-  console.log('🛒 [PURCHASE FORM] Cart keys:', Object.keys(cart));
-
   // Fetch available payment methods from admin settings (public endpoint)
   const { data: availablePaymentMethods = [] } = useQuery<any[]>({
     queryKey: ['/api/public/payment-methods'],
@@ -1696,8 +1691,8 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                 
                 return (
                   <div key={productId} className="bg-white dark:bg-gray-800 p-3 rounded-lg border">
-                    <div className="grid grid-cols-3 gap-3 items-center">
-                      {/* Left: Product Info */}
+                    <div className="flex items-start justify-between gap-3">
+                      {/* Product Info */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           {/* Small product image */}
@@ -1717,39 +1712,38 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                               <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">📦</div>
                             )}
                           </div>
-                          <div>
-                            <h4 className="font-medium text-sm truncate flex items-center gap-1">
-                              {product.name}
-                              {product.isFlammable && (
-                                <Flame className="w-3 h-3 text-orange-500 flex-shrink-0" aria-label="محصول آتش‌زا" />
-                              )}
-                            </h4>
-                            <p className="text-xs text-muted-foreground">{product.category}</p>
-                          </div>
+                          <h4 className="font-medium text-sm truncate flex items-center gap-1">
+                            {product.name}
+                            {product.isFlammable && (
+                              <Flame className="w-3 h-3 text-orange-500 flex-shrink-0" aria-label="محصول آتش‌زا" />
+                            )}
+                          </h4>
                         </div>
-                        <div className="mt-1">
+                        <p className="text-xs text-muted-foreground">{product.category}</p>
+                        <div className="mt-1 space-y-1">
                           <p className="text-sm font-medium">
                             {discountedPrice < basePrice && (
                               <span className="line-through text-gray-400 mr-2">{formatCurrency(basePrice)}</span>
                             )}
                             {formatCurrency(discountedPrice)} {t.each}
                           </p>
+
                         </div>
                       </div>
                       
-                      {/* Center: خرید عمده */}
-                      <div className="flex justify-center">
+                      {/* Middle Section with Bulk Indicator and Quantity Controls */}
+                      <div className="flex flex-col items-center gap-2">
+                        {/* خرید عمده با کادر زیبا */}
                         {product.bulkPurchaseThreshold && product.bulkPurchaseDiscount && (
-                          <div className="px-3 py-1 bg-gradient-to-r from-blue-100 to-green-100 border-2 border-blue-300 rounded-full shadow-sm">
-                            <span className="text-xs font-semibold text-blue-800">
-                              خرید عمده
-                            </span>
+                          <div className="mb-2">
+                            <div className="px-3 py-1 bg-gradient-to-r from-blue-100 to-green-100 border-2 border-blue-300 rounded-full shadow-sm">
+                              <span className="text-xs font-semibold text-blue-800">
+                                خرید عمده
+                              </span>
+                            </div>
                           </div>
                         )}
-                      </div>
-                      
-                      {/* Right: Quantity Controls */}
-                      <div className="flex flex-col items-center gap-2">
+                        
                         {/* Quantity Controls */}
                         <div className="flex items-center gap-2">
                           <Button

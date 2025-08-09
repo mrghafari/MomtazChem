@@ -83,9 +83,8 @@ export function usePersistentCart() {
           
           if (response.success && mounted.current) {
             // Handle different response formats
-            const cartData = response.data?.cart || response.data?.cartData || response.cart || {};
+            const cartData = response.data?.cartData || response.cart || {};
             console.log('🛒 Loaded cart from database:', cartData);
-            console.log('🛒 Full response for debugging:', response);
             setLocalCart(cartData);
             // Clear localStorage after successful sync
             localStorage.removeItem('cart');
