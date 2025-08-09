@@ -15795,13 +15795,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Don't fail the order if CRM capture fails
       }
 
-      // Create order_management record for financial department workflow
+      // Create order_management record for workflow routing
       try {
+        // CRITICAL: Route pure wallet payments directly to warehouse
+        let managementStatus = 'pending';
+        let department = 'customer';
+        
+        if (finalPaymentStatus === 'grace_period') {
+          managementStatus = 'payment_grace_period';
+        } else if (finalPaymentStatus === 'paid' && Math.round(remainingAmount) <= 1) {
+          // Pure wallet payment - go directly to warehouse
+          managementStatus = 'warehouse_pending';
+          department = 'warehouse';
+          console.log(`🏪 [PURE WALLET ROUTING] Order ${orderNumber} routed directly to warehouse (paid with wallet)`);
+        }
+
         let orderMgmtData = {
           customerOrderId: order.id,
           customerId: finalCustomerId,
-          currentStatus: finalPaymentStatus === 'grace_period' ? 'payment_grace_period' : 'pending',
-          currentDepartment: 'customer',
+          currentStatus: managementStatus,
+          currentDepartment: department,
           totalAmount: totalAmount.toString(),
           currency: orderData.currency || "IQD",
           notes: orderData.notes || "",
