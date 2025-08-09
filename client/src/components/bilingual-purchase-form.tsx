@@ -431,6 +431,31 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     staleTime: 5 * 60 * 1000,
   });
 
+  // Fetch shop settings for proforma deadline
+  const { data: shopSettings } = useQuery({
+    queryKey: ['/api/shop/settings'],
+    queryFn: async () => {
+      try {
+        const response = await apiRequest('/api/shop/settings', { method: 'GET' });
+        return response.data || [];
+      } catch (error) {
+        console.log('Error fetching shop settings:', error);
+        return [];
+      }
+    },
+    retry: false,
+    staleTime: 5 * 60 * 1000, // 5 minutes cache
+  });
+
+  // Get dynamic proforma deadline from shop settings
+  const proformaDeadlineDays = useMemo(() => {
+    if (shopSettings && Array.isArray(shopSettings)) {
+      const deadlineSetting = shopSettings.find(setting => setting.settingKey === 'proforma_deadline_days');
+      return deadlineSetting ? parseInt(deadlineSetting.settingValue) : 3;
+    }
+    return 3; // fallback to 3 days
+  }, [shopSettings]);
+
   // Fetch VAT settings from public endpoint
   const { data: vatData } = useQuery({
     queryKey: ['/api/tax-settings'],
@@ -1983,7 +2008,9 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                           {method.methodName}
                         </Label>
                         <span className="text-xs text-amber-600 mr-2">
-                          {method.description}
+                          {method.methodKey === 'bank_transfer_grace' 
+                            ? `مهلت پرداخت: ${proformaDeadlineDays} روز`
+                            : method.description}
                         </span>
                       </div>
                     );
