@@ -263,15 +263,25 @@ export default function KPIDashboard() {
           <div className="text-xs text-gray-500">
             آخرین بروزرسانی: {lastUpdated.toLocaleTimeString('fa-IR')}
           </div>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={refreshAllData}
-            disabled={isLoading}
-          >
-            <RefreshCw className={`w-4 h-4 ml-2 ${isLoading ? 'animate-spin' : ''}`} />
-            بروزرسانی
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setLocation("/admin/kpi-report")}
+            >
+              <Download className="w-4 h-4 ml-2" />
+              گزارش PDF
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={refreshAllData}
+              disabled={isLoading}
+            >
+              <RefreshCw className={`w-4 h-4 ml-2 ${isLoading ? 'animate-spin' : ''}`} />
+              بروزرسانی
+            </Button>
+          </div>
           <Button variant="outline" size="sm">
             <Download className="w-4 h-4 ml-2" />
             گزارش PDF

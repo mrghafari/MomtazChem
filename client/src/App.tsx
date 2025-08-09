@@ -130,6 +130,7 @@ import WalletCorrection from "@/pages/admin/wallet-correction";
 import WalletDebugTest from "@/pages/wallet-debug-test";
 import TestLogistics from "@/pages/test-logistics";
 import KpiDashboard from "@/pages/kpi-dashboard";
+import KpiReport from "@/pages/kpi-report";
 import ManagementDashboard from "@/pages/management-dashboard";
 import AccountingManagement from "@/pages/admin/accounting-management";
 import CompanyInformation from "@/pages/admin/company-information";
@@ -272,6 +273,7 @@ function Router() {
           <Route path="/admin/server-config" component={ServerConfig} />
           <Route path="/admin/batch-management" component={BatchManagement} />
           <Route path="/admin/kpi-dashboard" component={KpiDashboard} />
+          <Route path="/admin/kpi-report" component={KpiReport} />
           <Route path="/admin/management-dashboard" component={ManagementDashboard} />
           <Route path="/admin/accounting-management" component={AccountingManagement} />
           <Route path="/admin/company-information" component={CompanyInformation} />
