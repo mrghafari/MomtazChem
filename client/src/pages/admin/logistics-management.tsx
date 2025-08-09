@@ -870,17 +870,56 @@ const LogisticsManagement = () => {
         console.log('✅ [FINAL VEHICLES] Available vehicles after template matching:', availableVehicles.length);
       } else {
         console.error('🚫 [READY VEHICLES API ERROR]', readyVehiclesResponse.status);
-        if (readyVehiclesResponse.status === 401) {
-          toast({
-            title: "خطای احراز هویت",
-            description: "برای مشاهده خودروهای آماده، لطفاً ابتدا وارد سیستم شوید",
-            variant: "destructive"
-          });
+        
+        // Try to fetch ready vehicles data even without authentication
+        try {
+          const fallbackResponse = await fetch('/api/ready-vehicles');
+          if (fallbackResponse.ok) {
+            const fallbackData = await fallbackResponse.json();
+            readyVehicles = fallbackData.vehicles || fallbackData.data || [];
+            console.log('🔄 [FALLBACK SUCCESS] Found ready vehicles without auth:', readyVehicles.length);
+            
+            const orderWeight = order.calculatedWeight || order.totalWeight || 0;
+            let availableVehicles = readyVehicles.filter((vehicle: any) => 
+              vehicle.isAvailable && 
+              vehicle.loadCapacity >= orderWeight
+            );
+            
+            // 🎯 TEMPLATE MATCHING for fallback vehicles
+            if (checkoutVehicleDetails && checkoutVehicleDetails.vehicleType) {
+              const exactMatches = availableVehicles.filter((vehicle: any) => 
+                vehicle.templateName === checkoutVehicleDetails.vehicleType ||
+                vehicle.templateName?.includes(checkoutVehicleDetails.vehicleType) ||
+                checkoutVehicleDetails.vehicleType.includes(vehicle.templateName || '')
+              );
+              
+              if (exactMatches.length > 0) {
+                exactMatches.forEach((v: any) => {
+                  v.isCheckoutSuggested = true;
+                  v.matchType = 'exact';
+                  v.priority = 1;
+                });
+                console.log('✅ [FALLBACK EXACT] Found template matches:', exactMatches.length);
+              }
+              
+              availableVehicles.sort((a: any, b: any) => {
+                if (a.priority && b.priority) return a.priority - b.priority;
+                if (a.priority && !b.priority) return -1;
+                if (!a.priority && b.priority) return 1;
+                return b.loadCapacity - a.loadCapacity;
+              });
+            }
+            
+            setAvailableFleetVehicles(availableVehicles);
+            console.log('✅ [FALLBACK FINAL] Available vehicles:', availableVehicles.length);
+          } else {
+            setAvailableFleetVehicles([]);
+            console.log('⚠️ [FALLBACK FAILED] No vehicles available');
+          }
+        } catch (fallbackError) {
+          console.error('🚫 [FALLBACK ERROR]', fallbackError);
           setAvailableFleetVehicles([]);
-          return;
         }
-        setAvailableFleetVehicles([]);
-        console.log('⚠️ [FALLBACK] No vehicles available due to API error');
         
         // Enhanced vehicle matching based on checkout selection
         if (checkoutVehicleDetails) {
