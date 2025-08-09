@@ -1714,16 +1714,21 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                           </div>
                           <h4 className="font-medium text-sm truncate flex items-center gap-1">
                             {product.name}
-                            {product.bulkPurchaseThreshold && product.bulkPurchaseDiscount && (
-                              <span className="text-xs font-medium text-blue-800 mx-1">
-                                خرید عمده
-                              </span>
-                            )}
-                            {product.bulkPurchaseThreshold && product.bulkPurchaseDiscount && " - "}
                             {product.isFlammable && (
                               <Flame className="w-3 h-3 text-orange-500 flex-shrink-0" aria-label="محصول آتش‌زا" />
                             )}
                           </h4>
+                          
+                          {/* خرید عمده با کادر زیبا در وسط */}
+                          {product.bulkPurchaseThreshold && product.bulkPurchaseDiscount && (
+                            <div className="mt-2 flex justify-center">
+                              <div className="px-3 py-1 bg-gradient-to-r from-blue-100 to-green-100 border-2 border-blue-300 rounded-full shadow-sm">
+                                <span className="text-xs font-semibold text-blue-800">
+                                  خرید عمده
+                                </span>
+                              </div>
+                            </div>
+                          )}
                         </div>
                         <p className="text-xs text-muted-foreground">{product.category}</p>
                         <div className="mt-1 space-y-1">
