@@ -1835,7 +1835,7 @@ const LogisticsManagement = () => {
     <html dir="rtl" lang="ar">
     <head>
       <meta charset="utf-8">
-      <title>جزئیات سفارش ${orderDetails.orderNumber}</title>
+      <title></title>
       <style>
         body { 
           font-family: 'Segoe UI', Tahoma, Arial, sans-serif; 
@@ -1917,6 +1917,8 @@ const LogisticsManagement = () => {
         @media print {
           body { margin: 0; }
           .no-print { display: none !important; }
+          @page { margin: 0.5in; }
+          title { display: none !important; }
         }
       </style>
     </head>
@@ -1924,7 +1926,7 @@ const LogisticsManagement = () => {
       <div class="header">
         <img src="/uploads/Logo_1753245273579.jpeg" alt="شرکت ممتاز شیمی" style="max-width: 120px; max-height: 80px; margin-bottom: 15px;" onerror="this.style.display='none'">
         <div class="company-name">ممتاز شیمی</div>
-        <div>جزئیات سفارش ${orderDetails.orderNumber}</div>
+        <div>جزئیات سفارش</div>
         <div style="font-size: 12px; color: #6b7280;">تاریخ چاپ: ${new Date().toLocaleDateString('en-GB')}</div>
       </div>
 
