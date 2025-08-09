@@ -2081,17 +2081,7 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
             </div>
           )}
 
-          {/* Customer Data Status */}
-          {customerData?.success && customerData.customer && (
-            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3 mb-4">
-              <p className="text-sm text-green-800 dark:text-green-200 font-medium">
-                ✓ Customer information loaded from your account
-              </p>
-              <p className="text-xs text-green-600 dark:text-green-300 mt-1">
-                You can modify any details below if needed
-              </p>
-            </div>
-          )}
+
 
           {/* Purchase Form */}
           <div>
