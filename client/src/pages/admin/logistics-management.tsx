@@ -1813,7 +1813,7 @@ const LogisticsManagement = () => {
         </head>
         <body>
           <div class="header">
-            <img src="${companyInfo?.data?.logoUrl || '/uploads/Logo_1753245273579.jpeg'}" alt="شرکت ممتاز شیمی" style="max-width: 120px; max-height: 80px; margin-bottom: 15px;" onerror="this.style.display='none'">
+            <img src="${(companyInfo as any)?.data?.logoUrl || '/uploads/Logo_1753245273579.jpeg'}" alt="شرکت ممتاز شیمی" style="max-width: 120px; max-height: 80px; margin-bottom: 15px;" onerror="this.style.display='none'">
             <h1>جزئیات سفارش لجستیک</h1>
             <h2>سفارش ${selectedOrder.orderNumber}</h2>
             <p>تاریخ چاپ: ${new Date().toLocaleDateString('en-US')}</p>
@@ -1906,19 +1906,19 @@ const LogisticsManagement = () => {
             </div>
           </div>
 
-          ${selectedOrder.financialReviewedAt || selectedOrder.financialNotes ? `
+          ${(selectedOrder as any).financialReviewedAt || (selectedOrder as any).financialNotes ? `
           <div class="section">
             <h3>💰 اطلاعات مالی</h3>
             <div class="info-grid">
-              ${selectedOrder.financialReviewedAt ? `
+              ${(selectedOrder as any).financialReviewedAt ? `
               <div class="info-item">
                 <span class="label">تاریخ بررسی مالی:</span>
-                <span class="value">${new Date(selectedOrder.financialReviewedAt).toLocaleDateString('en-GB')}</span>
+                <span class="value">${new Date((selectedOrder as any).financialReviewedAt).toLocaleDateString('en-GB')}</span>
               </div>` : ''}
-              ${selectedOrder.financialNotes ? `
+              ${(selectedOrder as any).financialNotes ? `
               <div class="info-item" style="grid-column: 1 / -1;">
                 <span class="label">یادداشت‌های مالی:</span>
-                <span class="value">${selectedOrder.financialNotes}</span>
+                <span class="value">${(selectedOrder as any).financialNotes}</span>
               </div>` : ''}
             </div>
           </div>` : ''}
@@ -2071,7 +2071,7 @@ const LogisticsManagement = () => {
     </head>
     <body>
       <div class="header">
-        <img src="${companyInfo?.data?.logoUrl || '/uploads/Logo_1753245273579.jpeg'}" alt="شرکت ممتاز شیمی" style="max-width: 120px; max-height: 80px; margin-bottom: 15px;" onerror="this.style.display='none'">
+        <img src="${(companyInfo as any)?.data?.logoUrl || '/uploads/Logo_1753245273579.jpeg'}" alt="شرکت ممتاز شیمی" style="max-width: 120px; max-height: 80px; margin-bottom: 15px;" onerror="this.style.display='none'">
         <div class="company-name">ممتاز شیمی</div>
         <div>جزئیات سفارش</div>
         <div style="font-size: 12px; color: #6b7280;">تاریخ چاپ: ${new Date().toLocaleDateString('en-GB')}</div>
@@ -4508,7 +4508,7 @@ const LogisticsManagement = () => {
                     <Truck className="w-5 h-5 mr-2" />
                     خودروهای آماده از ناوگان شرکت
                   </h3>
-                  {(!user || (adminUser?.success === false && adminUser?.message?.includes('Access denied'))) && (
+                  {(!user || ((adminUser as any)?.success === false && (adminUser as any)?.message?.includes('Access denied'))) && (
                     <Button
                       onClick={() => window.location.href = '/admin/login'}
                       size="sm"
@@ -4535,12 +4535,12 @@ const LogisticsManagement = () => {
                     <p className="text-orange-600 mb-4">
                       {!user 
                         ? "برای مشاهده خودروهای فیزیکی آماده، لطفاً با حساب مدیریت وارد سیستم شوید" 
-                        : adminUser?.success === false && adminUser?.message?.includes('Access denied')
+                        : (adminUser as any)?.success === false && (adminUser as any)?.message?.includes('Access denied')
                         ? "دسترسی محدود: لطفاً با حساب مدیر سیستم وارد شوید تا خودروهای فیزیکی آماده را مشاهده کنید"
                         : "هیچ خودروی مناسبی از این نوع در دسترس نیست"
                       }
                     </p>
-                    {(!user || (adminUser?.success === false && adminUser?.message?.includes('Access denied'))) ? (
+                    {(!user || ((adminUser as any)?.success === false && (adminUser as any)?.message?.includes('Access denied'))) ? (
                       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                         <div className="text-sm text-blue-700 space-y-2 text-right">
                           <p className="font-medium">💡 راهنمای ورود مدیریت:</p>
