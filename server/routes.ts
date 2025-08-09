@@ -11753,6 +11753,359 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Enhanced Vehicle Assignment Endpoint - using new logistics storage system
+  app.post("/api/orders/:orderId/assign-vehicle", requireAuth, async (req, res) => {
+    try {
+      const { orderId } = req.params;
+      const { vehicleTemplateId, readyVehicleId } = req.body;
+      
+      console.log(`🚛 [VEHICLE ASSIGNMENT] Assigning vehicle template ${vehicleTemplateId} to order ${orderId}`);
+      
+      // Get order details
+      const orderResult = await db
+        .select({
+          id: customerOrders.id,
+          orderNumber: customerOrders.orderNumber,
+          shippingAddress: customerOrders.shippingAddress
+        })
+        .from(customerOrders)
+        .where(eq(customerOrders.id, parseInt(orderId)))
+        .limit(1);
+
+      if (orderResult.length === 0) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "سفارش یافت نشد" 
+        });
+      }
+
+      const order = orderResult[0];
+      
+      // Get order items and calculate weight
+      const orderItemsList = await db
+        .select({
+          productId: orderItems.productId,
+          quantity: orderItems.quantity,
+          productName: orderItems.productName
+        })
+        .from(orderItems)
+        .where(eq(orderItems.orderId, parseInt(orderId)));
+
+      // Calculate order weight
+      let orderWeight = 0;
+      if (orderItemsList.length > 0) {
+        orderWeight = orderItemsList.reduce((total, item) => {
+          const itemQuantity = parseFloat(item.quantity.toString()) || 0;
+          const itemWeight = 10; // kg - default weight
+          return total + (itemWeight * itemQuantity);
+        }, 0);
+      }
+
+      // Check for flammable products
+      const productIds = orderItemsList.map(item => item.productId);
+      let containsFlammableProducts = false;
+      
+      if (productIds.length > 0) {
+        const flammableProducts = await db
+          .select({
+            id: showcaseProducts.id,
+            isFlammable: showcaseProducts.isFlammable
+          })
+          .from(showcaseProducts)
+          .where(or(...productIds.map(id => eq(showcaseProducts.id, id))));
+
+        containsFlammableProducts = flammableProducts.some(product => product.isFlammable);
+      }
+
+      // Extract destination city
+      let destinationCity = 'اربیل';
+      if (order.shippingAddress) {
+        const address = typeof order.shippingAddress === 'string' 
+          ? JSON.parse(order.shippingAddress) 
+          : order.shippingAddress;
+        
+        if (address && address.city) {
+          destinationCity = address.city;
+        }
+      }
+
+      // Calculate distance
+      const distance = destinationCity === 'اربیل' ? 0 : 
+                      destinationCity === 'بغداد' ? 350 :
+                      destinationCity === 'بصره' ? 540 :
+                      destinationCity === 'کربلا' ? 420 :
+                      destinationCity === 'موصل' ? 80 : 200;
+
+      // Use new logistics storage system for assignment
+      const assignmentResult = await logisticsStorage.assignVehicleToOrder(
+        order.orderNumber, 
+        vehicleTemplateId, 
+        readyVehicleId
+      );
+
+      // Also get suitable vehicles for comparison
+      const suitableVehicles = await logisticsStorage.getSuitableVehiclesForOrder(
+        parseInt(orderId),
+        {
+          weightKg: orderWeight,
+          routeType: distance > 100 ? 'interurban' : 'urban',
+          distanceKm: distance,
+          isFlammable: containsFlammableProducts,
+          isFragile: true // assume fragile for safety
+        }
+      );
+
+      res.json({
+        success: assignmentResult.success,
+        message: assignmentResult.message,
+        data: {
+          assignedVehicle: assignmentResult.assignedVehicle,
+          selectionHistory: assignmentResult.selectionHistory,
+          orderDetails: {
+            id: order.id,
+            orderNumber: order.orderNumber,
+            weight: orderWeight,
+            distance: distance,
+            destinationCity: destinationCity,
+            containsFlammableProducts: containsFlammableProducts
+          },
+          recommendedAlternatives: suitableVehicles.recommendedVehicles.slice(0, 3)
+        }
+      });
+
+    } catch (error) {
+      console.error("Error assigning vehicle to order:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در تخصیص خودرو به سفارش" 
+      });
+    }
+  });
+
+  // =============================================================================
+  // VEHICLE TEMPLATES MANAGEMENT ENDPOINTS
+  // =============================================================================
+
+  // Get all vehicle templates
+  app.get("/api/vehicle-templates", requireAuth, async (req, res) => {
+    try {
+      const { isActive, vehicleType } = req.query;
+      
+      const filters: any = {};
+      if (isActive !== undefined) filters.isActive = isActive === 'true';
+      if (vehicleType) filters.vehicleType = vehicleType as string;
+      
+      const templates = await logisticsStorage.getVehicleTemplates(filters);
+      
+      res.json({
+        success: true,
+        data: templates
+      });
+    } catch (error) {
+      console.error("Error getting vehicle templates:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در دریافت الگوهای خودرو" 
+      });
+    }
+  });
+
+  // Create vehicle template
+  app.post("/api/vehicle-templates", requireAuth, async (req, res) => {
+    try {
+      const template = await logisticsStorage.createVehicleTemplate(req.body);
+      
+      res.json({
+        success: true,
+        message: "الگوی خودرو با موفقیت ایجاد شد",
+        data: template
+      });
+    } catch (error) {
+      console.error("Error creating vehicle template:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در ایجاد الگوی خودرو" 
+      });
+    }
+  });
+
+  // Update vehicle template
+  app.put("/api/vehicle-templates/:id", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const template = await logisticsStorage.updateVehicleTemplate(parseInt(id), req.body);
+      
+      res.json({
+        success: true,
+        message: "الگوی خودرو با موفقیت بروزرسانی شد",
+        data: template
+      });
+    } catch (error) {
+      console.error("Error updating vehicle template:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در بروزرسانی الگوی خودرو" 
+      });
+    }
+  });
+
+  // Delete vehicle template (soft delete)
+  app.delete("/api/vehicle-templates/:id", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await logisticsStorage.deleteVehicleTemplate(parseInt(id));
+      
+      res.json({
+        success: true,
+        message: "الگوی خودرو با موفقیت حذف شد"
+      });
+    } catch (error) {
+      console.error("Error deleting vehicle template:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در حذف الگوی خودرو" 
+      });
+    }
+  });
+
+  // =============================================================================
+  // READY VEHICLES MANAGEMENT ENDPOINTS
+  // =============================================================================
+
+  // Get all ready vehicles
+  app.get("/api/ready-vehicles", requireAuth, async (req, res) => {
+    try {
+      const { isAvailable, vehicleTemplateId, currentLocation } = req.query;
+      
+      const filters: any = {};
+      if (isAvailable !== undefined) filters.isAvailable = isAvailable === 'true';
+      if (vehicleTemplateId) filters.vehicleTemplateId = parseInt(vehicleTemplateId as string);
+      if (currentLocation) filters.currentLocation = currentLocation as string;
+      
+      const vehicles = await logisticsStorage.getReadyVehicles(filters);
+      
+      res.json({
+        success: true,
+        data: vehicles
+      });
+    } catch (error) {
+      console.error("Error getting ready vehicles:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در دریافت خودروهای آماده" 
+      });
+    }
+  });
+
+  // Create ready vehicle
+  app.post("/api/ready-vehicles", requireAuth, async (req, res) => {
+    try {
+      const vehicle = await logisticsStorage.createReadyVehicle(req.body);
+      
+      res.json({
+        success: true,
+        message: "خودروی آماده با موفقیت ایجاد شد",
+        data: vehicle
+      });
+    } catch (error) {
+      console.error("Error creating ready vehicle:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در ایجاد خودروی آماده" 
+      });
+    }
+  });
+
+  // Update ready vehicle
+  app.put("/api/ready-vehicles/:id", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const vehicle = await logisticsStorage.updateReadyVehicle(parseInt(id), req.body);
+      
+      res.json({
+        success: true,
+        message: "خودروی آماده با موفقیت بروزرسانی شد",
+        data: vehicle
+      });
+    } catch (error) {
+      console.error("Error updating ready vehicle:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در بروزرسانی خودروی آماده" 
+      });
+    }
+  });
+
+  // Update vehicle availability
+  app.patch("/api/ready-vehicles/:id/availability", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { isAvailable } = req.body;
+      
+      const vehicle = await logisticsStorage.updateReadyVehicleAvailability(parseInt(id), isAvailable);
+      
+      res.json({
+        success: true,
+        message: `وضعیت خودرو به ${isAvailable ? 'در دسترس' : 'تخصیص یافته'} تغییر یافت`,
+        data: vehicle
+      });
+    } catch (error) {
+      console.error("Error updating vehicle availability:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در بروزرسانی وضعیت خودرو" 
+      });
+    }
+  });
+
+  // Delete ready vehicle
+  app.delete("/api/ready-vehicles/:id", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await logisticsStorage.deleteReadyVehicle(parseInt(id));
+      
+      res.json({
+        success: true,
+        message: "خودروی آماده با موفقیت حذف شد"
+      });
+    } catch (error) {
+      console.error("Error deleting ready vehicle:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در حذف خودروی آماده" 
+      });
+    }
+  });
+
+  // =============================================================================
+  // VEHICLE SELECTION HISTORY ENDPOINTS
+  // =============================================================================
+
+  // Get vehicle selection history
+  app.get("/api/vehicle-selection-history", requireAuth, async (req, res) => {
+    try {
+      const { orderNumber, customerId, vehicleTemplateId } = req.query;
+      
+      const filters: any = {};
+      if (orderNumber) filters.orderNumber = orderNumber as string;
+      if (customerId) filters.customerId = parseInt(customerId as string);
+      if (vehicleTemplateId) filters.vehicleTemplateId = parseInt(vehicleTemplateId as string);
+      
+      const history = await logisticsStorage.getVehicleSelectionHistory(filters);
+      
+      res.json({
+        success: true,
+        data: history
+      });
+    } catch (error) {
+      console.error("Error getting vehicle selection history:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "خطا در دریافت تاریخچه انتخاب خودرو" 
+      });
+    }
+  });
+
   // =============================================================================
   // ORDER MANAGEMENT STATUS UPDATE ENDPOINTS
   // =============================================================================

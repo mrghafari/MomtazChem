@@ -8,6 +8,9 @@ import {
   deliveryCodeCounter,
   deliveryVerificationCodes,
   logisticsAnalytics,
+  vehicleTemplates,
+  readyVehicles,
+  vehicleSelectionHistory,
   type TransportationCompany,
   type InsertTransportationCompany,
   type DeliveryVehicle,
@@ -22,6 +25,12 @@ import {
   type InsertDeliveryVerificationCode,
   type LogisticsAnalytics,
   type InsertLogisticsAnalytics,
+  type VehicleTemplate,
+  type InsertVehicleTemplate,
+  type ReadyVehicle,
+  type InsertReadyVehicle,
+  type VehicleSelectionHistory,
+  type InsertVehicleSelectionHistory,
   VEHICLE_TYPES,
   DELIVERY_STATUS,
   ROUTE_STATUS,
@@ -120,18 +129,73 @@ export interface ILogisticsStorage {
   getDriverPerformance(driverId?: number, period?: number): Promise<any>;
   getVehicleUtilization(vehicleId?: number, period?: number): Promise<any>;
   getCostAnalysis(period: number): Promise<any>;
+
+  // Vehicle Templates (الگوهای خودرو)
+  getVehicleTemplates(filters?: { isActive?: boolean; vehicleType?: string }): Promise<VehicleTemplate[]>;
+  getVehicleTemplateById(id: number): Promise<VehicleTemplate | null>;
+  createVehicleTemplate(data: InsertVehicleTemplate): Promise<VehicleTemplate>;
+  updateVehicleTemplate(id: number, data: Partial<InsertVehicleTemplate>): Promise<VehicleTemplate>;
+  deleteVehicleTemplate(id: number): Promise<void>;
+
+  // Ready Vehicles (خودروهای فیزیکی آماده)
+  getReadyVehicles(filters?: { 
+    isAvailable?: boolean; 
+    vehicleTemplateId?: number;
+    currentLocation?: string;
+  }): Promise<ReadyVehicle[]>;
+  getReadyVehicleById(id: number): Promise<ReadyVehicle | null>;
+  createReadyVehicle(data: InsertReadyVehicle): Promise<ReadyVehicle>;
+  updateReadyVehicle(id: number, data: Partial<InsertReadyVehicle>): Promise<ReadyVehicle>;
+  updateReadyVehicleAvailability(id: number, isAvailable: boolean): Promise<ReadyVehicle>;
+  deleteReadyVehicle(id: number): Promise<void>;
+
+  // Vehicle Assignment System (سیستم تخصیص خودرو)
+  getSuitableVehiclesForOrder(orderId: number, orderData: {
+    weightKg: number;
+    volumeM3?: number;
+    routeType: string;
+    distanceKm: number;
+    isHazardous?: boolean;
+    isFlammable?: boolean;
+    isRefrigerated?: boolean;
+    isFragile?: boolean;
+  }): Promise<{
+    recommendedVehicles: Array<{
+      template: VehicleTemplate;
+      readyVehicles: ReadyVehicle[];
+      estimatedCost: number;
+      reasonForSelection: string;
+    }>;
+    allCompatibleTemplates: VehicleTemplate[];
+  }>;
+  
+  assignVehicleToOrder(orderNumber: string, vehicleTemplateId: number, readyVehicleId?: number): Promise<{
+    success: boolean;
+    message: string;
+    assignedVehicle?: ReadyVehicle;
+    selectionHistory: VehicleSelectionHistory;
+  }>;
+
+  // Vehicle Selection History
+  getVehicleSelectionHistory(filters?: { 
+    orderNumber?: string;
+    customerId?: number;
+    vehicleTemplateId?: number;
+  }): Promise<VehicleSelectionHistory[]>;
+  createVehicleSelectionHistory(data: InsertVehicleSelectionHistory): Promise<VehicleSelectionHistory>;
 }
 
 export class LogisticsStorage implements ILogisticsStorage {
   // Transportation Companies
   async getTransportationCompanies(filters?: { isActive?: boolean }): Promise<TransportationCompany[]> {
-    let query = db.select().from(transportationCompanies);
-    
     if (filters?.isActive !== undefined) {
-      query = query.where(eq(transportationCompanies.isActive, filters.isActive));
+      return db.select().from(transportationCompanies)
+        .where(eq(transportationCompanies.isActive, filters.isActive))
+        .orderBy(desc(transportationCompanies.totalDeliveries));
     }
     
-    return query.orderBy(desc(transportationCompanies.totalDeliveries));
+    return db.select().from(transportationCompanies)
+      .orderBy(desc(transportationCompanies.totalDeliveries));
   }
 
   async getTransportationCompanyById(id: number): Promise<TransportationCompany | null> {
@@ -177,7 +241,6 @@ export class LogisticsStorage implements ILogisticsStorage {
     currentStatus?: string; 
     isActive?: boolean 
   }): Promise<DeliveryVehicle[]> {
-    let query = db.select().from(deliveryVehicles);
     const conditions = [];
     
     if (filters?.companyId) {
@@ -194,10 +257,13 @@ export class LogisticsStorage implements ILogisticsStorage {
     }
     
     if (conditions.length > 0) {
-      query = query.where(and(...conditions));
+      return db.select().from(deliveryVehicles)
+        .where(and(...conditions))
+        .orderBy(asc(deliveryVehicles.plateNumber));
     }
     
-    return query.orderBy(asc(deliveryVehicles.plateNumber));
+    return db.select().from(deliveryVehicles)
+      .orderBy(asc(deliveryVehicles.plateNumber));
   }
 
   async getDeliveryVehicleById(id: number): Promise<DeliveryVehicle | null> {
@@ -215,15 +281,10 @@ export class LogisticsStorage implements ILogisticsStorage {
     minWeight?: number;
     minVolume?: number;
   }): Promise<DeliveryVehicle[]> {
-    let query = db
-      .select()
-      .from(deliveryVehicles)
-      .where(and(
-        eq(deliveryVehicles.isActive, true),
-        eq(deliveryVehicles.currentStatus, 'available')
-      ));
-    
-    const conditions = [];
+    const conditions = [
+      eq(deliveryVehicles.isActive, true),
+      eq(deliveryVehicles.currentStatus, 'available')
+    ];
     
     if (criteria.vehicleType) {
       conditions.push(eq(deliveryVehicles.vehicleType, criteria.vehicleType));
@@ -235,11 +296,9 @@ export class LogisticsStorage implements ILogisticsStorage {
       conditions.push(gte(deliveryVehicles.maxVolume, criteria.minVolume.toString()));
     }
     
-    if (conditions.length > 0) {
-      query = query.where(and(...conditions));
-    }
-    
-    return query.orderBy(desc(deliveryVehicles.maxWeight));
+    return db.select().from(deliveryVehicles)
+      .where(and(...conditions))
+      .orderBy(desc(deliveryVehicles.maxWeight));
   }
 
   async createDeliveryVehicle(data: InsertDeliveryVehicle): Promise<DeliveryVehicle> {
@@ -284,7 +343,6 @@ export class LogisticsStorage implements ILogisticsStorage {
     currentStatus?: string; 
     isActive?: boolean 
   }): Promise<DeliveryPersonnel[]> {
-    let query = db.select().from(deliveryPersonnel);
     const conditions = [];
     
     if (filters?.companyId) {
@@ -298,10 +356,13 @@ export class LogisticsStorage implements ILogisticsStorage {
     }
     
     if (conditions.length > 0) {
-      query = query.where(and(...conditions));
+      return db.select().from(deliveryPersonnel)
+        .where(and(...conditions))
+        .orderBy(desc(deliveryPersonnel.averageRating));
     }
     
-    return query.orderBy(desc(deliveryPersonnel.averageRating));
+    return db.select().from(deliveryPersonnel)
+      .orderBy(desc(deliveryPersonnel.averageRating));
   }
 
   async getDeliveryPersonnelById(id: number): Promise<DeliveryPersonnel | null> {
@@ -386,7 +447,6 @@ export class LogisticsStorage implements ILogisticsStorage {
     status?: string; 
     dateRange?: { start: Date; end: Date }
   }): Promise<DeliveryRoute[]> {
-    let query = db.select().from(deliveryRoutes);
     const conditions = [];
     
     if (filters?.driverId) {
@@ -403,10 +463,13 @@ export class LogisticsStorage implements ILogisticsStorage {
     }
     
     if (conditions.length > 0) {
-      query = query.where(and(...conditions));
+      return db.select().from(deliveryRoutes)
+        .where(and(...conditions))
+        .orderBy(desc(deliveryRoutes.plannedStartTime));
     }
     
-    return query.orderBy(desc(deliveryRoutes.plannedStartTime));
+    return db.select().from(deliveryRoutes)
+      .orderBy(desc(deliveryRoutes.plannedStartTime));
   }
 
   async getDeliveryRouteById(id: number): Promise<DeliveryRoute | null> {
@@ -528,7 +591,6 @@ export class LogisticsStorage implements ILogisticsStorage {
     isVerified?: boolean; 
     smsStatus?: string 
   }): Promise<DeliveryVerificationCode[]> {
-    let query = db.select().from(deliveryVerificationCodes);
     const conditions = [];
     
     if (filters?.customerOrderId) {
@@ -542,10 +604,13 @@ export class LogisticsStorage implements ILogisticsStorage {
     }
     
     if (conditions.length > 0) {
-      query = query.where(and(...conditions));
+      return db.select().from(deliveryVerificationCodes)
+        .where(and(...conditions))
+        .orderBy(desc(deliveryVerificationCodes.createdAt));
     }
     
-    return query.orderBy(desc(deliveryVerificationCodes.createdAt));
+    return db.select().from(deliveryVerificationCodes)
+      .orderBy(desc(deliveryVerificationCodes.createdAt));
   }
 
   async getDeliveryVerificationCodeById(id: number): Promise<DeliveryVerificationCode | null> {
@@ -586,14 +651,12 @@ export class LogisticsStorage implements ILogisticsStorage {
     await db
       .insert(deliveryVerificationCodes)
       .values({
-        orderManagementId,
-        customerOrderId: 0, // Will be updated if needed
+        customerOrderId: orderManagementId,
         verificationCode: sequentialCode,
         customerPhone,
         customerName: '', // Will be populated if needed
         smsMessage: `کد تحویل سفارش شما: ${sequentialCode}`,
         smsStatus: 'pending',
-        isActive: true,
         expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
       });
     
@@ -759,7 +822,6 @@ ${verificationCode}
     period?: string; 
     dateRange?: { start: Date; end: Date }
   }): Promise<LogisticsAnalytics[]> {
-    let query = db.select().from(logisticsAnalytics);
     const conditions = [];
     
     if (filters?.period) {
@@ -770,10 +832,13 @@ ${verificationCode}
     }
     
     if (conditions.length > 0) {
-      query = query.where(and(...conditions));
+      return db.select().from(logisticsAnalytics)
+        .where(and(...conditions))
+        .orderBy(desc(logisticsAnalytics.analyticsDate));
     }
     
-    return query.orderBy(desc(logisticsAnalytics.analyticsDate));
+    return db.select().from(logisticsAnalytics)
+      .orderBy(desc(logisticsAnalytics.analyticsDate));
   }
 
   async generateDailyAnalytics(date: Date): Promise<LogisticsAnalytics> {
@@ -895,6 +960,373 @@ ${verificationCode}
       costPerDelivery: 0,
       costPerKm: 0
     };
+  }
+
+  // =============================================================================
+  // VEHICLE TEMPLATES MANAGEMENT (الگوهای خودرو)
+  // =============================================================================
+  
+  async getVehicleTemplates(filters?: { isActive?: boolean; vehicleType?: string }): Promise<VehicleTemplate[]> {
+    const conditions = [];
+    
+    if (filters?.isActive !== undefined) {
+      conditions.push(eq(vehicleTemplates.isActive, filters.isActive));
+    }
+    if (filters?.vehicleType) {
+      conditions.push(eq(vehicleTemplates.vehicleType, filters.vehicleType));
+    }
+    
+    if (conditions.length > 0) {
+      return db.select().from(vehicleTemplates)
+        .where(and(...conditions))
+        .orderBy(asc(vehicleTemplates.priority), desc(vehicleTemplates.maxWeightKg));
+    }
+    
+    return db.select().from(vehicleTemplates)
+      .orderBy(asc(vehicleTemplates.priority), desc(vehicleTemplates.maxWeightKg));
+  }
+
+  async getVehicleTemplateById(id: number): Promise<VehicleTemplate | null> {
+    const results = await db
+      .select()
+      .from(vehicleTemplates)
+      .where(eq(vehicleTemplates.id, id))
+      .limit(1);
+    
+    return results[0] || null;
+  }
+
+  async createVehicleTemplate(data: InsertVehicleTemplate): Promise<VehicleTemplate> {
+    const [template] = await db
+      .insert(vehicleTemplates)
+      .values(data)
+      .returning();
+    
+    return template;
+  }
+
+  async updateVehicleTemplate(id: number, data: Partial<InsertVehicleTemplate>): Promise<VehicleTemplate> {
+    const [template] = await db
+      .update(vehicleTemplates)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(vehicleTemplates.id, id))
+      .returning();
+    
+    return template;
+  }
+
+  async deleteVehicleTemplate(id: number): Promise<void> {
+    await db
+      .update(vehicleTemplates)
+      .set({ isActive: false, updatedAt: new Date() })
+      .where(eq(vehicleTemplates.id, id));
+  }
+
+  // =============================================================================
+  // READY VEHICLES MANAGEMENT (خودروهای فیزیکی آماده)
+  // =============================================================================
+
+  async getReadyVehicles(filters?: { 
+    isAvailable?: boolean; 
+    vehicleTemplateId?: number;
+    currentLocation?: string;
+  }): Promise<ReadyVehicle[]> {
+    const conditions = [];
+    
+    if (filters?.isAvailable !== undefined) {
+      conditions.push(eq(readyVehicles.isAvailable, filters.isAvailable));
+    }
+    if (filters?.vehicleTemplateId) {
+      conditions.push(eq(readyVehicles.vehicleTemplateId, filters.vehicleTemplateId));
+    }
+    if (filters?.currentLocation) {
+      conditions.push(eq(readyVehicles.currentLocation, filters.currentLocation));
+    }
+    
+    if (conditions.length > 0) {
+      return db.select().from(readyVehicles)
+        .where(and(...conditions))
+        .orderBy(desc(readyVehicles.isAvailable), asc(readyVehicles.driverName));
+    }
+    
+    return db.select().from(readyVehicles)
+      .orderBy(desc(readyVehicles.isAvailable), asc(readyVehicles.driverName));
+  }
+
+  async getReadyVehicleById(id: number): Promise<ReadyVehicle | null> {
+    const results = await db
+      .select()
+      .from(readyVehicles)
+      .where(eq(readyVehicles.id, id))
+      .limit(1);
+    
+    return results[0] || null;
+  }
+
+  async createReadyVehicle(data: InsertReadyVehicle): Promise<ReadyVehicle> {
+    const [vehicle] = await db
+      .insert(readyVehicles)
+      .values(data)
+      .returning();
+    
+    return vehicle;
+  }
+
+  async updateReadyVehicle(id: number, data: Partial<InsertReadyVehicle>): Promise<ReadyVehicle> {
+    const [vehicle] = await db
+      .update(readyVehicles)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(readyVehicles.id, id))
+      .returning();
+    
+    return vehicle;
+  }
+
+  async updateReadyVehicleAvailability(id: number, isAvailable: boolean): Promise<ReadyVehicle> {
+    const [vehicle] = await db
+      .update(readyVehicles)
+      .set({ isAvailable, updatedAt: new Date() })
+      .where(eq(readyVehicles.id, id))
+      .returning();
+    
+    return vehicle;
+  }
+
+  async deleteReadyVehicle(id: number): Promise<void> {
+    await db
+      .delete(readyVehicles)
+      .where(eq(readyVehicles.id, id));
+  }
+
+  // =============================================================================
+  // VEHICLE ASSIGNMENT SYSTEM (سیستم تخصیص خودرو)
+  // =============================================================================
+
+  async getSuitableVehiclesForOrder(orderId: number, orderData: {
+    weightKg: number;
+    volumeM3?: number;
+    routeType: string;
+    distanceKm: number;
+    isHazardous?: boolean;
+    isFlammable?: boolean;
+    isRefrigerated?: boolean;
+    isFragile?: boolean;
+  }): Promise<{
+    recommendedVehicles: Array<{
+      template: VehicleTemplate;
+      readyVehicles: ReadyVehicle[];
+      estimatedCost: number;
+      reasonForSelection: string;
+    }>;
+    allCompatibleTemplates: VehicleTemplate[];
+  }> {
+    // 1. Get all active vehicle templates
+    const allTemplates = await this.getVehicleTemplates({ isActive: true });
+    
+    // 2. Filter templates based on order requirements
+    const compatibleTemplates = allTemplates.filter(template => {
+      // Check weight capacity
+      if (parseFloat(template.maxWeightKg.toString()) < orderData.weightKg) {
+        return false;
+      }
+      
+      // Check volume capacity if needed
+      if (orderData.volumeM3 && template.maxVolumeM3) {
+        if (parseFloat(template.maxVolumeM3.toString()) < orderData.volumeM3) {
+          return false;
+        }
+      }
+      
+      // Check route compatibility
+      if (!template.allowedRoutes?.includes(orderData.routeType)) {
+        return false;
+      }
+      
+      // Check special requirements
+      if (orderData.isHazardous && !template.supportsHazardous) {
+        return false;
+      }
+      
+      if (orderData.isFlammable && (!template.supportsFlammable || template.notAllowedFlammable)) {
+        return false;
+      }
+      
+      if (orderData.isRefrigerated && !template.supportsRefrigerated) {
+        return false;
+      }
+      
+      if (orderData.isFragile && !template.supportsFragile) {
+        return false;
+      }
+      
+      return true;
+    });
+
+    // 3. For each compatible template, find available ready vehicles and calculate cost
+    const recommendedVehicles = await Promise.all(
+      compatibleTemplates.map(async (template) => {
+        // Get ready vehicles for this template
+        const availableVehicles = await this.getReadyVehicles({
+          isAvailable: true,
+          vehicleTemplateId: template.id
+        });
+
+        // Calculate estimated cost
+        const basePrice = parseFloat(template.basePrice.toString());
+        const distanceCost = parseFloat(template.pricePerKm.toString()) * orderData.distanceKm;
+        const weightCost = parseFloat((template.pricePerKg || "0").toString()) * orderData.weightKg;
+        const estimatedCost = basePrice + distanceCost + weightCost;
+
+        // Generate reason for selection
+        let reasonForSelection = `مناسب برای وزن ${orderData.weightKg} کیلوگرم`;
+        if (orderData.volumeM3) {
+          reasonForSelection += ` و حجم ${orderData.volumeM3} متر مکعب`;
+        }
+        reasonForSelection += `. مسیر: ${orderData.routeType}`;
+        
+        if (orderData.isHazardous) reasonForSelection += '. پشتیبانی از مواد خطرناک';
+        if (orderData.isFlammable) reasonForSelection += '. پشتیبانی از مواد آتش‌زا';
+        if (orderData.isRefrigerated) reasonForSelection += '. دارای سیستم سردخانه';
+        if (orderData.isFragile) reasonForSelection += '. پشتیبانی از کالاهای شکستنی';
+
+        return {
+          template,
+          readyVehicles: availableVehicles,
+          estimatedCost,
+          reasonForSelection
+        };
+      })
+    );
+
+    // 4. Sort by cost (cheapest first) and availability
+    recommendedVehicles.sort((a, b) => {
+      // Prioritize vehicles with available ready vehicles
+      if (a.readyVehicles.length > 0 && b.readyVehicles.length === 0) return -1;
+      if (a.readyVehicles.length === 0 && b.readyVehicles.length > 0) return 1;
+      
+      // Then sort by cost
+      return a.estimatedCost - b.estimatedCost;
+    });
+
+    return {
+      recommendedVehicles,
+      allCompatibleTemplates: compatibleTemplates
+    };
+  }
+
+  async assignVehicleToOrder(orderNumber: string, vehicleTemplateId: number, readyVehicleId?: number): Promise<{
+    success: boolean;
+    message: string;
+    assignedVehicle: ReadyVehicle | null;
+    selectionHistory: VehicleSelectionHistory;
+  }> {
+    // Get vehicle template
+    const template = await this.getVehicleTemplateById(vehicleTemplateId);
+    if (!template) {
+      throw new Error('الگوی خودروی انتخاب شده یافت نشد');
+    }
+
+    let assignedVehicle: ReadyVehicle | null = null;
+    let message = '';
+
+    // If specific ready vehicle is requested
+    if (readyVehicleId) {
+      assignedVehicle = await this.getReadyVehicleById(readyVehicleId);
+      if (!assignedVehicle) {
+        return {
+          success: false,
+          message: 'خودروی مشخص شده یافت نشد',
+          selectionHistory: {} as VehicleSelectionHistory
+        };
+      }
+
+      if (!assignedVehicle.isAvailable) {
+        return {
+          success: false,
+          message: 'خودروی انتخابی در حال حاضر در دسترس نیست',
+          selectionHistory: {} as VehicleSelectionHistory
+        };
+      }
+
+      // Mark vehicle as assigned
+      await this.updateReadyVehicleAvailability(readyVehicleId, false);
+      message = `خودرو ${assignedVehicle.licensePlate} با راننده ${assignedVehicle.driverName} تخصیص یافت`;
+    } else {
+      // Find any available vehicle for this template
+      const availableVehicles = await this.getReadyVehicles({
+        isAvailable: true,
+        vehicleTemplateId
+      });
+
+      if (availableVehicles.length > 0) {
+        assignedVehicle = availableVehicles[0];
+        await this.updateReadyVehicleAvailability(assignedVehicle.id, false);
+        message = `خودرو ${assignedVehicle.licensePlate} با راننده ${assignedVehicle.driverName} تخصیص یافت`;
+      } else {
+        message = `الگوی خودروی ${template.name} انتخاب شد اما هیچ خودروی فیزیکی در دسترس نیست. لطفاً با مدیریت لجستیک تماس بگیرید`;
+      }
+    }
+
+    // Create selection history record
+    const selectionHistory = await this.createVehicleSelectionHistory({
+      orderNumber,
+      selectedVehicleTemplateId: vehicleTemplateId,
+      selectedVehicleName: template.name,
+      orderWeightKg: "0", // This should be passed from the order data
+      routeType: "urban", // This should be passed from the order data
+      distanceKm: "0", // This should be passed from the order data
+      basePrice: template.basePrice.toString(),
+      distanceCost: "0",
+      totalCost: template.basePrice.toString(),
+      selectionCriteria: `انتخاب الگوی ${template.name}` + (assignedVehicle ? ` و تخصیص خودرو ${assignedVehicle.licensePlate}` : ' بدون تخصیص خودرو فیزیکی')
+    });
+
+    return {
+      success: true,
+      message,
+      assignedVehicle,
+      selectionHistory
+    };
+  }
+
+  // =============================================================================
+  // VEHICLE SELECTION HISTORY
+  // =============================================================================
+
+  async getVehicleSelectionHistory(filters?: { 
+    orderNumber?: string;
+    customerId?: number;
+    vehicleTemplateId?: number;
+  }): Promise<VehicleSelectionHistory[]> {
+    const conditions = [];
+    
+    if (filters?.orderNumber) {
+      conditions.push(eq(vehicleSelectionHistory.orderNumber, filters.orderNumber));
+    }
+    if (filters?.customerId) {
+      conditions.push(eq(vehicleSelectionHistory.customerId, filters.customerId));
+    }
+    if (filters?.vehicleTemplateId) {
+      conditions.push(eq(vehicleSelectionHistory.selectedVehicleTemplateId, filters.vehicleTemplateId));
+    }
+    
+    if (conditions.length > 0) {
+      return db.select().from(vehicleSelectionHistory)
+        .where(and(...conditions))
+        .orderBy(desc(vehicleSelectionHistory.createdAt));
+    }
+    
+    return db.select().from(vehicleSelectionHistory)
+      .orderBy(desc(vehicleSelectionHistory.createdAt));
+  }
+
+  async createVehicleSelectionHistory(data: InsertVehicleSelectionHistory): Promise<VehicleSelectionHistory> {
+    const [history] = await db
+      .insert(vehicleSelectionHistory)
+      .values(data)
+      .returning();
+    
+    return history;
   }
 }
 
