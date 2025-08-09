@@ -162,7 +162,12 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
   
-  const paymentSettings = paymentSettingsResponse?.data || [];
+  // CRITICAL FIX: Always provide stable payment methods to prevent disappearing options
+  const paymentSettings = paymentSettingsResponse?.data || [
+    { methodKey: 'bank_receipt', methodName: 'ارسال فیش واریزی بانکی', enabled: true, priority: 90 },
+    { methodKey: 'online_payment', methodName: 'پرداخت آنلاین', enabled: true, priority: 80 },
+    { methodKey: 'wallet', methodName: 'کیف پول', enabled: true, priority: 100 }
+  ];
 
   // Iraqi provinces and cities queries for secondary address dropdowns
   const { data: provincesData, isLoading: provincesLoading } = useQuery<{success: boolean, data: any[]}>({
@@ -860,10 +865,21 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
   
   const beforeWalletTotal = subtotal + shippingCost + totalTaxAmount;
   
-  // Auto-enable wallet usage when wallet payment method is selected
+  // Auto-enable wallet usage when wallet payment method is selected - NO PAYMENT METHOD CLEARING
   useEffect(() => {
     const paymentMethod = form.watch('paymentMethod');
+    
+    console.log('🔧 [PAYMENT METHOD WATCH]:', {
+      currentPaymentMethod: paymentMethod,
+      walletBalance,
+      beforeWalletTotal,
+      action: paymentMethod === 'wallet_combined' ? 'Setup wallet' : 'Keep current selection'
+    });
+    
+    // ONLY handle wallet_combined setup - DO NOT INTERFERE WITH OTHER PAYMENT METHODS
     if (paymentMethod === 'wallet_combined') {
+      console.log('💰 [WALLET SETUP] Setting up wallet payment - preserving other payment methods');
+      
       setUseWallet(true);
       // Always suggest full payment amount if wallet has sufficient balance
       const suggestedAmount = Math.min(walletBalance, beforeWalletTotal);
@@ -885,10 +901,14 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
           actualUsage: Math.min(suggestedAmount, Math.min(walletBalance, beforeWalletTotal))
         });
       }, 100);
-    } else {
+    } else if (paymentMethod && paymentMethod !== 'wallet_combined') {
+      // For NON-WALLET payment methods - reset wallet settings but PRESERVE the selected payment method
+      console.log('💳 [NON-WALLET PAYMENT] Preserving payment method:', paymentMethod);
       setUseWallet(false);
       setWalletAmountToUse(0);
+      // DO NOT clear or change the payment method - let user's selection stay
     }
+    // If paymentMethod is empty/undefined, do nothing - let the form handle its own state
   }, [form.watch('paymentMethod'), walletBalance, beforeWalletTotal]);
   
   // Calculate wallet usage
