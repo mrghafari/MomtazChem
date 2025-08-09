@@ -312,7 +312,7 @@ const LogisticsManagement = () => {
     if (selectedReadyVehicle && vehicleTemplatesData) {
       // Get current vehicle template names from database
       const templateNames = ((vehicleTemplatesData as any)?.data || []).map((template: any) => template.name);
-      const matchingTemplate = templateNames.find(name => name === selectedReadyVehicle.vehicleType);
+      const matchingTemplate = templateNames.find((name: string) => name === selectedReadyVehicle.vehicleType);
       
       if (matchingTemplate) {
         setSelectedEditVehicleType(matchingTemplate);
@@ -390,9 +390,7 @@ const LogisticsManagement = () => {
       loadCapacity: parseFloat(formData.get('loadCapacity') as string),
       currentLocation: formData.get('currentLocation') as string,
       notes: formData.get('notes') as string,
-      isAvailable: formData.get('isAvailable') === 'true',
-      supportsFlammable: formData.get('supportsFlammable') === 'true',
-      notAllowedFlammable: formData.get('notAllowedFlammable') === 'true'
+      isAvailable: formData.get('isAvailable') === 'true'
     };
 
     createReadyVehicleMutation.mutate(vehicleData);
@@ -419,9 +417,7 @@ const LogisticsManagement = () => {
       loadCapacity: parseFloat(formData.get('loadCapacity') as string),
       currentLocation: formData.get('currentLocation') as string,
       notes: formData.get('notes') as string,
-      isAvailable: formData.get('isAvailable') === 'true',
-      supportsFlammable: formData.get('supportsFlammable') === 'true',
-      notAllowedFlammable: formData.get('notAllowedFlammable') === 'true'
+      isAvailable: formData.get('isAvailable') === 'true'
     };
 
     updateReadyVehicleMutation.mutate(vehicleData);
@@ -1041,6 +1037,7 @@ const LogisticsManagement = () => {
                         <Label htmlFor="averageSpeedKmh">سرعت متوسط (کیلومتر/ساعت)</Label>
                         <Input id="averageSpeedKmh" name="averageSpeedKmh" type="number" defaultValue="50" />
                       </div>
+
                     </div>
                     <DialogFooter>
                       <Button type="button" variant="outline" onClick={() => setIsCreateVehicleDialogOpen(false)}>انصراف</Button>
@@ -1257,17 +1254,7 @@ const LogisticsManagement = () => {
                           className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="edit-supportsFlammable">مجاز برای حمل مواد آتش زا</Label>
-                        <select 
-                          name="supportsFlammable" 
-                          defaultValue={editingVehicle.supportsFlammable ? "true" : "false"}
-                          className="w-full p-2 border rounded"
-                        >
-                          <option value="false">❌ غیرمجاز</option>
-                          <option value="true">✅ مجاز</option>
-                        </select>
-                      </div>
+
 
                       <div className="space-y-2 col-span-2">
                         <div className="flex items-center space-x-2">
@@ -3503,9 +3490,7 @@ const LogisticsManagement = () => {
         loadCapacity: parseInt(formData.get('loadCapacity') as string),
         currentLocation: formData.get('currentLocation') as string,
         notes: formData.get('notes') as string,
-        isAvailable: formData.get('isAvailable') === 'true',
-        supportsFlammable: formData.get('supportsFlammable') === 'true',
-        notAllowedFlammable: formData.get('notAllowedFlammable') === 'true'
+        isAvailable: formData.get('isAvailable') === 'true'
       };
       
       createReadyVehicleMutation.mutate(vehicleData);
@@ -3541,9 +3526,7 @@ const LogisticsManagement = () => {
         loadCapacity: parseInt(formData.get('loadCapacity') as string),
         currentLocation: formData.get('currentLocation') as string,
         notes: formData.get('notes') as string,
-        isAvailable: formData.get('isAvailable') === 'true',
-        supportsFlammable: formData.get('supportsFlammable') === 'true',
-        notAllowedFlammable: formData.get('notAllowedFlammable') === 'true'
+        isAvailable: formData.get('isAvailable') === 'true'
       };
       
       updateReadyVehicleMutation.mutate(vehicleData);
@@ -3578,7 +3561,6 @@ const LogisticsManagement = () => {
                   <TableHead>شماره خودرو</TableHead>
                   <TableHead>نام راننده</TableHead>
                   <TableHead>موبایل راننده</TableHead>
-                  <TableHead>مواد آتش‌زا</TableHead>
                   <TableHead>موقعیت فعلی</TableHead>
                   <TableHead>وضعیت</TableHead>
                   <TableHead>حذف</TableHead>
@@ -3587,11 +3569,11 @@ const LogisticsManagement = () => {
               <TableBody>
                 {readyVehiclesLoading ? (
                   <TableRow>
-                    <TableCell colSpan={9} className="text-center py-8">در حال بارگذاری...</TableCell>
+                    <TableCell colSpan={7} className="text-center py-8">در حال بارگذاری...</TableCell>
                   </TableRow>
                 ) : readyVehicles.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={9} className="text-center py-8">
+                    <TableCell colSpan={7} className="text-center py-8">
                       <div className="flex flex-col items-center gap-2">
                         <Truck className="h-12 w-12 text-gray-400" />
                         <p className="text-gray-600">هیچ خودرو آماده‌ای ثبت نشده</p>
@@ -3612,26 +3594,6 @@ const LogisticsManagement = () => {
                         <div className="flex items-center gap-1">
                           <Phone className="h-3 w-3 text-blue-600" />
                           <span className="font-mono text-blue-600">{vehicle.driverMobile}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          {vehicle.supportsFlammable ? (
-                            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300 text-xs">
-                              <CheckCircle className="h-3 w-3 mr-1" />
-                              مجاز
-                            </Badge>
-                          ) : vehicle.notAllowedFlammable ? (
-                            <Badge variant="outline" className="bg-red-50 text-red-700 border-red-300 text-xs">
-                              <X className="h-3 w-3 mr-1" />
-                              غیرمجاز
-                            </Badge>
-                          ) : (
-                            <Badge variant="outline" className="bg-gray-50 text-gray-600 border-gray-300 text-xs">
-                              <Minus className="h-3 w-3 mr-1" />
-                              نامشخص
-                            </Badge>
-                          )}
                         </div>
                       </TableCell>
                       <TableCell>
@@ -3784,40 +3746,6 @@ const LogisticsManagement = () => {
                     <Label htmlFor="isAvailable">آماده به کار</Label>
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-orange-700 flex items-center gap-2">
-                    <Flame className="h-4 w-4" />
-                    قابلیت حمل مواد آتش‌زا
-                  </Label>
-                  <div className="flex flex-col space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <input type="hidden" name="supportsFlammable" value="false" />
-                      <input 
-                        type="checkbox" 
-                        id="supportsFlammable" 
-                        name="supportsFlammable" 
-                        value="true"
-                      />
-                      <Label htmlFor="supportsFlammable" className="text-green-700">
-                        <CheckCircle className="h-3 w-3 mr-1 inline" />
-                        مجهز برای حمل مواد آتش‌زا
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <input type="hidden" name="notAllowedFlammable" value="false" />
-                      <input 
-                        type="checkbox" 
-                        id="notAllowedFlammable" 
-                        name="notAllowedFlammable" 
-                        value="true"
-                      />
-                      <Label htmlFor="notAllowedFlammable" className="text-red-700">
-                        <X className="h-3 w-3 mr-1 inline" />
-                        غیرمجاز برای مواد آتش‌زا
-                      </Label>
-                    </div>
-                  </div>
-                </div>
               </div>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setIsCreateReadyVehicleDialogOpen(false)}>
@@ -3935,42 +3863,6 @@ const LogisticsManagement = () => {
                         defaultChecked={selectedReadyVehicle.isAvailable}
                       />
                       <Label htmlFor="edit-isAvailable">آماده به کار</Label>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-orange-700 flex items-center gap-2">
-                      <Flame className="h-4 w-4" />
-                      قابلیت حمل مواد آتش‌زا
-                    </Label>
-                    <div className="flex flex-col space-y-2">
-                      <div className="flex items-center space-x-2">
-                        <input type="hidden" name="supportsFlammable" value="false" />
-                        <input 
-                          type="checkbox" 
-                          id="edit-supportsFlammable" 
-                          name="supportsFlammable" 
-                          value="true"
-                          defaultChecked={selectedReadyVehicle.supportsFlammable}
-                        />
-                        <Label htmlFor="edit-supportsFlammable" className="text-green-700">
-                          <CheckCircle className="h-3 w-3 mr-1 inline" />
-                          مجهز برای حمل مواد آتش‌زا
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <input type="hidden" name="notAllowedFlammable" value="false" />
-                        <input 
-                          type="checkbox" 
-                          id="edit-notAllowedFlammable" 
-                          name="notAllowedFlammable" 
-                          value="true"
-                          defaultChecked={selectedReadyVehicle.notAllowedFlammable}
-                        />
-                        <Label htmlFor="edit-notAllowedFlammable" className="text-red-700">
-                          <X className="h-3 w-3 mr-1 inline" />
-                          غیرمجاز برای مواد آتش‌زا
-                        </Label>
-                      </div>
                     </div>
                   </div>
                 </div>
