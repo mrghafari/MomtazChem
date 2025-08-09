@@ -83,8 +83,7 @@ const translations = {
     remainingAmount: "Remaining amount",
     insufficientWallet: "Insufficient wallet balance",
     discountApplied: "Discount Applied",
-    bankTransferGrace: "Bank Transfer with 3-Day Grace Period",
-    bankTransferGraceDesc: "Order locked - Receipt upload deadline: 3 days",
+    bankTransferGrace: "Bank Transfer with Grace Period",
     
     // Shipping options
     deliveryMethod: "Delivery Method",
@@ -2056,11 +2055,6 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                           <Clock className="w-4 h-4 text-amber-600" />
                           <div className="flex flex-col">
                             <span className="font-semibold">پرداخت به روش حواله با مهلت {proformaDeadlineDays} روزه</span>
-                            {reminderInfo && (
-                              <span className="text-xs text-gray-500 mt-1">
-                                یادآوری: {reminderInfo}
-                              </span>
-                            )}
                           </div>
                         </Label>
                       </div>
