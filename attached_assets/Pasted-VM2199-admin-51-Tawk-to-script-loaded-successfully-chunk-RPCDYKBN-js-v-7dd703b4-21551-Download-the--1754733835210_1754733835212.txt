@@ -1,0 +1,80 @@
+VM2199 admin:51 Tawk.to script loaded successfully
+chunk-RPCDYKBN.js?v=7dd703b4:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+/api/customers/me:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+useAuth.ts:43 Auth check result: Object
+128x128:1  Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED
+twk-chunk-common.js:2 Error: Unable to store cookie
+    at e.value (twk-chunk-common.js:2:117574)
+    at t.value (twk-chunk-common.js:2:150658)
+    at p.updateUUID (twk-chunk-common.js:2:202310)
+    at Array.<anonymous> (twk-vendor.js:2:76358)
+    at p.dispatch (twk-vendor.js:2:78106)
+    at p.dispatch (twk-vendor.js:2:73855)
+    at t.value (twk-chunk-common.js:2:124589)
+    at twk-chunk-common.js:2:123900
+value @ twk-chunk-common.js:2
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+site-management-fixed.tsx:71 🔍 [DEBUG] useEffect triggered, userPermissions: undefined
+VM2199 admin:23 Tawk.to Live Chat loaded successfully
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+site-management-fixed.tsx:71 🔍 [DEBUG] useEffect triggered, userPermissions: Object
+site-management-fixed.tsx:74 🔍 [DEBUG] userPermissions modules: Array(34)
+site-management-fixed.tsx:430 🔍 [DEBUG] Full userPermissions response: Object
+site-management-fixed.tsx:431 🔍 [DEBUG] userPermissions.modules: Array(34)
+site-management-fixed.tsx:432 🔍 [DEBUG] userPermissions.permissions: Array(34)
+site-management-fixed.tsx:437 🔍 [DEBUG] Total allButtons count: 35
+site-management-fixed.tsx:438 🔍 [DEBUG] AI Settings exists in allButtons: true
+site-management-fixed.tsx:439 🔍 [DEBUG] Content Management exists in allButtons: true
+site-management-fixed.tsx:441 🔍 [DEBUG] allowedModules: Array(34)
+site-management-fixed.tsx:442 🔍 [DEBUG] kpi_dashboard in allowedModules? true
+site-management-fixed.tsx:443 🔍 [DEBUG] management_dashboard in allowedModules? true
+site-management-fixed.tsx:444 🔍 [DEBUG] finance in allowedModules? true
+site-management-fixed.tsx:445 🔍 [DEBUG] geography_analytics in allowedModules? true
+site-management-fixed.tsx:446 🔍 [DEBUG] ai_settings in allowedModules? true
+site-management-fixed.tsx:447 🔍 [DEBUG] content_management in allowedModules? true
+site-management-fixed.tsx:453 🔍 [CRITICAL] Missing button detection:
+site-management-fixed.tsx:457 🔍 [MISSING] order-tracking-view Order Management & Tracking - View Only moduleId: order_tracking
+site-management-fixed.tsx:461 🔍 [CRITICAL] Missing buttons count: 1
+site-management-fixed.tsx:463 🔍 [DEBUG] finance button found in allButtons? Object
+site-management-fixed.tsx:464 🔍 [DEBUG] geography_analytics button found in allButtons? Object
+site-management-fixed.tsx:465 🔍 [DEBUG] ai_settings button found in allButtons? Object
+site-management-fixed.tsx:466 🔍 [DEBUG] content_management button found in allButtons? Object
+site-management-fixed.tsx:467 🔍 [DEBUG] finance button in filtered? Object
+site-management-fixed.tsx:468 🔍 [DEBUG] geography_analytics button in filtered? Object
+site-management-fixed.tsx:469 🔍 [DEBUG] ai_settings button in filtered? Object
+site-management-fixed.tsx:470 🔍 [DEBUG] content_management button in filtered? Object
+site-management-fixed.tsx:76 🔍 [DEBUG] filtered buttons count: 34
+site-management-fixed.tsx:77 🔍 [DEBUG] First 5 filtered buttons: Array(5)
+site-management-fixed.tsx:78 🔍 [DEBUG] AI Control button in filtered: Object
+site-management-fixed.tsx:79 🔍 [DEBUG] Content Management button in filtered: Object
+site-management-fixed.tsx:25 🔍 [DEBUG] Site Management component initialized
+/api/shop/returns/stats:1  Failed to load resource: the server responded with a status of 400 (Bad Request)
+useAuth.ts:43 Auth check result: Object
+/api/shop/products/474/bulk-purchase:1  Failed to load resource: the server responded with a status of 400 (Bad Request)
+useAuth.ts:43 Auth check result: {success: true, user: {…}}
+queryClient.ts:54  PUT https://861926f6-85c5-4e93-bb9b-7e1a3d8bd878-00-2majci4octycm.picard.replit.dev/api/shop/products/474/bulk-purchase 400 (Bad Request)
+apiRequest @ queryClient.ts:54
+mutationFn @ BulkPurchaseProductCard.tsx:33
+fn @ @tanstack_react-query.js?v=7dd703b4:1189
+run @ @tanstack_react-query.js?v=7dd703b4:494
+start @ @tanstack_react-query.js?v=7dd703b4:536
+execute @ @tanstack_react-query.js?v=7dd703b4:1225
+await in execute
+mutate @ @tanstack_react-query.js?v=7dd703b4:2630
+(anonymous) @ @tanstack_react-query.js?v=7dd703b4:3295
+handleSave @ BulkPurchaseProductCard.tsx:71
+callCallback2 @ chunk-RPCDYKBN.js?v=7dd703b4:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=7dd703b4:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=7dd703b4:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=7dd703b4:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=7dd703b4:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=7dd703b4:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=7dd703b4:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=7dd703b4:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=7dd703b4:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=7dd703b4:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=7dd703b4:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=7dd703b4:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=7dd703b4:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=7dd703b4:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=7dd703b4:5449

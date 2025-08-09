@@ -32,11 +32,11 @@ export default function BulkPurchaseProductCard({ product, onUpdate }: BulkPurch
     }) => {
       return await apiRequest(`/api/shop/products/${data.productId}/bulk-purchase`, {
         method: 'PUT',
-        body: JSON.stringify({
+        body: {
           bulk_purchase_enabled: data.bulk_purchase_enabled,
           bulk_purchase_minimum_quantity: data.bulk_purchase_minimum_quantity,
           bulk_purchase_description: data.bulk_purchase_description,
-        }),
+        },
       });
     },
     onSuccess: () => {

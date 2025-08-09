@@ -133,7 +133,7 @@ export default function ShopAdmin() {
 
   // Load existing proforma deadline settings
   useEffect(() => {
-    if (shopSettings.length > 0) {
+    if (Array.isArray(shopSettings) && shopSettings.length > 0) {
       const proformaDeadline = shopSettings.find((s: any) => s.settingKey === 'proforma_deadline_days');
       if (proformaDeadline) {
         setProformaDeadlineDays(proformaDeadline.settingValue);

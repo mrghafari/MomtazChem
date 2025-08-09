@@ -33,7 +33,6 @@ export default function ShopManagement() {
   const queryClient = useQueryClient();
   
   // Settings state
-  const [proformaDeadlineDays, setProformaDeadlineDays] = useState("3");
   const [currency, setCurrency] = useState("IQD");
   const [timezone, setTimezone] = useState("Asia/Baghdad");
   const [businessHours, setBusinessHours] = useState("8:00-17:00");
@@ -68,12 +67,9 @@ export default function ShopManagement() {
   // Load existing settings
   useEffect(() => {
     if (shopSettings.length > 0) {
-      const proformaDeadline = shopSettings.find(s => s.settingKey === 'proforma_deadline_days');
       const currencySetting = shopSettings.find(s => s.settingKey === 'default_currency');
       const timezoneSetting = shopSettings.find(s => s.settingKey === 'timezone');
       const businessHoursSetting = shopSettings.find(s => s.settingKey === 'business_hours');
-
-      if (proformaDeadline) setProformaDeadlineDays(proformaDeadline.settingValue);
       if (currencySetting) setCurrency(currencySetting.settingValue);
       if (timezoneSetting) setTimezone(timezoneSetting.settingValue);
       if (businessHoursSetting) setBusinessHours(businessHoursSetting.settingValue);
@@ -108,18 +104,6 @@ export default function ShopManagement() {
   const handleSaveSettings = () => {
     setIsUpdating(true);
     const settingsToSave = [
-      {
-        settingKey: 'proforma_deadline_days',
-        settingValue: proformaDeadlineDays,
-        settingType: 'number',
-        displayName: 'مهلت پیش فاکتور خرید (روز)',
-        displayNameEn: 'Proforma Invoice Deadline (Days)',
-        description: 'تعداد روزهای مهلت برای پرداخت پیش فاکتور',
-        category: 'payment',
-        isPublic: true,
-        validationRule: 'min:1,max:30',
-        defaultValue: '3'
-      },
       {
         settingKey: 'default_currency',
         settingValue: currency,
@@ -180,12 +164,8 @@ export default function ShopManagement() {
         </Badge>
       </div>
 
-      <Tabs defaultValue="payment" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="payment" className="flex items-center gap-2">
-            <Calendar className="h-4 w-4" />
-            مهلت پیش فاکتور
-          </TabsTrigger>
+      <Tabs defaultValue="general" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="general" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
             تنظیمات عمومی
@@ -200,56 +180,7 @@ export default function ShopManagement() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="payment" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                مهلت پیش فاکتور خرید
-              </CardTitle>
-              <CardDescription>
-                تعداد روزهای مهلت برای پرداخت پیش فاکتور که در کارت خرید و checkout نمایش داده می‌شود
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Alert>
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
-                  این تنظیم بر تمام محصولات فروشگاه اعمال می‌شود و در صفحه checkout و کارت خرید نمایش داده می‌شود.
-                </AlertDescription>
-              </Alert>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="proforma_deadline">مهلت پرداخت (روز)</Label>
-                  <Input
-                    id="proforma_deadline"
-                    type="number"
-                    min="1"
-                    max="30"
-                    value={proformaDeadlineDays}
-                    onChange={(e) => setProformaDeadlineDays(e.target.value)}
-                    placeholder="3"
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    تعداد روزهای مهلت برای پرداخت (حداقل 1 روز، حداکثر 30 روز)
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <Label>پیش‌نمایش پیام</Label>
-                  <div className="p-3 bg-muted rounded-md">
-                    <p className="text-sm">
-                      مهلت پرداخت: <strong>{proformaDeadlineDays} روز</strong>
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      این پیام در کارت خرید و صفحه checkout نمایش داده می‌شود
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+
 
 
 
