@@ -143,11 +143,11 @@ export default function ShopAdmin() {
     console.log('📄 [PROFORMA DEADLINE] Raw response:', shopSettingsResponse);
     console.log('📄 [PROFORMA DEADLINE] Parsed settings:', shopSettings);
     if (Array.isArray(shopSettings) && shopSettings.length > 0) {
-      const proformaDeadline = shopSettings.find((s: any) => s.settingKey === 'proforma_deadline_days');
+      const proformaDeadline = shopSettings.find((s: any) => s.setting_key === 'proforma_deadline_days');
       console.log('📄 [PROFORMA DEADLINE] Found setting:', proformaDeadline);
       if (proformaDeadline) {
-        console.log('📄 [PROFORMA DEADLINE] Setting state to:', proformaDeadline.settingValue);
-        setProformaDeadlineDays(proformaDeadline.settingValue);
+        console.log('📄 [PROFORMA DEADLINE] Setting state to:', proformaDeadline.setting_value);
+        setProformaDeadlineDays(proformaDeadline.setting_value);
       }
     }
   }, [shopSettingsResponse, shopSettings]);
@@ -157,15 +157,15 @@ export default function ShopAdmin() {
     mutationFn: async (days: string) => {
       console.log('💾 [PROFORMA DEADLINE] Saving days:', days);
       const settings = [{
-        settingKey: 'proforma_deadline_days',
-        settingValue: days,
-        settingType: 'number',
-        displayName: 'Purchase Proforma Deadline (Days)',
+        setting_key: 'proforma_deadline_days',
+        setting_value: days,
+        setting_type: 'number',
+        display_name: 'Purchase Proforma Deadline (Days)',
         description: 'Number of days for proforma payment deadline',
         category: 'payment',
-        isPublic: true,
-        validationRule: 'min:1,max:30',
-        defaultValue: '3'
+        is_public: true,
+        validation_rule: 'min:1,max:30',
+        default_value: '3'
       }];
       console.log('💾 [PROFORMA DEADLINE] Settings to save:', settings);
       const result = await apiRequest('/api/shop/settings', { method: 'POST', body: { settings } });
