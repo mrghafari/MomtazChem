@@ -43131,111 +43131,36 @@ momtazchem.com
         }
       }
 
-      // Calculate cost and score for each suitable vehicle
+      // Calculate cost and score for each suitable vehicle - COST-FIRST APPROACH
       const scoredVehicles = suitableVehicles.map(vehicle => {
         // Calculate total cost
         const basePrice = parseFloat(vehicle.basePrice || '0');
         const pricePerKm = parseFloat(vehicle.pricePerKm || '0');
         const distanceCost = distance * pricePerKm;
-        const weightCost = 0; // Most vehicles don't have weight-based pricing
+        const weightCost = 0;
         const totalCost = basePrice + distanceCost;
         
-
-        
-        // Calculate efficiency score (higher is better)
-        let score = 0;
-        
-        // Weight utilization efficiency (prefer vehicles that use capacity well)
+        // Check weight capacity
         const weightUtilization = finalWeightKg / parseFloat(vehicle.maxWeightKg);
-        
-        // Give higher score for better weight utilization, but penalize over-capacity vehicles heavily
-        if (weightUtilization > 1) {
-          score = 0; // Cannot use vehicle that's over capacity
-        } else if (weightUtilization > 0.7) {
-          score += 50; // Excellent utilization
-        } else if (weightUtilization > 0.3) {
-          score += 35; // Good utilization  
-        } else if (weightUtilization > 0.1) {
-          score += 20; // Fair utilization
-        } else {
-          score += 5; // Poor utilization - heavily penalize over-sized vehicles
-        }
-        
-        // Cost efficiency - prefer lower total cost for small loads
-        const costScore = totalCost > 0 ? Math.max(0, 100 - (totalCost / 1000)) : 0;
-        score += costScore * 0.3;
-        
-        // Size appropriateness bonus - penalize vehicles that are too big for small loads
-        const maxCapacity = parseFloat(vehicle.maxWeightKg);
-        if (finalWeightKg < 100 && maxCapacity > 1000) {
-          score -= 20; // Heavy penalty for using large vehicles for tiny loads
-        } else if (finalWeightKg < 500 && maxCapacity > 5000) {
-          score -= 15; // Moderate penalty
-        } else if (finalWeightKg < 1000 && maxCapacity > 10000) {
-          score -= 10; // Light penalty
-        }
-        
-        // Vehicle type appropriateness for weight range and distance
         const vehicleName = vehicle.name?.toLowerCase() || '';
         
-        // Distance-based restrictions
-        if (distance > 100) {
-          // Long distance trips - motorcycles not suitable
-          if (vehicleName.includes('موتور')) {
-            score -= 100; // Very heavy penalty for long distance motorcycle usage
-          }
-        } else if (distance > 50) {
-          // Medium distance - moderate penalty for motorcycles
-          if (vehicleName.includes('موتور')) {
-            score -= 30;
-          }
-        }
+        // Calculate score based purely on cost efficiency
+        let score = 0;
         
-        if (finalWeightKg < 50) {
-          // Very small loads - prefer small vehicles but consider distance
-          if (distance <= 50) {
-            // Short distance - motorcycles OK for very light loads
-            if (vehicleName.includes('موتور')) {
-              score += 30;
-            } else if (vehicleName.includes('پیکاپ') || vehicleName.includes('ون')) {
-              score += 20;
-            }
-          } else {
-            // Medium to long distance - prefer vans/pickups over motorcycles
-            if (vehicleName.includes('پیکاپ') || vehicleName.includes('ون')) {
-              score += 25;
-            } else if (vehicleName.includes('موتور')) {
-              score += 5; // Minimal bonus, already penalized above for long distance
-            }
-          }
+        // Eliminate unusable vehicles first
+        if (weightUtilization > 1) {
+          score = -999; // Over capacity
+        } else if (distance > 100 && vehicleName.includes('موتور')) {
+          score = -999; // Motorcycle long distance not safe
+        } else {
+          // Main scoring: Inverse of cost (lower cost = higher score)
+          score = 1000000 / totalCost;
           
-          if (vehicleName.includes('کامیون') || vehicleName.includes('تانکر') || vehicleName.includes('اتوبوس')) {
-            score -= 25;
-          }
-        } else if (finalWeightKg < 500) {
-          // Small loads - prefer medium vehicles
-          if (vehicleName.includes('ون') || vehicleName.includes('پیکاپ')) {
-            score += 20;
-          } else if (vehicleName.includes('تانکر') || vehicleName.includes('اتوبوس')) {
-            score -= 15;
-          }
-          // Motorcycles not suitable for loads > 50kg regardless of distance
-          if (vehicleName.includes('موتور')) {
-            score -= 30;
-          }
+          // Small safety bonuses for required features
+          if (isHazardous && vehicle.canTransportHazardous) score += 5;
+          if (isRefrigerated && vehicle.hasRefrigeration) score += 5;
+          if (isFragile && vehicle.canTransportFragile) score += 2;
         }
-        
-        // Fuel efficiency bonus
-        const fuelEfficiency = parseFloat(vehicle.fuelConsumptionL100km || '20');
-        score += Math.max(0, (30 - fuelEfficiency)) * 0.5;
-        
-        // Priority bonus from template
-        score += parseFloat(vehicle.priority || '0') * 2;
-        
-        // Special capability bonus
-        if (isHazardous && vehicle.canTransportHazardous) score += 10;
-        if (isRefrigerated && vehicle.hasRefrigeration) score += 10;
-        if (isFragile && vehicle.canTransportFragile) score += 5;
 
         return {
           ...vehicle,
