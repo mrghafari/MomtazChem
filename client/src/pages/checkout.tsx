@@ -464,21 +464,19 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
         cartProducts: cartItems.map(item => ({ id: item.id, name: item.name, isFlammable: item.isFlammable }))
       });
       
-      // Use the enhanced multi-vehicle smart selection API
-      const response = await fetch('/api/logistics/select-optimal-vehicle', {
+      // Use the flammable-aware calculate-delivery-cost API instead of old vehicle selection
+      const response = await fetch('/api/calculate-delivery-cost', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          orderNumber: `CART-${Date.now()}`,
-          weightKg: weight,
-          routeType: 'highway',
-          distanceKm: 200, // Default distance for calculation
+          weight: weight,
           destinationCity: destination,
-          isHazardous: containsFlammableProducts,
-          isRefrigerated: false,
-          isFragile: false
+          destinationProvince: destination,
+          originCity: 'اربیل',
+          cart: Object.fromEntries(Object.entries(cart).map(([id, qty]) => [id, qty])),
+          useSecondaryAddress: false
         })
       });
 
@@ -490,48 +488,42 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
       const result = await response.json();
       console.log('🚚 [CHECKOUT] API Response:', result);
       
-      if (result.success) {
-        // Handle multi-vehicle response from new API
-        if (result.multiVehicleRequired && result.solution) {
-          const multiSolution = result.solution;
-          
+      if (result.success && result.data) {
+        // Handle intercity bus response
+        if (result.data.transportMethod === 'intercity_bus' && result.data.selectedOption) {
+          const busOption = result.data.selectedOption;
           setSelectedVehicle({
-            name: `${multiSolution.totalVehicles} × تانکر - چندین خودرو`,
-            type: 'multiple',
-            cost: multiSolution.totalCost,
-            totalVehicles: multiSolution.totalVehicles,
-            vehicles: multiSolution.vehicles,
-            weightUtilization: ((multiSolution.totalWeight / (multiSolution.totalVehicles * 23000)) * 100),
-            estimatedTime: 120 // Default estimate for multi-vehicle
+            name: busOption.transportName,
+            type: 'intercity_bus',
+            cost: busOption.totalCost,
+            restrictions: busOption.restrictions
           });
           
-          console.log('🚛 [CHECKOUT] Multi-vehicle solution:', {
-            solution: `${multiSolution.totalVehicles} vehicles`,
-            totalCost: multiSolution.totalCost,
-            totalVehicles: multiSolution.totalVehicles,
-            vehicleBreakdown: multiSolution.vehicles?.map((v: any) => `${v.name} (${v.loadWeight}kg)`) || []
+          console.log('🚌 [CHECKOUT] Intercity bus selected:', {
+            option: busOption.transportName,
+            cost: busOption.totalCost,
+            restrictions: busOption.restrictions
           });
           
-          return multiSolution.totalCost;
+          return busOption.totalCost;
         }
         
-        // Handle single vehicle response from new API
-        if (result.selectedVehicle) {
-          const vehicleInfo = result.selectedVehicle;
-          
+        // Handle optimal vehicle response
+        if (result.data.optimalVehicle) {
+          const vehicleInfo = result.data.optimalVehicle;
           setSelectedVehicle({
             name: vehicleInfo.vehicleName,
-            type: vehicleInfo.vehicleType || 'single',
+            type: vehicleInfo.vehicleType,
             cost: vehicleInfo.totalCost,
-            maxWeight: vehicleInfo.maxWeightKg,
-            maxVolume: vehicleInfo.maxVolumeM3,
-            estimatedTime: 90 // Default estimate
+            maxWeight: vehicleInfo.maxWeight,
+            estimatedTime: vehicleInfo.estimatedTime
           });
           
-          console.log('🚚 [CHECKOUT] Single vehicle:', {
+          console.log('🚚 [CHECKOUT] Heavy vehicle selected for flammable materials:', {
             vehicle: vehicleInfo.vehicleName,
             totalCost: vehicleInfo.totalCost,
-            vehicleType: vehicleInfo.vehicleType
+            vehicleType: vehicleInfo.vehicleType,
+            safetyCompliant: true
           });
           
           return vehicleInfo.totalCost;
@@ -1825,41 +1817,13 @@ export default function Checkout({ cart, products, onOrderComplete }: CheckoutPr
                             <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded p-2 border border-emerald-200 dark:border-emerald-800">
                               <div className="text-xs text-emerald-700 dark:text-emerald-300 space-y-1">
                                 <div className="font-medium">📋 جزئیات انتخاب هوشمند:</div>
-                                
-                                {selectedVehicle.type === 'multiple' ? (
-                                  // Multi-vehicle solution display
-                                  <>
-                                    <div>🚛 راه‌حل چند خودرویی: {selectedVehicle.name}</div>
-                                    <div>📊 تعداد خودروها: {selectedVehicle.totalVehicles}</div>
-                                    <div>⚖️ میزان استفاده از ظرفیت: {selectedVehicle.weightUtilization?.toFixed(1)}%</div>
-                                    {selectedVehicle.vehicles && (
-                                      <div className="mt-2 pt-2 border-t border-emerald-200 dark:border-emerald-700">
-                                        <div className="font-medium">تفکیک خودروها:</div>
-                                        {selectedVehicle.vehicles.map((vehicle: any, index: number) => (
-                                          <div key={index} className="flex justify-between">
-                                            <span>خودرو {index + 1}: {vehicle.vehicleName}</span>
-                                            <span>{vehicle.weight} کگ</span>
-                                          </div>
-                                        ))}
-                                      </div>
-                                    )}
-                                  </>
-                                ) : (
-                                  // Single vehicle solution display
-                                  <>
-                                    <div>🚛 خودرو انتخابی: {selectedVehicle.name}</div>
-                                    <div>⚖️ ظرفیت وزنی: {selectedVehicle.maxWeight} کگ</div>
-                                    <div>📦 ظرفیت حجمی: {selectedVehicle.maxVolume} متر مکعب</div>
-                                    <div>🛣️ مسیرهای مجاز: {selectedVehicle.allowedRoutes}</div>
-                                    {selectedVehicle.hazardousMaterials && <div>⚠️ حمل مواد خطرناک</div>}
-                                    {selectedVehicle.refrigeratedTransport && <div>❄️ حمل یخچالی</div>}
-                                    {selectedVehicle.fragileItems && <div>📱 مناسب اقلام شکستنی</div>}
-                                  </>
-                                )}
-                                
-                                {selectedVehicle.estimatedTime && (
-                                  <div>⏱️ زمان تخمینی تحویل: {selectedVehicle.estimatedTime} دقیقه</div>
-                                )}
+                                <div>🚛 خودرو انتخابی: {selectedVehicle.name}</div>
+                                <div>⚖️ ظرفیت وزنی: {selectedVehicle.maxWeight} کگ</div>
+                                <div>📦 ظرفیت حجمی: {selectedVehicle.maxVolume} متر مکعب</div>
+                                <div>🛣️ مسیرهای مجاز: {selectedVehicle.allowedRoutes}</div>
+                                {selectedVehicle.hazardousMaterials && <div>⚠️ حمل مواد خطرناک</div>}
+                                {selectedVehicle.refrigeratedTransport && <div>❄️ حمل یخچالی</div>}
+                                {selectedVehicle.fragileItems && <div>📱 مناسب اقلام شکستنی</div>}
                               </div>
                             </div>
                           ) : selectedMethod.freeShippingThreshold && parseFloat(selectedMethod.freeShippingThreshold) > 0 ? (

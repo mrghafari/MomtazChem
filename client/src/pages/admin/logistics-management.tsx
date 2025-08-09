@@ -43,10 +43,7 @@ import {
   Wallet,
   DollarSign,
   Clock,
-  RefreshCw,
-  Upload,
-  Download,
-  FileSpreadsheet
+  RefreshCw
 } from 'lucide-react';
 import { useOrderNotifications } from '@/hooks/useOrderNotifications';
 import PostalServicesTab from '@/components/PostalServicesTab';
@@ -4247,304 +4244,6 @@ const LogisticsManagement = () => {
     );
   };
 
-  // CSV Import Tab Component
-  const CsvImportTab = () => {
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [importType, setImportType] = useState<string>('');
-    const [uploadProgress, setUploadProgress] = useState(0);
-    const [importResults, setImportResults] = useState<any>(null);
-    const { toast } = useToast();
-
-    const importCsvMutation = useMutation({
-      mutationFn: async (formData: FormData) => {
-        return await apiRequest('/api/logistics/import-csv', {
-          method: 'POST',
-          body: formData,
-        });
-      },
-      onSuccess: (data) => {
-        toast({
-          title: "بارگذاری موفق",
-          description: `${data.imported} رکورد با موفقیت وارد شد.`,
-        });
-        setImportResults(data);
-        setSelectedFile(null);
-        setUploadProgress(0);
-        queryClient.invalidateQueries({ queryKey: ['/api/logistics/provinces'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/logistics/cities'] });
-      },
-      onError: (error: any) => {
-        toast({
-          title: "خطا در بارگذاری",
-          description: error.message || "خطا در پردازش فایل CSV",
-          variant: "destructive",
-        });
-        setUploadProgress(0);
-      },
-    });
-
-    const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-      const file = event.target.files?.[0];
-      if (file && file.type === 'text/csv') {
-        setSelectedFile(file);
-      } else {
-        toast({
-          title: "فرمت فایل نامعتبر",
-          description: "لطفاً فایل CSV انتخاب کنید",
-          variant: "destructive",
-        });
-      }
-    };
-
-    const handleImport = () => {
-      if (!selectedFile || !importType) {
-        toast({
-          title: "اطلاعات ناقص",
-          description: "لطفاً فایل و نوع داده را انتخاب کنید",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const formData = new FormData();
-      formData.append('csvFile', selectedFile);
-      formData.append('dataType', importType);
-      
-      setUploadProgress(10);
-      importCsvMutation.mutate(formData);
-    };
-
-    const downloadSampleCsv = async (type: 'provinces' | 'cities') => {
-      try {
-        const response = await fetch(`/api/logistics/generate-sample-csv/${type}`, {
-          method: 'GET',
-          headers: {
-            'Accept': 'text/csv',
-          },
-        });
-
-        if (response.ok) {
-          const blob = await response.blob();
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.style.display = 'none';
-          a.href = url;
-          a.download = `sample-${type}.csv`;
-          document.body.appendChild(a);
-          a.click();
-          window.URL.revokeObjectURL(url);
-          document.body.removeChild(a);
-          
-          toast({
-            title: "دانلود موفق",
-            description: `فایل نمونه ${type === 'provinces' ? 'استان‌ها' : 'شهرها'} دانلود شد`,
-          });
-        } else {
-          throw new Error('Failed to download sample file');
-        }
-      } catch (error) {
-        console.error('Error downloading sample CSV:', error);
-        toast({
-          title: "خطا در دانلود",
-          description: "خطا در دانلود فایل نمونه",
-          variant: "destructive",
-        });
-      }
-    };
-
-    const downloadTemplate = (type: string) => {
-      const templates = {
-        provinces: `id,name_ar,name_en,name_ku,code
-1,بغداد,Baghdad,بەغداد,BGD
-2,البصرة,Basra,بەسرە,BSR`,
-        cities: `id,name_ar,name_en,name_ku,province_id,postal_code
-1,بغداد,Baghdad,بەغداد,1,10001
-2,الكرخ,Al-Karkh,کەرخ,1,10002`,
-        shipping_rates: `id,from_city,to_city,rate,currency,vehicle_type
-1,1,2,50000,IQD,truck
-2,2,1,50000,IQD,truck`
-      };
-      
-      const content = templates[type as keyof typeof templates];
-      if (content) {
-        const blob = new Blob([content], { type: 'text/csv' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${type}_template.csv`;
-        a.click();
-        URL.revokeObjectURL(url);
-      }
-    };
-
-    return (
-      <div className="space-y-6" dir="rtl">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileSpreadsheet className="w-6 h-6 text-blue-600" />
-              ورود داده‌های جغرافیایی از فایل CSV
-            </CardTitle>
-            <CardDescription>
-              امکان وارد کردن اطلاعات استان‌ها، شهرها، فاصله‌ها و نرخ‌های حمل از فایل‌های CSV
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Import Type Selection */}
-            <div className="space-y-2">
-              <Label htmlFor="import-type">نوع داده</Label>
-              <Select value={importType} onValueChange={setImportType}>
-                <SelectTrigger>
-                  <SelectValue placeholder="انتخاب نوع داده برای ورود" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="provinces">استان‌ها (Provinces)</SelectItem>
-                  <SelectItem value="cities">شهرها (Cities)</SelectItem>
-                  <SelectItem value="distances">فاصله‌ها (Distances)</SelectItem>
-                  <SelectItem value="shipping_rates">نرخ‌های حمل (Shipping Rates)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Template Download */}
-            {importType && (
-              <div className="bg-blue-50 rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="text-sm font-medium text-blue-800">دانلود فایل نمونه</h4>
-                    <p className="text-xs text-blue-600">
-                      برای درک فرمت صحیح فایل CSV، فایل نمونه را دانلود کنید
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        window.open(`/api/admin/logistics/export-csv/${importType}`, '_blank');
-                      }}
-                      className="flex items-center gap-2"
-                    >
-                      <Download className="w-4 h-4" />
-                      خروجی موجود
-                    </Button>
-                    {(importType === 'provinces' || importType === 'cities' || importType === 'distances') && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          if (importType === 'provinces' || importType === 'cities') {
-                            downloadSampleCsv(importType as 'provinces' | 'cities');
-                          } else {
-                            window.open(`/api/admin/logistics/sample-csv?type=${importType}`, '_blank');
-                          }
-                        }}
-                        className="flex items-center gap-2"
-                      >
-                        <Download className="w-4 h-4" />
-                        فایل نمونه
-                      </Button>
-                    )}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => downloadTemplate(importType)}
-                      className="flex items-center gap-2"
-                    >
-                      <Download className="w-4 h-4" />
-                      قالب ساده
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* File Selection */}
-            <div className="space-y-2">
-              <Label htmlFor="csv-file">انتخاب فایل CSV</Label>
-              <div className="flex items-center gap-2">
-                <Input
-                  id="csv-file"
-                  type="file"
-                  accept=".csv"
-                  onChange={handleFileSelect}
-                  className="flex-1"
-                />
-                {selectedFile && (
-                  <Badge variant="outline" className="flex items-center gap-1">
-                    <FileSpreadsheet className="w-3 h-3" />
-                    {selectedFile.name}
-                  </Badge>
-                )}
-              </div>
-            </div>
-
-            {/* Upload Progress */}
-            {uploadProgress > 0 && (
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>در حال بارگذاری...</span>
-                  <span>{uploadProgress}%</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${uploadProgress}%` }}
-                  ></div>
-                </div>
-              </div>
-            )}
-
-            {/* Import Button */}
-            <Button
-              onClick={handleImport}
-              disabled={!selectedFile || !importType || importCsvMutation.isPending}
-              className="w-full flex items-center gap-2"
-            >
-              <Upload className="w-4 h-4" />
-              {importCsvMutation.isPending ? "در حال پردازش..." : "ورود داده‌ها"}
-            </Button>
-
-            {/* Import Results */}
-            {importResults && (
-              <div className="bg-green-50 rounded-lg p-4">
-                <h4 className="text-sm font-medium text-green-800 mb-2">نتیجه ورود داده‌ها</h4>
-                <div className="space-y-1 text-sm text-green-700">
-                  <p>✅ تعداد رکوردهای وارد شده: {importResults.imported}</p>
-                  {importResults.skipped > 0 && (
-                    <p>⚠️ تعداد رکوردهای نادیده گرفته شده: {importResults.skipped}</p>
-                  )}
-                  {importResults.errors?.length > 0 && (
-                    <div>
-                      <p>❌ خطاها:</p>
-                      <ul className="list-disc list-inside">
-                        {importResults.errors.map((error: string, index: number) => (
-                          <li key={index}>{error}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Format Guidelines */}
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h4 className="text-sm font-medium text-gray-800 mb-2">راهنمای فرمت فایل</h4>
-              <ul className="text-xs text-gray-600 space-y-1">
-                <li>• فایل باید دارای پسوند .csv باشد</li>
-                <li>• سطر اول باید شامل عناوین ستون‌ها باشد</li>
-                <li>• از کدگذاری UTF-8 استفاده کنید</li>
-                <li>• فیلدها با کاما (,) جدا شوند</li>
-                <li>• داده‌های تکراری نادیده گرفته می‌شوند</li>
-              </ul>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  };
-
   return (
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
@@ -4562,12 +4261,11 @@ const LogisticsManagement = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-9">
+        <TabsList className="grid w-full grid-cols-8">
           <TabsTrigger value="orders">سفارشات</TabsTrigger>
           <TabsTrigger value="delivered">تحویل شده</TabsTrigger>
           <TabsTrigger value="companies">شرکت‌های حمل</TabsTrigger>
           <TabsTrigger value="geography">جغرافیای عراق</TabsTrigger>
-          <TabsTrigger value="csv-import">ورود داده‌ها</TabsTrigger>
           <TabsTrigger value="international">جغرافیای خارج از عراق</TabsTrigger>
           <TabsTrigger value="vehicle-templates">قالب‌های خودرو</TabsTrigger>
           <TabsTrigger value="fleet-vehicles">ناوگان خودروها</TabsTrigger>
@@ -4590,9 +4288,9 @@ const LogisticsManagement = () => {
           <GeographyTab />
         </TabsContent>
 
-        <TabsContent value="csv-import">
-          <CsvImportTab />
-        </TabsContent>
+
+
+
 
         <TabsContent value="vehicle-templates">
           <VehicleTemplatesTab />
