@@ -248,8 +248,10 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const [locationData, setLocationData] = useState<{latitude: number, longitude: number} | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<'online_payment' | 'wallet' | 'wallet_full' | 'wallet_partial' | 'wallet_combined' | 'bank_transfer_grace' | 'bank_receipt'>('online_payment');
 
-  // Simply use cart prop directly - no internal state needed
-  // The issue was not state sync, but that cart prop wasn't updated when purchase form opened
+  // Debug cart sync issue
+  console.log('🛒 [PURCHASE FORM] Cart received:', cart);
+  console.log('🛒 [PURCHASE FORM] Cart total items:', Object.values(cart).reduce((sum, qty) => sum + qty, 0));
+  console.log('🛒 [PURCHASE FORM] Cart keys:', Object.keys(cart));
 
   // Fetch available payment methods from admin settings (public endpoint)
   const { data: availablePaymentMethods = [] } = useQuery<any[]>({

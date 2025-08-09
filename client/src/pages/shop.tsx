@@ -2056,7 +2056,7 @@ const Shop = () => {
       {showCheckout && (
         <div>
           <div style={{ position: 'fixed', top: '10px', right: '10px', background: 'red', color: 'white', padding: '10px', zIndex: 9999 }}>
-            CHECKOUT MODAL IS OPEN
+            CHECKOUT: Cart={JSON.stringify(cart)} Items={getTotalItems()}
           </div>
 
           <BilingualPurchaseForm
