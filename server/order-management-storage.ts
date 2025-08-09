@@ -625,6 +625,9 @@ export class OrderManagementStorage implements IOrderManagementStorage {
       const logisticsStatuses = statuses || [
         orderStatuses.WAREHOUSE_PENDING, // سفارشات آماده انبار - اضافه شد برای نمایش سفارشات
         orderStatuses.WAREHOUSE_APPROVED, // تایید شده توسط انبار
+        'in_transit', // 🚛 سفارشات در حال ارسال - shipped orders که باید در لجستیک نمایش داده شوند
+        'shipped', // 🚛 سفارشات ارسال شده - باید در لجستیک قابل مشاهده باشند
+        'delivered', // 📦 سفارشات تحویل شده - تایید نهایی توسط لجستیک
         orderStatuses.LOGISTICS_ASSIGNED,
         orderStatuses.LOGISTICS_PROCESSING,
         orderStatuses.LOGISTICS_DISPATCHED
