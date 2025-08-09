@@ -242,19 +242,20 @@ const getCurrentLocation = (): Promise<{latitude: number, longitude: number}> =>
 
 export default function BilingualPurchaseForm({ cart, products, onOrderComplete, onClose, existingCustomer, onUpdateQuantity, onRemoveItem }: PurchaseFormProps) {
   // Early return if cart or products are not ready
-  if (!cart || !products || products.length === 0) {
+  if (!cart || !products || products.length === 0 || (cart && Object.keys(cart).length === 0)) {
     console.log('🔄 [BILINGUAL FORM] Waiting for cart and products data...', {
       hasCart: !!cart,
       cartKeys: cart ? Object.keys(cart).length : 0,
       hasProducts: !!products,
-      productsLength: products ? products.length : 0
+      productsLength: products ? products.length : 0,
+      cartEmpty: cart && Object.keys(cart).length === 0
     });
     return (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl">
           <div className="flex items-center space-x-3">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-            <span className="text-lg">در حال بارگذاری...</span>
+            <span className="text-lg">در حال بارگذاری سبد خرید...</span>
           </div>
         </div>
       </div>
@@ -988,21 +989,39 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
     const product = products.find(p => p.id === parseInt(productId));
     if (product) {
       // Get weight from product data (prioritize grossWeight for logistics calculations)
-      const productWeight = parseFloat(product.grossWeight || product.netWeight || product.weight || '0');
-      console.log('🔍 [WEIGHT CALCULATION]', {
+      // Handle both string and number values, try multiple field names
+      const grossWeight = product.grossWeight || product.gross_weight || 0;
+      const netWeight = product.netWeight || product.net_weight || 0; 
+      const weight = product.weight || 0;
+      
+      const productWeight = parseFloat(String(grossWeight || netWeight || weight || '0'));
+      
+      console.log('🔍 [WEIGHT CALCULATION] Enhanced:', {
         productId,
         quantity,
         productName: product.name,
-        productWeight,
-        weightFields: {
+        rawWeightFields: {
           grossWeight: product.grossWeight,
+          gross_weight: product.gross_weight,
           netWeight: product.netWeight,
+          net_weight: product.net_weight,
           weight: product.weight
         },
-        weightContribution: productWeight * quantity
+        parsedWeights: {
+          grossWeight: parseFloat(String(grossWeight || '0')),
+          netWeight: parseFloat(String(netWeight || '0')),
+          weight: parseFloat(String(weight || '0'))
+        },
+        finalProductWeight: productWeight,
+        weightContribution: productWeight * quantity,
+        isValidWeight: !isNaN(productWeight) && productWeight > 0
       });
-      return sum + (productWeight * quantity);
+      
+      // Ensure we have a valid weight (minimum 1kg if no weight found)
+      const finalWeight = (!isNaN(productWeight) && productWeight > 0) ? productWeight : 1;
+      return sum + (finalWeight * quantity);
     }
+    console.log('🚨 [WEIGHT CALCULATION] Product not found for ID:', productId);
     return sum;
   }, 0) : 0;
   
@@ -1020,18 +1039,35 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   
   // Enhanced debugging for weight calculation issues
   if (cart && products && products.length > 0 && Object.keys(cart).length > 0) {
+    console.log('🔍 [WEIGHT CALCULATION] About to process cart items:', {
+      cartEntries: Object.entries(cart),
+      productsAvailable: products.length,
+      cartProductIds: Object.keys(cart),
+      productIdsInList: products.map(p => p.id)
+    });
+    
     Object.entries(cart).forEach(([productId, quantity]) => {
       const product = products.find(p => p.id === parseInt(productId));
       console.log('🔍 [INDIVIDUAL PRODUCT WEIGHT]', {
         productId,
         quantity,
+        productFound: !!product,
         product: product ? {
           name: product.name,
           grossWeight: product.grossWeight,
           netWeight: product.netWeight,
-          weight: product.weight
-        } : 'NOT FOUND'
+          weight: product.weight,
+          allFields: Object.keys(product).slice(0, 10) // Show first 10 keys
+        } : 'NOT FOUND',
+        calculatedWeight: product ? (parseFloat(product.grossWeight || product.netWeight || product.weight || '0') * quantity) : 0
       });
+    });
+  } else {
+    console.log('🔍 [WEIGHT CALCULATION] Skipping calculation:', {
+      hasCart: !!cart,
+      hasProducts: !!products,
+      productsLength: products?.length,
+      cartLength: cart ? Object.keys(cart).length : 0
     });
   }
 
