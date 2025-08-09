@@ -180,18 +180,20 @@ export class IncompletePaymentCleaner {
       const currentStage = order.notification_stage || 0;
 
       // Grace period notifications and cleanup (3 days = 72 hours)
+      // NEW POLICY: Only keep grace period orders with financial confirmation
       if (ageDays >= 3 && currentStage < 4) {
-        // After 3 days - delete the expired grace period order
+        // After 3 days - delete expired grace period order to free up order number
+        console.log(`🗑️ [GRACE PERIOD EXPIRED] Deleting order ${order.order_number} after 3 days - no financial confirmation received`);
         await this.deleteIncompleteOrder(order, 'grace_period_expired');
       } else if (ageHours >= 48 && currentStage < 3) {
         // After 2 days - final warning (24 hours left)
-        await this.sendNotification(order, 3, 'Final warning - 24 hours remaining', 'grace_period');
+        await this.sendNotification(order, 3, 'Final warning - 24 hours remaining for financial confirmation', 'grace_period');
       } else if (ageHours >= 24 && currentStage < 2) {
         // After 1 day - second notification (48 hours left)
-        await this.sendNotification(order, 2, 'Second reminder - 48 hours remaining', 'grace_period');
+        await this.sendNotification(order, 2, 'Second reminder - 48 hours remaining for financial confirmation', 'grace_period');
       } else if (ageHours >= 6 && currentStage < 1) {
         // After 6 hours - first notification
-        await this.sendNotification(order, 1, 'First reminder - payment deadline', 'grace_period');
+        await this.sendNotification(order, 1, 'First reminder - financial confirmation required within 3 days', 'grace_period');
       }
     }
   }
@@ -239,7 +241,7 @@ export class IncompletePaymentCleaner {
   private async deleteIncompleteOrder(order: any, orderType: string = 'online_payment') {
     try {
       const reason = orderType === 'grace_period_expired' ? 'after grace period expiry (3 days)' : 'after timeout';
-      console.log(`🗑️ [INCOMPLETE PAYMENT CLEANER] Deleting incomplete order ${order.order_number} ${reason}`);
+      console.log(`🗑️ [PERMANENT ORDER CLEANUP] Deleting permanent order ${order.order_number} ${reason} - freeing order number for reuse`);
       
       const { pool } = await import('./db');
       

@@ -7383,7 +7383,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      // Handle failed/cancelled payments by immediately deleting temporary orders
+      // Handle failed/cancelled payments by immediately deleting permanent orders to free up order numbers
       const isPaymentFailed = paymentStatus === 'failed' || 
                              paymentStatus === 'cancelled' || 
                              paymentStatus === 'error' ||
@@ -7391,7 +7391,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                              paymentStatus === 'abandoned';
                              
       if (isPaymentFailed) {
-        console.log(`❌ [PAYMENT CALLBACK] Payment failed/abandoned - deleting temporary order ${orderId || orderNumber}`);
+        console.log(`❌ [PAYMENT CALLBACK] Payment failed/abandoned - deleting permanent order ${orderId || orderNumber} to free up order number`);
         
         try {
           // Try to find order by ID or order number
@@ -7409,13 +7409,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
           
           if (targetOrderId) {
-            await customerStorage.deleteTemporaryOrder(parseInt(targetOrderId));
-            console.log(`✅ [PAYMENT CALLBACK] Temporary order ${targetOrderId} deleted after payment failure`);
+            // NEW CLEANUP: Delete permanent order to free up the order number for reuse
+            const deletedOrder = await customerStorage.deleteTemporaryOrder(parseInt(targetOrderId));
+            console.log(`🗑️ [ORDER CLEANUP] Permanent order ${orderNumber} deleted - order number freed for reuse`);
+            console.log(`📦 [INVENTORY RESTORED] Released products back to inventory:`, deletedOrder.releasedProducts);
             
             return res.json({
               success: true,
-              message: "سفارش موقت به دلیل عدم موفقیت پرداخت حذف شد",
-              orderDeleted: true
+              message: "سفارش به دلیل عدم موفقیت پرداخت حذف شد و شماره سفارش آزاد شد",
+              orderDeleted: true,
+              orderNumber: orderNumber,
+              inventoryRestored: deletedOrder.releasedProducts?.length || 0
             });
           } else {
             console.log(`⚠️ [PAYMENT CALLBACK] Order not found for deletion: ${orderId || orderNumber}`);
@@ -7497,6 +7501,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({
         success: false,
         message: "خطا در پردازش سفارشات معلق"
+      });
+    }
+  });
+
+  // NEW ENDPOINT: Confirm grace period payment by financial department
+  app.post("/api/admin/orders/confirm-grace-period-payment", requireAuth, async (req, res) => {
+    try {
+      const { orderId, orderNumber, confirmed } = req.body;
+      
+      console.log(`🏦 [GRACE PERIOD CONFIRMATION] Processing financial confirmation:`, {
+        orderId,
+        orderNumber,
+        confirmed
+      });
+
+      if (!orderId && !orderNumber) {
+        return res.status(400).json({
+          success: false,
+          message: "شناسه سفارش الزامی است"
+        });
+      }
+
+      // Find order by ID or order number
+      let targetOrderId = orderId;
+      if (!targetOrderId && orderNumber) {
+        const orderResult = await db
+          .select({ id: customerOrders.id })
+          .from(customerOrders)
+          .where(eq(customerOrders.orderNumber, orderNumber))
+          .limit(1);
+        
+        if (orderResult.length > 0) {
+          targetOrderId = orderResult[0].id;
+        }
+      }
+
+      if (!targetOrderId) {
+        return res.status(404).json({
+          success: false,
+          message: "سفارش یافت نشد"
+        });
+      }
+
+      if (confirmed) {
+        // Financial department confirmed payment - keep order and send to warehouse
+        await db
+          .update(customerOrders)
+          .set({
+            paymentStatus: 'paid',
+            status: 'confirmed',
+            updatedAt: new Date()
+          })
+          .where(eq(customerOrders.id, parseInt(targetOrderId)));
+
+        console.log(`✅ [GRACE PERIOD CONFIRMED] Order ${orderNumber} confirmed by financial department - sending to warehouse`);
+        
+        return res.json({
+          success: true,
+          message: "پرداخت تایید شد و سفارش به انبار ارسال شد",
+          orderConfirmed: true
+        });
+      } else {
+        // Financial department rejected payment - delete order to free up number
+        const deletedOrder = await customerStorage.deleteTemporaryOrder(parseInt(targetOrderId));
+        console.log(`🗑️ [GRACE PERIOD REJECTED] Order ${orderNumber} rejected by financial department - order deleted`);
+        
+        return res.json({
+          success: true,
+          message: "پرداخت رد شد و سفارش حذف شد",
+          orderDeleted: true,
+          orderNumber: orderNumber,
+          inventoryRestored: deletedOrder.releasedProducts?.length || 0
+        });
+      }
+      
+    } catch (error) {
+      console.error('❌ [GRACE PERIOD CONFIRMATION] Error processing confirmation:', error);
+      res.status(500).json({
+        success: false,
+        message: "خطا در پردازش تایید پرداخت"
       });
     }
   });
@@ -14977,9 +15061,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let remainingAmount = totalAmount;
       let finalPaymentMethod = orderData.paymentMethod || "traditional";
 
-      // BANK PAYMENT WORKFLOW: Create order first, then route to payment
-      // Success callback will assign order number and send to warehouse
-      // Failure callback will delete the orderless record
+      // NEW ORDER MANAGEMENT STRATEGY: Create permanent orders directly
+      // Success: Keep order with assigned number
+      // Failure: Delete order immediately to free up number
+      // Grace period orders: Only keep with financial approval
       
       // Set payment method and status based on customer choice
       if (orderData.paymentMethod === 'online_payment') {
@@ -14987,7 +15072,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         finalPaymentMethod = "online_payment";
         walletAmountUsed = 0;
         remainingAmount = totalAmount;
-        console.log("✅ [CUSTOMER CHOICE] Online payment validated and selected");
+        // Generate order number immediately for all payment types
+        orderNumber = await orderManagementStorage.generateOrderNumberInTransaction();
+        console.log(`✅ [PERMANENT ORDER] Online payment order ${orderNumber} created`);
       }
       // If customer explicitly chose bank_transfer, NEVER use wallet instead
       else if (orderData.paymentMethod === 'bank_transfer') {
@@ -14995,14 +15082,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         finalPaymentMethod = "bank_transfer";
         walletAmountUsed = 0;
         remainingAmount = totalAmount;
-        console.log("✅ [CUSTOMER CHOICE] Bank transfer selected - NO wallet substitution allowed");
+        // Generate order number immediately for all payment types
+        orderNumber = await orderManagementStorage.generateOrderNumberInTransaction();
+        console.log(`✅ [PERMANENT ORDER] Bank transfer order ${orderNumber} created`);
       }
       // Only process wallet payments when customer explicitly chose wallet options
       else if (orderData.paymentMethod === 'wallet_full' || orderData.paymentMethod === 'wallet_partial') {
+        // Generate order number immediately for wallet payments
+        orderNumber = await orderManagementStorage.generateOrderNumberInTransaction();
+        
         walletAmountUsed = Math.round(parseFloat(orderData.walletAmountUsed || 0));
         remainingAmount = Math.round(parseFloat(orderData.remainingAmount || totalAmount));
         
-        console.log('💰 [BILINGUAL WALLET DEBUG] Processing wallet payment:', {
+        console.log('💰 [PERMANENT WALLET ORDER] Processing wallet payment:', {
+          orderNumber,
           walletAmountUsed,
           remainingAmount,
           finalCustomerId,
@@ -15022,20 +15115,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
               undefined  // no admin processing this
             );
             
-            console.log(`✅ Wallet payment processed: ${walletAmountUsed} IQD deducted, transaction ID: ${transaction.id}`);
+            console.log(`✅ [PERMANENT ORDER] Wallet payment processed: ${walletAmountUsed} IQD deducted for order ${orderNumber}`);
             
             // CRITICAL FIX: Check if remainingAmount is 0 to send directly to warehouse
             if (Math.round(remainingAmount) <= 1) {
               finalPaymentStatus = "paid"; // Fully paid by wallet
               finalPaymentMethod = "wallet_full"; // Ensure correct method
-              console.log('🏪 [WAREHOUSE DIRECT] Bank payment = 0, sending order directly to warehouse');
+              console.log(`🏪 [WAREHOUSE DIRECT] Order ${orderNumber} fully paid by wallet - direct to warehouse`);
             } else {
               finalPaymentStatus = "partial"; // Partially paid by wallet
               finalPaymentMethod = "wallet_partial"; // Requires bank payment
-              console.log('🏦 [BANK REQUIRED] Bank payment > 0, will require bank gateway');
+              console.log(`🏦 [BANK REQUIRED] Order ${orderNumber} partially paid - remaining ${remainingAmount} needs bank payment`);
             }
           } catch (walletError) {
-            console.log(`❌ Wallet payment failed:`, walletError);
+            console.log(`❌ Wallet payment failed for order ${orderNumber}:`, walletError);
+            // TODO: Delete the order to free up the number
             return res.status(400).json({
               success: false,
               message: "موجودی کیف پول کافی نیست یا خطا در پردازش"
@@ -15048,30 +15142,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       else if (orderData.paymentMethod === 'bank_receipt') {
         finalPaymentStatus = "pending";
         finalPaymentMethod = "bank_receipt";
-        console.log("✅ Bank receipt method selected - customer will upload receipt");
+        // Generate order number immediately for bank receipt method
+        orderNumber = await orderManagementStorage.generateOrderNumberInTransaction();
+        console.log(`✅ [PERMANENT ORDER] Bank receipt order ${orderNumber} created - customer will upload receipt`);
       }
       
       // Handle bank transfer with grace period method
       else if (orderData.paymentMethod === 'bank_transfer_grace') {
         finalPaymentStatus = "grace_period";
         finalPaymentMethod = "bank_transfer_grace";
-        console.log("✅ Bank transfer with grace period method selected - 3-day grace period activated");
+        // Generate order number immediately for grace period method
+        orderNumber = await orderManagementStorage.generateOrderNumberInTransaction();
+        console.log(`✅ [PERMANENT ORDER] Grace period order ${orderNumber} created - 3-day grace period activated`);
       }
 
-      // 🔍 DETERMINE ORDER NUMBER ASSIGNMENT STRATEGY
-      console.log(`🔍 [PAYMENT METHOD DEBUG] Original: ${orderData.paymentMethod}, Final: ${finalPaymentMethod}`);
-      const isBankPayment = ['bank_transfer', 'bank_gateway', 'bank', 'online_bank', 'gateway'].includes(finalPaymentMethod);
-      const isNonRoutedBankPayment = ['bank_receipt', 'bank_transfer_grace'].includes(finalPaymentMethod);
-      
-      // Generate order numbers based on payment type
-      if (!isBankPayment && !isNonRoutedBankPayment && finalPaymentMethod !== 'online_payment') {
-        // Generate order number for wallet payments and other non-bank methods
-        orderNumber = await orderManagementStorage.generateOrderNumberInTransaction();
-        console.log(`✅ [NON-BANK ORDER] Generated order number ${orderNumber} for ${finalPaymentMethod}`);
-      } else {
-        // Bank payments and online payments: no order number until payment verification
-        console.log(`🏦 [BANK/ONLINE ORDER] No order number assigned - waiting for payment verification (${finalPaymentMethod})`);
-      }
+      console.log(`✅ [PERMANENT ORDER STRATEGY] All orders get immediate order numbers: ${orderNumber} (${finalPaymentMethod})`);
+      console.log(`📝 [CLEANUP POLICY] Failed payments will trigger order deletion to free up numbers`);
 
       const order = await customerStorage.createOrder({
         customerId: finalCustomerId,
