@@ -18831,6 +18831,47 @@ Momtaz Chemical Technical Team`,
     }
   });
 
+  // Update bulk purchase settings for a product
+  app.patch("/api/shop/products/:id/bulk-settings", requireAuth, async (req, res) => {
+    try {
+      const productId = parseInt(req.params.id);
+      if (isNaN(productId)) {
+        return res.status(400).json({ success: false, message: "Invalid product ID" });
+      }
+      
+      const { bulkPurchaseThreshold, bulkPurchaseDiscount } = req.body;
+      
+      // Validate the inputs
+      if (bulkPurchaseThreshold && (bulkPurchaseThreshold < 1 || !Number.isInteger(bulkPurchaseThreshold))) {
+        return res.status(400).json({ success: false, message: "Bulk purchase threshold must be a positive integer" });
+      }
+      
+      if (bulkPurchaseDiscount && (bulkPurchaseDiscount < 0 || bulkPurchaseDiscount > 100)) {
+        return res.status(400).json({ success: false, message: "Bulk purchase discount must be between 0 and 100" });
+      }
+      
+      // Update the product in the database
+      await db.update(shopProducts)
+        .set({
+          bulkPurchaseThreshold: bulkPurchaseThreshold,
+          bulkPurchaseDiscount: bulkPurchaseDiscount
+        })
+        .where(eq(shopProducts.id, productId));
+      
+      res.json({ 
+        success: true, 
+        message: "Bulk purchase settings updated successfully",
+        data: {
+          bulkPurchaseThreshold,
+          bulkPurchaseDiscount
+        }
+      });
+    } catch (error) {
+      console.error("Error updating bulk purchase settings:", error);
+      res.status(500).json({ success: false, message: "Failed to update bulk purchase settings" });
+    }
+  });
+
   app.delete("/api/shop/products/:id", requireAuth, async (req, res) => {
     try {
       const productId = parseInt(req.params.id);

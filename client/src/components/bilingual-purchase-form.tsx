@@ -730,7 +730,16 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
   const getDiscountedPrice = (product: any, quantity: number) => {
     const basePrice = Math.round(parseFloat(product.price || '0'));
     
-    // Check if product has quantity discounts
+    // Check for bulk purchase discount first (highest priority)
+    if (product.bulkPurchaseThreshold && product.bulkPurchaseDiscount && 
+        quantity >= product.bulkPurchaseThreshold) {
+      const bulkDiscount = parseFloat(product.bulkPurchaseDiscount) / 100;
+      const discountedPrice = Math.round(basePrice * (1 - bulkDiscount));
+      console.log(`BilingualForm BULK DISCOUNT: ${product.name}, quantity=${quantity}, threshold=${product.bulkPurchaseThreshold}, discount=${product.bulkPurchaseDiscount}%, price=${basePrice} -> ${discountedPrice}`);
+      return discountedPrice;
+    }
+    
+    // Check if product has regular quantity discounts
     let discounts = product.quantityDiscounts;
     
     // If quantityDiscounts is a string, try to parse it
@@ -1711,12 +1720,21 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                           </h4>
                         </div>
                         <p className="text-xs text-muted-foreground">{product.category}</p>
-                        <p className="text-sm font-medium mt-1">
-                          {discountedPrice < basePrice && (
-                            <span className="line-through text-gray-400 mr-2">{formatCurrency(basePrice)}</span>
+                        <div className="mt-1 space-y-1">
+                          <p className="text-sm font-medium">
+                            {discountedPrice < basePrice && (
+                              <span className="line-through text-gray-400 mr-2">{formatCurrency(basePrice)}</span>
+                            )}
+                            {formatCurrency(discountedPrice)} {t.each}
+                          </p>
+                          {/* Bulk purchase indicator */}
+                          {product.bulkPurchaseThreshold && product.bulkPurchaseDiscount && 
+                           quantity >= product.bulkPurchaseThreshold && (
+                            <Badge variant="secondary" className="text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                              خرید عمده {product.bulkPurchaseDiscount}% تخفیف
+                            </Badge>
                           )}
-                          {formatCurrency(discountedPrice)} {t.each}
-                        </p>
+                        </div>
                       </div>
                       
                       {/* Quantity Controls */}
