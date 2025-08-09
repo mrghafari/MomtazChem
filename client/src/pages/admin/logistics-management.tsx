@@ -554,6 +554,7 @@ const LogisticsManagement = () => {
   // Vehicle optimization states
   const [isCreateVehicleDialogOpen, setIsCreateVehicleDialogOpen] = useState(false);
   const [optimizationRequest, setOptimizationRequest] = useState<any>({});
+  const [availableVehicles, setAvailableVehicles] = useState<any[]>([]);
 
   const { data: citiesResponse, isLoading: loadingCities } = useQuery({
     queryKey: ['/api/logistics/cities'],
