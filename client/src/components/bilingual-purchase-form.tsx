@@ -2117,20 +2117,24 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
               {/* Payment Options */}
               <RadioGroup value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as any)} className="space-y-3">
                 {/* Dynamic payment methods based on admin settings */}
-                {Array.isArray(availablePaymentMethods) && availablePaymentMethods.map((method: any) => {
-                  if (method.methodKey === 'online_payment') {
-                    return (
-                      <div key={method.methodKey} className="flex items-center space-x-2 space-x-reverse">
-                        <RadioGroupItem value="online_payment" id="online_payment" />
-                        <Label htmlFor="online_payment" className="flex items-center gap-2 cursor-pointer">
-                          <CreditCard className="w-4 h-4 text-blue-600" />
-                          <span className="font-semibold">{method.methodName}</span>
-                        </Label>
-                      </div>
-                    );
-                  }
-                  return null;
-                })}
+                {Array.isArray(availablePaymentMethods) && availablePaymentMethods.length > 0 ? (
+                  availablePaymentMethods.map((method: any) => {
+                    if (method.methodKey === 'online_payment') {
+                      return (
+                        <div key={method.methodKey} className="flex items-center space-x-2 space-x-reverse">
+                          <RadioGroupItem value="online_payment" id="online_payment" />
+                          <Label htmlFor="online_payment" className="flex items-center gap-2 cursor-pointer">
+                            <CreditCard className="w-4 h-4 text-blue-600" />
+                            <span className="font-semibold">{method.methodName}</span>
+                          </Label>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })
+                ) : (
+                  <div className="text-gray-500 text-sm">در حال بارگذاری روش‌های پرداخت...</div>
+                )}
                 
                 {/* دوم: پرداخت از کیف پول (تمام یا بخش از آن) */}
                 {canUseWallet && isWalletEnabledInSettings && (
@@ -2145,47 +2149,49 @@ export default function BilingualPurchaseForm({ cart, products, onOrderComplete,
                 
                 
                 {/* Dynamic other payment methods */}
-                {Array.isArray(availablePaymentMethods) && availablePaymentMethods.map((method: any) => {
-                  if (method.methodKey === 'bank_transfer_grace') {
-                    return (
-                      <div key={method.methodKey} className="flex items-center space-x-2 space-x-reverse">
-                        <RadioGroupItem 
-                          value="bank_transfer_grace" 
-                          id="bank_transfer_grace"
-                        />
-                        <Label htmlFor="bank_transfer_grace" className="flex items-center gap-2 cursor-pointer">
-                          <Clock className="w-4 h-4 text-amber-600" />
-                          {method.methodName}
-                        </Label>
-                        <span className="text-xs text-amber-600 mr-2">
-                          {method.description}
-                        </span>
-                      </div>
-                    );
-                  } else if (method.methodKey === 'bank_receipt') {
-                    return (
-                      <div key={method.methodKey} className="flex items-center space-x-2 space-x-reverse">
-                        <RadioGroupItem value="bank_receipt" id="bank_receipt" />
-                        <Label htmlFor="bank_receipt" className="flex items-center gap-2 cursor-pointer">
-                          <Upload className="w-4 h-4 text-orange-600" />
-                          {method.methodName}
-                        </Label>
-                      </div>
-                    );
-                  } else if (method.methodKey === 'wallet' && method.enabled) {
-                    // Display wallet option from admin settings if enabled
-                    return (
-                      <div key={method.methodKey} className="flex items-center space-x-2 space-x-reverse">
-                        <RadioGroupItem value="wallet" id="wallet" />
-                        <Label htmlFor="wallet" className="flex items-center gap-2 cursor-pointer">
-                          <Wallet className="w-4 h-4 text-green-600" />
-                          {method.methodName}
-                        </Label>
-                      </div>
-                    );
-                  }
-                  return null;
-                })}
+                {Array.isArray(availablePaymentMethods) && availablePaymentMethods.length > 0 && 
+                  availablePaymentMethods.map((method: any) => {
+                    if (method.methodKey === 'bank_transfer_grace') {
+                      return (
+                        <div key={method.methodKey} className="flex items-center space-x-2 space-x-reverse">
+                          <RadioGroupItem 
+                            value="bank_transfer_grace" 
+                            id="bank_transfer_grace"
+                          />
+                          <Label htmlFor="bank_transfer_grace" className="flex items-center gap-2 cursor-pointer">
+                            <Clock className="w-4 h-4 text-amber-600" />
+                            {method.methodName}
+                          </Label>
+                          <span className="text-xs text-amber-600 mr-2">
+                            {method.description}
+                          </span>
+                        </div>
+                      );
+                    } else if (method.methodKey === 'bank_receipt') {
+                      return (
+                        <div key={method.methodKey} className="flex items-center space-x-2 space-x-reverse">
+                          <RadioGroupItem value="bank_receipt" id="bank_receipt" />
+                          <Label htmlFor="bank_receipt" className="flex items-center gap-2 cursor-pointer">
+                            <Upload className="w-4 h-4 text-orange-600" />
+                            {method.methodName}
+                          </Label>
+                        </div>
+                      );
+                    } else if (method.methodKey === 'wallet' && method.enabled) {
+                      // Display wallet option from admin settings if enabled
+                      return (
+                        <div key={method.methodKey} className="flex items-center space-x-2 space-x-reverse">
+                          <RadioGroupItem value="wallet" id="wallet" />
+                          <Label htmlFor="wallet" className="flex items-center gap-2 cursor-pointer">
+                            <Wallet className="w-4 h-4 text-green-600" />
+                            {method.methodName}
+                          </Label>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })
+                }
 
 
               </RadioGroup>
