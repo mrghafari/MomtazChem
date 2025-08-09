@@ -2010,7 +2010,22 @@ const LogisticsManagement = () => {
         </div>
       </div>` : ''}
 
-
+      ${orderDetails.financialReviewedAt || orderDetails.financialNotes ? `
+      <div class="section">
+        <div class="section-title">اطلاعات مالی</div>
+        <div class="info-grid">
+          ${orderDetails.financialReviewedAt ? `
+          <div class="info-item">
+            <span class="label">تاریخ بررسی مالی:</span>
+            <span class="value">${new Date(orderDetails.financialReviewedAt).toLocaleDateString('en-GB')}</span>
+          </div>` : ''}
+          ${orderDetails.financialNotes ? `
+          <div class="info-item" style="grid-column: 1 / -1;">
+            <span class="label">یادداشت‌های مالی:</span>
+            <span class="value">${orderDetails.financialNotes}</span>
+          </div>` : ''}
+        </div>
+      </div>` : ''}
 
       ${orderDetails.deliveryNotes || orderDetails.logisticsNotes ? `
       <div class="section">
@@ -5493,7 +5508,7 @@ const LogisticsManagement = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <p className="text-sm text-gray-600 mb-1">تاریخ بررسی مالی:</p>
-                      <p className="font-medium">{new Date((selectedOrderForDetails as any).financialReviewedAt).toLocaleDateString('fa-IR')}</p>
+                      <p className="font-medium">{new Date((selectedOrderForDetails as any).financialReviewedAt).toLocaleDateString('en-GB')}</p>
                     </div>
                     {(selectedOrderForDetails as any).financialNotes && (
                       <div>
